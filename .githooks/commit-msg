@@ -1,0 +1,11 @@
+#!/bin/sh
+# Vocabulary guard for commit messages; word list mirrors pre-commit.
+
+WORDS='REDACTED'
+
+if grep -qiE "$WORDS" "$1"; then
+    echo "vocab guard: forbidden vocabulary in commit message" >&2
+    grep -niE "$WORDS" "$1" >&2
+    exit 1
+fi
+exit 0
