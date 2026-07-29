@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from algo_coach.eval import agreement
 from algo_coach.log import AttemptLog
@@ -6,7 +6,7 @@ from algo_coach.schema import Attempt, Diagnosis, FailureMode, ProblemRef, TestR
 
 
 def make_attempt(id: str, self_label: FailureMode | None) -> Attempt:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return Attempt(
         id=id,
         started_at=now,
@@ -28,7 +28,7 @@ def make_diagnosis(attempt_id: str, mode: FailureMode) -> Diagnosis:
         evidence="loop bound off by one",
         model="test-model",
         prompt_version="v0",
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
 
 
