@@ -5,7 +5,7 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 
 ## Stack
 
-- Python ≥3.12, `uv` for env/deps, pydantic v2, pytest.
+- Python ≥3.14, `uv` for env/deps, pydantic v2, pytest.
 - `uv sync` to set up; `uv run pytest` to test.
 
 ## Architecture rules
