@@ -7,6 +7,7 @@ when it's used daily, not when it's feature-complete.
 
 Run real attempts through execute-verify, classify the failure, log it.
 
+- Drill loop
 - Failure classifier: speed / rust / gap / syntax router — *why* an attempt
   failed, not just whether. Structured LLM output.
 - Eval harness from day one: classifier agreement vs self-labels, measured.
