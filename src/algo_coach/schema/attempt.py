@@ -1,10 +1,10 @@
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class FailureMode(str, Enum):
+class FailureMode(StrEnum):
     SPEED = "speed"  # solved, but too slowly
     RUST = "rust"  # once-fluent technique, retrieval/fluency failure
     GAP = "gap"  # technique not actually known
