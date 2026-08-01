@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class FailureMode(StrEnum):
@@ -39,11 +39,31 @@ class Attempt(BaseModel):
     tests: list[TestResult] = Field(default_factory=list)
 
 
+class ClaimSource(StrEnum):
+    USER = "user"
+    CLASSIFIER = "classifier"
+
+
 class AttemptTechnique(BaseModel):
-    """The user's claim about which technique an attempt used. Append-only:
-    a later claim never rewrites an earlier one, latest wins on read."""
+    """A claim about which technique an attempt used, and what per-technique
+    progress is measured from. Append-only: a later claim never rewrites an
+    earlier one, latest wins on read."""
 
     id: str  # engine-minted
     created_at: datetime
     attempt_id: str
     technique: str
+    source: ClaimSource  # required: a mislabelled claim cannot be corrected later
+    model: str | None = None
+    prompt_version: str | None = None
+
+    @model_validator(mode="after")
+    def _provenance_matches_source(self) -> AttemptTechnique:
+        """Machine claims are re-derivable, so they must say by what. User
+        claims are not, so version fields on one would name nothing."""
+        versioned = self.model is not None and self.prompt_version is not None
+        if self.source is ClaimSource.CLASSIFIER and not versioned:
+            raise ValueError("a classifier claim needs model and prompt_version")
+        if self.source is ClaimSource.USER and (self.model or self.prompt_version):
+            raise ValueError("a user claim carries no model or prompt_version")
+        return self
