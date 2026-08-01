@@ -80,9 +80,14 @@ Teaching content about a technique — not the vocabulary itself.
   the minted one. An append-only record must not hold a reference nothing can
   follow, so an unresolvable one is rejected — hence problems are pushed first.
   Rejection is per-record, and re-pushing later is a no-op on what landed.
-- **The verdict records what it rests on** — the client's word or the engine's
-  own run. A pushed attempt can only carry the client's: the engine owns no
-  test cases for a pushed problem, so it cannot have run them.
+- **Origin is who produced the attempt** — the push API or the engine's own
+  drill loop — and is stamped by the ingest path, never sent by a client.
+  Whether the verdict rests on a real test run is a separate fact, recorded
+  once the engine can verify: the drill loop produces attempts on pushed
+  problems, which it cannot verify.
+- **The platform's own status is kept verbatim.** `solved` is the projection
+  over it, and the raw value carries what the projection drops — a timeout and
+  a wrong answer are both unsolved, and only one is evidence of slowness.
 - **Problem techniques are never denormalized onto an attempt.** Tags are
   re-derivable, the log is not, and a copy taken at ingest would drift with no
   way to tell which is right.

@@ -6,7 +6,7 @@ import pytest
 from algo_coach import cli
 from algo_coach.ingest import ingest_attempts
 from algo_coach.log import AttemptLog
-from algo_coach.schema import VerdictSource
+from algo_coach.schema import AttemptOrigin
 
 
 def record(external_id: str = "e1", **overrides) -> dict:
@@ -55,14 +55,21 @@ def test_payload_cannot_supply_identity(tmp_path, problems):
     assert attempt.problem_id == "minted-u1"
 
 
-def test_verdict_is_marked_as_the_client_s(tmp_path, problems):
-    """Nothing on this path ran the tests, whatever the payload asserts."""
+def test_origin_is_stamped_as_pushed(tmp_path, problems):
+    """A record arriving here came through the push API, whatever it asserts."""
     log = AttemptLog(tmp_path)
-    ingest_attempts(
-        [record(verdict_source="engine")], user_id="u1", log=log, problems=problems
-    )
+    ingest_attempts([record(origin="engine")], user_id="u1", log=log, problems=problems)
 
-    assert log.attempts()[0].verdict_source is VerdictSource.CLIENT
+    assert log.attempts()[0].origin is AttemptOrigin.PUSH
+
+
+def test_source_status_is_kept_verbatim(tmp_path, problems):
+    """The platform's own status is the client's to send; the engine maps it
+    later and never rewrites it."""
+    log = AttemptLog(tmp_path)
+    ingest_attempts([record(source_status="10")], user_id="u1", log=log, problems=problems)
+
+    assert log.attempts()[0].source_status == "10"
 
 
 def test_engine_mints_distinct_ids(tmp_path, problems):

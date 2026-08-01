@@ -52,12 +52,17 @@ Per-technique skill state updated from attempts and the diagnosis signal;
 scheduling targets the diagnosed cause, not per-problem intervals. Exit: the
 scheduler drives daily practice.
 
+Sessions land here: a sitting is several submissions, and counting each as an
+attempt over-weights the ones that took a retry. A derived view over the log,
+grouped on read — never a field a client sets.
+
 ## Phase 5 — Product problems + verification
 
 Product-owned problems and test cases seeded from the content pipeline;
 attempts on them are executed and verified locally. The first attempts the
-engine produces rather than ingests. Exit: verified attempts feed the mastery
-model.
+engine produces rather than ingests. `Attempt` gains whether a real test run
+backs its verdict — additive, and meaningless before now. Exit: verified
+attempts feed the mastery model.
 
 ## Phase 6 — Program-analysis-grounded diagnosis
 

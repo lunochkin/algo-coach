@@ -13,9 +13,9 @@ from algo_coach.ingest.result import (
 )
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, VerdictSource
+from algo_coach.schema import Attempt, AttemptOrigin
 
-_ENGINE_OWNED = frozenset({"id", "user_id", "problem_id", "verdict_source"})
+_ENGINE_OWNED = frozenset({"id", "user_id", "problem_id", "origin"})
 # Consumed by ingest to resolve the reference; never stored on the record.
 _PAYLOAD_ONLY = frozenset({"problem_external_id"})
 
@@ -32,8 +32,8 @@ def ingest_attempts(
 ) -> AttemptIngestResult:
     """Validate a pushed batch, stamp identity, append what is new.
 
-    - Identity is the engine's: `id`, `user_id`, `problem_id` and
-      `verdict_source` are stamped here, and payload values for them dropped.
+    - Identity is the engine's: `id`, `user_id`, `problem_id` and `origin` are
+      stamped here, and payload values for them dropped.
     - `external_id` is the client's idempotency token, required. A pair already
       in the log is a duplicate: counted, not appended, not an error.
     - `problem_external_id` is resolved to the minted `problem_id`. The log
@@ -73,8 +73,7 @@ def ingest_attempts(
                 "id": uuid.uuid4().hex,
                 "user_id": user_id,
                 "problem_id": problem.id,
-                # Nothing on this path ran the tests; the client says it passed.
-                "verdict_source": VerdictSource.CLIENT,
+                "origin": AttemptOrigin.PUSH,
             },
         )
         try:

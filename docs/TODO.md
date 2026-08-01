@@ -12,8 +12,17 @@
       version on a machine claim. Not deferred: "attribution is always
       automatic" is an assumption the log would be stuck with, and re-deriving
       needs to know which machine claims are stale
-- [x] Verdict provenance on `Attempt`: client claim or engine run. Ingest
-      stamps the client value; a pushed attempt cannot carry the engine one
+- [x] `Attempt.origin`: push API or engine drill loop, stamped by the ingest
+      path. Whether a real test run backs the verdict is a separate fact,
+      recorded when the engine can first verify anything
+- [x] `Attempt.source_status`: the origin platform's own status, verbatim. A
+      timeout and a wrong answer both land as unsolved, and Phase 3 cannot
+      recover the difference from a boolean
+- [x] `started_at`, `time_to_solve_sec` and `code` optional — a platform gives
+      the submission time and often nothing else, and a backfill that rejects
+      the backlog is worth less than one that counts it
+- [x] Drop `Attempt.session`: a sitting is grouped from the log on read, so a
+      client-set field would be a derived view stored on an append-only record
 
 ### Techniques
 - [x] Scaffold project

@@ -18,9 +18,9 @@ class TestResult(BaseModel):
     runtime_ms: float | None = None
 
 
-class VerdictSource(StrEnum):
-    CLIENT = "client"  # the pushing client says so
-    ENGINE = "engine"  # the engine ran the tests itself
+class AttemptOrigin(StrEnum):
+    PUSH = "push"  # arrived through the push API
+    ENGINE = "engine"  # produced by the engine's own drill loop
 
 
 class Attempt(BaseModel):
@@ -32,24 +32,27 @@ class Attempt(BaseModel):
     external_id: str | None = None
     user_id: str
     problem_id: str
-    started_at: datetime
+    # A platform records when a submission landed, rarely when work started.
+    # Optional so a backfill of past attempts counts instead of being rejected.
+    started_at: datetime | None = None
     finished_at: datetime
     language: str = "python"
-    time_to_solve_sec: float
+    time_to_solve_sec: float | None = None
     solved: bool
-    verdict_source: VerdictSource  # what `solved` and `tests` rest on
-    session: str | None = None
+    origin: AttemptOrigin
+    # The origin platform's own status, verbatim and unmapped; `solved` is the
+    # projection over it. Kept raw so a later mapping can re-read it.
+    source_status: str | None = None
     self_label: FailureMode | None = None
     notes: str | None = None
-    code: str
+    code: str | None = None
     tests: list[TestResult] = Field(default_factory=list)
 
     @model_validator(mode="after")
-    def _pushed_verdicts_are_claims(self) -> Attempt:
-        """The engine owns no test cases for a pushed problem, so it cannot
-        have run them."""
-        if self.external_id is not None and self.verdict_source is not VerdictSource.CLIENT:
-            raise ValueError("a pushed attempt's verdict can only come from the client")
+    def _pushed_attempts_declare_their_origin(self) -> Attempt:
+        """A client cannot claim the engine produced what it pushed."""
+        if self.external_id is not None and self.origin is not AttemptOrigin.PUSH:
+            raise ValueError("an attempt carrying an external_id originates from the push API")
         return self
 
 

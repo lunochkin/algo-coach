@@ -6,13 +6,13 @@ from pydantic import ValidationError
 from algo_coach.log import AttemptLog
 from algo_coach.schema import (
     Attempt,
+    AttemptOrigin,
     ClaimSource,
     Diagnosis,
     FailureMode,
     Technique,
     TechniqueClaim,
     TestResult,
-    VerdictSource,
 )
 
 
@@ -27,15 +27,31 @@ def make_attempt(id: str, self_label: FailureMode | None) -> Attempt:
         code="def f(): pass",
         tests=[TestResult(name="t1", passed=False)],
         solved=False,
-        verdict_source=VerdictSource.ENGINE,
+        origin=AttemptOrigin.ENGINE,
         time_to_solve_sec=900.0,
         self_label=self_label,
     )
 
 
-def test_a_pushed_attempt_cannot_claim_engine_verification():
-    """The engine owns no test cases for a pushed problem, so it cannot have
-    run them — a client asserting otherwise is rejected outright."""
+def test_a_backfilled_attempt_needs_only_when_it_landed():
+    """A platform records the submission time and little else. Requiring a
+    start, a duration or the code would reject the whole backlog."""
+    attempt = Attempt(
+        id="a1",
+        user_id="u1",
+        problem_id="p1",
+        finished_at=datetime.now(UTC),
+        solved=True,
+        origin=AttemptOrigin.PUSH,
+    )
+    assert attempt.started_at is None
+    assert attempt.time_to_solve_sec is None
+    assert attempt.code is None
+
+
+def test_a_pushed_attempt_cannot_claim_engine_origin():
+    """An external_id only exists on the push path, so a record carrying one
+    and claiming the engine produced it is rejected outright."""
     now = datetime.now(UTC)
     with pytest.raises(ValidationError):
         Attempt(
@@ -47,7 +63,7 @@ def test_a_pushed_attempt_cannot_claim_engine_verification():
             finished_at=now,
             code="def f(): pass",
             solved=True,
-            verdict_source=VerdictSource.ENGINE,
+            origin=AttemptOrigin.ENGINE,
             time_to_solve_sec=900.0,
         )
 
