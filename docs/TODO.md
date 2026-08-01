@@ -14,8 +14,6 @@
       with the package. Verified present in the built wheel
 - [x] `is_known` for the write path only — never in the pydantic model, so a
       retired code cannot make historical records unreadable
-- [ ] Call `is_known` from the technique-assignment path once it exists —
-      nothing enforces the vocabulary yet
 
 ### Push API
 - [x] Ingest `Attempt`: validate, append, no-op on re-push. Duplicates are not
@@ -27,10 +25,9 @@
       descriptive fields and never moves the minted id
 - [x] Reject client-supplied owner, id, user_id and techniques; the engine
       assigns all four
-- [ ] Map `source_tags` to engine `techniques`; unmapped tags stay in
-      `source_tags` and produce no code. Until it exists, ingest carries the
-      stored `techniques` across a re-push rather than recomputing — that line
-      becomes the call to the mapping
+- [x] Map `source_tags` to engine `techniques`; unmapped tags stay in
+      `source_tags` and produce no code. Re-derived on every push, so a mapping
+      change reaches problems already in the store
 - [ ] Reject an attempt whose `problem_id` is not in the store — currently a
       dangling reference ingests silently. The attempt push predates the
       problem store, so nothing checks it yet
@@ -39,7 +36,9 @@
       ingest resolves it, or problems must be pushed before their attempts
 
 ### CLI
-- [ ] Assign a technique to an attempt, as an `AttemptTechnique` record
+- [ ] Assign a technique to an attempt, as an `AttemptTechnique` record.
+      Reject a code `is_known` returns False for — this is the only write path
+      that could introduce one, since `map_tags` already filters
 - [ ] Retire `cards seed` — it writes technique codes into the cards store
 
 ### Drill board
@@ -50,13 +49,20 @@
 ### Exit
 - [ ] A week of real attempts in the store, board rendering from them
 
-## Later phases
+## Deferred
 
-- [ ] Cards: teaching content referencing a technique, not the vocabulary.
-      Model and store already scaffolded; `Card.name` becomes a card code
+Known gaps with a trigger, not a date. Each names what has to happen first.
+
+- [ ] Re-derive stored problems without a push — when the mapping changes for
+      problems no longer being pushed. A re-push covers it until then
 - [ ] Ingest assumes a single writer: duplicate detection reads the log, so two
       concurrent pushes can both miss the same `external_id`. Decide when the
       web version lands whether the CLI writes to the store or calls the API
 - [ ] Duplicate detection loads the whole attempt log per call, and
       `by_external` scans every problem file per record; both become queries
       when storage swaps
+
+## Later phases
+
+- [ ] Cards: teaching content referencing a technique, not the vocabulary.
+      Model and store already scaffolded; `Card.name` becomes a card code

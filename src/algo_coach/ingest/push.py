@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, ValidationError
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Attempt, Problem, ProblemOwner
+from algo_coach.techniques import map_tags
 
 # Fields the engine assigns; a client sending them is ignored, not trusted.
 _ENGINE_OWNED = frozenset({"id", "user_id", "owner", "techniques"})
@@ -91,8 +92,9 @@ def ingest_problems(
     - `owner` is stamped `USER` by this path and is never read from the
       payload, the same rule as identity.
     - `techniques` is engine-derived and is dropped if a client sends it. The
-      payload's platform tags land in `source_tags` verbatim; codes come from
-      the engine's mapping, once that exists.
+      payload's platform tags land in `source_tags` verbatim, and codes are
+      re-derived from them on every push, so a mapping change reaches problems
+      already in the store.
     - `(user_id, external_id)` identifies the problem across pushes. A known
       pair is an update, not a duplicate: the descriptive fields — title,
       title_slug, url, platform, source_tags, difficulty — are refreshed from
@@ -120,7 +122,6 @@ def ingest_problems(
             "external_id": external_id,
             "user_id": user_id,
             "owner": ProblemOwner.USER,
-            "techniques": existing.techniques if existing else [],
         }
 
         try:
@@ -128,6 +129,10 @@ def ingest_problems(
         except ValidationError as exc:
             result.rejected.append(Rejected(index=index, reason=_reason(exc)))
             continue
+
+        # Derived, never pushed: re-derived on every push so a mapping change
+        # reaches problems already in the store.
+        problem = problem.model_copy(update={"techniques": map_tags(problem.source_tags)})
 
         store.put(problem)
         if existing:

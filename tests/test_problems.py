@@ -100,8 +100,26 @@ def test_client_supplied_techniques_are_dropped(tmp_path):
     )
 
     problem = store.all()[0]
-    assert problem.techniques == []
+    assert problem.techniques == ["dynamic-programming"]
     assert problem.source_tags == ["Dynamic Programming"]
+
+
+def test_unmapped_tags_survive_without_a_code(tmp_path):
+    store = ProblemStore(tmp_path)
+    ingest_problems([record(source_tags=["Simulation"])], user_id="u1", store=store)
+
+    problem = store.all()[0]
+    assert problem.techniques == []
+    assert problem.source_tags == ["Simulation"]
+
+
+def test_re_push_re_derives_techniques(tmp_path):
+    """Raw tags are the truth; codes are a view over them, recomputed."""
+    store = ProblemStore(tmp_path)
+    ingest_problems([record(source_tags=["Greedy"])], user_id="u1", store=store)
+    ingest_problems([record(source_tags=["Trie"])], user_id="u1", store=store)
+
+    assert store.all()[0].techniques == ["trie"]
 
 
 def test_re_push_updates_in_place(tmp_path):
