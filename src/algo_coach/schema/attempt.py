@@ -19,7 +19,7 @@ class TestResult(BaseModel):
 
 
 class ProblemRef(BaseModel):
-    source: str  # ProblemSource id, e.g. "local"
+    source: str  # origin platform, e.g. "local"
     problem_id: str
     techniques: list[str] = Field(default_factory=list)
 
