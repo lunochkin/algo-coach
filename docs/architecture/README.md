@@ -123,8 +123,12 @@ version, so every attempt can be re-diagnosed and compared.
 ## Boundaries
 
 - **Push API** — the platform's only runtime ingest path, carrying user-pushed
-  problems and attempts. A format contract, not a protocol: clients emit the
-  `Problem` and `Attempt` schemas.
+  problems and attempts. A format contract, not a protocol: clients emit
+  `AttemptPush` and `ProblemPush` (`src/algo_coach/schema/push.py`), which are
+  the payloads the stored records are built from, not the records themselves.
+  - The payload has no field for what the engine stamps, so identity and
+    provenance cannot be forged by sending them. Unknown keys are ignored, so a
+    newer client stays pushable to an older engine.
   - Attempts append, problems upsert.
   - Each attempt's problem reference is resolved to the engine's own id, so
     attempts are pushed after the problems they name.

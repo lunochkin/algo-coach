@@ -46,6 +46,9 @@
 - [x] Resolve `problem_external_id` to the minted `problem_id`, rejecting what
       does not resolve. Problems are pushed first; re-pushing after they land
       is a no-op on what ingested
+- [x] `AttemptPush` and `ProblemPush` as the contract clients copy. Engine
+      fields have no field to arrive in, so stripping is enforced by the type
+      rather than a hand-kept name list
 
 ### CLI
 - [x] Retire `cards seed` — it wrote technique codes into the cards store, and
