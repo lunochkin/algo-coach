@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 
 import pytest
 
+from algo_coach import cli
 from algo_coach.ingest import ingest_attempts
 from algo_coach.log import AttemptLog
 
@@ -128,8 +129,6 @@ def test_empty_batch(tmp_path):
 
 
 def test_push_command_reads_jsonl(tmp_path, monkeypatch, capsys):
-    from algo_coach import cli
-
     source = tmp_path / "attempts.jsonl"
     source.write_text(
         json.dumps(record("e1")) + "\n\n" + json.dumps(record("e2")) + "\n"
@@ -145,9 +144,23 @@ def test_push_command_reads_jsonl(tmp_path, monkeypatch, capsys):
     assert json.loads(capsys.readouterr().out)["ingested"] == 2
 
 
-def test_push_command_exits_nonzero_on_rejection(tmp_path, monkeypatch):
-    from algo_coach import cli
+def test_push_command_reports_a_line_that_is_not_json(tmp_path, monkeypatch, capsys):
+    """Corrupt transport, not an invalid record: ingest never sees the line,
+    so it exits with the line number instead of a traceback."""
+    source = tmp_path / "attempts.jsonl"
+    source.write_text(json.dumps(record("e1")) + "\nnot json\n")
+    monkeypatch.setattr(cli, "DATA_ROOT", tmp_path / "data")
+    monkeypatch.setattr("sys.argv", ["algo-coach", "push", "attempts", str(source)])
 
+    with pytest.raises(SystemExit) as exc:
+        cli.main()
+
+    assert exc.value.code == 2
+    assert "line 2" in capsys.readouterr().err
+    assert len(AttemptLog(tmp_path / "data").attempts()) == 1
+
+
+def test_push_command_exits_nonzero_on_rejection(tmp_path, monkeypatch):
     source = tmp_path / "attempts.jsonl"
     source.write_text(json.dumps({"external_id": "e1"}) + "\n")
     monkeypatch.setattr(cli, "DATA_ROOT", tmp_path / "data")

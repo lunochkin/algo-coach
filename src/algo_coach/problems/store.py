@@ -25,7 +25,7 @@ class ProblemStore:
         return Problem.model_validate_json(path.read_text())
 
     def by_external(self, user_id: str, external_id: str) -> Problem | None:
-        """The push identity: a problem is the same one it was last push."""
+        """Identity across pushes: the same pair is the same problem."""
         for problem in self.all():
             if problem.user_id == user_id and problem.external_id == external_id:
                 return problem

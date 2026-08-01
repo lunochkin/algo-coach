@@ -12,12 +12,21 @@ from algo_coach.problems import ProblemStore
 DATA_ROOT = Path("data")
 
 
+class BadLine(Exception):
+    """A line that is not JSON at all — corrupt transport, not an invalid
+    record. Ingest never sees it, so it cannot be reported as a rejection."""
+
+
 def _read_jsonl(source: str) -> Iterator[dict]:
     """One record per line, so a half-written file is still half-ingestible."""
     lines = sys.stdin if source == "-" else Path(source).read_text().splitlines()
-    for line in lines:
-        if line.strip():
+    for number, line in enumerate(lines, start=1):
+        if not line.strip():
+            continue
+        try:
             yield json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise BadLine(f"line {number}: {exc.msg}") from exc
 
 
 def main() -> None:
@@ -34,19 +43,23 @@ def main() -> None:
     )
 
     args = parser.parse_args()
-    log = AttemptLog(DATA_ROOT)
+    records = _read_jsonl(args.source)
 
-    if args.command == "push":
-        records = _read_jsonl(args.source)
+    try:
         if args.kind == "attempts":
-            result = ingest_attempts(records, user_id=args.user, log=log)
+            result = ingest_attempts(records, user_id=args.user, log=AttemptLog(DATA_ROOT))
         else:
             result = ingest_problems(
                 records, user_id=args.user, store=ProblemStore(DATA_ROOT)
             )
-        print(result.model_dump_json(indent=2))
-        if result.rejected:
-            parser.exit(1)
+    except BadLine as exc:
+        # Records before the bad line are already stored. Re-pushing the fixed
+        # file is a no-op on those, so resuming is just running it again.
+        parser.exit(2, f"push: {exc}\n")
+
+    print(result.model_dump_json(indent=2))
+    if result.rejected:
+        parser.exit(1)
 
 
 if __name__ == "__main__":
