@@ -1,0 +1,29 @@
+{
+  "techniques": [
+    "backtracking",
+    "binary-search",
+    "bit-manipulation",
+    "breadth-first-search",
+    "depth-first-search",
+    "divide-and-conquer",
+    "dynamic-programming",
+    "greedy",
+    "hashing",
+    "heap",
+    "intervals",
+    "linked-list",
+    "math",
+    "monotonic-stack",
+    "prefix-sum",
+    "recursion",
+    "shortest-path",
+    "sliding-window",
+    "sorting",
+    "string-matching",
+    "topological-sort",
+    "tree-traversal",
+    "trie",
+    "two-pointers",
+    "union-find"
+  ]
+}

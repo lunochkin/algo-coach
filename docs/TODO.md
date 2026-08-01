@@ -10,11 +10,12 @@
 
 ### Techniques
 - [x] Scaffold project
-- [ ] Technique vocabulary as a data file under `src/algo_coach/`, so it ships
-      with the package
-- [ ] Alias map beside it: retired code → current code, applied when grouping
-- [ ] Membership check on the write path only — never in the pydantic model,
-      or retiring a code makes historical records unreadable
+- [x] Technique vocabulary as a data file under `src/algo_coach/`, so it ships
+      with the package. Verified present in the built wheel
+- [x] `is_known` for the write path only — never in the pydantic model, so a
+      retired code cannot make historical records unreadable
+- [ ] Call `is_known` from the technique-assignment path once it exists —
+      nothing enforces the vocabulary yet
 
 ### Push API
 - [x] Ingest `Attempt`: validate, append, no-op on re-push. Duplicates are not
