@@ -39,7 +39,7 @@ class AttemptPush(BaseModel):
     finished_at: datetime
     solved: bool
     started_at: datetime | None = None
-    language: str = "python"
+    language: str | None = None
     time_to_solve_sec: float | None = None
     source_status: str | None = None
     self_label: FailureMode | None = None

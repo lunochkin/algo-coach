@@ -36,7 +36,7 @@ class Attempt(BaseModel):
     # Optional so a backfill of past attempts counts instead of being rejected.
     started_at: datetime | None = None
     finished_at: datetime
-    language: str = "python"
+    language: str | None = None  # not always recorded; a default would guess
     time_to_solve_sec: float | None = None
     solved: bool
     origin: AttemptOrigin
