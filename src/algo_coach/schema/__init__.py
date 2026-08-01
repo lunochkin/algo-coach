@@ -4,6 +4,7 @@ from algo_coach.schema.attempt import (
     ClaimSource,
     FailureMode,
     TestResult,
+    VerdictSource,
 )
 from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.problem import Problem, ProblemDifficulty, ProblemOwner
@@ -20,4 +21,5 @@ __all__ = [
     "ProblemOwner",
     "Technique",
     "TestResult",
+    "VerdictSource",
 ]

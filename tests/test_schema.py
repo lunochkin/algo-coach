@@ -12,6 +12,7 @@ from algo_coach.schema import (
     FailureMode,
     Technique,
     TestResult,
+    VerdictSource,
 )
 
 
@@ -26,9 +27,29 @@ def make_attempt(id: str, self_label: FailureMode | None) -> Attempt:
         code="def f(): pass",
         tests=[TestResult(name="t1", passed=False)],
         solved=False,
+        verdict_source=VerdictSource.ENGINE,
         time_to_solve_sec=900.0,
         self_label=self_label,
     )
+
+
+def test_a_pushed_attempt_cannot_claim_engine_verification():
+    """The engine owns no test cases for a pushed problem, so it cannot have
+    run them — a client asserting otherwise is rejected outright."""
+    now = datetime.now(UTC)
+    with pytest.raises(ValidationError):
+        Attempt(
+            id="a1",
+            external_id="e1",
+            user_id="u1",
+            problem_id="p1",
+            started_at=now,
+            finished_at=now,
+            code="def f(): pass",
+            solved=True,
+            verdict_source=VerdictSource.ENGINE,
+            time_to_solve_sec=900.0,
+        )
 
 
 def make_diagnosis(attempt_id: str, mode: FailureMode) -> Diagnosis:

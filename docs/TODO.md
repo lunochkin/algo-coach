@@ -11,10 +11,9 @@
       model and prompt version on a machine claim. Not deferred, because
       "attribution is always automatic" is an assumption the log would be
       stuck with, and re-deriving machine claims means knowing which are stale
-- [ ] Verdict provenance on `Attempt`: whether `solved` and `tests` were
-      claimed by the client or produced by engine verification. Unambiguous
-      only while every attempt is pushed; from Phase 5 both land in the same
-      fields
+- [x] Verdict provenance on `Attempt`: whether `solved` and `tests` were
+      claimed by the client or produced by engine verification. Ingest stamps
+      the client value and a pushed attempt cannot carry the engine one
 
 ### Techniques
 - [x] Scaffold project

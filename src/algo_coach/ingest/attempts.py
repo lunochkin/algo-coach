@@ -13,9 +13,9 @@ from algo_coach.ingest.result import (
 )
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt
+from algo_coach.schema import Attempt, VerdictSource
 
-_ENGINE_OWNED = frozenset({"id", "user_id", "problem_id"})
+_ENGINE_OWNED = frozenset({"id", "user_id", "problem_id", "verdict_source"})
 # Consumed by ingest to resolve the reference; never stored on the record.
 _PAYLOAD_ONLY = frozenset({"problem_external_id"})
 
@@ -80,6 +80,8 @@ def ingest_attempts(
                 "id": uuid.uuid4().hex,
                 "user_id": user_id,
                 "problem_id": problem.id,
+                # Nothing on this path ran the tests; the client says it passed.
+                "verdict_source": VerdictSource.CLIENT,
             },
         )
         try:

@@ -18,6 +18,11 @@ class TestResult(BaseModel):
     runtime_ms: float | None = None
 
 
+class VerdictSource(StrEnum):
+    CLIENT = "client"  # the pushing client says so
+    ENGINE = "engine"  # the engine ran the tests itself
+
+
 class Attempt(BaseModel):
     """One real practice attempt. Records are append-only: never rewritten,
     never deleted; schema changes must be additive."""
@@ -32,11 +37,20 @@ class Attempt(BaseModel):
     language: str = "python"
     time_to_solve_sec: float
     solved: bool
+    verdict_source: VerdictSource  # what `solved` and `tests` rest on
     session: str | None = None
     self_label: FailureMode | None = None
     notes: str | None = None
     code: str
     tests: list[TestResult] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _pushed_verdicts_are_claims(self) -> Attempt:
+        """A pushed attempt was solved outside the engine, which owns no test
+        cases for its problem — so the platform cannot have verified it."""
+        if self.external_id is not None and self.verdict_source is not VerdictSource.CLIENT:
+            raise ValueError("a pushed attempt's verdict can only come from the client")
+        return self
 
 
 class ClaimSource(StrEnum):

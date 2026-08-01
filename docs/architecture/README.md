@@ -82,6 +82,11 @@ Teaching content about a technique — not the vocabulary itself.
   follow, so an unresolvable one is rejected — hence problems are pushed before
   their attempts. Rejection is per-record, and re-pushing once the problems
   land is a no-op on what already ingested.
+- **The verdict records what it rests on.** `solved` and its test results are
+  either the client's word or the engine's own run, and the two are not the
+  same evidence. Only the engine may write the verified value, and a pushed
+  attempt cannot carry it at all — the engine owns no test cases for a pushed
+  problem, so it cannot have run them.
 - **Problem techniques are never denormalized onto an attempt.** Problem tags
   are re-derivable; the log is not, and a copy taken at ingest would drift from
   its source with no way to tell which is right.

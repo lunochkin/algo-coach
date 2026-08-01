@@ -6,6 +6,7 @@ import pytest
 from algo_coach import cli
 from algo_coach.ingest import ingest_attempts
 from algo_coach.log import AttemptLog
+from algo_coach.schema import VerdictSource
 
 
 def record(external_id: str = "e1", **overrides) -> dict:
@@ -52,6 +53,16 @@ def test_payload_cannot_supply_identity(tmp_path, problems):
     assert attempt.user_id == "u1"
     assert attempt.id != "forged"
     assert attempt.problem_id == "minted-u1"
+
+
+def test_verdict_is_marked_as_the_client_s(tmp_path, problems):
+    """Nothing on this path ran the tests, whatever the payload asserts."""
+    log = AttemptLog(tmp_path)
+    ingest_attempts(
+        [record(verdict_source="engine")], user_id="u1", log=log, problems=problems
+    )
+
+    assert log.attempts()[0].verdict_source is VerdictSource.CLIENT
 
 
 def test_engine_mints_distinct_ids(tmp_path, problems):
