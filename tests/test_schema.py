@@ -1,8 +1,11 @@
 from datetime import UTC, datetime
 
+import pytest
+from pydantic import ValidationError
+
 from algo_coach.eval import agreement
 from algo_coach.log import AttemptLog
-from algo_coach.schema import Attempt, Diagnosis, FailureMode, ProblemRef, TestResult
+from algo_coach.schema import Attempt, Diagnosis, FailureMode, Technique, TestResult
 
 
 def make_attempt(id: str, self_label: FailureMode | None) -> Attempt:
@@ -11,7 +14,8 @@ def make_attempt(id: str, self_label: FailureMode | None) -> Attempt:
         id=id,
         started_at=now,
         finished_at=now,
-        problem=ProblemRef(source="local", problem_id="p1", techniques=["two-pointers"]),
+        problem_id="p1",
+        user_id="user1",
         code="def f(): pass",
         tests=[TestResult(name="t1", passed=False)],
         solved=False,
@@ -63,3 +67,14 @@ def test_agreement_skips_unlabeled():
     report = agreement(attempts, diagnoses)
     assert report.n == 0
     assert report.rate == 0.0
+
+
+@pytest.mark.parametrize("code", ["", "  ", "../evil", "a/b", "Foo", "-leading-dash"])
+def test_technique_code_must_be_a_safe_slug(code):
+    with pytest.raises(ValidationError):
+        Technique(code=code)
+
+
+@pytest.mark.parametrize("code", ["monotonic-stack", "backtracking"])
+def test_technique_code_accepts_slug(code):
+    assert Technique(code=code).code == code

@@ -18,25 +18,32 @@ class TestResult(BaseModel):
     runtime_ms: float | None = None
 
 
-class ProblemRef(BaseModel):
-    source: str  # origin platform, e.g. "local"
-    problem_id: str
-    techniques: list[str] = Field(default_factory=list)
-
-
 class Attempt(BaseModel):
     """One real practice attempt. Records are append-only: never rewritten,
     never deleted; schema changes must be additive."""
 
-    id: str
+    id: str  # engine-minted; never accepted from a client
+    # (external_id, user_id) — idempotency key for pushed attempts
+    external_id: str | None = None
+    user_id: str
+    problem_id: str
     started_at: datetime
     finished_at: datetime
-    problem: ProblemRef
-    code: str
     language: str = "python"
-    tests: list[TestResult] = Field(default_factory=list)
-    solved: bool
     time_to_solve_sec: float
+    solved: bool
     session: str | None = None
     self_label: FailureMode | None = None
     notes: str | None = None
+    code: str
+    tests: list[TestResult] = Field(default_factory=list)
+
+
+class AttemptTechnique(BaseModel):
+    """The user's claim about which technique an attempt used. Append-only:
+    a later claim never rewrites an earlier one, latest wins on read."""
+
+    id: str  # engine-minted
+    created_at: datetime
+    attempt_id: str
+    technique: str
