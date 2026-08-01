@@ -16,11 +16,16 @@
       or retiring a code makes historical records unreadable
 
 ### Push API
+- [x] Ingest `Attempt`: validate, append, no-op on re-push. Duplicates are not
+      errors; a batch ingests partially so one bad line costs only itself
+- [x] Reject client-supplied `id` and `user_id`; stamp both from the adapter
+- [x] `algo-coach push <file|->`, `--user` standing in for authentication
 - [ ] Ingest `Problem`: validate, upsert as user-owned
-- [ ] Ingest `Attempt`: validate, append, no-op on re-push
-- [ ] Reject client-supplied owner and `id`; derive both from the ingest path
+- [ ] Reject client-supplied owner; derive it from the ingest path
 - [ ] Map `source_tags` to engine `techniques`; unmapped tags stay in
       `source_tags` and produce no code
+- [ ] Reject an attempt whose `problem_id` is not in the store — currently a
+      dangling reference ingests silently
 
 ### CLI
 - [ ] Assign a technique to an attempt, as an `AttemptTechnique` record
@@ -38,3 +43,8 @@
 
 - [ ] Cards: teaching content referencing a technique, not the vocabulary.
       Model and store already scaffolded; `Card.name` becomes a card code
+- [ ] Ingest assumes a single writer: duplicate detection reads the log, so two
+      concurrent pushes can both miss the same `external_id`. Decide when the
+      web version lands whether the CLI writes to the store or calls the API
+- [ ] Duplicate detection loads the whole attempt log per call; becomes a query
+      when storage swaps
