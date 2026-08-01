@@ -136,7 +136,7 @@ def test_push_command_reads_jsonl(tmp_path, monkeypatch, capsys):
     )
     monkeypatch.setattr(cli, "DATA_ROOT", tmp_path / "data")
     monkeypatch.setattr(
-        "sys.argv", ["algo-coach", "push", str(source), "--user", "u1"]
+        "sys.argv", ["algo-coach", "push", "attempts", str(source), "--user", "u1"]
     )
 
     cli.main()
@@ -151,7 +151,7 @@ def test_push_command_exits_nonzero_on_rejection(tmp_path, monkeypatch):
     source = tmp_path / "attempts.jsonl"
     source.write_text(json.dumps({"external_id": "e1"}) + "\n")
     monkeypatch.setattr(cli, "DATA_ROOT", tmp_path / "data")
-    monkeypatch.setattr("sys.argv", ["algo-coach", "push", str(source)])
+    monkeypatch.setattr("sys.argv", ["algo-coach", "push", "attempts", str(source)])
 
     with pytest.raises(SystemExit) as exc:
         cli.main()

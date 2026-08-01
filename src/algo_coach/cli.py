@@ -7,8 +7,9 @@ from pathlib import Path
 
 from algo_coach.cards import Card, CardStore
 from algo_coach.eval import agreement
-from algo_coach.ingest import ingest_attempts
+from algo_coach.ingest import ingest_attempts, ingest_problems
 from algo_coach.log import AttemptLog
+from algo_coach.problems import ProblemStore
 
 DATA_ROOT = Path("data")
 
@@ -32,7 +33,8 @@ def main() -> None:
     cards_sub = cards_parser.add_subparsers(dest="cards_command", required=True)
     cards_sub.add_parser("seed", help="seed cards")
 
-    push_parser = sub.add_parser("push", help="ingest pushed attempts from JSONL")
+    push_parser = sub.add_parser("push", help="ingest pushed records from JSONL")
+    push_parser.add_argument("kind", choices=["attempts", "problems"])
     push_parser.add_argument("source", help="path to a JSONL file, or - for stdin")
     push_parser.add_argument(
         "--user",
@@ -57,7 +59,13 @@ def main() -> None:
                 except FileExistsError:
                     print(f"skipped: {card.name}")
     elif args.command == "push":
-        result = ingest_attempts(_read_jsonl(args.source), user_id=args.user, log=log)
+        records = _read_jsonl(args.source)
+        if args.kind == "attempts":
+            result = ingest_attempts(records, user_id=args.user, log=log)
+        else:
+            result = ingest_problems(
+                records, user_id=args.user, store=ProblemStore(DATA_ROOT)
+            )
         print(result.model_dump_json(indent=2))
         if result.rejected:
             parser.exit(1)

@@ -4,8 +4,9 @@
 
 ### Schema (before the first real ingest)
 - [x] `user_id` on `Attempt`, set by engine at ingest from the authenticated pusher
-- [ ] `Problem` provenance: owner set by ingest path, origin platform, pusher
-- [ ] Add `AttemptTechnique`
+- [x] `Problem` provenance: owner set by ingest path, origin platform, pusher
+- [x] Add `AttemptTechnique` — the record exists and is exported; nothing
+      writes or reads it yet
 
 ### Techniques
 - [x] Scaffold project
@@ -19,13 +20,22 @@
 - [x] Ingest `Attempt`: validate, append, no-op on re-push. Duplicates are not
       errors; a batch ingests partially so one bad line costs only itself
 - [x] Reject client-supplied `id` and `user_id`; stamp both from the adapter
-- [x] `algo-coach push <file|->`, `--user` standing in for authentication
-- [ ] Ingest `Problem`: validate, upsert as user-owned
-- [ ] Reject client-supplied owner; derive it from the ingest path
+- [x] `algo-coach push <attempts|problems> <file|->`, `--user` standing in for
+      authentication
+- [x] Ingest `Problem`: validate, upsert as user-owned. A re-push updates the
+      descriptive fields and never moves the minted id
+- [x] Reject client-supplied owner, id, user_id and techniques; the engine
+      assigns all four
 - [ ] Map `source_tags` to engine `techniques`; unmapped tags stay in
-      `source_tags` and produce no code
+      `source_tags` and produce no code. Until it exists, ingest carries the
+      stored `techniques` across a re-push rather than recomputing — that line
+      becomes the call to the mapping
 - [ ] Reject an attempt whose `problem_id` is not in the store — currently a
-      dangling reference ingests silently
+      dangling reference ingests silently. The attempt push predates the
+      problem store, so nothing checks it yet
+- [ ] Decide what a pushed attempt references: `Problem.id` is engine-minted,
+      so a client cannot know it. Either the client pushes `external_id` and
+      ingest resolves it, or problems must be pushed before their attempts
 
 ### CLI
 - [ ] Assign a technique to an attempt, as an `AttemptTechnique` record
@@ -46,5 +56,6 @@
 - [ ] Ingest assumes a single writer: duplicate detection reads the log, so two
       concurrent pushes can both miss the same `external_id`. Decide when the
       web version lands whether the CLI writes to the store or calls the API
-- [ ] Duplicate detection loads the whole attempt log per call; becomes a query
+- [ ] Duplicate detection loads the whole attempt log per call, and
+      `by_external` scans every problem file per record; both become queries
       when storage swaps
