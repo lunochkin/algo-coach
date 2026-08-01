@@ -7,11 +7,10 @@
 - [x] `Problem` provenance: owner set by ingest path, origin platform, pusher
 - [x] Add `AttemptTechnique` — the record exists and is exported; nothing
       writes or reads it yet
-- [ ] Claim source on `AttemptTechnique`: who asserted the technique, and for
-      a machine claim, the model and prompt version — the shape `Diagnosis`
-      already has. Without it, user and classifier claims are
-      indistinguishable and their disagreement cannot be measured, which is
-      the reason the record is separate at all
+- [x] Claim source on `AttemptTechnique`, required: user or classifier, plus
+      model and prompt version on a machine claim. Not deferred, because
+      "attribution is always automatic" is an assumption the log would be
+      stuck with, and re-deriving machine claims means knowing which are stale
 - [ ] Verdict provenance on `Attempt`: whether `solved` and `tests` were
       claimed by the client or produced by engine verification. Unambiguous
       only while every attempt is pushed; from Phase 5 both land in the same

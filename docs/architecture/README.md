@@ -4,123 +4,111 @@ Target state. Code lags this doc; where they differ, this doc wins.
 
 ## Shape
 
-Engine public, content private.
-Everything the practice loop reads is local to the engine: problems, cards,
-and attempts live in datastore(s) the engine controls, and the technique
-vocabulary ships with the package.
-The engine never contacts external platforms; user clients push data in.
+Engine public, content private. Everything the practice loop reads is local to
+the engine: problems, cards, and attempts live in datastore(s) the engine
+controls, and the technique vocabulary ships with the package. The engine never
+contacts external platforms; user clients push data in.
 
 Consequence: no third-party dependency in the drill loop.
 
 ## Terminology
 
-An attempt is a user's solution to a problem, successful or failed.
-
-Verification is the process of executing an attempt against a problem's
-test cases, yielding pass or fail.
-
-Diagnosis is the process of classifying why an attempt failed;
-a `Diagnosis` record stores the result.
+- **Attempt** — a user's solution to a problem, successful or failed.
+- **Verification** — executing an attempt against a problem's test cases,
+  yielding pass or fail.
+- **Diagnosis** — classifying why an attempt failed; a `Diagnosis` record
+  stores the result.
 
 ## Data classes
 
+| Class | Owner | Visibility | Write semantics | Source of truth |
+|---|---|---|---|---|
+| Techniques | product | global | read-only at runtime | this repo, in git |
+| Cards | product | global | read-only at runtime | private content repo |
+| Problems | product or user | global if product-owned, user-scoped if pushed | read-only if product-owned, mutable cache if pushed | product set, or the pushing client |
+| Attempts | user | private | append-only | the store |
+| Technique claims | user | private | append-only | the store |
+| Diagnoses | user | private | append-only | the store |
+
 ### Techniques
 
-- Owner: product
-- Visibility: global, identical for all users
-- Write semantics: read-only at runtime
-- Source of truth: this repo, in git
+The vocabulary the append-only log references.
 
-The technique vocabulary is the anchor the append-only log references, so it
-is versioned as code rather than stored as data: a file shipped with the
-package, not a datastore the engine writes.
-
-A code is never deleted, because records carrying it outlive it. Retirement
-means an entry in an alias map, applied when grouping.
-
-Membership is checked on the write path only. A model that validated codes on
-read would make the log unreadable by its own schema the moment a code was
-retired.
+- **Versioned as code, not stored as data** — a file shipped with the package,
+  not a datastore the engine writes.
+- **A code is never deleted**, because records carrying it outlive it.
+  Retirement means an entry in an alias map, applied when grouping.
+- **Membership is checked on the write path only.** A model that validated
+  codes on read would make the log unreadable by its own schema the moment a
+  code was retired.
 
 ### Cards
 
-- Owner: product
-- Visibility: global, identical for all users
-- Write semantics: read-only at runtime
-- Source of truth: private content repo
+Teaching content about a technique — not the vocabulary itself.
 
-Cards are teaching content about a technique — not the vocabulary itself.
-They are product data, not code: they live in the engine datastore, seeded
-from a private repo that holds their version history.
-
-Card granularity follows teaching granularity, which is finer than the
-technique: one technique can carry several cards. Mastery is estimated per
-technique, so cards are never the unit of estimation and are never referenced
-by the log.
+- **Product data, not code** — cards live in the engine datastore, seeded from
+  a private repo that holds their version history.
+- **Granularity follows teaching, not estimation.** One technique can carry
+  several cards. Mastery is estimated per technique, so cards are never the
+  unit of estimation and are never referenced by the log.
 
 ### Problems
 
-- Owner: product or user
-- Visibility: global for product-owned, scoped for user-pushed
-- Write semantics: read-only for product-owned, mutable cache for user-pushed
-- Source of truth: the product set or the pushing client
-
-Problems have provenance.
-Product problems need a rights record; pushed problems need an origin
-platform and a pushing user.
-
-User-pushed problems arrive through the push API. `(user_id, external_id)` is
-the push identity, so a re-push updates rather than duplicates. The engine
-mints the `id`, and it never moves on update, because attempts reference it.
-
-Product-owned problems are created using a content pipeline, which lives
-in a separate private repo.
-
-Tag mapping is owned by the engine. A pushed problem carries the origin
-platform's tags verbatim; the engine derives its own technique codes beside
-them. The raw tags are the truth, the codes are a derived view, so re-running
-the mapping is legal and expected. An unmapped tag produces no code and blocks
-nothing: a metadata mismatch must never cost a real attempt.
+- **Provenance is required.** Product problems need a rights record; pushed
+  problems need an origin platform and a pushing user.
+- **Two origins.** User-pushed problems arrive through the push API.
+  Product-owned problems come from a content pipeline in a separate private
+  repo.
+- **Push identity is `(user_id, external_id)`**, so a re-push updates rather
+  than duplicates. The engine mints the `id`, and it never moves on update,
+  because attempts reference it.
+- **Tag mapping is owned by the engine.** A pushed problem carries the origin
+  platform's tags verbatim and the engine derives its own codes beside them.
+  Raw tags are the truth, codes are a derived view, so re-running the mapping
+  is legal and expected.
+- **An unmapped tag blocks nothing.** It produces no code and the problem still
+  ingests: a metadata mismatch must never cost a real attempt.
 
 ### Attempts
 
-- Owner: user
-- Visibility: private
-- Write semantics: append-only
-- Source of truth: the store — records are either user-pushed or produced by the engine
+- **One source per problem** — the user if the problem is user-pushed,
+  otherwise the engine.
+- **Identity is the engine's.** A pushed attempt carries an id minted by the
+  client, unique per user, so re-pushing an ingested attempt is a no-op. The
+  engine mints its own id and never accepts one from a client.
+- **The problem reference is resolved at ingest.** A pushed attempt names its
+  problem as the origin platform does; the engine resolves that to the minted
+  `problem_id`. An append-only record must not hold a reference nothing can
+  follow, so an unresolvable one is rejected — hence problems are pushed before
+  their attempts. Rejection is per-record, and re-pushing once the problems
+  land is a no-op on what already ingested.
+- **Problem techniques are never denormalized onto an attempt.** Problem tags
+  are re-derivable; the log is not, and a copy taken at ingest would drift from
+  its source with no way to tell which is right.
 
-Attributing an attempt to a technique is a claim, not a fact, so it lives in
-its own append-only record rather than on the attempt:
-- Initially the user's own assignment: they mark how they solved the problem
-- Later, an ML classifier assigns the solution to a technique
+### Technique claims
 
-Neither overwrites the other. Successive claims accumulate and the latest wins
-on read, so the disagreement between user and classifier stays measurable —
-the same shape as `Diagnosis`, for the same reason.
+Which technique an attempt used — what per-technique progress is measured from.
+A claim rather than a fact, and open to revision, so it is its own record
+rather than a field on the attempt.
 
-An attempt never denormalizes the problem's techniques. Problem tags are
-re-derivable; the log is not, and a copy taken at ingest would drift from its
-source with no way to tell which is right.
-
-Attempts for a given problem come from one source only: the user if the
-problem is user-pushed, otherwise the engine.
-
-User-pushed attempts carry an id minted by the pushing client, unique per
-user, so re-pushing an already-ingested attempt is a no-op. The engine mints
-its own id and never accepts one from a client.
-
-A pushed attempt names its problem as the origin platform does; the engine
-resolves that to the minted `problem_id`. An append-only record must not hold
-a reference nothing can follow, so an unresolvable one is rejected — hence
-problems are pushed before their attempts. Rejection is per-record, and
-re-pushing once the problems land is a no-op on what already ingested.
+- **Two writers.** Initially the user's own assignment: they mark how they
+  solved the problem. Later, an ML classifier assigns the solution to a
+  technique.
+- **A revision never rewrites what it replaces.** Successive claims accumulate
+  and the latest wins on read — the same shape as `Diagnosis`, for the same
+  reason.
+- **Every claim records its source**, and a machine claim also records the
+  model and prompt version that produced it. Both count the same toward
+  progress, but a machine claim can be recomputed by a better classifier and a
+  user's cannot, so the two have to be separable and re-deriving has to tell
+  which claims are stale — the same reason platform tags are kept apart from
+  the codes derived from them.
 
 ### Diagnoses
 
-- Owner: user
-- Visibility: private
-- Write semantics: append-only
-- Source of truth: the store
+Why an attempt failed. Keyed to an attempt, versioned by model and prompt
+version, so every attempt can be re-diagnosed and compared.
 
 ## Boundaries
 
@@ -134,8 +122,8 @@ re-pushing once the problems land is a no-op on what already ingested.
     land. One malformed line must not cost the attempts around it.
   - An already-ingested record is counted, not an error, so retrying is safe.
 - **Verification** — runs locally, against test cases the engine owns. Product
-  problems only: pushed problems carry no test cases, so their attempts
-  happen outside the engine.
+  problems only: pushed problems carry no test cases, so their attempts happen
+  outside the engine.
 - **Storage** — concrete for now (JSON files under a gitignored directory), a
   database later. The schema is the contract; storage swaps underneath it.
 - **Product content ingest** — cards, problems, and test cases are produced by
@@ -145,28 +133,31 @@ re-pushing once the problems land is a no-op on what already ingested.
 
 ## Invariants
 
+Properties the system holds at all times.
+
 - Attempts, technique claims, and diagnoses are append-only.
-- `Diagnosis` is a separate record, keyed to an attempt and versioned by model
-  and prompt version, so every attempt can be re-diagnosed and compared.
-- No third-party problem statements or test cases in git — in any repo.
-- Pushed attempts cannot be verified by the platform and never enter
-  cross-user aggregates.
-- The technique vocabulary is product-owned and global; no user-authored
-  techniques or cards. Technique codes are stable identifiers with a migration
-  path, since attempts, problems, and future user annotations reference them.
-  Cards are teaching content and are never referenced by the log.
 - Every reference in an append-only record is engine-minted. External ids are
   resolved at the boundary and never stored on an attempt, so the log stays
   readable without the platform that produced it.
 - Aggregates are derived views, never stored truth.
+- A problem's owner (product or user) is stored state, and determines its
+  visibility, test-case availability, attempt origin, verifiability, and
+  eligibility for cross-user aggregates. Those are derived, never stored
+  independently, and the owner is set by the ingest path — never supplied by a
+  client.
+- Pushed attempts cannot be verified by the platform and never enter cross-user
+  aggregates.
+- The technique vocabulary is product-owned and global; no user-authored
+  techniques or cards. Technique codes are stable identifiers with a migration
+  path, since attempts, problems, and future user annotations reference them.
+  Cards are teaching content and are never referenced by the log.
 - Domain logic stays adapter-free and directly callable; the CLI is one
   adapter, a web API will be another.
-- A problem's owner (product or user) is stored state and determines its visibility, test-case
-  availability, attempt origin, verifiability, and eligibility for cross-user
-  aggregates. These are derived, never stored independently, and the owner is
-  set by the ingest path — never supplied by a client.
+- No third-party problem statements or test cases in git — in any repo.
 
-## Additional constraints
+## Repo constraints
+
+Rules on how this repo is built, rather than properties of the running system.
 
 - No concrete third-party problem-platform client ever enters this repo.
 - Schema changes must be additive (new optional fields), never breaking.
