@@ -47,7 +47,12 @@ def main() -> None:
 
     try:
         if args.kind == "attempts":
-            result = ingest_attempts(records, user_id=args.user, log=AttemptLog(DATA_ROOT))
+            result = ingest_attempts(
+                records,
+                user_id=args.user,
+                log=AttemptLog(DATA_ROOT),
+                problems=ProblemStore(DATA_ROOT),
+            )
         else:
             result = ingest_problems(
                 records, user_id=args.user, store=ProblemStore(DATA_ROOT)
