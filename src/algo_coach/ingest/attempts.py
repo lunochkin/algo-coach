@@ -32,23 +32,16 @@ def ingest_attempts(
 ) -> AttemptIngestResult:
     """Validate a pushed batch, stamp identity, append what is new.
 
-    The contract, in the order it has to hold:
-
-    - `user_id` comes from the adapter, never from the payload. A record
-      carrying its own `user_id`, `id` or `problem_id` has them dropped —
-      identity is the engine's to assign.
-    - `id` is minted here (uuid4 hex).
-    - `external_id` is required and is the client's idempotency token.
-      `(user_id, external_id)` already in the log means the record is a
-      duplicate: counted, not appended, not an error.
-    - `problem_external_id` names the problem as the origin platform does; the
-      engine resolves it to the minted `problem_id` it stores. A client cannot
-      know that id, and the log must not hold a reference nothing can follow,
-      so an unresolvable one is rejected. Push problems before their attempts.
-    - A record that fails validation is rejected by index and does not stop the
-      batch. Partial ingest is the point — one malformed line must not cost the
-      attempts around it.
-    - Ingest is append-only. Nothing here rewrites an existing record.
+    - Identity is the engine's: `id`, `user_id`, `problem_id` and
+      `verdict_source` are stamped here, and payload values for them dropped.
+    - `external_id` is the client's idempotency token, required. A pair already
+      in the log is a duplicate: counted, not appended, not an error.
+    - `problem_external_id` is resolved to the minted `problem_id`. The log
+      must not hold a reference nothing can follow, so an unresolvable one is
+      rejected — push problems before their attempts.
+    - A bad record is rejected by index and the batch continues, so one
+      malformed line costs only itself.
+    - Append-only: nothing here rewrites a record.
     """
     seen = {attempt.external_id for attempt in log.attempts() if attempt.user_id == user_id}
     result = AttemptIngestResult()

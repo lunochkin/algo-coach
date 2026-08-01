@@ -7,11 +7,11 @@ from algo_coach.schema import Technique
 
 @cache
 def codes() -> frozenset[str]:
-    """The product-owned technique vocabulary, read from the packaged file.
+    """The product-owned technique vocabulary.
 
-    Read through `importlib.resources`, not a path relative to the working
-    directory: the vocabulary ships inside the wheel and has to resolve
-    wherever the CLI is run from.
+    Read through `importlib.resources` rather than a path relative to the
+    working directory: it ships inside the wheel and has to resolve wherever
+    the CLI runs.
     """
     raw = json.loads(
         resources.files("algo_coach.techniques").joinpath("vocabulary.json").read_text()

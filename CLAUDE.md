@@ -10,6 +10,11 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 
 @docs/architecture/README.md
 
+## Writing
+
+- Docs, commits, comments: shortest form that keeps the reason. Cut restating,
+  hedging, and any sentence that only rephrases the one before.
+
 ## Code style
 
 - Comments sparse; explain why, never what. Match pydantic/pytest idiom.

@@ -13,8 +13,8 @@ DATA_ROOT = Path("data")
 
 
 class BadLine(Exception):
-    """A line that is not JSON at all — corrupt transport, not an invalid
-    record. Ingest never sees it, so it cannot be reported as a rejection."""
+    """Not JSON at all: corrupt transport, not an invalid record. Ingest never
+    sees it, so it cannot come back as a rejection."""
 
 
 def _read_jsonl(source: str) -> Iterator[dict]:
@@ -58,8 +58,8 @@ def main() -> None:
                 records, user_id=args.user, store=ProblemStore(DATA_ROOT)
             )
     except BadLine as exc:
-        # Records before the bad line are already stored. Re-pushing the fixed
-        # file is a no-op on those, so resuming is just running it again.
+        # Records before it are stored; re-pushing the fixed file is a no-op
+        # on those, so resuming means running the command again.
         parser.exit(2, f"push: {exc}\n")
 
     print(result.model_dump_json(indent=2))

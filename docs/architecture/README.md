@@ -73,23 +73,19 @@ Teaching content about a technique — not the vocabulary itself.
 
 - **One source per problem** — the user if the problem is user-pushed,
   otherwise the engine.
-- **Identity is the engine's.** A pushed attempt carries an id minted by the
-  client, unique per user, so re-pushing an ingested attempt is a no-op. The
-  engine mints its own id and never accepts one from a client.
-- **The problem reference is resolved at ingest.** A pushed attempt names its
-  problem as the origin platform does; the engine resolves that to the minted
-  `problem_id`. An append-only record must not hold a reference nothing can
-  follow, so an unresolvable one is rejected — hence problems are pushed before
-  their attempts. Rejection is per-record, and re-pushing once the problems
-  land is a no-op on what already ingested.
-- **The verdict records what it rests on.** `solved` and its test results are
-  either the client's word or the engine's own run, and the two are not the
-  same evidence. Only the engine may write the verified value, and a pushed
-  attempt cannot carry it at all — the engine owns no test cases for a pushed
-  problem, so it cannot have run them.
-- **Problem techniques are never denormalized onto an attempt.** Problem tags
-  are re-derivable; the log is not, and a copy taken at ingest would drift from
-  its source with no way to tell which is right.
+- **Identity is the engine's.** A pushed attempt carries a client-minted id,
+  unique per user, so re-pushing an ingested one is a no-op. The engine mints
+  its own id and never accepts one from a client.
+- **The problem reference is resolved at ingest**, from the platform's id to
+  the minted one. An append-only record must not hold a reference nothing can
+  follow, so an unresolvable one is rejected — hence problems are pushed first.
+  Rejection is per-record, and re-pushing later is a no-op on what landed.
+- **The verdict records what it rests on** — the client's word or the engine's
+  own run. A pushed attempt can only carry the client's: the engine owns no
+  test cases for a pushed problem, so it cannot have run them.
+- **Problem techniques are never denormalized onto an attempt.** Tags are
+  re-derivable, the log is not, and a copy taken at ingest would drift with no
+  way to tell which is right.
 
 ### Technique claims
 
@@ -103,12 +99,11 @@ rather than a field on the attempt.
 - **A revision never rewrites what it replaces.** Successive claims accumulate
   and the latest wins on read — the same shape as `Diagnosis`, for the same
   reason.
-- **Every claim records its source**, and a machine claim also records the
-  model and prompt version that produced it. Both count the same toward
-  progress, but a machine claim can be recomputed by a better classifier and a
-  user's cannot, so the two have to be separable and re-deriving has to tell
-  which claims are stale — the same reason platform tags are kept apart from
-  the codes derived from them.
+- **Every claim records its source**, and a machine claim its model and prompt
+  version. Both count the same toward progress, but a machine claim can be
+  recomputed by a better classifier and a user's cannot — so re-deriving has to
+  find the stale ones and leave the rest, as with platform tags and the codes
+  derived from them.
 
 ### Diagnoses
 

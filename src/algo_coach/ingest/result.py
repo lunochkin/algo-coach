@@ -23,8 +23,7 @@ class ProblemIngestResult(BaseModel):
 
 
 def external_id_of(raw: Mapping) -> str | None:
-    """The client's idempotency token. Required on every push path, so its
-    absence is the one rejection both ingests raise before validating."""
+    """The client's idempotency token, required on every push path."""
     value = raw.get("external_id")
     return value if isinstance(value, str) and value else None
 
@@ -32,14 +31,14 @@ def external_id_of(raw: Mapping) -> str | None:
 def engine_payload(raw: Mapping, *, owned: frozenset[str], values: dict) -> dict:
     """Strip the fields the engine assigns, then apply its own.
 
-    Stripping rather than only overwriting: a field the engine derives has to
-    survive from the stored record, and a client value left in place would win.
+    Stripped rather than overwritten: a derived field carried over from the
+    stored record would otherwise lose to the client's value.
     """
     return {key: value for key, value in raw.items() if key not in owned} | values
 
 
 def reason(exc: ValidationError) -> str:
-    """One line per report. Pydantic's own rendering is a multi-line block,
+    """Flatten to one line: pydantic's own rendering is a multi-line block,
     which reads badly inside JSON a client has to parse."""
     return "; ".join(
         f"{'.'.join(str(part) for part in error['loc'])}: {error['msg']}"

@@ -25,21 +25,13 @@ def ingest_problems(
 
     Where this differs from attempts:
 
-    - `owner` is stamped `USER` by this path and is never read from the
-      payload, the same rule as identity.
-    - `techniques` is engine-derived and is dropped if a client sends it. The
-      payload's platform tags land in `source_tags` verbatim, and codes are
-      re-derived from them on every push, so a mapping change reaches problems
-      already in the store.
-    - `(user_id, external_id)` identifies the problem across pushes. A known
-      pair is an update, not a duplicate: the descriptive fields — title,
-      title_slug, url, platform, source_tags, difficulty — are refreshed from
-      the payload, counted in `updated`.
-    - Identity never moves on update. The engine-minted `id`, `owner`,
-      `user_id`, and `external_id` of an existing problem survive a re-push,
-      because attempts already reference that `id`.
-    - As with attempts, `external_id` is required here, a bad record is
-      rejected by index, and the rest of the batch still lands.
+    - `owner` is stamped `USER`, never read from the payload.
+    - `techniques` is dropped if a client sends it: platform tags land in
+      `source_tags` verbatim and codes are re-derived on every push, so a
+      mapping change reaches problems already stored.
+    - `(user_id, external_id)` identifies the problem across pushes, so a known
+      pair refreshes the descriptive fields and counts as `updated`.
+    - Identity survives that update — attempts already reference the `id`.
     """
     result = ProblemIngestResult()
 

@@ -12,18 +12,17 @@ Get real daily attempts into the engine and make current state visible.
 
 - Record schema settled before the first real ingest: engine-minted ids on
   `Attempt` and `Problem`, `user_id` and `external_id` on `Attempt`, and
-  `AttemptTechnique` as a joined record. The log is append-only — none of these
-  can be retrofitted once real data lands.
-- Push API: ingest `Problem` and `Attempt` records from the practice client.
-  Validate and append; no verification on this path.
-- Techniques: the product-owned vocabulary, a data file in this repo rather
-  than a datastore. Codes are referenced by the log, so retirement goes through
-  an alias map, never a deletion.
-- Drill board: read-only — per technique, attempt history and current state,
-  derived from recency, attempt count, solved/unsolved, and the user's
-  self-label. Grouping comes from `AttemptTechnique`, the user's own claim;
-  problem tags are a hint, never the key. Diagnosis is not an input until
-  Phase 3. No scheduling; the user picks what to drill.
+  `AttemptTechnique` as a joined record. The log is append-only, so none of it
+  can be retrofitted.
+- Push API: ingest `Problem` and `Attempt` from the practice client. No
+  verification on this path.
+- Techniques: the product-owned vocabulary, a data file rather than a
+  datastore. The log references the codes, so retirement goes through an alias
+  map, never a deletion.
+- Drill board: read-only — per technique, attempt history and current state
+  from recency, attempt count, solved/unsolved, and self-label. Grouping comes
+  from `AttemptTechnique`; problem tags are a hint, never the key. Diagnosis is
+  not an input until Phase 3. No scheduling; the user picks what to drill.
 - Exit: a week of real attempts is in the store, and the board renders
   per-technique state from them.
 
@@ -31,7 +30,7 @@ Get real daily attempts into the engine and make current state visible.
 
 - Interactive drill loop: board → pick a technique → attempt → record.
 - Cards: teaching content referencing a technique — briefs shown before an
-  attempt. The first thing cards are actually for.
+  attempt. The first use cards actually have.
 - Exit: loop runs on real daily attempts.
 
 ## Phase 3 — Diagnosis

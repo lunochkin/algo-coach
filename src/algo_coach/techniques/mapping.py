@@ -25,12 +25,12 @@ def map_tags(tags: Iterable[str]) -> list[str]:
     """Derive engine technique codes from an origin platform's tags.
 
     Normalisation carries most tags on its own — "Dynamic Programming" is
-    already the code — so the alias file only has to hold what it misses. A tag
-    that reaches neither is not an error: it stays in `source_tags` and
-    produces no code, because a metadata mismatch must never cost an attempt.
+    already the code — so the alias file holds only what it misses. A tag that
+    reaches neither produces no code and blocks nothing: a metadata mismatch
+    must never cost an attempt.
 
-    Sorted and deduplicated, so re-deriving is stable regardless of the order
-    the platform sent its tags in.
+    Sorted and deduplicated, so re-deriving is stable however the platform
+    ordered its tags.
     """
     known = codes()
     mapped = set()

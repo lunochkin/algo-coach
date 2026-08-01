@@ -4,10 +4,10 @@ from algo_coach.schema import Problem
 
 
 class ProblemStore:
-    """Store for problems. One file per problem, named by its engine-minted id.
+    """One file per problem, named by its engine-minted id.
 
-    Unlike the attempt log, this is a mutable cache: a re-pushed problem
-    overwrites the descriptive fields it carries. Identity never moves.
+    A mutable cache, unlike the attempt log: a re-push overwrites the
+    descriptive fields. Identity never moves.
     """
 
     def __init__(self, root: Path):

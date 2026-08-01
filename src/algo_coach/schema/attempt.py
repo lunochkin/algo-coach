@@ -24,8 +24,8 @@ class VerdictSource(StrEnum):
 
 
 class Attempt(BaseModel):
-    """One real practice attempt. Records are append-only: never rewritten,
-    never deleted; schema changes must be additive."""
+    """One real practice attempt. Append-only: never rewritten, never deleted,
+    and schema changes stay additive."""
 
     id: str  # engine-minted; never accepted from a client
     # (external_id, user_id) — idempotency key for pushed attempts
@@ -46,8 +46,8 @@ class Attempt(BaseModel):
 
     @model_validator(mode="after")
     def _pushed_verdicts_are_claims(self) -> Attempt:
-        """A pushed attempt was solved outside the engine, which owns no test
-        cases for its problem — so the platform cannot have verified it."""
+        """The engine owns no test cases for a pushed problem, so it cannot
+        have run them."""
         if self.external_id is not None and self.verdict_source is not VerdictSource.CLIENT:
             raise ValueError("a pushed attempt's verdict can only come from the client")
         return self
@@ -59,9 +59,9 @@ class ClaimSource(StrEnum):
 
 
 class AttemptTechnique(BaseModel):
-    """A claim about which technique an attempt used, and what per-technique
-    progress is measured from. Append-only: a later claim never rewrites an
-    earlier one, latest wins on read."""
+    """Which technique an attempt used — what per-technique progress is
+    measured from. Append-only: a later claim never rewrites an earlier one,
+    latest wins on read."""
 
     id: str  # engine-minted
     created_at: datetime
@@ -73,8 +73,8 @@ class AttemptTechnique(BaseModel):
 
     @model_validator(mode="after")
     def _provenance_matches_source(self) -> AttemptTechnique:
-        """Machine claims are re-derivable, so they must say by what. User
-        claims are not, so version fields on one would name nothing."""
+        """A machine claim is re-derivable, so it must say by what; versions on
+        a user claim would name a model that never touched it."""
         versioned = self.model is not None and self.prompt_version is not None
         if self.source is ClaimSource.CLASSIFIER and not versioned:
             raise ValueError("a classifier claim needs model and prompt_version")
