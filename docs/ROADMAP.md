@@ -12,7 +12,7 @@ Get real daily attempts into the engine and make current state visible.
 
 - Record schema settled before the first real ingest: engine-minted ids on
   `Attempt` and `Problem`, `user_id` and `external_id` on `Attempt`, and
-  `AttemptTechnique` as a joined record. The log is append-only, so none of it
+  `TechniqueClaim` as a joined record. The log is append-only, so none of it
   can be retrofitted.
 - Push API: ingest `Problem` and `Attempt` from the practice client. No
   verification on this path.
@@ -20,9 +20,10 @@ Get real daily attempts into the engine and make current state visible.
   datastore. The log references the codes, so retirement goes through an alias
   map, never a deletion.
 - Drill board: read-only — per technique, attempt history and current state
-  from recency, attempt count, solved/unsolved, and self-label. Grouping comes
-  from `AttemptTechnique`; problem tags are a hint, never the key. Diagnosis is
-  not an input until Phase 3. No scheduling; the user picks what to drill.
+  from recency, attempt count, solved/unsolved, and self-label. Grouping
+  resolves to a claim if one exists, otherwise the problem's tags, so a history
+  of past attempts groups without being labelled. Diagnosis is not an input
+  until Phase 3. No scheduling; the user picks what to drill.
 - Exit: a week of real attempts is in the store, and the board renders
   per-technique state from them.
 
@@ -31,6 +32,10 @@ Get real daily attempts into the engine and make current state visible.
 - Interactive drill loop: board → pick a technique → attempt → record.
 - Cards: teaching content referencing a technique — briefs shown before an
   attempt. The first use cards actually have.
+- Attribution classifier: which of the problem's tags the solution actually
+  used. Card progress is the first number that decides something, and tag
+  fallback biases it toward broad techniques. Constrained to the problem's own
+  tags, so it picks among candidates rather than classifying freely.
 - Exit: loop runs on real daily attempts.
 
 ## Phase 3 — Diagnosis

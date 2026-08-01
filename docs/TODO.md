@@ -5,8 +5,10 @@
 ### Schema (before the first real ingest)
 - [x] `user_id` on `Attempt`, stamped at ingest from the authenticated pusher
 - [x] `Problem` provenance: owner set by ingest path, origin platform, pusher
-- [x] Add `AttemptTechnique` — the record exists; nothing writes it yet
-- [x] Claim source on `AttemptTechnique`, required, plus model and prompt
+- [x] Add `TechniqueClaim` — the record exists; nothing writes it yet
+- [x] One claim per attempt naming every technique it used, since a solution
+      can use several and a revision has to replace the whole set
+- [x] Claim source on `TechniqueClaim`, required, plus model and prompt
       version on a machine claim. Not deferred: "attribution is always
       automatic" is an assumption the log would be stuck with, and re-deriving
       needs to know which machine claims are stale
@@ -37,16 +39,17 @@
       is a no-op on what ingested
 
 ### CLI
-- [ ] Assign a technique to an attempt, as an `AttemptTechnique` record.
-      Reject a code `is_known` rejects — the only write path that could
-      introduce one, since `map_tags` already filters
 - [x] Retire `cards seed` — it wrote technique codes into the cards store, and
       the vocabulary ships in git now
 
 ### Drill board
-- [ ] Per-technique view: attempt count, recency, solved/unsolved, self-label.
-      Grouping key is `AttemptTechnique`, never problem tags
+- [ ] Resolve an attempt's techniques: its claim if one exists, otherwise the
+      problem's. Read-time only — never stored, so re-deriving the tag mapping
+      reaches every unclaimed attempt
+- [ ] Per-technique view: attempt count, recency, solved/unsolved, self-label
 - [ ] `algo-coach board` CLI command
+- [ ] Count how much of the backlog carries more than one tag — it sets how
+      badly Phase 2's classifier is needed
 
 ### Exit
 - [ ] A week of real attempts in the store, board rendering from them
@@ -55,6 +58,10 @@
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
 
+- [ ] Assign techniques to an attempt, as a `TechniqueClaim` record — when a
+      resolved default is wrong often enough to be worth correcting. Reject a
+      code `is_known` rejects: the only write path that could introduce one,
+      since `map_tags` already filters
 - [ ] Re-derive stored problems without a push — when the mapping changes for
       problems no longer pushed. A re-push covers it until then
 - [ ] Ingest assumes a single writer: two concurrent pushes can both miss the

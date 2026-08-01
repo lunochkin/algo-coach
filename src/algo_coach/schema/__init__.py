@@ -1,8 +1,8 @@
 from algo_coach.schema.attempt import (
     Attempt,
-    AttemptTechnique,
     ClaimSource,
     FailureMode,
+    TechniqueClaim,
     TestResult,
     VerdictSource,
 )
@@ -12,7 +12,6 @@ from algo_coach.schema.technique import Technique
 
 __all__ = [
     "Attempt",
-    "AttemptTechnique",
     "ClaimSource",
     "Diagnosis",
     "FailureMode",
@@ -20,6 +19,7 @@ __all__ = [
     "ProblemDifficulty",
     "ProblemOwner",
     "Technique",
+    "TechniqueClaim",
     "TestResult",
     "VerdictSource",
 ]

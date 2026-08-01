@@ -6,11 +6,11 @@ from pydantic import ValidationError
 from algo_coach.log import AttemptLog
 from algo_coach.schema import (
     Attempt,
-    AttemptTechnique,
     ClaimSource,
     Diagnosis,
     FailureMode,
     Technique,
+    TechniqueClaim,
     TestResult,
     VerdictSource,
 )
@@ -75,37 +75,49 @@ def test_attempt_roundtrip(tmp_path):
 
 
 def test_technique_claim_records_its_source():
-    claim = AttemptTechnique(
+    claim = TechniqueClaim(
         id="c1",
         created_at=datetime.now(UTC),
         attempt_id="a1",
-        technique="backtracking",
+        techniques=["backtracking"],
         source=ClaimSource.USER,
     )
 
     assert claim.source is ClaimSource.USER
 
 
+def test_a_claim_names_every_technique_at_once():
+    """One record per attempt, so a revision replaces the whole set."""
+    claim = make_claim(ClaimSource.USER, techniques=["backtracking", "recursion"])
+
+    assert claim.techniques == ["backtracking", "recursion"]
+
+
+def test_a_claim_names_at_least_one_technique():
+    with pytest.raises(ValidationError):
+        make_claim(ClaimSource.USER, techniques=[])
+
+
 def test_technique_claim_requires_a_source():
     """Nothing distinguishes a user claim from a machine one after the fact."""
     with pytest.raises(ValidationError):
-        AttemptTechnique(
+        TechniqueClaim(
             id="c1",
             created_at=datetime.now(UTC),
             attempt_id="a1",
-            technique="backtracking",
+            techniques=["backtracking"],
         )
 
 
-def make_claim(source: ClaimSource, **overrides) -> AttemptTechnique:
+def make_claim(source: ClaimSource, **overrides) -> TechniqueClaim:
     fields = {
         "id": "c1",
         "created_at": datetime.now(UTC),
         "attempt_id": "a1",
-        "technique": "backtracking",
+        "techniques": ["backtracking"],
         "source": source,
     } | overrides
-    return AttemptTechnique.model_validate(fields)
+    return TechniqueClaim.model_validate(fields)
 
 
 def test_classifier_claim_records_what_produced_it():

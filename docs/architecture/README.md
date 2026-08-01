@@ -89,21 +89,26 @@ Teaching content about a technique — not the vocabulary itself.
 
 ### Technique claims
 
-Which technique an attempt used — what per-technique progress is measured from.
-A claim rather than a fact, and open to revision, so it is its own record
+Which techniques an attempt used — what per-technique progress is measured
+from. A claim rather than a fact, and open to revision, so it is its own record
 rather than a field on the attempt.
 
-- **Two writers.** Initially the user's own assignment: they mark how they
-  solved the problem. Later, an ML classifier assigns the solution to a
-  technique.
-- **A revision never rewrites what it replaces.** Successive claims accumulate
-  and the latest wins on read — the same shape as `Diagnosis`, for the same
-  reason.
+- **Attribution resolves, it is not required.** A claim if one exists,
+  otherwise the problem's techniques. Nothing has to be labelled for an attempt
+  to count, which is what makes a history of past attempts usable.
+- **Resolution happens on read and is never stored**, so re-deriving the tag
+  mapping reaches every unclaimed attempt.
+- **The fallback answers a different question.** A tag says what a problem
+  could exercise, a claim what the solution did. Tags over-credit broad
+  techniques, which skews scheduling away from the weakest ones.
+- **Two writers**: a classifier, and the user correcting it.
+- **One claim per attempt**, naming every technique it used, since a solution
+  can use several. A later claim replaces the whole set rather than rewriting
+  the earlier one, and the latest wins on read — the same shape as `Diagnosis`.
 - **Every claim records its source**, and a machine claim its model and prompt
   version. Both count the same toward progress, but a machine claim can be
-  recomputed by a better classifier and a user's cannot — so re-deriving has to
-  find the stale ones and leave the rest, as with platform tags and the codes
-  derived from them.
+  recomputed by a better classifier and a user's cannot, so re-deriving has to
+  find the stale ones and leave the rest.
 
 ### Diagnoses
 

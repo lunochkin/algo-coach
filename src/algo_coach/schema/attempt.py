@@ -58,21 +58,26 @@ class ClaimSource(StrEnum):
     CLASSIFIER = "classifier"
 
 
-class AttemptTechnique(BaseModel):
-    """Which technique an attempt used — what per-technique progress is
+class TechniqueClaim(BaseModel):
+    """Which techniques an attempt used — what per-technique progress is
     measured from. Append-only: a later claim never rewrites an earlier one,
-    latest wins on read."""
+    latest wins on read.
+
+    One record names every technique of one attempt, asserted together, so a
+    revision replaces the whole set. Per-technique records would leave a later
+    claim merging with an earlier one, with nothing to say which stands.
+    """
 
     id: str  # engine-minted
     created_at: datetime
     attempt_id: str
-    technique: str
+    techniques: list[str] = Field(min_length=1)
     source: ClaimSource  # required: a mislabelled claim cannot be corrected later
     model: str | None = None
     prompt_version: str | None = None
 
     @model_validator(mode="after")
-    def _provenance_matches_source(self) -> AttemptTechnique:
+    def _provenance_matches_source(self) -> TechniqueClaim:
         """A machine claim is re-derivable, so it must say by what; versions on
         a user claim would name a model that never touched it."""
         versioned = self.model is not None and self.prompt_version is not None
