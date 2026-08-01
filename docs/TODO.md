@@ -7,6 +7,15 @@
 - [x] `Problem` provenance: owner set by ingest path, origin platform, pusher
 - [x] Add `AttemptTechnique` — the record exists and is exported; nothing
       writes or reads it yet
+- [ ] Claim source on `AttemptTechnique`: who asserted the technique, and for
+      a machine claim, the model and prompt version — the shape `Diagnosis`
+      already has. Without it, user and classifier claims are
+      indistinguishable and their disagreement cannot be measured, which is
+      the reason the record is separate at all
+- [ ] Verdict provenance on `Attempt`: whether `solved` and `tests` were
+      claimed by the client or produced by engine verification. Unambiguous
+      only while every attempt is pushed; from Phase 5 both land in the same
+      fields
 
 ### Techniques
 - [x] Scaffold project
@@ -28,12 +37,10 @@
 - [x] Map `source_tags` to engine `techniques`; unmapped tags stay in
       `source_tags` and produce no code. Re-derived on every push, so a mapping
       change reaches problems already in the store
-- [ ] Reject an attempt whose `problem_id` is not in the store — currently a
-      dangling reference ingests silently. The attempt push predates the
-      problem store, so nothing checks it yet
-- [ ] Decide what a pushed attempt references: `Problem.id` is engine-minted,
-      so a client cannot know it. Either the client pushes `external_id` and
-      ingest resolves it, or problems must be pushed before their attempts
+- [x] Resolve `problem_external_id` to the minted `problem_id` at ingest, and
+      reject what does not resolve. Problems must be pushed before their
+      attempts; rejection is per-record, so re-pushing after they land is a
+      no-op on what already ingested
 
 ### CLI
 - [ ] Assign a technique to an attempt, as an `AttemptTechnique` record.

@@ -5,8 +5,9 @@ Target state. Code lags this doc; where they differ, this doc wins.
 ## Shape
 
 Engine public, content private.
-Everything the practice loop reads is local to the engine:
-problems, cards, and attempts all live in datastore(s) the engine controls.
+Everything the practice loop reads is local to the engine: problems, cards,
+and attempts live in datastore(s) the engine controls, and the technique
+vocabulary ships with the package.
 The engine never contacts external platforms; user clients push data in.
 
 Consequence: no third-party dependency in the drill loop.
@@ -14,8 +15,6 @@ Consequence: no third-party dependency in the drill loop.
 ## Terminology
 
 An attempt is a user's solution to a problem, successful or failed.
-
-The corpus is the set of all attempts, successful and failed.
 
 Verification is the process of executing an attempt against a problem's
 test cases, yielding pass or fail.
@@ -70,7 +69,9 @@ Problems have provenance.
 Product problems need a rights record; pushed problems need an origin
 platform and a pushing user.
 
-User-pushed problems arrive through the push API.
+User-pushed problems arrive through the push API. `(user_id, external_id)` is
+the push identity, so a re-push updates rather than duplicates. The engine
+mints the `id`, and it never moves on update, because attempts reference it.
 
 Product-owned problems are created using a content pipeline, which lives
 in a separate private repo.
@@ -108,6 +109,12 @@ User-pushed attempts carry an id minted by the pushing client, unique per
 user, so re-pushing an already-ingested attempt is a no-op. The engine mints
 its own id and never accepts one from a client.
 
+A pushed attempt names its problem as the origin platform does; the engine
+resolves that to the minted `problem_id`. An append-only record must not hold
+a reference nothing can follow, so an unresolvable one is rejected — hence
+problems are pushed before their attempts. Rejection is per-record, and
+re-pushing once the problems land is a no-op on what already ingested.
+
 ### Diagnoses
 
 - Owner: user
@@ -117,9 +124,15 @@ its own id and never accepts one from a client.
 
 ## Boundaries
 
-- **Push API** — the platform's only runtime ingest path. Carries user-pushed
+- **Push API** — the platform's only runtime ingest path, carrying user-pushed
   problems and attempts. A format contract, not a protocol: clients emit the
-  `Problem` and `Attempt` schemas; ingest is validate and append.
+  `Problem` and `Attempt` schemas.
+  - Attempts append, problems upsert.
+  - Each attempt's problem reference is resolved to the engine's own id, so
+    attempts are pushed after the problems they name.
+  - A batch ingests per record: a bad one is rejected by index, the rest still
+    land. One malformed line must not cost the attempts around it.
+  - An already-ingested record is counted, not an error, so retrying is safe.
 - **Verification** — runs locally, against test cases the engine owns. Product
   problems only: pushed problems carry no test cases, so their attempts
   happen outside the engine.
@@ -132,9 +145,9 @@ its own id and never accepts one from a client.
 
 ## Invariants
 
-- Attempts and diagnoses are append-only.
+- Attempts, technique claims, and diagnoses are append-only.
 - `Diagnosis` is a separate record, keyed to an attempt and versioned by model
-  and prompt version, so the whole corpus can be re-diagnosed and compared.
+  and prompt version, so every attempt can be re-diagnosed and compared.
 - No third-party problem statements or test cases in git — in any repo.
 - Pushed attempts cannot be verified by the platform and never enter
   cross-user aggregates.
@@ -142,6 +155,9 @@ its own id and never accepts one from a client.
   techniques or cards. Technique codes are stable identifiers with a migration
   path, since attempts, problems, and future user annotations reference them.
   Cards are teaching content and are never referenced by the log.
+- Every reference in an append-only record is engine-minted. External ids are
+  resolved at the boundary and never stored on an attempt, so the log stays
+  readable without the platform that produced it.
 - Aggregates are derived views, never stored truth.
 - Domain logic stays adapter-free and directly callable; the CLI is one
   adapter, a web API will be another.
@@ -157,10 +173,6 @@ its own id and never accepts one from a client.
 - `data/` is gitignored; only the schema is public.
 - Prefer tools and functions over agents; a pipeline earns multi-agent, not the
   other way around.
-
-## Follow-ups
-
-The eval approach will be decided later.
 
 ## Meta-rule
 
