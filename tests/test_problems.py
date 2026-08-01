@@ -208,7 +208,7 @@ def test_push_problems_command(tmp_path, monkeypatch, capsys):
 def test_push_rejects_unknown_kind(tmp_path, monkeypatch):
     from algo_coach import cli
 
-    monkeypatch.setattr("sys.argv", ["algo-coach", "push", "cards", "f.jsonl"])
+    monkeypatch.setattr("sys.argv", ["algo-coach", "push", "diagnoses", "f.jsonl"])
 
     with pytest.raises(SystemExit):
         cli.main()

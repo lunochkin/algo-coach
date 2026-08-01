@@ -66,4 +66,7 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 ## Later phases
 
 - [ ] Cards: teaching content referencing a technique, not the vocabulary.
-      Model and store already scaffolded; `Card.name` becomes a card code
+      Model and store existed once and were removed; git holds them
+- [ ] Classifier and the agreement eval, removed with the same reasoning.
+      `Diagnosis` and the log's diagnosis methods stayed — records outlive
+      features, and an append-only log cannot be retrofitted

@@ -5,7 +5,6 @@ import sys
 from collections.abc import Iterator
 from pathlib import Path
 
-from algo_coach.eval import agreement
 from algo_coach.ingest import ingest_attempts, ingest_problems
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
@@ -24,9 +23,6 @@ def _read_jsonl(source: str) -> Iterator[dict]:
 def main() -> None:
     parser = argparse.ArgumentParser(prog="algo-coach")
     sub = parser.add_subparsers(dest="command", required=True)
-
-    sub.add_parser("eval", help="agreement report: diagnoses vs self-labels")
-    sub.add_parser("classify", help="diagnose unclassified attempts (Phase 1 slice)")
 
     push_parser = sub.add_parser("push", help="ingest pushed records from JSONL")
     push_parser.add_argument("kind", choices=["attempts", "problems"])
@@ -51,11 +47,6 @@ def main() -> None:
         print(result.model_dump_json(indent=2))
         if result.rejected:
             parser.exit(1)
-    elif args.command == "eval":
-        report = agreement(log.attempts(), log.diagnoses())
-        print(report.model_dump_json(indent=2))
-    elif args.command == "classify":
-        parser.exit(2, "classify: not implemented yet (next slice)\n")
 
 
 if __name__ == "__main__":

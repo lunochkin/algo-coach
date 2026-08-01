@@ -3,7 +3,6 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from algo_coach.eval import agreement
 from algo_coach.log import AttemptLog
 from algo_coach.schema import Attempt, Diagnosis, FailureMode, Technique, TestResult
 
@@ -44,29 +43,6 @@ def test_attempt_roundtrip(tmp_path):
 
     assert log.attempts() == [attempt]
     assert log.diagnoses()[0].attempt_id == "a1"
-
-
-def test_agreement_counts_latest_diagnosis_only():
-    attempts = [make_attempt("a1", FailureMode.GAP), make_attempt("a2", FailureMode.SPEED)]
-    diagnoses = [
-        make_diagnosis("a1", FailureMode.RUST),
-        make_diagnosis("a1", FailureMode.GAP),
-        make_diagnosis("a2", FailureMode.SPEED),
-    ]
-
-    report = agreement(attempts, diagnoses)
-    assert report.n == 2
-    assert report.agree == 2
-    assert report.rate == 1.0
-
-
-def test_agreement_skips_unlabeled():
-    attempts = [make_attempt("a1", None)]
-    diagnoses = [make_diagnosis("a1", FailureMode.SYNTAX)]
-
-    report = agreement(attempts, diagnoses)
-    assert report.n == 0
-    assert report.rate == 0.0
 
 
 @pytest.mark.parametrize("code", ["", "  ", "../evil", "a/b", "Foo", "-leading-dash"])
