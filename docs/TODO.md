@@ -39,7 +39,8 @@
 - [ ] Assign a technique to an attempt, as an `AttemptTechnique` record.
       Reject a code `is_known` returns False for — this is the only write path
       that could introduce one, since `map_tags` already filters
-- [ ] Retire `cards seed` — it writes technique codes into the cards store
+- [x] Retire `cards seed` — it wrote technique codes into the cards store, and
+      the vocabulary ships in git now, so there is nothing left to seed
 
 ### Drill board
 - [ ] Per-technique view: attempt count, recency, solved/unsolved, self-label.
