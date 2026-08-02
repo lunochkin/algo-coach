@@ -58,7 +58,7 @@
 - [x] Resolve an attempt's techniques: its claim if one exists, otherwise the
       problem's. Read-time only — never stored, so re-deriving the tag mapping
       reaches every unclaimed attempt
-- [ ] Per-technique view: attempt count, recency, solved/unsolved, self-label
+- [x] Per-technique view: attempt count, recency, solved/unsolved, self-label
 - [ ] `algo-coach board` CLI command
 - [x] Count how much of the backlog carries more than one tag — it sets how
       badly Phase 2's classifier is needed. Measured over 485 problems: 61 map
