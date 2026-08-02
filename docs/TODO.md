@@ -99,6 +99,50 @@ The rest extends that command.
 ### Exit
 - [ ] The loop runs on real daily attempts
 
+## Phase 3 — technique attribution (current)
+
+Which techniques a solution used. A checkable question — the code answers it,
+and two careful readers agree — so the classifier can be scored against a hand
+answer given retroactively. Why an attempt failed is a different kind of
+question and moved to Phase 4.
+
+### Hand claims
+
+Ground truth for attribution, and the correction path afterwards. Retroactive
+on purpose: the evidence is the code, and the code is still there.
+
+- [ ] `algo-coach claim` — the loop's technique question over sampled
+      attempts, no drill and no push. Writes a `TechniqueClaim`, source `user`
+- [ ] Sample one attempt per sitting, not per attempt: a backfill repeats the
+      same solution across retries and would over-weight what was resubmitted
+- [ ] Around a hundred, drawn from problems carrying two or more tags —
+      where attribution has something to decide — and spread across techniques
+      so no single one carries the estimate
+- [ ] No self-label here. Why an attempt went the way it did is a memory of
+      the sitting, and the part still recoverable from the record — a timeout,
+      a compile error — is the part the classifier already reads
+
+### Technique attribution
+
+- [ ] Classifier picks among the problem's own tags rather than classifying
+      freely, so it can narrow what a problem could exercise but never invent
+      a technique the tags do not name
+- [ ] Write the verdict as a `TechniqueClaim`, source `classifier`, with model
+      and prompt version. Reject a code `is_known` rejects — the only write
+      path that could introduce one
+- [ ] Run it over the stored log, not only over fresh practice: every one of
+      the 1785 attempts carries its code, so the whole backlog is classifiable
+      today
+- [ ] Two measurements, answering different questions: disagreement with the
+      tag fallback says whether the board moves, agreement with the hand
+      claims says whether the move is right
+- [ ] Re-derive stale machine claims by model and prompt version, leaving user
+      claims untouched
+
+### Exit
+- [ ] Attribution runs on real daily attempts, carrying a measured agreement
+      number rather than an asserted one
+
 ## Deferred
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
@@ -114,31 +158,29 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 
 ## Later phases
 
-### Phase 3 — classification
-- [ ] Classifier picks among the problem's own tags rather than classifying
-      freely, so it can narrow what a problem could exercise but never invent
-      a technique the tags do not name
-- [ ] Write the verdict as a `TechniqueClaim`, source `classifier`, with model
-      and prompt version. Reject a code `is_known` rejects — the only write
-      path that could introduce one
-- [ ] Run it over the stored log, not only over fresh practice: every one of
-      the 1785 attempts carries its code, so the whole backlog is classifiable
-      today
-- [ ] Correct a claim after the fact, source `user` — overriding a classifier
-      verdict, or claiming a backfilled attempt no loop ever touched. First
-      capture is the loop's
-- [ ] Re-derive stale machine claims by model and prompt version, leaving user
-      claims untouched
-- [ ] Measure how often a claim disagrees with the tag fallback. The board's
-      numbers only move if it does, and 61% of attempts carry two or more tags
-
-### Phase 4 — cards
+### Phase 4 — mastery, cards, failure mode
 - [ ] `Card` model and store: teaching content keyed to a technique, several
       per technique, never referenced by the log. Git holds the removed version
 - [ ] Seed from the private content repo; read-only at runtime
 - [ ] Cards for the techniques the board names weakest, not for all 27
+- [ ] Rust against gap is per-technique state wearing a per-attempt costume:
+      the two failures look identical in the record, and only whether the
+      technique was ever fluent separates them. It lands with the mastery
+      model or not at all
+- [ ] Settle `SPEED` before anything writes it — "solved but too slowly" is
+      about the user, a timeout is about the solution's complexity, and only
+      the second is in the record
+- [ ] Narrow the failure classifier to what the record supports: reading a
+      sitting's code for a mechanical slip against a conceptual miss. A
+      four-way router asks it for what it cannot see
+- [ ] Write the verdict as a `Diagnosis` with model and prompt version. It
+      never supersedes a self-label: the eval scores one against the other
+- [ ] Eval per mode rather than overall, against self-labels the loop
+      produced — a router that only ever says `gap` would score well on a
+      corpus of gaps
 
 ### Removed, kept in git
-- [ ] Failure classifier and its agreement eval, cut before Phase 1 shipped.
-      `Diagnosis` and the log's diagnosis methods stayed: records outlive
-      features, and an append-only log cannot be retrofitted
+- [ ] The failure classifier and its eval were cut before Phase 1 shipped and
+      are Phase 4's to rebuild; git holds what was removed. `Diagnosis` and the
+      log's diagnosis methods stayed behind, since records outlive features and
+      an append-only log cannot be retrofitted

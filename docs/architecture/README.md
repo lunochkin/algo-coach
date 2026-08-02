@@ -108,7 +108,9 @@ rather than a field on the attempt.
 - **The fallback answers a different question.** A tag says what a problem
   could exercise, a claim what the solution did. Tags over-credit broad
   techniques, which skews scheduling away from the weakest ones.
-- **Two writers**: a classifier, and the user correcting it.
+- **Two writers, user first.** The drill loop asks at the moment of solving,
+  and a hand pass reaches attempts no loop touched; a classifier fills the
+  rest and is what a later user claim corrects.
 - **One claim per attempt**, naming every technique it used, since a solution
   can use several. A later claim replaces the whole set rather than rewriting
   the earlier one, and the latest wins on read.
@@ -128,8 +130,17 @@ own record rather than a field on the attempt, for the same reason a claim is.
   the other, and a shared record read latest-first would let the machine
   supersede the evidence it is measured against.
 - **One label per attempt**, latest wins on read.
-- **The drill loop is the only writer.** A pushed attempt carries no label: the
-  platform never asked.
+- **The drill loop is the only writer.** A pushed attempt carries no label:
+  the platform never asked.
+- **A label cannot be given later.** Why an attempt went the way it did is a
+  memory of the sitting; what is still recoverable from the record months
+  after — a timeout, a compile error — is what a `Diagnosis` reads, so a
+  recalled label is either invention or the classifier's own input handed back
+  as evidence against it.
+- **A claim is retroactive, a label is not.** The evidence for a claim is the
+  code, which does not decay; the evidence for a label is recall, which does.
+  That is why they are asked separately rather than as two halves of one
+  prompt.
 
 ### Diagnoses
 

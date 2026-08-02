@@ -27,36 +27,46 @@ Get real daily attempts into the engine and make current state visible.
 - Exit: a week of real attempts is in the store, and the board renders
   per-technique state from them.
 
-## Phase 2 — Drill loop (current)
+## Phase 2 — Drill loop
 
 Board → pick a technique → solve on the platform → record what it cannot know.
 The flow and its rules live in `docs/architecture/README.md`.
 
-- The loop mints no attempt: its last step invokes the client's export, and the
-  records arrive through the push path.
+- The loop mints no attempt: it waits for the user to push and diffs its own
+  log, so the engine calls nothing and works whatever they push with.
 - A technique claim and a self-label per attempt. The first writer of either,
-  and the only one until a classifier exists.
-- Exit: loop runs on real daily attempts.
+  and the only writer of self-labels there will be.
+- Exit: loop runs on real daily attempts. Built, and open until it does.
 
-## Phase 3 — Classification
+## Phase 3 — Technique attribution (current)
 
-What an attempt used, and why it failed. Both are LLM classifiers over the same
-records, and both are scored against something the loop wrote by hand — which
-is why they follow it rather than accompany it.
+Which techniques a solution used. A checkable question — the code answers it,
+and two careful readers agree — so the ground truth can be given retroactively
+and the phase needs no practice to start.
 
-- Attribution classifier: which of the problem's tags the solution actually
-  used, constrained to those tags, so it picks among candidates rather than
-  classifying freely. Tag fallback biases progress toward broad techniques.
-- Failure classifier: speed / rust / gap / syntax router. Structured LLM output.
-- Eval: attribution agreement vs the user's claims, diagnosis agreement vs
-  self-labels. Measured, not asserted.
-- Exit: both run on real daily attempts.
+- Hand claims over a sample of the backlog: the eval set, and the correction
+  path afterwards. A self-label cannot be given this way, which is why the
+  failure work is not here.
+- Attribution classifier constrained to the problem's own tags, so it picks
+  among candidates rather than classifying freely. Tag fallback biases progress
+  toward broad techniques.
+- Two measurements: disagreement with the tag fallback says whether the board
+  moves, agreement with the hand claims says whether the move is right.
+- Exit: attribution runs on real daily attempts, carrying a measured number.
 
-## Phase 4 — Technique mastery + cards
+## Phase 4 — Technique mastery, cards, failure mode
 
 Per-technique skill state updated from attempts and the diagnosis signal;
 scheduling targets the diagnosed cause, not per-problem intervals. Exit: the
 scheduler drives daily practice.
+
+Failure mode lands here rather than beside attribution. Rust and gap are
+identical in a single attempt, and only whether the technique was ever fluent
+separates them — which is the mastery state itself. What a classifier adds is
+narrower: reading a sitting's code for a mechanical slip against a conceptual
+miss, scored per mode against the loop's self-labels. `SPEED` needs settling
+first, since "solved but too slowly" is about the user while a timeout is about
+the solution's complexity.
 
 Cards land here: teaching content referencing a technique, shown as a brief
 before an attempt. Progress per card is the mastery number under another name,
