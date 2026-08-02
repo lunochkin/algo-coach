@@ -2,15 +2,24 @@ import argparse
 import json
 import os
 import sys
+import uuid
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import NamedTuple
 
 from algo_coach.board import ProblemRow, TechniqueRow, candidates, per_technique, ungrouped
 from algo_coach.ingest import ingest_attempts, ingest_problems
 from algo_coach.log import AttemptLog, appeared, latest_by_attempt
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, Problem
+from algo_coach.schema import (
+    Attempt,
+    ClaimSource,
+    FailureMode,
+    Problem,
+    SelfLabel,
+    TechniqueClaim,
+)
 
 DATA_ROOT = Path("data")
 
@@ -122,8 +131,8 @@ def _drill(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
     if not fresh:
         print("nothing recorded")
         return
-    noun = "attempt" if len(fresh) == 1 else "attempts"
-    print(f"{len(fresh)} {noun} appeared. Claim and self-label prompts come next.")
+    claims, labels = _record_answers(fresh, problem.problem, technique, log)
+    print(f"\nrecorded {claims} claim(s), {labels} label(s) over {len(fresh)} attempt(s)")
 
 
 def _pick_technique(
@@ -175,6 +184,108 @@ def _await_push(problem_id: str, known: set[str], user_id: str) -> list[Attempt]
         if fresh:
             return fresh
         print("nothing new in the log for this problem")
+
+
+def _record_answers(
+    fresh: list[Attempt], problem: Problem, technique: str, log: AttemptLog
+) -> tuple[int, int]:
+    """A claim and a self-label per attempt, both defaulted so a long sitting
+    stays affordable.
+
+    The drilled technique seeds the claim — selection picked the problem by its
+    own tags, so it is always a legal one — and each answer becomes the next
+    attempt's default. `a` accepts the defaults for everything remaining, `s`
+    records nothing for that question.
+    """
+    options = sorted(set(problem.techniques) | {technique})
+    modes = list(FailureMode)
+    print(f"\n{len(fresh)} to record. Enter takes the default, a takes it for the rest, s skips.")
+    print("  techniques  " + "   ".join(f"{i} {code}" for i, code in enumerate(options, 1)))
+    print("  labels      " + "   ".join(f"{i} {mode}" for i, mode in enumerate(modes, 1)))
+
+    claimed = [technique]
+    labelled: FailureMode | None = None
+    rest = False
+    claims = labels = 0
+
+    for index, attempt in enumerate(fresh, start=1):
+        print(f"\n{index}/{len(fresh)}  {attempt.finished_at:%Y-%m-%d %H:%M}  {_verdict(attempt)}")
+        if not rest:
+            seeded = [str(options.index(code) + 1) for code in claimed]
+            answer = _ask_choice("techniques", options, seeded)
+            if answer is None:
+                break
+            if answer.picked is not None:
+                claimed = [options[int(number) - 1] for number in answer.picked]
+            elif not answer.rest:
+                claimed = []
+
+            # `a` at either prompt stops the questions outright, so it does not
+            # cost a second keystroke on the attempt that ends them.
+            rest = answer.rest
+            if not rest:
+                picked_label = _ask_choice(
+                    "label", modes, [str(modes.index(labelled) + 1)] if labelled else []
+                )
+                if picked_label is None:
+                    break
+                rest = picked_label.rest
+                if picked_label.picked is not None:
+                    labelled = modes[int(picked_label.picked[0]) - 1]
+                elif not picked_label.rest:
+                    labelled = None
+
+        if claimed:
+            log.append_claim(
+                TechniqueClaim(
+                    id=uuid.uuid4().hex,
+                    created_at=datetime.now(UTC),
+                    attempt_id=attempt.id,
+                    techniques=claimed,
+                    source=ClaimSource.USER,
+                )
+            )
+            claims += 1
+        if labelled is not None:
+            log.append_self_label(
+                SelfLabel(
+                    id=uuid.uuid4().hex,
+                    created_at=datetime.now(UTC),
+                    attempt_id=attempt.id,
+                    mode=labelled,
+                )
+            )
+            labels += 1
+    return claims, labels
+
+
+class _Answer(NamedTuple):
+    picked: list[str] | None  # None when skipped or defaulted away
+    rest: bool  # apply the defaults to every attempt still to come
+
+
+def _ask_choice(what: str, options: list, default: list[str]) -> _Answer | None:
+    """One prompt over a numbered list. None on EOF, which ends the recording
+    with whatever already landed — the log is append-only either way."""
+    shown = ",".join(default) if default else "skip"
+    while True:
+        try:
+            answer = input(f"  {what} [{shown}]: ").strip().lower()
+        except EOFError:
+            print()
+            return None
+        if answer == "s":
+            return _Answer(None, False)
+        if answer in {"a", ""}:
+            return _Answer(default or None, answer == "a")
+        numbers = [part.strip() for part in answer.split(",") if part.strip()]
+        if numbers and all(n.isdigit() and 1 <= int(n) <= len(options) for n in numbers):
+            return _Answer(numbers, False)
+        print(f"  pick numbers between 1 and {len(options)}, or a, or s")
+
+
+def _verdict(attempt: Attempt) -> str:
+    return attempt.source_status or ("solved" if attempt.solved else "unsolved")
 
 
 def _technique_choice(row: TechniqueRow, now: datetime) -> str:

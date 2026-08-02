@@ -82,17 +82,17 @@ Flow and its rules: `docs/architecture/README.md`, "Drill loop".
       least recently attempted first, lowest solve rate breaking a tie
 - [x] Hand over the problem's origin URL and what the log says about it. The
       card shown before it is Phase 4; the loop runs without a brief until then
-- [x] `algo-coach drill` — steps 1-4, prompting and rendering only. Invalid
-      input re-asks, EOF ends the drill, and the handover says nothing is
-      recorded yet rather than moving no number in silence
+- [x] `algo-coach drill` — the whole flow, prompting and rendering only.
+      Invalid input re-asks, EOF ends the drill wherever it stands
 
 The rest extends that command.
 
 - [x] Wait for the user to push, then diff the log for what appeared against
       that problem — exact, since the loop knows what was there before
-- [ ] Ask for a claim and a self-label on each attempt that appeared, the
-      drilled technique pre-filled and the previous answer carried forward — a
-      sitting reached 29 submissions
+- [x] Ask for a claim and a self-label on each attempt that appeared, the
+      drilled technique pre-filled and the previous answer carried forward.
+      `a` takes the defaults for the rest, `s` records nothing for that
+      question, and EOF keeps whatever already landed
 - [x] Nothing pushed, nothing recorded: wait again or end, never hold the
       answers against a record that may not arrive
 
