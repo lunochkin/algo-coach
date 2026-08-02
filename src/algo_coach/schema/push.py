@@ -10,7 +10,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from algo_coach.schema.attempt import FailureMode, TestResult
+from algo_coach.schema.attempt import TestResult
 from algo_coach.schema.problem import ProblemDifficulty
 
 
@@ -42,7 +42,6 @@ class AttemptPush(BaseModel):
     language: str | None = None
     time_to_solve_sec: float | None = None
     source_status: str | None = None
-    self_label: FailureMode | None = None
     notes: str | None = None
     code: str | None = None
     tests: list[TestResult] = Field(default_factory=list)

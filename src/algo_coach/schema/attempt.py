@@ -3,6 +3,8 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field, model_validator
 
+from algo_coach.schema.record import AttemptRecord
+
 
 class FailureMode(StrEnum):
     SPEED = "speed"  # solved, but too slowly
@@ -43,7 +45,6 @@ class Attempt(BaseModel):
     # The origin platform's own status, verbatim and unmapped; `solved` is the
     # projection over it. Kept raw so a later mapping can re-read it.
     source_status: str | None = None
-    self_label: FailureMode | None = None
     notes: str | None = None
     code: str | None = None
     tests: list[TestResult] = Field(default_factory=list)
@@ -56,12 +57,27 @@ class Attempt(BaseModel):
         return self
 
 
+class SelfLabel(AttemptRecord):
+    """The user's own verdict on why an attempt went the way it did.
+
+    A judgement made after the fact and open to revision, so it is its own
+    record rather than a field on the attempt — the same reason
+    `TechniqueClaim` is. Append-only, latest wins on read.
+
+    Only ever the user's: a machine answering the same question produces a
+    `Diagnosis`, which carries what model and prompt reached it. The two never
+    supersede each other — the eval scores one against the other.
+    """
+
+    mode: FailureMode
+
+
 class ClaimSource(StrEnum):
     USER = "user"
     CLASSIFIER = "classifier"
 
 
-class TechniqueClaim(BaseModel):
+class TechniqueClaim(AttemptRecord):
     """Which techniques an attempt used — what per-technique progress is
     measured from. Append-only: a later claim never rewrites an earlier one,
     latest wins on read.
@@ -71,9 +87,6 @@ class TechniqueClaim(BaseModel):
     claim merging with an earlier one, with nothing to say which stands.
     """
 
-    id: str  # engine-minted
-    created_at: datetime
-    attempt_id: str
     techniques: list[str] = Field(min_length=1)
     source: ClaimSource  # required: a mislabelled claim cannot be corrected later
     model: str | None = None

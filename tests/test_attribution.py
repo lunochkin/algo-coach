@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
-from algo_coach.log import AttemptLog
+from algo_coach.log import AttemptLog, latest_by_attempt
 from algo_coach.schema import (
     Attempt,
     AttemptOrigin,
@@ -9,7 +9,7 @@ from algo_coach.schema import (
     ProblemOwner,
     TechniqueClaim,
 )
-from algo_coach.techniques import latest_claims, map_tags, resolve_techniques
+from algo_coach.techniques import map_tags, resolve_techniques
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -72,7 +72,7 @@ def test_a_claim_wins_over_the_problems_tags():
     """A tag says what a problem could exercise, a claim what the solution
     did."""
     problem = make_problem(source_tags=["Hash Table", "Sorting"])
-    claims = latest_claims([make_claim(["two-pointers"])])
+    claims = latest_by_attempt([make_claim(["two-pointers"])])
 
     assert resolve_techniques(make_attempt(), problem, claims) == ["two-pointers"]
 
@@ -80,7 +80,7 @@ def test_a_claim_wins_over_the_problems_tags():
 def test_a_later_claim_replaces_the_whole_set():
     """Not merged with the earlier one: the earlier record still says
     "dynamic-programming" and must not reach a reader."""
-    claims = latest_claims(
+    claims = latest_by_attempt(
         [
             make_claim(["dynamic-programming", "greedy"], id="c1", created_at=T0),
             make_claim(["greedy"], id="c2", created_at=T0 + timedelta(hours=1)),
@@ -95,12 +95,12 @@ def test_the_earlier_claim_never_wins_on_input_order():
     late = make_claim(["greedy"], id="c2", created_at=T0 + timedelta(hours=1))
     early = make_claim(["backtracking"], id="c1", created_at=T0)
 
-    assert latest_claims([late, early])["a1"].techniques == ["greedy"]
+    assert latest_by_attempt([late, early])["a1"].techniques == ["greedy"]
 
 
 def test_a_tie_on_created_at_is_broken_by_append_order():
     """Two claims minted in the same instant: the one that landed last stands."""
-    claims = latest_claims(
+    claims = latest_by_attempt(
         [
             make_claim(["backtracking"], id="c1"),
             make_claim(["recursion"], id="c2"),
@@ -112,7 +112,7 @@ def test_a_tie_on_created_at_is_broken_by_append_order():
 
 def test_a_user_claim_and_a_machine_claim_are_ordered_only_by_time():
     """Both count the same toward progress; recency decides, not the source."""
-    claims = latest_claims(
+    claims = latest_by_attempt(
         [
             make_claim(["greedy"], id="c1", created_at=T0, source=ClaimSource.USER),
             make_claim(
@@ -129,7 +129,7 @@ def test_a_user_claim_and_a_machine_claim_are_ordered_only_by_time():
 
 def test_a_claim_on_another_attempt_does_not_leak():
     problem = make_problem(source_tags=["Greedy"])
-    claims = latest_claims([make_claim(["two-pointers"], attempt_id="a2")])
+    claims = latest_by_attempt([make_claim(["two-pointers"], attempt_id="a2")])
 
     assert resolve_techniques(make_attempt("a1"), problem, claims) == ["greedy"]
 
@@ -143,7 +143,7 @@ def test_an_unclaimed_attempt_on_an_unmapped_problem_resolves_to_nothing():
 
 def test_a_resolved_claim_is_sorted_and_deduplicated():
     """Same shape as `map_tags`, so grouping does not depend on claim order."""
-    claims = latest_claims([make_claim(["greedy", "backtracking", "greedy"])])
+    claims = latest_by_attempt([make_claim(["greedy", "backtracking", "greedy"])])
 
     assert resolve_techniques(make_attempt(), make_problem(), claims) == [
         "backtracking",
@@ -161,7 +161,7 @@ def test_re_deriving_the_mapping_reaches_every_unclaimed_attempt():
     assert resolve_techniques(attempt, before, {}) == ["greedy"]
     assert resolve_techniques(attempt, after, {}) == ["greedy", "sorting"]
 
-    claims = latest_claims([make_claim(["two-pointers"])])
+    claims = latest_by_attempt([make_claim(["two-pointers"])])
     assert resolve_techniques(attempt, after, claims) == ["two-pointers"]
 
 
@@ -183,4 +183,4 @@ def test_claims_read_back_in_append_order(tmp_path):
 def test_resolving_an_empty_log(tmp_path):
     log = AttemptLog(tmp_path)
 
-    assert latest_claims(log.claims()) == {}
+    assert latest_by_attempt(log.claims()) == {}

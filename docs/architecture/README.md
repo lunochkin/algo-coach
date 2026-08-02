@@ -28,6 +28,7 @@ Consequence: no third-party dependency in the drill loop.
 | Problems | product or user | global if product-owned, user-scoped if pushed | read-only if product-owned, mutable cache if pushed | product set, or the pushing client |
 | Attempts | user | private | append-only | the store |
 | Technique claims | user | private | append-only | the store |
+| Self-labels | user | private | append-only | the store |
 | Diagnoses | user | private | append-only | the store |
 
 ### Techniques
@@ -109,16 +110,44 @@ rather than a field on the attempt.
 - **Two writers**: a classifier, and the user correcting it.
 - **One claim per attempt**, naming every technique it used, since a solution
   can use several. A later claim replaces the whole set rather than rewriting
-  the earlier one, and the latest wins on read — the same shape as `Diagnosis`.
+  the earlier one, and the latest wins on read.
 - **Every claim records its source**, and a machine claim its model and prompt
   version. Both count the same toward progress, but a machine claim can be
   recomputed by a better classifier and a user's cannot, so re-deriving has to
   find the stale ones and leave the rest.
 
+### Self-labels
+
+The user's own verdict on why an attempt went the way it did. Reported, not
+inferred — a judgement made after the fact and open to revision, so it is its
+own record rather than a field on the attempt, for the same reason a claim is.
+
+- **Only ever the user's.** A machine answering the same question produces a
+  `Diagnosis`. The two are separate records because the eval scores one against
+  the other, and a shared record read latest-first would let the machine
+  supersede the evidence it is measured against.
+- **One label per attempt**, latest wins on read.
+- **The drill loop is the only writer.** A pushed attempt carries no label: the
+  platform never asked.
+
 ### Diagnoses
 
-Why an attempt failed. Keyed to an attempt, versioned by model and prompt
-version, so every attempt can be re-diagnosed and compared.
+Why an attempt failed, inferred rather than reported. Keyed to an attempt,
+versioned by model and prompt version, so every attempt can be re-diagnosed and
+compared.
+
+- **The machine counterpart of a self-label, never its replacement.** Neither
+  supersedes the other; agreement between them is the eval.
+- **Kept per model and prompt version**, so a later diagnosis is a second
+  reading rather than a correction.
+
+### What every record keyed to an attempt carries
+
+Claims, self-labels and diagnoses share a base: an engine-minted `id`, the
+`attempt_id` they assert about, and `created_at`. One reader serves all
+three — latest by `created_at`, append order breaking a tie — and the `id`
+lets a record be cited, by an eval naming the diagnosis it scored or a user
+correcting a claim.
 
 ## Boundaries
 
@@ -149,7 +178,10 @@ version, so every attempt can be re-diagnosed and compared.
 
 Properties the system holds at all times.
 
-- Attempts, technique claims, and diagnoses are append-only.
+- Attempts, technique claims, self-labels and diagnoses are append-only.
+- Every record keyed to an attempt carries an engine-minted `id`, its
+  `attempt_id` and `created_at`, so one reader resolves what stands for any of
+  them.
 - Every reference in an append-only record is engine-minted. External ids are
   resolved at the boundary and never stored on an attempt, so the log stays
   readable without the platform that produced it.

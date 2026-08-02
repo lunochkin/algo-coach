@@ -8,9 +8,8 @@ from pathlib import Path
 
 from algo_coach.board import TechniqueRow, per_technique, ungrouped
 from algo_coach.ingest import ingest_attempts, ingest_problems
-from algo_coach.log import AttemptLog
+from algo_coach.log import AttemptLog, latest_by_attempt
 from algo_coach.problems import ProblemStore
-from algo_coach.techniques import latest_claims
 
 DATA_ROOT = Path("data")
 
@@ -68,8 +67,9 @@ def _board(args: argparse.Namespace) -> None:
     # Every problem, not the user's: an attempt resolves through the id it was
     # ingested with, and a narrower mapping would raise on a legitimate one.
     problems = {problem.id: problem for problem in ProblemStore(DATA_ROOT).all()}
-    claims = latest_claims(log.claims())
-    rows = per_technique(attempts, problems, claims)
+    claims = latest_by_attempt(log.claims())
+    labels = latest_by_attempt(log.self_labels())
+    rows = per_technique(attempts, problems, claims, labels)
     if args.stale:
         rows.sort(key=lambda row: row.last_attempt_at)
     missed = len(ungrouped(attempts, problems, claims))

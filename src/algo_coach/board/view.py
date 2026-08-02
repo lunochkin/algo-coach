@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from algo_coach.schema import Attempt, FailureMode, Problem, TechniqueClaim
+from algo_coach.schema import Attempt, FailureMode, Problem, SelfLabel, TechniqueClaim
 from algo_coach.techniques import resolve_techniques
 
 
@@ -17,7 +17,7 @@ class TechniqueRow(BaseModel):
     attempt_count: int
     solved_count: int
     last_attempt_at: datetime
-    # Only the labels an attempt actually carried; an unlabelled attempt
+    # Only the modes an attempt was labelled with; an unlabelled attempt
     # counts toward the row and toward no mode.
     self_labels: dict[FailureMode, int] = Field(default_factory=dict)
 
@@ -30,6 +30,7 @@ def per_technique(
     attempts: Iterable[Attempt],
     problems: Mapping[str, Problem],
     claims: Mapping[str, TechniqueClaim],
+    labels: Mapping[str, SelfLabel],
 ) -> list[TechniqueRow]:
     """The drill board: one row per technique the log reaches, ordered by code.
 
@@ -39,7 +40,8 @@ def per_technique(
     tag blocks nothing and invents nothing.
 
     `problems` is keyed by the engine-minted id. A reference it cannot answer
-    is a broken invariant, not an empty row.
+    is a broken invariant, not an empty row. `claims` and `labels` are keyed
+    by attempt id, each holding the record that stands.
     """
     grouped: dict[str, list[Attempt]] = defaultdict(list)
     for attempt in attempts:
@@ -54,7 +56,7 @@ def per_technique(
             solved_count=sum(attempt.solved for attempt in group),
             last_attempt_at=max(attempt.finished_at for attempt in group),
             self_labels=Counter(
-                attempt.self_label for attempt in group if attempt.self_label is not None
+                labels[attempt.id].mode for attempt in group if attempt.id in labels
             ),
         )
         for technique, group in sorted(grouped.items())

@@ -14,6 +14,7 @@ from algo_coach.schema import (
     FailureMode,
     Problem,
     ProblemOwner,
+    SelfLabel,
     TechniqueClaim,
 )
 from algo_coach.techniques import map_tags
@@ -52,7 +53,6 @@ def attempt(
     problem_id: str = "minted-u1",
     finished_at: datetime = T0,
     solved: bool = True,
-    self_label=None,
 ) -> Attempt:
     return Attempt(
         id=id,
@@ -62,7 +62,6 @@ def attempt(
         finished_at=finished_at,
         solved=solved,
         origin=AttemptOrigin.PUSH,
-        self_label=self_label,
     )
 
 
@@ -72,8 +71,11 @@ def run(monkeypatch, *argv: str) -> None:
 
 
 def test_board_renders_a_row_per_technique(board_root, monkeypatch, capsys):
-    board_root.append_attempt(attempt("a1", solved=False, self_label=FailureMode.RUST))
+    board_root.append_attempt(attempt("a1", solved=False))
     board_root.append_attempt(attempt("a2"))
+    board_root.append_self_label(
+        SelfLabel(id="l1", created_at=T0, attempt_id="a1", mode=FailureMode.RUST)
+    )
 
     run(monkeypatch, "--user", "u1")
 

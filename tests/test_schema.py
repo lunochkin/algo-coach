@@ -7,16 +7,19 @@ from algo_coach.log import AttemptLog
 from algo_coach.schema import (
     Attempt,
     AttemptOrigin,
+    AttemptPush,
+    AttemptRecord,
     ClaimSource,
     Diagnosis,
     FailureMode,
+    SelfLabel,
     Technique,
     TechniqueClaim,
     TestResult,
 )
 
 
-def make_attempt(id: str, self_label: FailureMode | None) -> Attempt:
+def make_attempt(id: str) -> Attempt:
     now = datetime.now(UTC)
     return Attempt(
         id=id,
@@ -29,7 +32,6 @@ def make_attempt(id: str, self_label: FailureMode | None) -> Attempt:
         solved=False,
         origin=AttemptOrigin.ENGINE,
         time_to_solve_sec=900.0,
-        self_label=self_label,
     )
 
 
@@ -70,6 +72,7 @@ def test_a_pushed_attempt_cannot_claim_engine_origin():
 
 def make_diagnosis(attempt_id: str, mode: FailureMode) -> Diagnosis:
     return Diagnosis(
+        id=f"d-{attempt_id}",
         attempt_id=attempt_id,
         mode=mode,
         confidence=0.8,
@@ -82,7 +85,7 @@ def make_diagnosis(attempt_id: str, mode: FailureMode) -> Diagnosis:
 
 def test_attempt_roundtrip(tmp_path):
     log = AttemptLog(tmp_path)
-    attempt = make_attempt("a1", FailureMode.RUST)
+    attempt = make_attempt("a1")
     log.append_attempt(attempt)
     log.append_diagnosis(make_diagnosis("a1", FailureMode.RUST))
 
@@ -162,3 +165,62 @@ def test_technique_code_must_be_a_safe_slug(code):
 @pytest.mark.parametrize("code", ["monotonic-stack", "backtracking"])
 def test_technique_code_accepts_slug(code):
     assert Technique(code=code).code == code
+
+
+def test_a_self_label_is_its_own_record():
+    """A verdict made after the fact and open to revision, like a claim — too
+    late to be a field on an append-only attempt."""
+    assert "self_label" not in Attempt.model_fields
+
+
+def test_self_label_roundtrip(tmp_path):
+    log = AttemptLog(tmp_path)
+    now = datetime.now(UTC)
+    first = SelfLabel(id="l1", created_at=now, attempt_id="a1", mode=FailureMode.GAP)
+    second = SelfLabel(id="l2", created_at=now, attempt_id="a1", mode=FailureMode.RUST)
+    log.append_self_label(first)
+    log.append_self_label(second)
+
+    assert log.self_labels() == [first, second]
+
+
+def test_a_client_still_sending_a_self_label_is_not_rejected():
+    """Unknown keys are ignored, so the old client keeps pushing while it is
+    updated — it just stops carrying the label."""
+    push = AttemptPush.model_validate(
+        {
+            "external_id": "e1",
+            "problem_external_id": "p1",
+            "finished_at": datetime.now(UTC),
+            "solved": True,
+            "self_label": "rust",
+        }
+    )
+
+    assert not hasattr(push, "self_label")
+
+
+ATTEMPT_RECORDS = [SelfLabel, TechniqueClaim, Diagnosis]
+
+
+@pytest.mark.parametrize("record", ATTEMPT_RECORDS)
+def test_every_record_keyed_to_an_attempt_shares_the_base(record):
+    """One reader serves all three: `latest_by_attempt` needs `attempt_id` and
+    `created_at`, and an eval naming what it scored needs `id`."""
+    assert issubclass(record, AttemptRecord)
+    assert {"id", "created_at", "attempt_id"} <= set(record.model_fields)
+
+
+@pytest.mark.parametrize("record", ATTEMPT_RECORDS)
+def test_an_attempt_record_is_referenceable(record):
+    """Identity is required, not optional: a record nothing can name cannot be
+    cited by a later one."""
+    assert record.model_fields["id"].is_required()
+
+
+def test_a_self_label_and_a_diagnosis_stay_separate_records():
+    """Both answer why an attempt went the way it did, but the eval scores one
+    against the other — merged under latest-wins, the machine would supersede
+    the ground truth it is measured against."""
+    assert "confidence" not in SelfLabel.model_fields
+    assert "model" not in SelfLabel.model_fields
