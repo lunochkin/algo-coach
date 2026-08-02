@@ -74,44 +74,21 @@
       attempts over 117 practice days, 159 of them in the last 30; the board
       renders 25 technique rows, and 101 attempts reach no row
 
-## Phase 2 — drill loop + cards + attribution
+## Phase 2 — drill loop
 
-### Attribution
-- [ ] Classifier picks among the problem's own tags rather than classifying
-      freely, so it can narrow what a problem could exercise but never invent
-      a technique the tags do not name
-- [ ] Write the verdict as a `TechniqueClaim`, source `classifier`, with model
-      and prompt version. Reject a code `is_known` rejects — the only write
-      path that could introduce one
-- [ ] Run it over the stored log, not only over fresh practice: every one of
-      the 1785 attempts carries its code, so the whole backlog is classifiable
-      today
-- [ ] Correct a claim by hand, source `user`. A machine claim is re-derivable
-      and a user's is not, which is what makes the distinction worth storing
-- [ ] Re-derive stale machine claims by model and prompt version, leaving user
-      claims untouched
-- [ ] Measure how often a claim disagrees with the tag fallback. The board's
-      numbers only move if it does, and 61% of attempts carry two or more tags
+Flow and its rules: `docs/architecture/README.md`, "Drill loop".
 
-### Cards
-- [ ] `Card` model and store: teaching content keyed to a technique, several
-      per technique, never referenced by the log. Git holds the removed version
-- [ ] Seed from the private content repo; read-only at runtime
-- [ ] Cards for the techniques the board names weakest, not for all 27
-
-### Drill loop
-- [ ] Pick a technique from the board ordered by staleness — the user chooses.
-      Scheduling is Phase 4
-- [ ] Pick a problem for it: unsolved, or solved long enough ago to redo. The
-      engine holds no statement, so the loop hands over the origin URL
-- [ ] Show the technique's card before the attempt — the first use cards have
-- [ ] Record the attempt with origin `engine`, unverified: a pushed problem
-      carries no test cases
-- [ ] Prompt for a self-label afterwards. The board's `labels` column is empty
-      on the whole backfill and stays that way until this exists
-- [ ] Decide how a loop-recorded attempt and its later push avoid counting the
-      same solving event twice — one lands as `engine`, one as `push`, and
-      nothing keys them together
+- [ ] Pick a technique from the stale-ordered board, then a problem for it —
+      least recently attempted first, lowest solve rate breaking a tie
+- [ ] Hand over the problem's origin URL. The card shown before it is Phase 4;
+      the loop runs without a brief until then
+- [ ] Export command in configuration — the only engine path that needs a
+      client to work
+- [ ] On return, invoke the export for that problem; the attempts land through
+      the push path and the loop mints none
+- [ ] Ask for a claim and a self-label on each attempt the export minted,
+      carrying the previous answer forward — a sitting reached 29 submissions
+- [ ] A failed export records nothing; ask again after a later push
 - [ ] `algo-coach drill` CLI command
 
 ### Exit
@@ -132,6 +109,31 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 
 ## Later phases
 
+### Phase 3 — classification
+- [ ] Classifier picks among the problem's own tags rather than classifying
+      freely, so it can narrow what a problem could exercise but never invent
+      a technique the tags do not name
+- [ ] Write the verdict as a `TechniqueClaim`, source `classifier`, with model
+      and prompt version. Reject a code `is_known` rejects — the only write
+      path that could introduce one
+- [ ] Run it over the stored log, not only over fresh practice: every one of
+      the 1785 attempts carries its code, so the whole backlog is classifiable
+      today
+- [ ] Correct a claim after the fact, source `user` — overriding a classifier
+      verdict, or claiming a backfilled attempt no loop ever touched. First
+      capture is the loop's
+- [ ] Re-derive stale machine claims by model and prompt version, leaving user
+      claims untouched
+- [ ] Measure how often a claim disagrees with the tag fallback. The board's
+      numbers only move if it does, and 61% of attempts carry two or more tags
+
+### Phase 4 — cards
+- [ ] `Card` model and store: teaching content keyed to a technique, several
+      per technique, never referenced by the log. Git holds the removed version
+- [ ] Seed from the private content repo; read-only at runtime
+- [ ] Cards for the techniques the board names weakest, not for all 27
+
+### Removed, kept in git
 - [ ] Failure classifier and its agreement eval, cut before Phase 1 shipped.
       `Diagnosis` and the log's diagnosis methods stayed: records outlive
       features, and an append-only log cannot be retrofitted

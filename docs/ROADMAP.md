@@ -29,28 +29,38 @@ Get real daily attempts into the engine and make current state visible.
 
 ## Phase 2 — Drill loop (current)
 
-- Interactive drill loop: board → pick a technique → attempt → record.
-- Cards: teaching content referencing a technique — briefs shown before an
-  attempt. The first use cards actually have.
-- Attribution classifier: which of the problem's tags the solution actually
-  used. Card progress is the first number that decides something, and tag
-  fallback biases it toward broad techniques. Constrained to the problem's own
-  tags, so it picks among candidates rather than classifying freely.
+Board → pick a technique → solve on the platform → record what it cannot know.
+The flow and its rules live in `docs/architecture/README.md`.
+
+- The loop mints no attempt: its last step invokes the client's export, and the
+  records arrive through the push path.
+- A technique claim and a self-label per attempt. The first writer of either,
+  and the only one until a classifier exists.
 - Exit: loop runs on real daily attempts.
 
-## Phase 3 — Diagnosis
+## Phase 3 — Classification
 
-Why an attempt failed, not just whether.
+What an attempt used, and why it failed. Both are LLM classifiers over the same
+records, and both are scored against something the loop wrote by hand — which
+is why they follow it rather than accompany it.
 
+- Attribution classifier: which of the problem's tags the solution actually
+  used, constrained to those tags, so it picks among candidates rather than
+  classifying freely. Tag fallback biases progress toward broad techniques.
 - Failure classifier: speed / rust / gap / syntax router. Structured LLM output.
-- Eval: classifier agreement vs self-labels, measured.
-- Exit: classifier runs on real daily attempts.
+- Eval: attribution agreement vs the user's claims, diagnosis agreement vs
+  self-labels. Measured, not asserted.
+- Exit: both run on real daily attempts.
 
-## Phase 4 — Technique-mastery model
+## Phase 4 — Technique mastery + cards
 
 Per-technique skill state updated from attempts and the diagnosis signal;
 scheduling targets the diagnosed cause, not per-problem intervals. Exit: the
 scheduler drives daily practice.
+
+Cards land here: teaching content referencing a technique, shown as a brief
+before an attempt. Progress per card is the mastery number under another name,
+so the two are one thing, and choosing what to show is what the scheduler does.
 
 Sessions land here: a sitting is several submissions, and counting each as an
 attempt over-weights the ones that took a retry. A derived view over the log,

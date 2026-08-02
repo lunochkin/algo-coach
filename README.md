@@ -28,10 +28,10 @@ attempt (real code) → record → diagnose failure mode
   outcome.
 - **Technique-level mastery** — skill state per technique, updated from
   attempts and their diagnoses; not per-problem intervals.
-- **Push your practice in** — you solve wherever you already solve; your client
-  pushes `Problem` and `Attempt` records through the push API. The engine
-  contacts no external platform, and no third-party platform client lives in
-  this repo.
+- **Push your practice in** — you solve wherever you already solve; your
+  client pushes `Problem` and `Attempt` records through the push API. The
+  engine contacts no external platform, and no third-party platform client
+  lives in this repo.
 - **Verification where it's owned** — problems the project ships carry test
   cases and are executed and verified locally; pushed attempts are recorded
   as-is.

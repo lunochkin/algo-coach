@@ -79,8 +79,9 @@ Teaching content about a technique — not the vocabulary itself.
   its own id and never accepts one from a client.
 - **The problem reference is resolved at ingest**, from the platform's id to
   the minted one. An append-only record must not hold a reference nothing can
-  follow, so an unresolvable one is rejected — hence problems are pushed first.
-  Rejection is per-record, and re-pushing later is a no-op on what landed.
+  follow, so an unresolvable one is rejected — hence problems are pushed
+  first. Rejection is per-record, and re-pushing later is a no-op on what
+  landed.
 - **Origin is who produced the attempt** — the push API or the engine's own
   drill loop — and is stamped by the ingest path, never sent by a client.
   Whether the verdict rests on a real test run is a separate fact, recorded
@@ -164,6 +165,12 @@ correcting a claim.
   - A batch ingests per record: a bad one is rejected by index, the rest still
     land. One malformed line must not cost the attempts around it.
   - An already-ingested record is counted, not an error, so retrying is safe.
+- **Client invocation** — the one seam the engine crosses outward. The drill
+  loop asks the client to export one problem's submissions on demand; the
+  records return through the push API. The engine holds a command to run and
+  waits for it, never a client of its own, so any exporter answering per
+  problem fits — and the drill loop is the only path that stops working
+  without one.
 - **Verification** — runs locally, against test cases the engine owns. Product
   problems only: pushed problems carry no test cases, so their attempts happen
   outside the engine.
@@ -173,6 +180,45 @@ correcting a claim.
   an offline content pipeline in a separate private repo, and seeded into the
   engine datastore. File-based for now. The technique vocabulary is the
   exception: it ships with the package, in git.
+
+## Flows
+
+Sequences. The sections above say what the system holds and where it ends; a
+flow says in what order, and what each step may not do.
+
+### Drill loop
+
+Practice on a pushed problem. The engine points, the platform serves and times,
+the loop records what neither of them can know.
+
+1. The board, ordered by staleness. The user picks a technique.
+2. Candidates for it — least recently attempted first, lowest solve rate
+   breaking a tie. The user picks one.
+3. The technique's card, before the attempt rather than after it.
+4. The problem's origin URL. Solving happens on the platform.
+5. On return, the loop asks the client to export that problem's attempts,
+   which land through the push API.
+6. Keyed to each attempt the push minted, the loop asks for a technique claim
+   and a self-label.
+
+- **The loop mints no attempt.** The records come from the platform that
+  witnessed them. `origin: engine` stays reserved for Phase 5, where the
+  engine produces attempts by verifying them.
+- **Timing is the platform's** — the work happens there. An attempt it did not
+  time stays untimed rather than carrying a duration the engine reconstructed.
+- **A drill can mint several attempts**, since a sitting is usually several
+  submissions, and each is asked about in turn. A submission that failed on
+  syntax and the one that passed are different evidence, and labelling only
+  the last would leave the counts on two denominators: attempts per
+  submission, labels per sitting.
+- **The label and the claim are cheap only here.** The candidates are the
+  problem's own two or three tags, and the attempt is minutes old — the two
+  facts a classifier has to infer later are a keystroke each at this moment.
+- **A failed export ends the drill without a record.** The label and the claim
+  have nothing to key to, so they are asked again after a later push rather
+  than held against an attempt that may never arrive.
+- **Selection never schedules.** Ordering is a view; what to drill is the
+  user's until Phase 4.
 
 ## Invariants
 
