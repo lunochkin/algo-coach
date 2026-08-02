@@ -80,8 +80,14 @@ Flow and its rules: `docs/architecture/README.md`, "Drill loop".
 
 - [x] Pick a technique from the stale-ordered board, then a problem for it —
       least recently attempted first, lowest solve rate breaking a tie
-- [ ] Hand over the problem's origin URL. The card shown before it is Phase 4;
-      the loop runs without a brief until then
+- [x] Hand over the problem's origin URL and what the log says about it. The
+      card shown before it is Phase 4; the loop runs without a brief until then
+- [x] `algo-coach drill` — steps 1-4, prompting and rendering only. Invalid
+      input re-asks, EOF ends the drill, and the handover says nothing is
+      recorded yet rather than moving no number in silence
+
+The rest extends that command.
+
 - [ ] Export command in configuration — the only engine path that needs a
       client to work
 - [ ] On return, invoke the export for that problem; the attempts land through
@@ -89,7 +95,6 @@ Flow and its rules: `docs/architecture/README.md`, "Drill loop".
 - [ ] Ask for a claim and a self-label on each attempt the export minted,
       carrying the previous answer forward — a sitting reached 29 submissions
 - [ ] A failed export records nothing; ask again after a later push
-- [ ] `algo-coach drill` CLI command
 
 ### Exit
 - [ ] The loop runs on real daily attempts
