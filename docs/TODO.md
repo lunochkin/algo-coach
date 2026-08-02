@@ -78,7 +78,7 @@
 
 Flow and its rules: `docs/architecture/README.md`, "Drill loop".
 
-- [ ] Pick a technique from the stale-ordered board, then a problem for it —
+- [x] Pick a technique from the stale-ordered board, then a problem for it —
       least recently attempted first, lowest solve rate breaking a tie
 - [ ] Hand over the problem's origin URL. The card shown before it is Phase 4;
       the loop runs without a brief until then
