@@ -59,3 +59,21 @@ def per_technique(
         )
         for technique, group in sorted(grouped.items())
     ]
+
+
+def ungrouped(
+    attempts: Iterable[Attempt],
+    problems: Mapping[str, Problem],
+    claims: Mapping[str, TechniqueClaim],
+) -> list[Attempt]:
+    """The attempts `per_technique` reaches no row for.
+
+    Real work that the board cannot show: unmapped tags and unclaimed
+    attempts leave no code to group by. Counted beside the rows so the
+    omission is visible rather than silent.
+    """
+    return [
+        attempt
+        for attempt in attempts
+        if not resolve_techniques(attempt, problems[attempt.problem_id], claims)
+    ]

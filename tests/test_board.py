@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from algo_coach.board import TechniqueRow, per_technique
+from algo_coach.board import TechniqueRow, per_technique, ungrouped
 from algo_coach.schema import (
     Attempt,
     AttemptOrigin,
@@ -183,3 +183,30 @@ def test_a_problem_reference_that_does_not_resolve_is_an_error():
 def test_a_row_is_never_stored():
     """Derived on read: the model has no id and nothing to write it by."""
     assert "id" not in TechniqueRow.model_fields
+
+
+def test_ungrouped_names_the_attempts_no_row_reached():
+    problem = make_problem("unmapped", ["Brainteaser"])
+    missed = make_attempt("a1", problem_id="unmapped")
+
+    assert ungrouped([missed, make_attempt("a2")], index(problem, GREEDY), {}) == [missed]
+
+
+def test_an_attempt_a_claim_rescues_is_not_ungrouped():
+    """Its problem maps to nothing, but the claim says what it exercised."""
+    problem = make_problem("unmapped", ["Brainteaser"])
+    claims = latest_claims([make_claim(["greedy"])])
+
+    assert ungrouped([make_attempt("a1", problem_id="unmapped")], index(problem), claims) == []
+
+
+def test_ungrouped_and_the_rows_partition_nothing():
+    """An attempt on several techniques is on several rows; the two counts
+    answer different questions and are not meant to add up."""
+    problem = make_problem("two-tags", ["Greedy", "Sorting"])
+    attempts = [make_attempt("a1", problem_id="two-tags")]
+
+    rows = per_technique(attempts, index(problem), {})
+
+    assert sum(row.attempt_count for row in rows) == 2
+    assert ungrouped(attempts, index(problem), {}) == []

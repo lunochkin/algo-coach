@@ -21,34 +21,45 @@ from algo_coach.techniques import map_tags
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
 
-@pytest.fixture
-def board_root(tmp_path, monkeypatch) -> AttemptLog:
-    """A store holding one greedy problem, and a log of attempts on it."""
-    root = tmp_path / "data"
-    tags = ["Greedy", "Sorting"]
+def seed_problem(root, *, id: str, tags: list[str]) -> None:
     ProblemStore(root).put(
         Problem(
-            id="minted-u1",
-            external_id="p1",
+            id=id,
+            external_id=f"ext-{id}",
             user_id="u1",
             owner=ProblemOwner.USER,
-            title="Two Sum",
-            title_slug="two-sum",
+            title=id,
+            title_slug=id,
             source_tags=tags,
             techniques=map_tags(tags),
         )
     )
+
+
+@pytest.fixture
+def board_root(tmp_path, monkeypatch) -> AttemptLog:
+    """A store holding one greedy problem, and a log of attempts on it."""
+    root = tmp_path / "data"
+    seed_problem(root, id="minted-u1", tags=["Greedy", "Sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
     return AttemptLog(root)
 
 
-def attempt(id: str, *, user_id: str = "u1", solved: bool = True, self_label=None) -> Attempt:
+def attempt(
+    id: str,
+    *,
+    user_id: str = "u1",
+    problem_id: str = "minted-u1",
+    finished_at: datetime = T0,
+    solved: bool = True,
+    self_label=None,
+) -> Attempt:
     return Attempt(
         id=id,
         external_id=f"ext-{id}",
         user_id=user_id,
-        problem_id="minted-u1",
-        finished_at=T0,
+        problem_id=problem_id,
+        finished_at=finished_at,
         solved=solved,
         origin=AttemptOrigin.PUSH,
         self_label=self_label,
@@ -92,7 +103,7 @@ def test_board_json_carries_the_rows(board_root, monkeypatch, capsys):
 
     run(monkeypatch, "--user", "u1", "--json")
 
-    rows = json.loads(capsys.readouterr().out)
+    rows = json.loads(capsys.readouterr().out)["rows"]
     assert [(row["technique"], row["attempt_count"]) for row in rows] == [
         ("greedy", 1),
         ("sorting", 1),
@@ -105,7 +116,7 @@ def test_board_counts_only_the_users_own_attempts(board_root, monkeypatch, capsy
 
     run(monkeypatch, "--user", "u1", "--json")
 
-    assert {row["attempt_count"] for row in json.loads(capsys.readouterr().out)} == {1}
+    assert {row["attempt_count"] for row in json.loads(capsys.readouterr().out)["rows"]} == {1}
 
 
 def test_board_follows_a_claim_over_the_problems_tags(board_root, monkeypatch, capsys):
@@ -122,7 +133,9 @@ def test_board_follows_a_claim_over_the_problems_tags(board_root, monkeypatch, c
 
     run(monkeypatch, "--user", "u1", "--json")
 
-    assert [row["technique"] for row in json.loads(capsys.readouterr().out)] == ["two-pointers"]
+    assert [row["technique"] for row in json.loads(capsys.readouterr().out)["rows"]] == [
+        "two-pointers"
+    ]
 
 
 def test_board_on_an_empty_log_says_so(board_root, monkeypatch, capsys):
@@ -139,3 +152,51 @@ def test_render_pads_every_column(board_root, monkeypatch, capsys):
 
     header, *rows = capsys.readouterr().out.splitlines()
     assert all(line.index("2026-01-01") == header.index("last") for line in rows)
+
+
+def seed_unmapped_problem(root) -> None:
+    """A problem whose tags reach no code: its attempts land on no row."""
+    seed_problem(root, id="minted-unmapped", tags=["Database"])
+
+
+def test_a_footer_counts_the_attempts_no_row_reached(board_root, monkeypatch, capsys):
+    """Unmapped work is still work; without the footer the board just loses
+    it."""
+    seed_unmapped_problem(board_root.root)
+    board_root.append_attempt(attempt("a1"))
+    board_root.append_attempt(attempt("a2", problem_id="minted-unmapped"))
+
+    run(monkeypatch, "--user", "u1")
+
+    assert "1 attempt grouped nowhere" in capsys.readouterr().out
+
+
+def test_no_footer_when_every_attempt_reached_a_row(board_root, monkeypatch, capsys):
+    board_root.append_attempt(attempt("a1"))
+
+    run(monkeypatch, "--user", "u1")
+
+    assert "grouped nowhere" not in capsys.readouterr().out
+
+
+def test_json_carries_the_ungrouped_count(board_root, monkeypatch, capsys):
+    seed_unmapped_problem(board_root.root)
+    board_root.append_attempt(attempt("a1", problem_id="minted-unmapped"))
+
+    run(monkeypatch, "--user", "u1", "--json")
+
+    assert json.loads(capsys.readouterr().out) == {"rows": [], "ungrouped": 1}
+
+
+def test_stale_orders_the_least_recently_practised_first(board_root, monkeypatch, capsys):
+    """Alphabetical order buries the row a scheduler would pick."""
+    seed_problem(board_root.root, id="minted-trie", tags=["Trie"])
+    board_root.append_attempt(attempt("a1", finished_at=T0))
+    board_root.append_attempt(
+        attempt("a2", problem_id="minted-trie", finished_at=T0 + timedelta(days=30))
+    )
+
+    run(monkeypatch, "--user", "u1", "--stale")
+
+    header, *rows = capsys.readouterr().out.splitlines()
+    assert [line.split()[0] for line in rows] == ["greedy", "sorting", "trie"]

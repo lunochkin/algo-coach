@@ -6,7 +6,7 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
 
-from algo_coach.board import TechniqueRow, per_technique
+from algo_coach.board import TechniqueRow, per_technique, ungrouped
 from algo_coach.ingest import ingest_attempts, ingest_problems
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
@@ -68,18 +68,29 @@ def _board(args: argparse.Namespace) -> None:
     # Every problem, not the user's: an attempt resolves through the id it was
     # ingested with, and a narrower mapping would raise on a legitimate one.
     problems = {problem.id: problem for problem in ProblemStore(DATA_ROOT).all()}
-    rows = per_technique(attempts, problems, latest_claims(log.claims()))
+    claims = latest_claims(log.claims())
+    rows = per_technique(attempts, problems, claims)
+    if args.stale:
+        rows.sort(key=lambda row: row.last_attempt_at)
+    missed = len(ungrouped(attempts, problems, claims))
 
     if args.json:
-        print(json.dumps([row.model_dump(mode="json") for row in rows], indent=2))
-    elif rows:
-        print(_render(rows, datetime.now(UTC)))
-    else:
+        payload = {"rows": [row.model_dump(mode="json") for row in rows], "ungrouped": missed}
+        print(json.dumps(payload, indent=2))
+        return
+
+    if not rows:
         print(f"no attempts for {args.user}")
+        return
+
+    print(_render(rows, datetime.now(UTC)))
+    if missed:
+        noun = "attempt" if missed == 1 else "attempts"
+        print(f"\n{missed} {noun} grouped nowhere — no technique resolved")
 
 
 def _render(rows: list[TechniqueRow], now: datetime) -> str:
-    """Fixed-width columns, in the order `per_technique` gives them."""
+    """Fixed-width columns, in the order the caller settled on."""
     header = ("technique", "attempts", "solved", "last", "labels")
     body = [
         (
@@ -109,6 +120,9 @@ def main() -> None:
 
     board_parser = sub.add_parser("board", help="per-technique standing, derived from the log")
     board_parser.add_argument("--json", action="store_true", help="emit rows instead of a table")
+    board_parser.add_argument(
+        "--stale", action="store_true", help="order by recency, least recently practised first"
+    )
     _user_argument(board_parser)
 
     args = parser.parse_args()
