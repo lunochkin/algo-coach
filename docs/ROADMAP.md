@@ -6,7 +6,7 @@ when it's used daily, not when it's feature-complete.
 `docs/architecture/README.md` owns the concepts, boundaries, and invariants.
 This file owns only sequencing; where the two differ, the architecture wins.
 
-## Phase 1 — MVP (current)
+## Phase 1 — Push API, techniques, drill board
 
 Get real daily attempts into the engine and make current state visible.
 
@@ -27,7 +27,7 @@ Get real daily attempts into the engine and make current state visible.
 - Exit: a week of real attempts is in the store, and the board renders
   per-technique state from them.
 
-## Phase 2 — Drill loop
+## Phase 2 — Drill loop (current)
 
 - Interactive drill loop: board → pick a technique → attempt → record.
 - Cards: teaching content referencing a technique — briefs shown before an

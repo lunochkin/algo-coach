@@ -74,14 +74,53 @@
       attempts over 117 practice days, 159 of them in the last 30; the board
       renders 25 technique rows, and 101 attempts reach no row
 
+## Phase 2 — drill loop + cards + attribution
+
+### Attribution
+- [ ] Classifier picks among the problem's own tags rather than classifying
+      freely, so it can narrow what a problem could exercise but never invent
+      a technique the tags do not name
+- [ ] Write the verdict as a `TechniqueClaim`, source `classifier`, with model
+      and prompt version. Reject a code `is_known` rejects — the only write
+      path that could introduce one
+- [ ] Run it over the stored log, not only over fresh practice: every one of
+      the 1785 attempts carries its code, so the whole backlog is classifiable
+      today
+- [ ] Correct a claim by hand, source `user`. A machine claim is re-derivable
+      and a user's is not, which is what makes the distinction worth storing
+- [ ] Re-derive stale machine claims by model and prompt version, leaving user
+      claims untouched
+- [ ] Measure how often a claim disagrees with the tag fallback. The board's
+      numbers only move if it does, and 61% of attempts carry two or more tags
+
+### Cards
+- [ ] `Card` model and store: teaching content keyed to a technique, several
+      per technique, never referenced by the log. Git holds the removed version
+- [ ] Seed from the private content repo; read-only at runtime
+- [ ] Cards for the techniques the board names weakest, not for all 27
+
+### Drill loop
+- [ ] Pick a technique from the board ordered by staleness — the user chooses.
+      Scheduling is Phase 4
+- [ ] Pick a problem for it: unsolved, or solved long enough ago to redo. The
+      engine holds no statement, so the loop hands over the origin URL
+- [ ] Show the technique's card before the attempt — the first use cards have
+- [ ] Record the attempt with origin `engine`, unverified: a pushed problem
+      carries no test cases
+- [ ] Prompt for a self-label afterwards. The board's `labels` column is empty
+      on the whole backfill and stays that way until this exists
+- [ ] Decide how a loop-recorded attempt and its later push avoid counting the
+      same solving event twice — one lands as `engine`, one as `push`, and
+      nothing keys them together
+- [ ] `algo-coach drill` CLI command
+
+### Exit
+- [ ] The loop runs on real daily attempts
+
 ## Deferred
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
 
-- [ ] Assign techniques to an attempt, as a `TechniqueClaim` record — when a
-      resolved default is wrong often enough to be worth correcting. Reject a
-      code `is_known` rejects: the only write path that could introduce one,
-      since `map_tags` already filters
 - [ ] Re-derive stored problems without a push — when the mapping changes for
       problems no longer pushed. A re-push covers it until then
 - [ ] Ingest assumes a single writer: two concurrent pushes can both miss the
@@ -93,8 +132,6 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 
 ## Later phases
 
-- [ ] Cards: teaching content referencing a technique. Model and store were
-      removed; git holds them
-- [ ] Classifier and the agreement eval, removed likewise. `Diagnosis` and the
-      log's diagnosis methods stayed: records outlive features, and an
-      append-only log cannot be retrofitted
+- [ ] Failure classifier and its agreement eval, cut before Phase 1 shipped.
+      `Diagnosis` and the log's diagnosis methods stayed: records outlive
+      features, and an append-only log cannot be retrofitted
