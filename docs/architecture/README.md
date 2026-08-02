@@ -165,12 +165,6 @@ correcting a claim.
   - A batch ingests per record: a bad one is rejected by index, the rest still
     land. One malformed line must not cost the attempts around it.
   - An already-ingested record is counted, not an error, so retrying is safe.
-- **Client invocation** — the one seam the engine crosses outward. The drill
-  loop asks the client to export one problem's submissions on demand; the
-  records return through the push API. The engine holds a command to run and
-  waits for it, never a client of its own, so any exporter answering per
-  problem fits — and the drill loop is the only path that stops working
-  without one.
 - **Verification** — runs locally, against test cases the engine owns. Product
   problems only: pushed problems carry no test cases, so their attempts happen
   outside the engine.
@@ -196,9 +190,9 @@ the loop records what neither of them can know.
    breaking a tie. The user picks one.
 3. The technique's card, before the attempt rather than after it.
 4. The problem's origin URL. Solving happens on the platform.
-5. On return, the loop asks the client to export that problem's attempts,
-   which land through the push API.
-6. Keyed to each attempt the push minted, the loop asks for a technique claim
+5. On return, the user pushes as they always do. The loop waits, then reads
+   the log for what appeared against that problem.
+6. Keyed to each attempt that appeared, the loop asks for a technique claim
    and a self-label.
 
 - **The loop mints no attempt.** The records come from the platform that
@@ -211,12 +205,19 @@ the loop records what neither of them can know.
   syntax and the one that passed are different evidence, and labelling only
   the last would leave the counts on two denominators: attempts per
   submission, labels per sitting.
+- **The drilled technique is the claim's default.** Selection picked the
+  problem by its own tags, so what was just practised is always a legal claim:
+  confirming costs a keystroke, and the problem's other tags are the
+  alternatives.
 - **The label and the claim are cheap only here.** The candidates are the
   problem's own two or three tags, and the attempt is minutes old — the two
   facts a classifier has to infer later are a keystroke each at this moment.
-- **A failed export ends the drill without a record.** The label and the claim
-  have nothing to key to, so they are asked again after a later push rather
-  than held against an attempt that may never arrive.
+- **Nothing pushed, nothing recorded.** Until an attempt exists, the label and
+  the claim have nothing to key to, so the loop waits or ends rather than
+  holding them against a record that may never arrive.
+- **The engine still calls nothing.** It waits on a push and diffs its own
+  log — which is exact, since it knows what was already there — so the drill
+  loop needs no client of its own and works whatever the user pushes with.
 - **Selection never schedules.** Ordering is a view; what to drill is the
   user's until Phase 4.
 

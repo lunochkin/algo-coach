@@ -88,13 +88,13 @@ Flow and its rules: `docs/architecture/README.md`, "Drill loop".
 
 The rest extends that command.
 
-- [ ] Export command in configuration — the only engine path that needs a
-      client to work
-- [ ] On return, invoke the export for that problem; the attempts land through
-      the push path and the loop mints none
-- [ ] Ask for a claim and a self-label on each attempt the export minted,
-      carrying the previous answer forward — a sitting reached 29 submissions
-- [ ] A failed export records nothing; ask again after a later push
+- [ ] Wait for the user to push, then diff the log for what appeared against
+      that problem — exact, since the loop knows what was there before
+- [ ] Ask for a claim and a self-label on each attempt that appeared, the
+      drilled technique pre-filled and the previous answer carried forward — a
+      sitting reached 29 submissions
+- [ ] Nothing pushed, nothing recorded: wait again or end, never hold the
+      answers against a record that may not arrive
 
 ### Exit
 - [ ] The loop runs on real daily attempts
