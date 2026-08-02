@@ -2,6 +2,8 @@
   "techniques": [
     "backtracking",
     "binary-search",
+    "binary-search-tree",
+    "binary-tree",
     "bit-manipulation",
     "breadth-first-search",
     "depth-first-search",

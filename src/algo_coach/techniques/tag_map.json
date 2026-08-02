@@ -17,5 +17,6 @@
   "priority-queue": "heap",
   "sort": "sorting",
   "topological-sorting": "topological-sort",
+  "tree": "tree-traversal",
   "two-pointer": "two-pointers"
 }

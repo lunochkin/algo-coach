@@ -64,7 +64,7 @@
       badly Phase 2's classifier is needed. Measured over 485 problems: 61 map
       to no technique, 183 to one, 241 to two or more. Fallback attribution
       over-credits half the corpus
-- [ ] Close the vocabulary gaps the count exposed: `tree`, `binary-tree` and
+- [x] Close the vocabulary gaps the count exposed: `tree`, `binary-tree` and
       `binary-search-tree` reach no code, so their attempts group nowhere.
       Non-algorithmic tags (database, dataframe work) are correctly unmapped
       and stay that way

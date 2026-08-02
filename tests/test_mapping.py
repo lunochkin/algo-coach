@@ -24,8 +24,30 @@ def test_aliases_cover_what_normalisation_misses(tag, expected):
     assert map_tags([tag]) == [expected]
 
 
+@pytest.mark.parametrize(
+    ("tag", "expected"),
+    [
+        ("Tree", "tree-traversal"),
+        ("Binary Tree", "binary-tree"),
+        ("Binary Search Tree", "binary-search-tree"),
+    ],
+)
+def test_tree_tags_reach_a_code(tag, expected):
+    """A bare "Tree" says only that one is walked; the other two are their own
+    techniques, and grouping them under traversal would credit it for the
+    ordering invariant."""
+    assert map_tags([tag]) == [expected]
+
+
 def test_unmapped_tag_produces_no_code():
     assert map_tags(["Simulation", "Brainteaser"]) == []
+
+
+@pytest.mark.parametrize("tag", ["Database", "Pandas", "Shell", "Interactive"])
+def test_non_algorithmic_tags_stay_unmapped(tag):
+    """Nothing about them is a technique to practise. Unmapped is the correct
+    answer, not a gap to close later."""
+    assert map_tags([tag]) == []
 
 
 def test_unmapped_tags_do_not_block_the_rest():
