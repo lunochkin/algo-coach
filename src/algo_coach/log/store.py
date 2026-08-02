@@ -1,25 +1,34 @@
 from pathlib import Path
 
-from algo_coach.schema import Attempt, Diagnosis
+from algo_coach.schema import Attempt, Diagnosis, TechniqueClaim
 
 
 class AttemptLog:
-    """Append-only JSONL store for attempts and diagnoses. One line per
-    record; the files are the longitudinal dataset — no rewrites."""
+    """Append-only JSONL store for attempts, technique claims and diagnoses.
+    One line per record; the files are the longitudinal dataset — no
+    rewrites."""
 
     def __init__(self, root: Path):
         self.root = root
         self.attempts_path = root / "attempts.jsonl"
+        self.claims_path = root / "technique_claims.jsonl"
         self.diagnoses_path = root / "diagnoses.jsonl"
 
     def append_attempt(self, attempt: Attempt) -> None:
         self._append(self.attempts_path, attempt.model_dump_json())
+
+    def append_claim(self, claim: TechniqueClaim) -> None:
+        self._append(self.claims_path, claim.model_dump_json())
 
     def append_diagnosis(self, diagnosis: Diagnosis) -> None:
         self._append(self.diagnoses_path, diagnosis.model_dump_json())
 
     def attempts(self) -> list[Attempt]:
         return [Attempt.model_validate_json(line) for line in self._lines(self.attempts_path)]
+
+    def claims(self) -> list[TechniqueClaim]:
+        """In append order: a tie on `created_at` is broken by what landed last."""
+        return [TechniqueClaim.model_validate_json(line) for line in self._lines(self.claims_path)]
 
     def diagnoses(self) -> list[Diagnosis]:
         return [Diagnosis.model_validate_json(line) for line in self._lines(self.diagnoses_path)]

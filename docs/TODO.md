@@ -55,7 +55,7 @@
       the vocabulary ships in git now
 
 ### Drill board
-- [ ] Resolve an attempt's techniques: its claim if one exists, otherwise the
+- [x] Resolve an attempt's techniques: its claim if one exists, otherwise the
       problem's. Read-time only — never stored, so re-deriving the tag mapping
       reaches every unclaimed attempt
 - [ ] Per-technique view: attempt count, recency, solved/unsolved, self-label
