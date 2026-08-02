@@ -3,11 +3,14 @@ import json
 import os
 import sys
 from collections.abc import Iterator
+from datetime import UTC, datetime
 from pathlib import Path
 
+from algo_coach.board import TechniqueRow, per_technique
 from algo_coach.ingest import ingest_attempts, ingest_problems
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
+from algo_coach.techniques import latest_claims
 
 DATA_ROOT = Path("data")
 
@@ -29,22 +32,16 @@ def _read_jsonl(source: str) -> Iterator[dict]:
             raise BadLine(f"line {number}: {exc.msg}") from exc
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(prog="algo-coach")
-    sub = parser.add_subparsers(dest="command", required=True)
-
-    push_parser = sub.add_parser("push", help="ingest pushed records from JSONL")
-    push_parser.add_argument("kind", choices=["attempts", "problems"])
-    push_parser.add_argument("source", help="path to a JSONL file, or - for stdin")
-    push_parser.add_argument(
+def _user_argument(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
         "--user",
         default=os.environ.get("ALGO_COACH_USER", "local"),
         help="identity to stamp on ingested records; stands in for authentication",
     )
 
-    args = parser.parse_args()
-    records = _read_jsonl(args.source)
 
+def _push(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
+    records = _read_jsonl(args.source)
     try:
         if args.kind == "attempts":
             result = ingest_attempts(
@@ -54,9 +51,7 @@ def main() -> None:
                 problems=ProblemStore(DATA_ROOT),
             )
         else:
-            result = ingest_problems(
-                records, user_id=args.user, store=ProblemStore(DATA_ROOT)
-            )
+            result = ingest_problems(records, user_id=args.user, store=ProblemStore(DATA_ROOT))
     except BadLine as exc:
         # Records before it are stored; re-pushing the fixed file is a no-op
         # on those, so resuming means running the command again.
@@ -65,6 +60,62 @@ def main() -> None:
     print(result.model_dump_json(indent=2))
     if result.rejected:
         parser.exit(1)
+
+
+def _board(args: argparse.Namespace) -> None:
+    log = AttemptLog(DATA_ROOT)
+    attempts = [attempt for attempt in log.attempts() if attempt.user_id == args.user]
+    # Every problem, not the user's: an attempt resolves through the id it was
+    # ingested with, and a narrower mapping would raise on a legitimate one.
+    problems = {problem.id: problem for problem in ProblemStore(DATA_ROOT).all()}
+    rows = per_technique(attempts, problems, latest_claims(log.claims()))
+
+    if args.json:
+        print(json.dumps([row.model_dump(mode="json") for row in rows], indent=2))
+    elif rows:
+        print(_render(rows, datetime.now(UTC)))
+    else:
+        print(f"no attempts for {args.user}")
+
+
+def _render(rows: list[TechniqueRow], now: datetime) -> str:
+    """Fixed-width columns, in the order `per_technique` gives them."""
+    header = ("technique", "attempts", "solved", "last", "labels")
+    body = [
+        (
+            row.technique,
+            str(row.attempt_count),
+            f"{row.solved_count}/{row.attempt_count}",
+            f"{row.last_attempt_at:%Y-%m-%d} ({(now - row.last_attempt_at).days}d)",
+            " ".join(f"{mode}:{count}" for mode, count in sorted(row.self_labels.items())),
+        )
+        for row in rows
+    ]
+    widths = [max(len(cell) for cell in column) for column in zip(header, *body, strict=True)]
+    return "\n".join(
+        "  ".join(cell.ljust(width) for cell, width in zip(line, widths, strict=True)).rstrip()
+        for line in (header, *body)
+    )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(prog="algo-coach")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    push_parser = sub.add_parser("push", help="ingest pushed records from JSONL")
+    push_parser.add_argument("kind", choices=["attempts", "problems"])
+    push_parser.add_argument("source", help="path to a JSONL file, or - for stdin")
+    _user_argument(push_parser)
+
+    board_parser = sub.add_parser("board", help="per-technique standing, derived from the log")
+    board_parser.add_argument("--json", action="store_true", help="emit rows instead of a table")
+    _user_argument(board_parser)
+
+    args = parser.parse_args()
+    if args.command == "board":
+        _board(args)
+    else:
+        _push(args, parser)
 
 
 if __name__ == "__main__":

@@ -59,7 +59,7 @@
       problem's. Read-time only — never stored, so re-deriving the tag mapping
       reaches every unclaimed attempt
 - [x] Per-technique view: attempt count, recency, solved/unsolved, self-label
-- [ ] `algo-coach board` CLI command
+- [x] `algo-coach board` CLI command
 - [x] Count how much of the backlog carries more than one tag — it sets how
       badly Phase 2's classifier is needed. Measured over 485 problems: 61 map
       to no technique, 183 to one, 241 to two or more. Fallback attribution
