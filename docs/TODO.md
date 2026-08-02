@@ -88,12 +88,12 @@ Flow and its rules: `docs/architecture/README.md`, "Drill loop".
 
 The rest extends that command.
 
-- [ ] Wait for the user to push, then diff the log for what appeared against
+- [x] Wait for the user to push, then diff the log for what appeared against
       that problem — exact, since the loop knows what was there before
 - [ ] Ask for a claim and a self-label on each attempt that appeared, the
       drilled technique pre-filled and the previous answer carried forward — a
       sitting reached 29 submissions
-- [ ] Nothing pushed, nothing recorded: wait again or end, never hold the
+- [x] Nothing pushed, nothing recorded: wait again or end, never hold the
       answers against a record that may not arrive
 
 ### Exit

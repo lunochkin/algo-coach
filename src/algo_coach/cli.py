@@ -8,8 +8,9 @@ from pathlib import Path
 
 from algo_coach.board import ProblemRow, TechniqueRow, candidates, per_technique, ungrouped
 from algo_coach.ingest import ingest_attempts, ingest_problems
-from algo_coach.log import AttemptLog, latest_by_attempt
+from algo_coach.log import AttemptLog, appeared, latest_by_attempt
 from algo_coach.problems import ProblemStore
+from algo_coach.schema import Attempt, Problem
 
 DATA_ROOT = Path("data")
 
@@ -90,27 +91,16 @@ def _board(args: argparse.Namespace) -> None:
 
 
 def _drill(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
-    """Steps 1-4 of the flow: pick, point, hand over. Recording arrives with
-    the export step; until then a drill leaves nothing behind."""
+    """Pick, point, hand over, then wait for the push and read what it added.
+    Asking about each attempt is the step still missing."""
     log = AttemptLog(DATA_ROOT)
     attempts = [attempt for attempt in log.attempts() if attempt.user_id == args.user]
     stored = ProblemStore(DATA_ROOT).all()
-    rows = per_technique(
-        attempts,
-        {problem.id: problem for problem in stored},
-        latest_by_attempt(log.claims()),
-        latest_by_attempt(log.self_labels()),
-    )
-    if not rows:
-        parser.exit(1, f"drill: no attempts for {args.user}\n")
-
     now = datetime.now(UTC)
-    rows.sort(key=lambda row: row.last_attempt_at)
-    technique = args.technique or _choose(
-        "technique",
-        [(row.technique, _technique_choice(row, now)) for row in rows[: args.limit]],
-        parser,
-    )
+
+    # Only the first prompt needs the board. Named outright, a technique with
+    # no history is still drillable — which is the case a new store is in.
+    technique = args.technique or _pick_technique(args, parser, log, attempts, stored, now)
 
     offers = candidates(technique, stored, attempts)
     if not offers:
@@ -121,11 +111,70 @@ def _drill(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
         parser,
     )
 
+    known = {attempt.id for attempt in attempts if attempt.problem_id == problem.problem.id}
+
     print(f"\n{problem.problem.title} — {technique}")
     if problem.problem.url:
         print(problem.problem.url)
     print(_problem_history(problem, now))
-    print("\nSolve it there, then push. The loop records nothing yet.")
+
+    fresh = _await_push(problem.problem.id, known, args.user)
+    if not fresh:
+        print("nothing recorded")
+        return
+    noun = "attempt" if len(fresh) == 1 else "attempts"
+    print(f"{len(fresh)} {noun} appeared. Claim and self-label prompts come next.")
+
+
+def _pick_technique(
+    args: argparse.Namespace,
+    parser: argparse.ArgumentParser,
+    log: AttemptLog,
+    attempts: list[Attempt],
+    stored: list[Problem],
+    now: datetime,
+) -> str:
+    """The board, stalest first. Without one there is nothing to choose from,
+    so an empty log ends the drill here rather than at the problem step."""
+    rows = per_technique(
+        attempts,
+        {problem.id: problem for problem in stored},
+        latest_by_attempt(log.claims()),
+        latest_by_attempt(log.self_labels()),
+    )
+    if not rows:
+        parser.exit(1, f"drill: no attempts for {args.user}, name a technique to drill\n")
+    rows.sort(key=lambda row: row.last_attempt_at)
+    return _choose(
+        "technique",
+        [(row.technique, _technique_choice(row, now)) for row in rows[: args.limit]],
+        parser,
+    )
+
+
+def _await_push(problem_id: str, known: set[str], user_id: str) -> list[Attempt]:
+    """Waits on the user rather than a client: the engine calls nothing, and
+    re-reading its own log answers exactly what a push added.
+
+    An empty log after a push is not an error — the export may not have run
+    yet — so it asks again until something appears or the drill is ended.
+    """
+    while True:
+        print("\nSolve it there and push. Enter when pushed, or q to end.")
+        try:
+            if input("pushed? ").strip().lower() in {"q", "quit"}:
+                return []
+        except EOFError:
+            print()
+            return []
+
+        attempts = [
+            attempt for attempt in AttemptLog(DATA_ROOT).attempts() if attempt.user_id == user_id
+        ]
+        fresh = appeared(attempts, problem_id=problem_id, known=known)
+        if fresh:
+            return fresh
+        print("nothing new in the log for this problem")
 
 
 def _technique_choice(row: TechniqueRow, now: datetime) -> str:
@@ -148,7 +197,9 @@ def _problem_history(row: ProblemRow, now: datetime) -> str:
 def _age(when: datetime | None, now: datetime) -> str:
     if when is None:
         return "never"
-    return f"{when:%Y-%m-%d} ({(now - when).days}d)"
+    # Clamped: a submission stamped later today is not negatively old.
+    days = max((now - when).days, 0)
+    return f"{when:%Y-%m-%d} ({days}d)"
 
 
 def _choose[T](what: str, options: list[tuple[T, str]], parser: argparse.ArgumentParser) -> T:
