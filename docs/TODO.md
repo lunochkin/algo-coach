@@ -70,7 +70,9 @@
       and stay that way
 
 ### Exit
-- [ ] A week of real attempts in the store, board rendering from them
+- [x] A week of real attempts in the store, board rendering from them. 1785
+      attempts over 117 practice days, 159 of them in the last 30; the board
+      renders 25 technique rows, and 101 attempts reach no row
 
 ## Deferred
 
