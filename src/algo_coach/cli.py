@@ -6,7 +6,7 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
 
-from algo_coach.board import TechniqueRow, per_technique, ungrouped
+from algo_coach.board import ProblemRow, TechniqueRow, candidates, per_technique, ungrouped
 from algo_coach.ingest import ingest_attempts, ingest_problems
 from algo_coach.log import AttemptLog, latest_by_attempt
 from algo_coach.problems import ProblemStore
@@ -89,6 +89,83 @@ def _board(args: argparse.Namespace) -> None:
         print(f"\n{missed} {noun} grouped nowhere — no technique resolved")
 
 
+def _drill(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
+    """Steps 1-4 of the flow: pick, point, hand over. Recording arrives with
+    the export step; until then a drill leaves nothing behind."""
+    log = AttemptLog(DATA_ROOT)
+    attempts = [attempt for attempt in log.attempts() if attempt.user_id == args.user]
+    stored = ProblemStore(DATA_ROOT).all()
+    rows = per_technique(
+        attempts,
+        {problem.id: problem for problem in stored},
+        latest_by_attempt(log.claims()),
+        latest_by_attempt(log.self_labels()),
+    )
+    if not rows:
+        parser.exit(1, f"drill: no attempts for {args.user}\n")
+
+    now = datetime.now(UTC)
+    rows.sort(key=lambda row: row.last_attempt_at)
+    technique = args.technique or _choose(
+        "technique",
+        [(row.technique, _technique_choice(row, now)) for row in rows[: args.limit]],
+        parser,
+    )
+
+    offers = candidates(technique, stored, attempts)
+    if not offers:
+        parser.exit(1, f"drill: no problem carries {technique}\n")
+    problem = _choose(
+        "problem",
+        [(row, _problem_choice(row, now)) for row in offers[: args.limit]],
+        parser,
+    )
+
+    print(f"\n{problem.problem.title} — {technique}")
+    if problem.problem.url:
+        print(problem.problem.url)
+    print(_problem_history(problem, now))
+    print("\nSolve it there, then push. The loop records nothing yet.")
+
+
+def _technique_choice(row: TechniqueRow, now: datetime) -> str:
+    solved = f"{row.solved_count}/{row.attempt_count}"
+    return f"{row.technique:22} {solved:<9} {_age(row.last_attempt_at, now)}"
+
+
+def _problem_choice(row: ProblemRow, now: datetime) -> str:
+    solved = f"{row.solved_count}/{row.attempt_count}"
+    return f"{row.problem.title[:38]:40} {solved:<7} {_age(row.last_attempt_at, now)}"
+
+
+def _problem_history(row: ProblemRow, now: datetime) -> str:
+    if row.last_attempt_at is None:
+        return "never attempted"
+    solved = f"{row.solved_count}/{row.attempt_count}"
+    return f"last attempted {_age(row.last_attempt_at, now)}, solved {solved}"
+
+
+def _age(when: datetime | None, now: datetime) -> str:
+    if when is None:
+        return "never"
+    return f"{when:%Y-%m-%d} ({(now - when).days}d)"
+
+
+def _choose[T](what: str, options: list[tuple[T, str]], parser: argparse.ArgumentParser) -> T:
+    """Numbered list, one line each, re-asked until it resolves. EOF ends the
+    drill rather than picking for the user."""
+    for index, (_, line) in enumerate(options, start=1):
+        print(f"{index:3}  {line}")
+    while True:
+        try:
+            answer = input(f"{what} [1-{len(options)}]: ").strip()
+        except EOFError:
+            parser.exit(2, f"\ndrill: no {what} chosen\n")
+        if answer.isdigit() and 1 <= int(answer) <= len(options):
+            return options[int(answer) - 1][0]
+        print(f"pick a number between 1 and {len(options)}")
+
+
 def _render(rows: list[TechniqueRow], now: datetime) -> str:
     """Fixed-width columns, in the order the caller settled on."""
     header = ("technique", "attempts", "solved", "last", "labels")
@@ -125,9 +202,18 @@ def main() -> None:
     )
     _user_argument(board_parser)
 
+    drill_parser = sub.add_parser("drill", help="pick a technique, then a problem for it")
+    drill_parser.add_argument("--technique", help="skip the first prompt with a known code")
+    drill_parser.add_argument(
+        "--limit", type=int, default=10, help="how many choices to offer at each step"
+    )
+    _user_argument(drill_parser)
+
     args = parser.parse_args()
     if args.command == "board":
         _board(args)
+    elif args.command == "drill":
+        _drill(args, parser)
     else:
         _push(args, parser)
 
