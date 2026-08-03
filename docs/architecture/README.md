@@ -111,6 +111,21 @@ rather than a field on the attempt.
 - **Two writers, user first.** The drill loop asks at the moment of solving,
   and a hand pass reaches attempts no loop touched; a classifier fills the
   rest and is what a later user claim corrects.
+- **The classifier reads code because no training data exists for this label.**
+  Public corpora tag problems, not solutions, so a model trained on them
+  predicts the fallback rather than improving on it. Nobody has labelled what
+  a given solution did, because doing so means reading it — which is the work
+  the classifier is there to do. So it is a prompted model reading the
+  solution, not a trained one.
+- **Recognising an approach in code is semantic work.** A problem's tags span
+  what it admits — several approaches to it, or one solution combining several
+  techniques — so choosing among them means reading which the code took.
+  Two-pointers and sliding-window differ in their invariant, not their syntax;
+  backtracking is depth-first search plus an undo; greedy is a property of why
+  a choice is correct rather than a construct. A scan of imports and keywords
+  is weakest exactly where the claim is worth making.
+- **Worth is measured against the fallback**, the incumbent the board already
+  computes, and against the user's own claims — never against nothing.
 - **One claim per attempt**, naming every technique it used, since a solution
   can use several. A later claim replaces the whole set rather than rewriting
   the earlier one, and the latest wins on read.
