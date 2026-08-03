@@ -117,14 +117,16 @@ nothing checks sends practice somewhere unverified for weeks.
       attempts, no drill and no push. Writes a `TechniqueClaim`, source `user`.
       Offers only what a claim would decide: unclaimed, carrying its code, on
       a problem whose tags leave a choice
-- [ ] Sample one attempt per problem, not per attempt: a backfill retries the
+- [x] Sample one attempt per problem, not per attempt: a backfill retries the
       same problem, and a repeat asks the identical question — same code, same
       candidate tags — so counting both weights that problem twice. Per problem
       rather than per sitting, since a retry months later repeats it too, and
       sittings are Phase 4's
-- [ ] Of a problem's attempts, the latest carrying code — the solution that
+- [x] Of a problem's attempts, the latest carrying code — the solution that
       stands. An earlier one may show an approach that was abandoned, and the
-      claim worth scoring is the one the board credits
+      claim worth scoring is the one the board credits. A claimed problem does
+      not return through an older sibling: the collapse runs before the
+      claimed filter, not after
 - [ ] Drawn from problems carrying two or more tags — where attribution has
       something to decide — and spread across techniques so no single one
       carries the estimate
