@@ -113,8 +113,10 @@ trained. Retroactive on purpose: the evidence is the code, and the code is
 still there. The board's numbers decide what gets drilled, so a classifier
 nothing checks sends practice somewhere unverified for weeks.
 
-- [ ] `algo-coach claim` — the loop's technique question over sampled
-      attempts, no drill and no push. Writes a `TechniqueClaim`, source `user`
+- [x] `algo-coach claim` — the loop's technique question over sampled
+      attempts, no drill and no push. Writes a `TechniqueClaim`, source `user`.
+      Offers only what a claim would decide: unclaimed, carrying its code, on
+      a problem whose tags leave a choice
 - [ ] Sample one attempt per sitting, not per attempt: a backfill repeats the
       same solution across retries and would over-weight what was resubmitted
 - [ ] Drawn from problems carrying two or more tags — where attribution has

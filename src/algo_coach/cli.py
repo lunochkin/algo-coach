@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import random
 import sys
 import uuid
 from collections.abc import Iterator
@@ -259,6 +260,72 @@ def _record_answers(
     return claims, labels
 
 
+def _claim(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
+    """The drill loop's technique question, pointed at attempts already in the
+    log. No drill, no push — the evidence is the code, which is still there.
+
+    Only attempts a claim would decide something about: unclaimed, carrying
+    their code, on a problem whose tags leave a choice to make.
+    """
+    log = AttemptLog(DATA_ROOT)
+    problems = {problem.id: problem for problem in ProblemStore(DATA_ROOT).all()}
+    claimed = latest_by_attempt(log.claims())
+    pool = [
+        attempt
+        for attempt in log.attempts()
+        if attempt.user_id == args.user
+        and attempt.id not in claimed
+        and attempt.code
+        and _decides_something(problems.get(attempt.problem_id), args.technique)
+    ]
+    if not pool:
+        parser.exit(1, f"claim: nothing left to claim for {args.user}\n")
+
+    # Shuffled rather than ordered, so a sample is not all of one era; seeded,
+    # so a stopped session resumes over the same order.
+    random.Random(args.seed).shuffle(pool)
+    written = 0
+    for index, attempt in enumerate(pool[: args.count], start=1):
+        problem = problems[attempt.problem_id]
+        print(f"\n{index}/{min(args.count, len(pool))}  {problem.title}")
+        print(f"{_verdict(attempt)}, {attempt.finished_at:%Y-%m-%d}")
+        print(_code_excerpt(attempt.code or "", args.lines))
+        # Printed per attempt: the candidates are this problem's tags.
+        print("  " + "   ".join(f"{i} {code}" for i, code in enumerate(problem.techniques, 1)))
+        answer = _ask_choice("techniques", problem.techniques, [])
+        if answer is None or answer.rest:
+            break
+        if answer.picked is None:
+            continue
+        log.append_claim(
+            TechniqueClaim(
+                id=uuid.uuid4().hex,
+                created_at=datetime.now(UTC),
+                attempt_id=attempt.id,
+                techniques=[problem.techniques[int(number) - 1] for number in answer.picked],
+                source=ClaimSource.USER,
+            )
+        )
+        written += 1
+
+    print(f"\n{written} claim(s) written")
+
+
+def _decides_something(problem: Problem | None, technique: str | None) -> bool:
+    """A single-tag problem needs no claim — the fallback already answers it,
+    and a claim there would assert what nothing disputes."""
+    if problem is None or len(problem.techniques) < 2:
+        return False
+    return technique is None or technique in problem.techniques
+
+
+def _code_excerpt(code: str, limit: int) -> str:
+    lines = code.splitlines()
+    if len(lines) <= limit:
+        return code
+    return "\n".join([*lines[:limit], f"... {len(lines) - limit} more lines"])
+
+
 class _Answer(NamedTuple):
     picked: list[str] | None  # None when skipped or defaulted away
     rest: bool  # apply the defaults to every attempt still to come
@@ -364,6 +431,13 @@ def main() -> None:
     )
     _user_argument(board_parser)
 
+    claim_parser = sub.add_parser("claim", help="name the techniques a stored attempt used")
+    claim_parser.add_argument("--count", type=int, default=30, help="how many to ask about")
+    claim_parser.add_argument("--technique", help="only attempts whose problem carries it")
+    claim_parser.add_argument("--lines", type=int, default=60, help="lines of code to show")
+    claim_parser.add_argument("--seed", type=int, default=0, help="sampling order")
+    _user_argument(claim_parser)
+
     drill_parser = sub.add_parser("drill", help="pick a technique, then a problem for it")
     drill_parser.add_argument("--technique", help="skip the first prompt with a known code")
     drill_parser.add_argument(
@@ -374,6 +448,8 @@ def main() -> None:
     args = parser.parse_args()
     if args.command == "board":
         _board(args)
+    elif args.command == "claim":
+        _claim(args, parser)
     elif args.command == "drill":
         _drill(args, parser)
     else:
