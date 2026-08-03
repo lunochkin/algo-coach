@@ -108,16 +108,22 @@ question and moved to Phase 4.
 
 ### Hand claims
 
-Ground truth for attribution, and the correction path afterwards. Retroactive
-on purpose: the evidence is the code, and the code is still there.
+An eval set and the correction path — never training data, since nothing is
+trained. Retroactive on purpose: the evidence is the code, and the code is
+still there. The board's numbers decide what gets drilled, so a classifier
+nothing checks sends practice somewhere unverified for weeks.
 
 - [ ] `algo-coach claim` — the loop's technique question over sampled
       attempts, no drill and no push. Writes a `TechniqueClaim`, source `user`
 - [ ] Sample one attempt per sitting, not per attempt: a backfill repeats the
       same solution across retries and would over-weight what was resubmitted
-- [ ] Around a hundred, drawn from problems carrying two or more tags —
-      where attribution has something to decide — and spread across techniques
-      so no single one carries the estimate
+- [ ] Drawn from problems carrying two or more tags — where attribution has
+      something to decide — and spread across techniques so no single one
+      carries the estimate
+- [ ] Label before running the classifier. Reviewing its answers is the same
+      labour, but anchors on them: a plausible wrong call gets waved through
+- [ ] Thirty separates usable from broken, a hundred narrows the interval.
+      Stop at whichever answers the question
 - [ ] No self-label here. Why an attempt went the way it did is a memory of
       the sitting, and the part still recoverable from the record — a timeout,
       a compile error — is the part the classifier already reads
@@ -133,9 +139,13 @@ on purpose: the evidence is the code, and the code is still there.
 - [ ] Run it over the stored log, not only over fresh practice: every one of
       the 1785 attempts carries its code, so the whole backlog is classifiable
       today
-- [ ] Two measurements, answering different questions: disagreement with the
-      tag fallback says whether the board moves, agreement with the hand
-      claims says whether the move is right
+- [ ] Score against the hand claims per technique, by set equality — the board
+      is per technique, and a claim naming every candidate would pass a metric
+      that only asks whether the right code appears
+- [ ] Disagreement with the tag fallback is a sanity check, not a criterion:
+      narrowing two or three candidates to one moves the board by
+      construction, so near-zero movement means the classifier hedged rather
+      than decided
 - [ ] Re-derive stale machine claims by model and prompt version, leaving user
       claims untouched
 

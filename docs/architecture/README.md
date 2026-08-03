@@ -124,8 +124,13 @@ rather than a field on the attempt.
   backtracking is depth-first search plus an undo; greedy is a property of why
   a choice is correct rather than a construct. A scan of imports and keywords
   is weakest exactly where the claim is worth making.
-- **Worth is measured against the fallback**, the incumbent the board already
-  computes, and against the user's own claims — never against nothing.
+- **A claim is scored against the user's own**, per technique rather than
+  overall, since the board is per technique and a classifier that over-claims
+  one code skews it. Set equality, not overlap: a claim naming every candidate
+  agrees with the tags, decides nothing, and would score well on a metric that
+  only asks whether the right code appears.
+- **Those claims are an eval set and a correction path**, never training data:
+  nothing in the engine is trained.
 - **One claim per attempt**, naming every technique it used, since a solution
   can use several. A later claim replaces the whole set rather than rewriting
   the earlier one, and the latest wins on read.
