@@ -142,11 +142,6 @@ nothing checks sends practice somewhere unverified for weeks.
       a technique the tags do not name. The response schema enforces them; the
       prompt names them too, since thinking is not schema-constrained and a
       reading made without knowing the candidates meets them only at emission
-- [ ] Classify freely over the whole vocabulary and intersect with the tags in
-      code instead, as a second prompt version — the outcome is the same, and
-      an out-of-tag verdict is the only signal that the tags are the gap.
-      Decided by the eval rather than up front, since both write the same
-      claim and switching costs one re-run
 - [x] Write the verdict as a `TechniqueClaim`, source `classifier`, with model
       and prompt version. Reject a code `is_known` rejects — the only write
       path that could introduce one. Whole rather than per code, since a claim
@@ -172,6 +167,11 @@ nothing checks sends practice somewhere unverified for weeks.
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
 
+- [ ] Classify freely over the whole vocabulary and intersect with the tags in
+      code, as a second prompt version — when the hand claims can score it
+      against the constrained one. An out-of-tag verdict is the only signal
+      that the tags are the gap, but both write the same claim, so the choice
+      costs one re-run rather than a migration
 - [ ] Re-derive stored problems without a push — when the mapping changes for
       problems no longer pushed. A re-push covers it until then
 - [ ] Ingest assumes a single writer: two concurrent pushes can both miss the
