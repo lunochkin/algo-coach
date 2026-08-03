@@ -93,9 +93,7 @@ def test_re_push_is_a_no_op(tmp_path, problems):
 
 def test_duplicate_within_one_batch(tmp_path, problems):
     log = AttemptLog(tmp_path)
-    result = ingest_attempts(
-        [record("e1"), record("e1")], user_id="u1", log=log, problems=problems
-    )
+    result = ingest_attempts([record("e1"), record("e1")], user_id="u1", log=log, problems=problems)
 
     assert result.ingested == 1
     assert result.duplicates == 1
@@ -157,13 +155,9 @@ def test_empty_batch(tmp_path, problems):
 
 def test_push_command_reads_jsonl(tmp_path, monkeypatch, capsys, data_root):
     source = tmp_path / "attempts.jsonl"
-    source.write_text(
-        json.dumps(record("e1")) + "\n\n" + json.dumps(record("e2")) + "\n"
-    )
+    source.write_text(json.dumps(record("e1")) + "\n\n" + json.dumps(record("e2")) + "\n")
     monkeypatch.setattr(cli, "DATA_ROOT", tmp_path / "data")
-    monkeypatch.setattr(
-        "sys.argv", ["algo-coach", "push", "attempts", str(source), "--user", "u1"]
-    )
+    monkeypatch.setattr("sys.argv", ["algo-coach", "push", "attempts", str(source), "--user", "u1"])
 
     cli.main()
 
@@ -171,9 +165,7 @@ def test_push_command_reads_jsonl(tmp_path, monkeypatch, capsys, data_root):
     assert json.loads(capsys.readouterr().out)["ingested"] == 2
 
 
-def test_push_command_reports_a_line_that_is_not_json(
-    tmp_path, monkeypatch, capsys, data_root
-):
+def test_push_command_reports_a_line_that_is_not_json(tmp_path, monkeypatch, capsys, data_root):
     """Corrupt transport, not an invalid record: ingest never sees the line,
     so it exits with the line number instead of a traceback."""
     source = tmp_path / "attempts.jsonl"

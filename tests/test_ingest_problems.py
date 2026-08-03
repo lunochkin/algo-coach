@@ -146,9 +146,7 @@ def test_push_problems_command(tmp_path, monkeypatch, capsys):
     source = tmp_path / "problems.jsonl"
     source.write_text(json.dumps(record("e1")) + "\n" + json.dumps(record("e2")) + "\n")
     monkeypatch.setattr(cli, "DATA_ROOT", tmp_path / "data")
-    monkeypatch.setattr(
-        "sys.argv", ["algo-coach", "push", "problems", str(source), "--user", "u1"]
-    )
+    monkeypatch.setattr("sys.argv", ["algo-coach", "push", "problems", str(source), "--user", "u1"])
 
     cli.main()
 

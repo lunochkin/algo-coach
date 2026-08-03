@@ -22,6 +22,5 @@ def reason(exc: ValidationError) -> str:
     """Flatten to one line: pydantic's own rendering is a multi-line block,
     which reads badly inside JSON a client has to parse."""
     return "; ".join(
-        f"{'.'.join(str(part) for part in error['loc'])}: {error['msg']}"
-        for error in exc.errors()
+        f"{'.'.join(str(part) for part in error['loc'])}: {error['msg']}" for error in exc.errors()
     )
