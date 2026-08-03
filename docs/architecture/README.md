@@ -131,6 +131,11 @@ rather than a field on the attempt.
   only asks whether the right code appears.
 - **Those claims are an eval set and a correction path**, never training data:
   nothing in the engine is trained.
+- **The eval set holds one attempt per problem**, its latest carrying code. A
+  retry asks the identical question — same solution, same candidate tags — so
+  a repeat measures one decision twice rather than measuring two. The drill
+  loop still asks about every attempt of a sitting, where the answer costs a
+  keystroke and the count is per submission.
 - **One claim per attempt**, naming every technique it used, since a solution
   can use several. A later claim replaces the whole set rather than rewriting
   the earlier one, and the latest wins on read.

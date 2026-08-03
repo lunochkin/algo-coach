@@ -117,8 +117,14 @@ nothing checks sends practice somewhere unverified for weeks.
       attempts, no drill and no push. Writes a `TechniqueClaim`, source `user`.
       Offers only what a claim would decide: unclaimed, carrying its code, on
       a problem whose tags leave a choice
-- [ ] Sample one attempt per sitting, not per attempt: a backfill repeats the
-      same solution across retries and would over-weight what was resubmitted
+- [ ] Sample one attempt per problem, not per attempt: a backfill retries the
+      same problem, and a repeat asks the identical question — same code, same
+      candidate tags — so counting both weights that problem twice. Per problem
+      rather than per sitting, since a retry months later repeats it too, and
+      sittings are Phase 4's
+- [ ] Of a problem's attempts, the latest carrying code — the solution that
+      stands. An earlier one may show an approach that was abandoned, and the
+      claim worth scoring is the one the board credits
 - [ ] Drawn from problems carrying two or more tags — where attribution has
       something to decide — and spread across techniques so no single one
       carries the estimate
@@ -126,9 +132,6 @@ nothing checks sends practice somewhere unverified for weeks.
       labour, but anchors on them: a plausible wrong call gets waved through
 - [ ] Thirty separates usable from broken, a hundred narrows the interval.
       Stop at whichever answers the question
-- [ ] No self-label here. Why an attempt went the way it did is a memory of
-      the sitting, and the part still recoverable from the record — a timeout,
-      a compile error — is the part the classifier already reads
 
 ### Technique attribution
 

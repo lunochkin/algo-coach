@@ -194,7 +194,7 @@ def test_the_same_seed_asks_in_the_same_order(tmp_path, monkeypatch, capsys):
 
 
 def test_a_claimed_attempt_drops_out_of_the_pool(tmp_path, monkeypatch, capsys):
-    """Successive sessions make progress rather than re-asking."""
+    """Successive runs make progress rather than re-asking."""
     log = seeded_store(tmp_path / "one", monkeypatch)
     run(monkeypatch, ["1"], "--count", "1")
     run(monkeypatch, ["1"], "--count", "1")
