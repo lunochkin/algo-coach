@@ -13,6 +13,7 @@ from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
 from algo_coach.cli.drill import drill
 from algo_coach.cli.push import BadLine, push
+from algo_coach.cli.score import score
 
 DATA_ROOT = Path("data")
 
@@ -55,6 +56,10 @@ def main() -> None:
     classify_parser.add_argument("--technique", help="only attempts whose problem carries it")
     _user_argument(classify_parser)
 
+    score_parser = sub.add_parser("score", help="the classifier against the user's own claims")
+    score_parser.add_argument("--limit", type=int, help="how many hand claims to score against")
+    _user_argument(score_parser)
+
     drill_parser = sub.add_parser("drill", help="pick a technique, then a problem for it")
     drill_parser.add_argument("--technique", help="skip the first prompt with a known code")
     drill_parser.add_argument(
@@ -71,6 +76,8 @@ def main() -> None:
         claim(args, parser, root)
     elif args.command == "classify":
         classify(args, parser, root)
+    elif args.command == "score":
+        score(args, parser, root)
     elif args.command == "drill":
         drill(args, parser, root)
     else:

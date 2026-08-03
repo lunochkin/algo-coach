@@ -7,6 +7,7 @@ from algo_coach.claims.classifier import (
 )
 from algo_coach.claims.run import ClassifyResult, Failed, classify_backlog
 from algo_coach.claims.sample import claimable, decides_something, eligible, one_per_problem
+from algo_coach.claims.score import Score, TechniqueScore, score, score_backlog
 
 __all__ = [
     "EFFORT",
@@ -15,10 +16,14 @@ __all__ = [
     "ClassifierError",
     "ClassifyResult",
     "Failed",
+    "Score",
+    "TechniqueScore",
     "claimable",
     "classify",
     "classify_backlog",
     "decides_something",
     "eligible",
     "one_per_problem",
+    "score",
+    "score_backlog",
 ]

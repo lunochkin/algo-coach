@@ -1,88 +1,15 @@
-import json
-from dataclasses import dataclass, field
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 import pytest
+from helpers import T0, FakeClient, Verdict, attempt, seed_problem
 
 from algo_coach import cli
 from algo_coach.claims import MODEL, PROMPT_VERSION, ClassifierError, classify_backlog
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import (
-    Attempt,
-    AttemptOrigin,
-    ClaimSource,
-    Problem,
-    ProblemOwner,
-    TechniqueClaim,
-)
-from algo_coach.techniques import map_tags
+from algo_coach.schema import ClaimSource, TechniqueClaim
 
-T0 = datetime(2026, 1, 1, tzinfo=UTC)
-
-
-@dataclass
-class Verdict:
-    """One reply the fake model gives, or one failure it raises."""
-
-    techniques: list[str] | None = None
-    error: Exception | None = None
-
-
-@dataclass
-class FakeMessages:
-    replies: list[Verdict]
-    calls: list[dict] = field(default_factory=list)
-
-    def create(self, **kwargs):
-        self.calls.append(kwargs)
-        verdict = self.replies[len(self.calls) - 1]
-        if verdict.error is not None:
-            raise verdict.error
-        text = json.dumps({"techniques": verdict.techniques})
-        return type(
-            "Response",
-            (),
-            {"content": [type("Block", (), {"type": "text", "text": text})()]},
-        )()
-
-
-@dataclass
-class FakeClient:
-    messages: FakeMessages
-
-
-def answering(*verdicts: Verdict) -> FakeClient:
-    return FakeClient(FakeMessages(list(verdicts)))
-
-
-def seed_problem(root, *, id: str, tags: list[str]) -> None:
-    ProblemStore(root).put(
-        Problem(
-            id=id,
-            external_id=f"ext-{id}",
-            user_id="u1",
-            owner=ProblemOwner.USER,
-            title=id,
-            title_slug=id,
-            source_tags=tags,
-            techniques=map_tags(tags),
-        )
-    )
-
-
-def attempt(id: str, problem_id: str, *, code: str | None = "def f(): pass", **kwargs) -> Attempt:
-    return Attempt(
-        id=id,
-        external_id=f"ext-{id}",
-        user_id="u1",
-        problem_id=problem_id,
-        finished_at=kwargs.pop("finished_at", T0),
-        solved=True,
-        origin=AttemptOrigin.PUSH,
-        code=code,
-        **kwargs,
-    )
+answering = FakeClient.answering
 
 
 @pytest.fixture

@@ -150,9 +150,15 @@ nothing checks sends practice somewhere unverified for weeks.
       the 1785 attempts carries its code, so the whole backlog is classifiable
       today. `algo-coach classify`, newest first so a capped run improves what
       the board shows, resuming on the next run rather than paying twice
-- [ ] Score against the hand claims per technique, by set equality — the board
+- [x] Score against the hand claims per technique, by set equality — the board
       is per technique, and a claim naming every candidate would pass a metric
-      that only asks whether the right code appears
+      that only asks whether the right code appears. `algo-coach score`, which
+      writes nothing: a machine claim on a hand-claimed attempt would be the
+      later record, and the latest wins on read
+- [x] Report over-claiming and under-claiming apart, since they want opposite
+      fixes, and print every disagreement — the hand claims are ground truth by
+      construction rather than by being right, so reading the disagreements is
+      the only place a mislabelled one surfaces
 - [ ] Disagreement with the tag fallback is a sanity check, not a criterion:
       narrowing two or three candidates to one moves the board by
       construction, so near-zero movement means the classifier hedged rather
