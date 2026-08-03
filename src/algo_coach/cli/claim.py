@@ -1,14 +1,13 @@
 import argparse
 import random
-import uuid
-from datetime import UTC, datetime
 from pathlib import Path
 
 from algo_coach.cli.display import verdict
 from algo_coach.cli.prompts import ask_choice, numbered
 from algo_coach.log import AttemptLog, latest_by_attempt
+from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import ClaimSource, Problem, TechniqueClaim
+from algo_coach.schema import Problem
 
 
 def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -48,15 +47,8 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             break
         if answer.picked is None:
             continue
-        log.append_claim(
-            TechniqueClaim(
-                id=uuid.uuid4().hex,
-                created_at=datetime.now(UTC),
-                attempt_id=attempt.id,
-                techniques=[problem.techniques[int(number) - 1] for number in answer.picked],
-                source=ClaimSource.USER,
-            )
-        )
+        chosen = [problem.techniques[int(number) - 1] for number in answer.picked]
+        log.append_claim(user_claim(attempt.id, chosen))
         written += 1
 
     print(f"\n{written} claim(s) written")

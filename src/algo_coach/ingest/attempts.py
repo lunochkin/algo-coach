@@ -1,10 +1,10 @@
-import uuid
 from collections.abc import Iterable, Mapping
 
 from pydantic import ValidationError
 
 from algo_coach.ingest.result import AttemptIngestResult, Rejected, reason
 from algo_coach.log import AttemptLog
+from algo_coach.mint import new_id
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Attempt, AttemptOrigin, AttemptPush
 
@@ -53,7 +53,7 @@ def ingest_attempts(
 
         attempt = Attempt(
             **push.model_dump(exclude={"problem_external_id"}),
-            id=uuid.uuid4().hex,
+            id=new_id(),
             user_id=user_id,
             problem_id=problem.id,
             origin=AttemptOrigin.PUSH,

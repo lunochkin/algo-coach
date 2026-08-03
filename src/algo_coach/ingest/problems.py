@@ -1,9 +1,9 @@
-import uuid
 from collections.abc import Iterable, Mapping
 
 from pydantic import ValidationError
 
 from algo_coach.ingest.result import ProblemIngestResult, Rejected, reason
+from algo_coach.mint import new_id
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Problem, ProblemOwner, ProblemPush
 from algo_coach.techniques import map_tags
@@ -36,7 +36,7 @@ def ingest_problems(
         existing = store.by_external(user_id, push.external_id)
         problem = Problem(
             **push.model_dump(),
-            id=existing.id if existing else uuid.uuid4().hex,
+            id=existing.id if existing else new_id(),
             user_id=user_id,
             owner=ProblemOwner.USER,
             techniques=map_tags(push.source_tags),

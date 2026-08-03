@@ -1,5 +1,4 @@
 import argparse
-import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -7,15 +6,9 @@ from algo_coach.board import candidates, per_technique
 from algo_coach.cli.display import problem_choice, problem_history, technique_choice, verdict
 from algo_coach.cli.prompts import ask_choice, choose, numbered
 from algo_coach.log import AttemptLog, appeared, latest_by_attempt
+from algo_coach.mint import self_label, user_claim
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import (
-    Attempt,
-    ClaimSource,
-    FailureMode,
-    Problem,
-    SelfLabel,
-    TechniqueClaim,
-)
+from algo_coach.schema import Attempt, FailureMode, Problem
 
 
 def drill(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -154,24 +147,9 @@ def record_answers(
                     labelled = None
 
         if claimed:
-            log.append_claim(
-                TechniqueClaim(
-                    id=uuid.uuid4().hex,
-                    created_at=datetime.now(UTC),
-                    attempt_id=attempt.id,
-                    techniques=claimed,
-                    source=ClaimSource.USER,
-                )
-            )
+            log.append_claim(user_claim(attempt.id, claimed))
             claims += 1
         if labelled is not None:
-            log.append_self_label(
-                SelfLabel(
-                    id=uuid.uuid4().hex,
-                    created_at=datetime.now(UTC),
-                    attempt_id=attempt.id,
-                    mode=labelled,
-                )
-            )
+            log.append_self_label(self_label(attempt.id, labelled))
             labels += 1
     return claims, labels
