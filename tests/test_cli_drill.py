@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from algo_coach import cli
+from algo_coach.cli.display import age
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
@@ -233,7 +234,7 @@ def test_an_empty_board_says_what_to_do_instead(drill_root, monkeypatch, capsys)
 
 def test_an_attempt_stamped_later_today_is_not_negatively_old():
     """The platform's clock can be ahead of the reader's within a day."""
-    assert "(0d)" in cli._age(T0 + timedelta(hours=6), T0)
+    assert "(0d)" in age(T0 + timedelta(hours=6), T0)
 
 
 def test_the_drilled_technique_is_the_claims_default(drill_root, monkeypatch, capsys):

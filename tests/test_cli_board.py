@@ -5,6 +5,7 @@ import pytest
 
 from algo_coach import cli
 from algo_coach.board import TechniqueRow
+from algo_coach.cli.board import render
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
@@ -95,7 +96,7 @@ def test_the_last_column_dates_an_attempt_and_ages_it():
         last_attempt_at=T0,
     )
 
-    (_, line) = cli._render([row], now=T0 + timedelta(days=9)).splitlines()
+    (_, line) = render([row], now=T0 + timedelta(days=9)).splitlines()
 
     assert "2026-01-01 (9d)" in line
 

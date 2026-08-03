@@ -1,0 +1,33 @@
+from datetime import datetime
+
+from algo_coach.board import ProblemRow, TechniqueRow
+from algo_coach.schema import Attempt
+
+
+def age(when: datetime | None, now: datetime) -> str:
+    if when is None:
+        return "never"
+    # Clamped: a submission stamped later today is not negatively old.
+    days = max((now - when).days, 0)
+    return f"{when:%Y-%m-%d} ({days}d)"
+
+
+def verdict(attempt: Attempt) -> str:
+    return attempt.source_status or ("solved" if attempt.solved else "unsolved")
+
+
+def technique_choice(row: TechniqueRow, now: datetime) -> str:
+    solved = f"{row.solved_count}/{row.attempt_count}"
+    return f"{row.technique:22} {solved:<9} {age(row.last_attempt_at, now)}"
+
+
+def problem_choice(row: ProblemRow, now: datetime) -> str:
+    solved = f"{row.solved_count}/{row.attempt_count}"
+    return f"{row.problem.title[:38]:40} {solved:<7} {age(row.last_attempt_at, now)}"
+
+
+def problem_history(row: ProblemRow, now: datetime) -> str:
+    if row.last_attempt_at is None:
+        return "never attempted"
+    solved = f"{row.solved_count}/{row.attempt_count}"
+    return f"last attempted {age(row.last_attempt_at, now)}, solved {solved}"
