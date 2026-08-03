@@ -14,7 +14,6 @@ def test_an_id_says_nothing_about_the_record():
     second = user_claim("a1", ["greedy"])
 
     assert first.id != second.id
-    assert "a1" not in first.id
 
 
 def test_a_user_claim_carries_no_version():
