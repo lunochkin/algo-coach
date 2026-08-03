@@ -159,10 +159,12 @@ nothing checks sends practice somewhere unverified for weeks.
       fixes, and print every disagreement — the hand claims are ground truth by
       construction rather than by being right, so reading the disagreements is
       the only place a mislabelled one surfaces
-- [ ] Disagreement with the tag fallback is a sanity check, not a criterion:
-      narrowing two or three candidates to one moves the board by
-      construction, so near-zero movement means the classifier hedged rather
-      than decided
+- [x] Report the board with the classifier's claims against the board without
+      them, per technique. `algo-coach movement`, needing no hand claim and no
+      call: narrowing two or three candidates to one removes credit by
+      arithmetic, so a row that barely moves is one the classifier never
+      declined to name. A sanity check, never a criterion — movement says it
+      decided something, and only the hand claims say it decided right
 - [ ] Re-derive stale machine claims by model and prompt version, leaving user
       claims untouched
 

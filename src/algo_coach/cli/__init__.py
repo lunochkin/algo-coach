@@ -12,6 +12,7 @@ from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
 from algo_coach.cli.drill import drill
+from algo_coach.cli.movement import moved
 from algo_coach.cli.push import BadLine, push
 from algo_coach.cli.score import score
 
@@ -60,6 +61,11 @@ def main() -> None:
     score_parser.add_argument("--limit", type=int, help="how many hand claims to score against")
     _user_argument(score_parser)
 
+    movement_parser = sub.add_parser(
+        "movement", help="how far the classifier's claims move the board off the tags"
+    )
+    _user_argument(movement_parser)
+
     drill_parser = sub.add_parser("drill", help="pick a technique, then a problem for it")
     drill_parser.add_argument("--technique", help="skip the first prompt with a known code")
     drill_parser.add_argument(
@@ -78,6 +84,8 @@ def main() -> None:
         classify(args, parser, root)
     elif args.command == "score":
         score(args, parser, root)
+    elif args.command == "movement":
+        moved(args, parser, root)
     elif args.command == "drill":
         drill(args, parser, root)
     else:
