@@ -165,8 +165,14 @@ nothing checks sends practice somewhere unverified for weeks.
       arithmetic, so a row that barely moves is one the classifier never
       declined to name. A sanity check, never a criterion — movement says it
       decided something, and only the hand claims say it decided right
-- [ ] Re-derive stale machine claims by model and prompt version, leaving user
-      claims untouched
+- [x] Re-derive stale machine claims by model and prompt version, leaving user
+      claims untouched. `algo-coach classify --redo`, since a re-derivation
+      costs a call per attempt: unclaimed first, because a first claim buys a
+      number the board does not have and a re-derivation only revises one it
+      does. Compared whole rather than ordered, so running an earlier prompt
+      rolls back by the same path. An unchanged verdict is still written —
+      the record names the classifier that reached it, and an unwritten
+      agreement would be paid for again on every later run
 
 ### Exit
 - [ ] Attribution runs on real daily attempts, carrying a measured agreement

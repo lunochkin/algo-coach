@@ -20,12 +20,15 @@ def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         user_id=args.user,
         limit=args.limit,
         technique=args.technique,
+        redo=args.redo,
     )
 
     print(f"{result.classified} claim(s) written by {MODEL}, prompt {PROMPT_VERSION}")
+    if result.redone:
+        print(f"{result.redone} stale machine claim(s) re-derived")
     if result.undecided:
         print(f"{result.undecided} named no candidate — the fallback stands")
     for failure in result.failed:
         print(f"{failure.attempt_id}: {failure.reason}")
-    if result.failed and not result.classified:
+    if result.failed and not result.written:
         parser.exit(1, "classify: nothing landed\n")

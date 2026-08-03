@@ -5,7 +5,8 @@ from helpers import T0, FakeClient, Verdict, attempt, seed_problem
 
 from algo_coach import cli
 from algo_coach.claims import MODEL, PROMPT_VERSION, ClassifierError, classify_backlog
-from algo_coach.log import AttemptLog
+from algo_coach.log import AttemptLog, latest_by_attempt
+from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import ClaimSource, TechniqueClaim
 
@@ -141,6 +142,119 @@ def test_one_failure_does_not_cost_the_attempts_behind_it(tmp_path, monkeypatch)
     assert result.classified == 1
     assert [failure.attempt_id for failure in result.failed] == ["a2"]
     assert [claim.attempt_id for claim in log.claims()] == ["a1"]
+
+
+def machine_claim(log, attempt_id, *, model=MODEL, prompt_version=PROMPT_VERSION):
+    log.append_claim(
+        classifier_claim(attempt_id, ["sorting"], model=model, prompt_version=prompt_version)
+    )
+
+
+def test_a_claim_from_an_older_prompt_version_is_re_derived(backlog):
+    machine_claim(backlog, "a1", prompt_version="0")
+
+    result = run(answering(Verdict(["greedy"])), backlog, redo=True)
+
+    standing = latest_by_attempt(backlog.claims())["a1"]
+    assert standing.techniques == ["greedy"]
+    assert (standing.model, standing.prompt_version) == (MODEL, PROMPT_VERSION)
+    assert (result.redone, result.classified) == (1, 0)
+
+
+def test_a_claim_from_another_model_is_re_derived(backlog):
+    machine_claim(backlog, "a1", model="an-older-model")
+
+    result = run(answering(Verdict(["greedy"])), backlog, redo=True)
+
+    assert result.redone == 1
+
+
+def test_a_claim_from_this_classifier_is_never_re_derived(backlog):
+    """It would ask the same question of the same model and pay for the same
+    answer."""
+    machine_claim(backlog, "a1")
+    client = answering()
+
+    result = run(client, backlog, redo=True)
+
+    assert (result.redone, client.messages.calls) == (0, [])
+
+
+def test_a_stale_claim_is_left_alone_without_the_flag(backlog):
+    """A re-derivation costs a call per attempt, so it is asked for."""
+    machine_claim(backlog, "a1", prompt_version="0")
+    client = answering()
+
+    result = run(client, backlog)
+
+    assert (result.redone, client.messages.calls) == (0, [])
+
+
+def test_a_user_claim_is_never_stale(backlog):
+    """Nothing re-derives it: it is what the classifier is corrected by."""
+    backlog.append_claim(
+        TechniqueClaim(
+            id="c1",
+            created_at=T0,
+            attempt_id="a1",
+            techniques=["sorting"],
+            source=ClaimSource.USER,
+        )
+    )
+    client = answering()
+
+    result = run(client, backlog, redo=True)
+
+    assert (result.redone, client.messages.calls) == (0, [])
+
+
+def test_a_re_derivation_supersedes_rather_than_rewrites(backlog):
+    """The log is append-only: the older claim stays in it and stops being
+    read."""
+    machine_claim(backlog, "a1", prompt_version="0")
+
+    run(answering(Verdict(["greedy"])), backlog, redo=True)
+
+    older, newer = backlog.claims()
+    assert (older.prompt_version, older.techniques) == ("0", ["sorting"])
+    assert (newer.prompt_version, newer.techniques) == (PROMPT_VERSION, ["greedy"])
+
+
+def test_an_unchanged_verdict_is_still_written(backlog):
+    """The record names the classifier that reached it, so an unwritten
+    agreement would stay stale and be paid for on every later run."""
+    machine_claim(backlog, "a1", prompt_version="0")
+
+    run(answering(Verdict(["sorting"])), backlog, redo=True)
+    result = run(answering(), backlog, redo=True)
+
+    assert (len(backlog.claims()), result.redone) == (2, 0)
+
+
+def test_unclaimed_attempts_are_claimed_before_stale_ones(tmp_path):
+    """A first claim buys a number the board does not have; a re-derivation
+    only revises one it does."""
+    root = tmp_path / "data"
+    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    log = AttemptLog(root)
+    log.append_attempt(attempt("unclaimed", "two-tags", finished_at=T0))
+    log.append_attempt(attempt("stale", "two-tags", finished_at=T0 + timedelta(days=1)))
+    machine_claim(log, "stale", prompt_version="0")
+
+    run(answering(Verdict(["greedy"])), log, limit=1, redo=True)
+
+    assert [claim.attempt_id for claim in log.claims()] == ["stale", "unclaimed"]
+
+
+def test_naming_no_candidate_leaves_the_older_claim_standing(backlog):
+    """A claim cannot say 'none of these', and the stale one answers the
+    attempt until something replaces it."""
+    machine_claim(backlog, "a1", prompt_version="0")
+
+    result = run(answering(Verdict([])), backlog, redo=True)
+
+    standing = latest_by_attempt(backlog.claims())["a1"]
+    assert (standing.prompt_version, result.undecided, result.redone) == ("0", 1, 0)
 
 
 def test_the_technique_flag_narrows_the_backlog(backlog):

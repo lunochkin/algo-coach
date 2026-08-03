@@ -4,8 +4,9 @@ import pytest
 from helpers import FakeClient, Verdict, attempt, seed_problem
 
 from algo_coach import cli
-from algo_coach.claims import MODEL
-from algo_coach.log import AttemptLog
+from algo_coach.claims import MODEL, PROMPT_VERSION
+from algo_coach.log import AttemptLog, latest_by_attempt
+from algo_coach.mint import classifier_claim
 
 # By module, not by dotted string: `algo_coach.cli.classify` resolves to the
 # command the package re-exports, which shadows the module of the same name.
@@ -45,6 +46,17 @@ def test_a_run_that_landed_nothing_exits_nonzero(root, monkeypatch, capsys):
 
     assert exit_info.value.code == 1
     assert "bad key" in capsys.readouterr().out
+
+
+def test_redo_re_derives_a_stale_machine_claim(root, monkeypatch, capsys):
+    log = AttemptLog(root)
+    log.append_claim(classifier_claim("a1", ["sorting"], model=MODEL, prompt_version="0"))
+
+    run(monkeypatch, FakeClient.answering(Verdict(["greedy"])), "--redo")
+
+    standing = latest_by_attempt(AttemptLog(root).claims())["a1"]
+    assert (standing.techniques, standing.prompt_version) == (["greedy"], PROMPT_VERSION)
+    assert "1 stale machine claim(s) re-derived" in capsys.readouterr().out
 
 
 def test_the_limit_caps_the_run(root, monkeypatch, capsys):

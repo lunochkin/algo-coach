@@ -55,6 +55,11 @@ def main() -> None:
     classify_parser = sub.add_parser("classify", help="claim stored attempts with the classifier")
     classify_parser.add_argument("--limit", type=int, help="how many attempts to claim")
     classify_parser.add_argument("--technique", help="only attempts whose problem carries it")
+    classify_parser.add_argument(
+        "--redo",
+        action="store_true",
+        help="also re-derive claims an older model or prompt version made",
+    )
     _user_argument(classify_parser)
 
     score_parser = sub.add_parser("score", help="the classifier against the user's own claims")
