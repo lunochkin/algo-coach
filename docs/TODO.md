@@ -146,9 +146,10 @@ nothing checks sends practice somewhere unverified for weeks.
       and prompt version. Reject a code `is_known` rejects — the only write
       path that could introduce one. Whole rather than per code, since a claim
       asserts one set and half of it is a set nobody made
-- [ ] Run it over the stored log, not only over fresh practice: every one of
+- [x] Run it over the stored log, not only over fresh practice: every one of
       the 1785 attempts carries its code, so the whole backlog is classifiable
-      today
+      today. `algo-coach classify`, newest first so a capped run improves what
+      the board shows, resuming on the next run rather than paying twice
 - [ ] Score against the hand claims per technique, by set equality — the board
       is per technique, and a claim naming every candidate would pass a metric
       that only asks whether the right code appears

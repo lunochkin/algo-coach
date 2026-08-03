@@ -19,16 +19,32 @@ def claimable(
     with a seed describes its sample by that seed rather than by the order the
     log happened to hold.
     """
-    eligible = [
+    # Claimed drops out after the collapse, not before: filtering first would
+    # promote an older attempt and ask the same problem twice.
+    collapsed = one_per_problem(eligible(attempts, problems, user_id=user_id, technique=technique))
+    return [attempt for attempt in collapsed if attempt.id not in claimed]
+
+
+def eligible(
+    attempts: Iterable[Attempt],
+    problems: Mapping[str, Problem],
+    *,
+    user_id: str,
+    technique: str | None = None,
+) -> list[Attempt]:
+    """The user's attempts a claim could be made about: carrying their code,
+    on a problem whose tags leave a choice.
+
+    What a hand pass and the classifier both draw from — they differ in how
+    many they take, not in what qualifies.
+    """
+    return [
         attempt
         for attempt in attempts
         if attempt.user_id == user_id
         and attempt.code
         and decides_something(problems.get(attempt.problem_id), technique)
     ]
-    # Claimed drops out after the collapse, not before: filtering first would
-    # promote an older attempt and ask the same problem twice.
-    return [attempt for attempt in one_per_problem(eligible) if attempt.id not in claimed]
 
 
 def one_per_problem(attempts: Iterable[Attempt]) -> list[Attempt]:

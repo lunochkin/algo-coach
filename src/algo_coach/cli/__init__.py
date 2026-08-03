@@ -10,6 +10,7 @@ from pathlib import Path
 
 from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
+from algo_coach.cli.classify import classify
 from algo_coach.cli.drill import drill
 from algo_coach.cli.push import BadLine, push
 
@@ -49,6 +50,11 @@ def main() -> None:
     claim_parser.add_argument("--seed", type=int, default=0, help="sampling order")
     _user_argument(claim_parser)
 
+    classify_parser = sub.add_parser("classify", help="claim stored attempts with the classifier")
+    classify_parser.add_argument("--limit", type=int, help="how many attempts to claim")
+    classify_parser.add_argument("--technique", help="only attempts whose problem carries it")
+    _user_argument(classify_parser)
+
     drill_parser = sub.add_parser("drill", help="pick a technique, then a problem for it")
     drill_parser.add_argument("--technique", help="skip the first prompt with a known code")
     drill_parser.add_argument(
@@ -63,6 +69,8 @@ def main() -> None:
         board(args, root)
     elif args.command == "claim":
         claim(args, parser, root)
+    elif args.command == "classify":
+        classify(args, parser, root)
     elif args.command == "drill":
         drill(args, parser, root)
     else:
