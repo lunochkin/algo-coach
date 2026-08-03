@@ -1,0 +1,104 @@
+"""Which of a problem's techniques a solution used.
+
+A prompted model reading the code, not a trained one: public corpora tag
+problems, not solutions, so a model trained on them would predict the fallback
+rather than improve on it.
+"""
+
+import json
+from collections.abc import Sequence
+from typing import Any
+
+MODEL = "claude-opus-5"
+EFFORT = "medium"
+# Bumped whenever the prompt, the schema or the effort changes: a machine claim
+# names what produced it so a better classifier can find the stale ones.
+PROMPT_VERSION = "1"
+
+SYSTEM = """You name which techniques a solution used.
+
+The candidates are one problem's tags — what the problem could exercise. Say
+which of them the code in front of you actually did. Name every one it used
+and nothing more: a solution can combine several, and one naming every
+candidate agrees with the tags and decides nothing.
+
+Read for the invariant, not the syntax. Two-pointers and sliding-window look
+alike and differ in what they maintain. Backtracking is depth-first search
+plus an undo. Greedy is why a choice is correct, not a construct. A technique
+counts when it is what makes the solution work, not when it is incidental.
+
+If the code used none of the candidates, name none of them."""
+
+
+class ClassifierError(Exception):
+    """The model returned no verdict — a refusal, or an answer cut short."""
+
+
+def classify(client: Any, candidates: Sequence[str], code: str) -> list[str]:
+    """The techniques a solution used, chosen from the problem's own tags.
+
+    The candidates appear twice, doing different jobs. The response schema
+    enforces them, so the classifier cannot name a technique the tags do not.
+    The prompt informs them: thinking is not schema-constrained, so a model
+    that met the candidates only at emission time would reason about the code
+    without knowing which answers exist, then be forced into the nearest one.
+
+    The code is the only evidence beyond them: a title or a statement
+    describes what the problem admits, which is the question the fallback
+    already answers.
+
+    Naming nothing is legal — the tags may not cover what the code did, and no
+    claim leaves the fallback standing rather than asserting a wrong one.
+    """
+    if len(candidates) < 2:
+        # Nothing to decide: the fallback already says this, and a schema
+        # offering one choice would ask the model to agree with itself.
+        return list(candidates)
+
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=16000,
+        system=SYSTEM,
+        output_config={
+            "effort": EFFORT,
+            "format": {"type": "json_schema", "schema": schema(candidates)},
+        },
+        messages=[{"role": "user", "content": prompt(candidates, code)}],
+    )
+    text = next((block.text for block in response.content if block.type == "text"), None)
+    if text is None:
+        raise ClassifierError(f"no verdict: {response.stop_reason}")
+
+    # Checked again because the schema's guarantee ends with the request and
+    # the record does not: an append-only log has no pass that fixes a bad
+    # code later.
+    named = set(json.loads(text)["techniques"])
+    return [technique for technique in candidates if technique in named]
+
+
+def prompt(candidates: Sequence[str], code: str) -> str:
+    """The candidates before the code, so the reading is made knowing what can
+    be named. Delimited, since the code is data the model reads rather than
+    instructions it follows."""
+    return "\n".join(
+        [
+            f"Candidates: {', '.join(candidates)}",
+            "",
+            "<solution>",
+            code,
+            "</solution>",
+        ]
+    )
+
+
+def schema(candidates: Sequence[str]) -> dict[str, Any]:
+    """The same candidates as an enum. The prompt informs the reading; this
+    enforces it — an instruction can be violated, a response format cannot."""
+    return {
+        "type": "object",
+        "properties": {
+            "techniques": {"type": "array", "items": {"type": "string", "enum": list(candidates)}},
+        },
+        "required": ["techniques"],
+        "additionalProperties": False,
+    }
