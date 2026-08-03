@@ -147,9 +147,10 @@ nothing checks sends practice somewhere unverified for weeks.
       an out-of-tag verdict is the only signal that the tags are the gap.
       Decided by the eval rather than up front, since both write the same
       claim and switching costs one re-run
-- [ ] Write the verdict as a `TechniqueClaim`, source `classifier`, with model
+- [x] Write the verdict as a `TechniqueClaim`, source `classifier`, with model
       and prompt version. Reject a code `is_known` rejects — the only write
-      path that could introduce one
+      path that could introduce one. Whole rather than per code, since a claim
+      asserts one set and half of it is a set nobody made
 - [ ] Run it over the stored log, not only over fresh practice: every one of
       the 1785 attempts carries its code, so the whole backlog is classifiable
       today

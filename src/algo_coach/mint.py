@@ -10,6 +10,7 @@ import uuid
 from datetime import UTC, datetime
 
 from algo_coach.schema import ClaimSource, FailureMode, SelfLabel, TechniqueClaim
+from algo_coach.techniques import is_known
 
 
 def new_id() -> str:
@@ -27,6 +28,32 @@ def user_claim(attempt_id: str, techniques: list[str]) -> TechniqueClaim:
         attempt_id=attempt_id,
         techniques=techniques,
         source=ClaimSource.USER,
+    )
+
+
+def classifier_claim(
+    attempt_id: str, techniques: list[str], *, model: str, prompt_version: str
+) -> TechniqueClaim:
+    """A claim a model made. It names what produced it, since a better
+    classifier can recompute it and a user's claim cannot be recomputed at all.
+
+    Membership is checked here because this is the only write path that could
+    introduce an unrecognised code — every other one draws on the tag mapping,
+    which is derived from the vocabulary already. Rejected whole rather than
+    per code: a claim asserts one set, and writing the half that passed would
+    record a set nobody made.
+    """
+    unknown = [code for code in techniques if not is_known(code)]
+    if unknown:
+        raise ValueError(f"unknown technique code(s): {', '.join(unknown)}")
+    return TechniqueClaim(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        attempt_id=attempt_id,
+        techniques=techniques,
+        source=ClaimSource.CLASSIFIER,
+        model=model,
+        prompt_version=prompt_version,
     )
 
 
