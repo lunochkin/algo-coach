@@ -17,6 +17,11 @@ from algo_coach.log import AttemptLog, latest_by_attempt
 from algo_coach.mint import classifier_claim
 from algo_coach.schema import Problem
 
+# Consecutive failures that mean the run is broken rather than unlucky. A
+# refusal or a rate limit hits one attempt; a rejected key or a spent quota
+# hits every one, and reporting that per attempt buries it.
+ABORT_AFTER = 3
+
 
 class Failed(BaseModel):
     attempt_id: str
@@ -28,6 +33,7 @@ class ClassifyResult(BaseModel):
     redone: int = 0  # stale machine claims superseded by this classifier
     undecided: int = 0  # named none of the candidates; the fallback stands
     failed: list[Failed] = Field(default_factory=list)
+    aborted: bool = False
 
     @property
     def written(self) -> int:
@@ -76,6 +82,7 @@ def classify_backlog(
     superseding = {attempt.id for attempt in stale}
 
     result = ClassifyResult()
+    consecutive = 0
     for attempt in (unclaimed + stale)[:limit]:
         problem = problems[attempt.problem_id]
         try:
@@ -85,7 +92,14 @@ def classify_backlog(
             # is one attempt's problem, and a backlog run must not lose the
             # ones behind it.
             result.failed.append(Failed(attempt_id=attempt.id, reason=repr(exc)))
+            consecutive += 1
+            if consecutive == ABORT_AFTER:
+                result.aborted = True
+                break
             continue
+        # Answered, so the classifier is reachable — an undecided verdict is a
+        # reading, not a failure.
+        consecutive = 0
         if not techniques:
             # A claim cannot say "none of these", so what already answers the
             # attempt keeps answering it: the tags, or the older claim being

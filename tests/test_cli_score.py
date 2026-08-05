@@ -8,19 +8,20 @@ from algo_coach.claims import MODEL
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 
-# By module, not by dotted string: `algo_coach.cli.score` resolves to the
-# command the package re-exports, which shadows the module of the same name.
-COMMAND = import_module("algo_coach.cli.score")
+CLIENT = import_module("algo_coach.cli.client")
 
 
 def run(monkeypatch, client: FakeClient, *argv: str) -> None:
-    monkeypatch.setattr(COMMAND, "Anthropic", lambda: client)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test")
+    monkeypatch.setattr(CLIENT, "Anthropic", lambda: client)
     monkeypatch.setattr("sys.argv", ["algo-coach", "score", "--user", "u1", *argv])
     cli.main()
 
 
 @pytest.fixture
 def hand_claimed(tmp_path, monkeypatch):
+    # Off the repo, so `main` never loads the developer's own `.env`.
+    monkeypatch.chdir(tmp_path)
     data = tmp_path / "data"
     seed_problem(data, id="two-tags", tags=["Greedy", "Sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", data)

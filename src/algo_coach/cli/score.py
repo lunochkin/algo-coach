@@ -1,9 +1,8 @@
 import argparse
 from pathlib import Path
 
-from anthropic import Anthropic
-
 from algo_coach.claims import MODEL, PROMPT_VERSION, Score, score_backlog
+from algo_coach.cli.client import client
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
 
@@ -11,9 +10,10 @@ from algo_coach.problems import ProblemStore
 def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
     """The classifier against the user's own claims. Writes nothing: the
     verdicts are read once and reported, never stored."""
+    api = client(args, parser)
     log = AttemptLog(root)
     problems = {problem.id: problem for problem in ProblemStore(root).all()}
-    result = score_backlog(Anthropic(), log, problems, user_id=args.user, limit=args.limit)
+    result = score_backlog(api, log, problems, user_id=args.user, limit=args.limit)
 
     for failure in result.failed:
         print(f"{failure.attempt_id}: {failure.reason}")

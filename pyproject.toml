@@ -9,6 +9,7 @@ authors = [{ name = "Maksim Lunochkin" }]
 dependencies = [
     "anthropic>=0.116",
     "pydantic>=2.7",
+    "python-dotenv>=1.0",
 ]
 
 [project.scripts]

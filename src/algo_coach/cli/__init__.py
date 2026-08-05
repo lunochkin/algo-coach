@@ -8,6 +8,8 @@ import argparse
 import os
 from pathlib import Path
 
+from dotenv import find_dotenv, load_dotenv
+
 from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
@@ -30,6 +32,12 @@ def _user_argument(parser: argparse.ArgumentParser) -> None:
 
 
 def main() -> None:
+    # Before the parser, since a default reads the environment too. An exported
+    # variable wins over the file: the shell is the deliberate one. Found from
+    # the working directory, like the data root — not from the package, which
+    # sits elsewhere once installed.
+    load_dotenv(find_dotenv(usecwd=True))
+
     parser = argparse.ArgumentParser(prog="algo-coach")
     sub = parser.add_subparsers(dest="command", required=True)
 
