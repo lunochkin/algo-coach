@@ -14,13 +14,10 @@ CLIENT = import_module("algo_coach.cli.client")
 
 @pytest.fixture
 def cwd(tmp_path, monkeypatch):
-    """An empty working directory, so a test never reads the repo's own
-    `.env`."""
-    monkeypatch.chdir(tmp_path)
+    """The working directory every test already runs in, empty of a `.env`
+    until one of these writes it."""
     monkeypatch.setattr(cli, "DATA_ROOT", tmp_path / "data")
     monkeypatch.setattr(CLIENT, "Anthropic", lambda: FakeClient.answering(Verdict(["greedy"])))
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
     monkeypatch.setattr("sys.argv", ["algo-coach", "classify", "--user", "u1"])
     return tmp_path
 

@@ -1,7 +1,21 @@
 import pytest
 
+from algo_coach.cli.client import CREDENTIALS
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Problem, ProblemOwner
+
+
+@pytest.fixture(autouse=True)
+def off_the_developer_machine(tmp_path, monkeypatch):
+    """Nothing outside the repo decides a test's outcome.
+
+    `main` loads `.env` from the working directory and reads the environment
+    for defaults, so a developer's own key or user id would otherwise reach
+    every command a test runs.
+    """
+    monkeypatch.chdir(tmp_path)
+    for name in ("ALGO_COACH_USER", *CREDENTIALS):
+        monkeypatch.delenv(name, raising=False)
 
 
 def seed_problem(store: ProblemStore, *, id: str, external_id: str, user_id: str) -> None:

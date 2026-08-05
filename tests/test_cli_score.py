@@ -20,8 +20,6 @@ def run(monkeypatch, client: FakeClient, *argv: str) -> None:
 
 @pytest.fixture
 def hand_claimed(tmp_path, monkeypatch):
-    # Off the repo, so `main` never loads the developer's own `.env`.
-    monkeypatch.chdir(tmp_path)
     data = tmp_path / "data"
     seed_problem(data, id="two-tags", tags=["Greedy", "Sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", data)
