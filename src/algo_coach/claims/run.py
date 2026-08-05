@@ -5,7 +5,7 @@ loop's own claims reach only what it touched, and the board's numbers are read
 from all of it.
 """
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -15,7 +15,7 @@ from algo_coach.claims.sample import eligible, recency
 from algo_coach.claims.stale import is_stale
 from algo_coach.log import AttemptLog, latest_by_attempt
 from algo_coach.mint import classifier_claim
-from algo_coach.schema import Problem
+from algo_coach.schema import Attempt, Problem
 
 # Consecutive failures that mean the run is broken rather than unlucky. A
 # refusal or a rate limit hits one attempt; a rejected key or a spent quota
@@ -26,6 +26,18 @@ ABORT_AFTER = 3
 class Failed(BaseModel):
     attempt_id: str
     reason: str
+
+
+class Progress(BaseModel):
+    """One attempt, answered. Reported as the run goes rather than counted at
+    the end, since a call per attempt makes a backlog run minutes long."""
+
+    index: int  # 1-based, over what this run will ask about
+    total: int
+    attempt_id: str
+    title: str
+    techniques: list[str] = Field(default_factory=list)  # empty when undecided
+    reason: str | None = None  # the failure, when there was one
 
 
 class ClassifyResult(BaseModel):
@@ -49,9 +61,14 @@ def classify_backlog(
     limit: int | None = None,
     technique: str | None = None,
     redo: bool = False,
+    on_progress: Callable[[Progress], None] | None = None,
 ) -> ClassifyResult:
     """Claim every attempt nothing has claimed yet, and with `redo`, every one
     an older classifier claimed.
+
+    `on_progress` is called once per attempt asked about, so a caller can
+    report a run as it goes. Reporting is the caller's, not this loop's: the
+    CLI prints, a web API would not.
 
     Newest first, so a run cut short by `limit` improves the numbers the board
     is showing rather than the oldest ones. Claims are appended as they are
@@ -81,9 +98,19 @@ def classify_backlog(
     )
     superseding = {attempt.id for attempt in stale}
 
+    asking = (unclaimed + stale)[:limit]
+
+    def report(index: int, attempt: Attempt, title: str, **verdict: Any) -> None:
+        if on_progress is not None:
+            on_progress(
+                Progress(
+                    index=index, total=len(asking), attempt_id=attempt.id, title=title, **verdict
+                )
+            )
+
     result = ClassifyResult()
     consecutive = 0
-    for attempt in (unclaimed + stale)[:limit]:
+    for index, attempt in enumerate(asking, start=1):
         problem = problems[attempt.problem_id]
         try:
             techniques = classify(client, problem.techniques, attempt.code or "")
@@ -92,6 +119,7 @@ def classify_backlog(
             # is one attempt's problem, and a backlog run must not lose the
             # ones behind it.
             result.failed.append(Failed(attempt_id=attempt.id, reason=repr(exc)))
+            report(index, attempt, problem.title, reason=repr(exc))
             consecutive += 1
             if consecutive == ABORT_AFTER:
                 result.aborted = True
@@ -105,6 +133,7 @@ def classify_backlog(
             # attempt keeps answering it: the tags, or the older claim being
             # re-derived. Both leave it pending for the next run.
             result.undecided += 1
+            report(index, attempt, problem.title)
             continue
         # Written even when the verdict is unchanged: the record names the
         # classifier that reached it, so an unwritten agreement would stay
@@ -116,4 +145,5 @@ def classify_backlog(
             result.redone += 1
         else:
             result.classified += 1
+        report(index, attempt, problem.title, techniques=techniques)
     return result

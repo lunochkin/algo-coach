@@ -5,7 +5,7 @@ from helpers import T0, FakeClient, Verdict, attempt, seed_problem
 
 from algo_coach import cli
 from algo_coach.claims import MODEL, PROMPT_VERSION, ClassifierError, classify_backlog
-from algo_coach.claims.run import ABORT_AFTER
+from algo_coach.claims.run import ABORT_AFTER, Progress
 from algo_coach.log import AttemptLog, latest_by_attempt
 from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
@@ -219,6 +219,31 @@ def test_a_backlog_shorter_than_the_threshold_never_aborts(tmp_path):
     result = run(client, log)
 
     assert (result.aborted, len(result.failed)) == (False, ABORT_AFTER - 1)
+
+
+def test_progress_is_reported_per_attempt_as_the_run_goes(tmp_path):
+    """A call takes seconds, so the count at the end is not the report — the
+    caller hears about each attempt when it is answered."""
+    log = backlog_of(tmp_path / "data", 3)
+    seen: list[Progress] = []
+
+    run(answering(Verdict(["greedy"]), Verdict([]), broken()), log, on_progress=seen.append)
+
+    assert [(p.index, p.total) for p in seen] == [(1, 3), (2, 3), (3, 3)]
+    assert seen[0].techniques == ["greedy"]
+    assert (seen[1].techniques, seen[1].reason) == ([], None)  # undecided
+    assert "bad key" in seen[2].reason
+    assert {p.title for p in seen} == {"two-tags"}
+
+
+def test_progress_counts_only_what_the_run_asks_about(backlog):
+    """A single-tag problem is never asked about, so it is not in the total —
+    a denominator the run never reaches would stall at the last line."""
+    seen: list[Progress] = []
+
+    run(answering(Verdict(["greedy"])), backlog, on_progress=seen.append)
+
+    assert [(p.index, p.total) for p in seen] == [(1, 1)]
 
 
 def machine_claim(log, attempt_id, *, model=MODEL, prompt_version=PROMPT_VERSION):

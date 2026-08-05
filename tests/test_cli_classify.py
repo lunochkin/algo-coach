@@ -65,6 +65,16 @@ def test_a_missing_key_fails_before_the_run(root, monkeypatch, capsys):
     assert client.messages.calls == []
 
 
+def test_the_command_reports_each_attempt_as_it_goes(root, monkeypatch, capsys):
+    """On stderr, so the counts on stdout stay the command's output."""
+    run(monkeypatch, FakeClient.answering(Verdict(["greedy"])))
+
+    captured = capsys.readouterr()
+    assert "[1/1] two-tags" in " ".join(captured.err.split())
+    assert "greedy" in captured.err
+    assert "[1/1]" not in captured.out
+
+
 def test_an_aborted_run_says_so_and_exits_nonzero(root, monkeypatch, capsys):
     """A run the classifier was unreachable for is not a backlog with nothing
     left to claim, and the reason is printed once rather than per attempt."""
