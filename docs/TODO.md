@@ -134,8 +134,13 @@ nothing checks sends practice somewhere unverified for weeks.
       counts toward every tag its problem carries, since one claim decides all
       of them. The seed chooses within a technique, not across, so a sample is
       still described by its seed
-- [ ] Label before running the classifier. Reviewing its answers is the same
-      labour, but anchors on them: a plausible wrong call gets waved through
+- [x] Label before running the classifier. Reviewing its answers is the same
+      labour, but anchors on them: a plausible wrong call gets waved through.
+      Ordering is not what holds it: the hand pass prints the code and the
+      problem's tags and never an existing claim, so a machine verdict cannot
+      anchor one. A machine claim therefore leaves an attempt in the pool —
+      the classifier fills what no hand reached, and only the user's own
+      answer settles a problem
 - [ ] Thirty separates usable from broken, a hundred narrows the interval.
       Stop at whichever answers the question
 

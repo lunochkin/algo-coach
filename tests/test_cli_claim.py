@@ -3,7 +3,8 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from algo_coach import cli
-from algo_coach.log import AttemptLog
+from algo_coach.log import AttemptLog, latest_by_attempt
+from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
     Attempt,
@@ -122,6 +123,39 @@ def test_an_already_claimed_attempt_is_not_asked_again(claim_root, monkeypatch, 
 
     assert exit_info.value.code == 1
     assert "nothing left to claim" in capsys.readouterr().err
+
+
+def test_a_machine_claimed_attempt_is_still_offered(claim_root, monkeypatch, capsys):
+    """The classifier fills what no hand reached, and a user claim is what
+    corrects it — so a machine claim leaves the attempt in the pool. A pool
+    that emptied as the classifier ran would freeze the eval set at whatever
+    was labelled before the first run."""
+    claim_root.append_claim(
+        classifier_claim("a1", ["sorting"], model="a-model", prompt_version="1")
+    )
+
+    run(monkeypatch, ["1"])
+
+    standing = latest_by_attempt(claim_root.claims())["a1"]
+    assert (standing.techniques, standing.source) == (["greedy"], ClaimSource.USER)
+
+
+def test_the_machine_verdict_is_never_shown(claim_root, monkeypatch, capsys):
+    """Reviewing an answer is the same labour as making one, but anchors on
+    it: a plausible wrong call gets waved through. The question is asked from
+    the code and the tags, as it would be with nothing claimed."""
+    claim_root.append_claim(
+        classifier_claim("a1", ["sorting"], model="a-model", prompt_version="1")
+    )
+
+    run(monkeypatch, ["1"])
+
+    shown = capsys.readouterr().out
+    assert "a-model" not in shown
+    assert "classifier" not in shown
+    # The candidates are the problem's tags, in the problem's order — not the
+    # claim's set, which would put what the machine chose first.
+    assert "1 greedy   2 sorting" in shown
 
 
 def test_an_attempt_without_code_is_not_offered(tmp_path, monkeypatch, capsys):

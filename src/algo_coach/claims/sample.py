@@ -1,15 +1,15 @@
 import random
 from collections import Counter, defaultdict
-from collections.abc import Container, Iterable, Mapping
+from collections.abc import Iterable, Mapping
 from datetime import datetime
 
-from algo_coach.schema import Attempt, Problem
+from algo_coach.schema import Attempt, ClaimSource, Problem, TechniqueClaim
 
 
 def claimable(
     attempts: Iterable[Attempt],
     problems: Mapping[str, Problem],
-    claimed: Container[str],
+    claimed: Mapping[str, TechniqueClaim],
     *,
     user_id: str,
     technique: str | None = None,
@@ -18,16 +18,27 @@ def claimable(
     """The attempts a hand claim would decide something about, in the order to
     ask about them.
 
-    Unclaimed, carrying their code, one per problem, on a problem whose tags
-    leave a choice to make — and spread across techniques, so a sample cut at
-    any length is not carried by whichever technique the backlog holds most of.
+    Carrying their code, one per problem, on a problem whose tags leave a
+    choice to make — and spread across techniques, so a sample cut at any
+    length is not carried by whichever technique the backlog holds most of.
+
+    A machine claim does not take an attempt out of the pool: the classifier
+    fills what no hand reached, and a user claim is what corrects it. Only the
+    user's own answer settles a problem, since asking again would ask what has
+    been answered.
     """
     # Claimed drops out after the collapse, not before: filtering first would
     # promote an older attempt and ask the same problem twice.
     collapsed = one_per_problem(eligible(attempts, problems, user_id=user_id, technique=technique))
     return spread(
-        [attempt for attempt in collapsed if attempt.id not in claimed], problems, seed=seed
+        [attempt for attempt in collapsed if not answered_by_hand(claimed.get(attempt.id))],
+        problems,
+        seed=seed,
     )
+
+
+def answered_by_hand(claim: TechniqueClaim | None) -> bool:
+    return claim is not None and claim.source is ClaimSource.USER
 
 
 def spread(
