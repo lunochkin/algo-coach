@@ -268,6 +268,21 @@ def test_count_caps_how_many_are_asked_about(tmp_path, monkeypatch, capsys):
     assert len(log.claims()) == 2
 
 
+def test_the_sample_is_spread_across_techniques(tmp_path, monkeypatch, capsys):
+    """A pile of one pair of tags does not take the whole sample: the rare
+    problem is asked about before a sixth greedy one."""
+    root = tmp_path / "data"
+    monkeypatch.setattr(cli, "DATA_ROOT", root)
+    log = seed_many(root, 5)
+    seed_problem(root, id="rare", tags=["Trie", "Backtracking"])
+    log.append_attempt(attempt("a-rare", "rare"))
+
+    run(monkeypatch, ["1"], "--count", "1")
+
+    (claim,) = log.claims()
+    assert claim.attempt_id == "a-rare"
+
+
 def test_the_technique_flag_narrows_the_pool(claim_root, monkeypatch, capsys):
     seed_problem(claim_root.root, id="tries", tags=["Trie", "Sorting"])
     claim_root.append_attempt(attempt("a3", "tries"))

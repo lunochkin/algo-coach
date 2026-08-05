@@ -127,9 +127,13 @@ nothing checks sends practice somewhere unverified for weeks.
       claim worth scoring is the one the board credits. A claimed problem does
       not return through an older sibling: the collapse runs before the
       claimed filter, not after
-- [ ] Drawn from problems carrying two or more tags — where attribution has
+- [x] Drawn from problems carrying two or more tags — where attribution has
       something to decide — and spread across techniques so no single one
-      carries the estimate
+      carries the estimate. Each draw takes the technique the order has covered
+      least, so any prefix is spread and `--count` needs no quota; an attempt
+      counts toward every tag its problem carries, since one claim decides all
+      of them. The seed chooses within a technique, not across, so a sample is
+      still described by its seed
 - [ ] Label before running the classifier. Reviewing its answers is the same
       labour, but anchors on them: a plausible wrong call gets waved through
 - [ ] Thirty separates usable from broken, a hundred narrows the interval.

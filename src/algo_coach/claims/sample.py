@@ -1,3 +1,5 @@
+import random
+from collections import Counter, defaultdict
 from collections.abc import Container, Iterable, Mapping
 from datetime import datetime
 
@@ -11,18 +13,71 @@ def claimable(
     *,
     user_id: str,
     technique: str | None = None,
+    seed: int = 0,
 ) -> list[Attempt]:
-    """The attempts a hand claim would decide something about.
+    """The attempts a hand claim would decide something about, in the order to
+    ask about them.
 
     Unclaimed, carrying their code, one per problem, on a problem whose tags
-    leave a choice to make. Ordered by problem id, so a caller that shuffles
-    with a seed describes its sample by that seed rather than by the order the
-    log happened to hold.
+    leave a choice to make — and spread across techniques, so a sample cut at
+    any length is not carried by whichever technique the backlog holds most of.
     """
     # Claimed drops out after the collapse, not before: filtering first would
     # promote an older attempt and ask the same problem twice.
     collapsed = one_per_problem(eligible(attempts, problems, user_id=user_id, technique=technique))
-    return [attempt for attempt in collapsed if attempt.id not in claimed]
+    return spread(
+        [attempt for attempt in collapsed if attempt.id not in claimed], problems, seed=seed
+    )
+
+
+def spread(
+    attempts: Iterable[Attempt], problems: Mapping[str, Problem], *, seed: int = 0
+) -> list[Attempt]:
+    """The pool ordered so no single technique carries the estimate.
+
+    Each step takes an attempt on the technique the order has covered least so
+    far, so any prefix of it is spread. A backlog is skewed — a uniform shuffle
+    puts most of a thirty-attempt sample on the two or three techniques that
+    dominate it, and the score the sample estimates is read per technique.
+
+    An attempt counts toward every technique its problem carries, since a claim
+    on it decides all of them: what is levelled is coverage, not how many times
+    each technique was drawn from. Shuffled within a technique by `seed`, so a
+    sample is described by its seed rather than by listing what it held.
+    """
+    pool = list(attempts)
+    random.Random(seed).shuffle(pool)
+
+    buckets: dict[str, list[Attempt]] = defaultdict(list)
+    for attempt in pool:
+        for code in problems[attempt.problem_id].techniques:
+            buckets[code].append(attempt)
+
+    covered: Counter[str] = Counter()
+    taken: set[str] = set()
+    cursors: Counter[str] = Counter()
+
+    def untaken(code: str) -> Attempt | None:
+        """The bucket's next attempt nothing has drawn. The cursor never goes
+        back, so the scan is paid once per attempt rather than once per step."""
+        bucket = buckets[code]
+        while cursors[code] < len(bucket) and bucket[cursors[code]].id in taken:
+            cursors[code] += 1
+        return bucket[cursors[code]] if cursors[code] < len(bucket) else None
+
+    order: list[Attempt] = []
+    while True:
+        # Sorted, so the code breaks a tie on coverage and the order is the
+        # seed's alone.
+        live = [
+            (code, attempt) for code in sorted(buckets) if (attempt := untaken(code)) is not None
+        ]
+        if not live:
+            return order
+        _, drawn = min(live, key=lambda pair: covered[pair[0]])
+        taken.add(drawn.id)
+        order.append(drawn)
+        covered.update(problems[drawn.problem_id].techniques)
 
 
 def eligible(

@@ -1,5 +1,4 @@
 import argparse
-import random
 from pathlib import Path
 
 from algo_coach.claims import claimable
@@ -22,13 +21,11 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         latest_by_attempt(log.claims()),
         user_id=args.user,
         technique=args.technique,
+        seed=args.seed,
     )
     if not pool:
         parser.exit(1, f"claim: nothing left to claim for {args.user}\n")
 
-    # Shuffled rather than ordered, so a sample is not all of one era; seeded,
-    # so a sample is described by its seed rather than by what it held.
-    random.Random(args.seed).shuffle(pool)
     written = 0
     for index, attempt in enumerate(pool[: args.count], start=1):
         problem = problems[attempt.problem_id]
