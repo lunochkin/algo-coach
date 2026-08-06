@@ -10,6 +10,19 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 
 @docs/architecture/README.md
 
+## Where knowledge lives
+
+- Docs matter more with an AI executor, and should be fewer: they are the only
+  durable context, and they got cheap to write exactly when they got valuable.
+- They carry intent, reasons, and the shape of the system — what a model
+  cannot infer and would otherwise reinvent differently each session.
+- Facts go where they can be enforced: tests, then hooks and types. Prose is
+  the residue, for what nothing can execute.
+- Implementation follows from tests and shape, and feeds back: what it
+  discovers revises the doc.
+- Divergence is checked on purpose. An unchecked doc becomes fiction, and a
+  model implements fiction without complaint.
+
 ## Writing
 
 - Docs, commits, comments: shortest form that keeps the reason. Cut restating,

@@ -210,6 +210,11 @@ nothing checks sends practice somewhere unverified for weeks.
 ### Exit
 - [ ] Attribution runs on real daily attempts, carrying a measured agreement
       number rather than an asserted one
+- [ ] The architecture doc read against the code, every divergence landing
+      here as an item. A doc that wins on conflict is only worth having while
+      the conflict is known, and the last one — a hand pass that skipped
+      machine-claimed attempts, against a doc saying a user claim corrects
+      them — surfaced by accident
 
 ## Deferred
 
