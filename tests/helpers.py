@@ -5,11 +5,33 @@ import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
+from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, AttemptOrigin, Problem, ProblemOwner
+from algo_coach.schema import Attempt, AttemptOrigin, Problem, ProblemOwner, TechniqueClaim
 from algo_coach.techniques import map_tags
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
+
+
+def machine_claim(
+    attempt_id: str,
+    techniques: list[str],
+    *,
+    model: str = "a-model",
+    effort: str = "medium",
+    prompt_version: str = "1",
+    prompt_hash: str = "0123456789ab",
+) -> TechniqueClaim:
+    """A classifier claim under a named configuration, defaulted so a test
+    naming one field says that field is what it is about."""
+    return classifier_claim(
+        attempt_id,
+        techniques,
+        model=model,
+        effort=effort,
+        prompt_version=prompt_version,
+        prompt_hash=prompt_hash,
+    )
 
 
 @dataclass

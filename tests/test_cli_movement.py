@@ -1,9 +1,9 @@
 import pytest
-from helpers import attempt, seed_problem
+from helpers import attempt, machine_claim, seed_problem
 
 from algo_coach import cli
 from algo_coach.log import AttemptLog
-from algo_coach.mint import classifier_claim, user_claim
+from algo_coach.mint import user_claim
 
 
 def run(monkeypatch, *argv: str) -> None:
@@ -18,7 +18,7 @@ def classified(tmp_path, monkeypatch) -> AttemptLog:
     monkeypatch.setattr(cli, "DATA_ROOT", data)
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-tags"))
-    log.append_claim(classifier_claim("a1", ["greedy"], model="a-model", prompt_version="1"))
+    log.append_claim(machine_claim("a1", ["greedy"]))
     return log
 
 

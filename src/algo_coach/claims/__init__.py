@@ -1,6 +1,7 @@
 from algo_coach.claims.classifier import (
     EFFORT,
     MODEL,
+    PROMPT_HASH,
     PROMPT_VERSION,
     ClassifierError,
     classify,
@@ -19,6 +20,7 @@ from algo_coach.claims.stale import is_stale
 __all__ = [
     "EFFORT",
     "MODEL",
+    "PROMPT_HASH",
     "PROMPT_VERSION",
     "ClassifierError",
     "ClassifyResult",

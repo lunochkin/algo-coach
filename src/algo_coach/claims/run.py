@@ -10,7 +10,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.claims.classifier import MODEL, PROMPT_VERSION, classify
+from algo_coach.claims.classifier import EFFORT, MODEL, PROMPT_HASH, PROMPT_VERSION, classify
 from algo_coach.claims.sample import eligible, recency
 from algo_coach.claims.stale import is_stale
 from algo_coach.log import AttemptLog
@@ -94,7 +94,12 @@ def classify_backlog(
             attempt
             for attempt in candidates
             if attempt.id in standing
-            and is_stale(standing[attempt.id], model=MODEL, prompt_version=PROMPT_VERSION)
+            and is_stale(
+                standing[attempt.id],
+                model=MODEL,
+                effort=EFFORT,
+                prompt_version=PROMPT_VERSION,
+            )
         ]
         if redo
         else []
@@ -142,7 +147,14 @@ def classify_backlog(
         # classifier that reached it, so an unwritten agreement would stay
         # stale and be paid for again on every run.
         log.append_claim(
-            classifier_claim(attempt.id, techniques, model=MODEL, prompt_version=PROMPT_VERSION)
+            classifier_claim(
+                attempt.id,
+                techniques,
+                model=MODEL,
+                effort=EFFORT,
+                prompt_version=PROMPT_VERSION,
+                prompt_hash=PROMPT_HASH,
+            )
         )
         if attempt.id in superseding:
             result.redone += 1

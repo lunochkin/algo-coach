@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import StrEnum
+from typing import ClassVar
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -89,16 +90,29 @@ class TechniqueClaim(AttemptRecord):
 
     techniques: list[str] = Field(min_length=1)
     source: ClaimSource  # required: a mislabelled claim cannot be corrected later
+    # What produced a machine claim, whole: model, how hard it was asked to
+    # think, the author's statement that the reading changed, and the
+    # mechanical fact of the text sent. Optional on the field because a user
+    # claim carries none of them; required on a machine one by the validator.
     model: str | None = None
+    effort: str | None = None
     prompt_version: str | None = None
+    prompt_hash: str | None = None
+
+    PROVENANCE: ClassVar[tuple[str, ...]] = ("model", "effort", "prompt_version", "prompt_hash")
 
     @model_validator(mode="after")
     def _provenance_matches_source(self) -> TechniqueClaim:
-        """A machine claim is re-derivable, so it must say by what; versions on
-        a user claim would name a model that never touched it."""
-        versioned = self.model is not None and self.prompt_version is not None
-        if self.source is ClaimSource.CLASSIFIER and not versioned:
-            raise ValueError("a classifier claim needs model and prompt_version")
-        if self.source is ClaimSource.USER and (self.model or self.prompt_version):
-            raise ValueError("a user claim carries no model or prompt_version")
+        """A machine claim is re-derivable, so it must say by what; provenance
+        on a user claim would name a model that never touched it.
+
+        All four or none. A machine claim missing one cannot be compared with
+        one that has it, and a reader would branch on the absence forever.
+        """
+        named = [field for field in self.PROVENANCE if getattr(self, field) is not None]
+        if self.source is ClaimSource.CLASSIFIER and len(named) < len(self.PROVENANCE):
+            missing = [field for field in self.PROVENANCE if field not in named]
+            raise ValueError(f"a classifier claim needs {', '.join(missing)}")
+        if self.source is ClaimSource.USER and named:
+            raise ValueError(f"a user claim carries no {', '.join(named)}")
         return self

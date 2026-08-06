@@ -1,9 +1,11 @@
 import json
 from dataclasses import dataclass, field
+from hashlib import sha256
 
 import pytest
 
-from algo_coach.claims import MODEL, PROMPT_VERSION, ClassifierError, classify
+from algo_coach.claims import EFFORT, MODEL, PROMPT_HASH, PROMPT_VERSION, ClassifierError, classify
+from algo_coach.claims.classifier import SYSTEM
 
 CODE = "def f(nums):\n    return sorted(nums)\n"
 
@@ -141,4 +143,27 @@ def test_the_claim_records_what_produced_it():
     recomputed by a better classifier, so re-deriving has to find the stale
     ones and leave the rest."""
     assert MODEL == "claude-opus-5"
+    assert EFFORT
     assert PROMPT_VERSION
+    assert PROMPT_HASH
+
+
+def test_the_prompt_hash_is_the_text_that_was_sent():
+    """Recomputed rather than compared with a literal: a hard-coded digest
+    would need editing on every prompt edit and would assert only that someone
+    edited it."""
+    assert sha256(SYSTEM.encode()).hexdigest()[: len(PROMPT_HASH)] == PROMPT_HASH
+
+
+def test_the_prompt_hash_changes_with_the_prompt():
+    """What makes a forgotten version bump visible: two hashes under one
+    version say the text moved and the version did not."""
+    reflowed = SYSTEM.replace("\n\n", "\n")
+
+    assert sha256(reflowed.encode()).hexdigest()[: len(PROMPT_HASH)] != PROMPT_HASH
+
+
+def test_the_prompt_hash_is_short_enough_to_store_on_every_claim():
+    """Only ever compared for equality, so the collision margin is irrelevant;
+    sixty-four characters on every line of an append-only log is not."""
+    assert len(PROMPT_HASH) == 12

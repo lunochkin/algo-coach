@@ -166,6 +166,9 @@ rather than a field on the attempt.
   model, effort, prompt version, prompt hash. Both count the same toward
   progress, but a machine claim can be recomputed by a better classifier and a
   user's cannot, so re-deriving has to find the stale ones and leave the rest.
+  All four or none, since a reading whose configuration is partly unknown
+  compares with nothing — and a user's claim carries none of them, because
+  nothing re-derives it.
 - **What produced a claim is compared whole, never ordered.** A version is an
   identity, not a number to be greater than, so running an earlier prompt on
   purpose re-derives what a later one wrote and a rollback needs no separate
@@ -304,7 +307,12 @@ the loop records what neither of them can know.
 
 Properties the system holds at all times.
 
-- Attempts, technique claims, self-labels and diagnoses are append-only.
+- Attempts, technique claims, self-labels and diagnoses are append-only. The
+  guarantee is the running system's: no record is ever revised or removed in
+  place. Discarding a private log wholesale, while it holds nothing
+  irreplaceable, is a different act — it destroys no evidence, because there is
+  none yet to destroy. That window closes the first time a record is worth
+  keeping, and does not reopen.
 - Every record keyed to an attempt carries an engine-minted `id`, its
   `attempt_id` and `created_at`, so one reader orders any of them.
 - The user's own record stands over the machine's answer to the same question,
@@ -335,7 +343,13 @@ Properties the system holds at all times.
 Rules on how this repo is built, rather than properties of the running system.
 
 - No concrete third-party problem-platform client ever enters this repo.
-- Schema changes must be additive (new optional fields), never breaking.
+- Schema changes must be additive (new optional fields), never breaking. A
+  change may tighten instead — a field made required, a validator widened —
+  only while no stored record carries the loose shape, which in practice means
+  deleting the ones that do. Weigh what is deleted, not how many: the rule
+  exists so the log stays readable by its own schema, and an optional field
+  kept for the sake of a handful of disposable records is one every reader
+  branches on forever.
 - `data/` is gitignored; only the schema is public.
 - Prefer tools and functions over agents; a pipeline earns multi-agent, not the
   other way around.

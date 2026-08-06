@@ -192,11 +192,14 @@ nothing checks sends practice somewhere unverified for weeks.
       are still disjoint. `standing_claims` beside `resolve_techniques`,
       calling `latest_by_attempt` once per writer: in what order is the log's
       question, who wins is the record's
-- [ ] `effort` and `prompt_hash` on the record beside model and prompt
-      version, all optional and additive. The 25 machine claims already
-      written carry neither, and `--redo` replaces them: the ambiguity is
-      disposable now and permanent once the eval set is read at scale
-- [ ] `is_stale` compares model, effort and prompt version — not the hash,
+- [x] `effort` and `prompt_hash` on the record beside model and prompt
+      version. Required rather than optional, which the 25 machine claims
+      already written paid for: they were deleted rather than re-derived,
+      since an optional provenance field is one every reader branches on
+      forever and a partly-known configuration compares with nothing. The
+      ambiguity was disposable then and is permanent once the eval set is
+      read at scale
+- [x] `is_stale` compares model, effort and prompt version — not the hash,
       which would re-derive the backlog for a reflowed sentence
 - [ ] `score` stores what it reads, and reads only what it has no reading
       for at this configuration. Scoring is already a pure function over two

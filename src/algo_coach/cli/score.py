@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from algo_coach.claims import MODEL, PROMPT_VERSION, Score, score_backlog
+from algo_coach.claims import EFFORT, MODEL, PROMPT_VERSION, Score, score_backlog
 from algo_coach.cli.client import client
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
@@ -21,7 +21,7 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         parser.exit(1, f"score: nothing hand-claimed to score against for {args.user}\n")
 
     share = result.exact / result.scored
-    print(f"{MODEL}, prompt {PROMPT_VERSION}")
+    print(f"{MODEL}, effort {EFFORT}, prompt {PROMPT_VERSION}")
     print(f"{result.exact}/{result.scored} exact ({share:.0%})\n")
     print(render(result))
 

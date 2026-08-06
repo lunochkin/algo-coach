@@ -1,9 +1,9 @@
 import pytest
-from helpers import FakeClient, Verdict, attempt, seed_problem
+from helpers import FakeClient, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach.claims import score_backlog
 from algo_coach.log import AttemptLog
-from algo_coach.mint import classifier_claim, user_claim
+from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
 
 
@@ -55,7 +55,7 @@ def test_a_machine_claim_is_not_ground_truth(tmp_path):
     seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-tags"))
-    log.append_claim(classifier_claim("a1", ["greedy"], model="a-model", prompt_version="1"))
+    log.append_claim(machine_claim("a1", ["greedy"]))
 
     client = FakeClient.answering()
     result = run(client, log)

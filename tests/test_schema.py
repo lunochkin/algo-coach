@@ -139,21 +139,44 @@ def make_claim(source: ClaimSource, **overrides) -> TechniqueClaim:
     return TechniqueClaim.model_validate(fields)
 
 
+PROVENANCE = {
+    "model": "test-model",
+    "effort": "medium",
+    "prompt_version": "v0",
+    "prompt_hash": "0123456789ab",
+}
+
+
 def test_classifier_claim_records_what_produced_it():
-    claim = make_claim(ClaimSource.CLASSIFIER, model="test-model", prompt_version="v0")
+    claim = make_claim(ClaimSource.CLASSIFIER, **PROVENANCE)
 
-    assert (claim.model, claim.prompt_version) == ("test-model", "v0")
+    assert {field: getattr(claim, field) for field in PROVENANCE} == PROVENANCE
 
 
-def test_classifier_claim_without_a_version_is_rejected():
+def test_classifier_claim_without_any_provenance_is_rejected():
     """Re-deriving machine claims means knowing which ones are stale."""
     with pytest.raises(ValidationError):
         make_claim(ClaimSource.CLASSIFIER)
 
 
-def test_user_claim_carries_no_version():
-    with pytest.raises(ValidationError):
-        make_claim(ClaimSource.USER, model="test-model", prompt_version="v0")
+@pytest.mark.parametrize("missing", PROVENANCE)
+def test_classifier_claim_needs_every_field_that_produced_it(missing):
+    """All four or none. A reading whose configuration is partly unknown
+    cannot be compared with one whose configuration is known, and a reader
+    would branch on the absence forever."""
+    with pytest.raises(ValidationError, match=missing):
+        make_claim(
+            ClaimSource.CLASSIFIER,
+            **{field: value for field, value in PROVENANCE.items() if field != missing},
+        )
+
+
+@pytest.mark.parametrize("field", PROVENANCE)
+def test_user_claim_carries_no_provenance(field):
+    """Nothing re-derives a user's claim, so naming a model would name one
+    that never touched it."""
+    with pytest.raises(ValidationError, match=field):
+        make_claim(ClaimSource.USER, **{field: PROVENANCE[field]})
 
 
 @pytest.mark.parametrize("code", ["", "  ", "../evil", "a/b", "Foo", "-leading-dash"])

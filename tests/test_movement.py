@@ -1,7 +1,6 @@
-from helpers import attempt, seed_problem
+from helpers import attempt, machine_claim, seed_problem
 
 from algo_coach.board import movement
-from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
 
 
@@ -10,7 +9,7 @@ def problems(root):
 
 
 def claim(attempt_id: str, *techniques: str):
-    return classifier_claim(attempt_id, list(techniques), model="a-model", prompt_version="1")
+    return machine_claim(attempt_id, list(techniques))
 
 
 def rows(result):

@@ -1,13 +1,19 @@
 from datetime import timedelta
 
 import pytest
-from helpers import T0, FakeClient, Verdict, attempt, seed_problem
+from helpers import T0, FakeClient, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach import cli
-from algo_coach.claims import MODEL, PROMPT_VERSION, ClassifierError, classify_backlog
+from algo_coach.claims import (
+    EFFORT,
+    MODEL,
+    PROMPT_HASH,
+    PROMPT_VERSION,
+    ClassifierError,
+    classify_backlog,
+)
 from algo_coach.claims.run import ABORT_AFTER, Progress
 from algo_coach.log import AttemptLog
-from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import ClaimSource, TechniqueClaim
 from algo_coach.techniques import standing_claims
@@ -247,35 +253,74 @@ def test_progress_counts_only_what_the_run_asks_about(backlog):
     assert [(p.index, p.total) for p in seen] == [(1, 1)]
 
 
-def machine_claim(log, attempt_id, *, model=MODEL, prompt_version=PROMPT_VERSION):
+def store_claim(log, attempt_id, **configuration):
+    """A stored machine claim at this classifier's configuration unless a test
+    names the field it differs in."""
     log.append_claim(
-        classifier_claim(attempt_id, ["sorting"], model=model, prompt_version=prompt_version)
+        machine_claim(
+            attempt_id,
+            ["sorting"],
+            **{
+                "model": MODEL,
+                "effort": EFFORT,
+                "prompt_version": PROMPT_VERSION,
+                "prompt_hash": PROMPT_HASH,
+            }
+            | configuration,
+        )
     )
 
 
 def test_a_claim_from_an_older_prompt_version_is_re_derived(backlog):
-    machine_claim(backlog, "a1", prompt_version="0")
+    store_claim(backlog, "a1", prompt_version="0")
 
     result = run(answering(Verdict(["greedy"])), backlog, redo=True)
 
     standing = standing_claims(backlog.claims())["a1"]
     assert standing.techniques == ["greedy"]
-    assert (standing.model, standing.prompt_version) == (MODEL, PROMPT_VERSION)
+    assert (standing.model, standing.effort, standing.prompt_version) == (
+        MODEL,
+        EFFORT,
+        PROMPT_VERSION,
+    )
+    assert standing.prompt_hash == PROMPT_HASH
     assert (result.redone, result.classified) == (1, 0)
 
 
 def test_a_claim_from_another_model_is_re_derived(backlog):
-    machine_claim(backlog, "a1", model="an-older-model")
+    store_claim(backlog, "a1", model="an-older-model")
 
     result = run(answering(Verdict(["greedy"])), backlog, redo=True)
 
     assert result.redone == 1
 
 
+def test_a_claim_from_another_effort_is_re_derived(backlog):
+    """How hard the model was asked to think decides the reading, so it is a
+    configuration of its own rather than something folded into the version."""
+    store_claim(backlog, "a1", effort="low")
+
+    result = run(answering(Verdict(["greedy"])), backlog, redo=True)
+
+    assert result.redone == 1
+
+
+def test_a_claim_differing_only_in_prompt_hash_is_not_re_derived(backlog):
+    """The hash marks nothing. It is the mechanical fact of the text, and a
+    reflowed sentence must not cost a call per attempt in the backlog — only
+    the author's version bump says the reading changed."""
+    store_claim(backlog, "a1", prompt_hash="ffffffffffff")
+    client = answering()
+
+    result = run(client, backlog, redo=True)
+
+    assert (result.redone, client.messages.calls) == (0, [])
+
+
 def test_a_claim_from_this_classifier_is_never_re_derived(backlog):
     """It would ask the same question of the same model and pay for the same
     answer."""
-    machine_claim(backlog, "a1")
+    store_claim(backlog, "a1")
     client = answering()
 
     result = run(client, backlog, redo=True)
@@ -285,7 +330,7 @@ def test_a_claim_from_this_classifier_is_never_re_derived(backlog):
 
 def test_a_stale_claim_is_left_alone_without_the_flag(backlog):
     """A re-derivation costs a call per attempt, so it is asked for."""
-    machine_claim(backlog, "a1", prompt_version="0")
+    store_claim(backlog, "a1", prompt_version="0")
     client = answering()
 
     result = run(client, backlog)
@@ -314,7 +359,7 @@ def test_a_user_claim_is_never_stale(backlog):
 def test_a_re_derivation_supersedes_rather_than_rewrites(backlog):
     """The log is append-only: the older claim stays in it and stops being
     read."""
-    machine_claim(backlog, "a1", prompt_version="0")
+    store_claim(backlog, "a1", prompt_version="0")
 
     run(answering(Verdict(["greedy"])), backlog, redo=True)
 
@@ -326,7 +371,7 @@ def test_a_re_derivation_supersedes_rather_than_rewrites(backlog):
 def test_an_unchanged_verdict_is_still_written(backlog):
     """The record names the classifier that reached it, so an unwritten
     agreement would stay stale and be paid for on every later run."""
-    machine_claim(backlog, "a1", prompt_version="0")
+    store_claim(backlog, "a1", prompt_version="0")
 
     run(answering(Verdict(["sorting"])), backlog, redo=True)
     result = run(answering(), backlog, redo=True)
@@ -342,7 +387,7 @@ def test_unclaimed_attempts_are_claimed_before_stale_ones(tmp_path):
     log = AttemptLog(root)
     log.append_attempt(attempt("unclaimed", "two-tags", finished_at=T0))
     log.append_attempt(attempt("stale", "two-tags", finished_at=T0 + timedelta(days=1)))
-    machine_claim(log, "stale", prompt_version="0")
+    store_claim(log, "stale", prompt_version="0")
 
     run(answering(Verdict(["greedy"])), log, limit=1, redo=True)
 
@@ -352,7 +397,7 @@ def test_unclaimed_attempts_are_claimed_before_stale_ones(tmp_path):
 def test_naming_no_candidate_leaves_the_older_claim_standing(backlog):
     """A claim cannot say 'none of these', and the stale one answers the
     attempt until something replaces it."""
-    machine_claim(backlog, "a1", prompt_version="0")
+    store_claim(backlog, "a1", prompt_version="0")
 
     result = run(answering(Verdict([])), backlog, redo=True)
 

@@ -32,10 +32,19 @@ def user_claim(attempt_id: str, techniques: list[str]) -> TechniqueClaim:
 
 
 def classifier_claim(
-    attempt_id: str, techniques: list[str], *, model: str, prompt_version: str
+    attempt_id: str,
+    techniques: list[str],
+    *,
+    model: str,
+    effort: str,
+    prompt_version: str,
+    prompt_hash: str,
 ) -> TechniqueClaim:
     """A claim a model made. It names what produced it, since a better
     classifier can recompute it and a user's claim cannot be recomputed at all.
+
+    All four, never a subset: a reading whose configuration is partly unknown
+    cannot be compared with one whose configuration is known.
 
     Membership is checked here because this is the only write path that could
     introduce an unrecognised code — every other one draws on the tag mapping,
@@ -53,7 +62,9 @@ def classifier_claim(
         techniques=techniques,
         source=ClaimSource.CLASSIFIER,
         model=model,
+        effort=effort,
         prompt_version=prompt_version,
+        prompt_hash=prompt_hash,
     )
 
 

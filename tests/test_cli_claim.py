@@ -131,7 +131,14 @@ def test_a_machine_claimed_attempt_is_still_offered(claim_root, monkeypatch, cap
     that emptied as the classifier ran would freeze the eval set at whatever
     was labelled before the first run."""
     claim_root.append_claim(
-        classifier_claim("a1", ["sorting"], model="a-model", prompt_version="1")
+        classifier_claim(
+            "a1",
+            ["sorting"],
+            model="a-model",
+            effort="medium",
+            prompt_version="1",
+            prompt_hash="0123456789ab",
+        )
     )
 
     run(monkeypatch, ["1"])
@@ -145,7 +152,14 @@ def test_the_machine_verdict_is_never_shown(claim_root, monkeypatch, capsys):
     it: a plausible wrong call gets waved through. The question is asked from
     the code and the tags, as it would be with nothing claimed."""
     claim_root.append_claim(
-        classifier_claim("a1", ["sorting"], model="a-model", prompt_version="1")
+        classifier_claim(
+            "a1",
+            ["sorting"],
+            model="a-model",
+            effort="medium",
+            prompt_version="1",
+            prompt_hash="0123456789ab",
+        )
     )
 
     run(monkeypatch, ["1"])

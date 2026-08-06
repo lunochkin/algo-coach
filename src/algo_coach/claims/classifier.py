@@ -7,12 +7,14 @@ rather than improve on it.
 
 import json
 from collections.abc import Sequence
+from hashlib import sha256
 from typing import Any
 
 MODEL = "claude-opus-5"
 EFFORT = "medium"
-# Bumped whenever the prompt, the schema or the effort changes: a machine claim
-# names what produced it so a better classifier can find the stale ones.
+# Bumped when the reading changes meaningfully — the author's statement, not a
+# number to be greater than. The effort is recorded beside it rather than
+# folded into it, so a bump says the prompt changed and nothing else.
 PROMPT_VERSION = "1"
 
 SYSTEM = """You name which techniques a solution used.
@@ -28,6 +30,14 @@ plus an undo. Greedy is why a choice is correct, not a construct. A technique
 counts when it is what makes the solution work, not when it is incidental.
 
 If the code used none of the candidates, name none of them."""
+
+# The mechanical fact of the instructions sent, marking nothing. A forgotten
+# version bump is otherwise invisible forever; with both, two hashes under one
+# version say so. Twelve hex characters of sha256 over SYSTEM: only ever
+# compared for equality, and the candidates and the code vary per attempt, so
+# hashing the rendered prompt would identify a call rather than a
+# configuration.
+PROMPT_HASH = sha256(SYSTEM.encode()).hexdigest()[:12]
 
 
 class ClassifierError(Exception):
