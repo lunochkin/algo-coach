@@ -6,10 +6,11 @@ from helpers import T0, FakeClient, Verdict, attempt, seed_problem
 from algo_coach import cli
 from algo_coach.claims import MODEL, PROMPT_VERSION, ClassifierError, classify_backlog
 from algo_coach.claims.run import ABORT_AFTER, Progress
-from algo_coach.log import AttemptLog, latest_by_attempt
+from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import ClaimSource, TechniqueClaim
+from algo_coach.techniques import standing_claims
 
 answering = FakeClient.answering
 
@@ -257,7 +258,7 @@ def test_a_claim_from_an_older_prompt_version_is_re_derived(backlog):
 
     result = run(answering(Verdict(["greedy"])), backlog, redo=True)
 
-    standing = latest_by_attempt(backlog.claims())["a1"]
+    standing = standing_claims(backlog.claims())["a1"]
     assert standing.techniques == ["greedy"]
     assert (standing.model, standing.prompt_version) == (MODEL, PROMPT_VERSION)
     assert (result.redone, result.classified) == (1, 0)
@@ -355,7 +356,7 @@ def test_naming_no_candidate_leaves_the_older_claim_standing(backlog):
 
     result = run(answering(Verdict([])), backlog, redo=True)
 
-    standing = latest_by_attempt(backlog.claims())["a1"]
+    standing = standing_claims(backlog.claims())["a1"]
     assert (standing.prompt_version, result.undecided, result.redone) == ("0", 1, 0)
 
 

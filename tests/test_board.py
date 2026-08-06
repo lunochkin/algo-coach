@@ -14,7 +14,7 @@ from algo_coach.schema import (
     SelfLabel,
     TechniqueClaim,
 )
-from algo_coach.techniques import map_tags
+from algo_coach.techniques import map_tags, standing_claims
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -163,7 +163,7 @@ def test_an_attempt_counts_once_in_every_technique_it_names():
 
 
 def test_a_claim_moves_an_attempt_to_the_technique_it_claims():
-    claims = latest_by_attempt([make_claim(["two-pointers"])])
+    claims = standing_claims([make_claim(["two-pointers"])])
 
     rows = per_technique([make_attempt("a1")], index(GREEDY), claims, {})
 
@@ -189,7 +189,7 @@ def test_rows_are_ordered_by_technique_code():
 
 def test_a_technique_only_a_claim_names_still_gets_a_row():
     """The vocabulary is wider than what the tags of the log happen to reach."""
-    claims = latest_by_attempt([make_claim(["binary-search"], attempt_id="a2")])
+    claims = standing_claims([make_claim(["binary-search"], attempt_id="a2")])
     attempts = [make_attempt("a1"), make_attempt("a2")]
 
     rows = per_technique(attempts, index(GREEDY), claims, {})
@@ -219,7 +219,7 @@ def test_ungrouped_names_the_attempts_no_row_reached():
 def test_an_attempt_a_claim_rescues_is_not_ungrouped():
     """Its problem maps to nothing, but the claim says what it exercised."""
     problem = make_problem("unmapped", ["Brainteaser"])
-    claims = latest_by_attempt([make_claim(["greedy"])])
+    claims = standing_claims([make_claim(["greedy"])])
 
     assert ungrouped([make_attempt("a1", problem_id="unmapped")], index(problem), claims) == []
 

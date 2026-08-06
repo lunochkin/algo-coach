@@ -185,11 +185,13 @@ nothing checks sends practice somewhere unverified for weeks.
 
 ### Storing what the classifier read
 
-- [ ] Resolve a claim user-first rather than latest-wins, so a machine claim
+- [x] Resolve a claim user-first rather than latest-wins, so a machine claim
       lands on a hand-claimed attempt without superseding it. No attempt
       carries claims from both writers today, so the rule changes no number
       the board shows — which is the moment to change it, while the two sets
-      are still disjoint
+      are still disjoint. `standing_claims` beside `resolve_techniques`,
+      calling `latest_by_attempt` once per writer: in what order is the log's
+      question, who wins is the record's
 - [ ] `effort` and `prompt_hash` on the record beside model and prompt
       version, all optional and additive. The 25 machine claims already
       written carry neither, and `--redo` replaces them: the ambiguity is

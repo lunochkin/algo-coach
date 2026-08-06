@@ -6,8 +6,9 @@ from helpers import FakeClient, Verdict, attempt, seed_problem
 from algo_coach import cli
 from algo_coach.claims import MODEL, PROMPT_VERSION
 from algo_coach.claims.run import ABORT_AFTER
-from algo_coach.log import AttemptLog, latest_by_attempt
+from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim
+from algo_coach.techniques import standing_claims
 
 CLIENT = import_module("algo_coach.cli.client")
 
@@ -95,7 +96,7 @@ def test_redo_re_derives_a_stale_machine_claim(root, monkeypatch, capsys):
 
     run(monkeypatch, FakeClient.answering(Verdict(["greedy"])), "--redo")
 
-    standing = latest_by_attempt(AttemptLog(root).claims())["a1"]
+    standing = standing_claims(AttemptLog(root).claims())["a1"]
     assert (standing.techniques, standing.prompt_version) == (["greedy"], PROMPT_VERSION)
     assert "1 stale machine claim(s) re-derived" in capsys.readouterr().out
 

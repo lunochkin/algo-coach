@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from algo_coach import cli
-from algo_coach.log import AttemptLog, latest_by_attempt
+from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
@@ -14,7 +14,7 @@ from algo_coach.schema import (
     ProblemOwner,
     TechniqueClaim,
 )
-from algo_coach.techniques import map_tags
+from algo_coach.techniques import map_tags, standing_claims
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -136,7 +136,7 @@ def test_a_machine_claimed_attempt_is_still_offered(claim_root, monkeypatch, cap
 
     run(monkeypatch, ["1"])
 
-    standing = latest_by_attempt(claim_root.claims())["a1"]
+    standing = standing_claims(claim_root.claims())["a1"]
     assert (standing.techniques, standing.source) == (["greedy"], ClaimSource.USER)
 
 

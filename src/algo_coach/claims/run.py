@@ -13,9 +13,10 @@ from pydantic import BaseModel, Field
 from algo_coach.claims.classifier import MODEL, PROMPT_VERSION, classify
 from algo_coach.claims.sample import eligible, recency
 from algo_coach.claims.stale import is_stale
-from algo_coach.log import AttemptLog, latest_by_attempt
+from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim
 from algo_coach.schema import Attempt, Problem
+from algo_coach.techniques import standing_claims
 
 # Consecutive failures that mean the run is broken rather than unlucky. A
 # refusal or a rate limit hits one attempt; a rejected key or a spent quota
@@ -76,10 +77,12 @@ def classify_backlog(
     stopped instead of paying for it twice.
 
     Unclaimed before stale, since a first claim buys a number the board does
-    not have and a re-derivation only revises one it does. A user's claim is
-    neither: it is what the classifier is corrected by.
+    not have and a re-derivation only revises one it does. A hand-claimed
+    attempt is neither, and is skipped as an economy rather than as what
+    protects the eval — a verdict there could never stand, since the user's
+    claim wins on read. What protects the eval is the reader.
     """
-    standing = latest_by_attempt(log.claims())
+    standing = standing_claims(log.claims())
     candidates = sorted(
         eligible(log.attempts(), problems, user_id=user_id, technique=technique),
         key=recency,

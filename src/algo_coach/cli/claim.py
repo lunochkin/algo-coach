@@ -4,9 +4,10 @@ from pathlib import Path
 from algo_coach.claims import claimable
 from algo_coach.cli.display import verdict
 from algo_coach.cli.prompts import ask_choice, numbered
-from algo_coach.log import AttemptLog, latest_by_attempt
+from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
+from algo_coach.techniques import standing_claims
 
 
 def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -18,7 +19,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     pool = claimable(
         log.attempts(),
         problems,
-        latest_by_attempt(log.claims()),
+        standing_claims(log.claims()),
         user_id=args.user,
         technique=args.technique,
         seed=args.seed,

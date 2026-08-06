@@ -12,8 +12,9 @@ from pydantic import BaseModel, Field
 from algo_coach.claims.classifier import classify
 from algo_coach.claims.run import Failed
 from algo_coach.claims.sample import eligible, recency
-from algo_coach.log import AttemptLog, latest_by_attempt
+from algo_coach.log import AttemptLog
 from algo_coach.schema import ClaimSource, Problem
+from algo_coach.techniques import standing_claims
 
 
 class TechniqueScore(BaseModel):
@@ -104,11 +105,12 @@ def score_backlog(
 ) -> Score:
     """Classify the hand-claimed attempts and score the verdicts.
 
-    Nothing is written. A machine claim landing on an attempt the user claimed
-    would be the later record, and the latest wins on read — the classifier
-    would supersede the evidence it is being measured against.
+    Nothing is written yet. Storing a reading is safe now that the user's claim
+    wins on read — what it buys is an eval that is a dataset rather than a run,
+    where a second configuration pays only for what it has not read. That is
+    the next step, not this one, so a run still reports and forgets.
     """
-    claimed = latest_by_attempt(log.claims())
+    claimed = standing_claims(log.claims())
     hand_claimed = [
         attempt
         for attempt in sorted(

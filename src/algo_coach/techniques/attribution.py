@@ -1,6 +1,28 @@
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 
-from algo_coach.schema import Attempt, Problem, TechniqueClaim
+from algo_coach.log import latest_by_attempt
+from algo_coach.schema import Attempt, ClaimSource, Problem, TechniqueClaim
+
+
+def standing_claims(claims: Iterable[TechniqueClaim]) -> dict[str, TechniqueClaim]:
+    """The claim that stands for each attempt, keyed by attempt id.
+
+    The user's own if they made one, however late the machine's is; otherwise
+    the latest of the classifier's. Latest alone would make the two writers
+    race, and the classifier writes far more often — ground truth would last
+    until something re-derived over it.
+
+    Which is what makes a machine claim safe to store on an attempt the user
+    has claimed: it is a reading, not a candidate. It stays in the log and is
+    scored, and never reaches the board.
+
+    `latest_by_attempt` orders within a writer and knows nothing of sources —
+    in what order is the log's question, who wins is this record's.
+    """
+    claims = list(claims)
+    return latest_by_attempt(claims) | latest_by_attempt(
+        [claim for claim in claims if claim.source is ClaimSource.USER]
+    )
 
 
 def resolve_techniques(
@@ -9,7 +31,7 @@ def resolve_techniques(
     """Which techniques an attempt exercised: its claim if one exists,
     otherwise the techniques of the problem it answers.
 
-    `claims` is keyed by attempt id — `latest_by_attempt` over the log.
+    `claims` is keyed by attempt id — `standing_claims` over the log.
 
     Derived on read and never stored, so re-deriving the tag mapping reaches
     every unclaimed attempt. Sorted and deduplicated, as `map_tags` is, so

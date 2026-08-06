@@ -9,6 +9,7 @@ from algo_coach.log import AttemptLog, appeared, latest_by_attempt
 from algo_coach.mint import self_label, user_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Attempt, FailureMode, Problem
+from algo_coach.techniques import standing_claims
 
 
 def drill(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -59,7 +60,7 @@ def pick_technique(
     rows = per_technique(
         attempts,
         {problem.id: problem for problem in stored},
-        latest_by_attempt(log.claims()),
+        standing_claims(log.claims()),
         latest_by_attempt(log.self_labels()),
     )
     if not rows:
