@@ -5,9 +5,9 @@ import pytest
 from helpers import T0, FakeClient, Verdict, attempt, seed_problem
 
 from algo_coach import cli
-from algo_coach.claims import MODEL
+from algo_coach.claims import EFFORT, MODEL, PROMPT_HASH, PROMPT_VERSION
 from algo_coach.log import AttemptLog
-from algo_coach.mint import user_claim
+from algo_coach.mint import classifier_claim, user_claim
 
 CLIENT = import_module("algo_coach.cli.client")
 
@@ -17,6 +17,17 @@ def run(monkeypatch, client: FakeClient, *argv: str) -> None:
     monkeypatch.setattr(CLIENT, "Anthropic", lambda: client)
     monkeypatch.setattr("sys.argv", ["algo-coach", "score", "--user", "u1", *argv])
     cli.main()
+
+
+def reading(attempt_id: str, techniques: list[str], *, model: str = MODEL):
+    return classifier_claim(
+        attempt_id,
+        techniques,
+        model=model,
+        effort=EFFORT,
+        prompt_version=PROMPT_VERSION,
+        prompt_hash=PROMPT_HASH,
+    )
 
 
 @pytest.fixture
@@ -82,6 +93,95 @@ def test_the_command_says_how_many_named_no_candidate(hand_claimed, monkeypatch,
     out = capsys.readouterr().out
     assert "1/1 exact (100%)" in out
     assert "1 named no candidate" in out
+
+
+def test_the_named_classifier_is_the_one_scored(hand_claimed, monkeypatch, capsys):
+    run(monkeypatch, FakeClient.answering(Verdict(["greedy"])), "--model", "a-cheap-model")
+
+    out = capsys.readouterr().out
+    assert "a-cheap-model" in out
+    assert "1/1 exact (100%)" in out
+
+
+def test_the_effort_attaches_to_the_model_before_it(hand_claimed, monkeypatch, capsys):
+    """Two configurations of one model, told apart by what each was asked at —
+    which is lost the moment the flags are collected separately."""
+    run(
+        monkeypatch,
+        FakeClient.answering(Verdict(["greedy"]), Verdict(["sorting"])),
+        *("--model", "a-model", "--effort", "low"),
+        *("--model", "a-model", "--effort", "high"),
+    )
+
+    out = capsys.readouterr().out
+    assert "a-model/low" in out
+    assert "a-model/high" in out
+
+
+def test_the_same_configuration_twice_is_refused(hand_claimed, monkeypatch, capsys):
+    """It would compare with itself, and its column would say what the one
+    beside it already says."""
+    with pytest.raises(SystemExit) as exit_info:
+        run(monkeypatch, FakeClient.answering(), "--model", "a-model", "--model", "a-model")
+
+    assert exit_info.value.code == 2
+    assert "named twice" in capsys.readouterr().err
+
+
+def test_two_efforts_for_one_model_is_refused(hand_claimed, monkeypatch, capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        run(monkeypatch, FakeClient.answering(), *("--effort", "low", "--effort", "high"))
+
+    assert exit_info.value.code == 2
+    assert "two --effort" in capsys.readouterr().err
+
+
+def test_the_shares_are_over_what_both_read(hand_claimed, monkeypatch, capsys):
+    """Two columns under one denominator: a cheaper classifier measured on its
+    own smaller sample would read as the better one."""
+    run(
+        monkeypatch,
+        FakeClient.answering(Verdict(["greedy"]), Verdict(["sorting"])),
+        *("--model", MODEL, "--model", "a-cheap-model"),
+    )
+
+    out = capsys.readouterr().out
+    assert "1 of 1 hand-claimed attempts read by all" in out
+    assert "1/1 (100%)" in out
+    assert "0/1 (0%)" in out
+    assert f"{MODEL}: greedy" in out
+    assert "a-cheap-model: sorting" in out
+
+
+def test_a_stored_run_makes_no_call_and_needs_no_key(hand_claimed, monkeypatch, capsys):
+    """What makes it the reproducible mode: it can be run anywhere, and twice."""
+    hand_claimed.append_claim(reading("a1", ["greedy"]))
+    for name in CLIENT.CREDENTIALS:
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setattr("sys.argv", ["algo-coach", "score", "--user", "u1", "--stored"])
+
+    cli.main()
+
+    assert "1/1 exact (100%)" in capsys.readouterr().out
+
+
+def test_a_stored_run_with_a_limit_is_refused(hand_claimed, monkeypatch, capsys):
+    """A cap on a run that pays for nothing states two different things."""
+    with pytest.raises(SystemExit) as exit_info:
+        run(monkeypatch, FakeClient.answering(), "--stored", "--limit", "5")
+
+    assert exit_info.value.code == 2
+    assert "--stored with --limit" in capsys.readouterr().err
+
+
+def test_a_stored_run_over_nothing_read_exits_nonzero(hand_claimed, monkeypatch, capsys):
+    """Ground truth exists and no reading of it does — told apart from having
+    no ground truth at all, since only one of them is fixed by reading."""
+    with pytest.raises(SystemExit) as exit_info:
+        run(monkeypatch, FakeClient.answering(), "--stored")
+
+    assert exit_info.value.code == 1
+    assert "nothing every configuration named has read" in capsys.readouterr().err
 
 
 def test_nothing_hand_claimed_exits_nonzero(tmp_path, monkeypatch, capsys):

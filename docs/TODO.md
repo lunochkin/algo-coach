@@ -210,9 +210,18 @@ nothing checks sends practice somewhere unverified for weeks.
       forgotten bump says. Two decisions came with it: the eval set collapses
       to one attempt per problem, which the doc said and the code did not,
       and an undecided verdict is counted rather than scored
-- [ ] `score --model`, over the attempts both configurations read. Comparing
+- [x] `score --model`, over the attempts both configurations read. Comparing
       each one's own sample scores against a different denominator, and the
-      number would read as quality
+      number would read as quality. Repeatable, and one command: a comparison
+      of one is the ordinary score, since intersecting one set is that set, so
+      only the rendering branches. Each is scored against the hand claims and
+      never against another — the column beside it buys the shared denominator.
+      Three decisions came with it: a `Configuration` value object, since a
+      lookup key threaded as four keywords is one a caller can get half right;
+      `--effort` alternating with `--model` so which followed which survives,
+      and no `--prompt-version`, which would relabel the same prompt text; and
+      `--stored`, which makes no call and asks for no credentials, so a
+      comparison is reproducible once the reads are paid for
 - [ ] Decide whether re-reading at a configuration already read is available
       on purpose — the same question asked twice says whether one
       configuration answers it the same way

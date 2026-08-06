@@ -16,7 +16,7 @@ from algo_coach.cli.classify import classify
 from algo_coach.cli.drill import drill
 from algo_coach.cli.movement import moved
 from algo_coach.cli.push import BadLine, push
-from algo_coach.cli.score import score
+from algo_coach.cli.score import Named, score
 
 DATA_ROOT = Path("data")
 
@@ -92,7 +92,31 @@ def main() -> None:
 
     score_parser = _command(sub, "score", "the classifier against the user's own claims")
     score_parser.add_argument(
-        "--limit", type=int, help="how many attempts to read; every unread one otherwise"
+        "--limit",
+        type=int,
+        help="how many attempts to read per classifier; every unread one otherwise",
+    )
+    # One destination for both, so which effort followed which model survives.
+    # Named more than once, they are scored side by side over what all of them
+    # read; named not at all, the built-in classifier is the one scored.
+    score_parser.add_argument(
+        "--model",
+        dest="named",
+        action=Named,
+        metavar="MODEL",
+        help="a classifier to score; repeatable",
+    )
+    score_parser.add_argument(
+        "--effort",
+        dest="named",
+        action=Named,
+        metavar="EFFORT",
+        help="the effort of the --model before it",
+    )
+    score_parser.add_argument(
+        "--stored",
+        action="store_true",
+        help="score only readings already stored, making no call",
     )
     _user_argument(score_parser)
 

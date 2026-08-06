@@ -7,11 +7,12 @@ paid to read. A user's claim names nothing, and nothing re-derives it.
 
 from collections.abc import Iterable
 
+from algo_coach.claims.classifier import Configuration
 from algo_coach.log import latest_by_attempt
 from algo_coach.schema import ClaimSource, TechniqueClaim
 
 
-def is_stale(claim: TechniqueClaim, *, model: str, effort: str, prompt_version: str) -> bool:
+def is_stale(claim: TechniqueClaim, configuration: Configuration) -> bool:
     """Whether a claim came from a different classifier than the one running.
 
     Compared whole rather than ordered: a version is an identity, not a number
@@ -28,12 +29,10 @@ def is_stale(claim: TechniqueClaim, *, model: str, effort: str, prompt_version: 
     if claim.source is not ClaimSource.CLASSIFIER:
         return False
 
-    return not at_configuration(claim, model=model, effort=effort, prompt_version=prompt_version)
+    return not at_configuration(claim, configuration)
 
 
-def at_configuration(
-    claim: TechniqueClaim, *, model: str, effort: str, prompt_version: str
-) -> bool:
+def at_configuration(claim: TechniqueClaim, configuration: Configuration) -> bool:
     """Whether this classifier produced the claim.
 
     The positive form of the same comparison. `not is_stale` is not it: it
@@ -43,11 +42,15 @@ def at_configuration(
     """
     if claim.source is not ClaimSource.CLASSIFIER:
         return False
-    return (claim.model, claim.effort, claim.prompt_version) == (model, effort, prompt_version)
+    return (claim.model, claim.effort, claim.prompt_version) == (
+        configuration.model,
+        configuration.effort,
+        configuration.prompt_version,
+    )
 
 
 def readings_at(
-    claims: Iterable[TechniqueClaim], *, model: str, effort: str, prompt_version: str
+    claims: Iterable[TechniqueClaim], configuration: Configuration
 ) -> dict[str, TechniqueClaim]:
     """The claim this configuration already read each attempt as.
 
@@ -55,8 +58,4 @@ def readings_at(
     on purpose is a rollback, so an attempt's latest machine claim can be
     another configuration's while this one's reading sits under it.
     """
-    return latest_by_attempt([
-        claim
-        for claim in claims
-        if at_configuration(claim, model=model, effort=effort, prompt_version=prompt_version)
-    ])
+    return latest_by_attempt([claim for claim in claims if at_configuration(claim, configuration)])

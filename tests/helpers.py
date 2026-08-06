@@ -5,12 +5,17 @@ import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
+from algo_coach.claims import Configuration
 from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Attempt, AttemptOrigin, Problem, ProblemOwner, TechniqueClaim
 from algo_coach.techniques import map_tags
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
+
+# The configuration `machine_claim` defaults to, so a test can look a claim up
+# without restating what produced it.
+CONFIGURATION = Configuration(model="a-model", effort="medium", prompt_version="1")
 
 
 def machine_claim(

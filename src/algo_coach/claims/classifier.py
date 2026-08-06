@@ -10,6 +10,8 @@ from collections.abc import Sequence
 from hashlib import sha256
 from typing import Any
 
+from pydantic import BaseModel
+
 MODEL = "claude-opus-5"
 EFFORT = "medium"
 # Bumped when the reading changes meaningfully — the author's statement, not a
@@ -40,11 +42,30 @@ If the code used none of the candidates, name none of them."""
 PROMPT_HASH = sha256(SYSTEM.encode()).hexdigest()[:12]
 
 
+class Configuration(BaseModel, frozen=True):
+    """Which classifier a reading came from, and the key it is found under.
+
+    Three fields, not the record's four: the hash is this build's `SYSTEM` text
+    rather than something a caller selects, so it is stamped on the write path
+    and keyed off nowhere. Frozen because it is an identity — compared whole,
+    never ordered, so a rollback is naming the earlier one.
+    """
+
+    model: str = MODEL
+    effort: str = EFFORT
+    prompt_version: str = PROMPT_VERSION
+
+
+DEFAULT = Configuration()
+
+
 class ClassifierError(Exception):
     """The model returned no verdict — a refusal, or an answer cut short."""
 
 
-def classify(client: Any, candidates: Sequence[str], code: str) -> list[str]:
+def classify(
+    client: Any, candidates: Sequence[str], code: str, *, configuration: Configuration = DEFAULT
+) -> list[str]:
     """The techniques a solution used, chosen from the problem's own tags.
 
     The candidates appear twice, doing different jobs. The response schema
@@ -66,11 +87,11 @@ def classify(client: Any, candidates: Sequence[str], code: str) -> list[str]:
         return list(candidates)
 
     response = client.messages.create(
-        model=MODEL,
+        model=configuration.model,
         max_tokens=16000,
         system=SYSTEM,
         output_config={
-            "effort": EFFORT,
+            "effort": configuration.effort,
             "format": {"type": "json_schema", "schema": schema(candidates)},
         },
         messages=[{"role": "user", "content": prompt(candidates, code)}],

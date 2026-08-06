@@ -3,7 +3,15 @@ from datetime import timedelta
 import pytest
 from helpers import T0, FakeClient, Verdict, attempt, machine_claim, seed_problem
 
-from algo_coach.claims import EFFORT, MODEL, PROMPT_HASH, PROMPT_VERSION, score_backlog
+from algo_coach.claims import (
+    DEFAULT,
+    EFFORT,
+    MODEL,
+    PROMPT_HASH,
+    PROMPT_VERSION,
+    Configuration,
+    score_backlog,
+)
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
@@ -53,13 +61,24 @@ def two_problems(tmp_path) -> AttemptLog:
     return log
 
 
-def run(client, log, **kwargs):
+def compare(client, log, **kwargs):
     problems = {problem.id: problem for problem in ProblemStore(log.root).all()}
     return score_backlog(client, log, problems, user_id="u1", **kwargs)
 
 
+def run(client, log, **kwargs):
+    """One configuration's score. A comparison of one is the same code path,
+    so the tests that predate the flag read it unwrapped."""
+    return compare(client, log, **kwargs).scores[0].score
+
+
 def machine_claims(log):
     return [claim for claim in log.claims() if claim.source is ClaimSource.CLASSIFIER]
+
+
+# A second classifier to put beside the built-in one. Cheaper only in the story
+# the tests tell; what matters is that it is another configuration.
+CHEAP = Configuration(model="a-cheap-model")
 
 
 def test_agreement_is_scored_against_the_users_claim(hand_claimed):
@@ -271,3 +290,93 @@ def test_the_limit_caps_the_calls_not_the_score(two_problems):
 
     assert (result.scored, result.exact) == (2, 2)
     assert (result.read, result.reused, len(client.messages.calls)) == (1, 1, 1)
+
+
+def test_a_named_configuration_stores_its_own_provenance(hand_claimed):
+    """A reading names the classifier that reached it, or a later run could not
+    tell whose answer it was reusing."""
+    run(FakeClient.answering(Verdict(["greedy"])), hand_claimed, configurations=(CHEAP,))
+
+    (stored,) = machine_claims(hand_claimed)
+    assert (stored.model, stored.effort, stored.prompt_version) == (
+        CHEAP.model,
+        CHEAP.effort,
+        CHEAP.prompt_version,
+    )
+    # This build's prompt text, not the configuration's: a caller names which
+    # classifier to run, never which prompt was sent.
+    assert stored.prompt_hash == PROMPT_HASH
+
+
+def test_the_shares_are_over_the_attempts_every_configuration_read(two_problems):
+    """A configuration measured on a smaller sample scores against a different
+    denominator, and the number would read as quality."""
+    two_problems.append_claim(reading("a1", ["greedy"]))
+    two_problems.append_claim(reading("a2", ["greedy"]))
+    # The cheap one reads the newest and stops there, so a1 is the built-in
+    # classifier's alone and belongs to neither share.
+    client = FakeClient.answering(Verdict(["sorting"]))
+
+    result = compare(client, two_problems, configurations=(DEFAULT, CHEAP), limit=1)
+
+    assert (result.eval_set, result.common) == (2, 1)
+    assert [scored.score.scored for scored in result.scores] == [1, 1]
+    assert [scored.score.exact for scored in result.scores] == [1, 0]
+
+
+def test_the_limit_caps_the_calls_of_each_configuration(two_problems):
+    """A cap across the run would spend it all on the first classifier and
+    measure the second on nothing."""
+    client = FakeClient.answering(Verdict(["greedy"]), Verdict(["greedy"]))
+
+    result = compare(client, two_problems, configurations=(DEFAULT, CHEAP), limit=1)
+
+    assert [scored.score.read for scored in result.scores] == [1, 1]
+    assert (len(client.messages.calls), result.common) == (2, 1)
+
+
+def test_an_attempt_one_configuration_declined_is_in_neither_denominator(two_problems):
+    """A decline is missing evidence rather than a wrong answer, and a share the
+    other configuration alone was scored on would not be a comparison."""
+    two_problems.append_claim(reading("a1", ["greedy"]))
+    two_problems.append_claim(reading("a2", ["greedy"]))
+    client = FakeClient.answering(Verdict([]), Verdict(["greedy"]))
+
+    result = compare(client, two_problems, configurations=(DEFAULT, CHEAP))
+
+    assert result.common == 1
+    assert [scored.score.scored for scored in result.scores] == [1, 1]
+    assert result.scores[1].score.undecided == 1
+
+
+def test_only_the_attempts_they_answered_differently_are_split(two_problems):
+    """Where they agreed there is nothing to choose between them, however wrong
+    both are — a1 is where reading the code decides which to keep."""
+    two_problems.append_claim(reading("a1", ["sorting"]))
+    two_problems.append_claim(reading("a2", ["sorting"]))
+    client = FakeClient.answering(Verdict(["sorting"]), Verdict(["greedy"]))
+
+    result = compare(client, two_problems, configurations=(DEFAULT, CHEAP))
+
+    assert [split.attempt_id for split in result.splits] == ["a1"]
+    assert result.splits[0].verdicts == [["sorting"], ["greedy"]]
+    assert result.splits[0].user == ["greedy"]
+
+
+def test_one_configuration_is_compared_with_nothing(hand_claimed):
+    """The comparison of one is the ordinary score, so nothing splits and the
+    denominator is what that configuration read."""
+    result = compare(FakeClient.answering(Verdict(["greedy"])), hand_claimed)
+
+    assert (result.common, result.splits) == (1, [])
+    assert result.scores[0].configuration == DEFAULT
+
+
+def test_a_cap_of_no_calls_scores_what_is_already_stored(hand_claimed):
+    """The reproducible run: nothing is paid for, so the client is never
+    reached and need not exist."""
+    hand_claimed.append_claim(reading("a1", ["greedy"]))
+
+    result = compare(None, hand_claimed, limit=0)
+
+    assert (result.common, result.scores[0].score.reused) == (1, 1)

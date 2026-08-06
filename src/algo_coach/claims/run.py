@@ -10,7 +10,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.claims.classifier import EFFORT, MODEL, PROMPT_HASH, PROMPT_VERSION, classify
+from algo_coach.claims.classifier import DEFAULT, PROMPT_HASH, Configuration, classify
 from algo_coach.claims.sample import eligible, recency
 from algo_coach.claims.stale import is_stale
 from algo_coach.log import AttemptLog
@@ -53,15 +53,27 @@ class ClassifyResult(BaseModel):
         return self.classified + self.redone
 
 
-def ask(client: Any, log: AttemptLog, attempt: Attempt, problem: Problem) -> list[str]:
+def ask(
+    client: Any,
+    log: AttemptLog,
+    attempt: Attempt,
+    problem: Problem,
+    *,
+    configuration: Configuration = DEFAULT,
+) -> list[str]:
     """Classify one attempt and store the verdict, returning what was named.
 
     An empty verdict is undecided rather than a claim: a claim cannot say "none
     of these", so nothing is written and whatever already answers the attempt
     keeps answering it. Failures are the caller's — a backlog run aborts on a
     broken key and an eval does not.
+
+    The hash is this build's rather than the configuration's: a caller names
+    which classifier to run, never which prompt text it sent.
     """
-    techniques = classify(client, problem.techniques, attempt.code or "")
+    techniques = classify(
+        client, problem.techniques, attempt.code or "", configuration=configuration
+    )
     if techniques:
         # Written even when the verdict is unchanged: the record names the
         # classifier that reached it, so an unwritten agreement would stay
@@ -70,9 +82,9 @@ def ask(client: Any, log: AttemptLog, attempt: Attempt, problem: Problem) -> lis
             classifier_claim(
                 attempt.id,
                 techniques,
-                model=MODEL,
-                effort=EFFORT,
-                prompt_version=PROMPT_VERSION,
+                model=configuration.model,
+                effort=configuration.effort,
+                prompt_version=configuration.prompt_version,
                 prompt_hash=PROMPT_HASH,
             )
         )
@@ -85,6 +97,7 @@ def classify_backlog(
     problems: Mapping[str, Problem],
     *,
     user_id: str,
+    configuration: Configuration = DEFAULT,
     limit: int | None = None,
     technique: str | None = None,
     redo: bool = False,
@@ -119,13 +132,7 @@ def classify_backlog(
         [
             attempt
             for attempt in candidates
-            if attempt.id in standing
-            and is_stale(
-                standing[attempt.id],
-                model=MODEL,
-                effort=EFFORT,
-                prompt_version=PROMPT_VERSION,
-            )
+            if attempt.id in standing and is_stale(standing[attempt.id], configuration)
         ]
         if redo
         else []
@@ -147,7 +154,7 @@ def classify_backlog(
     for index, attempt in enumerate(asking, start=1):
         problem = problems[attempt.problem_id]
         try:
-            techniques = ask(client, log, attempt, problem)
+            techniques = ask(client, log, attempt, problem, configuration=configuration)
         except Exception as exc:
             # Broad on purpose: a refusal, a rate limit or a dropped connection
             # is one attempt's problem, and a backlog run must not lose the

@@ -14,7 +14,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.claims.classifier import EFFORT, MODEL, PROMPT_HASH, PROMPT_VERSION
+from algo_coach.claims.classifier import DEFAULT, PROMPT_HASH, Configuration
 from algo_coach.claims.run import Failed, Progress, ask
 from algo_coach.claims.sample import recency
 from algo_coach.claims.stale import readings_at
@@ -38,19 +38,21 @@ def read(
     problems: Mapping[str, Problem],
     *,
     claims: Sequence[TechniqueClaim],
+    configuration: Configuration = DEFAULT,
     limit: int | None = None,
     on_progress: Callable[[Progress], None] | None = None,
 ) -> ReadResult:
-    """What this classifier reads each attempt as, from the log where it can.
+    """What one classifier reads each attempt as, from the log where it can.
 
     Selection is the caller's: which attempts are worth reading is what the
     next configuration comparison changes, and it is not this loop's question.
 
     `limit` caps the calls, not the attempts — a stored reading is free, so a
     capped run adds to what earlier runs read rather than replacing it. What is
-    still unread is taken newest first, as the backlog run takes it.
+    still unread is taken newest first, as the backlog run takes it. A cap of
+    zero pays for nothing, so `client` is never reached and may be absent.
     """
-    stored = readings_at(claims, model=MODEL, effort=EFFORT, prompt_version=PROMPT_VERSION)
+    stored = readings_at(claims, configuration)
     result = ReadResult()
 
     unread: list[Attempt] = []
@@ -78,7 +80,7 @@ def read(
     for index, attempt in enumerate(asking, start=1):
         problem = problems[attempt.problem_id]
         try:
-            techniques = ask(client, log, attempt, problem)
+            techniques = ask(client, log, attempt, problem, configuration=configuration)
         except Exception as exc:
             # One attempt's problem, as in the backlog run: an eval that dies
             # on the first refusal reports nothing about the rest.

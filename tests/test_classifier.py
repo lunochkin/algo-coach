@@ -4,7 +4,15 @@ from hashlib import sha256
 
 import pytest
 
-from algo_coach.claims import EFFORT, MODEL, PROMPT_HASH, PROMPT_VERSION, ClassifierError, classify
+from algo_coach.claims import (
+    EFFORT,
+    MODEL,
+    PROMPT_HASH,
+    PROMPT_VERSION,
+    ClassifierError,
+    Configuration,
+    classify,
+)
 from algo_coach.claims.classifier import SYSTEM
 
 CODE = "def f(nums):\n    return sorted(nums)\n"
@@ -136,6 +144,31 @@ def test_a_response_carrying_no_verdict_raises():
 
     with pytest.raises(ClassifierError, match="refusal"):
         classify(client, ["greedy", "sorting"], CODE)
+
+
+def test_the_built_in_configuration_is_what_a_caller_naming_none_gets():
+    client = answering("greedy")
+
+    classify(client, ["greedy", "sorting"], CODE)
+
+    (call,) = client.messages.calls
+    assert (call["model"], call["output_config"]["effort"]) == (MODEL, EFFORT)
+
+
+def test_a_named_configuration_is_what_the_call_carries():
+    """What makes a second classifier readable at all: the flag has to reach
+    the request, not only the record written from it."""
+    client = answering("greedy")
+
+    classify(
+        client,
+        ["greedy", "sorting"],
+        CODE,
+        configuration=Configuration(model="a-cheap-model", effort="low"),
+    )
+
+    (call,) = client.messages.calls
+    assert (call["model"], call["output_config"]["effort"]) == ("a-cheap-model", "low")
 
 
 def test_the_claim_records_what_produced_it():

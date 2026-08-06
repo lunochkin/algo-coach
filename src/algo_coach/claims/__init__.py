@@ -1,9 +1,11 @@
 from algo_coach.claims.classifier import (
+    DEFAULT,
     EFFORT,
     MODEL,
     PROMPT_HASH,
     PROMPT_VERSION,
     ClassifierError,
+    Configuration,
     classify,
 )
 from algo_coach.claims.reading import ReadResult, read
@@ -16,19 +18,32 @@ from algo_coach.claims.sample import (
     one_per_problem,
     spread,
 )
-from algo_coach.claims.score import Score, TechniqueScore, score, score_backlog
+from algo_coach.claims.score import (
+    Comparison,
+    ConfigurationScore,
+    Score,
+    Split,
+    TechniqueScore,
+    score,
+    score_backlog,
+)
 from algo_coach.claims.stale import at_configuration, is_stale, readings_at
 
 __all__ = [
+    "DEFAULT",
     "EFFORT",
     "MODEL",
     "PROMPT_HASH",
     "PROMPT_VERSION",
     "ClassifierError",
     "ClassifyResult",
+    "Comparison",
+    "Configuration",
+    "ConfigurationScore",
     "Failed",
     "ReadResult",
     "Score",
+    "Split",
     "TechniqueScore",
     "answered_by_hand",
     "ask",
