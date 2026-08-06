@@ -2,18 +2,21 @@ import argparse
 from pathlib import Path
 
 from algo_coach.claims import EFFORT, MODEL, PROMPT_VERSION, Score, score_backlog
+from algo_coach.cli.classify import show
 from algo_coach.cli.client import client
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
 
 
 def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """The classifier against the user's own claims. Writes nothing: the
-    verdicts are read once and reported, never stored."""
+    """The classifier against the user's own claims. Every reading is stored,
+    so a later run is paid for only where this one did not reach."""
     api = client(args, parser)
     log = AttemptLog(root)
     problems = {problem.id: problem for problem in ProblemStore(root).all()}
-    result = score_backlog(api, log, problems, user_id=args.user, limit=args.limit)
+    result = score_backlog(
+        api, log, problems, user_id=args.user, limit=args.limit, on_progress=show
+    )
 
     for failure in result.failed:
         print(f"{failure.attempt_id}: {failure.reason}")
@@ -22,7 +25,17 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
 
     share = result.exact / result.scored
     print(f"{MODEL}, effort {EFFORT}, prompt {PROMPT_VERSION}")
-    print(f"{result.exact}/{result.scored} exact ({share:.0%})\n")
+    print(f"{result.exact}/{result.scored} exact ({share:.0%})")
+    print(f"{result.read} read, {result.reused} reused")
+    if result.rehashed:
+        # Two prompt texts under one version: a bump the author forgot. Reuse
+        # keys off the version, so nothing else would ever say so.
+        print(f"{result.rehashed} reused reading(s) from another prompt text")
+    if result.undecided:
+        # Beside the share, since declining shrinks the denominator and
+        # improves the number for it.
+        print(f"{result.undecided} named no candidate — not scored")
+    print()
     print(render(result))
 
     # Printed in full, not summarised: reading them is how a mislabelled hand

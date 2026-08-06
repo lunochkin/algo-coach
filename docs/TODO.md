@@ -201,10 +201,15 @@ nothing checks sends practice somewhere unverified for weeks.
       read at scale
 - [x] `is_stale` compares model, effort and prompt version — not the hash,
       which would re-derive the backlog for a reflowed sentence
-- [ ] `score` stores what it reads, and reads only what it has no reading
+- [x] `score` stores what it reads, and reads only what it has no reading
       for at this configuration. Scoring is already a pure function over two
       mappings, so it splits into reading and scoring rather than being
-      rewritten
+      rewritten. `--limit` caps the reads, not the attempts scored: a stored
+      reading is free. Reuse keys off the version, as staleness does, so a
+      reused reading from another prompt text is reported — the only thing a
+      forgotten bump says. Two decisions came with it: the eval set collapses
+      to one attempt per problem, which the doc said and the code did not,
+      and an undecided verdict is counted rather than scored
 - [ ] `score --model`, over the attempts both configurations read. Comparing
       each one's own sample scores against a different denominator, and the
       number would read as quality

@@ -6,8 +6,10 @@ from algo_coach.claims.classifier import (
     ClassifierError,
     classify,
 )
-from algo_coach.claims.run import ClassifyResult, Failed, classify_backlog
+from algo_coach.claims.reading import ReadResult, read
+from algo_coach.claims.run import ClassifyResult, Failed, ask, classify_backlog
 from algo_coach.claims.sample import (
+    answered_by_hand,
     claimable,
     decides_something,
     eligible,
@@ -15,7 +17,7 @@ from algo_coach.claims.sample import (
     spread,
 )
 from algo_coach.claims.score import Score, TechniqueScore, score, score_backlog
-from algo_coach.claims.stale import is_stale
+from algo_coach.claims.stale import at_configuration, is_stale, readings_at
 
 __all__ = [
     "EFFORT",
@@ -25,8 +27,12 @@ __all__ = [
     "ClassifierError",
     "ClassifyResult",
     "Failed",
+    "ReadResult",
     "Score",
     "TechniqueScore",
+    "answered_by_hand",
+    "ask",
+    "at_configuration",
     "claimable",
     "classify",
     "classify_backlog",
@@ -34,6 +40,8 @@ __all__ = [
     "eligible",
     "is_stale",
     "one_per_problem",
+    "read",
+    "readings_at",
     "score",
     "score_backlog",
     "spread",

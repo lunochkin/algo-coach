@@ -92,7 +92,7 @@ def main() -> None:
 
     score_parser = _command(sub, "score", "the classifier against the user's own claims")
     score_parser.add_argument(
-        "--limit", type=int, help="how many hand claims to score against; all of them otherwise"
+        "--limit", type=int, help="how many attempts to read; every unread one otherwise"
     )
     _user_argument(score_parser)
 

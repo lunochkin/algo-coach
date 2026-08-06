@@ -53,6 +53,32 @@ class ClassifyResult(BaseModel):
         return self.classified + self.redone
 
 
+def ask(client: Any, log: AttemptLog, attempt: Attempt, problem: Problem) -> list[str]:
+    """Classify one attempt and store the verdict, returning what was named.
+
+    An empty verdict is undecided rather than a claim: a claim cannot say "none
+    of these", so nothing is written and whatever already answers the attempt
+    keeps answering it. Failures are the caller's — a backlog run aborts on a
+    broken key and an eval does not.
+    """
+    techniques = classify(client, problem.techniques, attempt.code or "")
+    if techniques:
+        # Written even when the verdict is unchanged: the record names the
+        # classifier that reached it, so an unwritten agreement would stay
+        # stale and be paid for again on every later run.
+        log.append_claim(
+            classifier_claim(
+                attempt.id,
+                techniques,
+                model=MODEL,
+                effort=EFFORT,
+                prompt_version=PROMPT_VERSION,
+                prompt_hash=PROMPT_HASH,
+            )
+        )
+    return techniques
+
+
 def classify_backlog(
     client: Any,
     log: AttemptLog,
@@ -121,7 +147,7 @@ def classify_backlog(
     for index, attempt in enumerate(asking, start=1):
         problem = problems[attempt.problem_id]
         try:
-            techniques = classify(client, problem.techniques, attempt.code or "")
+            techniques = ask(client, log, attempt, problem)
         except Exception as exc:
             # Broad on purpose: a refusal, a rate limit or a dropped connection
             # is one attempt's problem, and a backlog run must not lose the
@@ -143,19 +169,6 @@ def classify_backlog(
             result.undecided += 1
             report(index, attempt, problem.title)
             continue
-        # Written even when the verdict is unchanged: the record names the
-        # classifier that reached it, so an unwritten agreement would stay
-        # stale and be paid for again on every run.
-        log.append_claim(
-            classifier_claim(
-                attempt.id,
-                techniques,
-                model=MODEL,
-                effort=EFFORT,
-                prompt_version=PROMPT_VERSION,
-                prompt_hash=PROMPT_HASH,
-            )
-        )
         if attempt.id in superseding:
             result.redone += 1
         else:

@@ -1,7 +1,8 @@
+from datetime import timedelta
 from importlib import import_module
 
 import pytest
-from helpers import FakeClient, Verdict, attempt, seed_problem
+from helpers import T0, FakeClient, Verdict, attempt, seed_problem
 
 from algo_coach import cli
 from algo_coach.claims import MODEL
@@ -55,6 +56,32 @@ def test_the_disagreements_are_printed_in_full(hand_claimed, monkeypatch, capsys
     assert "a1" in out
     assert "you: greedy" in out
     assert "it:  sorting" in out
+
+
+def test_the_command_says_what_it_paid_for(hand_claimed, monkeypatch, capsys):
+    """A run is minutes of calls, and reuse is what the stored readings buy —
+    so the cost is reported beside the share rather than inferred from it."""
+    run(monkeypatch, FakeClient.answering(Verdict(["greedy"])))
+    capsys.readouterr()
+
+    run(monkeypatch, FakeClient.answering())
+
+    out = capsys.readouterr().out
+    assert "1 reused" in out
+
+
+def test_the_command_says_how_many_named_no_candidate(hand_claimed, monkeypatch, capsys):
+    """A classifier that declines gets a smaller denominator and a better share
+    for it, so the declines are printed next to the share."""
+    seed_problem(hand_claimed.root, id="second", tags=["Greedy", "Sorting"])
+    hand_claimed.append_attempt(attempt("a2", "second", finished_at=T0 + timedelta(days=1)))
+    hand_claimed.append_claim(user_claim("a2", ["greedy"]))
+
+    run(monkeypatch, FakeClient.answering(Verdict([]), Verdict(["greedy"])))
+
+    out = capsys.readouterr().out
+    assert "1/1 exact (100%)" in out
+    assert "1 named no candidate" in out
 
 
 def test_nothing_hand_claimed_exits_nonzero(tmp_path, monkeypatch, capsys):

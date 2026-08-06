@@ -139,6 +139,12 @@ rather than a field on the attempt.
 - **One claim per attempt**, naming every technique it used, since a solution
   can use several. A later claim replaces the whole set rather than rewriting
   the earlier one.
+- **A verdict naming no candidate is not a claim.** The resolver takes a
+  claim's existence as its answer, so an empty one drops the attempt off the
+  board rather than leaving the fallback standing. Unstorable, and unscored
+  because missing evidence is not a disagreement, so every later run asks
+  again. The count is reported: a dropped decline shrinks the denominator and
+  flatters the share.
 - **The user's claim wins on read, the latest of each writer's otherwise.**
   Latest alone would make the two writers race, and the classifier writes far
   more often, so ground truth would last exactly until something re-derived

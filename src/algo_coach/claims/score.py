@@ -4,16 +4,16 @@ Per technique rather than overall, since the board is per technique and a
 classifier that over-claims one code skews it wherever that code is read.
 """
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.claims.classifier import classify
-from algo_coach.claims.run import Failed
-from algo_coach.claims.sample import eligible, recency
+from algo_coach.claims.reading import read
+from algo_coach.claims.run import Failed, Progress
+from algo_coach.claims.sample import answered_by_hand, eligible, one_per_problem
 from algo_coach.log import AttemptLog
-from algo_coach.schema import ClaimSource, Problem
+from algo_coach.schema import Problem
 from algo_coach.techniques import standing_claims
 
 
@@ -47,6 +47,13 @@ class Score(BaseModel):
     per_technique: list[TechniqueScore] = Field(default_factory=list)
     disagreements: list[Disagreement] = Field(default_factory=list)
     failed: list[Failed] = Field(default_factory=list)
+    # What the run cost and what it declined to answer. Reported beside the
+    # share, since a classifier that declines gets a smaller denominator and a
+    # better number for it.
+    read: int = 0
+    reused: int = 0
+    rehashed: int = 0
+    undecided: int = 0
 
 
 def score(truth: Mapping[str, Sequence[str]], machine: Mapping[str, Sequence[str]]) -> Score:
@@ -102,37 +109,46 @@ def score_backlog(
     *,
     user_id: str,
     limit: int | None = None,
+    on_progress: Callable[[Progress], None] | None = None,
 ) -> Score:
-    """Classify the hand-claimed attempts and score the verdicts.
+    """What the classifier reads the hand-claimed attempts as, scored.
 
-    Nothing is written yet. Storing a reading is safe now that the user's claim
-    wins on read — what it buys is an eval that is a dataset rather than a run,
-    where a second configuration pays only for what it has not read. That is
-    the next step, not this one, so a run still reports and forgets.
+    Which attempts are the eval set is decided here and the reading is not: one
+    per problem, since a retry asks the identical question, and only those the
+    user answered, since the hand claims are what a reading is scored against.
+
+    Every reading is stored, so what a configuration answered stays readable
+    and a later run pays only where it has not read. On the ordinary correction
+    path — the backlog run claims, the user corrects — the reading is already
+    there and the score costs nothing.
+
+    `standing` is read once though the run writes as it goes: what it writes is
+    the classifier's, and a user's claim wins by source rather than by being
+    the earlier record.
     """
-    claimed = standing_claims(log.claims())
+    claims = log.claims()
+    standing = standing_claims(claims)
     hand_claimed = [
         attempt
-        for attempt in sorted(
-            eligible(log.attempts(), problems, user_id=user_id), key=recency, reverse=True
-        )
-        if attempt.id in claimed and claimed[attempt.id].source is ClaimSource.USER
+        for attempt in one_per_problem(eligible(log.attempts(), problems, user_id=user_id))
+        if answered_by_hand(standing.get(attempt.id))
     ]
 
-    truth: dict[str, Sequence[str]] = {}
-    machine: dict[str, Sequence[str]] = {}
-    failed: list[Failed] = []
-    for attempt in hand_claimed[:limit]:
-        truth[attempt.id] = claimed[attempt.id].techniques
-        try:
-            machine[attempt.id] = classify(
-                client, problems[attempt.problem_id].techniques, attempt.code or ""
-            )
-        except Exception as exc:
-            # One attempt's problem, as in the backlog run: an eval that dies
-            # on the first refusal reports nothing about the rest.
-            failed.append(Failed(attempt_id=attempt.id, reason=repr(exc)))
+    readings = read(
+        client,
+        log,
+        hand_claimed,
+        problems,
+        claims=claims,
+        limit=limit,
+        on_progress=on_progress,
+    )
+    truth: dict[str, Sequence[str]] = {
+        attempt.id: standing[attempt.id].techniques for attempt in hand_claimed
+    }
 
-    result = score(truth, machine)
-    result.failed = failed
+    result = score(truth, readings.verdicts)
+    result.failed = readings.failed
+    result.read, result.reused = readings.read, readings.reused
+    result.rehashed, result.undecided = readings.rehashed, readings.undecided
     return result

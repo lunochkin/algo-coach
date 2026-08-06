@@ -14,6 +14,7 @@ from algo_coach.claims import (
 )
 from algo_coach.claims.run import ABORT_AFTER, Progress
 from algo_coach.log import AttemptLog
+from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import ClaimSource, TechniqueClaim
 from algo_coach.techniques import standing_claims
@@ -354,6 +355,19 @@ def test_a_user_claim_is_never_stale(backlog):
     result = run(client, backlog, redo=True)
 
     assert (result.redone, client.messages.calls) == (0, [])
+
+
+def test_a_reading_stored_under_a_hand_claim_is_never_re_derived(backlog):
+    """The eval stores what it read on hand-claimed attempts. It holds at this
+    configuration and at any other: the user's claim is what stands there, and
+    nothing re-derives it — so the reading under it is never asked again."""
+    backlog.append_claim(user_claim("a1", ["greedy"]))
+    store_claim(backlog, "a1", prompt_version="0")
+    client = answering()
+
+    result = run(client, backlog, redo=True)
+
+    assert (result.redone, result.classified, client.messages.calls) == (0, 0, [])
 
 
 def test_a_re_derivation_supersedes_rather_than_rewrites(backlog):
