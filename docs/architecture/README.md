@@ -100,9 +100,9 @@ Which techniques an attempt used — what per-technique progress is measured
 from. A claim rather than a fact, and open to revision, so it is its own record
 rather than a field on the attempt.
 
-- **Attribution resolves, it is not required.** A claim if one exists,
-  otherwise the problem's techniques. Nothing has to be labelled for an attempt
-  to count, which is what makes a history of past attempts usable.
+- **Attribution resolves, it is not required.** The claim that stands if one
+  exists, otherwise the problem's techniques. Nothing has to be labelled for an
+  attempt to count, which is what makes a history of past attempts usable.
 - **Resolution happens on read and is never stored**, so re-deriving the tag
   mapping reaches every unclaimed attempt.
 - **The fallback answers a different question.** A tag says what a problem
@@ -138,11 +138,49 @@ rather than a field on the attempt.
   keystroke and the count is per submission.
 - **One claim per attempt**, naming every technique it used, since a solution
   can use several. A later claim replaces the whole set rather than rewriting
-  the earlier one, and the latest wins on read.
-- **Every claim records its source**, and a machine claim its model and prompt
-  version. Both count the same toward progress, but a machine claim can be
-  recomputed by a better classifier and a user's cannot, so re-deriving has to
-  find the stale ones and leave the rest.
+  the earlier one.
+- **The user's claim wins on read, the latest of each writer's otherwise.**
+  Latest alone would make the two writers race, and the classifier writes far
+  more often, so ground truth would last exactly until something re-derived
+  over it. The rule is what makes a machine claim safe to store on an attempt
+  the user has claimed — and a claim scored against the user's own has to be
+  stored, or an eval run is evidence that exists only while it prints.
+- **Which is why it is a rule rather than a discipline.** Skipping claimed
+  attempts on the write path is one writer remembering to; a writer that
+  forgets overwrites the evidence, and an append-only log cannot take it back.
+  A reader that prefers the user's makes that unrepresentable. The classifier
+  still skips them, but as an economy — a call whose verdict could never
+  stand — rather than as what protects the eval.
+- **A machine claim on a hand-claimed attempt is a reading, not a candidate.**
+  It never becomes the standing claim, never reaches the board, and exists to
+  be scored. Storing it makes an eval a dataset rather than a run: what a
+  configuration answered stays readable, and a second configuration is paid
+  for only where it has not read.
+- **One record for both writers, not two.** Splitting them would mirror
+  `SelfLabel` and `Diagnosis`, but the classifier claims already written stay
+  in the log forever, so a reader carries the old shape whatever else changes.
+  A third record written only by the eval needs no migration and is worse: the
+  same verdict would be a claim or a reading depending on what else happens to
+  be claimed on the attempt, its type decided by its neighbours.
+- **Every claim records its source**, and a machine claim what produced it:
+  model, effort, prompt version, prompt hash. Both count the same toward
+  progress, but a machine claim can be recomputed by a better classifier and a
+  user's cannot, so re-deriving has to find the stale ones and leave the rest.
+- **What produced a claim is compared whole, never ordered.** A version is an
+  identity, not a number to be greater than, so running an earlier prompt on
+  purpose re-derives what a later one wrote and a rollback needs no separate
+  path.
+- **The prompt is named twice, deliberately.** The version is the author's
+  statement that the reading changed meaningfully and is what marks a stored
+  claim stale; the hash is the mechanical fact of the text that was sent, and
+  marks nothing. A forgotten bump would otherwise be invisible forever —
+  with both, two hashes under one version say so, and a re-derivation fixes
+  it. Driving staleness from the hash instead would re-derive the backlog for
+  a reflowed sentence: the hash is a syntactic boundary and the version a
+  semantic one, and only the semantic one should cost money.
+- **Configurations are compared over the attempts both read**, not over each
+  one's own. A cheaper classifier measured on a smaller sample scores against
+  a different denominator, and the number would read as quality.
 
 ### Self-labels
 
@@ -181,10 +219,15 @@ compared.
 ### What every record keyed to an attempt carries
 
 Claims, self-labels and diagnoses share a base: an engine-minted `id`, the
-`attempt_id` they assert about, and `created_at`. One reader serves all
+`attempt_id` they assert about, and `created_at`. One reader orders all
 three — latest by `created_at`, append order breaking a tie — and the `id`
 lets a record be cited, by an eval naming the diagnosis it scored or a user
 correcting a claim.
+
+Ordering is not the same question as what stands. A self-label has one writer,
+so the latest is what stands. A claim has two, and the user's stands over any
+machine claim however late; a diagnosis never supersedes a self-label at all.
+The shared reader answers "in what order", and each record says who wins.
 
 ## Boundaries
 
@@ -263,8 +306,11 @@ Properties the system holds at all times.
 
 - Attempts, technique claims, self-labels and diagnoses are append-only.
 - Every record keyed to an attempt carries an engine-minted `id`, its
-  `attempt_id` and `created_at`, so one reader resolves what stands for any of
-  them.
+  `attempt_id` and `created_at`, so one reader orders any of them.
+- The user's own record stands over the machine's answer to the same question,
+  whichever was written later: a technique claim resolves user-first, and a
+  diagnosis never supersedes a self-label. What the machine wrote is kept and
+  scored, never discarded and never promoted.
 - Every reference in an append-only record is engine-minted. External ids are
   resolved at the boundary and never stored on an attempt, so the log stays
   readable without the platform that produced it.

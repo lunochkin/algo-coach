@@ -183,6 +183,30 @@ nothing checks sends practice somewhere unverified for weeks.
       the record names the classifier that reached it, and an unwritten
       agreement would be paid for again on every later run
 
+### Storing what the classifier read
+
+- [ ] Resolve a claim user-first rather than latest-wins, so a machine claim
+      lands on a hand-claimed attempt without superseding it. No attempt
+      carries claims from both writers today, so the rule changes no number
+      the board shows — which is the moment to change it, while the two sets
+      are still disjoint
+- [ ] `effort` and `prompt_hash` on the record beside model and prompt
+      version, all optional and additive. The 25 machine claims already
+      written carry neither, and `--redo` replaces them: the ambiguity is
+      disposable now and permanent once the eval set is read at scale
+- [ ] `is_stale` compares model, effort and prompt version — not the hash,
+      which would re-derive the backlog for a reflowed sentence
+- [ ] `score` stores what it reads, and reads only what it has no reading
+      for at this configuration. Scoring is already a pure function over two
+      mappings, so it splits into reading and scoring rather than being
+      rewritten
+- [ ] `score --model`, over the attempts both configurations read. Comparing
+      each one's own sample scores against a different denominator, and the
+      number would read as quality
+- [ ] Decide whether re-reading at a configuration already read is available
+      on purpose — the same question asked twice says whether one
+      configuration answers it the same way
+
 ### Exit
 - [ ] Attribution runs on real daily attempts, carrying a measured agreement
       number rather than an asserted one
