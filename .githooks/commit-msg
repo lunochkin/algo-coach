@@ -1,7 +1,15 @@
 #!/bin/sh
-# Vocabulary guard for commit messages; word list mirrors pre-commit.
+# Vocabulary guard for commit messages; reads the same untracked list as
+# pre-commit. See that hook for why the list is not in the repo.
 
-WORDS='REDACTED'
+LIST="$(dirname "$0")/words"
+if [ ! -f "$LIST" ]; then
+    echo "vocab guard: $LIST is missing, so nothing is being checked" >&2
+    exit 1
+fi
+
+WORDS=$(sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$LIST" | grep -v '^$' | paste -sd '|' -)
+[ -z "$WORDS" ] && exit 0
 
 if grep -qiE "$WORDS" "$1"; then
     echo "vocab guard: forbidden vocabulary in commit message" >&2

@@ -1,9 +1,26 @@
 #!/bin/sh
 # Vocabulary guard: this repo is treated as public from commit 1.
 # Blocks staged content containing project-private or off-framing vocabulary.
-# Extend the list here; keep it lowercase (match is case-insensitive).
+#
+# The list itself is untracked, and has to be: it names exactly what must never
+# be committed, so committing it is the leak it exists to prevent. Keep it in
+# .githooks/words, one extended-regex alternative per line, `#` for comments.
+# Anchor a pattern with \b where the bare substring would sit inside ordinary
+# English.
+#
+# Missing list means the guard is not running, which is failed rather than
+# passed — a guard that goes quiet when unconfigured is worse than none, since
+# nothing says it stopped.
 
-WORDS='REDACTED'
+LIST="$(dirname "$0")/words"
+if [ ! -f "$LIST" ]; then
+    echo "vocab guard: $LIST is missing, so nothing is being checked" >&2
+    echo "(one pattern per line; the list is private and never committed)" >&2
+    exit 1
+fi
+
+WORDS=$(sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$LIST" | grep -v '^$' | paste -sd '|' -)
+[ -z "$WORDS" ] && exit 0
 
 FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -v '^\.githooks/')
 [ -z "$FILES" ] && exit 0
@@ -12,7 +29,7 @@ HITS=$(echo "$FILES" | xargs grep -lniE "$WORDS" 2>/dev/null)
 if [ -n "$HITS" ]; then
     echo "vocab guard: forbidden vocabulary in staged files:" >&2
     echo "$FILES" | xargs grep -niE "$WORDS" 2>/dev/null | head -20 >&2
-    echo "(word list: .githooks/pre-commit)" >&2
+    echo "(word list: .githooks/words)" >&2
     exit 1
 fi
 exit 0

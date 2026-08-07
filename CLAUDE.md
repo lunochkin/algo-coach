@@ -39,4 +39,7 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 - Conventional Commits, imperative subject ≤50 chars, English.
 - Pre-commit + commit-msg hooks live in `.githooks/`
   (enable once: `git config core.hooksPath .githooks`).
-  They enforce a vocabulary guard; extend the word list there if needed.
+  They enforce a vocabulary guard whose word list is `.githooks/words` —
+  untracked, since it names exactly what must never be committed. Without it
+  the hooks fail rather than pass: a guard that goes quiet when unconfigured
+  is worse than none.

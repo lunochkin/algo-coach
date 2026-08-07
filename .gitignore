@@ -9,3 +9,6 @@ CLAUDE.local.md
 
 .DS_Store
 .obsidian/
+
+# Never committed: it names what must not be.
+.githooks/words
