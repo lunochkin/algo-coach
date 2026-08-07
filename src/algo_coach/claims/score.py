@@ -55,6 +55,7 @@ class Score(BaseModel):
     reused: int = 0
     rehashed: int = 0
     undecided: int = 0
+    aborted: bool = False
 
 
 class ConfigurationScore(BaseModel):
@@ -207,6 +208,7 @@ def score_backlog(
         scored.failed = reading.failed
         scored.read, scored.reused = reading.read, reading.reused
         scored.rehashed, scored.undecided = reading.rehashed, reading.undecided
+        scored.aborted = reading.aborted
         result.scores.append(ConfigurationScore(configuration=configuration, score=scored))
 
     # In eval-set order, which is by problem — the order the disagreements print

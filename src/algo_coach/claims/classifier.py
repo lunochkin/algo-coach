@@ -14,6 +14,11 @@ from pydantic import BaseModel
 
 MODEL = "claude-opus-5"
 EFFORT = "medium"
+# The effort of a model that is asked for none — some reject the parameter
+# outright. A named level rather than an absent field, since a reading whose
+# configuration is partly unknown compares with nothing: what it ran at is the
+# model's own default, which is a fact about the reading and not a gap in it.
+UNSENT = "default"
 # Bumped when the reading changes meaningfully — the author's statement, not a
 # number to be greater than. The effort is recorded beside it rather than
 # folded into it, so a bump says the prompt changed and nothing else.
@@ -86,14 +91,19 @@ def classify(
         # offering one choice would ask the model to agree with itself.
         return list(candidates)
 
+    output_config: dict[str, Any] = {
+        "format": {"type": "json_schema", "schema": schema(candidates)}
+    }
+    if configuration.effort != UNSENT:
+        # Sent only where it was asked for: a model that does not take the
+        # parameter rejects every call carrying it, whatever the level.
+        output_config["effort"] = configuration.effort
+
     response = client.messages.create(
         model=configuration.model,
         max_tokens=16000,
         system=SYSTEM,
-        output_config={
-            "effort": configuration.effort,
-            "format": {"type": "json_schema", "schema": schema(candidates)},
-        },
+        output_config=output_config,
         messages=[{"role": "user", "content": prompt(candidates, code)}],
     )
     text = next((block.text for block in response.content if block.type == "text"), None)

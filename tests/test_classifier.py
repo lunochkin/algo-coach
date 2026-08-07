@@ -9,6 +9,7 @@ from algo_coach.claims import (
     MODEL,
     PROMPT_HASH,
     PROMPT_VERSION,
+    UNSENT,
     ClassifierError,
     Configuration,
     classify,
@@ -144,6 +145,23 @@ def test_a_response_carrying_no_verdict_raises():
 
     with pytest.raises(ClassifierError, match="refusal"):
         classify(client, ["greedy", "sorting"], CODE)
+
+
+def test_an_unsent_effort_is_left_off_the_call():
+    """Some models reject the parameter outright, so a level that means "the
+    model's own" has to be absent from the request rather than sent as text."""
+    client = answering("greedy")
+
+    classify(
+        client,
+        ["greedy", "sorting"],
+        CODE,
+        configuration=Configuration(model="a-model", effort=UNSENT),
+    )
+
+    (call,) = client.messages.calls
+    assert "effort" not in call["output_config"]
+    assert call["output_config"]["format"]["type"] == "json_schema"
 
 
 def test_the_built_in_configuration_is_what_a_caller_naming_none_gets():

@@ -32,8 +32,8 @@ def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         print(f"{result.redone} stale machine claim(s) re-derived")
     if result.undecided:
         print(f"{result.undecided} named no candidate — the fallback stands")
-    for failure in result.failed:
-        print(f"{failure.attempt_id}: {failure.reason}")
+    # Each failure was reported by `show` as it happened; a second list here
+    # would say it twice, and the counts are what stdout is for.
     if result.aborted:
         # Nonzero even when claims landed: the backlog was left unfinished for
         # a reason nothing in it can fix.

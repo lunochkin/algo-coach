@@ -174,7 +174,9 @@ rather than a field on the attempt.
   user's cannot, so re-deriving has to find the stale ones and leave the rest.
   All four or none, since a reading whose configuration is partly unknown
   compares with nothing — and a user's claim carries none of them, because
-  nothing re-derives it.
+  nothing re-derives it. A model asked for no effort, or one that rejects the
+  parameter, records the level it ran at rather than an empty field: the
+  model's own default is a fact about the reading, not a gap in it.
 - **What produced a claim is compared whole, never ordered.** A version is an
   identity, not a number to be greater than, so running an earlier prompt on
   purpose re-derives what a later one wrote and a rollback needs no separate

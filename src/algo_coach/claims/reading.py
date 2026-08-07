@@ -15,7 +15,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from algo_coach.claims.classifier import DEFAULT, PROMPT_HASH, Configuration
-from algo_coach.claims.run import Failed, Progress, ask
+from algo_coach.claims.run import ABORT_AFTER, Failed, Progress, ask
 from algo_coach.claims.sample import recency
 from algo_coach.claims.stale import readings_at
 from algo_coach.log import AttemptLog
@@ -29,6 +29,7 @@ class ReadResult(BaseModel):
     rehashed: int = 0  # of `reused`, those written under another prompt text
     undecided: int = 0  # named no candidate, so unstorable and read again next run
     failed: list[Failed] = Field(default_factory=list)
+    aborted: bool = False
 
 
 def read(
@@ -77,16 +78,26 @@ def read(
                 )
             )
 
+    consecutive = 0
     for index, attempt in enumerate(asking, start=1):
         problem = problems[attempt.problem_id]
         try:
             techniques = ask(client, log, attempt, problem, configuration=configuration)
         except Exception as exc:
             # One attempt's problem, as in the backlog run: an eval that dies
-            # on the first refusal reports nothing about the rest.
+            # on the first refusal reports nothing about the rest. A run of
+            # them is a different fact — a configuration this classifier cannot
+            # run fails identically on every attempt, and paying for the whole
+            # eval set to learn it once is the same waste the backlog run
+            # already refuses.
             result.failed.append(Failed(attempt_id=attempt.id, reason=repr(exc)))
             report(index, attempt, problem.title, reason=repr(exc))
+            consecutive += 1
+            if consecutive == ABORT_AFTER:
+                result.aborted = True
+                break
             continue
+        consecutive = 0
         if not techniques:
             # Unstorable, so it is asked again on every later run at this
             # configuration — which the count is what says.

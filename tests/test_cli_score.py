@@ -8,6 +8,7 @@ from algo_coach import cli
 from algo_coach.claims import EFFORT, MODEL, PROMPT_HASH, PROMPT_VERSION
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_claim
+from algo_coach.schema import ClaimSource
 
 CLIENT = import_module("algo_coach.cli.client")
 
@@ -151,6 +152,38 @@ def test_the_shares_are_over_what_both_read(hand_claimed, monkeypatch, capsys):
     assert "0/1 (0%)" in out
     assert f"{MODEL}: greedy" in out
     assert "a-cheap-model: sorting" in out
+
+
+def test_a_classifier_that_fails_every_call_aborts(hand_claimed, monkeypatch, capsys):
+    """A model that rejects a parameter fails identically on every attempt —
+    the eval set must not be paid for to learn it once."""
+    seed_problem(hand_claimed.root, id="second", tags=["Greedy", "Sorting"])
+    seed_problem(hand_claimed.root, id="third", tags=["Greedy", "Sorting"])
+    for index, name in enumerate(("second", "third"), start=2):
+        hand_claimed.append_attempt(
+            attempt(f"a{index}", name, finished_at=T0 + timedelta(days=index))
+        )
+        hand_claimed.append_claim(user_claim(f"a{index}", ["greedy"]))
+    rejected = Verdict(error=RuntimeError("does not support the effort parameter"))
+
+    with pytest.raises(SystemExit) as exit_info:
+        run(monkeypatch, FakeClient.answering(rejected, rejected, rejected), "--model", "a-model")
+
+    assert exit_info.value.code == 1
+    assert "aborted after 3 consecutive failures" in capsys.readouterr().err
+
+
+def test_an_unsupported_effort_can_be_left_unset(hand_claimed, monkeypatch, capsys):
+    """`--effort default` is how a model that rejects the parameter is named:
+    the level it ran at, stored like any other."""
+    client = FakeClient.answering(Verdict(["greedy"]))
+
+    run(monkeypatch, client, *("--effort", "default"))
+
+    (call,) = client.messages.calls
+    assert "effort" not in call["output_config"]
+    (reading,) = [c for c in hand_claimed.claims() if c.source is ClaimSource.CLASSIFIER]
+    assert reading.effort == "default"
 
 
 def test_a_stored_run_makes_no_call_and_needs_no_key(hand_claimed, monkeypatch, capsys):

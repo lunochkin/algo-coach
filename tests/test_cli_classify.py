@@ -48,7 +48,9 @@ def test_a_run_that_landed_nothing_exits_nonzero(root, monkeypatch, capsys):
         run(monkeypatch, client)
 
     assert exit_info.value.code == 1
-    assert "bad key" in capsys.readouterr().out
+    # On stderr, where the run reported it as it happened — stdout carries the
+    # counts, and a second copy of the reason would only say it twice.
+    assert "bad key" in capsys.readouterr().err
 
 
 def test_a_missing_key_fails_before_the_run(root, monkeypatch, capsys):

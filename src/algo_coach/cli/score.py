@@ -11,6 +11,7 @@ from algo_coach.claims import (
     TechniqueScore,
     score_backlog,
 )
+from algo_coach.claims.run import ABORT_AFTER
 from algo_coach.cli.classify import show
 from algo_coach.cli.client import client
 from algo_coach.log import AttemptLog
@@ -85,13 +86,24 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         on_progress=show,
     )
 
-    for name, scored in zip(labels(named), result.scores, strict=True):
-        for failure in scored.score.failed:
-            prefix = f"{name}: " if len(named) > 1 else ""
-            print(f"{prefix}{failure.attempt_id}: {failure.reason}")
-
+    # Failures are not printed here: `show` already reported each one as it
+    # happened, and which configuration it came from is the header `announce`
+    # prints above it. A second list on stdout would say it twice.
     if not result.eval_set:
         parser.exit(1, f"score: nothing hand-claimed to score against for {args.user}\n")
+    aborted = [
+        name
+        for name, scored in zip(labels(named), result.scores, strict=True)
+        if scored.score.aborted
+    ]
+    if aborted:
+        # Before the numbers rather than after: what a configuration read
+        # before it broke is a slice of the eval set, and a share over it would
+        # be read as its answer.
+        parser.exit(
+            1,
+            f"score: {', '.join(aborted)} aborted after {ABORT_AFTER} consecutive failures\n",
+        )
     if not result.common:
         # Told apart from the above: ground truth exists and no reading of it
         # does — a stored run before anything was read, or every call failing.

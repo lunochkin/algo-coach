@@ -12,6 +12,7 @@ from algo_coach.claims import (
     Configuration,
     score_backlog,
 )
+from algo_coach.claims.run import ABORT_AFTER
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
@@ -290,6 +291,35 @@ def test_the_limit_caps_the_calls_not_the_score(two_problems):
 
     assert (result.scored, result.exact) == (2, 2)
     assert (result.read, result.reused, len(client.messages.calls)) == (1, 1, 1)
+
+
+def test_a_run_of_failures_aborts_rather_than_paying_for_the_eval_set(tmp_path):
+    """A configuration this classifier cannot run fails identically on every
+    attempt, and the eval set is the wrong place to learn that once."""
+    root = tmp_path / "data"
+    log = AttemptLog(root)
+    for index in range(ABORT_AFTER + 2):
+        seed_problem(root, id=f"p{index}", tags=["Greedy", "Sorting"])
+        log.append_attempt(attempt(f"a{index}", f"p{index}", finished_at=T0))
+        log.append_claim(user_claim(f"a{index}", ["greedy"]))
+    broken = Verdict(error=RuntimeError("does not support the effort parameter"))
+    client = FakeClient.answering(*[broken] * (ABORT_AFTER + 2))
+
+    result = compare(client, log, configurations=(CHEAP,))
+
+    assert result.scores[0].score.aborted
+    assert len(client.messages.calls) == ABORT_AFTER
+
+
+def test_a_scattered_failure_does_not_abort(two_problems):
+    """One refusal is one attempt's problem — an eval that stopped there would
+    report nothing about the attempts behind it."""
+    client = FakeClient.answering(Verdict(error=RuntimeError("refused")), Verdict(["greedy"]))
+
+    result = compare(client, two_problems)
+
+    assert not result.scores[0].score.aborted
+    assert result.scores[0].score.scored == 1
 
 
 def test_a_named_configuration_stores_its_own_provenance(hand_claimed):
