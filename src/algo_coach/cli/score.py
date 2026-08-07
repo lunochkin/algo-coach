@@ -56,8 +56,8 @@ def configurations(
         Configuration(model=model, effort=effort or DEFAULT.effort) for model, effort in named
     )
     if len(set(built)) != len(built):
-        # A configuration compared with itself measures nothing, and its column
-        # would say what the one beside it already says.
+        # Reading one configuration twice would measure its own sampling noise,
+        # which nothing here consumes yet — refused rather than paid for.
         parser.exit(2, "score: the same configuration named twice\n")
     return built
 

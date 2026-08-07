@@ -119,8 +119,8 @@ def test_the_effort_attaches_to_the_model_before_it(hand_claimed, monkeypatch, c
 
 
 def test_the_same_configuration_twice_is_refused(hand_claimed, monkeypatch, capsys):
-    """It would compare with itself, and its column would say what the one
-    beside it already says."""
+    """It would measure the classifier's own sampling noise — a real number,
+    and one nothing here consumes yet."""
     with pytest.raises(SystemExit) as exit_info:
         run(monkeypatch, FakeClient.answering(), "--model", "a-model", "--model", "a-model")
 

@@ -222,9 +222,6 @@ nothing checks sends practice somewhere unverified for weeks.
       and no `--prompt-version`, which would relabel the same prompt text; and
       `--stored`, which makes no call and asks for no credentials, so a
       comparison is reproducible once the reads are paid for
-- [ ] Decide whether re-reading at a configuration already read is available
-      on purpose — the same question asked twice says whether one
-      configuration answers it the same way
 
 ### Exit
 - [ ] Attribution runs on real daily attempts, carrying a measured agreement
