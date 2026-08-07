@@ -72,8 +72,33 @@ def main() -> None:
     claim_parser.add_argument(
         "--technique", help="only attempts whose problem carries it; every technique otherwise"
     )
-    claim_parser.add_argument("--lines", type=int, default=60, help="lines of code to show")
+    claim_parser.add_argument("--lines", type=int, default=120, help="lines of code to show")
     claim_parser.add_argument("--seed", type=int, default=0, help="sampling order")
+    # Revising asks about what the hand pass answered rather than what it did
+    # not, and shows what each named classifier read the same code as.
+    claim_parser.add_argument(
+        "--revise", action="store_true", help="ask again about attempts already claimed"
+    )
+    claim_parser.add_argument(
+        "--model",
+        dest="named",
+        action=Named,
+        metavar="MODEL",
+        help="a classifier whose reading to show beside the claim; repeatable",
+    )
+    claim_parser.add_argument(
+        "--effort",
+        dest="named",
+        action=Named,
+        metavar="EFFORT",
+        help="the effort of the --model before it",
+    )
+    claim_parser.add_argument(
+        "--disputed",
+        type=int,
+        default=1,
+        help="how many of them must read it differently; 0 for every claim",
+    )
     _user_argument(claim_parser)
 
     classify_parser = _command(sub, "classify", "claim stored attempts with the classifier")

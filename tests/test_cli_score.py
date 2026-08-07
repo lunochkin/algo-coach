@@ -150,8 +150,10 @@ def test_the_shares_are_over_what_both_read(hand_claimed, monkeypatch, capsys):
     assert "1 of 1 hand-claimed attempts read by all" in out
     assert "1/1 (100%)" in out
     assert "0/1 (0%)" in out
-    assert f"{MODEL}: greedy" in out
-    assert "a-cheap-model: sorting" in out
+    # Named by model and effort both: effort moves a number as far as the model
+    # does, so a column that dropped it would leave two readings under one name.
+    assert f"{MODEL}/{EFFORT}: greedy" in out
+    assert f"a-cheap-model/{EFFORT}: sorting" in out
 
 
 def test_a_classifier_that_fails_every_call_aborts(hand_claimed, monkeypatch, capsys):

@@ -7,10 +7,17 @@ class Answer(NamedTuple):
     rest: bool  # apply the defaults to every attempt still to come
 
 
-def ask_choice(what: str, options: list, default: list[str]) -> Answer | None:
+def ask_choice(
+    what: str, options: list, default: list[str], *, empty: str = "skip"
+) -> Answer | None:
     """One prompt over a numbered list. None on EOF, which ends the recording
-    with whatever already landed — the log is append-only either way."""
-    shown = ",".join(default) if default else "skip"
+    with whatever already landed — the log is append-only either way.
+
+    `empty` names what an empty answer does where "skip" would mislead: over an
+    attempt already claimed, writing nothing keeps the claim rather than
+    leaving it unanswered.
+    """
+    shown = ",".join(default) if default else empty
     while True:
         try:
             answer = input(f"  {what} [{shown}]: ").strip().lower()

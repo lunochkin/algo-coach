@@ -180,15 +180,14 @@ def describe(configuration: Configuration) -> str:
 
 
 def labels(configurations: Sequence[Configuration]) -> list[str]:
-    """A column heading per configuration: the model where that names it, the
-    effort beside it where two configurations share a model."""
-    models = [configuration.model for configuration in configurations]
-    return [
-        configuration.model
-        if models.count(configuration.model) == 1
-        else f"{configuration.model}/{configuration.effort}"
-        for configuration in configurations
-    ]
+    """A column heading per configuration: the model and the effort it ran at.
+
+    Both always, though the model alone would name a column where no two share
+    one. Effort moves a number as far as the model does, so a heading that
+    dropped it would put two readings of the same model under one name and
+    leave which is which to whoever remembers the command line.
+    """
+    return [f"{configuration.model}/{configuration.effort}" for configuration in configurations]
 
 
 def exactly(scored: Score) -> str:
