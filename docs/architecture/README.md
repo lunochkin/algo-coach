@@ -37,6 +37,20 @@ The vocabulary the append-only log references.
 
 - **Versioned as code, not stored as data** — a file shipped with the package,
   not a datastore the engine writes.
+- **A code carries the criterion for claiming it**, not only its name. The
+  codes are four kinds of thing, and one question asked of all four is
+  answered differently for each. Every code names its kind, what earns it, and
+  the near miss it is confused with — the near miss being the load-bearing
+  half, since the disputes are boundaries rather than definitions.
+  - A procedure counts when the solution performs it.
+  - A structure counts when its properties carry the correctness or the
+    complexity, and no other candidate covers what it does.
+  - A paradigm counts when it is why the solution is correct.
+  - A problem class counts when it is what the problem asks for.
+- **The criteria are the prompt.** They reach the classifier beside the
+  candidates and the reader beside the code, so one rulebook answers both.
+  Editing one therefore changes readings: it is a prompt change, it belongs in
+  the prompt hash, and a meaningful edit bumps the prompt version.
 - **A code is never deleted**, because records carrying it outlive it.
   Retirement means an entry in an alias map, applied when grouping.
 - **Membership is checked on the write path only.** A model that validated
@@ -131,6 +145,14 @@ rather than a field on the attempt.
   only asks whether the right code appears.
 - **Those claims are an eval set and a correction path**, never training data:
   nothing in the engine is trained.
+- **A set claimed against the readings calibrates; only a blind one measures.**
+  Writing the criteria means labelling, and labelling against a second reader
+  is how the boundaries surface — so the first hand pass is a rulebook being
+  written, and its product is the criteria rather than the labels. Agreement
+  measured on it afterwards is agreement with itself. The eval set is claimed
+  from the criteria alone, which is what makes the number mean anything; the
+  calibration set stays useful for a different question, whether a later edit
+  silently reclassifies what was already settled.
 - **The eval set holds one attempt per problem**, its latest carrying code. A
   retry asks the identical question — same solution, same candidate tags — so
   a repeat measures one decision twice rather than measuring two. The drill
@@ -183,8 +205,9 @@ rather than a field on the attempt.
   path.
 - **The prompt is named twice, deliberately.** The version is the author's
   statement that the reading changed meaningfully and is what marks a stored
-  claim stale; the hash is the mechanical fact of the text that was sent, and
-  marks nothing. A forgotten bump would otherwise be invisible forever —
+  claim stale; the hash is the mechanical fact of the text that was sent —
+  the instructions and the criteria both, since both shape every reading —
+  and marks nothing. A forgotten bump would otherwise be invisible forever —
   with both, two hashes under one version say so, and a re-derivation fixes
   it. Driving staleness from the hash instead would re-derive the backlog for
   a reflowed sentence: the hash is a syntactic boundary and the version a

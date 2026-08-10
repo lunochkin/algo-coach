@@ -136,13 +136,10 @@ nothing checks sends practice somewhere unverified for weeks.
       still described by its seed
 - [x] Label before running the classifier. Reviewing its answers is the same
       labour, but anchors on them: a plausible wrong call gets waved through.
-      Ordering is not what holds it: the hand pass prints the code and the
-      problem's tags and never an existing claim, so a machine verdict cannot
-      anchor one. A machine claim therefore leaves an attempt in the pool —
-      the classifier fills what no hand reached, and only the user's own
-      answer settles a problem
-- [ ] Thirty separates usable from broken, a hundred narrows the interval.
-      Stop at whichever answers the question
+- [ ] Claim the next batch blind, stopping at whichever count answers the
+      question: thirty separates usable from broken, a hundred narrows the
+      interval. Blind because the first thirty were revised against the
+      classifiers' readings and no longer measure agreement independently
 
 ### Technique attribution
 
@@ -223,19 +220,53 @@ nothing checks sends practice somewhere unverified for weeks.
       `--stored`, which makes no call and asks for no credentials, so a
       comparison is reproducible once the reads are paid for
 
+### What a code means
+
+Twelve configurations spanning a 10× price range scored within two attempts of
+each other and failed in the same cells, so the model was never the lever. The
+vocabulary is 27 bare codes and the prompt asks one question of all of them,
+which is well posed for a procedure and means something else for a structure, a
+paradigm and a problem class.
+
+- [ ] Give each code its kind, what earns it, and the near miss it is confused
+      with. The near miss is the load-bearing half: nothing failed for want of
+      knowing what a traversal is, and everything failed for want of a rule
+      that descending-and-pruning is not one. Written to stand on a
+      complexity, redundancy or definitional argument that would hold if no
+      model had ever run — a criterion whose only support is that the
+      classifiers agreed has been written backwards
+- [ ] Render them beside the candidates rather than into the system text,
+      which every call pays for whether or not the code is a candidate. The
+      three worked examples the system text carries today are per-code
+      criteria in the wrong file and move into their entries
+- [ ] Hash the instructions and the criteria together, since both now shape
+      every reading and an edit invisible to the hash is the divergence the
+      hash exists to catch. Prompt version to 2
+- [ ] Show the reader the same criteria the classifier gets. One rulebook and
+      two annotators is what makes their disagreement mean something: without
+      it, a disagreement is ambiguous between an unclear rule and two
+      different ones
+- [ ] Re-answer the calibration set from the criteria alone, readings hidden
+      until after. Not to fix labels — to find the rules that cannot be
+      applied without peeking, which is cheaper to learn on thirty settled
+      cases than on a hundred new ones
+- [ ] Read the calibration set at version 2 and compare it with version 1.
+      It cannot measure quality, having helped write the criteria, but it
+      answers the diagnostic question: did the two systematic failures stop
+      being systematic
+
 ### Exit
 - [ ] Attribution runs on real daily attempts, carrying a measured agreement
       number rather than an asserted one
-- [ ] The architecture doc read against the code, every divergence landing
-      here as an item. A doc that wins on conflict is only worth having while
-      the conflict is known, and the last one — a hand pass that skipped
-      machine-claimed attempts, against a doc saying a user claim corrects
-      them — surfaced by accident
 
 ## Deferred
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
 
+- [ ] Read the architecture doc against the code, landing every divergence
+      here as an item saying which side is wrong. Not that none exist — the
+      doc is target state and code lags it on purpose — but that none are
+      unknown: two were found by accident this phase, which is the argument
 - [ ] Classify freely over the whole vocabulary and intersect with the tags in
       code, as a second prompt version — when the hand claims can score it
       against the constrained one. An out-of-tag verdict is the only signal
