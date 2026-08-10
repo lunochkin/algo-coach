@@ -12,11 +12,18 @@ from algo_coach.schema import (
     ClaimSource,
     Diagnosis,
     FailureMode,
+    Kind,
     SelfLabel,
     Technique,
     TechniqueClaim,
     TestResult,
 )
+
+
+def entry(code: str) -> Technique:
+    """A vocabulary entry with the criterion fields filled in, so a test about
+    the code says only that."""
+    return Technique(code=code, kind=Kind.PROCEDURE, earns="e", near_miss="n")
 
 
 def make_attempt(id: str) -> Attempt:
@@ -182,12 +189,12 @@ def test_user_claim_carries_no_provenance(field):
 @pytest.mark.parametrize("code", ["", "  ", "../evil", "a/b", "Foo", "-leading-dash"])
 def test_technique_code_must_be_a_safe_slug(code):
     with pytest.raises(ValidationError):
-        Technique(code=code)
+        entry(code)
 
 
 @pytest.mark.parametrize("code", ["monotonic-stack", "backtracking"])
 def test_technique_code_accepts_slug(code):
-    assert Technique(code=code).code == code
+    assert entry(code).code == code
 
 
 def test_a_self_label_is_its_own_record():

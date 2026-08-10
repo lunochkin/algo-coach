@@ -11,7 +11,7 @@ from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.problem import Problem, ProblemDifficulty, ProblemOwner
 from algo_coach.schema.push import AttemptPush, ProblemPush
 from algo_coach.schema.record import AttemptRecord
-from algo_coach.schema.technique import Technique
+from algo_coach.schema.technique import Kind, Technique
 
 __all__ = [
     "Attempt",
@@ -21,6 +21,7 @@ __all__ = [
     "ClaimSource",
     "Diagnosis",
     "FailureMode",
+    "Kind",
     "Problem",
     "ProblemDifficulty",
     "ProblemOwner",

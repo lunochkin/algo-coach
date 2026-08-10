@@ -1,31 +1,166 @@
 {
   "techniques": [
-    "backtracking",
-    "binary-search",
-    "binary-search-tree",
-    "binary-tree",
-    "bit-manipulation",
-    "breadth-first-search",
-    "depth-first-search",
-    "divide-and-conquer",
-    "dynamic-programming",
-    "greedy",
-    "hashing",
-    "heap",
-    "intervals",
-    "linked-list",
-    "math",
-    "monotonic-stack",
-    "prefix-sum",
-    "recursion",
-    "shortest-path",
-    "sliding-window",
-    "sorting",
-    "string-matching",
-    "topological-sort",
-    "tree-traversal",
-    "trie",
-    "two-pointers",
-    "union-find"
+    {
+      "code": "backtracking",
+      "kind": "procedure",
+      "earns": "The solution builds partial candidates, extends one, and retracts the extension to try another — an explicit undo, or a fresh copy per branch that makes the retraction implicit.",
+      "near_miss": "A depth-first search, which visits each node once and retracts nothing: there is no partial candidate to abandon. Pruning does not decide it either — a search that prunes a subtree but never returns to an alternative extension is still a traversal."
+    },
+    {
+      "code": "binary-search",
+      "kind": "procedure",
+      "earns": "The solution halves a search space each step against a predicate that is monotone over it — an index range, or a range of candidate answers.",
+      "near_miss": "A halving the complexity does not rest on: one lookup in a sorted list beside a linear pass that dominates. And descending a binary search tree, which halves by the structure's own invariant — that is the structure's operation, and `binary-search-tree` names it."
+    },
+    {
+      "code": "binary-search-tree",
+      "kind": "structure",
+      "earns": "The ordering — every left descendant smaller, every right larger — carries the correctness or the complexity: a descent that discards one subtree, an in-order walk relied on for sorted output, an insert or delete that preserves the order.",
+      "near_miss": "A tree the problem calls a search tree while the solution ignores the ordering and visits every node as it would any tree. `binary-tree` covers that; the ordering has to do work of its own."
+    },
+    {
+      "code": "binary-tree",
+      "kind": "structure",
+      "earns": "Having exactly two children, distinguished as left and right, carries the correctness or the complexity — a left/right recursion, a level or height argument, a shape the answer depends on.",
+      "near_miss": "A tree walked as a generic graph of children, where nothing distinguishes left from right and an n-ary version of the same code would be correct unchanged. A search tree earns this too when the branching shape does work beyond the ordering, which is the usual case for a descent."
+    },
+    {
+      "code": "bit-manipulation",
+      "kind": "procedure",
+      "earns": "The solution operates on a value's bit representation — masking, shifting, XOR, popcount, subset enumeration — and that operation is what makes it correct or fast.",
+      "near_miss": "Arithmetic written with bit operators: `>> 1` for a midpoint, `& 1` for parity. Replace it with the ordinary arithmetic and nothing changes in either the answer or the cost."
+    },
+    {
+      "code": "breadth-first-search",
+      "kind": "procedure",
+      "earns": "The solution expands a frontier level by level from a FIFO queue, so a node is first reached along a path of fewest edges. The FIFO is load-bearing: replace it with a stack and the distances are wrong.",
+      "near_miss": "A queue used as a worklist, where a stack would serve equally well. Peeling zero-indegree vertices is correct under either order, so the queue carries nothing there — that is `topological-sort`."
+    },
+    {
+      "code": "depth-first-search",
+      "kind": "procedure",
+      "earns": "The solution follows one edge as far as it goes before considering the next, over a graph or a tree — by recursion or an explicit stack.",
+      "near_miss": "A recursion that follows no adjacency. Divide-and-conquer descends too, but over index arithmetic on a range it splits itself rather than over edges it is given."
+    },
+    {
+      "code": "divide-and-conquer",
+      "kind": "paradigm",
+      "earns": "The solution is correct because the input splits into independent subproblems of the same shape, solved separately and combined — and the combine step is where the work is.",
+      "near_miss": "Any recursion. A recursion following a structure's own edges is a traversal; one whose subproblems recur and are reused is dynamic programming. Here the pieces are cut by the solution and share nothing."
+    },
+    {
+      "code": "dynamic-programming",
+      "kind": "paradigm",
+      "earns": "The solution is correct and fast because subproblems recur and each is solved once — a memo that hits, or a table filled in dependency order. Remove the reuse and the run time changes complexity class.",
+      "near_miss": "Recursion with a cache that never hits, and a tree recursion computing one value per node: every subproblem is reached exactly once, so nothing is reused and the memo saves nothing. The overlap is the claim, not the memo."
+    },
+    {
+      "code": "greedy",
+      "kind": "paradigm",
+      "earns": "The solution is correct because a locally best choice, committed to and never reconsidered, is globally optimal — typically an order imposed first, then a single sweep taking each item that still fits.",
+      "near_miss": "A pass that computes an aggregate rather than choosing — a running maximum commits to nothing. And a pass that chooses but revises: comparing alternatives and keeping the better is dynamic programming, however local it looks."
+    },
+    {
+      "code": "hashing",
+      "kind": "structure",
+      "earns": "Constant-time lookup by key carries the complexity: a set or map turning a repeated scan into a probe, or a hash of a canonical form grouping equal items.",
+      "near_miss": "A map with dense integer keys, standing in for an array, or a set collecting output. A list would give the same complexity, so the hash carries nothing."
+    },
+    {
+      "code": "heap",
+      "kind": "structure",
+      "earns": "Repeatedly extracting the extreme of a set that changes as the algorithm runs, in logarithmic time — a priority queue driving the loop, which is why a sort cannot replace it.",
+      "near_miss": "One-shot use over a set that never changes — heapifying to read the k largest, where sorting costs the same and expresses it directly."
+    },
+    {
+      "code": "intervals",
+      "kind": "problem-class",
+      "earns": "The solution's data are ranges with a start and an end, and what it computes is over their overlap — sorting by endpoint and merging, sweeping starts against ends, or selecting a non-conflicting set.",
+      "near_miss": "A pair of numbers that is not a range — a two-field record, or the bounds of a window a scan maintains, which is `sliding-window`."
+    },
+    {
+      "code": "linked-list",
+      "kind": "structure",
+      "earns": "The correctness rests on relinking pointers, or on there being no random access — reversing by rewiring, splicing during a merge, or a fast/slow argument over the chain.",
+      "near_miss": "A list read once into an array and solved there. The code's structure is then the array's, and the chain is only the input format."
+    },
+    {
+      "code": "math",
+      "kind": "paradigm",
+      "earns": "The solution is correct because of a derived numeric fact — a closed form, a modular or number-theoretic identity, a counting argument — that replaces enumerating candidates.",
+      "near_miss": "Arithmetic every solution does: indexing, a midpoint, a modulo for bucketing or wraparound. The test is whether a derivation had to be found, not whether numbers appear."
+    },
+    {
+      "code": "monotonic-stack",
+      "kind": "structure",
+      "earns": "A stack kept sorted by an invariant, popped while the incoming element violates it, so each element is pushed and popped once and the next greater or smaller element is found in amortised constant time.",
+      "near_miss": "A plain stack tracking nesting — parentheses, or an iterative traversal's frontier. Nothing is popped to restore an order, so there is no monotone invariant."
+    },
+    {
+      "code": "prefix-sum",
+      "kind": "structure",
+      "earns": "A cumulative array, or a running total against a map of totals already seen, answering a range aggregate in constant time and turning a quadratic scan into a linear one.",
+      "near_miss": "A running total read only at the end. No range is ever queried against an earlier total, so nothing is prefixed."
+    },
+    {
+      "code": "recursion",
+      "kind": "procedure",
+      "earns": "The solution calls itself, and no narrower candidate names what the recursion does — unfolding a definition, or generating a sequence.",
+      "near_miss": "Every other recursive code. Divide-and-conquer, depth-first search, backtracking, tree traversal and memoised dynamic programming are all self-calls, and each says what the self-call is for. This is the one code naming a language mechanism rather than an approach, so it sits under all of them and is claimed only when none fits."
+    },
+    {
+      "code": "shortest-path",
+      "kind": "problem-class",
+      "earns": "The solution computes a minimum cost between vertices, accumulated along the edges of a graph it is given or builds — distances relaxed until they settle, or a frontier over unweighted edges.",
+      "near_miss": "A minimum that is not over routes: a smallest window, a fewest operations with no graph behind it. There has to be an adjacency the cost accumulates along."
+    },
+    {
+      "code": "sliding-window",
+      "kind": "procedure",
+      "earns": "Two bounds over one contiguous run, both advancing forward only, with an aggregate updated as they move — something added on the right, something removed on the left — so the whole scan is linear rather than one pass per window.",
+      "near_miss": "A single scan with a map and no left bound: nothing ever leaves, so there is no window. And two indices converging or walking two sequences, which is `two-pointers`. The test is whether advancing the left bound removes something from the aggregate."
+    },
+    {
+      "code": "sorting",
+      "kind": "procedure",
+      "earns": "The solution orders its data — by a call or by hand — and a later step relies on that order.",
+      "near_miss": "Ordering the output for presentation, and input that arrives sorted: the solution performs no sort there, so what it did is whatever exploits the order."
+    },
+    {
+      "code": "string-matching",
+      "kind": "problem-class",
+      "earns": "The solution locates a pattern inside a longer text, or decides whether it occurs — comparing a window against the pattern, a failure function, a rolling hash, or successive character counts against the pattern's.",
+      "near_miss": "String work that seeks nothing inside anything: parsing, building, comparing two whole strings, counting characters. There has to be a pattern and a text it is sought in."
+    },
+    {
+      "code": "topological-sort",
+      "kind": "procedure",
+      "earns": "The solution produces an order over vertices in which every edge points forward — peeling zero-indegree vertices, or reversing a depth-first post-order. Counting the peeled vertices to decide acyclicity still performs it.",
+      "near_miss": "Cycle detection by colour-marking during a depth-first search, which computes no order and reports only whether one exists."
+    },
+    {
+      "code": "tree-traversal",
+      "kind": "procedure",
+      "earns": "The solution visits every node of a tree in a defined order — pre-, in-, post-order, or level by level — and the order matters to what it computes.",
+      "near_miss": "A descent that follows one child at each step and discards the other, as a search-tree lookup or insert does. That reaches a path, not a tree: the node count is the height, not the size, and `binary-search-tree` names it."
+    },
+    {
+      "code": "trie",
+      "kind": "structure",
+      "earns": "A tree keyed by successive characters, so words sharing a prefix share a path and lookup or insert costs the key's length rather than the dictionary's size.",
+      "near_miss": "A set or map of whole words, which answers membership but no prefix question; and a per-character table with no path linking one character to the next."
+    },
+    {
+      "code": "two-pointers",
+      "kind": "procedure",
+      "earns": "Two indices advanced by a comparison rather than a fixed step — converging from both ends of sorted data, taking the smaller head while merging two sequences, or a fast and a slow index whose gap is the argument.",
+      "near_miss": "Two bounds over one contiguous run with an aggregate maintained between them, which is `sliding-window`. And a second index that is a constant offset carrying no argument."
+    },
+    {
+      "code": "union-find",
+      "kind": "structure",
+      "earns": "A disjoint-set forest with union and find, so connectivity is answered as edges arrive, without re-traversing the graph after each one.",
+      "near_miss": "Labelling components by one traversal over a graph already fully known — same answer, no incremental union, and nothing a disjoint-set forest was needed for."
+    }
   ]
 }

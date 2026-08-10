@@ -228,7 +228,7 @@ vocabulary is 27 bare codes and the prompt asks one question of all of them,
 which is well posed for a procedure and means something else for a structure, a
 paradigm and a problem class.
 
-- [ ] Give each code its kind, what earns it, and the near miss it is confused
+- [x] Give each code its kind, what earns it, and the near miss it is confused
       with. The near miss is the load-bearing half: nothing failed for want of
       knowing what a traversal is, and everything failed for want of a rule
       that descending-and-pruning is not one. Written to stand on a
