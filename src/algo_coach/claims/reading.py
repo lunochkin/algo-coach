@@ -14,7 +14,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.claims.classifier import DEFAULT, PROMPT_HASH, Configuration
+from algo_coach.calls import CallLog
+from algo_coach.claims.classifier import DEFAULT, Configuration, request_hash
 from algo_coach.claims.run import (
     ABORT_AFTER,
     CONCURRENCY,
@@ -34,7 +35,6 @@ class ReadResult(BaseModel):
     verdicts: dict[str, list[str]] = Field(default_factory=dict)  # attempt id -> techniques
     read: int = 0  # attempts this run paid a call for
     reused: int = 0  # answered from a stored reading
-    rehashed: int = 0  # of `reused`, those written under another prompt text
     undecided: int = 0  # named no candidate, so unstorable and read again next run
     failed: list[Failed] = Field(default_factory=list)
     aborted: bool = False
@@ -43,6 +43,7 @@ class ReadResult(BaseModel):
 def read(
     client: Any,
     log: AttemptLog,
+    calls: CallLog,
     attempts: Sequence[Attempt],
     problems: Mapping[str, Problem],
     *,
@@ -50,6 +51,7 @@ def read(
     configuration: Configuration = DEFAULT,
     limit: int | None = None,
     concurrency: int = CONCURRENCY,
+    fresh: bool = False,
     on_progress: Callable[[Progress], None] | None = None,
 ) -> ReadResult:
     """What one classifier reads each attempt as, from the log where it can.
@@ -62,7 +64,12 @@ def read(
     still unread is taken newest first, as the backlog run takes it. A cap of
     zero pays for nothing, so `client` is never reached and may be absent.
     """
-    stored = readings_at(claims, configuration)
+    asked = {
+        attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
+        for attempt in attempts
+        if attempt.problem_id in problems
+    }
+    stored = {} if fresh else readings_at(claims, configuration, asked)
     result = ReadResult()
 
     unread: list[Attempt] = []
@@ -73,9 +80,6 @@ def read(
             continue
         result.verdicts[attempt.id] = reading.techniques
         result.reused += 1
-        # Two hashes under one version are a forgotten bump. Reuse keys off the
-        # version, so nothing else would ever say so.
-        result.rehashed += reading.prompt_hash != PROMPT_HASH
 
     asking = sorted(unread, key=recency, reverse=True)[:limit]
 
@@ -89,15 +93,16 @@ def read(
 
     consecutive = 0
     index = 0
-    for attempt, techniques, failure in as_answered(
+    for attempt, answer, failure in as_answered(
         lambda attempt: read_one(
-            client, attempt, problems[attempt.problem_id], configuration=configuration
+            client, calls, attempt, problems[attempt.problem_id], configuration=configuration
         ),
         asking,
         concurrency=concurrency,
     ):
         index += 1
         problem = problems[attempt.problem_id]
+        techniques, call = answer if answer is not None else ([], None)
         if failure is not None:
             # One attempt's problem, as in the backlog run: an eval that dies
             # on the first refusal reports nothing about the rest. A run of
@@ -119,7 +124,8 @@ def read(
             result.undecided += 1
             report(index, attempt, problem.title)
             continue
-        store(log, attempt.id, techniques, configuration=configuration)
+        if call is not None:
+            store(log, attempt.id, techniques, call)
         result.verdicts[attempt.id] = techniques
         result.read += 1
         report(index, attempt, problem.title, techniques=techniques)

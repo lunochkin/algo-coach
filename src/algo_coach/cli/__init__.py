@@ -120,6 +120,11 @@ def main() -> None:
         default=CONCURRENCY,
         help="calls in flight at once; one at a time otherwise",
     )
+    classify_parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help="ask again even where a stored claim answers the same prompt",
+    )
     _user_argument(classify_parser)
 
     score_parser = _command(sub, "score", "the classifier against the user's own claims")
@@ -155,6 +160,11 @@ def main() -> None:
         type=int,
         default=CONCURRENCY,
         help="calls in flight at once; one at a time otherwise",
+    )
+    score_parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help="ask again even where a stored claim answers the same prompt",
     )
     _user_argument(score_parser)
 

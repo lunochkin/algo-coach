@@ -91,15 +91,17 @@ class TechniqueClaim(AttemptRecord):
     techniques: list[str] = Field(min_length=1)
     source: ClaimSource  # required: a mislabelled claim cannot be corrected later
     # What produced a machine claim, whole: model, how hard it was asked to
-    # think, the author's statement that the reading changed, and the
-    # mechanical fact of the text sent. Optional on the field because a user
-    # claim carries none of them; required on a machine one by the validator.
+    # think, the digest of the text sent, and the call that carries the rest.
+    # The first three are copied from the call so the claims file reads on its
+    # own; they cannot drift, since a call is append-only and the copy is made
+    # in the same write. Optional on the field because a user claim carries
+    # none of them; required on a machine one by the validator.
     model: str | None = None
     effort: str | None = None
-    prompt_version: str | None = None
     prompt_hash: str | None = None
+    call_id: str | None = None
 
-    PROVENANCE: ClassVar[tuple[str, ...]] = ("model", "effort", "prompt_version", "prompt_hash")
+    PROVENANCE: ClassVar[tuple[str, ...]] = ("model", "effort", "prompt_hash", "call_id")
 
     @model_validator(mode="after")
     def _provenance_matches_source(self) -> TechniqueClaim:

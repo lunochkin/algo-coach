@@ -9,6 +9,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from algo_coach.calls import CallLog
 from algo_coach.claims.classifier import DEFAULT, Configuration
 from algo_coach.claims.reading import read
 from algo_coach.claims.run import CONCURRENCY, Failed, Progress
@@ -61,7 +62,6 @@ class Score(BaseModel):
     # better number for it.
     read: int = 0
     reused: int = 0
-    rehashed: int = 0
     undecided: int = 0
     aborted: bool = False
 
@@ -173,12 +173,14 @@ def per_decision(
 def score_backlog(
     client: Any,
     log: AttemptLog,
+    calls: CallLog,
     problems: Mapping[str, Problem],
     *,
     user_id: str,
     configurations: Sequence[Configuration] = (DEFAULT,),
     limit: int | None = None,
     concurrency: int = CONCURRENCY,
+    fresh: bool = False,
     on_configuration: Callable[[Configuration], None] | None = None,
     on_progress: Callable[[Progress], None] | None = None,
 ) -> Comparison:
@@ -219,12 +221,14 @@ def score_backlog(
             read(
                 client,
                 log,
+                calls,
                 hand_claimed,
                 problems,
                 claims=claims,
                 configuration=configuration,
                 limit=limit,
                 concurrency=concurrency,
+                fresh=fresh,
                 on_progress=on_progress,
             )
         )
@@ -252,7 +256,7 @@ def score_backlog(
         )
         scored.failed = reading.failed
         scored.read, scored.reused = reading.read, reading.reused
-        scored.rehashed, scored.undecided = reading.rehashed, reading.undecided
+        scored.undecided = reading.undecided
         scored.aborted = reading.aborted
         result.scores.append(ConfigurationScore(configuration=configuration, score=scored))
 

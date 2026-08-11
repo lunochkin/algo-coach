@@ -15,7 +15,11 @@ T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
 # The configuration `machine_claim` defaults to, so a test can look a claim up
 # without restating what produced it.
-CONFIGURATION = Configuration(model="a-model", effort="medium", prompt_version="1")
+CONFIGURATION = Configuration(model="a-model", effort="medium")
+
+# The digest `machine_claim` defaults to. A test naming a different one is
+# saying the prompt changed, which is the only thing that makes a claim stale.
+PROMPT_HASH = "0123456789ab"
 
 
 def machine_claim(
@@ -24,8 +28,8 @@ def machine_claim(
     *,
     model: str = "a-model",
     effort: str = "medium",
-    prompt_version: str = "1",
-    prompt_hash: str = "0123456789ab",
+    prompt_hash: str = PROMPT_HASH,
+    call_id: str = "call-1",
 ) -> TechniqueClaim:
     """A classifier claim under a named configuration, defaulted so a test
     naming one field says that field is what it is about."""
@@ -34,8 +38,8 @@ def machine_claim(
         techniques,
         model=model,
         effort=effort,
-        prompt_version=prompt_version,
         prompt_hash=prompt_hash,
+        call_id=call_id,
     )
 
 

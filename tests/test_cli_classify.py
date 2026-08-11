@@ -4,7 +4,7 @@ import pytest
 from helpers import FakeClient, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach import cli
-from algo_coach.claims import EFFORT, MODEL, PROMPT_HASH, PROMPT_VERSION
+from algo_coach.claims import EFFORT, MODEL
 from algo_coach.claims.run import ABORT_AFTER
 from algo_coach.log import AttemptLog
 from algo_coach.techniques import standing_claims
@@ -33,10 +33,7 @@ def test_the_command_claims_the_backlog(root, monkeypatch, capsys):
 
     (claim,) = AttemptLog(root).claims()
     assert claim.techniques == ["greedy"]
-    assert (
-        f"1 claim(s) written by {MODEL}, effort {EFFORT}, prompt {PROMPT_VERSION}"
-        in capsys.readouterr().out
-    )
+    assert f"1 claim(s) written by {MODEL}, effort {EFFORT}" in capsys.readouterr().out
 
 
 def test_a_run_that_landed_nothing_exits_nonzero(root, monkeypatch, capsys):
@@ -96,13 +93,13 @@ def test_an_aborted_run_says_so_and_exits_nonzero(root, monkeypatch, capsys):
 
 def test_redo_re_derives_a_stale_machine_claim(root, monkeypatch, capsys):
     log = AttemptLog(root)
-    log.append_claim(machine_claim("a1", ["sorting"], model=MODEL, prompt_version="0"))
+    log.append_claim(machine_claim("a1", ["sorting"], model=MODEL, prompt_hash="ffffffffffff"))
 
     run(monkeypatch, FakeClient.answering(Verdict(["greedy"])), "--redo")
 
     standing = standing_claims(AttemptLog(root).claims())["a1"]
-    assert (standing.techniques, standing.prompt_version) == (["greedy"], PROMPT_VERSION)
-    assert (standing.effort, standing.prompt_hash) == (EFFORT, PROMPT_HASH)
+    assert standing.techniques == ["greedy"]
+    assert (standing.model, standing.effort) == (MODEL, EFFORT)
     assert "1 stale machine claim(s) re-derived" in capsys.readouterr().out
 
 

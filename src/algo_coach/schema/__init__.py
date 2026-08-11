@@ -7,6 +7,7 @@ from algo_coach.schema.attempt import (
     TechniqueClaim,
     TestResult,
 )
+from algo_coach.schema.call import Call
 from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.problem import Problem, ProblemDifficulty, ProblemOwner
 from algo_coach.schema.push import AttemptPush, ProblemPush
@@ -18,6 +19,7 @@ __all__ = [
     "AttemptOrigin",
     "AttemptPush",
     "AttemptRecord",
+    "Call",
     "ClaimSource",
     "Diagnosis",
     "FailureMode",

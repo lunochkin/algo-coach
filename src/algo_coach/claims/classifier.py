@@ -7,25 +7,17 @@ rather than improve on it.
 
 import json
 from collections.abc import Sequence
-from hashlib import sha256
 from typing import Any
 
 from pydantic import BaseModel
 
+from algo_coach.calls import CallLog, ask
+from algo_coach.calls import prompt_hash as digest
+from algo_coach.schema import Call
 from algo_coach.techniques import criteria
 
 MODEL = "claude-opus-5"
 EFFORT = "medium"
-# The effort of a model that is asked for none — some reject the parameter
-# outright. A named level rather than an absent field, since a reading whose
-# configuration is partly unknown compares with nothing: what it ran at is the
-# model's own default, which is a fact about the reading and not a gap in it.
-UNSENT = "default"
-# Bumped when the reading changes meaningfully — the author's statement, not a
-# number to be greater than. The effort is recorded beside it rather than
-# folded into it, so a bump says the prompt changed and nothing else.
-PROMPT_VERSION = "4"
-
 SYSTEM = """You name which techniques a solution used.
 
 The candidates are one problem's tags — what the problem could exercise. Say
@@ -48,27 +40,19 @@ the syntax, and let each candidate's near miss say where that line falls.
 
 If the code used none of the candidates, name none of them."""
 
-# The mechanical fact of the instructions sent, marking nothing. A forgotten
-# version bump is otherwise invisible forever; with both, two hashes under one
-# version say so. Twelve hex characters of sha256 over SYSTEM: only ever
-# compared for equality, and the candidates and the code vary per attempt, so
-# hashing the rendered prompt would identify a call rather than a
-# configuration.
-PROMPT_HASH = sha256(SYSTEM.encode()).hexdigest()[:12]
-
 
 class Configuration(BaseModel, frozen=True):
     """Which classifier a reading came from, and the key it is found under.
 
-    Three fields, not the record's four: the hash is this build's `SYSTEM` text
-    rather than something a caller selects, so it is stamped on the write path
-    and keyed off nowhere. Frozen because it is an identity — compared whole,
-    never ordered, so a rollback is naming the earlier one.
+    Two fields, not the record's four. The prompt is not among them: it varies
+    per attempt, since a candidate's criterion travels with it, so what rulebook
+    a reading came from is a digest of what that attempt was actually sent and
+    never a property of the classifier. Frozen because it is an identity —
+    compared whole, never ordered, so a rollback is naming the earlier one.
     """
 
     model: str = MODEL
     effort: str = EFFORT
-    prompt_version: str = PROMPT_VERSION
 
 
 DEFAULT = Configuration()
@@ -78,10 +62,27 @@ class ClassifierError(Exception):
     """The model returned no verdict — a refusal, or an answer cut short."""
 
 
+def request_hash(candidates: Sequence[str], code: str) -> str:
+    """The digest of what this attempt would be sent, right now.
+
+    What decides whether a reading is worth paying for again. A criterion
+    travels with its candidate, so editing one entry changes this for the
+    attempts carrying that code and for no others — which is the whole reason
+    it is computed per attempt rather than carried on the configuration.
+    """
+    return digest(SYSTEM, prompt(candidates, code))
+
+
 def classify(
-    client: Any, candidates: Sequence[str], code: str, *, configuration: Configuration = DEFAULT
-) -> list[str]:
-    """The techniques a solution used, chosen from the problem's own tags.
+    client: Any,
+    log: CallLog,
+    candidates: Sequence[str],
+    code: str,
+    *,
+    configuration: Configuration = DEFAULT,
+) -> tuple[list[str], Call | None]:
+    """The techniques a solution used, chosen from the problem's own tags, and
+    the call that read them — `None` where the answer cost nothing.
 
     The candidates appear twice, doing different jobs. The response schema
     enforces them, so the classifier cannot name a technique the tags do not.
@@ -99,32 +100,25 @@ def classify(
     if len(candidates) < 2:
         # Nothing to decide: the fallback already says this, and a schema
         # offering one choice would ask the model to agree with itself.
-        return list(candidates)
+        return list(candidates), None
 
-    output_config: dict[str, Any] = {
-        "format": {"type": "json_schema", "schema": schema(candidates)}
-    }
-    if configuration.effort != UNSENT:
-        # Sent only where it was asked for: a model that does not take the
-        # parameter rejects every call carrying it, whatever the level.
-        output_config["effort"] = configuration.effort
-
-    response = client.messages.create(
-        model=configuration.model,
-        max_tokens=16000,
+    call, text = ask(
+        client,
+        log,
         system=SYSTEM,
-        output_config=output_config,
-        messages=[{"role": "user", "content": prompt(candidates, code)}],
+        content=prompt(candidates, code),
+        model=configuration.model,
+        effort=configuration.effort,
+        schema=schema(candidates),
     )
-    text = next((block.text for block in response.content if block.type == "text"), None)
     if text is None:
-        raise ClassifierError(f"no verdict: {response.stop_reason}")
+        raise ClassifierError(call.error or "no verdict")
 
     # Checked again because the schema's guarantee ends with the request and
     # the record does not: an append-only log has no pass that fixes a bad
     # code later.
     named = set(json.loads(text)["techniques"])
-    return [technique for technique in candidates if technique in named]
+    return [technique for technique in candidates if technique in named], call
 
 
 def prompt(candidates: Sequence[str], code: str) -> str:

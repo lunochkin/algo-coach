@@ -12,12 +12,13 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.claims.classifier import DEFAULT, PROMPT_HASH, Configuration, classify
+from algo_coach.calls import CallLog
+from algo_coach.claims.classifier import DEFAULT, Configuration, classify, request_hash
 from algo_coach.claims.sample import eligible, recency
 from algo_coach.claims.stale import is_stale
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim
-from algo_coach.schema import Attempt, Problem
+from algo_coach.schema import Attempt, Call, Problem
 from algo_coach.techniques import standing_claims
 
 # Consecutive failures that mean the run is broken rather than unlucky. A
@@ -63,41 +64,45 @@ class ClassifyResult(BaseModel):
 
 def read_one(
     client: Any,
+    calls: CallLog,
     attempt: Attempt,
     problem: Problem,
     *,
     configuration: Configuration = DEFAULT,
-) -> list[str]:
-    """What one classifier reads one attempt as. Makes the call and nothing
-    else, so it is safe to run several at once — the write is the caller's,
-    and the log has one writer however many calls are in flight."""
-    return classify(client, problem.techniques, attempt.code or "", configuration=configuration)
+) -> tuple[list[str], Call | None]:
+    """What one classifier reads one attempt as, and the call that read it.
+
+    Makes the call and writes no claim, so it is safe to run several at once —
+    the claim is the caller's, and the claims log has one writer however many
+    calls are in flight. The call log is its own file and its own append.
+    """
+    return classify(
+        client, calls, problem.techniques, attempt.code or "", configuration=configuration
+    )
 
 
 def store(
     log: AttemptLog,
     attempt_id: str,
     techniques: Sequence[str],
-    *,
-    configuration: Configuration = DEFAULT,
+    call: Call,
 ) -> None:
     """Append what a classifier read, on the calling thread.
 
-    Written even when the verdict is unchanged: the record names the classifier
-    that reached it, so an unwritten agreement would stay stale and be paid for
-    again on every later run.
-
-    The hash is this build's rather than the configuration's: a caller names
-    which classifier to run, never which prompt text it sent.
+    Only ever after a call: a reading served from an earlier claim was already
+    written by the run that paid for it, and appending it again would say a
+    question was asked twice. The model, effort and digest are copied from the
+    call so the claims file reads without opening the call log, and the call is
+    cited for what only it holds — the tokens, the response, the reasoning.
     """
     log.append_claim(
         classifier_claim(
             attempt_id,
             list(techniques),
-            model=configuration.model,
-            effort=configuration.effort,
-            prompt_version=configuration.prompt_version,
-            prompt_hash=PROMPT_HASH,
+            model=call.model,
+            effort=call.effort,
+            prompt_hash=call.prompt_hash,
+            call_id=call.id,
         )
     )
 
@@ -105,6 +110,7 @@ def store(
 def ask(
     client: Any,
     log: AttemptLog,
+    calls: CallLog,
     attempt: Attempt,
     problem: Problem,
     *,
@@ -114,12 +120,12 @@ def ask(
 
     An empty verdict is undecided rather than a claim: a claim cannot say "none
     of these", so nothing is written and whatever already answers the attempt
-    keeps answering it. Failures are the caller's — a backlog run aborts on a
-    broken key and an eval does not.
+    keeps answering it — the call log still records that it was asked. Failures
+    are the caller's: a backlog run aborts on a broken key and an eval does not.
     """
-    techniques = read_one(client, attempt, problem, configuration=configuration)
-    if techniques:
-        store(log, attempt.id, techniques, configuration=configuration)
+    techniques, call = read_one(client, calls, attempt, problem, configuration=configuration)
+    if techniques and call is not None:
+        store(log, attempt.id, techniques, call)
     return techniques
 
 
@@ -170,6 +176,7 @@ def as_answered[T, R](
 def classify_backlog(
     client: Any,
     log: AttemptLog,
+    calls: CallLog,
     problems: Mapping[str, Problem],
     *,
     user_id: str,
@@ -178,6 +185,7 @@ def classify_backlog(
     technique: str | None = None,
     redo: bool = False,
     concurrency: int = CONCURRENCY,
+    fresh: bool = False,
     on_progress: Callable[[Progress], None] | None = None,
 ) -> ClassifyResult:
     """Claim every attempt nothing has claimed yet, and with `redo`, every one
@@ -204,12 +212,20 @@ def classify_backlog(
         key=recency,
         reverse=True,
     )
+    # What each attempt would be sent now. A claim already answering that exact
+    # question is not stale however old it is, and `fresh` says to ask anyway —
+    # which is what a run measuring a model against itself needs.
+    asked = {
+        attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
+        for attempt in candidates
+    }
     unclaimed = [attempt for attempt in candidates if attempt.id not in standing]
     stale = (
         [
             attempt
             for attempt in candidates
-            if attempt.id in standing and is_stale(standing[attempt.id], configuration)
+            if attempt.id in standing
+            and (fresh or is_stale(standing[attempt.id], configuration, asked[attempt.id]))
         ]
         if redo
         else []
@@ -229,9 +245,9 @@ def classify_backlog(
     result = ClassifyResult()
     consecutive = 0
     index = 0
-    for attempt, techniques, failure in as_answered(
+    for attempt, answer, failure in as_answered(
         lambda attempt: read_one(
-            client, attempt, problems[attempt.problem_id], configuration=configuration
+            client, calls, attempt, problems[attempt.problem_id], configuration=configuration
         ),
         asking,
         concurrency=concurrency,
@@ -241,6 +257,7 @@ def classify_backlog(
         # and what a reader wants is a count that climbs.
         index += 1
         problem = problems[attempt.problem_id]
+        techniques, call = answer if answer is not None else ([], None)
         if failure is not None:
             # Broad on purpose: a refusal, a rate limit or a dropped connection
             # is one attempt's problem, and a backlog run must not lose the
@@ -266,7 +283,8 @@ def classify_backlog(
             result.undecided += 1
             report(index, attempt, problem.title)
             continue
-        store(log, attempt.id, techniques, configuration=configuration)
+        if call is not None:
+            store(log, attempt.id, techniques, call)
         if attempt.id in superseding:
             result.redone += 1
         else:

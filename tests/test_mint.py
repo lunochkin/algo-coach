@@ -21,7 +21,7 @@ def test_a_user_claim_carries_no_version():
     claim = user_claim("a1", ["greedy", "sorting"])
 
     assert claim.source is ClaimSource.USER
-    assert (claim.model, claim.effort, claim.prompt_version, claim.prompt_hash) == (
+    assert (claim.model, claim.effort, claim.call_id, claim.prompt_hash) == (
         None,
         None,
         None,
@@ -37,10 +37,10 @@ def test_a_classifier_claim_names_what_produced_it():
     claim = machine_claim("a1", ["greedy"])
 
     assert claim.source is ClaimSource.CLASSIFIER
-    assert (claim.model, claim.effort, claim.prompt_version, claim.prompt_hash) == (
+    assert (claim.model, claim.effort, claim.call_id, claim.prompt_hash) == (
         "a-model",
         "medium",
-        "1",
+        "call-1",
         "0123456789ab",
     )
 

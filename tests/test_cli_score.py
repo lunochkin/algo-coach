@@ -5,7 +5,7 @@ import pytest
 from helpers import T0, FakeClient, Verdict, attempt, seed_problem
 
 from algo_coach import cli
-from algo_coach.claims import EFFORT, MODEL, PROMPT_HASH, PROMPT_VERSION
+from algo_coach.claims import EFFORT, MODEL, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_claim
 from algo_coach.schema import ClaimSource
@@ -26,8 +26,8 @@ def reading(attempt_id: str, techniques: list[str], *, model: str = MODEL):
         techniques,
         model=model,
         effort=EFFORT,
-        prompt_version=PROMPT_VERSION,
-        prompt_hash=PROMPT_HASH,
+        prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
+        call_id="call-1",
     )
 
 

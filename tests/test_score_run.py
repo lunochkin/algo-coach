@@ -3,21 +3,17 @@ from datetime import timedelta
 import pytest
 from helpers import T0, FakeClient, Verdict, attempt, machine_claim, seed_problem
 
-from algo_coach.claims import (
-    DEFAULT,
-    EFFORT,
-    MODEL,
-    PROMPT_HASH,
-    PROMPT_VERSION,
-    Configuration,
-    score_backlog,
-)
+from algo_coach.calls import CallLog
+from algo_coach.claims import DEFAULT, EFFORT, MODEL, Configuration, request_hash, score_backlog
 from algo_coach.claims.run import ABORT_AFTER
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import ClaimSource
 from algo_coach.techniques import standing_claims
+
+# What the one-attempt fixture would be sent now.
+ASKED = request_hash(["greedy", "sorting"], "def f(): pass")
 
 
 def reading(attempt_id: str, techniques: list[str], **configuration):
@@ -29,8 +25,7 @@ def reading(attempt_id: str, techniques: list[str], **configuration):
         **{
             "model": MODEL,
             "effort": EFFORT,
-            "prompt_version": PROMPT_VERSION,
-            "prompt_hash": PROMPT_HASH,
+            "prompt_hash": ASKED,
         }
         | configuration,
     )
@@ -64,7 +59,7 @@ def two_problems(tmp_path) -> AttemptLog:
 
 def compare(client, log, **kwargs):
     problems = {problem.id: problem for problem in ProblemStore(log.root).all()}
-    return score_backlog(client, log, problems, user_id="u1", **kwargs)
+    return score_backlog(client, log, CallLog(log.root), problems, user_id="u1", **kwargs)
 
 
 def run(client, log, **kwargs):
@@ -104,12 +99,8 @@ def test_what_the_classifier_read_is_stored(hand_claimed):
 
     (stored,) = machine_claims(hand_claimed)
     assert (stored.attempt_id, stored.techniques) == ("a1", ["sorting"])
-    assert (stored.model, stored.effort, stored.prompt_version, stored.prompt_hash) == (
-        MODEL,
-        EFFORT,
-        PROMPT_VERSION,
-        PROMPT_HASH,
-    )
+    assert (stored.model, stored.effort, stored.prompt_hash) == (MODEL, EFFORT, ASKED)
+    assert stored.call_id
 
 
 def test_a_stored_reading_never_becomes_the_standing_claim(hand_claimed):
@@ -150,11 +141,11 @@ def test_a_reading_stored_before_the_hand_claim_is_reused(tmp_path):
     assert client.messages.calls == []
 
 
-def test_a_rolled_back_configuration_reuses_its_own_reading(hand_claimed):
-    """Running an earlier prompt on purpose is a rollback, so this
-    configuration's reading can sit under a later one's and still answer."""
+def test_a_rolled_back_rulebook_reuses_the_reading_under_it(hand_claimed):
+    """Running an earlier rulebook on purpose is a rollback, so the reading
+    answering today's question can sit under a later one and still answer."""
     hand_claimed.append_claim(reading("a1", ["greedy"]))
-    hand_claimed.append_claim(reading("a1", ["sorting"], prompt_version="0"))
+    hand_claimed.append_claim(reading("a1", ["sorting"], prompt_hash="ffffffffffff"))
     client = FakeClient.answering()
 
     result = run(client, hand_claimed)
@@ -162,8 +153,8 @@ def test_a_rolled_back_configuration_reuses_its_own_reading(hand_claimed):
     assert (result.exact, result.reused, client.messages.calls) == (1, 1, [])
 
 
-def test_a_reading_from_an_older_prompt_version_is_read_again(hand_claimed):
-    hand_claimed.append_claim(reading("a1", ["sorting"], prompt_version="0"))
+def test_a_reading_answering_another_prompt_is_read_again(hand_claimed):
+    hand_claimed.append_claim(reading("a1", ["sorting"], prompt_hash="ffffffffffff"))
 
     result = run(FakeClient.answering(Verdict(["greedy"])), hand_claimed)
 
@@ -178,10 +169,10 @@ def test_a_reading_from_another_model_is_read_again(hand_claimed):
     assert (result.read, result.exact) == (1, 1)
 
 
-def test_a_reading_differing_only_in_prompt_hash_is_reused(hand_claimed):
-    """The hash marks nothing — only the author's version bump says the reading
-    changed, and a reflowed sentence must not re-read the eval set."""
-    hand_claimed.append_claim(reading("a1", ["greedy"], prompt_hash="ffffffffffff"))
+def test_a_reading_answering_the_same_prompt_is_reused(hand_claimed):
+    """The saving: an edit this attempt's candidates never carried leaves its
+    stored reading answering the same question, and nothing is paid twice."""
+    hand_claimed.append_claim(reading("a1", ["greedy"]))
     client = FakeClient.answering()
 
     result = run(client, hand_claimed)
@@ -189,15 +180,14 @@ def test_a_reading_differing_only_in_prompt_hash_is_reused(hand_claimed):
     assert (result.reused, client.messages.calls) == (1, [])
 
 
-def test_a_reused_reading_from_another_prompt_text_is_reported(hand_claimed):
-    """Two hashes under one version are a forgotten bump. Reuse keys off the
-    version, so the divergence the hash exists to expose is the one reuse would
-    otherwise bury."""
-    hand_claimed.append_claim(reading("a1", ["greedy"], prompt_hash="ffffffffffff"))
+def test_fresh_asks_again_where_a_reading_already_answers(hand_claimed):
+    """A run measuring a model against itself needs the same question asked
+    twice, which is the one thing a cache exists to prevent."""
+    hand_claimed.append_claim(reading("a1", ["greedy"]))
 
-    result = run(FakeClient.answering(), hand_claimed)
+    result = run(FakeClient.answering(Verdict(["sorting"])), hand_claimed, fresh=True)
 
-    assert (result.reused, result.rehashed) == (1, 1)
+    assert (result.read, result.reused) == (1, 0)
 
 
 def test_naming_no_candidate_is_undecided_rather_than_a_total_miss(hand_claimed):
@@ -328,14 +318,9 @@ def test_a_named_configuration_stores_its_own_provenance(hand_claimed):
     run(FakeClient.answering(Verdict(["greedy"])), hand_claimed, configurations=(CHEAP,))
 
     (stored,) = machine_claims(hand_claimed)
-    assert (stored.model, stored.effort, stored.prompt_version) == (
-        CHEAP.model,
-        CHEAP.effort,
-        CHEAP.prompt_version,
-    )
-    # This build's prompt text, not the configuration's: a caller names which
-    # classifier to run, never which prompt was sent.
-    assert stored.prompt_hash == PROMPT_HASH
+    assert (stored.model, stored.effort) == (CHEAP.model, CHEAP.effort)
+    # What this attempt was actually sent, which no caller selects.
+    assert stored.prompt_hash == ASKED
 
 
 def test_the_shares_are_over_the_attempts_every_configuration_read(two_problems):

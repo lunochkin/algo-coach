@@ -149,8 +149,8 @@ def make_claim(source: ClaimSource, **overrides) -> TechniqueClaim:
 PROVENANCE = {
     "model": "test-model",
     "effort": "medium",
-    "prompt_version": "v0",
     "prompt_hash": "0123456789ab",
+    "call_id": "call-1",
 }
 
 

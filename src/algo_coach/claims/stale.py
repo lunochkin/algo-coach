@@ -1,39 +1,39 @@
 """Which stored claims this classifier produced, and which a later one replaces.
 
 A machine claim names what produced it, so a re-run can find the ones an
-older model or prompt reached, and an eval can find the ones it has already
-paid to read. A user's claim names nothing, and nothing re-derives it.
+older classifier reached, and an eval can find the ones it has already paid to
+read. A user's claim names nothing, and nothing re-derives it.
 """
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 
 from algo_coach.claims.classifier import Configuration
 from algo_coach.log import latest_by_attempt
 from algo_coach.schema import ClaimSource, TechniqueClaim
 
 
-def is_stale(claim: TechniqueClaim, configuration: Configuration) -> bool:
-    """Whether a claim came from a different classifier than the one running.
+def is_stale(claim: TechniqueClaim, configuration: Configuration, prompt_hash: str) -> bool:
+    """Whether a claim came from a different question than the one being asked.
 
-    Compared whole rather than ordered: a version is an identity, not a number
-    to be greater than, so running an earlier prompt on purpose re-derives what
-    a later one wrote and a rollback needs no separate path.
+    The hash decides, and it is the hash of what *this* attempt would be sent —
+    so editing one entry re-derives the attempts carrying that candidate and
+    leaves every other one alone. There is no version beside it: a version was
+    an author's word for "the reading changed", and a word can be forgotten
+    while the text moves. The digest cannot.
 
-    The prompt hash is deliberately absent. The version is the author's
-    statement that the reading changed meaningfully and is what marks a stored
-    claim stale; the hash is the mechanical fact of the text and marks nothing.
-    Driving staleness from it would re-derive the backlog for a reflowed
-    sentence — the hash is a syntactic boundary, the version a semantic one,
-    and only the semantic one should cost money.
+    The cost is that a reflowed sentence re-derives the attempts it reaches.
+    That is the intended trade — nothing licenses calling an edit cosmetic on
+    a model's behalf, and the per-attempt hash keeps the bill to the entries
+    actually touched.
     """
     if claim.source is not ClaimSource.CLASSIFIER:
         return False
 
-    return not at_configuration(claim, configuration)
+    return not at_configuration(claim, configuration, prompt_hash)
 
 
-def at_configuration(claim: TechniqueClaim, configuration: Configuration) -> bool:
-    """Whether this classifier produced the claim.
+def at_configuration(claim: TechniqueClaim, configuration: Configuration, prompt_hash: str) -> bool:
+    """Whether this classifier, asked this question, produced the claim.
 
     The positive form of the same comparison. `not is_stale` is not it: it
     means "not known-stale", and a user's claim is at no configuration at all —
@@ -42,20 +42,34 @@ def at_configuration(claim: TechniqueClaim, configuration: Configuration) -> boo
     """
     if claim.source is not ClaimSource.CLASSIFIER:
         return False
-    return (claim.model, claim.effort, claim.prompt_version) == (
+    return (claim.model, claim.effort, claim.prompt_hash) == (
         configuration.model,
         configuration.effort,
-        configuration.prompt_version,
+        prompt_hash,
     )
 
 
 def readings_at(
-    claims: Iterable[TechniqueClaim], configuration: Configuration
+    claims: Iterable[TechniqueClaim],
+    configuration: Configuration,
+    hashes: Mapping[str, str],
 ) -> dict[str, TechniqueClaim]:
-    """The claim this configuration already read each attempt as.
+    """The claim this configuration already read each attempt as, for the
+    question it would ask now.
 
-    Filtered before `latest_by_attempt`, never after: running an earlier prompt
-    on purpose is a rollback, so an attempt's latest machine claim can be
-    another configuration's while this one's reading sits under it.
+    `hashes` is what each attempt would be sent, keyed by attempt id — an
+    attempt missing from it can match nothing, since there is no question to
+    compare against.
+
+    Filtered before `latest_by_attempt`, never after: an attempt's latest
+    machine claim can be another configuration's, or an older rulebook's, while
+    this one's reading sits under it.
     """
-    return latest_by_attempt([claim for claim in claims if at_configuration(claim, configuration)])
+    return latest_by_attempt(
+        [
+            claim
+            for claim in claims
+            if claim.attempt_id in hashes
+            and at_configuration(claim, configuration, hashes[claim.attempt_id])
+        ]
+    )

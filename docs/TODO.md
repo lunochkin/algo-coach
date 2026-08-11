@@ -227,6 +227,21 @@ nothing checks sends practice somewhere unverified for weeks.
       key; and the progress index counts answers rather than positions, which
       jump about with calls in flight
 
+- [x] Key reuse on what an attempt was actually sent, not on a rulebook
+      version. A criterion travels with its candidate, so editing one entry
+      re-derives the attempts carrying it and no others — 7 of 31 on the last
+      edit. `prompt_version` is gone: a word can be forgotten while the text
+      moves, a digest cannot. Costs a reflow re-deriving what it reaches, and a
+      rulebook that can no longer be cited by name. `--fresh` asks anyway,
+      which measuring a model against itself needs. 961 machine claims dropped
+      to land it; the 48 hand claims are the only irreplaceable thing there
+- [x] A call log below the claims: model, effort, prompt, digest, response,
+      reasoning, tokens, error. Domain-free, so a second consumer needs no
+      teaching, and it holds what a claim cannot — declines, failures, and what
+      a run cost. The prompt is stored whole beside its digest, so a record
+      digests to its own key. Claims cite a call and decide for themselves
+      whether to ask again, so nothing on the run path reads it back
+
 ### What a code means
 
 Twelve configurations spanning a 10× price range scored within two attempts of
@@ -258,9 +273,9 @@ paradigm and a problem class.
       at ceiling. Kept on its own argument. The contrast with the Kahn fix is
       the lesson — a repeated cell is fixable by a rule, scattered errors are
       not
-- [ ] Hash the instructions and the criteria together, since both now shape
-      every reading and an edit invisible to the hash is the divergence the
-      hash exists to catch. Prompt version to 2
+- [x] Hash the instructions and the criteria together — landed as a digest of
+      the whole payload, per attempt, which subsumes this and the version with
+      it
 - [ ] Show the reader the same criteria the classifier gets. One rulebook and
       two annotators is what makes their disagreement mean something: without
       it, a disagreement is ambiguous between an unclear rule and two

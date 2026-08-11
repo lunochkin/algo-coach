@@ -5,14 +5,8 @@ import pytest
 from helpers import T0, FakeClient, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach import cli
-from algo_coach.claims import (
-    EFFORT,
-    MODEL,
-    PROMPT_HASH,
-    PROMPT_VERSION,
-    ClassifierError,
-    classify_backlog,
-)
+from algo_coach.calls import CallLog
+from algo_coach.claims import EFFORT, MODEL, ClassifierError, classify_backlog, request_hash
 from algo_coach.claims.run import ABORT_AFTER, Progress
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
@@ -42,7 +36,7 @@ def stored(log: AttemptLog):
 
 
 def run(client, log, **kwargs):
-    return classify_backlog(client, log, stored(log), user_id="u1", **kwargs)
+    return classify_backlog(client, log, CallLog(log.root), stored(log), user_id="u1", **kwargs)
 
 
 def test_a_verdict_is_written_as_a_classifier_claim(backlog):
@@ -54,7 +48,7 @@ def test_a_verdict_is_written_as_a_classifier_claim(backlog):
     assert claim.attempt_id == "a1"
     assert claim.techniques == ["greedy"]
     assert claim.source is ClaimSource.CLASSIFIER
-    assert (claim.model, claim.prompt_version) == (MODEL, PROMPT_VERSION)
+    assert (claim.model, claim.prompt_hash) == (MODEL, ASKED)
     assert result.classified == 1
 
 
@@ -255,6 +249,11 @@ def test_progress_counts_only_what_the_run_asks_about(backlog):
     assert [(p.index, p.total) for p in seen] == [(1, 1)]
 
 
+# What the two-tag fixture attempt would be sent now. A claim carrying it is
+# answering the question this run would ask; anything else is stale.
+ASKED = request_hash(["greedy", "sorting"], "def f(): pass")
+
+
 def store_claim(log, attempt_id, **configuration):
     """A stored machine claim at this classifier's configuration unless a test
     names the field it differs in."""
@@ -262,30 +261,21 @@ def store_claim(log, attempt_id, **configuration):
         machine_claim(
             attempt_id,
             ["sorting"],
-            **{
-                "model": MODEL,
-                "effort": EFFORT,
-                "prompt_version": PROMPT_VERSION,
-                "prompt_hash": PROMPT_HASH,
-            }
-            | configuration,
+            **{"model": MODEL, "effort": EFFORT, "prompt_hash": ASKED} | configuration,
         )
     )
 
 
-def test_a_claim_from_an_older_prompt_version_is_re_derived(backlog):
-    store_claim(backlog, "a1", prompt_version="0")
+def test_a_claim_answering_another_prompt_is_re_derived(backlog):
+    """The rulebook moved for this attempt, so the reading is worth paying for
+    again — and only for the attempts the edit reached."""
+    store_claim(backlog, "a1", prompt_hash="ffffffffffff")
 
     result = run(answering(Verdict(["greedy"])), backlog, redo=True)
 
     standing = standing_claims(backlog.claims())["a1"]
     assert standing.techniques == ["greedy"]
-    assert (standing.model, standing.effort, standing.prompt_version) == (
-        MODEL,
-        EFFORT,
-        PROMPT_VERSION,
-    )
-    assert standing.prompt_hash == PROMPT_HASH
+    assert (standing.model, standing.effort, standing.prompt_hash) == (MODEL, EFFORT, ASKED)
     assert (result.redone, result.classified) == (1, 0)
 
 
@@ -307,11 +297,11 @@ def test_a_claim_from_another_effort_is_re_derived(backlog):
     assert result.redone == 1
 
 
-def test_a_claim_differing_only_in_prompt_hash_is_not_re_derived(backlog):
-    """The hash marks nothing. It is the mechanical fact of the text, and a
-    reflowed sentence must not cost a call per attempt in the backlog — only
-    the author's version bump says the reading changed."""
-    store_claim(backlog, "a1", prompt_hash="ffffffffffff")
+def test_an_edit_the_prompt_never_reached_costs_nothing(backlog):
+    """The saving the whole scheme is for: a criterion travels with its
+    candidate, so editing an entry this attempt never sees leaves its stored
+    reading answering the same question, and the run makes no call."""
+    store_claim(backlog, "a1")
     client = answering()
 
     result = run(client, backlog, redo=True)
@@ -332,7 +322,7 @@ def test_a_claim_from_this_classifier_is_never_re_derived(backlog):
 
 def test_a_stale_claim_is_left_alone_without_the_flag(backlog):
     """A re-derivation costs a call per attempt, so it is asked for."""
-    store_claim(backlog, "a1", prompt_version="0")
+    store_claim(backlog, "a1", prompt_hash="ffffffffffff")
     client = answering()
 
     result = run(client, backlog)
@@ -363,7 +353,7 @@ def test_a_reading_stored_under_a_hand_claim_is_never_re_derived(backlog):
     configuration and at any other: the user's claim is what stands there, and
     nothing re-derives it — so the reading under it is never asked again."""
     backlog.append_claim(user_claim("a1", ["greedy"]))
-    store_claim(backlog, "a1", prompt_version="0")
+    store_claim(backlog, "a1", prompt_hash="ffffffffffff")
     client = answering()
 
     result = run(client, backlog, redo=True)
@@ -374,19 +364,19 @@ def test_a_reading_stored_under_a_hand_claim_is_never_re_derived(backlog):
 def test_a_re_derivation_supersedes_rather_than_rewrites(backlog):
     """The log is append-only: the older claim stays in it and stops being
     read."""
-    store_claim(backlog, "a1", prompt_version="0")
+    store_claim(backlog, "a1", prompt_hash="ffffffffffff")
 
     run(answering(Verdict(["greedy"])), backlog, redo=True)
 
     older, newer = backlog.claims()
-    assert (older.prompt_version, older.techniques) == ("0", ["sorting"])
-    assert (newer.prompt_version, newer.techniques) == (PROMPT_VERSION, ["greedy"])
+    assert (older.prompt_hash, older.techniques) == ("ffffffffffff", ["sorting"])
+    assert (newer.prompt_hash, newer.techniques) == (ASKED, ["greedy"])
 
 
 def test_an_unchanged_verdict_is_still_written(backlog):
     """The record names the classifier that reached it, so an unwritten
     agreement would stay stale and be paid for on every later run."""
-    store_claim(backlog, "a1", prompt_version="0")
+    store_claim(backlog, "a1", prompt_hash="ffffffffffff")
 
     run(answering(Verdict(["sorting"])), backlog, redo=True)
     result = run(answering(), backlog, redo=True)
@@ -402,7 +392,7 @@ def test_unclaimed_attempts_are_claimed_before_stale_ones(tmp_path):
     log = AttemptLog(root)
     log.append_attempt(attempt("unclaimed", "two-tags", finished_at=T0))
     log.append_attempt(attempt("stale", "two-tags", finished_at=T0 + timedelta(days=1)))
-    store_claim(log, "stale", prompt_version="0")
+    store_claim(log, "stale", prompt_hash="ffffffffffff")
 
     run(answering(Verdict(["greedy"])), log, limit=1, redo=True)
 
@@ -412,12 +402,12 @@ def test_unclaimed_attempts_are_claimed_before_stale_ones(tmp_path):
 def test_naming_no_candidate_leaves_the_older_claim_standing(backlog):
     """A claim cannot say 'none of these', and the stale one answers the
     attempt until something replaces it."""
-    store_claim(backlog, "a1", prompt_version="0")
+    store_claim(backlog, "a1", prompt_hash="ffffffffffff")
 
     result = run(answering(Verdict([])), backlog, redo=True)
 
     standing = standing_claims(backlog.claims())["a1"]
-    assert (standing.prompt_version, result.undecided, result.redone) == ("0", 1, 0)
+    assert (standing.prompt_hash, result.undecided, result.redone) == ("ffffffffffff", 1, 0)
 
 
 def test_the_technique_flag_narrows_the_backlog(backlog):
@@ -473,3 +463,51 @@ def test_a_concurrent_run_counts_up_as_answers_arrive(tmp_path):
 
     assert [progress.index for progress in seen] == [1, 2, 3, 4, 5, 6]
     assert {progress.total for progress in seen} == {6}
+
+
+def test_a_call_is_recorded_beside_the_claim_it_produced(tmp_path):
+    """The claim says what stands; the call says what happened, and carries
+    what a claim structurally cannot — the tokens and the reasoning."""
+    log = backlog_of(tmp_path / "data", 1)
+    calls = CallLog(log.root)
+
+    classify_backlog(answering(Verdict(["greedy"])), log, calls, stored(log), user_id="u1")
+
+    (claim,) = log.claims()
+    (call,) = calls.all()
+    assert claim.call_id == call.id
+    assert (claim.model, claim.prompt_hash) == (call.model, call.prompt_hash)
+
+
+def test_a_declined_verdict_is_a_call_with_no_claim(tmp_path):
+    """A claim cannot say "none of these", so the decline used to print once
+    and vanish. The call log is where it now lives."""
+    log = backlog_of(tmp_path / "data", 1)
+    calls = CallLog(log.root)
+
+    result = classify_backlog(answering(Verdict([])), log, calls, stored(log), user_id="u1")
+
+    assert (result.undecided, log.claims()) == (1, [])
+    assert len(calls.all()) == 1
+
+
+def test_a_failed_call_is_recorded_though_nothing_claims_it(tmp_path):
+    log = backlog_of(tmp_path / "data", 1)
+    calls = CallLog(log.root)
+
+    result = classify_backlog(answering(broken()), log, calls, stored(log), user_id="u1")
+
+    assert (len(result.failed), log.claims()) == (1, [])
+    (call,) = calls.all()
+    assert call.error and call.response is None
+
+
+def test_fresh_asks_again_where_a_claim_already_answers(tmp_path):
+    """Which a cache exists to prevent — so a run measuring a model against
+    itself has to say it wants the question asked twice."""
+    log = backlog_of(tmp_path / "data", 1)
+    store_claim(log, "a0")
+
+    result = run(answering(Verdict(["greedy"])), log, redo=True, fresh=True)
+
+    assert result.redone == 1

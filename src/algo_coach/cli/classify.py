@@ -2,7 +2,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from algo_coach.claims import EFFORT, MODEL, PROMPT_VERSION, classify_backlog
+from algo_coach.calls import CallLog
+from algo_coach.claims import EFFORT, MODEL, classify_backlog
 from algo_coach.claims.run import ABORT_AFTER, Progress
 from algo_coach.cli.client import client
 from algo_coach.log import AttemptLog
@@ -13,22 +14,23 @@ def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
     """Claim the backlog."""
     api = client(args, parser)
     log = AttemptLog(root)
+    calls = CallLog(root)
     problems = {problem.id: problem for problem in ProblemStore(root).all()}
     result = classify_backlog(
         api,
         log,
+        calls,
         problems,
         user_id=args.user,
         concurrency=args.concurrency,
         limit=args.limit,
         technique=args.technique,
         redo=args.redo,
+        fresh=args.fresh,
         on_progress=show,
     )
 
-    print(
-        f"{result.classified} claim(s) written by {MODEL}, effort {EFFORT}, prompt {PROMPT_VERSION}"
-    )
+    print(f"{result.classified} claim(s) written by {MODEL}, effort {EFFORT}")
     if result.redone:
         print(f"{result.redone} stale machine claim(s) re-derived")
     if result.undecided:

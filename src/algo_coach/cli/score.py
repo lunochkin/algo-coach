@@ -3,6 +3,7 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from algo_coach.calls import CallLog
 from algo_coach.claims import (
     DEFAULT,
     Comparison,
@@ -74,14 +75,17 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     # anywhere is what makes the stored mode the reproducible one.
     api = None if args.stored else client(args, parser)
     log = AttemptLog(root)
+    calls = CallLog(root)
     problems = {problem.id: problem for problem in ProblemStore(root).all()}
     result = score_backlog(
         api,
         log,
+        calls,
         problems,
         user_id=args.user,
         configurations=named,
         concurrency=args.concurrency,
+        fresh=args.fresh,
         limit=0 if args.stored else args.limit,
         on_configuration=announce if len(named) > 1 else None,
         on_progress=show,
@@ -124,10 +128,6 @@ def alone(result: Comparison) -> None:
     if only.decisions:
         print(decided(only))
     print(f"{only.read} read, {only.reused} reused")
-    if only.rehashed:
-        # Two prompt texts under one version: a bump the author forgot. Reuse
-        # keys off the version, so nothing else would ever say so.
-        print(f"{only.rehashed} reused reading(s) from another prompt text")
     if only.undecided:
         # Beside the share, since declining shrinks the denominator and
         # improves the number for it.
@@ -160,8 +160,6 @@ def compared(result: Comparison) -> None:
     if any(scored.decisions for scored in scores):
         summary.append(("per decision", [decided(scored) for scored in scores]))
     summary.append(("read/reused", [f"{scored.read}/{scored.reused}" for scored in scores]))
-    if any(scored.rehashed for scored in scores):
-        summary.append(("other prompt text", [str(scored.rehashed) for scored in scores]))
     if any(scored.undecided for scored in scores):
         summary.append(("named no candidate", [str(scored.undecided) for scored in scores]))
     print(table(("", *names), [(head, *cells) for head, cells in summary]))
@@ -178,10 +176,10 @@ def compared(result: Comparison) -> None:
 
 
 def describe(configuration: Configuration) -> str:
-    return (
-        f"{configuration.model}, effort {configuration.effort}, "
-        f"prompt {configuration.prompt_version}"
-    )
+    """Model and effort, and no rulebook: which criteria a reading was made
+    against is a digest of what that attempt was sent, so it varies within one
+    run and belongs on the record rather than in a heading."""
+    return f"{configuration.model}, effort {configuration.effort}"
 
 
 def labels(configurations: Sequence[Configuration]) -> list[str]:

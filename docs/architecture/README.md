@@ -28,6 +28,7 @@ Consequence: no third-party dependency in the drill loop.
 | Problems | product or user | global if product-owned, user-scoped if pushed | read-only if product-owned, mutable cache if pushed | product set, or the pushing client |
 | Attempts | user | private | append-only | the store |
 | Technique claims | user | private | append-only | the store |
+| Calls | user | private | append-only | the store |
 | Self-labels | user | private | append-only | the store |
 | Diagnoses | user | private | append-only | the store |
 
@@ -73,8 +74,10 @@ The vocabulary the append-only log references.
   row; it never re-partitions it.
 - **The criteria are the prompt.** They reach the classifier beside the
   candidates and the reader beside the code, so one rulebook answers both.
-  Editing one therefore changes readings: it is a prompt change, it belongs in
-  the prompt hash, and a meaningful edit bumps the prompt version.
+  Editing one therefore changes readings, and changes them only for the
+  attempts carrying that candidate — which is why what a reading was made
+  against is a digest of the text that attempt was sent, and never a version
+  number covering the whole rulebook.
 - **A code is never deleted**, because records carrying it outlive it.
   Retirement means an entry in an alias map, applied when grouping.
 - **Membership is checked on the write path only.** A model that validated
@@ -221,30 +224,64 @@ rather than a field on the attempt.
   same verdict would be a claim or a reading depending on what else happens to
   be claimed on the attempt, its type decided by its neighbours.
 - **Every claim records its source**, and a machine claim what produced it:
-  model, effort, prompt version, prompt hash. Both count the same toward
-  progress, but a machine claim can be recomputed by a better classifier and a
-  user's cannot, so re-deriving has to find the stale ones and leave the rest.
-  All four or none, since a reading whose configuration is partly unknown
-  compares with nothing — and a user's claim carries none of them, because
-  nothing re-derives it. A model asked for no effort, or one that rejects the
-  parameter, records the level it ran at rather than an empty field: the
-  model's own default is a fact about the reading, not a gap in it.
-- **What produced a claim is compared whole, never ordered.** A version is an
-  identity, not a number to be greater than, so running an earlier prompt on
-  purpose re-derives what a later one wrote and a rollback needs no separate
-  path.
-- **The prompt is named twice, deliberately.** The version is the author's
-  statement that the reading changed meaningfully and is what marks a stored
-  claim stale; the hash is the mechanical fact of the text that was sent —
-  the instructions and the criteria both, since both shape every reading —
-  and marks nothing. A forgotten bump would otherwise be invisible forever —
-  with both, two hashes under one version say so, and a re-derivation fixes
-  it. Driving staleness from the hash instead would re-derive the backlog for
-  a reflowed sentence: the hash is a syntactic boundary and the version a
-  semantic one, and only the semantic one should cost money.
+  model, effort, the digest of what that attempt was sent, and the call that
+  sent it. Both count the same toward progress, but a machine claim can be
+  recomputed by a better classifier and a user's cannot, so re-deriving has to
+  find the stale ones and leave the rest. All four or none, since a reading
+  whose configuration is partly unknown compares with nothing — and a user's
+  claim carries none of them, because nothing re-derives it. A model asked for
+  no effort, or one that rejects the parameter, records the level it ran at
+  rather than an empty field: the model's own default is a fact about the
+  reading, not a gap in it.
+- **The digest is of the question, not of the rulebook.** A criterion travels
+  with its candidate, so editing one entry changes what a few attempts are
+  asked and leaves every other one untouched. Keying staleness on it therefore
+  re-derives the slice an edit reached and nothing else, where a rulebook-wide
+  version re-derived the backlog for a sentence most attempts never saw.
+- **There is no version beside it.** A version was an author's word for "the
+  reading changed", and a word can be forgotten while the text moves — the
+  digest cannot. What it costs is that a reflowed sentence re-derives the
+  attempts it reaches, which is the intended trade: nothing licenses calling an
+  edit cosmetic on a model's behalf, and the blast radius is now the entries
+  actually touched. What it also costs is a name — a rulebook can no longer be
+  cited as "prompt 3", only as the digest of what was sent, and diffed by
+  reading the prompts two calls carry.
+- **The claim's copy of the three cannot drift**, because a call is append-only
+  and the copy is made in the same write. It is there so the claims log reads
+  on its own: a board renders from it, and loading the calls to learn which
+  model produced a claim would put a megabyte-scale read on every command.
 - **Configurations are compared over the attempts both read**, not over each
   one's own. A cheaper classifier measured on a smaller sample scores against
   a different denominator, and the number would read as quality.
+
+### Calls
+
+One request to a model and what came back. A layer below the claims: a claim
+cites a call and reads its own meaning into the response, and the call knows
+nothing about what the answer was for.
+
+- **Domain-free on purpose.** No attempt, no techniques, no vocabulary — only
+  what was asked, of whom, and what returned. That is what lets a second domain
+  reuse the log without being taught anything, and what keeps the run loop's
+  decisions in the domain where they belong.
+- **The prompt is stored whole, beside its digest**, so the record digests to
+  its own key and a renderer that changes later cannot make an old one
+  unreadable. Inline rather than deduplicated into a store of its own: one
+  append cannot half-succeed, where a file plus a log line can leave a call
+  naming a prompt that is not there.
+- **It holds what a claim structurally cannot** — the tokens a run cost, the
+  reasoning behind a verdict, and the calls that produced no claim at all. A
+  decline names no candidate and a failure names nothing; both were counters
+  that printed once and vanished.
+- **`prompt_hash` is not unique.** A retry after a rate limit repeats it, and
+  sampling one prompt on purpose repeats it deliberately, so a reader looking
+  one up must say which it wants rather than assume there is one.
+- **Nothing on the run path reads it back.** Whether to ask again is decided
+  from the claims, which carry the model, effort and digest already — so this
+  file is written by every run and loaded only by whoever sits down to analyse
+  one. A cache over the calls themselves would serve prompts shared by two
+  attempts, and is not built: the log is shaped for it, and the saving is small
+  while there is one domain.
 
 ### Self-labels
 

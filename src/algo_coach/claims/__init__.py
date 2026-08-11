@@ -2,12 +2,10 @@ from algo_coach.claims.classifier import (
     DEFAULT,
     EFFORT,
     MODEL,
-    PROMPT_HASH,
-    PROMPT_VERSION,
-    UNSENT,
     ClassifierError,
     Configuration,
     classify,
+    request_hash,
 )
 from algo_coach.claims.reading import ReadResult, read
 from algo_coach.claims.revision import against, contested, revisable
@@ -44,9 +42,6 @@ __all__ = [
     "DEFAULT",
     "EFFORT",
     "MODEL",
-    "PROMPT_HASH",
-    "PROMPT_VERSION",
-    "UNSENT",
     "CONCURRENCY",
     "ClassifierError",
     "ClassifyResult",
@@ -65,6 +60,7 @@ __all__ = [
     "at_configuration",
     "claimable",
     "classify",
+    "request_hash",
     "classify_backlog",
     "contested",
     "decides_something",

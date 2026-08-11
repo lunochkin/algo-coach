@@ -136,8 +136,8 @@ def test_a_machine_claimed_attempt_is_still_offered(claim_root, monkeypatch, cap
             ["sorting"],
             model="a-model",
             effort="medium",
-            prompt_version="1",
             prompt_hash="0123456789ab",
+            call_id="call-1",
         )
     )
 
@@ -157,8 +157,8 @@ def test_the_machine_verdict_is_never_shown(claim_root, monkeypatch, capsys):
             ["sorting"],
             model="a-model",
             effort="medium",
-            prompt_version="1",
             prompt_hash="0123456789ab",
+            call_id="call-1",
         )
     )
 

@@ -1,25 +1,29 @@
 import json
 import re
+import tempfile
 from dataclasses import dataclass, field
-from hashlib import sha256
+from pathlib import Path
 
 import pytest
 
-from algo_coach.claims import (
-    EFFORT,
-    MODEL,
-    PROMPT_HASH,
-    PROMPT_VERSION,
-    UNSENT,
-    ClassifierError,
-    Configuration,
-    classify,
-)
+from algo_coach.calls import UNSENT, CallLog
+from algo_coach.claims import EFFORT, MODEL, ClassifierError, Configuration, request_hash
+from algo_coach.claims import classify as _classify
 from algo_coach.claims.classifier import SYSTEM
 from algo_coach.schema import Kind
 from algo_coach.techniques import criteria
 
 CODE = "def f(nums):\n    return sorted(nums)\n"
+
+# One throwaway call log for the whole module: these tests are about the
+# request, and where the record of it lands is another module's subject.
+CALLS = CallLog(Path(tempfile.mkdtemp()))
+
+
+def verdict(client, candidates, code, **kwargs):
+    """`classify` without its call, which only the write path needs."""
+    techniques, _ = _classify(client, CALLS, candidates, code, **kwargs)
+    return techniques
 
 
 @dataclass
@@ -60,14 +64,14 @@ def answering(*techniques: str) -> FakeClient:
 def test_the_verdict_is_the_techniques_it_named():
     client = answering("greedy")
 
-    assert classify(client, ["greedy", "sorting"], CODE) == ["greedy"]
+    assert verdict(client, ["greedy", "sorting"], CODE) == ["greedy"]
 
 
 def test_several_techniques_can_be_named():
     """A solution can combine them, so the answer is a set, not a choice."""
     client = answering("sorting", "greedy")
 
-    assert classify(client, ["greedy", "sorting"], CODE) == ["greedy", "sorting"]
+    assert verdict(client, ["greedy", "sorting"], CODE) == ["greedy", "sorting"]
 
 
 def test_the_candidates_are_the_only_answers_the_schema_allows():
@@ -75,7 +79,7 @@ def test_the_candidates_are_the_only_answers_the_schema_allows():
     the tags do not name."""
     client = answering("greedy")
 
-    classify(client, ["greedy", "sorting"], CODE)
+    verdict(client, ["greedy", "sorting"], CODE)
 
     schema = client.messages.calls[0]["output_config"]["format"]["schema"]
     assert schema["properties"]["techniques"]["items"]["enum"] == ["greedy", "sorting"]
@@ -87,7 +91,7 @@ def test_the_candidates_are_named_in_the_prompt_too():
     answers exist."""
     client = answering("greedy")
 
-    classify(client, ["greedy", "sorting"], CODE)
+    verdict(client, ["greedy", "sorting"], CODE)
 
     (call,) = client.messages.calls
     assert "greedy, sorting" in call["messages"][0]["content"]
@@ -98,7 +102,7 @@ def test_each_candidate_reaches_the_model_with_its_criterion():
     against what earns a code and the near miss it is confused with."""
     client = answering("greedy")
 
-    classify(client, ["greedy", "sorting"], CODE)
+    verdict(client, ["greedy", "sorting"], CODE)
 
     (call,) = client.messages.calls
     content = call["messages"][0]["content"]
@@ -115,7 +119,7 @@ def test_a_candidate_carries_its_kind_as_a_test_not_a_label():
     judged on whether it was performed."""
     client = answering("greedy")
 
-    classify(client, ["greedy", "binary-search-tree"], CODE)
+    verdict(client, ["greedy", "binary-search-tree"], CODE)
 
     (call,) = client.messages.calls
     content = call["messages"][0]["content"]
@@ -128,7 +132,7 @@ def test_a_criterion_is_paid_for_only_where_its_code_is_a_candidate():
     call would carry all 27, and a call decides between two or three."""
     client = answering("greedy")
 
-    classify(client, ["greedy", "sorting"], CODE)
+    verdict(client, ["greedy", "sorting"], CODE)
 
     (call,) = client.messages.calls
     assert criteria()["trie"].earns not in call["messages"][0]["content"]
@@ -147,7 +151,7 @@ def test_a_retired_candidate_carries_no_criterion_and_still_asks():
     criteria no longer hold. A missing rule costs its own line, not the call."""
     client = answering("greedy")
 
-    classify(client, ["greedy", "dynamic-programming-2d"], CODE)
+    verdict(client, ["greedy", "dynamic-programming-2d"], CODE)
 
     (call,) = client.messages.calls
     assert "greedy, dynamic-programming-2d" in call["messages"][0]["content"]
@@ -158,7 +162,7 @@ def test_a_technique_outside_the_candidates_is_dropped():
     an unknown code must never reach an append-only log."""
     client = answering("greedy", "dynamic-programming")
 
-    assert classify(client, ["greedy", "sorting"], CODE) == ["greedy"]
+    assert verdict(client, ["greedy", "sorting"], CODE) == ["greedy"]
 
 
 def test_the_verdict_is_ordered_by_the_candidates():
@@ -166,7 +170,7 @@ def test_the_verdict_is_ordered_by_the_candidates():
     runs on the same problem comparable."""
     client = answering("sorting", "greedy")
 
-    assert classify(client, ["greedy", "sorting"], CODE) == ["greedy", "sorting"]
+    assert verdict(client, ["greedy", "sorting"], CODE) == ["greedy", "sorting"]
 
 
 def test_naming_nothing_is_a_legal_verdict():
@@ -174,13 +178,13 @@ def test_naming_nothing_is_a_legal_verdict():
     claim and leaves the fallback standing, rather than asserting a wrong one."""
     client = answering()
 
-    assert classify(client, ["greedy", "sorting"], CODE) == []
+    assert verdict(client, ["greedy", "sorting"], CODE) == []
 
 
 def test_the_code_is_what_it_reads():
     client = answering("greedy")
 
-    classify(client, ["greedy", "sorting"], CODE)
+    verdict(client, ["greedy", "sorting"], CODE)
 
     (call,) = client.messages.calls
     assert CODE in call["messages"][0]["content"]
@@ -190,14 +194,14 @@ def test_one_candidate_decides_nothing_and_costs_no_call():
     """The fallback already answers it, and the schema would offer one choice."""
     client = answering("greedy")
 
-    assert classify(client, ["greedy"], CODE) == ["greedy"]
+    assert verdict(client, ["greedy"], CODE) == ["greedy"]
     assert client.messages.calls == []
 
 
 def test_no_candidates_is_no_question():
     client = answering()
 
-    assert classify(client, [], CODE) == []
+    assert verdict(client, [], CODE) == []
     assert client.messages.calls == []
 
 
@@ -207,7 +211,7 @@ def test_a_response_carrying_no_verdict_raises():
     client = FakeClient(FakeMessages(Response([], stop_reason="refusal")))
 
     with pytest.raises(ClassifierError, match="refusal"):
-        classify(client, ["greedy", "sorting"], CODE)
+        verdict(client, ["greedy", "sorting"], CODE)
 
 
 def test_an_unsent_effort_is_left_off_the_call():
@@ -215,7 +219,7 @@ def test_an_unsent_effort_is_left_off_the_call():
     model's own" has to be absent from the request rather than sent as text."""
     client = answering("greedy")
 
-    classify(
+    verdict(
         client,
         ["greedy", "sorting"],
         CODE,
@@ -230,7 +234,7 @@ def test_an_unsent_effort_is_left_off_the_call():
 def test_the_built_in_configuration_is_what_a_caller_naming_none_gets():
     client = answering("greedy")
 
-    classify(client, ["greedy", "sorting"], CODE)
+    verdict(client, ["greedy", "sorting"], CODE)
 
     (call,) = client.messages.calls
     assert (call["model"], call["output_config"]["effort"]) == (MODEL, EFFORT)
@@ -241,7 +245,7 @@ def test_a_named_configuration_is_what_the_call_carries():
     the request, not only the record written from it."""
     client = answering("greedy")
 
-    classify(
+    verdict(
         client,
         ["greedy", "sorting"],
         CODE,
@@ -258,26 +262,26 @@ def test_the_claim_records_what_produced_it():
     ones and leave the rest."""
     assert MODEL == "claude-opus-5"
     assert EFFORT
-    assert PROMPT_VERSION
-    assert PROMPT_HASH
 
 
-def test_the_prompt_hash_is_the_text_that_was_sent():
-    """Recomputed rather than compared with a literal: a hard-coded digest
-    would need editing on every prompt edit and would assert only that someone
+def test_the_request_hash_is_the_question_this_attempt_would_be_asked():
+    """What decides whether a reading is worth paying for again — recomputed
+    rather than compared with a literal, which would assert only that someone
     edited it."""
-    assert sha256(SYSTEM.encode()).hexdigest()[: len(PROMPT_HASH)] == PROMPT_HASH
+    assert request_hash(["greedy", "sorting"], CODE) == request_hash(["greedy", "sorting"], CODE)
 
 
-def test_the_prompt_hash_changes_with_the_prompt():
-    """What makes a forgotten version bump visible: two hashes under one
-    version say the text moved and the version did not."""
-    reflowed = SYSTEM.replace("\n\n", "\n")
-
-    assert sha256(reflowed.encode()).hexdigest()[: len(PROMPT_HASH)] != PROMPT_HASH
+def test_a_different_solution_is_a_different_question():
+    assert request_hash(["greedy", "sorting"], CODE) != request_hash(["greedy", "sorting"], "pass")
 
 
-def test_the_prompt_hash_is_short_enough_to_store_on_every_claim():
+def test_a_different_candidate_is_a_different_question():
+    """Because a criterion travels with its candidate: editing one entry
+    changes this for the attempts carrying that code and for no others."""
+    assert request_hash(["greedy", "sorting"], CODE) != request_hash(["greedy", "trie"], CODE)
+
+
+def test_the_request_hash_is_short_enough_to_store_on_every_claim():
     """Only ever compared for equality, so the collision margin is irrelevant;
     sixty-four characters on every line of an append-only log is not."""
-    assert len(PROMPT_HASH) == 12
+    assert len(request_hash(["greedy", "sorting"], CODE)) == 12
