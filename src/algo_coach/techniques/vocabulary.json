@@ -3,8 +3,8 @@
     {
       "code": "backtracking",
       "kind": "procedure",
-      "earns": "The solution builds partial candidates, extends one, and retracts the extension to try another — an explicit undo, or a fresh copy per branch that makes the retraction implicit. It is a descent with a retraction, so it earns `depth-first-search` beside this.",
-      "near_miss": "A depth-first search that retracts nothing: it visits each node once and there is no partial candidate to abandon, so it earns `depth-first-search` alone. Pruning does not decide it either — a search that prunes a subtree but never returns to an alternative extension is still a traversal."
+      "earns": "The solution carries one partial candidate down the recursion, extends it, and retracts the extension to try another — an explicit undo, or a fresh copy per branch that makes the retraction implicit. The candidate travels downward either way: at any moment there is one incomplete answer in hand. It is a descent with a retraction, so it earns `depth-first-search` beside this.",
+      "near_miss": "A recursion that returns finished results and combines them, rather than carrying a candidate down — each call hands back complete answers, and the loop over them assembles rather than retracts, so nothing partial is ever in hand to abandon. The copy clause covers a candidate rebuilt per branch on the way down, never results built up on the way back. And a depth-first search that retracts nothing: it visits each node once and there is no partial candidate to abandon, so it earns `depth-first-search` alone. Pruning does not decide it either — a search that prunes a subtree but never returns to an alternative extension is still a traversal."
     },
     {
       "code": "binary-search",
