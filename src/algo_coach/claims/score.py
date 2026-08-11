@@ -45,6 +45,14 @@ class Disagreement(BaseModel):
 class Score(BaseModel):
     scored: int = 0
     exact: int = 0
+    # The include/exclude calls behind the sets — one per candidate on each
+    # scored attempt. Set equality compounds them: a classifier right on a
+    # share of them lands near that share raised to the candidate count, so a
+    # run of near-misses on three-candidate attempts reads as a far worse
+    # classifier than it is. Reported beside `exact` to tell a configuration
+    # that is broadly weak from one that is narrowly wrong.
+    decisions: int = 0
+    decisions_agreed: int = 0
     per_technique: list[TechniqueScore] = Field(default_factory=list)
     disagreements: list[Disagreement] = Field(default_factory=list)
     failed: list[Failed] = Field(default_factory=list)
@@ -136,6 +144,32 @@ def score(truth: Mapping[str, Sequence[str]], machine: Mapping[str, Sequence[str
     return result
 
 
+def per_decision(
+    truth: Mapping[str, Sequence[str]],
+    machine: Mapping[str, Sequence[str]],
+    candidates: Mapping[str, Sequence[str]],
+) -> tuple[int, int]:
+    """How many include/exclude calls a classifier got right, and of how many.
+
+    The denominator is the candidates rather than the claims: declining a code
+    correctly is a decision the classifier made, and it is the one set equality
+    never credits. Computed here rather than in `score`, which is a pure
+    function over the two claim mappings and knows nothing of the problems.
+
+    A disagreement is counted only where it names a candidate. A stored reading
+    can carry a code the tag mapping has since stopped deriving, and an
+    attempt's decisions must not outnumber the choices it offered.
+    """
+    total = agreed = 0
+    for attempt_id, expected in truth.items():
+        offered = set(candidates.get(attempt_id, ()))
+        if attempt_id not in machine or not offered:
+            continue
+        total += len(offered)
+        agreed += len(offered) - len((set(expected) ^ set(machine[attempt_id])) & offered)
+    return total, agreed
+
+
 def score_backlog(
     client: Any,
     log: AttemptLog,
@@ -202,9 +236,18 @@ def score_backlog(
         if attempt.id in common
     }
 
+    candidates = {
+        attempt.id: problems[attempt.problem_id].techniques
+        for attempt in hand_claimed
+        if attempt.problem_id in problems
+    }
+
     result = Comparison(eval_set=len(hand_claimed), common=len(common))
     for configuration, reading in zip(configurations, readings, strict=True):
         scored = score(truth, reading.verdicts)
+        scored.decisions, scored.decisions_agreed = per_decision(
+            truth, reading.verdicts, candidates
+        )
         scored.failed = reading.failed
         scored.read, scored.reused = reading.read, reading.reused
         scored.rehashed, scored.undecided = reading.rehashed, reading.undecided

@@ -120,6 +120,8 @@ def alone(result: Comparison) -> None:
     only = result.scores[0].score
     print(describe(result.scores[0].configuration))
     print(exactly(only))
+    if only.decisions:
+        print(decided(only))
     print(f"{only.read} read, {only.reused} reused")
     if only.rehashed:
         # Two prompt texts under one version: a bump the author forgot. Reuse
@@ -153,8 +155,10 @@ def compared(result: Comparison) -> None:
     print()
     summary = [
         ("exact", [share(scored) for scored in scores]),
-        ("read/reused", [f"{scored.read}/{scored.reused}" for scored in scores]),
     ]
+    if any(scored.decisions for scored in scores):
+        summary.append(("per decision", [decided(scored) for scored in scores]))
+    summary.append(("read/reused", [f"{scored.read}/{scored.reused}" for scored in scores]))
     if any(scored.rehashed for scored in scores):
         summary.append(("other prompt text", [str(scored.rehashed) for scored in scores]))
     if any(scored.undecided for scored in scores):
@@ -197,6 +201,16 @@ def exactly(scored: Score) -> str:
 def share(scored: Score) -> str:
     """The same number without the word, which the row label already carries."""
     return f"{scored.exact}/{scored.scored} ({scored.exact / scored.scored:.0%})"
+
+
+def decided(scored: Score) -> str:
+    """To a tenth, unlike the shares: the whole point of the row is that the
+    configurations sit within a point or two of each other here while the
+    shares spread out, and a rounded percent would hide the ordering."""
+    return (
+        f"{scored.decisions_agreed}/{scored.decisions} "
+        f"({scored.decisions_agreed / scored.decisions:.1%})"
+    )
 
 
 def rows(result: Comparison) -> list[tuple[str, ...]]:

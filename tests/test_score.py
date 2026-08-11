@@ -1,4 +1,5 @@
 from algo_coach.claims import score
+from algo_coach.claims.score import per_decision
 
 
 def rows(result):
@@ -102,3 +103,57 @@ def test_the_rows_are_ordered_by_technique():
     result = score({"a1": ["sorting", "greedy"]}, {"a1": ["sorting", "greedy"]})
 
     assert [row.technique for row in result.per_technique] == ["greedy", "sorting"]
+
+
+def test_per_decision_counts_every_candidate_not_every_claim():
+    """Declining a code correctly is a decision the classifier made, and the
+    one set equality never credits."""
+    total, agreed = per_decision(
+        {"a1": ["greedy"]},
+        {"a1": ["greedy"]},
+        {"a1": ["greedy", "sorting", "hashing"]},
+    )
+
+    assert (total, agreed) == (3, 3)
+
+
+def test_per_decision_charges_one_call_per_wrong_candidate():
+    """A missed code and an over-claimed one are one wrong decision each, so a
+    set wrong in two places scores worse than one wrong in a single place."""
+    total, agreed = per_decision(
+        {"a1": ["greedy"]},
+        {"a1": ["sorting"]},
+        {"a1": ["greedy", "sorting", "hashing"]},
+    )
+
+    assert (total, agreed) == (3, 1)
+
+
+def test_per_decision_ignores_a_code_the_candidates_no_longer_offer():
+    """A stored reading can carry a code the tag mapping has stopped deriving.
+    An attempt's decisions must never outnumber the choices it offered."""
+    total, agreed = per_decision(
+        {"a1": ["greedy"]},
+        {"a1": ["greedy", "retired-code"]},
+        {"a1": ["greedy", "sorting"]},
+    )
+
+    assert (total, agreed) == (2, 2)
+
+
+def test_per_decision_skips_an_attempt_with_no_candidates():
+    """A problem whose tags reach no code offers no decision — counted at zero
+    it would drag every rate toward zero for a call nobody made."""
+    total, agreed = per_decision({"a1": ["greedy"]}, {"a1": ["greedy"]}, {})
+
+    assert (total, agreed) == (0, 0)
+
+
+def test_per_decision_skips_what_the_classifier_did_not_read():
+    total, agreed = per_decision(
+        {"a1": ["greedy"], "a2": ["sorting"]},
+        {"a1": ["greedy"]},
+        {"a1": ["greedy", "sorting"], "a2": ["greedy", "sorting"]},
+    )
+
+    assert (total, agreed) == (2, 2)

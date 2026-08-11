@@ -239,6 +239,12 @@ paradigm and a problem class.
       which every call pays for whether or not the code is a candidate. The
       three worked examples the system text carries today are per-code
       criteria in the wrong file and move into their entries
+- [x] Report per-decision agreement beside the share. Set equality compounds a
+      per-candidate error over the candidate count — 95% of calls reads as 87%
+      over three candidates — and the candidates are the denominator, since
+      declining a code correctly is a decision the share never credits. The
+      ladder is 90/95/98/99% across haiku, sonnet, opus and fable: the top
+      three are within one label
 - [ ] Hash the instructions and the criteria together, since both now shape
       every reading and an edit invisible to the hash is the divergence the
       hash exists to catch. Prompt version to 2
