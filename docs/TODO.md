@@ -235,7 +235,7 @@ paradigm and a problem class.
       complexity, redundancy or definitional argument that would hold if no
       model had ever run — a criterion whose only support is that the
       classifiers agreed has been written backwards
-- [ ] Render them beside the candidates rather than into the system text,
+- [x] Render them beside the candidates rather than into the system text,
       which every call pays for whether or not the code is a candidate. The
       three worked examples the system text carries today are per-code
       criteria in the wrong file and move into their entries

@@ -1,4 +1,5 @@
 import json
+import re
 from dataclasses import dataclass, field
 from hashlib import sha256
 
@@ -15,6 +16,7 @@ from algo_coach.claims import (
     classify,
 )
 from algo_coach.claims.classifier import SYSTEM
+from algo_coach.techniques import criteria
 
 CODE = "def f(nums):\n    return sorted(nums)\n"
 
@@ -88,6 +90,52 @@ def test_the_candidates_are_named_in_the_prompt_too():
 
     (call,) = client.messages.calls
     assert "greedy, sorting" in call["messages"][0]["content"]
+
+
+def test_each_candidate_reaches_the_model_with_its_criterion():
+    """One rulebook, applied where it decides something: the reading is made
+    against what earns a code and the near miss it is confused with."""
+    client = answering("greedy")
+
+    classify(client, ["greedy", "sorting"], CODE)
+
+    (call,) = client.messages.calls
+    content = call["messages"][0]["content"]
+    for candidate in ("greedy", "sorting"):
+        entry = criteria()[candidate]
+        assert entry.earns in content
+        assert entry.near_miss in content
+        assert str(entry.kind) in content
+
+
+def test_a_criterion_is_paid_for_only_where_its_code_is_a_candidate():
+    """Which is why it is rendered here and not in the system text — every
+    call would carry all 27, and a call decides between two or three."""
+    client = answering("greedy")
+
+    classify(client, ["greedy", "sorting"], CODE)
+
+    (call,) = client.messages.calls
+    assert criteria()["trie"].earns not in call["messages"][0]["content"]
+
+
+def test_the_system_text_carries_no_per_code_rule():
+    """A rule about one code in the text every call pays for is a criterion in
+    the wrong file: it belongs to the vocabulary entry, which travels with the
+    candidate."""
+    for code in criteria():
+        assert not re.search(rf"\b{re.escape(code)}\b", SYSTEM)
+
+
+def test_a_retired_candidate_carries_no_criterion_and_still_asks():
+    """Records outlive the vocabulary, so a stored problem can name a code the
+    criteria no longer hold. A missing rule costs its own line, not the call."""
+    client = answering("greedy")
+
+    classify(client, ["greedy", "dynamic-programming-2d"], CODE)
+
+    (call,) = client.messages.calls
+    assert "greedy, dynamic-programming-2d" in call["messages"][0]["content"]
 
 
 def test_a_technique_outside_the_candidates_is_dropped():

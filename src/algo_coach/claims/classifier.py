@@ -12,6 +12,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from algo_coach.techniques import criteria
+
 MODEL = "claude-opus-5"
 EFFORT = "medium"
 # The effort of a model that is asked for none — some reject the parameter
@@ -22,7 +24,7 @@ UNSENT = "default"
 # Bumped when the reading changes meaningfully — the author's statement, not a
 # number to be greater than. The effort is recorded beside it rather than
 # folded into it, so a bump says the prompt changed and nothing else.
-PROMPT_VERSION = "1"
+PROMPT_VERSION = "2"
 
 SYSTEM = """You name which techniques a solution used.
 
@@ -31,9 +33,9 @@ which of them the code in front of you actually did. Name every one it used
 and nothing more: a solution can combine several, and one naming every
 candidate agrees with the tags and decides nothing.
 
-Read for the invariant, not the syntax. Two-pointers and sliding-window look
-alike and differ in what they maintain. Backtracking is depth-first search
-plus an undo. Greedy is why a choice is correct, not a construct. A technique
+Each candidate carries what earns it and the near miss it is confused with.
+Decide each against its own rule, and where the code fits the near miss
+instead, do not name it. Read for the invariant, not the syntax: a technique
 counts when it is what makes the solution work, not when it is incidental.
 
 If the code used none of the candidates, name none of them."""
@@ -118,18 +120,41 @@ def classify(
 
 
 def prompt(candidates: Sequence[str], code: str) -> str:
-    """The candidates before the code, so the reading is made knowing what can
-    be named. Delimited, since the code is data the model reads rather than
-    instructions it follows."""
+    """The candidates and their criteria before the code, so the reading is
+    made knowing what can be named and what earns each one. Delimited, since
+    the code is data the model reads rather than instructions it follows.
+
+    Beside the candidates rather than in the system text: a criterion is a
+    per-code rule, and one carried by every call is paid for on the calls
+    where its code is not a candidate — which, over a vocabulary of this size,
+    is nearly all of them.
+    """
     return "\n".join(
         [
             f"Candidates: {', '.join(candidates)}",
             "",
+            *(line for candidate in candidates for line in criterion(candidate)),
             "<solution>",
             code,
             "</solution>",
         ]
     )
+
+
+def criterion(candidate: str) -> list[str]:
+    """One candidate's rule, and nothing for a code the vocabulary no longer
+    carries. Records outlive the vocabulary, so a retired code can still be a
+    candidate; it then reaches the model as a bare name, which is what the
+    prompt said before any criterion existed."""
+    entry = criteria().get(candidate)
+    if entry is None:
+        return []
+    return [
+        f"{entry.code} ({entry.kind}):",
+        f"  Earns it: {entry.earns}",
+        f"  Near miss: {entry.near_miss}",
+        "",
+    ]
 
 
 def schema(candidates: Sequence[str]) -> dict[str, Any]:
