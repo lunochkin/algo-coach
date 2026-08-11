@@ -3,26 +3,26 @@
     {
       "code": "backtracking",
       "kind": "procedure",
-      "earns": "The solution builds partial candidates, extends one, and retracts the extension to try another — an explicit undo, or a fresh copy per branch that makes the retraction implicit.",
-      "near_miss": "A depth-first search, which visits each node once and retracts nothing: there is no partial candidate to abandon. Pruning does not decide it either — a search that prunes a subtree but never returns to an alternative extension is still a traversal."
+      "earns": "The solution builds partial candidates, extends one, and retracts the extension to try another — an explicit undo, or a fresh copy per branch that makes the retraction implicit. It is a descent with a retraction, so it earns `depth-first-search` beside this.",
+      "near_miss": "A depth-first search that retracts nothing: it visits each node once and there is no partial candidate to abandon, so it earns `depth-first-search` alone. Pruning does not decide it either — a search that prunes a subtree but never returns to an alternative extension is still a traversal."
     },
     {
       "code": "binary-search",
       "kind": "procedure",
       "earns": "The solution halves a search space each step against a predicate that is monotone over it — an index range, or a range of candidate answers.",
-      "near_miss": "A halving the complexity does not rest on: one lookup in a sorted list beside a linear pass that dominates. And descending a binary search tree, which halves by the structure's own invariant — that is the structure's operation, and `binary-search-tree` names it."
+      "near_miss": "A halving the complexity does not rest on: one lookup in a sorted list beside a linear pass that dominates. A descent through a search tree halves against the ordering and earns this beside `binary-search-tree`, since a code is never withheld because a narrower one also applies."
     },
     {
       "code": "binary-search-tree",
       "kind": "structure",
       "earns": "The ordering — every left descendant smaller, every right larger — carries the correctness or the complexity: a descent that discards one subtree, an in-order walk relied on for sorted output, an insert or delete that preserves the order.",
-      "near_miss": "A tree the problem calls a search tree while the solution ignores the ordering and visits every node as it would any tree. `binary-tree` covers that; the ordering has to do work of its own."
+      "near_miss": "A tree the problem calls a search tree while the solution ignores the ordering and visits every node as it would any tree: the ordering has to do work of its own. Such a solution still earns `binary-tree`, which this never displaces — a search tree is a binary tree, and both are claimed wherever both do work."
     },
     {
       "code": "binary-tree",
       "kind": "structure",
       "earns": "Having exactly two children, distinguished as left and right, carries the correctness or the complexity — a left/right recursion, a level or height argument, a shape the answer depends on.",
-      "near_miss": "A tree walked as a generic graph of children, where nothing distinguishes left from right and an n-ary version of the same code would be correct unchanged. A search tree earns this too when the branching shape does work beyond the ordering, which is the usual case for a descent."
+      "near_miss": "A tree walked as a generic graph of children, where nothing distinguishes left from right and an n-ary version of the same code would be correct unchanged. A search tree earns this too whenever the left/right shape does work, which a descent always does: `binary-search-tree` is claimed beside this, never instead of it."
     },
     {
       "code": "bit-manipulation",
@@ -33,20 +33,20 @@
     {
       "code": "breadth-first-search",
       "kind": "procedure",
-      "earns": "The solution expands a frontier level by level from a FIFO queue, so a node is first reached along a path of fewest edges. The FIFO is load-bearing: replace it with a stack and the distances are wrong.",
-      "near_miss": "A queue used as a worklist, where a stack would serve equally well. Peeling zero-indegree vertices is correct under either order, so the queue carries nothing there — that is `topological-sort`."
+      "earns": "The solution expands a frontier from a FIFO queue — each node entering once, expanded once, in the order it became ready — over a graph it is given or generates. Both discovery rules count: on first sight, where the order is distance in edges, and on readiness, as peeling zero-indegree vertices is, which earns `topological-sort` beside this.",
+      "near_miss": "A container that is not a FIFO over a frontier: a heap ordered by accumulated cost, which is `shortest-path`, or a deque pushed at the front, which lets a node enter twice. And a queue used as a plain worklist over items with no adjacency between them — nothing is expanded, so there is no frontier. Choosing a queue where a stack would also have worked does not disqualify it."
     },
     {
       "code": "depth-first-search",
       "kind": "procedure",
-      "earns": "The solution follows one edge as far as it goes before considering the next, over a graph or a tree — by recursion or an explicit stack.",
+      "earns": "The solution follows one edge as far as it goes before considering the next, over a graph or a tree — by recursion or an explicit stack. Anything built on that descent earns this beside its own code: `backtracking`, a `tree-traversal` in pre- or post-order, an order produced by reversing a post-order.",
       "near_miss": "A recursion that follows no adjacency. Divide-and-conquer descends too, but over index arithmetic on a range it splits itself rather than over edges it is given."
     },
     {
       "code": "divide-and-conquer",
       "kind": "paradigm",
       "earns": "The solution is correct because the input splits into independent subproblems of the same shape, solved separately and combined — and the combine step is where the work is.",
-      "near_miss": "Any recursion. A recursion following a structure's own edges is a traversal; one whose subproblems recur and are reused is dynamic programming. Here the pieces are cut by the solution and share nothing."
+      "near_miss": "Any recursion. A recursion following a structure's own edges is a traversal. Subproblems that recur and are reused are `dynamic-programming` instead of this rather than beside it — independence is what this claims, and overlapping subproblems are not independent. Here the pieces are cut by the solution and share nothing."
     },
     {
       "code": "dynamic-programming",
@@ -76,7 +76,7 @@
       "code": "intervals",
       "kind": "problem-class",
       "earns": "The solution's data are ranges with a start and an end, and what it computes is over their overlap — sorting by endpoint and merging, sweeping starts against ends, or selecting a non-conflicting set.",
-      "near_miss": "A pair of numbers that is not a range — a two-field record, or the bounds of a window a scan maintains, which is `sliding-window`."
+      "near_miss": "A pair of numbers that is not a range — a two-field record, or the bounds of a window a scan maintains, which are the solution's own state rather than the problem's data, and belong to `sliding-window`."
     },
     {
       "code": "linked-list",
@@ -105,8 +105,8 @@
     {
       "code": "recursion",
       "kind": "procedure",
-      "earns": "The solution calls itself, and no narrower candidate names what the recursion does — unfolding a definition, or generating a sequence.",
-      "near_miss": "Every other recursive code. Divide-and-conquer, depth-first search, backtracking, tree traversal and memoised dynamic programming are all self-calls, and each says what the self-call is for. This is the one code naming a language mechanism rather than an approach, so it sits under all of them and is claimed only when none fits."
+      "earns": "The solution calls itself, and no other candidate names what the self-call does — unfolding a definition, or generating a sequence.",
+      "near_miss": "Every other recursive code. Divide-and-conquer, depth-first search, backtracking, tree traversal and memoised dynamic programming are all self-calls, and each says what the self-call is for. This is the deliberate exception to claiming a code beside the narrower one that covers it: it names a language mechanism rather than an approach, so a row counting every recursive solution would name no skill. Claimed only when nothing else fits."
     },
     {
       "code": "shortest-path",
@@ -123,7 +123,7 @@
     {
       "code": "sorting",
       "kind": "procedure",
-      "earns": "The solution orders its data — by a call or by hand — and a later step relies on that order.",
+      "earns": "The solution orders its data — by a call or by hand — and a later step relies on that order. A sort written out rather than called earns its own paradigm beside this: a merge sort is `divide-and-conquer` and this both.",
       "near_miss": "Ordering the output for presentation, and input that arrives sorted: the solution performs no sort there, so what it did is whatever exploits the order."
     },
     {
@@ -135,14 +135,14 @@
     {
       "code": "topological-sort",
       "kind": "procedure",
-      "earns": "The solution produces an order over vertices in which every edge points forward — peeling zero-indegree vertices, or reversing a depth-first post-order. Counting the peeled vertices to decide acyclicity still performs it.",
+      "earns": "The solution produces an order over vertices in which every edge points forward — peeling zero-indegree vertices from a queue, which earns `breadth-first-search` beside this, or reversing a post-order, which earns `depth-first-search`. Counting the peeled vertices to decide acyclicity still performs it.",
       "near_miss": "Cycle detection by colour-marking during a depth-first search, which computes no order and reports only whether one exists."
     },
     {
       "code": "tree-traversal",
       "kind": "procedure",
       "earns": "The solution visits every node of a tree in a defined order — pre-, in-, post-order, or level by level — and the order matters to what it computes.",
-      "near_miss": "A descent that follows one child at each step and discards the other, as a search-tree lookup or insert does. That reaches a path, not a tree: the node count is the height, not the size, and `binary-search-tree` names it."
+      "near_miss": "A descent that follows one child at each step and discards the other, as a search-tree lookup or insert does. That reaches a path, not a tree: the node count is the height, not the size, so nothing is traversed."
     },
     {
       "code": "trie",

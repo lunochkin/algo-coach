@@ -24,7 +24,7 @@ UNSENT = "default"
 # Bumped when the reading changes meaningfully — the author's statement, not a
 # number to be greater than. The effort is recorded beside it rather than
 # folded into it, so a bump says the prompt changed and nothing else.
-PROMPT_VERSION = "2"
+PROMPT_VERSION = "3"
 
 SYSTEM = """You name which techniques a solution used.
 
@@ -35,8 +35,16 @@ candidate agrees with the tags and decides nothing.
 
 Each candidate carries what earns it and the near miss it is confused with.
 Decide each against its own rule, and where the code fits the near miss
-instead, do not name it. Read for the invariant, not the syntax: a technique
-counts when it is what makes the solution work, not when it is incidental.
+instead, do not name it.
+
+Name a candidate even when a narrower one also applies. What a solution does
+can be true at more than one level, and every level it did is claimed — never
+withhold a code because another candidate covers it. An entry that is an
+exception to this says so.
+
+What disqualifies a candidate is incidental use: the technique appears in the
+code without being part of how the solution works. Read for the invariant, not
+the syntax, and let each candidate's near miss say where that line falls.
 
 If the code used none of the candidates, name none of them."""
 

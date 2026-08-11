@@ -44,9 +44,28 @@ The vocabulary the append-only log references.
   half, since the disputes are boundaries rather than definitions.
   - A procedure counts when the solution performs it.
   - A structure counts when its properties carry the correctness or the
-    complexity, and no other candidate covers what it does.
+    complexity.
   - A paradigm counts when it is why the solution is correct.
   - A problem class counts when it is what the problem asks for.
+- **A code is claimed beside the narrower ones, never instead of them.** What a
+  solution does is true at several levels — a backtracking search descends, a
+  search tree is a binary tree — and a claim names every level it worked at. An
+  exclusive rule would need a containment order over the codes, which nothing
+  generates, so it can only be hand-written pair by pair and disagreed with
+  case by case. The exceptions are per code and stated in the entry: `recursion`
+  names a language mechanism rather than an approach, so a row counting every
+  self-call would name no skill.
+- **What disqualifies a code is incidental use**, never that another candidate
+  covers it. The near miss carries that line, and carries the whole of it: a
+  sorted lookup beside a linear pass that dominates, a map standing in for an
+  array. Reading it as precedence is what made the classifier drop codes the
+  user claimed.
+- **Inclusive claiming is what keeps a row coherent.** Attribution falls back
+  to the problem's tags, and platform tags already nest, so an exclusive claim
+  would count a claimed attempt and an unclaimed one on the same problem by
+  different rules — and the mixture would shift as classification progressed,
+  moving the board while nothing about the practice changed. A claim narrows a
+  row; it never re-partitions it.
 - **The criteria are the prompt.** They reach the classifier beside the
   candidates and the reader beside the code, so one rulebook answers both.
   Editing one therefore changes readings: it is a prompt change, it belongs in
@@ -143,6 +162,12 @@ rather than a field on the attempt.
   one code skews it. Set equality, not overlap: a claim naming every candidate
   agrees with the tags, decides nothing, and would score well on a metric that
   only asks whether the right code appears.
+- **How often a claim names every candidate is reported beside the score.**
+  Claiming inclusively removes the reason to withhold a code, so the way it
+  fails is by naming all of them — which is the fallback, wearing the score of
+  whatever the tags happened to get right. Set equality does not catch it,
+  since agreeing with the tags scores well whenever the tags are right. The
+  hand claims are the reference the machine's share is read against.
 - **Those claims are an eval set and a correction path**, never training data:
   nothing in the engine is trained.
 - **A set claimed against the readings calibrates; only a blind one measures.**
