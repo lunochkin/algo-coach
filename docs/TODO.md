@@ -245,6 +245,12 @@ paradigm and a problem class.
       declining a code correctly is a decision the share never credits. The
       ladder is 90/95/98/99% across haiku, sonnet, opus and fable: the top
       three are within one label
+- [x] Render a kind as its test rather than its name — a label helps only a
+      reader who already knows what it selects. No measured gain at version 4:
+      the cell it targeted is unchanged, sonnet lost three decisions, opus sat
+      at ceiling. Kept on its own argument. The contrast with the Kahn fix is
+      the lesson — a repeated cell is fixable by a rule, scattered errors are
+      not
 - [ ] Hash the instructions and the criteria together, since both now shape
       every reading and an edit invisible to the hash is the divergence the
       hash exists to catch. Prompt version to 2

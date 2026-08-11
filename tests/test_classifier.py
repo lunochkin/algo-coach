@@ -16,6 +16,7 @@ from algo_coach.claims import (
     classify,
 )
 from algo_coach.claims.classifier import SYSTEM
+from algo_coach.schema import Kind
 from algo_coach.techniques import criteria
 
 CODE = "def f(nums):\n    return sorted(nums)\n"
@@ -106,6 +107,20 @@ def test_each_candidate_reaches_the_model_with_its_criterion():
         assert entry.earns in content
         assert entry.near_miss in content
         assert str(entry.kind) in content
+
+
+def test_a_candidate_carries_its_kind_as_a_test_not_a_label():
+    """One question is answered four ways, and a bare kind name only helps a
+    reader who already knows which way — which is how a structure comes to be
+    judged on whether it was performed."""
+    client = answering("greedy")
+
+    classify(client, ["greedy", "binary-search-tree"], CODE)
+
+    (call,) = client.messages.calls
+    content = call["messages"][0]["content"]
+    assert Kind.PARADIGM.test in content
+    assert Kind.STRUCTURE.test in content
 
 
 def test_a_criterion_is_paid_for_only_where_its_code_is_a_candidate():

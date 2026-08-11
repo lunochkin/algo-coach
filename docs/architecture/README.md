@@ -47,6 +47,11 @@ The vocabulary the append-only log references.
     complexity.
   - A paradigm counts when it is why the solution is correct.
   - A problem class counts when it is what the problem asks for.
+- **A kind reaches both readers as its test, never as its name.** The label
+  helps only a reader who already knows what it selects, and a reader who does
+  not judges a structure on whether it was performed. The four tests live with
+  the kind rather than in the vocabulary file, so twenty-seven entries state
+  them once.
 - **A code is claimed beside the narrower ones, never instead of them.** What a
   solution does is true at several levels — a backtracking search descends, a
   search tree is a binary tree — and a claim names every level it worked at. An

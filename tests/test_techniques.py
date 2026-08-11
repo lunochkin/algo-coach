@@ -117,3 +117,11 @@ def test_is_known_does_not_reject_retired_codes_at_read_time():
 
     claim = user_claim("a1", [retired])
     assert TechniqueClaim.model_validate_json(claim.model_dump_json()).techniques == [retired]
+
+
+def test_every_kind_names_its_test():
+    """The kind selects the question asked of a code, so a kind that cannot
+    say what it selects is a label the prompt and the reader both guess at."""
+    for kind in Kind:
+        assert kind.test.strip()
+    assert len({kind.test for kind in Kind}) == len(Kind)

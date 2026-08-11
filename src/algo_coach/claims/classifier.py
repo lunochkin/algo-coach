@@ -24,7 +24,7 @@ UNSENT = "default"
 # Bumped when the reading changes meaningfully — the author's statement, not a
 # number to be greater than. The effort is recorded beside it rather than
 # folded into it, so a bump says the prompt changed and nothing else.
-PROMPT_VERSION = "3"
+PROMPT_VERSION = "4"
 
 SYSTEM = """You name which techniques a solution used.
 
@@ -153,12 +153,17 @@ def criterion(candidate: str) -> list[str]:
     """One candidate's rule, and nothing for a code the vocabulary no longer
     carries. Records outlive the vocabulary, so a retired code can still be a
     candidate; it then reaches the model as a bare name, which is what the
-    prompt said before any criterion existed."""
+    prompt said before any criterion existed.
+
+    The kind arrives as its test rather than as its name: one question is
+    answered four ways, and a bare label only helps a reader who already knows
+    which way. Naming it is what keeps a structure from being judged on whether
+    it was performed."""
     entry = criteria().get(candidate)
     if entry is None:
         return []
     return [
-        f"{entry.code} ({entry.kind}):",
+        f"{entry.code} — {entry.kind}: {entry.kind.test}.",
         f"  Earns it: {entry.earns}",
         f"  Near miss: {entry.near_miss}",
         "",
