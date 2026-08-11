@@ -81,6 +81,7 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         problems,
         user_id=args.user,
         configurations=named,
+        concurrency=args.concurrency,
         limit=0 if args.stored else args.limit,
         on_configuration=announce if len(named) > 1 else None,
         on_progress=show,

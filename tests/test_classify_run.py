@@ -1,3 +1,4 @@
+import threading
 from datetime import timedelta
 
 import pytest
@@ -426,3 +427,49 @@ def test_the_technique_flag_narrows_the_backlog(backlog):
     run(answering(Verdict(["trie"])), backlog, technique="trie")
 
     assert [claim.attempt_id for claim in backlog.claims()] == ["a3"]
+
+
+def test_the_log_has_one_writer_however_many_calls_are_in_flight(tmp_path):
+    """A torn line in an append-only log cannot be taken back, so the calls fan
+    out and the write stays on the thread that drives the run."""
+    log = backlog_of(tmp_path / "data", 6)
+    appending = log.append_claim
+    writers: list[threading.Thread] = []
+
+    def watched(claim):
+        writers.append(threading.current_thread())
+        appending(claim)
+
+    log.append_claim = watched
+    client = answering(*[Verdict(["greedy"])] * 6)
+
+    result = run(client, log, concurrency=4)
+
+    assert result.classified == 6
+    assert set(writers) == {threading.current_thread()}
+
+
+def test_a_concurrent_run_claims_every_attempt_once(tmp_path):
+    """Completion order is not the order asked in, and a verdict must still
+    land on the attempt it was read from."""
+    log = backlog_of(tmp_path / "data", 8)
+    client = answering(*[Verdict(["greedy"])] * 8)
+
+    result = run(client, log, concurrency=4)
+
+    claimed = [claim.attempt_id for claim in log.claims()]
+    assert result.classified == 8
+    assert sorted(claimed) == sorted(f"a{age}" for age in range(8))
+
+
+def test_a_concurrent_run_counts_up_as_answers_arrive(tmp_path):
+    """A position in the order asked would jump about with calls in flight;
+    what a reader wants is a count that climbs."""
+    log = backlog_of(tmp_path / "data", 6)
+    client = answering(*[Verdict(["greedy"])] * 6)
+    seen: list[Progress] = []
+
+    run(client, log, concurrency=3, on_progress=seen.append)
+
+    assert [progress.index for progress in seen] == [1, 2, 3, 4, 5, 6]
+    assert {progress.total for progress in seen} == {6}

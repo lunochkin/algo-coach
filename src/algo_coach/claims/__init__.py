@@ -11,7 +11,16 @@ from algo_coach.claims.classifier import (
 )
 from algo_coach.claims.reading import ReadResult, read
 from algo_coach.claims.revision import against, contested, revisable
-from algo_coach.claims.run import ClassifyResult, Failed, ask, classify_backlog
+from algo_coach.claims.run import (
+    CONCURRENCY,
+    ClassifyResult,
+    Failed,
+    as_answered,
+    ask,
+    classify_backlog,
+    read_one,
+    store,
+)
 from algo_coach.claims.sample import (
     answered_by_hand,
     claimable,
@@ -38,6 +47,7 @@ __all__ = [
     "PROMPT_HASH",
     "PROMPT_VERSION",
     "UNSENT",
+    "CONCURRENCY",
     "ClassifierError",
     "ClassifyResult",
     "Comparison",
@@ -50,6 +60,7 @@ __all__ = [
     "TechniqueScore",
     "against",
     "answered_by_hand",
+    "as_answered",
     "ask",
     "at_configuration",
     "claimable",
@@ -61,9 +72,11 @@ __all__ = [
     "is_stale",
     "one_per_problem",
     "read",
+    "read_one",
     "readings_at",
     "revisable",
     "score",
     "score_backlog",
     "spread",
+    "store",
 ]

@@ -15,7 +15,15 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from algo_coach.claims.classifier import DEFAULT, PROMPT_HASH, Configuration
-from algo_coach.claims.run import ABORT_AFTER, Failed, Progress, ask
+from algo_coach.claims.run import (
+    ABORT_AFTER,
+    CONCURRENCY,
+    Failed,
+    Progress,
+    as_answered,
+    read_one,
+    store,
+)
 from algo_coach.claims.sample import recency
 from algo_coach.claims.stale import readings_at
 from algo_coach.log import AttemptLog
@@ -41,6 +49,7 @@ def read(
     claims: Sequence[TechniqueClaim],
     configuration: Configuration = DEFAULT,
     limit: int | None = None,
+    concurrency: int = CONCURRENCY,
     on_progress: Callable[[Progress], None] | None = None,
 ) -> ReadResult:
     """What one classifier reads each attempt as, from the log where it can.
@@ -79,19 +88,25 @@ def read(
             )
 
     consecutive = 0
-    for index, attempt in enumerate(asking, start=1):
+    index = 0
+    for attempt, techniques, failure in as_answered(
+        lambda attempt: read_one(
+            client, attempt, problems[attempt.problem_id], configuration=configuration
+        ),
+        asking,
+        concurrency=concurrency,
+    ):
+        index += 1
         problem = problems[attempt.problem_id]
-        try:
-            techniques = ask(client, log, attempt, problem, configuration=configuration)
-        except Exception as exc:
+        if failure is not None:
             # One attempt's problem, as in the backlog run: an eval that dies
             # on the first refusal reports nothing about the rest. A run of
             # them is a different fact — a configuration this classifier cannot
             # run fails identically on every attempt, and paying for the whole
             # eval set to learn it once is the same waste the backlog run
             # already refuses.
-            result.failed.append(Failed(attempt_id=attempt.id, reason=repr(exc)))
-            report(index, attempt, problem.title, reason=repr(exc))
+            result.failed.append(Failed(attempt_id=attempt.id, reason=repr(failure)))
+            report(index, attempt, problem.title, reason=repr(failure))
             consecutive += 1
             if consecutive == ABORT_AFTER:
                 result.aborted = True
@@ -104,6 +119,7 @@ def read(
             result.undecided += 1
             report(index, attempt, problem.title)
             continue
+        store(log, attempt.id, techniques, configuration=configuration)
         result.verdicts[attempt.id] = techniques
         result.read += 1
         report(index, attempt, problem.title, techniques=techniques)

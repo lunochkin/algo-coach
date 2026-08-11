@@ -10,6 +10,7 @@ from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
 
+from algo_coach.claims import CONCURRENCY
 from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
@@ -113,6 +114,12 @@ def main() -> None:
         action="store_true",
         help="also re-derive claims an older model or prompt version made",
     )
+    classify_parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=CONCURRENCY,
+        help="calls in flight at once; one at a time otherwise",
+    )
     _user_argument(classify_parser)
 
     score_parser = _command(sub, "score", "the classifier against the user's own claims")
@@ -142,6 +149,12 @@ def main() -> None:
         "--stored",
         action="store_true",
         help="score only readings already stored, making no call",
+    )
+    score_parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=CONCURRENCY,
+        help="calls in flight at once; one at a time otherwise",
     )
     _user_argument(score_parser)
 

@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 from algo_coach.claims.classifier import DEFAULT, Configuration
 from algo_coach.claims.reading import read
-from algo_coach.claims.run import Failed, Progress
+from algo_coach.claims.run import CONCURRENCY, Failed, Progress
 from algo_coach.claims.sample import answered_by_hand, eligible, one_per_problem
 from algo_coach.log import AttemptLog
 from algo_coach.schema import Problem
@@ -178,6 +178,7 @@ def score_backlog(
     user_id: str,
     configurations: Sequence[Configuration] = (DEFAULT,),
     limit: int | None = None,
+    concurrency: int = CONCURRENCY,
     on_configuration: Callable[[Configuration], None] | None = None,
     on_progress: Callable[[Progress], None] | None = None,
 ) -> Comparison:
@@ -223,6 +224,7 @@ def score_backlog(
                 claims=claims,
                 configuration=configuration,
                 limit=limit,
+                concurrency=concurrency,
                 on_progress=on_progress,
             )
         )

@@ -19,6 +19,7 @@ def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         log,
         problems,
         user_id=args.user,
+        concurrency=args.concurrency,
         limit=args.limit,
         technique=args.technique,
         redo=args.redo,

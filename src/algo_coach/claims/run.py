@@ -5,7 +5,9 @@ loop's own claims reach only what it touched, and the board's numbers are read
 from all of it.
 """
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from itertools import islice
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -22,6 +24,12 @@ from algo_coach.techniques import standing_claims
 # refusal or a rate limit hits one attempt; a rejected key or a spent quota
 # hits every one, and reporting that per attempt buries it.
 ABORT_AFTER = 3
+
+# One call at a time. A backlog run is minutes of waiting on a network, so the
+# default is the cautious one and the caller raises it: the binding limit is
+# input tokens per minute, not requests, since every call carries the code and
+# the criteria and thinks before it answers.
+CONCURRENCY = 1
 
 
 class Failed(BaseModel):
@@ -53,6 +61,47 @@ class ClassifyResult(BaseModel):
         return self.classified + self.redone
 
 
+def read_one(
+    client: Any,
+    attempt: Attempt,
+    problem: Problem,
+    *,
+    configuration: Configuration = DEFAULT,
+) -> list[str]:
+    """What one classifier reads one attempt as. Makes the call and nothing
+    else, so it is safe to run several at once — the write is the caller's,
+    and the log has one writer however many calls are in flight."""
+    return classify(client, problem.techniques, attempt.code or "", configuration=configuration)
+
+
+def store(
+    log: AttemptLog,
+    attempt_id: str,
+    techniques: Sequence[str],
+    *,
+    configuration: Configuration = DEFAULT,
+) -> None:
+    """Append what a classifier read, on the calling thread.
+
+    Written even when the verdict is unchanged: the record names the classifier
+    that reached it, so an unwritten agreement would stay stale and be paid for
+    again on every later run.
+
+    The hash is this build's rather than the configuration's: a caller names
+    which classifier to run, never which prompt text it sent.
+    """
+    log.append_claim(
+        classifier_claim(
+            attempt_id,
+            list(techniques),
+            model=configuration.model,
+            effort=configuration.effort,
+            prompt_version=configuration.prompt_version,
+            prompt_hash=PROMPT_HASH,
+        )
+    )
+
+
 def ask(
     client: Any,
     log: AttemptLog,
@@ -67,28 +116,55 @@ def ask(
     of these", so nothing is written and whatever already answers the attempt
     keeps answering it. Failures are the caller's — a backlog run aborts on a
     broken key and an eval does not.
-
-    The hash is this build's rather than the configuration's: a caller names
-    which classifier to run, never which prompt text it sent.
     """
-    techniques = classify(
-        client, problem.techniques, attempt.code or "", configuration=configuration
-    )
+    techniques = read_one(client, attempt, problem, configuration=configuration)
     if techniques:
-        # Written even when the verdict is unchanged: the record names the
-        # classifier that reached it, so an unwritten agreement would stay
-        # stale and be paid for again on every later run.
-        log.append_claim(
-            classifier_claim(
-                attempt.id,
-                techniques,
-                model=configuration.model,
-                effort=configuration.effort,
-                prompt_version=configuration.prompt_version,
-                prompt_hash=PROMPT_HASH,
-            )
-        )
+        store(log, attempt.id, techniques, configuration=configuration)
     return techniques
+
+
+def as_answered[T, R](
+    work: Callable[[T], R],
+    items: Sequence[T],
+    *,
+    concurrency: int = CONCURRENCY,
+) -> Iterator[tuple[T, R | None, Exception | None]]:
+    """Run `work` over `items`, yielding each as it finishes.
+
+    Completion order, not the order asked in — which is safe for what the
+    callers do with it. A claim ties with another only on `created_at`, broken
+    by append order, and that decides between two claims on one attempt; a run
+    makes at most one per attempt, so nothing a run writes can race itself.
+
+    Submission is bounded rather than all at once: a consumer that stops early
+    — a run aborting on a rejected key — must not have paid for the tail.
+    Closing the iterator cancels what has not started, and lets what is in
+    flight finish, since an API call cannot be taken back.
+
+    One worker is the serial path outright, not a pool of one: the ordinary run
+    should not depend on a thread pool to be correct.
+    """
+    if concurrency <= 1:
+        for item in items:
+            try:
+                yield item, work(item), None
+            except Exception as exc:
+                yield item, None, exc
+        return
+
+    queued = iter(items)
+    with ThreadPoolExecutor(max_workers=concurrency) as pool:
+        running = {pool.submit(work, item): item for item in islice(queued, concurrency)}
+        try:
+            while running:
+                done, _ = wait(running, return_when=FIRST_COMPLETED)
+                for future in done:
+                    item = running.pop(future)
+                    failure = future.exception()
+                    yield item, (None if failure else future.result()), failure
+                    running.update({pool.submit(work, nxt): nxt for nxt in islice(queued, 1)})
+        finally:
+            pool.shutdown(cancel_futures=True)
 
 
 def classify_backlog(
@@ -101,6 +177,7 @@ def classify_backlog(
     limit: int | None = None,
     technique: str | None = None,
     redo: bool = False,
+    concurrency: int = CONCURRENCY,
     on_progress: Callable[[Progress], None] | None = None,
 ) -> ClassifyResult:
     """Claim every attempt nothing has claimed yet, and with `redo`, every one
@@ -151,18 +228,31 @@ def classify_backlog(
 
     result = ClassifyResult()
     consecutive = 0
-    for index, attempt in enumerate(asking, start=1):
+    index = 0
+    for attempt, techniques, failure in as_answered(
+        lambda attempt: read_one(
+            client, attempt, problems[attempt.problem_id], configuration=configuration
+        ),
+        asking,
+        concurrency=concurrency,
+    ):
+        # Counted as answers arrive rather than taken from the order asked in:
+        # with several calls in flight a position in that order jumps about,
+        # and what a reader wants is a count that climbs.
+        index += 1
         problem = problems[attempt.problem_id]
-        try:
-            techniques = ask(client, log, attempt, problem, configuration=configuration)
-        except Exception as exc:
+        if failure is not None:
             # Broad on purpose: a refusal, a rate limit or a dropped connection
             # is one attempt's problem, and a backlog run must not lose the
             # ones behind it.
-            result.failed.append(Failed(attempt_id=attempt.id, reason=repr(exc)))
-            report(index, attempt, problem.title, reason=repr(exc))
+            result.failed.append(Failed(attempt_id=attempt.id, reason=repr(failure)))
+            report(index, attempt, problem.title, reason=repr(failure))
             consecutive += 1
             if consecutive == ABORT_AFTER:
+                # Consecutive by the order answered. What is already in flight
+                # still lands, so a broken key costs up to `concurrency`
+                # failures rather than `ABORT_AFTER` — time on calls that fail
+                # before they are billed, which is the price of not waiting.
                 result.aborted = True
                 break
             continue
@@ -176,6 +266,7 @@ def classify_backlog(
             result.undecided += 1
             report(index, attempt, problem.title)
             continue
+        store(log, attempt.id, techniques, configuration=configuration)
         if attempt.id in superseding:
             result.redone += 1
         else:

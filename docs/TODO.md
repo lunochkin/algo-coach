@@ -220,6 +220,13 @@ nothing checks sends practice somewhere unverified for weeks.
       `--stored`, which makes no call and asks for no credentials, so a
       comparison is reproducible once the reads are paid for
 
+- [x] Fan the calls out, keep one writer. `--concurrency` on `classify` and
+      `score`, since a backlog run is hours of waiting on a network. The write
+      left the worker so the log cannot tear; abort counts consecutive failures
+      by the order answered, costing up to `concurrency` of them on a broken
+      key; and the progress index counts answers rather than positions, which
+      jump about with calls in flight
+
 ### What a code means
 
 Twelve configurations spanning a 10× price range scored within two attempts of
