@@ -276,6 +276,11 @@ paradigm and a problem class.
 - [x] Hash the instructions and the criteria together — landed as a digest of
       the whole payload, per attempt, which subsumes this and the version with
       it
+- [x] Measure a configuration against itself — three passes with `--fresh`. 1
+      attempt of 31 flips for opus, 3 for haiku and sonnet: 0.5–2.2% of
+      decisions. A one- or two-attempt difference is unreadable; only the tier
+      gaps clear it. Flips are not random — four of six land on
+      `binary-search-tree` or `tree-traversal` boundaries
 - [ ] Show the reader the same criteria the classifier gets. One rulebook and
       two annotators is what makes their disagreement mean something: without
       it, a disagreement is ambiguous between an unclear rule and two
