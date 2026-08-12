@@ -284,10 +284,13 @@ paradigm and a problem class.
       until after. Not to fix labels — to find the rules that cannot be
       applied without peeking, which is cheaper to learn on thirty settled
       cases than on a hundred new ones
-- [ ] Read the calibration set at version 2 and compare it with version 1.
-      It cannot measure quality, having helped write the criteria, but it
-      answers the diagnostic question: did the two systematic failures stop
-      being systematic
+- [x] Read the calibration set after each criteria edit. It cannot measure
+      quality, having helped write the criteria, but it answered the diagnostic
+      question: both systematic cells cleared — Kahn for every configuration,
+      backtracking for the three that fell in — while the one edit aimed at a
+      mechanism inferred from scattered errors moved nothing. The rule that
+      came out of it: a cell several readers hit the same way is fixable by a
+      rule, and scattered errors are not
 
 ### Exit
 - [ ] Attribution runs on real daily attempts, carrying a measured agreement
@@ -302,8 +305,8 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
       doc is target state and code lags it on purpose — but that none are
       unknown: two were found by accident this phase, which is the argument
 - [ ] Classify freely over the whole vocabulary and intersect with the tags in
-      code, as a second prompt version — when the hand claims can score it
-      against the constrained one. An out-of-tag verdict is the only signal
+      code, as a second rulebook — when the hand claims can score it against
+      the constrained one. An out-of-tag verdict is the only signal
       that the tags are the gap, but both write the same claim, so the choice
       costs one re-run rather than a migration
 - [ ] Re-derive stored problems without a push — when the mapping changes for
