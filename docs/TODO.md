@@ -281,14 +281,6 @@ paradigm and a problem class.
       decisions. A one- or two-attempt difference is unreadable; only the tier
       gaps clear it. Flips are not random — four of six land on
       `binary-search-tree` or `tree-traversal` boundaries
-- [ ] Show the reader the same criteria the classifier gets. One rulebook and
-      two annotators is what makes their disagreement mean something: without
-      it, a disagreement is ambiguous between an unclear rule and two
-      different ones
-- [ ] Re-answer the calibration set from the criteria alone, readings hidden
-      until after. Not to fix labels — to find the rules that cannot be
-      applied without peeking, which is cheaper to learn on thirty settled
-      cases than on a hundred new ones
 - [x] Read the calibration set after each criteria edit. It cannot measure
       quality, having helped write the criteria, but it answered the diagnostic
       question: both systematic cells cleared — Kahn for every configuration,
@@ -296,6 +288,14 @@ paradigm and a problem class.
       mechanism inferred from scattered errors moved nothing. The rule that
       came out of it: a cell several readers hit the same way is fixable by a
       rule, and scattered errors are not
+- [x] Show the reader the same criteria the classifier gets. One rulebook and
+      two annotators is what makes their disagreement mean something: without
+      it, a disagreement is ambiguous between an unclear rule and two
+      different ones
+- [ ] Re-answer the calibration set from the criteria alone, readings hidden
+      until after. Not to fix labels — to find the rules that cannot be
+      applied without peeking, which is cheaper to learn on thirty settled
+      cases than on a hundred new ones
 
 ### Exit
 - [ ] Attribution runs on real daily attempts, carrying a measured agreement

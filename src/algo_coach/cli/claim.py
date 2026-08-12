@@ -1,6 +1,7 @@
 import argparse
 from collections.abc import Mapping, Sequence
 from pathlib import Path
+from textwrap import fill
 
 from algo_coach.claims import (
     against,
@@ -16,8 +17,9 @@ from algo_coach.cli.score import configurations, labels
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, Problem, TechniqueClaim
+from algo_coach.schema import Attempt, Problem, Technique, TechniqueClaim
 from algo_coach.techniques import standing_claims
+from algo_coach.techniques.vocabulary import criteria
 
 
 def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -64,6 +66,11 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             print(read_as(attempt, standing[attempt.id], readings, names))
         # Printed per attempt: the candidates are this problem's tags.
         print(f"  {numbered(problem.techniques)}")
+
+        entries = criteria()
+        hints = [criterion(entries[code]) for code in entries if code in problem.techniques]
+        print(f"\n{'\n\n'.join(hints)}\n")
+
         answer = ask_choice(
             "techniques", problem.techniques, [], empty="keep" if args.revise else "skip"
         )
@@ -144,3 +151,20 @@ def code_excerpt(code: str, limit: int) -> str:
     if len(lines) <= limit:
         return code
     return "\n".join([*lines[:limit], f"... {len(lines) - limit} more lines"])
+
+
+def criterion(technique: Technique) -> str:
+    INDENT = "    "
+
+    lines = []
+    lines.append(f"  Code: {technique.code}")
+    lines.append(f"  Kind: {technique.kind}")
+
+    earns = fill(technique.earns, width=100, initial_indent=INDENT, subsequent_indent=INDENT)
+    lines.append(f"  Earns:\n{earns}")
+
+    near_miss = fill(
+        technique.near_miss, width=100, initial_indent=INDENT, subsequent_indent=INDENT
+    )
+    lines.append(f"  Near Miss:\n{near_miss}")
+    return "\n".join(lines)
