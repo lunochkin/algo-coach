@@ -23,6 +23,31 @@ def criteria() -> Mapping[str, Technique]:
     return MappingProxyType({entry.code: entry for entry in entries})
 
 
+def criterion(code: str) -> list[str]:
+    """One code's rule in the words both annotators meet, and nothing for a
+    code the vocabulary no longer carries. Records outlive the vocabulary, so a
+    retired code can still be a candidate; it then reaches its reader as a bare
+    name, which is what was said before any criterion existed.
+
+    Rendered here rather than by each reader, because one rulebook and two
+    annotators is what makes their disagreement mean something: two renderers
+    would drift, and a disagreement would stop being about the code.
+
+    The kind arrives as its test rather than as its name: one question is
+    answered four ways, and a bare label only helps whoever already knows
+    which way. Naming it is what keeps a structure from being judged on
+    whether it was performed.
+    """
+    entry = criteria().get(code)
+    if entry is None:
+        return []
+    return [
+        f"{entry.code} — {entry.kind}: {entry.kind.test}.",
+        f"  Earns it: {entry.earns}",
+        f"  Near miss: {entry.near_miss}",
+    ]
+
+
 @cache
 def codes() -> frozenset[str]:
     return frozenset(criteria())

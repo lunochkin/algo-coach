@@ -11,11 +11,12 @@ from algo_coach.schema import (
     Attempt,
     AttemptOrigin,
     ClaimSource,
+    Kind,
     Problem,
     ProblemOwner,
     TechniqueClaim,
 )
-from algo_coach.techniques import map_tags, standing_claims
+from algo_coach.techniques import criteria, criterion, map_tags, standing_claims
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -31,6 +32,23 @@ def seed_problem(root, *, id: str, tags: list[str]) -> None:
             title_slug=id,
             source_tags=tags,
             techniques=map_tags(tags),
+        )
+    )
+
+
+def put_problem(root, *, id: str, techniques: list[str]) -> None:
+    """Codes set directly rather than derived. `map_tags` sorts, so a problem
+    stored by another path is where the codes' own order shows."""
+    ProblemStore(root).put(
+        Problem(
+            id=id,
+            external_id=f"ext-{id}",
+            user_id="u1",
+            owner=ProblemOwner.USER,
+            title=id,
+            title_slug=id,
+            source_tags=[],
+            techniques=techniques,
         )
     )
 
@@ -388,6 +406,78 @@ def test_the_candidates_are_shown(claim_root, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "1 greedy" in out
     assert "2 sorting" in out
+
+
+def test_each_candidate_is_shown_with_its_criterion(claim_root, monkeypatch, capsys):
+    """One rulebook and two annotators is what makes their disagreement mean
+    something: a reader judging from the code name alone disagrees with the
+    classifier over an unclear rule and a different one indistinguishably."""
+    run(monkeypatch, ["1"])
+
+    out = " ".join(capsys.readouterr().out.split())
+    for candidate in ("greedy", "sorting"):
+        entry = criteria()[candidate]
+        assert " ".join(entry.earns.split()) in out
+        assert " ".join(entry.near_miss.split()) in out
+
+
+def test_a_candidate_carries_its_kind_as_a_test_not_a_label(claim_root, monkeypatch, capsys):
+    """The half a bare label drops. A reader who does not already know what a
+    kind selects judges a structure on whether it was performed."""
+    seed_problem(claim_root.root, id="mixed", tags=["Greedy", "Binary Search Tree"])
+    claim_root.append_attempt(attempt("a3", "mixed"))
+
+    run(monkeypatch, ["1"], "--technique", "binary-search-tree", "--count", "1")
+
+    out = " ".join(capsys.readouterr().out.split())
+    assert Kind.PARADIGM.test in out
+    assert Kind.STRUCTURE.test in out
+
+
+def test_the_reader_and_the_classifier_meet_the_same_words(claim_root, monkeypatch, capsys):
+    """Wrapping is this reader's, the words are not. Two renderers of one
+    rulebook drift, and the drift is invisible in the agreement number."""
+    run(monkeypatch, ["1"])
+
+    out = " ".join(capsys.readouterr().out.split())
+    for candidate in ("greedy", "sorting"):
+        for line in criterion(candidate):
+            assert " ".join(line.split()) in out
+
+
+def test_the_criteria_are_shown_in_the_candidates_order(tmp_path, monkeypatch, capsys):
+    """The numbers select from the problem's own order. Criteria in vocabulary
+    order agree with it only while the tag mapping sorts and the vocabulary is
+    alphabetical — neither is a promise to a reader matching rule to number."""
+    root = tmp_path / "data"
+    monkeypatch.setattr(cli, "DATA_ROOT", root)
+    put_problem(root, id="unsorted", techniques=["sorting", "greedy"])
+    log = AttemptLog(root)
+    log.append_attempt(attempt("a1", "unsorted"))
+
+    run(monkeypatch, ["1"])
+
+    out = capsys.readouterr().out
+    assert "1 sorting   2 greedy" in out
+    assert out.index("sorting —") < out.index("greedy —")
+
+
+def test_a_retired_candidate_costs_its_own_criterion_and_nothing_else(
+    tmp_path, monkeypatch, capsys
+):
+    """Records outlive the vocabulary, so a stored problem can name a code the
+    criteria no longer hold. It is still a legal claim."""
+    root = tmp_path / "data"
+    monkeypatch.setattr(cli, "DATA_ROOT", root)
+    put_problem(root, id="retired", techniques=["greedy", "dynamic-programming-2d"])
+    log = AttemptLog(root)
+    log.append_attempt(attempt("a1", "retired"))
+
+    run(monkeypatch, ["2"])
+
+    (claim,) = log.claims()
+    assert claim.techniques == ["dynamic-programming-2d"]
+    assert criteria()["greedy"].earns in capsys.readouterr().out.replace("\n      ", " ")
 
 
 def test_revise_shows_a_named_classifier_s_reading_of_the_same_prompt(

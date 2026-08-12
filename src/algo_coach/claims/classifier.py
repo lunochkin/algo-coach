@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from algo_coach.calls import CallLog, ask
 from algo_coach.calls import prompt_hash as digest
 from algo_coach.schema import Call
-from algo_coach.techniques import criteria
+from algo_coach.techniques import criterion
 
 MODEL = "claude-opus-5"
 EFFORT = "medium"
@@ -135,7 +135,7 @@ def prompt(candidates: Sequence[str], code: str) -> str:
         [
             f"Candidates: {', '.join(candidates)}",
             "",
-            *(line for candidate in candidates for line in criterion(candidate)),
+            *(line for candidate in candidates for line in block(candidate)),
             "<solution>",
             code,
             "</solution>",
@@ -143,25 +143,12 @@ def prompt(candidates: Sequence[str], code: str) -> str:
     )
 
 
-def criterion(candidate: str) -> list[str]:
-    """One candidate's rule, and nothing for a code the vocabulary no longer
-    carries. Records outlive the vocabulary, so a retired code can still be a
-    candidate; it then reaches the model as a bare name, which is what the
-    prompt said before any criterion existed.
-
-    The kind arrives as its test rather than as its name: one question is
-    answered four ways, and a bare label only helps a reader who already knows
-    which way. Naming it is what keeps a structure from being judged on whether
-    it was performed."""
-    entry = criteria().get(candidate)
-    if entry is None:
-        return []
-    return [
-        f"{entry.code} — {entry.kind}: {entry.kind.test}.",
-        f"  Earns it: {entry.earns}",
-        f"  Near miss: {entry.near_miss}",
-        "",
-    ]
+def block(candidate: str) -> list[str]:
+    """The prompt's copy of one rule: the shared lines, and the blank that
+    separates one candidate from the next. A retired code costs its own lines,
+    not the separator around a rule that is not there."""
+    lines = criterion(candidate)
+    return [*lines, ""] if lines else []
 
 
 def schema(candidates: Sequence[str]) -> dict[str, Any]:
