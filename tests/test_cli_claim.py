@@ -3,8 +3,9 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from algo_coach import cli
+from algo_coach.claims import request_hash
 from algo_coach.log import AttemptLog
-from algo_coach.mint import classifier_claim
+from algo_coach.mint import classifier_claim, user_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
     Attempt,
@@ -387,3 +388,47 @@ def test_the_candidates_are_shown(claim_root, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "1 greedy" in out
     assert "2 sorting" in out
+
+
+def test_revise_shows_a_named_classifier_s_reading_of_the_same_prompt(
+    claim_root, monkeypatch, capsys
+):
+    """The revision pool is what a reading disputes, so the command has to ask
+    what each attempt would be sent now — a reading of an older rulebook
+    answered a different question and is not a disagreement about this one."""
+    claim_root.append_claim(user_claim("a1", ["greedy"]))
+    claim_root.append_claim(
+        classifier_claim(
+            "a1",
+            ["sorting"],
+            model="claude-opus-5",
+            effort="medium",
+            prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
+            call_id="call-1",
+        )
+    )
+
+    run(monkeypatch, [""], "--revise", "--model", "claude-opus-5")
+
+    out = capsys.readouterr().out
+    assert "1 of 1 disagree" in out
+    assert "sorting" in out
+
+
+def test_revise_ignores_a_reading_of_a_prompt_nobody_sends_now(claim_root, monkeypatch, capsys):
+    claim_root.append_claim(user_claim("a1", ["greedy"]))
+    claim_root.append_claim(
+        classifier_claim(
+            "a1",
+            ["sorting"],
+            model="claude-opus-5",
+            effort="medium",
+            prompt_hash="ffffffffffff",
+            call_id="call-1",
+        )
+    )
+
+    with pytest.raises(SystemExit):
+        run(monkeypatch, [""], "--revise", "--model", "claude-opus-5")
+
+    assert "nothing disputed" in capsys.readouterr().err

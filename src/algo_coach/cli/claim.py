@@ -2,7 +2,14 @@ import argparse
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
-from algo_coach.claims import against, claimable, contested, readings_at, revisable
+from algo_coach.claims import (
+    against,
+    claimable,
+    contested,
+    readings_at,
+    request_hash,
+    revisable,
+)
 from algo_coach.cli.display import verdict
 from algo_coach.cli.prompts import ask_choice, numbered
 from algo_coach.cli.score import configurations, labels
@@ -86,15 +93,23 @@ def disputed(
     configuration ever run would answer it for them.
     """
     named = configurations(args, parser)
-    readings = [readings_at(claims, configuration) for configuration in named]
+    pool = revisable(
+        log.attempts(),
+        problems,
+        standing,
+        user_id=args.user,
+        technique=args.technique,
+    )
+    # What each attempt would be asked now. A reading of an older rulebook
+    # answered a different question, so showing it beside a claim would put a
+    # disagreement with text nobody sends any more in front of the reader.
+    asked = {
+        attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
+        for attempt in pool
+    }
+    readings = [readings_at(claims, configuration, asked) for configuration in named]
     pool = contested(
-        revisable(
-            log.attempts(),
-            problems,
-            standing,
-            user_id=args.user,
-            technique=args.technique,
-        ),
+        pool,
         standing,
         readings,
         at_least=args.disputed,
