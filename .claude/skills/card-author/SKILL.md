@@ -76,6 +76,10 @@ one. Change `title`.
    - **Out of scope** — what belongs to this technique and is deliberately not
      here, so the card is closed rather than merely unfinished. Name where it
      would be needed.
+   - **Open** — the hard form the card's optional template answers, named as a
+     thing worth deriving first. What makes it hard, and nothing that removes
+     the difficulty: the answer is in the optional template, which is not read
+     unless it is asked for.
    - **Pitfalls** — where time is actually lost: off-by-ones, ties, leftovers,
      sentinels. **Give the structural fix, not the warning.** "Append a
      sentinel so there is one width formula and one code path" is a fix;
@@ -123,11 +127,28 @@ one. Change `title`.
      problem does. Union-find over a grid is the same mechanic with an index
      trick, so it is a delta; a disjoint set carrying a ratio has a different
      `find`, so it is a template.
+   - **Two templates may not blank-file to the same code.** If the second one
+     reproduces the first's lines, reproducing it proves nothing and the
+     recall count says two forms where there is one. Either it is a delta, or
+     what it actually adds — the bounds, the feasibility predicate, the setup —
+     is the part that must be typed concretely, and the template is the whole
+     solve rather than the skeleton.
+   - **A callable parameter is not a placeholder.** A base template taking a
+     predicate is the reusable skeleton, and passing a lambda at the call site
+     is how it is used. What is forbidden is a named helper that stands for
+     unwritten work.
    - **It must read like real solve code**, because that is what it trains.
      Keep the names a solve would use, and let a trailing comment state the
      invariant the structure maintains (`# indices; nums[st] strictly
      decreasing`) or mark the step that is the trick. Nothing else in comments,
      and complexity goes in the brief.
+   - **A card may carry one optional template, and usually should.** Mark it
+     `"optional": true`. It is the capstone — the hard problem's method, the
+     variant that is a stretch rather than the day's work — and it sits outside
+     the card's default study set. Zero or one, never two: a second one means
+     the card was scoped wrong. It is authored in full, code included; what
+     makes it optional is that nothing surfaces it unless it is asked for by
+     name.
    - **Code that must never be shipped goes in `notes`, never in a template.**
      The naive form that shows why the optimisation exists earns its place —
      as a contrast to read, marked as one. A template is drilled until it is
@@ -156,6 +177,19 @@ one. Change `title`.
 
 - **No third-party problem statements or test cases**, in the file or anywhere
   else in any repo. Name a problem and link it; never paste it.
+- **Never print a template's code into the conversation.** Not while
+  authoring, not when reporting what was written, not when summarising a
+  revision — write it to the file and name the template by its slug. A card is
+  read when the reader chooses to read it, and a solution pasted into a session
+  is read whether or not it was wanted. This holds for every template and
+  doubly for the optional one; print it only when explicitly asked to.
+- **A form the source reserves goes in the optional template**, not into the
+  ordinary set. A note may mark something withheld, unsolved on purpose, or a
+  stretch — "solve it cold", "no hints". The card still holds the answer, which
+  is what makes it a card; the optional flag is what keeps it from arriving
+  uninvited, and the brief's **Open** section names the difficulty without
+  removing it. Never reproduce a pointer to where a solution lives either — a
+  reference is a spoiler with an extra step.
 - **A card holds no history.** No recall dates, no graduation stamp, no "5 WA
   on this in March", no ladder checkboxes. Those are records the engine keeps
   per user, and a card is product content one store seeds and another store
