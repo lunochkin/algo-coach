@@ -335,6 +335,12 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
       claim per attempt, not the standing one, which on 13 of 62 is a revision.
       Triggered when mastery estimation reads claims and a wrong one starts
       spending practice time
+- [ ] Reconsider what the eval scores against. `score` takes one reader's
+      claims as ground truth, so it measures agreement with a person and caps
+      at that person's own consistency. Adjudicated labels, agreement with no
+      gold set, or scoring a verdict against the rule it cites would change the
+      metric and not the log. Triggered by the measurement above, which is what
+      says whether the ceiling binds
 - [ ] Read the architecture doc against the code, landing every divergence
       here as an item saying which side is wrong. Not that none exist — the
       doc is target state and code lags it on purpose — but that none are
