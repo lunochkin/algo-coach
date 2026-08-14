@@ -376,8 +376,9 @@ the loop records what neither of them can know.
    and a self-label.
 
 - **The loop mints no attempt.** The records come from the platform that
-  witnessed them. `origin: engine` stays reserved for Phase 5, where the
-  engine produces attempts by verifying them.
+  witnessed them. `origin: engine` stays reserved for the phase where the
+  engine produces attempts by verifying them — named as a capability rather
+  than a number, since a stored value's meaning cannot move when phases do.
 - **Timing is the platform's** — the work happens there. An attempt it did not
   time stays untimed rather than carrying a duration the engine reconstructed.
 - **A drill can mint several attempts**, since a sitting is usually several
@@ -399,7 +400,7 @@ the loop records what neither of them can know.
   log — which is exact, since it knows what was already there — so the drill
   loop needs no client of its own and works whatever the user pushes with.
 - **Selection never schedules.** Ordering is a view; what to drill is the
-  user's until Phase 4.
+  user's until the scheduler lands.
 
 ## Invariants
 

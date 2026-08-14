@@ -99,13 +99,13 @@ The rest extends that command.
 ### Exit
 - [ ] The loop runs on real daily attempts
 
-## Phase 3 — technique attribution (current)
+## Phase 3 — technique attribution
 
 Which techniques a solution used. The evidence is the code and the code does
 not decay, so the classifier can be scored against a hand answer given
 retroactively. Whether two careful readers agree is what the scoring asks, not
 what licenses it. Why an attempt failed is a different kind of question and
-moved to Phase 4.
+moved to Phase 5.
 
 ### Hand claims
 
@@ -122,7 +122,7 @@ nothing checks sends practice somewhere unverified for weeks.
       same problem, and a repeat asks the identical question — same code, same
       candidate tags — so counting both weights that problem twice. Per problem
       rather than per sitting, since a retry months later repeats it too, and
-      sittings are Phase 4's
+      sittings land with the mastery model
 - [x] Of a problem's attempts, the latest carrying code — the solution that
       stands. An earlier one may show an approach that was abandoned, and the
       claim worth scoring is the one the board credits. A claimed problem does
@@ -324,6 +324,29 @@ reading it back is the deferred measurement's.
       classifier beats the tag fallback is measured when mastery estimation
       reads claims, not here
 
+## Phase 4 — cards (current)
+
+How studying a technique is organised. Not an ability estimate: mastery is what
+a user can solve, per technique, and it is Phase 5.
+
+### Phase 4a — cards and recall
+- [ ] `Card`: the topic, its templates, and a fixed problem ladder. Product
+      content, structured, several cards per technique
+- [ ] Seed from files through a path that stays a boundary — the private repo
+      it moves behind later is a different argument, not a refactor
+- [ ] A recall attempt is its own record, keyed to a card and a template.
+      Nothing keys it to an attempt: there is no problem and no submission
+- [ ] The trainer: names hidden, blank-filed cold, run against the card's own
+      tests, never printing the template
+- [ ] Port the authoring skill, output retargeted to the structured card
+- [ ] Card status — recalled when, ladder outstanding, probes available. The
+      inputs a graduation rule reads, and no threshold
+
+### Phase 4b — what daily use asks for
+
+Candidates, not commitments: a graduation rule, recall windows, a rust jog
+short of the full loop. Which of them matters is what 4a's daily use answers.
+
 ## Deferred
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
@@ -361,15 +384,12 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 
 ## Later phases
 
-### Phase 4 — mastery, cards, failure mode
-- [ ] `Card` model and store: teaching content keyed to a technique, several
-      per technique, never referenced by the log. Git holds the removed version
-- [ ] Seed from the private content repo; read-only at runtime
-- [ ] Cards for the techniques the board names weakest, not for all 27
+### Phase 5 — mastery, scheduling, failure mode
 - [ ] Rust against gap is per-technique state wearing a per-attempt costume:
       the two failures look identical in the record, and only whether the
-      technique was ever fluent separates them. It lands with the mastery
-      model or not at all
+      technique was ever fluent separates them. Recall history does not stand
+      in — reproducing a form cold is not recognising it unprompted. It lands
+      with the mastery model or not at all
 - [ ] Settle `SPEED` before anything writes it — "solved but too slowly" is
       about the user, a timeout is about the solution's complexity, and only
       the second is in the record
@@ -384,6 +404,6 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 
 ### Removed, kept in git
 - [ ] The failure classifier and its eval were cut before Phase 1 shipped and
-      are Phase 4's to rebuild; git holds what was removed. `Diagnosis` and the
+      are Phase 5's to rebuild; git holds what was removed. `Diagnosis` and the
       log's diagnosis methods stayed behind, since records outlive features and
       an append-only log cannot be retrofitted
