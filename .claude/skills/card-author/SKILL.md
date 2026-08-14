@@ -51,6 +51,15 @@ one. Change `title`.
    (`binary-search` on values vs on an answer space); keep one when the
    variations are decision axes within a single form.
 
+   **Scope by the machinery, not by the vocabulary.** A code's criterion says
+   what earns the label; a card says what is studied together, and the two do
+   not have to agree. Peeling degree-1 leaves from an undirected graph is not a
+   topological order and belongs on that card anyway: same queue, same degree
+   array, and it is what a reader reaches for the technique to solve. Include a
+   form when it shares the machinery or when it is what the technique gets
+   confused with — and say in its notes that it is not the technique proper, so
+   the card teaches the boundary instead of blurring it.
+
 3. **Write the card's `trigger`** — what in a problem says "reach for this
    technique", including the brute force it replaces. One or two sentences.
    The load-bearing field: a probe asks whether the technique is recognised
@@ -75,7 +84,11 @@ one. Change `title`.
      monotone over the range — since that is what a reader tests a new problem
      against.
    - **Decision axes** — the per-problem variations to pick (direction,
-     variant, comparison).
+     variant, comparison). **Representation is one of them** whenever the input
+     can arrive keyed differently: a dict keyed by the problem's own names
+     against an array behind an integer mapping. A mapping layer has to be
+     total over everything that can appear, and the error class it produces —
+     a name that was never mapped — is worth naming with the axis.
    - **Key insights** — 3–6 bullets, non-obvious only. Include the solve-time
      practicalities that cost minutes rather than correctness: sizing an array
      `n + 1` to work 1-indexed instead of remapping labels, and the like.
