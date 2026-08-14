@@ -144,6 +144,12 @@ file in place.
    capstone, a stretch rather than the day's work, authored in full and outside
    the default study set. Never two — a second means the card was scoped wrong.
 
+   Optional means *reserved for deriving*, never *rare* or *advanced-looking*.
+   A faster idiom the reader would reach for in an ordinary solve — a bitset
+   standing in for a boolean array — is studied however clever it looks, because
+   it is a tool rather than a challenge. What earns the flag is that meeting it
+   cold is worth more than reading it.
+
    ### What a template carries
 
    - **Its own `trigger`** — what says this form rather than another of the same
