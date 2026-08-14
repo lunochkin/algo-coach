@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from algo_coach.schema import Card, ProblemDifficulty, Selector, Template
+from algo_coach.schema import Card, ProblemDifficulty, Selector, Template, TemplateKind
 
 
 def template(slug: str = "sliding-window", **kwargs) -> Template:
@@ -10,7 +10,7 @@ def template(slug: str = "sliding-window", **kwargs) -> Template:
         slug=slug,
         title=slug,
         trigger=kwargs.pop("trigger", "a window over a contiguous run"),
-        code="def f(): pass",
+        code=kwargs.pop("code", "def f(): pass"),
         **kwargs,
     )
 
@@ -104,6 +104,15 @@ def test_the_trigger_is_its_own_field():
     """A probe asks whether the form is recognised unprompted, which is what
     the trigger states — so it is shown and withheld apart from the prose."""
     assert card().trigger not in card().brief
+
+
+def test_a_template_holds_code_unless_it_says_otherwise():
+    """Nearly always code, so that is the default. A method reproduced cold —
+    the steps for framing an unseen problem — is the exception that has to say
+    so, since nothing else could tell a checklist from source."""
+    assert template().kind is TemplateKind.CODE
+    steps = template(kind=TemplateKind.PROCEDURE, code="1. State\n2. Meaning\n")
+    assert steps.kind is TemplateKind.PROCEDURE
 
 
 def test_a_template_is_studied_unless_it_says_otherwise():

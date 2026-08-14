@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Annotated
 
 from pydantic import BaseModel, Field, model_validator
@@ -5,6 +6,19 @@ from pydantic import BaseModel, Field, model_validator
 from algo_coach.schema.problem import ProblemDifficulty
 
 Slug = Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9-]*$")]
+
+
+class TemplateKind(StrEnum):
+    """What a template reproduces.
+
+    Usually code. Sometimes the thing that has to come back cold is a method
+    rather than a function — the steps for turning an unseen problem into a
+    state and a recurrence — and a procedure written out as code would be a
+    checklist pretending to run.
+    """
+
+    CODE = "code"
+    PROCEDURE = "procedure"
 
 
 class Selector(BaseModel):
@@ -66,6 +80,10 @@ class Template(BaseModel):
     # for by name. A capstone the user may want to derive rather than read, so
     # the card holds the answer and does not volunteer it.
     optional: bool = False
+    kind: TemplateKind = TemplateKind.CODE
+    # Whatever is blank-filled: a runnable unit, or the numbered steps of a
+    # method. The field keeps its name because code is what it holds nearly
+    # always, and a second field would leave every reader asking which is set.
     code: str
 
 

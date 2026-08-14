@@ -13,7 +13,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from algo_coach.schema import CardSeed
+from algo_coach.schema import CardSeed, TemplateKind
 from algo_coach.techniques import is_known
 
 
@@ -31,6 +31,8 @@ def problems(path: Path) -> list[str]:
     if path.stem != card.slug:
         found.append(f"file name {path.stem} does not match slug {card.slug}")
     for template in card.templates:
+        if template.kind is not TemplateKind.CODE:
+            continue  # a procedure is steps to reproduce, not source
         try:
             compile(template.code, f"{card.slug}/{template.slug}", "exec")
         except SyntaxError as error:

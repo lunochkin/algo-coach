@@ -10,7 +10,13 @@ slugs and the record carries both.
 
 from pydantic import BaseModel, Field, model_validator
 
-from algo_coach.schema.card import Selector, Slug, optional_budget, unique_slugs
+from algo_coach.schema.card import (
+    Selector,
+    Slug,
+    TemplateKind,
+    optional_budget,
+    unique_slugs,
+)
 
 
 class TemplateSeed(BaseModel):
@@ -21,6 +27,7 @@ class TemplateSeed(BaseModel):
     trigger: str = Field(min_length=1)
     notes: str | None = None
     optional: bool = False
+    kind: TemplateKind = TemplateKind.CODE
     code: str
 
 

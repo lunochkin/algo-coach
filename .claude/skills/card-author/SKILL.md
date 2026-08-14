@@ -152,6 +152,19 @@ file in place.
      read, marked as one. A template is drilled until automatic, so the wrong
      version must not be one.
 
+   ### When the template is a method, not code
+
+   **What has to come back cold is sometimes a procedure.** Framing an unseen
+   problem — deciding the state, the meaning, the transition, the base, the
+   order, where the answer sits — is a method, and writing it as code would be
+   a checklist pretending to run. Mark it `"kind": "procedure"` and write the
+   numbered steps, one line each, keyword and gist. It is blank-filled and
+   measured like any other template; it is simply not compiled and not run.
+
+   Reach for it when the failure is in framing rather than in typing, and when
+   the steps have a fixed order that the reader must reproduce. Everything else
+   below is about code templates.
+
    ### How the code is written
 
    - **A complete runnable unit in the shape it is actually typed** — a function
