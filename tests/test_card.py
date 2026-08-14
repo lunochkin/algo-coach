@@ -4,8 +4,15 @@ from pydantic import ValidationError
 from algo_coach.schema import Card, ProblemDifficulty, Selector, Template
 
 
-def template(slug: str = "sliding-window") -> Template:
-    return Template(id=f"minted-{slug}", slug=slug, title=slug, code="def f(): pass")
+def template(slug: str = "sliding-window", **kwargs) -> Template:
+    return Template(
+        id=f"minted-{slug}",
+        slug=slug,
+        title=slug,
+        trigger=kwargs.pop("trigger", "a window over a contiguous run"),
+        code="def f(): pass",
+        **kwargs,
+    )
 
 
 def card(slug: str = "two-pointers-basic", *, technique: str = "two-pointers", **kwargs) -> Card:
@@ -14,6 +21,8 @@ def card(slug: str = "two-pointers-basic", *, technique: str = "two-pointers", *
         slug=slug,
         technique=technique,
         title=slug,
+        trigger=kwargs.pop("trigger", "sorted array, pair summing to a target"),
+        brief=kwargs.pop("brief", "## Core idea\n\nTwo indices, one pass."),
         templates=kwargs.pop("templates", [template()]),
         selector=kwargs.pop("selector", Selector(technique=technique, size=5)),
         **kwargs,
@@ -89,6 +98,29 @@ def test_the_vocabulary_is_not_checked_by_the_model():
     """Membership is a write-path check, as it is for a claim. A card seeded
     before a code was retired must stay readable by its own schema."""
     assert card(technique="retired-code").technique == "retired-code"
+
+
+def test_the_trigger_is_its_own_field():
+    """A probe asks whether the form is recognised unprompted, which is what
+    the trigger states — so it is shown and withheld apart from the prose."""
+    assert card().trigger not in card().brief
+
+
+def test_each_template_states_its_own_cue():
+    """Recall is per template, so the cue that has to fire is per template. The
+    card's says to reach for the technique; a form's says which form."""
+    forms = [template("expanding"), template("fixed-width", trigger="a window of size k")]
+    assert len({form.trigger for form in forms}) == 2
+    with pytest.raises(ValidationError):
+        template(trigger="")
+
+
+@pytest.mark.parametrize("blank", ["trigger", "brief"])
+def test_a_card_says_what_to_read(blank):
+    """A card organises what to read as much as what to reproduce. Empty prose
+    is not authored prose."""
+    with pytest.raises(ValidationError):
+        card(**{blank: ""})
 
 
 def test_a_card_round_trips():

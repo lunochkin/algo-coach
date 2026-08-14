@@ -103,6 +103,14 @@ user can solve, per technique, and the two share no data.
   filters that narrow it — and the ladder is derived from the corpus. Ids are
   minted per engine, so a card holding them would mean nothing in another
   store, where a selector ships anywhere.
+- **The recognition cue is its own field**, apart from the prose it could sit
+  in. A probe asks exactly it — whether the form is recognised unprompted —
+  so it is shown and withheld on its own, and the rest of what to read is one
+  authored block the engine never parses.
+- **The cue is carried at both levels**, answering different questions: the
+  card's says to reach for the technique, a template's says which of its forms.
+  Recall is per template, so a card-level cue alone would be right about the
+  technique and silent about what has to be reproduced.
 - **The ladder is resolved at import**, once, and a re-import never rewrites
   the ladder of a card already started. Same rule as a problem's minted id,
   and for the same reason: something is already working through it.
@@ -408,6 +416,14 @@ The shared reader answers "in what order", and each record says who wins.
   an offline content pipeline in a separate private repo, and seeded into the
   engine datastore. File-based for now. The technique vocabulary is the
   exception: it ships with the package, in git.
+  - What an author writes is its own shape, as a client's push is: `CardSeed`
+    (`src/algo_coach/schema/seed.py`) is the payload the stored card is built
+    from, not the card. Identity is the engine's at both boundaries, so the
+    payload has no field for it and an author cannot supply one by writing it.
+  - A card and each of its templates are matched by their authored slug, which
+    is what makes re-seeding refresh rather than duplicate. A new slug is a new
+    card: the runs and the recall history stay with the old one, so renaming is
+    a title change.
 
 ## Flows
 

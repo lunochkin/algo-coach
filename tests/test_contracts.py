@@ -1,19 +1,37 @@
-"""The push models are the contract clients copy, and ingest builds a record
-straight from one. Nothing but these tests keeps the two shapes aligned."""
+"""A payload is what someone outside the engine writes — a client pushing, an
+author seeding — and ingest builds a record straight from one. Nothing but
+these tests keeps the two shapes aligned.
+
+Two boundaries, one rule: identity and provenance are the engine's, so the
+payload has no field for them.
+"""
 
 import pytest
 
-from algo_coach.schema import Attempt, AttemptPush, Problem, ProblemPush
+from algo_coach.schema import (
+    Attempt,
+    AttemptPush,
+    Card,
+    CardSeed,
+    Problem,
+    ProblemPush,
+    Template,
+    TemplateSeed,
+)
 
 # What ingest stamps, and so must never reach the payload.
 ATTEMPT_STAMPED = frozenset({"id", "user_id", "problem_id", "origin"})
 PROBLEM_STAMPED = frozenset({"id", "user_id", "owner", "techniques"})
+MINTED = frozenset({"id"})
 
 CONTRACTS = [
     # `problem_external_id` is consumed by ingest to resolve the reference and
     # is the one payload field with no field on the record.
     (AttemptPush, Attempt, ATTEMPT_STAMPED, frozenset({"problem_external_id"})),
     (ProblemPush, Problem, PROBLEM_STAMPED, frozenset()),
+    # A card is authored once and seeded anywhere: only its id is per engine.
+    (CardSeed, Card, MINTED, frozenset()),
+    (TemplateSeed, Template, MINTED, frozenset()),
 ]
 
 

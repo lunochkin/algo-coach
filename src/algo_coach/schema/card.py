@@ -20,6 +20,17 @@ class Selector(BaseModel):
     size: int = Field(ge=1)  # a ladder of nothing teaches nothing
 
 
+def unique_slugs(slugs: list[str]) -> None:
+    """Two templates sharing a slug leave a re-import with no rule for which
+    minted id to keep, and a recall history split across both.
+
+    Checked on the authored payload as well as the record: a card rejected
+    only at import costs an authoring pass to learn what a validator knew.
+    """
+    if len(set(slugs)) != len(slugs):
+        raise ValueError("template slugs are unique within a card")
+
+
 class Template(BaseModel):
     """One form reproduced from memory. The unit of recall, since a card's
     forms are learned and lost separately."""
@@ -27,6 +38,11 @@ class Template(BaseModel):
     id: str  # engine-minted; a recall attempt keys to it and outlives any edit
     slug: Slug  # authored; how a re-import finds the same template
     title: str
+    # Which form this is, where the card's cue says to reach for the technique
+    # at all. Recall is per template, so the cue that has to fire is too — a
+    # card-level one would be right about the technique and silent about which
+    # of its forms the problem is asking for.
+    trigger: str = Field(min_length=1)
     code: str
 
 
@@ -50,14 +66,15 @@ class Card(BaseModel):
     slug: Slug  # authored; the idempotency key a re-seed matches on
     technique: str
     title: str
+    # When to reach for the technique at all, apart from the rest of the prose:
+    # a probe asks exactly this — whether it is recognised unprompted — so it is
+    # shown and withheld on its own. Which form to reach for is the template's.
+    trigger: str = Field(min_length=1)
+    brief: str = Field(min_length=1)  # markdown; what to read before solving
     templates: list[Template] = Field(min_length=1)
     selector: Selector
 
     @model_validator(mode="after")
     def _template_slugs_are_unique(self) -> Card:
-        """Two templates sharing a slug leave a re-import with no rule for
-        which minted id to keep, and a recall history split across both."""
-        slugs = [template.slug for template in self.templates]
-        if len(set(slugs)) != len(slugs):
-            raise ValueError("template slugs are unique within a card")
+        unique_slugs([template.slug for template in self.templates])
         return self
