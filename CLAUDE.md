@@ -23,6 +23,15 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 - Divergence is checked on purpose. An unchecked doc becomes fiction, and a
   model implements fiction without complaint.
 
+## Sequencing
+
+High-level design first, without detail; then small items one at a time.
+Neither big batches nor detailed design up front.
+
+A design pass settles boundaries, record shapes and what is irreversible, then
+stops. A detail only real use can answer is named as deferred rather than
+reasoned out — the schema runs a phase ahead, features do not.
+
 ## Writing
 
 - Docs, commits, comments: shortest form that keeps the reason. Cut restating,
