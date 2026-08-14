@@ -61,9 +61,21 @@ one. Change `title`.
    omit one that has nothing to say:
    - **Core idea** — the mechanic in 2–4 sentences, plus the non-obvious mental
      unlock if there is one.
+   - **Mental model** — what each name in the templates means and where it is
+     *not* valid: a parent pointer is not a root, a size is meaningful only on
+     a root. The misreading a reader will make, named before they make it.
    - **Decision axes** — the per-problem variations to pick (direction,
      variant, comparison).
-   - **Key insights** — 3–6 bullets, non-obvious only.
+   - **Key insights** — 3–6 bullets, non-obvious only. Include the solve-time
+     practicalities that cost minutes rather than correctness: sizing an array
+     `n + 1` to work 1-indexed instead of remapping labels, and the like.
+   - **Complexity** — per speed-up and per variation where they differ, with
+     the bound named rather than described: the naive form, each optimisation
+     alone, and both together. "Effectively constant" says nothing a reader
+     can reason with; `O(α(n))`, α ≤ 4 for any real n, does.
+   - **Out of scope** — what belongs to this technique and is deliberately not
+     here, so the card is closed rather than merely unfinished. Name where it
+     would be needed.
    - **Pitfalls** — where time is actually lost: off-by-ones, ties, leftovers,
      sentinels. **Give the structural fix, not the warning.** "Append a
      sentinel so there is one width formula and one code path" is a fix;
@@ -91,16 +103,35 @@ one. Change `title`.
      Omit `notes` when the trigger already says everything.
    - One statement per line. Never `;`-joined, never a single-line body
      (`if x: return` puts the body on its own line).
-   - A complete function, arguments to return value, that runs. No
-     pseudo-code placeholders — no `feasible()`, no `complete()`, no bare
-     `return True`. If the technique is a generic shape, describe the shape in
-     the brief and make the code a concrete canonical instance (placement →
-     n-queens count).
+   - **A complete runnable unit in the shape it is actually typed** — a
+     function where a solve types a function, a class where a solve types a
+     class. A structure carried across a whole solve (a disjoint set, a trie
+     node) is typed as a class with its methods, and forcing it into a
+     standalone function trains a form nobody writes.
+   - **A later template may use an earlier one by name**, since that is how it
+     is typed: the base structure, then the twenty lines that use it. Order the
+     templates so the base comes first. What is forbidden is a placeholder that
+     stands for work — no `feasible()`, no `complete()`, no bare `return True`.
+     If the technique is a generic shape, describe the shape in the brief and
+     make the code a concrete canonical instance (placement → n-queens count).
+   - **A variation that is a few lines on top of a base is a delta, not a
+     template.** Put it in the base template's `notes` as a fenced fragment
+     showing only the changed lines. Retyping the base to change three lines
+     makes four templates out of one form, and recall is per template — the
+     count would say four forms were learned where one was.
+   - **A form earns its own template when the mechanic differs**, not when the
+     problem does. Union-find over a grid is the same mechanic with an index
+     trick, so it is a delta; a disjoint set carrying a ratio has a different
+     `find`, so it is a template.
    - **It must read like real solve code**, because that is what it trains.
      Keep the names a solve would use, and let a trailing comment state the
      invariant the structure maintains (`# indices; nums[st] strictly
      decreasing`) or mark the step that is the trick. Nothing else in comments,
      and complexity goes in the brief.
+   - **Code that must never be shipped goes in `notes`, never in a template.**
+     The naive form that shows why the optimisation exists earns its place —
+     as a contrast to read, marked as one. A template is drilled until it is
+     automatic, so the wrong version must not be one.
    - **Run every template before writing it into the card.** Against a brute
      force over random inputs where one is cheap to write — a template that
      compiles and is subtly wrong is worse than none, since it is drilled until
