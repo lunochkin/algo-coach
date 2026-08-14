@@ -292,6 +292,7 @@ paradigm and a problem class.
       two annotators is what makes their disagreement mean something: without
       it, a disagreement is ambiguous between an unclear rule and two
       different ones
+- [ ] Add a confidence-level parameter to the manual labelling process
 - [ ] Re-answer the calibration set from the criteria alone, readings hidden
       until after. Not to fix labels — to find the rules that cannot be
       applied without peeking, which is cheaper to learn on thirty settled
