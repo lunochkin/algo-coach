@@ -330,12 +330,19 @@ How studying a technique is organised. Not an ability estimate: mastery is what
 a user can solve, per technique, and it is Phase 5.
 
 ### Phase 4a — cards and recall
-- [ ] `Card`: the topic, its templates, and a fixed problem ladder. Product
-      content, structured, several cards per technique
+- [ ] `Card`: the topic, its templates, and the selector a ladder resolves
+      from. Names no problem, so it ships anywhere. Several per technique
 - [ ] Seed from files through a path that stays a boundary — the private repo
       it moves behind later is a different argument, not a refactor
+- [ ] Resolve the ladder at import, and never rewrite one a card has already
+      been started on
+- [ ] `CardRun`: starting is explicit, since the ladder is measured from it.
+      Holds when it began and the probes assigned; later probes append
 - [ ] A recall attempt is its own record, keyed to a card and a template.
-      Nothing keys it to an attempt: there is no problem and no submission
+      Nothing keys it to an attempt: there is no problem and no submission.
+      What was hinted before a pass is part of it
+- [ ] Generate ladders and probes from the corpus — a skill now, since it is
+      judgment, and possibly an agent later
 - [ ] The trainer: names hidden, blank-filed cold, run against the card's own
       tests, never printing the template
 - [ ] Port the authoring skill, output retargeted to the structured card

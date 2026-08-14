@@ -71,8 +71,11 @@ technique, and it is Phase 5; the two share sequence and no data.
 ### Phase 4a — cards and recall
 
 - Card content is product data, structured and seeded from files: the topic,
-  its templates, and a fixed problem ladder. Authored by a skill, never
+  its templates, and a selector the ladder is resolved from at import. A card
+  names no problem, so it ships anywhere. Authored by a skill, never
   hand-edited — prose parsed by regex is what this replaces.
+- Studying a card is an explicit act, since the ladder is measured from it and
+  probes are assigned at it.
 - A recall attempt is not an `Attempt`: no problem, no platform, no
   submission. Its own record, keyed to a card and a template.
 - The trainer never prints a template. Names hidden, blank-filed cold, run

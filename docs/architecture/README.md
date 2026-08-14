@@ -26,6 +26,8 @@ Consequence: no third-party dependency in the drill loop.
 | Techniques | product | global | read-only at runtime | this repo, in git |
 | Cards | product | global | read-only at runtime | private content repo |
 | Problems | product or user | global if product-owned, user-scoped if pushed | read-only if product-owned, mutable cache if pushed | product set, or the pushing client |
+| Card runs | user | private | append-only | the store |
+| Recall attempts | user | private | append-only | the store |
 | Attempts | user | private | append-only | the store |
 | Technique claims | user | private | append-only | the store |
 | Calls | user | private | append-only | the store |
@@ -88,11 +90,63 @@ The vocabulary the append-only log references.
 
 Teaching content about a technique — not the vocabulary itself.
 
+A card organises studying one technique: what to read, what to reproduce from
+memory, and what to solve. It is not an ability estimate — mastery is what a
+user can solve, per technique, and the two share no data.
+
 - **Product data, not code** — cards live in the engine datastore, seeded from
   a private repo that holds their version history.
 - **Granularity follows teaching, not estimation.** One technique can carry
   several cards. Mastery is estimated per technique, so cards are never the
-  unit of estimation and are never referenced by the log.
+  unit of estimation, and the attempt log never references one.
+- **A card names no problem.** It carries a selector — a technique and the
+  filters that narrow it — and the ladder is derived from the corpus. Ids are
+  minted per engine, so a card holding them would mean nothing in another
+  store, where a selector ships anywhere.
+- **The ladder is resolved at import**, once, and a re-import never rewrites
+  the ladder of a card already started. Same rule as a problem's minted id,
+  and for the same reason: something is already working through it.
+- **Probes are assigned when a card is started**, not at import, and more can
+  be assigned after. What was unseen at import need not still be, and the
+  ordering answers it — unseen first, then least recently attempted. They are
+  never drawn from the ladder, which teaches the form rather than testing
+  whether it is recognised unprompted.
+- **A probe is not scarce.** With nothing unseen left, the least recently
+  solved stands in: someone who has solved everything in the technique is
+  past the point where the distinction pays for itself.
+- **Resolution is the engine's, as tag mapping is.** The selector is the
+  truth and the ladder a derived view, so re-deriving it is legal — for a
+  card nobody has started.
+
+### Card runs
+
+Studying a card is an act, not a state that drifts into being.
+
+- **Starting is explicit**, because the ladder is measured from it. A ladder
+  problem solved before the card began does not count toward it — the card
+  teaches the form, and having solved the problem once is not having studied
+  it.
+- **The run holds what the start produced**: when it began and the probes it
+  was given. Later probes append rather than replacing the set, so what was
+  offered and when stays readable.
+- **Derived from it, never stored**: ladder progress, recall state per
+  template, and whether the card is done. Aggregates are views. "Done" is only
+  a view for now — graduation becomes a process later, once there are numbers
+  to set its box and its probe count from.
+
+### Recall attempts
+
+One template reproduced from memory, and how it went.
+
+- **Not an `Attempt`.** No problem, no platform, no submission — nothing to
+  key to an attempt, so it is its own record, keyed to a card and a template.
+- **The unit is the template, not the card.** A card's forms are learned and
+  lost separately, and a card-level number would average them into silence.
+- **A hinted pass is not a pass.** What was taken before succeeding is part of
+  the record, or a decaying form reads as a fluent one.
+- **Recall fluency is not solving fluency.** Reproducing a form cold is not
+  recognising it unprompted, so this never stands in for mastery — the gap
+  between them is exactly the false fluency that blocked practice trains.
 
 ### Problems
 
