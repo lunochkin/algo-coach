@@ -9,6 +9,7 @@ from algo_coach.schema.attempt import (
     TestResult,
 )
 from algo_coach.schema.call import Call
+from algo_coach.schema.card import Card, Selector, Template
 from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.problem import Problem, ProblemDifficulty, ProblemOwner
 from algo_coach.schema.push import AttemptPush, ProblemPush
@@ -21,6 +22,7 @@ __all__ = [
     "AttemptPush",
     "AttemptRecord",
     "Call",
+    "Card",
     "ClaimSource",
     "Confidence",
     "Diagnosis",
@@ -31,7 +33,9 @@ __all__ = [
     "ProblemOwner",
     "ProblemPush",
     "SelfLabel",
+    "Selector",
     "Technique",
     "TechniqueClaim",
+    "Template",
     "TestResult",
 ]

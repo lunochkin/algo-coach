@@ -330,7 +330,7 @@ How studying a technique is organised. Not an ability estimate: mastery is what
 a user can solve, per technique, and it is Phase 5.
 
 ### Phase 4a — cards and recall
-- [ ] `Card`: the topic, its templates, and the selector a ladder resolves
+- [x] `Card`: the topic, its templates, and the selector a ladder resolves
       from. Names no problem, so it ships anywhere. Several per technique
 - [ ] Seed from files through a path that stays a boundary — the private repo
       it moves behind later is a different argument, not a refactor
