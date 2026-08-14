@@ -17,10 +17,11 @@ from algo_coach.cli.score import configurations, labels
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, Problem, TechniqueClaim
+from algo_coach.schema import Attempt, Confidence, Problem, TechniqueClaim
 from algo_coach.techniques import criterion, standing_claims
 
 WIDTH = 100
+LEVELS = list(Confidence)
 
 
 def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -39,7 +40,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     if args.revise:
         pool, readings, names = disputed(args, parser, claims, log, problems, standing)
     else:
-        if args.named or args.disputed != 1:
+        if args.named or args.disputed is not None:
             parser.exit(2, "claim: --model, --effort and --disputed need --revise\n")
         pool, readings, names = (
             claimable(
@@ -54,8 +55,15 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             [],
         )
     if not pool:
-        left = "disputed" if args.revise else "left to claim"
+        # "disputed" only where that is what emptied it. The revision pool is
+        # every claim by default, so an empty one means none were made.
+        left = "left to claim"
+        if args.revise:
+            left = "disputed" if args.disputed else "to revise"
         parser.exit(1, f"claim: nothing {left} for {args.user}\n")
+
+    # Once, unlike the candidates: the levels are the same at every attempt.
+    print(f"\nconfidence: {numbered(LEVELS)}")
 
     written = 0
     for index, attempt in enumerate(pool[: args.count], start=1):
@@ -80,8 +88,25 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         if answer.picked is None:
             continue
         chosen = [problem.techniques[int(number) - 1] for number in answer.picked]
-        log.append_claim(user_claim(attempt.id, chosen))
+
+        # Empty leaves it unsaid rather than defaulting to the middle: a level
+        # nobody gave is not a level, and the eval reads the absence.
+        level = ask_choice("confidence", LEVELS, [], empty="unsaid")
+        if level is None:
+            break
+        log.append_claim(
+            user_claim(
+                attempt.id,
+                chosen,
+                confidence=LEVELS[int(level.picked[0]) - 1] if level.picked else None,
+                informed_by=shown(attempt, readings),
+            )
+        )
         written += 1
+        # `a` at either prompt stops outright, as the drill loop's do — but
+        # after the append here, since the techniques answer already landed.
+        if level.rest:
+            break
 
     print(f"\n{written} claim(s) written")
 
@@ -120,9 +145,23 @@ def disputed(
         pool,
         standing,
         readings,
-        at_least=args.disputed,
+        at_least=args.disputed if args.disputed is not None else 0,
     )
     return pool, readings, labels(named)
+
+
+def shown(attempt: Attempt, readings: Sequence[Mapping[str, TechniqueClaim]]) -> list[str]:
+    """The calls whose verdicts `read_as` put in front of the reader.
+
+    A named configuration that never read this attempt showed nothing, so it
+    informed nothing — the pool only promises that one of them disagreed, not
+    that all of them answered.
+    """
+    return [
+        reading.call_id
+        for stored in readings
+        if (reading := stored.get(attempt.id)) is not None and reading.call_id is not None
+    ]
 
 
 def read_as(

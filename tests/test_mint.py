@@ -2,7 +2,7 @@ import pytest
 from helpers import machine_claim
 
 from algo_coach.mint import new_id, self_label, user_claim
-from algo_coach.schema import ClaimSource, FailureMode
+from algo_coach.schema import ClaimSource, Confidence, FailureMode
 
 
 def test_ids_do_not_repeat():
@@ -28,6 +28,35 @@ def test_a_user_claim_carries_no_version():
         None,
     )
     assert claim.techniques == ["greedy", "sorting"]
+
+
+def test_a_user_claim_is_blind_by_default():
+    """The drill loop asks before any classifier has read the attempt, and a
+    hand pass over the backlog is asked from the code and the tags. Both are
+    independent, so the caller says otherwise rather than saying so."""
+    claim = user_claim("a1", ["greedy"])
+
+    assert (claim.informed_by, claim.confidence) == ([], None)
+
+
+def test_a_user_claim_records_what_its_author_had_seen():
+    """A revision is asked with the readings in view, and a claim that cannot
+    say so is scored against the reading that produced it."""
+    claim = user_claim("a1", ["greedy"], informed_by=["call-1"])
+
+    assert claim.informed_by == ["call-1"]
+
+
+def test_a_user_claim_records_how_sure_its_author_was():
+    claim = user_claim("a1", ["greedy"], confidence=Confidence.GUESS)
+
+    assert claim.confidence is Confidence.GUESS
+
+
+def test_a_machine_claim_has_seen_nothing():
+    """The classifier reads one attempt's code and candidates, never another
+    reading of it — so there is no configuration it is not independent of."""
+    assert machine_claim("a1", ["greedy"]).informed_by == []
 
 
 def test_a_classifier_claim_names_what_produced_it():

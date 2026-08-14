@@ -78,6 +78,12 @@ class ClaimSource(StrEnum):
     CLASSIFIER = "classifier"
 
 
+class Confidence(StrEnum):
+    GUESS = "guess"
+    LEANING = "leaning"
+    SURE = "sure"
+
+
 class TechniqueClaim(AttemptRecord):
     """Which techniques an attempt used — what per-technique progress is
     measured from. Append-only: a later claim never rewrites an earlier one,
@@ -90,6 +96,17 @@ class TechniqueClaim(AttemptRecord):
 
     techniques: list[str] = Field(min_length=1)
     source: ClaimSource  # required: a mislabelled claim cannot be corrected later
+    # The calls whose readings were in view when the claim was made, empty for
+    # a blind one. Not provenance: provenance is what produced a claim, this is
+    # what its author had seen, so a user claim carries this and never that.
+    # Named one by one rather than flagged, because a claim made after seeing
+    # one configuration's reading is still independent of another's, and
+    # configurations are scored against the same claims.
+    informed_by: list[str] = Field(default_factory=list)
+    # How sure its author was, a level rather than a float: a judgement made in
+    # seconds carries no more. Absent on every claim written before it was
+    # asked for, and a level nobody gave is not the same as a low one.
+    confidence: Confidence | None = None
     # What produced a machine claim, whole: model, how hard it was asked to
     # think, the digest of the text sent, and the call that carries the rest.
     # The first three are copied from the call so the claims file reads on its

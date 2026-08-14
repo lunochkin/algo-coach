@@ -7,9 +7,10 @@ the clock has no place there either.
 """
 
 import uuid
+from collections.abc import Sequence
 from datetime import UTC, datetime
 
-from algo_coach.schema import Call, ClaimSource, FailureMode, SelfLabel, TechniqueClaim
+from algo_coach.schema import Call, ClaimSource, Confidence, FailureMode, SelfLabel, TechniqueClaim
 from algo_coach.techniques import is_known
 
 
@@ -49,15 +50,29 @@ def call(
     )
 
 
-def user_claim(attempt_id: str, techniques: list[str]) -> TechniqueClaim:
+def user_claim(
+    attempt_id: str,
+    techniques: list[str],
+    *,
+    confidence: Confidence | None = None,
+    informed_by: Sequence[str] = (),
+) -> TechniqueClaim:
     """A claim the user made, in the drill loop or over the stored log. It
-    carries no model or prompt version because nothing re-derives it."""
+    carries no model or prompt version because nothing re-derives it.
+
+    Blind and unsure unless the caller says otherwise: the drill loop asks
+    before any classifier has read the attempt, and the hand pass asks from the
+    code and the tags. Only a revision has readings in view, and only it says
+    so — a default that guessed would record independence nobody claimed.
+    """
     return TechniqueClaim(
         id=new_id(),
         created_at=datetime.now(UTC),
         attempt_id=attempt_id,
         techniques=techniques,
         source=ClaimSource.USER,
+        informed_by=list(informed_by),
+        confidence=confidence,
     )
 
 

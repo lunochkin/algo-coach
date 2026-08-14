@@ -10,6 +10,7 @@ from algo_coach.schema import (
     AttemptPush,
     AttemptRecord,
     ClaimSource,
+    Confidence,
     Diagnosis,
     FailureMode,
     Kind,
@@ -184,6 +185,44 @@ def test_user_claim_carries_no_provenance(field):
     that never touched it."""
     with pytest.raises(ValidationError, match=field):
         make_claim(ClaimSource.USER, **{field: PROVENANCE[field]})
+
+
+def test_a_claim_is_blind_unless_it_says_otherwise():
+    """The absence of a reading is the ordinary case — the drill loop asks
+    before any classifier has run — so an empty list is what a claim means
+    when nothing recorded what its author saw."""
+    assert make_claim(ClaimSource.USER).informed_by == []
+
+
+def test_a_user_claim_records_the_readings_its_author_saw():
+    """Not provenance: provenance is what produced a claim, this is what its
+    author had in view. A user claim carries the second and never the first."""
+    claim = make_claim(ClaimSource.USER, informed_by=["call-1", "call-2"])
+
+    assert claim.informed_by == ["call-1", "call-2"]
+
+
+def test_readings_are_named_one_by_one_rather_than_flagged():
+    """A claim made after seeing one configuration's reading is still
+    independent of another's, and configurations are scored against the same
+    claims — so validity is per configuration, which a boolean cannot say."""
+    claim = make_claim(ClaimSource.USER, informed_by=["call-1"])
+
+    assert "call-1" in claim.informed_by
+    assert "call-2" not in claim.informed_by
+
+
+def test_a_claim_carries_no_confidence_unless_asked():
+    """Every claim written so far has none, and a missing level is not the
+    same as a low one."""
+    assert make_claim(ClaimSource.USER).confidence is None
+
+
+@pytest.mark.parametrize("level", list(Confidence))
+def test_confidence_is_a_level_not_a_number(level):
+    """A judgement made in seconds carries no more resolution than this, and a
+    float would invite a precision the reader does not have."""
+    assert make_claim(ClaimSource.USER, confidence=level).confidence is level
 
 
 @pytest.mark.parametrize("code", ["", "  ", "../evil", "a/b", "Foo", "-leading-dash"])

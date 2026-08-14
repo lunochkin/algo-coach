@@ -94,11 +94,14 @@ def main() -> None:
         metavar="EFFORT",
         help="the effort of the --model before it",
     )
+    # Unset rather than 0, so "not passed" is a state instead of a value the
+    # flag could also be given. Every claim by default: reviewing only what a
+    # classifier contests corrects the hand claims in one direction.
     claim_parser.add_argument(
         "--disputed",
         type=int,
-        default=1,
-        help="how many of them must read it differently; 0 for every claim",
+        default=None,
+        help="how many of them must read it differently; every claim otherwise",
     )
     _user_argument(claim_parser)
 
