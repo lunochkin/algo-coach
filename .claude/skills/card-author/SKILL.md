@@ -57,6 +57,12 @@ one. Change `title`.
    unprompted, which is this and nothing else. Which *form* to reach for is
    each template's own trigger, written in step 5.
 
+   **End it with the negative, and name where to go instead.** The precondition
+   that makes the technique legal, and the technique that takes over when it
+   fails: not contiguous or not monotone in window size means prefix-sum, a
+   heap, or DP. Recognising that this is *not* the tool is half of what the cue
+   is for, and "not this" without a destination leaves the reader nowhere.
+
 4. **Write `brief`** — markdown, read before solving. Sections, in order, and
    omit one that has nothing to say:
    - **Core idea** — the mechanic in 2–4 sentences, plus the non-obvious mental
@@ -64,6 +70,10 @@ one. Change `title`.
    - **Mental model** — what each name in the templates means and where it is
      *not* valid: a parent pointer is not a root, a size is meaningful only on
      a root. The misreading a reader will make, named before they make it.
+     State the precondition the whole technique rests on as a property that can
+     be checked — the window state folds and unfolds in O(1), the predicate is
+     monotone over the range — since that is what a reader tests a new problem
+     against.
    - **Decision axes** — the per-problem variations to pick (direction,
      variant, comparison).
    - **Key insights** — 3–6 bullets, non-obvious only. Include the solve-time
@@ -90,11 +100,13 @@ one. Change `title`.
 5. **Write the templates.** Each is a blank-file target: the user reproduces it
    cold, and a recall attempt is keyed to its slug forever.
 
-   **Expect three to five for a technique worth a card**, not one. A form earns
-   its own template when it is reproduced separately — the base mechanic, the
-   variant that carries an aggregate on the stack, the one that folds into a DP,
-   the specialisation with the sentinel. One template is a sign the card was
-   scoped as a definition rather than as what gets typed.
+   **Expect three to five studied templates on a card**, not one — the
+   optional template, if there is one, sits outside that count. Per card, not
+   per technique: a technique carrying several cards carries several such sets.
+   A form earns its own template when it is reproduced separately — the base
+   mechanic, the variant that carries an aggregate on the stack, the one that
+   folds into a DP, the specialisation with the sentinel. One template is a sign
+   the card was scoped as a definition rather than as what gets typed.
 
    - **Each carries its own `trigger`** — what says this *form* rather than
      another form of the same technique (a window of fixed width vs one that
@@ -137,6 +149,12 @@ one. Change `title`.
      predicate is the reusable skeleton, and passing a lambda at the call site
      is how it is used. What is forbidden is a named helper that stands for
      unwritten work.
+   - **The canonical form is the one that cannot produce the known bug**, not
+     the shortest or the cleverest. Where a source records what went wrong —
+     a stale index, a diverging second code path — the template is the shape
+     that makes that mistake structurally impossible, and the tempting variant
+     goes in `notes` named as the trap it is. A card that drills the elegant
+     form re-teaches the bug the notes warn about.
    - **It must read like real solve code**, because that is what it trains.
      Keep the names a solve would use, and let a trailing comment state the
      invariant the structure maintains (`# indices; nums[st] strictly
