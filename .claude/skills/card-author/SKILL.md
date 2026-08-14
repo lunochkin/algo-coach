@@ -133,6 +133,13 @@ file in place.
      the setup — must be typed concretely, and the template is the whole solve
      rather than the skeleton.
 
+   **Every template must satisfy the card's own trigger.** If the card selects
+   states depending on a fixed, small number of previous positions, a form that
+   reads all of them is not a variation of this card — it is another card's,
+   however naturally it comes to mind. Check each template's trigger against the
+   card's before writing the code; a card whose trigger does not select its own
+   contents teaches a boundary it then violates.
+
    **One optional template, and usually one.** Mark it `"optional": true`: the
    capstone, a stretch rather than the day's work, authored in full and outside
    the default study set. Never two — a second means the card was scoped wrong.
