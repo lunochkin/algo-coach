@@ -296,44 +296,28 @@ paradigm and a problem class.
 
 ### What a claim was made against
 
-A hand claim is ground truth by construction, and nothing records whether it
-was made before or after a reading of the same attempt. Latest-wins among the
-user's own claims, so a revision made with the readings in view silently
-becomes what that reading is scored against. The evidence is on disk and no
-command can reach it.
+Nothing recorded whether a hand claim was made before or after a reading of the
+same attempt, and the user's latest wins — so a revision asked with the readings
+in view silently became what that reading was scored against. Recorded now;
+reading it back is the deferred measurement's.
 
-Recorded here, read later: the score still takes the standing claim whatever it
-was made against, and restricting it to independent ones is the deferred
-measurement's to do. What cannot wait is the field, since a claim written
-without it is unmarked forever.
-
-- [x] `informed_by` on `TechniqueClaim`: the call ids visible when the claim
-      was made, empty for a blind one. Not a boolean — a claim made after
-      seeing one configuration's reading is still independent of another's,
-      and configurations are compared, so validity is per configuration. Not
-      provenance either: provenance is what produced a claim, this is what its
-      author had seen, so a user claim carries the one and never the other.
-      Written on the revise path, where a named configuration that never read
-      the attempt showed nothing and so informed nothing — the pool promises
-      one of them disagreed, not that all of them answered
-- [x] `confidence` beside it, a level rather than a float: a judgement made in
-      seconds carries no more. Stamped before the reading or it says nothing,
-      and it is what separates a rulebook that cannot be applied from a reader
-      who slipped. Asked on the hand pass only, and unsaid on an empty answer
-      rather than defaulting to the middle: the drill loop's whole economy is
-      that a claim costs one keystroke, and a level nobody gave is not a level.
-      Costs a second prompt, which every scripted test now scripts — the cost
-      of a prompt being part of the command's contract
-- [x] Offer undisputed attempts to the revision pool: `--disputed` unset rather
-      than 1, so what narrowed the pool is a state and not a value the flag
-      could be given. Selecting only what a classifier contests corrected the
-      hand claims in one direction, so agreement climbed for reasons unrelated
-      to either reader being right. Ordering is unchanged — the most disputed
-      are still asked about first, since those are what decide something
-- [ ] Backfill the existing hand claims from the log — the machine claims on
-      that attempt created earlier. Over-marks, since a reading that existed
-      need not have been read, and over-marking shrinks the eval set rather
-      than inflating the score
+- [x] `informed_by`: the calls shown when the claim was made, empty for a blind
+      one. Named one by one rather than flagged, since a claim informed by one
+      configuration still measures another. Not provenance — that is what
+      produced a claim, this is what its author saw
+- [x] `confidence`, a level rather than a float, asked on the hand pass alone:
+      the drill loop's economy is one keystroke per claim. Empty leaves it
+      unsaid rather than defaulting to the middle
+- [x] `--disputed` unset rather than 1, so the pool is every claim. Offering
+      only what a classifier contests corrected the hand claims in one
+      direction. Ordering unchanged, most disputed first
+- [x] Not backfilled, nothing left to name: the readings those revisions saw
+      went with the 961 and their calls predate the call log. The timestamp
+      rule was the unsafe direction — no surviving machine claim predates any
+      revision, so it stamps all 79 blind
+- [x] The log answers it anyway. `claimable` offers only unclaimed attempts and
+      `revisable` only claimed ones, so a first user claim was blind and every
+      later one saw readings: 79 claims, 62 attempts, 17 revisions
 
 ### Exit
 - [ ] Attribution runs on real daily attempts and its claims stand. Whether the
@@ -344,16 +328,13 @@ without it is unmarked forever.
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
 
-- [ ] Measure attribution against an independent set: score restricted to
-      claims no reading touched, and the annotator's agreement with themselves
-      as the ceiling — a blind re-pass over the thirty, readings hidden until
-      after. Not to fix labels, but to find the rules that cannot be applied
-      without peeking, and to learn what a disagreement is worth: model error,
-      annotator error and an ambiguous rule are one number today. Deferred
-      because nothing downstream reads it — a wrong claim costs a board read
-      with judgment. Triggered when mastery estimation reads claims, where a
-      wrong one spends practice time instead. The schema that makes it
-      computable is not deferred
+- [ ] Measure attribution against an independent set: the score restricted to
+      blind claims, and the annotator against themselves as the ceiling — a
+      re-pass over the thirty, readings hidden. Model error, annotator error
+      and a rule that cannot be applied are one number today. Scores the first
+      claim per attempt, not the standing one, which on 13 of 62 is a revision.
+      Triggered when mastery estimation reads claims and a wrong one starts
+      spending practice time
 - [ ] Read the architecture doc against the code, landing every divergence
       here as an item saying which side is wrong. Not that none exist — the
       doc is target state and code lags it on purpose — but that none are
