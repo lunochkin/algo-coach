@@ -43,6 +43,11 @@ class Template(BaseModel):
     # card-level one would be right about the technique and silent about which
     # of its forms the problem is asking for.
     trigger: str = Field(min_length=1)
+    # What to read about this form and nothing else: when it applies, its
+    # unlock, its variations. Absent where the trigger says all there is —
+    # the card's brief carries what is technique-wide, and a reader studying
+    # one form should not have to scan the prose of the other three.
+    notes: str | None = None
     code: str
 
 

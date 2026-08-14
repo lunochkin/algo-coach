@@ -19,6 +19,7 @@ class TemplateSeed(BaseModel):
     slug: Slug
     title: str
     trigger: str = Field(min_length=1)
+    notes: str | None = None
     code: str
 
 

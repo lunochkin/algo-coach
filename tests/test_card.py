@@ -106,6 +106,13 @@ def test_the_trigger_is_its_own_field():
     assert card().trigger not in card().brief
 
 
+def test_a_form_that_needs_no_prose_carries_none():
+    """The trigger says when the form applies; notes say the rest, where there
+    is a rest. A card's brief carries what is technique-wide."""
+    assert template().notes is None
+    assert template(notes="Absorb the popped span; the entry is its own aggregate.").notes
+
+
 def test_each_template_states_its_own_cue():
     """Recall is per template, so the cue that has to fire is per template. The
     card's says to reach for the technique; a form's says which form."""
