@@ -25,7 +25,7 @@ Get real daily attempts into the engine and make current state visible.
   of past attempts groups without being labelled. Diagnosis is not an input
   until Phase 3. No scheduling; the user picks what to drill.
 - Exit: a week of real attempts is in the store, and the board renders
-  per-technique state from them.
+  per-technique state from them. Built, and open until it does.
 
 ## Phase 2 — Drill loop
 
@@ -40,9 +40,11 @@ The flow and its rules live in `docs/architecture/README.md`.
 
 ## Phase 3 — Technique attribution (current)
 
-Which techniques a solution used. A checkable question — the code answers it,
-and two careful readers agree — so the ground truth can be given retroactively
-and the phase needs no practice to start.
+Which techniques a solution used. The evidence is the code and the code does
+not decay, so the ground truth can be given retroactively and the phase needs
+no practice to start. Whether two careful readers agree is what the phase asks,
+not what it assumes: until something separates model error from annotator error
+from a rule that cannot be applied, a disagreement is all three at once.
 
 - Hand claims over a sample of the backlog: the eval set, and the correction
   path afterwards. A self-label cannot be given this way, which is why the
@@ -52,7 +54,10 @@ and the phase needs no practice to start.
   toward broad techniques.
 - Two measurements: disagreement with the tag fallback says whether the board
   moves, agreement with the hand claims says whether the move is right.
-- Exit: attribution runs on real daily attempts, carrying a measured number.
+- Exit: attribution runs on real daily attempts and its claims stand. Built,
+  and open until it does. Whether the classifier beats the tag fallback is
+  measured when mastery estimation reads claims, not here — until then a wrong
+  claim costs a board the user reads with their own judgment.
 
 ## Phase 4 — Technique mastery, cards, failure mode
 

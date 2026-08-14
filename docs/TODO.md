@@ -101,10 +101,11 @@ The rest extends that command.
 
 ## Phase 3 — technique attribution (current)
 
-Which techniques a solution used. A checkable question — the code answers it,
-and two careful readers agree — so the classifier can be scored against a hand
-answer given retroactively. Why an attempt failed is a different kind of
-question and moved to Phase 4.
+Which techniques a solution used. The evidence is the code and the code does
+not decay, so the classifier can be scored against a hand answer given
+retroactively. Whether two careful readers agree is what the scoring asks, not
+what licenses it. Why an attempt failed is a different kind of question and
+moved to Phase 4.
 
 ### Hand claims
 
@@ -292,20 +293,67 @@ paradigm and a problem class.
       two annotators is what makes their disagreement mean something: without
       it, a disagreement is ambiguous between an unclear rule and two
       different ones
-- [ ] Add a confidence-level parameter to the manual labelling process
-- [ ] Re-answer the calibration set from the criteria alone, readings hidden
-      until after. Not to fix labels — to find the rules that cannot be
-      applied without peeking, which is cheaper to learn on thirty settled
-      cases than on a hundred new ones
+
+### What a claim was made against
+
+A hand claim is ground truth by construction, and nothing records whether it
+was made before or after a reading of the same attempt. Latest-wins among the
+user's own claims, so a revision made with the readings in view silently
+becomes what that reading is scored against. The evidence is on disk and no
+command can reach it.
+
+Recorded here, read later: the score still takes the standing claim whatever it
+was made against, and restricting it to independent ones is the deferred
+measurement's to do. What cannot wait is the field, since a claim written
+without it is unmarked forever.
+
+- [x] `informed_by` on `TechniqueClaim`: the call ids visible when the claim
+      was made, empty for a blind one. Not a boolean — a claim made after
+      seeing one configuration's reading is still independent of another's,
+      and configurations are compared, so validity is per configuration. Not
+      provenance either: provenance is what produced a claim, this is what its
+      author had seen, so a user claim carries the one and never the other.
+      Written on the revise path, where a named configuration that never read
+      the attempt showed nothing and so informed nothing — the pool promises
+      one of them disagreed, not that all of them answered
+- [x] `confidence` beside it, a level rather than a float: a judgement made in
+      seconds carries no more. Stamped before the reading or it says nothing,
+      and it is what separates a rulebook that cannot be applied from a reader
+      who slipped. Asked on the hand pass only, and unsaid on an empty answer
+      rather than defaulting to the middle: the drill loop's whole economy is
+      that a claim costs one keystroke, and a level nobody gave is not a level.
+      Costs a second prompt, which every scripted test now scripts — the cost
+      of a prompt being part of the command's contract
+- [x] Offer undisputed attempts to the revision pool: `--disputed` unset rather
+      than 1, so what narrowed the pool is a state and not a value the flag
+      could be given. Selecting only what a classifier contests corrected the
+      hand claims in one direction, so agreement climbed for reasons unrelated
+      to either reader being right. Ordering is unchanged — the most disputed
+      are still asked about first, since those are what decide something
+- [ ] Backfill the existing hand claims from the log — the machine claims on
+      that attempt created earlier. Over-marks, since a reading that existed
+      need not have been read, and over-marking shrinks the eval set rather
+      than inflating the score
 
 ### Exit
-- [ ] Attribution runs on real daily attempts, carrying a measured agreement
-      number rather than an asserted one
+- [ ] Attribution runs on real daily attempts and its claims stand. Whether the
+      classifier beats the tag fallback is measured when mastery estimation
+      reads claims, not here
 
 ## Deferred
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
 
+- [ ] Measure attribution against an independent set: score restricted to
+      claims no reading touched, and the annotator's agreement with themselves
+      as the ceiling — a blind re-pass over the thirty, readings hidden until
+      after. Not to fix labels, but to find the rules that cannot be applied
+      without peeking, and to learn what a disagreement is worth: model error,
+      annotator error and an ambiguous rule are one number today. Deferred
+      because nothing downstream reads it — a wrong claim costs a board read
+      with judgment. Triggered when mastery estimation reads claims, where a
+      wrong one spends practice time instead. The schema that makes it
+      computable is not deferred
 - [ ] Read the architecture doc against the code, landing every divergence
       here as an item saying which side is wrong. Not that none exist — the
       doc is target state and code lags it on purpose — but that none are
