@@ -111,6 +111,11 @@ user can solve, per technique, and the two share no data.
   card's says to reach for the technique, a template's says which of its forms.
   Recall is per template, so a card-level cue alone would be right about the
   technique and silent about what has to be reproduced.
+- **One template may sit outside the studied set.** A card carries at most one
+  optional template — the capstone — and never only optional ones. It is
+  authored whole and surfaced on request alone: the hard form is worth deriving
+  before it is read, and a card that volunteered it would spend that once and
+  for good.
 - **The ladder is resolved at import**, once, and a re-import never rewrites
   the ladder of a card already started. Same rule as a problem's minted id,
   and for the same reason: something is already working through it.

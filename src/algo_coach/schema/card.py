@@ -20,6 +20,20 @@ class Selector(BaseModel):
     size: int = Field(ge=1)  # a ladder of nothing teaches nothing
 
 
+def optional_budget(optional: list[bool]) -> None:
+    """At most one optional template, and never every template.
+
+    An optional template is the hard capstone a card may carry — reached by
+    asking for it, not by studying the card. More than one and "optional" is
+    just a second tier of ordinary work; all of them and the card teaches
+    nothing until asked.
+    """
+    if sum(optional) > 1:
+        raise ValueError("a card carries at most one optional template")
+    if optional and all(optional):
+        raise ValueError("a card needs a template that is not optional")
+
+
 def unique_slugs(slugs: list[str]) -> None:
     """Two templates sharing a slug leave a re-import with no rule for which
     minted id to keep, and a recall history split across both.
@@ -48,6 +62,10 @@ class Template(BaseModel):
     # the card's brief carries what is technique-wide, and a reader studying
     # one form should not have to scan the prose of the other three.
     notes: str | None = None
+    # Outside the card's default study set: never rendered unless it is asked
+    # for by name. A capstone the user may want to derive rather than read, so
+    # the card holds the answer and does not volunteer it.
+    optional: bool = False
     code: str
 
 
@@ -80,6 +98,7 @@ class Card(BaseModel):
     selector: Selector
 
     @model_validator(mode="after")
-    def _template_slugs_are_unique(self) -> Card:
+    def _templates_are_well_formed(self) -> Card:
         unique_slugs([template.slug for template in self.templates])
+        optional_budget([template.optional for template in self.templates])
         return self

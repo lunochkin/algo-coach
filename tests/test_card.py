@@ -106,6 +106,26 @@ def test_the_trigger_is_its_own_field():
     assert card().trigger not in card().brief
 
 
+def test_a_template_is_studied_unless_it_says_otherwise():
+    """The default is the card's own set. Optional is the capstone a reader
+    asks for, so it has to be said."""
+    assert template().optional is False
+
+
+def test_a_card_carries_at_most_one_optional_template():
+    """Two optional templates is a second tier of ordinary work wearing the
+    name of an exception."""
+    with pytest.raises(ValidationError):
+        card(templates=[template("a", optional=True), template("b", optional=True)])
+
+
+def test_a_card_is_not_made_only_of_what_it_withholds():
+    """Every template optional means the card teaches nothing until asked."""
+    with pytest.raises(ValidationError):
+        card(templates=[template("a", optional=True)])
+    assert card(templates=[template("a"), template("b", optional=True)])
+
+
 def test_a_form_that_needs_no_prose_carries_none():
     """The trigger says when the form applies; notes say the rest, where there
     is a rest. A card's brief carries what is technique-wide."""
