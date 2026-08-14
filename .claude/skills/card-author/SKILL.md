@@ -65,17 +65,30 @@ one. Change `title`.
      variant, comparison).
    - **Key insights** — 3–6 bullets, non-obvious only.
    - **Pitfalls** — where time is actually lost: off-by-ones, ties, leftovers,
-     sentinels.
+     sentinels. **Give the structural fix, not the warning.** "Append a
+     sentinel so there is one width formula and one code path" is a fix;
+     "be careful with the width" is a note to forget.
 
    No problem statements, no test cases — see Rules.
 
 5. **Write the templates.** Each is a blank-file target: the user reproduces it
    cold, and a recall attempt is keyed to its slug forever.
+
+   **Expect three to five for a technique worth a card**, not one. A form earns
+   its own template when it is reproduced separately — the base mechanic, the
+   variant that carries an aggregate on the stack, the one that folds into a DP,
+   the specialisation with the sentinel. One template is a sign the card was
+   scoped as a definition rather than as what gets typed.
+
    - **Each carries its own `trigger`** — what says this *form* rather than
      another form of the same technique (a window of fixed width vs one that
      expands; binary search on values vs on an answer space). Recall is per
      template, so the cue that has to fire is too. With one template it may
      restate the card's more narrowly; do not paste the card's verbatim.
+   - **`notes` carry what is true of this form only**: when it applies, its
+     unlock, its variations, and what it transfers to. The derivation of the
+     line that goes wrong belongs here — write the derivation, not a warning.
+     Omit `notes` when the trigger already says everything.
    - One statement per line. Never `;`-joined, never a single-line body
      (`if x: return` puts the body on its own line).
    - A complete function, arguments to return value, that runs. No
@@ -83,10 +96,15 @@ one. Change `title`.
      `return True`. If the technique is a generic shape, describe the shape in
      the brief and make the code a concrete canonical instance (placement →
      n-queens count).
-   - Note the complexity in the brief, not in a comment.
-   - Several templates per card when the forms are reproduced separately; the
-     unit of recall is the template, and a card-level number would average
-     forms that are learned and lost apart.
+   - **It must read like real solve code**, because that is what it trains.
+     Keep the names a solve would use, and let a trailing comment state the
+     invariant the structure maintains (`# indices; nums[st] strictly
+     decreasing`) or mark the step that is the trick. Nothing else in comments,
+     and complexity goes in the brief.
+   - **Run every template before writing it into the card.** Against a brute
+     force over random inputs where one is cheap to write — a template that
+     compiles and is subtly wrong is worse than none, since it is drilled until
+     it is automatic.
 
 6. **Write the selector** — `technique`, optional `difficulty`, and `size`.
    The ladder is resolved from the corpus at import, so authoring names no
@@ -107,6 +125,12 @@ one. Change `title`.
 
 - **No third-party problem statements or test cases**, in the file or anywhere
   else in any repo. Name a problem and link it; never paste it.
+- **A card holds no history.** No recall dates, no graduation stamp, no "5 WA
+  on this in March", no ladder checkboxes. Those are records the engine keeps
+  per user, and a card is product content one store seeds and another store
+  seeds the same. What survives from a personal note is the depersonalised
+  lesson: not "my repeat offender", but which line the bug lives on and what
+  structural change removes the place it hides.
 - Be correct on the algorithm. State a subtle variant rather than hand-waving
   it.
 - Revising an existing card edits its file in place. Templates are matched by
