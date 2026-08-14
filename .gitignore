@@ -5,6 +5,7 @@ __pycache__/
 
 .env
 data/
+content/
 CLAUDE.local.md
 
 .DS_Store
