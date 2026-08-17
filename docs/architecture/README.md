@@ -25,6 +25,7 @@ Consequence: no third-party dependency in the drill loop.
 |---|---|---|---|---|
 | Techniques | product | global | read-only at runtime | this repo, in git |
 | Cards | product | global | read-only at runtime | private content repo |
+| Template matches | follows the problem | global if the problem is product-owned, private if pushed | append-only | the store |
 | Problems | product or user | global if product-owned, user-scoped if pushed | read-only if product-owned, mutable cache if pushed | product set, or the pushing client |
 | Card runs | user | private | append-only | the store |
 | Recall attempts | user | private | append-only | the store |
@@ -103,6 +104,19 @@ user can solve, per technique, and the two share no data.
   filters that narrow it — and the ladder is derived from the corpus. Ids are
   minted per engine, so a card holding them would mean nothing in another
   store, where a selector ships anywhere.
+- **The ladder covers every studied template.** Its rungs come from the
+  template matches, at least one per template, and the selector fills the rest
+  out to `size`. A ladder drawn from the selector alone would exercise the
+  technique and leave forms untouched, since a tag says what a problem is about
+  and not which form solves it.
+- **Requiredness is derived from what a rung covers**, never stored. A rung
+  covering a studied template is required; one covering only the optional
+  template is optional; one covering both is required, and the optional
+  template rides on it as the alternative approach. That last case is why a
+  problem matching several templates is the point rather than a nuisance.
+- **A studied template with no match is a reported gap**, not a quietly shorter
+  ladder. The card claims to teach that form, so a corpus that cannot exercise
+  it is a fact about the store worth surfacing.
 - **The recognition cue is its own field**, apart from the prose it could sit
   in. A probe asks exactly it — whether the form is recognised unprompted —
   so it is shown and withheld on its own, and the rest of what to read is one
@@ -130,6 +144,41 @@ user can solve, per technique, and the two share no data.
 - **Resolution is the engine's, as tag mapping is.** The selector is the
   truth and the ladder a derived view, so re-deriving it is legal — for a
   card nobody has started.
+
+### Template matches
+
+Which problems exercise which of a card's templates. What the ladder's coverage
+is computed from, and the engine's own work: an author names no problem, so
+nothing is authored here either.
+
+- **One record per template and problem, carrying a verdict.** Not a set per
+  template: problems arrive one push at a time, and a set record would rewrite
+  pairs that were already settled every time the corpus grew. A claim asserts
+  the whole set for one attempt because the set is the assertion; a match
+  asserts one pair, and the pairs are independent.
+- **A negative is stored.** Otherwise every re-run re-tests every non-match
+  forever. What still needs testing is the pairs carrying no record at the
+  current configuration — the rule `score` already uses for readings.
+- **A problem may match several templates**, and a template many problems. Two
+  approaches to one problem is the ordinary case, and it is what lets a single
+  rung cover a studied template and an optional one at once.
+- **Written after card import, never before.** Both references are minted — the
+  template at import, the problem at ingest — so a match cannot be authored
+  against a seed file.
+- **A call is per problem and card, a record is per pair.** The candidates are
+  that card's templates and the answer is the subset the problem exercises,
+  which is the classifier's shape; the records come from one answer.
+- **Candidates are pre-filtered by technique.** A problem is offered only to
+  cards whose technique its tags reach, or the work is every template against
+  every problem for an answer that is almost always no.
+- **Procedure templates are excluded.** A framing procedure is exercised by
+  every problem its technique reaches, so a per-problem verdict carries no
+  information; it is covered by the ladder as a whole.
+- **Re-derivation is the normal path, not an exception.** A technique claim
+  asks about one attempt and the question never changes; a match is a template
+  against a corpus that grows with every push.
+- **Provenance as a claim carries it**: the source, and on a machine match the
+  model, effort, prompt digest and call.
 
 ### Card runs
 
@@ -177,6 +226,13 @@ One template reproduced from memory, and how it went.
   is legal and expected.
 - **An unmapped tag blocks nothing.** It produces no code and the problem still
   ingests: a metadata mismatch must never cost a real attempt.
+- **The statement is stored, and matching is why.** Which form a problem
+  exercises is a question about what it asks, and tags answer what it is about.
+  Optional on the payload, since the corpus already ingested carries none, and a
+  problem without one still ingests and still counts — it simply cannot be
+  matched. The invariant against third-party statements is about git, and
+  `data/` is gitignored: the engine stores what a user pushed to their own
+  store, and no repo carries it.
 
 ### Attempts
 
@@ -507,7 +563,9 @@ Properties the system holds at all times.
 - The technique vocabulary is product-owned and global; no user-authored
   techniques or cards. Technique codes are stable identifiers with a migration
   path, since attempts, problems, and future user annotations reference them.
-  Cards are teaching content and are never referenced by the log.
+  Cards are teaching content and are never referenced by the attempt log — a
+  template match references one, but it is a fact about the corpus rather than
+  about a sitting, and mastery still reads no card.
 - Domain logic stays adapter-free and directly callable; the CLI is one
   adapter, a web API will be another.
 - No third-party problem statements or test cases in git — in any repo.
