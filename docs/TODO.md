@@ -332,20 +332,45 @@ a user can solve, per technique, and it is Phase 5.
 ### Phase 4a — cards and recall
 - [x] `Card`: the topic, its templates, and the selector a ladder resolves
       from. Names no problem, so it ships anywhere. Several per technique
+- [x] Port the authoring skill, output retargeted to the structured card. Nine
+      cards ported from the practice repo's notes, each authored blind first
+      and then compared against the hand-written one — the diffs are what the
+      skill's rules are, and every code template runs against a brute force
+      before it lands
+- [ ] `statement` on `ProblemPush` and `Problem`, optional. Which form a
+      problem exercises is a question about what it asks, and tags answer what
+      it is about. Landed first on purpose: nothing reads it until matching,
+      and every export before it lands is a corpus that has to be re-pushed.
+      Obliges re-copying `schema/push.py` into the practice repo — nothing
+      detects that drift
 - [ ] Seed from files through a path that stays a boundary — the private repo
       it moves behind later is a different argument, not a refactor
+- [ ] `TemplateMatch`: one record per template and problem, carrying a verdict.
+      Not a set per template — problems arrive a push at a time, and a set
+      would rewrite settled pairs whenever the corpus grew. The negative is
+      stored or every re-run re-tests every non-match forever
+- [ ] Match the corpus against a card's templates after import. One call per
+      problem and card, candidates in and the subset out, records per pair.
+      Pre-filtered by technique, or it is every template against every problem
+      for an answer that is almost always no. Procedure templates are excluded:
+      a framing procedure is exercised by everything its technique reaches
+- [ ] Resolve the ladder from the matches, the selector filling out to `size`.
+      Requiredness derived from what a rung covers — studied means required,
+      the optional template alone means optional, both means required with the
+      optional riding along as the alternative approach
 - [ ] Resolve the ladder at import, and never rewrite one a card has already
       been started on
+- [ ] Report a studied template no problem matches. The card claims to teach
+      that form, so a corpus that cannot exercise it is a fact about the store
 - [ ] `CardRun`: starting is explicit, since the ladder is measured from it.
       Holds when it began and the probes assigned; later probes append
 - [ ] A recall attempt is its own record, keyed to a card and a template.
       Nothing keys it to an attempt: there is no problem and no submission.
       What was hinted before a pass is part of it
-- [ ] Generate ladders and probes from the corpus — a skill now, since it is
-      judgment, and possibly an agent later
+- [ ] Generate probes from the corpus — a skill now, since it is judgment, and
+      possibly an agent later
 - [ ] The trainer: names hidden, blank-filed cold, run against the card's own
       tests, never printing the template
-- [ ] Port the authoring skill, output retargeted to the structured card
 - [ ] Card status — recalled when, ladder outstanding, probes available. The
       inputs a graduation rule reads, and no threshold
 
@@ -357,6 +382,12 @@ short of the full loop. Which of them matters is what 4a's daily use answers.
 ## Deferred
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
+
+- [ ] Score template matching. The hand-written cards annotate roughly sixty
+      rungs with the template each exercises, which is a labelled set for free
+      and the same role the hand claims play for the classifier. Triggered
+      when matching runs over the whole corpus rather than one card, since
+      before that the cost of being wrong is one ladder
 
 - [ ] Measure attribution against an independent set: the score restricted to
       blind claims, and the annotator against themselves as the ceiling — a
