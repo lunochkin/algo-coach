@@ -259,3 +259,17 @@ def test_a_provider_pins_the_model_before_it(hand_claimed, monkeypatch):
     first, second = client.calls
     assert (first["model"], first["provider"]) == ("a-model", "a-host")
     assert second["model"] == "b-model"
+
+
+def test_a_model_named_without_a_provider_is_not_pinned_to_another_model_s(
+    hand_claimed, monkeypatch
+):
+    """The built-in pin belongs to the built-in model: a provider carries some
+    models and not others, so inheriting one would route a model to a host
+    that never serves it."""
+    client = FakeTransport.answering(Verdict(["greedy"]))
+
+    run(monkeypatch, client, "--model", "another/model")
+
+    (call,) = client.calls
+    assert call["provider"] is None

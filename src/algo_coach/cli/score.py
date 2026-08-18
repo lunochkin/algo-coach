@@ -60,7 +60,11 @@ def configurations(
         Configuration(
             model=model,
             effort=effort or DEFAULT.effort,
-            provider=provider or DEFAULT.provider,
+            # A provider carries some models and not others, so the built-in
+            # pin belongs to the built-in model alone. Any other model named
+            # without one is left to the router, which `require_parameters`
+            # already keeps inside the providers that can answer it.
+            provider=provider or (DEFAULT.provider if model == DEFAULT.model else None),
         )
         for model, effort, provider in named
     )
