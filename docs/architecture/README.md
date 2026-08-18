@@ -359,8 +359,8 @@ rather than a field on the attempt.
   same verdict would be a claim or a reading depending on what else happens to
   be claimed on the attempt, its type decided by its neighbours.
 - **Every claim records its source**, and a machine claim what produced it:
-  model, effort, the digest of what that attempt was sent, and the call that
-  sent it. Both count the same toward progress, but a machine claim can be
+  model, effort, the endpoint it was pinned to, temperature, the digest of what
+  that attempt was sent, and the call that sent it. Both count the same toward progress, but a machine claim can be
   recomputed by a better classifier and a user's cannot, so re-deriving has to
   find the stale ones and leave the rest. All four or none, since a reading
   whose configuration is partly unknown compares with nothing — and a user's
@@ -381,8 +381,31 @@ rather than a field on the attempt.
   actually touched. What it also costs is a name — a rulebook can no longer be
   cited as "prompt 3", only as the digest of what was sent, and diffed by
   reading the prompts two calls carry.
-- **The claim's copy of the three cannot drift**, because a call is append-only
-  and the copy is made in the same write. It is there so the claims log reads
+- **A pin is part of the reading, not a note about routing.** A model id
+  resolves to as many builds as there are endpoints serving it, and
+  quantization changes the weights — an fp4 endpoint and a bf16 one answer as
+  two readers. Unpinned, the router chooses per request, so the readings under
+  one key are a mixture that no later run can take apart; the pin is therefore
+  required rather than optional, and compared like the model itself.
+- **Who served it is recorded and never compared.** The router reports a
+  company, not an endpoint, and one company serves several builds of a model —
+  so it confirms a pin held without identifying the build. It is also unknown
+  when a reader asks what it has already read, which is the question the
+  comparison exists to answer.
+- **A reading is greedy, and says so.** Sampling turns a verdict the model
+  holds at 0.9 into one it gives four times in five, which an eval absorbs by
+  being repeated and the backlog sweep cannot: it writes into an append-only
+  log the board reads forever, so the same fraction of a percent is permanent
+  and moves readings a criteria edit never touched. The temperature is part of
+  what identifies a reading for the same reason the pin is: one says which
+  weights answered, the other how they were sampled.
+- **A temperature nobody set is an arm, not a gap.** `None` is the provider's
+  own default, which moves without notice, so it is recorded absent rather than
+  guessed at — and it compares equal only to itself. That is what makes every
+  reading taken before the parameter existed scorable beside a greedy one
+  instead of discarded, and it is the same rule as an unsent effort.
+- **The claim's copy cannot drift**, because a call is append-only and the
+  copy is made in the same write. It is there so the claims log reads
   on its own: a board renders from it, and loading the calls to learn which
   model produced a claim would put a megabyte-scale read on every command.
 - **Configurations are compared over the attempts both read**, not over each
@@ -413,10 +436,14 @@ nothing about what the answer was for.
   base URL. Two provider shapes maintained by hand is what invites a library
   to reconcile them, and a library that reconciles them can downgrade a schema
   into a prompt where the record cannot show it happened.
-- **The serving provider is recorded**, because a model id answers who served
-  a request only while nothing routes. Pinned as well as recorded: a provider
-  that cannot honour the response schema is never chosen, and a request fails
-  rather than falling back to a backend the record would not name.
+- **What was sampled at is recorded beside who served it.** A reading's
+  configuration has to be recoverable from the record that holds it, and the
+  claim's copy is taken from here.
+- **Every request names one endpoint.** A provider that cannot honour the
+  response schema is never chosen, and a request fails rather than falling back
+  to a backend the record would not name. The pin is stored beside who answered
+  it: the first says which build was asked for and is what a re-run needs, the
+  second says whether anything answered at all.
 - **Reasoning is what the reading produced, not what was asked for.** A model
   deciding a question needs no thought returns none, and the field is empty —
   a fact about that reading rather than a gap in the record. Two calls on one

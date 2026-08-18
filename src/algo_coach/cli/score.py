@@ -18,15 +18,24 @@ from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
 
+# What `--temperature` is given to run at the provider's own default: a named
+# level rather than an omitted flag, as `--effort default` is. It is the arm
+# every reading stored before the parameter existed sits in, so naming it is
+# how those are scored beside a greedy run rather than discarded.
+UNSET = "default"
+
+# Which slot each flag fills in the row a `--model` opens. The order is the
+# command line's, so the row is positional and the flags are not.
+SLOTS = {"--effort": 1, "--provider": 2, "--temperature": 3}
+
 
 class Named(argparse.Action):
-    """`--model`, `--effort` and `--provider` alternately, into one ordered list.
+    """`--model` and its settings alternately, into one ordered list.
 
-    One action over three flags, because separate `append` destinations would
+    One action over every flag, because separate `append` destinations would
     lose which effort followed which model — and the command line's order is
-    the output's. A model opens a configuration at the defaults; an effort or a
-    provider sets the one just opened, or opens one at the default model coming
-    first.
+    the output's. A model opens a configuration at the defaults; a setting
+    fills the one just opened, or opens one at the default model coming first.
     """
 
     def __call__(
@@ -38,11 +47,11 @@ class Named(argparse.Action):
     ) -> None:
         named: list[list[str]] = getattr(namespace, self.dest, None) or []
         if option_string == "--model":
-            named.append([str(value), "", ""])
+            named.append([str(value), "", "", ""])
         else:
-            slot = 1 if option_string == "--effort" else 2
+            slot = SLOTS[str(option_string)]
             if not named:
-                named.append([DEFAULT.model, "", ""])
+                named.append([DEFAULT.model, "", "", ""])
             if named[-1][slot]:
                 parser.exit(2, f"score: two {option_string} for one --model\n")
             named[-1][slot] = str(value)
@@ -56,23 +65,45 @@ def configurations(
     named = getattr(args, "named", None)
     if not named:
         return (DEFAULT,)
+    unpinned = [model for model, _, provider, _ in named if not provider and model != DEFAULT.model]
+    if unpinned:
+        # Not defaulted to the built-in pin: an endpoint carries some models and
+        # not others, so inheriting one would route a model to a host that never
+        # serves it. Not left to the router either — the readings would be a
+        # mixture of builds under one key, which is what the pin exists to stop.
+        parser.exit(2, f"score: --provider needed for {', '.join(sorted(set(unpinned)))}\n")
     built = tuple(
         Configuration(
             model=model,
             effort=effort or DEFAULT.effort,
-            # A provider carries some models and not others, so the built-in
-            # pin belongs to the built-in model alone. Any other model named
-            # without one is left to the router, which `require_parameters`
-            # already keeps inside the providers that can answer it.
-            provider=provider or (DEFAULT.provider if model == DEFAULT.model else None),
+            pin=provider or DEFAULT.pin,
+            # Unlike the provider, part of what identifies a reading — so a
+            # model named without one runs at the built-in temperature rather
+            # than at whatever the endpoint defaults to. Two arms of one model
+            # are told apart here and nowhere else.
+            temperature=chosen(temperature, parser),
         )
-        for model, effort, provider in named
+        for model, effort, provider, temperature in named
     )
     if len(set(built)) != len(built):
         # Reading one configuration twice would measure its own sampling noise,
         # which nothing here consumes yet — refused rather than paid for.
         parser.exit(2, "score: the same configuration named twice\n")
     return built
+
+
+def chosen(temperature: str, parser: argparse.ArgumentParser) -> float | None:
+    """What a named model samples at: the built-in one where the flag was left
+    off, and `None` only where it was asked for by name."""
+    if not temperature:
+        return DEFAULT.temperature
+    if temperature == UNSET:
+        return None
+    try:
+        return float(temperature)
+    except ValueError:
+        parser.exit(2, f"score: --temperature {temperature} is not a number or {UNSET!r}\n")
+        raise
 
 
 def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -187,21 +218,40 @@ def compared(result: Comparison) -> None:
 
 
 def describe(configuration: Configuration) -> str:
-    """Model and effort, and no rulebook: which criteria a reading was made
-    against is a digest of what that attempt was sent, so it varies within one
-    run and belongs on the record rather than in a heading."""
-    return f"{configuration.model}, effort {configuration.effort}"
+    """The whole configuration in a sentence, which the column heading says in
+    a token. Two arms of one model differ by the temperature alone, so a
+    heading naming the model and the effort announces them identically and
+    leaves which is running to whoever remembers the command line.
+
+    The pin is here and not in the heading: it identifies a reading like the
+    rest, but a column is already unambiguous without it, and it is the first
+    thing to read when one of them 404s.
+
+    No rulebook, at either place: which criteria a reading was made against is
+    a digest of what that attempt was sent, so it varies within one run and
+    belongs on the record."""
+    temperature = UNSET if configuration.temperature is None else configuration.temperature
+    return (
+        f"{configuration.model}, effort {configuration.effort}, "
+        f"temperature {temperature}, via {configuration.pin}"
+    )
 
 
 def labels(configurations: Sequence[Configuration]) -> list[str]:
     """A column heading per configuration: the model and the effort it ran at.
 
-    Both always, though the model alone would name a column where no two share
-    one. Effort moves a number as far as the model does, so a heading that
-    dropped it would put two readings of the same model under one name and
-    leave which is which to whoever remembers the command line.
+    All three always, though the model alone would name a column where no two
+    share one. Effort and temperature each move a number as far as the model
+    does, so a heading that dropped one would put two readings of the same
+    model under one name and leave which is which to whoever remembers the
+    command line. The provider is not among them: it constrains who may answer
+    rather than what was asked, so two columns can never differ by it alone.
     """
-    return [f"{configuration.model}/{configuration.effort}" for configuration in configurations]
+    return [
+        f"{configuration.model}/{configuration.effort}"
+        f"@{UNSET if configuration.temperature is None else configuration.temperature}"
+        for configuration in configurations
+    ]
 
 
 def exactly(scored: Score) -> str:

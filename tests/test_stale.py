@@ -66,3 +66,24 @@ def test_a_later_claim_from_another_configuration_hides_nothing():
 
 def test_a_user_claim_is_not_a_reading():
     assert readings_at([user_claim("a1", ["greedy"])], CONFIGURATION, {"a1": PROMPT_HASH}) == {}
+
+
+def test_a_claim_read_at_another_temperature_is_stale():
+    """What was sampled is part of what produced a reading, so two temperatures
+    are two configurations. Mixed under one key, a re-derivation would serve a
+    sampled reading to a greedy run and call it already paid for."""
+    claim = machine_claim("a1", ["greedy"], temperature=1.0)
+
+    assert not at_configuration(claim, CONFIGURATION, PROMPT_HASH)
+    assert is_stale(claim, CONFIGURATION, PROMPT_HASH)
+
+
+def test_a_reading_taken_before_a_temperature_was_sent_is_its_own_arm():
+    """`None` is the provider's default, named rather than absent — as an
+    unsent effort is. It is the arm every reading already in the log sits in,
+    and the one a greedy run is compared against, so it is never discarded."""
+    claim = machine_claim("a1", ["greedy"], temperature=None)
+    unset = CONFIGURATION.model_copy(update={"temperature": None})
+
+    assert at_configuration(claim, unset, PROMPT_HASH)
+    assert not at_configuration(claim, CONFIGURATION, PROMPT_HASH)

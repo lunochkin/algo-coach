@@ -16,11 +16,21 @@ from typing import Any, Protocol
 class ProviderError(Exception):
     """The endpoint answered, and the answer holds no answer.
 
-    A 200 carrying an error and no choices, which is how a router reports that
-    whoever it picked failed. Raised rather than returned as an empty reply:
-    nothing was read, so there is no reading to record — only a call that
-    failed, and a message saying whose fault it was.
+    A 200 carrying an error and no choices, or a choice that stopped on one,
+    which is how a router reports that whoever it picked failed. Raised rather
+    than returned as an empty reply: nothing was read, so there is no reading
+    to record — only a call that failed, and a message saying whose fault it
+    was.
+
+    `code` is the status the provider reported inside that body, where it gave
+    one. A gateway failure and a rejected schema arrive by the same path and
+    only the code separates them: one is worth asking again, the other is the
+    configuration being wrong.
     """
+
+    def __init__(self, message: str, code: int | None = None):
+        super().__init__(message)
+        self.code = code
 
 
 @dataclass(frozen=True)
@@ -37,9 +47,9 @@ class Reply:
     stop_reason: str | None = None
     input_tokens: int | None = None
     output_tokens: int | None = None
-    # Who actually served it. A model id stops answering that the moment
-    # anything routes, and a reading whose configuration is partly unknown
-    # compares with nothing.
+    # Who actually served it — the name the router reports, which is the
+    # company rather than the endpoint. The build asked for is the request's
+    # own `pin`; this says whether anything answered at all.
     provider: str | None = None
 
 
@@ -57,7 +67,8 @@ class Transport(Protocol):
         content: str,
         model: str,
         effort: str,
-        provider: str | None,
+        pin: str,
+        temperature: float | None,
         schema: dict[str, Any] | None,
         max_tokens: int,
     ) -> Reply: ...

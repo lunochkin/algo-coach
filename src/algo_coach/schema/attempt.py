@@ -128,8 +128,21 @@ class TechniqueClaim(AttemptRecord):
     effort: str | None = None
     prompt_hash: str | None = None
     call_id: str | None = None
+    # Which build read it. Quantization changes the weights, so a reading from
+    # an fp4 endpoint does not answer for a bf16 one — which makes this part of
+    # the configuration rather than a note about routing.
+    pin: str | None = None
+    # Who served it, as the router reported. Recorded and never compared: it is
+    # unknown when a reader asks what it has already read, and a company name
+    # cannot be checked against an endpoint anyway.
+    provider: str | None = None
+    # Outside the all-or-none rule: `None` is a real answer here
+    # — the provider's own default — where on the other four it is a gap. Every
+    # reading taken before the field existed sits in that arm, which is what
+    # keeps them comparable with a greedy run instead of discarded.
+    temperature: float | None = None
 
-    PROVENANCE: ClassVar[tuple[str, ...]] = ("model", "effort", "prompt_hash", "call_id")
+    PROVENANCE: ClassVar[tuple[str, ...]] = ("model", "effort", "pin", "prompt_hash", "call_id")
 
     @model_validator(mode="after")
     def _provenance_matches_source(self) -> TechniqueClaim:
@@ -150,4 +163,8 @@ class TechniqueClaim(AttemptRecord):
             raise ValueError(f"a classifier claim needs {', '.join(missing)}")
         if self.source is ClaimSource.USER and named:
             raise ValueError(f"a user claim carries no {', '.join(named)}")
+        if self.source is ClaimSource.USER and self.temperature is not None:
+            raise ValueError("a user claim carries no temperature")
+        if self.source is ClaimSource.USER and self.provider is not None:
+            raise ValueError("a user claim carries no provider")
         return self

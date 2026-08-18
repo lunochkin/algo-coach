@@ -94,6 +94,20 @@ def main() -> None:
         metavar="EFFORT",
         help="the effort of the --model before it",
     )
+    claim_parser.add_argument(
+        "--provider",
+        dest="named",
+        action=Named,
+        metavar="PROVIDER",
+        help="the endpoint the --model before it read from",
+    )
+    claim_parser.add_argument(
+        "--temperature",
+        dest="named",
+        action=Named,
+        metavar="TEMPERATURE",
+        help="what the --model before it sampled at; 'default' for the provider's own",
+    )
     # Unset rather than 0, so "not passed" is a state instead of a value the
     # flag could also be given. Every claim by default: reviewing only what a
     # classifier contests corrects the hand claims in one direction.
@@ -136,8 +150,8 @@ def main() -> None:
         type=int,
         help="how many attempts to read per classifier; every unread one otherwise",
     )
-    # One destination for all three, so which effort and which provider
-    # followed which model survives. Named more than once, they are scored side
+    # One destination for all of them, so which setting followed which model
+    # survives. Named more than once, they are scored side
     # by side over what all of them read; named not at all, the built-in
     # classifier is the one scored.
     score_parser.add_argument(
@@ -160,6 +174,13 @@ def main() -> None:
         action=Named,
         metavar="PROVIDER",
         help="the backend to pin the --model before it to",
+    )
+    score_parser.add_argument(
+        "--temperature",
+        dest="named",
+        action=Named,
+        metavar="TEMPERATURE",
+        help="what the --model before it samples at; 'default' for the provider's own",
     )
     score_parser.add_argument(
         "--stored",

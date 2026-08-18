@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from algo_coach import cli
-from algo_coach.claims import request_hash
+from algo_coach.claims import PIN, TEMPERATURE, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_claim
 from algo_coach.problems import ProblemStore
@@ -157,6 +157,8 @@ def test_a_machine_claimed_attempt_is_still_offered(claim_root, monkeypatch, cap
             effort="medium",
             prompt_hash="0123456789ab",
             call_id="call-1",
+            pin=PIN,
+            temperature=TEMPERATURE,
         )
     )
 
@@ -178,6 +180,8 @@ def test_the_machine_verdict_is_never_shown(claim_root, monkeypatch, capsys):
             effort="medium",
             prompt_hash="0123456789ab",
             call_id="call-1",
+            pin=PIN,
+            temperature=TEMPERATURE,
         )
     )
 
@@ -495,10 +499,12 @@ def test_revise_shows_a_named_classifier_s_reading_of_the_same_prompt(
             effort="medium",
             prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
             call_id="call-1",
+            pin=PIN,
+            temperature=TEMPERATURE,
         )
     )
 
-    run(monkeypatch, [""], "--revise", "--model", "claude-opus-5")
+    run(monkeypatch, [""], "--revise", "--model", "claude-opus-5", "--provider", PIN)
 
     out = capsys.readouterr().out
     assert "1 of 1 disagree" in out
@@ -516,6 +522,8 @@ def disputing(log, techniques: list[str], *, call_id: str = "call-1") -> None:
             effort="medium",
             prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
             call_id=call_id,
+            pin=PIN,
+            temperature=TEMPERATURE,
         )
     )
 
@@ -528,7 +536,7 @@ def test_a_revision_records_the_readings_it_was_shown(claim_root, monkeypatch, c
     claim_root.append_claim(user_claim("a1", ["greedy"]))
     disputing(claim_root, ["sorting"])
 
-    run(monkeypatch, ["2", ""], "--revise", "--model", "claude-opus-5")
+    run(monkeypatch, ["2", ""], "--revise", "--model", "claude-opus-5", "--provider", PIN)
 
     revision = claim_root.claims()[-1]
     assert revision.source is ClaimSource.USER
@@ -553,7 +561,17 @@ def test_a_reading_of_another_attempt_is_not_recorded(claim_root, monkeypatch, c
     claim_root.append_claim(user_claim("a3", ["greedy"]))
     disputing(claim_root, ["sorting"])
 
-    run(monkeypatch, ["2", ""], "--revise", "--model", "claude-opus-5", "--count", "1")
+    run(
+        monkeypatch,
+        ["2", ""],
+        "--revise",
+        "--model",
+        "claude-opus-5",
+        "--provider",
+        PIN,
+        "--count",
+        "1",
+    )
 
     revision = claim_root.claims()[-1]
     assert revision.attempt_id == "a1"
@@ -568,7 +586,7 @@ def test_an_undisputed_attempt_is_offered_for_revision(claim_root, monkeypatch, 
     claim_root.append_claim(user_claim("a1", ["greedy"]))
     disputing(claim_root, ["greedy"])
 
-    run(monkeypatch, [""], "--revise", "--model", "claude-opus-5")
+    run(monkeypatch, [""], "--revise", "--model", "claude-opus-5", "--provider", PIN)
 
     assert "0 of 1 disagree" in capsys.readouterr().out
 
@@ -589,10 +607,22 @@ def test_the_most_disputed_are_still_asked_about_first(claim_root, monkeypatch, 
             effort="medium",
             prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
             call_id="call-2",
+            pin=PIN,
+            temperature=TEMPERATURE,
         )
     )
 
-    run(monkeypatch, ["", ""], "--revise", "--model", "claude-opus-5", "--count", "2")
+    run(
+        monkeypatch,
+        ["", ""],
+        "--revise",
+        "--model",
+        "claude-opus-5",
+        "--provider",
+        PIN,
+        "--count",
+        "2",
+    )
 
     out = capsys.readouterr().out
     assert out.index("1 of 1 disagree") < out.index("0 of 1 disagree")
@@ -619,12 +649,24 @@ def test_revise_ignores_a_reading_of_a_prompt_nobody_sends_now(claim_root, monke
             effort="medium",
             prompt_hash="ffffffffffff",
             call_id="call-1",
+            pin=PIN,
+            temperature=TEMPERATURE,
         )
     )
 
     # Asked for disputes specifically: the default pool is every claim, so an
     # ignored reading would leave the attempt in it either way and say nothing.
     with pytest.raises(SystemExit):
-        run(monkeypatch, [""], "--revise", "--model", "claude-opus-5", "--disputed", "1")
+        run(
+            monkeypatch,
+            [""],
+            "--revise",
+            "--model",
+            "claude-opus-5",
+            "--provider",
+            PIN,
+            "--disputed",
+            "1",
+        )
 
     assert "nothing disputed" in capsys.readouterr().err

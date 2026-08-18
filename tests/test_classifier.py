@@ -220,21 +220,21 @@ def test_an_unsent_effort_is_left_off_the_call():
     assert call["schema"]["properties"]["techniques"]["items"]["enum"] == ["greedy", "sorting"]
 
 
-def test_the_pinned_provider_travels_with_the_model_it_belongs_to():
-    """A configuration says which backend may serve it, since a provider
-    carries some models and not others — one setting for a whole run would be
-    wrong the moment two models are compared."""
+def test_the_pin_travels_with_the_model_it_belongs_to():
+    """A configuration says which build served it, since an endpoint carries
+    some models and not others — one setting for a whole run would be wrong
+    the moment two models are compared."""
     client = answering("greedy")
 
     verdict(
         client,
         ["greedy", "sorting"],
         CODE,
-        configuration=Configuration(model="a-model", effort="low", provider="a-host"),
+        configuration=Configuration(model="a-model", effort="low", pin="a-host"),
     )
 
     (call,) = client.calls
-    assert call["provider"] == "a-host"
+    assert call["pin"] == "a-host"
 
 
 def test_the_built_in_configuration_is_what_a_caller_naming_none_gets():
@@ -266,7 +266,7 @@ def test_the_claim_records_what_produced_it():
     """Both count the same toward progress, but a machine claim can be
     recomputed by a better classifier, so re-deriving has to find the stale
     ones and leave the rest."""
-    assert MODEL == "anthropic/claude-opus-5"
+    assert MODEL == "openai/gpt-oss-120b"
     assert EFFORT
 
 

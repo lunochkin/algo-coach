@@ -48,7 +48,7 @@ def test_the_stored_prompt_digests_to_the_hash_beside_it(tmp_path):
     its own key is a claim about what was sent rather than the thing itself."""
     log = CallLog(tmp_path)
 
-    ask(answering(), log, system="sys", content="body", model="m", effort="low")
+    ask(answering(), log, system="sys", content="body", model="m", effort="low", pin="a-host")
 
     (stored,) = log.all()
     assert sha256(stored.prompt.encode()).hexdigest()[: len(stored.prompt_hash)] == (
@@ -59,7 +59,7 @@ def test_the_stored_prompt_digests_to_the_hash_beside_it(tmp_path):
 def test_the_prompt_is_both_halves_in_the_order_sent(tmp_path):
     log = CallLog(tmp_path)
 
-    ask(answering(), log, system="sys", content="body", model="m", effort="low")
+    ask(answering(), log, system="sys", content="body", model="m", effort="low", pin="a-host")
 
     (stored,) = log.all()
     assert "sys" in stored.prompt and "body" in stored.prompt
@@ -76,6 +76,7 @@ def test_what_came_back_is_recorded_beside_what_it_cost(tmp_path):
         content="body",
         model="m",
         effort="low",
+        pin="a-host",
     )
 
     assert text == '{"techniques": []}'
@@ -95,7 +96,7 @@ def test_a_failure_is_recorded_and_then_raised(tmp_path):
     transport = FakeTransport(error=RuntimeError("rate limited"))
 
     with pytest.raises(RuntimeError):
-        ask(transport, log, system="sys", content="body", model="m", effort="low")
+        ask(transport, log, system="sys", content="body", model="m", effort="low", pin="a-host")
 
     (stored,) = log.all()
     assert stored.error == "RuntimeError: rate limited"
@@ -108,7 +109,9 @@ def test_a_reply_with_no_text_is_a_failure_not_an_empty_reading(tmp_path):
     log = CallLog(tmp_path)
     transport = FakeTransport(Reply(text=None, stop_reason="content_filter"))
 
-    call, text = ask(transport, log, system="sys", content="body", model="m", effort="low")
+    call, text = ask(
+        transport, log, system="sys", content="body", model="m", effort="low", pin="a-host"
+    )
 
     assert text is None
     assert "content_filter" in call.error
@@ -119,8 +122,8 @@ def test_the_same_prompt_may_be_called_more_than_once(tmp_path):
     repeat a hash — so nothing may assume one call per hash."""
     log = CallLog(tmp_path)
 
-    ask(answering(), log, system="sys", content="body", model="m", effort="low")
-    ask(answering(), log, system="sys", content="body", model="m", effort="low")
+    ask(answering(), log, system="sys", content="body", model="m", effort="low", pin="a-host")
+    ask(answering(), log, system="sys", content="body", model="m", effort="low", pin="a-host")
 
     first, second = log.all()
     assert first.prompt_hash == second.prompt_hash
@@ -154,3 +157,39 @@ def test_the_log_round_trips(tmp_path):
 
     assert log.all() == [call]
     assert isinstance(log.all()[0], Call)
+
+
+def test_the_call_records_what_it_was_sampled_at(tmp_path):
+    """A reading's configuration must be recoverable from its own record. The
+    claim carries a copy so the claims file reads alone; this is where the copy
+    is taken from, and it cannot drift because both are one append."""
+    log = CallLog(tmp_path)
+    transport = answering()
+
+    call, _ = ask(
+        transport,
+        log,
+        system="sys",
+        content="body",
+        model="m",
+        effort="low",
+        pin="a-host",
+        temperature=0.0,
+    )
+
+    assert transport.calls[0]["temperature"] == 0.0
+    assert call.temperature == 0.0
+    assert log.all()[0].temperature == 0.0
+
+
+def test_a_call_at_the_provider_s_own_default_records_no_temperature(tmp_path):
+    """Absent rather than guessed. What a provider defaults to is its business
+    and moves without notice, so a number written here would be a fact about
+    the record rather than about the request."""
+    log = CallLog(tmp_path)
+
+    call, _ = ask(
+        answering(), log, system="sys", content="body", model="m", effort="low", pin="a-host"
+    )
+
+    assert call.temperature is None

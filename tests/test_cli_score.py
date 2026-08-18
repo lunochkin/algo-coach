@@ -7,7 +7,7 @@ from helpers import T0, FakeTransport, Verdict, attempt, seed_problem
 
 from algo_coach import cli
 from algo_coach.calls import UNSENT
-from algo_coach.claims import EFFORT, MODEL, request_hash
+from algo_coach.claims import EFFORT, MODEL, PIN, TEMPERATURE, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_claim
 from algo_coach.schema import ClaimSource
@@ -30,6 +30,8 @@ def reading(attempt_id: str, techniques: list[str], *, model: str = MODEL):
         effort=EFFORT,
         prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
         call_id="call-1",
+        pin=PIN,
+        temperature=TEMPERATURE,
     )
 
 
@@ -99,7 +101,14 @@ def test_the_command_says_how_many_named_no_candidate(hand_claimed, monkeypatch,
 
 
 def test_the_named_classifier_is_the_one_scored(hand_claimed, monkeypatch, capsys):
-    run(monkeypatch, FakeTransport.answering(Verdict(["greedy"])), "--model", "a-cheap-model")
+    run(
+        monkeypatch,
+        FakeTransport.answering(Verdict(["greedy"])),
+        "--model",
+        "a-cheap-model",
+        "--provider",
+        "a-host",
+    )
 
     out = capsys.readouterr().out
     assert "a-cheap-model" in out
@@ -112,8 +121,8 @@ def test_the_effort_attaches_to_the_model_before_it(hand_claimed, monkeypatch, c
     run(
         monkeypatch,
         FakeTransport.answering(Verdict(["greedy"]), Verdict(["sorting"])),
-        *("--model", "a-model", "--effort", "low"),
-        *("--model", "a-model", "--effort", "high"),
+        *("--model", "a-model", "--provider", "a-host", "--effort", "low"),
+        *("--model", "a-model", "--provider", "a-host", "--effort", "high"),
     )
 
     out = capsys.readouterr().out
@@ -125,7 +134,18 @@ def test_the_same_configuration_twice_is_refused(hand_claimed, monkeypatch, caps
     """It would measure the classifier's own sampling noise — a real number,
     and one nothing here consumes yet."""
     with pytest.raises(SystemExit) as exit_info:
-        run(monkeypatch, FakeTransport.answering(), "--model", "a-model", "--model", "a-model")
+        run(
+            monkeypatch,
+            FakeTransport.answering(),
+            "--model",
+            "a-model",
+            "--provider",
+            "a-host",
+            "--model",
+            "a-model",
+            "--provider",
+            "a-host",
+        )
 
     assert exit_info.value.code == 2
     assert "named twice" in capsys.readouterr().err
@@ -145,7 +165,7 @@ def test_the_shares_are_over_what_both_read(hand_claimed, monkeypatch, capsys):
     run(
         monkeypatch,
         FakeTransport.answering(Verdict(["greedy"]), Verdict(["sorting"])),
-        *("--model", MODEL, "--model", "a-cheap-model"),
+        *("--model", MODEL, "--model", "a-cheap-model", "--provider", "a-host"),
     )
 
     out = capsys.readouterr().out
@@ -154,8 +174,8 @@ def test_the_shares_are_over_what_both_read(hand_claimed, monkeypatch, capsys):
     assert "0/1 (0%)" in out
     # Named by model and effort both: effort moves a number as far as the model
     # does, so a column that dropped it would leave two readings under one name.
-    assert f"{MODEL}/{EFFORT}: greedy" in out
-    assert re.search(rf"a-cheap-model/{EFFORT}:\s+sorting", out)
+    assert f"{MODEL}/{EFFORT}@{TEMPERATURE}: greedy" in out
+    assert re.search(rf"a-cheap-model/{EFFORT}@{TEMPERATURE}:\s+sorting", out)
 
 
 def test_a_classifier_that_fails_every_call_aborts(hand_claimed, monkeypatch, capsys):
@@ -174,8 +194,7 @@ def test_a_classifier_that_fails_every_call_aborts(hand_claimed, monkeypatch, ca
         run(
             monkeypatch,
             FakeTransport.answering(rejected, rejected, rejected),
-            "--model",
-            "a-model",
+            *("--model", "a-model", "--provider", "a-host"),
         )
 
     assert exit_info.value.code == 1
@@ -241,35 +260,101 @@ def test_nothing_hand_claimed_exits_nonzero(tmp_path, monkeypatch, capsys):
 
 
 def test_a_provider_pins_the_model_before_it(hand_claimed, monkeypatch):
-    """Three flags into one ordered list, so which backend belongs to which
-    model survives the command line."""
+    """Flags into one ordered list, so which build belongs to which model
+    survives the command line."""
     client = FakeTransport.answering(Verdict(["greedy"]), Verdict(["greedy"]))
 
     run(
         monkeypatch,
         client,
-        "--model",
-        "a-model",
-        "--provider",
-        "a-host",
-        "--model",
-        "b-model",
+        *("--model", "a-model", "--provider", "a-host"),
+        *("--model", "b-model", "--provider", "b-host"),
     )
 
     first, second = client.calls
-    assert (first["model"], first["provider"]) == ("a-model", "a-host")
-    assert second["model"] == "b-model"
+    assert (first["model"], first["pin"]) == ("a-model", "a-host")
+    assert (second["model"], second["pin"]) == ("b-model", "b-host")
 
 
-def test_a_model_named_without_a_provider_is_not_pinned_to_another_model_s(
-    hand_claimed, monkeypatch
-):
-    """The built-in pin belongs to the built-in model: a provider carries some
-    models and not others, so inheriting one would route a model to a host
-    that never serves it."""
-    client = FakeTransport.answering(Verdict(["greedy"]))
+def test_a_model_named_without_a_provider_is_refused(hand_claimed, monkeypatch, capsys):
+    """Neither inherited nor left to the router. An endpoint carries some
+    models and not others, so the built-in pin would route a model to a host
+    that never serves it; and unpinned, the readings under one key would be a
+    mixture of builds that no later run could take apart."""
+    with pytest.raises(SystemExit) as exit_info:
+        run(monkeypatch, FakeTransport.answering(), "--model", "another/model")
 
-    run(monkeypatch, client, "--model", "another/model")
+    assert exit_info.value.code == 2
+    assert "--provider needed for another/model" in capsys.readouterr().err
 
-    (call,) = client.calls
-    assert call["provider"] is None
+
+def test_the_temperature_attaches_to_the_model_before_it(hand_claimed, monkeypatch):
+    """Fourth slot in the same ordered list, for the same reason as the other
+    three: the command line's order is the output's, and separate destinations
+    would lose which temperature followed which model."""
+    client = FakeTransport.answering(Verdict(["greedy"]), Verdict(["sorting"]))
+
+    run(
+        monkeypatch,
+        client,
+        *("--model", "a-model", "--provider", "a-host", "--temperature", "0"),
+        *("--model", "b-model", "--provider", "b-host", "--temperature", "1"),
+    )
+
+    first, second = client.calls
+    assert (first["model"], first["temperature"]) == ("a-model", 0.0)
+    assert (second["model"], second["temperature"]) == ("b-model", 1.0)
+
+
+def test_two_temperatures_of_one_model_are_two_columns(hand_claimed, monkeypatch, capsys):
+    """The comparison the field exists for. Same model and same effort, so a
+    column named by those alone prints one heading twice and leaves the reader
+    guessing which arm they are reading."""
+    run(
+        monkeypatch,
+        FakeTransport.answering(Verdict(["greedy"]), Verdict(["sorting"])),
+        *("--model", "a-model", "--provider", "a-host", "--temperature", "0"),
+        *("--model", "a-model", "--provider", "a-host", "--temperature", "1"),
+    )
+
+    out = capsys.readouterr().out
+    header = next(line for line in out.splitlines() if line.count("a-model") == 2)
+    labels = [token for token in header.split() if "a-model" in token]
+    assert len(labels) == 2
+    assert labels[0] != labels[1]
+
+
+def test_one_model_at_one_temperature_twice_is_still_refused(hand_claimed, monkeypatch, capsys):
+    """Adding a field to the identity widens what counts as two configurations;
+    it does not stop a repeat from being one."""
+    with pytest.raises(SystemExit) as exit_info:
+        run(
+            monkeypatch,
+            FakeTransport.answering(),
+            *("--model", "a-model", "--provider", "a-host", "--temperature", "0"),
+            *("--model", "a-model", "--provider", "a-host", "--temperature", "0"),
+        )
+
+    assert exit_info.value.code == 2
+    assert "named twice" in capsys.readouterr().err
+
+
+def test_two_temperatures_for_one_model_is_refused(hand_claimed, monkeypatch, capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        run(
+            monkeypatch,
+            FakeTransport.answering(),
+            *(
+                "--model",
+                "a-model",
+                "--provider",
+                "a-host",
+                "--temperature",
+                "0",
+                "--temperature",
+                "1",
+            ),
+        )
+
+    assert exit_info.value.code == 2
+    assert "two --temperature" in capsys.readouterr().err

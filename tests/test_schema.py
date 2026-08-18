@@ -150,6 +150,7 @@ def make_claim(source: ClaimSource, **overrides) -> TechniqueClaim:
 PROVENANCE = {
     "model": "test-model",
     "effort": "medium",
+    "pin": "a-host",
     "prompt_hash": "0123456789ab",
     "call_id": "call-1",
 }
@@ -169,7 +170,7 @@ def test_classifier_claim_without_any_provenance_is_rejected():
 
 @pytest.mark.parametrize("missing", PROVENANCE)
 def test_classifier_claim_needs_every_field_that_produced_it(missing):
-    """All four or none. A reading whose configuration is partly unknown
+    """All of them or none. A reading whose configuration is partly unknown
     cannot be compared with one whose configuration is known, and a reader
     would branch on the absence forever."""
     with pytest.raises(ValidationError, match=missing):

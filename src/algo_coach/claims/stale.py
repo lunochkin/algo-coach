@@ -39,12 +39,20 @@ def at_configuration(claim: TechniqueClaim, configuration: Configuration, prompt
     means "not known-stale", and a user's claim is at no configuration at all —
     stated here rather than borrowed from the validator that keeps provenance
     off a user's claim.
+
+    The pin and the temperature are compared like the rest: one says which
+    weights answered and the other how they were sampled, and a reading from
+    another build or another sampler answered a different question. The
+    provider that served it is not compared — it is unknown when this is asked,
+    and a company name cannot be checked against an endpoint.
     """
     if claim.source is not ClaimSource.CLASSIFIER:
         return False
-    return (claim.model, claim.effort, claim.prompt_hash) == (
+    return (claim.model, claim.effort, claim.pin, claim.temperature, claim.prompt_hash) == (
         configuration.model,
         configuration.effort,
+        configuration.pin,
+        configuration.temperature,
         prompt_hash,
     )
 

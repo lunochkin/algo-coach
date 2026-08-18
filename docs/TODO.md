@@ -358,6 +358,21 @@ a user can solve, per technique, and it is Phase 5.
       `require_parameters` so a provider that cannot enforce the schema is
       never chosen, fallbacks off so a model id resolves to one backend, and
       the serving provider recorded on the call
+- [x] `temperature` on the configuration, the call and the claim, greedy by
+      default. Sampling is noise an eval absorbs by repeating and the backlog
+      sweep cannot: it writes into an append-only log the board reads forever,
+      so the same fraction of a percent is permanent and moves readings a
+      criteria edit never touched. Part of the identity where the pinned
+      provider is not, so two temperatures are two columns rather than one
+      mixed key — and `None` is the provider's own default, a named arm that
+      keeps every reading taken before the field scorable instead of discarded
+- [x] The pinned endpoint on the configuration, the call and the claim, and
+      required. A model id resolves to as many builds as there are endpoints
+      serving it, and quantization changes the weights — so unpinned readings
+      are a mixture under one key that nothing later can take apart. Compared
+      like the model; who actually served it is recorded beside it and never
+      compared, since the router names a company and a company serves several
+      builds
 - [ ] An outage falls back to another endpoint of the same shape, never to
       Anthropic direct. Its OpenAI compatibility layer ignores
       `response_format`, `strict` and `reasoning_effort`, so Claude reached

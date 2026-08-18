@@ -16,12 +16,26 @@ from algo_coach.calls import prompt_hash as digest
 from algo_coach.schema import Call
 from algo_coach.techniques import criterion
 
-MODEL = "anthropic/claude-opus-5"
+# Eight configurations read the same 59 hand-claimed attempts and five landed
+# inside the measured noise of each other, this one among them: the ceiling is
+# the hand claims, not the reader, and every model that reaches it makes the
+# same errors on the same attempts. So the choice is cost, and this is two
+# orders of magnitude under the frontier tier — which is what makes re-deriving
+# the whole backlog after a criteria edit cost cents rather than a decision.
+MODEL = "openai/gpt-oss-120b"
 EFFORT = "medium"
-# Which backend may serve it. A router picks one per request from whoever
-# carries the model, so without a pin two runs of one configuration can be
-# answered by different builds of the same weights.
-PROVIDER = "anthropic"
+# Which endpoint may serve it, named to the quantization. A router picks one
+# per request from whoever carries the model, so without a pin two runs of one
+# configuration are answered by different builds of the same weights — and fp4
+# and bf16 are different weights, not one model behind two doors.
+PIN = "deepinfra/bf16"
+# Greedy. Classification over a fixed candidate set has one right answer per
+# decision, and sampling turns a verdict the model holds at 0.9 into one it
+# gives four times in five. That noise is tolerable in an eval, which is
+# repeated and averaged; the backlog sweep writes into an append-only log the
+# board reads forever, so the same 1% would be permanent and would move
+# readings a criteria edit never touched.
+TEMPERATURE: float | None = 0.0
 SYSTEM = """You name which techniques a solution used.
 
 The candidates are one problem's tags — what the problem could exercise. Say
@@ -48,7 +62,7 @@ If the code used none of the candidates, name none of them."""
 class Configuration(BaseModel, frozen=True):
     """Which classifier a reading came from, and the key it is found under.
 
-    Two fields, not the record's four. The prompt is not among them: it varies
+    The prompt is not among them: it varies
     per attempt, since a candidate's criterion travels with it, so what rulebook
     a reading came from is a digest of what that attempt was actually sent and
     never a property of the classifier. Frozen because it is an identity —
@@ -57,11 +71,18 @@ class Configuration(BaseModel, frozen=True):
 
     model: str = MODEL
     effort: str = EFFORT
-    # A constraint on what may serve, not a part of what identifies a stored
-    # reading: a claim carries the model, the effort and the digest, and the
-    # call carries whoever actually answered. Pinning narrows the first;
-    # reading the second says whether the pin held.
-    provider: str | None = PROVIDER
+    # Which build read it. Quantization changes the weights, so an fp4
+    # endpoint and a bf16 one answer as two readers and a reading from one
+    # does not answer for the other. Required rather than optional: unpinned,
+    # the router chooses per request, and the readings under that key would be
+    # a mixture no later run could take apart.
+    pin: str = PIN
+    # Identity beside the pin, and for the same kind of reason: the pin fixes
+    # which weights answered, this fixes how they were sampled. `None`
+    # is the provider's own default — a named arm rather than a gap, as an
+    # unsent effort is, so every reading taken before this field existed stays
+    # comparable instead of being discarded.
+    temperature: float | None = TEMPERATURE
 
 
 DEFAULT = Configuration()
@@ -118,7 +139,8 @@ def classify(
         content=prompt(candidates, code),
         model=configuration.model,
         effort=configuration.effort,
-        provider=configuration.provider,
+        pin=configuration.pin,
+        temperature=configuration.temperature,
         schema=schema(candidates),
     )
     if text is None:

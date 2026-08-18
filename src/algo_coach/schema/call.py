@@ -42,9 +42,17 @@ class Call(BaseModel):
     # thought — a fact about that reading rather than a gap in the record.
     thinking: str | None = None
     stop_reason: str | None = None
-    # Who actually served the request. A model id answers that only while
-    # nothing routes; once something does, two readings under one
-    # configuration key can come from different backends.
+    # What the answer was sampled at. `None` is the provider's own default,
+    # which moves without notice — so it is left absent rather than guessed at,
+    # and a reading taken at it is its own arm rather than a gap in the log.
+    temperature: float | None = None
+    # The endpoint the request was pinned to, named to the quantization: an
+    # fp4 build and a bf16 one are two readers, so this is what says which
+    # answered. Optional only for the calls made before pinning was required.
+    pin: str | None = None
+    # Who actually served it, as the router reports — a company name rather
+    # than an endpoint, so it confirms the pin held without identifying the
+    # build on its own.
     provider: str | None = None
     input_tokens: int | None = None
     output_tokens: int | None = None

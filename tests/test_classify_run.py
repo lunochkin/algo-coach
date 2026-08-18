@@ -6,7 +6,14 @@ from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_pro
 
 from algo_coach import cli
 from algo_coach.calls import CallLog
-from algo_coach.claims import EFFORT, MODEL, ClassifierError, classify_backlog, request_hash
+from algo_coach.claims import (
+    EFFORT,
+    MODEL,
+    ClassifierError,
+    Configuration,
+    classify_backlog,
+    request_hash,
+)
 from algo_coach.claims.run import ABORT_AFTER, Progress
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
@@ -527,3 +534,19 @@ def test_fresh_asks_again_where_a_claim_already_answers(tmp_path):
     result = run(answering(Verdict(["greedy"])), log, redo=True, fresh=True)
 
     assert result.redone == 1
+
+
+def test_the_claim_carries_what_the_reading_was_sampled_at(backlog):
+    """Copied from the call in the same write, so the claims file names the
+    whole configuration without opening the call log — a board renders from it,
+    and loading the calls to learn how a claim was produced would put a
+    megabyte-scale read on every command."""
+    run(
+        backlog_client := answering(Verdict(["greedy"])),
+        backlog,
+        configuration=Configuration(model="a-model", effort="low", temperature=0.0),
+    )
+
+    (claim,) = backlog.claims()
+    assert claim.temperature == 0.0
+    assert backlog_client.calls[0]["temperature"] == 0.0

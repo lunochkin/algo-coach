@@ -57,6 +57,7 @@ def make_claim(
         source=source,
         model="m1" if machine else None,
         effort="medium" if machine else None,
+        pin="a-host" if machine else None,
         call_id="call-1" if machine else None,
         prompt_hash="0123456789ab" if machine else None,
     )

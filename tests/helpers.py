@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
 from algo_coach.calls import Reply
-from algo_coach.claims import Configuration
+from algo_coach.claims import PIN, TEMPERATURE, Configuration
 from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Attempt, AttemptOrigin, Problem, ProblemOwner, TechniqueClaim
@@ -31,6 +31,8 @@ def machine_claim(
     effort: str = "medium",
     prompt_hash: str = PROMPT_HASH,
     call_id: str = "call-1",
+    pin: str = PIN,
+    temperature: float | None = TEMPERATURE,
 ) -> TechniqueClaim:
     """A classifier claim under a named configuration, defaulted so a test
     naming one field says that field is what it is about."""
@@ -41,6 +43,8 @@ def machine_claim(
         effort=effort,
         prompt_hash=prompt_hash,
         call_id=call_id,
+        pin=pin,
+        temperature=temperature,
     )
 
 

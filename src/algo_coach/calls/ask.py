@@ -41,7 +41,8 @@ def ask(
     content: str,
     model: str,
     effort: str,
-    provider: str | None = None,
+    pin: str,
+    temperature: float | None = None,
     schema: dict[str, Any] | None = None,
     max_tokens: int = 16000,
 ) -> tuple[Call, str | None]:
@@ -66,7 +67,8 @@ def ask(
             content=content,
             model=model,
             effort=effort,
-            provider=provider,
+            pin=pin,
+            temperature=temperature,
             schema=schema,
             max_tokens=max_tokens,
         )
@@ -77,6 +79,8 @@ def ask(
                 effort=effort,
                 prompt=text,
                 prompt_hash=digest,
+                pin=pin,
+                temperature=temperature,
                 error=f"{type(exc).__name__}: {exc}",
             )
         )
@@ -87,6 +91,8 @@ def ask(
         effort=effort,
         prompt=text,
         prompt_hash=digest,
+        pin=pin,
+        temperature=temperature,
         # A reply with no text answered nothing — a refusal, or an answer cut
         # short. Recorded as the failure it is, so the log does not claim an
         # empty verdict was a reading.
