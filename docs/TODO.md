@@ -345,17 +345,26 @@ a user can solve, per technique, and it is Phase 5.
       detects that drift
 - [ ] `provider` on `Call`, optional: who actually served the request, which
       the model id stops answering the moment anything routes.
-- [ ] Move the Anthropic request shape and response parsing out of `ask` into
-      a transport function returning a neutral `Reply`; `ask` keeps the
-      digest, the call record and the failure path. A second transport is then
-      a new function, not a second copy of `ask`
-- [ ] Read models through OpenRouter: a second transport behind the seam,
-      speaking chat completions — `response_format` for the schema,
-      `reasoning` for the effort, `choices[0].message` and `usage` on the way
-      back, its own key and base URL. Pin the route rather than taking what it
-      offers: `require_parameters` so a provider that cannot enforce the
-      schema is never chosen, fallbacks off so a model id resolves to one
-      backend, and the serving provider recorded on the call
+- [ ] Replace the Anthropic transport rather than adding beside it. `ask`
+      keeps the digest, the call record and the failure path; the request
+      shape and the response walk move behind a neutral `Reply`. One shape at
+      a time, by rule — two maintained by hand is what invites a library to
+      reconcile them, and a normaliser degrades a schema where the reading
+      cannot see it
+- [ ] Read models through OpenRouter, as the only transport: chat completions
+      — `response_format` for the schema, `reasoning` for the effort,
+      `choices[0].message` and `usage` on the way back, key and base URL from
+      config. Pin the route rather than taking what it offers:
+      `require_parameters` so a provider that cannot enforce the schema is
+      never chosen, fallbacks off so a model id resolves to one backend, and
+      the serving provider recorded on the call
+- [ ] An outage falls back to another endpoint of the same shape, never to
+      Anthropic direct. Its OpenAI compatibility layer ignores
+      `response_format`, `strict` and `reasoning_effort`, so Claude reached
+      that way answers with the schema unenforced and the effort dropped —
+      the one guarantee attribution rests on, and one of its eval's axes.
+      Claude with enforcement means the native transport, which is the second
+      shape the rule above exists to avoid
 - [ ] Seed from files through a path that stays a boundary — the private repo
       it moves behind later is a different argument, not a refactor
 - [ ] `TemplateMatch`: one record per template and problem, carrying a verdict.
