@@ -7,6 +7,7 @@ layer, which ignores `response_format`, `strict` and `reasoning_effort` and so
 answers with the schema unenforced and the effort dropped.
 """
 
+import time
 from dataclasses import dataclass
 from typing import Any
 
@@ -30,6 +31,15 @@ UNSENT = "default"
 # The schema's name reaches the model, so it says what the object is rather
 # than that it is an object.
 FORMAT = "verdict"
+
+# How long to hold off after a rate limit, and how many times. Absorbed here
+# rather than reported upward: a per-minute cap is a fact about the endpoint,
+# and a run that abandons a backlog over one is spending the wrong thing. The
+# waits cover a minute between them, since that is the window such caps are
+# usually stated in — the endpoint's own reset time is not read, because where
+# it is carried varies by provider and a wrong parse would sleep for hours.
+BACKOFF = (5.0, 15.0, 30.0, 60.0)
+RATE_LIMITED = 429
 
 
 def extra(obj: Any, name: str) -> Any:
@@ -74,7 +84,7 @@ class OpenRouter:
                 "json_schema": {"name": FORMAT, "strict": True, "schema": schema},
             }
 
-        response = self.client.chat.completions.create(
+        response = self.send(
             model=model,
             max_tokens=max_tokens,
             messages=[
@@ -94,3 +104,19 @@ class OpenRouter:
             output_tokens=getattr(usage, "completion_tokens", None),
             provider=extra(response, "provider"),
         )
+
+    def send(self, **request: Any) -> Any:
+        """One request, held and repeated while the endpoint says too many.
+
+        Every other failure is raised on the first try: a bad key and a
+        rejected schema do not improve by being asked again, and a run that
+        retried them would burn its abort count slowly instead of at once.
+        """
+        for pause in BACKOFF:
+            try:
+                return self.client.chat.completions.create(**request)
+            except Exception as exc:
+                if getattr(exc, "status_code", None) != RATE_LIMITED:
+                    raise
+                time.sleep(pause)
+        return self.client.chat.completions.create(**request)

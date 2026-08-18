@@ -7,6 +7,8 @@ of the split — one file knows an API, the other knows a record.
 from dataclasses import dataclass, field
 from typing import Any
 
+import pytest
+
 from algo_coach.calls import ROUTING, UNSENT, OpenRouter
 
 
@@ -35,13 +37,24 @@ class Completion:
     provider: str | None = "Anthropic"
 
 
+class Rejected(Exception):
+    """What the SDK raises: the status is what a retry decision reads."""
+
+    def __init__(self, status_code: int):
+        super().__init__(f"status {status_code}")
+        self.status_code = status_code
+
+
 @dataclass
 class FakeCompletions:
     reply: Completion
     calls: list[dict] = field(default_factory=list)
+    raises: list[Exception] = field(default_factory=list)
 
     def create(self, **kwargs) -> Completion:
         self.calls.append(kwargs)
+        if self.raises:
+            raise self.raises.pop(0)
         return self.reply
 
 
@@ -55,9 +68,11 @@ class FakeClient:
     chat: FakeChat
 
 
-def client(message: Message | None = None, **completion: Any) -> FakeClient:
+def client(
+    message: Message | None = None, raises: list[Exception] = (), **completion: Any
+) -> FakeClient:
     reply = Completion([Choice(message or Message())], **completion)
-    return FakeClient(FakeChat(FakeCompletions(reply)))
+    return FakeClient(FakeChat(FakeCompletions(reply, raises=list(raises))))
 
 
 SCHEMA = {"type": "object", "properties": {"techniques": {"type": "array"}}}
@@ -179,3 +194,42 @@ def test_an_answer_with_no_content_is_no_verdict():
 
     assert reply.text is None
     assert reply.provider == "Some Host"
+
+
+def test_a_rate_limit_is_waited_out_rather_than_reported(monkeypatch):
+    """A per-minute cap is a fact about the endpoint. Reported upward it would
+    spend a run's abort count on something that fixes itself."""
+    slept: list[float] = []
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    api = client(raises=[Rejected(429), Rejected(429)])
+
+    reply = OpenRouter(api)(system="s", content="c", model="m", effort="low", schema=None)
+
+    assert reply.text == '{"techniques": []}'
+    assert len(api.chat.completions.calls) == 3
+    assert slept == [5.0, 15.0]
+
+
+def test_every_other_failure_is_raised_on_the_first_try(monkeypatch):
+    """A bad key and a rejected schema do not improve by being asked again."""
+    slept: list[float] = []
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    api = client(raises=[Rejected(401)])
+
+    with pytest.raises(Rejected):
+        OpenRouter(api)(system="s", content="c", model="m", effort="low", schema=None)
+
+    assert len(api.chat.completions.calls) == 1
+    assert slept == []
+
+
+def test_a_cap_that_never_lifts_is_reported_in_the_end(monkeypatch):
+    """The waits cover a minute between them; past that the endpoint is not
+    rate limiting, it is refusing."""
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    api = client(raises=[Rejected(429)] * 5)
+
+    with pytest.raises(Rejected):
+        OpenRouter(api)(system="s", content="c", model="m", effort="low", schema=None)
+
+    assert len(api.chat.completions.calls) == 5
