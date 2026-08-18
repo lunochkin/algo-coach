@@ -88,11 +88,20 @@ def test_a_known_code_beside_an_unknown_one_does_not_save_it():
         machine_claim("a1", ["greedy", "not-a-technique"])
 
 
-def test_naming_nothing_writes_no_claim():
-    """An empty verdict leaves the fallback standing; the record has no way to
-    say 'none of these' and should not be asked to."""
-    with pytest.raises(ValueError):
-        machine_claim("a1", [])
+def test_naming_nothing_is_a_verdict_the_machine_may_record():
+    """The classifier read the code and found the candidates did not cover it.
+    Stored, or every later run pays for the same answer; the fallback still
+    stands, because the resolver reads an empty set as no answer."""
+    claim = machine_claim("a1", [])
+
+    assert claim.techniques == []
+
+
+def test_naming_nothing_is_not_a_verdict_a_user_may_record():
+    """The loop records nothing where they skip, so an empty user claim would
+    be a lost answer wearing the shape of a stated one."""
+    with pytest.raises(ValueError, match="at least one technique"):
+        user_claim("a1", [])
 
 
 def test_a_self_label_is_keyed_to_its_attempt():

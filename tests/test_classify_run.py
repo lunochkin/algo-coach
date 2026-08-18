@@ -121,12 +121,25 @@ def test_the_newest_attempts_are_claimed_first(tmp_path, monkeypatch):
     assert [claim.attempt_id for claim in log.claims()] == ["new"]
 
 
-def test_naming_no_candidate_writes_nothing(backlog):
-    """A claim cannot say 'none of these', and the fallback already answers
-    what the tags say."""
+def test_naming_no_candidate_is_stored_and_answers_nothing(backlog):
+    """The classifier read the code and found the candidates did not cover it.
+    Kept, so no later run pays for the same answer; counted apart from a
+    claim, since it names nothing the board can group by."""
     result = run(answering(Verdict([])), backlog)
 
-    assert (result.classified, result.undecided, backlog.claims()) == (0, 1, [])
+    (claim,) = backlog.claims()
+    assert (result.classified, result.undecided) == (0, 1)
+    assert claim.techniques == []
+
+
+def test_a_stored_decline_is_not_asked_again(backlog):
+    """What it costs to store one: the run after it makes no call at all."""
+    run(answering(Verdict([])), backlog)
+    client = answering(Verdict(["greedy"]))
+
+    result = run(client, backlog)
+
+    assert (result.classified, len(client.calls)) == (0, 0)
 
 
 def test_one_failure_does_not_cost_the_attempts_behind_it(tmp_path, monkeypatch):
@@ -399,15 +412,17 @@ def test_unclaimed_attempts_are_claimed_before_stale_ones(tmp_path):
     assert [claim.attempt_id for claim in log.claims()] == ["stale", "unclaimed"]
 
 
-def test_naming_no_candidate_leaves_the_older_claim_standing(backlog):
-    """A claim cannot say 'none of these', and the stale one answers the
-    attempt until something replaces it."""
+def test_naming_no_candidate_supersedes_the_older_claim(backlog):
+    """Latest wins, as everywhere else in the log: a later reading saying the
+    candidates do not cover the code is evidence about the code, not an
+    absence of it. The board falls back to the tags rather than to a claim
+    made against a rulebook this reading disagrees with."""
     store_claim(backlog, "a1", prompt_hash="ffffffffffff")
 
     result = run(answering(Verdict([])), backlog, redo=True)
 
     standing = standing_claims(backlog.claims())["a1"]
-    assert (standing.prompt_hash, result.undecided, result.redone) == ("ffffffffffff", 1, 0)
+    assert (standing.techniques, result.undecided, result.redone) == ([], 1, 0)
 
 
 def test_the_technique_flag_narrows_the_backlog(backlog):
@@ -479,15 +494,16 @@ def test_a_call_is_recorded_beside_the_claim_it_produced(tmp_path):
     assert (claim.model, claim.prompt_hash) == (call.model, call.prompt_hash)
 
 
-def test_a_declined_verdict_is_a_call_with_no_claim(tmp_path):
-    """A claim cannot say "none of these", so the decline used to print once
-    and vanish. The call log is where it now lives."""
+def test_a_declined_verdict_is_a_call_and_a_claim_naming_nothing(tmp_path):
+    """Both logs hold it: the call says what it cost, the claim says the
+    question is answered and needs no second call."""
     log = backlog_of(tmp_path / "data", 1)
     calls = CallLog(log.root)
 
     result = classify_backlog(answering(Verdict([])), log, calls, stored(log), user_id="u1")
 
-    assert (result.undecided, log.claims()) == (1, [])
+    (claim,) = log.claims()
+    assert (result.undecided, claim.techniques) == (1, [])
     assert len(calls.all()) == 1
 
 

@@ -195,19 +195,21 @@ def test_naming_no_candidate_is_undecided_rather_than_a_total_miss(hand_claimed)
     would count a decline as a wrong answer against every technique."""
     result = run(FakeTransport.answering(Verdict([])), hand_claimed)
 
+    (reading,) = machine_claims(hand_claimed)
     assert (result.scored, result.undecided) == (0, 1)
-    assert machine_claims(hand_claimed) == []
+    assert reading.techniques == []
 
 
-def test_a_reading_that_named_no_candidate_is_paid_for_on_every_run(hand_claimed):
-    """A claim cannot say "none of these", so nothing records that it was
-    asked. The count is what says the call is a permanent line item."""
+def test_a_reading_that_named_no_candidate_is_paid_for_once(hand_claimed):
+    """The decline is stored, so a later run reads it back rather than asking
+    again — and still scores nothing, since missing evidence is not a
+    disagreement."""
     run(FakeTransport.answering(Verdict([])), hand_claimed)
     client = FakeTransport.answering(Verdict([]))
 
     result = run(client, hand_claimed)
 
-    assert (result.undecided, len(client.calls)) == (1, 1)
+    assert (result.undecided, result.scored, len(client.calls)) == (1, 0, 0)
 
 
 def test_a_failed_reading_stores_nothing(hand_claimed):

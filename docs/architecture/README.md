@@ -317,12 +317,24 @@ rather than a field on the attempt.
 - **One claim per attempt**, naming every technique it used, since a solution
   can use several. A later claim replaces the whole set rather than rewriting
   the earlier one.
-- **A verdict naming no candidate is not a claim.** The resolver takes a
-  claim's existence as its answer, so an empty one drops the attempt off the
-  board rather than leaving the fallback standing. Unstorable, and unscored
-  because missing evidence is not a disagreement, so every later run asks
-  again. The count is reported: a dropped decline shrinks the denominator and
-  flatters the share.
+- **A verdict naming no candidate is a reading, and is stored.** The
+  classifier read the code and found the candidates did not cover it, which is
+  evidence about the code rather than an absence of it — and an answer that
+  does not change while the question does not. Left unstored it was re-read by
+  every later run, paying again for the same decline.
+- **An empty claim answers nothing, so the fallback stands.** The resolver
+  reads a claim's *techniques* rather than its existence, so the tags keep
+  answering an attempt whose reading declined — the board is exactly as it was
+  when such a verdict went unrecorded. It is unscored for the same reason:
+  missing evidence is not a disagreement. The count is reported, since a
+  decline shrinks the denominator and flatters the share.
+- **A decline supersedes an earlier claim, as any later reading does.** One
+  rule orders the log, and a reading saying the candidates do not fit is not
+  weaker evidence than an older one made against a rulebook it disagrees with.
+  What it costs is that the older claim's answer gives way to the tags.
+- **Only the machine may name nothing.** The drill loop records nothing where
+  the user skips, so an empty user claim would be a lost answer wearing the
+  shape of a stated one.
 - **The user's claim wins on read, the latest of each writer's otherwise.**
   Latest alone would make the two writers race, and the classifier writes far
   more often, so ground truth would last exactly until something re-derived

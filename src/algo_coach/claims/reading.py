@@ -35,7 +35,7 @@ class ReadResult(BaseModel):
     verdicts: dict[str, list[str]] = Field(default_factory=dict)  # attempt id -> techniques
     read: int = 0  # attempts this run paid a call for
     reused: int = 0  # answered from a stored reading
-    undecided: int = 0  # named no candidate, so unstorable and read again next run
+    undecided: int = 0  # named no candidate: stored, and never scored
     failed: list[Failed] = Field(default_factory=list)
     aborted: bool = False
 
@@ -78,6 +78,11 @@ def read(
         if reading is None:
             unread.append(attempt)
             continue
+        if not reading.techniques:
+            # A stored decline. Read again by nothing and scored by nothing —
+            # missing evidence is not a disagreement.
+            result.undecided += 1
+            continue
         result.verdicts[attempt.id] = reading.techniques
         result.reused += 1
 
@@ -119,8 +124,12 @@ def read(
             continue
         consecutive = 0
         if not techniques:
-            # Unstorable, so it is asked again on every later run at this
-            # configuration — which the count is what says.
+            # Stored, so no later run at this configuration pays for it again,
+            # and left out of the verdicts, so nothing scores it: the
+            # classifier said the candidates do not cover the code, which is
+            # missing evidence rather than a disagreement.
+            if call is not None:
+                store(log, attempt.id, techniques, call)
             result.undecided += 1
             report(index, attempt, problem.title)
             continue

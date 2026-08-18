@@ -28,8 +28,13 @@ def standing_claims(claims: Iterable[TechniqueClaim]) -> dict[str, TechniqueClai
 def resolve_techniques(
     attempt: Attempt, problem: Problem, claims: Mapping[str, TechniqueClaim]
 ) -> list[str]:
-    """Which techniques an attempt exercised: its claim if one exists,
+    """Which techniques an attempt exercised: its claim if one names any,
     otherwise the techniques of the problem it answers.
+
+    A claim naming none is the classifier reporting that the candidates did not
+    cover the code. It is stored so the reading is not paid for again, and it
+    answers nothing — so the fallback stands, exactly as it did when such a
+    verdict went unrecorded.
 
     `claims` is keyed by attempt id — `standing_claims` over the log.
 
@@ -38,4 +43,4 @@ def resolve_techniques(
     grouping does not depend on how a claim ordered its codes.
     """
     claim = claims.get(attempt.id)
-    return sorted(set(claim.techniques if claim else problem.techniques))
+    return sorted(set(claim.techniques if claim and claim.techniques else problem.techniques))

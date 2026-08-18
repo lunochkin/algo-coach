@@ -92,9 +92,20 @@ class TechniqueClaim(AttemptRecord):
     One record names every technique of one attempt, asserted together, so a
     revision replaces the whole set. Per-technique records would leave a later
     claim merging with an earlier one, with nothing to say which stands.
+
+    A machine claim may name none of them. That is the classifier saying the
+    candidates do not cover what the code did — a reading worth keeping, since
+    an unstored one is re-read by every later run and the answer never changes
+    while the question does not. A user's claim may not: the loop records
+    nothing where they skip, so an empty one would be a lost answer wearing the
+    shape of a stated one.
     """
 
-    techniques: list[str] = Field(min_length=1)
+    # Empty is a verdict, not an absent one: the classifier read the code and
+    # found the candidates did not cover it. Stored so the reading is not paid
+    # for on every later run, and the resolver leaves the fallback standing
+    # rather than treating an empty set as an answer.
+    techniques: list[str] = Field(default_factory=list)
     source: ClaimSource  # required: a mislabelled claim cannot be corrected later
     # The calls whose readings were in view when the claim was made, empty for
     # a blind one. Not provenance: provenance is what produced a claim, this is
@@ -128,6 +139,11 @@ class TechniqueClaim(AttemptRecord):
         All four or none. A machine claim missing one cannot be compared with
         one that has it, and a reader would branch on the absence forever.
         """
+        if self.source is ClaimSource.USER and not self.techniques:
+            # The drill loop records nothing where the user skips, so an empty
+            # user claim is a lost answer rather than a stated one.
+            raise ValueError("a user claim names at least one technique")
+
         named = [field for field in self.PROVENANCE if getattr(self, field) is not None]
         if self.source is ClaimSource.CLASSIFIER and len(named) < len(self.PROVENANCE):
             missing = [field for field in self.PROVENANCE if field not in named]

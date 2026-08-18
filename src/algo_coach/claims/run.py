@@ -277,9 +277,13 @@ def classify_backlog(
         # reading, not a failure.
         consecutive = 0
         if not techniques:
-            # A claim cannot say "none of these", so what already answers the
-            # attempt keeps answering it: the tags, or the older claim being
-            # re-derived. Both leave it pending for the next run.
+            # Stored rather than dropped: the classifier read the code and
+            # found the candidates did not cover it, and that answer does not
+            # change while the question does not. What answers the attempt is
+            # unchanged — the resolver reads an empty claim as no answer, so
+            # the tags keep standing.
+            if call is not None:
+                store(log, attempt.id, techniques, call)
             result.undecided += 1
             report(index, attempt, problem.title)
             continue
