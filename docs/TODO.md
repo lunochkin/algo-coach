@@ -373,13 +373,6 @@ a user can solve, per technique, and it is Phase 5.
       like the model; who actually served it is recorded beside it and never
       compared, since the router names a company and a company serves several
       builds
-- [ ] An outage falls back to another endpoint of the same shape, never to
-      Anthropic direct. Its OpenAI compatibility layer ignores
-      `response_format`, `strict` and `reasoning_effort`, so Claude reached
-      that way answers with the schema unenforced and the effort dropped —
-      the one guarantee attribution rests on, and one of its eval's axes.
-      Claude with enforcement means the native transport, which is the second
-      shape the rule above exists to avoid
 - [ ] Seed from files through a path that stays a boundary — the private repo
       it moves behind later is a different argument, not a refactor
 - [ ] `TemplateMatch`: one record per template and problem, carrying a verdict.
@@ -448,6 +441,15 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
       the constrained one. An out-of-tag verdict is the only signal
       that the tags are the gap, but both write the same claim, so the choice
       costs one re-run rather than a migration
+- [ ] An outage falls back to another endpoint of the same shape, never to
+      Anthropic direct. Its OpenAI compatibility layer ignores
+      `response_format`, `strict` and `reasoning_effort`, so Claude reached
+      that way answers with the schema unenforced and the effort dropped —
+      the one guarantee attribution rests on, and one of its eval's axes.
+      Claude with enforcement means the native transport, which is the second
+      shape the pinned route exists to avoid. Triggered when an outage blocks
+      a run rather than delaying one — with fallbacks off and one endpoint
+      pinned, re-running later is the whole recovery today
 - [ ] Re-derive stored problems without a push — when the mapping changes for
       problems no longer pushed. A re-push covers it until then
 - [ ] Ingest assumes a single writer: two concurrent pushes can both miss the
