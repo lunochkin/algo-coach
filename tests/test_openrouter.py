@@ -9,7 +9,7 @@ from typing import Any
 
 import pytest
 
-from algo_coach.calls import ROUTING, UNSENT, OpenRouter
+from algo_coach.calls import ROUTING, UNSENT, OpenRouter, ProviderError
 
 
 @dataclass
@@ -233,3 +233,23 @@ def test_a_cap_that_never_lifts_is_reported_in_the_end(monkeypatch):
         OpenRouter(api)(system="s", content="c", model="m", effort="low", schema=None)
 
     assert len(api.chat.completions.calls) == 5
+
+
+def test_an_answer_with_no_choices_names_whose_fault_it_was():
+    """A router reports a failed provider as a 200 carrying an error and no
+    choices. Subscripting that is a TypeError with nothing in it; the body is
+    the only place that says what happened."""
+    api = client()
+    api.chat.completions.reply = Completion([], provider=None)
+    api.chat.completions.reply.error = {"message": "upstream timed out"}
+
+    with pytest.raises(ProviderError, match="upstream timed out"):
+        OpenRouter(api)(system="s", content="c", model="m", effort="low", schema=None)
+
+
+def test_no_choices_and_no_error_still_says_something():
+    api = client()
+    api.chat.completions.reply = Completion([], provider=None)
+
+    with pytest.raises(ProviderError, match="no choices returned"):
+        OpenRouter(api)(system="s", content="c", model="m", effort="low", schema=None)

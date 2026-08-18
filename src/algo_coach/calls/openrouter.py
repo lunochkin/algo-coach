@@ -11,7 +11,7 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from algo_coach.calls.transport import Reply
+from algo_coach.calls.transport import ProviderError, Reply
 
 BASE_URL = "https://openrouter.ai/api/v1"
 
@@ -94,7 +94,14 @@ class OpenRouter:
             extra_body=body,
             **request,
         )
-        choice = response.choices[0]
+        choices = getattr(response, "choices", None)
+        if not choices:
+            # A 200 with an error and no choices: the router reporting that the
+            # provider it chose failed. The body says whose and why, and it is
+            # the only place that says it.
+            raise ProviderError(str(extra(response, "error") or "no choices returned"))
+
+        choice = choices[0]
         usage = getattr(response, "usage", None)
         return Reply(
             text=choice.message.content or None,

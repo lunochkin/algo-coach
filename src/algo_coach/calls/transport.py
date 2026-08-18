@@ -13,6 +13,16 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 
+class ProviderError(Exception):
+    """The endpoint answered, and the answer holds no answer.
+
+    A 200 carrying an error and no choices, which is how a router reports that
+    whoever it picked failed. Raised rather than returned as an empty reply:
+    nothing was read, so there is no reading to record — only a call that
+    failed, and a message saying whose fault it was.
+    """
+
+
 @dataclass(frozen=True)
 class Reply:
     """One answer, in the terms the call log keeps.
