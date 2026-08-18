@@ -111,7 +111,12 @@ def test_is_known_does_not_reject_retired_codes_at_read_time():
     assert retired not in criteria()
 
     problem = Problem(
-        id="p1", owner=ProblemOwner.USER, title="t", title_slug="t", techniques=[retired]
+        id="p1",
+        owner=ProblemOwner.USER,
+        title="t",
+        title_slug="t",
+        statement="s",
+        techniques=[retired],
     )
     assert Problem.model_validate_json(problem.model_dump_json()).techniques == [retired]
 

@@ -25,6 +25,7 @@ class ProblemPush(BaseModel):
     platform: str | None = None
     source_tags: list[str] = Field(default_factory=list)
     difficulty: ProblemDifficulty | None = None
+    statement: str = Field(min_length=1)  # matching reads it; a corpus without one is silent
 
 
 class AttemptPush(BaseModel):

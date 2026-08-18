@@ -45,6 +45,7 @@ def make_problem(id: str, source_tags: list[str]) -> Problem:
         owner=ProblemOwner.USER,
         title=id,
         title_slug=id,
+        statement="Given an array, return ...",
         source_tags=source_tags,
         techniques=map_tags(source_tags),
     )

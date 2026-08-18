@@ -337,12 +337,14 @@ a user can solve, per technique, and it is Phase 5.
       and then compared against the hand-written one — the diffs are what the
       skill's rules are, and every code template runs against a brute force
       before it lands
-- [ ] `statement` on `ProblemPush` and `Problem`, optional. Which form a
+- [x] `statement` on `ProblemPush` and `Problem`, optional. Which form a
       problem exercises is a question about what it asks, and tags answer what
       it is about. Landed first on purpose: nothing reads it until matching,
       and every export before it lands is a corpus that has to be re-pushed.
       Obliges re-copying `schema/push.py` into the practice repo — nothing
-      detects that drift
+      detects that drift. Tightened to required and non-blank once the corpus
+      was backfilled, 485 of 485: a missing statement is a problem nothing can
+      ever match, and it was silent
 - [x] `provider` on `Call`, optional: who actually served the request, which
       the model id stops answering the moment anything routes.
 - [x] Replace the Anthropic transport rather than adding beside it. `ask`

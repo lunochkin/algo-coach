@@ -35,6 +35,7 @@ def make_problem(*, source_tags: list[str] | None = None, id: str = "minted-u1")
         owner=ProblemOwner.USER,
         title="Two Sum",
         title_slug="two-sum",
+        statement="Given an array, return ...",
         source_tags=tags,
         techniques=map_tags(tags),
     )

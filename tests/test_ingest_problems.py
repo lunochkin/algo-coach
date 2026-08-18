@@ -13,6 +13,7 @@ def record(external_id: str = "e1", **overrides) -> dict:
         "external_id": external_id,
         "title": "Two Sum",
         "title_slug": "two-sum",
+        "statement": "Given an array, return ...",
     } | overrides
 
 
@@ -75,11 +76,38 @@ def test_re_push_re_derives_techniques(tmp_path):
     assert store.all()[0].techniques == ["trie"]
 
 
+def test_statement_lands_verbatim(tmp_path):
+    store = ProblemStore(tmp_path)
+    ingest_problems([record(statement="Given an array...")], user_id="u1", store=store)
+
+    assert store.all()[0].statement == "Given an array..."
+
+
+@pytest.mark.parametrize("statement", [None, ""])
+def test_a_problem_without_a_statement_is_rejected(tmp_path, statement):
+    """Matching reads the statement, so a corpus missing one is silent rather
+    than short. Rejecting is per record, and the push is re-runnable."""
+    store = ProblemStore(tmp_path)
+    payload = record()
+    if statement is None:
+        del payload["statement"]
+    else:
+        payload["statement"] = statement
+
+    result = ingest_problems([payload], user_id="u1", store=store)
+
+    assert result.ingested == 0
+    assert [r.index for r in result.rejected] == [0]
+    assert store.all() == []
+
+
 def test_re_push_updates_in_place(tmp_path):
     store = ProblemStore(tmp_path)
     ingest_problems([record(title="Two Sum")], user_id="u1", store=store)
     result = ingest_problems(
-        [record(title="Two Sum II", difficulty="hard")], user_id="u1", store=store
+        [record(title="Two Sum II", difficulty="hard", statement="restated")],
+        user_id="u1",
+        store=store,
     )
 
     assert result.ingested == 0
@@ -88,6 +116,7 @@ def test_re_push_updates_in_place(tmp_path):
     problem = store.all()[0]
     assert problem.title == "Two Sum II"
     assert problem.difficulty is ProblemDifficulty.HARD
+    assert problem.statement == "restated"
 
 
 def test_re_push_keeps_identity(tmp_path):

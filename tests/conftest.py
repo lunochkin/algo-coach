@@ -27,6 +27,7 @@ def seed_problem(store: ProblemStore, *, id: str, external_id: str, user_id: str
             owner=ProblemOwner.USER,
             title="Two Sum",
             title_slug="two-sum",
+            statement="Given an array, return ...",
         )
     )
 

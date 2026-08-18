@@ -28,6 +28,7 @@ def seed_problem(root, *, id: str, tags: list[str], title: str | None = None) ->
             owner=ProblemOwner.USER,
             title=title or id,
             title_slug=id,
+            statement="Given an array, return ...",
             url=f"https://example.invalid/{id}",
             source_tags=tags,
             techniques=map_tags(tags),

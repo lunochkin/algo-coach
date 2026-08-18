@@ -15,6 +15,7 @@ def make_problem(id: str, tags: list[str]) -> Problem:
         owner=ProblemOwner.USER,
         title=id,
         title_slug=id,
+        statement="Given an array, return ...",
         url=f"https://example.invalid/{id}",
         source_tags=tags,
         techniques=map_tags(tags),

@@ -10,6 +10,7 @@ def make_problem(id: str = "i1", external_id: str = "e1", **overrides) -> Proble
         "owner": ProblemOwner.USER,
         "title": "Two Sum",
         "title_slug": "two-sum",
+        "statement": "Given an array, return ...",
     } | overrides
     return Problem.model_validate(fields)
 

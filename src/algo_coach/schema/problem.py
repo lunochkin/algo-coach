@@ -29,3 +29,5 @@ class Problem(BaseModel):
     source_tags: list[str] = Field(default_factory=list)
     techniques: list[str] = Field(default_factory=list)
     difficulty: ProblemDifficulty | None = None
+    # what the problem asks, where tags say what it is about; matching reads it
+    statement: str = Field(min_length=1)

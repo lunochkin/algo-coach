@@ -228,11 +228,17 @@ One template reproduced from memory, and how it went.
   ingests: a metadata mismatch must never cost a real attempt.
 - **The statement is stored, and matching is why.** Which form a problem
   exercises is a question about what it asks, and tags answer what it is about.
-  Optional on the payload, since the corpus already ingested carries none, and a
-  problem without one still ingests and still counts — it simply cannot be
-  matched. The invariant against third-party statements is about git, and
-  `data/` is gitignored: the engine stores what a user pushed to their own
-  store, and no repo carries it.
+  The invariant against third-party statements is about git, and `data/` is
+  gitignored: the engine stores what a user pushed to their own store, and no
+  repo carries it.
+- **Required, and non-blank — the one metadata gap that does block.** It landed
+  optional, was backfilled across the corpus, then tightened while nothing
+  stored carried the loose shape. The reason it is not an unmapped tag: a
+  missing code costs one problem its place in one board row, where a missing
+  statement is a problem that can never be matched and says so nowhere. That
+  silence is what the field exists to prevent, so it fails at the boundary
+  instead — per record, and the push is re-runnable once the scrape catches up.
+  A blank string is the same absence wearing a value, so it is rejected too.
 
 ### Attempts
 

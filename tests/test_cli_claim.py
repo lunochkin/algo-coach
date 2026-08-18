@@ -30,6 +30,7 @@ def seed_problem(root, *, id: str, tags: list[str]) -> None:
             owner=ProblemOwner.USER,
             title=id,
             title_slug=id,
+            statement="Given an array, return ...",
             source_tags=tags,
             techniques=map_tags(tags),
         )
@@ -47,6 +48,7 @@ def put_problem(root, *, id: str, techniques: list[str]) -> None:
             owner=ProblemOwner.USER,
             title=id,
             title_slug=id,
+            statement="Given an array, return ...",
             source_tags=[],
             techniques=techniques,
         )
