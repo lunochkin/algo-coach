@@ -136,9 +136,10 @@ def main() -> None:
         type=int,
         help="how many attempts to read per classifier; every unread one otherwise",
     )
-    # One destination for both, so which effort followed which model survives.
-    # Named more than once, they are scored side by side over what all of them
-    # read; named not at all, the built-in classifier is the one scored.
+    # One destination for all three, so which effort and which provider
+    # followed which model survives. Named more than once, they are scored side
+    # by side over what all of them read; named not at all, the built-in
+    # classifier is the one scored.
     score_parser.add_argument(
         "--model",
         dest="named",
@@ -152,6 +153,13 @@ def main() -> None:
         action=Named,
         metavar="EFFORT",
         help="the effort of the --model before it",
+    )
+    score_parser.add_argument(
+        "--provider",
+        dest="named",
+        action=Named,
+        metavar="PROVIDER",
+        help="the backend to pin the --model before it to",
     )
     score_parser.add_argument(
         "--stored",

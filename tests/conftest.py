@@ -1,6 +1,6 @@
 import pytest
 
-from algo_coach.cli.client import CREDENTIALS
+from algo_coach.cli.transport import CREDENTIALS
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Problem, ProblemOwner
 

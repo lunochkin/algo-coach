@@ -11,13 +11,17 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from algo_coach.calls import CallLog, ask
+from algo_coach.calls import CallLog, Transport, ask
 from algo_coach.calls import prompt_hash as digest
 from algo_coach.schema import Call
 from algo_coach.techniques import criterion
 
-MODEL = "claude-opus-5"
+MODEL = "anthropic/claude-opus-5"
 EFFORT = "medium"
+# Which backend may serve it. A router picks one per request from whoever
+# carries the model, so without a pin two runs of one configuration can be
+# answered by different builds of the same weights.
+PROVIDER = "anthropic"
 SYSTEM = """You name which techniques a solution used.
 
 The candidates are one problem's tags — what the problem could exercise. Say
@@ -53,6 +57,11 @@ class Configuration(BaseModel, frozen=True):
 
     model: str = MODEL
     effort: str = EFFORT
+    # A constraint on what may serve, not a part of what identifies a stored
+    # reading: a claim carries the model, the effort and the digest, and the
+    # call carries whoever actually answered. Pinning narrows the first;
+    # reading the second says whether the pin held.
+    provider: str | None = PROVIDER
 
 
 DEFAULT = Configuration()
@@ -74,7 +83,7 @@ def request_hash(candidates: Sequence[str], code: str) -> str:
 
 
 def classify(
-    client: Any,
+    transport: Transport,
     log: CallLog,
     candidates: Sequence[str],
     code: str,
@@ -103,12 +112,13 @@ def classify(
         return list(candidates), None
 
     call, text = ask(
-        client,
+        transport,
         log,
         system=SYSTEM,
         content=prompt(candidates, code),
         model=configuration.model,
         effort=configuration.effort,
+        provider=configuration.provider,
         schema=schema(candidates),
     )
     if text is None:

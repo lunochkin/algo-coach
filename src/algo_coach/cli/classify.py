@@ -5,14 +5,14 @@ from pathlib import Path
 from algo_coach.calls import CallLog
 from algo_coach.claims import EFFORT, MODEL, classify_backlog
 from algo_coach.claims.run import ABORT_AFTER, Progress
-from algo_coach.cli.client import client
+from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
 
 
 def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
     """Claim the backlog."""
-    api = client(args, parser)
+    api = transport(args, parser)
     log = AttemptLog(root)
     calls = CallLog(root)
     problems = {problem.id: problem for problem in ProblemStore(root).all()}

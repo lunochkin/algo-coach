@@ -5,11 +5,10 @@ classifier that over-claims one code skews it wherever that code is read.
 """
 
 from collections.abc import Callable, Mapping, Sequence
-from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog
+from algo_coach.calls import CallLog, Transport
 from algo_coach.claims.classifier import DEFAULT, Configuration
 from algo_coach.claims.reading import read
 from algo_coach.claims.run import CONCURRENCY, Failed, Progress
@@ -171,7 +170,7 @@ def per_decision(
 
 
 def score_backlog(
-    client: Any,
+    transport: Transport | None,
     log: AttemptLog,
     calls: CallLog,
     problems: Mapping[str, Problem],
@@ -219,7 +218,7 @@ def score_backlog(
             on_configuration(configuration)
         readings.append(
             read(
-                client,
+                transport,
                 log,
                 calls,
                 hand_claimed,

@@ -9,54 +9,38 @@ from hashlib import sha256
 
 import pytest
 
-from algo_coach.calls import THINKING, UNSENT, CallLog, ask, payload, prompt_hash
+from algo_coach.calls import CallLog, Reply, ask, payload, prompt_hash
 from algo_coach.mint import call as mint_call
 from algo_coach.schema import Call
 
 
 @dataclass
-class Block:
-    text: str = ""
-    thinking: str = ""
-    type: str = "text"
+class FakeTransport:
+    """One scripted reply, or one failure. What was asked of it is recorded,
+    since a call's own record is what these tests read back."""
 
-
-@dataclass
-class Usage:
-    input_tokens: int = 11
-    output_tokens: int = 22
-
-
-@dataclass
-class Response:
-    content: list[Block]
-    stop_reason: str = "end_turn"
-    usage: Usage = field(default_factory=Usage)
-
-
-@dataclass
-class FakeMessages:
-    reply: Response | None = None
+    reply: Reply | None = None
     error: Exception | None = None
     calls: list[dict] = field(default_factory=list)
 
-    def create(self, **kwargs) -> Response:
+    def __call__(self, **kwargs) -> Reply:
         self.calls.append(kwargs)
         if self.error is not None:
             raise self.error
         return self.reply
 
 
-@dataclass
-class FakeClient:
-    messages: FakeMessages
-
-
-def answering(text: str = '{"ok": true}', thinking: str = "") -> FakeClient:
-    blocks = [Block(text=text)]
-    if thinking:
-        blocks.insert(0, Block(thinking=thinking, type="thinking"))
-    return FakeClient(FakeMessages(Response(blocks)))
+def answering(text: str = '{"ok": true}', thinking: str | None = None) -> FakeTransport:
+    return FakeTransport(
+        Reply(
+            text=text,
+            thinking=thinking,
+            stop_reason="stop",
+            input_tokens=11,
+            output_tokens=22,
+            provider="a-provider",
+        )
+    )
 
 
 def test_the_stored_prompt_digests_to_the_hash_beside_it(tmp_path):
@@ -99,7 +83,8 @@ def test_what_came_back_is_recorded_beside_what_it_cost(tmp_path):
     assert stored.response == '{"techniques": []}'
     assert stored.thinking == "weighing the invariant"
     assert (stored.input_tokens, stored.output_tokens) == (11, 22)
-    assert stored.stop_reason == "end_turn"
+    assert stored.stop_reason == "stop"
+    assert stored.provider == "a-provider"
     assert stored.id == call.id
 
 
@@ -107,10 +92,10 @@ def test_a_failure_is_recorded_and_then_raised(tmp_path):
     """A run that broke at two in the morning is readable afterwards, rather
     than a counter that printed once and vanished."""
     log = CallLog(tmp_path)
-    client = FakeClient(FakeMessages(error=RuntimeError("rate limited")))
+    transport = FakeTransport(error=RuntimeError("rate limited"))
 
     with pytest.raises(RuntimeError):
-        ask(client, log, system="sys", content="body", model="m", effort="low")
+        ask(transport, log, system="sys", content="body", model="m", effort="low")
 
     (stored,) = log.all()
     assert stored.error == "RuntimeError: rate limited"
@@ -121,37 +106,12 @@ def test_a_reply_with_no_text_is_a_failure_not_an_empty_reading(tmp_path):
     """A refusal and an answer cut short both land here. Recording it as a
     response would say the model answered nothing on purpose."""
     log = CallLog(tmp_path)
-    client = FakeClient(FakeMessages(Response([], stop_reason="refusal")))
+    transport = FakeTransport(Reply(text=None, stop_reason="content_filter"))
 
-    call, text = ask(client, log, system="sys", content="body", model="m", effort="low")
+    call, text = ask(transport, log, system="sys", content="body", model="m", effort="low")
 
     assert text is None
-    assert "refusal" in call.error
-
-
-def test_an_unsent_effort_leaves_thinking_off_the_request_too(tmp_path):
-    """They arrived together, so a model old enough to reject the effort
-    parameter rejects adaptive thinking as well — `UNSENT` says both in one
-    word, and sending either to such a model fails every call identically."""
-    log = CallLog(tmp_path)
-    client = answering()
-
-    ask(client, log, system="sys", content="body", model="m", effort=UNSENT)
-
-    (request,) = client.messages.calls
-    assert "effort" not in request["output_config"]
-    assert "thinking" not in request
-
-
-def test_an_effort_that_was_asked_for_brings_thinking_with_it(tmp_path):
-    log = CallLog(tmp_path)
-    client = answering()
-
-    ask(client, log, system="sys", content="body", model="m", effort="low")
-
-    (request,) = client.messages.calls
-    assert request["output_config"]["effort"] == "low"
-    assert request["thinking"] == THINKING
+    assert "content_filter" in call.error
 
 
 def test_the_same_prompt_may_be_called_more_than_once(tmp_path):

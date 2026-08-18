@@ -12,7 +12,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog
+from algo_coach.calls import CallLog, Transport
 from algo_coach.claims.classifier import DEFAULT, Configuration, classify, request_hash
 from algo_coach.claims.sample import eligible, recency
 from algo_coach.claims.stale import is_stale
@@ -63,7 +63,7 @@ class ClassifyResult(BaseModel):
 
 
 def read_one(
-    client: Any,
+    transport: Transport,
     calls: CallLog,
     attempt: Attempt,
     problem: Problem,
@@ -77,7 +77,7 @@ def read_one(
     calls are in flight. The call log is its own file and its own append.
     """
     return classify(
-        client, calls, problem.techniques, attempt.code or "", configuration=configuration
+        transport, calls, problem.techniques, attempt.code or "", configuration=configuration
     )
 
 
@@ -108,7 +108,7 @@ def store(
 
 
 def ask(
-    client: Any,
+    transport: Transport,
     log: AttemptLog,
     calls: CallLog,
     attempt: Attempt,
@@ -123,7 +123,7 @@ def ask(
     keeps answering it — the call log still records that it was asked. Failures
     are the caller's: a backlog run aborts on a broken key and an eval does not.
     """
-    techniques, call = read_one(client, calls, attempt, problem, configuration=configuration)
+    techniques, call = read_one(transport, calls, attempt, problem, configuration=configuration)
     if techniques and call is not None:
         store(log, attempt.id, techniques, call)
     return techniques
@@ -174,7 +174,7 @@ def as_answered[T, R](
 
 
 def classify_backlog(
-    client: Any,
+    transport: Transport,
     log: AttemptLog,
     calls: CallLog,
     problems: Mapping[str, Problem],
@@ -247,7 +247,7 @@ def classify_backlog(
     index = 0
     for attempt, answer, failure in as_answered(
         lambda attempt: read_one(
-            client, calls, attempt, problems[attempt.problem_id], configuration=configuration
+            transport, calls, attempt, problems[attempt.problem_id], configuration=configuration
         ),
         asking,
         concurrency=concurrency,

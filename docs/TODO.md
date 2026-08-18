@@ -343,15 +343,15 @@ a user can solve, per technique, and it is Phase 5.
       and every export before it lands is a corpus that has to be re-pushed.
       Obliges re-copying `schema/push.py` into the practice repo — nothing
       detects that drift
-- [ ] `provider` on `Call`, optional: who actually served the request, which
+- [x] `provider` on `Call`, optional: who actually served the request, which
       the model id stops answering the moment anything routes.
-- [ ] Replace the Anthropic transport rather than adding beside it. `ask`
+- [x] Replace the Anthropic transport rather than adding beside it. `ask`
       keeps the digest, the call record and the failure path; the request
       shape and the response walk move behind a neutral `Reply`. One shape at
       a time, by rule — two maintained by hand is what invites a library to
       reconcile them, and a normaliser degrades a schema where the reading
       cannot see it
-- [ ] Read models through OpenRouter, as the only transport: chat completions
+- [x] Read models through OpenRouter, as the only transport: chat completions
       — `response_format` for the schema, `reasoning` for the effort,
       `choices[0].message` and `usage` on the way back, key and base URL from
       config. Pin the route rather than taking what it offers:

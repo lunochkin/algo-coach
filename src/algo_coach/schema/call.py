@@ -37,10 +37,15 @@ class Call(BaseModel):
     # Whichever happened. A call returns an answer or it fails.
     response: str | None = None
     error: str | None = None
-    # The reasoning behind the answer, when the request asked for it to be
-    # summarised. Absent on a failure, and on a model that returns none.
+    # The reasoning behind the answer, where the reading produced any.
+    # Absent on a failure, and on a question the model judged needed no
+    # thought — a fact about that reading rather than a gap in the record.
     thinking: str | None = None
     stop_reason: str | None = None
+    # Who actually served the request. A model id answers that only while
+    # nothing routes; once something does, two readings under one
+    # configuration key can come from different backends.
+    provider: str | None = None
     input_tokens: int | None = None
     output_tokens: int | None = None
 

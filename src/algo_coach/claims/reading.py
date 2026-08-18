@@ -14,7 +14,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog
+from algo_coach.calls import CallLog, Transport
 from algo_coach.claims.classifier import DEFAULT, Configuration, request_hash
 from algo_coach.claims.run import (
     ABORT_AFTER,
@@ -41,7 +41,7 @@ class ReadResult(BaseModel):
 
 
 def read(
-    client: Any,
+    transport: Transport | None,
     log: AttemptLog,
     calls: CallLog,
     attempts: Sequence[Attempt],
@@ -62,7 +62,7 @@ def read(
     `limit` caps the calls, not the attempts — a stored reading is free, so a
     capped run adds to what earlier runs read rather than replacing it. What is
     still unread is taken newest first, as the backlog run takes it. A cap of
-    zero pays for nothing, so `client` is never reached and may be absent.
+    zero pays for nothing, so `transport` is never reached and may be absent.
     """
     asked = {
         attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
@@ -95,7 +95,7 @@ def read(
     index = 0
     for attempt, answer, failure in as_answered(
         lambda attempt: read_one(
-            client, calls, attempt, problems[attempt.problem_id], configuration=configuration
+            transport, calls, attempt, problems[attempt.problem_id], configuration=configuration
         ),
         asking,
         concurrency=concurrency,

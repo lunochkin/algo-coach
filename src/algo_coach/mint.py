@@ -30,6 +30,7 @@ def call(
     error: str | None = None,
     thinking: str | None = None,
     stop_reason: str | None = None,
+    provider: str | None = None,
     input_tokens: int | None = None,
     output_tokens: int | None = None,
 ) -> Call:
@@ -45,6 +46,7 @@ def call(
         error=error,
         thinking=thinking,
         stop_reason=stop_reason,
+        provider=provider,
         input_tokens=input_tokens,
         output_tokens=output_tokens,
     )

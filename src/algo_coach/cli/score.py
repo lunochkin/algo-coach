@@ -14,18 +14,19 @@ from algo_coach.claims import (
 )
 from algo_coach.claims.run import ABORT_AFTER
 from algo_coach.cli.classify import show
-from algo_coach.cli.client import client
+from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
 
 
 class Named(argparse.Action):
-    """`--model` and `--effort` alternately, into one ordered list.
+    """`--model`, `--effort` and `--provider` alternately, into one ordered list.
 
-    One action over two flags, because two `append` destinations would lose
-    which effort followed which model — and the command line's order is the
-    output's. A model opens a configuration at the default effort; an effort
-    sets the one just opened, or opens one at the default model coming first.
+    One action over three flags, because separate `append` destinations would
+    lose which effort followed which model — and the command line's order is
+    the output's. A model opens a configuration at the defaults; an effort or a
+    provider sets the one just opened, or opens one at the default model coming
+    first.
     """
 
     def __call__(
@@ -36,14 +37,15 @@ class Named(argparse.Action):
         option_string: str | None = None,
     ) -> None:
         named: list[list[str]] = getattr(namespace, self.dest, None) or []
-        if option_string == "--effort":
-            if not named:
-                named.append([DEFAULT.model, ""])
-            if named[-1][1]:
-                parser.exit(2, "score: two --effort for one --model\n")
-            named[-1][1] = str(value)
+        if option_string == "--model":
+            named.append([str(value), "", ""])
         else:
-            named.append([str(value), ""])
+            slot = 1 if option_string == "--effort" else 2
+            if not named:
+                named.append([DEFAULT.model, "", ""])
+            if named[-1][slot]:
+                parser.exit(2, f"score: two {option_string} for one --model\n")
+            named[-1][slot] = str(value)
         setattr(namespace, self.dest, named)
 
 
@@ -55,7 +57,12 @@ def configurations(
     if not named:
         return (DEFAULT,)
     built = tuple(
-        Configuration(model=model, effort=effort or DEFAULT.effort) for model, effort in named
+        Configuration(
+            model=model,
+            effort=effort or DEFAULT.effort,
+            provider=provider or DEFAULT.provider,
+        )
+        for model, effort, provider in named
     )
     if len(set(built)) != len(built):
         # Reading one configuration twice would measure its own sampling noise,
@@ -73,7 +80,7 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
 
     # No credentials asked for by a run that makes no call: being runnable
     # anywhere is what makes the stored mode the reproducible one.
-    api = None if args.stored else client(args, parser)
+    api = None if args.stored else transport(args, parser)
     log = AttemptLog(root)
     calls = CallLog(root)
     problems = {problem.id: problem for problem in ProblemStore(root).all()}

@@ -1,14 +1,16 @@
 """Making a call and recording it, with nothing said about what it was for.
 
-The transport half of a classification: a caller hands over the text and the
-schema it wants back, and gets the answer and the id of the record that now
-holds it. What the answer means is the caller's.
+The half of a classification that is not the transport: a caller hands over
+the text and the schema it wants back, and gets the answer and the id of the
+record that now holds it. What the answer means is the caller's; how it was
+fetched is the transport's.
 """
 
 from hashlib import sha256
 from typing import Any
 
 from algo_coach.calls.store import CallLog
+from algo_coach.calls.transport import Reply, Transport
 from algo_coach.mint import call as mint_call
 from algo_coach.schema import Call
 
@@ -16,16 +18,6 @@ from algo_coach.schema import Call
 # collision margin is irrelevant beside carrying sixty-four of them on every
 # line of an append-only log.
 HASH_LENGTH = 12
-
-# Returned rather than hidden: a summary is what says why a verdict came out
-# the way it did, and it costs no tokens — thinking happens and is billed the
-# same whether or not the summary comes back.
-THINKING = {"type": "adaptive", "display": "summarized"}
-
-# The effort of a model that is asked for none — some reject the parameter
-# outright. A named level rather than an absent field, since a reading whose
-# configuration is partly unknown compares with nothing.
-UNSENT = "default"
 
 
 def payload(system: str, content: str) -> str:
@@ -42,13 +34,14 @@ def prompt_hash(system: str, content: str) -> str:
 
 
 def ask(
-    client: Any,
+    transport: Transport,
     log: CallLog,
     *,
     system: str,
     content: str,
     model: str,
     effort: str,
+    provider: str | None = None,
     schema: dict[str, Any] | None = None,
     max_tokens: int = 16000,
 ) -> tuple[Call, str | None]:
@@ -67,28 +60,15 @@ def ask(
     text = payload(system, content)
     digest = prompt_hash(system, content)
 
-    output_config: dict[str, Any] = {}
-    if schema is not None:
-        output_config["format"] = {"type": "json_schema", "schema": schema}
-
-    # Both are sent only where they were asked for: a model that does not take
-    # them rejects every call carrying them, whatever the level. They are sent
-    # together because they arrived together — a model old enough to reject the
-    # effort parameter rejects adaptive thinking too — so `UNSENT` is how a
-    # caller says this model takes neither, in one word rather than two.
-    request: dict[str, Any] = {}
-    if effort != UNSENT:
-        output_config["effort"] = effort
-        request["thinking"] = THINKING
-
     try:
-        response = client.messages.create(
-            model=model,
-            max_tokens=max_tokens,
+        reply = transport(
             system=system,
-            output_config=output_config,
-            messages=[{"role": "user", "content": content}],
-            **request,
+            content=content,
+            model=model,
+            effort=effort,
+            provider=provider,
+            schema=schema,
+            max_tokens=max_tokens,
         )
     except Exception as exc:
         log.append(
@@ -102,33 +82,24 @@ def ask(
         )
         raise
 
-    answer = next((block.text for block in response.content if block.type == "text"), None)
     call = mint_call(
         model=model,
         effort=effort,
         prompt=text,
         prompt_hash=digest,
-        # A response with no text block answered nothing — a refusal, or an
-        # answer cut short. Recorded as the failure it is, so the log does not
-        # claim an empty verdict was a reading.
-        response=answer,
-        error=None if answer is not None else f"no verdict: {response.stop_reason}",
-        thinking=summarised(response),
-        stop_reason=getattr(response, "stop_reason", None),
-        input_tokens=getattr(getattr(response, "usage", None), "input_tokens", None),
-        output_tokens=getattr(getattr(response, "usage", None), "output_tokens", None),
+        # A reply with no text answered nothing — a refusal, or an answer cut
+        # short. Recorded as the failure it is, so the log does not claim an
+        # empty verdict was a reading.
+        response=reply.text,
+        error=None if reply.text is not None else f"no verdict: {reply.stop_reason}",
+        thinking=reply.thinking,
+        stop_reason=reply.stop_reason,
+        input_tokens=reply.input_tokens,
+        output_tokens=reply.output_tokens,
+        provider=reply.provider,
     )
     log.append(call)
-    return call, answer
+    return call, reply.text
 
 
-def summarised(response: Any) -> str | None:
-    """The reasoning the model was willing to show. Empty on a model that
-    returns none, which is a fact about the model rather than a gap."""
-    blocks = [
-        getattr(block, "thinking", "")
-        for block in response.content
-        if getattr(block, "type", None) == "thinking"
-    ]
-    joined = "\n".join(block for block in blocks if block)
-    return joined or None
+__all__ = ["HASH_LENGTH", "Reply", "Transport", "ask", "payload", "prompt_hash"]

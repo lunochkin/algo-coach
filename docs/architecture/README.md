@@ -396,6 +396,20 @@ nothing about what the answer was for.
   reasoning behind a verdict, and the calls that produced no claim at all. A
   decline names no candidate and a failure names nothing; both were counters
   that printed once and vanished.
+- **One transport, one shape.** Every model is reached as chat completions
+  through a router, so adding a model is a string and adding a provider is a
+  base URL. Two provider shapes maintained by hand is what invites a library
+  to reconcile them, and a library that reconciles them can downgrade a schema
+  into a prompt where the record cannot show it happened.
+- **The serving provider is recorded**, because a model id answers who served
+  a request only while nothing routes. Pinned as well as recorded: a provider
+  that cannot honour the response schema is never chosen, and a request fails
+  rather than falling back to a backend the record would not name.
+- **Reasoning is what the reading produced, not what was asked for.** A model
+  deciding a question needs no thought returns none, and the field is empty —
+  a fact about that reading rather than a gap in the record. Two calls on one
+  prompt can differ here, which is the same adaptive behaviour the noise floor
+  already measures.
 - **`prompt_hash` is not unique.** A retry after a rate limit repeats it, and
   sampling one prompt on purpose repeats it deliberately, so a reader looking
   one up must say which it wants rather than assume there is one.

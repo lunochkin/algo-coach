@@ -2,7 +2,7 @@ import threading
 from datetime import timedelta
 
 import pytest
-from helpers import T0, FakeClient, Verdict, attempt, machine_claim, seed_problem
+from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach import cli
 from algo_coach.calls import CallLog
@@ -14,7 +14,7 @@ from algo_coach.problems import ProblemStore
 from algo_coach.schema import ClaimSource, TechniqueClaim
 from algo_coach.techniques import standing_claims
 
-answering = FakeClient.answering
+answering = FakeTransport.answering
 
 
 @pytest.fixture
@@ -60,7 +60,7 @@ def test_a_single_tag_problem_is_never_asked_about(backlog):
     run(client, backlog)
 
     assert [claim.attempt_id for claim in backlog.claims()] == ["a1"]
-    assert len(client.messages.calls) == 1
+    assert len(client.calls) == 1
 
 
 def test_an_attempt_without_code_is_never_asked_about(tmp_path, monkeypatch):
@@ -90,7 +90,7 @@ def test_a_claimed_attempt_is_not_asked_again(backlog):
 
     result = run(client, backlog)
 
-    assert (result.classified, client.messages.calls) == (0, [])
+    assert (result.classified, client.calls) == (0, [])
 
 
 def test_a_run_resumes_where_the_last_one_stopped(tmp_path, monkeypatch):
@@ -172,7 +172,7 @@ def test_a_run_aborts_once_failures_stop_being_one_attempt_s_problem(tmp_path):
     result = run(client, log)
 
     assert result.aborted
-    assert len(client.messages.calls) == ABORT_AFTER
+    assert len(client.calls) == ABORT_AFTER
     assert len(result.failed) == ABORT_AFTER
     assert log.claims() == []
 
@@ -187,7 +187,7 @@ def test_a_success_resets_the_count(tmp_path):
 
     assert not result.aborted
     assert (result.classified, len(result.failed)) == (ABORT_AFTER, ABORT_AFTER)
-    assert len(client.messages.calls) == ABORT_AFTER * 2
+    assert len(client.calls) == ABORT_AFTER * 2
 
 
 def test_an_undecided_verdict_resets_the_count(tmp_path):
@@ -306,7 +306,7 @@ def test_an_edit_the_prompt_never_reached_costs_nothing(backlog):
 
     result = run(client, backlog, redo=True)
 
-    assert (result.redone, client.messages.calls) == (0, [])
+    assert (result.redone, client.calls) == (0, [])
 
 
 def test_a_claim_from_this_classifier_is_never_re_derived(backlog):
@@ -317,7 +317,7 @@ def test_a_claim_from_this_classifier_is_never_re_derived(backlog):
 
     result = run(client, backlog, redo=True)
 
-    assert (result.redone, client.messages.calls) == (0, [])
+    assert (result.redone, client.calls) == (0, [])
 
 
 def test_a_stale_claim_is_left_alone_without_the_flag(backlog):
@@ -327,7 +327,7 @@ def test_a_stale_claim_is_left_alone_without_the_flag(backlog):
 
     result = run(client, backlog)
 
-    assert (result.redone, client.messages.calls) == (0, [])
+    assert (result.redone, client.calls) == (0, [])
 
 
 def test_a_user_claim_is_never_stale(backlog):
@@ -345,7 +345,7 @@ def test_a_user_claim_is_never_stale(backlog):
 
     result = run(client, backlog, redo=True)
 
-    assert (result.redone, client.messages.calls) == (0, [])
+    assert (result.redone, client.calls) == (0, [])
 
 
 def test_a_reading_stored_under_a_hand_claim_is_never_re_derived(backlog):
@@ -358,7 +358,7 @@ def test_a_reading_stored_under_a_hand_claim_is_never_re_derived(backlog):
 
     result = run(client, backlog, redo=True)
 
-    assert (result.redone, result.classified, client.messages.calls) == (0, 0, [])
+    assert (result.redone, result.classified, client.calls) == (0, 0, [])
 
 
 def test_a_re_derivation_supersedes_rather_than_rewrites(backlog):

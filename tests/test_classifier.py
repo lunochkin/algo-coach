@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from algo_coach.calls import UNSENT, CallLog
+from algo_coach.calls import UNSENT, CallLog, Reply
 from algo_coach.claims import EFFORT, MODEL, ClassifierError, Configuration, request_hash
 from algo_coach.claims import classify as _classify
 from algo_coach.claims.classifier import SYSTEM
@@ -27,38 +27,25 @@ def verdict(client, candidates, code, **kwargs):
 
 
 @dataclass
-class Block:
-    text: str
-    type: str = "text"
-
-
-@dataclass
-class Response:
-    content: list[Block]
-    stop_reason: str = "end_turn"
-
-
-@dataclass
-class FakeMessages:
+class FakeTransport:
     """Records the request rather than making one — the prompt is the thing
     under test, and a real call would score a live model, not this code."""
 
-    reply: Response | None = None
+    techniques: list[str]
+    silent: bool = False
     calls: list[dict] = field(default_factory=list)
 
-    def create(self, **kwargs) -> Response:
+    def __call__(self, **kwargs) -> Reply:
         self.calls.append(kwargs)
-        return self.reply
+        if self.silent:
+            # A refusal and an answer cut short arrive the same way: nothing
+            # to read, and a stop reason saying why.
+            return Reply(text=None, stop_reason="content_filter")
+        return Reply(text=json.dumps({"techniques": self.techniques}), stop_reason="stop")
 
 
-@dataclass
-class FakeClient:
-    messages: FakeMessages
-
-
-def answering(*techniques: str) -> FakeClient:
-    text = json.dumps({"techniques": list(techniques)})
-    return FakeClient(FakeMessages(Response([Block(text)])))
+def answering(*techniques: str) -> FakeTransport:
+    return FakeTransport(list(techniques))
 
 
 def test_the_verdict_is_the_techniques_it_named():
@@ -81,7 +68,7 @@ def test_the_candidates_are_the_only_answers_the_schema_allows():
 
     verdict(client, ["greedy", "sorting"], CODE)
 
-    schema = client.messages.calls[0]["output_config"]["format"]["schema"]
+    schema = client.calls[0]["schema"]
     assert schema["properties"]["techniques"]["items"]["enum"] == ["greedy", "sorting"]
 
 
@@ -93,8 +80,8 @@ def test_the_candidates_are_named_in_the_prompt_too():
 
     verdict(client, ["greedy", "sorting"], CODE)
 
-    (call,) = client.messages.calls
-    assert "greedy, sorting" in call["messages"][0]["content"]
+    (call,) = client.calls
+    assert "greedy, sorting" in call["content"]
 
 
 def test_each_candidate_reaches_the_model_with_its_criterion():
@@ -104,8 +91,8 @@ def test_each_candidate_reaches_the_model_with_its_criterion():
 
     verdict(client, ["greedy", "sorting"], CODE)
 
-    (call,) = client.messages.calls
-    content = call["messages"][0]["content"]
+    (call,) = client.calls
+    content = call["content"]
     for candidate in ("greedy", "sorting"):
         entry = criteria()[candidate]
         assert entry.earns in content
@@ -121,8 +108,8 @@ def test_a_candidate_carries_its_kind_as_a_test_not_a_label():
 
     verdict(client, ["greedy", "binary-search-tree"], CODE)
 
-    (call,) = client.messages.calls
-    content = call["messages"][0]["content"]
+    (call,) = client.calls
+    content = call["content"]
     assert Kind.PARADIGM.test in content
     assert Kind.STRUCTURE.test in content
 
@@ -134,8 +121,8 @@ def test_a_criterion_is_paid_for_only_where_its_code_is_a_candidate():
 
     verdict(client, ["greedy", "sorting"], CODE)
 
-    (call,) = client.messages.calls
-    assert criteria()["trie"].earns not in call["messages"][0]["content"]
+    (call,) = client.calls
+    assert criteria()["trie"].earns not in call["content"]
 
 
 def test_the_system_text_carries_no_per_code_rule():
@@ -153,8 +140,8 @@ def test_a_retired_candidate_carries_no_criterion_and_still_asks():
 
     verdict(client, ["greedy", "dynamic-programming-2d"], CODE)
 
-    (call,) = client.messages.calls
-    assert "greedy, dynamic-programming-2d" in call["messages"][0]["content"]
+    (call,) = client.calls
+    assert "greedy, dynamic-programming-2d" in call["content"]
 
 
 def test_a_technique_outside_the_candidates_is_dropped():
@@ -186,8 +173,8 @@ def test_the_code_is_what_it_reads():
 
     verdict(client, ["greedy", "sorting"], CODE)
 
-    (call,) = client.messages.calls
-    assert CODE in call["messages"][0]["content"]
+    (call,) = client.calls
+    assert CODE in call["content"]
 
 
 def test_one_candidate_decides_nothing_and_costs_no_call():
@@ -195,28 +182,28 @@ def test_one_candidate_decides_nothing_and_costs_no_call():
     client = answering("greedy")
 
     assert verdict(client, ["greedy"], CODE) == ["greedy"]
-    assert client.messages.calls == []
+    assert client.calls == []
 
 
 def test_no_candidates_is_no_question():
     client = answering()
 
     assert verdict(client, [], CODE) == []
-    assert client.messages.calls == []
+    assert client.calls == []
 
 
 def test_a_response_carrying_no_verdict_raises():
     """A refusal and a truncated answer both land here: the caller is running
     over a backlog, and one attempt must not cost the rest."""
-    client = FakeClient(FakeMessages(Response([], stop_reason="refusal")))
+    client = FakeTransport([], silent=True)
 
-    with pytest.raises(ClassifierError, match="refusal"):
+    with pytest.raises(ClassifierError, match="content_filter"):
         verdict(client, ["greedy", "sorting"], CODE)
 
 
 def test_an_unsent_effort_is_left_off_the_call():
     """Some models reject the parameter outright, so a level that means "the
-    model's own" has to be absent from the request rather than sent as text."""
+    model's own" travels as itself and the transport leaves it off the wire."""
     client = answering("greedy")
 
     verdict(
@@ -226,9 +213,28 @@ def test_an_unsent_effort_is_left_off_the_call():
         configuration=Configuration(model="a-model", effort=UNSENT),
     )
 
-    (call,) = client.messages.calls
-    assert "effort" not in call["output_config"]
-    assert call["output_config"]["format"]["type"] == "json_schema"
+    (call,) = client.calls
+    assert call["effort"] == UNSENT
+    # The schema is unaffected: what the model is asked to think with and what
+    # it is allowed to answer are separate requests of it.
+    assert call["schema"]["properties"]["techniques"]["items"]["enum"] == ["greedy", "sorting"]
+
+
+def test_the_pinned_provider_travels_with_the_model_it_belongs_to():
+    """A configuration says which backend may serve it, since a provider
+    carries some models and not others — one setting for a whole run would be
+    wrong the moment two models are compared."""
+    client = answering("greedy")
+
+    verdict(
+        client,
+        ["greedy", "sorting"],
+        CODE,
+        configuration=Configuration(model="a-model", effort="low", provider="a-host"),
+    )
+
+    (call,) = client.calls
+    assert call["provider"] == "a-host"
 
 
 def test_the_built_in_configuration_is_what_a_caller_naming_none_gets():
@@ -236,8 +242,8 @@ def test_the_built_in_configuration_is_what_a_caller_naming_none_gets():
 
     verdict(client, ["greedy", "sorting"], CODE)
 
-    (call,) = client.messages.calls
-    assert (call["model"], call["output_config"]["effort"]) == (MODEL, EFFORT)
+    (call,) = client.calls
+    assert (call["model"], call["effort"]) == (MODEL, EFFORT)
 
 
 def test_a_named_configuration_is_what_the_call_carries():
@@ -252,15 +258,15 @@ def test_a_named_configuration_is_what_the_call_carries():
         configuration=Configuration(model="a-cheap-model", effort="low"),
     )
 
-    (call,) = client.messages.calls
-    assert (call["model"], call["output_config"]["effort"]) == ("a-cheap-model", "low")
+    (call,) = client.calls
+    assert (call["model"], call["effort"]) == ("a-cheap-model", "low")
 
 
 def test_the_claim_records_what_produced_it():
     """Both count the same toward progress, but a machine claim can be
     recomputed by a better classifier, so re-deriving has to find the stale
     ones and leave the rest."""
-    assert MODEL == "claude-opus-5"
+    assert MODEL == "anthropic/claude-opus-5"
     assert EFFORT
 
 

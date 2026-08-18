@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import pytest
-from helpers import T0, FakeClient, Verdict, attempt, machine_claim, seed_problem
+from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach.calls import CallLog
 from algo_coach.claims import DEFAULT, EFFORT, MODEL, Configuration, request_hash, score_backlog
@@ -78,13 +78,13 @@ CHEAP = Configuration(model="a-cheap-model")
 
 
 def test_agreement_is_scored_against_the_users_claim(hand_claimed):
-    result = run(FakeClient.answering(Verdict(["greedy"])), hand_claimed)
+    result = run(FakeTransport.answering(Verdict(["greedy"])), hand_claimed)
 
     assert (result.scored, result.exact) == (1, 1)
 
 
 def test_disagreement_is_scored_per_technique(hand_claimed):
-    result = run(FakeClient.answering(Verdict(["sorting"])), hand_claimed)
+    result = run(FakeTransport.answering(Verdict(["sorting"])), hand_claimed)
 
     rows = {row.technique: row for row in result.per_technique}
     assert (result.scored, result.exact) == (1, 0)
@@ -95,7 +95,7 @@ def test_disagreement_is_scored_per_technique(hand_claimed):
 def test_what_the_classifier_read_is_stored(hand_claimed):
     """An eval that forgot its verdicts would be evidence that exists only
     while it prints."""
-    run(FakeClient.answering(Verdict(["sorting"])), hand_claimed)
+    run(FakeTransport.answering(Verdict(["sorting"])), hand_claimed)
 
     (stored,) = machine_claims(hand_claimed)
     assert (stored.attempt_id, stored.techniques) == ("a1", ["sorting"])
@@ -106,7 +106,7 @@ def test_what_the_classifier_read_is_stored(hand_claimed):
 def test_a_stored_reading_never_becomes_the_standing_claim(hand_claimed):
     """It is a reading, not a candidate: the user's claim wins by source, not
     by being the later record."""
-    run(FakeClient.answering(Verdict(["sorting"])), hand_claimed)
+    run(FakeTransport.answering(Verdict(["sorting"])), hand_claimed)
 
     standing = standing_claims(hand_claimed.claims())["a1"]
     assert [claim.techniques for claim in machine_claims(hand_claimed)] == [["sorting"]]
@@ -115,13 +115,13 @@ def test_a_stored_reading_never_becomes_the_standing_claim(hand_claimed):
 
 def test_a_second_run_at_this_configuration_pays_for_nothing(hand_claimed):
     """The same question of the same classifier has an answer in the log."""
-    run(FakeClient.answering(Verdict(["greedy"])), hand_claimed)
-    client = FakeClient.answering()
+    run(FakeTransport.answering(Verdict(["greedy"])), hand_claimed)
+    client = FakeTransport.answering()
 
     result = run(client, hand_claimed)
 
     assert (result.scored, result.exact) == (1, 1)
-    assert (result.read, result.reused, client.messages.calls) == (0, 1, [])
+    assert (result.read, result.reused, client.calls) == (0, 1, [])
 
 
 def test_a_reading_stored_before_the_hand_claim_is_reused(tmp_path):
@@ -133,12 +133,12 @@ def test_a_reading_stored_before_the_hand_claim_is_reused(tmp_path):
     log.append_attempt(attempt("a1", "two-tags"))
     log.append_claim(reading("a1", ["sorting"]))
     log.append_claim(user_claim("a1", ["greedy"]))
-    client = FakeClient.answering()
+    client = FakeTransport.answering()
 
     result = run(client, log)
 
     assert (result.scored, result.exact, result.reused) == (1, 0, 1)
-    assert client.messages.calls == []
+    assert client.calls == []
 
 
 def test_a_rolled_back_rulebook_reuses_the_reading_under_it(hand_claimed):
@@ -146,17 +146,17 @@ def test_a_rolled_back_rulebook_reuses_the_reading_under_it(hand_claimed):
     answering today's question can sit under a later one and still answer."""
     hand_claimed.append_claim(reading("a1", ["greedy"]))
     hand_claimed.append_claim(reading("a1", ["sorting"], prompt_hash="ffffffffffff"))
-    client = FakeClient.answering()
+    client = FakeTransport.answering()
 
     result = run(client, hand_claimed)
 
-    assert (result.exact, result.reused, client.messages.calls) == (1, 1, [])
+    assert (result.exact, result.reused, client.calls) == (1, 1, [])
 
 
 def test_a_reading_answering_another_prompt_is_read_again(hand_claimed):
     hand_claimed.append_claim(reading("a1", ["sorting"], prompt_hash="ffffffffffff"))
 
-    result = run(FakeClient.answering(Verdict(["greedy"])), hand_claimed)
+    result = run(FakeTransport.answering(Verdict(["greedy"])), hand_claimed)
 
     assert (result.read, result.reused, result.exact) == (1, 0, 1)
 
@@ -164,7 +164,7 @@ def test_a_reading_answering_another_prompt_is_read_again(hand_claimed):
 def test_a_reading_from_another_model_is_read_again(hand_claimed):
     hand_claimed.append_claim(reading("a1", ["sorting"], model="an-older-model"))
 
-    result = run(FakeClient.answering(Verdict(["greedy"])), hand_claimed)
+    result = run(FakeTransport.answering(Verdict(["greedy"])), hand_claimed)
 
     assert (result.read, result.exact) == (1, 1)
 
@@ -173,11 +173,11 @@ def test_a_reading_answering_the_same_prompt_is_reused(hand_claimed):
     """The saving: an edit this attempt's candidates never carried leaves its
     stored reading answering the same question, and nothing is paid twice."""
     hand_claimed.append_claim(reading("a1", ["greedy"]))
-    client = FakeClient.answering()
+    client = FakeTransport.answering()
 
     result = run(client, hand_claimed)
 
-    assert (result.reused, client.messages.calls) == (1, [])
+    assert (result.reused, client.calls) == (1, [])
 
 
 def test_fresh_asks_again_where_a_reading_already_answers(hand_claimed):
@@ -185,7 +185,7 @@ def test_fresh_asks_again_where_a_reading_already_answers(hand_claimed):
     twice, which is the one thing a cache exists to prevent."""
     hand_claimed.append_claim(reading("a1", ["greedy"]))
 
-    result = run(FakeClient.answering(Verdict(["sorting"])), hand_claimed, fresh=True)
+    result = run(FakeTransport.answering(Verdict(["sorting"])), hand_claimed, fresh=True)
 
     assert (result.read, result.reused) == (1, 0)
 
@@ -193,7 +193,7 @@ def test_fresh_asks_again_where_a_reading_already_answers(hand_claimed):
 def test_naming_no_candidate_is_undecided_rather_than_a_total_miss(hand_claimed):
     """No verdict is missing evidence, not a disagreement — scoring it as one
     would count a decline as a wrong answer against every technique."""
-    result = run(FakeClient.answering(Verdict([])), hand_claimed)
+    result = run(FakeTransport.answering(Verdict([])), hand_claimed)
 
     assert (result.scored, result.undecided) == (0, 1)
     assert machine_claims(hand_claimed) == []
@@ -202,16 +202,16 @@ def test_naming_no_candidate_is_undecided_rather_than_a_total_miss(hand_claimed)
 def test_a_reading_that_named_no_candidate_is_paid_for_on_every_run(hand_claimed):
     """A claim cannot say "none of these", so nothing records that it was
     asked. The count is what says the call is a permanent line item."""
-    run(FakeClient.answering(Verdict([])), hand_claimed)
-    client = FakeClient.answering(Verdict([]))
+    run(FakeTransport.answering(Verdict([])), hand_claimed)
+    client = FakeTransport.answering(Verdict([]))
 
     result = run(client, hand_claimed)
 
-    assert (result.undecided, len(client.messages.calls)) == (1, 1)
+    assert (result.undecided, len(client.calls)) == (1, 1)
 
 
 def test_a_failed_reading_stores_nothing(hand_claimed):
-    result = run(FakeClient.answering(Verdict(error=RuntimeError("refused"))), hand_claimed)
+    result = run(FakeTransport.answering(Verdict(error=RuntimeError("refused"))), hand_claimed)
 
     assert [failure.attempt_id for failure in result.failed] == ["a1"]
     assert (result.scored, machine_claims(hand_claimed)) == (0, [])
@@ -226,10 +226,10 @@ def test_a_machine_claim_is_not_ground_truth(tmp_path):
     log.append_attempt(attempt("a1", "two-tags"))
     log.append_claim(machine_claim("a1", ["greedy"]))
 
-    client = FakeClient.answering()
+    client = FakeTransport.answering()
     result = run(client, log)
 
-    assert (result.scored, client.messages.calls) == (0, [])
+    assert (result.scored, client.calls) == (0, [])
 
 
 def test_an_unclaimed_attempt_is_not_scored(tmp_path):
@@ -239,9 +239,9 @@ def test_an_unclaimed_attempt_is_not_scored(tmp_path):
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-tags"))
 
-    client = FakeClient.answering()
+    client = FakeTransport.answering()
 
-    assert (run(client, log).scored, client.messages.calls) == (0, [])
+    assert (run(client, log).scored, client.calls) == (0, [])
 
 
 def test_only_the_latest_attempt_of_a_problem_is_scored(tmp_path):
@@ -255,7 +255,7 @@ def test_only_the_latest_attempt_of_a_problem_is_scored(tmp_path):
     log.append_claim(user_claim("older", ["greedy"]))
     log.append_claim(user_claim("latest", ["sorting"]))
 
-    result = run(FakeClient.answering(Verdict(["sorting"])), log)
+    result = run(FakeTransport.answering(Verdict(["sorting"])), log)
 
     assert (result.scored, result.exact, result.failed) == (1, 1, [])
 
@@ -263,7 +263,7 @@ def test_only_the_latest_attempt_of_a_problem_is_scored(tmp_path):
 def test_one_failure_does_not_cost_the_rest(two_problems):
     """An eval that dies on the first refusal reports nothing about the rest."""
     result = run(
-        FakeClient.answering(Verdict(error=RuntimeError("refused")), Verdict(["greedy"])),
+        FakeTransport.answering(Verdict(error=RuntimeError("refused")), Verdict(["greedy"])),
         two_problems,
     )
 
@@ -275,12 +275,12 @@ def test_the_limit_caps_the_calls_not_the_score(two_problems):
     """A stored reading is free, so a capped run adds to what earlier runs read
     rather than reporting on a slice of it."""
     two_problems.append_claim(reading("a2", ["greedy"]))
-    client = FakeClient.answering(Verdict(["greedy"]))
+    client = FakeTransport.answering(Verdict(["greedy"]))
 
     result = run(client, two_problems, limit=1)
 
     assert (result.scored, result.exact) == (2, 2)
-    assert (result.read, result.reused, len(client.messages.calls)) == (1, 1, 1)
+    assert (result.read, result.reused, len(client.calls)) == (1, 1, 1)
 
 
 def test_a_run_of_failures_aborts_rather_than_paying_for_the_eval_set(tmp_path):
@@ -293,18 +293,18 @@ def test_a_run_of_failures_aborts_rather_than_paying_for_the_eval_set(tmp_path):
         log.append_attempt(attempt(f"a{index}", f"p{index}", finished_at=T0))
         log.append_claim(user_claim(f"a{index}", ["greedy"]))
     broken = Verdict(error=RuntimeError("does not support the effort parameter"))
-    client = FakeClient.answering(*[broken] * (ABORT_AFTER + 2))
+    client = FakeTransport.answering(*[broken] * (ABORT_AFTER + 2))
 
     result = compare(client, log, configurations=(CHEAP,))
 
     assert result.scores[0].score.aborted
-    assert len(client.messages.calls) == ABORT_AFTER
+    assert len(client.calls) == ABORT_AFTER
 
 
 def test_a_scattered_failure_does_not_abort(two_problems):
     """One refusal is one attempt's problem — an eval that stopped there would
     report nothing about the attempts behind it."""
-    client = FakeClient.answering(Verdict(error=RuntimeError("refused")), Verdict(["greedy"]))
+    client = FakeTransport.answering(Verdict(error=RuntimeError("refused")), Verdict(["greedy"]))
 
     result = compare(client, two_problems)
 
@@ -315,7 +315,7 @@ def test_a_scattered_failure_does_not_abort(two_problems):
 def test_a_named_configuration_stores_its_own_provenance(hand_claimed):
     """A reading names the classifier that reached it, or a later run could not
     tell whose answer it was reusing."""
-    run(FakeClient.answering(Verdict(["greedy"])), hand_claimed, configurations=(CHEAP,))
+    run(FakeTransport.answering(Verdict(["greedy"])), hand_claimed, configurations=(CHEAP,))
 
     (stored,) = machine_claims(hand_claimed)
     assert (stored.model, stored.effort) == (CHEAP.model, CHEAP.effort)
@@ -330,7 +330,7 @@ def test_the_shares_are_over_the_attempts_every_configuration_read(two_problems)
     two_problems.append_claim(reading("a2", ["greedy"]))
     # The cheap one reads the newest and stops there, so a1 is the built-in
     # classifier's alone and belongs to neither share.
-    client = FakeClient.answering(Verdict(["sorting"]))
+    client = FakeTransport.answering(Verdict(["sorting"]))
 
     result = compare(client, two_problems, configurations=(DEFAULT, CHEAP), limit=1)
 
@@ -342,12 +342,12 @@ def test_the_shares_are_over_the_attempts_every_configuration_read(two_problems)
 def test_the_limit_caps_the_calls_of_each_configuration(two_problems):
     """A cap across the run would spend it all on the first classifier and
     measure the second on nothing."""
-    client = FakeClient.answering(Verdict(["greedy"]), Verdict(["greedy"]))
+    client = FakeTransport.answering(Verdict(["greedy"]), Verdict(["greedy"]))
 
     result = compare(client, two_problems, configurations=(DEFAULT, CHEAP), limit=1)
 
     assert [scored.score.read for scored in result.scores] == [1, 1]
-    assert (len(client.messages.calls), result.common) == (2, 1)
+    assert (len(client.calls), result.common) == (2, 1)
 
 
 def test_an_attempt_one_configuration_declined_is_in_neither_denominator(two_problems):
@@ -355,7 +355,7 @@ def test_an_attempt_one_configuration_declined_is_in_neither_denominator(two_pro
     other configuration alone was scored on would not be a comparison."""
     two_problems.append_claim(reading("a1", ["greedy"]))
     two_problems.append_claim(reading("a2", ["greedy"]))
-    client = FakeClient.answering(Verdict([]), Verdict(["greedy"]))
+    client = FakeTransport.answering(Verdict([]), Verdict(["greedy"]))
 
     result = compare(client, two_problems, configurations=(DEFAULT, CHEAP))
 
@@ -369,7 +369,7 @@ def test_only_the_attempts_they_answered_differently_are_split(two_problems):
     both are — a1 is where reading the code decides which to keep."""
     two_problems.append_claim(reading("a1", ["sorting"]))
     two_problems.append_claim(reading("a2", ["sorting"]))
-    client = FakeClient.answering(Verdict(["sorting"]), Verdict(["greedy"]))
+    client = FakeTransport.answering(Verdict(["sorting"]), Verdict(["greedy"]))
 
     result = compare(client, two_problems, configurations=(DEFAULT, CHEAP))
 
@@ -381,7 +381,7 @@ def test_only_the_attempts_they_answered_differently_are_split(two_problems):
 def test_one_configuration_is_compared_with_nothing(hand_claimed):
     """The comparison of one is the ordinary score, so nothing splits and the
     denominator is what that configuration read."""
-    result = compare(FakeClient.answering(Verdict(["greedy"])), hand_claimed)
+    result = compare(FakeTransport.answering(Verdict(["greedy"])), hand_claimed)
 
     assert (result.common, result.splits) == (1, [])
     assert result.scores[0].configuration == DEFAULT
