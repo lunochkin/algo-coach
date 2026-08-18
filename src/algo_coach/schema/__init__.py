@@ -11,7 +11,9 @@ from algo_coach.schema.attempt import (
 from algo_coach.schema.call import Call
 from algo_coach.schema.card import Card, Selector, Template, TemplateKind
 from algo_coach.schema.diagnosis import Diagnosis
+from algo_coach.schema.match import MatchSource, TemplateMatch
 from algo_coach.schema.problem import Problem, ProblemDifficulty, ProblemOwner
+from algo_coach.schema.provenance import MachineProvenance
 from algo_coach.schema.push import AttemptPush, ProblemPush
 from algo_coach.schema.record import AttemptRecord
 from algo_coach.schema.seed import CardSeed, TemplateSeed
@@ -30,6 +32,8 @@ __all__ = [
     "Diagnosis",
     "FailureMode",
     "Kind",
+    "MachineProvenance",
+    "MatchSource",
     "Problem",
     "ProblemDifficulty",
     "ProblemOwner",
@@ -40,6 +44,7 @@ __all__ = [
     "TechniqueClaim",
     "Template",
     "TemplateKind",
+    "TemplateMatch",
     "TemplateSeed",
     "TestResult",
 ]

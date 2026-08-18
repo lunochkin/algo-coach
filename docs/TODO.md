@@ -377,10 +377,13 @@ a user can solve, per technique, and it is Phase 5.
       builds
 - [ ] Seed from files through a path that stays a boundary — the private repo
       it moves behind later is a different argument, not a refactor
-- [ ] `TemplateMatch`: one record per template and problem, carrying a verdict.
+- [x] `TemplateMatch`: one record per template and problem, carrying a verdict.
       Not a set per template — problems arrive a push at a time, and a set
       would rewrite settled pairs whenever the corpus grew. The negative is
-      stored or every re-run re-tests every non-match forever
+      stored or every re-run re-tests every non-match forever. Provenance is
+      the claim's, and now shared as `MachineProvenance` rather than written
+      out twice: the question differs, the rule about what a re-run must know
+      to supersede a reading does not
 - [ ] Match the corpus against a card's templates after import. One call per
       problem and card, candidates in and the subset out, records per pair.
       Pre-filtered by technique, or it is every template against every problem
