@@ -10,10 +10,64 @@ from a problem's tags, and scheduling will target the weakest technique rather
 than the oldest problem. Procedural-skill SRS, not fact SRS — built for
 experienced engineers restoring fluency, not beginners learning concepts.
 
-**Status: early.** Push API, technique vocabulary,
-attribution classifier and drill loop are built; cards are in progress;
-failure-mode diagnosis and scheduling are not started. Sequencing lives in
-[`docs/ROADMAP.md`](docs/ROADMAP.md).
+## What it looks like
+
+Per-technique standing, derived from a real backlog of 1,785 ingested attempts.
+Nothing here is stored: every column is computed from the append-only log on
+read.
+
+```
+$ algo-coach board
+
+technique             attempts  solved   last               labels
+backtracking          144       110/144  2026-07-22 (28d)
+binary-search         198       105/198  2026-07-19 (31d)
+binary-search-tree    45        28/45    2025-10-10 (312d)
+dynamic-programming   367       226/367  2026-07-28 (22d)
+greedy                80        42/80    2026-06-30 (50d)
+monotonic-stack       83        47/83    2026-07-28 (22d)
+shortest-path         18        12/18    2026-06-24 (56d)
+string-matching       8         6/8      2025-01-16 (580d)
+...
+101 attempts grouped nowhere — no technique resolved
+```
+
+The attribution classifier, scored against an adjudicated eval set. The model
+is a cheap open one, constrained to each problem's own candidate tags, and
+every divergence is printed rather than averaged away.
+
+```
+$ algo-coach score
+
+openai/gpt-oss-120b, effort medium, temperature 0.0, via deepinfra/bf16
+56/62 exact (90%)          # the whole claimed set, per attempt
+169/175 (96.6%)            # per candidate technique, claim or not
+0 read, 62 reused          # stored readings answer; nothing re-asked
+
+technique             attempts  exact  missed  over
+backtracking          8         7      0       0
+dynamic-programming   8         7      1       0
+hashing               7         7      0       2
+...
+b505a8d07e86403ea1f5df7f6ff4892e
+  you: dynamic-programming monotonic-stack
+  it:  monotonic-stack
+```
+
+## Where it stands
+
+| | |
+|---|---|
+| Ingested attempts | 1,785, from real daily practice |
+| Technique vocabulary | 27 codes, each with what earns it and the near miss it is confused with |
+| Eval set | 62 attempts, hand-claimed blind, then adjudicated against a frontier reader |
+| Attribution | 90% exact set match, 96.6% per decision, on a 120B open model |
+| Cards | 9 authored |
+| Tests | 585 |
+
+Built: push API, technique vocabulary, attribution classifier, drill loop.
+In progress: cards. Not started: failure-mode diagnosis, mastery estimation,
+scheduling. Sequencing lives in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Core loop, as built
 
@@ -23,8 +77,10 @@ board (per technique, by staleness) → pick a technique → pick a problem
       → claim which techniques the solution used + label why it went that way
 ```
 
-Diagnosis and scheduling close this loop later; today the user picks what to
-drill and the board says what is stale.
+The engine calls no external platform and mints no attempt: it waits for a
+push and diffs its own log, which is exact because it knows what was already
+there. Diagnosis and scheduling close this loop later; today the user picks
+what to drill and the board says what is stale.
 
 ## Design
 
@@ -55,7 +111,9 @@ Two features worth reading the doc for:
   classifier, because no training data exists for that label: public corpora
   tag *problems*, not solutions. Constrained to the problem's own tags, scored
   against hand claims by set equality per technique, and every reading records
-  the model, the effort, the digest of what was sent and the call that sent it.
+  the model, the effort, the endpoint it was pinned to, the temperature, the
+  digest of what was sent and the call that sent it — so two configurations are
+  compared over the attempts both read, rather than each over its own.
 - **[Cards](docs/architecture/README.md#cards)** — teaching content per
   technique: a recognition cue, what to read, and the templates to reproduce
   from memory. A card names no problem; it carries a selector, and its ladder
@@ -70,10 +128,12 @@ uv run algo-coach <command>
 | Command | What it does |
 |---|---|
 | `push attempts\|problems` | ingest records your own client exports |
+| `seed` | seed authored cards into the store |
 | `board` | per-technique standing: attempts, solved, recency, labels |
 | `drill` | pick a technique, then a problem, then record what came back |
 | `claim` | hand-label which techniques a stored attempt used |
 | `classify` | claim stored attempts with the classifier |
+| `match` | which problems exercise a card's templates |
 | `score` | the classifier against the hand claims, per technique |
 | `movement` | how far the classifier's claims move the board off the tags |
 
@@ -82,7 +142,7 @@ uv run algo-coach <command>
 ```
 src/algo_coach/schema/       the record contracts — the public part
 src/algo_coach/techniques/   the vocabulary: 27 codes, each with its criterion
-src/algo_coach/{board,claims,ingest,log,calls}/
+src/algo_coach/{board,claims,ingest,log,calls,matches}/
 docs/architecture/README.md  concepts, boundaries, invariants
 docs/{ROADMAP,TODO}.md       sequencing, and what is open
 .claude/skills/card-author/  the skill that authors cards
