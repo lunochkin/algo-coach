@@ -323,12 +323,12 @@ reading it back is the deferred measurement's.
 
 Flow and its rules: `docs/architecture/README.md`, "Adjudicating the eval set".
 
-- [ ] Read the 62 hand-claimed attempts with a frontier configuration, stored
+- [x] Read the 62 hand-claimed attempts with a frontier configuration, stored
       as readings. Nothing is added to the blind pass while a reading is in
       view — it is what makes the reference independent of either reader
-- [ ] Resolve every divergence by hand, one at a time: the criterion is edited
+- [x] Resolve every divergence by hand, one at a time: the criterion is edited
       or the claim is. `claim --revise --disputed 1` is the queue
-- [ ] Re-read the attempts a criteria edit reaches, and repeat until the
+- [x] Re-read the attempts a criteria edit reaches, and repeat until the
       frontier disagrees with nothing. That is the stopping signal, not a
       score — what is left is sampling noise or a criterion that still does
       not say
