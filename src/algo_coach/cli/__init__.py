@@ -23,7 +23,10 @@ from algo_coach.cli.seed import seed
 
 DATA_ROOT = Path("data")
 
-__all__ = ["BadLine", "DATA_ROOT", "main"]
+# What a shell reports for a command its user stopped: 128 plus the signal.
+INTERRUPTED = 130
+
+__all__ = ["BadLine", "DATA_ROOT", "INTERRUPTED", "main"]
 
 
 class _Defaults(argparse.ArgumentDefaultsHelpFormatter):
@@ -240,6 +243,16 @@ def main() -> None:
     args = parser.parse_args()
     # Read at call time, not at import: tests point DATA_ROOT elsewhere.
     root = DATA_ROOT
+    try:
+        dispatch(args, parser, root)
+    except KeyboardInterrupt:
+        # Ctrl-C is an answer, not a fault: every command appends as it goes,
+        # so what landed is kept. A traceback would name the line the prompt
+        # was waiting on — where the user was, not what went wrong.
+        parser.exit(INTERRUPTED, "\ninterrupted\n")
+
+
+def dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
     if args.command == "seed":
         seed(args, parser, root)
     elif args.command == "board":

@@ -46,3 +46,21 @@ def test_no_file_is_not_an_error(cwd):
         cli.main()
 
     assert exit_info.value.code == 2
+
+
+def test_ctrl_c_ends_the_command_rather_than_reporting_it(monkeypatch, capsys):
+    """Every command appends as it goes, so a stopped run keeps what landed.
+    The traceback would name the line the prompt was waiting on, which is
+    where the user was rather than what went wrong."""
+    monkeypatch.setattr(cli, "board", _interrupted)
+    monkeypatch.setattr("sys.argv", ["algo-coach", "board"])
+
+    with pytest.raises(SystemExit) as exit_info:
+        cli.main()
+
+    assert exit_info.value.code == cli.INTERRUPTED
+    assert "interrupted" in capsys.readouterr().err
+
+
+def _interrupted(*_args, **_kwargs):
+    raise KeyboardInterrupt
