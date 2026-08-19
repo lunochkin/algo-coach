@@ -18,6 +18,7 @@ from algo_coach.cli.drill import drill
 from algo_coach.cli.movement import moved
 from algo_coach.cli.push import BadLine, push
 from algo_coach.cli.score import Named, score
+from algo_coach.cli.seed import seed
 
 DATA_ROOT = Path("data")
 
@@ -60,6 +61,10 @@ def main() -> None:
     push_parser.add_argument("kind", choices=["attempts", "problems"])
     push_parser.add_argument("source", help="path to a JSONL file, or - for stdin")
     _user_argument(push_parser)
+
+    seed_parser = _command(sub, "seed", "seed authored content into the store")
+    seed_parser.add_argument("kind", choices=["cards"])
+    seed_parser.add_argument("source", help="path to an authored JSON file, or a directory of them")
 
     board_parser = _command(sub, "board", "per-technique standing, derived from the log")
     board_parser.add_argument("--json", action="store_true", help="emit rows instead of a table")
@@ -217,7 +222,9 @@ def main() -> None:
     args = parser.parse_args()
     # Read at call time, not at import: tests point DATA_ROOT elsewhere.
     root = DATA_ROOT
-    if args.command == "board":
+    if args.command == "seed":
+        seed(args, parser, root)
+    elif args.command == "board":
         board(args, root)
     elif args.command == "claim":
         claim(args, parser, root)

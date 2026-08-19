@@ -18,6 +18,12 @@ class ProblemIngestResult(BaseModel):
     rejected: list[Rejected] = Field(default_factory=list)
 
 
+class CardSeedResult(BaseModel):
+    ingested: int = 0
+    updated: int = 0  # a slug already seeded; the card refreshes, its id stays
+    rejected: list[Rejected] = Field(default_factory=list)
+
+
 def reason(exc: ValidationError) -> str:
     """Flatten to one line: pydantic's own rendering is a multi-line block,
     which reads badly inside JSON a client has to parse."""

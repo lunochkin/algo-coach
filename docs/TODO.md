@@ -375,7 +375,7 @@ a user can solve, per technique, and it is Phase 5.
       like the model; who actually served it is recorded beside it and never
       compared, since the router names a company and a company serves several
       builds
-- [ ] Seed from files through a path that stays a boundary — the private repo
+- [x] Seed from files through a path that stays a boundary — the private repo
       it moves behind later is a different argument, not a refactor
 - [x] `TemplateMatch`: one record per template and problem, carrying a verdict.
       Not a set per template — problems arrive a push at a time, and a set
