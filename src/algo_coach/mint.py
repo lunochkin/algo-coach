@@ -10,7 +10,16 @@ import uuid
 from collections.abc import Sequence
 from datetime import UTC, datetime
 
-from algo_coach.schema import Call, ClaimSource, Confidence, FailureMode, SelfLabel, TechniqueClaim
+from algo_coach.schema import (
+    Call,
+    ClaimSource,
+    Confidence,
+    FailureMode,
+    MatchSource,
+    SelfLabel,
+    TechniqueClaim,
+    TemplateMatch,
+)
 from algo_coach.techniques import is_known
 
 
@@ -117,6 +126,43 @@ def classifier_claim(
         attempt_id=attempt_id,
         techniques=techniques,
         source=ClaimSource.CLASSIFIER,
+        model=model,
+        effort=effort,
+        prompt_hash=prompt_hash,
+        call_id=call_id,
+        pin=pin,
+        temperature=temperature,
+        provider=provider,
+    )
+
+
+def machine_match(
+    template_id: str,
+    problem_id: str,
+    *,
+    matched: bool,
+    model: str,
+    effort: str,
+    prompt_hash: str,
+    call_id: str,
+    pin: str,
+    temperature: float | None = None,
+    provider: str | None = None,
+) -> TemplateMatch:
+    """One pair a matcher read, positive or negative.
+
+    The negative is a record like any other: without it every re-run re-tests
+    every non-match forever, which on a growing corpus is nearly all the work.
+    The provenance is the claim's, since what a re-run has to know to supersede
+    a reading does not change with the question it answers.
+    """
+    return TemplateMatch(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        template_id=template_id,
+        problem_id=problem_id,
+        matched=matched,
+        source=MatchSource.CLASSIFIER,
         model=model,
         effort=effort,
         prompt_hash=prompt_hash,

@@ -15,6 +15,7 @@ from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
 from algo_coach.cli.drill import drill
+from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
 from algo_coach.cli.push import BadLine, push
 from algo_coach.cli.score import Named, score
@@ -149,6 +150,23 @@ def main() -> None:
     )
     _user_argument(classify_parser)
 
+    match_parser = _command(sub, "match", "which problems exercise a card's templates")
+    match_parser.add_argument(
+        "--limit", type=int, help="how many pairs to read; every outstanding one otherwise"
+    )
+    match_parser.add_argument("--card", help="one card by slug; every seeded card otherwise")
+    match_parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=CONCURRENCY,
+        help="calls in flight at once; one at a time otherwise",
+    )
+    match_parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help="ask again even where a stored record answers the same question",
+    )
+
     score_parser = _command(sub, "score", "the classifier against the user's own claims")
     score_parser.add_argument(
         "--limit",
@@ -230,6 +248,8 @@ def main() -> None:
         claim(args, parser, root)
     elif args.command == "classify":
         classify(args, parser, root)
+    elif args.command == "match":
+        match(args, parser, root)
     elif args.command == "score":
         score(args, parser, root)
     elif args.command == "movement":
