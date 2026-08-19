@@ -415,6 +415,10 @@ a user can solve, per technique, and it is Phase 5.
       different questions. A lone candidate is still asked about: there the
       tags already answer, here the verdict is the record. Nine cards against
       485 problems pre-filter to 345 pairs, 1724 records, none read yet
+- [x] Time a call at both levels: what the caller waited and how many requests
+      that took, beside the last request's own time — the one that answered or
+      the one that failed. A run held behind a per-minute cap read as a slow
+      model without the count
 - [x] A hand match: `MatchSource.USER`, carrying no provenance, minted where
       the machine's is. Nothing re-derives it, which is what makes it the
       reference the readings are scored against

@@ -51,6 +51,36 @@ class Reply:
     # company rather than the endpoint. The build asked for is the request's
     # own `pin`; this says whether anything answered at all.
     provider: str | None = None
+    # What this request took, and how many it took to get here — the answering
+    # one included. The retry loop's to report: a wait timed above it would
+    # carry backoff this request never waited through.
+    request_ms: int | None = None
+    attempts: int | None = None
+
+
+@dataclass(frozen=True)
+class Trace:
+    """What a failure still knows about itself.
+
+    A reply carries its own count and timing; a failure has nothing to carry
+    them on, and they are as much a fact about the endpoint there. Stamped on
+    the exception rather than wrapped around it, so the failure keeps its type
+    and every caller that catches one still catches the same thing.
+    """
+
+    attempts: int
+    request_ms: int
+
+
+def stamp(exc: Exception, trace: Trace) -> None:
+    exc.__dict__["trace"] = trace
+
+
+def traced(exc: Exception) -> Trace | None:
+    """Absent where nothing stamped it, which is a transport that never
+    retried rather than one that is wrong."""
+    trace = exc.__dict__.get("trace")
+    return trace if isinstance(trace, Trace) else None
 
 
 class Transport(Protocol):

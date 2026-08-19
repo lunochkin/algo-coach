@@ -7,10 +7,11 @@ fetched is the transport's.
 """
 
 from hashlib import sha256
+from time import monotonic
 from typing import Any
 
 from algo_coach.calls.store import CallLog
-from algo_coach.calls.transport import Reply, Transport
+from algo_coach.calls.transport import Reply, Transport, traced
 from algo_coach.mint import call as mint_call
 from algo_coach.schema import Call
 
@@ -57,9 +58,15 @@ def ask(
     The output schema is not part of the hash. It is built from the candidates,
     which already appear verbatim in the content, so it varies with nothing the
     hash does not already cover.
+
+    The whole wait is timed here, so a retried call records what it cost the
+    run; the last request's time and the count come back from the transport,
+    which is the only thing that sees them. A monotonic clock, or a wall clock
+    stepping backwards would record a negative wait.
     """
     text = payload(system, content)
     digest = prompt_hash(system, content)
+    started = monotonic()
 
     try:
         reply = transport(
@@ -82,6 +89,8 @@ def ask(
                 pin=pin,
                 temperature=temperature,
                 error=f"{type(exc).__name__}: {exc}",
+                elapsed_ms=elapsed(started),
+                **failed(exc),
             )
         )
         raise
@@ -103,9 +112,25 @@ def ask(
         input_tokens=reply.input_tokens,
         output_tokens=reply.output_tokens,
         provider=reply.provider,
+        elapsed_ms=elapsed(started),
+        request_ms=reply.request_ms,
+        attempts=reply.attempts,
     )
     log.append(call)
     return call, reply.text
+
+
+def failed(exc: Exception) -> dict[str, int]:
+    """What the transport stamped, or nothing — which leaves the fields absent
+    rather than claiming a request nobody counted."""
+    trace = traced(exc)
+    return {} if trace is None else {"attempts": trace.attempts, "request_ms": trace.request_ms}
+
+
+def elapsed(started: float) -> int:
+    """Milliseconds, since nothing reads a call's timing more finely than that
+    and a float would carry precision the clock never had."""
+    return round((monotonic() - started) * 1000)
 
 
 __all__ = ["HASH_LENGTH", "Reply", "Transport", "ask", "payload", "prompt_hash"]

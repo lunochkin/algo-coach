@@ -8,10 +8,10 @@ answers with the schema unenforced and the effort dropped.
 """
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
-from algo_coach.calls.transport import ProviderError, Reply
+from algo_coach.calls.transport import ProviderError, Reply, Trace, stamp
 
 BASE_URL = "https://openrouter.ai/api/v1"
 
@@ -134,15 +134,28 @@ class OpenRouter:
         Every other failure is raised on the first try: a bad key and a
         rejected schema do not improve by being asked again, and a run that
         retried them would burn its abort count slowly instead of at once.
+
+        The count and the last request's time ride back with the outcome,
+        whichever it is: a caller sees one call however many requests it took,
+        and only this loop knows how many that was.
         """
-        for pause in BACKOFF:
+        for tries, pause in enumerate(BACKOFF, start=1):
             try:
-                return self.attempt(**request)
+                return self.once(tries, **request)
             except Exception as exc:
                 if not transient(exc):
                     raise
                 time.sleep(pause)
-        return self.attempt(**request)
+        return self.once(len(BACKOFF) + 1, **request)
+
+    def once(self, tries: int, **request: Any) -> Reply:
+        """One request, timed and counted whether it answers or fails."""
+        started = time.monotonic()
+        try:
+            return replace(self.attempt(**request), attempts=tries, request_ms=since(started))
+        except Exception as exc:
+            stamp(exc, Trace(attempts=tries, request_ms=since(started)))
+            raise
 
     def attempt(self, **request: Any) -> Reply:
         """One request, read into the terms the call log keeps."""
@@ -171,3 +184,8 @@ class OpenRouter:
             output_tokens=getattr(usage, "completion_tokens", None),
             provider=extra(response, "provider"),
         )
+
+
+def since(started: float) -> int:
+    """Milliseconds, since nothing reads a request's timing more finely."""
+    return round((time.monotonic() - started) * 1000)

@@ -44,6 +44,9 @@ def call(
     provider: str | None = None,
     input_tokens: int | None = None,
     output_tokens: int | None = None,
+    elapsed_ms: int | None = None,
+    request_ms: int | None = None,
+    attempts: int | None = None,
 ) -> Call:
     """One request to a model, minted where every other id is minted."""
     return Call(
@@ -62,6 +65,9 @@ def call(
         provider=provider,
         input_tokens=input_tokens,
         output_tokens=output_tokens,
+        elapsed_ms=elapsed_ms,
+        request_ms=request_ms,
+        attempts=attempts,
     )
 
 

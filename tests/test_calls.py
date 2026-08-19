@@ -4,14 +4,17 @@ Domain-free on purpose — nothing here knows what a technique is, which is what
 lets a second consumer read the log without being taught anything.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from hashlib import sha256
+from importlib import import_module
 
 import pytest
 
-from algo_coach.calls import CallLog, Reply, ask, payload, prompt_hash
+from algo_coach.calls import CallLog, Reply, Trace, ask, payload, prompt_hash, stamp
 from algo_coach.mint import call as mint_call
 from algo_coach.schema import Call
+
+ASK = import_module("algo_coach.calls.ask")
 
 
 @dataclass
@@ -193,3 +196,74 @@ def test_a_call_at_the_provider_s_own_default_records_no_temperature(tmp_path):
     )
 
     assert call.temperature is None
+
+
+def test_the_execution_and_its_last_request_are_both_recorded(tmp_path, monkeypatch):
+    """Two levels: what the caller waited and how many requests that took,
+    then the request that answered. Their difference is the endpoint's."""
+    ticks = iter([100.0, 100.25])
+    monkeypatch.setattr(ASK, "monotonic", lambda: next(ticks))
+    log = CallLog(tmp_path)
+    transport = answering()
+    transport.reply = replace(transport.reply, request_ms=90, attempts=2)
+
+    ask(transport, log, system="sys", content="body", model="m", effort="low", pin="a-host")
+
+    (stored,) = log.all()
+    assert (stored.elapsed_ms, stored.attempts, stored.request_ms) == (250, 2, 90)
+
+
+def test_a_failure_records_both_levels_too(tmp_path, monkeypatch):
+    """A request that failed instantly and one that timed out after five tries
+    are different facts about an endpoint, and the failure is where knowing
+    which matters."""
+    ticks = iter([0.0, 30.0])
+    monkeypatch.setattr(ASK, "monotonic", lambda: next(ticks))
+    log = CallLog(tmp_path)
+    failure = RuntimeError("timed out")
+    stamp(failure, Trace(attempts=5, request_ms=9_000))
+
+    with pytest.raises(RuntimeError):
+        ask(
+            FakeTransport(error=failure),
+            log,
+            system="sys",
+            content="body",
+            model="m",
+            effort="low",
+            pin="a-host",
+        )
+
+    (stored,) = log.all()
+    assert (stored.elapsed_ms, stored.attempts, stored.request_ms) == (30_000, 5, 9_000)
+
+
+def test_a_transport_that_never_retried_stamps_nothing(tmp_path):
+    """Absent rather than claimed: a count nothing kept is not a count of one."""
+    log = CallLog(tmp_path)
+
+    with pytest.raises(RuntimeError):
+        ask(
+            FakeTransport(error=RuntimeError("no key")),
+            log,
+            system="sys",
+            content="body",
+            model="m",
+            effort="low",
+            pin="a-host",
+        )
+
+    (stored,) = log.all()
+    assert (stored.attempts, stored.request_ms) == (None, None)
+
+
+def test_a_call_from_before_the_waits_were_measured_still_reads():
+    """Additive, like every other field: the log stays readable by its own
+    schema, and an unmeasured call says so rather than claiming zero."""
+    stored = Call.model_validate_json(
+        mint_call(
+            model="m", effort="low", prompt="p", prompt_hash="h", response="r"
+        ).model_dump_json(exclude={"elapsed_ms"})
+    )
+
+    assert stored.elapsed_ms is None

@@ -9,7 +9,7 @@ from typing import Any
 
 import pytest
 
-from algo_coach.calls import ROUTING, UNSENT, OpenRouter, ProviderError
+from algo_coach.calls import ROUTING, UNSENT, OpenRouter, ProviderError, openrouter, traced
 
 
 @dataclass
@@ -269,6 +269,9 @@ def test_a_rate_limit_is_waited_out_rather_than_reported(monkeypatch):
     assert reply.text == '{"techniques": []}'
     assert len(api.chat.completions.calls) == 3
     assert slept == [5.0, 15.0]
+    # What the two waits on the record differ by: held behind a cap twice, the
+    # call reads as a slow model without this.
+    assert reply.attempts == 3
 
 
 def test_every_other_failure_is_raised_on_the_first_try(monkeypatch):
@@ -340,3 +343,35 @@ def test_no_temperature_sends_none_at_all():
 
     (request,) = api.chat.completions.calls
     assert "temperature" not in request
+
+
+def test_an_endpoint_that_answers_first_time_took_one_attempt():
+    reply = OpenRouter(client())(system="s", content="c", model="m", effort="low", pin="a-host")
+
+    assert reply.attempts == 1
+
+
+def test_the_request_times_itself(monkeypatch):
+    """Timed inside the transport, where a request begins: a wait measured
+    above it would carry the backoff of every request before this one, which
+    is the other number and answers the other question."""
+    ticks = iter([5.0, 5.4])
+    monkeypatch.setattr(openrouter.time, "monotonic", lambda: next(ticks))
+
+    reply = OpenRouter(client())(system="s", content="c", model="m", effort="low", pin="a-host")
+
+    assert reply.request_ms == 400
+
+
+def test_a_failure_carries_what_the_loop_knows(monkeypatch):
+    """The failure keeps its own type — every caller that catches one still
+    catches the same thing — and the count rides on it."""
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    api = client(raises=[Rejected(429)] * 5)
+
+    with pytest.raises(Rejected) as failure:
+        OpenRouter(api)(system="s", content="c", model="m", effort="low", pin="a-host", schema=None)
+
+    trace = traced(failure.value)
+    assert trace is not None
+    assert trace.attempts == 5

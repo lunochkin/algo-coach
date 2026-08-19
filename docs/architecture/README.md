@@ -499,6 +499,11 @@ nothing about what the answer was for.
 - **`prompt_hash` is not unique.** A retry after a rate limit repeats it, and
   sampling one prompt on purpose repeats it deliberately, so a reader looking
   one up must say which it wants rather than assume there is one.
+- **A call is timed at two levels.** What the caller waited and how many
+  requests that took, beside what the last request took on its own — the one
+  that answered, or the one that failed. Their difference is the endpoint's
+  backoff, and without it a run held behind a per-minute cap reads as a slow
+  model.
 - **Nothing on the run path reads it back.** Whether to ask again is decided
   from the claims, which carry the model, effort and digest already — so this
   file is written by every run and loaded only by whoever sits down to analyse

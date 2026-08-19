@@ -56,6 +56,16 @@ class Call(BaseModel):
     provider: str | None = None
     input_tokens: int | None = None
     output_tokens: int | None = None
+    # The execution: what the caller waited, and how many requests that took.
+    # A run held behind a per-minute cap reads as a slow model without the
+    # count.
+    elapsed_ms: int | None = None
+    attempts: int | None = None
+    # The last request inside it — the one that answered, or the one that
+    # failed. Recorded either way: an instant rejection and a timeout are
+    # different facts about an endpoint. Optional, like the two above, for the
+    # calls made before any of it was measured.
+    request_ms: int | None = None
 
     @model_validator(mode="after")
     def _answered_or_failed(self) -> Call:
