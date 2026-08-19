@@ -174,11 +174,53 @@ nothing is authored here either.
 - **Procedure templates are excluded.** A framing procedure is exercised by
   every problem its technique reaches, so a per-problem verdict carries no
   information; it is covered by the ladder as a whole.
+- **A card's relation to a problem is a fold over its templates**, never a
+  record of its own. The technique reaches the problem and some template
+  matches: that is what earns a rung, and it is derived from the pairs rather
+  than stored beside them. Nothing asserts that a problem is a card's in one
+  place, so nothing has to be rewritten when one template's verdict changes.
 - **Re-derivation is the normal path, not an exception.** A technique claim
   asks about one attempt and the question never changes; a match is a template
   against a corpus that grows with every push.
 - **Provenance as a claim carries it**: the source, and on a machine match the
   model, effort, prompt digest and call.
+- **Two writers, and the user's stands.** A hand annotation is what a machine
+  run is measured against, so it stands on read whenever it was written, and a
+  machine verdict on an annotated pair is a reading — stored and scored, never
+  what a ladder resolves from. One rule, stated once for claims and holding
+  here: the record the machine cannot recompute wins.
+- **A hand record settles what stands, not what has been read.** The run path
+  skips a pair only where the hand settled every template of that card, since
+  the call asks about the card whole and a partly annotated one is a question
+  still worth asking. The eval reads annotated pairs on purpose — that reading
+  is the measurement.
+- **Agreement is per pair, grouped per template.** A match asserts one pair, so
+  the pair is what agrees or disagrees; the call that carried six of them is an
+  economy of asking, not a unit of truth. Grouped per template because the
+  ladder is per template: a form the matcher over-matches fills its rung with
+  problems that do not teach it, and one number over the card averages that
+  away.
+- **Nothing is scored as a set.** A claim is scored whole because it asserts a
+  whole set, and only equality catches the claim that names every candidate. A
+  match asserts a pair, and the matcher that says yes to everything is already
+  visible as a false positive on every template — the same signal, without a
+  second number and without a metric that calls six verdicts wrong for one bad
+  one.
+- **Accuracy over the pairs is not the metric either.** Most pairs are
+  negative, so a matcher that names nothing scores in the nineties and resolves
+  an empty ladder. What is scored is the positive verdicts, both directions:
+  what the annotator named and the machine missed, and what the machine named
+  and the annotator did not.
+- **An empty answer is negatives, not a decline.** A claim naming nothing
+  answers nothing and leaves the tags standing; a call naming no template
+  asserts that each of them does not match, which is a verdict on every pair
+  and is scored as one. The record shape decides that, not the model's
+  behaviour.
+- **The first hand pass calibrates, a blind one measures.** Annotating is where
+  the line between exercising a form and merely admitting it gets drawn, so a
+  score taken over the pairs that drew it is agreement with itself. The eval
+  set is annotated from the templates alone, and configurations are compared
+  over the pairs both read — the claims rule, unchanged.
 
 ### Card runs
 

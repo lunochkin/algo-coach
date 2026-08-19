@@ -384,11 +384,40 @@ a user can solve, per technique, and it is Phase 5.
       the claim's, and now shared as `MachineProvenance` rather than written
       out twice: the question differs, the rule about what a re-run must know
       to supersede a reading does not
-- [ ] Match the corpus against a card's templates after import. One call per
+- [x] Lift the driver the run loops share — the fan-out and the abort limit —
+      out of `claims`. A third loop would otherwise import the classifier for
+      a decision that belongs to neither, and how many calls are in flight is
+      not a fact about what is being read
+- [x] Match the corpus against a card's templates after import. One call per
       problem and card, candidates in and the subset out, records per pair.
       Pre-filtered by technique, or it is every template against every problem
       for an answer that is almost always no. Procedure templates are excluded:
-      a framing procedure is exercised by everything its technique reaches
+      a framing procedure is exercised by everything its technique reaches.
+      Its own configuration, not the claim classifier's — the two ask
+      different questions. A lone candidate is still asked about: there the
+      tags already answer, here the verdict is the record. Nine cards against
+      485 problems pre-filter to 345 pairs, 1724 records, none read yet
+- [ ] Hand-annotate a sample of pairs — the statement and the card's templates,
+      one record per template including the ones the problem does not exercise.
+      Spread across cards, or the three dynamic-programming cards carry the
+      set. The deferred item's trigger has fired: matching runs over the corpus
+      rather than one card, so being wrong now costs every ladder at once
+- [ ] Score the matcher per pair, grouped per template, over the pairs both
+      read. Not as a set: a match asserts a pair, and the call that carried six
+      of them is an economy of asking. Accuracy is not it either — most pairs
+      are negative, so a matcher that names nothing scores in the nineties and
+      resolves an empty ladder. What is reported is the positive verdicts, both
+      directions, which is also what catches the matcher that says yes to
+      everything
+- [ ] Skip a pair the hand settled on the run path, and read it in the eval.
+      `match` re-reads annotated pairs today, and a machine verdict there could
+      never stand — so the reading is worth paying for once, in the run that
+      measures it. The skip needs every template of the card settled, since the
+      call asks about the card whole
+- [ ] The first hand pass calibrates and a blind one measures, the claims rule
+      unchanged. Annotating is where the line between exercising a form and
+      merely admitting it gets drawn, so a score over the pairs that drew it is
+      agreement with itself
 - [ ] Resolve the ladder from the matches, the selector filling out to `size`.
       Requiredness derived from what a rung covers — studied means required,
       the optional template alone means optional, both means required with the
@@ -417,12 +446,6 @@ short of the full loop. Which of them matters is what 4a's daily use answers.
 ## Deferred
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
-
-- [ ] Score template matching. The hand-written cards annotate roughly sixty
-      rungs with the template each exercises, which is a labelled set for free
-      and the same role the hand claims play for the classifier. Triggered
-      when matching runs over the whole corpus rather than one card, since
-      before that the cost of being wrong is one ladder
 
 - [ ] Measure attribution against an independent set: the score restricted to
       blind claims, and the annotator against themselves as the ceiling — a
