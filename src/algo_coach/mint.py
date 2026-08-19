@@ -136,6 +136,27 @@ def classifier_claim(
     )
 
 
+def user_match(template_id: str, problem_id: str, *, matched: bool) -> TemplateMatch:
+    """One pair the user annotated, positive or negative.
+
+    It carries no configuration because nothing re-derives it, which is what
+    makes it the reference a machine reading is scored against — and what makes
+    it stand on read however early it was written.
+
+    The negative is annotated as deliberately as the positive: the machine
+    answers every candidate of a card, so a reference that only named matches
+    would score its "yes" and say nothing about its "no".
+    """
+    return TemplateMatch(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        template_id=template_id,
+        problem_id=problem_id,
+        matched=matched,
+        source=MatchSource.USER,
+    )
+
+
 def machine_match(
     template_id: str,
     problem_id: str,

@@ -397,7 +397,7 @@ a user can solve, per technique, and it is Phase 5.
       different questions. A lone candidate is still asked about: there the
       tags already answer, here the verdict is the record. Nine cards against
       485 problems pre-filter to 345 pairs, 1724 records, none read yet
-- [ ] A hand match: `MatchSource.USER`, carrying no provenance, minted where
+- [x] A hand match: `MatchSource.USER`, carrying no provenance, minted where
       the machine's is. Nothing re-derives it, which is what makes it the
       reference the readings are scored against
 - [ ] Sample what to annotate — unannotated questions first, spread across

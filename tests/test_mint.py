@@ -1,8 +1,8 @@
 import pytest
 from helpers import machine_claim
 
-from algo_coach.mint import new_id, self_label, user_claim
-from algo_coach.schema import ClaimSource, Confidence, FailureMode
+from algo_coach.mint import machine_match, new_id, self_label, user_claim, user_match
+from algo_coach.schema import ClaimSource, Confidence, FailureMode, MatchSource
 
 
 def test_ids_do_not_repeat():
@@ -117,3 +117,43 @@ def test_records_are_stamped_when_minted():
 
     assert claim.created_at.tzinfo is not None
     assert label.created_at.tzinfo is not None
+
+
+def test_a_hand_match_carries_no_configuration():
+    """Nothing re-derives it, which is what makes it the reference a reading is
+    scored against."""
+    match = user_match("t1", "p1", matched=True)
+
+    assert match.source is MatchSource.USER
+    assert [field for field in match.RECORDED if getattr(match, field) is not None] == []
+    assert (match.template_id, match.problem_id, match.matched) == ("t1", "p1", True)
+
+
+def test_a_hand_match_annotates_the_negative_too():
+    """The machine answers every candidate of a card, so a reference naming
+    only the matches would score its yes and say nothing about its no."""
+    assert user_match("t1", "p1", matched=False).matched is False
+
+
+def test_a_machine_match_names_what_produced_it():
+    match = machine_match(
+        "t1",
+        "p1",
+        matched=True,
+        model="a-model",
+        effort="medium",
+        prompt_hash="0123456789ab",
+        call_id="call-1",
+        pin="a-host",
+        temperature=0.0,
+        provider="fake",
+    )
+
+    assert match.source is MatchSource.CLASSIFIER
+    assert (match.model, match.effort, match.pin, match.prompt_hash, match.call_id) == (
+        "a-model",
+        "medium",
+        "a-host",
+        "0123456789ab",
+        "call-1",
+    )
