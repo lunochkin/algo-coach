@@ -349,14 +349,13 @@ rather than a field on the attempt.
   hand claims are the reference the machine's share is read against.
 - **Those claims are an eval set and a correction path**, never training data:
   nothing in the engine is trained.
-- **A set claimed against the readings calibrates; only a blind one measures.**
-  Writing the criteria means labelling, and labelling against a second reader
-  is how the boundaries surface — so the first hand pass is a rulebook being
-  written, and its product is the criteria rather than the labels. Agreement
-  measured on it afterwards is agreement with itself. The eval set is claimed
-  from the criteria alone, which is what makes the number mean anything; the
-  calibration set stays useful for a different question, whether a later edit
-  silently reclassifies what was already settled.
+- **What invalidates a label is which reader informed it, not that one did.** A
+  claim made with the scored configuration's reading in view measures that
+  configuration against itself, and the first hand pass over a rulebook still
+  being written is agreement with itself for the same reason. A claim
+  adjudicated against a reader that is never scored is neither — it is how the
+  boundary gets drawn — so `informed_by` names the readings its author saw one
+  by one, and a set can be read back for either question.
 - **The eval set holds one attempt per problem**, its latest carrying code. A
   retry asks the identical question — same solution, same candidate tags — so
   a repeat measures one decision twice rather than measuring two. The drill
@@ -633,6 +632,45 @@ the loop records what neither of them can know.
   loop needs no client of its own and works whatever the user pushes with.
 - **Selection never schedules.** Ordering is a view; what to drill is the
   user's until the scheduler lands.
+
+### Adjudicating the eval set
+
+What the classifier is scored against. One reader's blind claims cap at that
+reader's own consistency, so the reference is a set two readers reached: the
+user's blind pass, a frontier model reading the same attempts, and every
+divergence resolved by hand.
+
+1. The blind hand claims stand as pass one. Nothing is added to them while a
+   reading is in view.
+2. The frontier model reads those same attempts as a scored configuration. Its
+   claims are readings — stored, never standing.
+3. Each divergence is reviewed alone and resolved one of two ways: the
+   criterion is edited, or the user's claim is.
+4. A criteria edit changes the digest of the attempts it reaches, and the
+   frontier reads those again.
+5. Repeat until it disagrees with nothing. That is the stopping signal.
+6. The set is frozen, and the cheap classifiers are scored against it.
+
+- **The adjudicator is never the classifier.** Its number on this set is 100%
+  by construction — the gold is its own labels wherever the user did not
+  overturn them — so what the number says is that adjudication finished, not
+  that the model reads well. Anything short of it is either sampling noise or a
+  criterion that still does not say.
+- **Consistency is what the model is there for.** It applies the same rule at
+  the sixtieth attempt as at the first, where a human drifts across one
+  sitting. Consistency is not correctness, which is why every divergence is
+  decided by hand rather than taken.
+- **The blind pass is what keeps the reference independent.** Reviewing a
+  proposed label is easier and more permissive than producing one, so a claim
+  made with a reading in view records what it saw and never stands in for pass
+  one.
+- **Which way the divergences went is the health check.** Mostly claim edits
+  means the rulebook is becoming a transcript of one model; a real share of
+  criteria edits means it is doing its own work.
+- **What the set cannot show** is a classifier that is right where the frontier
+  was wrong: it reads as an error, and the attempts both readers got wrong the
+  same way stay invisible. That is the price of a fixed reference, and it is
+  paid knowingly.
 
 ## Invariants
 

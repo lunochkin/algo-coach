@@ -319,6 +319,24 @@ reading it back is the deferred measurement's.
       `revisable` only claimed ones, so a first user claim was blind and every
       later one saw readings: 79 claims, 62 attempts, 17 revisions
 
+### Adjudicating the eval set
+
+Flow and its rules: `docs/architecture/README.md`, "Adjudicating the eval set".
+
+- [ ] Read the 62 hand-claimed attempts with a frontier configuration, stored
+      as readings. Nothing is added to the blind pass while a reading is in
+      view — it is what makes the reference independent of either reader
+- [ ] Resolve every divergence by hand, one at a time: the criterion is edited
+      or the claim is. `claim --revise --disputed 1` is the queue
+- [ ] Re-read the attempts a criteria edit reaches, and repeat until the
+      frontier disagrees with nothing. That is the stopping signal, not a
+      score — what is left is sampling noise or a criterion that still does
+      not say
+- [ ] Count which way the divergences went. Mostly claim edits means the
+      rulebook is becoming a transcript of one model
+- [ ] Score the cheap classifiers against the frozen set, and keep the
+      adjudicator out of the candidates: its 100% is construction, not quality
+
 ### Exit
 - [ ] Attribution runs on real daily attempts and its claims stand. Whether the
       classifier beats the tag fallback is measured when mastery estimation
@@ -457,19 +475,11 @@ short of the full loop. Which of them matters is what 4a's daily use answers.
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
 
-- [ ] Measure attribution against an independent set: the score restricted to
-      blind claims, and the annotator against themselves as the ceiling — a
-      re-pass over the thirty, readings hidden. Model error, annotator error
-      and a rule that cannot be applied are one number today. Scores the first
-      claim per attempt, not the standing one, which on 13 of 62 is a revision.
-      Triggered when mastery estimation reads claims and a wrong one starts
-      spending practice time
-- [ ] Reconsider what the eval scores against. `score` takes one reader's
-      claims as ground truth, so it measures agreement with a person and caps
-      at that person's own consistency. Adjudicated labels, agreement with no
-      gold set, or scoring a verdict against the rule it cites would change the
-      metric and not the log. Triggered by the measurement above, which is what
-      says whether the ceiling binds
+- [ ] The annotator against themselves as the ceiling — a re-pass over thirty
+      attempts, readings hidden. Adjudication moves the ceiling to where both
+      readers agree and are both wrong, which stays invisible without a number
+      for it. Triggered when mastery estimation reads claims and a wrong one
+      starts spending practice time
 - [ ] Read the architecture doc against the code, landing every divergence
       here as an item saying which side is wrong. Not that none exist — the
       doc is target state and code lags it on purpose — but that none are
