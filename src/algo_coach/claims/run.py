@@ -5,9 +5,7 @@ loop's own claims reach only what it touched, and the board's numbers are read
 from all of it.
 """
 
-from collections.abc import Callable, Iterator, Mapping, Sequence
-from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
-from itertools import islice
+from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -18,19 +16,9 @@ from algo_coach.claims.sample import eligible, recency
 from algo_coach.claims.stale import is_stale
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim
+from algo_coach.runs import ABORT_AFTER, CONCURRENCY, as_answered
 from algo_coach.schema import Attempt, Call, Problem
 from algo_coach.techniques import standing_claims
-
-# Consecutive failures that mean the run is broken rather than unlucky. A
-# refusal or a rate limit hits one attempt; a rejected key or a spent quota
-# hits every one, and reporting that per attempt buries it.
-ABORT_AFTER = 3
-
-# One call at a time. A backlog run is minutes of waiting on a network, so the
-# default is the cautious one and the caller raises it: the binding limit is
-# input tokens per minute, not requests, since every call carries the code and
-# the criteria and thinks before it answers.
-CONCURRENCY = 1
 
 
 class Failed(BaseModel):
@@ -131,50 +119,6 @@ def ask(
     if techniques and call is not None:
         store(log, attempt.id, techniques, call)
     return techniques
-
-
-def as_answered[T, R](
-    work: Callable[[T], R],
-    items: Sequence[T],
-    *,
-    concurrency: int = CONCURRENCY,
-) -> Iterator[tuple[T, R | None, Exception | None]]:
-    """Run `work` over `items`, yielding each as it finishes.
-
-    Completion order, not the order asked in — which is safe for what the
-    callers do with it. A claim ties with another only on `created_at`, broken
-    by append order, and that decides between two claims on one attempt; a run
-    makes at most one per attempt, so nothing a run writes can race itself.
-
-    Submission is bounded rather than all at once: a consumer that stops early
-    — a run aborting on a rejected key — must not have paid for the tail.
-    Closing the iterator cancels what has not started, and lets what is in
-    flight finish, since an API call cannot be taken back.
-
-    One worker is the serial path outright, not a pool of one: the ordinary run
-    should not depend on a thread pool to be correct.
-    """
-    if concurrency <= 1:
-        for item in items:
-            try:
-                yield item, work(item), None
-            except Exception as exc:
-                yield item, None, exc
-        return
-
-    queued = iter(items)
-    with ThreadPoolExecutor(max_workers=concurrency) as pool:
-        running = {pool.submit(work, item): item for item in islice(queued, concurrency)}
-        try:
-            while running:
-                done, _ = wait(running, return_when=FIRST_COMPLETED)
-                for future in done:
-                    item = running.pop(future)
-                    failure = future.exception()
-                    yield item, (None if failure else future.result()), failure
-                    running.update({pool.submit(work, nxt): nxt for nxt in islice(queued, 1)})
-        finally:
-            pool.shutdown(cancel_futures=True)
 
 
 def classify_backlog(
