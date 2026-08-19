@@ -10,7 +10,7 @@ from algo_coach.matches.matcher import (
     match,
     request_hash,
 )
-from algo_coach.matches.pairs import Pair, at_configuration, outstanding, pairs
+from algo_coach.matches.questions import Question, at_configuration, outstanding, questions
 from algo_coach.matches.run import Failed, MatchResult, Progress, match_corpus, read_one, store
 from algo_coach.matches.store import MatchLog
 
@@ -25,14 +25,14 @@ __all__ = [
     "MatchLog",
     "MatchResult",
     "MatcherError",
-    "Pair",
+    "Question",
     "Progress",
     "at_configuration",
     "candidates",
     "match",
     "match_corpus",
     "outstanding",
-    "pairs",
+    "questions",
     "read_one",
     "request_hash",
     "store",

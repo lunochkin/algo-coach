@@ -31,7 +31,7 @@ def test_the_command_matches_the_corpus(root, monkeypatch, capsys):
     records = MatchLog(root).matches()
     assert sorted(match.matched for match in records) == [False, True]
     out = capsys.readouterr().out
-    assert f"1 pair(s) read by {MODEL}, effort {EFFORT}" in out
+    assert f"1 card/problem question(s) read by {MODEL}, effort {EFFORT}" in out
     assert "1 match(es), 1 non-match(es) recorded" in out
 
 

@@ -1,4 +1,9 @@
-"""Which problems to test against which card, and what is already settled.
+"""Which problems to ask about against which card, and what is already settled.
+
+A question is one card and one problem — what a call carries. The record it
+produces is per template and problem, and those are the pairs: independent of
+each other, settled one at a time, and never asserted as a set. The question is
+an economy of asking, so nothing but the call is keyed to it.
 
 Pre-filtering is what makes the run affordable: a problem is offered only to
 cards whose technique its tags reach, or the work is every template against
@@ -13,9 +18,9 @@ from algo_coach.matches.matcher import Configuration, candidates
 from algo_coach.schema import Card, MatchSource, Problem, TemplateMatch
 
 
-class Pair(BaseModel):
-    """One question: this problem against this card's templates. The unit a
-    call is made for, where the record is per template."""
+class Question(BaseModel):
+    """This problem against this card's templates: the unit a call is made
+    for, where a record is one template against one problem."""
 
     card: Card
     problem: Problem
@@ -25,15 +30,15 @@ class Pair(BaseModel):
         return (self.card.id, self.problem.id)
 
 
-def pairs(cards: Iterable[Card], problems: Iterable[Problem]) -> list[Pair]:
-    """Every pair worth a call, before what is already read is taken out.
+def questions(cards: Iterable[Card], problems: Iterable[Problem]) -> list[Question]:
+    """Every question worth a call, before what is already read is taken out.
 
     A card whose every template is a framing procedure asks nothing, so it
-    produces no pair rather than a call with no candidates.
+    produces no question rather than a call with no candidates.
     """
     asking = [card for card in cards if candidates(card)]
     return [
-        Pair(card=card, problem=problem)
+        Question(card=card, problem=problem)
         for problem in problems
         for card in asking
         if card.technique in problem.techniques
@@ -62,24 +67,26 @@ def at_configuration(match: TemplateMatch, configuration: Configuration, prompt_
 
 
 def outstanding(
-    candidate_pairs: Sequence[Pair],
+    asking: Sequence[Question],
     matches: Iterable[TemplateMatch],
     hashes: Mapping[tuple[str, str], str],
     *,
     configuration: Configuration,
-) -> list[Pair]:
-    """The pairs this configuration has not answered at the question it would
-    ask now.
+) -> list[Question]:
+    """The questions this configuration has not answered as it would ask them
+    now.
 
-    `hashes` is what each pair would be sent, keyed by card and problem. A
-    pair is outstanding when any of its templates carries no record at that
-    question — the rule readings already use, one level down: a template added
-    to a card leaves the rest of that card's pairs unanswered by nothing more
-    than the digest, and the call that reads the new form re-reads the others
-    in the same breath.
+    `hashes` is what each question would be sent, keyed by card and problem. A
+    question stands while any of its pairs carries no record at that text — the
+    rule readings already use, one level down. A pair already settled is
+    re-answered by the call that goes out for the unsettled one beside it,
+    which costs a verdict and settles nothing differently: the pairs are
+    independent, and a later record on one supersedes only itself.
     """
     card_of = {
-        template.id: pair.card.id for pair in candidate_pairs for template in candidates(pair.card)
+        template.id: question.card.id
+        for question in asking
+        for template in candidates(question.card)
     }
     read = {
         (match.template_id, match.problem_id)
@@ -90,7 +97,9 @@ def outstanding(
         )
     }
     return [
-        pair
-        for pair in candidate_pairs
-        if any((template.id, pair.problem.id) not in read for template in candidates(pair.card))
+        question
+        for question in asking
+        if any(
+            (template.id, question.problem.id) not in read for template in candidates(question.card)
+        )
     ]

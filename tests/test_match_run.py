@@ -13,7 +13,7 @@ from algo_coach.matches import (
     Progress,
     match_corpus,
     outstanding,
-    pairs,
+    questions,
     request_hash,
 )
 from algo_coach.runs import ABORT_AFTER
@@ -42,21 +42,21 @@ def test_candidates_are_pre_filtered_by_technique(tmp_path):
         problem("neither", tags=["Database"]),
     )
 
-    asked = pairs(cards, corpus)
+    asked = questions(cards, corpus)
 
-    assert {(pair.card.slug, pair.problem.id) for pair in asked} == {
+    assert {(question.card.slug, question.problem.id) for question in asked} == {
         ("sliding-window", "window"),
         ("backtracking", "search"),
     }
 
 
-def test_a_card_with_nothing_to_ask_makes_no_pair(tmp_path):
+def test_a_card_with_nothing_to_ask_asks_nothing(tmp_path):
     cards = seeded(tmp_path, card(templates=[template("framing", **PROCEDURE)]))
 
-    assert pairs(cards, stored(tmp_path, problem("p1", tags=["Sliding Window"]))) == []
+    assert questions(cards, stored(tmp_path, problem("p1", tags=["Sliding Window"]))) == []
 
 
-def test_one_call_per_pair_and_a_record_per_template(tmp_path):
+def test_one_call_per_card_and_a_record_per_pair(tmp_path):
     """The answer is one subset; the records come from it, positive and
     negative alike."""
     client = FakeTransport.answering(Verdict(["longest-valid-window"]))
@@ -179,7 +179,7 @@ def test_a_hand_annotation_is_never_what_a_run_leans_on(tmp_path):
         for index, template in enumerate(cards[0].templates)
     ]
 
-    assert outstanding(pairs(cards, corpus), hand, hashes, configuration=DEFAULT) != []
+    assert outstanding(questions(cards, corpus), hand, hashes, configuration=DEFAULT) != []
 
 
 def test_a_limit_cuts_the_run(tmp_path):

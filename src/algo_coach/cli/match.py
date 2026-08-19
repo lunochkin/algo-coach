@@ -30,7 +30,7 @@ def match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         on_progress=show,
     )
 
-    print(f"{result.asked} pair(s) read by {MODEL}, effort {EFFORT}")
+    print(f"{result.asked} card/problem question(s) read by {MODEL}, effort {EFFORT}")
     print(f"{result.matched} match(es), {result.unmatched} non-match(es) recorded")
     if result.aborted:
         parser.exit(1, f"match: aborted after {ABORT_AFTER} consecutive failures\n")
@@ -39,7 +39,7 @@ def match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
 
 
 def show(progress: Progress) -> None:
-    """A line per pair, flushed and on stderr, as the classifier reports: a
+    """A line per question, flushed and on stderr, as the classifier reports: a
     call takes seconds, and stdout stays the command's own output."""
     counter = f"[{progress.index:>{len(str(progress.total))}}/{progress.total}]"
     if progress.reason is not None:

@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.matches.matcher import DEFAULT, Configuration, candidates, match, request_hash
-from algo_coach.matches.pairs import Pair, outstanding, pairs
+from algo_coach.matches.questions import Question, outstanding, questions
 from algo_coach.matches.store import MatchLog
 from algo_coach.mint import machine_match
 from algo_coach.runs import ABORT_AFTER, CONCURRENCY, as_answered
@@ -26,8 +26,8 @@ class Failed(BaseModel):
 
 
 class Progress(BaseModel):
-    """One pair, answered. Reported as the run goes: a call per pair makes a
-    corpus run minutes long."""
+    """One question, answered. Reported as the run goes: a call per question
+    makes a corpus run minutes long."""
 
     index: int  # 1-based, over what this run will ask about
     total: int
@@ -38,7 +38,7 @@ class Progress(BaseModel):
 
 
 class MatchResult(BaseModel):
-    asked: int = 0  # calls made, one per pair
+    asked: int = 0  # calls made, one per card and problem
     matched: int = 0  # pairs recorded as exercised
     unmatched: int = 0  # pairs recorded as not; stored, or every re-run re-tests them
     failed: list[Failed] = Field(default_factory=list)
@@ -52,20 +52,20 @@ class MatchResult(BaseModel):
 def read_one(
     transport: Transport,
     calls: CallLog,
-    pair: Pair,
+    question: Question,
     *,
     configuration: Configuration = DEFAULT,
 ) -> tuple[list[str], Call | None]:
-    """What one matcher reads one pair as, and the call that read it.
+    """What one matcher reads one question as, and the call that read it.
 
     Makes the call and writes no record, so it is safe to run several at once —
     the records are the caller's, and the match log has one writer however many
     calls are in flight.
     """
-    return match(transport, calls, pair.card, pair.problem, configuration=configuration)
+    return match(transport, calls, question.card, question.problem, configuration=configuration)
 
 
-def store(log: MatchLog, pair: Pair, matched: Sequence[str], call: Call) -> int:
+def store(log: MatchLog, question: Question, matched: Sequence[str], call: Call) -> int:
     """Append a verdict per template, returning how many were positive.
 
     Every candidate gets a record, not only the ones named: the answer is the
@@ -73,11 +73,11 @@ def store(log: MatchLog, pair: Pair, matched: Sequence[str], call: Call) -> int:
     that is the reading a later run must not pay for again.
     """
     named = set(matched)
-    for template in candidates(pair.card):
+    for template in candidates(question.card):
         log.append(
             machine_match(
                 template.id,
-                pair.problem.id,
+                question.problem.id,
                 matched=template.slug in named,
                 model=call.model,
                 effort=call.effort,
@@ -106,7 +106,7 @@ def match_corpus(
     on_progress: Callable[[Progress], None] | None = None,
 ) -> MatchResult:
     """Test every problem a card's technique reaches against that card's
-    templates, skipping the pairs this configuration has already answered.
+    templates, skipping the questions this configuration has already answered.
 
     Written after card import and never before: both references are minted, so
     a match cannot exist until the templates do.
@@ -115,22 +115,22 @@ def match_corpus(
     is what measuring a matcher against itself needs. `on_progress` reports as
     the run goes; printing is the caller's.
     """
-    asking = pairs(
+    asking = questions(
         [card for card in cards if card_slug is None or card.slug == card_slug], problems
     )
-    hashes = {pair.key: request_hash(pair.card, pair.problem) for pair in asking}
+    hashes = {question.key: request_hash(question.card, question.problem) for question in asking}
     if not fresh:
         asking = outstanding(asking, log.matches(), hashes, configuration=configuration)
     asking = asking[:limit]
 
-    def report(index: int, pair: Pair, **verdict: Any) -> None:
+    def report(index: int, question: Question, **verdict: Any) -> None:
         if on_progress is not None:
             on_progress(
                 Progress(
                     index=index,
                     total=len(asking),
-                    card_slug=pair.card.slug,
-                    title=pair.problem.title,
+                    card_slug=question.card.slug,
+                    title=question.problem.title,
                     **verdict,
                 )
             )
@@ -138,19 +138,23 @@ def match_corpus(
     result = MatchResult()
     consecutive = 0
     index = 0
-    for pair, answer, failure in as_answered(
-        lambda pair: read_one(transport, calls, pair, configuration=configuration),
+    for question, answer, failure in as_answered(
+        lambda question: read_one(transport, calls, question, configuration=configuration),
         asking,
         concurrency=concurrency,
     ):
         index += 1
         if failure is not None:
             # Broad on purpose: a refusal, a rate limit or a dropped connection
-            # is one pair's problem, and the corpus behind it must still run.
+            # is one question's problem, and the corpus behind it must still run.
             result.failed.append(
-                Failed(card_id=pair.card.id, problem_id=pair.problem.id, reason=repr(failure))
+                Failed(
+                    card_id=question.card.id,
+                    problem_id=question.problem.id,
+                    reason=repr(failure),
+                )
             )
-            report(index, pair, reason=repr(failure))
+            report(index, question, reason=repr(failure))
             consecutive += 1
             if consecutive == ABORT_AFTER:
                 result.aborted = True
@@ -163,8 +167,8 @@ def match_corpus(
             # procedures alone has no per-problem verdict to give.
             continue
         result.asked += 1
-        positive = store(log, pair, matched, call)
+        positive = store(log, question, matched, call)
         result.matched += positive
-        result.unmatched += len(candidates(pair.card)) - positive
-        report(index, pair, templates=matched)
+        result.unmatched += len(candidates(question.card)) - positive
+        report(index, question, templates=matched)
     return result
