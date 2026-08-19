@@ -397,11 +397,21 @@ a user can solve, per technique, and it is Phase 5.
       different questions. A lone candidate is still asked about: there the
       tags already answer, here the verdict is the record. Nine cards against
       485 problems pre-filter to 345 pairs, 1724 records, none read yet
-- [ ] Hand-annotate a sample of pairs — the statement and the card's templates,
-      one record per template including the ones the problem does not exercise.
-      Spread across cards, or the three dynamic-programming cards carry the
-      set. The deferred item's trigger has fired: matching runs over the corpus
-      rather than one card, so being wrong now costs every ladder at once
+- [ ] A hand match: `MatchSource.USER`, carrying no provenance, minted where
+      the machine's is. Nothing re-derives it, which is what makes it the
+      reference the readings are scored against
+- [ ] Sample what to annotate — unannotated questions first, spread across
+      cards, or the three dynamic-programming cards carry the set. A seed, so
+      an order is reproducible. The deferred item's trigger has fired: matching
+      runs over the corpus rather than one card, so being wrong now costs every
+      ladder at once
+- [ ] `algo-coach annotate` — the statement and the card's templates numbered,
+      answered at once and written one record per template, the ones the
+      problem does not exercise included. The question is what is shown and the
+      pair is what is written: reading a statement once to judge five forms is
+      the cheap order. Blind by default, with the matcher's verdict shown only
+      on request, as `claim --revise` shows a reading. Skip, take-the-rest and
+      EOF as `claim` has them
 - [ ] Score the matcher per pair, grouped per template, over the pairs both
       read. Not as a set: a match asserts a pair, and the call that carried six
       of them is an economy of asking. Accuracy is not it either — most pairs
