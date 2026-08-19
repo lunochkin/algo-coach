@@ -71,10 +71,17 @@ scheduling. Sequencing lives in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Core loop, as built
 
-```
-board (per technique, by staleness) → pick a technique → pick a problem
-      → solve it wherever you already solve → push → the loop diffs its log
-      → claim which techniques the solution used + label why it went that way
+```mermaid
+flowchart LR
+  L[("append-only log")] --> B["board<br/>by staleness"]
+  B --> T["pick a technique"] --> P["pick a problem"]
+  P --> S
+  subgraph outside["wherever you already solve"]
+    S["solve, submit"]
+  end
+  S -->|"your own client exports"| PUSH["push API"]
+  PUSH --> D["diff the log"] --> C["claim the techniques used<br/>label why it went that way"]
+  C --> L
 ```
 
 The engine calls no external platform and mints no attempt: it waits for a
@@ -86,7 +93,22 @@ what to drill and the board says what is stale.
 
 [`docs/architecture/README.md`](docs/architecture/README.md) is the primary
 design document — the concepts, boundaries and invariants, and the reasons
-behind them. The load-bearing ones:
+behind them.
+
+What is keyed to an attempt, and who may write it:
+
+```mermaid
+flowchart LR
+  U(["user"]) --> SL["SelfLabel<br/><i>why the sitting went that way</i>"]
+  U -->|"stands on read"| TC["TechniqueClaim<br/><i>which techniques the solution used</i>"]
+  M(["machine"]) -.->|"kept and scored, never promoted"| TC
+  M --> DG["Diagnosis<br/><i>why it failed, inferred</i>"]
+  SL --- A["Attempt<br/><i>engine-minted id, append-only</i>"]
+  TC --- A
+  DG --- A
+```
+
+The load-bearing ones:
 
 - **[The log is append-only.](docs/architecture/README.md#invariants)** No
   record is revised or removed in place, so component boundaries can be
