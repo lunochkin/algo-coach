@@ -5,9 +5,12 @@ a few on the rest. What these check is that a prefix of the order is spread
 across techniques rather than drawn from whatever dominates.
 """
 
+from collections import Counter
+
 from helpers import attempt, seed_problem
 
-from algo_coach.claims import spread
+from algo_coach.claims import claimable, spread
+from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
 
 
@@ -97,3 +100,58 @@ def test_another_seed_gives_another_order(tmp_path):
 
 def test_an_empty_pool_is_an_empty_order(tmp_path):
     assert spread([], {}) == []
+
+
+def test_a_technique_already_claimed_waits_like_a_covered_one(tmp_path):
+    """The eval set is grown, not drawn fresh. What `spread` levels is the
+    claimed set plus the sample, so a technique the hand pass already reached
+    forty times is behind one it has never reached — the same rule as within a
+    batch, extended to what was claimed before it."""
+    attempts, problems = pool(
+        tmp_path,
+        {
+            "fat1": ["Greedy", "Sorting"],
+            "fat2": ["Greedy", "Sorting"],
+            "thin": ["Trie", "Backtracking"],
+        },
+    )
+    order = spread(attempts, problems, covered=Counter({"greedy": 40, "sorting": 40}))
+    assert order[0].id == "a-thin"
+
+
+def test_prior_coverage_does_not_drop_an_attempt(tmp_path):
+    """It reorders the pool and never filters it: an attempt on a technique
+    already claimed is later, not gone, or a sample cut long would be short."""
+    attempts, problems = skewed(tmp_path, common=10)
+    order = spread(attempts, problems, covered=Counter({"greedy": 99, "sorting": 99}))
+    assert {one.id for one in order} == {one.id for one in attempts}
+
+
+def test_no_prior_coverage_is_the_order_it_had(tmp_path):
+    """The default is the current behaviour: an empty count is what `spread`
+    starts from now, so nothing that does not pass one reads differently."""
+    attempts, problems = skewed(tmp_path, common=20)
+    assert [one.id for one in spread(attempts, problems, seed=3)] == [
+        one.id for one in spread(attempts, problems, covered=Counter(), seed=3)
+    ]
+
+
+def test_claimable_levels_against_what_was_already_claimed(tmp_path):
+    """The pool `claimable` returns has the hand-claimed attempts taken out of
+    it, so the counts they carry have to reach `spread` some other way. Without
+    that the batch is spread and the eval set it joins is not."""
+    attempts, problems = pool(
+        tmp_path,
+        {
+            "done1": ["Backtracking", "Greedy"],
+            "done2": ["Backtracking", "Greedy"],
+            "left1": ["Backtracking", "Greedy"],
+            "left2": ["Trie", "Two Pointers"],
+        },
+    )
+    # Tagged so the claimed technique sorts first: without prior coverage the
+    # tie breaks on the code and `left1` leads, which is the current behaviour
+    # and what this has to tell apart.
+    claimed = {f"a-{id}": user_claim(f"a-{id}", ["greedy"]) for id in ("done1", "done2")}
+    order = claimable(attempts, problems, claimed, user_id="u1")
+    assert [one.id for one in order] == ["a-left2", "a-left1"]

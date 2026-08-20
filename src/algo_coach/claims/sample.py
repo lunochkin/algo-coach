@@ -26,13 +26,23 @@ def claimable(
     fills what no hand reached, and a user claim is what corrects it. Only the
     user's own answer settles a problem, since asking again would ask what has
     been answered.
+
+    Spread against the claims already made rather than within the batch, since
+    the eval set is grown and never redrawn.
     """
     # Claimed drops out after the collapse, not before: filtering first would
     # promote an older attempt and ask the same problem twice.
     collapsed = one_per_problem(eligible(attempts, problems, user_id=user_id, technique=technique))
+    answered = [attempt for attempt in collapsed if answered_by_hand(claimed.get(attempt.id))]
     return spread(
         [attempt for attempt in collapsed if not answered_by_hand(claimed.get(attempt.id))],
         problems,
+        # What the answered attempts covered, carried past the filter that
+        # removed them. They are what the sample joins, so levelling the batch
+        # alone would spend it on whatever the eval set already holds most of.
+        covered=Counter(
+            code for attempt in answered for code in problems[attempt.problem_id].techniques
+        ),
         seed=seed,
     )
 
@@ -42,7 +52,11 @@ def answered_by_hand(claim: TechniqueClaim | None) -> bool:
 
 
 def spread(
-    attempts: Iterable[Attempt], problems: Mapping[str, Problem], *, seed: int = 0
+    attempts: Iterable[Attempt],
+    problems: Mapping[str, Problem],
+    *,
+    covered: Mapping[str, int] | None = None,
+    seed: int = 0,
 ) -> list[Attempt]:
     """The pool ordered so no single technique carries the estimate.
 
@@ -55,6 +69,12 @@ def spread(
     on it decides all of them: what is levelled is coverage, not how many times
     each technique was drawn from. Shuffled within a technique by `seed`, so a
     sample is described by its seed rather than by listing what it held.
+
+    `covered` is what the order starts from — the techniques a caller has
+    already reached, so a code the eval set holds fifteen of waits behind one
+    it holds four of. It reorders and never filters: an attempt on a covered
+    technique is later, not gone, so a sample cut at any length is still that
+    length. Empty by default, which is the levelling a first pass wants.
     """
     pool = list(attempts)
     random.Random(seed).shuffle(pool)
@@ -64,7 +84,7 @@ def spread(
         for code in problems[attempt.problem_id].techniques:
             buckets[code].append(attempt)
 
-    covered: Counter[str] = Counter()
+    counts: Counter[str] = Counter(covered)
     taken: set[str] = set()
     cursors: Counter[str] = Counter()
 
@@ -85,10 +105,10 @@ def spread(
         ]
         if not live:
             return order
-        _, drawn = min(live, key=lambda pair: covered[pair[0]])
+        _, drawn = min(live, key=lambda pair: counts[pair[0]])
         taken.add(drawn.id)
         order.append(drawn)
-        covered.update(problems[drawn.problem_id].techniques)
+        counts.update(problems[drawn.problem_id].techniques)
 
 
 def eligible(
