@@ -422,11 +422,18 @@ a user can solve, per technique, and it is Phase 5.
 - [x] A hand match: `MatchSource.USER`, carrying no provenance, minted where
       the machine's is. Nothing re-derives it, which is what makes it the
       reference the readings are scored against
-- [ ] Sample what to annotate — unannotated questions first, spread across
-      cards, or the three dynamic-programming cards carry the set. A seed, so
-      an order is reproducible. The deferred item's trigger has fired: matching
-      runs over the corpus rather than one card, so being wrong now costs every
-      ladder at once
+- [x] Sample what to annotate — unannotated questions first, and spread across
+      templates rather than cards, or the three dynamic-programming cards carry
+      the set. A seed, so an order is reproducible. Per template because the
+      score is grouped there and the ladder resolves there: the two agree while
+      a card's forms move together, and part where a re-seed adds one — counted
+      per card that card is the best covered there is while holding the only
+      gap. `--card` narrows it to one, which is what a card just added asks
+      for, and the counts still read the whole reference: narrowed too, a
+      card's forms would look untouched beside nothing. A machine verdict
+      settles no question, being what the annotation is scored against. A
+      question carries one card, so nothing rides along the way a tag does on
+      an attempt: 45 of the 345 reach all 44 templates, five records each
 - [ ] `algo-coach annotate` — the statement and the card's templates numbered,
       answered at once and written one record per template, the ones the
       problem does not exercise included. The question is what is shown and the

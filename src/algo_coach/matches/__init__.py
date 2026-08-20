@@ -12,6 +12,7 @@ from algo_coach.matches.matcher import (
 )
 from algo_coach.matches.questions import Question, at_configuration, outstanding, questions
 from algo_coach.matches.run import Failed, MatchResult, Progress, match_corpus, read_one, store
+from algo_coach.matches.sample import annotatable
 from algo_coach.matches.store import MatchLog
 
 __all__ = [
@@ -27,6 +28,7 @@ __all__ = [
     "MatcherError",
     "Question",
     "Progress",
+    "annotatable",
     "at_configuration",
     "candidates",
     "match",
