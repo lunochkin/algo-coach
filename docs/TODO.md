@@ -444,6 +444,15 @@ a user can solve, per technique, and it is Phase 5.
       the forms is a verdict on every pair, so the prompt needs a reply that
       the claim prompt must never have. Opened per caller for that reason —
       an empty claim is a lost answer wearing the shape of a stated one
+- [x] The whole corpus synced, ~4k problems against 485. Every statement
+      non-blank, so the field tightened last phase held across an eight-fold
+      push. What it moves is matching: the same nine cards pre-filter to ~2.8k
+      questions and ~14k pair verdicts, so a full run is a cost to check
+      before it is a command to type. The claims side is unmoved — attempts
+      bound it, and 485 problems carry one. ~800 problems reach no code, most
+      of them `database` and the container tags, which is the next count worth
+      reading. Rounded on purpose here and in the README: an exact catalogue
+      size names the platform as surely as the platform would
 - [ ] Score the matcher per pair, grouped per template, over the pairs both
       read. Not as a set: a match asserts a pair, and the call that carried six
       of them is an economy of asking. Accuracy is not it either — most pairs

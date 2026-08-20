@@ -164,13 +164,13 @@ is why the engine runs them rather than the frontier.
 | | |
 |---|---|
 | Ingested attempts | 1,785, from real daily practice |
-| Problems | 485, each with the statement matching reads |
+| Problems | ~4k, each with the statement matching reads |
 | Technique vocabulary | 27 codes, each with what earns it and the near miss it is confused with |
 | Eval set | 62 attempts, hand-claimed blind, adjudicated against a frontier reader |
 | Attribution | 85–98% exact set match across five classifiers (n=60), at $0.04–3.15 per 1k decisions |
 | Cards | 9 authored |
 | Model calls logged | 2,045, each with its prompt, provenance and timings |
-| Tests | 585 |
+| Tests | 615 |
 
 Built: push API, technique vocabulary, attribution classifier, drill loop.
 In progress: cards. Not started: failure-mode diagnosis, mastery estimation,
@@ -242,11 +242,11 @@ Why it is shaped this way:
   fluency that blocked practice trains.
 
 **Where it stands:** the card record, the authoring skill and its nine cards,
-seeding, and the template matcher are built — nine cards against 485 problems
-pre-filter to 345 questions and 1,724 pair verdicts. Next: the hand-annotated
-match reference and the matcher's score against it, then ladder resolution,
-card runs, and the recall trainer. Item by item in
-[`docs/TODO.md`](docs/TODO.md), phase 4a.
+seeding, the template matcher and the hand-annotation prompt are built — nine
+cards against ~4k problems pre-filter to ~2.8k questions and ~14k pair
+verdicts, none read yet. Next: the annotated reference itself and the matcher's
+score against it, then ladder resolution, card runs, and the recall trainer.
+Item by item in [`docs/TODO.md`](docs/TODO.md), phase 4a.
 
 ## Design
 
