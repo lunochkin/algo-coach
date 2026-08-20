@@ -99,7 +99,12 @@ def test_a_template_nothing_reached_pulls_its_card_forward(tmp_path):
         user_match(id[form], f"b{n}", matched=False)
         for form in ("subsets", "permutations")
         for n in range(3)
-    ] + [user_match(id["plain-union"], "u0", matched=False)]
+    ] + [
+        # Both of union-find's forms, or its minimum is zero too and the draw
+        # is a tie that the slug decides rather than the coverage.
+        user_match(id[form], "u0", matched=False)
+        for form in ("plain-union", "weighted-union")
+    ]
     order = annotatable(cards, problems, lopsided)
     assert order[0].card.slug == "backtracking"
 

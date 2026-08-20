@@ -88,17 +88,20 @@ def spread(asking: Sequence[Question], *, covered: Counter[str], seed: int = 0) 
     queues: dict[str, list[Question]] = {}
     forms: dict[str, list[str]] = {}
     for question in pool:
-        queues.setdefault(question.card.id, []).append(question)
-        forms[question.card.id] = [template.id for template in candidates(question.card)]
+        # Keyed by slug, not by the minted id: a tie on coverage breaks on this
+        # key, and an id minted per store would make the order differ between
+        # two engines holding the same cards.
+        queues.setdefault(question.card.slug, []).append(question)
+        forms[question.card.slug] = [template.id for template in candidates(question.card)]
 
     counts = Counter(covered)
     order: list[Question] = []
     while queues:
-        # Sorted, so the card breaks a tie on coverage and the order is the
+        # Sorted, so the slug breaks a tie on coverage and the order is the
         # seed's alone.
         drawn = min(
             sorted(queues),
-            key=lambda card_id: min(counts[form] for form in forms[card_id]),
+            key=lambda slug: min(counts[form] for form in forms[slug]),
         )
         order.append(queues[drawn].pop())
         counts.update(forms[drawn])
