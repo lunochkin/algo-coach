@@ -11,6 +11,7 @@ from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 
 from algo_coach.claims import CONCURRENCY
+from algo_coach.cli.annotate import annotate
 from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
@@ -170,6 +171,18 @@ def main() -> None:
         help="ask again even where a stored record answers the same question",
     )
 
+    annotate_parser = _command(
+        sub, "annotate", "which of a card's templates a problem exercises, by hand"
+    )
+    annotate_parser.add_argument("--count", type=int, default=30, help="how many to ask about")
+    annotate_parser.add_argument("--card", help="one card by slug; every seeded card otherwise")
+    annotate_parser.add_argument("--seed", type=int, default=0, help="sampling order")
+    # Off by default: the first pass is what the line gets drawn by, and an
+    # annotation made with a verdict in view records what it reviewed.
+    annotate_parser.add_argument(
+        "--verdict", action="store_true", help="show what the matcher read the same pairs as"
+    )
+
     score_parser = _command(sub, "score", "the classifier against the user's own claims")
     score_parser.add_argument(
         "--limit",
@@ -263,6 +276,8 @@ def dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         classify(args, parser, root)
     elif args.command == "match":
         match(args, parser, root)
+    elif args.command == "annotate":
+        annotate(args, parser, root)
     elif args.command == "score":
         score(args, parser, root)
     elif args.command == "movement":

@@ -434,13 +434,16 @@ a user can solve, per technique, and it is Phase 5.
       settles no question, being what the annotation is scored against. A
       question carries one card, so nothing rides along the way a tag does on
       an attempt: 45 of the 345 reach all 44 templates, five records each
-- [ ] `algo-coach annotate` — the statement and the card's templates numbered,
+- [x] `algo-coach annotate` — the statement and the card's templates numbered,
       answered at once and written one record per template, the ones the
       problem does not exercise included. The question is what is shown and the
       pair is what is written: reading a statement once to judge five forms is
       the cheap order. Blind by default, with the matcher's verdict shown only
       on request, as `claim --revise` shows a reading. Skip, take-the-rest and
-      EOF as `claim` has them
+      EOF as `claim` has them, and `0` besides: a problem exercising none of
+      the forms is a verdict on every pair, so the prompt needs a reply that
+      the claim prompt must never have. Opened per caller for that reason —
+      an empty claim is a lost answer wearing the shape of a stated one
 - [ ] Score the matcher per pair, grouped per template, over the pairs both
       read. Not as a set: a match asserts a pair, and the call that carried six
       of them is an economy of asking. Accuracy is not it either — most pairs

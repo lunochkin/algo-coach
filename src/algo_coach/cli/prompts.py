@@ -8,7 +8,7 @@ class Answer(NamedTuple):
 
 
 def ask_choice(
-    what: str, options: list, default: list[str], *, empty: str = "skip"
+    what: str, options: list, default: list[str], *, empty: str = "skip", none: str | None = None
 ) -> Answer | None:
     """One prompt over a numbered list. None on EOF, which ends the recording
     with whatever already landed — the log is append-only either way.
@@ -16,6 +16,14 @@ def ask_choice(
     `empty` names what an empty answer does where "skip" would mislead: over an
     attempt already claimed, writing nothing keeps the claim rather than
     leaving it unanswered.
+
+    `none` opens `0`, for the question where naming nothing is an answer rather
+    than a decline: a match asserts a pair, so a problem exercising none of a
+    card's forms is a verdict on every one of them. It comes back as an empty
+    list, which no other reply gives — a skip is `None`, and the two must not
+    be read as one where only one of them is evidence. Closed unless a caller
+    names it, since a claim naming nothing is a lost answer wearing the shape
+    of a stated one.
     """
     shown = ",".join(default) if default else empty
     while True:
@@ -28,10 +36,13 @@ def ask_choice(
             return Answer(None, False)
         if answer in {"a", ""}:
             return Answer(default or None, answer == "a")
+        if none is not None and answer == "0":
+            return Answer([], False)
         numbers = [part.strip() for part in answer.split(",") if part.strip()]
         if numbers and all(n.isdigit() and 1 <= int(n) <= len(options) for n in numbers):
             return Answer(numbers, False)
-        print(f"  pick numbers between 1 and {len(options)}, or a, or s")
+        zero = f", 0 for {none}" if none is not None else ""
+        print(f"  pick numbers between 1 and {len(options)}{zero}, or a, or s")
 
 
 def choose[T](what: str, options: list[tuple[T, str]], parser: argparse.ArgumentParser) -> T:
