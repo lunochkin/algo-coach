@@ -17,7 +17,7 @@ TRANSPORT = import_module("algo_coach.cli.transport")
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
     monkeypatch.setenv("OPENROUTER_API_KEY", "test")
-    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api: client)
+    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: client)
     monkeypatch.setattr("sys.argv", ["algo-coach", "score", "--user", "u1", *argv])
     cli.main()
 

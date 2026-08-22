@@ -14,7 +14,7 @@ TRANSPORT = import_module("algo_coach.cli.transport")
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
     monkeypatch.setenv("OPENROUTER_API_KEY", "test")
-    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api: client)
+    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: client)
     monkeypatch.setattr("sys.argv", ["algo-coach", "classify", "--user", "u1", *argv])
     cli.main()
 
@@ -56,7 +56,7 @@ def test_a_missing_key_fails_before_the_run(root, monkeypatch, capsys):
     client = FakeTransport.answering(Verdict(["greedy"]))
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
-    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api: client)
+    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: client)
     monkeypatch.setattr("sys.argv", ["algo-coach", "classify", "--user", "u1"])
 
     with pytest.raises(SystemExit) as exit_info:

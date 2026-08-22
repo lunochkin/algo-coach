@@ -9,7 +9,7 @@ from typing import Any
 
 import pytest
 
-from algo_coach.calls import ROUTING, UNSENT, OpenRouter, ProviderError, openrouter, traced
+from algo_coach.calls import ROUTING, UNSENT, OpenRouter, ProviderError, Retry, openrouter, traced
 
 
 @dataclass
@@ -375,3 +375,112 @@ def test_a_failure_carries_what_the_loop_knows(monkeypatch):
     trace = traced(failure.value)
     assert trace is not None
     assert trace.attempts == 5
+
+
+def test_a_wait_is_reported_while_it_is_being_waited_out(monkeypatch):
+    """The call record says how many requests an answer took, and says it
+    afterwards. A run held behind a cap is silent until then, and silence is
+    what a slow model looks like."""
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    held: list[Retry] = []
+    api = client(raises=[Rejected(429), Rejected(429)])
+
+    OpenRouter(api, on_retry=held.append)(
+        system="s", content="c", model="a-model", effort="low", pin="a-host", schema=None
+    )
+
+    assert [(one.status, one.tries, one.pause) for one in held] == [(429, 1, 5.0), (429, 2, 15.0)]
+    assert {(one.model, one.pin, one.of) for one in held} == {("a-model", "a-host", 5)}
+
+
+def test_a_failure_nobody_waits_out_is_reported_by_nobody(monkeypatch):
+    """The report is about the wait. A rejected key raises on the first try,
+    and the run's own failure path is what says so."""
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    held: list[Retry] = []
+    api = client(raises=[Rejected(401)])
+
+    with pytest.raises(Rejected):
+        OpenRouter(api, on_retry=held.append)(
+            system="s", content="c", model="m", effort="low", pin="a-host", schema=None
+        )
+
+    assert held == []
+
+
+def test_an_answer_on_the_first_try_reports_nothing(monkeypatch):
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    held: list[Retry] = []
+
+    OpenRouter(client(), on_retry=held.append)(
+        system="s", content="c", model="m", effort="low", pin="a-host", schema=None
+    )
+
+    assert held == []
+
+
+def test_a_gateway_failure_inside_a_200_is_reported_by_its_code(monkeypatch):
+    """The same wait, reached by the other path: the router carrying the
+    provider's failure in a body rather than a status."""
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    held: list[Retry] = []
+    api = client()
+    broken = Completion([], provider=None)
+    broken.error = {"message": "ext_proc failed", "code": 502}
+    replies = [broken, api.chat.completions.reply]
+    api.chat.completions.create = lambda **kw: (
+        api.chat.completions.calls.append(kw) or replies.pop(0)
+    )
+
+    OpenRouter(api, on_retry=held.append)(
+        system="s", content="c", model="m", effort="low", pin="a-host", schema=None
+    )
+
+    (one,) = held
+    assert (one.status, one.reason) == (502, "ext_proc failed")
+
+
+def test_a_cap_that_never_lifts_is_reported_at_every_wait(monkeypatch):
+    """One line per wait, so the last four minutes of a run read as four
+    holds rather than as nothing happening."""
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    held: list[Retry] = []
+    api = client(raises=[Rejected(429)] * 5)
+
+    with pytest.raises(Rejected):
+        OpenRouter(api, on_retry=held.append)(
+            system="s", content="c", model="m", effort="low", pin="a-host", schema=None
+        )
+
+    # Four waits and five requests: the last one is not held, it is reported.
+    assert [one.tries for one in held] == [1, 2, 3, 4]
+    assert len(api.chat.completions.calls) == 5
+
+
+def test_a_transport_nobody_asked_to_report_still_waits(monkeypatch):
+    """The callback is a report, never what makes the retry happen."""
+    slept: list[float] = []
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    api = client(raises=[Rejected(429)])
+
+    reply = OpenRouter(api)(
+        system="s", content="c", model="m", effort="low", pin="a-host", schema=None
+    )
+
+    assert reply.attempts == 2
+    assert slept == [5.0]
+
+
+def test_the_pin_reaches_the_route_and_not_the_request():
+    """It is the retry loop's to report and the routing's to enforce, never a
+    parameter of its own. Sent as one it would reach the provider as an
+    unknown field rather than as where to send this."""
+    api = client()
+
+    OpenRouter(api)(
+        system="s", content="c", model="m", effort="low", pin="deepinfra/bf16", schema=None
+    )
+
+    (request,) = api.chat.completions.calls
+    assert "pin" not in request
+    assert request["extra_body"]["provider"]["order"] == ["deepinfra/bf16"]

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from algo_coach.board import ProblemRow, TechniqueRow
+from algo_coach.calls import Retry
 from algo_coach.schema import Attempt
 
 
@@ -31,3 +32,15 @@ def problem_history(row: ProblemRow, now: datetime) -> str:
         return "never attempted"
     solved = f"{row.solved_count}/{row.attempt_count}"
     return f"last attempted {age(row.last_attempt_at, now)}, solved {solved}"
+
+
+def held(retry: Retry) -> str:
+    """One wait, named by what caused it and how long it will last.
+
+    The endpoint rather than the model alone: a cap is per endpoint, and two
+    configurations sharing one are held by the same limit.
+    """
+    return (
+        f"! {retry.status or 'failed'} {retry.model} @ {retry.pin}, "
+        f"try {retry.tries}/{retry.of}, waiting {retry.pause:g}s"
+    )

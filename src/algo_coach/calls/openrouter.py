@@ -8,10 +8,11 @@ so it answers with the schema unenforced and the effort dropped.
 """
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 from typing import Any
 
-from algo_coach.calls.transport import ProviderError, Reply, Trace, stamp
+from algo_coach.calls.transport import ProviderError, Reply, Retry, Trace, stamp
 
 BASE_URL = "https://openrouter.ai/api/v1"
 
@@ -47,14 +48,15 @@ BACKOFF = (5.0, 15.0, 30.0, 60.0)
 TRANSIENT = frozenset({429, 500, 502, 503, 504})
 
 
-def transient(exc: Exception) -> bool:
-    """Whether asking again is worth anything.
+def status(exc: Exception) -> int | None:
+    """A status from the SDK, or the code a router carried inside a 200 — the
+    same failure reaches us both ways depending on where it happened."""
+    return getattr(exc, "status_code", None) or getattr(exc, "code", None)
 
-    A status from the SDK, or the code a router carried inside a 200 — the
-    same failure reaches us both ways depending on where it happened.
-    """
-    code = getattr(exc, "status_code", None) or getattr(exc, "code", None)
-    return code in TRANSIENT
+
+def transient(exc: Exception) -> bool:
+    """Whether asking again is worth anything."""
+    return status(exc) in TRANSIENT
 
 
 def failure(error: Any) -> tuple[str, int | None]:
@@ -78,6 +80,9 @@ class OpenRouter:
     """A transport over an OpenAI-shaped client pointed at OpenRouter."""
 
     client: Any
+    # Called as a transient failure is waited out, on the thread that made the
+    # request. Reporting is the caller's: the CLI warns, a web API would not.
+    on_retry: Callable[[Retry], None] | None = None
 
     def __call__(
         self,
@@ -117,6 +122,7 @@ class OpenRouter:
             }
 
         return self.send(
+            pin=pin,
             model=model,
             max_tokens=max_tokens,
             messages=[
@@ -127,7 +133,7 @@ class OpenRouter:
             **request,
         )
 
-    def send(self, **request: Any) -> Reply:
+    def send(self, *, pin: str, **request: Any) -> Reply:
         """One reading, held and repeated while the endpoint answers with a
         reason to ask again.
 
@@ -145,8 +151,29 @@ class OpenRouter:
             except Exception as exc:
                 if not transient(exc):
                     raise
+                self.held(exc, pin=pin, model=request["model"], tries=tries, pause=pause)
                 time.sleep(pause)
         return self.once(len(BACKOFF) + 1, **request)
+
+    def held(self, exc: Exception, *, pin: str, model: str, tries: int, pause: float) -> None:
+        """Report one wait, if anyone asked to hear about it.
+
+        Before the sleep rather than after it, since the wait is what the
+        report is about. A caller that raises here is reporting badly, and
+        that surfaces rather than being folded into the retry.
+        """
+        if self.on_retry is not None:
+            self.on_retry(
+                Retry(
+                    status=status(exc),
+                    model=model,
+                    pin=pin,
+                    tries=tries,
+                    of=len(BACKOFF) + 1,
+                    pause=pause,
+                    reason=str(exc),
+                )
+            )
 
     def once(self, tries: int, **request: Any) -> Reply:
         """One request, timed and counted whether it answers or fails."""

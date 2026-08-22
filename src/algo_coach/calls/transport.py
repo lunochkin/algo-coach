@@ -72,6 +72,30 @@ class Trace:
     request_ms: int
 
 
+@dataclass(frozen=True)
+class Retry:
+    """One transient failure, reported while it is being waited out.
+
+    The call record already holds how many requests an answer took. What no
+    record can hold is the wait itself: a run behind a per-minute cap is
+    silent for as long as the backoff lasts, and silence reads as a slow
+    model. So the transport says it happened and the caller decides whether
+    anything prints.
+
+    Raised to nobody and returned to nobody. A retry that succeeds is not a
+    failure of the call, which is why this is a report rather than an
+    exception.
+    """
+
+    status: int | None
+    model: str
+    pin: str
+    tries: int  # the request that just failed, 1-based
+    of: int  # how many it will make in all
+    pause: float  # seconds about to be slept
+    reason: str
+
+
 def stamp(exc: Exception, trace: Trace) -> None:
     exc.__dict__["trace"] = trace
 
