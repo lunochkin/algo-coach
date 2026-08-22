@@ -60,7 +60,10 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         left = "left to claim"
         if args.revise:
             left = "disputed" if args.disputed else "to revise"
-        parser.exit(1, f"claim: nothing {left} for {args.user}\n")
+        # Zero, because an empty pool is a completed query rather than a
+        # fault. Nothing disputed is what adjudication stops on, so the status
+        # would contradict the message it prints. Misuse still exits 2.
+        parser.exit(0, f"claim: nothing {left} for {args.user}\n")
 
     # Once, unlike the candidates: the levels are the same at every attempt.
     print(f"\nconfidence: {numbered(LEVELS)}")

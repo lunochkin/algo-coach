@@ -142,7 +142,7 @@ def test_an_already_claimed_attempt_is_not_asked_again(claim_root, monkeypatch, 
     with pytest.raises(SystemExit) as exit_info:
         run(monkeypatch, [])
 
-    assert exit_info.value.code == 1
+    assert exit_info.value.code == 0
     assert "nothing left to claim" in capsys.readouterr().err
 
 
@@ -207,7 +207,7 @@ def test_an_attempt_without_code_is_not_offered(tmp_path, monkeypatch, capsys):
     with pytest.raises(SystemExit) as exit_info:
         run(monkeypatch, [])
 
-    assert exit_info.value.code == 1
+    assert exit_info.value.code == 0
 
 
 def test_the_code_is_shown(claim_root, monkeypatch, capsys):
@@ -318,7 +318,7 @@ def test_a_problem_leaves_the_pool_once_its_attempt_is_claimed(tmp_path, monkeyp
     with pytest.raises(SystemExit) as exit_info:
         run(monkeypatch, [])
 
-    assert exit_info.value.code == 1
+    assert exit_info.value.code == 0
 
 
 def seed_many(root, count: int) -> AttemptLog:
@@ -658,7 +658,7 @@ def test_revise_ignores_a_reading_of_a_prompt_nobody_sends_now(claim_root, monke
 
     # Asked for disputes specifically: the default pool is every claim, so an
     # ignored reading would leave the attempt in it either way and say nothing.
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as exit_info:
         run(
             monkeypatch,
             [""],
@@ -671,4 +671,5 @@ def test_revise_ignores_a_reading_of_a_prompt_nobody_sends_now(claim_root, monke
             "1",
         )
 
+    assert exit_info.value.code == 0
     assert "nothing disputed" in capsys.readouterr().err
