@@ -62,13 +62,23 @@ drill *args:
 claim *args:
     uv run algo-coach claim {{ args }}
 
+revise:
+    uv run algo-coach claim --revise --disputed 1 --model anthropic/claude-opus-5 --effort medium --provider anthropic --temperature default
+
 # Claim stored attempts with the classifier.
 classify *args:
     uv run algo-coach classify {{ args }}
 
 # The classifier against the user's own claims.
 score *args:
-    uv run algo-coach score {{ args }}
+    uv run algo-coach score --concurrency 4 \
+        --model anthropic/claude-opus-5 --provider anthropic --temperature default \
+        --model anthropic/claude-sonnet-5 --provider anthropic --temperature default \
+        --model google/gemma-4-31b-it --provider coreweave/bf16 \
+        --model openai/gpt-oss-120b --provider deepinfra/bf16 \
+        --model openai/gpt-oss-120b --provider coreweave/fp4 \
+        --model z-ai/glm-5.2 --provider gmicloud/fp8  \
+        {{ args }}
 
 # How far the classifier's claims move the board off the tags.
 movement *args:
