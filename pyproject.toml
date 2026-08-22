@@ -17,6 +17,7 @@ algo-coach = "algo_coach.cli:main"
 
 [dependency-groups]
 dev = [
+    "duckdb>=1.5",
     "pytest>=8.0",
     "ruff>=0.16.0",
 ]
