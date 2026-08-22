@@ -18,12 +18,12 @@ def ask_choice(
     leaving it unanswered.
 
     `none` opens `0`, for the question where naming nothing is an answer rather
-    than a decline: a match asserts a pair, so a problem exercising none of a
+    than a decline. A match asserts a pair, so a problem exercising none of a
     card's forms is a verdict on every one of them. It comes back as an empty
-    list, which no other reply gives — a skip is `None`, and the two must not
-    be read as one where only one of them is evidence. Closed unless a caller
-    names it, since a claim naming nothing is a lost answer wearing the shape
-    of a stated one.
+    list, which no other reply gives. A skip is `None`, and the two must not be
+    read as one, since only one of them is evidence. Closed unless a caller
+    names it: an empty claim would be indistinguishable from a stated one, and
+    a skipped answer would read as an answer given.
     """
     shown = ",".join(default) if default else empty
     while True:

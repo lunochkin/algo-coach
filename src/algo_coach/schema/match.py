@@ -14,16 +14,16 @@ class MatchSource(StrEnum):
 class TemplateMatch(MachineProvenance):
     """Whether one problem exercises one of a card's templates.
 
-    The engine's own work, never an author's: a card names no problem, so what
+    The engine's own work, never an author's. A card names no problem, so what
     a rung covers is read off the corpus rather than written down beside it.
 
     One record per pair, not a set per template. Problems arrive a push at a
     time, and a set record would rewrite pairs that were already settled
-    whenever the corpus grew — where the pairs are independent, and a push
-    only adds to them. A claim asserts a whole set because the set is the
-    assertion; a match asserts one pair.
+    whenever the corpus grew. The pairs are independent, and a push only adds
+    to them. A claim asserts a whole set because the set is the assertion. A
+    match asserts one pair.
 
-    Append-only, like every other reading: a re-run at a new configuration
+    Append-only, like every other reading. A re-run at a new configuration
     appends its verdict, and what the old one said stays readable.
     """
 

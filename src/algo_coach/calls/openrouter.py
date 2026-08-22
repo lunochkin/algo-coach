@@ -2,9 +2,9 @@
 
 Every model is reached through one endpoint and one request shape, so adding a
 model is a string and adding a provider is a base URL. An outage falls back to
-another endpoint of the same shape — never to Anthropic's own compatibility
-layer, which ignores `response_format`, `strict` and `reasoning_effort` and so
-answers with the schema unenforced and the effort dropped.
+another endpoint of the same shape, never to Anthropic's own compatibility
+layer. That layer ignores `response_format`, `strict` and `reasoning_effort`,
+so it answers with the schema unenforced and the effort dropped.
 """
 
 import time

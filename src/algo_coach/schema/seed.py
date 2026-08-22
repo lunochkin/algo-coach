@@ -1,10 +1,10 @@
 """What an author writes. The engine's own record is `Card`; this is the
 payload it is built from.
 
-The same rule as the push contract, at a different boundary: identity is the
+The same rule as the push contract, at a different boundary. Identity is the
 engine's, so the payload has no field for it and an author cannot supply one by
 writing it. A card is authored once and seeded into any store, where the ids it
-is referenced by are minted per engine — which is why the authored form carries
+is referenced by are minted per engine. That is why the authored form carries
 slugs and the record carries both.
 """
 

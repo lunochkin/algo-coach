@@ -60,8 +60,8 @@ def read_one(
 ) -> tuple[list[str], Call | None]:
     """What one classifier reads one attempt as, and the call that read it.
 
-    Makes the call and writes no claim, so it is safe to run several at once —
-    the claim is the caller's, and the claims log has one writer however many
+    Makes the call and writes no claim, so it is safe to run several at once.
+    The claim is the caller's, and the claims log has one writer however many
     calls are in flight. The call log is its own file and its own append.
     """
     return classify(
@@ -77,12 +77,12 @@ def store(
 ) -> None:
     """Append what a classifier read, on the calling thread.
 
-    Only ever after a call: a reading served from an earlier claim was already
+    Only ever after a call. A reading served from an earlier claim was already
     written by the run that paid for it, and appending it again would say a
     question was asked twice. The model, effort, temperature and digest are
-    copied from the call so the claims file reads without opening the call log,
-    and the call is cited for what only it holds — the tokens, the response,
-    the reasoning.
+    copied from the call so the claims file reads without opening the call log.
+    The call is cited for what only it holds: the tokens, the response, the
+    reasoning.
     """
     log.append_claim(
         classifier_claim(

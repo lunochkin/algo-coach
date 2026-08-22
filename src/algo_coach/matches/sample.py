@@ -1,14 +1,14 @@
 """The order a hand annotation is asked in.
 
 Levelled per template, not per card. The score is grouped per template and the
-ladder resolves per template, so a form nothing has annotated is a gap that no
-card-level count reports — a re-seeded card gains one and stays the best
-covered card there is while holding the only hole in the set.
+ladder resolves per template, so a form nothing has annotated is a gap no
+card-level count reports. A re-seeded card gains such a form and stays the best
+covered card there is, while holding the only gap in the set.
 
-In the steady state the two agree: annotating answers every template of a card
-at once, so its counts move together and the minimum over them is how many
-times the card was asked about. They part exactly where the counts diverge,
-which is the case worth having.
+In the steady state the two agree. Annotating answers every template of a card
+at once, so its counts move together, and the minimum over them is how many
+times the card was asked about. They diverge exactly where those counts
+diverge, which is the case worth having.
 """
 
 import random

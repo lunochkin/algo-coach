@@ -62,11 +62,11 @@ If the code used none of the candidates, name none of them."""
 class Configuration(BaseModel, frozen=True):
     """Which classifier a reading came from, and the key it is found under.
 
-    The prompt is not among them: it varies
-    per attempt, since a candidate's criterion travels with it, so what rulebook
-    a reading came from is a digest of what that attempt was actually sent and
-    never a property of the classifier. Frozen because it is an identity —
-    compared whole, never ordered, so a rollback is naming the earlier one.
+    The prompt is not among them. It varies per attempt, since a candidate's
+    criterion travels with it. So what rulebook a reading came from is a digest
+    of what that attempt was actually sent, and never a property of the
+    classifier. Frozen because it is an identity: compared whole, never
+    ordered, so a rollback is naming the earlier one.
     """
 
     model: str = MODEL
@@ -97,8 +97,8 @@ def request_hash(candidates: Sequence[str], code: str) -> str:
 
     What decides whether a reading is worth paying for again. A criterion
     travels with its candidate, so editing one entry changes this for the
-    attempts carrying that code and for no others — which is the whole reason
-    it is computed per attempt rather than carried on the configuration.
+    attempts carrying that code and for no others. That is the whole reason it
+    is computed per attempt rather than carried on the configuration.
     """
     return digest(SYSTEM, prompt(candidates, code))
 
@@ -158,10 +158,10 @@ def prompt(candidates: Sequence[str], code: str) -> str:
     made knowing what can be named and what earns each one. Delimited, since
     the code is data the model reads rather than instructions it follows.
 
-    Beside the candidates rather than in the system text: a criterion is a
-    per-code rule, and one carried by every call is paid for on the calls
-    where its code is not a candidate — which, over a vocabulary of this size,
-    is nearly all of them.
+    Beside the candidates rather than in the system text. A criterion is a
+    per-code rule, and one carried by every call is paid for on the calls where
+    its code is not a candidate. Over a vocabulary of this size, that is nearly
+    all of them.
     """
     return "\n".join(
         [

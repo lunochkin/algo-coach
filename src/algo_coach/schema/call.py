@@ -8,19 +8,18 @@ from pydantic import BaseModel, Field, model_validator
 class Call(BaseModel):
     """One request to a model and what came back.
 
-    Deliberately knows nothing about what the answer was for: no attempt, no
-    techniques, no vocabulary. A domain record cites a call by `id` and reads
-    its own meaning into the response; this record only says what was asked,
-    of whom, and what returned. That is what lets a second domain reuse the
-    log without teaching it anything.
+    Holds nothing about what the answer was for: no attempt, no techniques, no
+    vocabulary. A domain record cites a call by `id` and reads its own meaning
+    into the response. This record only says what was asked, of whom, and what
+    returned. That is what lets a second domain reuse the log without changes.
 
     Kept for what a claim cannot hold: the tokens a run cost, the reasoning
-    behind a verdict, and the calls that produced no claim at all — a decline
-    names no candidate and a failure names nothing, and both were counters
-    that printed once and vanished.
+    behind a verdict, and the calls that produced no claim at all. A decline
+    names no candidate and a failure names nothing. Before this record, both
+    were counters that printed once and were lost.
 
     `prompt_hash` is not unique. A call retried after a rate limit repeats it,
-    and sampling one prompt several times repeats it on purpose — so a reader
+    and sampling one prompt several times repeats it on purpose. A reader
     looking one up must say which it wants rather than assume there is one.
     """
 

@@ -19,10 +19,10 @@ def claimable(
     ask about them.
 
     Carrying their code, one per problem, on a problem whose tags leave a
-    choice to make — and spread across techniques, so a sample cut at any
-    length is not carried by whichever technique the backlog holds most of.
+    choice to make. Spread across techniques, so a sample cut at any length is
+    not carried by whichever technique the backlog holds most of.
 
-    A machine claim does not take an attempt out of the pool: the classifier
+    A machine claim does not take an attempt out of the pool. The classifier
     fills what no hand reached, and a user claim is what corrects it. Only the
     user's own answer settles a problem, since asking again would ask what has
     been answered.
@@ -61,18 +61,18 @@ def spread(
     """The pool ordered so no single technique carries the estimate.
 
     Each step takes an attempt on the technique the order has covered least so
-    far, so any prefix of it is spread. A backlog is skewed — a uniform shuffle
+    far, so any prefix of it is spread. A backlog is skewed. A uniform shuffle
     puts most of a thirty-attempt sample on the two or three techniques that
     dominate it, and the score the sample estimates is read per technique.
 
     An attempt counts toward every technique its problem carries, since a claim
-    on it decides all of them: what is levelled is coverage, not how many times
+    on it decides all of them. What is levelled is coverage, not how many times
     each technique was drawn from. Shuffled within a technique by `seed`, so a
     sample is described by its seed rather than by listing what it held.
 
-    `covered` is what the order starts from — the techniques a caller has
+    `covered` is what the order starts from: the techniques a caller has
     already reached, so a code the eval set holds fifteen of waits behind one
-    it holds four of. It reorders and never filters: an attempt on a covered
+    it holds four of. It reorders and never filters. An attempt on a covered
     technique is later, not gone, so a sample cut at any length is still that
     length. Empty by default, which is the levelling a first pass wants.
     """

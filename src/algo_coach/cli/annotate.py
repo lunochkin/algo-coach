@@ -2,12 +2,12 @@
 
 The question is the card and the record is the pair. One statement is read
 once and judged against every form of the card, and the answer writes a row per
-template — the ones the problem does not exercise included, since a reference
-that only named matches would score the matcher's "yes" and say nothing about
-its "no".
+template. The ones the problem does not exercise are included: a reference that
+only named matches would score the matcher's "yes" and say nothing about its
+"no".
 
-Blind by default. The first pass is where the line between exercising a form
-and merely admitting it gets drawn, and an annotation made with a verdict in
+Blind by default. The first pass is where the line gets drawn between
+exercising a form and merely admitting it. An annotation made with a verdict in
 view records what it reviewed rather than what it read.
 """
 

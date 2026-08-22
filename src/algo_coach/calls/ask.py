@@ -49,20 +49,20 @@ def ask(
 ) -> tuple[Call, str | None]:
     """Send one prompt, record what happened, and return the call and its text.
 
-    A failure is recorded too, then raised: the caller decides whether one
+    A failure is recorded too, then raised. The caller decides whether one
     attempt's problem ends the run, and the record is what makes a run that
-    broke at two in the morning readable afterwards. Only the message and the
-    exception's type are kept — a repr can carry request context, and this file
-    outlives the terminal it would have been printed to.
+    broke overnight readable afterwards. Only the message and the exception's
+    type are kept. A repr can carry request context, and this file outlives the
+    terminal it would have been printed to.
 
     The output schema is not part of the hash. It is built from the candidates,
     which already appear verbatim in the content, so it varies with nothing the
     hash does not already cover.
 
     The whole wait is timed here, so a retried call records what it cost the
-    run; the last request's time and the count come back from the transport,
-    which is the only thing that sees them. A monotonic clock, or a wall clock
-    stepping backwards would record a negative wait.
+    run. The last request's time and the count come back from the transport,
+    which is the only thing that sees them. A monotonic clock is used: a wall
+    clock stepping backwards would record a negative wait.
     """
     text = payload(system, content)
     digest = prompt_hash(system, content)

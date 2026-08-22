@@ -35,9 +35,9 @@ def candidates(
     while a claim says what one past solution did. A problem nobody has
     attempted is a candidate on the same terms as one attempted last year.
 
-    Ranked by staleness, lowest solve rate breaking a tie — the row a retrieval
-    drill wants first — and by problem id where both are equal, so two renders
-    of the same log offer the same order.
+    Ranked by staleness, lowest solve rate breaking a tie, which is the row a
+    retrieval drill wants first. Problem id breaks a remaining tie, so two
+    renders of the same log offer the same order.
     """
     by_problem: dict[str, list[Attempt]] = defaultdict(list)
     for attempt in attempts:

@@ -48,12 +48,12 @@ def questions(cards: Iterable[Card], problems: Iterable[Problem]) -> list[Questi
 def at_configuration(match: TemplateMatch, configuration: Configuration, prompt_hash: str) -> bool:
     """Whether this matcher, asked this question, produced the record.
 
-    The same comparison staleness makes on a claim, and for the same reasons:
-    the pin says which build answered and the temperature how it was sampled,
+    The same comparison staleness makes on a claim, and for the same reasons.
+    The pin says which build answered and the temperature how it was sampled,
     while the provider that served it is recorded and never compared. A hand
     annotation is at no configuration at all, which keeps it out of what a
-    re-run counts as answered — it is the reference a run is scored against,
-    not a reading a run may lean on.
+    re-run counts as answered. It is the reference a run is scored against, not
+    a reading a run may rely on.
     """
     if match.source is not MatchSource.CLASSIFIER:
         return False

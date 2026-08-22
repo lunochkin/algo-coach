@@ -1,10 +1,10 @@
 # Roadmap
 
-Each phase = real practice value + a write-up. Ship thin; a phase is done
-when it's used daily, not when it's feature-complete.
+Each phase = real practice value + a write-up. Ship thin. A phase is done when
+it's used daily, not when it's feature-complete.
 
 `docs/architecture/README.md` owns the concepts, boundaries, and invariants.
-This file owns only sequencing; where the two differ, the architecture wins.
+This file owns only sequencing. Where the two differ, the architecture wins.
 
 ## Phase 1 — Push API, techniques, drill board
 
@@ -19,11 +19,11 @@ Get real daily attempts into the engine and make current state visible.
 - Techniques: the product-owned vocabulary, a data file rather than a
   datastore. The log references the codes, so retirement goes through an alias
   map, never a deletion.
-- Drill board: read-only — per technique, attempt history and current state
+- Drill board: read-only. Per technique, attempt history and current state
   from recency, attempt count, solved/unsolved, and self-label. Grouping
   resolves to a claim if one exists, otherwise the problem's tags, so a history
   of past attempts groups without being labelled. Diagnosis is not an input
-  until Phase 3. No scheduling; the user picks what to drill.
+  until Phase 3. No scheduling: the user picks what to drill.
 - Exit: a week of real attempts is in the store, and the board renders
   per-technique state from them. Built, and open until it does.
 
@@ -41,9 +41,9 @@ The flow and its rules live in `docs/architecture/README.md`.
 ## Phase 3 — Technique attribution
 
 Which techniques a solution used. The evidence is the code and the code does
-not decay, so the ground truth can be given retroactively and the phase needs
+not decay, so the ground truth can be given retroactively, and the phase needs
 no practice to start. Whether two careful readers agree is what the phase asks,
-not what it assumes: until something separates model error from annotator error
+not what it assumes. Until something separates model error from annotator error
 from a rule that cannot be applied, a disagreement is all three at once.
 
 - Hand claims over a sample of the backlog: the eval set, and the correction
@@ -56,7 +56,7 @@ from a rule that cannot be applied, a disagreement is all three at once.
   moves, agreement with the hand claims says whether the move is right.
 - Exit: attribution runs on real daily attempts and its claims stand. Built,
   and open until it does. Whether the classifier beats the tag fallback is
-  measured when mastery estimation reads claims, not here — until then a wrong
+  measured when mastery estimation reads claims, not here. Until then a wrong
   claim costs a board the user reads with their own judgment.
 
 ## Phase 4 — Cards (current)
@@ -73,7 +73,7 @@ technique, and it is Phase 5; the two share sequence and no data.
 - Card content is product data, structured and seeded from files: the topic,
   its templates, and a selector the ladder is resolved from at import. A card
   names no problem, so it ships anywhere. Authored by a skill, never
-  hand-edited — prose parsed by regex is what this replaces.
+  hand-edited. It replaces prose parsed by regex.
 - Studying a card is an explicit act, since the ladder is measured from it and
   probes are assigned at it.
 - A recall attempt is not an `Attempt`: no problem, no platform, no
@@ -88,9 +88,9 @@ technique, and it is Phase 5; the two share sequence and no data.
 ### Phase 4b — what daily use asks for
 
 Left open deliberately. Graduation needs a timed box, a probe count and a decay
-edge, and none can be chosen before the numbers exist — which is why 4a shows
-the inputs and names no threshold. The other candidate is the rust jog: a card
-is the full learning loop, and a technique that was once fluent wants minutes.
+edge, and none can be chosen before the numbers exist. That is why 4a shows the
+inputs and names no threshold. The other candidate is the rust jog: a card is
+the full learning loop, and a technique that was once fluent wants minutes.
 
 ## Phase 5 — Technique mastery, scheduling, failure mode
 
@@ -99,18 +99,18 @@ scheduling targets the diagnosed cause, not per-problem intervals. Exit: the
 scheduler drives daily practice.
 
 Failure mode lands here rather than beside attribution. Rust and gap are
-identical in a single attempt, and only whether the technique was ever fluent
-separates them — which is the mastery state itself. Recall history does not
+identical in a single attempt. Only whether the technique was ever fluent
+separates them, and that is the mastery state itself. Recall history does not
 stand in for it: reproducing a form cold is not recognising it unprompted, and
 the gap between the two is the false-fluency trap. What a classifier adds is
-narrower: reading a sitting's code for a mechanical slip against a conceptual
+narrower. It reads a sitting's code for a mechanical slip against a conceptual
 miss, scored per mode against the loop's self-labels. `SPEED` needs settling
 first, since "solved but too slowly" is about the user while a timeout is about
 the solution's complexity.
 
-Sessions land here: a sitting is several submissions, and counting each as an
-attempt over-weights the ones that took a retry. A derived view over the log,
-grouped on read — never a field a client sets.
+Sessions land here too. A sitting is several submissions, and counting each as
+an attempt over-weights the ones that took a retry. It is a derived view over
+the log, grouped on read, and never a field a client sets.
 
 ## Phase 6 — Product problems + verification
 
@@ -124,8 +124,8 @@ attempts feed the mastery model.
 
 Ground the classifier in evidence: AST-diff vs reference solutions,
 execution-trace comparison, empirical complexity measurement. Needs the test
-cases and reference solutions verification brings. Deliverable: measured accuracy delta vs
-LLM-only diagnosis.
+cases and reference solutions verification brings. Deliverable: measured
+accuracy delta vs LLM-only diagnosis.
 
 ## Phase 8 — Retrieval
 
@@ -134,8 +134,8 @@ attempt corpus in the engine store; weak-spot patterns surfaced.
 
 ## Phase 9 — MCP + autonomy
 
-Corpus and tools exposed as an MCP server; a scheduled agent runs the
-practice loop — picks drills, adapts to history.
+Corpus and tools exposed as an MCP server. A scheduled agent runs the practice
+loop: it picks drills and adapts to history.
 
 ## Phase 10 — Multi-agent (conditional)
 

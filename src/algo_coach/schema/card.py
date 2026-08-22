@@ -11,10 +11,10 @@ Slug = Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9-]*$")]
 class TemplateKind(StrEnum):
     """What a template reproduces.
 
-    Usually code. Sometimes the thing that has to come back cold is a method
-    rather than a function — the steps for turning an unseen problem into a
-    state and a recurrence — and a procedure written out as code would be a
-    checklist pretending to run.
+    Usually code. Sometimes what has to come back cold is a method rather than
+    a function: the steps for turning an unseen problem into a state and a
+    recurrence. Written out as code, such a procedure would be a checklist that
+    only looks executable.
     """
 
     CODE = "code"

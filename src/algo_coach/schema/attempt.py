@@ -85,20 +85,21 @@ class Confidence(StrEnum):
 
 
 class TechniqueClaim(AttemptRecord, MachineProvenance):
-    """Which techniques an attempt used — what per-technique progress is
-    measured from. Append-only: a later claim never rewrites an earlier one,
-    latest wins on read.
+    """Which techniques an attempt used. Per-technique progress is measured
+    from this. Append-only: a later claim never rewrites an earlier one, and
+    the latest wins on read.
 
     One record names every technique of one attempt, asserted together, so a
     revision replaces the whole set. Per-technique records would leave a later
     claim merging with an earlier one, with nothing to say which stands.
 
     A machine claim may name none of them. That is the classifier saying the
-    candidates do not cover what the code did — a reading worth keeping, since
-    an unstored one is re-read by every later run and the answer never changes
-    while the question does not. A user's claim may not: the loop records
-    nothing where they skip, so an empty one would be a lost answer wearing the
-    shape of a stated one.
+    candidates do not cover what the code did. It is a reading worth keeping,
+    since an unstored one is re-read by every later run, and the answer never
+    changes while the question does not. A user's claim may not name none. The
+    loop records nothing where they skip, so an empty one would be
+    indistinguishable from a stated one, and a skip would read as an answer
+    given.
     """
 
     # Empty is a verdict, not an absent one: the classifier read the code and

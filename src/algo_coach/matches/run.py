@@ -58,8 +58,8 @@ def read_one(
 ) -> tuple[list[str], Call | None]:
     """What one matcher reads one question as, and the call that read it.
 
-    Makes the call and writes no record, so it is safe to run several at once —
-    the records are the caller's, and the match log has one writer however many
+    Makes the call and writes no record, so it is safe to run several at once.
+    The records are the caller's, and the match log has one writer however many
     calls are in flight.
     """
     return match(transport, calls, question.card, question.problem, configuration=configuration)

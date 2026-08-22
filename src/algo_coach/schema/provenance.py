@@ -2,8 +2,8 @@
 
 A technique claim reads one attempt's code, a template match reads one problem
 against one form. Different questions, one rule about what a re-run has to know
-to find the readings it supersedes — so the fields and the all-or-none check
-live here rather than being written out twice and drifting apart.
+to find the readings it supersedes. So the fields and the all-or-none check
+live here, rather than being written out twice and drifting apart.
 """
 
 from typing import ClassVar

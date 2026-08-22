@@ -1,9 +1,9 @@
 """Where the engine's identity comes from.
 
 Every stored record carries an id the engine minted and a client never sees.
-Kept in one module so the policy is one line to read and one line to change —
-a schema model states what a record holds, not where its id came from, and
-the clock has no place there either.
+Kept in one module so the policy is one line to read and one line to change. A
+schema model states what a record holds, not where its id came from, and the
+clock has no place there either.
 """
 
 import uuid
@@ -112,13 +112,13 @@ def classifier_claim(
     """A claim a model made. It names what produced it, since a better
     classifier can recompute it and a user's claim cannot be recomputed at all.
 
-    All four, never a subset: a reading whose configuration is partly unknown
-    cannot be compared with one whose configuration is known. The model and
-    effort are copied from the call rather than read through it, so the claims
-    file says what produced each claim without opening the call log.
+    All of them, never a subset. A reading whose configuration is partly
+    unknown cannot be compared with one whose configuration is known. The model
+    and effort are copied from the call rather than read through it, so the
+    claims file says what produced each claim without opening the call log.
 
     Membership is checked here because this is the only write path that could
-    introduce an unrecognised code — every other one draws on the tag mapping,
+    introduce an unrecognised code. Every other one draws on the tag mapping,
     which is derived from the vocabulary already. Rejected whole rather than
     per code: a claim asserts one set, and writing the half that passed would
     record a set nobody made.
@@ -145,11 +145,11 @@ def classifier_claim(
 def user_match(template_id: str, problem_id: str, *, matched: bool) -> TemplateMatch:
     """One pair the user annotated, positive or negative.
 
-    It carries no configuration because nothing re-derives it, which is what
-    makes it the reference a machine reading is scored against — and what makes
+    It carries no configuration because nothing re-derives it. That is what
+    makes it the reference a machine reading is scored against, and what makes
     it stand on read however early it was written.
 
-    The negative is annotated as deliberately as the positive: the machine
+    The negative is annotated as deliberately as the positive. The machine
     answers every candidate of a card, so a reference that only named matches
     would score its "yes" and say nothing about its "no".
     """

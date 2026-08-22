@@ -1,9 +1,10 @@
 """How far the classifier's claims move the board off the tag fallback.
 
 A sanity check, never a criterion. Narrowing two or three candidates to one
-removes credit by arithmetic, so a board that barely moves says the classifier
-named the whole candidate set — agreeing with the tags and deciding nothing.
-Movement says it decided something; only the hand claims say it decided right.
+removes credit by arithmetic. A board that barely moves therefore says the
+classifier named the whole candidate set, agreeing with the tags and deciding
+nothing. Movement says it decided something. Only the hand claims say it
+decided right.
 """
 
 from collections.abc import Iterable, Mapping

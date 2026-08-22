@@ -34,8 +34,23 @@ reasoned out — the schema runs a phase ahead, features do not.
 
 ## Writing
 
-- Docs, commits, comments: shortest form that keeps the reason. Cut restating,
-  hedging, and any sentence that only rephrases the one before.
+Docs, `README.md`, commits, comments.
+
+- Shortest form that keeps the reason. Cut restating, hedging, and any
+  sentence that only rephrases the one before.
+- **No aphorisms.** State the rule, then the reason, both literally. Don't
+  compress an argument into a metaphor the reader has to unpack.
+- **No personification.** Records don't wear, ride, go quiet, or flatter. Say
+  what the code does.
+- **One idea per sentence.** Split at the em-dash and the semicolon instead
+  of chaining. Target 25 words; nothing over 40.
+- Precise technical terms are unaffected — `append-only`, `digest`,
+  `denominator`, `supersede`. Density comes from those, not from clause count.
+
+Before: "A blank string is the same absence wearing a value, so it is
+rejected too."
+After: "A blank string is rejected too. It passes a presence check while
+carrying nothing."
 
 ## Code style
 
@@ -48,7 +63,7 @@ reasoned out — the schema runs a phase ahead, features do not.
 - Conventional Commits, imperative subject ≤50 chars, English.
 - Pre-commit + commit-msg hooks live in `.githooks/`
   (enable once: `git config core.hooksPath .githooks`).
-  They enforce a vocabulary guard whose word list is `.githooks/words` —
-  untracked, since it names exactly what must never be committed. Without it
-  the hooks fail rather than pass: a guard that goes quiet when unconfigured
-  is worse than none.
+  They enforce a vocabulary guard whose word list is `.githooks/words`. It is
+  untracked, since it names exactly what must never be committed. Without the
+  list the hooks fail rather than pass. A guard that silently allows everything
+  when unconfigured is worse than no guard.

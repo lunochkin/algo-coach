@@ -6,12 +6,12 @@ from algo_coach.schema import Call
 class CallLog:
     """Append-only JSONL store for what was asked of a model and what returned.
 
-    Its own file rather than a column on the claims: the claims file is parsed
+    Its own file rather than a column on the claims. The claims file is parsed
     by every command that renders a board, and a prompt and a reasoning summary
     per line would make that a megabyte-scale read for information no board
-    needs. Nothing on the run path reads this back — the domain decides what to
-    ask from its own records — so it stays cheap to write and is loaded only by
-    whoever sits down to analyse a run.
+    needs. Nothing on the run path reads this back, since the domain decides
+    what to ask from its own records. So it stays cheap to write, and is loaded
+    only for analysis.
     """
 
     def __init__(self, root: Path):

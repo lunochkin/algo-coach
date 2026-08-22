@@ -30,17 +30,18 @@ def as_answered[T, R](
 ) -> Iterator[tuple[T, R | None, Exception | None]]:
     """Run `work` over `items`, yielding each as it finishes.
 
-    Completion order, not the order asked in — which is safe for what the
+    Completion order, not the order asked in, which is safe for what the
     callers do with it. A claim ties with another only on `created_at`, broken
-    by append order, and that decides between two claims on one attempt; a run
-    makes at most one per attempt, so nothing a run writes can race itself.
+    by append order, and that decides between two claims on one attempt. A run
+    makes at most one per attempt, so nothing a run writes can conflict with
+    itself.
 
-    Submission is bounded rather than all at once: a consumer that stops early
-    — a run aborting on a rejected key — must not have paid for the tail.
+    Submission is bounded rather than all at once. A consumer that stops early,
+    such as a run aborting on a rejected key, must not have paid for the tail.
     Closing the iterator cancels what has not started, and lets what is in
     flight finish, since an API call cannot be taken back.
 
-    One worker is the serial path outright, not a pool of one: the ordinary run
+    One worker is the serial path outright, not a pool of one. The ordinary run
     should not depend on a thread pool to be correct.
     """
     if concurrency <= 1:

@@ -5,12 +5,12 @@ spaced repetition over a technique-mastery model, with LLM-based attribution of
 what a solution actually did.
 
 Most practice tools schedule *problems*. algo-coach models mastery of
-*techniques* — what a solution used is read from the code by a model rather than
-inferred from a problem's tags, and scheduling will target the weakest technique
-rather than the oldest problem. Procedural-skill SRS, not fact SRS — built for
+*techniques*. What a solution used is read from the code by a model, not
+inferred from a problem's tags. Scheduling will target the weakest technique
+rather than the oldest problem. Procedural-skill SRS, not fact SRS: built for
 experienced engineers restoring fluency, not beginners learning concepts.
 
-The interesting part is not that an LLM is in the loop; it is what the log does
+The interesting part is not that an LLM is in the loop. It is what the log does
 with what the LLM said. Every reading is stored with the configuration that
 produced it, scored against hand claims, and outranked by the user's own record
 forever.
@@ -21,7 +21,7 @@ Three places, and nothing is trained anywhere in the engine:
 
 - **Attribution** — a prompted classifier reads the *solution* and names the
   techniques it used, choosing among the problem's own candidate tags. No
-  training data exists for that label: public corpora tag problems, not
+  training data exists for that label. Public corpora tag problems, not
   solutions, so a trained model would predict the tag fallback it is meant to
   improve on.
 - **Template matching** — which problems exercise which form of a card, read
@@ -35,19 +35,19 @@ And three rules on top of them:
 - **The user's record stands over the machine's**, whichever was written later.
   A machine reading of an attempt the user already claimed is kept and scored,
   never promoted.
-- **Every reading is identified by its configuration** — model, effort, the
+- **Every reading is identified by its configuration**: model, effort, the
   endpoint it was pinned to, the temperature, the digest of the exact prompt
   that attempt was sent, and the call that sent it. Two configurations are
   compared over the attempts *both* read, never each over its own.
-- **Readings are greedy, and the noise floor is measured** — repeating a
-  configuration flips 0.5–2.2% of decisions, so a one- or two-attempt gap
-  between models is unreadable and is not read.
+- **Readings are greedy, and the noise floor is measured.** Repeating a
+  configuration flips 0.5–2.2% of decisions. A one- or two-attempt gap between
+  models is therefore unreadable, and is not read.
 
 Models are reached through [OpenRouter](https://openrouter.ai) as the single
 transport: one chat-completions shape for every provider, a schema-enforcing
-endpoint required rather than hoped for, fallbacks off so a model id resolves
-to one backend, and the serving provider recorded on the call. Adding a model
-is a string; adding a provider is a base URL.
+endpoint required rather than optional, fallbacks off so a model id resolves to
+one backend, and the serving provider recorded on the call. Adding a model is a
+string. Adding a provider is a base URL.
 
 ## What it looks like
 
@@ -96,11 +96,11 @@ named no candidate  0                1                0                1
 
 ## Early evaluation
 
-The eval set is 62 attempts: claimed by hand blind, then read by a frontier
-model as a scored configuration, and every divergence resolved one at a time —
-by editing the criterion or by editing the claim — until the frontier disagreed
-with nothing. That stopping signal is what makes the set a reference two
-readers reached rather than one reader's consistency.
+The eval set is 62 attempts. They were claimed by hand blind, then read by a
+frontier model as a scored configuration. Every divergence was resolved one at
+a time, by editing the criterion or by editing the claim, until the frontier
+disagreed with nothing. That stopping signal is what makes the set a reference
+two readers reached rather than one reader's consistency.
 
 Classifiers against it, greedy, each pinned to one endpoint. The adjudicator is
 listed first and is not a candidate — its 100% is construction, since the gold
@@ -125,37 +125,37 @@ Two results, and the second is why the table is worth keeping:
 - **`gemma-4-31b-it` lands within 0.6 points of the adjudicator's per-decision
   agreement at a twenty-sixth of the price.** That is what decides which
   classifier the engine runs.
-- **Size does not order this task.** A mid-tier frontier model sits last,
-  nine attempts behind a 31B open one and outside the noise floor by a wide
-  margin — reading which technique a solution used is a rulebook-application
-  problem, and a model that applies the criteria as written beats one that
-  reasons around them.
+- **Size does not order this task.** A mid-tier frontier model places last,
+  nine attempts behind a 31B open one and well outside the noise floor.
+  Reading which technique a solution used is a rulebook-application problem. A
+  model that applies the criteria as written beats one that reasons around
+  them.
 
 Read honestly, and with the caveats the tool prints:
 
 - **n = 60**, the attempts every configuration in the table read at the current
-  criteria text; the score command computes that denominator rather than
+  criteria text. The score command computes that denominator rather than
   letting each model be graded on its own sample. A criteria edit changes the
-  digest of the attempts it reaches, so a reading taken before it is stale and
+  digest of the attempts it reaches, so a reading taken before it is stale, and
   is re-asked rather than quietly counted.
 - **The endpoint is part of the reading.** A model id resolves to as many
   builds as there are endpoints serving it, and quantization changes the
-  weights — so a configuration is pinned, and the same model on two endpoints
-  is two columns rather than one mixed key.
+  weights. So a configuration is pinned, and the same model on two endpoints is
+  two columns rather than one mixed key.
 - **Adjacent rows are inside the noise floor.** Repeating one configuration
   flips 0.5–2.2% of decisions, so a one- or two-attempt difference is not a
-  ranking. The span between the best and the worst candidate — eight
-  attempts — clears it by a wide margin.
-- **Two numbers, because one hides things.** Set equality per attempt catches
-  the classifier that names every candidate; per-decision agreement credits
-  correctly declining a code, and keeps a per-candidate error from compounding
-  over the candidate count.
+  ranking. The span between the best and the worst candidate is eight attempts,
+  which clears the floor by a wide margin.
+- **Two numbers, because one number would hide a failure mode.** Set equality
+  per attempt catches the classifier that names every candidate. Per-decision
+  agreement credits correctly declining a code, and keeps a per-candidate error
+  from compounding over the candidate count.
 - **What the set cannot show** is a classifier right where the frontier was
-  wrong. That is the price of a fixed reference, paid knowingly.
+  wrong. That is the cost of a fixed reference, and it is accepted.
 
-For scale: on the calibration set — the pass that helped write the criteria, so
-it measures applicability rather than quality — four sizes of frontier model
-laddered 90/95/98/99% per decision, the top three within one label of each
+For scale, on the calibration set: that pass helped write the criteria, so it
+measures applicability rather than quality. Four sizes of frontier model
+laddered 90/95/98/99% per decision, with the top three within one label of each
 other. The cheap models above land in that upper band on the frozen set, which
 is why the engine runs them rather than the frontier.
 
@@ -191,14 +191,14 @@ flowchart LR
   C --> L
 ```
 
-The engine calls no external platform and mints no attempt: it waits for a
-push and diffs its own log, which is exact because it knows what was already
-there. Diagnosis and scheduling close this loop later; today the user picks
-what to drill and the board says what is stale.
+The engine calls no external platform and mints no attempt. It waits for a
+push and diffs its own log, and the diff is exact because the engine knows what
+was already there. Diagnosis and scheduling close this loop later. Today the
+user picks what to drill, and the board says what is stale.
 
 ## Cards — how a technique gets studied
 
-The board says which technique is weak; a card says what to do about it. Not an
+The board says which technique is weak. A card says what to do about it. Not an
 ability estimate and not a problem list: a card is one technique's study unit —
 the cue that should fire, what to read, the forms to reproduce from memory, and
 a selector the problems to solve are drawn by.
@@ -213,7 +213,7 @@ monotonic-stack                                  9 cards authored
 ```
 
 **A card names no problem.** It carries the selector, and the ladder of
-problems is resolved against whatever corpus the engine holds — so a card ships
+problems is resolved against whatever corpus the engine holds. So a card ships
 anywhere, and the same card teaches from your backlog or someone else's.
 
 ```mermaid
@@ -228,21 +228,21 @@ flowchart LR
 Why it is shaped this way:
 
 - **The unit of recall is the template, not the card.** A card's forms are
-  learned and lost separately, and a card-level number would average them into
-  silence. A hinted pass is recorded as hinted, or a decaying form reads as a
-  fluent one.
+  learned and lost separately, and a card-level number would average them
+  together and show neither. A hinted pass is recorded as hinted, or a decaying
+  form scores the same as a fluent one.
 - **Coverage is derived, not authored.** The ladder must exercise every studied
-  form, and a tag says what a problem is *about*, not which form solves it — so
+  form, and a tag says what a problem is *about*, not which form solves it. So
   which problems exercise which template is read from the statement and stored
   per pair, negatives included. A studied form no problem matches is a reported
   gap, never a quietly shorter ladder.
 - **Recall fluency is not solving fluency.** Reproducing a form cold is not
-  recognising it unprompted, so a probe — an unseen problem, no card in view —
+  recognising it unprompted. A probe — an unseen problem, no card in view —
   asks the second question. The gap between the two is exactly the false
   fluency that blocked practice trains.
 
 **Where it stands:** the card record, the authoring skill and its nine cards,
-seeding, the template matcher and the hand-annotation prompt are built — nine
+seeding, the template matcher and the hand-annotation prompt are built. Nine
 cards against ~4k problems pre-filter to ~2.8k questions and ~14k pair
 verdicts, none read yet. Next: the annotated reference itself and the matcher's
 score against it, then ladder resolution, card runs, and the recall trainer.
@@ -270,9 +270,9 @@ flowchart LR
 The load-bearing ones:
 
 - **[The log is append-only.](docs/architecture/README.md#invariants)** No
-  record is revised or removed in place, so component boundaries can be
-  refactored and the record schema cannot. The schema runs a phase ahead of the
-  features on purpose.
+  record is revised or removed in place. Component boundaries can therefore be
+  refactored, and the record schema cannot. The schema runs a phase ahead of
+  the features on purpose.
 - **[Identity is the engine's.](docs/architecture/README.md#problems)** A client
   pushes external ids; the engine mints its own and resolves references at the
   boundary, so the log stays readable without the platform that produced it.
@@ -285,11 +285,11 @@ The load-bearing ones:
   in any repo. The engine contacts no external platform, and no platform client
   lives here.
 
-The deep ends, if you read one thing: **[technique
-claims](docs/architecture/README.md#technique-claims)** — what a reading is,
-why it is stored even when it can never stand, and what identifies one — and
-**[template matches](docs/architecture/README.md#template-matches)**, the same
-argument for a corpus that grows.
+If you read one section, read **[technique
+claims](docs/architecture/README.md#technique-claims)**: what a reading is, why
+it is stored even when it can never stand, and what identifies one. Then
+**[template matches](docs/architecture/README.md#template-matches)**, which
+makes the same argument for a corpus that grows.
 
 ## Commands
 

@@ -219,15 +219,16 @@ def compared(result: Comparison) -> None:
 
 def describe(configuration: Configuration) -> str:
     """The whole configuration in a sentence, which the column heading says in
-    a token. Two arms of one model differ by the temperature alone, so a
-    heading naming the model and the effort announces them identically and
-    leaves which is running to whoever remembers the command line.
+    a token. Two arms of one model can differ by the temperature alone. A
+    heading naming only the model and the effort would announce them
+    identically, leaving which is running to whoever remembers the command
+    line.
 
     The pin is here and not in the heading: it identifies a reading like the
     rest, but a column is already unambiguous without it, and it is the first
     thing to read when one of them 404s.
 
-    No rulebook, at either place: which criteria a reading was made against is
+    No rulebook, at either place. Which criteria a reading was made against is
     a digest of what that attempt was sent, so it varies within one run and
     belongs on the record."""
     temperature = UNSET if configuration.temperature is None else configuration.temperature
@@ -242,10 +243,10 @@ def labels(configurations: Sequence[Configuration]) -> list[str]:
 
     All three always, though the model alone would name a column where no two
     share one. Effort and temperature each move a number as far as the model
-    does, so a heading that dropped one would put two readings of the same
-    model under one name and leave which is which to whoever remembers the
-    command line. The provider is not among them: it constrains who may answer
-    rather than what was asked, so two columns can never differ by it alone.
+    does. A heading that dropped one would put two readings of the same model
+    under one name, leaving which is which to whoever remembers the command
+    line. The provider is not among them. It constrains who may answer rather
+    than what was asked, so two columns can never differ by it alone.
     """
     return [
         f"{configuration.model}/{configuration.effort}"
@@ -264,7 +265,7 @@ def share(scored: Score) -> str:
 
 
 def decided(scored: Score) -> str:
-    """To a tenth, unlike the shares: the whole point of the row is that the
+    """To a tenth, unlike the shares. The point of the row is that the
     configurations sit within a point or two of each other here while the
     shares spread out, and a rounded percent would hide the ordering."""
     return (

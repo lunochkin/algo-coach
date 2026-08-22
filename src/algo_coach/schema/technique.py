@@ -21,11 +21,11 @@ class Kind(StrEnum):
         """What this kind asks of a solution, in words rather than as a label.
 
         A kind name is only a label, and a reader who does not already know
-        what it selects gets nothing from it — which is how a structure comes
-        to be judged by the procedure's test, on whether it was performed
-        rather than on whether its properties carry the work. Carried here
-        rather than in the vocabulary file so twenty-seven entries state it
-        once, and so the classifier and the reader meet the same words.
+        what it selects gets nothing from it. That is how a structure comes to
+        be judged by the procedure's test: on whether it was performed, rather
+        than on whether its properties carry the work. Carried here rather than
+        in the vocabulary file, so twenty-seven entries state it once and the
+        classifier and the reader meet the same words.
         """
         return _TESTS[self]
 

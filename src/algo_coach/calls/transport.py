@@ -1,12 +1,12 @@
 """What a transport returns, and what one is.
 
-The shape a provider answers in is the provider's; what the log records is
-ours. `Reply` is the line between them — a transport turns one API's response
+The shape a provider answers in is the provider's. What the log records is
+ours. `Reply` is the line between them: a transport turns one API's response
 into this, and nothing above it ever sees a content block or a choice.
 
-One shape at a time, by rule. Two provider shapes maintained by hand is what
-invites a library to reconcile them, and a library that reconciles them can
-downgrade a schema into a prompt where the record cannot show it happened.
+One shape at a time, by rule. Two provider shapes maintained by hand would
+create pressure to adopt a library that reconciles them. Such a library can
+downgrade a schema into a prompt, and the record would not show it happened.
 """
 
 from dataclasses import dataclass
