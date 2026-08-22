@@ -94,7 +94,7 @@ class OpenRouter:
         pin: str,
         temperature: float | None = None,
         schema: dict[str, Any] | None = None,
-        max_tokens: int = 16000,
+        max_tokens: int = 4000,
     ) -> Reply:
         # `allow_fallbacks` bounds what happens after a provider fails; the
         # first choice among those carrying the model is still the router's

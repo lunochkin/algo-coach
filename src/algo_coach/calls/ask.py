@@ -45,7 +45,7 @@ def ask(
     pin: str,
     temperature: float | None = None,
     schema: dict[str, Any] | None = None,
-    max_tokens: int = 16000,
+    max_tokens: int = 4000,
 ) -> tuple[Call, str | None]:
     """Send one prompt, record what happened, and return the call and its text.
 
