@@ -79,7 +79,7 @@ def main() -> None:
     _user_argument(board_parser)
 
     claim_parser = _command(sub, "claim", "name the techniques a stored attempt used")
-    claim_parser.add_argument("--count", type=int, default=30, help="how many to ask about")
+    claim_parser.add_argument("--count", type=int, default=10, help="how many to ask about")
     claim_parser.add_argument(
         "--technique", help="only attempts whose problem carries it; every technique otherwise"
     )
@@ -174,7 +174,7 @@ def main() -> None:
     annotate_parser = _command(
         sub, "annotate", "which of a card's templates a problem exercises, by hand"
     )
-    annotate_parser.add_argument("--count", type=int, default=30, help="how many to ask about")
+    annotate_parser.add_argument("--count", type=int, default=10, help="how many to ask about")
     annotate_parser.add_argument("--card", help="one card by slug; every seeded card otherwise")
     annotate_parser.add_argument("--seed", type=int, default=0, help="sampling order")
     # Off by default: the first pass is what the line gets drawn by, and an
