@@ -35,6 +35,7 @@ def machine_claim(
     call_id: str = "call-1",
     pin: str = PIN,
     temperature: float | None = TEMPERATURE,
+    cost: float | None = None,
 ) -> TechniqueClaim:
     """A classifier claim under a named configuration, defaulted so a test
     naming one field says that field is what it is about."""
@@ -47,6 +48,7 @@ def machine_claim(
         call_id=call_id,
         pin=pin,
         temperature=temperature,
+        cost=cost,
     )
 
 
@@ -78,6 +80,10 @@ class FakeTransport:
     # deployment, which is the ordinary case.
     scripted: dict[tuple[str, str], list[Verdict]] | None = None
     calls: list[dict] = field(default_factory=list)
+    # What the router would charge. One number for every call, since what a
+    # test asks about is whether the price reaches the record, never how it
+    # varies.
+    cost: float | None = None
     lock: threading.Lock = field(default_factory=threading.Lock)
 
     @classmethod
@@ -119,6 +125,7 @@ class FakeTransport:
             text=json.dumps({"techniques": verdict.techniques}),
             stop_reason="stop",
             provider="fake",
+            cost=self.cost,
         )
 
 

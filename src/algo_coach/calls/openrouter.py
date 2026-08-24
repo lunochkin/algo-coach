@@ -209,6 +209,7 @@ class OpenRouter:
             stop_reason=choice.finish_reason,
             input_tokens=getattr(usage, "prompt_tokens", None),
             output_tokens=getattr(usage, "completion_tokens", None),
+            cost=extra(usage, "cost") if usage is not None else None,
             provider=extra(response, "provider"),
         )
 

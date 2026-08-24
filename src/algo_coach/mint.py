@@ -44,6 +44,7 @@ def call(
     provider: str | None = None,
     input_tokens: int | None = None,
     output_tokens: int | None = None,
+    cost: float | None = None,
     elapsed_ms: int | None = None,
     request_ms: int | None = None,
     attempts: int | None = None,
@@ -65,6 +66,7 @@ def call(
         provider=provider,
         input_tokens=input_tokens,
         output_tokens=output_tokens,
+        cost=cost,
         elapsed_ms=elapsed_ms,
         request_ms=request_ms,
         attempts=attempts,
@@ -108,6 +110,7 @@ def classifier_claim(
     pin: str,
     temperature: float | None = None,
     provider: str | None = None,
+    cost: float | None = None,
 ) -> TechniqueClaim:
     """A claim a model made. It names what produced it, since a better
     classifier can recompute it and a user's claim cannot be recomputed at all.
@@ -139,6 +142,7 @@ def classifier_claim(
         pin=pin,
         temperature=temperature,
         provider=provider,
+        cost=cost,
     )
 
 

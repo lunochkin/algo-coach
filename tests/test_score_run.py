@@ -565,3 +565,37 @@ def test_a_progress_report_names_the_configuration_that_read_it(tmp_path):
 
     assert {configuration for configuration, _ in seen} == {LOW, HIGH}
     assert sorted(index for _, index in seen) == [1, 1, 2, 2]
+
+
+def test_a_reading_carries_what_it_was_charged(hand_claimed):
+    """Recorded rather than derived: a price moves, so a rate applied later
+    says what a reading would cost now instead of what it cost."""
+    client = FakeTransport.answering(Verdict(["greedy"]))
+    client.cost = 0.0042
+
+    result = run(client, hand_claimed)
+
+    assert (result.cost, result.costed) == (0.0042, 1)
+    (stored,) = machine_claims(hand_claimed)
+    assert stored.cost == 0.0042
+
+
+def test_a_reused_reading_brings_its_own_price(hand_claimed):
+    """The run that paid it recorded it. Re-reading the log must not make an
+    old reading look free, nor reprice it at today's rate."""
+    hand_claimed.append_claim(reading("a1", ["greedy"], cost=0.0031))
+
+    result = run(None, hand_claimed, limit=0)
+
+    assert (result.reused, result.costed) == (1, 1)
+    assert result.cost == 0.0031
+
+
+def test_a_reading_stored_before_the_price_is_left_out_of_the_mean(hand_claimed):
+    """Counting it as free would flatter whichever configuration was read
+    earliest, which is the opposite of what the column is for."""
+    hand_claimed.append_claim(reading("a1", ["greedy"]))
+
+    result = run(None, hand_claimed, limit=0)
+
+    assert (result.reused, result.costed, result.cost) == (1, 0, 0.0)

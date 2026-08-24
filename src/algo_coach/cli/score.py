@@ -202,6 +202,8 @@ def alone(result: Comparison) -> None:
     if only.decisions:
         print(decided(only))
     print(f"{only.read} read, {only.reused} reused")
+    if only.costed:
+        print(f"{spent(only)} per attempt, {outlay(only)} over {only.costed} priced reading(s)")
     if only.undecided:
         # Beside the share, since declining shrinks the denominator and
         # improves the number for it.
@@ -255,6 +257,13 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
     if any(scored.decisions for scored in scores):
         column("per decision", decided)
     column("read/reused", lambda scored: f"{scored.read}/{scored.reused}")
+    if any(scored.costed for scored in scores):
+        # A mean over the readings that carry a price, not over the eval set:
+        # one stored before the router's charge was recorded says nothing, and
+        # counting it as free would flatter whichever configuration was read
+        # earliest.
+        column("per attempt", spent)
+        column("set", outlay)
     if any(scored.undecided for scored in scores):
         column("named no candidate", lambda scored: str(scored.undecided))
     if any(scored.failed for scored in scores):
@@ -340,6 +349,23 @@ def decided(scored: Score) -> str:
         f"{scored.decisions_agreed}/{scored.decisions} "
         f"({scored.decisions_agreed / scored.decisions:.1%})"
     )
+
+
+def spent(scored: Score) -> str:
+    """What one attempt cost this configuration, averaged over the readings
+    that say. Six decimals, since the cheapest column reads a whole eval set
+    for well under a cent — at four, everything below a tenth of a cent printed
+    as the same number."""
+    if not scored.costed:
+        return "—"
+    return f"${scored.cost / scored.costed:.6f}"
+
+
+def outlay(scored: Score) -> str:
+    """What the whole set cost, which is the figure a run is decided on. The
+    mean says which classifier is dear; this says whether the comparison was
+    worth running."""
+    return f"${scored.cost:.4f}" if scored.costed else "—"
 
 
 def rows(result: Comparison) -> list[tuple[str, ...]]:

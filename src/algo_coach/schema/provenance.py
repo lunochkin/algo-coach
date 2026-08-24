@@ -41,9 +41,15 @@ class MachineProvenance(BaseModel):
     # reading taken before the field existed sits in that arm, which is what
     # keeps them comparable with a greedy run instead of discarded.
     temperature: float | None = None
+    # What the reading cost, as the router charged it. Recorded rather than
+    # required: a price is a fact about when a reading was taken, not about
+    # which reader took it, so two readings compare whether or not either
+    # carries one. Every reading stored before the field has none, and so does
+    # one a provider priced at nothing.
+    cost: float | None = None
 
     PROVENANCE: ClassVar[tuple[str, ...]] = ("model", "effort", "pin", "prompt_hash", "call_id")
-    RECORDED: ClassVar[tuple[str, ...]] = (*PROVENANCE, "provider", "temperature")
+    RECORDED: ClassVar[tuple[str, ...]] = (*PROVENANCE, "provider", "temperature", "cost")
 
     def check_provenance(self, machine: bool) -> None:
         """All of it on a machine reading, none of it on a hand one.

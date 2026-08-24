@@ -29,6 +29,12 @@ class ReadResult(BaseModel):
     undecided: int = 0  # named no candidate: stored, and never scored
     failed: list[Failed] = Field(default_factory=list)
     aborted: bool = False
+    # What the readings behind this result were charged, and how many of them
+    # said. A reading stored before the field carries no price and is left out
+    # of both, so the mean is over what is known rather than over a
+    # denominator including readings that report nothing.
+    cost: float = 0.0
+    costed: int = 0
 
 
 class Plan(BaseModel):
@@ -92,6 +98,11 @@ def select(
             continue
         plan.result.verdicts[attempt.id] = reading.techniques
         plan.result.reused += 1
+        # Its own price, from the run that paid it. A rate applied now would
+        # say what the reading would cost today rather than what it cost.
+        if reading.cost is not None:
+            plan.result.cost += reading.cost
+            plan.result.costed += 1
 
     plan.asking = sorted(unread, key=recency, reverse=True)[:limit]
     return plan
@@ -130,6 +141,9 @@ def absorb(
     # Answered, so the classifier is reachable — an undecided verdict is a
     # reading, not a failure.
     plan.consecutive = 0
+    if call is not None and call.cost is not None:
+        plan.result.cost += call.cost
+        plan.result.costed += 1
     if call is not None:
         # Stored whether or not it named anything, so no later run at this
         # configuration pays for the same question again.

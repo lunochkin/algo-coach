@@ -59,6 +59,9 @@ class Reply:
     stop_reason: str | None = None
     input_tokens: int | None = None
     output_tokens: int | None = None
+    # What the router says the call cost. Always returned, so it needs no
+    # parameter; absent only where a provider reported none.
+    cost: float | None = None
     # Who actually served it — the name the router reports, which is the
     # company rather than the endpoint. The build asked for is the request's
     # own `pin`; this says whether anything answered at all.

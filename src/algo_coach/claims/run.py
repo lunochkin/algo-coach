@@ -95,6 +95,7 @@ def store(
             pin=call.pin or "",
             temperature=call.temperature,
             provider=call.provider,
+            cost=call.cost,
         )
     )
 

@@ -111,6 +111,7 @@ def ask(
         stop_reason=reply.stop_reason,
         input_tokens=reply.input_tokens,
         output_tokens=reply.output_tokens,
+        cost=reply.cost,
         provider=reply.provider,
         elapsed_ms=elapsed(started),
         request_ms=reply.request_ms,

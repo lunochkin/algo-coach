@@ -64,6 +64,11 @@ class Score(BaseModel):
     reused: int = 0
     undecided: int = 0
     aborted: bool = False
+    # What this configuration's readings cost, and how many of them said. A
+    # mean over the second is what a column reports: a reading stored before
+    # the price was recorded carries none, and counting it would understate.
+    cost: float = 0.0
+    costed: int = 0
 
 
 class ConfigurationScore(BaseModel):
@@ -322,6 +327,7 @@ def score_backlog(
         )
         scored.failed = reading.failed
         scored.read, scored.reused = reading.read, reading.reused
+        scored.cost, scored.costed = reading.cost, reading.costed
         scored.undecided = reading.undecided
         scored.aborted = reading.aborted
         result.scores.append(ConfigurationScore(configuration=configuration, score=scored))

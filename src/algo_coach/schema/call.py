@@ -55,6 +55,11 @@ class Call(BaseModel):
     provider: str | None = None
     input_tokens: int | None = None
     output_tokens: int | None = None
+    # What the router charged for it, as it reported at the time. Recorded
+    # rather than derived: a price moves, so a rate applied later would say
+    # what a reading would cost now instead of what it cost. Absent on the
+    # calls made before the field, and on any the router priced at nothing.
+    cost: float | None = None
     # The execution: what the caller waited, and how many requests that took.
     # A run held behind a per-minute cap reads as a slow model without the
     # count.
