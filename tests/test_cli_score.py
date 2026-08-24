@@ -410,3 +410,59 @@ def test_what_they_read_differently_is_counted_rather_than_printed(
     assert "1 read differently — --splits to see them" in out
     # The verdicts themselves are what the flag buys.
     assert not re.search(r"^\s+1:\s+greedy", out, re.MULTILINE)
+
+
+def ranked(monkeypatch, *argv: str) -> None:
+    """The worse classifier named first, so the command line's order and the
+    ranking cannot agree by accident."""
+    run(
+        monkeypatch,
+        FakeTransport.per_deployment(
+            {
+                ("a-cheap-model", "a-host"): Verdict(["sorting"]),
+                (MODEL, PIN): Verdict(["greedy"]),
+            }
+        ),
+        *("--model", "a-cheap-model", "--provider", "a-host", "--model", MODEL),
+        *argv,
+    )
+
+
+def test_the_summary_is_ranked_by_the_exact_share(hand_claimed, monkeypatch, capsys):
+    """What a comparison is read for is which classifier won. Finding that by
+    eye down a column of twenty shares is work the sort does once."""
+    ranked(monkeypatch)
+
+    out = capsys.readouterr().out
+    assert re.search(rf"1\s+{re.escape(MODEL)}\s+{EFFORT}\s+{TEMPERATURE}", out)
+    assert re.search(rf"2\s+a-cheap-model\s+{EFFORT}\s+{TEMPERATURE}", out)
+
+
+def test_a_split_follows_the_ranking_rather_than_the_command_line(
+    hand_claimed, monkeypatch, capsys
+):
+    """A split's verdicts are positional, aligned with the scores. Reordering
+    the summary alone would file each verdict under the wrong configuration."""
+    ranked(monkeypatch, "--splits")
+
+    out = capsys.readouterr().out
+    assert re.search(r"1:\s+greedy", out)
+    assert re.search(r"2:\s+sorting", out)
+
+
+def test_the_per_technique_table_is_counted_rather_than_printed(hand_claimed, monkeypatch, capsys):
+    """It grows a column per configuration, so a run comparing forty of them
+    prints a table nothing can read across."""
+    ranked(monkeypatch)
+
+    out = capsys.readouterr().out
+    assert "techniques — --splits to see them per configuration" in out
+    assert "backtracking" not in out
+
+
+def test_the_flag_prints_the_per_technique_table(hand_claimed, monkeypatch, capsys):
+    ranked(monkeypatch, "--splits")
+
+    out = capsys.readouterr().out
+    assert re.search(r"technique\s+attempts\s+1\s+2", out)
+    assert "greedy" in out

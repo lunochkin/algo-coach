@@ -229,7 +229,7 @@ def main() -> None:
     score_parser.add_argument(
         "--splits",
         action="store_true",
-        help="print every attempt the configurations read differently; counted otherwise",
+        help="print the per-technique table and every attempt read differently; counted otherwise",
     )
     score_parser.add_argument(
         "--concurrency",

@@ -8,6 +8,7 @@ from algo_coach.claims import (
     DEFAULT,
     Comparison,
     Configuration,
+    ConfigurationScore,
     Score,
     TechniqueScore,
     score_backlog,
@@ -215,7 +216,7 @@ def alone(result: Comparison) -> None:
     if only.failed:
         print(failures(describe(result.scores[0].configuration), only))
     print()
-    print(table(("technique", "attempts", "exact", "missed", "over"), rows(result)))
+    print(table(("technique", "attempts", "exact", "missed", "over"), rows(result.scores)))
 
     # Printed in full, not summarised: reading them is how a mislabelled hand
     # claim is caught, and a corrected claim supersedes the earlier one.
@@ -237,8 +238,26 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
     a number, and the summary is where that number is spelled out. A heading
     naming the whole configuration wrapped the table at six of them, and a
     wrapped table compares nothing.
+
+    Only the summary is printed by default. The per-technique table still grows
+    a column per configuration, which a number rather than a name only delays —
+    at forty it wraps whatever the heading says.
     """
-    scores = [scored.score for scored in result.scores]
+    # Ranked here rather than in the domain, which keeps the command line's
+    # order so a caller can zip its own configurations against the readings.
+    # What a comparison is read for is which classifier won, and finding that
+    # down a column of fifty shares is work the sort does once. Ties keep the
+    # order they were named in, since the sort is stable.
+    #
+    # A permutation rather than a sorted copy. Everything else aligned with
+    # `Comparison.scores` has to follow, and a split's verdicts are positional.
+    # Reordering the rows alone would file each verdict under the wrong
+    # configuration.
+    order = sorted(
+        range(len(result.scores)), key=lambda index: exact(result.scores[index].score), reverse=True
+    )
+    ranked = [result.scores[index] for index in order]
+    scores = [scored.score for scored in ranked]
     keys = [str(index) for index in range(1, len(scores) + 1)]
 
     print(f"{result.common} of {result.eval_set} hand-claimed attempts read by all")
@@ -253,7 +272,7 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
         [key, scored.configuration.model, scored.configuration.effort]
         + [sampled(scored.configuration.temperature), f"@ {scored.configuration.pin}"]
         + [share(scored.score)]
-        for key, scored in zip(keys, result.scores, strict=True)
+        for key, scored in zip(keys, ranked, strict=True)
     ]
 
     def column(name: str, cell: Callable[[Score], str]) -> None:
@@ -282,8 +301,17 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
         # diagnosed: a configuration that failed read fewer than it planned to.
         column("failed", lambda scored: str(len(scored.failed)))
     print(table(head, body))
-    print()
-    print(table(("technique", "attempts", *keys), rows(result)))
+
+    # Behind the same flag as the splits, and for the same reason: a column per
+    # configuration, so forty of them is a table nothing can read. The summary
+    # answers which classifier won, which is what a wide run is for. Where one
+    # of them goes wrong is a question asked of a shortlist.
+    per_technique = rows(ranked)
+    if splits:
+        print()
+        print(table(("technique", "attempts", *keys), per_technique))
+    else:
+        print(f"\n{len(per_technique)} techniques — --splits to see them per configuration")
 
     # Where they agreed there is nothing to choose between them, however wrong
     # both are — so only the splits are ever printed, and the code decides them.
@@ -295,12 +323,12 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
     width = max(len("you"), *(len(key) for key in keys)) + 1
     for split in result.splits if splits else []:
         print(f"\n{split.attempt_id}\n  {'you:'.ljust(width)} {' '.join(split.user)}")
-        for key, verdict in zip(keys, split.verdicts, strict=True):
+        for key, verdict in zip(keys, (split.verdicts[index] for index in order), strict=True):
             print(f"  {(key + ':').ljust(width)} {' '.join(verdict)}")
 
     # Named in full here rather than by number: a failure block is read on its
     # own, often pasted somewhere the summary above it did not go.
-    for key, scored in zip(keys, result.scores, strict=True):
+    for key, scored in zip(keys, ranked, strict=True):
         if scored.score.failed:
             print(failures(f"{key}  {describe(scored.configuration)}", scored.score))
 
@@ -345,6 +373,12 @@ def labels(configurations: Sequence[Configuration]) -> list[str]:
 
 def exactly(scored: Score) -> str:
     return f"{scored.exact}/{scored.scored} exact ({scored.exact / scored.scored:.0%})"
+
+
+def exact(scored: Score) -> float:
+    """The share as a number. What the table prints is rounded to a percent,
+    and sorting on that would call two configurations a point apart equal."""
+    return scored.exact / scored.scored
 
 
 def share(scored: Score) -> str:
@@ -408,7 +442,7 @@ def outlay(scored: Score) -> str:
     return f"${scored.cost:.4f}" if scored.costed else "—"
 
 
-def rows(result: Comparison) -> list[tuple[str, ...]]:
+def rows(scored_entries: Sequence[ConfigurationScore]) -> list[tuple[str, ...]]:
     """Per technique, since the board is — an overall number hides a code the
     classifier reaches for wrongly everywhere it is read.
 
@@ -417,7 +451,7 @@ def rows(result: Comparison) -> list[tuple[str, ...]]:
     still a row, carrying the over-claims that put it there.
     """
     counted = [
-        {row.technique: row for row in scored.score.per_technique} for scored in result.scores
+        {row.technique: row for row in scored.score.per_technique} for scored in scored_entries
     ]
     body = []
     for technique in sorted({name for rows in counted for name in rows}):
