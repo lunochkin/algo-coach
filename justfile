@@ -72,19 +72,34 @@ classify *args:
 # The classifier against the user's own claims.
 score *args:
     uv run algo-coach score --concurrency 4 \
+        --model anthropic/claude-sonnet-5 --provider anthropic --temperature default \
         --model anthropic/claude-opus-5 --provider anthropic --temperature default \
         --model anthropic/claude-fable-5 --provider anthropic --temperature default \
+        --model google/gemini-3.7-flash --provider google-ai-studio --effort low \
         --model google/gemini-3.7-flash --provider google-ai-studio \
+        --model google/gemini-3.7-flash --provider google-ai-studio --temperature default \
+        --model google/gemini-3.7-flash --provider google-ai-studio --effort high \
         --model google/gemini-3.1-pro-preview --provider google-ai-studio \
         --model openai/gpt-5.6-sol --provider openai --temperature default \
         --model openai/gpt-5.6-terra --provider openai --temperature default \
+        --model openai/gpt-5.6-luna --provider openai --temperature default --effort low \
         --model openai/gpt-5.6-luna --provider openai --temperature default \
+        --model openai/gpt-5.6-luna --provider openai --temperature default --effort high \
         --model x-ai/grok-4.6 --provider xai/zdr \
         --model qwen/qwen3.8-max --provider alibaba \
         --model deepseek/deepseek-v4-pro-0813 --provider alibaba \
+        --model openai/gpt-oss-120b --provider coreweave/fp4 --effort low  \
         --model openai/gpt-oss-120b --provider coreweave/fp4 \
+        --model openai/gpt-oss-120b --provider coreweave/fp4 --temperature default \
+        --model openai/gpt-oss-120b --provider coreweave/fp4 --effort high \
+        --model google/gemma-4-31b-it --provider coreweave/bf16 --effort low \
         --model google/gemma-4-31b-it --provider coreweave/bf16 \
+        --model google/gemma-4-31b-it --provider coreweave/bf16 --temperature default \
+        --model google/gemma-4-31b-it --provider coreweave/bf16 --effort high \
+        --model z-ai/glm-5.2 --provider gmicloud/fp8 --effort low  \
         --model z-ai/glm-5.2 --provider gmicloud/fp8  \
+        --model z-ai/glm-5.2 --provider gmicloud/fp8 --temperature default  \
+        --model z-ai/glm-5.2 --provider gmicloud/fp8 --effort high  \
         --model nvidia/nemotron-3-super-120b-a12b --provider digitalocean \
         --model minimax/minimax-m3 --provider coreweave/fp4 \
         --model qwen/qwen3-next-80b-a3b-thinking --provider nebius/fp8 \
@@ -92,6 +107,11 @@ score *args:
         --model arcee-ai/trinity-large-thinking --provider parasail/fp4 \
         --model meta/muse-glimmer-30b --provider deepinfra/bf16 \
         --model tencent/hy3 --provider baidu/fp8 \
+        --model mistralai/mistral-small-2603  --provider venice/fp8 \
+        --model xiaomi/mimo-v2.5              --provider parasail/fp8 \
+        --model bytedance-seed/seed-2.0-mini  --provider seed/fp8 \
+        --model upstage/solar-pro4            --provider upstage \
+        --model moonshotai/kimi-k2-thinking   --provider novita/bf16 \
         {{ args }}
 
 # How far the classifier's claims move the board off the tags.
