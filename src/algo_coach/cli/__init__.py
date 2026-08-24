@@ -227,6 +227,11 @@ def main() -> None:
         help="score only readings already stored, making no call",
     )
     score_parser.add_argument(
+        "--splits",
+        action="store_true",
+        help="print every attempt the configurations read differently; counted otherwise",
+    )
+    score_parser.add_argument(
         "--concurrency",
         type=int,
         default=CONCURRENCY,

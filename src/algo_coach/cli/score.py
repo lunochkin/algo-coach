@@ -1,6 +1,6 @@
 import argparse
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from algo_coach.calls import CallLog
@@ -14,7 +14,7 @@ from algo_coach.claims import (
 )
 from algo_coach.claims.reading import Plan
 from algo_coach.claims.run import ABORT_AFTER, Progress
-from algo_coach.cli.display import UNSET
+from algo_coach.cli.display import UNSET, sampled
 from algo_coach.cli.status import Status
 from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
@@ -178,7 +178,7 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     if len(result.scores) == 1:
         alone(result)
     else:
-        compared(result)
+        compared(result, splits=args.splits)
 
 
 def failures(name: str, scored: Score) -> str:
@@ -219,44 +219,70 @@ def alone(result: Comparison) -> None:
         print(f"\n{disagreement.attempt_id}\n  you: {user}\n  it:  {machine}")
 
 
-def compared(result: Comparison) -> None:
+def compared(result: Comparison, *, splits: bool = False) -> None:
     """Several configurations, every number over the attempts all of them read.
 
     What a column beside another buys is the denominator they share, without
     which two shares cannot be read against each other at all.
+
+    The summary is a row per configuration and the per-technique table a column
+    per configuration, because only one of them can grow sideways. Techniques
+    are what the second table compares along, so the configurations there are
+    a number, and the summary is where that number is spelled out. A heading
+    naming the whole configuration wrapped the table at six of them, and a
+    wrapped table compares nothing.
     """
-    names = labels([scored.configuration for scored in result.scores])
     scores = [scored.score for scored in result.scores]
+    keys = [str(index) for index in range(1, len(scores) + 1)]
 
     print(f"{result.common} of {result.eval_set} hand-claimed attempts read by all")
     print()
-    summary = [
-        ("exact", [share(scored) for scored in scores]),
+
+    # No heading over the identity columns: the row says what it is, and a
+    # word above it would only repeat the configuration underneath.
+    head = ["", "", "", "", "exact"]
+    body = [
+        [key, scored.configuration.model, scored.configuration.effort]
+        + [sampled(scored.configuration.temperature), share(scored.score)]
+        for key, scored in zip(keys, result.scores, strict=True)
     ]
+
+    def column(name: str, cell: Callable[[Score], str]) -> None:
+        head.append(name)
+        for row, scored in zip(body, scores, strict=True):
+            row.append(cell(scored))
+
     if any(scored.decisions for scored in scores):
-        summary.append(("per decision", [decided(scored) for scored in scores]))
-    summary.append(("read/reused", [f"{scored.read}/{scored.reused}" for scored in scores]))
+        column("per decision", decided)
+    column("read/reused", lambda scored: f"{scored.read}/{scored.reused}")
     if any(scored.undecided for scored in scores):
-        summary.append(("named no candidate", [str(scored.undecided) for scored in scores]))
+        column("named no candidate", lambda scored: str(scored.undecided))
     if any(scored.failed for scored in scores):
         # Beside `read/reused`, which is where a shrunken denominator is
         # diagnosed: a configuration that failed read fewer than it planned to.
-        summary.append(("failed", [str(len(scored.failed)) for scored in scores]))
-    print(table(("", *names), [(head, *cells) for head, cells in summary]))
+        column("failed", lambda scored: str(len(scored.failed)))
+    print(table(head, body))
     print()
-    print(table(("technique", "attempts", *names), rows(result)))
+    print(table(("technique", "attempts", *keys), rows(result)))
 
     # Where they agreed there is nothing to choose between them, however wrong
-    # both are — so only the splits are printed, and the code decides them.
-    width = max(len(name) for name in names) + 1
-    for split in result.splits:
+    # both are — so only the splits are ever printed, and the code decides them.
+    # Counted rather than printed by default: one split is a line per
+    # configuration, so ten of them turn a handful of disagreements into
+    # hundreds of lines that mostly repeat each other.
+    if result.splits and not splits:
+        print(f"\n{len(result.splits)} read differently — --splits to see them")
+    width = max(len("you"), *(len(key) for key in keys)) + 1
+    for split in result.splits if splits else []:
         print(f"\n{split.attempt_id}\n  {'you:'.ljust(width)} {' '.join(split.user)}")
-        for name, verdict in zip(names, split.verdicts, strict=True):
-            print(f"  {(name + ':').ljust(width)} {' '.join(verdict)}")
+        for key, verdict in zip(keys, split.verdicts, strict=True):
+            print(f"  {(key + ':').ljust(width)} {' '.join(verdict)}")
 
-    for name, scored in zip(names, scores, strict=True):
-        if scored.failed:
-            print(failures(name, scored))
+    # Named in full here rather than by number: a failure block is read on its
+    # own, often pasted somewhere the summary above it did not go.
+    for key, scored in zip(keys, result.scores, strict=True):
+        if scored.score.failed:
+            print(failures(f"{key}  {describe(scored.configuration)}", scored.score))
 
 
 def describe(configuration: Configuration) -> str:
@@ -281,7 +307,7 @@ def describe(configuration: Configuration) -> str:
 
 
 def labels(configurations: Sequence[Configuration]) -> list[str]:
-    """A column heading per configuration: the model and the effort it ran at.
+    """A short name per configuration: the model and the effort it ran at.
 
     All three always, though the model alone would name a column where no two
     share one. Effort and temperature each move a number as far as the model

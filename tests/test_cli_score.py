@@ -125,9 +125,11 @@ def test_the_effort_attaches_to_the_model_before_it(hand_claimed, monkeypatch, c
         *("--model", "a-model", "--provider", "a-host", "--effort", "high"),
     )
 
-    out = capsys.readouterr().out
-    assert "a-model/low" in out
-    assert "a-model/high" in out
+    # A row each in the summary, which is where a configuration is spelled
+    # out now that the table below it heads columns with a number.
+    rows = [line for line in capsys.readouterr().out.splitlines() if "a-model" in line]
+    assert [line.split()[0] for line in rows] == ["1", "2"]
+    assert "low" in rows[0] and "high" in rows[1]
 
 
 def test_the_same_configuration_twice_is_refused(hand_claimed, monkeypatch, capsys):
@@ -173,16 +175,20 @@ def test_the_shares_are_over_what_both_read(hand_claimed, monkeypatch, capsys):
             }
         ),
         *("--model", MODEL, "--model", "a-cheap-model", "--provider", "a-host"),
+        "--splits",
     )
 
     out = capsys.readouterr().out
     assert "1 of 1 hand-claimed attempts read by all" in out
     assert "1/1 (100%)" in out
     assert "0/1 (0%)" in out
-    # Named by model and effort both: effort moves a number as far as the model
-    # does, so a column that dropped it would leave two readings under one name.
-    assert f"{MODEL}/{EFFORT}@{TEMPERATURE}: greedy" in out
-    assert re.search(rf"a-cheap-model/{EFFORT}@{TEMPERATURE}:\s+sorting", out)
+    # The split names each configuration by its summary row, so the verdicts
+    # line up with the numbers the technique table is headed by.
+    assert re.search(r"1:\s+greedy", out)
+    assert re.search(r"2:\s+sorting", out)
+    # And the summary is where those numbers are spelled out.
+    assert re.search(rf"1\s+{re.escape(MODEL)}\s+{EFFORT}\s+{TEMPERATURE}", out)
+    assert re.search(rf"2\s+a-cheap-model\s+{EFFORT}\s+{TEMPERATURE}", out)
 
 
 def test_a_classifier_that_fails_every_call_aborts(hand_claimed, monkeypatch, capsys):
@@ -340,11 +346,11 @@ def test_two_temperatures_of_one_model_are_two_columns(hand_claimed, monkeypatch
         *("--model", "a-model", "--provider", "a-host", "--temperature", "1"),
     )
 
-    out = capsys.readouterr().out
-    header = next(line for line in out.splitlines() if line.count("a-model") == 2)
-    labels = [token for token in header.split() if "a-model" in token]
-    assert len(labels) == 2
-    assert labels[0] != labels[1]
+    rows = [line for line in capsys.readouterr().out.splitlines() if "a-model" in line]
+    assert len(rows) == 2
+    # Same model and same effort, so only the temperature separates them.
+    assert rows[0].split()[:4] == ["1", "a-model", EFFORT, "0.0"]
+    assert rows[1].split()[:4] == ["2", "a-model", EFFORT, "1.0"]
 
 
 def test_one_model_at_one_temperature_twice_is_still_refused(hand_claimed, monkeypatch, capsys):
@@ -381,3 +387,25 @@ def test_two_temperatures_for_one_model_is_refused(hand_claimed, monkeypatch, ca
 
     assert exit_info.value.code == 2
     assert "two --temperature" in capsys.readouterr().err
+
+
+def test_what_they_read_differently_is_counted_rather_than_printed(
+    hand_claimed, monkeypatch, capsys
+):
+    """One split is a line per configuration, so ten configurations turn a
+    handful of disagreements into hundreds of lines that mostly repeat."""
+    run(
+        monkeypatch,
+        FakeTransport.per_deployment(
+            {
+                (MODEL, PIN): Verdict(["greedy"]),
+                ("a-cheap-model", "a-host"): Verdict(["sorting"]),
+            }
+        ),
+        *("--model", MODEL, "--model", "a-cheap-model", "--provider", "a-host"),
+    )
+
+    out = capsys.readouterr().out
+    assert "1 read differently — --splits to see them" in out
+    # The verdicts themselves are what the flag buys.
+    assert not re.search(r"^\s+1:\s+greedy", out, re.MULTILINE)
