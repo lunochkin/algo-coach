@@ -156,6 +156,38 @@ def test_a_hand_match_carries_no_configuration():
     assert (match.template_id, match.problem_id, match.matched) == ("t1", "p1", True)
 
 
+def test_a_hand_match_is_blind_by_default():
+    """The pool offers a pair whatever a matcher said about it, and the prompt
+    shows nothing unless asked — so the caller says otherwise rather than
+    saying so."""
+    assert user_match("t1", "p1", matched=True).informed_by == []
+
+
+def test_a_hand_match_records_what_its_author_had_seen():
+    """An annotation made with a verdict in view is no longer independent of
+    it, and the agreement it is later scored on measures rather less."""
+    match = user_match("t1", "p1", matched=True, informed_by=["call-1"])
+
+    assert match.informed_by == ["call-1"]
+
+
+def test_a_machine_match_has_seen_nothing():
+    """The matcher reads one statement against one card's cues, never another
+    reading of them."""
+    match = machine_match(
+        "t1",
+        "p1",
+        matched=True,
+        model="a-model",
+        effort="medium",
+        prompt_hash="0123456789ab",
+        call_id="call-1",
+        pin="a-host",
+    )
+
+    assert match.informed_by == []
+
+
 def test_a_hand_match_annotates_the_negative_too():
     """The machine answers every candidate of a card, so a reference naming
     only the matches would score its yes and say nothing about its no."""

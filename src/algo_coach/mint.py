@@ -154,7 +154,13 @@ def classifier_claim(
     )
 
 
-def user_match(template_id: str, problem_id: str, *, matched: bool) -> TemplateMatch:
+def user_match(
+    template_id: str,
+    problem_id: str,
+    *,
+    matched: bool,
+    informed_by: Sequence[str] = (),
+) -> TemplateMatch:
     """One pair the user annotated, positive or negative.
 
     It carries no configuration because nothing re-derives it. That is what
@@ -164,6 +170,10 @@ def user_match(template_id: str, problem_id: str, *, matched: bool) -> TemplateM
     The negative is annotated as deliberately as the positive. The machine
     answers every candidate of a card, so a reference that only named matches
     would score its "yes" and say nothing about its "no".
+
+    Blind unless the caller says otherwise, as a user claim is. Only an
+    annotation asking to see the matcher has a verdict in view, and only it
+    records one.
     """
     return TemplateMatch(
         id=new_id(),
@@ -172,6 +182,7 @@ def user_match(template_id: str, problem_id: str, *, matched: bool) -> TemplateM
         problem_id=problem_id,
         matched=matched,
         source=MatchSource.USER,
+        informed_by=list(informed_by),
     )
 
 

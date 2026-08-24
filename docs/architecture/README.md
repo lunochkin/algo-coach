@@ -216,6 +216,11 @@ problem, so nothing is authored here either.
   asserts that each of them does not match, which is a verdict on every pair
   and is scored as one. The record shape decides this, not the model's
   behaviour.
+- **An annotation records the verdicts its author saw**, as a claim does.
+  `informed_by` names them one by one, so a record made after seeing one
+  matcher is still independent of another. It is written on every pair the
+  answer settles, negatives included, because what the reader saw is a fact
+  about the sitting rather than about the verdict.
 - **The first hand pass calibrates, a blind one measures.** Annotating is where
   the line gets drawn between exercising a form and merely admitting it. A
   score taken over the pairs that drew that line measures agreement with

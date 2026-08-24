@@ -8,7 +8,8 @@ only named matches would score the matcher's "yes" and say nothing about its
 
 Blind by default. The first pass is where the line gets drawn between
 exercising a form and merely admitting it. An annotation made with a verdict in
-view records what it reviewed rather than what it read.
+view records what it reviewed rather than what it read, and `informed_by` names
+the calls it saw.
 """
 
 import argparse
@@ -70,8 +71,11 @@ def annotate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         if answer.picked is None:
             continue
         picked = {forms[int(number) - 1].id for number in answer.picked}
+        saw = shown(question, forms, read)
         for form in forms:
-            log.append(user_match(form.id, question.problem.id, matched=form.id in picked))
+            log.append(
+                user_match(form.id, question.problem.id, matched=form.id in picked, informed_by=saw)
+            )
             written += 1
         answered += 1
 
@@ -94,6 +98,29 @@ def machine_verdicts(matches: Iterable[TemplateMatch]) -> dict[tuple[str, str], 
         if pair not in latest or match.created_at >= latest[pair].created_at:
             latest[pair] = match
     return latest
+
+
+def shown(
+    question: Question,
+    forms: list[Template],
+    read: Mapping[tuple[str, str], TemplateMatch],
+) -> list[str]:
+    """The calls whose verdicts `read_as` put in front of the annotator.
+
+    One call answers a whole card, so the forms of one question usually name
+    the same one; it is listed once. A form no matcher has read showed nothing,
+    so it informed nothing.
+
+    Recorded on every pair the answer writes, positive and negative alike. What
+    the reader saw is a fact about the sitting rather than about the verdict,
+    and the negatives are scored as the positives are.
+    """
+    seen: list[str] = []
+    for form in forms:
+        match = read.get((form.id, question.problem.id))
+        if match is not None and match.call_id is not None and match.call_id not in seen:
+            seen.append(match.call_id)
+    return seen
 
 
 def read_as(

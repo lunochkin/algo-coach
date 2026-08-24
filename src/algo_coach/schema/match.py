@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 
 from algo_coach.schema.provenance import MachineProvenance
 
@@ -37,6 +37,13 @@ class TemplateMatch(MachineProvenance):
     # every non-match forever, which on a growing corpus is nearly all the work.
     matched: bool
     source: MatchSource
+    # The calls whose verdicts were in view when the pair was annotated, empty
+    # for a blind one. Not provenance: provenance is what produced a reading,
+    # this is what its author had seen. A hand record carries this and never
+    # that. Named one by one, because an annotation made after seeing one
+    # matcher's verdict is still independent of another's, and configurations
+    # are scored against the same records.
+    informed_by: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _provenance_matches_source(self) -> TemplateMatch:

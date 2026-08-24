@@ -46,6 +46,33 @@ def test_a_negative_is_a_verdict_and_is_stored():
     assert make_match(MatchSource.USER, matched=False).matched is False
 
 
+def test_an_annotation_is_blind_unless_it_says_otherwise():
+    """The first pass is asked from the statement and the cues alone, so an
+    empty list is what a record means when nothing recorded what its author
+    saw."""
+    assert make_match(MatchSource.USER).informed_by == []
+
+
+def test_a_hand_match_records_the_verdicts_its_author_saw():
+    """Not provenance: provenance is what produced a reading, this is what its
+    author had in view. A hand record carries the second and never the
+    first."""
+    match = make_match(MatchSource.USER, informed_by=["call-1", "call-2"])
+
+    assert match.informed_by == ["call-1", "call-2"]
+    assert [field for field in match.RECORDED if getattr(match, field) is not None] == []
+
+
+def test_verdicts_are_named_one_by_one_rather_than_flagged():
+    """An annotation made after seeing one matcher's verdict is still
+    independent of another's, and configurations are scored against the same
+    records."""
+    match = make_match(MatchSource.USER, informed_by=["call-1"])
+
+    assert "call-1" in match.informed_by
+    assert "call-2" not in match.informed_by
+
+
 def test_a_match_states_its_verdict():
     with pytest.raises(ValidationError):
         make_match(MatchSource.CLASSIFIER, matched=None, **PROVENANCE)

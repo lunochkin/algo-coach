@@ -55,6 +55,12 @@ def written(root):
     return MatchLog(root).matches()
 
 
+def annotated(root):
+    """The hand records alone: a test that seeds a matcher's verdict finds it
+    in the log beside what the sitting wrote."""
+    return [one for one in written(root) if one.source is MatchSource.USER]
+
+
 def by_slug(root):
     """Minted template id to slug, since a record carries the id and a test
     reads the form."""
@@ -209,6 +215,33 @@ def test_the_matcher_is_shown_on_request(annotate_root, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "a-matcher" in out
     assert "yes  subsets" in out
+
+
+def test_a_blind_annotation_names_no_reading(annotate_root, monkeypatch, capsys):
+    """Nothing was in view, so there is nothing to record — which is what makes
+    the record independent of every configuration scored against it."""
+    read_by_matcher(annotate_root)
+    run(monkeypatch, ["0"], "--count", "1", "--card", "backtracking")
+
+    assert all(one.informed_by == [] for one in annotated(annotate_root))
+
+
+def test_an_annotation_records_the_calls_it_saw(annotate_root, monkeypatch, capsys):
+    """On every pair the answer writes, negatives included: what the reader saw
+    is a fact about the sitting rather than about the verdict."""
+    read_by_matcher(annotate_root)
+    run(monkeypatch, ["0"], "--count", "1", "--card", "backtracking", "--verdict")
+
+    assert all(one.informed_by == ["c"] for one in annotated(annotate_root))
+
+
+def test_a_form_no_matcher_read_informs_nothing(annotate_root, monkeypatch, capsys):
+    """Only `subsets` was read, so only its call is named — the prompt showed
+    the other two forms with no verdict beside them."""
+    read_by_matcher(annotate_root)
+    run(monkeypatch, ["1"], "--count", "1", "--card", "backtracking", "--verdict")
+
+    assert {tuple(one.informed_by) for one in annotated(annotate_root)} == {("c",)}
 
 
 def test_one_card_is_asked_about_alone(annotate_root, monkeypatch, capsys):
