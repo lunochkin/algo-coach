@@ -7,7 +7,15 @@ from pathlib import Path
 import pytest
 
 from algo_coach.calls import UNSENT, CallLog, Reply
-from algo_coach.claims import EFFORT, MODEL, ClassifierError, Configuration, request_hash
+from algo_coach.claims import (
+    DEFAULT,
+    EFFORT,
+    MODEL,
+    PIN,
+    ClassifierError,
+    Configuration,
+    request_hash,
+)
 from algo_coach.claims import classify as _classify
 from algo_coach.claims.classifier import SYSTEM
 from algo_coach.schema import Kind
@@ -262,12 +270,20 @@ def test_a_named_configuration_is_what_the_call_carries():
     assert (call["model"], call["effort"]) == ("a-cheap-model", "low")
 
 
-def test_the_claim_records_what_produced_it():
-    """Both count the same toward progress, but a machine claim can be
-    recomputed by a better classifier, so re-deriving has to find the stale
-    ones and leave the rest."""
-    assert MODEL == "openai/gpt-oss-120b"
-    assert EFFORT
+def test_the_default_configuration_is_known_in_every_part():
+    """A machine claim can be recomputed by a better classifier, so re-deriving
+    has to find the stale ones and leave the rest — and a reading whose
+    configuration is partly unknown compares with nothing.
+
+    Which model is named is a decision the eval set makes and remakes; that it
+    is named, pinned and sampled deliberately is the rule. A literal id here
+    would assert only that someone typed one.
+    """
+    assert (DEFAULT.model, DEFAULT.effort, DEFAULT.pin) == (MODEL, EFFORT, PIN)
+    assert all((MODEL, EFFORT, PIN))
+    # Greedy rather than absent: the sweep writes permanently, so a sampled
+    # default would make the same fraction of a percent permanent with it.
+    assert DEFAULT.temperature == 0.0
 
 
 def test_the_request_hash_is_the_question_this_attempt_would_be_asked():

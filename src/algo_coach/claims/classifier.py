@@ -16,19 +16,26 @@ from algo_coach.calls import prompt_hash as digest
 from algo_coach.schema import Call
 from algo_coach.techniques import criterion
 
-# Eight configurations read the same 59 hand-claimed attempts and five landed
-# inside the measured noise of each other, this one among them: the ceiling is
-# the hand claims, not the reader, and every model that reaches it makes the
-# same errors on the same attempts. So the choice is cost, and this is two
-# orders of magnitude under the frontier tier — which is what makes re-deriving
-# the whole backlog after a criteria edit cost cents rather than a decision.
-MODEL = "openai/gpt-oss-120b"
+# Twenty configurations read the same 80 hand-claimed attempts, and the readers
+# do not share a ceiling: the spread is 70% to 95%, and of the sixteen attempts
+# any of the leaders got wrong, none defeated all of them and ten were wrong for
+# exactly one. So the choice is not only cost — an earlier note here claimed
+# every model that reached the ceiling erred on the same attempts, and the eval
+# set has since disproved it.
+#
+# This one agrees with the best reader to within a single attempt, which is
+# inside the noise its own effort arms measured, at a twentieth of the price.
+# What that buys is re-derivation: a criteria edit re-reads the attempts it
+# reaches, and at this rate the whole backlog is under a dollar rather than a
+# decision. The cost is time — it is the slowest of the leaders by an order of
+# magnitude, and a full sweep is hours rather than minutes.
+MODEL = "google/gemma-4-31b-it"
 EFFORT = "medium"
 # Which endpoint may serve it, named to the quantization. A router picks one
 # per request from whoever carries the model, so without a pin two runs of one
 # configuration are answered by different builds of the same weights — and fp4
 # and bf16 are different weights, not one model behind two doors.
-PIN = "deepinfra/bf16"
+PIN = "coreweave/bf16"
 # Greedy. Classification over a fixed candidate set has one right answer per
 # decision, and sampling turns a verdict the model holds at 0.9 into one it
 # gives four times in five. That noise is tolerable in an eval, which is
