@@ -85,6 +85,13 @@ score *args:
         --model openai/gpt-oss-120b --provider coreweave/fp4 \
         --model google/gemma-4-31b-it --provider coreweave/bf16 \
         --model z-ai/glm-5.2 --provider gmicloud/fp8  \
+        --model nvidia/nemotron-3-super-120b-a12b --provider digitalocean \
+        --model minimax/minimax-m3 --provider coreweave/fp4 \
+        --model qwen/qwen3-next-80b-a3b-thinking --provider nebius/fp8 \
+        --model deepseek/deepseek-v3.2 --provider streamlake/fp8 \
+        --model arcee-ai/trinity-large-thinking --provider parasail/fp4 \
+        --model meta/muse-glimmer-30b --provider deepinfra/bf16 \
+        --model tencent/hy3 --provider baidu/fp8 \
         {{ args }}
 
 # How far the classifier's claims move the board off the tags.
