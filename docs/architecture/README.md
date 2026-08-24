@@ -391,9 +391,17 @@ rather than a field on the attempt.
   rule orders the log. A reading saying the candidates do not fit is not weaker
   evidence than an older one made against a rulebook it disagrees with. What it
   costs is that the older claim's answer gives way to the tags.
-- **Only the machine may name nothing.** The drill loop records nothing where
-  the user skips. An empty user claim would be indistinguishable from a stated
-  one, so a skipped answer would read as an answer given.
+- **A decline is stated, never inferred from an empty set.** Either writer may
+  name none of the candidates. The user says so with `declined`, because the
+  drill loop records nothing where they skip, and emptiness alone would make a
+  lost answer and a stated verdict the same record. The classifier needs no
+  flag: it answers or it fails, and a failure writes no claim.
+- **The eval set can hold a correct decline, and could not before.**
+  Adjudication sometimes ends at "no candidate applies". Without a way to say
+  it, such a claim could only be deleted. Membership is keyed on a hand claim
+  existing, so deleting it drops the attempt from the set. The classifier's
+  declines were stored and scored while the user's could not be recorded, and
+  the field removes that asymmetry.
 - **The user's claim wins on read, the latest of each writer's otherwise.**
   Under latest-wins alone, whichever writer wrote last would decide, and the
   classifier writes far more often. Ground truth would last only until

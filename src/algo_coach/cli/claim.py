@@ -12,7 +12,7 @@ from algo_coach.claims import (
     revisable,
 )
 from algo_coach.cli.display import verdict
-from algo_coach.cli.prompts import ask_choice, numbered
+from algo_coach.cli.prompts import NONE, ask_choice, numbered
 from algo_coach.cli.score import configurations, labels
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
@@ -67,6 +67,11 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
 
     # Once, unlike the candidates: the levels are the same at every attempt.
     print(f"\nconfidence: {numbered(LEVELS)}")
+    # What each answer does, said before the first prompt rather than only in
+    # the retry hint. `0` and `s` are the pair worth spelling out: one is a
+    # verdict about the code, the other leaves the attempt unanswered.
+    kept = "keeps the claim" if args.revise else "skips"
+    print(f"keys: numbers to name, 0 for {NONE}, s skips, enter {kept}, a stops.")
 
     written = 0
     for index, attempt in enumerate(pool[: args.count], start=1):
@@ -84,7 +89,15 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         print(f"\n{'\n\n'.join(rules)}\n")
 
         answer = ask_choice(
-            "techniques", problem.techniques, [], empty="keep" if args.revise else "skip"
+            "techniques",
+            problem.techniques,
+            [],
+            empty="keep" if args.revise else "skip",
+            # Naming none of the tags is a verdict about the code, and the
+            # classifier can already record it. Without it here, a hand claim
+            # could only be overturned by deleting it, which drops the attempt
+            # out of the eval set entirely.
+            none=NONE,
         )
         if answer is None or answer.rest:
             break
@@ -101,6 +114,10 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             user_claim(
                 attempt.id,
                 chosen,
+                # `0` came back as an empty list, which no other reply gives.
+                # Stated rather than inferred: the schema refuses an empty
+                # claim that does not say it is one.
+                declined=not chosen,
                 confidence=LEVELS[int(level.picked[0]) - 1] if level.picked else None,
                 informed_by=shown(attempt, readings),
             )

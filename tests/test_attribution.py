@@ -48,6 +48,7 @@ def make_claim(
     attempt_id: str = "a1",
     created_at: datetime = T0,
     source: ClaimSource = ClaimSource.USER,
+    declined: bool = False,
 ) -> TechniqueClaim:
     machine = source is ClaimSource.CLASSIFIER
     return TechniqueClaim(
@@ -56,6 +57,7 @@ def make_claim(
         attempt_id=attempt_id,
         techniques=techniques,
         source=source,
+        declined=declined,
         model="m1" if machine else None,
         effort="medium" if machine else None,
         pin="a-host" if machine else None,
@@ -287,3 +289,26 @@ def test_resolving_an_empty_log(tmp_path):
     log = AttemptLog(tmp_path)
 
     assert standing_claims(log.claims()) == {}
+
+
+def test_a_user_decline_leaves_the_fallback_standing():
+    """The resolver reads a claim's techniques rather than its existence, so a
+    decline answers nothing and the tags keep answering — the same rule a
+    machine decline already follows, and the board does not move."""
+    attempt = make_attempt()
+    problem = make_problem(source_tags=["Greedy", "Sorting"])
+    claims = standing_claims([make_claim([], declined=True)])
+
+    assert resolve_techniques(attempt, problem, claims) == ["greedy", "sorting"]
+
+
+def test_a_user_decline_stands_over_a_later_machine_claim():
+    """A decline is the user's answer, so it wins on read like any other. The
+    machine's stays in the log as a reading and is scored against it."""
+    later = make_claim(
+        ["greedy"], id="c2", created_at=T0 + timedelta(days=1), source=ClaimSource.CLASSIFIER
+    )
+    standing = standing_claims([make_claim([], id="c1", declined=True), later])
+
+    assert standing["a1"].id == "c1"
+    assert standing["a1"].declined is True

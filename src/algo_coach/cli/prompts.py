@@ -7,6 +7,11 @@ class Answer(NamedTuple):
     rest: bool  # apply the defaults to every attempt still to come
 
 
+# What `0` answers, worded once. The prompt shows it, the loops announce it,
+# and the retry hint repeats it — three places that must not drift.
+NONE = "none of these"
+
+
 def ask_choice(
     what: str, options: list, default: list[str], *, empty: str = "skip", none: str | None = None
 ) -> Answer | None:

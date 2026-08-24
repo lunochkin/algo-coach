@@ -81,9 +81,14 @@ def user_claim(
     *,
     confidence: Confidence | None = None,
     informed_by: Sequence[str] = (),
+    declined: bool = False,
 ) -> TechniqueClaim:
     """A claim the user made, in the drill loop or over the stored log. It
     carries no model or prompt version because nothing re-derives it.
+
+    `declined` is how they name none of the candidates. Passed rather than
+    inferred from an empty list, so a writer that lost an answer cannot record
+    a verdict nobody gave.
 
     Blind and unsure unless the caller says otherwise: the drill loop asks
     before any classifier has read the attempt, and the hand pass asks from the
@@ -95,6 +100,7 @@ def user_claim(
         created_at=datetime.now(UTC),
         attempt_id=attempt_id,
         techniques=techniques,
+        declined=declined,
         source=ClaimSource.USER,
         informed_by=list(informed_by),
         confidence=confidence,

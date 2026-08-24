@@ -4,7 +4,7 @@ from pathlib import Path
 
 from algo_coach.board import candidates, per_technique
 from algo_coach.cli.display import problem_choice, problem_history, technique_choice, verdict
-from algo_coach.cli.prompts import ask_choice, choose, numbered
+from algo_coach.cli.prompts import NONE, ask_choice, choose, numbered
 from algo_coach.log import AttemptLog, appeared, latest_by_attempt
 from algo_coach.mint import self_label, user_claim
 from algo_coach.problems import ProblemStore
@@ -112,10 +112,15 @@ def record_answers(
     options = sorted(set(problem.techniques) | {technique})
     modes = list(FailureMode)
     print(f"\n{len(fresh)} to record. Enter takes the default, a takes it for the rest, s skips.")
-    print(f"  techniques  {numbered(options)}")
+    # Beside the candidates rather than in the line above, because only this
+    # question takes it. A legend covering both would offer the labels a key
+    # their prompt rejects.
+    print(f"  techniques  {numbered(options)}   0 for {NONE}")
     print(f"  labels      {numbered(modes)}")
 
-    claimed = [technique]
+    # `None` is nothing answered, `[]` is a stated decline. The write path
+    # tells them apart, so an empty list is never a lost answer.
+    claimed: list[str] | None = [technique]
     labelled: FailureMode | None = None
     rest = False
     claims = labels = 0
@@ -123,14 +128,16 @@ def record_answers(
     for index, attempt in enumerate(fresh, start=1):
         print(f"\n{index}/{len(fresh)}  {attempt.finished_at:%Y-%m-%d %H:%M}  {verdict(attempt)}")
         if not rest:
-            seeded = [str(options.index(code) + 1) for code in claimed]
-            answer = ask_choice("techniques", options, seeded)
+            seeded = [str(options.index(code) + 1) for code in claimed or []]
+            # Naming none of the tags is cheapest here, where the attempt is
+            # minutes old — the same keystroke the claim itself costs.
+            answer = ask_choice("techniques", options, seeded, none=NONE)
             if answer is None:
                 break
             if answer.picked is not None:
                 claimed = [options[int(number) - 1] for number in answer.picked]
             elif not answer.rest:
-                claimed = []
+                claimed = None
 
             # `a` at either prompt stops the questions outright, so it does not
             # cost a second keystroke on the attempt that ends them.
@@ -147,8 +154,10 @@ def record_answers(
                 elif not picked_label.rest:
                     labelled = None
 
-        if claimed:
-            log.append_claim(user_claim(attempt.id, claimed))
+        if claimed is not None:
+            # Not a truthiness test: `[]` is the decline, and reading it as
+            # nothing answered would drop the verdict without saying so.
+            log.append_claim(user_claim(attempt.id, claimed, declined=not claimed))
             claims += 1
         if labelled is not None:
             log.append_self_label(self_label(attempt.id, labelled))

@@ -673,3 +673,45 @@ def test_revise_ignores_a_reading_of_a_prompt_nobody_sends_now(claim_root, monke
 
     assert exit_info.value.code == 0
     assert "nothing disputed" in capsys.readouterr().err
+
+
+def test_zero_records_a_decline(claim_root, monkeypatch, capsys):
+    """`0` is an answer: the candidates do not cover what the code did. It is
+    the reading the classifier can already record, and adjudication needs the
+    user to be able to overturn a claim with it."""
+    run(monkeypatch, ["0", ""])
+
+    (claim,) = claim_root.claims()
+    assert claim.attempt_id == "a1"
+    assert (claim.techniques, claim.declined) == ([], True)
+    assert claim.source is ClaimSource.USER
+
+
+def test_a_skip_still_records_nothing(claim_root, monkeypatch, capsys):
+    """The distinction the flag exists for. `s` leaves the attempt unanswered,
+    where `0` answers it."""
+    run(monkeypatch, ["s", "s"])
+
+    assert claim_root.claims() == []
+
+
+def test_a_decline_can_supersede_an_earlier_claim(claim_root, monkeypatch, capsys):
+    """What the countRangeSum case needs: a hand claim revised to name none of
+    the candidates, rather than deleted to get it out of the eval set."""
+    claim_root.append_claim(user_claim("a1", ["greedy"]))
+
+    run(monkeypatch, ["0", ""], "--revise")
+
+    latest = standing_claims(claim_root.claims())["a1"]
+    assert (latest.techniques, latest.declined) == ([], True)
+
+
+def test_the_keys_are_announced_before_the_first_prompt(claim_root, monkeypatch, capsys):
+    """`0` and `s` are the pair worth spelling out: one is a verdict about the
+    code, the other leaves the attempt unanswered. Learning them from the
+    retry hint means typing something wrong first."""
+    run(monkeypatch, ["1", ""])
+
+    out = capsys.readouterr().out
+    assert "0 for none of these" in out
+    assert "s skips" in out

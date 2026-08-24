@@ -93,13 +93,15 @@ class TechniqueClaim(AttemptRecord, MachineProvenance):
     revision replaces the whole set. Per-technique records would leave a later
     claim merging with an earlier one, with nothing to say which stands.
 
-    A machine claim may name none of them. That is the classifier saying the
-    candidates do not cover what the code did. It is a reading worth keeping,
-    since an unstored one is re-read by every later run, and the answer never
-    changes while the question does not. A user's claim may not name none. The
-    loop records nothing where they skip, so an empty one would be
-    indistinguishable from a stated one, and a skip would read as an answer
-    given.
+    A claim may name none of them. That is its author saying the candidates do
+    not cover what the code did. From the classifier it is a reading worth
+    keeping, since an unstored one is re-read by every later run, and the
+    answer never changes while the question does not.
+
+    A user says so with `declined`, never with an empty list alone. The loop
+    records nothing where they skip, so emptiness on its own would be
+    indistinguishable from a stated decline, and a skipped answer would read
+    as an answer given. The flag is what tells the two apart.
     """
 
     # Empty is a verdict, not an absent one: the classifier read the code and
@@ -107,6 +109,12 @@ class TechniqueClaim(AttemptRecord, MachineProvenance):
     # for on every later run, and the resolver leaves the fallback standing
     # rather than treating an empty set as an answer.
     techniques: list[str] = Field(default_factory=list)
+    # The user's decline, stated rather than inferred from an empty list. Only
+    # they need it: the classifier answers or fails, and a failure writes no
+    # claim, so its empty set was never ambiguous. Making it required of both
+    # would tighten a field every stored machine decline already carries
+    # loosely, which the schema rule does not allow.
+    declined: bool = False
     source: ClaimSource  # required: a mislabelled claim cannot be corrected later
     # The calls whose readings were in view when the claim was made, empty for
     # a blind one. Not provenance: provenance is what produced a claim, this is
@@ -127,10 +135,15 @@ class TechniqueClaim(AttemptRecord, MachineProvenance):
     def _provenance_matches_source(self) -> TechniqueClaim:
         """A machine claim is re-derivable, so it must say by what; provenance
         on a user claim would name a model that never touched it."""
-        if self.source is ClaimSource.USER and not self.techniques:
+        if self.source is ClaimSource.USER and not (self.techniques or self.declined):
             # The drill loop records nothing where the user skips, so an empty
-            # user claim is a lost answer rather than a stated one.
-            raise ValueError("a user claim names at least one technique")
+            # user claim is a lost answer rather than a stated one — unless it
+            # says which it is.
+            raise ValueError("a user claim names at least one technique, or declines")
+        if self.techniques and self.declined:
+            # One record would assert that the candidates do not apply and name
+            # two of them. Nothing reading it could say which was meant.
+            raise ValueError("a claim that names techniques cannot decline")
 
         self.check_provenance(self.source is ClaimSource.CLASSIFIER)
         return self

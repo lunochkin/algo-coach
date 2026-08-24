@@ -338,3 +338,91 @@ def test_a_bad_answer_is_asked_again(drill_root, monkeypatch, capsys):
 
     assert "pick numbers between 1 and" in capsys.readouterr().out
     assert len(drill_root.claims()) == 1
+
+
+def test_the_loop_records_a_decline_at_the_moment_of_solving(
+    drill_root, monkeypatch, capsys
+):
+    """A claim is cheapest here, and so is a decline. Naming none of the tags
+    is a verdict about the code, and the loop is where it is worth a keystroke
+    rather than a re-read months later."""
+    seed_problem(root_of(drill_root), id="two-tags", tags=["Greedy", "Sorting"])
+    pushed = [attempt("a3", "two-tags", finished_at=T0 + timedelta(days=200))]
+    scripted = iter(["1", "0", "s"])
+
+    def ask(prompt: str) -> str:
+        if prompt.startswith("pushed?"):
+            if not pushed:
+                return "q"
+            for record in pushed:
+                drill_root.append_attempt(record)
+            pushed.clear()
+            return ""
+        return next(scripted)
+
+    monkeypatch.setattr("builtins.input", ask)
+    monkeypatch.setattr(
+        "sys.argv", ["algo-coach", "drill", "--user", "u1", "--technique", "greedy"]
+    )
+    cli.main()
+
+    (claim,) = drill_root.claims()
+    assert (claim.techniques, claim.declined) == ([], True)
+
+
+def test_a_skipped_claim_is_still_no_claim(drill_root, monkeypatch, capsys):
+    """The trap the flag exists to avoid. `if claimed:` reads a stated empty
+    list as nothing answered, so the two need telling apart on the write path
+    and not only in the schema."""
+    seed_problem(root_of(drill_root), id="two-tags", tags=["Greedy", "Sorting"])
+    pushed = [attempt("a3", "two-tags", finished_at=T0 + timedelta(days=200))]
+    scripted = iter(["1", "s", "s"])
+
+    def ask(prompt: str) -> str:
+        if prompt.startswith("pushed?"):
+            if not pushed:
+                return "q"
+            for record in pushed:
+                drill_root.append_attempt(record)
+            pushed.clear()
+            return ""
+        return next(scripted)
+
+    monkeypatch.setattr("builtins.input", ask)
+    monkeypatch.setattr(
+        "sys.argv", ["algo-coach", "drill", "--user", "u1", "--technique", "greedy"]
+    )
+    cli.main()
+
+    assert drill_root.claims() == []
+
+
+def test_the_none_key_is_shown_beside_the_candidates(drill_root, monkeypatch, capsys):
+    """Only the techniques question takes it. A legend over both would offer
+    the labels a key their prompt rejects."""
+    seed_problem(root_of(drill_root), id="two-tags", tags=["Greedy", "Sorting"])
+    pushed = [attempt("a3", "two-tags", finished_at=T0 + timedelta(days=200))]
+    # `choose` re-asks until a number lands, so the problem pick comes first.
+    scripted = iter(["1", "s", "s"])
+
+    def ask(prompt: str) -> str:
+        if prompt.startswith("pushed?"):
+            if not pushed:
+                return "q"
+            for record in pushed:
+                drill_root.append_attempt(record)
+            pushed.clear()
+            return ""
+        return next(scripted)
+
+    monkeypatch.setattr("builtins.input", ask)
+    monkeypatch.setattr(
+        "sys.argv", ["algo-coach", "drill", "--user", "u1", "--technique", "greedy"]
+    )
+    cli.main()
+
+    lines = capsys.readouterr().out.splitlines()
+    (techniques,) = [line for line in lines if line.strip().startswith("techniques")]
+    (labels,) = [line for line in lines if line.strip().startswith("labels")]
+    assert "0 for none of these" in techniques
+    assert "0 for" not in labels

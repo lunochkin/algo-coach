@@ -98,10 +98,37 @@ def test_naming_nothing_is_a_verdict_the_machine_may_record():
 
 
 def test_naming_nothing_is_not_a_verdict_a_user_may_record():
-    """The loop records nothing where they skip, so an empty user claim would
-    be a lost answer wearing the shape of a stated one."""
+    """The loop records nothing where they skip, so a bare empty user claim
+    would be a lost answer in the shape of a stated one. Saying so is a
+    separate field, and this is the case without it."""
     with pytest.raises(ValueError, match="at least one technique"):
         user_claim("a1", [])
+
+
+def test_a_user_may_decline_by_saying_so():
+    """The candidates do not cover what the code did, asserted rather than
+    inferred from an empty list. It is what a skip is told apart from."""
+    claim = user_claim("a1", [], declined=True)
+
+    assert claim.techniques == []
+    assert claim.declined is True
+    assert claim.source is ClaimSource.USER
+
+
+def test_a_claim_naming_techniques_cannot_also_decline():
+    """Both at once asserts that the candidates do not apply and names two of
+    them. Nothing reading the record could say which was meant."""
+    with pytest.raises(ValueError, match="decline"):
+        user_claim("a1", ["greedy"], declined=True)
+
+
+def test_a_machine_decline_needs_no_flag():
+    """Its empty set was never ambiguous: the classifier answers or fails, and
+    a failure writes no claim. Tightening the field would reach every decline
+    already stored."""
+    claim = machine_claim("a1", [])
+
+    assert (claim.techniques, claim.declined) == ([], False)
 
 
 def test_a_self_label_is_keyed_to_its_attempt():
