@@ -72,6 +72,16 @@ classify *args:
 # The classifier against the user's own claims.
 score *args:
     uv run algo-coach score --concurrency 4 \
+        --model anthropic/claude-opus-5 --provider anthropic --temperature default \
+        --model google/gemini-3.7-flash --provider google-ai-studio \
+        --model openai/gpt-oss-120b --provider coreweave/fp4 \
+        --model google/gemma-4-31b-it --provider coreweave/bf16 \
+        --model z-ai/glm-5.2 --provider gmicloud/fp8  \
+        {{ args }}
+
+# The classifier against the user's own claims.
+score-stored *args:
+    uv run algo-coach score --stored \
         --model anthropic/claude-sonnet-5 --provider anthropic --temperature default \
         --model anthropic/claude-opus-5 --provider anthropic --temperature default \
         --model anthropic/claude-fable-5 --provider anthropic --temperature default \
