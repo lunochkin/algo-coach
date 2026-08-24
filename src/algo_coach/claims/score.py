@@ -69,6 +69,14 @@ class Score(BaseModel):
     # the price was recorded carries none, and counting it would understate.
     cost: float = 0.0
     costed: int = 0
+    # What the readings spent, averaged by the caller. Joined from the calls
+    # rather than copied onto the claims: a claim deliberately holds no token
+    # counts, and this is the report that wants them.
+    input_tokens: int = 0
+    output_tokens: int = 0
+    reasoning_tokens: int = 0
+    tokened: int = 0  # readings whose call reported a count
+    reasoned: int = 0  # of those, the ones reporting the thinking split
 
 
 class ConfigurationScore(BaseModel):
@@ -173,6 +181,26 @@ def per_decision(
         total += len(offered)
         agreed += len(offered) - len((set(expected) ^ set(machine[attempt_id])) & offered)
     return total, agreed
+
+
+def spent(scored: Score, calls: Sequence[Call]) -> None:
+    """Fold what the calls behind a reading consumed into its score.
+
+    Counted over the calls that reported, never over the readings: one made
+    before a count was recorded says nothing, and treating it as zero would
+    understate whichever configuration was read earliest. The thinking split
+    has a denominator of its own, since a model may report the total and not
+    the part of it spent reasoning.
+    """
+    for call in calls:
+        if call.input_tokens is None or call.output_tokens is None:
+            continue
+        scored.input_tokens += call.input_tokens
+        scored.output_tokens += call.output_tokens
+        scored.tokened += 1
+        if call.reasoning_tokens is not None:
+            scored.reasoning_tokens += call.reasoning_tokens
+            scored.reasoned += 1
 
 
 def queued(plans: Sequence[Plan]) -> Iterator[tuple[Plan, Attempt]]:
@@ -319,6 +347,11 @@ def score_backlog(
         if attempt.problem_id in problems
     }
 
+    # Read once, for the whole comparison. The claims deliberately carry no
+    # token counts, so this is the only place they can come from — and this is
+    # a report rather than a path a board renders from.
+    seen = {call.id: call for call in calls.all()}
+
     result = Comparison(eval_set=len(hand_claimed), common=len(common))
     for configuration, reading in zip(configurations, readings, strict=True):
         scored = score(truth, reading.verdicts)
@@ -328,6 +361,7 @@ def score_backlog(
         scored.failed = reading.failed
         scored.read, scored.reused = reading.read, reading.reused
         scored.cost, scored.costed = reading.cost, reading.costed
+        spent(scored, [seen[one] for one in reading.call_ids if one in seen])
         scored.undecided = reading.undecided
         scored.aborted = reading.aborted
         result.scores.append(ConfigurationScore(configuration=configuration, score=scored))

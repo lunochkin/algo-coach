@@ -112,6 +112,7 @@ def ask(
         input_tokens=reply.input_tokens,
         output_tokens=reply.output_tokens,
         cost=reply.cost,
+        reasoning_tokens=reply.reasoning_tokens,
         provider=reply.provider,
         elapsed_ms=elapsed(started),
         request_ms=reply.request_ms,

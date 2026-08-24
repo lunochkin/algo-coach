@@ -54,7 +54,19 @@ class Call(BaseModel):
     # build on its own.
     provider: str | None = None
     input_tokens: int | None = None
+    # Reasoning and answer together, as the router counts them. A verdict is a
+    # dozen tokens, so on a model that thinks this is almost entirely the
+    # thinking — which is what `reasoning_tokens` separates out.
     output_tokens: int | None = None
+    # What was spent thinking, as the provider reported it. Not reliably a
+    # part of `output_tokens`: some count it inside the completion and some
+    # beside it, and the router passes both through unchanged. So the two are
+    # read against each other rather than subtracted, and a reader wanting the
+    # answer's own length cannot get it from here.
+    #
+    # Zero on a model that judged the question needed no thought, and absent on
+    # one that does not report the split — two different facts, not merged.
+    reasoning_tokens: int | None = None
     # What the router charged for it, as it reported at the time. Recorded
     # rather than derived: a price moves, so a rate applied later would say
     # what a reading would cost now instead of what it cost. Absent on the

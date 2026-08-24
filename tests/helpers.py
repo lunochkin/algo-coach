@@ -84,6 +84,8 @@ class FakeTransport:
     # test asks about is whether the price reaches the record, never how it
     # varies.
     cost: float | None = None
+    # Input, output and the thinking split, as a router would report them.
+    tokens: tuple[int | None, int | None, int | None] = (None, None, None)
     lock: threading.Lock = field(default_factory=threading.Lock)
 
     @classmethod
@@ -126,6 +128,9 @@ class FakeTransport:
             stop_reason="stop",
             provider="fake",
             cost=self.cost,
+            input_tokens=self.tokens[0],
+            output_tokens=self.tokens[1],
+            reasoning_tokens=self.tokens[2],
         )
 
 

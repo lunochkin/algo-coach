@@ -210,8 +210,25 @@ class OpenRouter:
             input_tokens=getattr(usage, "prompt_tokens", None),
             output_tokens=getattr(usage, "completion_tokens", None),
             cost=extra(usage, "cost") if usage is not None else None,
+            reasoning_tokens=reasoning(usage),
             provider=extra(response, "provider"),
         )
+
+
+def reasoning(usage: Any) -> int | None:
+    """How much of the completion was spent thinking, where the router said.
+
+    Nested a level down, and absent rather than zero on a model that reports
+    no split — a model that thought nothing and one that does not say are
+    different facts about the reading.
+    """
+    details = getattr(usage, "completion_tokens_details", None) if usage is not None else None
+    if details is None:
+        return None
+    value = getattr(details, "reasoning_tokens", None)
+    if value is None and isinstance(details, dict):
+        value = details.get("reasoning_tokens")
+    return value
 
 
 def since(started: float) -> int:

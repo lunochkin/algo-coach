@@ -599,3 +599,40 @@ def test_a_reading_stored_before_the_price_is_left_out_of_the_mean(hand_claimed)
     result = run(None, hand_claimed, limit=0)
 
     assert (result.reused, result.costed, result.cost) == (1, 0, 0.0)
+
+
+def test_what_a_reading_consumed_is_joined_from_its_call(hand_claimed):
+    """A claim deliberately holds no token counts, so the report reads them
+    from the call it cites rather than from a copy that could drift."""
+    client = FakeTransport.answering(Verdict(["greedy"]))
+    client.tokens = (1100, 400, 380)
+
+    result = run(client, hand_claimed)
+
+    assert (result.input_tokens, result.output_tokens) == (1100, 400)
+    assert (result.reasoning_tokens, result.tokened, result.reasoned) == (380, 1, 1)
+
+
+def test_a_call_reporting_no_thinking_split_is_counted_apart(hand_claimed):
+    """A model that reports the total and not the part spent reasoning is not
+    a model that reasoned nothing, so the two have separate denominators."""
+    client = FakeTransport.answering(Verdict(["greedy"]))
+    client.tokens = (1100, 400, None)
+
+    result = run(client, hand_claimed)
+
+    assert (result.tokened, result.reasoned) == (1, 0)
+    assert result.output_tokens == 400
+
+
+def test_a_reused_reading_brings_its_calls_counts_too(hand_claimed):
+    """The join is by call id, so a reading paid for by an earlier run counts
+    the same as one this run made."""
+    client = FakeTransport.answering(Verdict(["greedy"]))
+    client.tokens = (900, 200, 150)
+    run(client, hand_claimed)
+
+    again = run(None, hand_claimed, limit=0)
+
+    assert (again.reused, again.tokened) == (1, 1)
+    assert (again.input_tokens, again.reasoning_tokens) == (900, 150)

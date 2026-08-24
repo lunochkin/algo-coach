@@ -35,6 +35,11 @@ class ReadResult(BaseModel):
     # denominator including readings that report nothing.
     cost: float = 0.0
     costed: int = 0
+    # The calls behind the readings, so a report can join what only a call
+    # holds. Ids rather than the tokens themselves: the doc keeps token counts
+    # off a claim on purpose, and copying them here would be the same move one
+    # layer along.
+    call_ids: list[str] = Field(default_factory=list)
 
 
 class Plan(BaseModel):
@@ -103,6 +108,8 @@ def select(
         if reading.cost is not None:
             plan.result.cost += reading.cost
             plan.result.costed += 1
+        if reading.call_id is not None:
+            plan.result.call_ids.append(reading.call_id)
 
     plan.asking = sorted(unread, key=recency, reverse=True)[:limit]
     return plan
@@ -141,9 +148,11 @@ def absorb(
     # Answered, so the classifier is reachable — an undecided verdict is a
     # reading, not a failure.
     plan.consecutive = 0
-    if call is not None and call.cost is not None:
-        plan.result.cost += call.cost
-        plan.result.costed += 1
+    if call is not None:
+        plan.result.call_ids.append(call.id)
+        if call.cost is not None:
+            plan.result.cost += call.cost
+            plan.result.costed += 1
     if call is not None:
         # Stored whether or not it named anything, so no later run at this
         # configuration pays for the same question again.

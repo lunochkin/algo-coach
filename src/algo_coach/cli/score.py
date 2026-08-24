@@ -202,6 +202,8 @@ def alone(result: Comparison) -> None:
     if only.decisions:
         print(decided(only))
     print(f"{only.read} read, {only.reused} reused")
+    if only.tokened:
+        print(f"{tokens(only)} tokens in/out/thinking per attempt")
     if only.costed:
         print(f"{spent(only)} per attempt, {outlay(only)} over {only.costed} priced reading(s)")
     if only.undecided:
@@ -257,6 +259,8 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
     if any(scored.decisions for scored in scores):
         column("per decision", decided)
     column("read/reused", lambda scored: f"{scored.read}/{scored.reused}")
+    if any(scored.tokened for scored in scores):
+        column("in/out/think", tokens)
     if any(scored.costed for scored in scores):
         # A mean over the readings that carry a price, not over the eval set:
         # one stored before the router's charge was recorded says nothing, and
@@ -359,6 +363,22 @@ def spent(scored: Score) -> str:
     if not scored.costed:
         return "—"
     return f"${scored.cost / scored.costed:.6f}"
+
+
+def tokens(scored: Score) -> str:
+    """In, out and of that how much was thinking, per attempt.
+
+    Three numbers rather than three columns: they are read against each other,
+    since a verdict is a dozen tokens and everything above that is the model
+    deciding. A dash for the split where the router reported none.
+    """
+    if not scored.tokened:
+        return "—"
+    thinking = f"{round(scored.reasoning_tokens / scored.reasoned)}" if scored.reasoned else "—"
+    return (
+        f"{round(scored.input_tokens / scored.tokened)}/"
+        f"{round(scored.output_tokens / scored.tokened)}/{thinking}"
+    )
 
 
 def outlay(scored: Score) -> str:

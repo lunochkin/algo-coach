@@ -59,6 +59,7 @@ class Reply:
     stop_reason: str | None = None
     input_tokens: int | None = None
     output_tokens: int | None = None
+    reasoning_tokens: int | None = None
     # What the router says the call cost. Always returned, so it needs no
     # parameter; absent only where a provider reported none.
     cost: float | None = None
