@@ -10,25 +10,48 @@ Blind by default. The first pass is where the line gets drawn between
 exercising a form and merely admitting it. An annotation made with a verdict in
 view records what it reviewed rather than what it read, and `informed_by` names
 the calls it saw.
+
+The prompt is a two-pane screen rather than a scroll, and `annotating.py` holds
+it. What is asked and what is written stay here, so a sitting can be driven
+without a terminal.
 """
 
 import argparse
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
-from textwrap import fill
 
 from algo_coach.cards import CardStore
-from algo_coach.cli.prompts import ask_choice
+from algo_coach.cli.annotating import Annotating
 from algo_coach.matches import MatchLog, Question, annotatable, candidates
 from algo_coach.mint import user_match
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import MatchSource, Template, TemplateMatch
 
-WIDTH = 100
+
+class Landing:
+    """What one answer writes: every pair of the card, positive and negative.
+
+    Held apart from the prompt so a sitting cut short keeps what was answered.
+    The log is append-only, and each question is a whole write.
+    """
+
+    def __init__(self, log: MatchLog, read: Mapping[tuple[str, str], TemplateMatch]):
+        self.log = log
+        self.read = read
+        self.written = 0
+
+    def __call__(self, question: Question, picked: set[str]) -> None:
+        forms = candidates(question.card)
+        saw = shown(question, forms, self.read)
+        for form in forms:
+            self.log.append(
+                user_match(form.id, question.problem.id, matched=form.id in picked, informed_by=saw)
+            )
+            self.written += 1
 
 
-def annotate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """The matcher's question, answered by hand over sampled problems.
+def annotating(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> Annotating:
+    """The sitting, built but not run.
 
     What the matcher is scored against, so it writes `MatchSource.USER` records
     carrying no configuration: nothing re-derives them, which is what makes
@@ -46,40 +69,14 @@ def annotate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         parser.exit(1, f"annotate: nothing {left}\n")
 
     read = machine_verdicts(stored) if args.verdict else {}
+    return Annotating(pool[: args.count], read, Landing(log, read))
 
-    answered = written = 0
-    total = min(args.count, len(pool))
-    for index, question in enumerate(pool[: args.count], start=1):
-        forms = candidates(question.card)
-        print(f"\n{index}/{total}  {question.card.slug}  {question.problem.title}")
-        print(wrapped(question.problem.statement))
-        # Per question, since the forms are this card's. The cue rather than
-        # the code: which form a problem asks for is what is being decided, and
-        # the trigger is the field that says it. The slug beside the number
-        # because a title is the author's shorthand and the slug is what the
-        # record names.
-        for number, form in enumerate(forms, start=1):
-            print(f"\n  {number} {form.slug} — {form.title}")
-            print(wrapped(form.trigger, hanging=True))
-        if args.verdict:
-            print(read_as(question, forms, read))
-        print()
 
-        answer = ask_choice("templates", forms, [], none="no template")
-        if answer is None or answer.rest:
-            break
-        if answer.picked is None:
-            continue
-        picked = {forms[int(number) - 1].id for number in answer.picked}
-        saw = shown(question, forms, read)
-        for form in forms:
-            log.append(
-                user_match(form.id, question.problem.id, matched=form.id in picked, informed_by=saw)
-            )
-            written += 1
-        answered += 1
-
-    print(f"\n{answered} question(s) annotated, {written} record(s) written")
+def annotate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+    """The matcher's question, answered by hand over sampled problems."""
+    app = annotating(args, parser, root)
+    app.run()
+    print(f"{app.count} question(s) annotated, {app.answered.written} record(s) written")
 
 
 def machine_verdicts(matches: Iterable[TemplateMatch]) -> dict[tuple[str, str], TemplateMatch]:
@@ -102,10 +99,10 @@ def machine_verdicts(matches: Iterable[TemplateMatch]) -> dict[tuple[str, str], 
 
 def shown(
     question: Question,
-    forms: list[Template],
+    forms: Sequence[Template],
     read: Mapping[tuple[str, str], TemplateMatch],
 ) -> list[str]:
-    """The calls whose verdicts `read_as` put in front of the annotator.
+    """The calls whose verdicts the prompt put in front of the annotator.
 
     One call answers a whole card, so the forms of one question usually name
     the same one; it is listed once. A form no matcher has read showed nothing,
@@ -121,32 +118,3 @@ def shown(
         if match is not None and match.call_id is not None and match.call_id not in seen:
             seen.append(match.call_id)
     return seen
-
-
-def read_as(
-    question: Question,
-    forms: list[Template],
-    read: Mapping[tuple[str, str], TemplateMatch],
-) -> str:
-    """What the matcher made of the same pairs, named by the model that
-    answered. Shown before the answer, which is the reader's choice and has a
-    cost: an annotation made with a verdict in view is no longer independent of
-    it, and the agreement it is later scored on measures rather less."""
-    lines = []
-    for form in forms:
-        match = read.get((form.id, question.problem.id))
-        if match is not None:
-            mark = "yes" if match.matched else "no "
-            lines.append(f"  {mark}  {form.slug}  ({match.model})")
-    return "\n" + "\n".join(lines) if lines else ""
-
-
-def wrapped(text: str, *, hanging: bool = False) -> str:
-    """A statement or a cue at terminal width. The words are the author's;
-    only the wrapping is this reader's."""
-    indent = "      " if hanging else "  "
-    return "\n".join(
-        fill(line, width=WIDTH, initial_indent=indent, subsequent_indent=indent)
-        for line in text.splitlines()
-        if line.strip()
-    )
