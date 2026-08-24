@@ -69,6 +69,9 @@ revise:
 classify *args:
     uv run algo-coach classify {{ args }}
 
+adjudicate:
+    uv run algo-coach score --concurrency 4 --model anthropic/claude-opus-5 --provider anthropic --temperature default
+
 # The classifier against the user's own claims.
 score *args:
     uv run algo-coach score --concurrency 4 \
