@@ -73,13 +73,17 @@ classify *args:
 score *args:
     uv run algo-coach score --concurrency 4 \
         --model anthropic/claude-opus-5 --provider anthropic --temperature default \
-        --model google/gemma-4-31b-it --provider coreweave/bf16 \
-        --model openai/gpt-oss-120b --provider coreweave/fp4 \
+        --model anthropic/claude-fable-5 --provider anthropic --temperature default \
         --model google/gemini-3.7-flash --provider google-ai-studio \
         --model google/gemini-3.1-pro-preview --provider google-ai-studio \
         --model openai/gpt-5.6-sol --provider openai --temperature default \
         --model openai/gpt-5.6-terra --provider openai --temperature default \
         --model openai/gpt-5.6-luna --provider openai --temperature default \
+        --model x-ai/grok-4.6 --provider xai/zdr \
+        --model qwen/qwen3.8-max --provider alibaba \
+        --model deepseek/deepseek-v4-pro-0813 --provider gmicloud/fp8 \
+        --model openai/gpt-oss-120b --provider coreweave/fp4 \
+        --model google/gemma-4-31b-it --provider coreweave/bf16 \
         --model z-ai/glm-5.2 --provider gmicloud/fp8  \
         {{ args }}
 
