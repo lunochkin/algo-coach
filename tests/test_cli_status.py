@@ -125,6 +125,20 @@ def test_a_wait_marks_every_row_the_deployment_holds():
     assert all("a-model" in line for line in held)
 
 
+def test_a_row_asking_nothing_is_not_marked_as_held():
+    """It shares the deployment but makes no call, so it never approaches the
+    cap. Marked, it would report being in a wait it is not in."""
+    stream = Stream(terminal=True)
+    board = Status(stream, [LOW, HIGH])
+    board.planned([2, 0])  # HIGH is answered entirely from the log
+
+    board.waiting(retry())
+
+    rows = stream.writes[-1].splitlines()
+    assert "held 15s" in rows[0]
+    assert "held" not in rows[1]
+
+
 def test_an_answer_ends_the_wait_it_was_held_by():
     stream = Stream(terminal=True)
     board = Status(stream, [LOW])

@@ -144,12 +144,18 @@ class Status:
         """A cap, marked on every row the deployment holds.
 
         Two configurations pinned to one endpoint are held by the same limit,
-        so the mark belongs on both. The wait is shown rather than printed:
-        a line of its own would scroll the block being redrawn.
+        so the mark belongs on both — but only on the ones that will call. A
+        row asking nothing is answered from the log and never approaches the
+        cap, so marking it would report a wait it is not in.
+
+        The wait is shown rather than printed: a line of its own would scroll
+        the block being redrawn.
         """
         with self.lock:
             marked = False
             for row in self.rows:
+                if not row.total:
+                    continue
                 if (row.configuration.model, row.configuration.pin) == (retry.model, retry.pin):
                     row.holding = retry.pause
                     row.held += 1
