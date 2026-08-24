@@ -195,24 +195,60 @@ def failures(name: str, scored: Score) -> str:
     )
 
 
+def columns(scores: Sequence[Score]) -> list[tuple[str, Callable[[Score], str]]]:
+    """Which numbers a run reports, and how each one renders.
+
+    One list, because two renderers naming their own columns drift. The single
+    configuration's summary said a decline was unscored for as long as it took
+    someone to read it, having been written before declines were scored and
+    never revisited when they were.
+
+    A column is included only where some configuration has the number, so a run
+    over readings taken before a field existed is not a table of dashes.
+    `exact` is not among them: it is the ranking key and the one column that is
+    never absent, and the comparison prints it before the identity columns end.
+    """
+    shown: list[tuple[str, Callable[[Score], str]]] = []
+    if any(scored.decisions for scored in scores):
+        shown.append(("per decision", decided))
+    shown.append(("read/reused", lambda scored: f"{scored.read}/{scored.reused}"))
+    if any(scored.tokened for scored in scores):
+        shown.append(("in/out/think", tokens))
+    if any(scored.timed for scored in scores):
+        shown.append(("mean/max", latency))
+    if any(scored.costed for scored in scores):
+        # A mean over the readings that carry a price, not over the eval set:
+        # one stored before the router's charge was recorded says nothing, and
+        # counting it as free would flatter whichever configuration was read
+        # earliest.
+        shown.append(("per attempt", spent))
+        shown.append(("set", outlay))
+    if any(scored.undecided for scored in scores):
+        shown.append(("named no candidate", considered))
+    # The two faults, beside each other and apart from the verdict above them.
+    # A cut-short reply names nothing for a reason that is not about the code,
+    # so a single column would have said the two were one number in two
+    # flavours. `read/reused` is where a shrunken denominator is diagnosed,
+    # and these are what shrank it.
+    if any(scored.exhausted for scored in scores):
+        shown.append(("cut short", lambda scored: str(scored.exhausted)))
+    if any(scored.failed for scored in scores):
+        shown.append(("failed", lambda scored: str(len(scored.failed))))
+    return shown
+
+
 def alone(result: Comparison) -> None:
     """One configuration: what it read, and every disagreement with the user."""
     only = result.scores[0].score
     print(describe(result.scores[0].configuration))
     print(exactly(only))
-    if only.decisions:
-        print(decided(only))
-    print(f"{only.read} read, {only.reused} reused")
-    if only.tokened:
-        print(f"{tokens(only)} tokens in/out/thinking per attempt")
-    if only.timed:
-        print(f"{latency(only)} per request, mean and slowest")
-    if only.costed:
-        print(f"{spent(only)} per attempt, {outlay(only)} over {only.costed} priced reading(s)")
-    if only.undecided:
-        # Beside the share, since declining shrinks the denominator and
-        # improves the number for it.
-        print(f"{only.undecided} named no candidate — not scored")
+    # The comparison's columns, down the page rather than across it. One
+    # configuration does not need the width, and a nine-column row for a
+    # single reader is harder to read than a line each.
+    named = [(name, cell(only)) for name, cell in columns([only])]
+    width = max(len(name) for name, _ in named)
+    for name, value in named:
+        print(f"{name:<{width}}  {value}")
     if only.failed:
         print(failures(describe(result.scores[0].configuration), only))
     print()
@@ -260,7 +296,9 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
     scores = [scored.score for scored in ranked]
     keys = [str(index) for index in range(1, len(scores) + 1)]
 
-    print(f"{result.common} of {result.eval_set} hand-claimed attempts read by all")
+    # Each share carries its own denominator, so this line says how far they
+    # agree rather than what they were all measured over.
+    print(f"{result.eval_set} hand-claimed attempts, {result.common} read by all")
     print()
 
     # No heading over the identity columns: the row says what it is, and a
@@ -275,31 +313,10 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
         for key, scored in zip(keys, ranked, strict=True)
     ]
 
-    def column(name: str, cell: Callable[[Score], str]) -> None:
+    for name, cell in columns(scores):
         head.append(name)
         for row, scored in zip(body, scores, strict=True):
             row.append(cell(scored))
-
-    if any(scored.decisions for scored in scores):
-        column("per decision", decided)
-    column("read/reused", lambda scored: f"{scored.read}/{scored.reused}")
-    if any(scored.tokened for scored in scores):
-        column("in/out/think", tokens)
-    if any(scored.timed for scored in scores):
-        column("mean/max", latency)
-    if any(scored.costed for scored in scores):
-        # A mean over the readings that carry a price, not over the eval set:
-        # one stored before the router's charge was recorded says nothing, and
-        # counting it as free would flatter whichever configuration was read
-        # earliest.
-        column("per attempt", spent)
-        column("set", outlay)
-    if any(scored.undecided for scored in scores):
-        column("named no candidate", lambda scored: str(scored.undecided))
-    if any(scored.failed for scored in scores):
-        # Beside `read/reused`, which is where a shrunken denominator is
-        # diagnosed: a configuration that failed read fewer than it planned to.
-        column("failed", lambda scored: str(len(scored.failed)))
     print(table(head, body))
 
     # Behind the same flag as the splits, and for the same reason: a column per
@@ -404,6 +421,14 @@ def spent(scored: Score) -> str:
     if not scored.costed:
         return "—"
     return f"${scored.cost / scored.costed:.6f}"
+
+
+def considered(scored: Score) -> str:
+    """Declines that were a judgement about the code, with the cut-short ones
+    taken out. Both name nothing and both are scored the same way, since both
+    contradict a claim naming a technique. Only one of them says anything
+    about the code, so they are counted as two numbers rather than one."""
+    return str(scored.undecided - scored.exhausted)
 
 
 def tokens(scored: Score) -> str:

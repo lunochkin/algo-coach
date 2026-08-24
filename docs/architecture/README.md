@@ -368,6 +368,14 @@ rather than a field on the attempt.
 - **One claim per attempt**, naming every technique it used, since a solution
   can use several. A later claim replaces the whole set rather than rewriting
   the earlier one.
+- **A reply cut short by the token cap names nothing, and is stored too.** A
+  reading is greedy, so the same prompt decodes the same way. Left unstored, a
+  runaway is re-asked by every later run, pays the whole cap again, and fails
+  identically. What is recorded is a fact about that configuration on that
+  prompt, not about the code. The call's `stop_reason` separates the two, and
+  the report counts them apart — how often a reader finds the candidates
+  wanting is the number that is worth seeing, and a runaway decoder is not
+  evidence about candidates.
 - **A verdict naming no candidate is a reading, and is stored.** The classifier
   read the code and found the candidates did not cover it. That is evidence
   about the code rather than an absence of it, and the answer does not change
@@ -476,9 +484,17 @@ rather than a field on the attempt.
   is made in the same write. It is there so the claims log reads on its own: a
   board renders from it, and loading the calls to learn which model produced a
   claim would put a megabyte-scale read on every command.
-- **Configurations are compared over the attempts both read**, not over each
-  one's own. A cheaper classifier measured on a smaller sample scores against a
-  different denominator, and the number would read as quality.
+- **Each configuration is scored over what it read**, and how many all of them
+  read is reported beside the shares. A comparison over the intersection alone
+  charged every column for the attempts one of them failed on. One aborted run
+  shrank the denominator for the whole table, and re-running it moved numbers
+  that no re-reading touched.
+- **The denominator is therefore visible, never assumed.** A share prints as
+  `92/98`, so two columns measured over different samples cannot be read as one
+  rate. What the reader must still supply is judgement: a cheaper classifier
+  that read fewer attempts is measured on a different sample, and the harder of
+  two samples reads as the worse classifier. The splits are unaffected, since a
+  verdict every configuration has is what a split needs.
 
 ### Calls
 

@@ -41,14 +41,20 @@ class FakeTransport:
 
     techniques: list[str]
     silent: bool = False
+    # The token cap, where whatever came back is truncated. `text` carries the
+    # runaway that emits whitespace until it runs out; without it, the reply
+    # that never reached the schema at all.
+    stop_reason: str = "stop"
+    text: str | None = None
     calls: list[dict] = field(default_factory=list)
 
     def __call__(self, **kwargs) -> Reply:
         self.calls.append(kwargs)
         if self.silent:
-            # A refusal and an answer cut short arrive the same way: nothing
-            # to read, and a stop reason saying why.
+            # A refusal answers nothing and says nothing about the code.
             return Reply(text=None, stop_reason="content_filter")
+        if self.stop_reason != "stop":
+            return Reply(text=self.text, stop_reason=self.stop_reason)
         return Reply(text=json.dumps({"techniques": self.techniques}), stop_reason="stop")
 
 
@@ -307,3 +313,34 @@ def test_the_request_hash_is_short_enough_to_store_on_every_claim():
     """Only ever compared for equality, so the collision margin is irrelevant;
     sixty-four characters on every line of an append-only log is not."""
     assert len(request_hash(["greedy", "sorting"], CODE)) == 12
+
+
+
+def test_a_reply_cut_short_by_the_cap_names_nothing():
+    """The decoder ran out of tokens, so whatever came back is truncated and
+    no verdict can be read from it. Recorded as naming nothing rather than
+    raised. Greedy decoding is deterministic, so every later run would re-ask
+    the same prompt and be cut short in the same place."""
+    client = FakeTransport([], stop_reason="length", text='{  \t  \n\n  \t  ')
+
+    techniques, call = _classify(client, CALLS, ["greedy", "sorting"], CODE)
+
+    assert techniques == []
+    assert call is not None and call.stop_reason == "length"
+
+
+def test_a_cap_hit_that_returned_no_text_names_nothing_too():
+    """Both shapes of the same event. Which one arrives depends on whether the
+    runaway was inside the schema or before it, and neither can be read."""
+    client = FakeTransport([], stop_reason="length")
+
+    techniques, call = _classify(client, CALLS, ["greedy", "sorting"], CODE)
+
+    assert techniques == []
+
+
+def test_a_refusal_still_raises():
+    """It answered nothing and says nothing about the code. Only the cap is
+    stored as a verdict, because only the cap repeats."""
+    with pytest.raises(ClassifierError):
+        _classify(FakeTransport([], silent=True), CALLS, ["greedy", "sorting"], CODE)

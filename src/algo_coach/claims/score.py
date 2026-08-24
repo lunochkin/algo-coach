@@ -54,6 +54,11 @@ class Score(BaseModel):
     # that is broadly weak from one that is narrowly wrong.
     decisions: int = 0
     decisions_agreed: int = 0
+    # Of `undecided`, those whose reply was cut short by the token cap rather
+    # than considered and declined. Reported apart, because how often a reader
+    # finds the candidates wanting is the number that bullet is about, and a
+    # runaway decoder says nothing about the candidates.
+    exhausted: int = 0
     per_technique: list[TechniqueScore] = Field(default_factory=list)
     disagreements: list[Disagreement] = Field(default_factory=list)
     failed: list[Failed] = Field(default_factory=list)
@@ -207,6 +212,10 @@ def spent(scored: Score, calls: Sequence[Call]) -> None:
     without its tokens being counted.
     """
     for call in calls:
+        # An empty verdict has two causes, and only one of them is a reading.
+        # The claim cannot tell them apart, since both name no technique — the
+        # call can, so the count is taken here.
+        scored.exhausted += call.stop_reason == "length"
         if call.request_ms is not None:
             scored.request_ms += call.request_ms
             scored.slowest_ms = max(scored.slowest_ms, call.request_ms)
@@ -353,10 +362,19 @@ def score_backlog(
     common = (
         set.intersection(*(set(reading.verdicts) for reading in readings)) if readings else set()
     )
+    # The whole eval set, not the intersection. `score` and `per_decision`
+    # both skip an attempt the configuration has no verdict for, so each is
+    # measured over what it read. A share printed as `92/98` carries its own
+    # denominator, and `common` is reported beside them so a reader can see
+    # where they diverge.
+    #
+    # The trade: two configurations that read different attempts are no longer
+    # scored over one denominator, and the harder of two samples reads as the
+    # worse classifier. What it buys is that a configuration is never charged
+    # for an attempt another one failed on — an aborted or rate-limited run
+    # used to shrink the denominator for every column beside it.
     truth: dict[str, Sequence[str]] = {
-        attempt.id: standing[attempt.id].techniques
-        for attempt in hand_claimed
-        if attempt.id in common
+        attempt.id: standing[attempt.id].techniques for attempt in hand_claimed
     }
 
     candidates = {

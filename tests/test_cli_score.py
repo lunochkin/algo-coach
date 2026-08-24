@@ -83,7 +83,7 @@ def test_the_command_says_what_it_paid_for(hand_claimed, monkeypatch, capsys):
     run(monkeypatch, FakeTransport.answering())
 
     out = capsys.readouterr().out
-    assert "1 reused" in out
+    assert re.search(r"read/reused\s+0/1", out)
 
 
 def test_the_command_says_how_many_named_no_candidate(hand_claimed, monkeypatch, capsys):
@@ -98,7 +98,7 @@ def test_the_command_says_how_many_named_no_candidate(hand_claimed, monkeypatch,
 
     out = capsys.readouterr().out
     assert "1/2 exact (50%)" in out
-    assert "1 named no candidate" in out
+    assert re.search(r"named no candidate\s+1", out)
 
 
 def test_the_named_classifier_is_the_one_scored(hand_claimed, monkeypatch, capsys):
@@ -180,7 +180,7 @@ def test_the_shares_are_over_what_both_read(hand_claimed, monkeypatch, capsys):
     )
 
     out = capsys.readouterr().out
-    assert "1 of 1 hand-claimed attempts read by all" in out
+    assert "1 hand-claimed attempts, 1 read by all" in out
     assert "1/1 (100%)" in out
     assert "0/1 (0%)" in out
     # The split names each configuration by its summary row, so the verdicts
@@ -466,3 +466,58 @@ def test_the_flag_prints_the_per_technique_table(hand_claimed, monkeypatch, caps
     out = capsys.readouterr().out
     assert re.search(r"technique\s+attempts\s+1\s+2", out)
     assert "greedy" in out
+
+
+def test_one_configuration_reports_the_columns_the_comparison_does(
+    hand_claimed, monkeypatch, capsys
+):
+    """One list of columns, laid down instead of across. Two renderers naming
+    their own columns drift — this path said a decline was unscored long after
+    declines started being scored."""
+    # Reporting tokens, a price and a duration, so every optional column has
+    # a number and the two renderers can be compared on all of them.
+    one = FakeTransport.answering(Verdict(["greedy"]))
+    one.tokens, one.request_ms, one.cost = (800, 40, 30), 1200, 0.0001
+    run(monkeypatch, one)
+    alone = capsys.readouterr().out
+
+    two = FakeTransport.per_deployment(
+        {
+            (MODEL, PIN): Verdict(["greedy"]),
+            ("a-cheap-model", "a-host"): Verdict(["greedy"]),
+        }
+    )
+    two.tokens, two.request_ms, two.cost = (800, 40, 30), 1200, 0.0001
+    run(monkeypatch, two, *("--model", MODEL, "--model", "a-cheap-model", "--provider", "a-host"))
+    compared = capsys.readouterr().out
+
+    for name in ("per decision", "read/reused", "in/out/think", "mean/max", "per attempt", "set"):
+        assert name in alone, f"{name} missing from the single configuration"
+        assert name in compared, f"{name} missing from the comparison"
+
+
+def test_a_cut_short_reply_is_its_own_column(hand_claimed, monkeypatch, capsys):
+    """A considered decline and a runaway decoder both name nothing, and only
+    one of them is a reading. One column carrying both would have said they
+    were a single number in two flavours."""
+    seed_problem(hand_claimed.root, id="second", tags=["Greedy", "Sorting"])
+    hand_claimed.append_attempt(attempt("a2", "second", finished_at=T0 + timedelta(days=1)))
+    hand_claimed.append_claim(user_claim("a2", ["greedy"]))
+
+    run(
+        monkeypatch,
+        FakeTransport.answering(Verdict([]), Verdict(stop_reason="length", text="{  ")),
+    )
+
+    out = capsys.readouterr().out
+    assert re.search(r"named no candidate\s+1", out)
+    assert re.search(r"cut short\s+1", out)
+
+
+def test_no_cut_short_column_where_nothing_was(hand_claimed, monkeypatch, capsys):
+    """A column of zeroes is width spent saying nothing happened."""
+    run(monkeypatch, FakeTransport.answering(Verdict([])))
+
+    out = capsys.readouterr().out
+    assert re.search(r"named no candidate\s+1", out)
+    assert "cut short" not in out

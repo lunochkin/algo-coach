@@ -339,9 +339,10 @@ def test_a_named_configuration_stores_its_own_provenance(hand_claimed):
     assert stored.prompt_hash == ASKED
 
 
-def test_the_shares_are_over_the_attempts_every_configuration_read(two_problems):
-    """A configuration measured on a smaller sample scores against a different
-    denominator, and the number would read as quality."""
+def test_each_share_is_over_what_its_own_configuration_read(two_problems):
+    """A configuration is never charged for an attempt another one failed on.
+    The cost is that two columns can carry different denominators, so each
+    share prints its own and `common` says how far they overlap."""
     two_problems.append_claim(reading("a1", ["greedy"]))
     two_problems.append_claim(reading("a2", ["greedy"]))
     # The cheap one reads the newest and stops there, so a1 is the built-in
@@ -353,8 +354,9 @@ def test_the_shares_are_over_the_attempts_every_configuration_read(two_problems)
     result = compare(client, two_problems, configurations=(DEFAULT, CHEAP), limit=1)
 
     assert (result.eval_set, result.common) == (2, 1)
-    assert [scored.score.scored for scored in result.scores] == [1, 1]
-    assert [scored.score.exact for scored in result.scores] == [1, 0]
+    # The built-in one read both, the cheap one only the newest.
+    assert [scored.score.scored for scored in result.scores] == [2, 1]
+    assert [scored.score.exact for scored in result.scores] == [2, 0]
 
 
 def test_the_limit_caps_the_calls_of_each_configuration(two_problems):
@@ -667,3 +669,42 @@ def test_the_slowest_request_is_kept_beside_the_mean(two_problems):
     assert result.timed == 2
     assert result.slowest_ms == 30000
     assert result.request_ms == 32000
+
+
+def test_a_machine_decline_agrees_with_a_user_decline(hand_claimed):
+    """Both assert the candidates do not apply, so the sets are equal and the
+    reading is exact. Without a stated user decline the gold could only be a
+    set the machine was bound to disagree with, which is what forced an
+    adjudicated decline out of the eval set."""
+    hand_claimed.append_claim(user_claim("a1", [], declined=True))
+
+    result = run(FakeTransport.answering(Verdict([])), hand_claimed)
+
+    assert (result.scored, result.exact) == (1, 1)
+
+
+def test_a_named_verdict_misses_against_a_user_decline(hand_claimed):
+    """The countRangeSum case: the user says no candidate applies and the
+    classifier names one. A disagreement, scored as one."""
+    hand_claimed.append_claim(user_claim("a1", [], declined=True))
+
+    result = run(FakeTransport.answering(Verdict(["greedy"])), hand_claimed)
+
+    assert (result.scored, result.exact) == (1, 0)
+
+
+def test_a_reply_cut_short_is_counted_apart_from_a_decline(hand_claimed):
+    """Both name no candidate, and only one is evidence about the code. How
+    often a reader finds the candidates wanting is the number the report is
+    for, and a runaway decoder would inflate it."""
+    result = run(FakeTransport.answering(Verdict(stop_reason="length", text="{  ")), hand_claimed)
+
+    # `undecided` counts every empty verdict, since both are scored the same
+    # way. `exhausted` is the share of them that says nothing about the code.
+    assert (result.undecided, result.exhausted) == (1, 1)
+
+
+def test_a_considered_decline_is_not_counted_as_cut_short(hand_claimed):
+    result = run(FakeTransport.answering(Verdict([])), hand_claimed)
+
+    assert (result.undecided, result.exhausted) == (1, 0)

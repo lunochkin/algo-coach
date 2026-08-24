@@ -146,7 +146,9 @@ def classify(
     already answers.
 
     Naming nothing is legal — the tags may not cover what the code did, and no
-    claim leaves the fallback standing rather than asserting a wrong one.
+    claim leaves the fallback standing rather than asserting a wrong one. A
+    reply cut short by the token cap names nothing for a different reason, and
+    the call's `stop_reason` is what separates the two.
     """
     if len(candidates) < 2:
         # Nothing to decide: the fallback already says this, and a schema
@@ -164,6 +166,15 @@ def classify(
         temperature=configuration.temperature,
         schema=schema(candidates),
     )
+    if call.stop_reason == "length":
+        # The decoder ran out of tokens, so whatever came back is truncated and
+        # carries no verdict. Named as nothing rather than raised, because this
+        # one repeats: a reading is greedy, so the same prompt runs the same
+        # way and every later run pays the whole cap again to fail identically.
+        # What is stored is a fact about this configuration on this prompt, and
+        # the call beside it says which — `stop_reason` tells an exhausted
+        # reading from a considered decline.
+        return [], call
     if text is None:
         raise ClassifierError(call.error or "no verdict")
 

@@ -58,6 +58,11 @@ class Verdict:
 
     techniques: list[str] | None = None
     error: Exception | None = None
+    # What ended the reply. `length` is the token cap, where whatever came
+    # back is truncated — with `text`, the runaway that emits whitespace until
+    # it runs out, and without, the reply that never reached the schema.
+    stop_reason: str = "stop"
+    text: str | None = None
 
 
 @dataclass
@@ -131,8 +136,12 @@ class FakeTransport:
         if verdict.error is not None:
             raise verdict.error
         return Reply(
-            text=json.dumps({"techniques": verdict.techniques}),
-            stop_reason="stop",
+            text=(
+                verdict.text
+                if verdict.text is not None or verdict.techniques is None
+                else json.dumps({"techniques": verdict.techniques})
+            ),
+            stop_reason=verdict.stop_reason,
             provider="fake",
             cost=self.cost,
             input_tokens=self.tokens[0],
