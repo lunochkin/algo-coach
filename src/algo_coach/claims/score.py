@@ -124,8 +124,13 @@ def score(truth: Mapping[str, Sequence[str]], machine: Mapping[str, Sequence[str
 
     Equality rather than overlap: a claim naming every candidate agrees with
     the tags, decides nothing, and would pass a metric that only asks whether
-    the right code appears. An attempt the classifier produced no verdict for
-    is missing evidence, not a disagreement, so it is not scored.
+    the right code appears.
+
+    A verdict naming no candidate is scored like any other. It asserts that
+    none of them apply, which a claim naming some of them contradicts — and a
+    metric that skipped it would pay a classifier to decline, since every
+    decline left a smaller denominator behind. An attempt with no verdict at
+    all is still missing evidence and still unscored: nothing was read.
 
     Every disagreement is returned beside the counts. Reviewing them is how a
     mislabelled hand claim is caught — the eval measures agreement, and only a

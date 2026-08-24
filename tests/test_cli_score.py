@@ -87,8 +87,9 @@ def test_the_command_says_what_it_paid_for(hand_claimed, monkeypatch, capsys):
 
 
 def test_the_command_says_how_many_named_no_candidate(hand_claimed, monkeypatch, capsys):
-    """A classifier that declines gets a smaller denominator and a better share
-    for it, so the declines are printed next to the share."""
+    """A decline is scored like any other verdict, so it no longer buys a
+    smaller denominator. It is still counted beside the share, since how often
+    a classifier finds the candidates wanting is worth seeing on its own."""
     seed_problem(hand_claimed.root, id="second", tags=["Greedy", "Sorting"])
     hand_claimed.append_attempt(attempt("a2", "second", finished_at=T0 + timedelta(days=1)))
     hand_claimed.append_claim(user_claim("a2", ["greedy"]))
@@ -96,7 +97,7 @@ def test_the_command_says_how_many_named_no_candidate(hand_claimed, monkeypatch,
     run(monkeypatch, FakeTransport.answering(Verdict([]), Verdict(["greedy"])))
 
     out = capsys.readouterr().out
-    assert "1/1 exact (100%)" in out
+    assert "1/2 exact (50%)" in out
     assert "1 named no candidate" in out
 
 

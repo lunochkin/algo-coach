@@ -97,10 +97,11 @@ def select(
             unread.append(attempt)
             continue
         if not reading.techniques:
-            # A stored decline. Read again by nothing and scored by nothing —
-            # missing evidence is not a disagreement.
+            # A stored decline, kept as the verdict it is. The classifier read
+            # the code and said none of the candidates apply, which contradicts
+            # a claim naming some of them rather than failing to answer it.
+            plan.result.verdicts[attempt.id] = []
             plan.result.undecided += 1
-            continue
         plan.result.verdicts[attempt.id] = reading.techniques
         plan.result.reused += 1
         # Its own price, from the run that paid it. A rate applied now would
@@ -158,9 +159,10 @@ def absorb(
         # configuration pays for the same question again.
         store(log, attempt.id, techniques, call)
     if not techniques:
-        # Left out of the verdicts, so nothing scores it: the classifier said
-        # the candidates do not cover the code, which is missing evidence
-        # rather than a disagreement.
+        # Counted apart and scored all the same. Naming none of the candidates
+        # is an answer, and a share that dropped it would reward declining:
+        # every decline shrank the denominator it was measured against.
+        plan.result.verdicts[attempt.id] = []
         plan.result.undecided += 1
         return {}
     plan.result.verdicts[attempt.id] = techniques

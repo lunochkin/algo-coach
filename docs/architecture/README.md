@@ -376,9 +376,17 @@ rather than a field on the attempt.
 - **An empty claim answers nothing, so the fallback stands.** The resolver
   reads a claim's *techniques* rather than its existence. The tags therefore
   keep answering an attempt whose reading declined, and the board is exactly as
-  it was when such a verdict went unrecorded. It is unscored for the same
-  reason: missing evidence is not a disagreement. The count is reported,
-  because a decline shrinks the denominator and raises the reported share.
+  it was when such a verdict went unrecorded.
+- **It is scored all the same.** The board and the eval ask different
+  questions. A decline gives the board nothing to render, and it gives the eval
+  an assertion: none of these candidates apply. A hand claim naming one of them
+  contradicts that, so it is a disagreement and counts as a miss against every
+  technique the user named. Calling it missing evidence was inconsistent with
+  storing it as evidence, and it paid a classifier to decline — every decline
+  left a smaller denominator behind and a better share over it. What is still
+  unscored is an attempt with no verdict at all, where nothing was read. The
+  count is reported beside the share, because how often a reader finds the
+  candidates wanting is worth seeing on its own.
 - **A decline supersedes an earlier claim, as any later reading does.** One
   rule orders the log. A reading saying the candidates do not fit is not weaker
   evidence than an older one made against a rulebook it disagrees with. What it

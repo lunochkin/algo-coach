@@ -201,26 +201,29 @@ def test_fresh_asks_again_where_a_reading_already_answers(hand_claimed):
     assert (result.read, result.reused) == (1, 0)
 
 
-def test_naming_no_candidate_is_undecided_rather_than_a_total_miss(hand_claimed):
-    """No verdict is missing evidence, not a disagreement — scoring it as one
-    would count a decline as a wrong answer against every technique."""
+def test_naming_no_candidate_is_scored_against_a_claim_that_named_some(hand_claimed):
+    """It asserts that none of the candidates apply, which a claim naming one
+    of them contradicts. Counted apart as well, since a decline is worth
+    seeing — but not excused from the score for being one."""
     result = run(FakeTransport.answering(Verdict([])), hand_claimed)
 
     (reading,) = machine_claims(hand_claimed)
-    assert (result.scored, result.undecided) == (0, 1)
+    assert (result.scored, result.exact, result.undecided) == (1, 0, 1)
     assert reading.techniques == []
+    # Missed against every technique the claim named, and over-claimed on none.
+    (row,) = [one for one in result.per_technique if one.technique == "greedy"]
+    assert (row.attempts, row.missed, row.over) == (1, 1, 0)
 
 
 def test_a_reading_that_named_no_candidate_is_paid_for_once(hand_claimed):
     """The decline is stored, so a later run reads it back rather than asking
-    again — and still scores nothing, since missing evidence is not a
-    disagreement."""
+    again. The answer does not change while the question does not."""
     run(FakeTransport.answering(Verdict([])), hand_claimed)
     client = FakeTransport.answering(Verdict([]))
 
     result = run(client, hand_claimed)
 
-    assert (result.undecided, result.scored, len(client.calls)) == (1, 0, 0)
+    assert (result.undecided, result.scored, len(client.calls)) == (1, 1, 0)
 
 
 def test_a_failed_reading_stores_nothing(hand_claimed):
@@ -370,9 +373,10 @@ def test_the_limit_caps_the_calls_of_each_configuration(two_problems):
     assert client.asked("model") == {MODEL, CHEAP.model}
 
 
-def test_an_attempt_one_configuration_declined_is_in_neither_denominator(two_problems):
-    """A decline is missing evidence rather than a wrong answer, and a share the
-    other configuration alone was scored on would not be a comparison."""
+def test_an_attempt_one_configuration_declined_stays_in_both_denominators(two_problems):
+    """A decline is an answer, so it keeps the attempt in `common`. Dropping it
+    would shrink the denominator for every configuration whenever any one of
+    them declined — and reward the one that did."""
     two_problems.append_claim(reading("a1", ["greedy"]))
     two_problems.append_claim(reading("a2", ["greedy"]))
     # Only the cheap one asks; the newest attempt is what it declines.
@@ -382,9 +386,11 @@ def test_an_attempt_one_configuration_declined_is_in_neither_denominator(two_pro
 
     result = compare(client, two_problems, configurations=(DEFAULT, CHEAP))
 
-    assert result.common == 1
-    assert [scored.score.scored for scored in result.scores] == [1, 1]
+    assert result.common == 2
+    assert [scored.score.scored for scored in result.scores] == [2, 2]
     assert result.scores[1].score.undecided == 1
+    # The decline is the one it got wrong.
+    assert [scored.score.exact for scored in result.scores] == [2, 1]
 
 
 def test_only_the_attempts_they_answered_differently_are_split(two_problems):
