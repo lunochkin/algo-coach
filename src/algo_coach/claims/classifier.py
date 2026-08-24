@@ -84,6 +84,20 @@ class Configuration(BaseModel, frozen=True):
     # comparable instead of being discarded.
     temperature: float | None = TEMPERATURE
 
+    @property
+    def deployment(self) -> tuple[str, str]:
+        """Which deployment answers, and so whose cap a call is metered against.
+
+        OpenRouter imposes no request limit on a paid model; every 429 comes
+        from the provider, and a provider meters per model per endpoint. Two
+        configurations differing only in effort or temperature reach one
+        deployment and share one budget.
+
+        What it does not cover: the account-wide caps on free models, and one
+        key driven by two runs at once. Neither is a property of a reading.
+        """
+        return self.model, self.pin
+
 
 DEFAULT = Configuration()
 

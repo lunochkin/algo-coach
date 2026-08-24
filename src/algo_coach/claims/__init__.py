@@ -9,7 +9,7 @@ from algo_coach.claims.classifier import (
     classify,
     request_hash,
 )
-from algo_coach.claims.reading import ReadResult, read
+from algo_coach.claims.reading import Plan, ReadResult, absorb, select
 from algo_coach.claims.revision import against, contested, revisable
 from algo_coach.claims.run import (
     CONCURRENCY,
@@ -39,6 +39,7 @@ from algo_coach.claims.score import (
     score_backlog,
 )
 from algo_coach.claims.stale import at_configuration, is_stale, readings_at
+from algo_coach.runs import as_answered_grouped
 
 __all__ = [
     "DEFAULT",
@@ -53,6 +54,7 @@ __all__ = [
     "Configuration",
     "ConfigurationScore",
     "Failed",
+    "Plan",
     "ReadResult",
     "Score",
     "Split",
@@ -60,6 +62,7 @@ __all__ = [
     "against",
     "answered_by_hand",
     "as_answered",
+    "as_answered_grouped",
     "ask",
     "at_configuration",
     "claimable",
@@ -71,7 +74,8 @@ __all__ = [
     "eligible",
     "is_stale",
     "one_per_problem",
-    "read",
+    "select",
+    "absorb",
     "read_one",
     "readings_at",
     "revisable",

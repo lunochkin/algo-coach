@@ -230,7 +230,7 @@ def main() -> None:
         "--concurrency",
         type=int,
         default=CONCURRENCY,
-        help="calls in flight at once; one at a time otherwise",
+        help="calls in flight at once per model and endpoint; one at a time otherwise",
     )
     score_parser.add_argument(
         "--fresh",

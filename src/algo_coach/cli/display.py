@@ -34,6 +34,16 @@ def problem_history(row: ProblemRow, now: datetime) -> str:
     return f"last attempted {age(row.last_attempt_at, now)}, solved {solved}"
 
 
+# What a temperature nobody set is called. A named arm rather than an empty
+# cell: the provider's own default is a fact about the reading, and it compares
+# only with itself.
+UNSET = "default"
+
+
+def sampled(temperature: float | None) -> str:
+    return UNSET if temperature is None else str(temperature)
+
+
 def held(retry: Retry) -> str:
     """One wait, named by what caused it and how long it will last.
 

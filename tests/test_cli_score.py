@@ -162,9 +162,16 @@ def test_two_efforts_for_one_model_is_refused(hand_claimed, monkeypatch, capsys)
 def test_the_shares_are_over_what_both_read(hand_claimed, monkeypatch, capsys):
     """Two columns under one denominator: a cheaper classifier measured on its
     own smaller sample would read as the better one."""
+    # Scripted per deployment: the two run at once, and which verdict each got
+    # is exactly what these assertions are about.
     run(
         monkeypatch,
-        FakeTransport.answering(Verdict(["greedy"]), Verdict(["sorting"])),
+        FakeTransport.per_deployment(
+            {
+                (MODEL, PIN): Verdict(["greedy"]),
+                ("a-cheap-model", "a-host"): Verdict(["sorting"]),
+            }
+        ),
         *("--model", MODEL, "--model", "a-cheap-model", "--provider", "a-host"),
     )
 
@@ -197,8 +204,14 @@ def test_a_classifier_that_fails_every_call_aborts(hand_claimed, monkeypatch, ca
             *("--model", "a-model", "--provider", "a-host"),
         )
 
+    said = capsys.readouterr().err
     assert exit_info.value.code == 1
-    assert "aborted after 3 consecutive failures" in capsys.readouterr().err
+    assert "aborted after 3 consecutive failures" in said
+    # Why, not only that. The numbers are withheld on this path, so nothing
+    # else would ever say what the calls answered — and the board's tally
+    # names no attempt.
+    assert "does not support the effort parameter" in said
+    assert "a1" in said
 
 
 def test_an_unsupported_effort_can_be_left_unset(hand_claimed, monkeypatch, capsys):
@@ -271,9 +284,13 @@ def test_a_provider_pins_the_model_before_it(hand_claimed, monkeypatch):
         *("--model", "b-model", "--provider", "b-host"),
     )
 
-    first, second = client.calls
-    assert (first["model"], first["pin"]) == ("a-model", "a-host")
-    assert (second["model"], second["pin"]) == ("b-model", "b-host")
+    # Which pin stayed with which model, not which was asked first: the two
+    # deployments run at once, so the order they reach the transport in is the
+    # scheduler's rather than the command line's.
+    assert {(call["model"], call["pin"]) for call in client.calls} == {
+        ("a-model", "a-host"),
+        ("b-model", "b-host"),
+    }
 
 
 def test_a_model_named_without_a_provider_is_refused(hand_claimed, monkeypatch, capsys):
@@ -292,7 +309,12 @@ def test_the_temperature_attaches_to_the_model_before_it(hand_claimed, monkeypat
     """Fourth slot in the same ordered list, for the same reason as the other
     three: the command line's order is the output's, and separate destinations
     would lose which temperature followed which model."""
-    client = FakeTransport.answering(Verdict(["greedy"]), Verdict(["sorting"]))
+    client = FakeTransport.per_deployment(
+        {
+            ("a-model", "a-host"): Verdict(["greedy"]),
+            ("b-model", "b-host"): Verdict(["sorting"]),
+        }
+    )
 
     run(
         monkeypatch,
@@ -301,9 +323,10 @@ def test_the_temperature_attaches_to_the_model_before_it(hand_claimed, monkeypat
         *("--model", "b-model", "--provider", "b-host", "--temperature", "1"),
     )
 
-    first, second = client.calls
-    assert (first["model"], first["temperature"]) == ("a-model", 0.0)
-    assert (second["model"], second["temperature"]) == ("b-model", 1.0)
+    assert {(call["model"], call["temperature"]) for call in client.calls} == {
+        ("a-model", 0.0),
+        ("b-model", 1.0),
+    }
 
 
 def test_two_temperatures_of_one_model_are_two_columns(hand_claimed, monkeypatch, capsys):

@@ -1,10 +1,21 @@
+import json
+import threading
+import time
 from datetime import timedelta
 
 import pytest
 from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_problem
 
-from algo_coach.calls import CallLog
-from algo_coach.claims import DEFAULT, EFFORT, MODEL, Configuration, request_hash, score_backlog
+from algo_coach.calls import CallLog, Reply
+from algo_coach.claims import (
+    DEFAULT,
+    EFFORT,
+    MODEL,
+    PIN,
+    Configuration,
+    request_hash,
+    score_backlog,
+)
 from algo_coach.claims.run import ABORT_AFTER
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
@@ -331,8 +342,10 @@ def test_the_shares_are_over_the_attempts_every_configuration_read(two_problems)
     two_problems.append_claim(reading("a1", ["greedy"]))
     two_problems.append_claim(reading("a2", ["greedy"]))
     # The cheap one reads the newest and stops there, so a1 is the built-in
-    # classifier's alone and belongs to neither share.
-    client = FakeTransport.answering(Verdict(["sorting"]))
+    # classifier's alone and belongs to neither share. Scripted by model: the
+    # built-in one reuses both readings and asks nothing, so a script naming it
+    # would say a call was expected that never comes.
+    client = FakeTransport.per_deployment({(CHEAP.model, CHEAP.pin): Verdict(["sorting"])})
 
     result = compare(client, two_problems, configurations=(DEFAULT, CHEAP), limit=1)
 
@@ -344,12 +357,17 @@ def test_the_shares_are_over_the_attempts_every_configuration_read(two_problems)
 def test_the_limit_caps_the_calls_of_each_configuration(two_problems):
     """A cap across the run would spend it all on the first classifier and
     measure the second on nothing."""
-    client = FakeTransport.answering(Verdict(["greedy"]), Verdict(["greedy"]))
+    client = FakeTransport.per_deployment(
+        {(MODEL, PIN): Verdict(["greedy"]), (CHEAP.model, CHEAP.pin): Verdict(["greedy"])}
+    )
 
     result = compare(client, two_problems, configurations=(DEFAULT, CHEAP), limit=1)
 
     assert [scored.score.read for scored in result.scores] == [1, 1]
+    # How many calls, not which came first: with the configurations running at
+    # once the order they arrive in is not a fact about the cap.
     assert (len(client.calls), result.common) == (2, 1)
+    assert client.asked("model") == {MODEL, CHEAP.model}
 
 
 def test_an_attempt_one_configuration_declined_is_in_neither_denominator(two_problems):
@@ -357,7 +375,10 @@ def test_an_attempt_one_configuration_declined_is_in_neither_denominator(two_pro
     other configuration alone was scored on would not be a comparison."""
     two_problems.append_claim(reading("a1", ["greedy"]))
     two_problems.append_claim(reading("a2", ["greedy"]))
-    client = FakeTransport.answering(Verdict([]), Verdict(["greedy"]))
+    # Only the cheap one asks; the newest attempt is what it declines.
+    client = FakeTransport.per_deployment(
+        {(CHEAP.model, CHEAP.pin): [Verdict([]), Verdict(["greedy"])]}
+    )
 
     result = compare(client, two_problems, configurations=(DEFAULT, CHEAP))
 
@@ -371,7 +392,9 @@ def test_only_the_attempts_they_answered_differently_are_split(two_problems):
     both are — a1 is where reading the code decides which to keep."""
     two_problems.append_claim(reading("a1", ["sorting"]))
     two_problems.append_claim(reading("a2", ["sorting"]))
-    client = FakeTransport.answering(Verdict(["sorting"]), Verdict(["greedy"]))
+    client = FakeTransport.per_deployment(
+        {(CHEAP.model, CHEAP.pin): [Verdict(["sorting"]), Verdict(["greedy"])]}
+    )
 
     result = compare(client, two_problems, configurations=(DEFAULT, CHEAP))
 
@@ -397,3 +420,148 @@ def test_a_cap_of_no_calls_scores_what_is_already_stored(hand_claimed):
     result = compare(None, hand_claimed, limit=0)
 
     assert (result.common, result.scores[0].score.reused) == (1, 1)
+
+
+# Two configurations of one model on one endpoint: the same deployment answers
+# both, so they share whatever meters it.
+LOW = Configuration(effort="low")
+HIGH = Configuration(effort="high")
+
+
+class Counting:
+    """A transport that reports how many of its calls overlapped, and where."""
+
+    def __init__(self, hold: float = 0.005):
+        self.hold = hold
+        self.lock = threading.Lock()
+        self.live: dict[tuple[str, str], int] = {}
+        self.peak: dict[tuple[str, str], int] = {}
+        self.calls = 0
+
+    def __call__(self, **kwargs):
+        key = (kwargs["model"], kwargs["pin"])
+        with self.lock:
+            self.calls += 1
+            self.live[key] = self.live.get(key, 0) + 1
+            self.peak[key] = max(self.peak.get(key, 0), self.live[key])
+        time.sleep(self.hold)
+        with self.lock:
+            self.live[key] -= 1
+        return Reply(text=json.dumps({"techniques": ["greedy"]}), stop_reason="stop")
+
+
+def spread(root, count: int) -> AttemptLog:
+    """A hand claim on each of `count` problems, so a run has that many calls
+    to spend per configuration."""
+    log = AttemptLog(root)
+    for index in range(count):
+        seed_problem(root, id=f"p{index}", tags=["Greedy", "Sorting"])
+        log.append_attempt(
+            attempt(f"a{index}", f"p{index}", finished_at=T0 + timedelta(days=index))
+        )
+        log.append_claim(user_claim(f"a{index}", ["greedy"]))
+    return log
+
+
+def test_configurations_on_one_deployment_share_a_budget(tmp_path):
+    """Effort does not change which deployment answers, so two efforts of one
+    model are one endpoint's traffic and one endpoint's cap."""
+    client = Counting()
+
+    compare(client, spread(tmp_path / "data", 6), configurations=(LOW, HIGH), concurrency=1)
+
+    assert client.peak == {(LOW.model, LOW.pin): 1}
+    assert client.calls == 12
+
+
+def test_configurations_on_different_deployments_run_at_once(tmp_path):
+    """The whole change: one budget each, spent together. The barrier clears
+    only if both deployments have a call in flight."""
+    ready = threading.Barrier(2, timeout=5)
+    other = Configuration(model="b-model", pin="b-host")
+
+    def client(**kwargs):
+        ready.wait()
+        return Reply(text=json.dumps({"techniques": ["greedy"]}), stop_reason="stop")
+
+    result = compare(
+        client, spread(tmp_path / "data", 2), configurations=(DEFAULT, other), concurrency=1
+    )
+
+    assert [scored.score.read for scored in result.scores] == [2, 2]
+
+
+def test_one_configuration_aborting_leaves_the_others_reading(tmp_path):
+    """A broken model is not a broken endpoint. The plan stops being drawn
+    from; the deployment it shares keeps answering."""
+    broken = RuntimeError("does not support the effort parameter")
+
+    # Keyed on the effort, which is what separates these two — the deployment
+    # cannot, since sharing one is the whole point of the case.
+    def client(**kwargs):
+        if kwargs["effort"] == LOW.effort:
+            raise broken
+        return Reply(text=json.dumps({"techniques": ["greedy"]}), stop_reason="stop")
+
+    result = compare(client, spread(tmp_path / "data", ABORT_AFTER + 2), configurations=(LOW, HIGH))
+
+    assert result.scores[0].score.aborted
+    assert len(result.scores[0].score.failed) == ABORT_AFTER
+    assert not result.scores[1].score.aborted
+    assert result.scores[1].score.read == ABORT_AFTER + 2
+
+
+def test_the_log_has_one_writer_however_many_configurations_run(tmp_path, monkeypatch):
+    """Claims are appended as they are read, and an append-only file cannot be
+    written by two threads at once. Every write is the consuming thread's."""
+    log = spread(tmp_path / "data", 6)
+    writers = []
+    appended = log.append_claim
+
+    def watched(claim):
+        writers.append(threading.current_thread())
+        appended(claim)
+
+    monkeypatch.setattr(log, "append_claim", watched)
+    other = Configuration(model="b-model", pin="b-host")
+
+    compare(Counting(), log, configurations=(DEFAULT, other), concurrency=3)
+
+    assert writers
+    assert set(writers) == {threading.current_thread()}
+
+
+def test_every_configuration_is_planned_before_the_first_call(tmp_path):
+    """A reader needs every total up front, and one answered entirely from the
+    log asks for nothing — reported as it started, it would never appear."""
+    log = spread(tmp_path / "data", 2)
+    log.append_claim(reading("a0", ["greedy"]))
+    log.append_claim(reading("a1", ["greedy"]))
+    planned = []
+
+    compare(
+        FakeTransport.per_deployment({(CHEAP.model, CHEAP.pin): Verdict(["greedy"])}),
+        log,
+        configurations=(DEFAULT, CHEAP),
+        on_plan=planned.append,
+    )
+
+    (plans,) = planned
+    assert [len(plan.asking) for plan in plans] == [0, 2]
+    assert [plan.configuration for plan in plans] == [DEFAULT, CHEAP]
+
+
+def test_a_progress_report_names_the_configuration_that_read_it(tmp_path):
+    """Several answer at once, so a line that did not say whose it was could
+    not be attributed at all."""
+    seen = []
+
+    compare(
+        Counting(),
+        spread(tmp_path / "data", 2),
+        configurations=(LOW, HIGH),
+        on_progress=lambda configuration, progress: seen.append((configuration, progress.index)),
+    )
+
+    assert {configuration for configuration, _ in seen} == {LOW, HIGH}
+    assert sorted(index for _, index in seen) == [1, 1, 2, 2]

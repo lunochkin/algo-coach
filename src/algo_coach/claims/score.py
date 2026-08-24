@@ -4,17 +4,18 @@ Per technique rather than overall, since the board is per technique and a
 classifier that over-claims one code skews it wherever that code is read.
 """
 
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.claims.classifier import DEFAULT, Configuration
-from algo_coach.claims.reading import read
-from algo_coach.claims.run import CONCURRENCY, Failed, Progress
+from algo_coach.claims.reading import Plan, absorb, select
+from algo_coach.claims.run import CONCURRENCY, Failed, Progress, read_one
 from algo_coach.claims.sample import answered_by_hand, eligible, one_per_problem
 from algo_coach.log import AttemptLog
-from algo_coach.schema import Problem
+from algo_coach.runs import as_answered_grouped
+from algo_coach.schema import Attempt, Call, Problem
 from algo_coach.techniques import standing_claims
 
 
@@ -169,6 +170,32 @@ def per_decision(
     return total, agreed
 
 
+def queued(plans: Sequence[Plan]) -> Iterator[tuple[Plan, Attempt]]:
+    """One deployment's work, drawn from the configurations sharing it in turn.
+
+    Round-robin rather than one configuration and then the next, so a
+    deployment's budget is spread over them and none waits for another to
+    finish.
+
+    A plan that has aborted stops being drawn from, which is why this is a
+    generator: the driver asks for the next item only after the previous answer
+    was folded in, so an abort is already recorded when the check runs. That is
+    what makes an abort cost one configuration rather than the endpoint.
+    """
+    queues = [(plan, iter(plan.asking)) for plan in plans]
+    while queues:
+        alive = []
+        for plan, queue in queues:
+            if plan.result.aborted:
+                continue
+            attempt = next(queue, None)
+            if attempt is None:
+                continue
+            yield plan, attempt
+            alive.append((plan, queue))
+        queues = alive
+
+
 def score_backlog(
     transport: Transport | None,
     log: AttemptLog,
@@ -180,8 +207,8 @@ def score_backlog(
     limit: int | None = None,
     concurrency: int = CONCURRENCY,
     fresh: bool = False,
-    on_configuration: Callable[[Configuration], None] | None = None,
-    on_progress: Callable[[Progress], None] | None = None,
+    on_plan: Callable[[Sequence[Plan]], None] | None = None,
+    on_progress: Callable[[Configuration, Progress], None] | None = None,
 ) -> Comparison:
     """What each classifier reads the hand-claimed attempts as, scored.
 
@@ -212,25 +239,65 @@ def score_backlog(
         if answered_by_hand(standing.get(attempt.id))
     ]
 
-    readings = []
-    for configuration in configurations:
-        if on_configuration is not None:
-            on_configuration(configuration)
-        readings.append(
-            read(
-                transport,
-                log,
-                calls,
-                hand_claimed,
-                problems,
-                claims=claims,
-                configuration=configuration,
-                limit=limit,
-                concurrency=concurrency,
-                fresh=fresh,
-                on_progress=on_progress,
-            )
+    plans = [
+        select(
+            hand_claimed,
+            problems,
+            claims=claims,
+            configuration=configuration,
+            limit=limit,
+            fresh=fresh,
         )
+        for configuration in configurations
+    ]
+    # Once, before the first call. A reader needs every total up front, and a
+    # configuration answered entirely from the log asks for nothing — reported
+    # per configuration as it started, it would never be mentioned at all.
+    if on_plan is not None:
+        on_plan(plans)
+
+    # Grouped by deployment, since that is what meters the requests. Two
+    # configurations differing only in effort share one budget; one model on
+    # two endpoints does not.
+    streams: dict[tuple[str, str], list[Plan]] = {}
+    for plan in plans:
+        if plan.asking:
+            streams.setdefault(plan.configuration.deployment, []).append(plan)
+
+    def asked(work: tuple[Plan, Attempt]) -> tuple[list[str], Call | None]:
+        plan, attempt = work
+        return read_one(
+            transport,
+            calls,
+            attempt,
+            problems[attempt.problem_id],
+            configuration=plan.configuration,
+        )
+
+    for (plan, attempt), answer, failure in as_answered_grouped(
+        asked,
+        {key: queued(group) for key, group in streams.items()},
+        concurrency=concurrency,
+    ):
+        verdict = absorb(log, plan, attempt, answer, failure)
+        if on_progress is not None:
+            problem = problems[attempt.problem_id]
+            on_progress(
+                plan.configuration,
+                # Counted as answers arrive rather than taken from the order
+                # asked in: with several calls in flight a position in that
+                # order jumps about, and what a reader wants is a count that
+                # climbs.
+                Progress(
+                    index=plan.answered,
+                    total=len(plan.asking),
+                    attempt_id=attempt.id,
+                    title=problem.title,
+                    **verdict,
+                ),
+            )
+
+    readings = [plan.result for plan in plans]
 
     common = (
         set.intersection(*(set(reading.verdicts) for reading in readings)) if readings else set()

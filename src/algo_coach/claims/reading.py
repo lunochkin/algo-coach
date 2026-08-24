@@ -9,26 +9,17 @@ What is stored is the reading, never the score. An aggregate is a derived view,
 recomputed on every read.
 """
 
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog, Transport
 from algo_coach.claims.classifier import DEFAULT, Configuration, request_hash
-from algo_coach.claims.run import (
-    ABORT_AFTER,
-    CONCURRENCY,
-    Failed,
-    Progress,
-    as_answered,
-    read_one,
-    store,
-)
+from algo_coach.claims.run import ABORT_AFTER, Failed, store
 from algo_coach.claims.sample import recency
 from algo_coach.claims.stale import readings_at
 from algo_coach.log import AttemptLog
-from algo_coach.schema import Attempt, Problem, TechniqueClaim
+from algo_coach.schema import Attempt, Call, Problem, TechniqueClaim
 
 
 class ReadResult(BaseModel):
@@ -40,29 +31,45 @@ class ReadResult(BaseModel):
     aborted: bool = False
 
 
-def read(
-    transport: Transport | None,
-    log: AttemptLog,
-    calls: CallLog,
+class Plan(BaseModel):
+    """One configuration's share of a run: what it must pay to read, and what
+    has landed so far.
+
+    Selecting is separated from asking so that one consumer can drive several
+    configurations at once. The answers arrive interleaved, and each is folded
+    into the state its own selection produced. That is also what keeps every
+    append on the consuming thread, however many calls are in flight.
+    """
+
+    configuration: Configuration
+    asking: list[Attempt] = Field(default_factory=list)  # newest first, after `limit`
+    result: ReadResult = Field(default_factory=ReadResult)
+    answered: int = 0  # of `asking`, however the answer went
+    consecutive: int = 0  # failures since the last answer
+
+
+def select(
     attempts: Sequence[Attempt],
     problems: Mapping[str, Problem],
     *,
     claims: Sequence[TechniqueClaim],
     configuration: Configuration = DEFAULT,
     limit: int | None = None,
-    concurrency: int = CONCURRENCY,
     fresh: bool = False,
-    on_progress: Callable[[Progress], None] | None = None,
-) -> ReadResult:
-    """What one classifier reads each attempt as, from the log where it can.
+) -> Plan:
+    """What one classifier still has to pay for, and what the log already
+    answers.
 
-    Selection is the caller's: which attempts are worth reading is what the
-    next configuration comparison changes, and it is not this loop's question.
+    Which attempts are worth reading is the caller's: that is what the next
+    comparison changes, and it is not this function's question.
 
     `limit` caps the calls, not the attempts — a stored reading is free, so a
     capped run adds to what earlier runs read rather than replacing it. What is
-    still unread is taken newest first, as the backlog run takes it. A cap of
-    zero pays for nothing, so `transport` is never reached and may be absent.
+    still unread is taken newest first, as the backlog run takes it.
+
+    Makes no call and writes nothing, so it needs neither a transport nor a
+    log. A configuration whose readings all come from the log asks for nothing
+    and is still a plan, with a total of zero.
     """
     asked = {
         attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
@@ -70,7 +77,7 @@ def read(
         if attempt.problem_id in problems
     }
     stored = {} if fresh else readings_at(claims, configuration, asked)
-    result = ReadResult()
+    plan = Plan(configuration=configuration)
 
     unread: list[Attempt] = []
     for attempt in attempts:
@@ -81,61 +88,58 @@ def read(
         if not reading.techniques:
             # A stored decline. Read again by nothing and scored by nothing —
             # missing evidence is not a disagreement.
-            result.undecided += 1
+            plan.result.undecided += 1
             continue
-        result.verdicts[attempt.id] = reading.techniques
-        result.reused += 1
+        plan.result.verdicts[attempt.id] = reading.techniques
+        plan.result.reused += 1
 
-    asking = sorted(unread, key=recency, reverse=True)[:limit]
+    plan.asking = sorted(unread, key=recency, reverse=True)[:limit]
+    return plan
 
-    def report(index: int, attempt: Attempt, title: str, **verdict: Any) -> None:
-        if on_progress is not None:
-            on_progress(
-                Progress(
-                    index=index, total=len(asking), attempt_id=attempt.id, title=title, **verdict
-                )
-            )
 
-    consecutive = 0
-    index = 0
-    for attempt, answer, failure in as_answered(
-        lambda attempt: read_one(
-            transport, calls, attempt, problems[attempt.problem_id], configuration=configuration
-        ),
-        asking,
-        concurrency=concurrency,
-    ):
-        index += 1
-        problem = problems[attempt.problem_id]
-        techniques, call = answer if answer is not None else ([], None)
-        if failure is not None:
-            # One attempt's problem, as in the backlog run: an eval that dies
-            # on the first refusal reports nothing about the rest. A run of
-            # them is a different fact — a configuration this classifier cannot
-            # run fails identically on every attempt, and paying for the whole
-            # eval set to learn it once is the same waste the backlog run
-            # already refuses.
-            result.failed.append(Failed(attempt_id=attempt.id, reason=repr(failure)))
-            report(index, attempt, problem.title, reason=repr(failure))
-            consecutive += 1
-            if consecutive == ABORT_AFTER:
-                result.aborted = True
-                break
-            continue
-        consecutive = 0
-        if not techniques:
-            # Stored, so no later run at this configuration pays for it again,
-            # and left out of the verdicts, so nothing scores it: the
-            # classifier said the candidates do not cover the code, which is
-            # missing evidence rather than a disagreement.
-            if call is not None:
-                store(log, attempt.id, techniques, call)
-            result.undecided += 1
-            report(index, attempt, problem.title)
-            continue
-        if call is not None:
-            store(log, attempt.id, techniques, call)
-        result.verdicts[attempt.id] = techniques
-        result.read += 1
-        report(index, attempt, problem.title, techniques=techniques)
-    return result
+def absorb(
+    log: AttemptLog,
+    plan: Plan,
+    attempt: Attempt,
+    answer: tuple[list[str], Call | None] | None,
+    failure: Exception | None,
+) -> dict[str, Any]:
+    """Fold one answer into the plan that asked for it, and say what to report.
+
+    Writes on the calling thread, which is the one consumer however many calls
+    are in flight. Returns the fields the verdict decides, leaving the counter
+    and the reporting to the caller.
+
+    A run of failures ends the plan rather than the run. A configuration this
+    classifier cannot run fails identically on every attempt, and the eval set
+    is the wrong place to learn that once — but a model that is broken says
+    nothing about the endpoint, so the configurations beside it keep reading.
+    """
+    plan.answered += 1
+    techniques, call = answer if answer is not None else ([], None)
+
+    if failure is not None:
+        # Broad on purpose: a refusal, a rate limit or a dropped connection is
+        # one attempt's problem, and a run must not lose the ones behind it.
+        plan.result.failed.append(Failed(attempt_id=attempt.id, reason=repr(failure)))
+        plan.consecutive += 1
+        if plan.consecutive == ABORT_AFTER:
+            plan.result.aborted = True
+        return {"reason": repr(failure)}
+
+    # Answered, so the classifier is reachable — an undecided verdict is a
+    # reading, not a failure.
+    plan.consecutive = 0
+    if call is not None:
+        # Stored whether or not it named anything, so no later run at this
+        # configuration pays for the same question again.
+        store(log, attempt.id, techniques, call)
+    if not techniques:
+        # Left out of the verdicts, so nothing scores it: the classifier said
+        # the candidates do not cover the code, which is missing evidence
+        # rather than a disagreement.
+        plan.result.undecided += 1
+        return {}
+    plan.result.verdicts[attempt.id] = techniques
+    plan.result.read += 1
+    return {"techniques": techniques}

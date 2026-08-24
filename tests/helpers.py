@@ -2,6 +2,8 @@
 script, and the two records a verdict needs to exist."""
 
 import json
+import threading
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
@@ -59,18 +61,58 @@ class Verdict:
 @dataclass
 class FakeTransport:
     """Records the request rather than making one — the prompt is what these
-    tests are about, and a real call would score a live model."""
+    tests are about, and a real call would score a live model.
+
+    Two scripts, because a run has two shapes. `answering` replies in call
+    order, which is what a single configuration produces and what most of
+    these tests read. `per_deployment` replies by which model and endpoint
+    asked, which is the
+    only script that survives configurations running at once: with several in
+    flight, the order calls arrive in is not a fact a test can assert.
+    """
 
     replies: list[Verdict]
+    # Keyed by model and pin, which is the unit that runs beside another. One
+    # model on two endpoints is two readers, and a script keyed on the model
+    # alone would answer for both. A list of one answers every call from that
+    # deployment, which is the ordinary case.
+    scripted: dict[tuple[str, str], list[Verdict]] | None = None
     calls: list[dict] = field(default_factory=list)
+    lock: threading.Lock = field(default_factory=threading.Lock)
 
     @classmethod
     def answering(cls, *verdicts: Verdict) -> FakeTransport:
         return cls(list(verdicts))
 
+    @classmethod
+    def per_deployment(
+        cls, scripts: Mapping[tuple[str, str], Verdict | Sequence[Verdict]]
+    ) -> FakeTransport:
+        """A script per deployment. Which of two reaches the transport first is
+        the scheduler's, so one shared script would make the verdicts depend on
+        it. Within a deployment the order is the run's, so a list serves."""
+        return cls(
+            [],
+            scripted={
+                key: list(script) if isinstance(script, Sequence) else [script]
+                for key, script in scripts.items()
+            },
+        )
+
+    def asked(self, field: str) -> set:
+        """What was sent for one field, as a set — the shape an assertion
+        takes once the order calls were made in stops being determinate."""
+        with self.lock:
+            return {call.get(field) for call in self.calls}
+
     def __call__(self, **kwargs) -> Reply:
-        self.calls.append(kwargs)
-        verdict = self.replies[len(self.calls) - 1]
+        with self.lock:
+            self.calls.append(kwargs)
+            if self.scripted is None:
+                verdict = self.replies[len(self.calls) - 1]
+            else:
+                script = self.scripted[kwargs["model"], kwargs["pin"]]
+                verdict = script.pop(0) if len(script) > 1 else script[0]
         if verdict.error is not None:
             raise verdict.error
         return Reply(

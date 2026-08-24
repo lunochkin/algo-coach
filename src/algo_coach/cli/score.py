@@ -12,17 +12,19 @@ from algo_coach.claims import (
     TechniqueScore,
     score_backlog,
 )
-from algo_coach.claims.run import ABORT_AFTER
-from algo_coach.cli.classify import show
+from algo_coach.claims.reading import Plan
+from algo_coach.claims.run import ABORT_AFTER, Progress
+from algo_coach.cli.display import UNSET
+from algo_coach.cli.status import Status
 from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
 
-# What `--temperature` is given to run at the provider's own default: a named
-# level rather than an omitted flag, as `--effort default` is. It is the arm
-# every reading stored before the parameter existed sits in, so naming it is
-# how those are scored beside a greedy run rather than discarded.
-UNSET = "default"
+# `--temperature default` is how the provider's own is asked for: a named level
+# rather than an omitted flag, as `--effort default` is. It is the arm every
+# reading stored before the parameter existed sits in, so naming it is how
+# those are scored beside a greedy run rather than discarded. Defined beside
+# the formatting, since the board renders the same word.
 
 # Which slot each flag fills in the row a `--model` opens. The order is the
 # command line's, so the row is positional and the flags are not.
@@ -113,29 +115,41 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         parser.exit(2, "score: --stored with --limit — a cap on a run that pays for nothing\n")
     named = configurations(args, parser)
 
+    # Built before the transport, so a wait is reported onto the row it holds
+    # rather than into the block being redrawn.
+    board = Status(sys.stderr, named)
     # No credentials asked for by a run that makes no call: being runnable
     # anywhere is what makes the stored mode the reproducible one.
-    api = None if args.stored else transport(args, parser)
+    api = None if args.stored else transport(args, parser, on_retry=board.waiting)
     log = AttemptLog(root)
     calls = CallLog(root)
     problems = {problem.id: problem for problem in ProblemStore(root).all()}
-    result = score_backlog(
-        api,
-        log,
-        calls,
-        problems,
-        user_id=args.user,
-        configurations=named,
-        concurrency=args.concurrency,
-        fresh=args.fresh,
-        limit=0 if args.stored else args.limit,
-        on_configuration=announce if len(named) > 1 else None,
-        on_progress=show,
-    )
 
-    # Failures are not printed here: `show` already reported each one as it
-    # happened, and which configuration it came from is the header `announce`
-    # prints above it. A second list on stdout would say it twice.
+    def planned(plans: Sequence[Plan]) -> None:
+        board.planned([len(plan.asking) for plan in plans])
+
+    def answered(configuration: Configuration, progress: Progress) -> None:
+        board.answered(configuration, failed=progress.reason is not None)
+
+    try:
+        result = score_backlog(
+            api,
+            log,
+            calls,
+            problems,
+            user_id=args.user,
+            configurations=named,
+            concurrency=args.concurrency,
+            fresh=args.fresh,
+            limit=0 if args.stored else args.limit,
+            on_plan=planned,
+            on_progress=answered,
+        )
+    finally:
+        # In a `finally`, so a run that raised still leaves a whole block
+        # rather than a half-drawn one.
+        board.close()
+
     if not result.eval_set:
         parser.exit(1, f"score: nothing hand-claimed to score against for {args.user}\n")
     aborted = [
@@ -144,12 +158,17 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         if scored.score.aborted
     ]
     if aborted:
-        # Before the numbers rather than after: what a configuration read
-        # before it broke is a slice of the eval set, and a share over it would
-        # be read as its answer.
+        # The numbers are withheld, the reasons are not. What a configuration
+        # read before it broke is a slice of the eval set, and a share over it
+        # would be read as its answer — but a run that ends here is one nothing
+        # else will explain, since the board carries a tally and no tally names
+        # an attempt.
+        for name, scored in zip(labels(named), result.scores, strict=True):
+            if scored.score.failed:
+                print(failures(name, scored.score), file=sys.stderr)
         parser.exit(
             1,
-            f"score: {', '.join(aborted)} aborted after {ABORT_AFTER} consecutive failures\n",
+            f"\nscore: {', '.join(aborted)} aborted after {ABORT_AFTER} consecutive failures\n",
         )
     if not result.common:
         # Told apart from the above: ground truth exists and no reading of it
@@ -160,6 +179,19 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         alone(result)
     else:
         compared(result)
+
+
+def failures(name: str, scored: Score) -> str:
+    """Which attempts a configuration failed on, and why.
+
+    The board carries a tally per row, and a tally names no attempt. Printed
+    with the numbers rather than as it happens: several configurations answer
+    at once, and a line in that stream cannot say which produced it.
+    """
+    return "\n".join(
+        [f"\n{name} failed on {len(scored.failed)}:"]
+        + [f"  {one.attempt_id}  {one.reason}" for one in scored.failed]
+    )
 
 
 def alone(result: Comparison) -> None:
@@ -174,6 +206,8 @@ def alone(result: Comparison) -> None:
         # Beside the share, since declining shrinks the denominator and
         # improves the number for it.
         print(f"{only.undecided} named no candidate — not scored")
+    if only.failed:
+        print(failures(describe(result.scores[0].configuration), only))
     print()
     print(table(("technique", "attempts", "exact", "missed", "over"), rows(result)))
 
@@ -204,6 +238,10 @@ def compared(result: Comparison) -> None:
     summary.append(("read/reused", [f"{scored.read}/{scored.reused}" for scored in scores]))
     if any(scored.undecided for scored in scores):
         summary.append(("named no candidate", [str(scored.undecided) for scored in scores]))
+    if any(scored.failed for scored in scores):
+        # Beside `read/reused`, which is where a shrunken denominator is
+        # diagnosed: a configuration that failed read fewer than it planned to.
+        summary.append(("failed", [str(len(scored.failed)) for scored in scores]))
     print(table(("", *names), [(head, *cells) for head, cells in summary]))
     print()
     print(table(("technique", "attempts", *names), rows(result)))
@@ -215,6 +253,10 @@ def compared(result: Comparison) -> None:
         print(f"\n{split.attempt_id}\n  {'you:'.ljust(width)} {' '.join(split.user)}")
         for name, verdict in zip(names, split.verdicts, strict=True):
             print(f"  {(name + ':').ljust(width)} {' '.join(verdict)}")
+
+    for name, scored in zip(names, scores, strict=True):
+        if scored.failed:
+            print(failures(name, scored))
 
 
 def describe(configuration: Configuration) -> str:
@@ -304,12 +346,6 @@ def packed(row: TechniqueScore | None) -> str:
     """One configuration's three counts in one column. A technique it never
     reached is three zeroes rather than a blank: it is a count, not a gap."""
     return "/".join(counts(row)) if row is not None else "0/0/0"
-
-
-def announce(configuration: Configuration) -> None:
-    """Which classifier the lines below came from. To stderr, beside the
-    per-attempt progress it heads."""
-    print(f"{describe(configuration)}:", file=sys.stderr, flush=True)
 
 
 def table(header: Sequence[str], body: Sequence[Sequence[str]]) -> str:

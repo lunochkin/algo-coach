@@ -8,6 +8,7 @@ the store or this repo.
 import argparse
 import os
 import sys
+from collections.abc import Callable
 
 from openai import OpenAI
 
@@ -33,8 +34,16 @@ def warn(retry: Retry) -> None:
     sys.stderr.write(held(retry) + "\n")
 
 
-def transport(args: argparse.Namespace, parser: argparse.ArgumentParser) -> OpenRouter:
+def transport(
+    args: argparse.Namespace,
+    parser: argparse.ArgumentParser,
+    *,
+    on_retry: Callable[[Retry], None] = warn,
+) -> OpenRouter:
     key = next((os.environ[name] for name in CREDENTIALS if os.environ.get(name)), None)
     if key is None:
         parser.exit(2, f"{args.command}: {' or '.join(CREDENTIALS)} unset\n")
-    return OpenRouter(OpenAI(api_key=key, base_url=BASE_URL), on_retry=warn)
+    # A line of its own by default. A command drawing a board takes the
+    # report instead, since a warning written beside a block being redrawn
+    # would scroll it.
+    return OpenRouter(OpenAI(api_key=key, base_url=BASE_URL), on_retry=on_retry)
