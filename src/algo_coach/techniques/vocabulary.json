@@ -100,7 +100,7 @@
       "code": "prefix-sum",
       "kind": "structure",
       "earns": "A cumulative array, or a running total against a map of totals already seen, answering a range aggregate in constant time and turning a quadratic scan into a linear one.",
-      "near_miss": "A running total read only at the end. No range is ever queried against an earlier total, so nothing is prefixed."
+      "near_miss": "A running total read only at the end, or one restarted at every starting index. No range is ever queried against an earlier total, so nothing is prefixed. The accumulator inside a nested loop over all subarrays is that second case: it saves a factor, and the scan it saves it from is still quadratic."
     },
     {
       "code": "recursion",
@@ -135,8 +135,8 @@
     {
       "code": "topological-sort",
       "kind": "procedure",
-      "earns": "The solution produces an order over vertices in which every edge points forward — peeling zero-indegree vertices from a queue, which earns `breadth-first-search` beside this, or reversing a post-order, which earns `depth-first-search`. Counting the peeled vertices to decide acyclicity still performs it.",
-      "near_miss": "Cycle detection by colour-marking during a depth-first search, which computes no order and reports only whether one exists."
+      "earns": "The solution computes an order over a directed graph's vertices in which every edge points forward — peeling zero-indegree vertices from a queue, which earns `breadth-first-search` beside this, or reversing a depth-first post-order, which earns `depth-first-search`. Computed, not necessarily kept: counting the peeled vertices to decide acyclicity still performs it.",
+      "near_miss": "Cycle detection by colour-marking during a depth-first search, which computes no order and reports only whether one exists. And a peel keyed on undirected degree: a leaf's one neighbour is not a predecessor, so removing it orders no edge, and the layers measure distance from the centre rather than dependency depth."
     },
     {
       "code": "tree-traversal",
