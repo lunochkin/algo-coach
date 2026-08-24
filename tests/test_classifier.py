@@ -315,13 +315,12 @@ def test_the_request_hash_is_short_enough_to_store_on_every_claim():
     assert len(request_hash(["greedy", "sorting"], CODE)) == 12
 
 
-
 def test_a_reply_cut_short_by_the_cap_names_nothing():
     """The decoder ran out of tokens, so whatever came back is truncated and
     no verdict can be read from it. Recorded as naming nothing rather than
     raised. Greedy decoding is deterministic, so every later run would re-ask
     the same prompt and be cut short in the same place."""
-    client = FakeTransport([], stop_reason="length", text='{  \t  \n\n  \t  ')
+    client = FakeTransport([], stop_reason="length", text="{  \t  \n\n  \t  ")
 
     techniques, call = _classify(client, CALLS, ["greedy", "sorting"], CODE)
 

@@ -340,9 +340,7 @@ def test_a_bad_answer_is_asked_again(drill_root, monkeypatch, capsys):
     assert len(drill_root.claims()) == 1
 
 
-def test_the_loop_records_a_decline_at_the_moment_of_solving(
-    drill_root, monkeypatch, capsys
-):
+def test_the_loop_records_a_decline_at_the_moment_of_solving(drill_root, monkeypatch, capsys):
     """A claim is cheapest here, and so is a decline. Naming none of the tags
     is a verdict about the code, and the loop is where it is worth a keystroke
     rather than a re-read months later."""
