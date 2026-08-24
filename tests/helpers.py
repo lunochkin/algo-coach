@@ -86,6 +86,9 @@ class FakeTransport:
     cost: float | None = None
     # Input, output and the thinking split, as a router would report them.
     tokens: tuple[int | None, int | None, int | None] = (None, None, None)
+    # What the answering request took. A list is drawn in call order, for the
+    # tests about the slowest of several.
+    request_ms: int | list[int] | None = None
     lock: threading.Lock = field(default_factory=threading.Lock)
 
     @classmethod
@@ -121,6 +124,10 @@ class FakeTransport:
             else:
                 script = self.scripted[kwargs["model"], kwargs["pin"]]
                 verdict = script.pop(0) if len(script) > 1 else script[0]
+        if isinstance(self.request_ms, list):
+            taken = self.request_ms[min(len(self.calls) - 1, len(self.request_ms) - 1)]
+        else:
+            taken = self.request_ms
         if verdict.error is not None:
             raise verdict.error
         return Reply(
@@ -131,6 +138,7 @@ class FakeTransport:
             input_tokens=self.tokens[0],
             output_tokens=self.tokens[1],
             reasoning_tokens=self.tokens[2],
+            request_ms=taken,
         )
 
 

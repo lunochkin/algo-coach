@@ -204,6 +204,8 @@ def alone(result: Comparison) -> None:
     print(f"{only.read} read, {only.reused} reused")
     if only.tokened:
         print(f"{tokens(only)} tokens in/out/thinking per attempt")
+    if only.timed:
+        print(f"{latency(only)} per request, mean and slowest")
     if only.costed:
         print(f"{spent(only)} per attempt, {outlay(only)} over {only.costed} priced reading(s)")
     if only.undecided:
@@ -243,11 +245,14 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
     print()
 
     # No heading over the identity columns: the row says what it is, and a
-    # word above it would only repeat the configuration underneath.
-    head = ["", "", "", "", "exact"]
+    # word above it would only repeat the configuration underneath. The pin is
+    # among them here though `labels` drops it — a row has the width a heading
+    # did not, and it is the first thing to read when a configuration 404s.
+    head = ["", "", "", "", "", "exact"]
     body = [
         [key, scored.configuration.model, scored.configuration.effort]
-        + [sampled(scored.configuration.temperature), share(scored.score)]
+        + [sampled(scored.configuration.temperature), f"@ {scored.configuration.pin}"]
+        + [share(scored.score)]
         for key, scored in zip(keys, result.scores, strict=True)
     ]
 
@@ -261,6 +266,8 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
     column("read/reused", lambda scored: f"{scored.read}/{scored.reused}")
     if any(scored.tokened for scored in scores):
         column("in/out/think", tokens)
+    if any(scored.timed for scored in scores):
+        column("mean/max", latency)
     if any(scored.costed for scored in scores):
         # A mean over the readings that carry a price, not over the eval set:
         # one stored before the router's charge was recorded says nothing, and
@@ -379,6 +386,19 @@ def tokens(scored: Score) -> str:
         f"{round(scored.input_tokens / scored.tokened)}/"
         f"{round(scored.output_tokens / scored.tokened)}/{thinking}"
     )
+
+
+def latency(scored: Score) -> str:
+    """How long the answering request took, on average and at its worst.
+
+    Seconds, since these run in tens of them and milliseconds would be five
+    digits of false precision. The worst is worth its own number: a reader that
+    stalls on one attempt in eighty is a different problem from one that is
+    uniformly slow, and a mean cannot tell them apart.
+    """
+    if not scored.timed:
+        return "—"
+    return f"{scored.request_ms / scored.timed / 1000:.1f}/{scored.slowest_ms / 1000:.1f}s"
 
 
 def outlay(scored: Score) -> str:

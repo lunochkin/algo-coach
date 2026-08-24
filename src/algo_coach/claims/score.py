@@ -77,6 +77,14 @@ class Score(BaseModel):
     reasoning_tokens: int = 0
     tokened: int = 0  # readings whose call reported a count
     reasoned: int = 0  # of those, the ones reporting the thinking split
+    # The answering request on its own, never what the caller waited. The
+    # difference between the two is the endpoint's backoff, and a run held
+    # behind a cap would otherwise read as a slow model. The slowest is beside
+    # the mean because a reader that stalls occasionally is a different problem
+    # from one that is uniformly slow, and a mean hides which it is.
+    request_ms: int = 0
+    slowest_ms: int = 0
+    timed: int = 0
 
 
 class ConfigurationScore(BaseModel):
@@ -189,10 +197,15 @@ def spent(scored: Score, calls: Sequence[Call]) -> None:
     Counted over the calls that reported, never over the readings: one made
     before a count was recorded says nothing, and treating it as zero would
     understate whichever configuration was read earliest. The thinking split
-    has a denominator of its own, since a model may report the total and not
-    the part of it spent reasoning.
+    and the timing each have a denominator of their own, since a model may
+    report the total and not the part spent reasoning, and a call may be timed
+    without its tokens being counted.
     """
     for call in calls:
+        if call.request_ms is not None:
+            scored.request_ms += call.request_ms
+            scored.slowest_ms = max(scored.slowest_ms, call.request_ms)
+            scored.timed += 1
         if call.input_tokens is None or call.output_tokens is None:
             continue
         scored.input_tokens += call.input_tokens

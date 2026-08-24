@@ -636,3 +636,28 @@ def test_a_reused_reading_brings_its_calls_counts_too(hand_claimed):
 
     assert (again.reused, again.tokened) == (1, 1)
     assert (again.input_tokens, again.reasoning_tokens) == (900, 150)
+
+
+def test_the_timing_is_the_request_not_the_wait(hand_claimed):
+    """A run held behind a cap waited longer than the model took. The
+    difference is the endpoint's backoff, and counting it would read as a slow
+    reader."""
+    client = FakeTransport.answering(Verdict(["greedy"]))
+    client.request_ms = 14000
+
+    result = run(client, hand_claimed)
+
+    assert (result.request_ms, result.slowest_ms, result.timed) == (14000, 14000, 1)
+
+
+def test_the_slowest_request_is_kept_beside_the_mean(two_problems):
+    """A reader that stalls on one attempt in eighty is a different problem
+    from one that is uniformly slow, and a mean cannot tell them apart."""
+    client = FakeTransport.answering(Verdict(["greedy"]), Verdict(["greedy"]))
+    client.request_ms = [2000, 30000]
+
+    result = run(client, two_problems)
+
+    assert result.timed == 2
+    assert result.slowest_ms == 30000
+    assert result.request_ms == 32000
