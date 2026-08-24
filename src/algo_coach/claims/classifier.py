@@ -35,7 +35,7 @@ EFFORT = "medium"
 # per request from whoever carries the model, so without a pin two runs of one
 # configuration are answered by different builds of the same weights — and fp4
 # and bf16 are different weights, not one model behind two doors.
-PIN = "coreweave/bf16"
+PIN = "coreweave/fp4"
 # Greedy. Classification over a fixed candidate set has one right answer per
 # decision, and sampling turns a verdict the model holds at 0.9 into one it
 # gives four times in five. That noise is tolerable in an eval, which is
