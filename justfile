@@ -81,7 +81,7 @@ score *args:
         --model openai/gpt-5.6-luna --provider openai --temperature default \
         --model x-ai/grok-4.6 --provider xai/zdr \
         --model qwen/qwen3.8-max --provider alibaba \
-        --model deepseek/deepseek-v4-pro-0813 --provider gmicloud/fp8 \
+        --model deepseek/deepseek-v4-pro-0813 --provider alibaba \
         --model openai/gpt-oss-120b --provider coreweave/fp4 \
         --model google/gemma-4-31b-it --provider coreweave/bf16 \
         --model z-ai/glm-5.2 --provider gmicloud/fp8  \
