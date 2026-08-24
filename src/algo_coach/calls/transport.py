@@ -12,6 +12,18 @@ downgrade a schema into a prompt, and the record would not show it happened.
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+# What one reading may generate, thinking and answer together. There is no
+# separate cap for the two: no model reached through this transport accepts a
+# reasoning budget, and one sent to a provider that cannot honour it would be
+# dropped by `require_parameters` rather than ignored.
+#
+# Set by what a runaway may cost rather than by what a reading needs. The
+# second is per model and unknowable in advance — a verdict is a dozen tokens,
+# but the thinking before it ran past 4000 on one model while another had never
+# exceeded 1220. What a cap decides is only whether a reading happens: a
+# truncated reply carries no verdict, so nothing is stored and nothing scored.
+MAX_TOKENS = 12000
+
 
 class ProviderError(Exception):
     """The endpoint answered, and the answer holds no answer.

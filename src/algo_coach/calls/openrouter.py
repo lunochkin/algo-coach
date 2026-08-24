@@ -12,7 +12,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, replace
 from typing import Any
 
-from algo_coach.calls.transport import ProviderError, Reply, Retry, Trace, stamp
+from algo_coach.calls.transport import MAX_TOKENS, ProviderError, Reply, Retry, Trace, stamp
 
 BASE_URL = "https://openrouter.ai/api/v1"
 
@@ -94,7 +94,7 @@ class OpenRouter:
         pin: str,
         temperature: float | None = None,
         schema: dict[str, Any] | None = None,
-        max_tokens: int = 4000,
+        max_tokens: int = MAX_TOKENS,
     ) -> Reply:
         # `allow_fallbacks` bounds what happens after a provider fails; the
         # first choice among those carrying the model is still the router's

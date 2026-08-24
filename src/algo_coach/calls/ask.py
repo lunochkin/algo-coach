@@ -11,7 +11,7 @@ from time import monotonic
 from typing import Any
 
 from algo_coach.calls.store import CallLog
-from algo_coach.calls.transport import Reply, Transport, traced
+from algo_coach.calls.transport import MAX_TOKENS, Reply, Transport, traced
 from algo_coach.mint import call as mint_call
 from algo_coach.schema import Call
 
@@ -45,7 +45,7 @@ def ask(
     pin: str,
     temperature: float | None = None,
     schema: dict[str, Any] | None = None,
-    max_tokens: int = 4000,
+    max_tokens: int = MAX_TOKENS,
 ) -> tuple[Call, str | None]:
     """Send one prompt, record what happened, and return the call and its text.
 
