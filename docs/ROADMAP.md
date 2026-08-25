@@ -1,98 +1,135 @@
 # Roadmap
 
-Each phase = real practice value + a write-up. Ship thin. A phase is done when
-it's used daily, not when it's feature-complete.
+Each phase ships one capability and a write-up. Ship thin.
+
+A phase exits when its deliverable is in use by whatever consumes it: daily
+practice for a phase the user runs, the next phase for one that builds a
+capability. A phase can also close as superseded — built, and answered by
+something later, so its exit no longer applies.
 
 `docs/architecture/README.md` owns the concepts, boundaries, and invariants.
 This file owns only sequencing. Where the two differ, the architecture wins.
 
-## Phase 1 — Push API, techniques, drill board
+A completed phase records what landed, not why. The reasons are in the
+architecture doc and in the commits.
 
-Get real daily attempts into the engine and make current state visible.
+## Phase 1 — Push API, techniques, drill board — done
 
-- Record schema settled before the first real ingest: engine-minted ids on
-  `Attempt` and `Problem`, `user_id` and `external_id` on `Attempt`, and
-  `TechniqueClaim` as a joined record. The log is append-only, so none of it
-  can be retrofitted.
-- Push API: ingest `Problem` and `Attempt` from the practice client. No
-  verification on this path.
-- Techniques: the product-owned vocabulary, a data file rather than a
-  datastore. The log references the codes, so retirement goes through an alias
-  map, never a deletion.
-- Drill board: read-only. Per technique, attempt history and current state
-  from recency, attempt count, solved/unsolved, and self-label. Grouping
-  resolves to a claim if one exists, otherwise the problem's tags, so a history
-  of past attempts groups without being labelled. Diagnosis is not an input
-  until Phase 3. No scheduling: the user picks what to drill.
-- Exit: a week of real attempts is in the store, and the board renders
-  per-technique state from them. Built, and open until it does.
+Real daily attempts in the engine, and current state visible.
 
-## Phase 2 — Drill loop
+- Push API: `Problem` and `Attempt` ingested from the practice client. Per
+  record, so one bad line costs nothing around it, and re-running is a no-op on
+  what landed.
+- Techniques: the product-owned vocabulary, shipped as code. A code carries the
+  criterion for claiming it and the near miss it is confused with.
+- Drill board: per-technique standing derived from the log, grouped on a claim
+  where one exists and on the problem's tags otherwise.
 
-Board → pick a technique → solve on the platform → record what it cannot know.
-The flow and its rules live in `docs/architecture/README.md`.
+## Phase 2 — Drill loop on a pushed problem — superseded
 
-- The loop mints no attempt: it waits for the user to push and diffs its own
-  log, so the engine calls nothing and works whatever they push with.
-- A technique claim and a self-label per attempt. The first writer of either,
-  and the only writer of self-labels there will be.
-- Exit: loop runs on real daily attempts. Built, and open until it does.
+Board, then a technique, then a problem, solved on the platform. The loop mints
+no attempt: it waits on a push and diffs its own log, so the engine calls
+nothing and works whatever the user pushes with.
 
-## Phase 3 — Technique attribution
+Superseded by Phase 7. The platform serves, times and judges, so this loop can
+never verify a submission or time a sitting it did not witness. What survives
+unchanged is the claim and self-label prompt at the moment of solving.
 
-Which techniques a solution used. The evidence is the code and the code does
-not decay, so the ground truth can be given retroactively, and the phase needs
-no practice to start. Whether two careful readers agree is what the phase asks,
-not what it assumes. Until something separates model error from annotator error
-from a rule that cannot be applied, a disagreement is all three at once.
+## Phase 3 — Technique attribution — done
 
-- Hand claims over a sample of the backlog: the eval set, and the correction
-  path afterwards. A self-label cannot be given this way, which is why the
-  failure work is not here.
-- Attribution classifier constrained to the problem's own tags, so it picks
-  among candidates rather than classifying freely. Tag fallback biases progress
-  toward broad techniques.
-- Two measurements: disagreement with the tag fallback says whether the board
-  moves, agreement with the hand claims says whether the move is right.
-- Exit: attribution runs on real daily attempts and its claims stand. Built,
-  and open until it does. Whether the classifier beats the tag fallback is
-  measured when mastery estimation reads claims, not here. Until then a wrong
-  claim costs a board the user reads with their own judgment.
+Which techniques a solution used, read off the code rather than off the
+problem's tags.
 
-## Phase 4 — Cards (current)
+- Hand claims over the backlog: the eval set, adjudicated against a frontier
+  model with every divergence resolved by hand.
+- A classifier constrained to the problem's own candidates, scored per
+  technique by set equality against the user's claims.
+- The call log beneath it: one transport, one record per request, carrying the
+  prompt whole, what the run cost and what it was sampled at.
+- Provenance settled — model, effort, pin, temperature, prompt digest. A
+  reading is greedy, and staleness keys on the digest of the question rather
+  than on a version over the rulebook.
 
-How studying a technique is organised: what to read, what to reproduce from
-memory, and what to solve. Cards are why daily practice starts, which is what
-Phases 1-3 all exit on.
+Delta for generated problems: candidates come from codes derived from canonical
+solutions rather than from a platform's tags. Phase 5 carries it.
 
-Cards are not an ability estimate. Mastery is what a user can solve, per
-technique, and it is Phase 5; the two share sequence and no data.
+## Phase 4 — Cards and template matching — done
 
-### Phase 4a — cards and recall
+- Card content as product data, authored by a skill into `content/` and seeded
+  into the store. A card names no problem; it carries a selector.
+- Template matches: one record per template and problem, negatives included,
+  three writers ordered by what each of them knew.
+- The matcher and its annotation pass, which writes the reference a machine
+  reading is measured against.
 
-- Card content is product data, structured and seeded from files: the topic,
-  its templates, and a selector the ladder is resolved from at import. A card
-  names no problem, so it ships anywhere. Authored by a skill, never
-  hand-edited. It replaces prose parsed by regex.
-- Studying a card is an explicit act, since the ladder is measured from it and
+What a card still needs — the ladder, runs, recall and probes — waits on a
+corpus that can fill it. Phase 6.
+
+## Phase 5 — Problem generation (current)
+
+The engine writes problems: a statement, the test cases that decide it, and at
+least one canonical solution. Nothing lands until the canonical passes them.
+
+It is first because everything after it needs a corpus the engine owns. The
+ladder resolves over problems, and the in-engine loop serves and verifies them.
+A pushed corpus covers whatever the user happened to solve, and it carries no
+test cases at all.
+
+- The matcher is scored first, per template on positive verdicts in both
+  directions. Generation asserts a match and the matcher audits it, so an
+  unmeasured matcher would audit at an unknown error rate.
+- Generation is a command in the engine, beside the classifier and the matcher.
+  One transport, one call log, one provenance base. No second pipeline.
+- A generated problem asserts the template it was written for. The matcher
+  reads it later for the templates it was not written for, and audits that
+  assertion.
+- A problem's techniques derive from its canonical solutions. That is also what
+  gives the attribution classifier its candidates on a generated problem.
+- The discrimination bar comes first. Cases that separate nothing license the
+  word `verified` on a canonical that is wrong. Which check is the bar is
+  settled from a real corpus rather than argued.
+- The announcement floor is measured against the pushed corpus. A form a
+  matcher names from the statement alone was telegraphed, and such a problem
+  teaches recognition of nothing.
+- Exit: a card's reported gaps are filled by generated problems, and Phase 6
+  resolves a ladder over them.
+
+## Phase 6 — Ladder, recall and card runs
+
+What a card needs once there are problems to fill it.
+
+- The ladder resolved at import, from the selector and the template matches, at
+  least one rung per studied template. A studied template with no match is a
+  reported gap, and the gap is what a generation run is aimed at.
+- Studying a card is an explicit act: the ladder is measured from it, and
   probes are assigned at it.
-- A recall attempt is not an `Attempt`: no problem, no platform, no
-  submission. Its own record, keyed to a card and a template.
-- The trainer never prints a template. Names hidden, blank-filed cold, run
+- A recall attempt is not an `Attempt`: no problem, no platform, no submission.
+  Its own record, keyed to a card and a template. A hinted pass is not a pass.
+- The trainer never prints a template. Names hidden, reproduced cold, run
   against the card's own tests.
 - Status, not verdicts: what was recalled and when, what the ladder has left,
   which probes are available. The inputs a graduation rule would read.
-- Exit: recall runs daily, and cards are authored and studied here rather than
-  by hand outside the engine.
+- Graduation names no threshold. A timed box, a probe count and a decay edge
+  cannot be chosen before the numbers exist. The rust jog is the other
+  candidate: a technique that was once fluent wants minutes, not a card.
+- Exit: recall and the ladder run daily.
 
-### Phase 4b — what daily use asks for
+## Phase 7 — In-engine drill loop
 
-Left open deliberately. Graduation needs a timed box, a probe count and a decay
-edge, and none can be chosen before the numbers exist. That is why 4a shows the
-inputs and names no threshold. The other candidate is the rust jog: a card is
-the full learning loop, and a technique that was once fluent wants minutes.
+The first attempts the engine produces rather than ingests. It serves a
+generated problem, times the sitting, runs the submission against the problem's
+own test cases, and records the verdict.
 
-## Phase 5 — Technique mastery, scheduling, failure mode
+- `Attempt` gains the verification result — which cases passed, out of how
+  many — beside the platform status string it already carries. Additive, and
+  meaningless before Phase 5.
+- The interaction is answered by using it: how a solution is entered, what the
+  loop does with a failing run, whether a sitting resumes.
+- Claims and self-labels are asked as Phase 2 asked them. The writers do not
+  change; what changes is who witnessed the sitting.
+- Exit: daily practice runs here, on problems the engine wrote and judged.
+
+## Phase 8 — Technique mastery, scheduling, failure mode
 
 Per-technique skill state updated from attempts and the diagnosis signal;
 scheduling targets the diagnosed cause, not per-problem intervals. Exit: the
@@ -112,36 +149,30 @@ Sessions land here too. A sitting is several submissions, and counting each as
 an attempt over-weights the ones that took a retry. It is a derived view over
 the log, grouped on read, and never a field a client sets.
 
-## Phase 6 — Product problems + verification
+## Phase 9 — Program-analysis-grounded diagnosis
 
-Product-owned problems and test cases seeded from the content pipeline;
-attempts on them are executed and verified locally. The first attempts the
-engine produces rather than ingests. `Attempt` gains whether a real test run
-backs its verdict — additive, and meaningless before now. Exit: verified
-attempts feed the mastery model.
-
-## Phase 7 — Program-analysis-grounded diagnosis
-
-Ground the classifier in evidence: AST-diff vs reference solutions,
+Ground the classifier in evidence: AST-diff against canonical solutions,
 execution-trace comparison, empirical complexity measurement. Needs the test
-cases and reference solutions verification brings. Deliverable: measured
-accuracy delta vs LLM-only diagnosis.
+cases and canonicals Phase 5 brings. Deliverable: measured accuracy delta
+against LLM-only diagnosis.
 
-## Phase 8 — Retrieval
+## Phase 10 — Retrieval
 
-Similar problems, patterns, and technique briefs retrieved from the user's own
-attempt corpus in the engine store; weak-spot patterns surfaced.
+Similar problems, patterns, and technique briefs retrieved from the corpus and
+the user's own attempts; weak-spot patterns surfaced.
 
-## Phase 9 — MCP + autonomy
+## Phase 11 — MCP + autonomy
 
 Corpus and tools exposed as an MCP server. A scheduled agent runs the practice
 loop: it picks drills and adapts to history.
 
-## Phase 10 — Multi-agent (conditional)
+## Phase 12 — Multi-agent (conditional)
 
 Only if a real pipeline earns it: diagnose → retrieve → brief → schedule.
 
-## Phase 11 — Verified problem synthesis
+## Phase 13 — Soundness-checked synthesis
 
-Formal constraint specs, property-based test-case generation, adversarial
-validation — soundness-checked generated problems.
+An upgrade to Phase 5's generation rather than its first appearance. Formal
+constraint specs, property-based test-case generation, adversarial validation.
+What it buys is a guarantee that a case set discriminates, where Phase 5 has a
+bar chosen from a real corpus.

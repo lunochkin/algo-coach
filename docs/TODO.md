@@ -1,249 +1,189 @@
 # TODO
 
-## Phase 1 — push API + techniques + drill board
+## Phase 1 — push API + techniques + drill board — done
 
 ### Schema (before the first real ingest)
 - [x] `user_id` on `Attempt`, stamped at ingest from the authenticated pusher
 - [x] `Problem` provenance: owner set by ingest path, origin platform, pusher
 - [x] Add `TechniqueClaim` — the record exists; nothing writes it yet
-- [x] One claim per attempt naming every technique it used, since a solution
-      can use several and a revision has to replace the whole set
+- [x] One claim per attempt naming every technique it used. A revision
+      replaces the whole set
 - [x] Claim source on `TechniqueClaim`, required, plus model and prompt
-      version on a machine claim. Not deferred: "attribution is always
-      automatic" is an assumption the log could never drop, and re-deriving
-      needs to know which machine claims are stale
+      version on a machine claim. Re-deriving has to know which are stale
 - [x] `Attempt.origin`: push API or engine drill loop, stamped by the ingest
-      path. Whether a real test run backs the verdict is a separate fact,
-      recorded when the engine can first verify anything
-- [x] `Attempt.source_status`: the origin platform's own status, verbatim. A
-      timeout and a wrong answer both land as unsolved. Phase 3 cannot recover
-      the difference from a boolean
-- [x] `started_at`, `time_to_solve_sec` and `code` optional. A platform gives
-      the submission time and often nothing else, and a backfill that rejects
-      the backlog is worth less than one that counts it
-- [x] Drop `Attempt.session`. A sitting is grouped from the log on read, so a
-      client-set field would be a derived view stored on an append-only
-      record
+      path. Whether a test run backs the verdict is a separate fact
+- [x] `Attempt.source_status`: the platform's own status, verbatim. A timeout
+      and a wrong answer both land as unsolved
+- [x] `started_at`, `time_to_solve_sec` and `code` optional. A backfill that
+      rejects the backlog is worth less than one that counts it
+- [x] Drop `Attempt.session`. A sitting is grouped on read, so the field would
+      store a derived view on an append-only record
 
 ### Techniques
 - [x] Scaffold project
 - [x] Technique vocabulary as a data file under `src/algo_coach/`, so it ships
-      with the package. Checked in the built wheel
-- [x] `is_known` for the write path only — in the pydantic model, a retired
-      code would make historical records unreadable
+      in the built wheel
+- [x] `is_known` for the write path only. In the model, a retired code would
+      make historical records unreadable
 
 ### Push API
-- [x] Ingest `Attempt`: validate, append, no-op on re-push. A duplicate is not
-      an error. A batch ingests per record, so one bad line costs itself
+- [x] Ingest `Attempt`: validate, append, no-op on re-push. A batch ingests
+      per record, so one bad line costs itself
 - [x] Stamp `id` and `user_id` from the adapter, dropping client values
 - [x] `algo-coach push <attempts|problems> <file|->`, `--user` standing in for
       authentication
-- [x] Ingest `Problem`: validate, upsert as user-owned. A re-push refreshes
-      the descriptive fields and never moves the minted id
+- [x] Ingest `Problem`: validate and upsert. A re-push refreshes the
+      descriptive fields and never moves the minted id
 - [x] Drop client-supplied owner, id, user_id and techniques
-- [x] Map `source_tags` to engine `techniques`; an unmapped tag produces no
-      code. Re-derived on every push, so a mapping change reaches stored
-      problems
+- [x] Map `source_tags` to engine `techniques`, re-derived on every push. An
+      unmapped tag produces no code
 - [x] Resolve `problem_external_id` to the minted `problem_id`, rejecting what
-      does not resolve. Problems are pushed first; re-pushing after they land
-      is a no-op on what ingested
+      does not resolve. Problems are pushed first
 - [x] `AttemptPush` and `ProblemPush` as the contract clients copy. Engine
-      fields have nowhere to arrive, so stripping is enforced by the type
-      rather than a hand-kept name list
+      fields have nowhere to arrive, so the type enforces the stripping
 
 ### CLI
-- [x] Retire `cards seed` — it wrote technique codes into the cards store, and
+- [x] Retire `cards seed`. It wrote technique codes into the cards store, and
       the vocabulary ships in git now
 
 ### Drill board
 - [x] Resolve an attempt's techniques: its claim if one exists, otherwise the
-      problem's. Read-time only — never stored, so re-deriving the tag mapping
-      reaches every unclaimed attempt
+      problem's. Read-time only, so re-deriving the mapping reaches everything
 - [x] Per-technique view: attempt count, recency, solved/unsolved, self-label
 - [x] `algo-coach board` CLI command
-- [x] Count how much of the backlog carries more than one tag — it sets how
-      badly Phase 2's classifier is needed. Measured over 485 problems: 61 map
-      to no technique, 183 to one, 241 to two or more. Fallback attribution
-      over-credits half the corpus
-- [x] Close the vocabulary gaps the count exposed: `tree`, `binary-tree` and
-      `binary-search-tree` reach no code, so their attempts group nowhere.
-      Non-algorithmic tags (database, dataframe work) are correctly unmapped
-      and stay that way
+- [x] Count the backlog's multi-tag share, which sets how badly Phase 3's
+      classifier is needed. Over 485 problems: 61 map to no technique, 183 to
+      one, 241 to two or more
+- [x] Close the vocabulary gaps that count exposed: `tree`, `binary-tree` and
+      `binary-search-tree` reached no code. Non-algorithmic tags stay unmapped
 
 ### Exit
 - [x] A week of real attempts in the store, board rendering from them. 1785
-      attempts over 117 practice days, 159 of them in the last 30. The board
-      renders 25 technique rows, and 101 attempts reach no row
+      attempts over 117 practice days, 159 of them in the last 30
+- [x] The board renders 25 technique rows, and 101 attempts reach none
 
-## Phase 2 — drill loop
+## Phase 2 — drill loop on a pushed problem — superseded
 
 Flow and its rules: `docs/architecture/README.md`, "Drill loop".
 
 - [x] Pick a technique from the stale-ordered board, then a problem for it —
       least recently attempted first, lowest solve rate breaking a tie
-- [x] Hand over the problem's origin URL and what the log says about it. The
-      card shown before it is Phase 4; the loop runs without a brief until then
+- [x] Hand over the problem's origin URL and what the log says about it
 - [x] `algo-coach drill` — the whole flow, prompting and rendering only.
       Invalid input re-asks, EOF ends the drill wherever it stands
 
 The rest extends that command.
 
 - [x] Wait for the user to push, then diff the log for what appeared against
-      that problem — exact, since the loop knows what was there before
+      that problem. Exact, since the loop knows what was there before
 - [x] Ask for a claim and a self-label on each attempt that appeared, the
-      drilled technique pre-filled and the previous answer carried forward.
-      `a` takes the defaults for the rest, `s` records nothing for that
-      question, and EOF keeps whatever already landed
+      drilled technique pre-filled. `a` takes the defaults for the rest, `s`
+      records nothing, EOF keeps whatever already landed
 - [x] Nothing pushed, nothing recorded: wait again or end, never hold the
       answers against a record that may not arrive
 
-### Exit
-- [ ] The loop runs on real daily attempts
+### Closed
+Superseded by Phase 7. The platform serves, times and judges, so this loop can
+never verify a submission or time a sitting it did not witness. Phase 7 asks
+the same two questions of an attempt the engine witnessed.
 
-## Phase 3 — technique attribution
+## Phase 3 — technique attribution — done
 
 Which techniques a solution used. The evidence is the code and the code does
 not decay, so the classifier can be scored against a hand answer given
 retroactively. Whether two careful readers agree is what the scoring asks, not
 what licenses it. Why an attempt failed is a different kind of question, and
-moved to Phase 5.
+moved to Phase 8.
 
 ### Hand claims
 
 An eval set and the correction path, never training data, since nothing is
-trained. Retroactive on purpose: the evidence is the code, and the code is
-still there. The board's numbers decide what gets drilled, so a classifier
-nothing checks sends practice somewhere unverified for weeks.
+trained. The board's numbers decide what gets drilled, so a classifier nothing
+checks sends practice somewhere unverified for weeks.
 
 - [x] `algo-coach claim` — the loop's technique question over sampled
-      attempts, no drill and no push. Writes a `TechniqueClaim`, source `user`.
-      Offers only what a claim would decide: unclaimed, carrying its code, on
-      a problem whose tags leave a choice
-- [x] Sample one attempt per problem, not per attempt. A backfill retries the
-      same problem, and a repeat asks the identical question: same code, same
-      candidate tags. Counting both would weight that problem twice. Per
-      problem rather than per sitting, since a retry months later repeats it
-      too, and sittings land with the mastery model
+      attempts, no drill and no push. Offers only what a claim would decide:
+      unclaimed, carrying code, on a problem whose tags leave a choice
+- [x] Sample one attempt per problem. A retry asks the identical question, so
+      counting both would weight that problem twice
 - [x] Of a problem's attempts, the latest carrying code: the solution that
-      stands. An earlier one may show an approach that was abandoned, and the
-      claim worth scoring is the one the board credits. A claimed problem does
-      not return through an older sibling, because the collapse runs before the
-      claimed filter rather than after
-- [x] Drawn from problems carrying two or more tags, where attribution has
-      something to decide, and spread across techniques so no single one
-      carries the estimate. Each draw takes the technique the order has covered
-      least, so any prefix is spread and `--count` needs no quota. An attempt
-      counts toward every tag its problem carries, since one claim decides all
-      of them. The seed chooses within a technique, not across, so a sample is
-      still described by its seed
+      stands. The collapse runs before the claimed filter, so a claimed problem
+      does not return through an older sibling
+- [x] Drawn from problems carrying two or more tags, and spread across
+      techniques so any prefix is spread and `--count` needs no quota. The seed
+      chooses within a technique, not across
 - [x] Label before running the classifier. Reviewing its answers is the same
-      labour, but anchors on them: a plausible wrong call gets accepted.
-- [ ] Claim the next batch blind, stopping at whichever count answers the
-      question. Thirty separates usable from broken, a hundred narrows the
-      interval. Blind because the first thirty were revised against the
-      classifiers' readings, and no longer measure agreement independently
+      labour but anchors on them, and a plausible wrong call gets accepted
+- [x] Claim the next batch blind, since the first thirty were revised against
+      readings and no longer measure agreement independently. 100 attempts
+      claimed, every one of them blind on its first claim
 
 ### Technique attribution
 
 - [x] Classifier picks among the problem's own tags rather than classifying
-      freely, so it can narrow what a problem could exercise but never invent
-      a technique the tags do not name. The response schema enforces them, and
-      the prompt names them too. Thinking is not schema-constrained, so a
-      reading made without knowing the candidates meets them only at
-      emission
-- [x] Write the verdict as a `TechniqueClaim`, source `classifier`, with model
-      and prompt version. Reject a code `is_known` rejects — the only write
-      path that could introduce one. Whole rather than per code, since a claim
-      asserts one set and half of it is a set nobody made
-- [x] Run it over the stored log, not only over fresh practice. Every one of
-      the 1785 attempts carries its code, so the whole backlog is classifiable
-      today. `algo-coach classify`, newest first so a capped run improves what
-      the board shows, resuming on the next run rather than paying twice
-- [x] Score against the hand claims per technique, by set equality. The board
-      is per technique, and a claim naming every candidate would pass a metric
-      that only asks whether the right code appears. `algo-coach score` writes
-      nothing: a machine claim on a hand-claimed attempt would be the later
-      record, and the latest wins on read
-- [x] Report over-claiming and under-claiming apart, since they want opposite
-      fixes, and print every disagreement. The hand claims are ground truth by
-      construction rather than by being right, so reading the disagreements is
-      the only place a mislabelled one surfaces
-- [x] Report the board with the classifier's claims against the board without
-      them, per technique. `algo-coach movement`, needing no hand claim and no
-      call. Narrowing two or three candidates to one removes credit by
-      arithmetic, so a row that barely moves is one the classifier never
-      declined to name. A sanity check, never a criterion: movement says it
-      decided something, and only the hand claims say it decided right
-- [x] Re-derive stale machine claims by model and prompt version, leaving user
-      claims untouched. `algo-coach classify --redo`, since a re-derivation
-      costs a call per attempt. Unclaimed first, because a first claim buys a
-      number the board does not have and a re-derivation only revises one it
-      does. Compared whole rather than ordered, so running an earlier prompt
-      rolls back by the same path. An unchanged verdict is still written. The
-      record names the classifier that reached it, and an unwritten agreement
-      would be paid for again on every later run
+      freely. The response schema enforces them; thinking is not constrained,
+      so a reading meets the candidates only at emission
+- [x] Write the verdict as a `TechniqueClaim`, source `classifier`. Reject a
+      code `is_known` rejects, whole rather than per code, since half a set is
+      a set nobody made
+- [x] `algo-coach classify` over the stored log, newest first, resuming rather
+      than paying twice. All 1785 attempts carry code
+- [x] `algo-coach score` against the hand claims per technique, by set
+      equality. Writes nothing: a machine claim on a hand-claimed attempt would
+      be the later record
+- [x] Report over-claiming and under-claiming apart, and print every
+      disagreement. They want opposite fixes, and a mislabelled hand claim
+      surfaces nowhere else
+- [x] `algo-coach movement`: the board with the classifier's claims against
+      the board without them, needing no hand claim and no call. A sanity
+      check, never a criterion
+- [x] `classify --redo` re-derives stale machine claims, leaving user claims
+      untouched. Unclaimed first: a first claim buys a number the board does
+      not have
+- [x] An unchanged verdict is still written, or the agreement is paid for
+      again on every later run
 
 ### Storing what the classifier read
 
 - [x] Resolve a claim user-first rather than latest-wins, so a machine claim
-      lands on a hand-claimed attempt without superseding it. No attempt
-      carries claims from both writers today, so the rule changes no number
-      the board shows, which is the moment to change it, while the two sets
-      are still disjoint. `standing_claims` beside `resolve_techniques`,
-      calling `latest_by_attempt` once per writer. In what order is the log's
-      question. Who wins is the record's
-- [x] `effort` and `prompt_hash` on the record beside model and prompt
-      version. Required rather than optional, which the 25 machine claims
-      already written paid for. They were deleted rather than re-derived. An
-      optional provenance field is one every reader branches on forever, and a
-      partly-known configuration compares with nothing. The ambiguity was
-      disposable then, and is permanent once the eval set is read at scale
+      lands without superseding. Changed while the two sets were still
+      disjoint, so no board number moved
+- [x] `effort` and `prompt_hash` required beside model and prompt version. The
+      25 machine claims already written were deleted rather than re-derived: a
+      partly-known configuration compares with nothing
 - [x] `is_stale` compares model, effort and prompt version, not the hash. The
       hash would re-derive the backlog for a reflowed sentence
-- [x] `score` stores what it reads, and reads only what it has no reading
-      for at this configuration. Scoring is already a pure function over two
-      mappings, so it splits into reading and scoring rather than being
-      rewritten. `--limit` caps the reads, not the attempts scored: a stored
-      reading is free. Reuse keys off the version, as staleness does, so a
-      reused reading from another prompt text is reported. That is the only
-      thing a forgotten bump says. Two decisions came with it. The eval set
-      collapses to one attempt per problem, which the doc said and the code did
-      not. And an undecided verdict is counted rather than scored
-- [x] `score --model`, over the attempts both configurations read. Comparing
-      each one's own sample scores against a different denominator, and the
-      number would read as quality. Repeatable, and one command. A comparison
-      of one is the ordinary score, since intersecting one set is that set, so
-      only the rendering branches. Each is scored against the hand claims and
-      never against another. The column beside it buys the shared denominator.
-      Three decisions came with it. A `Configuration` value object, since a
-      lookup key threaded as four keywords is one a caller can get half right.
-      `--effort` alternating with `--model`, so which followed which survives,
-      and no `--prompt-version`, which would relabel the same prompt text. And
-      `--stored`, which makes no call and asks for no credentials, so a
-      comparison is reproducible once the reads are paid for
-
-- [x] Fan the calls out, keep one writer. `--concurrency` on `classify` and
-      `score`, since a backlog run is hours of waiting on a network. The write
-      left the worker so the log cannot tear. Abort counts consecutive failures
-      by the order answered, costing up to `concurrency` of them on a broken
-      key. And the progress index counts answers rather than positions, which
-      jump about with calls in flight
-
-- [x] Key reuse on what an attempt was actually sent, not on a rulebook
-      version. A criterion travels with its candidate, so editing one entry
-      re-derives the attempts carrying it and no others: 7 of 31 on the last
-      edit. `prompt_version` is gone. An author can forget to bump a version
-      while the text moves; a digest cannot. It costs a reflow re-deriving what
-      it reaches, and a rulebook that can no longer be cited by name. `--fresh`
-      asks anyway, which measuring a model against itself needs. 961 machine
-      claims were dropped to land it. The 48 hand claims are the only
-      irreplaceable thing there
+- [x] `score` stores what it reads, and reads only what it has no reading for
+      at this configuration. A stored reading is free to score again
+- [x] `--limit` caps the reads, not the attempts scored
+- [x] Collapse the eval set to one attempt per problem, which the doc said and
+      the code did not
+- [x] Count an undecided verdict rather than scoring it
+- [x] `score --model`, over the attempts both configurations read. Each one's
+      own sample would score against a different denominator
+- [x] A `Configuration` value object. A lookup key threaded as four keywords
+      is one a caller can get half right
+- [x] `--effort` alternating with `--model`, so which followed which survives.
+      No `--prompt-version`, which would relabel the same prompt text
+- [x] `--stored` makes no call and asks for no credentials, so a comparison is
+      reproducible once the reads are paid for
+- [x] Fan the calls out, keep one writer: `--concurrency` on `classify` and
+      `score`. The write left the worker so the log cannot tear
+- [x] Abort counts consecutive failures by the order answered, costing up to
+      `concurrency` of them on a broken key
+- [x] The progress index counts answers rather than positions, which jump
+      about with calls in flight
+- [x] Key reuse on what an attempt was sent, not on a rulebook version. An
+      author can forget to bump a version while the text moves; a digest
+      cannot. Editing one entry re-derived 7 of 31
+- [x] `prompt_version` is gone. It cost a rulebook that can no longer be cited
+      by name
+- [x] `--fresh` asks anyway, which measuring a model against itself needs
+- [x] 961 machine claims were dropped to land it. The 48 hand claims were the
+      only irreplaceable thing there
 - [x] A call log below the claims: model, effort, prompt, digest, response,
-      reasoning, tokens, error. Domain-free, so a second consumer needs no
-      teaching. It holds what a claim cannot: declines, failures, and what a
-      run cost. The prompt is stored whole beside its digest, so a record
-      digests to its own key. Claims cite a call and decide for themselves
-      whether to ask again, so nothing on the run path reads it back
+      reasoning, tokens, error. Domain-free, and holding the declines, failures
+      and costs a claim cannot
 
 ### What a code means
 
@@ -254,302 +194,288 @@ them. That question is well posed for a procedure, and means something else for
 a structure, a paradigm and a problem class.
 
 - [x] Give each code its kind, what earns it, and the near miss it is confused
-      with. The near miss is the part that decides cases. Nothing failed for
-      want of knowing what a traversal is, and everything failed for want of a
-      rule that descending-and-pruning is not one. Each criterion is written to
-      stand on a complexity, redundancy or definitional argument that would
-      hold if no model had ever run. A criterion whose only support is that the
-      classifiers agreed has been written backwards
+      with. The near miss decides cases: nothing failed for want of knowing
+      what a traversal is
 - [x] Render them beside the candidates rather than into the system text,
-      which every call pays for whether or not the code is a candidate. The
-      three worked examples the system text carries today are per-code criteria
-      in the wrong file, and move into their entries
+      which every call pays for whether or not the code is a candidate
 - [x] Report per-decision agreement beside the share. Set equality compounds a
-      per-candidate error over the candidate count: 95% of calls reads as 87%
-      over three candidates. The candidates are the denominator, since
-      declining a code correctly is a decision the share never credits. The
-      ladder is 90/95/98/99% across haiku, sonnet, opus and fable, with the top
-      three within one label
-- [x] Render a kind as its test rather than its name. A label helps only a
-      reader who already knows what it selects. No measured gain at version 4:
-      the cell it targeted is unchanged, sonnet lost three decisions, opus sat
-      at ceiling. Kept on its own argument. The contrast with the Kahn fix is
-      what it taught. A repeated cell is fixable by a rule, and scattered
-      errors are not
+      per-candidate error: 95% of calls reads as 87% over three candidates
+- [x] The candidates are the denominator, since declining a code correctly is
+      a decision the share never credits
+- [x] The ladder is 90/95/98/99% across haiku, sonnet, opus and fable, with
+      the top three within one label
+- [x] Render a kind as its test rather than its name. No measured gain at
+      version 4, and kept on its own argument
 - [x] Hash the instructions and the criteria together — landed as a digest of
-      the whole payload, per attempt, which subsumes this and the version with
-      it
-- [x] Measure a configuration against itself: three passes with `--fresh`. 1
-      attempt of 31 flips for opus, 3 for haiku and sonnet, so 0.5–2.2% of
-      decisions. A one- or two-attempt difference is unreadable, and only the
-      tier gaps clear it. Flips are not random. Four of six land on
-      `binary-search-tree` or `tree-traversal` boundaries
+      the whole payload, per attempt, which subsumes the version with it
+- [x] Measure a configuration against itself: three `--fresh` passes. 1 of 31
+      attempts flips for opus, 3 for haiku and sonnet — 0.5-2.2% of decisions
+- [x] The flips are not random. Four of six land on `binary-search-tree` or
+      `tree-traversal` boundaries
 - [x] Read the calibration set after each criteria edit. It cannot measure
-      quality, having helped write the criteria, but it answered the diagnostic
-      question. Both systematic cells cleared: Kahn for every configuration,
-      backtracking for the three that fell in. Meanwhile the one edit aimed at
-      a mechanism inferred from scattered errors moved nothing. The rule that
-      came out of it: a cell several readers hit the same way is fixable by a
-      rule, and scattered errors are not
-- [x] Show the reader the same criteria the classifier gets. One rulebook and
-      two annotators is what makes their disagreement mean something. Without
-      it, a disagreement is ambiguous between an unclear rule and two different
-      ones
+      quality, having helped write the criteria
+- [x] Both systematic cells cleared, and the one edit aimed at scattered
+      errors moved nothing. A cell several readers hit the same way is fixable
+      by a rule; scattered errors are not
+- [x] Show the reader the same criteria the classifier gets. Otherwise a
+      disagreement is ambiguous between an unclear rule and two different ones
 
 ### What a claim was made against
 
 Nothing recorded whether a hand claim was made before or after a reading of the
 same attempt, and the user's latest wins. A revision asked with the readings in
-view therefore became, silently, what that reading was scored against. Recorded
-now. Reading it back belongs to the deferred measurement.
+view therefore became, silently, what that reading was scored against.
 
-- [x] `informed_by`: the calls shown when the claim was made, empty for a blind
-      one. Named one by one rather than flagged, since a claim informed by one
-      configuration still measures another. Not provenance. Provenance is what
-      produced a claim; this is what its author saw
+- [x] `informed_by`: the calls shown when the claim was made, empty for a
+      blind one. Named one by one, since a claim informed by one configuration
+      still measures another
 - [x] `confidence`, a level rather than a float, asked on the hand pass alone.
-      The drill loop allows one keystroke per claim. Empty leaves it unsaid
-      rather than defaulting to the middle
+      Empty leaves it unsaid rather than defaulting to the middle
 - [x] `--disputed` unset rather than 1, so the pool is every claim. Offering
       only what a classifier contests corrected the hand claims in one
-      direction. Ordering unchanged, most disputed first
-- [x] Not backfilled, with nothing left to name. The readings those revisions
-      saw went with the 961, and their calls predate the call log. The
-      timestamp rule was the unsafe direction: no surviving machine claim
-      predates any revision, so it stamps all 79 blind
-- [x] The log answers it anyway. `claimable` offers only unclaimed attempts and
-      `revisable` only claimed ones, so a first user claim was blind and every
-      later one saw readings. 79 claims, 62 attempts, 17 revisions
+      direction
+- [x] Not backfilled, with nothing left to name. Those readings went with the
+      961, and their calls predate the call log
+- [x] The log answers it anyway: `claimable` offers unclaimed attempts and
+      `revisable` claimed ones. 138 claims over 100 attempts, so 38 revisions
 
 ### Adjudicating the eval set
 
 Flow and its rules: `docs/architecture/README.md`, "Adjudicating the eval set".
 
 - [x] Read the 62 hand-claimed attempts with a frontier configuration, stored
-      as readings. Nothing is added to the blind pass while a reading is in
-      view. That is what makes the reference independent of either reader
+      as readings. Nothing is added to the blind pass while a reading is in view
 - [x] Resolve every divergence by hand, one at a time: the criterion is edited
       or the claim is. `claim --revise --disputed 1` is the queue
-- [x] Re-read the attempts a criteria edit reaches, and repeat until the
-      frontier disagrees with nothing. That is the stopping signal, not a
-      score. What is left is sampling noise, or a criterion that still does not
-      decide the case
-- [ ] Count which way the divergences went. Mostly claim edits means the
-      rulebook is becoming a transcript of one model
-- [ ] Score the cheap classifiers against the frozen set, and keep the
-      adjudicator out of the candidates. Its 100% is construction, not
-      quality
+- [x] Re-read the attempts a criteria edit reaches, until the frontier
+      disagrees with nothing. That is the stopping signal, not a score
 
-### Exit
-- [ ] Attribution runs on real daily attempts and its claims stand. Whether the
-      classifier beats the tag fallback is measured when mastery estimation
-      reads claims, and not here
+### Closed
+- [x] Attribution runs and its claims stand, with the board consuming them.
+      Whether it beats the tag fallback is measured in Phase 8
+- [x] What changes for a generated problem is where the candidates come from,
+      and Phase 5 writes them
 
-## Phase 4 — cards (current)
+## Phase 4 — cards and template matching — done
 
 How studying a technique is organised. Not an ability estimate. Mastery is what
-a user can solve, per technique, and it is Phase 5.
+a user can solve, per technique, and it is Phase 8.
 
-### Phase 4a — cards and recall
 - [x] `Card`: the topic, its templates, and the selector a ladder resolves
       from. Names no problem, so it ships anywhere. Several per technique
-- [x] Port the authoring skill, output retargeted to the structured card. Nine
-      cards ported from the practice repo's notes, each authored blind first
-      and then compared against the hand-written one. The diffs are what the
-      skill's rules are, and every code template runs against a brute force
-      before it lands
-- [x] `statement` on `ProblemPush` and `Problem`, optional. Which form a
-      problem exercises is a question about what it asks, and tags answer what
-      it is about. Landed first on purpose: nothing reads it until matching,
-      and every export before it lands is a corpus that has to be re-pushed.
-      Obliges re-copying `schema/push.py` into the practice repo, and nothing
-      detects that drift. Tightened to required and non-blank once the corpus
-      was backfilled, 485 of 485. A missing statement is a problem nothing can
-      ever match, and nothing reported it
+- [x] Port the authoring skill onto the structured card. Nine cards ported,
+      each authored blind and then compared against the hand-written one. The
+      diffs are what the skill's rules are
+- [x] Every code template runs against a brute force before it lands
+- [x] `statement` on `ProblemPush` and `Problem`, optional. Landed before
+      anything read it, since every earlier export is a corpus that has to be
+      re-pushed
+- [x] Tightened to required and non-blank at 485 of 485. A missing statement
+      is a problem nothing can ever match, and nothing reported it
 - [x] `provider` on `Call`, optional: who actually served the request, which
-      the model id stops answering the moment anything routes.
-- [x] Replace the Anthropic transport rather than adding beside it. `ask`
-      keeps the digest, the call record and the failure path. The request
+      the model id stops answering the moment anything routes
+- [x] Replace the Anthropic transport rather than adding beside it. The request
       shape and the response walk move behind a neutral `Reply`. One shape at a
-      time, by rule. Two shapes maintained by hand would create pressure to
-      adopt a library that reconciles them, and such a normaliser degrades a
-      schema where the reading cannot see it
-- [x] Read models through OpenRouter, as the only transport: chat completions
-      — `response_format` for the schema, `reasoning` for the effort,
-      `choices[0].message` and `usage` on the way back, key and base URL from
-      config. Pin the route rather than taking what it offers:
-      `require_parameters` so a provider that cannot enforce the schema is
-      never chosen, fallbacks off so a model id resolves to one backend, and
-      the serving provider recorded on the call
+      time, by rule
+- [x] Read models through OpenRouter as the only transport: `response_format`
+      for the schema, `reasoning` for the effort, key and base URL from config
+- [x] Pin the route rather than taking what it offers: `require_parameters` on,
+      fallbacks off, and the serving provider recorded on the call
 - [x] `temperature` on the configuration, the call and the claim, greedy by
-      default. Sampling is noise an eval absorbs by repeating, and the backlog
-      sweep cannot. It writes into an append-only log the board reads forever,
-      so the same fraction of a percent is permanent, and it lands on readings
-      no criteria edit touched. Part of the identity where the pinned provider
-      is not, so two temperatures are two columns rather than one mixed key.
-      `None` is the provider's own default, a named arm that keeps every
-      reading taken before the field scorable instead of discarded
-- [x] The pinned endpoint on the configuration, the call and the claim, and
-      required. A model id resolves to as many builds as there are endpoints
-      serving it, and quantization changes the weights. Unpinned readings are
-      therefore a mixture under one key that nothing later can separate.
-      Compared like the model. Who actually served it is recorded beside it and
-      never compared, since the router names a company and a company serves
-      several builds
-- [x] Seed from files through a path that stays a boundary. The private repo it
-      moves behind later is a different argument, not a refactor
-- [x] `TemplateMatch`: one record per template and problem, carrying a verdict.
-      Not a set per template. Problems arrive a push at a time, and a set
-      would rewrite settled pairs whenever the corpus grew. The negative is
-      stored, or every re-run re-tests every non-match forever. Provenance is
-      the claim's, and now shared as `MachineProvenance` rather than written
-      out twice. The question differs; the rule about what a re-run must know
-      to supersede a reading does not
-- [x] Lift the driver the run loops share, the fan-out and the abort limit, out
-      of `claims`. A third loop would otherwise import the classifier for a
-      decision that belongs to neither. How many calls are in flight is not a
-      fact about what is being read
+      default. `None` is the provider's own default, a named arm that keeps
+      earlier readings scorable rather than discarded
+- [x] The pinned endpoint on all three, and required. A model id resolves to as
+      many builds as there are endpoints serving it, and quantization changes
+      the weights
+- [x] Seed from files through a path that stays a boundary
+- [x] `TemplateMatch`: one record per template and problem, not a set per
+      template. Problems arrive a push at a time
+- [x] The negative is stored, or every re-run re-tests every non-match forever
+- [x] Provenance shared with the claim as `MachineProvenance`. The question
+      differs; what a re-run must know to supersede a reading does not
+- [x] Lift the driver the run loops share, the fan-out and the abort limit out
+      of `claims`. How many calls are in flight is not a fact about what is
+      being read
 - [x] Match the corpus against a card's templates after import. One call per
-      problem and card, candidates in and the subset out, records per pair.
-      Pre-filtered by technique, or it is every template against every problem
-      for an answer that is almost always no. Procedure templates are excluded:
-      a framing procedure is exercised by everything its technique reaches. Its
-      own configuration, not the claim classifier's, since the two ask
-      different questions. A lone candidate is still asked about: there the
-      tags already answer, here the verdict is the record. Nine cards against
-      485 problems pre-filter to 345 pairs, 1724 records, none read yet
-- [x] Time a call at both levels: what the caller waited and how many requests
-      that took, beside the last request's own time, whether it answered or
-      failed. Without the count, a run held behind a per-minute cap read as a
-      slow model
-- [x] A hand match: `MatchSource.USER`, carrying no provenance, minted where
-      the machine's is. Nothing re-derives it, which is what makes it the
-      reference the readings are scored against
-- [x] Sample what to annotate — unannotated questions first, and spread across
-      templates rather than cards, or the three dynamic-programming cards carry
-      the set. A seed, so an order is reproducible. Per template because the
-      score is grouped there and the ladder resolves there. The two agree while
-      a card's forms move together, and diverge where a re-seed adds one:
-      counted per card, that card is the best covered there is while holding
-      the only gap. `--card` narrows it to one, which is what a card just added
-      asks for, and the counts still read the whole reference. Narrowed too, a
-      card's forms would look untouched beside nothing. A machine verdict
-      settles no question, being what the annotation is scored against. A
-      question carries one card, so no second card is credited the way a
-      second tag is on an attempt. 45 of the 345 reach all 44 templates, five
-      records each
+      problem and card, candidates in and the subset out, records per pair
+- [x] Pre-filter by technique, or it is every template against every problem
+      for an answer that is almost always no
+- [x] Exclude procedure templates: a framing procedure is exercised by
+      everything its technique reaches
+- [x] Its own configuration, not the claim classifier's, since the two ask
+      different questions
+- [x] Nine cards against 485 problems: 345 pairs, 1724 records
+- [x] Time a call at both levels: what the caller waited and how many requests,
+      beside the last request's own time. Without the count, a run held behind
+      a per-minute cap read as a slow model
+- [x] A hand match: `MatchSource.USER`, carrying no provenance. Nothing
+      re-derives it, which is what makes it the reference
+- [x] Sample what to annotate: unannotated questions first, spread across
+      templates rather than cards. Counted per card, the three
+      dynamic-programming cards would carry the set
+- [x] A seed, so an order is reproducible. It chooses within a template, as
+      the claim sample chooses within a technique
+- [x] `--card` narrows the sample, which is what a card just added asks for.
+      The counts still read the whole reference, or a card's forms would look
+      untouched beside nothing
+- [x] 45 of the 345 questions reach all 44 templates, five records each
 - [x] `algo-coach annotate` — the statement and the card's templates numbered,
-      answered at once and written one record per template, the ones the
-      problem does not exercise included. The question is what is shown and the
-      pair is what is written: reading a statement once to judge five forms is
-      the cheap order. Blind by default, with the matcher's verdict shown only
-      on request, as `claim --revise` shows a reading. Skip, take-the-rest and
-      EOF as `claim` has them, and `0` besides. A problem exercising none of the
-      forms is a verdict on every pair, so the prompt needs a reply that the
-      claim prompt must never have. Opened per caller for that reason: an empty
-      claim would be indistinguishable from a stated one, and a skip would read
-      as an answer given
-- [x] The whole corpus synced, ~4k problems against 485. Every statement
-      non-blank, so the field tightened last phase held across an eight-fold
-      push. What it moves is matching. The same nine cards pre-filter to ~2.8k
-      questions and ~14k pair verdicts, so a full run is a cost to check before
-      it is a command to type. The claims side is unmoved: attempts bound it,
-      and 485 problems carry one. ~800 problems reach no code, most of them
-      `database` and the container tags, which is the next count worth reading.
-      Rounded on purpose here and in the README, because an exact catalogue
-      size names the platform as surely as the platform would
+      answered at once, one record per template. Reading a statement once to
+      judge five forms is the cheap order
+- [x] Blind by default, with the matcher's verdict shown only on request, as
+      `claim --revise` shows a reading
+- [x] `0` for none, opened per caller. A problem exercising no form is a
+      verdict on every pair, and an empty claim must stay distinct from a
+      stated one
+- [x] The whole corpus synced, ~4k problems against 485, every statement
+      non-blank. The field tightened last phase held across an eight-fold push
+- [x] The same nine cards pre-filter to ~2.8k questions and ~14k pair
+      verdicts, so a full run is a cost to check before a command to type
+- [x] The claims side is unmoved: attempts bound it, and 485 problems carry
+      one
+
+### Closed
+- [x] Cards are authored into `content/` and seeded, the matcher reads the
+      corpus against their templates, and the annotation pass writes the
+      reference its readings are scored against
+- [x] The ladder, runs, recall and probes wait on a corpus that can fill them,
+      and are Phase 6. What measures the matcher is Phase 5
+
+## Phase 5 — problem generation (current)
+
+The engine writes problems: a statement, the test cases that decide it, and at
+least one canonical solution. Flow and its rules:
+`docs/architecture/README.md`, "Generating a problem".
+
+The matcher lands first. Generation asserts a match and the matcher audits it,
+so an unmeasured matcher would audit at an unknown error rate.
+
 - [ ] Score the matcher per pair, grouped per template, over the pairs both
-      read. Not as a set: a match asserts a pair, and the call that carried six
-      of them only saved requests. Accuracy is not the metric either. Most
-      pairs are negative, so a matcher that names nothing scores in the
-      nineties and resolves an empty ladder. What is reported is the positive
-      verdicts, both directions, which is also what catches the matcher that
-      says yes to everything
+      read. Not as a set: a match asserts a pair
+- [ ] Report the positive verdicts in both directions. Accuracy would score a
+      matcher that names nothing in the nineties
 - [ ] Skip a pair the hand settled on the run path, and read it in the eval.
-      `match` re-reads annotated pairs today, and a machine verdict there could
-      never stand. The reading is worth paying for once, in the run that
-      measures it. The skip needs every template of the card settled, since the
-      call asks about the card whole
+      The skip needs every template of the card settled, since the call asks
+      about the card whole
 - [ ] The first hand pass calibrates and a blind one measures, the claims rule
-      unchanged. Annotating is where the line between exercising a form and
-      merely admitting it gets drawn, so a score over the pairs that drew it is
-      agreement with itself
-- [ ] Resolve the ladder from the matches, the selector filling out to `size`.
-      Requiredness derived from what a rung covers. Studied means required.
-      The optional template alone means optional. Both means required, with the
-      optional template offered as the alternative approach
+      unchanged. A score over the pairs that drew the line is agreement with
+      itself
+- [ ] `origin` on `Problem`, `engine` beside `push`, and `generated_for` naming
+      the template it was written for. An assertion rather than a reading,
+      which is what makes the first `TemplateMatch` provenance
+- [ ] `TestCase` and `CanonicalSolution`, written with the problem in one
+      call. Cases derived afterwards describe whatever the solution happens to
+      do
+- [ ] The canonical carries how many cases passed, out of how many. A count
+      rather than a flag, as a share prints its denominator
+- [ ] The runner: execute a solution against a problem's cases locally, pass or
+      fail per case. One subject today, a canonical, and an attempt on the same
+      path in Phase 7
+- [ ] `algo-coach generate`, a template in and a problem out, through the
+      transport the classifier and the matcher already share
+- [ ] Sampled rather than greedy, so one model's habits do not become the
+      whole corpus. The cost is a canonical that is re-runnable and never
+      reproducible
+- [ ] Nothing lands half-verified. A problem whose canonical fails is discarded
+      whole, and the call is recorded either way
+- [ ] Derive a generated problem's techniques from its canonical solutions,
+      beside the tag mapping rather than replacing it. A view, so adding a
+      canonical can widen the codes
+- [ ] Settle the discrimination bar on a real corpus. Cases that separate
+      nothing license `verified` on a canonical that is wrong
+- [ ] Candidates for the bar: two canonicals from different approaches
+      agreeing on every case, a mechanically broken canonical failing, the near
+      miss the technique entry already names failing
+- [ ] Measure the announcement floor against the pushed corpus, then read the
+      generated one against it. A form the matcher names from the statement
+      alone was telegraphed
+
+### Exit
+- [ ] A card's reported gaps are filled by generated problems, and Phase 6
+      resolves a ladder over them
+
+## Phase 6 — ladder, recall and card runs
+
+- [ ] Resolve the ladder from the matches, the selector filling out to `size`
+- [ ] Derive requiredness from what a rung covers: studied means required, the
+      optional template alone means optional, both means required with the
+      optional template offered as the alternative
 - [ ] Resolve the ladder at import, and never rewrite one a card has already
       been started on
 - [ ] Report a studied template no problem matches. The card claims to teach
       that form, so a corpus that cannot exercise it is a fact about the store
 - [ ] `CardRun`: starting is explicit, since the ladder is measured from it.
       Holds when it began and the probes assigned; later probes append
-- [ ] A recall attempt is its own record, keyed to a card and a template.
-      Nothing keys it to an attempt: there is no problem and no submission.
-      What was hinted before a pass is part of it
+- [ ] A recall attempt is its own record, keyed to a card and a template. There
+      is no problem and no submission. What was hinted before a pass is part of
+      it
 - [ ] Generate probes from the corpus. A skill now, since it is judgment, and
       possibly an agent later
 - [ ] The trainer: names hidden, blank-filed cold, run against the card's own
       tests, never printing the template
 - [ ] Card status — recalled when, ladder outstanding, probes available. The
       inputs a graduation rule reads, and no threshold
+- [ ] A graduation rule, recall windows, a rust jog short of the full loop.
+      Candidates, not commitments. Daily use answers which of them matters
 
-### Phase 4b — what daily use asks for
+### Exit
+- [ ] Recall and the ladder run daily
 
-Candidates, not commitments: a graduation rule, recall windows, a rust jog
-short of the full loop. Which of them matters is what 4a's daily use answers.
+## Phase 7 — in-engine drill loop
+
+The first attempts the engine produces rather than ingests.
+
+- [ ] Serve a generated problem, time the sitting, run the submission against
+      the problem's own cases, and mint the attempt with `origin: engine`
+- [ ] The verification result on `Attempt`, beside the platform status string
+      it already carries. Additive, and meaningless before Phase 5
+- [ ] Ask for a claim and a self-label as Phase 2 asked them. What changes is
+      who witnessed the sitting, not who writes
+- [ ] The interaction is deferred to using it: how a solution is entered, what
+      a failing run does, whether a sitting resumes
+
+### Exit
+- [ ] Daily practice runs here, on problems the engine wrote and judged
 
 ## Deferred
 
 Known gaps with a trigger, not a date. Each names what has to happen first.
 
 - [ ] The annotator against themselves as the ceiling: a re-pass over thirty
-      attempts, readings hidden. Adjudication moves the ceiling to where both
-      readers agree and are both wrong, which stays invisible without a number
-      for it. Triggered when mastery estimation reads claims, and a wrong one
-      starts spending practice time
+      attempts, readings hidden. Triggered when mastery estimation reads
+      claims, and a wrong one starts spending practice time
 - [ ] Read the architecture doc against the code, landing every divergence
-      here as an item saying which side is wrong. The goal is not that no
-      divergence exists, since the doc is target state and the code lags it on
-      purpose. The goal is that none is unknown. Two were found by accident
-      this phase, which is the argument
+      here. The goal is not that none exists, since the doc is target state.
+      The goal is that none is unknown
 - [ ] Classify freely over the whole vocabulary and intersect with the tags in
-      code, as a second rulebook, once the hand claims can score it against
-      the constrained one. An out-of-tag verdict is the only signal that the
-      tags are the gap. Both write the same claim, so the choice costs one
-      re-run rather than a migration
+      code, once the hand claims can score it against the constrained one. An
+      out-of-tag verdict is the only signal that the tags are the gap
 - [ ] An outage falls back to another endpoint of the same shape, never to
-      Anthropic direct. Its OpenAI compatibility layer ignores
-      `response_format`, `strict` and `reasoning_effort`. Claude reached that
-      way answers with the schema unenforced and the effort dropped. That
-      schema is the one guarantee attribution rests on, and effort is one of
-      its eval's axes. Claude with enforcement means the native transport,
-      which is the second shape the pinned route exists to avoid. Triggered
-      when an outage blocks a run rather than delaying one. With fallbacks off
-      and one endpoint pinned, re-running later is the whole recovery today
+      Anthropic direct. Triggered when an outage blocks a run rather than
+      delaying one
+- [ ] Anthropic direct is excluded because its compatibility layer ignores
+      `response_format`, `strict` and `reasoning_effort`. Claude with
+      enforcement means a second transport shape
 - [ ] Re-derive stored problems without a push, once the mapping changes for
       problems no longer pushed. A re-push covers it until then
 - [ ] Ingest assumes a single writer, so two concurrent pushes can both miss
-      the same `external_id`. When the web version lands, decide whether the
-      CLI writes to the store or calls the API
+      the same `external_id`. Decided when the web version lands
 - [ ] Duplicate detection loads the whole attempt log per call, and
       `by_external` scans every problem file per record. Both become queries
       when storage swaps
 
 ## Later phases
 
-### Phase 5 — mastery, scheduling, failure mode
+### Phase 8 — mastery, scheduling, failure mode
 - [ ] Rust against gap is a question about per-technique state, asked of a
-      single attempt. The two failures look identical in the record, and only
-      whether the technique was ever fluent separates them. Recall history does
-      not stand in: reproducing a form cold is not recognising it unprompted.
-      It lands with the mastery model or not at all
+      single attempt. Only whether the technique was ever fluent separates
+      them, so it lands with the mastery model or not at all
 - [ ] Settle `SPEED` before anything writes it. "Solved but too slowly" is
       about the user, a timeout is about the solution's complexity, and only
       the second is in the record
-- [ ] Narrow the failure classifier to what the record supports: reading a
-      sitting's code for a mechanical slip against a conceptual miss. A
-      four-way router would ask it for what it cannot see
+- [ ] Narrow the failure classifier to what the record supports: a mechanical
+      slip against a conceptual miss. A four-way router would ask it for what
+      it cannot see
 - [ ] Write the verdict as a `Diagnosis` with model and prompt version. It
       never supersedes a self-label, because the eval scores one against the
       other
@@ -559,6 +485,5 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 
 ### Removed, kept in git
 - [ ] The failure classifier and its eval were cut before Phase 1 shipped and
-      are Phase 5's to rebuild. Git holds what was removed. `Diagnosis` and the
-      log's diagnosis methods stayed behind, since records outlive features and
-      an append-only log cannot be retrofitted
+      are Phase 8's to rebuild. `Diagnosis` and the log's diagnosis methods
+      stayed behind, since an append-only log cannot be retrofitted
