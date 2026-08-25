@@ -360,7 +360,7 @@ loose shape.
       its canonical solutions, and there is no platform vocabulary left to map
 - [x] Remove the superseded drill loop: the push wait and the log diff. Neither
       act has a subject once nothing is pushed
-- [ ] Drop the tests that covered the removed paths, rather than adapting them
+- [x] Drop the tests that covered the removed paths, rather than adapting them
       to a shape nothing produces
 
 ### The reset

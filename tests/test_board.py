@@ -99,7 +99,7 @@ def test_a_row_splits_solved_from_unsolved():
 
 
 def test_recency_is_the_latest_attempt():
-    """Not the latest ingested: a backfill lands out of order."""
+    """Not the latest written: attempts can land out of order."""
     attempts = [
         make_attempt("a1", finished_at=T0 + timedelta(days=2)),
         make_attempt("a2", finished_at=T0),
@@ -201,7 +201,7 @@ def test_a_problem_reference_that_does_not_resolve_is_an_error():
     """Every reference on an append-only record is engine-minted and resolves;
     a board that quietly dropped one would under-count in silence."""
     with pytest.raises(KeyError):
-        per_technique([make_attempt("a1", problem_id="never-ingested")], {}, {}, {})
+        per_technique([make_attempt("a1", problem_id="never-stored")], {}, {}, {})
 
 
 def test_a_row_is_never_stored():

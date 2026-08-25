@@ -66,7 +66,7 @@ def make_claim(
 
 def test_an_unclaimed_attempt_falls_back_to_the_problems_techniques():
     """Nothing has to be labelled for an attempt to count — that is what makes
-    a backfilled history usable."""
+    a history nobody claimed usable."""
     problem = make_problem(techniques=["greedy", "hashing"])
 
     assert resolve_techniques(make_attempt(), problem, {}) == ["greedy", "hashing"]
@@ -254,9 +254,9 @@ def test_a_resolved_claim_is_sorted_and_deduplicated():
     ]
 
 
-def test_re_deriving_the_mapping_reaches_every_unclaimed_attempt():
-    """Resolution is read-time, so a mapping change shows up on attempts that
-    were ingested before it — and stops at the claimed ones."""
+def test_re_deriving_a_problems_techniques_reaches_every_unclaimed_attempt():
+    """Resolution is read-time, so a widened problem shows up on attempts
+    written before it — and stops at the claimed ones."""
     attempt = make_attempt()
     before = make_problem(techniques=["greedy"])
     after = make_problem(techniques=["greedy", "sorting"])
@@ -269,7 +269,8 @@ def test_re_deriving_the_mapping_reaches_every_unclaimed_attempt():
 
 
 def test_resolution_is_never_stored_on_an_attempt():
-    """A copy taken at ingest would drift, with no way to tell which is right."""
+    """A copy taken when the attempt was written would drift, with no way to
+    tell which is right."""
     assert "techniques" not in Attempt.model_fields
 
 

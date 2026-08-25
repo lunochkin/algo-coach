@@ -135,16 +135,9 @@ def test_a_row_counts_only_its_own_problems_attempts():
     assert (rows[0].attempt_count, rows[0].solved_count) == (1, 0)
 
 
-def test_a_row_carries_what_the_loop_hands_over():
-    """The loop points at the platform; without the URL it has nothing to say."""
-    rows = candidates("greedy", [GREEDY], [])
-
-    assert rows[0].problem.url == "https://example.invalid/greedy-one"
-    assert rows[0].problem.title == "greedy-one"
-
-
-def test_an_unmapped_problem_is_offered_for_nothing():
-    """Its tags reach no code, so no technique can select it."""
+def test_a_problem_carrying_no_technique_is_offered_for_nothing():
+    """Selection is per technique, so a problem naming none is reachable from
+    no row."""
     unmapped = make_problem("db-one", [])
 
     assert candidates("greedy", [unmapped], []) == []

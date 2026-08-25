@@ -33,8 +33,8 @@ def make_match(source: MatchSource, **overrides) -> TemplateMatch:
 
 
 def test_a_match_is_one_template_against_one_problem():
-    """Not a set per template: problems arrive a push at a time, and a set
-    record would rewrite pairs already settled whenever the corpus grew."""
+    """Not a set per template: problems arrive one at a time, and a set record
+    would rewrite pairs already settled whenever the corpus grew."""
     match = make_match(MatchSource.USER)
 
     assert (match.template_id, match.problem_id) == ("t1", "p1")
