@@ -1,8 +1,15 @@
 # algo-coach
 
 AI coaching layer for deliberate practice of algorithmic problem-solving:
-spaced repetition over a technique-mastery model, with LLM-based attribution of
-what a solution actually did.
+spaced repetition over a technique-mastery model, on a problem corpus the
+engine writes and owns.
+
+**The corpus is the target state.** A problem is generated for one form of one
+technique, carrying the test cases that decide it and a canonical solution that
+passed them. The engine then serves it, times the sitting and judges the
+submission against those cases. One origin, and nothing is fetched from a
+platform — which is what makes a verdict the engine's own rather than a status
+string it copied.
 
 Most practice tools schedule *problems*. algo-coach models mastery of
 *techniques*. What a solution used is read from the code by a model, not
@@ -15,15 +22,23 @@ with what the LLM said. Every reading is stored with the configuration that
 produced it, scored against hand claims, and outranked by the user's own record
 forever.
 
+Built and measured: the technique vocabulary, the attribution classifier, cards
+and template matching. Generation is next, and the numbers below were taken on
+the corpus it replaces — [what that corpus was, and why it
+went](#the-archived-corpus).
+
 ## Where the model sits
 
-Three places, and nothing is trained anywhere in the engine:
+Four places, and nothing is trained anywhere in the engine:
 
+- **Generation** *(next)* — a statement, its test cases and a canonical
+  solution, written together for one template. Nothing lands until the
+  canonical passes the cases, and a problem whose canonical fails is discarded
+  whole rather than stored for repair.
 - **Attribution** — a prompted classifier reads the *solution* and names the
-  techniques it used, choosing among the problem's own candidate tags. No
-  training data exists for that label. Public corpora tag problems, not
-  solutions, so a trained model would predict the tag fallback it is meant to
-  improve on.
+  techniques it used, choosing among the problem's own candidates. No training
+  data exists for that label. Public corpora tag problems, not solutions, so a
+  trained model would predict the fallback it is meant to improve on.
 - **Template matching** — which problems exercise which form of a card, read
   from the statement, because a tag says what a problem is *about* and not
   which form solves it.
@@ -51,8 +66,8 @@ string. Adding a provider is a base URL.
 
 ## What it looks like
 
-Per-technique standing, derived from a real backlog of 1,785 attempts. Nothing
-here is stored: every column is computed from the append-only log on read.
+Per-technique standing over the archived corpus of 1,785 attempts. Nothing here
+is stored: every column is computed from the append-only log on read.
 
 ```
 $ algo-coach board
@@ -94,6 +109,13 @@ named no candidate  0                1                0                1
 ```
 
 ## Early evaluation
+
+Measured on the archived corpus, which is where the attempts carrying code
+were. What the reset costs is the *set* — every claim keys to a problem the
+engine no longer holds. What survives it is everything the set was used to
+build: the criteria the classifier reads, the classifier itself, the transport
+and the call log beneath it, the scoring method, and the adjudication
+procedure. A set rebuilt by hand on generated problems is scored the same way.
 
 The eval set is 62 attempts. They were claimed by hand blind, then read by a
 frontier model as a scored configuration. Every divergence was resolved one at
@@ -162,19 +184,43 @@ is why the engine runs them rather than the frontier.
 
 | | |
 |---|---|
-| Attempts | 1,785, from real daily practice |
-| Problems | ~4k, each with the statement matching reads |
 | Technique vocabulary | 27 codes, each with what earns it and the near miss it is confused with |
-| Eval set | 62 attempts, hand-claimed blind, adjudicated against a frontier reader |
+| Cards | 9 authored, 45 templates between them |
 | Attribution | 85–98% exact set match across five classifiers (n=60), at $0.04–3.15 per 1k decisions |
-| Cards | 9 authored |
-| Model calls logged | 2,045, each with its prompt, provenance and timings |
-| Tests | 615 |
+| Store | empty of problems and attempts; generation refills it |
+| Tests | 602 |
 
-Built: technique vocabulary, attribution classifier, cards, template matching.
-In progress: the engine writing its own problems. Not started: failure-mode
-diagnosis, mastery estimation, scheduling. Sequencing lives in
-[`docs/ROADMAP.md`](docs/ROADMAP.md).
+Built: the technique vocabulary, the attribution classifier and its eval, the
+call log and transport, cards, and template matching. Next: the engine writing
+its own problems, then the ladder and recall, then the drill loop it serves and
+judges. Not started: failure-mode diagnosis, mastery estimation, scheduling.
+Sequencing lives in [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
+## The archived corpus
+
+Practice used to arrive through a push API: problems and attempts from a
+third-party platform, ingested and read. That corpus is archived under
+`data/old/` and nothing on the run path reads it.
+
+| | |
+|---|---|
+| Attempts | 1,785, over 117 practice days |
+| Problems | ~4k, each carrying the statement matching reads |
+| Hand claims | 138 over 100 attempts, the adjudicated eval set |
+| Machine readings | 6,523 technique claims |
+| Model calls | 7,644, each with its prompt, provenance and timings |
+
+**Why it went.** A scraped statement cannot ship, so a corpus built from one
+caps the product at what a single user already solved. It also carries no test
+cases, which is the harder problem: with nothing to run a submission against,
+the engine can only copy a platform's verdict, and an attempt on such a problem
+can never be verified. Generation answers both, so the second origin stopped
+earning the branch it cost in every record.
+
+**Why it is kept.** It sets the announcement floor. A generated problem must
+not telegraph its own form — if a matcher names the form from the statement
+alone, the problem teaches recognition of nothing. Measuring that floor needs a
+corpus no generator wrote, and this is the only one there will be.
 
 ## Core loop
 
@@ -192,9 +238,9 @@ The engine serves, times and judges. Everything the loop reads is local to it:
 the problem, the test cases that decide it, and the log. Nothing is fetched
 from an external platform, and no third-party client sits in the loop.
 
-The board and the hand claim run today, over the corpus already in the store.
-Writing the problems is next. Serving one, judging it and asking for the label
-follow, and the loop above is whole then.
+The board, the hand claim and the classifier ran daily over the archived
+corpus. Writing the problems is next; serving one, judging it and asking for
+the label follow, and the loop above is whole then.
 
 ## Cards — how a technique gets studied
 
@@ -242,11 +288,12 @@ Why it is shaped this way:
   fluency that blocked practice trains.
 
 **Where it stands:** the card record, the authoring skill and its nine cards,
-seeding, the template matcher and the hand-annotation prompt are built. Nine
-cards against ~4k problems pre-filter to ~2.8k questions and ~14k pair
-verdicts, none read yet. Next: the annotated reference itself and the matcher's
-score against it, then ladder resolution, card runs, and the recall trainer.
-Item by item in [`docs/TODO.md`](docs/TODO.md), phase 4a.
+seeding, the template matcher and the hand-annotation prompt are built. Against
+the archived corpus, nine cards pre-filtered to ~2.8k questions and ~14k pair
+verdicts. Next: the matcher's score against a hand-annotated reference, then a
+corpus generated for the forms the cards teach, then ladder resolution, card
+runs and the recall trainer. Item by item in
+[`docs/TODO.md`](docs/TODO.md), phases 6 and 7.
 
 ## Design
 
@@ -321,6 +368,7 @@ docs/architecture/README.md  concepts, boundaries, invariants
 docs/{ROADMAP,TODO}.md       sequencing, and what is open
 .claude/skills/card-author/  the skill that authors cards
 data/                        your attempts and solutions — never committed
+data/old/                    the archived corpus: calibration, not a store
 ```
 
 ## Your data stays yours

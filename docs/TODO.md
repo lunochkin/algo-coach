@@ -345,6 +345,8 @@ loose shape.
       exists because two origins did. Each states what one origin makes of it,
       or goes
 - [x] `README.md` drops the push API from what the engine exposes
+- [x] `README.md` leads with the owned corpus, and the measurements taken on
+      the pushed one say which corpus they were taken on
 
 ### Archive
 - [x] Move the pushed corpus and log to `data/old/`: 1785 attempts, 3962
