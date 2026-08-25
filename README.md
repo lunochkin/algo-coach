@@ -51,9 +51,8 @@ string. Adding a provider is a base URL.
 
 ## What it looks like
 
-Per-technique standing, derived from a real backlog of 1,785 ingested attempts.
-Nothing here is stored: every column is computed from the append-only log on
-read.
+Per-technique standing, derived from a real backlog of 1,785 attempts. Nothing
+here is stored: every column is computed from the append-only log on read.
 
 ```
 $ algo-coach board
@@ -163,7 +162,7 @@ is why the engine runs them rather than the frontier.
 
 | | |
 |---|---|
-| Ingested attempts | 1,785, from real daily practice |
+| Attempts | 1,785, from real daily practice |
 | Problems | ~4k, each with the statement matching reads |
 | Technique vocabulary | 27 codes, each with what earns it and the near miss it is confused with |
 | Eval set | 62 attempts, hand-claimed blind, adjudicated against a frontier reader |
@@ -172,29 +171,29 @@ is why the engine runs them rather than the frontier.
 | Model calls logged | 2,045, each with its prompt, provenance and timings |
 | Tests | 615 |
 
-Built: push API, technique vocabulary, attribution classifier, drill loop.
-In progress: cards. Not started: failure-mode diagnosis, mastery estimation,
-scheduling. Sequencing lives in [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Built: technique vocabulary, attribution classifier, cards, template matching.
+In progress: the engine writing its own problems. Not started: failure-mode
+diagnosis, mastery estimation, scheduling. Sequencing lives in
+[`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-## Core loop, as built
+## Core loop
 
 ```mermaid
 flowchart LR
   L[("append-only log")] --> B["board<br/>by staleness"]
   B --> T["pick a technique"] --> P["pick a problem"]
-  P --> S
-  subgraph outside["wherever you already solve"]
-    S["solve, submit"]
-  end
-  S -->|"your own client exports"| PUSH["push API"]
-  PUSH --> D["diff the log"] --> C["claim the techniques used<br/>label why it went that way"]
+  P --> S["serve the statement,<br/>time the sitting"]
+  S --> V["run the submission against<br/>the problem's own test cases"]
+  V --> C["claim the techniques used<br/>label why it went that way"]
   C --> L
 ```
 
-The engine calls no external platform and mints no attempt. It waits for a
-push and diffs its own log, and the diff is exact because the engine knows what
-was already there. Diagnosis and scheduling close this loop later. Today the
-user picks what to drill, and the board says what is stale.
+The engine serves, times and judges. Everything the loop reads is local to it:
+the problem, the test cases that decide it, and the log. Nothing is fetched
+from an external platform, and no third-party client sits in the loop.
+
+The board, the claim and the label run today. Writing the problems is next, and
+the sitting the engine witnesses follows it.
 
 ## Cards — how a technique gets studied
 
@@ -273,9 +272,9 @@ The load-bearing ones:
   record is revised or removed in place. Component boundaries can therefore be
   refactored, and the record schema cannot. The schema runs a phase ahead of
   the features on purpose.
-- **[Identity is the engine's.](docs/architecture/README.md#problems)** A client
-  pushes external ids; the engine mints its own and resolves references at the
-  boundary, so the log stays readable without the platform that produced it.
+- **[Identity is the engine's.](docs/architecture/README.md#problems)** Every
+  reference in an append-only record is one the engine minted, so the log stays
+  readable on its own.
 - **[The user's record stands over the machine's](docs/architecture/README.md#technique-claims)**
   answer to the same question, whichever was written later. What the machine
   wrote is kept and scored, never discarded and never promoted.
@@ -299,7 +298,6 @@ uv run algo-coach <command>
 
 | Command | What it does |
 |---|---|
-| `push attempts\|problems` | ingest records your own client exports |
 | `seed` | seed authored cards into the store |
 | `board` | per-technique standing: attempts, solved, recency, labels |
 | `drill` | pick a technique, then a problem, then record what came back |
@@ -318,7 +316,7 @@ src/algo_coach/claims/       the attribution classifier and its scoring
 src/algo_coach/matches/      which problems exercise which card template
 src/algo_coach/calls/        the model transport (OpenRouter) and the call log
 src/algo_coach/board/        the per-technique view, derived on read
-src/algo_coach/{ingest,log,cards,problems}/
+src/algo_coach/{log,cards,problems}/
 docs/architecture/README.md  concepts, boundaries, invariants
 docs/{ROADMAP,TODO}.md       sequencing, and what is open
 .claude/skills/card-author/  the skill that authors cards
