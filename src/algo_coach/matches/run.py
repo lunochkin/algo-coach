@@ -2,7 +2,7 @@
 
 Re-derivation is the normal path here, not an exception: a technique claim
 asks about one attempt and the question never changes, where a match is a
-template against a corpus that grows with every push.
+template against a corpus that grows with every generation run.
 """
 
 from collections.abc import Callable, Iterable, Sequence

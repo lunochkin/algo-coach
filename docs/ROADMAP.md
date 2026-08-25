@@ -65,41 +65,27 @@ solutions rather than from a platform's tags. Phase 6 carries it.
 What a card still needs — the ladder, runs, recall and probes — waits on a
 corpus that can fill it. Phase 7.
 
-## Phase 5 — Pivot to generated problems (current)
+## Phase 5 — Pivot to generated problems — done
 
-The engine writes its own problems, so the path that ingested a platform's
-stops being a second origin. Removing it before generation is written keeps
-generation from being built around a distinction that no longer earns its
-place.
+One origin end to end. The engine writes its own problems, so the path that
+ingested a platform's stopped being a second origin and was removed before
+generation was written.
 
-- The architecture doc goes first. It still describes the push API as a kept
-  second ingest path, and threads pushed-problem rules through Problems,
-  Attempts, Boundaries and Invariants. The doc carries the intent, so it
-  settles the shape the code then follows.
-- The ingest path goes: the push commands, the push payloads, the external-id
-  resolution, and the tag mapping that turned a platform's vocabulary into
-  codes. A generated problem derives its techniques from its canonical
-  solutions instead.
-- The superseded drill loop goes with it. It waited on a push and diffed the
-  log, and neither act has a subject once nothing is pushed.
-- The pushed corpus moves to `data/old/` rather than being deleted. It is the
-  reference the announcement floor is measured against, and Phase 6 reads it
-  from there.
-- The live store empties, and only then can the records tighten. `origin:
-  push`, `source_status`, `external_id` and the platform fields describe a
-  shape nothing produces, and a field kept for records that no longer exist is
-  one every reader branches on forever. Tightening is legal only while no
-  stored record carries the loose shape, so it follows the reset rather than
-  leading it.
-- The eval set does not survive. 138 hand claims over 100 attempts key to
+- The architecture doc first, then the code it settled: the push boundary, the
+  pushed-problem rules, and every rule that existed because two origins did.
+- The ingest path: the push command and package, the push payloads, the
+  external-id resolution, the tag mapping, and the drill loop that waited on a
+  push and diffed the log.
+- The pushed corpus moved to `data/old/`, which is a calibration corpus rather
+  than a store. Phase 6 measures the announcement floor against it.
+- The live store emptied, and the records then tightened. `origin`,
+  `source_status`, `external_id` and the platform fields describe a shape
+  nothing produces.
+- The eval set did not survive. 138 hand claims over 100 attempts key to
   pushed attempts, and a classifier scored later is scored against a set
-  rebuilt by hand on generated problems. That is the price of the reset, taken
-  deliberately.
-- Exit: one origin end to end. Nothing in the repo ingests a third-party
-  record, no doc describes a path that does, and the store holds only what the
-  engine wrote.
+  rebuilt by hand on generated problems.
 
-## Phase 6 — Problem generation
+## Phase 6 — Problem generation (current)
 
 The engine writes problems: a statement, the test cases that decide it, and at
 least one canonical solution. Nothing lands until the canonical passes them.
@@ -150,13 +136,12 @@ What a card needs once there are problems to fill it.
 
 ## Phase 8 — In-engine drill loop
 
-The first attempts the engine produces rather than ingests. It serves a
+The first attempts the engine produces itself. It serves a
 generated problem, times the sitting, runs the submission against the problem's
 own test cases, and records the verdict.
 
 - `Attempt` gains the verification result — which cases passed, out of how
-  many — beside the platform status string it already carries. Additive, and
-  meaningless before Phase 6.
+  many. Additive, and meaningless before Phase 6.
 - The interaction is answered by using it: how a solution is entered, what the
   loop does with a failing run, whether a sitting resumes.
 - Claims and self-labels are asked as Phase 2 asked them. The writers do not

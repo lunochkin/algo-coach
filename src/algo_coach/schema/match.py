@@ -17,9 +17,9 @@ class TemplateMatch(MachineProvenance):
     The engine's own work, never an author's. A card names no problem, so what
     a rung covers is read off the corpus rather than written down beside it.
 
-    One record per pair, not a set per template. Problems arrive a push at a
+    One record per pair, not a set per template. Problems arrive one at a
     time, and a set record would rewrite pairs that were already settled
-    whenever the corpus grew. The pairs are independent, and a push only adds
+    whenever the corpus grew. The pairs are independent, and a new problem adds
     to them. A claim asserts a whole set because the set is the assertion. A
     match asserts one pair.
 
@@ -27,10 +27,10 @@ class TemplateMatch(MachineProvenance):
     appends its verdict, and what the old one said stays readable.
     """
 
-    id: str  # engine-minted; never accepted from a client
+    id: str  # engine-minted, as every reference in the log is
     created_at: datetime
-    # Both minted: the template at card import, the problem at ingest. Which is
-    # why a match cannot be authored — neither reference exists in a seed file.
+    # Both minted: the template at card import, the problem at generation. So
+    # a match cannot be authored — neither reference exists in a seed file.
     template_id: str
     problem_id: str
     # The verdict, and a negative is stored: without it every re-run re-tests

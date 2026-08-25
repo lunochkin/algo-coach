@@ -322,7 +322,7 @@ a user can solve, per technique, and it is Phase 9.
 - [x] The ladder, runs, recall and probes wait on a corpus that can fill them,
       and are Phase 7. What measures the matcher is Phase 6
 
-## Phase 5 — pivot to generated problems (current)
+## Phase 5 — pivot to generated problems — done
 
 The engine writes its own problems, so a second ingest path is dead weight.
 The work splits by precondition: the doc settles the shape, the ingest path
@@ -372,11 +372,11 @@ loose shape.
       nothing stored carries the loose shape
 
 ### Exit
-- [ ] One origin end to end: nothing ingests a third-party record, no doc
+- [x] One origin end to end: nothing ingests a third-party record, no doc
       describes a path that does, and the store holds only what the engine
       wrote
 
-## Phase 6 — problem generation
+## Phase 6 — problem generation (current)
 
 The engine writes problems: a statement, the test cases that decide it, and at
 least one canonical solution. Flow and its rules:

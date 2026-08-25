@@ -26,7 +26,7 @@ LEVELS = list(Confidence)
 
 def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
     """The drill loop's technique question, pointed at attempts already in the
-    log. No drill, no push — the evidence is the code, which is still there.
+    log. No sitting to be present at — the evidence is the code, which stays.
 
     With `--revise`, the same question over what the hand pass already
     answered: a claim is open to revision, and a reading that disagrees is the

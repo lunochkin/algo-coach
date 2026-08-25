@@ -46,7 +46,7 @@ def _user_argument(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--user",
         default=os.environ.get("ALGO_COACH_USER", "local"),
-        help="identity to stamp on ingested records; stands in for authentication",
+        help="whose attempts to read; stands in for authentication",
     )
 
 

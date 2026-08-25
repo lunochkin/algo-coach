@@ -7,7 +7,7 @@ class CardStore:
     """One file per card, named by its engine-minted id.
 
     A cache of what an author wrote, as the problem store is of what a client
-    pushed: a re-seed refreshes the fields and never moves the id, because a
+    minted: a re-seed refreshes the fields and never moves the id, because a
     card run references it.
     """
 
