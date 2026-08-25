@@ -354,7 +354,7 @@ loose shape.
 - [x] Remove `algo-coach push` and the `ingest` package
 - [x] Remove `AttemptPush` and `ProblemPush`. The payload contract has no
       reader once nothing is pushed
-- [ ] Remove the external-id resolution. Every reference is engine-minted once
+- [x] Remove the external-id resolution. Every reference is engine-minted once
       nothing arrives from outside
 - [ ] Remove the tag mapping. A generated problem derives its techniques from
       its canonical solutions, and there is no platform vocabulary left to map

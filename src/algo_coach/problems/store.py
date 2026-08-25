@@ -6,8 +6,8 @@ from algo_coach.schema import Problem
 class ProblemStore:
     """One file per problem, named by its engine-minted id.
 
-    A mutable cache, unlike the attempt log: a re-push overwrites the
-    descriptive fields. Identity never moves.
+    A write replaces the file whole, unlike the attempt log's append. Identity
+    never moves.
     """
 
     def __init__(self, root: Path):
@@ -23,13 +23,6 @@ class ProblemStore:
         if not path.exists():
             return None
         return Problem.model_validate_json(path.read_text())
-
-    def by_external(self, user_id: str, external_id: str) -> Problem | None:
-        """Identity across pushes: the same pair is the same problem."""
-        for problem in self.all():
-            if problem.user_id == user_id and problem.external_id == external_id:
-                return problem
-        return None
 
     def all(self) -> list[Problem]:
         if not self.problems_path.exists():

@@ -36,9 +36,8 @@ def seed_problem(store: ProblemStore, *, id: str, external_id: str, user_id: str
 def problems(tmp_path) -> ProblemStore:
     """A store holding problem "p1" for both "u1" and "u2".
 
-    Attempt ingest resolves `problem_external_id` through this, so an attempt
-    is only pushable once its problem has been pushed — and each user resolves
-    to their own copy.
+    An attempt names a minted `problem_id`, so what a test needs from here is a
+    problem to point at — one per user, since the board reads per user.
     """
     store = ProblemStore(tmp_path)
     seed_problem(store, id="minted-u1", external_id="p1", user_id="u1")

@@ -28,23 +28,13 @@ def test_get_missing_is_none(tmp_path):
 
 
 def test_put_overwrites(tmp_path):
-    """A mutable cache: the second push of a problem replaces the first."""
+    """One file per id: the second write of a problem replaces the first."""
     store = ProblemStore(tmp_path)
     store.put(make_problem(title="Two Sum"))
     store.put(make_problem(title="Two Sum II"))
 
     assert store.get("i1").title == "Two Sum II"
     assert len(store.all()) == 1
-
-
-def test_by_external_scopes_to_the_user(tmp_path):
-    store = ProblemStore(tmp_path)
-    store.put(make_problem(id="i1", external_id="e1", user_id="u1"))
-    store.put(make_problem(id="i2", external_id="e1", user_id="u2"))
-
-    assert store.by_external("u1", "e1").id == "i1"
-    assert store.by_external("u2", "e1").id == "i2"
-    assert store.by_external("u3", "e1") is None
 
 
 def test_all_on_empty_store(tmp_path):
