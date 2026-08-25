@@ -18,11 +18,6 @@ the test cases that decide it. Test cases are what make verification reachable,
 and verification is what turns a canonical solution from an assertion into a
 fact.
 
-**The push API is a second ingest path, not what the corpus rests on.** It
-carries a user's practice on a third-party platform. What it brings in is the
-same class of record as a generated problem, carrying less: no test cases and no
-canonical solution.
-
 **The engine is the platform.** It serves a generated problem, times the
 sitting, runs the submission against the problem's own test cases, and records
 the verdict. Serving, timing and judging are all its own. Python only: a
@@ -45,7 +40,7 @@ a runner rather than a record change.
 |---|---|---|---|---|
 | Techniques | product | global | read-only at runtime | this repo, in git |
 | Cards | product | global | read-only at runtime | the store, seeded from `content/` |
-| Problems | product | global | generated once and never rewritten; a pushed one upserts | the store |
+| Problems | product | global | generated once and never rewritten | the store |
 | Test cases | product | global | written with the problem | the store |
 | Canonical solutions | product | global | append-only | the store |
 | Template matches | product | global | append-only | the store |
@@ -311,18 +306,12 @@ One template reproduced from memory, and how it went.
 - **The template it was written for is stored.** `generated_for` is an
   assertion rather than a reading, and it is what makes the first template match
   provenance. It never claims the problem exercises nothing else.
-- **A pushed problem is the other origin.** It carries an origin platform and a
-  pushing user, no test cases and no canonical solution. Same class of record,
-  carrying less.
 - **Every problem is product-owned.** Origin decides what a problem carries, not
   who may read it, and verifiability follows from the fields present rather than
   from a stored owner.
 - **Provenance is required either way.** A generated problem names what produced
   it, as any machine record does. A pushed one names its platform and the user
   who pushed it.
-- **Push identity is `(user_id, external_id)`**, so a re-push updates rather
-  than duplicates. The engine mints the `id`, and it never moves on update,
-  because attempts reference it.
 - **A generated problem's techniques are derived from its canonical
   solutions.** There is no platform to map, and the card's technique names only
   what the problem was written for. A solution that sorts before it searches
@@ -334,23 +323,14 @@ One template reproduced from memory, and how it went.
 - **Derived, so re-derivable.** Codes are a view over the canonicals, as they
   were a view over raw tags. Adding a canonical can widen a problem's techniques,
   and re-running the derivation is legal and expected.
-- **Tag mapping is owned by the engine.** A pushed problem carries the origin
-  platform's tags verbatim, and the engine derives its own codes beside them.
-  Raw tags are the truth and codes are a derived view, so re-running the
-  mapping is legal and expected.
-- **An unmapped tag blocks nothing.** It produces no code and the problem still
-  ingests. A metadata mismatch must never cost a real attempt.
 - **The statement is stored, and matching is why.** Which form a problem
-  exercises is a question about what it asks, and tags answer what it is about.
-  A generated statement is the product's own. A pushed one is the platform's,
-  and `data/` is gitignored, so no repo carries it.
-- **Required, and non-blank. The one metadata gap that does block.** It is not
-  treated like an unmapped tag for one reason. A missing code costs one problem its place in one board row. A
-  missing statement is a problem that can never be matched, and nothing reports
-  it. Preventing that silence is why the field exists, so it fails at the
-  boundary instead — per record, and the push is re-runnable once the scrape
-  catches up. A blank string is an absence that passes a presence check, so it
-  is rejected too.
+  exercises is a question about what it asks, and its techniques answer what it
+  is about.
+- **Required, and non-blank.** A missing code costs one problem its place in
+  one board row. A missing statement is a problem that can never be matched,
+  and nothing reports it. Preventing that silence is why the field exists, so
+  generation fails rather than landing a problem without one. A blank string is
+  an absence that passes a presence check, so it is rejected too.
 
 ### Test cases
 
@@ -732,19 +712,6 @@ wins.
 
 ## Boundaries
 
-- **Push API** — the platform's only runtime ingest path, carrying user-pushed
-  problems and attempts. A format contract, not a protocol: clients emit
-  `AttemptPush` and `ProblemPush` (`src/algo_coach/schema/push.py`), which are
-  the payloads the stored records are built from, not the records themselves.
-  - The payload has no field for what the engine stamps, so identity and
-    provenance cannot be forged by sending them. Unknown keys are ignored, so a
-    newer client stays pushable to an older engine.
-  - Attempts append, problems upsert.
-  - Each attempt's problem reference is resolved to the engine's own id, so
-    attempts are pushed after the problems they name.
-  - A batch ingests per record: a bad one is rejected by index, the rest still
-    land. One malformed line must not cost the attempts around it.
-  - An already-ingested record is counted, not an error, so retrying is safe.
 - **Verification** — runs locally, against test cases the engine owns. Reaches
   every generated problem and no pushed one: a platform ships no cases, so
   attempts on a pushed problem happen outside the engine and stay unverified.
@@ -760,11 +727,10 @@ wins.
 - **Card ingest** — cards are authored in `content/` and seeded into the
   datastore. File-based for now, and gitignored like `data/`. The technique
   vocabulary is the exception: it ships with the package, in git.
-  - What an author writes has its own shape, as a client's push does.
-    `CardSeed` (`src/algo_coach/schema/seed.py`) is the payload the stored card
-    is built from, not the card. Identity is the engine's at both boundaries,
-    so the payload has no field for it and an author cannot supply one by
-    writing it.
+  - What an author writes has its own shape. `CardSeed`
+    (`src/algo_coach/schema/seed.py`) is the payload the stored card is built
+    from, not the card. Identity is the engine's, so the payload has no field
+    for it and an author cannot supply one by writing it.
   - A card and each of its templates are matched by their authored slug, which
     is what makes re-seeding refresh rather than duplicate. A new slug is a new
     card: the runs and the recall history stay with the old one, so renaming is

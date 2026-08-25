@@ -357,7 +357,7 @@ loose shape.
       `superseded` joins `done` as a way to close
 - [x] Keep a TODO item to a line or two, splitting before compressing. The
       argument behind an item belongs in the architecture doc
-- [ ] The architecture doc drops the push boundary and the pushed-problem
+- [x] The architecture doc drops the push boundary and the pushed-problem
       rules. It still says the push API is a second ingest path, which stops
       being true here
 - [ ] Problems, Attempts, Boundaries and Invariants each carry a rule that
