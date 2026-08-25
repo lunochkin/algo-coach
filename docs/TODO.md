@@ -366,10 +366,8 @@ loose shape.
 - [x] `README.md` drops the push API from what the engine exposes
 
 ### Archive
-- [ ] Move the pushed corpus and log to `data/old/`: 1785 attempts, 3962
+- [x] Move the pushed corpus and log to `data/old/`: 1785 attempts, 3962
       problems, the claims and the call log
-- [ ] `data/old/` is read by the announcement floor in Phase 6 and by nothing
-      on the run path. It is a calibration corpus, not a store
 
 ### The ingest path
 - [ ] Remove `algo-coach push` and the `ingest` package

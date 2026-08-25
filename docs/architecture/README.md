@@ -699,6 +699,16 @@ wins.
   problem carries them, so every submission is judged by whatever ran it.
 - **Storage** — concrete for now (JSON files under a gitignored directory), a
   database later. The schema is the contract, and storage swaps underneath it.
+- **Calibration corpus** — what the pivot to generated problems left behind,
+  under `data/old/`: a platform's problems, the attempts against them, the
+  claims and the calls. It is a corpus, not a store. No store points there, and
+  nothing on the run path reads it.
+  - It is kept for one measurement. The announcement floor is how often a form
+    is named from the statement alone, and a corpus no generator wrote is what
+    sets that floor.
+  - How it is read is deferred. Loading it through the stores at a second root,
+    querying the files directly, or sampling it once into a fixture are all
+    open, and measuring the floor is what decides.
 - **Content generation** — problems, their test cases and their canonical
   solutions are written by the engine, as a command beside the classifier and
   the matcher. It reuses one transport, one call log and one provenance base,
