@@ -52,52 +52,96 @@ a runner rather than a record change.
 | Self-labels | user | private | append-only | the store |
 | Diagnoses | user | private | append-only | the store |
 
+### Machine records
+
+Claims, template matches and canonical solutions are written by a model. What
+each carries to stay comparable is the same, and is stated here once.
+
+- **Provenance is the configuration**: model, effort, the endpoint it was
+  pinned to, temperature, the digest of what that record was sent, and the call
+  that sent it. All of them or none, since a record whose configuration is
+  partly unknown compares with nothing. A model asked for no effort, or one
+  that rejects the parameter, records the level it ran at rather than an empty
+  field.
+- **A pin is part of the reading, not a note about routing.** A model id
+  resolves to as many builds as there are endpoints serving it, and
+  quantization changes the weights. Unpinned, the router chooses per request,
+  so the records under one key are a mixture no later run can separate.
+- **Who served it is recorded and never compared.** The router reports a
+  company rather than an endpoint, and one company serves several builds. It
+  confirms a pin held without identifying the build, and it is unknown when a
+  reader asks what it has already read.
+- **A reading is greedy, and says so.** Sampling turns a verdict the model
+  holds at 0.9 into one it gives four times in five. An eval absorbs that by
+  being repeated; a sweep writes into an append-only log the board reads
+  forever. Temperature identifies a record for the same reason the pin does:
+  one says which weights answered, the other how they were sampled. A
+  temperature nobody set is the provider's own default — recorded absent, and
+  equal only to itself, which keeps records taken before the parameter existed
+  scorable rather than discarded. Generation is the exception, and says why.
+- **Staleness keys on the digest of what was sent**, never on a version over
+  the rulebook. A criterion travels with its candidate, so editing one entry
+  re-derives what that entry reached and leaves the rest. An author can forget
+  to bump a version while the text moves; a digest cannot. It costs a reflowed
+  sentence re-deriving what it reaches, and a rulebook that is cited as a
+  digest rather than as "prompt 3".
+- **The record's own copy of the configuration cannot drift**, because a call
+  is append-only and the copy is made in the same write. It is there so the log
+  reads alone: loading the calls to learn which model produced a record would
+  put a megabyte-scale read on every command.
+- **The user's record stands over the machine's answer to the same question**,
+  whichever was written later. The machine's is stored and scored, never
+  promoted. A reader that prefers the user's makes overwriting the evidence
+  unrepresentable, where a write path that skips what the user answered depends
+  on every writer remembering to.
+- **Each configuration is scored over what it read**, and the denominator is
+  printed rather than assumed. Scoring over the intersection alone charges
+  every column for the records one of them failed on. A share prints as
+  `92/98`, so two columns over different samples cannot be read as one rate.
+  The reader still supplies the judgement that the harder sample reads as the
+  worse reader.
+
 ### Techniques
 
 The vocabulary the append-only log references.
 
 - **Versioned as code, not stored as data.** A file shipped with the package,
   not a datastore the engine writes.
-- **A code carries the criterion for claiming it**, not only its name. The
-  codes are four kinds of thing. One question is asked of all four, and
-  answered differently for each. Every code names its kind, what earns it, and
-  the near miss it is confused with. The near miss is the part that decides
-  cases, because the disputes are about boundaries rather than definitions.
+- **A code carries the criterion for claiming it**, not only its name: its
+  kind, what earns it, and the near miss it is confused with. The near miss
+  decides cases, because disputes are about boundaries rather than definitions.
+  The codes are four kinds of thing, and one question is answered differently
+  for each.
   - A procedure counts when the solution performs it.
   - A structure counts when its properties carry the correctness or the
     complexity.
   - A paradigm counts when it is why the solution is correct.
   - A problem class counts when it is what the problem asks for.
 - **A kind reaches both readers as its test, never as its name.** The label
-  helps only a reader who already knows what it selects. A reader who does not
-  will judge a structure on whether it was performed. The four tests live with
-  the kind rather than in the vocabulary file, so twenty-seven entries state
-  them once.
+  helps only a reader who already knows what it selects; one who does not will
+  judge a structure on whether it was performed. The four tests live with the
+  kind, so twenty-seven entries state them once.
 - **A code is claimed beside the narrower ones, never instead of them.** What a
-  solution does is true at several levels. A backtracking search descends, and
-  a search tree is a binary tree. A claim names every level it worked at. An
-  exclusive rule would need a containment order over the codes, and nothing
-  generates one. It could only be hand-written pair by pair, then disagreed
-  with case by case. The exceptions are per code and stated in the entry.
-  `recursion` names a language mechanism rather than an approach, so a row
-  counting every self-call would name no skill.
+  solution does is true at several levels: a backtracking search descends, and
+  a search tree is a binary tree. An exclusive rule would need a containment
+  order over the codes, and nothing generates one — it could only be written by
+  hand pair by pair, then disagreed with case by case. Exceptions are per code
+  and stated in the entry: `recursion` names a language mechanism rather than
+  an approach, so a row counting every self-call would name no skill.
 - **What disqualifies a code is incidental use**, never that another candidate
   covers it. The near miss states that line in full: a sorted lookup beside a
   linear pass that dominates, a map standing in for an array. A reader taking
   the near miss for precedence drops codes the user claimed.
-- **Inclusive claiming is what keeps a row coherent.** Attribution falls back
-  to the problem's own techniques, and those nest already. Under an exclusive
-  rule, a claimed attempt and an unclaimed one on the same problem would be
-  counted by different rules. The proportion of each would shift as
-  classification progressed, so the board numbers would change while the
-  practice behind them did not. A claim narrows a row. It never re-partitions
-  it.
+- **Inclusive claiming is what keeps a row coherent.** The fallback is the
+  problem's own techniques, and those nest already. Under an exclusive rule a
+  claimed attempt and an unclaimed one on the same problem would be counted
+  differently, so board numbers would move as classification progressed while
+  the practice behind them did not. A claim narrows a row; it never
+  re-partitions it.
 - **The criteria are the prompt.** They reach the classifier beside the
-  candidates, and the reader beside the code, so one rulebook answers both.
-  Editing an entry therefore changes readings, but only for the attempts
-  carrying that candidate. So what a reading was made against is a digest of
-  the text that attempt was sent, never a version number covering the whole
-  rulebook.
+  candidates and the reader beside the code, so one rulebook answers both.
+  Editing an entry changes readings, but only for the attempts carrying that
+  candidate.
 - **A code is never deleted**, because records carrying it outlive it.
   Retirement means an entry in an alias map, applied when grouping.
 - **Membership is checked on the write path only.** A model that validated
@@ -124,50 +168,36 @@ user can solve, per technique, and the two share no data.
   a selector ships anywhere.
 - **The ladder covers every studied template.** Its rungs come from the
   template matches, at least one per template, and the selector fills the rest
-  out to `size`. A ladder drawn from the selector alone would exercise the
-  technique and leave some forms unexercised, because a technique says what a
-  problem is about and not which form solves it.
+  out to `size`. Drawn from the selector alone it would exercise the technique
+  and leave some forms untouched, since a technique says what a problem is
+  about rather than which form solves it.
 - **Requiredness is derived from what a rung covers**, never stored. A rung
   covering a studied template is required. A rung covering only the optional
   template is optional. A rung covering both is required, and the optional
   template is offered on it as the alternative approach. That last case is why
   a problem matching several templates is wanted rather than a nuisance.
 - **A studied template with no match is a reported gap**, not a quietly shorter
-  ladder. The card claims to teach that form, so a corpus that cannot exercise
-  it is a fact about the store worth surfacing.
-- **A reported gap is the input to the next generation run.** Generation writes
-  for a named template, so a form the corpus cannot exercise names its own
-  remedy.
-- **A gap creates work, and never does the work.** Resolution reports what is
-  missing; a person runs the generation. A ladder that filled itself would be a
-  ladder nobody inspected, and the corpus is the product.
+  ladder, and the gap is the input to the next generation run: a form the
+  corpus cannot exercise names its own remedy. It creates the work and never
+  does it — a ladder that filled itself would be one nobody inspected, and the
+  corpus is the product.
 - **The recognition cue is its own field**, apart from the prose it could sit
-  in. A probe asks exactly that question: is the form recognised unprompted. So
-  the cue is shown and withheld on its own, and the rest of what to read is one
-  authored block the engine never parses.
-- **The cue is carried at both levels**, answering different questions. The
-  card's cue says to reach for the technique. A template's cue says which of
-  its forms. Recall is per template, so a card-level cue alone would be right
-  about the technique and silent about what has to be reproduced.
+  in, because a probe asks exactly that question: is the form recognised
+  unprompted. So it is shown and withheld on its own, where the rest of what to
+  read is one authored block the engine never parses. It is carried at both
+  levels — the card's says to reach for the technique, a template's says which
+  of its forms — because recall is per template.
 - **One template may sit outside the studied set.** A card carries at most one
-  optional template, the capstone, and never only optional ones. It is authored
-  whole and surfaced on request alone. The hard form is worth deriving before
-  it is read, and a card that showed it unasked would remove that chance
-  permanently.
-- **The ladder is resolved at import**, once, and a re-import never rewrites
-  the ladder of a card already started. Same rule as a problem's minted id, and
-  for the same reason: a user is already working through it.
-- **Probes are assigned when a card is started**, not at import, and more can
-  be assigned later. What was unseen at import need not still be unseen, and
-  the ordering answers that: unseen first, then least recently attempted. They
-  are never drawn from the ladder, which teaches the form rather than testing
-  whether it is recognised unprompted.
-- **A probe is not scarce.** With nothing unseen left, the least recently
-  solved stands in. Someone who has solved everything in the technique is past
-  the point where the distinction pays for itself.
-- **Resolution is the engine's.** The selector is the truth
-  and the ladder a derived view, so re-deriving it is legal — for a card nobody
-  has started.
+  optional template, the capstone, authored whole and surfaced on request
+  alone. The hard form is worth deriving before it is read, and a card showing
+  it unasked would remove that chance permanently.
+- **The ladder is resolved at import**, once. The selector is the truth and the
+  ladder a derived view, so re-deriving it is legal — but never for a card
+  already started, since a user is working through it.
+- **Probes are assigned when a card is started**, not at import, since what was
+  unseen at import need not still be unseen. Unseen first, then least recently
+  attempted, and never drawn from the ladder, which teaches the form rather
+  than testing whether it is recognised unprompted.
 
 ### Template matches
 
@@ -179,76 +209,57 @@ problem, so nothing is authored here either.
   template, so that pair is provenance rather than a reading, and the record
   names `generator` as its source. Nothing pays a call to learn what the
   generator was told to write.
-- **The matcher answers what generation cannot assert.** Two things: which
-  templates a problem exercises besides the one it was written for, and whether
-  the generator's own claim holds. The first is why a rung can still cover a
-  studied template and an optional one. The second is the only check on a
+- **The matcher answers what generation cannot assert**: which templates a
+  problem exercises besides the one it was written for, and whether the
+  generator's own claim holds. The first is why a rung can cover a studied
+  template and an optional one at once, the second the only check on a
   generator drifting from its brief.
 - **Three writers, ordered by what each of them knew.** A hand annotation
   stands over both machine sources. A generator's assertion stands over a
-  matcher's reading of the same pair, because the generator knew and the matcher
-  inferred. The matcher's disagreement is stored and scored, never promoted —
-  the same shape as a machine claim on a hand-claimed attempt.
+  matcher's reading of the same pair, because the generator knew and the
+  matcher inferred.
 - **One record per template and problem, carrying a verdict.** Not a set per
-  template. Problems arrive one at a time, and a set record would rewrite pairs
-  that were already settled every time the corpus grew. A claim asserts a whole
-  set for one attempt, because the set is the assertion. A match asserts one
-  pair, and the pairs are independent.
+  template: problems arrive one at a time, and a set record would rewrite pairs
+  already settled every time the corpus grew. A claim asserts a whole set
+  because the set is the assertion; a match asserts one pair, and pairs are
+  independent. A problem matching several templates is the ordinary case.
 - **A negative is stored.** Otherwise every re-run re-tests every non-match
   forever. What still needs testing is the pairs carrying no record at the
   current configuration, which is the rule `score` already uses for readings.
-- **A problem may match several templates**, and a template many problems. Two
-  approaches to one problem is the ordinary case. It is what lets a single rung
-  cover a studied template and an optional one at once.
 - **Written after card import, never before.** Both references are minted: the
   template at import, the problem at generation. So a match cannot be authored
   against a seed file.
 - **A call is per problem and card, a record is per pair.** The candidates are
   that card's templates, and the answer is the subset the problem exercises,
   which is the classifier's shape. The records come from one answer.
-- **Candidates are pre-filtered by technique.** A problem is offered only to
-  cards whose technique it carries. Otherwise the work is every template
-  against every problem, for an answer that is almost always no.
-- **Procedure templates are excluded.** A framing procedure is exercised by
-  every problem its technique reaches, so a per-problem verdict carries no
-  information. It is covered by the ladder as a whole.
+- **Not every pair is asked about.** A problem is offered only to cards whose
+  technique it carries, or the work is every template against every problem for
+  an answer that is almost always no. Procedure templates are excluded
+  outright: a framing procedure is exercised by every problem its technique
+  reaches, so a per-problem verdict carries no information.
 - **A card's relation to a problem is a fold over its templates**, never a
   record of its own. A rung is earned when the technique reaches the problem
-  and some template matches, and that is derived from the pairs rather than
-  stored beside them. Nothing asserts in one place that a problem belongs to a
-  card, so nothing has to be rewritten when one template's verdict changes.
+  and some template matches. Nothing asserts in one place that a problem
+  belongs to a card, so nothing is rewritten when one verdict changes.
 - **Re-derivation is the normal path, not an exception.** A technique claim
   asks about one attempt, and the question never changes. A match is a template
   against a corpus that grows with every generation run.
-- **Provenance as a claim carries it**: the source, and on a machine match the
-  model, effort, prompt digest and call.
-- **Two writers, and the user's stands.** A hand annotation is what a machine
-  run is measured against, so it stands on read whenever it was written. A
-  machine verdict on an annotated pair is a reading: stored and scored, never
-  what a ladder resolves from. One rule, stated once for claims and holding
-  here — the record the machine cannot recompute wins.
 - **A hand record settles what stands, not what has been read.** The run path
   skips a pair only where the hand pass settled every template of that card.
   The call asks about the card whole, and a partly annotated card is a question
   still worth asking. The eval reads annotated pairs on purpose, because that
   reading is the measurement.
-- **Agreement is per pair, grouped per template.** A match asserts one pair, so
-  the pair is what agrees or disagrees. A call carrying six of them saves
-  requests; it is not a unit of truth. Grouping is per template because the
-  ladder is per template. A form the matcher over-matches fills its rung with
-  problems that do not teach it, and one number over the card would average
-  that away.
-- **Nothing is scored as a set.** A claim is scored whole because it asserts a
-  whole set, and only equality catches the claim that names every candidate. A
-  match asserts a pair. A matcher that says yes to everything is already
-  visible as a false positive on every template. That is the same signal,
-  without a second number, and without a metric that calls six verdicts wrong
-  for one bad one.
-- **Accuracy over the pairs is not the metric either.** Most pairs are
-  negative, so a matcher that names nothing scores in the nineties and resolves
-  an empty ladder. What is scored is the positive verdicts, both directions:
-  what the annotator named and the machine missed, and what the machine named
-  and the annotator did not.
+- **Agreement is per pair, grouped per template.** A call carrying six pairs
+  saves requests; it is not a unit of truth. Grouping follows the ladder: a
+  form the matcher over-matches fills its rung with problems that do not teach
+  it, and one number over the card would average that away.
+- **Nothing is scored as a set, and accuracy is not the metric.** A match
+  asserts a pair, and a matcher that says yes to everything is already visible
+  as a false positive on every template. Most pairs are negative, so a matcher
+  naming nothing would score in the nineties and resolve an empty ladder. What
+  is scored is the positive verdicts, both directions: what the annotator named
+  and the machine missed, and what the machine named and the annotator did
+  not.
 - **An empty answer is negatives, not a decline.** A claim naming nothing
   answers nothing, and the problem's own techniques keep standing. A call
   naming no template asserts that each of them does not match, which is a
@@ -308,24 +319,22 @@ One template reproduced from memory, and how it went.
   provenance. It never claims the problem exercises nothing else.
 - **Provenance is required.** A problem names what produced it, as any machine
   record does.
-- **A problem's techniques are derived from its canonical solutions.** The
-  card's technique names only what the problem was written for. A solution that
-  sorts before it searches used both, and the codes say so.
-- **Which is why the fallback answers the right question.** Attribution
-  resolves to a claim if one exists, otherwise to the problem's techniques.
-  Those name what solving the problem can take, over every canonical it
-  carries. A claim names what one attempt did.
-- **Derived, so re-derivable.** Codes are a view over the canonicals. Adding a
-  canonical can widen a problem's techniques, and re-running the derivation is
-  legal and expected.
+- **A problem's techniques are derived from its canonical solutions**, and are
+  a view rather than stored truth: adding a canonical can widen them, and
+  re-deriving is legal and expected. The card's technique names only what the
+  problem was written for, where a solution that sorts before it searches used
+  both.
+- **Which is why the fallback answers the right question.** They name what
+  solving the problem can take, over every canonical it carries, where a claim
+  names what one attempt did.
 - **The statement is stored, and matching is why.** Which form a problem
   exercises is a question about what it asks, and its techniques answer what it
   is about.
 - **Required, and non-blank.** A missing code costs one problem its place in
-  one board row. A missing statement is a problem that can never be matched,
-  and nothing reports it. Preventing that silence is why the field exists, so
-  generation fails rather than landing a problem without one. A blank string is
-  an absence that passes a presence check, so it is rejected too.
+  one board row; a missing statement is a problem nothing can ever match, and
+  nothing reports it. Generation fails rather than landing one without it. A
+  blank string is an absence that passes a presence check, so it is rejected
+  too.
 
 ### Test cases
 
@@ -346,11 +355,10 @@ What decides whether a solution to a generated problem is correct.
 - **Cases that separate nothing are worse than none**, because they license the
   word `verified` on a canonical that is wrong. A set that does not discriminate
   is a defect in the problem, and a problem carrying one does not land.
-- **How discrimination is established is deferred.** Candidates are on hand: two
-  canonicals written from different approaches agreeing on every case, a
-  mechanically broken canonical failing, the near miss the technique entry
-  already names failing. Which of them is the bar is a question a real corpus
-  answers and an argument does not.
+- **How discrimination is established is deferred.** Candidates: two canonicals
+  from different approaches agreeing on every case, a mechanically broken
+  canonical failing, the near miss the technique entry names failing. Which is
+  the bar is a question a real corpus answers and an argument does not.
 
 ### Canonical solutions
 
@@ -370,14 +378,11 @@ attempt: no user and no sitting.
   form.
 - **Never counted as an attempt.** It answers no board row and earns no
   progress. A user who reads one has not solved the problem.
-- **Provenance as any machine record carries it**: model, effort, pin,
-  temperature, prompt digest, and the call.
-- **Sampled, not greedy, and that is a different rule.** A reading is greedy so
-  a verdict the model holds at 0.9 does not land as a coin flip in a log the
-  board reads forever. Generation produces the artifact rather than a verdict
-  about one, so there is nothing to protect, and variance is what stops one
-  model's habits becoming the whole corpus. The cost is that a canonical is
-  re-runnable and never reproducible, which is also why nothing re-derives it.
+- **Sampled, not greedy — the exception Machine records names.** Generation
+  produces the artifact rather than a verdict about one, so no verdict needs
+  protecting from variance, and variance is what stops one model's habits
+  becoming the whole corpus. The cost is a canonical that is re-runnable and
+  never reproducible, which is also why nothing re-derives it.
 - **The verification result is stored, never inferred**: which cases it passed
   and how many the problem had. A count rather than a flag, for the same reason
   a share prints its denominator.
@@ -404,195 +409,91 @@ rather than a field on the attempt.
 
 - **Attribution resolves, it is not required.** The claim that stands if one
   exists, otherwise the problem's techniques. Nothing has to be labelled for an
-  attempt to count, which is what makes a history of past attempts usable.
-- **Resolution happens on read and is never stored**, so re-deriving a
-  problem's techniques reaches every unclaimed attempt.
+  attempt to count. Resolution happens on read and is never stored, so
+  re-deriving a problem's techniques reaches every unclaimed attempt.
 - **The fallback answers a different question.** A problem's techniques say
   what solving it can take, a claim what one solution did. The fallback
-  over-credits techniques a canonical used incidentally, which skews
-  scheduling away from the weakest ones.
+  over-credits techniques a canonical used incidentally, which skews scheduling
+  away from the weakest ones.
 - **Two writers, user first.** The drill loop asks at the moment of solving,
   and a hand pass reaches attempts no loop touched. A classifier fills the rest,
   and a later user claim corrects it.
-- **The classifier reads code because no training data exists for this label.**
-  Public corpora tag problems, not solutions, so a model trained on them
-  predicts the fallback rather than improving on it. Nobody has labelled what a
-  given solution did, because doing so means reading it — which is the work the
-  classifier is there to do. So it is a prompted model reading the solution,
-  not a trained one.
-- **Recognising an approach in code is semantic work.** A problem's techniques
-  span what it admits: several approaches to it, or one solution combining
-  several techniques. Choosing among them means reading which the code took.
-  Two-pointers and sliding-window differ in their invariant, not their syntax.
-  Backtracking is depth-first search plus an undo. Greedy is a property of why
-  a choice is correct rather than a construct. A scan of imports and keywords
-  is weakest exactly where the claim is worth making.
-- **What the classifier is shown besides the code is deferred.** The attempt's
-  code is the subject and stays. Whether a reading is improved by also sending
-  the problem's canonical solutions, or the candidate techniques' templates, is
-  a question a measured comparison answers. The record absorbs the answer
-  without changing: what a reading was made against is the digest of what that
-  attempt was sent, so widening the prompt re-derives the readings it reaches
-  and settles the rest.
+- **The classifier is prompted, not trained.** Public corpora tag problems
+  rather than solutions, so a model trained on them predicts the fallback
+  instead of improving on it, and nobody has labelled what a given solution did
+  because doing so means reading it. Reading it is semantic work: two-pointers
+  and sliding-window differ in their invariant rather than their syntax,
+  backtracking is depth-first search plus an undo, and greedy is a property of
+  why a choice is correct rather than a construct. A scan of imports and
+  keywords is weakest exactly where the claim is worth making.
+- **What the classifier is shown besides the code is deferred.** The code is
+  the subject and stays; whether the problem's canonicals or the candidates'
+  templates improve a reading is a question a measured comparison answers.
 - **A richer prompt can change the question rather than the answer.** Shown a
   problem's canonicals, a classifier can report which one the attempt resembles
-  instead of which techniques its code used. Those are different labels, and the
-  hand claims scoring it were made against the second. A configuration that
-  moves the question is not comparable to one that answers it better.
+  instead of which techniques its code used. Those are different labels, and
+  the hand claims were made against the second. A configuration that moves the
+  question is not comparable to one that answers it better.
 - **A claim is scored against the user's own**, per technique rather than
-  overall. The board is per technique, and a classifier that over-claims one
-  code skews it. Set equality, not overlap: a claim naming every candidate
-  agrees with the fallback and decides nothing, but would score well on a
-  metric that only asks whether the right code appears.
+  overall, by set equality rather than overlap. The board is per technique, so
+  a classifier that over-claims one code skews it, and a claim naming every
+  candidate decides nothing while scoring well on a metric that only asks
+  whether the right code appears.
 - **How often a claim names every candidate is reported beside the score.**
   Claiming inclusively removes the reason to withhold a code, so the way it
-  fails is by naming all of them. That is the fallback, scored on whatever the
-  problem's own techniques happened to get right. Set equality does not catch
-  it, because agreeing with the fallback scores well whenever the fallback is
-  right. The hand claims are the reference the machine's share is read against.
-- **Those claims are an eval set and a correction path**, never training data.
-  Nothing in the engine is trained.
+  fails is by naming all of them — which is the fallback, and agrees with it
+  whenever the fallback is right. Set equality cannot catch that.
+- **The hand claims are an eval set and a correction path**, never training
+  data. Nothing in the engine is trained.
 - **What invalidates a label is which reader informed it, not that one did.** A
   claim made with the scored configuration's reading in view measures that
-  configuration against itself. The first hand pass over a rulebook still being
-  written is agreement with itself, for the same reason. A claim adjudicated
-  against a reader that is never scored is neither — it is how the boundary
-  gets drawn. So `informed_by` names the readings its author saw, one by one,
-  and a set can be read back for either question.
-- **The eval set holds one attempt per problem**, its latest carrying code. A
-  retry asks the identical question: same solution, same candidates. A repeat
-  would measure one decision twice rather than measuring two. The drill loop
-  still asks about every attempt of a sitting, where the answer costs a
-  keystroke and the count is per submission.
+  configuration against itself. A claim adjudicated against a reader that is
+  never scored is neither — it is how the boundary gets drawn. So `informed_by`
+  names the readings its author saw, one by one, and a set can be read back for
+  either question.
+- **The eval set holds one attempt per problem**, its latest carrying code,
+  since a retry asks the identical question and a repeat would measure one
+  decision twice. The drill loop still asks about every attempt of a sitting,
+  where the answer costs a keystroke.
 - **One claim per attempt**, naming every technique it used, since a solution
   can use several. A later claim replaces the whole set rather than rewriting
   the earlier one.
-- **A reply cut short by the token cap names nothing, and is stored too.** A
-  reading is greedy, so the same prompt decodes the same way. Left unstored, a
-  runaway is re-asked by every later run, pays the whole cap again, and fails
-  identically. What is recorded is a fact about that configuration on that
-  prompt, not about the code. The call's `stop_reason` separates the two, and
-  the report counts them apart — how often a reader finds the candidates
-  wanting is the number that is worth seeing, and a runaway decoder is not
-  evidence about candidates.
-- **A verdict naming no candidate is a reading, and is stored.** The classifier
-  read the code and found the candidates did not cover it. That is evidence
-  about the code rather than an absence of it, and the answer does not change
-  while the question does not. Left unstored, it would be re-read by every
-  later run, paying again for the same decline.
+- **A verdict naming no candidate is a reading, and is stored.** It is evidence
+  about the code rather than an absence of it, and unstored it would be re-read
+  by every later run. A reply cut short by the token cap also names nothing and
+  is stored for the same reason, but it is a fact about the configuration
+  instead. The call's `stop_reason` separates them, and the report counts them
+  apart.
 - **An empty claim answers nothing, so the fallback stands.** The resolver
-  reads a claim's *techniques* rather than its existence. The problem's own
-  techniques therefore keep answering an attempt whose reading declined, and
-  the board renders from them either way.
-- **It is scored all the same.** The board and the eval ask different
-  questions. A decline gives the board nothing to render, and it gives the eval
-  an assertion: none of these candidates apply. A hand claim naming one of them
-  contradicts that, so it is a disagreement and counts as a miss against every
-  technique the user named. Leaving it unscored would contradict storing it as
-  evidence, and would pay a classifier to decline: each one would leave a
-  smaller denominator behind and a better share over it. What is still
-  unscored is an attempt with no verdict at all, where nothing was read. The
-  count is reported beside the share, because how often a reader finds the
-  candidates wanting is worth seeing on its own.
-- **A decline supersedes an earlier claim, as any later reading does.** One
-  rule orders the log. A reading saying the candidates do not fit is not weaker
-  evidence than an older one made against a rulebook it disagrees with. What it
-  costs is that the older claim's answer gives way to the fallback.
-- **A decline is stated, never inferred from an empty set.** Either writer may
-  name none of the candidates. The user says so with `declined`, because the
-  drill loop records nothing where they skip, and emptiness alone would make a
-  lost answer and a stated verdict the same record. The classifier needs no
-  flag: it answers or it fails, and a failure writes no claim.
-- **The eval set holds a correct decline.** Adjudication sometimes ends at "no
-  candidate applies", and membership is keyed on a hand claim existing. A claim
-  with no way to say it could only be deleted, which drops the attempt from the
-  set. Either writer may name none of the candidates, so neither is scored on a
-  question the other is spared.
-- **The user's claim wins on read, the latest of each writer's otherwise.**
-  Under latest-wins alone, whichever writer wrote last would decide, and the
-  classifier writes far more often. Ground truth would last only until
-  something re-derived over it. This rule is what makes a machine claim safe to
-  store on an attempt the user has claimed. A claim scored against the user's own has to be stored, or
-  an eval run leaves no record once it has finished printing.
-- **Which is why it is a rule rather than a discipline.** Skipping claimed
-  attempts on the write path depends on one writer remembering to. A writer
-  that forgets overwrites the evidence, and an append-only log cannot take it
-  back. A reader that prefers the user's claim makes that unrepresentable. The
-  classifier still skips them, but only to save a call whose verdict could
-  never stand — not as what protects the eval.
+  reads a claim's *techniques* rather than its existence, so the problem's own
+  keep answering an attempt whose reading declined. A later decline supersedes
+  an earlier claim as any reading does, and what that costs is the older
+  answer giving way to the fallback.
+- **A decline is scored all the same.** It asserts that none of these
+  candidates apply, so a hand claim naming one is a miss against every
+  technique the user named. Unscored, declining would pay: each one would leave
+  a smaller denominator and a better share over it. Only an attempt nothing
+  read stays unscored, and the count of declines prints beside the share.
+- **A decline is stated, never inferred from an empty set.** The user says so
+  with `declined`, since the loop records nothing where they skip and emptiness
+  would make a lost answer and a stated verdict one record. The classifier
+  needs no flag: it answers or it fails, and a failure writes no claim. The
+  eval set holds a correct decline, or the attempt could only leave the set by
+  deletion.
 - **A machine claim on a hand-claimed attempt is a reading, not a candidate.**
-  It never becomes the standing claim, never reaches the board, and exists to
-  be scored. Storing it makes an eval a dataset rather than a run: what a
-  configuration answered stays readable, and a second configuration is paid for
-  only where it has not read.
-- **One record for both writers, not two.** Splitting them would mirror
-  `SelfLabel` and `Diagnosis`. But the classifier claims already written stay
-  in the log forever, so a reader carries the old shape whatever else changes.
-  A third record written only by the eval needs no migration, and is worse: the
-  same verdict would be a claim or a reading depending on what else was claimed
-  on the attempt, so other records would decide its type.
-- **Every claim records its source.** A machine claim also records what
-  produced it: model, effort, the endpoint it was pinned to, temperature, the
-  digest of what that attempt was sent, and the call that sent it. Both count
-  the same toward progress. But a machine claim can be recomputed by a better
-  classifier and a user's cannot, so re-deriving has to find the stale ones and
-  leave the rest. All of them or none, since a reading whose configuration is
-  partly unknown compares with nothing. A user's claim carries none of them,
-  because nothing re-derives it. A model asked for no effort, or one that
-  rejects the parameter, records the level it ran at rather than an empty
-  field: the model's own default is a fact about the reading, not a gap in it.
-- **The digest is of the question, not of the rulebook.** A criterion travels
-  with its candidate, so editing one entry changes what a few attempts are
-  asked and leaves every other one untouched. Keying staleness on the digest
-  therefore re-derives the slice an edit reached and nothing else, where a
-  rulebook-wide version re-derived the backlog for a sentence most attempts
-  never saw.
-- **There is no version beside it.** A version number was an author's word for
-  "the reading changed". An author can forget to bump it while the text moves;
-  a digest cannot. What it costs is that a reflowed sentence re-derives the
-  attempts it reaches, which is the intended trade: nothing licenses calling an
-  edit cosmetic on a model's behalf, and the scope is the entries actually
-  touched. What it also costs is a name. A rulebook is cited as the digest of
-  what was sent rather than as "prompt 3", and two of them are diffed by reading
-  the prompts two calls carry.
-- **A pin is part of the reading, not a note about routing.** A model id
-  resolves to as many builds as there are endpoints serving it, and
-  quantization changes the weights. An fp4 endpoint and a bf16 one are two
-  different readers. Unpinned, the router chooses per request, so the readings
-  under one key are a mixture no later run can separate. The pin is therefore
-  required rather than optional, and compared like the model itself.
-- **Who served it is recorded and never compared.** The router reports a
-  company, not an endpoint, and one company serves several builds of a model.
-  It confirms a pin held, without identifying the build. It is also unknown
-  when a reader asks what it has already read, which is the question the
-  comparison exists to answer.
-- **A reading is greedy, and says so.** Sampling turns a verdict the model
-  holds at 0.9 into one it gives four times in five. An eval absorbs that by
-  being repeated. The backlog sweep cannot: it writes into an append-only log
-  the board reads forever, so the same fraction of a percent is permanent, and
-  it moves readings a criteria edit never touched. Temperature identifies a
-  reading for the same reason the pin does. One says which weights answered,
-  the other how they were sampled.
-- **A temperature nobody set is an arm, not a gap.** `None` is the provider's
-  own default, which moves without notice, so it is recorded absent rather than
-  guessed at, and it compares equal only to itself. That is what makes every
-  reading taken before the parameter existed scorable beside a greedy one
-  instead of discarded. Same rule as an unsent effort.
-- **The claim's copy cannot drift**, because a call is append-only and the copy
-  is made in the same write. It is there so the claims log reads on its own: a
-  board renders from it, and loading the calls to learn which model produced a
-  claim would put a megabyte-scale read on every command.
-- **Each configuration is scored over what it read**, and how many all of them
-  read is reported beside the shares. A comparison over the intersection alone
-  charges every column for the attempts one of them failed on: a single aborted
-  run shrinks the denominator for the whole table, and re-running it moves
-  numbers that no re-reading touched.
-- **The denominator is therefore visible, never assumed.** A share prints as
-  `92/98`, so two columns measured over different samples cannot be read as one
-  rate. What the reader must still supply is judgement: a cheaper classifier
-  that read fewer attempts is measured on a different sample, and the harder of
-  two samples reads as the worse classifier. The splits are unaffected, since a
-  verdict every configuration has is what a split needs.
+  It never stands and never reaches the board; it exists to be scored. Storing
+  it makes an eval a dataset rather than a run, and a second configuration is
+  then paid for only where it has not read. The classifier still skips such
+  attempts, but only to save a call whose verdict could never stand.
+- **One record for both writers, not two.** Splitting would mirror `SelfLabel`
+  and `Diagnosis`, but claims already written stay in the log forever, so a
+  reader carries the old shape regardless. A third record written only by the
+  eval is worse: the same verdict would be a claim or a reading depending on
+  what else was claimed.
+- **Every claim records its source.** A user's carries no provenance, because
+  nothing re-derives it; a machine claim carries all of it, which is how a
+  re-derivation finds the stale ones and leaves the rest. Both count the same
+  toward progress.
 
 ### Calls
 
@@ -618,33 +519,22 @@ holds nothing about what the answer was for.
   base URL. Two provider shapes maintained by hand would create pressure to
   adopt a library that reconciles them, and such a library can downgrade a
   schema into a prompt where the record cannot show it happened.
-- **What was sampled at is recorded beside who served it.** A reading's
-  configuration has to be recoverable from the record that holds it, and the
-  claim's copy is taken from here.
-- **Every request names one endpoint.** A provider that cannot honour the
-  response schema is never chosen, and a request fails rather than falling back
-  to a backend the record would not name. The pin is stored beside who answered
-  it. The first says which build was asked for and is what a re-run needs, the
-  second says whether anything answered at all.
+- **Every request names one endpoint, and records who answered.** A provider
+  that cannot honour the response schema is never chosen, and a request fails
+  rather than falling back to a backend the record would not name. The pin says
+  which build was asked for and is what a re-run needs; the server says whether
+  anything answered at all. What it was sampled at is recorded beside them, and
+  a claim's copy is taken from here.
 - **Reasoning is what the reading produced, not what was asked for.** A model
-  that decides a question needs no thought returns none, and the field is
-  empty. That is a fact about the reading rather than a gap in the record. Two
-  calls on one prompt can differ here, which is the same adaptive behaviour the
-  noise floor already measures.
-- **`prompt_hash` is not unique.** A retry after a rate limit repeats it, and
-  sampling one prompt on purpose repeats it deliberately. A reader looking one
-  up must say which it wants rather than assume there is one.
-- **A call is timed at two levels.** What the caller waited, and how many
-  requests that took. Beside it, what the last request took on its own: the one
-  that answered, or the one that failed. Their difference is the endpoint's
-  backoff, and without it a run held behind a per-minute cap reads as a slow
-  model.
+  that decides a question needs no thought returns none, and the empty field is
+  a fact about the reading rather than a gap in the record.
+- **A call is timed at two levels**: what the caller waited and how many
+  requests that took, beside what the last request took alone. Their difference
+  is the endpoint's backoff, and without it a run held behind a per-minute cap
+  reads as a slow model.
 - **Nothing on the run path reads it back.** Whether to ask again is decided
-  from the claims, which already carry the model, effort and digest. This file
-  is written by every run and loaded only by whoever sits down to analyse one.
-  A cache over the calls themselves would serve prompts shared by two attempts,
-  and is not built: the log is shaped for it, and the saving is small while
-  there is one domain.
+  from the claims, which carry the configuration already. The file is written
+  by every run and loaded only to analyse one.
 
 ### Self-labels
 
@@ -659,40 +549,34 @@ own record rather than a field on the attempt, for the same reason a claim is.
 - **One label per attempt**, latest wins on read.
 - **The drill loop is the only writer.** The question is asked at the moment of
   solving, and nothing else is there to ask it.
-- **A label cannot be given later.** Why an attempt went the way it did is a
-  memory of the sitting. What is still recoverable from the record months
-  after — a timeout, a compile error — is what a `Diagnosis` reads. A label
-  recalled that late is either invention, or the classifier's own input handed
-  back as evidence against it.
-- **A claim is retroactive, a label is not.** The evidence for a claim is the
-  code, which does not decay. The evidence for a label is recall, which does.
-  That is why they are asked separately rather than as two halves of one
-  prompt.
+- **A label cannot be given later, where a claim can.** The evidence for a
+  claim is the code, which does not decay; for a label it is recall, which
+  does. What survives months on — a timeout, a compile error — is what a
+  `Diagnosis` reads, and a label recalled that late is either invention or the
+  classifier's own input handed back as evidence against it.
 
 ### Diagnoses
 
-Why an attempt failed, inferred rather than reported. Keyed to an attempt, and
-versioned by model and prompt version, so every attempt can be re-diagnosed and
-compared.
+Why an attempt failed, inferred rather than reported. Keyed to an attempt and
+carrying provenance as any machine record does, so every attempt can be
+re-diagnosed and compared.
 
 - **The machine counterpart of a self-label, never its replacement.** Neither
-  supersedes the other. Agreement between them is the eval.
-- **Kept per model and prompt version**, so a later diagnosis is a second
-  reading rather than a correction.
+  supersedes the other, and agreement between them is the eval. A later
+  diagnosis is a second reading rather than a correction.
 
 ### What every record keyed to an attempt carries
 
 Claims, self-labels and diagnoses share a base: an engine-minted `id`, the
 `attempt_id` they assert about, and `created_at`. One reader orders all three,
-latest by `created_at`, with append order breaking a tie. The `id` lets a
-record be cited, by an eval naming the diagnosis it scored or by a user
-correcting a claim.
+latest first, with append order breaking a tie. The `id` lets a record be
+cited, by an eval naming the diagnosis it scored or by a user correcting a
+claim.
 
-Ordering is not the same question as what stands. A self-label has one writer,
-so the latest is what stands. A claim has two writers, and the user's stands
-over any machine claim however late. A diagnosis never supersedes a self-label
-at all. The shared reader answers "in what order", and each record says who
-wins.
+Ordering is not what stands. A self-label has one writer, so the latest stands.
+A claim has two, and the user's stands over any machine claim however late. A
+diagnosis never supersedes a self-label at all. The shared reader answers "in
+what order", and each record says who wins.
 
 ## Boundaries
 
@@ -706,10 +590,7 @@ wins.
   nothing on the run path reads it.
   - It is kept for one measurement. The announcement floor is how often a form
     is named from the statement alone, and a corpus no generator wrote is what
-    sets that floor.
-  - How it is read is deferred. Loading it through the stores at a second root,
-    querying the files directly, or sampling it once into a fixture are all
-    open, and measuring the floor is what decides.
+    sets that floor. How it is read is deferred to taking that measurement.
 - **Content generation** — problems, their test cases and their canonical
   solutions are written by the engine, as a command beside the classifier and
   the matcher. It reuses one transport, one call log and one provenance base,
@@ -722,12 +603,11 @@ wins.
   vocabulary is the exception: it ships with the package, in git.
   - What an author writes has its own shape. `CardSeed`
     (`src/algo_coach/schema/seed.py`) is the payload the stored card is built
-    from, not the card. Identity is the engine's, so the payload has no field
-    for it and an author cannot supply one by writing it.
-  - A card and each of its templates are matched by their authored slug, which
-    is what makes re-seeding refresh rather than duplicate. A new slug is a new
-    card: the runs and the recall history stay with the old one, so renaming is
-    a title change.
+    from, not the card, and it has no field for the identity the engine mints.
+  - A card and each template are matched by their authored slug, which makes
+    re-seeding refresh rather than duplicate. A new slug is a new card: the
+    runs and the recall history stay with the old one, so renaming is a title
+    change.
 
 ## Flows
 
@@ -752,15 +632,12 @@ order matters because each step can reject what came before.
 - **The generator's assertion is not the matcher's verdict.** They are two
   records on one pair, and a disagreement is how a generator drifting from its
   brief is found.
-- **Announcement is measured, not assumed.** A form a matcher names instantly
-  from the statement alone was telegraphed, and a problem that telegraphs its
-  form teaches recognition of nothing. The real corpus sets that floor and the
-  generated one is read against it, which is the reason to keep a corpus that
-  can never ship.
-- **A generated problem is not a template exercise.** What is being trained is
-  reaching for a form unprompted, so the enabling property has to be derivable
-  from the statement rather than stated in it. That is a property of the brief,
-  and it is what the floor above measures.
+- **Announcement is measured, not assumed.** What is being trained is reaching
+  for a form unprompted, so the enabling property has to be derivable from the
+  statement rather than stated in it. A form a matcher names instantly from the
+  statement alone was telegraphed, and such a problem teaches recognition of
+  nothing. The archived corpus sets that floor and the generated one is read
+  against it.
 
 ### Drill loop
 
@@ -781,23 +658,16 @@ are answered by using it.
 6. Keyed to each attempt, the loop asks for a technique claim and a self-label.
 
 - **The engine witnessed the sitting, so it mints the attempt.** Serving,
-  timing and judging are one act, and the record comes from whatever performed
-  it.
-- **An attempt nobody timed stays untimed**, rather than carrying a duration
-  reconstructed after the fact.
-- **A drill can mint several attempts.** A sitting is usually several
-  submissions, and each is asked about in turn. A submission that failed on
-  syntax and the one that passed are different evidence, and labelling only the
-  last would leave the counts on two denominators: attempts per submission,
-  labels per sitting.
-- **The drilled technique is the claim's default.** Selection picked the
-  problem by its own techniques, so what was just practised is always a legal
-  claim. Confirming costs a keystroke, and the problem's other techniques are
-  the alternatives.
+  timing and judging are one act. An attempt nobody timed stays untimed, rather
+  than carrying a duration reconstructed after the fact.
+- **A drill can mint several attempts**, and each is asked about in turn. A
+  submission that failed on syntax and the one that passed are different
+  evidence, and labelling only the last would leave the counts on two
+  denominators: attempts per submission, labels per sitting.
 - **The label and the claim are cheap only here.** The candidates are the
-  problem's own two or three techniques, and the attempt is minutes old. The
-  two facts a classifier has to infer later cost a keystroke each at this
-  moment.
+  problem's own two or three techniques, the drilled one is the default since
+  selection picked the problem by it, and the attempt is minutes old. Two facts
+  a classifier has to infer later cost a keystroke each at this moment.
 - **Selection never schedules.** Ordering is a view. What to drill is the
   user's choice until the scheduler lands.
 
@@ -820,10 +690,9 @@ divergence resolved by hand.
 6. The set is frozen, and the cheap classifiers are scored against it.
 
 - **The adjudicator is never the classifier.** Its number on this set is 100%
-  by construction, because the gold is its own labels wherever the user did not
-  overturn them. The number says that adjudication finished, not that the model
-  reads well. Anything short of it is either sampling noise or a criterion that
-  still does not decide the case.
+  by construction, since the gold is its own labels wherever the user did not
+  overturn them, so the number says adjudication finished rather than that the
+  model reads well.
 - **Consistency is what the model is there for.** It applies the same rule at
   the sixtieth attempt as at the first, where a human drifts across one
   sitting. Consistency is not correctness, which is why every divergence is
@@ -844,12 +713,10 @@ divergence resolved by hand.
 
 Properties the system holds at all times.
 
-- Attempts, technique claims, self-labels and diagnoses are append-only. The
-  guarantee is the running system's: no record is ever revised or removed in
-  place. Discarding a private log wholesale, while it holds nothing
-  irreplaceable, is a different act. It destroys no evidence, because there is
-  none yet to destroy. That window closes the first time a record is worth
-  keeping, and does not reopen.
+- Attempts, technique claims, self-labels and diagnoses are append-only: no
+  record is ever revised or removed in place. Discarding a private log
+  wholesale while it holds nothing irreplaceable is a different act, and that
+  window closes the first time a record is worth keeping.
 - Every record keyed to an attempt carries an engine-minted `id`, its
   `attempt_id` and `created_at`, so one reader orders any of them.
 - The user's own record stands over the machine's answer to the same question,
@@ -863,12 +730,11 @@ Properties the system holds at all times.
 - A problem never lands without the test cases that decide it and a canonical
   solution that passed them. One whose canonical fails is not stored for
   repair; it is not stored.
-- The technique vocabulary is product-owned and global. There are no
-  user-authored techniques or cards. Technique codes are stable identifiers
-  with a migration path, since attempts, problems, and future user annotations
-  reference them. Cards are teaching content and are never referenced by the
-  attempt log. A template match references one, but it is a fact about the
-  corpus rather than about a sitting, and mastery still reads no card.
+- The technique vocabulary and the cards are product-owned and global, with no
+  user-authored ones of either. Codes are stable identifiers with a migration
+  path, since the log references them. The attempt log never references a card;
+  a template match does, but it is a fact about the corpus rather than about a
+  sitting, and mastery reads no card.
 - Domain logic stays adapter-free and directly callable. The CLI is one
   adapter, and a web API will be another.
 - No third-party problem statements or test cases in git — in any repo.
@@ -879,15 +745,14 @@ Rules on how this repo is built, rather than properties of the running system.
 
 - No concrete third-party problem-platform client ever enters this repo.
 - Schema changes must be additive (new optional fields), never breaking. A
-  change may tighten instead — a field made required, a validator widened —
-  only while no stored record carries the loose shape, which in practice means
-  deleting the ones that do. Weigh what is deleted, not how many. The rule
-  exists so the log stays readable by its own schema, and an optional field
-  kept for the sake of a handful of disposable records is one every reader
-  branches on forever.
+  change may tighten instead — a field made required, one removed, a validator
+  widened — only while no stored record carries the loose shape, which in
+  practice means deleting the ones that do. Weigh what is deleted, not how
+  many: the log has to stay readable by its own schema, and a field kept for a
+  handful of disposable records is one every reader branches on forever.
 - `data/` and `content/` are gitignored; only the schema is public. The
   generated corpus could be committed, since the product owns it, and is not:
-  the same directories hold the private log, and storage moves to a database
+  those directories also hold the private log, and storage moves to a database
   before the corpus ships anywhere.
 - Prefer tools and functions over agents. A pipeline earns multi-agent, not the
   other way around.
