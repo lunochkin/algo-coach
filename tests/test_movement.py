@@ -19,7 +19,7 @@ def rows(result):
 def test_a_narrowed_claim_takes_credit_off_the_other_tag(tmp_path):
     """The fallback credits both tags; the claim credits one, and the board is
     read per technique, so the difference is where practice gets steered."""
-    seed_problem(tmp_path, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(tmp_path, id="two-tags", techniques=["greedy", "sorting"])
     one = attempt("a1", "two-tags")
     claims = {"a1": claim("a1", "greedy")}
 
@@ -33,7 +33,7 @@ def test_a_narrowed_claim_takes_credit_off_the_other_tag(tmp_path):
 def test_a_claim_naming_every_candidate_moves_nothing(tmp_path):
     """The hedge the check exists to catch: it agrees with the tags, decides
     nothing, and would still write a claim for every attempt."""
-    seed_problem(tmp_path, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(tmp_path, id="two-tags", techniques=["greedy", "sorting"])
     one = attempt("a1", "two-tags")
     claims = {"a1": claim("a1", "greedy", "sorting")}
 
@@ -43,7 +43,7 @@ def test_a_claim_naming_every_candidate_moves_nothing(tmp_path):
 
 
 def test_an_unclaimed_attempt_moves_nothing(tmp_path):
-    seed_problem(tmp_path, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(tmp_path, id="two-tags", techniques=["greedy", "sorting"])
 
     result = movement([attempt("a1", "two-tags")], problems(tmp_path), {})
 
@@ -52,7 +52,7 @@ def test_an_unclaimed_attempt_moves_nothing(tmp_path):
 
 def test_a_single_tag_problem_cannot_move(tmp_path):
     """Nothing to narrow: the fallback already names one code."""
-    seed_problem(tmp_path, id="one-tag", tags=["Trie"])
+    seed_problem(tmp_path, id="one-tag", techniques=["trie"])
     one = attempt("a1", "one-tag")
 
     result = rows(movement([one], problems(tmp_path), {"a1": claim("a1", "trie")}))
@@ -62,7 +62,7 @@ def test_a_single_tag_problem_cannot_move(tmp_path):
 
 def test_a_technique_the_claims_emptied_still_gets_a_row(tmp_path):
     """A code narrowed away everywhere is exactly the one worth seeing."""
-    seed_problem(tmp_path, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(tmp_path, id="two-tags", techniques=["greedy", "sorting"])
     one = attempt("a1", "two-tags")
 
     result = rows(movement([one], problems(tmp_path), {"a1": claim("a1", "greedy")}))
@@ -71,7 +71,7 @@ def test_a_technique_the_claims_emptied_still_gets_a_row(tmp_path):
 
 
 def test_the_rows_are_ordered_by_technique(tmp_path):
-    seed_problem(tmp_path, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(tmp_path, id="two-tags", techniques=["greedy", "sorting"])
 
     result = movement([attempt("a1", "two-tags")], problems(tmp_path), {})
 

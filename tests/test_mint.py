@@ -75,8 +75,8 @@ def test_a_classifier_claim_names_what_produced_it():
 
 
 def test_an_unknown_code_is_rejected():
-    """The only write path that could introduce one: every other code comes
-    from the tag mapping, which draws on the vocabulary already."""
+    """The only write path that could introduce one: every other code is drawn
+    from the vocabulary already."""
     with pytest.raises(ValueError, match="not-a-technique"):
         machine_claim("a1", ["not-a-technique"])
 

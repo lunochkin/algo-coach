@@ -2,12 +2,11 @@ from datetime import UTC, datetime, timedelta
 
 from algo_coach.board import candidates
 from algo_coach.schema import Attempt, AttemptOrigin, Problem, ProblemOwner
-from algo_coach.techniques import map_tags
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
 
-def make_problem(id: str, tags: list[str]) -> Problem:
+def make_problem(id: str, techniques: list[str]) -> Problem:
     return Problem(
         id=id,
         external_id=id,
@@ -17,8 +16,7 @@ def make_problem(id: str, tags: list[str]) -> Problem:
         title_slug=id,
         statement="Given an array, return ...",
         url=f"https://example.invalid/{id}",
-        source_tags=tags,
-        techniques=map_tags(tags),
+        techniques=techniques,
     )
 
 
@@ -36,8 +34,8 @@ def make_attempt(
     )
 
 
-GREEDY = make_problem("greedy-one", ["Greedy"])
-TRIE = make_problem("trie-one", ["Trie"])
+GREEDY = make_problem("greedy-one", ["greedy"])
+TRIE = make_problem("trie-one", ["trie"])
 
 
 def test_only_problems_carrying_the_technique_are_offered():
@@ -60,7 +58,7 @@ def test_membership_is_the_problems_tags_not_its_attempts():
 
 def test_a_never_attempted_problem_ranks_first():
     """Nothing has been retrieved yet, so nothing has decayed."""
-    fresh = make_problem("greedy-two", ["Greedy"])
+    fresh = make_problem("greedy-two", ["greedy"])
     rows = candidates("greedy", [GREEDY, fresh], [make_attempt("a1", "greedy-one")])
 
     assert [row.problem.id for row in rows] == ["greedy-two", "greedy-one"]
@@ -69,7 +67,7 @@ def test_a_never_attempted_problem_ranks_first():
 
 
 def test_the_least_recently_attempted_comes_first():
-    old = make_problem("greedy-old", ["Greedy"])
+    old = make_problem("greedy-old", ["greedy"])
     rows = candidates(
         "greedy",
         [GREEDY, old],
@@ -98,7 +96,7 @@ def test_recency_is_the_latest_attempt_on_the_problem():
 
 def test_the_lower_solve_rate_breaks_a_tie_on_staleness():
     """Same day, so the one that went worse is the one worth redoing."""
-    shaky = make_problem("greedy-shaky", ["Greedy"])
+    shaky = make_problem("greedy-shaky", ["greedy"])
     rows = candidates(
         "greedy",
         [GREEDY, shaky],
@@ -114,7 +112,7 @@ def test_the_lower_solve_rate_breaks_a_tie_on_staleness():
 
 def test_problem_id_breaks_a_tie_on_both():
     """Two renders of the same log offer the same order."""
-    other = make_problem("greedy-aaa", ["Greedy"])
+    other = make_problem("greedy-aaa", ["greedy"])
     rows = candidates(
         "greedy",
         [GREEDY, other],
@@ -147,6 +145,6 @@ def test_a_row_carries_what_the_loop_hands_over():
 
 def test_an_unmapped_problem_is_offered_for_nothing():
     """Its tags reach no code, so no technique can select it."""
-    unmapped = make_problem("db-one", ["Database"])
+    unmapped = make_problem("db-one", [])
 
     assert candidates("greedy", [unmapped], []) == []

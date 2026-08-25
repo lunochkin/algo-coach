@@ -49,9 +49,9 @@ def annotate_root(tmp_path, monkeypatch):
     )
     stored(
         root,
-        problem("b0", tags=["Backtracking"]),
-        problem("b1", tags=["Backtracking"]),
-        problem("u0", tags=["Union Find"]),
+        problem("b0", techniques=["backtracking"]),
+        problem("b1", techniques=["backtracking"]),
+        problem("u0", techniques=["union-find"]),
     )
     return root
 
@@ -242,7 +242,7 @@ async def test_a_procedure_template_is_never_offered(annotate_root):
             templates=[template("next-greater"), template("framing", **PROCEDURE)],
         ),
     )
-    stored(root, problem("m0", tags=["Monotonic Stack"]))
+    stored(root, problem("m0", techniques=["monotonic-stack"]))
     await run(root, ["space", "enter"], count=1, card="monotonic-stack")
 
     slug = by_slug(root)

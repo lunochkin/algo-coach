@@ -13,8 +13,8 @@ from algo_coach.techniques import standing_claims
 def board(args: argparse.Namespace, root: Path) -> None:
     log = AttemptLog(root)
     attempts = [attempt for attempt in log.attempts() if attempt.user_id == args.user]
-    # Every problem, not the user's: an attempt resolves through the id it was
-    # ingested with, and a narrower mapping would raise on a legitimate one.
+    # Every problem, not the user's: an attempt names a minted id, and a
+    # narrower index would miss a legitimate one.
     problems = {problem.id: problem for problem in ProblemStore(root).all()}
     claims = standing_claims(log.claims())
     labels = latest_by_attempt(log.self_labels())

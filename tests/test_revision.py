@@ -23,8 +23,8 @@ def pool(log):
 def test_only_what_the_hand_pass_answered_is_revisable(tmp_path):
     """`claimable`'s mirror: the same pool, the opposite filter."""
     root = tmp_path / "data"
-    seed_problem(root, id="claimed", tags=["Greedy", "Sorting"])
-    seed_problem(root, id="unclaimed", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="claimed", techniques=["greedy", "sorting"])
+    seed_problem(root, id="unclaimed", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "claimed"))
     log.append_attempt(attempt("a2", "unclaimed"))
@@ -38,7 +38,7 @@ def test_a_revision_asks_about_the_attempt_that_was_scored(tmp_path):
     """Collapsed before the filter, as the eval set is — asking about an older
     attempt would revise a claim no score ever read."""
     root = tmp_path / "data"
-    seed_problem(root, id="p1", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="p1", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("older", "p1", finished_at=T0))
     log.append_attempt(attempt("latest", "p1", finished_at=T0 + timedelta(days=1)))
@@ -71,7 +71,7 @@ def test_the_most_disputed_are_asked_about_first(tmp_path):
     wrong; one disagreeing usually says that configuration is."""
     root = tmp_path / "data"
     for name in ("all", "one", "none"):
-        seed_problem(root, id=name, tags=["Greedy", "Sorting"])
+        seed_problem(root, id=name, techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     for name in ("all", "one", "none"):
         log.append_attempt(attempt(name, name))

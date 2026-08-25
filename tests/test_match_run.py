@@ -26,7 +26,9 @@ def run(root, client: FakeTransport, cards=None, problems=None, **kwargs):
         MatchLog(root),
         CallLog(root),
         cards if cards is not None else seeded(root),
-        problems if problems is not None else stored(root, problem("p1", tags=["Sliding Window"])),
+        problems
+        if problems is not None
+        else stored(root, problem("p1", techniques=["sliding-window"])),
         **kwargs,
     )
 
@@ -37,9 +39,9 @@ def test_candidates_are_pre_filtered_by_technique(tmp_path):
     cards = seeded(tmp_path, card(), card("backtracking", technique="backtracking"))
     corpus = stored(
         tmp_path,
-        problem("window", tags=["Sliding Window"]),
-        problem("search", tags=["Backtracking"]),
-        problem("neither", tags=["Database"]),
+        problem("window", techniques=["sliding-window"]),
+        problem("search", techniques=["backtracking"]),
+        problem("neither", techniques=[]),
     )
 
     asked = questions(cards, corpus)
@@ -53,7 +55,7 @@ def test_candidates_are_pre_filtered_by_technique(tmp_path):
 def test_a_card_with_nothing_to_ask_asks_nothing(tmp_path):
     cards = seeded(tmp_path, card(templates=[template("framing", **PROCEDURE)]))
 
-    assert questions(cards, stored(tmp_path, problem("p1", tags=["Sliding Window"]))) == []
+    assert questions(cards, stored(tmp_path, problem("p1", techniques=["sliding-window"]))) == []
 
 
 def test_one_call_per_card_and_a_record_per_pair(tmp_path):
@@ -90,7 +92,7 @@ def test_a_record_carries_what_read_it(tmp_path):
 def test_a_second_run_pays_for_nothing(tmp_path):
     """The pairs carrying no record at the current configuration are what
     still needs testing — the rule readings already use."""
-    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", tags=["Sliding Window"]))
+    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
     run(tmp_path, FakeTransport.answering(Verdict([])), cards, corpus)
 
     client = FakeTransport.answering()
@@ -105,10 +107,10 @@ def test_a_new_problem_is_the_only_one_re_read(tmp_path):
         tmp_path,
         FakeTransport.answering(Verdict([])),
         cards,
-        stored(tmp_path, problem("p1", tags=["Sliding Window"])),
+        stored(tmp_path, problem("p1", techniques=["sliding-window"])),
     )
 
-    grown = stored(tmp_path, problem("p2", tags=["Sliding Window"]))
+    grown = stored(tmp_path, problem("p2", techniques=["sliding-window"]))
     client = FakeTransport.answering(Verdict(["fixed-window"]))
     result = run(tmp_path, client, cards, grown)
 
@@ -122,8 +124,8 @@ def test_an_edited_template_re_reads_that_card_alone(tmp_path):
     cards = seeded(tmp_path, card(), card("backtracking", technique="backtracking"))
     corpus = stored(
         tmp_path,
-        problem("window", tags=["Sliding Window"]),
-        problem("search", tags=["Backtracking"]),
+        problem("window", techniques=["sliding-window"]),
+        problem("search", techniques=["backtracking"]),
     )
     run(tmp_path, FakeTransport.answering(Verdict([]), Verdict([])), cards, corpus)
 
@@ -140,7 +142,7 @@ def test_an_edited_template_re_reads_that_card_alone(tmp_path):
 
 
 def test_a_reading_at_another_configuration_is_not_an_answer(tmp_path):
-    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", tags=["Sliding Window"]))
+    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
     run(tmp_path, FakeTransport.answering(Verdict([])), cards, corpus)
 
     other = Configuration(model="another-model")
@@ -153,7 +155,7 @@ def test_a_reading_at_another_configuration_is_not_an_answer(tmp_path):
 
 def test_fresh_asks_again(tmp_path):
     """What measuring a matcher against itself needs."""
-    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", tags=["Sliding Window"]))
+    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
     run(tmp_path, FakeTransport.answering(Verdict([])), cards, corpus)
 
     result = run(tmp_path, FakeTransport.answering(Verdict([])), cards, corpus, fresh=True)
@@ -165,7 +167,7 @@ def test_fresh_asks_again(tmp_path):
 def test_a_hand_annotation_is_never_what_a_run_leans_on(tmp_path):
     """It is the reference a machine run is scored against, so it settles
     nothing about what still has to be read."""
-    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", tags=["Sliding Window"]))
+    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
     hashes = {(cards[0].id, "p1"): request_hash(cards[0], corpus[0])}
     hand = [
         TemplateMatch(
@@ -186,8 +188,8 @@ def test_a_limit_cuts_the_run(tmp_path):
     cards = seeded(tmp_path)
     corpus = stored(
         tmp_path,
-        problem("p1", tags=["Sliding Window"]),
-        problem("p2", tags=["Sliding Window"]),
+        problem("p1", techniques=["sliding-window"]),
+        problem("p2", techniques=["sliding-window"]),
     )
     client = FakeTransport.answering(Verdict([]))
 
@@ -200,8 +202,8 @@ def test_a_failure_costs_its_own_pair(tmp_path):
     cards = seeded(tmp_path)
     corpus = stored(
         tmp_path,
-        problem("p1", tags=["Sliding Window"]),
-        problem("p2", tags=["Sliding Window"]),
+        problem("p1", techniques=["sliding-window"]),
+        problem("p2", techniques=["sliding-window"]),
     )
     client = FakeTransport.answering(Verdict(error=RuntimeError("rate limit")), Verdict([]))
 
@@ -215,7 +217,7 @@ def test_a_broken_run_aborts(tmp_path):
     cards = seeded(tmp_path)
     corpus = stored(
         tmp_path,
-        *(problem(f"p{index}", tags=["Sliding Window"]) for index in range(ABORT_AFTER + 2)),
+        *(problem(f"p{index}", techniques=["sliding-window"]) for index in range(ABORT_AFTER + 2)),
     )
     client = FakeTransport.answering(*[Verdict(error=RuntimeError("bad key"))] * (ABORT_AFTER + 2))
 
@@ -241,8 +243,8 @@ def test_one_card_at_a_time(tmp_path):
     cards = seeded(tmp_path, card(), card("backtracking", technique="backtracking"))
     corpus = stored(
         tmp_path,
-        problem("window", tags=["Sliding Window"]),
-        problem("search", tags=["Backtracking"]),
+        problem("window", techniques=["sliding-window"]),
+        problem("search", techniques=["backtracking"]),
     )
     client = FakeTransport.answering(Verdict([]))
 

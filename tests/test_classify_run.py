@@ -28,8 +28,8 @@ answering = FakeTransport.answering
 def backlog(tmp_path, monkeypatch) -> AttemptLog:
     """One two-tag problem and one single-tag problem, an attempt on each."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
-    seed_problem(root, id="one-tag", tags=["Trie"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
+    seed_problem(root, id="one-tag", techniques=["trie"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
 
     log = AttemptLog(root)
@@ -72,7 +72,7 @@ def test_a_single_tag_problem_is_never_asked_about(backlog):
 
 def test_an_attempt_without_code_is_never_asked_about(tmp_path, monkeypatch):
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-tags", code=None))
 
@@ -104,7 +104,7 @@ def test_a_run_resumes_where_the_last_one_stopped(tmp_path, monkeypatch):
     """Claims land as they are made and a claimed attempt drops out, so the
     backlog is not paid for twice."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-tags", finished_at=T0))
     log.append_attempt(attempt("a2", "two-tags", finished_at=T0 + timedelta(days=1)))
@@ -118,7 +118,7 @@ def test_a_run_resumes_where_the_last_one_stopped(tmp_path, monkeypatch):
 def test_the_newest_attempts_are_claimed_first(tmp_path, monkeypatch):
     """A run cut short by `limit` improves the numbers the board is showing."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("old", "two-tags", finished_at=T0))
     log.append_attempt(attempt("new", "two-tags", finished_at=T0 + timedelta(days=1)))
@@ -153,7 +153,7 @@ def test_one_failure_does_not_cost_the_attempts_behind_it(tmp_path, monkeypatch)
     """A refusal, a rate limit or a dropped connection is one attempt's
     problem; a backlog run must not lose the rest."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-tags", finished_at=T0))
     log.append_attempt(attempt("a2", "two-tags", finished_at=T0 + timedelta(days=1)))
@@ -171,7 +171,7 @@ def test_one_failure_does_not_cost_the_attempts_behind_it(tmp_path, monkeypatch)
 def backlog_of(root, count: int) -> AttemptLog:
     """`count` attempts on one two-tag problem, oldest first — so a verdict
     script reads in the order the run asks, which is newest first."""
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     for age in reversed(range(count)):
         log.append_attempt(attempt(f"a{age}", "two-tags", finished_at=T0 + timedelta(days=-age)))
@@ -408,7 +408,7 @@ def test_unclaimed_attempts_are_claimed_before_stale_ones(tmp_path):
     """A first claim buys a number the board does not have; a re-derivation
     only revises one it does."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("unclaimed", "two-tags", finished_at=T0))
     log.append_attempt(attempt("stale", "two-tags", finished_at=T0 + timedelta(days=1)))
@@ -433,7 +433,7 @@ def test_naming_no_candidate_supersedes_the_older_claim(backlog):
 
 
 def test_the_technique_flag_narrows_the_backlog(backlog):
-    seed_problem(backlog.root, id="tries", tags=["Trie", "Sorting"])
+    seed_problem(backlog.root, id="tries", techniques=["sorting", "trie"])
     backlog.append_attempt(attempt("a3", "tries"))
 
     run(answering(Verdict(["trie"])), backlog, technique="trie")

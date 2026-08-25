@@ -16,12 +16,14 @@ from algo_coach.schema import (
     ProblemOwner,
     TechniqueClaim,
 )
-from algo_coach.techniques import criteria, criterion, map_tags, standing_claims
+from algo_coach.techniques import criteria, criterion, standing_claims
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
 
-def seed_problem(root, *, id: str, tags: list[str]) -> None:
+def seed_problem(root, *, id: str, techniques: list[str]) -> None:
+    """Codes in the order given: a problem's own order is what the candidates
+    are offered in."""
     ProblemStore(root).put(
         Problem(
             id=id,
@@ -31,25 +33,6 @@ def seed_problem(root, *, id: str, tags: list[str]) -> None:
             title=id,
             title_slug=id,
             statement="Given an array, return ...",
-            source_tags=tags,
-            techniques=map_tags(tags),
-        )
-    )
-
-
-def put_problem(root, *, id: str, techniques: list[str]) -> None:
-    """Codes set directly rather than derived. `map_tags` sorts, so a problem
-    stored by another path is where the codes' own order shows."""
-    ProblemStore(root).put(
-        Problem(
-            id=id,
-            external_id=f"ext-{id}",
-            user_id="u1",
-            owner=ProblemOwner.USER,
-            title=id,
-            title_slug=id,
-            statement="Given an array, return ...",
-            source_tags=[],
             techniques=techniques,
         )
     )
@@ -78,8 +61,8 @@ def attempt(
 def claim_root(tmp_path, monkeypatch) -> AttemptLog:
     """One two-tag problem and one single-tag problem, an attempt on each."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
-    seed_problem(root, id="one-tag", tags=["Trie"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
+    seed_problem(root, id="one-tag", techniques=["trie"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
 
     log = AttemptLog(root)
@@ -200,7 +183,7 @@ def test_the_machine_verdict_is_never_shown(claim_root, monkeypatch, capsys):
 def test_an_attempt_without_code_is_not_offered(tmp_path, monkeypatch, capsys):
     """The evidence is the code; without it there is nothing to read."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
     AttemptLog(root).append_attempt(attempt("a1", "two-tags", code=None))
 
@@ -218,7 +201,7 @@ def test_the_code_is_shown(claim_root, monkeypatch, capsys):
 
 def test_a_long_solution_is_cut_and_says_so(tmp_path, monkeypatch, capsys):
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
     AttemptLog(root).append_attempt(attempt("a1", "two-tags", code="\n".join("x" * 50)))
 
@@ -229,7 +212,7 @@ def test_a_long_solution_is_cut_and_says_so(tmp_path, monkeypatch, capsys):
 
 def retried(root, monkeypatch, *attempts: Attempt) -> AttemptLog:
     """Several attempts on one two-tag problem — a problem that took retries."""
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
     log = AttemptLog(root)
     for one in attempts:
@@ -326,7 +309,7 @@ def seed_many(root, count: int) -> AttemptLog:
     from, since a problem contributes one attempt however many it holds."""
     log = AttemptLog(root)
     for n in range(count):
-        seed_problem(root, id=f"p{n}", tags=["Greedy", "Sorting"])
+        seed_problem(root, id=f"p{n}", techniques=["greedy", "sorting"])
         log.append_attempt(attempt(f"a{n}", f"p{n}"))
     return log
 
@@ -347,7 +330,7 @@ def test_the_sample_is_spread_across_techniques(tmp_path, monkeypatch, capsys):
     root = tmp_path / "data"
     monkeypatch.setattr(cli, "DATA_ROOT", root)
     log = seed_many(root, 5)
-    seed_problem(root, id="rare", tags=["Trie", "Backtracking"])
+    seed_problem(root, id="rare", techniques=["backtracking", "trie"])
     log.append_attempt(attempt("a-rare", "rare"))
 
     run(monkeypatch, ["1", ""], "--count", "1")
@@ -357,7 +340,7 @@ def test_the_sample_is_spread_across_techniques(tmp_path, monkeypatch, capsys):
 
 
 def test_the_technique_flag_narrows_the_pool(claim_root, monkeypatch, capsys):
-    seed_problem(claim_root.root, id="tries", tags=["Trie", "Sorting"])
+    seed_problem(claim_root.root, id="tries", techniques=["sorting", "trie"])
     claim_root.append_attempt(attempt("a3", "tries"))
 
     run(monkeypatch, ["1", ""], "--technique", "trie", "--count", "1")
@@ -430,7 +413,7 @@ def test_each_candidate_is_shown_with_its_criterion(claim_root, monkeypatch, cap
 def test_a_candidate_carries_its_kind_as_a_test_not_a_label(claim_root, monkeypatch, capsys):
     """The half a bare label drops. A reader who does not already know what a
     kind selects judges a structure on whether it was performed."""
-    seed_problem(claim_root.root, id="mixed", tags=["Greedy", "Binary Search Tree"])
+    seed_problem(claim_root.root, id="mixed", techniques=["binary-search-tree", "greedy"])
     claim_root.append_attempt(attempt("a3", "mixed"))
 
     run(monkeypatch, ["1", ""], "--technique", "binary-search-tree", "--count", "1")
@@ -453,11 +436,12 @@ def test_the_reader_and_the_classifier_meet_the_same_words(claim_root, monkeypat
 
 def test_the_criteria_are_shown_in_the_candidates_order(tmp_path, monkeypatch, capsys):
     """The numbers select from the problem's own order. Criteria in vocabulary
-    order agree with it only while the tag mapping sorts and the vocabulary is
-    alphabetical — neither is a promise to a reader matching rule to number."""
+    order agree with it only while a problem's codes are stored sorted and the
+    vocabulary is alphabetical — neither is a promise to a reader matching rule
+    to number."""
     root = tmp_path / "data"
     monkeypatch.setattr(cli, "DATA_ROOT", root)
-    put_problem(root, id="unsorted", techniques=["sorting", "greedy"])
+    seed_problem(root, id="unsorted", techniques=["sorting", "greedy"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "unsorted"))
 
@@ -475,7 +459,7 @@ def test_a_retired_candidate_costs_its_own_criterion_and_nothing_else(
     criteria no longer hold. It is still a legal claim."""
     root = tmp_path / "data"
     monkeypatch.setattr(cli, "DATA_ROOT", root)
-    put_problem(root, id="retired", techniques=["greedy", "dynamic-programming-2d"])
+    seed_problem(root, id="retired", techniques=["greedy", "dynamic-programming-2d"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "retired"))
 
@@ -557,7 +541,7 @@ def test_a_claim_made_without_the_readings_is_blind(claim_root, monkeypatch, cap
 def test_a_reading_of_another_attempt_is_not_recorded(claim_root, monkeypatch, capsys):
     """Only what was in view for this attempt. A configuration that read the
     log but not this one was never shown."""
-    seed_problem(claim_root.root, id="other", tags=["Greedy", "Sorting"])
+    seed_problem(claim_root.root, id="other", techniques=["greedy", "sorting"])
     claim_root.append_attempt(attempt("a3", "other"))
     claim_root.append_claim(user_claim("a1", ["greedy"]))
     claim_root.append_claim(user_claim("a3", ["greedy"]))
@@ -596,7 +580,7 @@ def test_an_undisputed_attempt_is_offered_for_revision(claim_root, monkeypatch, 
 def test_the_most_disputed_are_still_asked_about_first(claim_root, monkeypatch, capsys):
     """Offering the agreed ones does not reorder the pool — what decides
     something is still shown before what probably does not."""
-    seed_problem(claim_root.root, id="agreed", tags=["Greedy", "Sorting"])
+    seed_problem(claim_root.root, id="agreed", techniques=["greedy", "sorting"])
     claim_root.append_attempt(attempt("a3", "agreed"))
     claim_root.append_claim(user_claim("a1", ["greedy"]))
     claim_root.append_claim(user_claim("a3", ["greedy"]))

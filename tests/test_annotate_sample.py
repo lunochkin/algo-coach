@@ -34,8 +34,8 @@ def corpus(root, *, backtracking: int = 3, union: int = 3):
     )
     problems = stored(
         root,
-        *(problem(f"b{n}", tags=["Backtracking"]) for n in range(backtracking)),
-        *(problem(f"u{n}", tags=["Union Find"]) for n in range(union)),
+        *(problem(f"b{n}", techniques=["backtracking"]) for n in range(backtracking)),
+        *(problem(f"u{n}", techniques=["union-find"]) for n in range(union)),
     )
     return cards, problems
 

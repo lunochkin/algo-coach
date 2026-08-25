@@ -10,9 +10,9 @@ from algo_coach.calls import CallLog
 from algo_coach.matches import DEFAULT, MatcherError, candidates, match, request_hash
 
 
-def read(tmp_path, client: FakeTransport, cards=None, tags=("Sliding Window",)):
+def read(tmp_path, client: FakeTransport, cards=None, techniques=("sliding-window",)):
     (one,) = seeded(tmp_path, *(cards or [card()]))
-    return one, match(client, CallLog(tmp_path), one, problem("p1", tags=list(tags)))
+    return one, match(client, CallLog(tmp_path), one, problem("p1", techniques=list(techniques)))
 
 
 def test_a_procedure_template_is_no_candidate(tmp_path):
@@ -48,7 +48,7 @@ def test_the_statement_is_the_evidence(tmp_path):
     answer what it is about."""
     client = FakeTransport.answering(Verdict([]))
     (one,) = seeded(tmp_path)
-    asked = problem("p1", tags=["Sliding Window"], statement="Find the longest substring ...")
+    asked = problem("p1", techniques=["sliding-window"], statement="Find the longest substring ...")
 
     match(client, CallLog(tmp_path), one, asked)
 
@@ -104,8 +104,8 @@ def test_the_digest_is_per_pair(tmp_path):
         card(),
         card("sliding-window-advanced", templates=[template("longest-valid-window", code="new")]),
     )
-    asked = problem("p1", tags=["Sliding Window"])
-    elsewhere = problem("p2", tags=["Sliding Window"], statement="A different question ...")
+    asked = problem("p1", techniques=["sliding-window"])
+    elsewhere = problem("p2", techniques=["sliding-window"], statement="A different question ...")
 
     assert request_hash(one, asked) == request_hash(one, asked)
     assert request_hash(one, asked) != request_hash(one, elsewhere)

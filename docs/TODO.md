@@ -356,7 +356,7 @@ loose shape.
       reader once nothing is pushed
 - [x] Remove the external-id resolution. Every reference is engine-minted once
       nothing arrives from outside
-- [ ] Remove the tag mapping. A generated problem derives its techniques from
+- [x] Remove the tag mapping. A generated problem derives its techniques from
       its canonical solutions, and there is no platform vocabulary left to map
 - [ ] Remove the superseded drill loop: the push wait and the log diff. Neither
       act has a subject once nothing is pushed

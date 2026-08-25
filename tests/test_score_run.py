@@ -46,7 +46,7 @@ def reading(attempt_id: str, techniques: list[str], **configuration):
 def hand_claimed(tmp_path) -> AttemptLog:
     """One two-tag problem, one attempt on it, the user's claim standing."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-tags"))
     log.append_claim(user_claim("a1", ["greedy"]))
@@ -58,8 +58,8 @@ def two_problems(tmp_path) -> AttemptLog:
     """A hand claim on each of two problems, so neither collapses into the
     other and a run has two attempts to spend a call on."""
     root = tmp_path / "data"
-    seed_problem(root, id="p1", tags=["Greedy", "Sorting"])
-    seed_problem(root, id="p2", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="p1", techniques=["greedy", "sorting"])
+    seed_problem(root, id="p2", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "p1", finished_at=T0))
     log.append_attempt(attempt("a2", "p2", finished_at=T0 + timedelta(days=1)))
@@ -139,7 +139,7 @@ def test_a_reading_stored_before_the_hand_claim_is_reused(tmp_path):
     """The ordinary correction path: the backlog run claims, the user corrects.
     Scoring that attempt is already paid for."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-tags"))
     log.append_claim(reading("a1", ["sorting"]))
@@ -237,7 +237,7 @@ def test_a_machine_claim_is_not_ground_truth(tmp_path):
     """The eval scores one against the other, so an attempt the classifier
     already claimed answers nothing."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-tags"))
     log.append_claim(machine_claim("a1", ["greedy"]))
@@ -251,7 +251,7 @@ def test_a_machine_claim_is_not_ground_truth(tmp_path):
 def test_an_unclaimed_attempt_is_not_scored(tmp_path):
     """Nothing to score it against — the hand pass has not reached it."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-tags"))
 
@@ -264,7 +264,7 @@ def test_only_the_latest_attempt_of_a_problem_is_scored(tmp_path):
     """A retry asks the identical question, so counting both would weight that
     problem twice."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("older", "two-tags", finished_at=T0))
     log.append_attempt(attempt("latest", "two-tags", finished_at=T0 + timedelta(days=1)))
@@ -305,7 +305,7 @@ def test_a_run_of_failures_aborts_rather_than_paying_for_the_eval_set(tmp_path):
     root = tmp_path / "data"
     log = AttemptLog(root)
     for index in range(ABORT_AFTER + 2):
-        seed_problem(root, id=f"p{index}", tags=["Greedy", "Sorting"])
+        seed_problem(root, id=f"p{index}", techniques=["greedy", "sorting"])
         log.append_attempt(attempt(f"a{index}", f"p{index}", finished_at=T0))
         log.append_claim(user_claim(f"a{index}", ["greedy"]))
     broken = Verdict(error=RuntimeError("does not support the effort parameter"))
@@ -463,7 +463,7 @@ def spread(root, count: int) -> AttemptLog:
     to spend per configuration."""
     log = AttemptLog(root)
     for index in range(count):
-        seed_problem(root, id=f"p{index}", tags=["Greedy", "Sorting"])
+        seed_problem(root, id=f"p{index}", techniques=["greedy", "sorting"])
         log.append_attempt(
             attempt(f"a{index}", f"p{index}", finished_at=T0 + timedelta(days=index))
         )

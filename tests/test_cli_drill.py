@@ -14,12 +14,11 @@ from algo_coach.schema import (
     Problem,
     ProblemOwner,
 )
-from algo_coach.techniques import map_tags
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
 
-def seed_problem(root, *, id: str, tags: list[str], title: str | None = None) -> None:
+def seed_problem(root, *, id: str, techniques: list[str], title: str | None = None) -> None:
     ProblemStore(root).put(
         Problem(
             id=id,
@@ -30,8 +29,7 @@ def seed_problem(root, *, id: str, tags: list[str], title: str | None = None) ->
             title_slug=id,
             statement="Given an array, return ...",
             url=f"https://example.invalid/{id}",
-            source_tags=tags,
-            techniques=map_tags(tags),
+            techniques=techniques,
         )
     )
 
@@ -55,8 +53,8 @@ def drill_root(tmp_path, monkeypatch) -> AttemptLog:
     """One greedy problem attempted long ago, one trie problem attempted since,
     so the stale ordering has something to say."""
     root = tmp_path / "data"
-    seed_problem(root, id="greedy-one", tags=["Greedy"], title="Can Place Flowers")
-    seed_problem(root, id="trie-one", tags=["Trie"], title="Implement Trie")
+    seed_problem(root, id="greedy-one", techniques=["greedy"], title="Can Place Flowers")
+    seed_problem(root, id="trie-one", techniques=["trie"], title="Implement Trie")
     monkeypatch.setattr(cli, "DATA_ROOT", root)
 
     log = AttemptLog(root)
@@ -213,7 +211,7 @@ def test_a_named_technique_drills_a_store_with_no_attempts(tmp_path, monkeypatch
     """A fresh store has no board to choose from, but a problem is still
     drillable when the technique is named outright."""
     root = tmp_path / "data"
-    seed_problem(root, id="fresh-one", tags=["Greedy"], title="Can Place Flowers")
+    seed_problem(root, id="fresh-one", techniques=["greedy"], title="Can Place Flowers")
     monkeypatch.setattr(cli, "DATA_ROOT", root)
 
     run(monkeypatch, ["1", "q"], "--technique", "greedy")
@@ -308,7 +306,7 @@ def test_a_takes_the_defaults_for_everything_remaining(drill_root, monkeypatch, 
 
 def test_a_claim_can_name_several_techniques(drill_root, monkeypatch, capsys):
     """A solution can use more than one, so the answer takes a list."""
-    seed_problem(root_of(drill_root), id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root_of(drill_root), id="two-tags", techniques=["greedy", "sorting"])
     pushed = [attempt("a3", "two-tags", finished_at=T0 + timedelta(days=200))]
     scripted = iter(["1", "1,2", "s"])
 
@@ -344,7 +342,7 @@ def test_the_loop_records_a_decline_at_the_moment_of_solving(drill_root, monkeyp
     """A claim is cheapest here, and so is a decline. Naming none of the tags
     is a verdict about the code, and the loop is where it is worth a keystroke
     rather than a re-read months later."""
-    seed_problem(root_of(drill_root), id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root_of(drill_root), id="two-tags", techniques=["greedy", "sorting"])
     pushed = [attempt("a3", "two-tags", finished_at=T0 + timedelta(days=200))]
     scripted = iter(["1", "0", "s"])
 
@@ -372,7 +370,7 @@ def test_a_skipped_claim_is_still_no_claim(drill_root, monkeypatch, capsys):
     """The trap the flag exists to avoid. `if claimed:` reads a stated empty
     list as nothing answered, so the two need telling apart on the write path
     and not only in the schema."""
-    seed_problem(root_of(drill_root), id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root_of(drill_root), id="two-tags", techniques=["greedy", "sorting"])
     pushed = [attempt("a3", "two-tags", finished_at=T0 + timedelta(days=200))]
     scripted = iter(["1", "s", "s"])
 
@@ -398,7 +396,7 @@ def test_a_skipped_claim_is_still_no_claim(drill_root, monkeypatch, capsys):
 def test_the_none_key_is_shown_beside_the_candidates(drill_root, monkeypatch, capsys):
     """Only the techniques question takes it. A legend over both would offer
     the labels a key their prompt rejects."""
-    seed_problem(root_of(drill_root), id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(root_of(drill_root), id="two-tags", techniques=["greedy", "sorting"])
     pushed = [attempt("a3", "two-tags", finished_at=T0 + timedelta(days=200))]
     # `choose` re-asks until a number lands, so the problem pick comes first.
     scripted = iter(["1", "s", "s"])

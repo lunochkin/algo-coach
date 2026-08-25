@@ -239,7 +239,7 @@ def main() -> None:
     _user_argument(score_parser)
 
     movement_parser = _command(
-        sub, "movement", "how far the classifier's claims move the board off the tags"
+        sub, "movement", "how far the classifier's claims move the board off the fallback"
     )
     _user_argument(movement_parser)
 

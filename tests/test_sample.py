@@ -1,7 +1,7 @@
 """The order a hand-claim sample is drawn in.
 
-The pool is skewed the way a backlog is: many problems on one pair of tags,
-a few on the rest. What these check is that a prefix of the order is spread
+The pool is skewed the way a corpus is: many problems on one pair of
+techniques, a few on the rest. What these check is that a prefix of the order is spread
 across techniques rather than drawn from whatever dominates.
 """
 
@@ -18,23 +18,23 @@ def techniques_of(problems, drawn):
     return {code for one in drawn for code in problems[one.problem_id].techniques}
 
 
-def pool(root, tagged: dict[str, list[str]]):
+def pool(root, coded: dict[str, list[str]]):
     """One problem per entry, an attempt on each. Returns the attempts and the
     stored problems, which is what `spread` reads the techniques from."""
-    for id, tags in tagged.items():
-        seed_problem(root, id=id, tags=tags)
-    attempts = [attempt(f"a-{id}", id) for id in tagged]
+    for id, techniques in coded.items():
+        seed_problem(root, id=id, techniques=techniques)
+    attempts = [attempt(f"a-{id}", id) for id in coded]
     return attempts, {problem.id: problem for problem in ProblemStore(root).all()}
 
 
 def skewed(root, *, common: int):
-    """`common` problems on the same two tags, and one problem each on three
-    other pairs — the shape a real backlog has."""
-    tagged = {f"common{n}": ["Greedy", "Sorting"] for n in range(common)}
-    tagged["rare1"] = ["Trie", "Dynamic Programming"]
-    tagged["rare2"] = ["Backtracking", "Binary Search"]
-    tagged["rare3"] = ["Two Pointers", "Sliding Window"]
-    return pool(root, tagged)
+    """`common` problems on the same two techniques, and one problem each on
+    three other pairs — the shape a real corpus has."""
+    coded = {f"common{n}": ["greedy", "sorting"] for n in range(common)}
+    coded["rare1"] = ["trie", "dynamic-programming"]
+    coded["rare2"] = ["backtracking", "binary-search"]
+    coded["rare3"] = ["two-pointers", "sliding-window"]
+    return pool(root, coded)
 
 
 def test_a_short_prefix_covers_every_technique(tmp_path):

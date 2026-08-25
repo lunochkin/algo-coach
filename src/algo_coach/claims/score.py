@@ -188,8 +188,8 @@ def per_decision(
     function over the two claim mappings and knows nothing of the problems.
 
     A disagreement is counted only where it names a candidate. A stored reading
-    can carry a code the tag mapping has since stopped deriving, and an
-    attempt's decisions must not outnumber the choices it offered.
+    can carry a code the problem's techniques have since stopped offering, and
+    an attempt's decisions must not outnumber the choices it offered.
     """
     total = agreed = 0
     for attempt_id, expected in truth.items():

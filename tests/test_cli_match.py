@@ -20,7 +20,7 @@ def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
 def root(tmp_path, monkeypatch):
     data = tmp_path / "data"
     seeded(data, card())
-    stored(data, problem("p1", tags=["Sliding Window"]))
+    stored(data, problem("p1", techniques=["sliding-window"]))
     monkeypatch.setattr(cli, "DATA_ROOT", data)
     return data
 

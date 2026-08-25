@@ -9,7 +9,7 @@ from algo_coach.schema import (
     ProblemOwner,
     TechniqueClaim,
 )
-from algo_coach.techniques import map_tags, resolve_techniques, standing_claims
+from algo_coach.techniques import resolve_techniques, standing_claims
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -26,8 +26,7 @@ def make_attempt(id: str = "a1", problem_id: str = "minted-u1") -> Attempt:
     )
 
 
-def make_problem(*, source_tags: list[str] | None = None, id: str = "minted-u1") -> Problem:
-    tags = source_tags or []
+def make_problem(*, techniques: list[str] | None = None, id: str = "minted-u1") -> Problem:
     return Problem(
         id=id,
         external_id="p1",
@@ -36,8 +35,7 @@ def make_problem(*, source_tags: list[str] | None = None, id: str = "minted-u1")
         title="Two Sum",
         title_slug="two-sum",
         statement="Given an array, return ...",
-        source_tags=tags,
-        techniques=map_tags(tags),
+        techniques=techniques or [],
     )
 
 
@@ -69,7 +67,7 @@ def make_claim(
 def test_an_unclaimed_attempt_falls_back_to_the_problems_techniques():
     """Nothing has to be labelled for an attempt to count — that is what makes
     a backfilled history usable."""
-    problem = make_problem(source_tags=["Hash Table", "Greedy"])
+    problem = make_problem(techniques=["greedy", "hashing"])
 
     assert resolve_techniques(make_attempt(), problem, {}) == ["greedy", "hashing"]
 
@@ -77,7 +75,7 @@ def test_an_unclaimed_attempt_falls_back_to_the_problems_techniques():
 def test_a_claim_wins_over_the_problems_tags():
     """A tag says what a problem could exercise, a claim what the solution
     did."""
-    problem = make_problem(source_tags=["Hash Table", "Sorting"])
+    problem = make_problem(techniques=["hashing", "sorting"])
     claims = standing_claims([make_claim(["two-pointers"])])
 
     assert resolve_techniques(make_attempt(), problem, claims) == ["two-pointers"]
@@ -233,7 +231,7 @@ def test_the_rule_holds_over_a_stream_read_once():
 
 
 def test_a_claim_on_another_attempt_does_not_leak():
-    problem = make_problem(source_tags=["Greedy"])
+    problem = make_problem(techniques=["greedy"])
     claims = standing_claims([make_claim(["two-pointers"], attempt_id="a2")])
 
     assert resolve_techniques(make_attempt("a1"), problem, claims) == ["greedy"]
@@ -241,13 +239,13 @@ def test_a_claim_on_another_attempt_does_not_leak():
 
 def test_an_unclaimed_attempt_on_an_unmapped_problem_resolves_to_nothing():
     """An unmapped tag blocks nothing: the attempt simply groups nowhere."""
-    problem = make_problem(source_tags=["Brainteaser"])
+    problem = make_problem(techniques=[])
 
     assert resolve_techniques(make_attempt(), problem, {}) == []
 
 
 def test_a_resolved_claim_is_sorted_and_deduplicated():
-    """Same shape as `map_tags`, so grouping does not depend on claim order."""
+    """Sorted, so grouping does not depend on claim order."""
     claims = standing_claims([make_claim(["greedy", "backtracking", "greedy"])])
 
     assert resolve_techniques(make_attempt(), make_problem(), claims) == [
@@ -260,8 +258,8 @@ def test_re_deriving_the_mapping_reaches_every_unclaimed_attempt():
     """Resolution is read-time, so a mapping change shows up on attempts that
     were ingested before it — and stops at the claimed ones."""
     attempt = make_attempt()
-    before = make_problem(source_tags=["Greedy"])
-    after = make_problem(source_tags=["Greedy", "Sorting"])
+    before = make_problem(techniques=["greedy"])
+    after = make_problem(techniques=["greedy", "sorting"])
 
     assert resolve_techniques(attempt, before, {}) == ["greedy"]
     assert resolve_techniques(attempt, after, {}) == ["greedy", "sorting"]
@@ -296,7 +294,7 @@ def test_a_user_decline_leaves_the_fallback_standing():
     decline answers nothing and the tags keep answering — the same rule a
     machine decline already follows, and the board does not move."""
     attempt = make_attempt()
-    problem = make_problem(source_tags=["Greedy", "Sorting"])
+    problem = make_problem(techniques=["greedy", "sorting"])
     claims = standing_claims([make_claim([], declined=True)])
 
     assert resolve_techniques(attempt, problem, claims) == ["greedy", "sorting"]

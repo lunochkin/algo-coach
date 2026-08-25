@@ -130,8 +130,8 @@ def test_per_decision_charges_one_call_per_wrong_candidate():
 
 
 def test_per_decision_ignores_a_code_the_candidates_no_longer_offer():
-    """A stored reading can carry a code the tag mapping has stopped deriving.
-    An attempt's decisions must never outnumber the choices it offered."""
+    """A stored reading can carry a code the problem's techniques no longer
+    offer. An attempt's decisions must never outnumber the choices it had."""
     total, agreed = per_decision(
         {"a1": ["greedy"]},
         {"a1": ["greedy", "retired-code"]},

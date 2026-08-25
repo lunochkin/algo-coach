@@ -38,7 +38,7 @@ def reading(attempt_id: str, techniques: list[str], *, model: str = MODEL):
 @pytest.fixture
 def hand_claimed(tmp_path, monkeypatch):
     data = tmp_path / "data"
-    seed_problem(data, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(data, id="two-tags", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", data)
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-tags"))
@@ -90,7 +90,7 @@ def test_the_command_says_how_many_named_no_candidate(hand_claimed, monkeypatch,
     """A decline is scored like any other verdict, so it no longer buys a
     smaller denominator. It is still counted beside the share, since how often
     a classifier finds the candidates wanting is worth seeing on its own."""
-    seed_problem(hand_claimed.root, id="second", tags=["Greedy", "Sorting"])
+    seed_problem(hand_claimed.root, id="second", techniques=["greedy", "sorting"])
     hand_claimed.append_attempt(attempt("a2", "second", finished_at=T0 + timedelta(days=1)))
     hand_claimed.append_claim(user_claim("a2", ["greedy"]))
 
@@ -195,8 +195,8 @@ def test_the_shares_are_over_what_both_read(hand_claimed, monkeypatch, capsys):
 def test_a_classifier_that_fails_every_call_aborts(hand_claimed, monkeypatch, capsys):
     """A model that rejects a parameter fails identically on every attempt —
     the eval set must not be paid for to learn it once."""
-    seed_problem(hand_claimed.root, id="second", tags=["Greedy", "Sorting"])
-    seed_problem(hand_claimed.root, id="third", tags=["Greedy", "Sorting"])
+    seed_problem(hand_claimed.root, id="second", techniques=["greedy", "sorting"])
+    seed_problem(hand_claimed.root, id="third", techniques=["greedy", "sorting"])
     for index, name in enumerate(("second", "third"), start=2):
         hand_claimed.append_attempt(
             attempt(f"a{index}", name, finished_at=T0 + timedelta(days=index))
@@ -268,7 +268,7 @@ def test_a_stored_run_over_nothing_read_exits_nonzero(hand_claimed, monkeypatch,
 def test_nothing_hand_claimed_exits_nonzero(tmp_path, monkeypatch, capsys):
     """No ground truth is not a score of zero — there is nothing to score."""
     data = tmp_path / "data"
-    seed_problem(data, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(data, id="two-tags", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", data)
     AttemptLog(data).append_attempt(attempt("a1", "two-tags"))
 
@@ -500,7 +500,7 @@ def test_a_cut_short_reply_is_its_own_column(hand_claimed, monkeypatch, capsys):
     """A considered decline and a runaway decoder both name nothing, and only
     one of them is a reading. One column carrying both would have said they
     were a single number in two flavours."""
-    seed_problem(hand_claimed.root, id="second", tags=["Greedy", "Sorting"])
+    seed_problem(hand_claimed.root, id="second", techniques=["greedy", "sorting"])
     hand_claimed.append_attempt(attempt("a2", "second", finished_at=T0 + timedelta(days=1)))
     hand_claimed.append_claim(user_claim("a2", ["greedy"]))
 

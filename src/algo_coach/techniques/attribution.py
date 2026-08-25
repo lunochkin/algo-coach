@@ -38,9 +38,9 @@ def resolve_techniques(
 
     `claims` is keyed by attempt id — `standing_claims` over the log.
 
-    Derived on read and never stored, so re-deriving the tag mapping reaches
-    every unclaimed attempt. Sorted and deduplicated, as `map_tags` is, so
-    grouping does not depend on how a claim ordered its codes.
+    Derived on read and never stored, so re-deriving a problem's techniques
+    reaches every unclaimed attempt. Sorted and deduplicated, so grouping does
+    not depend on how a claim ordered its codes.
     """
     claim = claims.get(attempt.id)
     return sorted(set(claim.techniques if claim and claim.techniques else problem.techniques))

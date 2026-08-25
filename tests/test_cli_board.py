@@ -18,12 +18,11 @@ from algo_coach.schema import (
     SelfLabel,
     TechniqueClaim,
 )
-from algo_coach.techniques import map_tags
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
 
-def seed_problem(root, *, id: str, tags: list[str]) -> None:
+def seed_problem(root, *, id: str, techniques: list[str]) -> None:
     ProblemStore(root).put(
         Problem(
             id=id,
@@ -33,8 +32,7 @@ def seed_problem(root, *, id: str, tags: list[str]) -> None:
             title=id,
             title_slug=id,
             statement="Given an array, return ...",
-            source_tags=tags,
-            techniques=map_tags(tags),
+            techniques=techniques,
         )
     )
 
@@ -43,7 +41,7 @@ def seed_problem(root, *, id: str, tags: list[str]) -> None:
 def board_root(tmp_path, monkeypatch) -> AttemptLog:
     """A store holding one greedy problem, and a log of attempts on it."""
     root = tmp_path / "data"
-    seed_problem(root, id="minted-u1", tags=["Greedy", "Sorting"])
+    seed_problem(root, id="minted-u1", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
     return AttemptLog(root)
 
@@ -160,7 +158,7 @@ def test_render_pads_every_column(board_root, monkeypatch, capsys):
 
 def seed_unmapped_problem(root) -> None:
     """A problem whose tags reach no code: its attempts land on no row."""
-    seed_problem(root, id="minted-unmapped", tags=["Database"])
+    seed_problem(root, id="minted-unmapped", techniques=[])
 
 
 def test_a_footer_counts_the_attempts_no_row_reached(board_root, monkeypatch, capsys):
@@ -194,7 +192,7 @@ def test_json_carries_the_ungrouped_count(board_root, monkeypatch, capsys):
 
 def test_stale_orders_the_least_recently_practised_first(board_root, monkeypatch, capsys):
     """Alphabetical order buries the row a scheduler would pick."""
-    seed_problem(board_root.root, id="minted-trie", tags=["Trie"])
+    seed_problem(board_root.root, id="minted-trie", techniques=["trie"])
     board_root.append_attempt(attempt("a1", finished_at=T0))
     board_root.append_attempt(
         attempt("a2", problem_id="minted-trie", finished_at=T0 + timedelta(days=30))

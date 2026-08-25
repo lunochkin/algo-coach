@@ -8,7 +8,6 @@ from algo_coach.calls import Reply
 from algo_coach.cards import CardStore, seed_cards
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Card, Problem, ProblemOwner, TemplateKind
-from algo_coach.techniques import map_tags
 
 
 @dataclass
@@ -84,7 +83,9 @@ def seeded(root, *records: dict) -> list[Card]:
     return [store.by_slug(one["slug"]) for one in authored]
 
 
-def problem(id: str, *, tags: list[str], statement: str = "Given an array, return ...") -> Problem:
+def problem(
+    id: str, *, techniques: list[str], statement: str = "Given an array, return ..."
+) -> Problem:
     return Problem(
         id=id,
         external_id=f"ext-{id}",
@@ -93,8 +94,7 @@ def problem(id: str, *, tags: list[str], statement: str = "Given an array, retur
         title=id,
         title_slug=id,
         statement=statement,
-        source_tags=tags,
-        techniques=map_tags(tags),
+        techniques=techniques,
     )
 
 

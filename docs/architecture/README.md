@@ -165,7 +165,7 @@ user can solve, per technique, and the two share no data.
 - **A probe is not scarce.** With nothing unseen left, the least recently
   solved stands in. Someone who has solved everything in the technique is past
   the point where the distinction pays for itself.
-- **Resolution is the engine's, as tag mapping is.** The selector is the truth
+- **Resolution is the engine's.** The selector is the truth
   and the ladder a derived view, so re-deriving it is legal — for a card nobody
   has started.
 
@@ -405,11 +405,12 @@ rather than a field on the attempt.
 - **Attribution resolves, it is not required.** The claim that stands if one
   exists, otherwise the problem's techniques. Nothing has to be labelled for an
   attempt to count, which is what makes a history of past attempts usable.
-- **Resolution happens on read and is never stored**, so re-deriving the tag
-  mapping reaches every unclaimed attempt.
-- **The fallback answers a different question.** A tag says what a problem
-  could exercise, a claim what the solution did. Tags over-credit broad
-  techniques, which skews scheduling away from the weakest ones.
+- **Resolution happens on read and is never stored**, so re-deriving a
+  problem's techniques reaches every unclaimed attempt.
+- **The fallback answers a different question.** A problem's techniques say
+  what solving it can take, a claim what one solution did. The fallback
+  over-credits techniques a canonical used incidentally, which skews
+  scheduling away from the weakest ones.
 - **Two writers, user first.** The drill loop asks at the moment of solving,
   and a hand pass reaches attempts no loop touched. A classifier fills the rest,
   and a later user claim corrects it.

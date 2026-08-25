@@ -12,7 +12,6 @@ from algo_coach.claims import PIN, TEMPERATURE, Configuration
 from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Attempt, AttemptOrigin, Problem, ProblemOwner, TechniqueClaim
-from algo_coach.techniques import map_tags
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -151,7 +150,7 @@ class FakeTransport:
         )
 
 
-def seed_problem(root, *, id: str, tags: list[str]) -> None:
+def seed_problem(root, *, id: str, techniques: list[str]) -> None:
     ProblemStore(root).put(
         Problem(
             id=id,
@@ -161,8 +160,7 @@ def seed_problem(root, *, id: str, tags: list[str]) -> None:
             title=id,
             title_slug=id,
             statement="Given an array, return ...",
-            source_tags=tags,
-            techniques=map_tags(tags),
+            techniques=techniques,
         )
     )
 

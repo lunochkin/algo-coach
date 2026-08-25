@@ -14,7 +14,7 @@ def run(monkeypatch, *argv: str) -> None:
 @pytest.fixture
 def classified(tmp_path, monkeypatch) -> AttemptLog:
     data = tmp_path / "data"
-    seed_problem(data, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(data, id="two-tags", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", data)
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-tags"))
@@ -35,7 +35,7 @@ def test_a_hand_claim_is_not_the_classifier_s_movement(tmp_path, monkeypatch, ca
     """A hand claim narrows for a different reason; crediting the machine with
     it would read as a classifier that decided something."""
     data = tmp_path / "data"
-    seed_problem(data, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(data, id="two-tags", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", data)
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-tags"))
@@ -50,7 +50,7 @@ def test_a_hand_claim_is_not_the_classifier_s_movement(tmp_path, monkeypatch, ca
 
 def test_nothing_classified_exits_nonzero(tmp_path, monkeypatch, capsys):
     data = tmp_path / "data"
-    seed_problem(data, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(data, id="two-tags", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", data)
     AttemptLog(data).append_attempt(attempt("a1", "two-tags"))
 

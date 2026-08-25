@@ -22,7 +22,7 @@ def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
 @pytest.fixture
 def root(tmp_path, monkeypatch):
     data = tmp_path / "data"
-    seed_problem(data, id="two-tags", tags=["Greedy", "Sorting"])
+    seed_problem(data, id="two-tags", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", data)
     AttemptLog(data).append_attempt(attempt("a1", "two-tags"))
     return data

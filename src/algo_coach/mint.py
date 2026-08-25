@@ -129,8 +129,8 @@ def classifier_claim(
     claims file says what produced each claim without opening the call log.
 
     Membership is checked here because this is the only write path that could
-    introduce an unrecognised code. Every other one draws on the tag mapping,
-    which is derived from the vocabulary already. Rejected whole rather than
+    introduce an unrecognised code. Every other one draws on the vocabulary
+    already. Rejected whole rather than
     per code: a claim asserts one set, and writing the half that passed would
     record a set nobody made.
     """

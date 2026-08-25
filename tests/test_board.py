@@ -14,7 +14,7 @@ from algo_coach.schema import (
     SelfLabel,
     TechniqueClaim,
 )
-from algo_coach.techniques import map_tags, standing_claims
+from algo_coach.techniques import standing_claims
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -37,7 +37,7 @@ def make_attempt(
     )
 
 
-def make_problem(id: str, source_tags: list[str]) -> Problem:
+def make_problem(id: str, techniques: list[str]) -> Problem:
     return Problem(
         id=id,
         external_id=id,
@@ -46,8 +46,7 @@ def make_problem(id: str, source_tags: list[str]) -> Problem:
         title=id,
         title_slug=id,
         statement="Given an array, return ...",
-        source_tags=source_tags,
-        techniques=map_tags(source_tags),
+        techniques=techniques,
     )
 
 
@@ -71,7 +70,7 @@ def index(*problems: Problem) -> dict[str, Problem]:
     return {problem.id: problem for problem in problems}
 
 
-GREEDY = make_problem("greedy-problem", ["Greedy"])
+GREEDY = make_problem("greedy-problem", ["greedy"])
 
 
 def test_an_empty_log_has_no_rows():
@@ -153,7 +152,7 @@ def test_a_relabelled_attempt_counts_once_under_its_latest_mode():
 def test_an_attempt_counts_once_in_every_technique_it_names():
     """A solution using two techniques is evidence about both. Over-crediting
     is the known cost of fallback attribution, not a bug in the count."""
-    problem = make_problem("two-tags", ["Greedy", "Sorting"])
+    problem = make_problem("two-tags", ["greedy", "sorting"])
 
     rows = per_technique([make_attempt("a1", problem_id="two-tags")], index(problem), {}, {})
 
@@ -173,7 +172,7 @@ def test_a_claim_moves_an_attempt_to_the_technique_it_claims():
 
 def test_an_attempt_resolving_to_no_technique_produces_no_row():
     """An unmapped tag blocks nothing and invents nothing."""
-    problem = make_problem("unmapped", ["Brainteaser"])
+    problem = make_problem("unmapped", [])
 
     assert per_technique([make_attempt("a1", problem_id="unmapped")], index(problem), {}, {}) == []
 
@@ -181,7 +180,7 @@ def test_an_attempt_resolving_to_no_technique_produces_no_row():
 def test_rows_are_ordered_by_technique_code():
     """Deterministic, so two renders of the same log read the same. Weakness
     ordering belongs to scheduling, not to the view."""
-    problem = make_problem("wide", ["Sorting", "Greedy", "Backtracking"])
+    problem = make_problem("wide", ["backtracking", "greedy", "sorting"])
 
     rows = per_technique([make_attempt("a1", problem_id="wide")], index(problem), {}, {})
 
@@ -211,7 +210,7 @@ def test_a_row_is_never_stored():
 
 
 def test_ungrouped_names_the_attempts_no_row_reached():
-    problem = make_problem("unmapped", ["Brainteaser"])
+    problem = make_problem("unmapped", [])
     missed = make_attempt("a1", problem_id="unmapped")
 
     assert ungrouped([missed, make_attempt("a2")], index(problem, GREEDY), {}) == [missed]
@@ -219,7 +218,7 @@ def test_ungrouped_names_the_attempts_no_row_reached():
 
 def test_an_attempt_a_claim_rescues_is_not_ungrouped():
     """Its problem maps to nothing, but the claim says what it exercised."""
-    problem = make_problem("unmapped", ["Brainteaser"])
+    problem = make_problem("unmapped", [])
     claims = standing_claims([make_claim(["greedy"])])
 
     assert ungrouped([make_attempt("a1", problem_id="unmapped")], index(problem), claims) == []
@@ -228,7 +227,7 @@ def test_an_attempt_a_claim_rescues_is_not_ungrouped():
 def test_ungrouped_and_the_rows_partition_nothing():
     """An attempt on several techniques is on several rows; the two counts
     answer different questions and are not meant to add up."""
-    problem = make_problem("two-tags", ["Greedy", "Sorting"])
+    problem = make_problem("two-tags", ["greedy", "sorting"])
     attempts = [make_attempt("a1", problem_id="two-tags")]
 
     rows = per_technique(attempts, index(problem), {}, {})

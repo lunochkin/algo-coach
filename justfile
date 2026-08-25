@@ -131,7 +131,7 @@ score-stored *args:
         --model z-ai/glm-5.2                         --provider gmicloud/fp8 \
         {{ args }}
 
-# How far the classifier's claims move the board off the tags.
+# How far the classifier's claims move the board off the fallback.
 movement *args:
     uv run algo-coach movement {{ args }}
 

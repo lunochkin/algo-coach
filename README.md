@@ -305,7 +305,7 @@ uv run algo-coach <command>
 | `classify` | claim stored attempts with the classifier |
 | `match` | which problems exercise a card's templates |
 | `score` | the classifier against the hand claims, per technique |
-| `movement` | how far the classifier's claims move the board off the tags |
+| `movement` | how far the classifier's claims move the board off the fallback |
 
 ## Where things are
 
