@@ -7,15 +7,35 @@ Target state. Code lags this doc; where they differ, this doc wins.
 Engine public, content private. Everything the practice loop reads is local to
 the engine. Problems, cards and attempts live in datastores the engine
 controls, and the technique vocabulary ships with the package. The engine never
-contacts external platforms. User clients push data in.
+contacts external platforms.
 
 Consequence: no third-party dependency in the drill loop.
+
+**Problems are the product's own, and the engine writes them.** A statement
+scraped from a platform cannot ship, which is what forces the question, but the
+answer is a capability rather than a licence fix. A generated problem carries
+the test cases that decide it. Test cases are what make verification reachable,
+and verification is what turns a canonical solution from an assertion into a
+fact.
+
+**The push API is a second ingest path, not what the corpus rests on.** It
+carries a user's practice on a third-party platform. What it brings in is the
+same class of record as a generated problem, carrying less: no test cases and no
+canonical solution.
+
+**The engine is the platform.** It serves a generated problem, times the
+sitting, runs the submission against the problem's own test cases, and records
+the verdict. Serving, timing and judging are all its own. Python only: a
+canonical is Python, the test cases are Python-shaped, and a second language is
+a runner rather than a record change.
 
 ## Terminology
 
 - **Attempt** — a user's solution to a problem, successful or failed.
-- **Verification** — executing an attempt against a problem's test cases,
-  yielding pass or fail.
+- **Canonical solution** — an exemplary solution to a problem, written to
+  display the approach rather than to pass. Never an attempt.
+- **Verification** — executing a solution against a problem's test cases,
+  yielding pass or fail. An attempt or a canonical solution alike.
 - **Diagnosis** — classifying why an attempt failed. A `Diagnosis` record
   stores the result.
 
@@ -24,9 +44,11 @@ Consequence: no third-party dependency in the drill loop.
 | Class | Owner | Visibility | Write semantics | Source of truth |
 |---|---|---|---|---|
 | Techniques | product | global | read-only at runtime | this repo, in git |
-| Cards | product | global | read-only at runtime | private content repo |
-| Template matches | follows the problem | global if the problem is product-owned, private if pushed | append-only | the store |
-| Problems | product or user | global if product-owned, user-scoped if pushed | read-only if product-owned, mutable cache if pushed | product set, or the pushing client |
+| Cards | product | global | read-only at runtime | the store, seeded from `content/` |
+| Problems | product | global | generated once and never rewritten; a pushed one upserts | the store |
+| Test cases | product | global | written with the problem | the store |
+| Canonical solutions | product | global | append-only | the store |
+| Template matches | product | global | append-only | the store |
 | Card runs | user | private | append-only | the store |
 | Recall attempts | user | private | append-only | the store |
 | Attempts | user | private | append-only | the store |
@@ -66,8 +88,8 @@ The vocabulary the append-only log references.
   counting every self-call would name no skill.
 - **What disqualifies a code is incidental use**, never that another candidate
   covers it. The near miss states that line in full: a sorted lookup beside a
-  linear pass that dominates, a map standing in for an array. Reading the near
-  miss as precedence is what made the classifier drop codes the user claimed.
+  linear pass that dominates, a map standing in for an array. A reader taking
+  the near miss for precedence drops codes the user claimed.
 - **Inclusive claiming is what keeps a row coherent.** Attribution falls back
   to the problem's tags, and platform tags already nest. Under an exclusive
   rule, a claimed attempt and an unclaimed one on the same problem would be
@@ -95,8 +117,9 @@ A card organises studying one technique: what to read, what to reproduce from
 memory, and what to solve. It is not an ability estimate. Mastery is what a
 user can solve, per technique, and the two share no data.
 
-- **Product data, not code.** Cards live in the engine datastore, seeded from a
-  private repo that holds their version history.
+- **Product data, not code.** Cards live in the engine datastore, seeded from
+  `content/`, which is gitignored like `data/`. One location, whatever the
+  content turns out to be worth keeping private.
 - **Granularity follows teaching, not estimation.** One technique can carry
   several cards. Mastery is estimated per technique, so cards are never the
   unit of estimation, and the attempt log never references one.
@@ -117,6 +140,12 @@ user can solve, per technique, and the two share no data.
 - **A studied template with no match is a reported gap**, not a quietly shorter
   ladder. The card claims to teach that form, so a corpus that cannot exercise
   it is a fact about the store worth surfacing.
+- **A reported gap is the input to the next generation run.** Generation writes
+  for a named template, so a form the corpus cannot exercise names its own
+  remedy.
+- **A gap creates work, and never does the work.** Resolution reports what is
+  missing; a person runs the generation. A ladder that filled itself would be a
+  ladder nobody inspected, and the corpus is the product.
 - **The recognition cue is its own field**, apart from the prose it could sit
   in. A probe asks exactly that question: is the form recognised unprompted. So
   the cue is shown and withheld on its own, and the rest of what to read is one
@@ -151,6 +180,20 @@ Which problems exercise which of a card's templates. The ladder's coverage is
 computed from these records. They are the engine's own work: an author names no
 problem, so nothing is authored here either.
 
+- **A generated problem asserts its own first match.** It was written for one
+  template, so that pair is provenance rather than a reading, and the record
+  names `generator` as its source. Nothing pays a call to learn what the
+  generator was told to write.
+- **The matcher answers what generation cannot assert.** Two things: which
+  templates a problem exercises besides the one it was written for, and whether
+  the generator's own claim holds. The first is why a rung can still cover a
+  studied template and an optional one. The second is the only check on a
+  generator drifting from its brief.
+- **Three writers, ordered by what each of them knew.** A hand annotation
+  stands over both machine sources. A generator's assertion stands over a
+  matcher's reading of the same pair, because the generator knew and the matcher
+  inferred. The matcher's disagreement is stored and scored, never promoted —
+  the same shape as a machine claim on a hand-claimed attempt.
 - **One record per template and problem, carrying a verdict.** Not a set per
   template. Problems arrive one push at a time, and a set record would rewrite
   pairs that were already settled every time the corpus grew. A claim asserts a
@@ -163,8 +206,8 @@ problem, so nothing is authored here either.
   approaches to one problem is the ordinary case. It is what lets a single rung
   cover a studied template and an optional one at once.
 - **Written after card import, never before.** Both references are minted: the
-  template at import, the problem at ingest. So a match cannot be authored
-  against a seed file.
+  template at import, the problem at generation or ingest. So a match cannot be
+  authored against a seed file.
 - **A call is per problem and card, a record is per pair.** The candidates are
   that card's templates, and the answer is the subset the problem exercises,
   which is the classifier's shape. The records come from one answer.
@@ -262,14 +305,35 @@ One template reproduced from memory, and how it went.
 
 ### Problems
 
-- **Provenance is required.** Product problems need a rights record. Pushed
-  problems need an origin platform and a pushing user.
-- **Two origins.** User-pushed problems arrive through the push API.
-  Product-owned problems come from a content pipeline in a separate private
-  repo.
+- **Generated, and that is the ordinary origin.** The engine writes a problem
+  for one of a card's templates: a statement, the test cases that decide it, and
+  at least one canonical solution. Nothing lands until the canonical passes.
+- **The template it was written for is stored.** `generated_for` is an
+  assertion rather than a reading, and it is what makes the first template match
+  provenance. It never claims the problem exercises nothing else.
+- **A pushed problem is the other origin.** It carries an origin platform and a
+  pushing user, no test cases and no canonical solution. Same class of record,
+  carrying less.
+- **Every problem is product-owned.** Origin decides what a problem carries, not
+  who may read it, and verifiability follows from the fields present rather than
+  from a stored owner.
+- **Provenance is required either way.** A generated problem names what produced
+  it, as any machine record does. A pushed one names its platform and the user
+  who pushed it.
 - **Push identity is `(user_id, external_id)`**, so a re-push updates rather
   than duplicates. The engine mints the `id`, and it never moves on update,
   because attempts reference it.
+- **A generated problem's techniques are derived from its canonical
+  solutions.** There is no platform to map, and the card's technique names only
+  what the problem was written for. A solution that sorts before it searches
+  used both, and the codes say so.
+- **Which is why the fallback answers the right question.** Attribution
+  resolves to a claim if one exists, otherwise to the problem's techniques. A
+  tag says what a problem is about and over-credits broad techniques. A code
+  read off a solution says what solving it took.
+- **Derived, so re-derivable.** Codes are a view over the canonicals, as they
+  were a view over raw tags. Adding a canonical can widen a problem's techniques,
+  and re-running the derivation is legal and expected.
 - **Tag mapping is owned by the engine.** A pushed problem carries the origin
   platform's tags verbatim, and the engine derives its own codes beside them.
   Raw tags are the truth and codes are a derived view, so re-running the
@@ -278,23 +342,75 @@ One template reproduced from memory, and how it went.
   ingests. A metadata mismatch must never cost a real attempt.
 - **The statement is stored, and matching is why.** Which form a problem
   exercises is a question about what it asks, and tags answer what it is about.
-  The invariant against third-party statements is about git, and `data/` is
-  gitignored. The engine stores what a user pushed to their own store, and no
-  repo carries it.
-- **Required, and non-blank. The one metadata gap that does block.** It landed
-  optional, was backfilled across the corpus, then tightened while nothing
-  stored carried the loose shape. It is not treated like an unmapped tag for
-  one reason. A missing code costs one problem its place in one board row. A
+  A generated statement is the product's own. A pushed one is the platform's,
+  and `data/` is gitignored, so no repo carries it.
+- **Required, and non-blank. The one metadata gap that does block.** It is not
+  treated like an unmapped tag for one reason. A missing code costs one problem its place in one board row. A
   missing statement is a problem that can never be matched, and nothing reports
   it. Preventing that silence is why the field exists, so it fails at the
   boundary instead — per record, and the push is re-runnable once the scrape
   catches up. A blank string is an absence that passes a presence check, so it
   is rejected too.
 
+### Test cases
+
+What decides whether a solution to a generated problem is correct.
+
+- **Written with the problem, in the same call.** Cases derived afterwards
+  describe whatever the solution happens to do. Cases written with the statement
+  describe what the problem asks.
+- **They are what makes verification reachable.** The engine could never verify
+  a pushed problem's attempts, because a platform ships no cases. A generated
+  problem carries its own, which is what `origin: engine` rests on.
+- **Owned, so the git invariant binds nothing the product ships.** The rule
+  against third-party test cases in git holds, and the cases a generated problem
+  carries are the product's own.
+- **Expected outputs taken from the canonical make verification a tautology.**
+  It passes by construction, and `verified` then means only that the solution
+  agrees with itself. That is the fact a quality bar has to answer.
+- **Cases that separate nothing are worse than none**, because they license the
+  word `verified` on a canonical that is wrong. A set that does not discriminate
+  is a defect in the problem, and a problem carrying one does not land.
+- **How discrimination is established is deferred.** Candidates are on hand: two
+  canonicals written from different approaches agreeing on every case, a
+  mechanically broken canonical failing, the near miss the technique entry
+  already names failing. Which of them is the bar is a question a real corpus
+  answers and an argument does not.
+
+### Canonical solutions
+
+An exemplary solution to a problem, written to display the approach. Not an
+attempt: no user, no sitting, no platform.
+
+- **Exemplary and verified are different properties**, and the record needs
+  both. A user's solved attempt is verified and idiosyncratic. A generated
+  solution is exemplary and asserted. Only one that passes the problem's test
+  cases is both.
+- **It is what a template match reads.** Which form a problem exercises is a
+  question about the solution, and a statement only implies one. The matcher
+  reads the canonical beside the statement.
+- **Several per problem, and the set is the assertion.** Two approaches to one
+  problem is the ordinary case, and it is what lets one rung cover a studied
+  template and an optional one. A problem carrying one canonical can teach one
+  form.
+- **Never counted as an attempt.** It answers no board row and earns no
+  progress. A user who reads one has not solved the problem.
+- **Provenance as any machine record carries it**: model, effort, pin,
+  temperature, prompt digest, and the call.
+- **Sampled, not greedy, and that is a different rule.** A reading is greedy so
+  a verdict the model holds at 0.9 does not land as a coin flip in a log the
+  board reads forever. Generation produces the artifact rather than a verdict
+  about one, so there is nothing to protect, and variance is what stops one
+  model's habits becoming the whole corpus. The cost is that a canonical is
+  re-runnable and never reproducible, which is also why nothing re-derives it.
+- **The verification result is stored, never inferred**: which cases it passed
+  and how many the problem had. A count rather than a flag, for the same reason
+  a share prints its denominator.
+
 ### Attempts
 
-- **One source per problem.** The user if the problem is user-pushed, otherwise
-  the engine.
+- **One source per problem.** The user for a pushed problem. The user or the
+  engine's own verification for a generated one.
 - **Identity is the engine's.** A pushed attempt carries a client-minted id,
   unique per user, so re-pushing an ingested one is a no-op. The engine mints
   its own id and never accepts one from a client.
@@ -305,12 +421,14 @@ One template reproduced from memory, and how it went.
   landed.
 - **Origin is who produced the attempt**: the push API, or the engine's own
   drill loop. It is stamped by the ingest path, never sent by a client. Whether
-  the verdict rests on a real test run is a separate fact, recorded once the
-  engine can verify. The drill loop produces attempts on pushed problems, and
-  it cannot verify those.
-- **The platform's own status is kept verbatim.** `solved` is the projection
-  over it, and the raw value carries what the projection drops. A timeout and a
-  wrong answer are both unsolved, and only one is evidence of slowness.
+  the verdict rests on a real test run is a separate fact. A generated problem
+  carries test cases, so the engine can record one. A pushed problem carries
+  none, and its attempts stay unverified however they were produced.
+- **Whatever judged it is kept verbatim.** A platform's status string for a
+  pushed attempt, the verification result for a generated one. `solved` is the
+  projection over either, and the raw value carries what the projection drops. A
+  timeout and a wrong answer are both unsolved, and only one is evidence of
+  slowness.
 - **Problem techniques are never denormalized onto an attempt.** Tags are
   re-derivable and the log is not, and a copy taken at ingest would drift with
   no way to tell which is right.
@@ -338,13 +456,25 @@ rather than a field on the attempt.
   given solution did, because doing so means reading it — which is the work the
   classifier is there to do. So it is a prompted model reading the solution,
   not a trained one.
-- **Recognising an approach in code is semantic work.** A problem's tags span
-  what it admits: several approaches to it, or one solution combining several
-  techniques. Choosing among them means reading which the code took.
+- **Recognising an approach in code is semantic work.** A problem's techniques
+  span what it admits: several approaches to it, or one solution combining
+  several techniques. Choosing among them means reading which the code took.
   Two-pointers and sliding-window differ in their invariant, not their syntax.
   Backtracking is depth-first search plus an undo. Greedy is a property of why
   a choice is correct rather than a construct. A scan of imports and keywords
   is weakest exactly where the claim is worth making.
+- **What the classifier is shown besides the code is deferred.** The attempt's
+  code is the subject and stays. Whether a reading is improved by also sending
+  the problem's canonical solutions, or the candidate techniques' templates, is
+  a question a measured comparison answers. The record absorbs the answer
+  without changing: what a reading was made against is the digest of what that
+  attempt was sent, so widening the prompt re-derives the readings it reaches
+  and settles the rest.
+- **A richer prompt can change the question rather than the answer.** Shown a
+  problem's canonicals, a classifier can report which one the attempt resembles
+  instead of which techniques its code used. Those are different labels, and the
+  hand claims scoring it were made against the second. A configuration that
+  moves the question is not comparable to one that answers it better.
 - **A claim is scored against the user's own**, per technique rather than
   overall. The board is per technique, and a classifier that over-claims one
   code skews it. Set equality, not overlap: a claim naming every candidate
@@ -384,19 +514,19 @@ rather than a field on the attempt.
 - **A verdict naming no candidate is a reading, and is stored.** The classifier
   read the code and found the candidates did not cover it. That is evidence
   about the code rather than an absence of it, and the answer does not change
-  while the question does not. Left unstored, it was re-read by every later
-  run, paying again for the same decline.
+  while the question does not. Left unstored, it would be re-read by every
+  later run, paying again for the same decline.
 - **An empty claim answers nothing, so the fallback stands.** The resolver
   reads a claim's *techniques* rather than its existence. The tags therefore
-  keep answering an attempt whose reading declined, and the board is exactly as
-  it was when such a verdict went unrecorded.
+  keep answering an attempt whose reading declined, and the board renders from
+  them either way.
 - **It is scored all the same.** The board and the eval ask different
   questions. A decline gives the board nothing to render, and it gives the eval
   an assertion: none of these candidates apply. A hand claim naming one of them
   contradicts that, so it is a disagreement and counts as a miss against every
-  technique the user named. Calling it missing evidence was inconsistent with
-  storing it as evidence, and it paid a classifier to decline — every decline
-  left a smaller denominator behind and a better share over it. What is still
+  technique the user named. Leaving it unscored would contradict storing it as
+  evidence, and would pay a classifier to decline: each one would leave a
+  smaller denominator behind and a better share over it. What is still
   unscored is an attempt with no verdict at all, where nothing was read. The
   count is reported beside the share, because how often a reader finds the
   candidates wanting is worth seeing on its own.
@@ -409,12 +539,11 @@ rather than a field on the attempt.
   drill loop records nothing where they skip, and emptiness alone would make a
   lost answer and a stated verdict the same record. The classifier needs no
   flag: it answers or it fails, and a failure writes no claim.
-- **The eval set can hold a correct decline, and could not before.**
-  Adjudication sometimes ends at "no candidate applies". Without a way to say
-  it, such a claim could only be deleted. Membership is keyed on a hand claim
-  existing, so deleting it drops the attempt from the set. The classifier's
-  declines were stored and scored while the user's could not be recorded, and
-  the field removes that asymmetry.
+- **The eval set holds a correct decline.** Adjudication sometimes ends at "no
+  candidate applies", and membership is keyed on a hand claim existing. A claim
+  with no way to say it could only be deleted, which drops the attempt from the
+  set. Either writer may name none of the candidates, so neither is scored on a
+  question the other is spared.
 - **The user's claim wins on read, the latest of each writer's otherwise.**
   Under latest-wins alone, whichever writer wrote last would decide, and the
   classifier writes far more often. Ground truth would last only until
@@ -458,10 +587,10 @@ rather than a field on the attempt.
   "the reading changed". An author can forget to bump it while the text moves;
   a digest cannot. What it costs is that a reflowed sentence re-derives the
   attempts it reaches, which is the intended trade: nothing licenses calling an
-  edit cosmetic on a model's behalf, and the scope is now the entries actually
-  touched. What it also costs is a name. A rulebook can no longer be cited as
-  "prompt 3", only as the digest of what was sent, and diffed by reading the
-  prompts two calls carry.
+  edit cosmetic on a model's behalf, and the scope is the entries actually
+  touched. What it also costs is a name. A rulebook is cited as the digest of
+  what was sent rather than as "prompt 3", and two of them are diffed by reading
+  the prompts two calls carry.
 - **A pin is part of the reading, not a note about routing.** A model id
   resolves to as many builds as there are endpoints serving it, and
   quantization changes the weights. An fp4 endpoint and a bf16 one are two
@@ -491,9 +620,9 @@ rather than a field on the attempt.
   claim would put a megabyte-scale read on every command.
 - **Each configuration is scored over what it read**, and how many all of them
   read is reported beside the shares. A comparison over the intersection alone
-  charged every column for the attempts one of them failed on. One aborted run
-  shrank the denominator for the whole table, and re-running it moved numbers
-  that no re-reading touched.
+  charges every column for the attempts one of them failed on: a single aborted
+  run shrinks the denominator for the whole table, and re-running it moves
+  numbers that no re-reading touched.
 - **The denominator is therefore visible, never assumed.** A share prints as
   `92/98`, so two columns measured over different samples cannot be read as one
   rate. What the reader must still supply is judgement: a cheaper classifier
@@ -518,8 +647,8 @@ holds nothing about what the answer was for.
   call naming a prompt that is not there.
 - **It holds what a claim structurally cannot**: the tokens a run cost, the
   reasoning behind a verdict, and the calls that produced no claim at all. A
-  decline names no candidate and a failure names nothing. Before this record,
-  both were counters that printed once and were lost.
+  decline names no candidate and a failure names nothing, so neither reaches a
+  claim at all. Without this record both are counters that print once.
 - **One transport, one shape.** Every model is reached as chat completions
   through a router, so adding a model is a string and adding a provider is a
   base URL. Two provider shapes maintained by hand would create pressure to
@@ -616,15 +745,21 @@ wins.
   - A batch ingests per record: a bad one is rejected by index, the rest still
     land. One malformed line must not cost the attempts around it.
   - An already-ingested record is counted, not an error, so retrying is safe.
-- **Verification** — runs locally, against test cases the engine owns. Product
-  problems only. Pushed problems carry no test cases, so their attempts happen
-  outside the engine.
+- **Verification** — runs locally, against test cases the engine owns. Reaches
+  every generated problem and no pushed one: a platform ships no cases, so
+  attempts on a pushed problem happen outside the engine and stay unverified.
 - **Storage** — concrete for now (JSON files under a gitignored directory), a
   database later. The schema is the contract, and storage swaps underneath it.
-- **Product content ingest** — cards, problems, and test cases are produced by
-  an offline content pipeline in a separate private repo, and seeded into the
-  engine datastore. File-based for now. The technique vocabulary is the
-  exception: it ships with the package, in git.
+- **Content generation** — problems, their test cases and their canonical
+  solutions are written by the engine, as a command beside the classifier and
+  the matcher. It reuses one transport, one call log and one provenance base,
+  rather than standing a second copy of each somewhere else.
+  - Extraction to a pipeline of its own stays possible and is not planned. What
+    it would have to preserve is the minted ids, since the attempt log
+    references them.
+- **Card ingest** — cards are authored in `content/` and seeded into the
+  datastore. File-based for now, and gitignored like `data/`. The technique
+  vocabulary is the exception: it ships with the package, in git.
   - What an author writes has its own shape, as a client's push does.
     `CardSeed` (`src/algo_coach/schema/seed.py`) is the payload the stored card
     is built from, not the card. Identity is the engine's at both boundaries,
@@ -640,10 +775,48 @@ wins.
 Sequences. The sections above say what the system holds and where it ends. A
 flow says in what order, and what each step may not do.
 
+### Generating a problem
+
+A problem, its test cases and its canonical solution are written together. The
+order matters because each step can reject what came before.
+
+1. A card's template, and the brief: write a problem this form solves.
+2. The statement, the canonical solution and the test cases, from one call.
+3. The canonical runs against the cases.
+4. All of it lands together, with the template match the generation asserts.
+5. The matcher reads the problem later, for the templates it was not written
+   for.
+
+- **Nothing lands half-verified.** A problem whose canonical fails is discarded
+  whole rather than stored for repair. The call is recorded either way, so what
+  was paid for and thrown away stays readable.
+- **The generator's assertion is not the matcher's verdict.** They are two
+  records on one pair, and a disagreement is how a generator drifting from its
+  brief is found.
+- **Announcement is measured, not assumed.** A form a matcher names instantly
+  from the statement alone was telegraphed, and a problem that telegraphs its
+  form teaches recognition of nothing. The real corpus sets that floor and the
+  generated one is read against it, which is the reason to keep a corpus that
+  can never ship.
+- **A generated problem is not a template exercise.** What is being trained is
+  reaching for a form unprompted, so the enabling property has to be derivable
+  from the statement rather than stated in it. That is a property of the brief,
+  and it is what the floor above measures.
+
 ### Drill loop
 
 Practice on a pushed problem. The engine points, the platform serves and times,
 and the loop records what neither of them can know.
+
+The loop for a generated problem runs entirely in the engine: it serves the
+statement, times the sitting, and verifies the submission against the problem's
+own test cases. It asks for a claim and a label as any drill does, and writes
+the same records — an attempt carrying `origin: engine` and a verification
+result rather than a platform's status string.
+
+What is not designed here is the interaction: how a solution is entered, what
+the loop does with a failing run, and whether a sitting can be resumed. Those
+are answered by using it.
 
 1. The board, ordered by staleness. The user picks a technique.
 2. Candidates for it — least recently attempted first, lowest solve rate
@@ -655,14 +828,12 @@ and the loop records what neither of them can know.
 6. Keyed to each attempt that appeared, the loop asks for a technique claim
    and a self-label.
 
-- **The loop mints no attempt.** The records come from the platform that
-  witnessed them. `origin: engine` stays reserved for the phase where the
-  engine produces attempts by verifying them. It is named as a capability
-  rather than a phase number, because a stored value's meaning must not change
-  when phases are renumbered.
-- **Timing is the platform's**, because the work happens there. An attempt it
-  did not time stays untimed, rather than carrying a duration the engine
-  reconstructed.
+- **The loop mints no attempt on a pushed problem.** Those records come from
+  the platform that witnessed them. On a generated problem the engine witnessed
+  it, so the loop mints the attempt and stamps `origin: engine`.
+- **Timing belongs to whoever watched the work.** The platform for a pushed
+  problem, the engine for a generated one. An attempt nobody timed stays
+  untimed, rather than carrying a duration reconstructed after the fact.
 - **A drill can mint several attempts.** A sitting is usually several
   submissions, and each is asked about in turn. A submission that failed on
   syntax and the one that passed are different evidence, and labelling only the
@@ -744,13 +915,14 @@ Properties the system holds at all times.
   resolved at the boundary and never stored on an attempt, so the log stays
   readable without the platform that produced it.
 - Aggregates are derived views, never stored truth.
-- A problem's owner (product or user) is stored state, and determines its
-  visibility, test-case availability, attempt origin, verifiability, and
-  eligibility for cross-user aggregates. Those are derived, never stored
-  independently. The owner is set by the ingest path and never supplied by a
-  client.
-- Pushed attempts cannot be verified by the platform and never enter cross-user
-  aggregates.
+- Every problem is product-owned. What one carries — test cases, a canonical
+  solution, a platform's tags — follows from its origin, and visibility,
+  verifiability and aggregate eligibility follow from the fields present rather
+  than from a stored owner.
+- A generated problem never lands without a canonical solution that passed its
+  test cases. One that fails is not stored for repair; it is not stored.
+- Attempts on a problem carrying no test cases cannot be verified and never
+  enter cross-user aggregates.
 - The technique vocabulary is product-owned and global. There are no
   user-authored techniques or cards. Technique codes are stable identifiers
   with a migration path, since attempts, problems, and future user annotations
@@ -773,7 +945,10 @@ Rules on how this repo is built, rather than properties of the running system.
   exists so the log stays readable by its own schema, and an optional field
   kept for the sake of a handful of disposable records is one every reader
   branches on forever.
-- `data/` is gitignored; only the schema is public.
+- `data/` and `content/` are gitignored; only the schema is public. The
+  generated corpus could be committed, since the product owns it, and is not:
+  the same directories hold the private log, and storage moves to a database
+  before the corpus ships anywhere.
 - Prefer tools and functions over agents. A pipeline earns multi-agent, not the
   other way around.
 
