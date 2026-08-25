@@ -31,7 +31,7 @@ Board, then a technique, then a problem, solved on the platform. The loop mints
 no attempt: it waits on a push and diffs its own log, so the engine calls
 nothing and works whatever the user pushes with.
 
-Superseded by Phase 7. The platform serves, times and judges, so this loop can
+Superseded by Phase 8. The platform serves, times and judges, so this loop can
 never verify a submission or time a sitting it did not witness. What survives
 unchanged is the claim and self-label prompt at the moment of solving.
 
@@ -51,7 +51,7 @@ problem's tags.
   than on a version over the rulebook.
 
 Delta for generated problems: candidates come from codes derived from canonical
-solutions rather than from a platform's tags. Phase 5 carries it.
+solutions rather than from a platform's tags. Phase 6 carries it.
 
 ## Phase 4 — Cards and template matching — done
 
@@ -63,9 +63,43 @@ solutions rather than from a platform's tags. Phase 5 carries it.
   reading is measured against.
 
 What a card still needs — the ladder, runs, recall and probes — waits on a
-corpus that can fill it. Phase 6.
+corpus that can fill it. Phase 7.
 
-## Phase 5 — Problem generation (current)
+## Phase 5 — Pivot to generated problems (current)
+
+The engine writes its own problems, so the path that ingested a platform's
+stops being a second origin. Removing it before generation is written keeps
+generation from being built around a distinction that no longer earns its
+place.
+
+- The architecture doc goes first. It still describes the push API as a kept
+  second ingest path, and threads pushed-problem rules through Problems,
+  Attempts, Boundaries and Invariants. The doc carries the intent, so it
+  settles the shape the code then follows.
+- The ingest path goes: the push commands, the push payloads, the external-id
+  resolution, and the tag mapping that turned a platform's vocabulary into
+  codes. A generated problem derives its techniques from its canonical
+  solutions instead.
+- The superseded drill loop goes with it. It waited on a push and diffed the
+  log, and neither act has a subject once nothing is pushed.
+- The pushed corpus moves to `data/old/` rather than being deleted. It is the
+  reference the announcement floor is measured against, and Phase 6 reads it
+  from there.
+- The live store empties, and only then can the records tighten. `origin:
+  push`, `source_status`, `external_id` and the platform fields describe a
+  shape nothing produces, and a field kept for records that no longer exist is
+  one every reader branches on forever. Tightening is legal only while no
+  stored record carries the loose shape, so it follows the reset rather than
+  leading it.
+- The eval set does not survive. 138 hand claims over 100 attempts key to
+  pushed attempts, and a classifier scored later is scored against a set
+  rebuilt by hand on generated problems. That is the price of the reset, taken
+  deliberately.
+- Exit: one origin end to end. Nothing in the repo ingests a third-party
+  record, no doc describes a path that does, and the store holds only what the
+  engine wrote.
+
+## Phase 6 — Problem generation
 
 The engine writes problems: a statement, the test cases that decide it, and at
 least one canonical solution. Nothing lands until the canonical passes them.
@@ -88,13 +122,13 @@ test cases at all.
 - The discrimination bar comes first. Cases that separate nothing license the
   word `verified` on a canonical that is wrong. Which check is the bar is
   settled from a real corpus rather than argued.
-- The announcement floor is measured against the pushed corpus. A form a
-  matcher names from the statement alone was telegraphed, and such a problem
-  teaches recognition of nothing.
-- Exit: a card's reported gaps are filled by generated problems, and Phase 6
+- The announcement floor is measured against the archived corpus in
+  `data/old/`. A form a matcher names from the statement alone was
+  telegraphed, and such a problem teaches recognition of nothing.
+- Exit: a card's reported gaps are filled by generated problems, and Phase 7
   resolves a ladder over them.
 
-## Phase 6 — Ladder, recall and card runs
+## Phase 7 — Ladder, recall and card runs
 
 What a card needs once there are problems to fill it.
 
@@ -114,7 +148,7 @@ What a card needs once there are problems to fill it.
   candidate: a technique that was once fluent wants minutes, not a card.
 - Exit: recall and the ladder run daily.
 
-## Phase 7 — In-engine drill loop
+## Phase 8 — In-engine drill loop
 
 The first attempts the engine produces rather than ingests. It serves a
 generated problem, times the sitting, runs the submission against the problem's
@@ -122,14 +156,14 @@ own test cases, and records the verdict.
 
 - `Attempt` gains the verification result — which cases passed, out of how
   many — beside the platform status string it already carries. Additive, and
-  meaningless before Phase 5.
+  meaningless before Phase 6.
 - The interaction is answered by using it: how a solution is entered, what the
   loop does with a failing run, whether a sitting resumes.
 - Claims and self-labels are asked as Phase 2 asked them. The writers do not
   change; what changes is who witnessed the sitting.
 - Exit: daily practice runs here, on problems the engine wrote and judged.
 
-## Phase 8 — Technique mastery, scheduling, failure mode
+## Phase 9 — Technique mastery, scheduling, failure mode
 
 Per-technique skill state updated from attempts and the diagnosis signal;
 scheduling targets the diagnosed cause, not per-problem intervals. Exit: the
@@ -149,30 +183,30 @@ Sessions land here too. A sitting is several submissions, and counting each as
 an attempt over-weights the ones that took a retry. It is a derived view over
 the log, grouped on read, and never a field a client sets.
 
-## Phase 9 — Program-analysis-grounded diagnosis
+## Phase 10 — Program-analysis-grounded diagnosis
 
 Ground the classifier in evidence: AST-diff against canonical solutions,
 execution-trace comparison, empirical complexity measurement. Needs the test
-cases and canonicals Phase 5 brings. Deliverable: measured accuracy delta
+cases and canonicals Phase 6 brings. Deliverable: measured accuracy delta
 against LLM-only diagnosis.
 
-## Phase 10 — Retrieval
+## Phase 11 — Retrieval
 
 Similar problems, patterns, and technique briefs retrieved from the corpus and
 the user's own attempts; weak-spot patterns surfaced.
 
-## Phase 11 — MCP + autonomy
+## Phase 12 — MCP + autonomy
 
 Corpus and tools exposed as an MCP server. A scheduled agent runs the practice
 loop: it picks drills and adapts to history.
 
-## Phase 12 — Multi-agent (conditional)
+## Phase 13 — Multi-agent (conditional)
 
 Only if a real pipeline earns it: diagnose → retrieve → brief → schedule.
 
-## Phase 13 — Soundness-checked synthesis
+## Phase 14 — Soundness-checked synthesis
 
-An upgrade to Phase 5's generation rather than its first appearance. Formal
+An upgrade to Phase 6's generation rather than its first appearance. Formal
 constraint specs, property-based test-case generation, adversarial validation.
-What it buys is a guarantee that a case set discriminates, where Phase 5 has a
+What it buys is a guarantee that a case set discriminates, where Phase 6 has a
 bar chosen from a real corpus.

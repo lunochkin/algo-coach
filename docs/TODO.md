@@ -83,8 +83,8 @@ The rest extends that command.
       answers against a record that may not arrive
 
 ### Closed
-Superseded by Phase 7. The platform serves, times and judges, so this loop can
-never verify a submission or time a sitting it did not witness. Phase 7 asks
+Superseded by Phase 8. The platform serves, times and judges, so this loop can
+never verify a submission or time a sitting it did not witness. Phase 8 asks
 the same two questions of an attempt the engine witnessed.
 
 ## Phase 3 — technique attribution — done
@@ -93,7 +93,7 @@ Which techniques a solution used. The evidence is the code and the code does
 not decay, so the classifier can be scored against a hand answer given
 retroactively. Whether two careful readers agree is what the scoring asks, not
 what licenses it. Why an attempt failed is a different kind of question, and
-moved to Phase 8.
+moved to Phase 9.
 
 ### Hand claims
 
@@ -252,14 +252,14 @@ Flow and its rules: `docs/architecture/README.md`, "Adjudicating the eval set".
 
 ### Closed
 - [x] Attribution runs and its claims stand, with the board consuming them.
-      Whether it beats the tag fallback is measured in Phase 8
+      Whether it beats the tag fallback is measured in Phase 9
 - [x] What changes for a generated problem is where the candidates come from,
-      and Phase 5 writes them
+      and Phase 6 writes them
 
 ## Phase 4 — cards and template matching — done
 
 How studying a technique is organised. Not an ability estimate. Mastery is what
-a user can solve, per technique, and it is Phase 8.
+a user can solve, per technique, and it is Phase 9.
 
 - [x] `Card`: the topic, its templates, and the selector a ladder resolves
       from. Names no problem, so it ships anywhere. Several per technique
@@ -339,9 +339,65 @@ a user can solve, per technique, and it is Phase 8.
       corpus against their templates, and the annotation pass writes the
       reference its readings are scored against
 - [x] The ladder, runs, recall and probes wait on a corpus that can fill them,
-      and are Phase 6. What measures the matcher is Phase 5
+      and are Phase 7. What measures the matcher is Phase 6
 
-## Phase 5 — problem generation (current)
+## Phase 5 — pivot to generated problems (current)
+
+The engine writes its own problems, so a second ingest path is dead weight.
+The work splits by precondition: the doc settles the shape, the ingest path
+goes, and the records tighten only once the store holds nothing carrying the
+loose shape.
+
+### Docs first
+- [x] The architecture doc pivots to an owned corpus: the engine writes the
+      problem, the cases that decide it and the canonical that passes them.
+      The owner distinction went, and origin decides what a problem carries
+- [x] Re-sequence the phases around that corpus, and amend the exit rule. A
+      phase exits when its deliverable is in use by whatever consumes it, and
+      `superseded` joins `done` as a way to close
+- [x] Keep a TODO item to a line or two, splitting before compressing. The
+      argument behind an item belongs in the architecture doc
+- [ ] The architecture doc drops the push boundary and the pushed-problem
+      rules. It still says the push API is a second ingest path, which stops
+      being true here
+- [ ] Problems, Attempts, Boundaries and Invariants each carry a rule that
+      exists because two origins did. Each states what one origin makes of it,
+      or goes
+- [ ] `README.md` drops the push API from what the engine exposes
+
+### Archive
+- [ ] Move the pushed corpus and log to `data/old/`: 1785 attempts, 3962
+      problems, the claims and the call log
+- [ ] `data/old/` is read by the announcement floor in Phase 6 and by nothing
+      on the run path. It is a calibration corpus, not a store
+
+### The ingest path
+- [ ] Remove `algo-coach push` and the `ingest` package
+- [ ] Remove `AttemptPush` and `ProblemPush`. The payload contract has no
+      reader once nothing is pushed
+- [ ] Remove the external-id resolution. Every reference is engine-minted once
+      nothing arrives from outside
+- [ ] Remove the tag mapping. A generated problem derives its techniques from
+      its canonical solutions, and there is no platform vocabulary left to map
+- [ ] Remove the superseded drill loop: the push wait and the log diff. Neither
+      act has a subject once nothing is pushed
+- [ ] Drop the tests that covered the removed paths, rather than adapting them
+      to a shape nothing produces
+
+### The reset
+- [ ] Empty the live store. The 138 hand claims over 100 attempts go with it,
+      and a later classifier is scored against a set rebuilt by hand on
+      generated problems
+- [ ] Tighten the records only after the store is empty: `origin: push`,
+      `source_status`, `external_id` and the platform fields. Legal only while
+      nothing stored carries the loose shape
+
+### Exit
+- [ ] One origin end to end: nothing ingests a third-party record, no doc
+      describes a path that does, and the store holds only what the engine
+      wrote
+
+## Phase 6 — problem generation
 
 The engine writes problems: a statement, the test cases that decide it, and at
 least one canonical solution. Flow and its rules:
@@ -370,7 +426,7 @@ so an unmeasured matcher would audit at an unknown error rate.
       rather than a flag, as a share prints its denominator
 - [ ] The runner: execute a solution against a problem's cases locally, pass or
       fail per case. One subject today, a canonical, and an attempt on the same
-      path in Phase 7
+      path in Phase 8
 - [ ] `algo-coach generate`, a template in and a problem out, through the
       transport the classifier and the matcher already share
 - [ ] Sampled rather than greedy, so one model's habits do not become the
@@ -386,15 +442,15 @@ so an unmeasured matcher would audit at an unknown error rate.
 - [ ] Candidates for the bar: two canonicals from different approaches
       agreeing on every case, a mechanically broken canonical failing, the near
       miss the technique entry already names failing
-- [ ] Measure the announcement floor against the pushed corpus, then read the
-      generated one against it. A form the matcher names from the statement
-      alone was telegraphed
+- [ ] Measure the announcement floor against the archived corpus in
+      `data/old/`, then read the generated one against it. A form the matcher
+      names from the statement alone was telegraphed
 
 ### Exit
-- [ ] A card's reported gaps are filled by generated problems, and Phase 6
+- [ ] A card's reported gaps are filled by generated problems, and Phase 7
       resolves a ladder over them
 
-## Phase 6 — ladder, recall and card runs
+## Phase 7 — ladder, recall and card runs
 
 - [ ] Resolve the ladder from the matches, the selector filling out to `size`
 - [ ] Derive requiredness from what a rung covers: studied means required, the
@@ -421,14 +477,14 @@ so an unmeasured matcher would audit at an unknown error rate.
 ### Exit
 - [ ] Recall and the ladder run daily
 
-## Phase 7 — in-engine drill loop
+## Phase 8 — in-engine drill loop
 
 The first attempts the engine produces rather than ingests.
 
 - [ ] Serve a generated problem, time the sitting, run the submission against
       the problem's own cases, and mint the attempt with `origin: engine`
 - [ ] The verification result on `Attempt`, beside the platform status string
-      it already carries. Additive, and meaningless before Phase 5
+      it already carries. Additive, and meaningless before Phase 6
 - [ ] Ask for a claim and a self-label as Phase 2 asked them. What changes is
       who witnessed the sitting, not who writes
 - [ ] The interaction is deferred to using it: how a solution is entered, what
@@ -466,7 +522,7 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 
 ## Later phases
 
-### Phase 8 — mastery, scheduling, failure mode
+### Phase 9 — mastery, scheduling, failure mode
 - [ ] Rust against gap is a question about per-technique state, asked of a
       single attempt. Only whether the technique was ever fluent separates
       them, so it lands with the mastery model or not at all
@@ -485,5 +541,5 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 
 ### Removed, kept in git
 - [ ] The failure classifier and its eval were cut before Phase 1 shipped and
-      are Phase 8's to rebuild. `Diagnosis` and the log's diagnosis methods
+      are Phase 9's to rebuild. `Diagnosis` and the log's diagnosis methods
       stayed behind, since an append-only log cannot be retrofitted
