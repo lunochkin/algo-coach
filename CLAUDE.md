@@ -46,6 +46,9 @@ Docs, `README.md`, commits, comments.
   what the code does.
 - **One idea per sentence.** Split at the em-dash and the semicolon instead
   of chaining. Target 25 words; nothing over 40.
+- **A TODO item is a task someone can finish**, not a statement about the
+  system. An item that only asserts what is true has nothing to do and never
+  gets ticked. State it in `docs/architecture/README.md` instead.
 - **A TODO item is one or two lines, rarely three.** It names what to do and
   the one reason that is not obvious from the name. The argument behind it
   belongs in `docs/architecture/README.md`, and the record of how it went

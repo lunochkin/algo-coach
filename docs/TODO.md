@@ -179,8 +179,6 @@ checks sends practice somewhere unverified for weeks.
 - [x] `prompt_version` is gone. It cost a rulebook that can no longer be cited
       by name
 - [x] `--fresh` asks anyway, which measuring a model against itself needs
-- [x] 961 machine claims were dropped to land it. The 48 hand claims were the
-      only irreplaceable thing there
 - [x] A call log below the claims: model, effort, prompt, digest, response,
       reasoning, tokens, error. Domain-free, and holding the declines, failures
       and costs a claim cannot
@@ -202,21 +200,14 @@ a structure, a paradigm and a problem class.
       per-candidate error: 95% of calls reads as 87% over three candidates
 - [x] The candidates are the denominator, since declining a code correctly is
       a decision the share never credits
-- [x] The ladder is 90/95/98/99% across haiku, sonnet, opus and fable, with
-      the top three within one label
 - [x] Render a kind as its test rather than its name. No measured gain at
       version 4, and kept on its own argument
 - [x] Hash the instructions and the criteria together — landed as a digest of
       the whole payload, per attempt, which subsumes the version with it
 - [x] Measure a configuration against itself: three `--fresh` passes. 1 of 31
       attempts flips for opus, 3 for haiku and sonnet — 0.5-2.2% of decisions
-- [x] The flips are not random. Four of six land on `binary-search-tree` or
-      `tree-traversal` boundaries
 - [x] Read the calibration set after each criteria edit. It cannot measure
       quality, having helped write the criteria
-- [x] Both systematic cells cleared, and the one edit aimed at scattered
-      errors moved nothing. A cell several readers hit the same way is fixable
-      by a rule; scattered errors are not
 - [x] Show the reader the same criteria the classifier gets. Otherwise a
       disagreement is ambiguous between an unclear rule and two different ones
 
@@ -234,8 +225,6 @@ view therefore became, silently, what that reading was scored against.
 - [x] `--disputed` unset rather than 1, so the pool is every claim. Offering
       only what a classifier contests corrected the hand claims in one
       direction
-- [x] Not backfilled, with nothing left to name. Those readings went with the
-      961, and their calls predate the call log
 - [x] The log answers it anyway: `claimable` offers unclaimed attempts and
       `revisable` claimed ones. 138 claims over 100 attempts, so 38 revisions
 
@@ -253,8 +242,6 @@ Flow and its rules: `docs/architecture/README.md`, "Adjudicating the eval set".
 ### Closed
 - [x] Attribution runs and its claims stand, with the board consuming them.
       Whether it beats the tag fallback is measured in Phase 9
-- [x] What changes for a generated problem is where the candidates come from,
-      and Phase 6 writes them
 
 ## Phase 4 — cards and template matching — done
 
@@ -304,7 +291,6 @@ a user can solve, per technique, and it is Phase 9.
       everything its technique reaches
 - [x] Its own configuration, not the claim classifier's, since the two ask
       different questions
-- [x] Nine cards against 485 problems: 345 pairs, 1724 records
 - [x] Time a call at both levels: what the caller waited and how many requests,
       beside the last request's own time. Without the count, a run held behind
       a per-minute cap read as a slow model
@@ -318,7 +304,6 @@ a user can solve, per technique, and it is Phase 9.
 - [x] `--card` narrows the sample, which is what a card just added asks for.
       The counts still read the whole reference, or a card's forms would look
       untouched beside nothing
-- [x] 45 of the 345 questions reach all 44 templates, five records each
 - [x] `algo-coach annotate` — the statement and the card's templates numbered,
       answered at once, one record per template. Reading a statement once to
       judge five forms is the cheap order
@@ -329,10 +314,6 @@ a user can solve, per technique, and it is Phase 9.
       stated one
 - [x] The whole corpus synced, ~4k problems against 485, every statement
       non-blank. The field tightened last phase held across an eight-fold push
-- [x] The same nine cards pre-filter to ~2.8k questions and ~14k pair
-      verdicts, so a full run is a cost to check before a command to type
-- [x] The claims side is unmoved: attempts bound it, and 485 problems carry
-      one
 
 ### Closed
 - [x] Cards are authored into `content/` and seeded, the matcher reads the
@@ -414,9 +395,9 @@ so an unmeasured matcher would audit at an unknown error rate.
 - [ ] The first hand pass calibrates and a blind one measures, the claims rule
       unchanged. A score over the pairs that drew the line is agreement with
       itself
-- [ ] `origin` on `Problem`, `engine` beside `push`, and `generated_for` naming
-      the template it was written for. An assertion rather than a reading,
-      which is what makes the first `TemplateMatch` provenance
+- [ ] `generated_for` on `Problem`, naming the template it was written for. An
+      assertion rather than a reading, which is what makes the first
+      `TemplateMatch` provenance
 - [ ] `TestCase` and `CanonicalSolution`, written with the problem in one
       call. Cases derived afterwards describe whatever the solution happens to
       do
@@ -437,9 +418,6 @@ so an unmeasured matcher would audit at an unknown error rate.
       canonical can widen the codes
 - [ ] Settle the discrimination bar on a real corpus. Cases that separate
       nothing license `verified` on a canonical that is wrong
-- [ ] Candidates for the bar: two canonicals from different approaches
-      agreeing on every case, a mechanically broken canonical failing, the near
-      miss the technique entry already names failing
 - [ ] Measure the announcement floor against the archived corpus in
       `data/old/`, then read the generated one against it. A form the matcher
       names from the statement alone was telegraphed
@@ -469,24 +447,20 @@ so an unmeasured matcher would audit at an unknown error rate.
       tests, never printing the template
 - [ ] Card status — recalled when, ladder outstanding, probes available. The
       inputs a graduation rule reads, and no threshold
-- [ ] A graduation rule, recall windows, a rust jog short of the full loop.
-      Candidates, not commitments. Daily use answers which of them matters
 
 ### Exit
 - [ ] Recall and the ladder run daily
 
 ## Phase 8 — in-engine drill loop
 
-The first attempts the engine produces rather than ingests.
+The first attempts the engine produces itself.
 
 - [ ] Serve a generated problem, time the sitting, run the submission against
-      the problem's own cases, and mint the attempt with `origin: engine`
-- [ ] The verification result on `Attempt`, beside the platform status string
-      it already carries. Additive, and meaningless before Phase 6
+      the problem's own cases, and mint the attempt
+- [ ] The verification result on `Attempt`. Additive, and meaningless before
+      Phase 6
 - [ ] Ask for a claim and a self-label as Phase 2 asked them. What changes is
       who witnessed the sitting, not who writes
-- [ ] The interaction is deferred to using it: how a solution is entered, what
-      a failing run does, whether a sitting resumes
 
 ### Exit
 - [ ] Daily practice runs here, on problems the engine wrote and judged
@@ -501,22 +475,12 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 - [ ] Read the architecture doc against the code, landing every divergence
       here. The goal is not that none exists, since the doc is target state.
       The goal is that none is unknown
-- [ ] Classify freely over the whole vocabulary and intersect with the tags in
-      code, once the hand claims can score it against the constrained one. An
-      out-of-tag verdict is the only signal that the tags are the gap
+- [ ] Classify freely over the whole vocabulary and intersect in code, once the
+      hand claims can score it against the constrained one. A verdict outside
+      the problem's own techniques is the only signal that they are the gap
 - [ ] An outage falls back to another endpoint of the same shape, never to
-      Anthropic direct. Triggered when an outage blocks a run rather than
-      delaying one
-- [ ] Anthropic direct is excluded because its compatibility layer ignores
-      `response_format`, `strict` and `reasoning_effort`. Claude with
-      enforcement means a second transport shape
-- [ ] Re-derive stored problems without a push, once the mapping changes for
-      problems no longer pushed. A re-push covers it until then
-- [ ] Ingest assumes a single writer, so two concurrent pushes can both miss
-      the same `external_id`. Decided when the web version lands
-- [ ] Duplicate detection loads the whole attempt log per call, and
-      `by_external` scans every problem file per record. Both become queries
-      when storage swaps
+      Anthropic direct, whose compatibility layer ignores `response_format`,
+      `strict` and `reasoning_effort`. Triggered when an outage blocks a run
 
 ## Later phases
 
@@ -537,7 +501,3 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
       produced. A router that only ever says `gap` would score well on a corpus
       of gaps
 
-### Removed, kept in git
-- [ ] The failure classifier and its eval were cut before Phase 1 shipped and
-      are Phase 9's to rebuild. `Diagnosis` and the log's diagnosis methods
-      stayed behind, since an append-only log cannot be retrofitted
