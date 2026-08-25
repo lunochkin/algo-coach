@@ -360,10 +360,10 @@ loose shape.
 - [x] The architecture doc drops the push boundary and the pushed-problem
       rules. It still says the push API is a second ingest path, which stops
       being true here
-- [ ] Problems, Attempts, Boundaries and Invariants each carry a rule that
+- [x] Problems, Attempts, Boundaries and Invariants each carry a rule that
       exists because two origins did. Each states what one origin makes of it,
       or goes
-- [ ] `README.md` drops the push API from what the engine exposes
+- [x] `README.md` drops the push API from what the engine exposes
 
 ### Archive
 - [ ] Move the pushed corpus and log to `data/old/`: 1785 attempts, 3962
