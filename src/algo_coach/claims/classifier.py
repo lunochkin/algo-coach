@@ -45,10 +45,10 @@ PIN = "coreweave/fp4"
 TEMPERATURE: float | None = 0.0
 SYSTEM = """You name which techniques a solution used.
 
-The candidates are one problem's tags — what the problem could exercise. Say
-which of them the code in front of you actually did. Name every one it used
-and nothing more: a solution can combine several, and one naming every
-candidate agrees with the tags and decides nothing.
+The candidates are one problem's own techniques — what the problem could
+exercise. Say which of them the code in front of you actually did. Name every
+one it used and nothing more: a solution can combine several, and one naming
+every candidate agrees with the fallback and decides nothing.
 
 Each candidate carries what earns it and the near miss it is confused with.
 Decide each against its own rule, and where the code fits the near miss
@@ -132,11 +132,11 @@ def classify(
     *,
     configuration: Configuration = DEFAULT,
 ) -> tuple[list[str], Call | None]:
-    """The techniques a solution used, chosen from the problem's own tags, and
-    the call that read them — `None` where the answer cost nothing.
+    """The techniques a solution used, chosen from the problem's own, and the
+    call that read them — `None` where the answer cost nothing.
 
     The candidates appear twice, doing different jobs. The response schema
-    enforces them, so the classifier cannot name a technique the tags do not.
+    enforces them, so the classifier cannot name one the problem does not.
     The prompt informs them: thinking is not schema-constrained, so a model
     that met the candidates only at emission time would reason about the code
     without knowing which answers exist, then be forced into the nearest one.
@@ -145,8 +145,9 @@ def classify(
     describes what the problem admits, which is the question the fallback
     already answers.
 
-    Naming nothing is legal — the tags may not cover what the code did, and no
-    claim leaves the fallback standing rather than asserting a wrong one. A
+    Naming nothing is legal — the candidates may not cover what the code did,
+    and no claim leaves the fallback standing rather than asserting a wrong
+    one. A
     reply cut short by the token cap names nothing for a different reason, and
     the call's `stop_reason` is what separates the two.
     """

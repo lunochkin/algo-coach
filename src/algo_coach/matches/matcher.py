@@ -1,7 +1,7 @@
 """Which of a card's templates a problem exercises.
 
-A question about what the problem asks, so the statement is the evidence:
-tags say what it is about, and a form is how it is solved. The same shape as
+A question about what the problem asks, so the statement is the evidence: a
+technique says what it is about, and a form is how it is solved. The same shape as
 the technique classifier — candidates in, the subset out — read by a prompted
 model for the same reason, that nobody has labelled which form solves what.
 """
@@ -98,9 +98,9 @@ def match(
     shape and one request rather than six. The records come from the one
     answer.
 
-    A single candidate is still asked about, unlike a lone technique: there the
-    tags already answer, here the verdict is the record, and yes and no are
-    both readings that have to be paid for once.
+    A single candidate is still asked about, unlike a lone technique: there
+    the problem's own techniques already answer, here the verdict is the
+    record, and yes and no are both readings that have to be paid for once.
     """
     forms = candidates(card)
     if not forms:

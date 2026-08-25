@@ -69,8 +69,8 @@ DERIVED = {
     """,
     "attributed": """
         -- What an attempt counts toward: its standing claim where that names
-        -- anything, the problem's tags otherwise. A claim naming nothing is a
-        -- reading that declined, so the fallback stands.
+        -- anything, the problem's own techniques otherwise. A claim naming
+        -- nothing is a reading that declined, so the fallback stands.
         select a.id attempt_id, a.problem_id, a.solved, a.finished_at,
                coalesce(nullif(s.techniques, []), p.techniques) techniques,
                s.source is not null and len(s.techniques) > 0 claimed

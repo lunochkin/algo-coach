@@ -40,8 +40,8 @@ Four places, and nothing is trained anywhere in the engine:
   data exists for that label. Public corpora tag problems, not solutions, so a
   trained model would predict the fallback it is meant to improve on.
 - **Template matching** — which problems exercise which form of a card, read
-  from the statement, because a tag says what a problem is *about* and not
-  which form solves it.
+  from the statement, because a technique says what a problem is *about* and
+  not which form solves it.
 - **Card authoring** — a skill turns notes into structured cards; every code
   template is checked against a brute force before it lands.
 
@@ -278,7 +278,8 @@ Why it is shaped this way:
   together and show neither. A hinted pass is recorded as hinted, or a decaying
   form scores the same as a fluent one.
 - **Coverage is derived, not authored.** The ladder must exercise every studied
-  form, and a tag says what a problem is *about*, not which form solves it. So
+  form, and a technique says what a problem is *about*, not which form solves
+  it. So
   which problems exercise which template is read from the statement and stored
   per pair, negatives included. A studied form no problem matches is a reported
   gap, never a quietly shorter ladder.

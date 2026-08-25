@@ -89,7 +89,6 @@ def problem(
     return Problem(
         id=id,
         title=id,
-        title_slug=id,
         statement=statement,
         techniques=techniques,
     )

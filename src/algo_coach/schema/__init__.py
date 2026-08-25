@@ -5,7 +5,6 @@ from algo_coach.schema.attempt import (
     FailureMode,
     SelfLabel,
     TechniqueClaim,
-    TestResult,
 )
 from algo_coach.schema.call import Call
 from algo_coach.schema.card import Card, Selector, Template, TemplateKind
@@ -40,5 +39,4 @@ __all__ = [
     "TemplateKind",
     "TemplateMatch",
     "TemplateSeed",
-    "TestResult",
 ]

@@ -38,10 +38,10 @@ def reading(attempt_id: str, techniques: list[str], *, model: str = MODEL):
 @pytest.fixture
 def hand_claimed(tmp_path, monkeypatch):
     data = tmp_path / "data"
-    seed_problem(data, id="two-tags", techniques=["greedy", "sorting"])
+    seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", data)
     log = AttemptLog(data)
-    log.append_attempt(attempt("a1", "two-tags"))
+    log.append_attempt(attempt("a1", "two-codes"))
     log.append_claim(user_claim("a1", ["greedy"]))
     return log
 
@@ -268,9 +268,9 @@ def test_a_stored_run_over_nothing_read_exits_nonzero(hand_claimed, monkeypatch,
 def test_nothing_hand_claimed_exits_nonzero(tmp_path, monkeypatch, capsys):
     """No ground truth is not a score of zero — there is nothing to score."""
     data = tmp_path / "data"
-    seed_problem(data, id="two-tags", techniques=["greedy", "sorting"])
+    seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", data)
-    AttemptLog(data).append_attempt(attempt("a1", "two-tags"))
+    AttemptLog(data).append_attempt(attempt("a1", "two-codes"))
 
     with pytest.raises(SystemExit) as exit_info:
         run(monkeypatch, FakeTransport.answering())

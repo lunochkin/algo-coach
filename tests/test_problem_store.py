@@ -6,7 +6,6 @@ def make_problem(id: str = "i1", **overrides) -> Problem:
     fields = {
         "id": id,
         "title": "Two Sum",
-        "title_slug": "two-sum",
         "statement": "Given an array, return ...",
     } | overrides
     return Problem.model_validate(fields)

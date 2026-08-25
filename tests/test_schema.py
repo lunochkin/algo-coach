@@ -15,7 +15,6 @@ from algo_coach.schema import (
     SelfLabel,
     Technique,
     TechniqueClaim,
-    TestResult,
 )
 
 
@@ -34,7 +33,6 @@ def make_attempt(id: str) -> Attempt:
         problem_id="p1",
         user_id="user1",
         code="def f(): pass",
-        tests=[TestResult(name="t1", passed=False)],
         solved=False,
         time_to_solve_sec=900.0,
     )

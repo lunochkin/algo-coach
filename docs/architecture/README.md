@@ -125,8 +125,8 @@ user can solve, per technique, and the two share no data.
 - **The ladder covers every studied template.** Its rungs come from the
   template matches, at least one per template, and the selector fills the rest
   out to `size`. A ladder drawn from the selector alone would exercise the
-  technique and leave some forms unexercised, because a tag says what a problem
-  is about and not which form solves it.
+  technique and leave some forms unexercised, because a technique says what a
+  problem is about and not which form solves it.
 - **Requiredness is derived from what a rung covers**, never stored. A rung
   covering a studied template is required. A rung covering only the optional
   template is optional. A rung covering both is required, and the optional

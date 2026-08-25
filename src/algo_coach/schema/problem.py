@@ -12,7 +12,6 @@ class ProblemDifficulty(StrEnum):
 class Problem(BaseModel):
     id: str  # engine-minted, as every reference in the log is
     title: str
-    title_slug: str
     # derived from the problem's canonical solutions, so re-derivable at any
     # time: a canonical added later can widen them
     techniques: list[str] = Field(default_factory=list)

@@ -112,7 +112,6 @@ def test_is_known_does_not_reject_retired_codes_at_read_time():
     problem = Problem(
         id="p1",
         title="t",
-        title_slug="t",
         statement="s",
         techniques=[retired],
     )

@@ -1,9 +1,9 @@
-"""How far the classifier's claims move the board off the tag fallback.
+"""How far the classifier's claims move the board off the fallback.
 
 A sanity check, never a criterion. Narrowing two or three candidates to one
 removes credit by arithmetic. A board that barely moves therefore says the
-classifier named the whole candidate set, agreeing with the tags and deciding
-nothing. Movement says it decided something. Only the hand claims say it
+classifier named the whole candidate set, agreeing with the fallback and
+deciding nothing. Movement says it decided something. Only the hand claims say it
 decided right.
 """
 
@@ -17,7 +17,7 @@ from algo_coach.schema import Attempt, Problem, TechniqueClaim
 
 class TechniqueMovement(BaseModel):
     technique: str
-    fallback: int  # attempts credited to it by the problem's tags alone
+    fallback: int  # attempts credited to it by the problem's techniques alone
     claimed: int  # attempts credited once the claims resolve
     moved: int  # claimed - fallback; negative is credit the claims took away
 

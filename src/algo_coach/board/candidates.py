@@ -30,9 +30,9 @@ def candidates(
 ) -> list[ProblemRow]:
     """What could be drilled for a technique, least recently attempted first.
 
-    Membership is the problem's own techniques, not the claims on its attempts:
-    selection asks what a problem could exercise, which is what a tag says,
-    while a claim says what one past solution did. A problem nobody has
+    Membership is the problem's own techniques, not the claims on its
+    attempts: selection asks what a problem could exercise, while a claim says
+    what one past solution did. A problem nobody has
     attempted is a candidate on the same terms as one attempted last year.
 
     Ranked by staleness, lowest solve rate breaking a tie, which is the row a

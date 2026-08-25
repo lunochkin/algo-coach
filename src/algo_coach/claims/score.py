@@ -128,8 +128,8 @@ def score(truth: Mapping[str, Sequence[str]], machine: Mapping[str, Sequence[str
     """Agreement by set equality, attempt by attempt.
 
     Equality rather than overlap: a claim naming every candidate agrees with
-    the tags, decides nothing, and would pass a metric that only asks whether
-    the right code appears.
+    the fallback, decides nothing, and would pass a metric that only asks
+    whether the right code appears.
 
     A verdict naming no candidate is scored like any other. It asserts that
     none of them apply, which a claim naming some of them contradicts — and a

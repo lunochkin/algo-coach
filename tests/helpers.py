@@ -155,7 +155,6 @@ def seed_problem(root, *, id: str, techniques: list[str]) -> None:
         Problem(
             id=id,
             title=id,
-            title_slug=id,
             statement="Given an array, return ...",
             techniques=techniques,
         )

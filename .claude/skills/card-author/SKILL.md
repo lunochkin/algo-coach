@@ -210,12 +210,9 @@ file in place.
 
 6. **Write the selector** — `technique`, optional `difficulty`, `size`. The
    ladder is resolved from the corpus at import, so authoring names no problem:
-   the selector says what to draw from and how many rungs. Check what the corpus
-   holds before choosing a size:
-
-   ```bash
-   uv run algo-coach board
-   ```
+   the selector says what to draw from and how many rungs. Size it by what the
+   technique needs, not by what the store happens to hold. A studied template
+   no problem matches is a reported gap, and generation writes for that gap.
 
 7. **Validate**, and fix what it reports:
 
@@ -226,7 +223,8 @@ file in place.
 ## Rules
 
 - **No third-party problem statements or test cases**, in the file or anywhere
-  else in any repo. Name a problem and link it; never paste it.
+  else in any repo. Describe the form a problem takes; never paste one, and
+  never link to where its statement lives.
 - **Never print a template's code into the conversation** — not while authoring,
   not when reporting what was written, not when summarising a revision. Write it
   to the file and name the template by its slug. A card is read when its reader

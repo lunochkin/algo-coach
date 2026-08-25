@@ -36,8 +36,8 @@ def per_technique(
 
     Each attempt is resolved through `resolve_techniques` and counted once in
     every technique it names — a solution using two techniques is evidence
-    about both. An attempt resolving to no code produces no row: an unmapped
-    tag blocks nothing and invents nothing.
+    about both. An attempt resolving to no code produces no row: a problem
+    naming no technique blocks nothing and invents nothing.
 
     `problems` is keyed by the engine-minted id. A reference it cannot answer
     is a broken invariant, not an empty row. `claims` and `labels` are keyed
@@ -70,8 +70,8 @@ def ungrouped(
 ) -> list[Attempt]:
     """The attempts `per_technique` reaches no row for.
 
-    Real work that the board cannot show: unmapped tags and unclaimed
-    attempts leave no code to group by. Counted beside the rows so the
+    Real work that the board cannot show: a problem naming no technique, and
+    an unclaimed attempt on it, leave no code to group by. Counted beside the rows so the
     omission is visible rather than silent.
     """
     return [

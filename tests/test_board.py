@@ -37,7 +37,6 @@ def make_problem(id: str, techniques: list[str]) -> Problem:
     return Problem(
         id=id,
         title=id,
-        title_slug=id,
         statement="Given an array, return ...",
         techniques=techniques,
     )
@@ -145,9 +144,9 @@ def test_a_relabelled_attempt_counts_once_under_its_latest_mode():
 def test_an_attempt_counts_once_in_every_technique_it_names():
     """A solution using two techniques is evidence about both. Over-crediting
     is the known cost of fallback attribution, not a bug in the count."""
-    problem = make_problem("two-tags", ["greedy", "sorting"])
+    problem = make_problem("two-codes", ["greedy", "sorting"])
 
-    rows = per_technique([make_attempt("a1", problem_id="two-tags")], index(problem), {}, {})
+    rows = per_technique([make_attempt("a1", problem_id="two-codes")], index(problem), {}, {})
 
     assert [(row.technique, row.attempt_count) for row in rows] == [
         ("greedy", 1),
@@ -220,8 +219,8 @@ def test_an_attempt_a_claim_rescues_is_not_ungrouped():
 def test_ungrouped_and_the_rows_partition_nothing():
     """An attempt on several techniques is on several rows; the two counts
     answer different questions and are not meant to add up."""
-    problem = make_problem("two-tags", ["greedy", "sorting"])
-    attempts = [make_attempt("a1", problem_id="two-tags")]
+    problem = make_problem("two-codes", ["greedy", "sorting"])
+    attempts = [make_attempt("a1", problem_id="two-codes")]
 
     rows = per_technique(attempts, index(problem), {}, {})
 

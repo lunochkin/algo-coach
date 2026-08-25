@@ -1,7 +1,7 @@
 [project]
 name = "algo-coach"
 version = "0.1.0"
-description = "AI coaching layer for deliberate practice of algorithmic problem-solving: SRS over a technique-mastery model with LLM failure diagnosis"
+description = "AI coaching layer for deliberate practice of algorithmic problem-solving: SRS over a technique-mastery model, on a problem corpus the engine writes and owns"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.14"

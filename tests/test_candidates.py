@@ -10,7 +10,6 @@ def make_problem(id: str, techniques: list[str]) -> Problem:
     return Problem(
         id=id,
         title=id,
-        title_slug=id,
         statement="Given an array, return ...",
         techniques=techniques,
     )

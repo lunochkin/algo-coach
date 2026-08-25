@@ -26,7 +26,6 @@ def seed_problem(root, *, id: str, techniques: list[str]) -> None:
         Problem(
             id=id,
             title=id,
-            title_slug=id,
             statement="Given an array, return ...",
             techniques=techniques,
         )
@@ -54,12 +53,12 @@ def attempt(
 def claim_root(tmp_path, monkeypatch) -> AttemptLog:
     """One two-tag problem and one single-tag problem, an attempt on each."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
+    seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     seed_problem(root, id="one-tag", techniques=["trie"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
 
     log = AttemptLog(root)
-    log.append_attempt(attempt("a1", "two-tags"))
+    log.append_attempt(attempt("a1", "two-codes"))
     log.append_attempt(attempt("a2", "one-tag"))
     return log
 
@@ -93,7 +92,7 @@ def test_a_single_tag_problem_is_never_offered(claim_root, monkeypatch, capsys):
     run(monkeypatch, ["1", ""])
 
     out = capsys.readouterr().out
-    assert "two-tags" in out
+    assert "two-codes" in out
     assert "one-tag" not in out
 
 
@@ -176,9 +175,9 @@ def test_the_machine_verdict_is_never_shown(claim_root, monkeypatch, capsys):
 def test_an_attempt_without_code_is_not_offered(tmp_path, monkeypatch, capsys):
     """The evidence is the code; without it there is nothing to read."""
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
+    seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
-    AttemptLog(root).append_attempt(attempt("a1", "two-tags", code=None))
+    AttemptLog(root).append_attempt(attempt("a1", "two-codes", code=None))
 
     with pytest.raises(SystemExit) as exit_info:
         run(monkeypatch, [])
@@ -194,9 +193,9 @@ def test_the_code_is_shown(claim_root, monkeypatch, capsys):
 
 def test_a_long_solution_is_cut_and_says_so(tmp_path, monkeypatch, capsys):
     root = tmp_path / "data"
-    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
+    seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
-    AttemptLog(root).append_attempt(attempt("a1", "two-tags", code="\n".join("x" * 50)))
+    AttemptLog(root).append_attempt(attempt("a1", "two-codes", code="\n".join("x" * 50)))
 
     run(monkeypatch, ["1", ""], "--lines", "10")
 
@@ -205,7 +204,7 @@ def test_a_long_solution_is_cut_and_says_so(tmp_path, monkeypatch, capsys):
 
 def retried(root, monkeypatch, *attempts: Attempt) -> AttemptLog:
     """Several attempts on one two-tag problem — a problem that took retries."""
-    seed_problem(root, id="two-tags", techniques=["greedy", "sorting"])
+    seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
     log = AttemptLog(root)
     for one in attempts:
@@ -219,9 +218,9 @@ def test_a_problem_contributes_one_attempt(tmp_path, monkeypatch, capsys):
     log = retried(
         tmp_path / "data",
         monkeypatch,
-        attempt("a1", "two-tags"),
-        attempt("a2", "two-tags"),
-        attempt("a3", "two-tags"),
+        attempt("a1", "two-codes"),
+        attempt("a2", "two-codes"),
+        attempt("a3", "two-codes"),
     )
 
     run(monkeypatch, ["1", ""], "--count", "3")
@@ -236,9 +235,9 @@ def test_the_latest_attempt_is_the_one_offered(tmp_path, monkeypatch, capsys):
     log = retried(
         tmp_path / "data",
         monkeypatch,
-        attempt("a1", "two-tags", finished_at=T0),
-        attempt("a2", "two-tags", finished_at=T0 + timedelta(days=2)),
-        attempt("a3", "two-tags", finished_at=T0 + timedelta(days=1)),
+        attempt("a1", "two-codes", finished_at=T0),
+        attempt("a2", "two-codes", finished_at=T0 + timedelta(days=2)),
+        attempt("a3", "two-codes", finished_at=T0 + timedelta(days=1)),
     )
 
     run(monkeypatch, ["1", ""])
@@ -253,9 +252,9 @@ def test_the_id_breaks_a_tie_on_the_same_timestamp(tmp_path, monkeypatch, capsys
     log = retried(
         tmp_path / "data",
         monkeypatch,
-        attempt("a3", "two-tags"),
-        attempt("a1", "two-tags"),
-        attempt("a2", "two-tags"),
+        attempt("a3", "two-codes"),
+        attempt("a1", "two-codes"),
+        attempt("a2", "two-codes"),
     )
 
     run(monkeypatch, ["1", ""])
@@ -270,8 +269,8 @@ def test_an_earlier_attempt_stands_in_when_the_latest_has_no_code(tmp_path, monk
     log = retried(
         tmp_path / "data",
         monkeypatch,
-        attempt("a1", "two-tags", finished_at=T0),
-        attempt("a2", "two-tags", finished_at=T0 + timedelta(days=1), code=None),
+        attempt("a1", "two-codes", finished_at=T0),
+        attempt("a2", "two-codes", finished_at=T0 + timedelta(days=1), code=None),
     )
 
     run(monkeypatch, ["1", ""])
@@ -286,8 +285,8 @@ def test_a_problem_leaves_the_pool_once_its_attempt_is_claimed(tmp_path, monkeyp
     retried(
         tmp_path / "data",
         monkeypatch,
-        attempt("a1", "two-tags", finished_at=T0),
-        attempt("a2", "two-tags", finished_at=T0 + timedelta(days=1)),
+        attempt("a1", "two-codes", finished_at=T0),
+        attempt("a2", "two-codes", finished_at=T0 + timedelta(days=1)),
     )
 
     run(monkeypatch, ["1", ""])

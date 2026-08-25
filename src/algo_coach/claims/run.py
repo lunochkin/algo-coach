@@ -230,7 +230,7 @@ def classify_backlog(
             # found the candidates did not cover it, and that answer does not
             # change while the question does not. What answers the attempt is
             # unchanged — the resolver reads an empty claim as no answer, so
-            # the tags keep standing.
+            # the problem's own techniques keep standing.
             if call is not None:
                 store(log, attempt.id, techniques, call)
             result.undecided += 1

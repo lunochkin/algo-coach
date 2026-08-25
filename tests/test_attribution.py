@@ -26,7 +26,6 @@ def make_problem(*, techniques: list[str] | None = None, id: str = "minted-u1") 
     return Problem(
         id=id,
         title="Two Sum",
-        title_slug="two-sum",
         statement="Given an array, return ...",
         techniques=techniques or [],
     )

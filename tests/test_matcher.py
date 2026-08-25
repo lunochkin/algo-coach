@@ -44,8 +44,8 @@ def test_one_call_carries_every_candidate(tmp_path):
 
 
 def test_the_statement_is_the_evidence(tmp_path):
-    """Which form a problem exercises is a question about what it asks; tags
-    answer what it is about."""
+    """Which form a problem exercises is a question about what it asks; its
+    techniques answer what it is about."""
     client = FakeTransport.answering(Verdict([]))
     (one,) = seeded(tmp_path)
     asked = problem("p1", techniques=["sliding-window"], statement="Find the longest substring ...")
@@ -61,8 +61,8 @@ def test_the_statement_is_the_evidence(tmp_path):
 
 
 def test_a_single_candidate_is_still_asked(tmp_path):
-    """Unlike a lone technique, where the tags already answer: here the verdict
-    is the record, and yes and no both have to be paid for once."""
+    """Unlike a lone technique, where the problem itself answers: here the
+    verdict is the record, and yes and no both have to be paid for once."""
     client = FakeTransport.answering(Verdict([]))
 
     _, (matched, call) = read(tmp_path, client, [card(templates=[template("only-form")])])

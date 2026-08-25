@@ -9,7 +9,7 @@ from algo_coach.techniques import standing_claims
 
 
 def moved(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """How far the classifier's claims move the board off the tag fallback.
+    """How far the classifier's claims move the board off the fallback.
 
     The classifier's only: a hand claim narrows for a different reason, and
     mixing the two would credit the machine with what the user decided.

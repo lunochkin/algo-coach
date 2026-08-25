@@ -81,7 +81,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         print(code_excerpt(attempt.code or "", args.lines))
         if args.revise:
             print(read_as(attempt, standing[attempt.id], readings, names))
-        # Printed per attempt: the candidates are this problem's tags.
+        # Printed per attempt: the candidates are this problem's techniques.
         print(f"  {numbered(problem.techniques)}")
 
         # In the candidates' order, since that is what the numbers select.
@@ -93,7 +93,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             problem.techniques,
             [],
             empty="keep" if args.revise else "skip",
-            # Naming none of the tags is a verdict about the code, and the
+            # Naming none of them is a verdict about the code, and the
             # classifier can already record it. Without it here, a hand claim
             # could only be overturned by deleting it, which drops the attempt
             # out of the eval set entirely.

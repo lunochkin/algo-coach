@@ -92,7 +92,7 @@ def user_claim(
 
     Blind and unsure unless the caller says otherwise: the drill loop asks
     before any classifier has read the attempt, and the hand pass asks from the
-    code and the tags. Only a revision has readings in view, and only it says
+    code and the candidates. Only a revision has readings in view, and only it says
     so — a default that guessed would record independence nobody claimed.
     """
     return TechniqueClaim(

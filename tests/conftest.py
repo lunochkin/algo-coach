@@ -23,7 +23,6 @@ def seed_problem(store: ProblemStore, *, id: str) -> None:
         Problem(
             id=id,
             title="Two Sum",
-            title_slug="two-sum",
             statement="Given an array, return ...",
         )
     )

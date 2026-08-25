@@ -6,8 +6,8 @@ each other, settled one at a time, and never asserted as a set. The question is
 an economy of asking, so nothing but the call is keyed to it.
 
 Pre-filtering is what makes the run affordable: a problem is offered only to
-cards whose technique its tags reach, or the work is every template against
-every problem for an answer that is almost always no.
+cards whose technique the problem carries, or the work is every template
+against every problem for an answer that is almost always no.
 """
 
 from collections.abc import Iterable, Mapping, Sequence

@@ -15,12 +15,6 @@ class FailureMode(StrEnum):
     NONE = "none"  # clean pass
 
 
-class TestResult(BaseModel):
-    name: str
-    passed: bool
-    runtime_ms: float | None = None
-
-
 class Attempt(BaseModel):
     """One real practice attempt. Append-only: never rewritten, never deleted,
     and schema changes stay additive."""
@@ -35,9 +29,7 @@ class Attempt(BaseModel):
     language: str | None = None  # not always recorded; a default would guess
     time_to_solve_sec: float | None = None
     solved: bool
-    notes: str | None = None
     code: str | None = None
-    tests: list[TestResult] = Field(default_factory=list)
 
 
 class SelfLabel(AttemptRecord):

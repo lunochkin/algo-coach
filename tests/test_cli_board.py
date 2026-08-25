@@ -25,7 +25,6 @@ def seed_problem(root, *, id: str, techniques: list[str]) -> None:
         Problem(
             id=id,
             title=id,
-            title_slug=id,
             statement="Given an array, return ...",
             techniques=techniques,
         )
@@ -150,7 +149,7 @@ def test_render_pads_every_column(board_root, monkeypatch, capsys):
 
 
 def seed_unmapped_problem(root) -> None:
-    """A problem whose tags reach no code: its attempts land on no row."""
+    """A problem naming no technique: its attempts land on no row."""
     seed_problem(root, id="minted-unmapped", techniques=[])
 
 
