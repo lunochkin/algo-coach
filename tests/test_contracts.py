@@ -1,55 +1,34 @@
-"""A payload is what someone outside the engine writes — a client pushing, an
-author seeding — and ingest builds a record straight from one. Nothing but
-these tests keeps the two shapes aligned.
+"""A payload is what someone outside the engine writes, and seeding builds a
+record straight from one. Nothing but these tests keeps the two shapes aligned.
 
-Two boundaries, one rule: identity and provenance are the engine's, so the
-payload has no field for them.
+One rule: identity is the engine's, so the payload has no field for it.
 """
 
 import pytest
 
-from algo_coach.schema import (
-    Attempt,
-    AttemptPush,
-    Card,
-    CardSeed,
-    Problem,
-    ProblemPush,
-    Template,
-    TemplateSeed,
-)
+from algo_coach.schema import Card, CardSeed, Template, TemplateSeed
 
-# What ingest stamps, and so must never reach the payload.
-ATTEMPT_STAMPED = frozenset({"id", "user_id", "problem_id", "origin"})
-PROBLEM_STAMPED = frozenset({"id", "user_id", "owner", "techniques"})
 MINTED = frozenset({"id"})
 
-CONTRACTS = [
-    # `problem_external_id` is consumed by ingest to resolve the reference and
-    # is the one payload field with no field on the record.
-    (AttemptPush, Attempt, ATTEMPT_STAMPED, frozenset({"problem_external_id"})),
-    (ProblemPush, Problem, PROBLEM_STAMPED, frozenset()),
-    # A card is authored once and seeded anywhere: only its id is per engine.
-    (CardSeed, Card, MINTED, frozenset()),
-    (TemplateSeed, Template, MINTED, frozenset()),
-]
+# A card is authored once and seeded anywhere: only its id is per engine.
+CONTRACTS = [(CardSeed, Card), (TemplateSeed, Template)]
 
 
-@pytest.mark.parametrize(("push", "record", "stamped", "consumed"), CONTRACTS)
-def test_every_payload_field_lands_on_the_record(push, record, stamped, consumed):
-    assert set(push.model_fields) - consumed <= set(record.model_fields)
+@pytest.mark.parametrize(("seed", "record"), CONTRACTS)
+def test_every_payload_field_lands_on_the_record(seed, record):
+    assert set(seed.model_fields) <= set(record.model_fields)
 
 
-@pytest.mark.parametrize(("push", "record", "stamped", "consumed"), CONTRACTS)
-def test_payload_has_no_field_for_what_the_engine_stamps(push, record, stamped, consumed):
-    """A field a client cannot name is a field it cannot forge."""
-    assert not set(push.model_fields) & stamped
+@pytest.mark.parametrize(("seed", "record"), CONTRACTS)
+def test_payload_has_no_field_for_what_the_engine_mints(seed, record):
+    """A field an author cannot name is a field they cannot forge."""
+    assert not set(seed.model_fields) & MINTED
 
 
-@pytest.mark.parametrize(("push", "record", "stamped", "consumed"), CONTRACTS)
-def test_payload_requires_what_the_record_requires(push, record, stamped, consumed):
-    """Ingest builds the record without catching a second validation error, so
+@pytest.mark.parametrize(("seed", "record"), CONTRACTS)
+def test_payload_requires_what_the_record_requires(seed, record):
+    """Seeding builds the record without catching a second validation error, so
     a field required there and optional here would crash the batch."""
     required = {name for name, field in record.model_fields.items() if field.is_required()}
-    supplied = {name for name, field in push.model_fields.items() if field.is_required()}
-    assert required - stamped <= supplied
+    supplied = {name for name, field in seed.model_fields.items() if field.is_required()}
+    assert required - MINTED <= supplied

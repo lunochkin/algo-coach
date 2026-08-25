@@ -7,7 +7,6 @@ from algo_coach.log import AttemptLog
 from algo_coach.schema import (
     Attempt,
     AttemptOrigin,
-    AttemptPush,
     AttemptRecord,
     ClaimSource,
     Confidence,
@@ -252,22 +251,6 @@ def test_self_label_roundtrip(tmp_path):
     log.append_self_label(second)
 
     assert log.self_labels() == [first, second]
-
-
-def test_a_client_still_sending_a_self_label_is_not_rejected():
-    """Unknown keys are ignored, so the old client keeps pushing while it is
-    updated — it just stops carrying the label."""
-    push = AttemptPush.model_validate(
-        {
-            "external_id": "e1",
-            "problem_external_id": "p1",
-            "finished_at": datetime.now(UTC),
-            "solved": True,
-            "self_label": "rust",
-        }
-    )
-
-    assert not hasattr(push, "self_label")
 
 
 ATTEMPT_RECORDS = [SelfLabel, TechniqueClaim, Diagnosis]

@@ -352,7 +352,7 @@ loose shape.
 
 ### The ingest path
 - [x] Remove `algo-coach push` and the `ingest` package
-- [ ] Remove `AttemptPush` and `ProblemPush`. The payload contract has no
+- [x] Remove `AttemptPush` and `ProblemPush`. The payload contract has no
       reader once nothing is pushed
 - [ ] Remove the external-id resolution. Every reference is engine-minted once
       nothing arrives from outside
