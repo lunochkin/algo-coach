@@ -6,7 +6,6 @@ from pydantic import ValidationError
 from algo_coach.log import AttemptLog
 from algo_coach.schema import (
     Attempt,
-    AttemptOrigin,
     AttemptRecord,
     ClaimSource,
     Confidence,
@@ -37,28 +36,8 @@ def make_attempt(id: str) -> Attempt:
         code="def f(): pass",
         tests=[TestResult(name="t1", passed=False)],
         solved=False,
-        origin=AttemptOrigin.ENGINE,
         time_to_solve_sec=900.0,
     )
-
-
-def test_a_pushed_attempt_cannot_claim_engine_origin():
-    """An external_id only exists on the push path, so a record carrying one
-    and claiming the engine produced it is rejected outright."""
-    now = datetime.now(UTC)
-    with pytest.raises(ValidationError):
-        Attempt(
-            id="a1",
-            external_id="e1",
-            user_id="u1",
-            problem_id="p1",
-            started_at=now,
-            finished_at=now,
-            code="def f(): pass",
-            solved=True,
-            origin=AttemptOrigin.ENGINE,
-            time_to_solve_sec=900.0,
-        )
 
 
 def make_diagnosis(attempt_id: str, mode: FailureMode) -> Diagnosis:

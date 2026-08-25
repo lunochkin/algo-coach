@@ -2,7 +2,7 @@ import pytest
 
 from algo_coach.cli.transport import CREDENTIALS
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Problem, ProblemOwner
+from algo_coach.schema import Problem
 
 
 @pytest.fixture(autouse=True)
@@ -18,13 +18,10 @@ def off_the_developer_machine(tmp_path, monkeypatch):
         monkeypatch.delenv(name, raising=False)
 
 
-def seed_problem(store: ProblemStore, *, id: str, external_id: str, user_id: str) -> None:
+def seed_problem(store: ProblemStore, *, id: str) -> None:
     store.put(
         Problem(
             id=id,
-            external_id=external_id,
-            user_id=user_id,
-            owner=ProblemOwner.USER,
             title="Two Sum",
             title_slug="two-sum",
             statement="Given an array, return ...",
@@ -34,14 +31,11 @@ def seed_problem(store: ProblemStore, *, id: str, external_id: str, user_id: str
 
 @pytest.fixture
 def problems(tmp_path) -> ProblemStore:
-    """A store holding problem "p1" for both "u1" and "u2".
-
-    An attempt names a minted `problem_id`, so what a test needs from here is a
-    problem to point at — one per user, since the board reads per user.
-    """
+    """Two stored problems. An attempt names a minted `problem_id`, so what a
+    test needs from here is something to point at."""
     store = ProblemStore(tmp_path)
-    seed_problem(store, id="minted-u1", external_id="p1", user_id="u1")
-    seed_problem(store, id="minted-u2", external_id="p1", user_id="u2")
+    seed_problem(store, id="minted-u1")
+    seed_problem(store, id="minted-u2")
     return store
 
 
@@ -49,6 +43,6 @@ def problems(tmp_path) -> ProblemStore:
 def data_root(tmp_path) -> ProblemStore:
     """The same seeding, under the directory the CLI treats as DATA_ROOT."""
     store = ProblemStore(tmp_path / "data")
-    seed_problem(store, id="minted-u1", external_id="p1", user_id="u1")
-    seed_problem(store, id="minted-local", external_id="p1", user_id="local")
+    seed_problem(store, id="minted-u1")
+    seed_problem(store, id="minted-local")
     return store

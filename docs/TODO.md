@@ -367,7 +367,7 @@ loose shape.
 - [x] Empty the live store. The 138 hand claims over 100 attempts go with it,
       and a later classifier is scored against a set rebuilt by hand on
       generated problems
-- [ ] Tighten the records only after the store is empty: `origin: push`,
+- [x] Tighten the records only after the store is empty: `origin: push`,
       `source_status`, `external_id` and the platform fields. Legal only while
       nothing stored carries the loose shape
 

@@ -119,8 +119,8 @@ class Annotating(App[None]):
         self.query_one("#head", Static).update(
             f"{self.index + 1}/{len(self.pool)}  {question.card.slug}  {question.problem.title}"
         )
-        # Rendered as markdown, which is what the platform wrote: the examples
-        # are fenced blocks and the constraints a list. Read as plain text they
+        # Rendered as markdown, which is how a statement is written: the
+        # examples are fenced blocks and the constraints a list. Read as plain text they
         # are the part of the statement that decides the question, printed as
         # backticks and asterisks.
         self.query_one("#statement-body", Markdown).update(question.problem.statement)

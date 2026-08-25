@@ -1,13 +1,10 @@
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Problem, ProblemOwner
+from algo_coach.schema import Problem
 
 
-def make_problem(id: str = "i1", external_id: str = "e1", **overrides) -> Problem:
+def make_problem(id: str = "i1", **overrides) -> Problem:
     fields = {
         "id": id,
-        "external_id": external_id,
-        "user_id": "u1",
-        "owner": ProblemOwner.USER,
         "title": "Two Sum",
         "title_slug": "two-sum",
         "statement": "Given an array, return ...",

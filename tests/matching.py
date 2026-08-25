@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from algo_coach.calls import Reply
 from algo_coach.cards import CardStore, seed_cards
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Card, Problem, ProblemOwner, TemplateKind
+from algo_coach.schema import Card, Problem, TemplateKind
 
 
 @dataclass
@@ -88,9 +88,6 @@ def problem(
 ) -> Problem:
     return Problem(
         id=id,
-        external_id=f"ext-{id}",
-        user_id="u1",
-        owner=ProblemOwner.USER,
         title=id,
         title_slug=id,
         statement=statement,

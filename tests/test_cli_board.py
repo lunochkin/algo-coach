@@ -10,11 +10,9 @@ from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
     Attempt,
-    AttemptOrigin,
     ClaimSource,
     FailureMode,
     Problem,
-    ProblemOwner,
     SelfLabel,
     TechniqueClaim,
 )
@@ -26,9 +24,6 @@ def seed_problem(root, *, id: str, techniques: list[str]) -> None:
     ProblemStore(root).put(
         Problem(
             id=id,
-            external_id=f"ext-{id}",
-            user_id="u1",
-            owner=ProblemOwner.USER,
             title=id,
             title_slug=id,
             statement="Given an array, return ...",
@@ -56,12 +51,10 @@ def attempt(
 ) -> Attempt:
     return Attempt(
         id=id,
-        external_id=f"ext-{id}",
         user_id=user_id,
         problem_id=problem_id,
         finished_at=finished_at,
         solved=solved,
-        origin=AttemptOrigin.PUSH,
     )
 
 

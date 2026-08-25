@@ -8,7 +8,6 @@ from algo_coach.mint import user_claim
 from algo_coach.schema import (
     Kind,
     Problem,
-    ProblemOwner,
     Technique,
     TechniqueClaim,
 )
@@ -112,7 +111,6 @@ def test_is_known_does_not_reject_retired_codes_at_read_time():
 
     problem = Problem(
         id="p1",
-        owner=ProblemOwner.USER,
         title="t",
         title_slug="t",
         statement="s",

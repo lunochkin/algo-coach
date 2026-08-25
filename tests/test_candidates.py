@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 from algo_coach.board import candidates
-from algo_coach.schema import Attempt, AttemptOrigin, Problem, ProblemOwner
+from algo_coach.schema import Attempt, Problem
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -9,13 +9,9 @@ T0 = datetime(2026, 1, 1, tzinfo=UTC)
 def make_problem(id: str, techniques: list[str]) -> Problem:
     return Problem(
         id=id,
-        external_id=id,
-        user_id="u1",
-        owner=ProblemOwner.USER,
         title=id,
         title_slug=id,
         statement="Given an array, return ...",
-        url=f"https://example.invalid/{id}",
         techniques=techniques,
     )
 
@@ -25,12 +21,10 @@ def make_attempt(
 ) -> Attempt:
     return Attempt(
         id=id,
-        external_id=f"ext-{id}",
         user_id="u1",
         problem_id=problem_id,
         finished_at=finished_at,
         solved=solved,
-        origin=AttemptOrigin.PUSH,
     )
 
 

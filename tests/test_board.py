@@ -6,11 +6,9 @@ from algo_coach.board import TechniqueRow, per_technique, ungrouped
 from algo_coach.log import latest_by_attempt
 from algo_coach.schema import (
     Attempt,
-    AttemptOrigin,
     ClaimSource,
     FailureMode,
     Problem,
-    ProblemOwner,
     SelfLabel,
     TechniqueClaim,
 )
@@ -32,17 +30,12 @@ def make_attempt(
         problem_id=problem_id,
         finished_at=finished_at,
         solved=solved,
-        origin=AttemptOrigin.PUSH,
-        external_id=f"ext-{id}",
     )
 
 
 def make_problem(id: str, techniques: list[str]) -> Problem:
     return Problem(
         id=id,
-        external_id=id,
-        user_id="u1",
-        owner=ProblemOwner.USER,
         title=id,
         title_slug=id,
         statement="Given an array, return ...",

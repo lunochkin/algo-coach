@@ -13,7 +13,7 @@ def age(when: datetime | None, now: datetime) -> str:
 
 
 def verdict(attempt: Attempt) -> str:
-    return attempt.source_status or ("solved" if attempt.solved else "unsolved")
+    return "solved" if attempt.solved else "unsolved"
 
 
 # What a temperature nobody set is called. A named arm rather than an empty

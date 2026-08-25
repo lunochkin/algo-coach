@@ -3,10 +3,8 @@ from datetime import UTC, datetime, timedelta
 from algo_coach.log import AttemptLog
 from algo_coach.schema import (
     Attempt,
-    AttemptOrigin,
     ClaimSource,
     Problem,
-    ProblemOwner,
     TechniqueClaim,
 )
 from algo_coach.techniques import resolve_techniques, standing_claims
@@ -21,17 +19,12 @@ def make_attempt(id: str = "a1", problem_id: str = "minted-u1") -> Attempt:
         problem_id=problem_id,
         finished_at=T0,
         solved=True,
-        origin=AttemptOrigin.PUSH,
-        external_id=f"ext-{id}",
     )
 
 
 def make_problem(*, techniques: list[str] | None = None, id: str = "minted-u1") -> Problem:
     return Problem(
         id=id,
-        external_id="p1",
-        user_id="u1",
-        owner=ProblemOwner.USER,
         title="Two Sum",
         title_slug="two-sum",
         statement="Given an array, return ...",
