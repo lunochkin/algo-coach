@@ -364,7 +364,7 @@ loose shape.
       to a shape nothing produces
 
 ### The reset
-- [ ] Empty the live store. The 138 hand claims over 100 attempts go with it,
+- [x] Empty the live store. The 138 hand claims over 100 attempts go with it,
       and a later classifier is scored against a set rebuilt by hand on
       generated problems
 - [ ] Tighten the records only after the store is empty: `origin: push`,
