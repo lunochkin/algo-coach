@@ -15,7 +15,6 @@ from algo_coach.cli.annotate import annotate
 from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
-from algo_coach.cli.drill import drill
 from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
 from algo_coach.cli.score import Named, score
@@ -243,15 +242,6 @@ def main() -> None:
     )
     _user_argument(movement_parser)
 
-    drill_parser = _command(sub, "drill", "pick a technique, then a problem for it")
-    drill_parser.add_argument(
-        "--technique", help="skip the first prompt with a known code; asked for otherwise"
-    )
-    drill_parser.add_argument(
-        "--limit", type=int, default=10, help="how many choices to offer at each step"
-    )
-    _user_argument(drill_parser)
-
     args = parser.parse_args()
     # Read at call time, not at import: tests point DATA_ROOT elsewhere.
     root = DATA_ROOT
@@ -279,7 +269,5 @@ def dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         annotate(args, parser, root)
     elif args.command == "score":
         score(args, parser, root)
-    elif args.command == "movement":
-        moved(args, parser, root)
     else:
-        drill(args, parser, root)
+        moved(args, parser, root)

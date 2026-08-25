@@ -358,7 +358,7 @@ loose shape.
       nothing arrives from outside
 - [x] Remove the tag mapping. A generated problem derives its techniques from
       its canonical solutions, and there is no platform vocabulary left to map
-- [ ] Remove the superseded drill loop: the push wait and the log diff. Neither
+- [x] Remove the superseded drill loop: the push wait and the log diff. Neither
       act has a subject once nothing is pushed
 - [ ] Drop the tests that covered the removed paths, rather than adapting them
       to a shape nothing produces

@@ -44,10 +44,6 @@ seed source="content/cards":
 board *args:
     uv run algo-coach board {{ args }}
 
-# Pick a technique, then a problem for it.
-drill *args:
-    uv run algo-coach drill {{ args }}
-
 # --- attribution ---
 
 # Claim stored attempts by hand: the eval set.

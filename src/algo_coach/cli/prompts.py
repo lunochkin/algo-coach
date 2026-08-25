@@ -1,4 +1,3 @@
-import argparse
 from typing import NamedTuple
 
 
@@ -48,21 +47,6 @@ def ask_choice(
             return Answer(numbers, False)
         zero = f", 0 for {none}" if none is not None else ""
         print(f"  pick numbers between 1 and {len(options)}{zero}, or a, or s")
-
-
-def choose[T](what: str, options: list[tuple[T, str]], parser: argparse.ArgumentParser) -> T:
-    """Numbered list, one line each, re-asked until it resolves. EOF ends the
-    drill rather than picking for the user."""
-    for index, (_, line) in enumerate(options, start=1):
-        print(f"{index:3}  {line}")
-    while True:
-        try:
-            answer = input(f"{what} [1-{len(options)}]: ").strip()
-        except EOFError:
-            parser.exit(2, f"\ndrill: no {what} chosen\n")
-        if answer.isdigit() and 1 <= int(answer) <= len(options):
-            return options[int(answer) - 1][0]
-        print(f"pick a number between 1 and {len(options)}")
 
 
 def numbered(items: list) -> str:

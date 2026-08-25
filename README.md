@@ -192,8 +192,9 @@ The engine serves, times and judges. Everything the loop reads is local to it:
 the problem, the test cases that decide it, and the log. Nothing is fetched
 from an external platform, and no third-party client sits in the loop.
 
-The board, the claim and the label run today. Writing the problems is next, and
-the sitting the engine witnesses follows it.
+The board and the hand claim run today, over the corpus already in the store.
+Writing the problems is next. Serving one, judging it and asking for the label
+follow, and the loop above is whole then.
 
 ## Cards — how a technique gets studied
 
@@ -300,7 +301,6 @@ uv run algo-coach <command>
 |---|---|
 | `seed` | seed authored cards into the store |
 | `board` | per-technique standing: attempts, solved, recency, labels |
-| `drill` | pick a technique, then a problem, then record what came back |
 | `claim` | hand-label which techniques a stored attempt used |
 | `classify` | claim stored attempts with the classifier |
 | `match` | which problems exercise a card's templates |
