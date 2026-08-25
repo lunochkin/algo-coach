@@ -46,6 +46,13 @@ Docs, `README.md`, commits, comments.
   what the code does.
 - **One idea per sentence.** Split at the em-dash and the semicolon instead
   of chaining. Target 25 words; nothing over 40.
+- **A TODO item is one or two lines, rarely three.** It names what to do and
+  the one reason that is not obvious from the name. The argument behind it
+  belongs in `docs/architecture/README.md`, and the record of how it went
+  belongs in the commit.
+- **Split before you compress.** An item carrying two decisions becomes two
+  items, not one dense paragraph. Each is then checkable on its own, and one
+  can land while the other is still open.
 - Precise technical terms are unaffected — `append-only`, `digest`,
   `denominator`, `supersede`. Density comes from those, not from clause count.
 
