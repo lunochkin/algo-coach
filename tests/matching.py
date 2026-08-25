@@ -5,8 +5,7 @@ import json
 from dataclasses import dataclass, field
 
 from algo_coach.calls import Reply
-from algo_coach.cards import CardStore
-from algo_coach.ingest import seed_cards
+from algo_coach.cards import CardStore, seed_cards
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Card, Problem, ProblemOwner, TemplateKind
 from algo_coach.techniques import map_tags

@@ -351,7 +351,7 @@ loose shape.
       problems, the claims and the call log
 
 ### The ingest path
-- [ ] Remove `algo-coach push` and the `ingest` package
+- [x] Remove `algo-coach push` and the `ingest` package
 - [ ] Remove `AttemptPush` and `ProblemPush`. The payload contract has no
       reader once nothing is pushed
 - [ ] Remove the external-id resolution. Every reference is engine-minted once

@@ -1,12 +1,30 @@
 from collections.abc import Iterable, Mapping
 
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
-from algo_coach.cards import CardStore
-from algo_coach.ingest.result import CardSeedResult, Rejected, reason
+from algo_coach.cards.store import CardStore
 from algo_coach.mint import new_id
 from algo_coach.schema import Card, CardSeed, Template
 from algo_coach.techniques import is_known
+
+
+class Rejected(BaseModel):
+    index: int  # position in the seeded batch, so the author can find the file
+    reason: str
+
+
+class CardSeedResult(BaseModel):
+    ingested: int = 0
+    updated: int = 0  # a slug already seeded; the card refreshes, its id stays
+    rejected: list[Rejected] = Field(default_factory=list)
+
+
+def reason(exc: ValidationError) -> str:
+    """Flatten to one line: pydantic's own rendering is a multi-line block,
+    which reads badly inside JSON a caller has to parse."""
+    return "; ".join(
+        f"{'.'.join(str(part) for part in error['loc'])}: {error['msg']}" for error in exc.errors()
+    )
 
 
 def seed_cards(records: Iterable[Mapping], *, store: CardStore) -> CardSeedResult:

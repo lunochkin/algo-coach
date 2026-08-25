@@ -3,9 +3,12 @@ import json
 from collections.abc import Iterator
 from pathlib import Path
 
-from algo_coach.cards import CardStore
-from algo_coach.cli.push import BadLine
-from algo_coach.ingest import seed_cards
+from algo_coach.cards import CardStore, seed_cards
+
+
+class BadLine(Exception):
+    """Not JSON at all: corrupt file, not an invalid record. Seeding never sees
+    it, so it cannot come back as a rejection."""
 
 
 def read_json(source: str) -> Iterator[dict]:

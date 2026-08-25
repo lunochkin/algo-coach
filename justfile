@@ -32,15 +32,7 @@ check: lint test
 hooks:
     git config core.hooksPath .githooks
 
-# --- ingest ---
-
-# Ingest pushed problems. Before the attempts naming them.
-push-problems source *args:
-    uv run algo-coach push problems {{ source }} {{ args }}
-
-# Ingest pushed attempts.
-push-attempts source *args:
-    uv run algo-coach push attempts {{ source }} {{ args }}
+# --- content ---
 
 # Seed authored cards into the store.
 seed source="content/cards":

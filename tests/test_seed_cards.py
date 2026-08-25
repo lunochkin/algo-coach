@@ -4,8 +4,7 @@ from pathlib import Path
 import pytest
 
 from algo_coach import cli
-from algo_coach.cards import CardStore
-from algo_coach.ingest import seed_cards
+from algo_coach.cards import CardStore, seed_cards
 
 CONTENT = Path(__file__).parents[1] / "content" / "cards"
 

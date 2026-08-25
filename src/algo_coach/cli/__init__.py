@@ -18,9 +18,8 @@ from algo_coach.cli.classify import classify
 from algo_coach.cli.drill import drill
 from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
-from algo_coach.cli.push import BadLine, push
 from algo_coach.cli.score import Named, score
-from algo_coach.cli.seed import seed
+from algo_coach.cli.seed import BadLine, seed
 
 DATA_ROOT = Path("data")
 
@@ -61,11 +60,6 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(prog="algo-coach")
     sub = parser.add_subparsers(dest="command", required=True)
-
-    push_parser = _command(sub, "push", "ingest pushed records from JSONL")
-    push_parser.add_argument("kind", choices=["attempts", "problems"])
-    push_parser.add_argument("source", help="path to a JSONL file, or - for stdin")
-    _user_argument(push_parser)
 
     seed_parser = _command(sub, "seed", "seed authored content into the store")
     seed_parser.add_argument("kind", choices=["cards"])
@@ -287,7 +281,5 @@ def dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         score(args, parser, root)
     elif args.command == "movement":
         moved(args, parser, root)
-    elif args.command == "drill":
-        drill(args, parser, root)
     else:
-        push(args, parser, root)
+        drill(args, parser, root)
