@@ -298,9 +298,9 @@ runs and the recall trainer. Item by item in
 
 ## Design
 
-[`docs/architecture/README.md`](docs/architecture/README.md) is the primary
-design document — the concepts, boundaries and invariants, and the reasons
-behind them.
+[`docs/architecture/`](docs/architecture/) is the primary design document —
+the concepts, boundaries and invariants, and the reasons behind them.
+[`README.md`](docs/architecture/README.md) is its map.
 
 What is keyed to an attempt, and who may write it:
 
@@ -321,10 +321,10 @@ The load-bearing ones:
   record is revised or removed in place. Component boundaries can therefore be
   refactored, and the record schema cannot. The schema runs a phase ahead of
   the features on purpose.
-- **[Identity is the engine's.](docs/architecture/README.md#problems)** Every
+- **[Identity is the engine's.](docs/architecture/corpus.md#problems)** Every
   reference in an append-only record is one the engine minted, so the log stays
   readable on its own.
-- **[The user's record stands over the machine's](docs/architecture/README.md#technique-claims)**
+- **[The user's record stands over the machine's](docs/architecture/log.md#technique-claims)**
   answer to the same question, whichever was written later. What the machine
   wrote is kept and scored, never discarded and never promoted.
 - **[Aggregates are derived views](docs/architecture/README.md#invariants)**,
@@ -334,9 +334,9 @@ The load-bearing ones:
   lives here.
 
 If you read one section, read **[technique
-claims](docs/architecture/README.md#technique-claims)**: what a reading is, why
+claims](docs/architecture/log.md#technique-claims)**: what a reading is, why
 it is stored even when it can never stand, and what identifies one. Then
-**[template matches](docs/architecture/README.md#template-matches)**, which
+**[template matches](docs/architecture/content.md#template-matches)**, which
 makes the same argument for a corpus that grows.
 
 ## Commands
@@ -365,7 +365,7 @@ src/algo_coach/matches/      which problems exercise which card template
 src/algo_coach/calls/        the model transport (OpenRouter) and the call log
 src/algo_coach/board/        the per-technique view, derived on read
 src/algo_coach/{log,cards,problems}/
-docs/architecture/README.md  concepts, boundaries, invariants
+docs/architecture/        concepts, boundaries, invariants, flows
 docs/{ROADMAP,TODO}.md       sequencing, and what is open
 .claude/skills/card-author/  the skill that authors cards
 data/                        your attempts and solutions — never committed

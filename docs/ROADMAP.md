@@ -7,7 +7,7 @@ practice for a phase the user runs, the next phase for one that builds a
 capability. A phase can also close as superseded — built, and answered by
 something later, so its exit no longer applies.
 
-`docs/architecture/README.md` owns the concepts, boundaries, and invariants.
+`docs/architecture/` owns the concepts, boundaries, and invariants.
 This file owns only sequencing. Where the two differ, the architecture wins.
 
 A completed phase records what landed, not why. The reasons are in the

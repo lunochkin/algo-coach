@@ -11,6 +11,11 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 - `uv sync` to set up; `uv run pytest` to test.
 
 @docs/architecture/README.md
+@docs/architecture/content.md
+@docs/architecture/corpus.md
+@docs/architecture/log.md
+@docs/architecture/machine.md
+@docs/architecture/flows.md
 
 ## Where knowledge lives
 
@@ -48,10 +53,10 @@ Docs, `README.md`, commits, comments.
   of chaining. Target 25 words; nothing over 40.
 - **A TODO item is a task someone can finish**, not a statement about the
   system. An item that only asserts what is true has nothing to do and never
-  gets ticked. State it in `docs/architecture/README.md` instead.
+  gets ticked. State it in `docs/architecture/` instead.
 - **A TODO item is one or two lines, rarely three.** It names what to do and
   the one reason that is not obvious from the name. The argument behind it
-  belongs in `docs/architecture/README.md`, and the record of how it went
+  belongs in `docs/architecture/`, and the record of how it went
   belongs in the commit.
 - **Split before you compress.** An item carrying two decisions becomes two
   items, not one dense paragraph. Each is then checkable on its own, and one

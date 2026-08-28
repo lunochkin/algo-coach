@@ -64,7 +64,7 @@
 
 ## Phase 2 — drill loop on a pushed problem — superseded
 
-Flow and its rules: `docs/architecture/README.md`, "Drill loop".
+Flow and its rules: `docs/architecture/flows.md`, "Drill loop".
 
 - [x] Pick a technique from the stale-ordered board, then a problem for it —
       least recently attempted first, lowest solve rate breaking a tie
@@ -230,7 +230,7 @@ view therefore became, silently, what that reading was scored against.
 
 ### Adjudicating the eval set
 
-Flow and its rules: `docs/architecture/README.md`, "Adjudicating the eval set".
+Flow and its rules: `docs/architecture/flows.md`, "Adjudicating the eval set".
 
 - [x] Read the 62 hand-claimed attempts with a frontier configuration, stored
       as readings. Nothing is added to the blind pass while a reading is in view
@@ -382,7 +382,7 @@ loose shape.
 
 The engine writes problems: a statement, the test cases that decide it, and at
 least one canonical solution. Flow and its rules:
-`docs/architecture/README.md`, "Generating a problem".
+`docs/architecture/flows.md`, "Generating a problem".
 
 ### Scoring the matcher
 
