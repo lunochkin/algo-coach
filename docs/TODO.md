@@ -384,8 +384,10 @@ The engine writes problems: a statement, the test cases that decide it, and at
 least one canonical solution. Flow and its rules:
 `docs/architecture/README.md`, "Generating a problem".
 
-The matcher lands first. Generation asserts a match and the matcher audits it,
-so an unmeasured matcher would audit at an unknown error rate.
+### Scoring the matcher
+
+It lands first. Generation asserts a match and the matcher audits it, so an
+unmeasured matcher would audit at an unknown error rate.
 
 - [ ] Score the matcher per pair, grouped per template, over the pairs both
       read. Not as a set: a match asserts a pair
@@ -397,32 +399,90 @@ so an unmeasured matcher would audit at an unknown error rate.
 - [ ] The first hand pass calibrates and a blind one measures, the claims rule
       unchanged. A score over the pairs that drew the line is agreement with
       itself
+
+### The runner
+
+Executing a solution against a problem's cases. One subject today, a canonical.
+Phase 8 puts an attempt on the same path.
+
+- [ ] Settle the calling convention: a case is arguments and an expected
+      return, a solution one named function. Parsing stdin would make a case
+      describe a transcript
+- [ ] Execute in a subprocess under a wall-clock cap per case. The engine runs
+      code a model wrote, and a non-terminating one must cost one case rather
+      than the run
+- [ ] Decide every case rather than stopping at the first failure. The
+      canonical stores a count, and a count needs every case decided
+- [ ] Separate a wrong answer from a crash and from a timeout. Phase 8 reads
+      the same result for an attempt, where only one of the three is evidence
+      of slowness
+- [ ] Decide how a case compares outputs where several answers are correct.
+      Equality on the returned value fails a correct solution to such a problem
+
+### The records
+
 - [ ] `generated_for` on `Problem`, naming the template it was written for. An
       assertion rather than a reading, which is what makes the first
       `TemplateMatch` provenance
-- [ ] `TestCase` and `CanonicalSolution`, written with the problem in one
-      call. Cases derived afterwards describe whatever the solution happens to
-      do
-- [ ] The canonical carries how many cases passed, out of how many. A count
-      rather than a flag, as a share prints its denominator
-- [ ] The runner: execute a solution against a problem's cases locally, pass or
-      fail per case. One subject today, a canonical, and an attempt on the same
-      path in Phase 8
-- [ ] `algo-coach generate`, a template in and a problem out, through the
+- [ ] `TestCase`, keyed to a problem and written in the same call as the
+      statement. Cases derived afterwards describe whatever the solution
+      happens to do
+- [ ] `CanonicalSolution`: the code, its provenance, and how many cases it
+      passed out of how many. A count rather than a flag, as a share prints its
+      denominator
+- [ ] Several canonicals per problem, appended. A rung covers a studied
+      template and an optional one only where two approaches are stored
+- [ ] A `MatchSource.GENERATOR` arm, above the matcher and below a hand
+      annotation. The generator knew what it was told to write; the matcher
+      inferred
+- [ ] Resolve a pair by that order rather than latest-wins, as a claim resolves
+      user-first. A matcher's later reading must not supersede the assertion it
+      audits
+- [ ] Derive a problem's techniques from its canonical solutions. A view, so
+      adding a canonical can widen them and re-deriving is legal
+- [ ] Feed the claim classifier its candidates from those derived techniques.
+      Nothing else supplies them now the tag mapping is gone
+
+### Generation
+
+- [ ] The prompt: a template and its cue in, a statement, a canonical and the
+      cases out. One call, or the cases describe the solution rather than the
+      problem
+- [ ] One response schema over all three parts, so a reply missing any of them
+      fails rather than landing a problem to repair later
+- [ ] Sampled rather than greedy, the exception the provenance rule names. One
+      model's habits would otherwise become the whole corpus
+- [ ] Its own configuration, as the matcher has its own. Generation asks for an
+      artifact where a reading asks for a verdict
+- [ ] `algo-coach generate`, a template in and problems out, through the
       transport the classifier and the matcher already share
-- [ ] Sampled rather than greedy, so one model's habits do not become the
-      whole corpus. The cost is a canonical that is re-runnable and never
-      reproducible
-- [ ] Nothing lands half-verified. A problem whose canonical fails is discarded
-      whole, and the call is recorded either way
-- [ ] Derive a generated problem's techniques from its canonical solutions,
-      beside the tag mapping rather than replacing it. A view, so adding a
-      canonical can widen the codes
-- [ ] Settle the discrimination bar on a real corpus. Cases that separate
-      nothing license `verified` on a canonical that is wrong
-- [ ] Measure the announcement floor against the archived corpus in
-      `data/old/`, then read the generated one against it. A form the matcher
-      names from the statement alone was telegraphed
+- [ ] Run the canonical before anything lands, and discard the problem whole
+      where it fails. The call is recorded either way, so what was paid for and
+      thrown away stays readable
+- [ ] Write the problem, its cases, the canonical and the asserted match in one
+      act. A half-written problem is one the matcher would read as finished
+- [ ] Aim a run at the templates carrying no match. A form the corpus cannot
+      exercise names its own remedy
+- [ ] Progress per problem, as the other run loops report it: the template, the
+      case run's verdict, and whether it landed
+- [ ] Let the matcher read the pair generation asserted, and report the
+      disagreements. That reading is the only check on a generator drifting
+      from its brief
+
+### The quality bars
+
+- [ ] Break a canonical mechanically and require the cases to fail it. The
+      cheapest of the discrimination candidates, and testable before the corpus
+      exists
+- [ ] Settle which check is the bar on a real corpus, then enforce it before a
+      problem lands. Cases that separate nothing license `verified` on a
+      canonical that is wrong
+- [ ] Settle how `data/old/` is read for a measurement. It is a corpus rather
+      than a store, so nothing on the run path may point at it
+- [ ] Measure the announcement floor over the archived statements: how often
+      the matcher names a form from the statement alone
+- [ ] Read the generated corpus against that floor. A problem the matcher names
+      instantly was telegraphed, and teaches recognition of nothing
 
 ### Exit
 - [ ] A card's reported gaps are filled by generated problems, and Phase 7

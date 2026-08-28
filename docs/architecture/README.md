@@ -40,7 +40,7 @@ a runner rather than a record change.
 |---|---|---|---|---|
 | Techniques | product | global | read-only at runtime | this repo, in git |
 | Cards | product | global | read-only at runtime | the store, seeded from `content/` |
-| Problems | product | global | generated once and never rewritten | the store |
+| Problems | product | global | append-only | the store |
 | Test cases | product | global | written with the problem | the store |
 | Canonical solutions | product | global | append-only | the store |
 | Template matches | product | global | append-only | the store |
@@ -322,19 +322,14 @@ One template reproduced from memory, and how it went.
 - **A problem's techniques are derived from its canonical solutions**, and are
   a view rather than stored truth: adding a canonical can widen them, and
   re-deriving is legal and expected. The card's technique names only what the
-  problem was written for, where a solution that sorts before it searches used
-  both.
+  problem was written for. A canonical that sorts before it searches used two
+  techniques, and only the derivation names the second.
 - **Which is why the fallback answers the right question.** They name what
   solving the problem can take, over every canonical it carries, where a claim
   names what one attempt did.
-- **The statement is stored, and matching is why.** Which form a problem
-  exercises is a question about what it asks, and its techniques answer what it
-  is about.
-- **Required, and non-blank.** A missing code costs one problem its place in
-  one board row; a missing statement is a problem nothing can ever match, and
-  nothing reports it. Generation fails rather than landing one without it. A
-  blank string is an absence that passes a presence check, so it is rejected
-  too.
+- **The statement is stored, because the matcher reads it.** Which template a
+  problem exercises is a question about what it asks. Its techniques answer
+  only what it is about. Required and non-blank.
 
 ### Test cases
 
