@@ -9,49 +9,24 @@ The engine writes problems: a statement, the test cases that decide it, and at
 least one canonical solution. Flow and its rules:
 `docs/architecture/flows.md`, "Generating a problem".
 
-### Scoring the matcher
-
-It lands first. Generation asserts a match and the matcher audits it, so an
-unmeasured matcher would audit at an unknown error rate.
-
-- [ ] Score the matcher per pair, grouped per template, over the pairs both
-      read. Not as a set: a match asserts a pair
-- [ ] Report the positive verdicts in both directions. Accuracy would score a
-      matcher that names nothing in the nineties
-- [ ] Skip a pair the hand settled on the run path, and read it in the eval.
-      The skip needs every template of the card settled, since the call asks
-      about the card whole
-- [ ] The first hand pass calibrates and a blind one measures, the claims rule
-      unchanged. A score over the pairs that drew the line is agreement with
-      itself
-
-### The runner
-
-Executing a solution against a problem's cases. One subject today, a canonical.
-Phase 8 puts an attempt on the same path.
-
-- [ ] Settle the calling convention: a case is arguments and an expected
-      return, a solution one named function. Parsing stdin would make a case
-      describe a transcript
-- [ ] Execute in a subprocess under a wall-clock cap per case. The engine runs
-      code a model wrote, and a non-terminating one must cost one case rather
-      than the run
-- [ ] Decide every case rather than stopping at the first failure. The
-      canonical stores a count, and a count needs every case decided
-- [ ] Separate a wrong answer from a crash and from a timeout. Phase 8 reads
-      the same result for an attempt, where only one of the three is evidence
-      of slowness
-- [ ] Decide how a case compares outputs where several answers are correct.
-      Equality on the returned value fails a correct solution to such a problem
+Generation lands before the matcher is scored. The Phase 5 reset took every
+template match with it, so no pair carries a hand reference, and none can
+until the engine has written problems to annotate.
 
 ### The records
 
 - [ ] `generated_for` on `Problem`, naming the template it was written for. An
       assertion rather than a reading, which is what makes the first
       `TemplateMatch` provenance
+- [ ] `MachineProvenance` on `Problem`, required as it is on a match. A problem
+      generated before the field exists carries none for good, and no
+      configuration could then be compared over the corpus
 - [ ] `TestCase`, keyed to a problem and written in the same call as the
       statement. Cases derived afterwards describe whatever the solution
       happens to do
+- [ ] The calling convention lives on `TestCase`: a case is arguments and an
+      expected return, a solution one named function. Parsing stdin would make
+      a case describe a transcript
 - [ ] `CanonicalSolution`: the code, its provenance, and how many cases it
       passed out of how many. A count rather than a flag, as a share prints its
       denominator
@@ -63,13 +38,12 @@ Phase 8 puts an attempt on the same path.
 - [ ] Resolve a pair by that order rather than latest-wins, as a claim resolves
       user-first. A matcher's later reading must not supersede the assertion it
       audits
-- [ ] Derive a problem's techniques from its canonical solutions. A view, so
-      adding a canonical can widen them and re-deriving is legal
-- [ ] Feed the claim classifier its candidates from those derived techniques.
-      Nothing else supplies them now the tag mapping is gone
 
 ### Generation
 
+- [ ] One template, one call, and read the reply out of the call log before any
+      of the rest. Whether a model writes a statement, a canonical and
+      discriminating cases in one call is what shapes everything below
 - [ ] The prompt: a template and its cue in, a statement, a canonical and the
       cases out. One call, or the cases describe the solution rather than the
       problem
@@ -81,33 +55,103 @@ Phase 8 puts an attempt on the same path.
       artifact where a reading asks for a verdict
 - [ ] `algo-coach generate`, a template in and problems out, through the
       transport the classifier and the matcher already share
+- [ ] Progress per problem, as the other run loops report it: the template, the
+      case run's verdict, and whether it landed
+
+### The runner
+
+Executing a solution against a problem's cases. One subject today, a canonical.
+Phase 8 puts an attempt on the same path.
+
+It comes after generation because the convention is fixed by `TestCase` and the
+output is then real. Landing closes here: nothing is stored until a canonical
+has passed.
+
+- [ ] Execute in a subprocess under a wall-clock cap per case. The engine runs
+      code a model wrote, and a non-terminating one must cost one case rather
+      than the run
+- [ ] Decide every case rather than stopping at the first failure. The
+      canonical stores a count, and a count needs every case decided
+- [ ] Separate a wrong answer from a crash and from a timeout. Phase 8 reads
+      the same result for an attempt, where only one of the three is evidence
+      of slowness
+- [ ] Decide how a case compares outputs where several answers are correct.
+      Equality on the returned value fails a correct solution to such a problem
 - [ ] Run the canonical before anything lands, and discard the problem whole
       where it fails. The call is recorded either way, so what was paid for and
       thrown away stays readable
 - [ ] Write the problem, its cases, the canonical and the asserted match in one
       act. A half-written problem is one the matcher would read as finished
+
+### What the corpus derives
+
+Folds over what generation and the runner stored. The first run is aimed by
+hand at the studied templates. Every later one is aimed by the report.
+
+- [ ] Derive a problem's techniques from its canonical solutions. A view, so
+      adding a canonical can widen them and re-deriving is legal
+- [ ] Report a studied template no problem matches. The card claims to teach
+      that form, so a corpus that cannot exercise it is a fact about the store
 - [ ] Aim a run at the templates carrying no match. A form the corpus cannot
       exercise names its own remedy
-- [ ] Progress per problem, as the other run loops report it: the template, the
-      case run's verdict, and whether it landed
-- [ ] Let the matcher read the pair generation asserted, and report the
-      disagreements. That reading is the only check on a generator drifting
-      from its brief
 
-### The quality bars
+### The discrimination bar
+
+Settled on the first corpus, then enforced before a problem lands. Cases that
+separate nothing license `verified` on a canonical that is wrong.
 
 - [ ] Break a canonical mechanically and require the cases to fail it. The
       cheapest of the discrimination candidates, and testable before the corpus
       exists
-- [ ] Settle which check is the bar on a real corpus, then enforce it before a
-      problem lands. Cases that separate nothing license `verified` on a
-      canonical that is wrong
+- [ ] Settle which check is the bar on a real corpus, then enforce it. Which
+      check it is comes from a corpus rather than from an argument
+
+### Annotating the generated corpus
+
+The hand pass does two jobs at once. It writes the matcher's reference, and it
+is the only reading of a generated problem that no model produced. A generator
+that wandered from its brief shows up there whatever the matcher says.
+
+- [ ] Aim the first run at the studied templates, 38 of the 45 across nine
+      cards, and annotate a sample of what lands
+- [ ] Annotate through `algo-coach annotate` unchanged. It already samples
+      across templates, and the cards are seeded
+- [ ] The first hand pass calibrates and a blind one measures, the claims rule
+      unchanged. A score over the pairs that drew the line is agreement with
+      itself
+
+### Scoring the matcher
+
+Generation asserts a match and the matcher audits it, so an unmeasured matcher
+audits at an unknown error rate. What that blocks is trusting the audit, not
+generating.
+
+- [ ] Score the matcher per pair, grouped per template, over the pairs both
+      read. Not as a set: a match asserts a pair
+- [ ] Report the positive verdicts in both directions. Accuracy would score a
+      matcher that names nothing in the nineties
+- [ ] Skip a pair the hand settled on the run path, and read it in the eval.
+      The skip needs every template of the card settled, since the call asks
+      about the card whole
+- [ ] Lift the scorer out of `claims` rather than copying it. It already prints
+      denominators and reports both directions, which is the shape a per-pair
+      score needs
+- [ ] Let the matcher read the pair generation asserted, and report the
+      disagreements. Actionable once the matcher carries a score
+
+### The announcement floor
+
+The archive half can start as soon as the matcher runs, and needs no scored
+matcher. The floor is one matcher over two corpora, so a systematic error
+largely cancels in the comparison.
+
 - [ ] Settle how `data/old/` is read for a measurement. It is a corpus rather
       than a store, so nothing on the run path may point at it
 - [ ] Measure the announcement floor over the archived statements: how often
       the matcher names a form from the statement alone
-- [ ] Read the generated corpus against that floor. A problem the matcher names
-      instantly was telegraphed, and teaches recognition of nothing
+- [ ] Read the generated corpus against that floor before growing it. A problem
+      the matcher names instantly was telegraphed, and teaches recognition of
+      nothing
 
 ### Exit
 - [ ] A card's reported gaps are filled by generated problems, and Phase 7
@@ -121,8 +165,6 @@ Phase 8 puts an attempt on the same path.
       optional template offered as the alternative
 - [ ] Resolve the ladder at import, and never rewrite one a card has already
       been started on
-- [ ] Report a studied template no problem matches. The card claims to teach
-      that form, so a corpus that cannot exercise it is a fact about the store
 - [ ] `CardRun`: starting is explicit, since the ladder is measured from it.
       Holds when it began and the probes assigned; later probes append
 - [ ] A recall attempt is its own record, keyed to a card and a template. There
@@ -146,6 +188,8 @@ The first attempts the engine produces itself.
       the problem's own cases, and mint the attempt
 - [ ] The verification result on `Attempt`. Additive, and meaningless before
       Phase 6
+- [ ] Feed the claim classifier its candidates from the problem's derived
+      techniques. Nothing else supplies them now the tag mapping is gone
 - [ ] Ask for a claim and a self-label as Phase 2 asked them. What changes is
       who witnessed the sitting, not who writes
 

@@ -127,9 +127,25 @@ ladder resolves over problems, and the in-engine loop serves and verifies them.
 A pushed corpus covers whatever the user happened to solve, and it carries no
 test cases at all.
 
-- The matcher is scored first, per template on positive verdicts in both
+- Generation lands before the matcher is scored. The Phase 5 reset took every
+  template match with it, so no pair carries a hand reference until the engine
+  has written problems to annotate.
+- `Problem` gains provenance before the first run. One generated without it
+  carries none for good, and the corpus could then not be compared across
+  generator configurations.
+- The gap report is here rather than in Phase 7. It is what aims a generation
+  run, and the phase exits on a card's gaps being filled.
+- The records come first, then generation, then the runner. `TestCase` fixes
+  the calling convention, so generation and the runner do not constrain each
+  other. The first generation run lands nothing and is read back from the call
+  log, which is what tells the runner the shape it must execute.
+- The matcher is then scored per template on positive verdicts in both
   directions. Generation asserts a match and the matcher audits it, so an
-  unmeasured matcher would audit at an unknown error rate.
+  unmeasured matcher audits at an unknown error rate. That blocks trusting the
+  audit rather than generating.
+- The hand pass over the generated corpus does two jobs. It writes the
+  matcher's reference, and it is the only reading of a generated problem no
+  model produced, so a generator drifting from its brief shows up there.
 - Generation is a command in the engine, beside the classifier and the matcher.
   One transport, one call log, one provenance base. No second pipeline.
 - A generated problem asserts the template it was written for. The matcher
@@ -137,9 +153,10 @@ test cases at all.
   assertion.
 - A problem's techniques derive from its canonical solutions. That is also what
   gives the attribution classifier its candidates on a generated problem.
-- The discrimination bar comes first. Cases that separate nothing license the
-  word `verified` on a canonical that is wrong. Which check is the bar is
-  settled from a real corpus rather than argued.
+- The discrimination bar is settled on the first corpus, then enforced before
+  a problem lands. Cases that separate nothing license the word `verified` on a
+  canonical that is wrong. Which check is the bar comes from a corpus rather
+  than from an argument.
 - The announcement floor is measured against the archived corpus in
   `data/old/`. A form a matcher names from the statement alone was
   telegraphed, and such a problem teaches recognition of nothing.
