@@ -11,7 +11,8 @@ something later, so its exit no longer applies.
 This file owns only sequencing. Where the two differ, the architecture wins.
 
 A completed phase records what landed, not why. The reasons are in the
-architecture doc and in the commits.
+architecture doc and in the commits. It also records what the phase measured.
+`docs/TODO.md` drops a phase when it closes, and a measurement is taken once.
 
 ## Phase 1 — Push API, techniques, drill board — done
 
@@ -24,6 +25,13 @@ Real daily attempts in the engine, and current state visible.
   criterion for claiming it and the near miss it is confused with.
 - Drill board: per-technique standing derived from the log, grouped on a claim
   where one exists and on the problem's tags otherwise.
+
+Measured:
+
+- 485 problems in the backlog: 61 reached no technique, 183 one, 241 two or
+  more. That share is what made a classifier worth building.
+- 1785 attempts over 117 practice days, 159 of them in the last 30.
+- The board renders 25 technique rows, and 101 attempts reach none.
 
 ## Phase 2 — Drill loop on a pushed problem — superseded
 
@@ -50,6 +58,22 @@ problem's tags.
   reading is greedy, and staleness keys on the digest of the question rather
   than on a version over the rulebook.
 
+Measured:
+
+- Twelve configurations over a 10x price range scored within two attempts of
+  each other and failed in the same cells. The model was never what to change.
+- A configuration against itself, three `--fresh` passes: 1 of 31 attempts
+  flips for opus, 3 for haiku and sonnet. 0.5-2.2% of decisions, and the
+  ceiling any score is read against.
+- Set equality compounds a per-candidate error: 95% of calls reads as 87% over
+  three candidates.
+- Keying reuse on the payload digest rather than on a version: editing one
+  criteria entry re-derived 7 of 31 attempts.
+- 100 attempts claimed blind, carrying 138 claims, so 38 revisions. 62 of them
+  were read by a frontier configuration to adjudicate the set.
+- Requiring `effort` and `prompt_hash` deleted the 25 machine claims already
+  written, rather than re-deriving them.
+
 Delta for generated problems: candidates come from codes derived from canonical
 solutions rather than from a platform's tags. Phase 6 carries it.
 
@@ -61,6 +85,13 @@ solutions rather than from a platform's tags. Phase 6 carries it.
   three writers ordered by what each of them knew.
 - The matcher and its annotation pass, which writes the reference a machine
   reading is measured against.
+
+Measured:
+
+- Nine cards ported, each authored blind and then compared against the
+  hand-written one. The diffs are what the skill's rules are.
+- `statement` tightened to required and non-blank at 485 of 485, and held at
+  ~4k problems across an eight-fold push.
 
 What a card still needs — the ladder, runs, recall and probes — waits on a
 corpus that can fill it. Phase 7.
@@ -77,7 +108,8 @@ generation was written.
   external-id resolution, the tag mapping, and the drill loop that waited on a
   push and diffed the log.
 - The pushed corpus moved to `data/old/`, which is a calibration corpus rather
-  than a store. Phase 6 measures the announcement floor against it.
+  than a store: 1785 attempts and 3962 problems, with the claims and the call
+  log. Phase 6 measures the announcement floor against it.
 - The live store emptied, and the records then tightened. `origin`,
   `source_status`, `external_id` and the platform fields describe a shape
   nothing produces.

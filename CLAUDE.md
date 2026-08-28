@@ -29,6 +29,12 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
   discovers revises the doc.
 - Divergence is checked on purpose. An unchecked doc becomes fiction, and a
   model implements fiction without complaint.
+- `docs/TODO.md` is a task list, not a log. It holds the phases still open.
+- A ticked item stays while its phase is open. The phase is the unit, not the
+  item, so nothing is removed as it lands.
+- A closed phase is harvested into `docs/ROADMAP.md`, then removed whole. What
+  survives is what it measured, since nothing re-derives it. How the work was
+  sequenced is in the commits.
 
 ## Sequencing
 
