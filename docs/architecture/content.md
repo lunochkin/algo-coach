@@ -94,9 +94,14 @@ user can solve, per technique, and the two share no data.
   optional template, the capstone, authored whole and surfaced on request
   alone. The hard form is worth deriving before it is read, and a card showing
   it unasked would remove that chance permanently.
-- **The ladder is resolved at import**, once. The selector is the truth and the
-  ladder a derived view, so re-deriving it is legal — but never for a card
-  already started, since a user is working through it.
+- **The ladder is resolved at import and re-derived whenever the corpus moves
+  under it.** The selector is the truth and the ladder a derived view, so
+  resolving it again costs nothing. A started card is re-derived too. Ladder
+  progress is a fold over attempts rather than a mark on a rung, so what was
+  solved stays solved.
+- **A retired problem fills no rung.** A defective one was never a fair test,
+  and a telegraphed one teaches recognition of nothing. Re-deriving is what
+  removes it, which is the other reason a started card is re-derived.
 - **Probes are assigned when a card is started**, not at import, since what was
   unseen at import need not still be unseen. Unseen first, then least recently
   attempted, and never drawn from the ladder, which teaches the form rather

@@ -9,6 +9,7 @@ clock has no place there either.
 import uuid
 from collections.abc import Sequence
 from datetime import UTC, datetime
+from typing import Any
 
 from algo_coach.schema import (
     Call,
@@ -21,6 +22,7 @@ from algo_coach.schema import (
     SelfLabel,
     TechniqueClaim,
     TemplateMatch,
+    TestCase,
 )
 from algo_coach.techniques import is_known
 
@@ -286,3 +288,17 @@ def generated_problem(
         provider=provider,
         cost=cost,
     )
+
+
+def case(problem_id: str, args: Sequence[Any], expected: Any) -> TestCase:
+    """One case of the set a generated problem carries.
+
+    Named `case` rather than `test_case`: pytest collects any callable whose
+    name begins with `test_`, so the minter would be run as a test wherever a
+    test module imported it.
+
+    Minted here as every stored record is. It carries no provenance: a case is
+    not a reading, and the problem it is keyed to already names the
+    configuration that wrote both in one call.
+    """
+    return TestCase(id=new_id(), problem_id=problem_id, args=list(args), expected=expected)

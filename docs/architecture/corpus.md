@@ -25,14 +25,53 @@ canonical solutions that display the approach. Part of the architecture;
 - **The statement is stored, because the matcher reads it.** Which template a
   problem exercises is a question about what it asks. Its techniques answer
   only what it is about. Required and non-blank.
+- **A problem is edited in place only where no verdict moves.** Wording that
+  changes nothing a solution returns is repaired. A statement that asks for
+  something else mints a new problem, and the old one keeps its attempts.
+- **A corrected statement usually drags cases with it**, which is why the edit
+  cannot stand. The new wording needs cases that pin it, and those would fail
+  attempts already made. So the verdicts an in-place edit meant to preserve do
+  not survive it.
+- **Retirement names its reason, because readers treat the two apart.**
+  `defective` is a statement that asked for something its cases do not decide.
+  `telegraphed` is one that names the approach, which the announcement floor
+  rejects.
+- **A defective problem's attempts are excluded from mastery, both
+  directions.** The failure was the problem's fault, and the self-label the
+  loop asked for blamed the user instead. Excluding only the failures would
+  raise a technique's solve rate because a problem was broken.
+- **A telegraphed problem's attempts are kept.** Its statement asked what its
+  cases decide, so the verdict is a fact about the solution. Whether such a
+  solve counts for less than an unprompted one is deferred, since it needs a
+  weighting nothing has.
+- **Exclusion is a read-time rule, never a deletion.** Aggregates are derived
+  views. The attempts stay readable, and the board stops counting them.
 
 ## Test cases
 
 What decides whether a solution to a generated problem is correct.
 
-- **Written with the problem, in the same call.** Cases derived afterwards
-  describe whatever the solution happens to do. Cases written with the statement
-  describe what the problem asks.
+- **The first set is written with the problem, in the same call.** Cases
+  derived afterwards describe whatever the solution happens to do. Cases
+  written with the statement describe what the problem asks. Later additions
+  append to that set rather than replacing it.
+- **A case is arguments and an expected return.** Parsing stdin would make a
+  case describe how a solution was driven rather than what it must compute.
+  The arguments are positional, so a canonical names its parameters whatever
+  reads best.
+- **The entry point is fixed rather than stored.** Every solution defines one
+  module-level function named `solve`. A stored name lets a generator write a
+  statement naming one function and a canonical defining another, and the
+  runner then fails a correct solution. A fixed name makes that state
+  unreachable.
+- **A fixed name also stops the signature announcing the approach.** A
+  function called `longest_palindromic_substring` tells the solver what the
+  statement was written to withhold. What the announcement floor measures on a
+  statement applies to a signature too.
+- **A problem needing more than one entry point is not expressible**, and that
+  is accepted. A structure asked for by its operations has no single function.
+  If one is ever wanted, `entrypoint` is an additive field whose absence means
+  the convention.
 - **They are what makes verification reachable.** Every problem carries the
   cases that decide it, so the engine judges a submission itself rather than
   recording a verdict it did not produce.
@@ -45,6 +84,22 @@ What decides whether a solution to a generated problem is correct.
 - **Cases that separate nothing are worse than none**, because they license the
   word `verified` on a canonical that is wrong. A set that does not discriminate
   is a defect in the problem, and a problem carrying one does not land.
+- **The cases define the problem, and the statement is what can disagree.** A
+  finite set of arguments and returns describes some function. The statement is
+  prose, and prose is where the mistake lands.
+- **A case set a deterministic canonical passes is already consistent.** Two
+  cases with the same arguments and different returns fit no function, so no
+  canonical can pass both. Nothing checks this separately.
+- **Cases are appended, never revised.** An edge case, or one that forces a
+  timeout, is added. What an addition leaves behind is a canonical needing
+  re-verification rather than a record that is now wrong.
+- **A case that turns out to be wrong is discarded with its problem.** Under
+  the rule above the fault is the statement's, so the repair mints a new
+  problem and the old cases go with the old one.
+- **Consistent is not the same as statable.** A set fitting only "compute f,
+  except return 7 on this input" is a function nobody can write a statement
+  for. Such a problem does not land, and the discrimination bar is what catches
+  it.
 - **How discrimination is established is deferred.** Candidates: two canonicals
   from different approaches agreeing on every case, a mechanically broken
   canonical failing, the near miss the technique entry names failing. Which is
@@ -73,7 +128,9 @@ attempt: no user and no sitting.
   protecting from variance, and variance is what stops one model's habits
   becoming the whole corpus. The cost is a canonical that is re-runnable and
   never reproducible, which is also why nothing re-derives it.
-- **The verification result is stored, never inferred**: which cases it passed
-  and how many the problem had. A count rather than a flag, for the same reason
-  a share prints its denominator.
+- **The verification result names the cases that passed**, never a count. A
+  count cannot separate a timeout on a large input from a wrong answer on an
+  edge case, and that separation is what a failure mode reads. It also survives
+  a case being added, where a denominator taken at one moment does not. Phase 8
+  stores the same result for an attempt.
 

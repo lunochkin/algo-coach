@@ -157,6 +157,9 @@ test cases at all.
   a problem lands. Cases that separate nothing license the word `verified` on a
   canonical that is wrong. Which check is the bar comes from a corpus rather
   than from an argument.
+- A problem found defective is retired rather than edited, and one naming its
+  own approach is retired as telegraphed. Only the first excludes its attempts
+  from mastery, and neither is deleted.
 - The announcement floor is measured against the archived corpus in
   `data/old/`. A form a matcher names from the statement alone was
   telegraphed, and such a problem teaches recognition of nothing.
@@ -193,6 +196,8 @@ own test cases, and records the verdict.
   many. Additive, and meaningless before Phase 6.
 - The interaction is answered by using it: how a solution is entered, what the
   loop does with a failing run, whether a sitting resumes.
+- The loop can mark a problem defective in place of a self-label, and the
+  board then stops counting that problem's attempts in either direction.
 - Claims and self-labels are asked as Phase 2 asked them. The writers do not
   change; what changes is who witnessed the sitting.
 - Exit: daily practice runs here, on problems the engine wrote and judged.

@@ -44,7 +44,8 @@ are answered by using it.
 4. The statement, and the clock starts.
 5. The submission runs against the problem's own test cases, and the attempt is
    minted carrying the result.
-6. Keyed to each attempt, the loop asks for a technique claim and a self-label.
+6. Keyed to each attempt, the loop asks for a technique claim and a
+   self-label, or the user marks the problem defective instead.
 
 - **The engine witnessed the sitting, so it mints the attempt.** Serving,
   timing and judging are one act. An attempt nobody timed stays untimed, rather
@@ -57,6 +58,10 @@ are answered by using it.
   problem's own two or three techniques, the drilled one is the default since
   selection picked the problem by it, and the attempt is minutes old. Two facts
   a classifier has to infer later cost a keystroke each at this moment.
+- **A statement that asked the wrong thing is marked, not labelled.** The loop
+  offers marking the problem defective in place of the self-label. Asking why
+  the sitting failed would otherwise record the problem's fault as the user's
+  own gap, and a self-label cannot be revised later.
 - **Selection never schedules.** Ordering is a view. What to drill is the
   user's choice until the scheduler lands.
 

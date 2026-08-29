@@ -23,15 +23,14 @@ until the engine has written problems to annotate.
       configuration could then be compared over the corpus
 - [x] `mint.generated_problem`, as `machine_match` mints a match. Minting in
       one place is what keeps a call site from filling provenance partly
-- [ ] `TestCase`, keyed to a problem and written in the same call as the
-      statement. Cases derived afterwards describe whatever the solution
-      happens to do
-- [ ] The calling convention lives on `TestCase`: a case is arguments and an
-      expected return, a solution one named function. Parsing stdin would make
-      a case describe a transcript
-- [ ] `CanonicalSolution`: the code, its provenance, and how many cases it
-      passed out of how many. A count rather than a flag, as a share prints its
-      denominator
+- [x] `TestCase`, keyed to a problem, carrying arguments and an expected
+      return. The first set is written in the same call as the statement, so
+      the cases describe what the problem asks rather than what a solution did
+- [ ] `Problem.retired`, naming `defective` or `telegraphed`. Selection reads
+      both, and only the first excludes the problem's attempts
+- [ ] `CanonicalSolution`: the code, its provenance, and which cases it
+      passed. Named rather than counted, since a count cannot separate a
+      timeout on a large input from a wrong answer on an edge case
 - [ ] Several canonicals per problem, appended. A rung covers a studied
       template and an optional one only where two approaches are stored
 - [ ] A `MatchSource.GENERATOR` arm, above the matcher and below a hand
@@ -69,6 +68,8 @@ It comes after generation because the convention is fixed by `TestCase` and the
 output is then real. Landing closes here: nothing is stored until a canonical
 has passed.
 
+- [ ] Reject a solution defining no `solve`. The convention is what makes a
+      stored entry point unnecessary, so nothing else checks it
 - [ ] Execute in a subprocess under a wall-clock cap per case. The engine runs
       code a model wrote, and a non-terminating one must cost one case rather
       than the run
@@ -161,12 +162,13 @@ largely cancels in the comparison.
 
 ## Phase 7 — ladder, recall and card runs
 
-- [ ] Resolve the ladder from the matches, the selector filling out to `size`
+- [ ] Resolve the ladder from the matches, the selector filling out to `size`.
+      A retired problem fills no rung
 - [ ] Derive requiredness from what a rung covers: studied means required, the
       optional template alone means optional, both means required with the
       optional template offered as the alternative
-- [ ] Resolve the ladder at import, and never rewrite one a card has already
-      been started on
+- [ ] Re-derive the ladder whenever the corpus moves under it, a started card
+      included. Progress is a fold over attempts, so nothing is lost
 - [ ] `CardRun`: starting is explicit, since the ladder is measured from it.
       Holds when it began and the probes assigned; later probes append
 - [ ] A recall attempt is its own record, keyed to a card and a template. There
@@ -192,6 +194,12 @@ The first attempts the engine produces itself.
       Phase 6
 - [ ] Feed the claim classifier its candidates from the problem's derived
       techniques. Nothing else supplies them now the tag mapping is gone
+- [ ] The loop marks a problem defective rather than asking for a self-label
+      on it. A statement that asked the wrong thing would otherwise be recorded
+      as the user's own gap
+- [ ] Exclude a defective problem's attempts from the board, both directions.
+      Dropping only the failures would raise a technique's solve rate because
+      a problem was broken
 - [ ] Ask for a claim and a self-label as Phase 2 asked them. What changes is
       who witnessed the sitting, not who writes
 
@@ -211,6 +219,9 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 - [ ] Classify freely over the whole vocabulary and intersect in code, once the
       hand claims can score it against the constrained one. A verdict outside
       the problem's own techniques is the only signal that they are the gap
+- [ ] Settle how a case forcing a timeout carries its input. Literal arguments
+      put a megabyte of JSON in the store per case, where a seed and a size do
+      not. Triggered when the first performance case is written
 - [ ] An outage falls back to another endpoint of the same shape, never to
       Anthropic direct, whose compatibility layer ignores `response_format`,
       `strict` and `reasoning_effort`. Triggered when an outage blocks a run
