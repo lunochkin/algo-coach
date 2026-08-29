@@ -25,6 +25,20 @@ canonical solutions that display the approach. Part of the architecture;
 - **The statement is stored, because the matcher reads it.** Which template a
   problem exercises is a question about what it asks. Its techniques answer
   only what it is about. Required and non-blank.
+- **A problem is created, cleared, then served.** `created` is written and
+  verified, which is not the same as fit to serve. The announcement floor is
+  what clears it: whether a statement telegraphs its form is a question about
+  the corpus, and the generation call cannot answer it.
+- **`created` is not a resting state.** Every created problem is promoted or
+  retired. Until the floor is measured, selection reads created problems too,
+  so the corpus is usable before the gate exists.
+- **Retirement does not imply the problem was served.** One failing the floor
+  is retired as telegraphed having never been active. The rule that its
+  attempts are kept holds either way, and is about nothing where it has none.
+- **The two bars sit at different points.** Discrimination is checked at
+  generation, so a problem whose cases separate nothing never lands. The floor
+  is checked over the corpus, so a problem that telegraphs its form lands and
+  is then retired.
 - **A problem is edited in place only where no verdict moves.** Wording that
   changes nothing a solution returns is repaired. A statement that asks for
   something else mints a new problem, and the old one keeps its attempts.

@@ -26,8 +26,9 @@ until the engine has written problems to annotate.
 - [x] `TestCase`, keyed to a problem, carrying arguments and an expected
       return. The first set is written in the same call as the statement, so
       the cases describe what the problem asks rather than what a solution did
-- [ ] `Problem.retired`, naming `defective` or `telegraphed`. Selection reads
-      both, and only the first excludes the problem's attempts
+- [x] `Problem.status` — created, active or retired — beside a
+      `retired_reason` of `defective` or `telegraphed`. A validator ties them,
+      since only the reason says whether the attempts count
 - [ ] `CanonicalSolution`: the code, its provenance, and which cases it
       passed. Named rather than counted, since a count cannot separate a
       timeout on a large input from a wrong answer on an edge case
@@ -152,6 +153,8 @@ largely cancels in the comparison.
       than a store, so nothing on the run path may point at it
 - [ ] Measure the announcement floor over the archived statements: how often
       the matcher names a form from the statement alone
+- [ ] Clear a created problem or retire it as telegraphed. `created` is not a
+      resting state, so nothing may leave a problem sitting in it
 - [ ] Read the generated corpus against that floor before growing it. A problem
       the matcher names instantly was telegraphed, and teaches recognition of
       nothing
@@ -188,6 +191,8 @@ largely cancels in the comparison.
 
 The first attempts the engine produces itself.
 
+- [ ] Serve active problems, and created ones while the floor has not run.
+      Reading only active would serve nothing until the gate exists
 - [ ] Serve a generated problem, time the sitting, run the submission against
       the problem's own cases, and mint the attempt
 - [ ] The verification result on `Attempt`. Additive, and meaningless before

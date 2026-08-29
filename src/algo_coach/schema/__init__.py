@@ -11,7 +11,12 @@ from algo_coach.schema.card import Card, Selector, Template, TemplateKind
 from algo_coach.schema.case import TestCase
 from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.match import MatchSource, TemplateMatch
-from algo_coach.schema.problem import Problem, ProblemDifficulty
+from algo_coach.schema.problem import (
+    Problem,
+    ProblemDifficulty,
+    ProblemStatus,
+    RetirementReason,
+)
 from algo_coach.schema.provenance import MachineProvenance
 from algo_coach.schema.record import AttemptRecord
 from algo_coach.schema.seed import CardSeed, TemplateSeed
@@ -32,6 +37,8 @@ __all__ = [
     "MatchSource",
     "Problem",
     "ProblemDifficulty",
+    "ProblemStatus",
+    "RetirementReason",
     "SelfLabel",
     "Selector",
     "Technique",

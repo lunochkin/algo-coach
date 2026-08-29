@@ -10,7 +10,7 @@ import pytest
 from helpers import GENERATED, PROVENANCE
 from pydantic import ValidationError
 
-from algo_coach.schema import Problem
+from algo_coach.schema import Problem, ProblemStatus, RetirementReason
 
 CONTENT = {
     "id": "p1",
@@ -103,3 +103,54 @@ def test_one_template_is_named_rather_than_a_set():
     templates it also matches are the matcher's question, and they are
     `TemplateMatch` records rather than a field here."""
     assert isinstance(make_problem().generated_for, str)
+
+
+def test_a_problem_starts_created_rather_than_served():
+    """Written and verified is not cleared to serve. What promotes it is the
+    quality bars, which do not exist yet."""
+    problem = make_problem()
+
+    assert problem.status is ProblemStatus.CREATED
+    assert problem.retired_reason is None
+
+
+def test_a_problem_is_retired_for_a_named_reason():
+    """Named rather than flagged: only a defective problem's attempts are
+    excluded, and a bare status would make every reader guess which happened."""
+    for reason in RetirementReason:
+        problem = make_problem(status="retired", retired_reason=reason)
+
+        assert problem.retired_reason is reason
+
+
+def test_the_reasons_are_the_two_the_board_reads_apart():
+    """A defective problem was never a fair test. A telegraphed one asked what
+    its cases decide, so its attempts stay evidence."""
+    assert set(RetirementReason) == {
+        RetirementReason.DEFECTIVE,
+        RetirementReason.TELEGRAPHED,
+    }
+
+
+def test_a_retired_problem_must_say_why():
+    """Whether its attempts count is read off the reason, so a retirement
+    without one would be excluded or counted by whichever reader guessed."""
+    with pytest.raises(ValidationError, match="retired_reason"):
+        make_problem(status="retired")
+
+
+@pytest.mark.parametrize("status", [ProblemStatus.CREATED, ProblemStatus.ACTIVE])
+def test_a_problem_still_in_service_carries_no_reason(status):
+    """It would name a retirement that did not happen."""
+    with pytest.raises(ValidationError, match="retired_reason"):
+        make_problem(status=status, retired_reason="defective")
+
+
+def test_an_unnamed_status_is_rejected():
+    with pytest.raises(ValidationError, match="status"):
+        make_problem(status="broken")
+
+
+def test_an_unnamed_reason_is_rejected():
+    with pytest.raises(ValidationError, match="retired_reason"):
+        make_problem(status="retired", retired_reason="wrong")

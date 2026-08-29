@@ -157,6 +157,9 @@ test cases at all.
   a problem lands. Cases that separate nothing license the word `verified` on a
   canonical that is wrong. Which check is the bar comes from a corpus rather
   than from an argument.
+- A problem is created, cleared by the announcement floor, then served.
+  Created is not a resting state: every one is promoted or retired, and a
+  problem can be retired before it was ever served.
 - A problem found defective is retired rather than edited, and one naming its
   own approach is retired as telegraphed. Only the first excludes its attempts
   from mastery, and neither is deleted.
