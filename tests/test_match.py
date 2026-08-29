@@ -10,6 +10,7 @@ import pytest
 from helpers import PROVENANCE
 from pydantic import ValidationError
 
+from algo_coach.mint import generator_match
 from algo_coach.schema import MatchSource, TemplateMatch
 
 
@@ -146,3 +147,42 @@ def test_a_match_names_no_card():
     """The template is the pair's half. A card is recoverable from it, and a
     copy taken here would be a second place to be wrong."""
     assert not [name for name in TemplateMatch.model_fields if "card" in name]
+
+
+def test_a_generated_problem_asserts_its_own_first_match():
+    """It was written for one template, so the pair is provenance rather than
+    a reading and nothing pays a call to learn it."""
+    match = generator_match("t1", "p1")
+
+    assert (match.template_id, match.problem_id) == ("t1", "p1")
+    assert match.source is MatchSource.GENERATOR
+
+
+def test_a_generator_match_carries_no_configuration():
+    """Nothing re-derives it, and the problem it points at already names the
+    call that wrote both."""
+    match = generator_match("t1", "p1")
+
+    assert [field for field in match.RECORDED if getattr(match, field) is not None] == []
+
+
+def test_a_generator_only_ever_asserts_a_positive():
+    """It asserts the form it was briefed on and says nothing about the
+    templates it was not, which is the matcher's question."""
+    assert generator_match("t1", "p1").matched is True
+
+
+def test_a_generator_match_has_seen_nothing():
+    """The brief named a template. No reading of the pair was in view, and
+    none could have been before the problem existed."""
+    assert generator_match("t1", "p1").informed_by == []
+
+
+def test_the_three_writers_are_named_apart():
+    """A hand annotation stands over both machine sources, and a generator's
+    assertion stands over a matcher's reading of the same pair."""
+    assert set(MatchSource) == {
+        MatchSource.USER,
+        MatchSource.GENERATOR,
+        MatchSource.CLASSIFIER,
+    }

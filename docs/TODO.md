@@ -38,9 +38,9 @@ until the engine has written problems to annotate.
       template and an optional one only where two approaches are stored
 - [x] Append-only stores for cases, canonicals and verifications. A case is
       added and never revised, and two runs of one solution are two records
-- [ ] A `MatchSource.GENERATOR` arm, above the matcher and below a hand
-      annotation. The generator knew what it was told to write; the matcher
-      inferred
+- [x] A `MatchSource.GENERATOR` arm, carrying no provenance as a hand match
+      does not. The generator knew what it was told to write, where a matcher
+      infers it
 - [ ] Resolve a pair by that order rather than latest-wins, as a claim resolves
       user-first. A matcher's later reading must not supersede the assertion it
       audits

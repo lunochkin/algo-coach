@@ -8,6 +8,10 @@ from algo_coach.schema.provenance import MachineProvenance
 
 class MatchSource(StrEnum):
     USER = "user"  # a hand annotation: the labelled set a machine run is scored against
+    # what the generator was told to write. An assertion rather than a
+    # reading, so it carries no provenance: nothing re-derives it, and the
+    # problem it points at already names the call that produced both
+    GENERATOR = "generator"
     CLASSIFIER = "classifier"
 
 

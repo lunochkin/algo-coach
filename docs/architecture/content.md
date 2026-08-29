@@ -117,6 +117,17 @@ problem, so nothing is authored here either.
   template, so that pair is provenance rather than a reading, and the record
   names `generator` as its source. Nothing pays a call to learn what the
   generator was told to write.
+- **A generator's assertion carries no configuration**, as a hand annotation
+  carries none. The all-or-none rule is about readings, which are re-derivable
+  and so must say by what. Nothing re-derives this pair short of writing the
+  problem again, and the problem already names the call that wrote both.
+- **It is only ever positive.** The generator asserts the form it was briefed
+  on. What else the problem exercises is the matcher's question, and a
+  generator saying nothing about a template is not a negative on it.
+- **The same fact sits on the problem and in a match.** `generated_for` names
+  the template, and the match is what lets the ladder read one kind of record
+  instead of special-casing the problem. They cannot drift, because generation
+  writes both in one act.
 - **The matcher answers what generation cannot assert**: which templates a
   problem exercises besides the one it was written for, and whether the
   generator's own claim holds. The first is why a rung can cover a studied

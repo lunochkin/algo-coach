@@ -193,6 +193,28 @@ def user_match(
     )
 
 
+def generator_match(template_id: str, problem_id: str) -> TemplateMatch:
+    """The pair a generated problem asserts about itself.
+
+    It was written for one template, so the pair is provenance rather than a
+    reading and nothing pays a call to learn it. Carries no configuration for
+    the same reason a hand match does not: nothing re-derives it, and the
+    problem already names the call that wrote both.
+
+    Only ever positive. A generator asserts the form it was briefed on and
+    says nothing about the templates it was not, which is the matcher's
+    question.
+    """
+    return TemplateMatch(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        template_id=template_id,
+        problem_id=problem_id,
+        matched=True,
+        source=MatchSource.GENERATOR,
+    )
+
+
 def machine_match(
     template_id: str,
     problem_id: str,
