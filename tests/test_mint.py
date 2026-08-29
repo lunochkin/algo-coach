@@ -1,7 +1,14 @@
 import pytest
 from helpers import machine_claim
 
-from algo_coach.mint import machine_match, new_id, self_label, user_claim, user_match
+from algo_coach.mint import (
+    generated_problem,
+    machine_match,
+    new_id,
+    self_label,
+    user_claim,
+    user_match,
+)
 from algo_coach.schema import ClaimSource, Confidence, FailureMode, MatchSource
 
 
@@ -216,3 +223,70 @@ def test_a_machine_match_names_what_produced_it():
         "0123456789ab",
         "call-1",
     )
+
+
+def generated(**overrides):
+    fields = {
+        "title": "Two Sum",
+        "statement": "Given an array, return ...",
+        "model": "a-model",
+        "effort": "medium",
+        "prompt_hash": "0123456789ab",
+        "call_id": "call-1",
+        "pin": "a-host",
+    } | overrides
+    return generated_problem(**fields)
+
+
+def test_a_generated_problem_names_what_wrote_it():
+    """Required unconditionally: generated is a problem's only origin, so
+    there is no hand arm to exempt as there is for a claim or a match."""
+    problem = generated()
+
+    assert (
+        problem.model,
+        problem.effort,
+        problem.pin,
+        problem.prompt_hash,
+        problem.call_id,
+    ) == ("a-model", "medium", "a-host", "0123456789ab", "call-1")
+
+
+def test_the_minter_is_what_supplies_provenance():
+    """A call site spelling the five fields out could fill them partly, and a
+    problem stored that way names a configuration nothing can compare it on."""
+    with pytest.raises(TypeError):
+        generated_problem("Two Sum", "Given an array, return ...")
+
+
+def test_a_generated_problem_is_minted_an_id():
+    """As every stored record is. Nothing outside the engine supplies one."""
+    assert generated().id != generated().id
+
+
+def test_generation_records_what_it_sampled_at():
+    """Sampled rather than greedy, which a reading never is: variance is what
+    stops one model's habits becoming the whole corpus."""
+    assert generated(temperature=1.0).temperature == 1.0
+    assert generated().temperature is None
+
+
+def test_who_served_a_generated_problem_is_recorded():
+    assert generated(provider="fake").provider == "fake"
+
+
+def test_what_a_generated_problem_cost_is_recorded():
+    """A match cannot record this and a claim can. Generation is the expensive
+    call of the three, so the corpus says what it was paid for."""
+    assert generated(cost=0.02).cost == 0.02
+
+
+def test_a_generated_problem_starts_with_no_techniques():
+    """A view over its canonical solutions, and none is written yet."""
+    assert generated().techniques == []
+
+
+def test_the_techniques_are_passed_rather_than_read_here():
+    """The canonical is written in the same act, so what it used is known by
+    the time the problem is minted."""
+    assert generated(techniques=["greedy"]).techniques == ["greedy"]

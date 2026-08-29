@@ -16,6 +16,8 @@ from algo_coach.schema import (
     Confidence,
     FailureMode,
     MatchSource,
+    Problem,
+    ProblemDifficulty,
     SelfLabel,
     TechniqueClaim,
     TemplateMatch,
@@ -227,3 +229,53 @@ def self_label(attempt_id: str, mode: FailureMode) -> SelfLabel:
     """Only ever the user's — a machine answering the same question produces a
     `Diagnosis`."""
     return SelfLabel(id=new_id(), created_at=datetime.now(UTC), attempt_id=attempt_id, mode=mode)
+
+
+def generated_problem(
+    title: str,
+    statement: str,
+    *,
+    model: str,
+    effort: str,
+    prompt_hash: str,
+    call_id: str,
+    pin: str,
+    techniques: Sequence[str] = (),
+    difficulty: ProblemDifficulty | None = None,
+    temperature: float | None = None,
+    provider: str | None = None,
+    cost: float | None = None,
+) -> Problem:
+    """A problem the engine wrote, and the configuration that wrote it.
+
+    Generated is a problem's only origin, so there is no hand arm to exempt as
+    there is for a claim or a match. Provenance is required, and this is the
+    one place that supplies it: a call site spelling the fields out could fill
+    them partly, and a problem stored that way names a configuration nothing
+    can compare it on.
+
+    Sampled rather than greedy, which a reading never is. Generation produces
+    an artifact instead of a verdict about one, so no verdict needs protecting
+    from variance, and variance is what stops one model's habits becoming the
+    whole corpus. The temperature is recorded either way, since a corpus
+    written at one is not the corpus written at another.
+
+    The techniques are a view over the problem's canonical solutions, passed
+    in rather than read here: the canonical is written in the same act, and
+    re-deriving them later is legal.
+    """
+    return Problem(
+        id=new_id(),
+        title=title,
+        statement=statement,
+        techniques=list(techniques),
+        difficulty=difficulty,
+        model=model,
+        effort=effort,
+        prompt_hash=prompt_hash,
+        call_id=call_id,
+        pin=pin,
+        temperature=temperature,
+        provider=provider,
+        cost=cost,
+    )

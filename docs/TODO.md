@@ -21,7 +21,7 @@ until the engine has written problems to annotate.
 - [x] `MachineProvenance` on `Problem`, required as it is on a match. A problem
       generated before the field exists carries none for good, and no
       configuration could then be compared over the corpus
-- [ ] `mint.generated_problem`, as `machine_match` mints a match. Minting in
+- [x] `mint.generated_problem`, as `machine_match` mints a match. Minting in
       one place is what keeps a call site from filling provenance partly
 - [ ] `TestCase`, keyed to a problem and written in the same call as the
       statement. Cases derived afterwards describe whatever the solution
