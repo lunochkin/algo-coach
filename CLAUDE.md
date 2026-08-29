@@ -60,6 +60,16 @@ Docs, `README.md`, commits, comments.
 - **A TODO item is a task someone can finish**, not a statement about the
   system. An item that only asserts what is true has nothing to do and never
   gets ticked. State it in `docs/architecture/` instead.
+- **An item opens with an imperative verb**: write, add, run, measure, delete,
+  rename. A noun phrase names a topic, and a reader cannot tell whether the
+  work is to build it, decide it or check it.
+- **An item names what exists when it is done** — a file, a field, a passing
+  test, a number written down. Without that, two readers tick it at different
+  points, and the phase closes on whichever read it loosest.
+- **An investigation is written as the run and its output**, never as the
+  question. "Whether X holds is what decides Y" is a statement; the task is to
+  run X once and record what it showed. Keep the question in
+  `docs/architecture/` if it needs stating at all.
 - **A TODO item is one or two lines, rarely three.** It names what to do and
   the one reason that is not obvious from the name. The argument behind it
   belongs in `docs/architecture/`, and the record of how it went
