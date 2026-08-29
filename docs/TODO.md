@@ -41,7 +41,7 @@ until the engine has written problems to annotate.
 - [x] A `MatchSource.GENERATOR` arm, carrying no provenance as a hand match
       does not. The generator knew what it was told to write, where a matcher
       infers it
-- [ ] Resolve a pair by that order rather than latest-wins, as a claim resolves
+- [x] Resolve a pair by that order rather than latest-wins, as a claim resolves
       user-first. A matcher's later reading must not supersede the assertion it
       audits
 
