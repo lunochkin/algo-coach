@@ -7,17 +7,10 @@ provenance rules and nothing else.
 from datetime import UTC, datetime
 
 import pytest
+from helpers import PROVENANCE
 from pydantic import ValidationError
 
 from algo_coach.schema import MatchSource, TemplateMatch
-
-PROVENANCE = {
-    "model": "test-model",
-    "effort": "medium",
-    "pin": "a-host",
-    "prompt_hash": "0123456789ab",
-    "call_id": "call-1",
-}
 
 
 def make_match(source: MatchSource, **overrides) -> TemplateMatch:

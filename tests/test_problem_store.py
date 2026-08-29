@@ -1,13 +1,19 @@
+from helpers import PROVENANCE
+
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Problem
 
 
 def make_problem(id: str = "i1", **overrides) -> Problem:
-    fields = {
-        "id": id,
-        "title": "Two Sum",
-        "statement": "Given an array, return ...",
-    } | overrides
+    fields = (
+        {
+            "id": id,
+            "title": "Two Sum",
+            "statement": "Given an array, return ...",
+        }
+        | PROVENANCE
+        | overrides
+    )
     return Problem.model_validate(fields)
 
 

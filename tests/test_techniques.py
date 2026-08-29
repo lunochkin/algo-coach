@@ -3,6 +3,7 @@ import re
 from importlib import resources
 
 import pytest
+from helpers import PROVENANCE
 
 from algo_coach.mint import user_claim
 from algo_coach.schema import (
@@ -114,6 +115,7 @@ def test_is_known_does_not_reject_retired_codes_at_read_time():
         title="t",
         statement="s",
         techniques=[retired],
+        **PROVENANCE,
     )
     assert Problem.model_validate_json(problem.model_dump_json()).techniques == [retired]
 

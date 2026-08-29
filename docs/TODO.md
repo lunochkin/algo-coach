@@ -18,9 +18,11 @@ until the engine has written problems to annotate.
 - [ ] `generated_for` on `Problem`, naming the template it was written for. An
       assertion rather than a reading, which is what makes the first
       `TemplateMatch` provenance
-- [ ] `MachineProvenance` on `Problem`, required as it is on a match. A problem
+- [x] `MachineProvenance` on `Problem`, required as it is on a match. A problem
       generated before the field exists carries none for good, and no
       configuration could then be compared over the corpus
+- [ ] `mint.generated_problem`, as `machine_match` mints a match. Minting in
+      one place is what keeps a call site from filling provenance partly
 - [ ] `TestCase`, keyed to a problem and written in the same call as the
       statement. Cases derived afterwards describe whatever the solution
       happens to do

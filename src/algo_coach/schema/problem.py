@@ -1,6 +1,8 @@
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import Field, model_validator
+
+from algo_coach.schema.provenance import MachineProvenance
 
 
 class ProblemDifficulty(StrEnum):
@@ -9,7 +11,7 @@ class ProblemDifficulty(StrEnum):
     HARD = "hard"
 
 
-class Problem(BaseModel):
+class Problem(MachineProvenance):
     id: str  # engine-minted, as every reference in the log is
     title: str
     # derived from the problem's canonical solutions, so re-derivable at any
@@ -19,3 +21,8 @@ class Problem(BaseModel):
     # what the problem asks; matching reads it, and a problem without one can
     # never be matched
     statement: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _provenance_required(self) -> Problem:
+        self.check_provenance(True)
+        return self

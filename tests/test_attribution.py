@@ -1,5 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
+from helpers import PROVENANCE
+
 from algo_coach.log import AttemptLog
 from algo_coach.schema import (
     Attempt,
@@ -28,6 +30,7 @@ def make_problem(*, techniques: list[str] | None = None, id: str = "minted-u1") 
         title="Two Sum",
         statement="Given an array, return ...",
         techniques=techniques or [],
+        **PROVENANCE,
     )
 
 

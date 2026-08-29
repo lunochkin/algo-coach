@@ -4,6 +4,8 @@ records a verdict needs to exist."""
 import json
 from dataclasses import dataclass, field
 
+from helpers import PROVENANCE
+
 from algo_coach.calls import Reply
 from algo_coach.cards import CardStore, seed_cards
 from algo_coach.problems import ProblemStore
@@ -91,6 +93,7 @@ def problem(
         title=id,
         statement=statement,
         techniques=techniques,
+        **PROVENANCE,
     )
 
 

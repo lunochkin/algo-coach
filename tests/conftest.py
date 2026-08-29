@@ -1,4 +1,5 @@
 import pytest
+from helpers import PROVENANCE
 
 from algo_coach.cli.transport import CREDENTIALS
 from algo_coach.problems import ProblemStore
@@ -24,6 +25,7 @@ def seed_problem(store: ProblemStore, *, id: str) -> None:
             id=id,
             title="Two Sum",
             statement="Given an array, return ...",
+            **PROVENANCE,
         )
     )
 

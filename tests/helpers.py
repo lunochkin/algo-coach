@@ -23,6 +23,31 @@ CONFIGURATION = Configuration(model="a-model", effort="medium")
 # saying the prompt changed, which is the only thing that makes a claim stale.
 PROMPT_HASH = "0123456789ab"
 
+# What a generated problem carries. Spelled out once: a problem carries
+# provenance unconditionally, so a site restating the five fields would say
+# nothing about what its test is for.
+PROVENANCE = {
+    "model": "a-model",
+    "effort": "medium",
+    "pin": PIN,
+    "prompt_hash": PROMPT_HASH,
+    "call_id": "call-1",
+}
+
+
+def make_problem(id: str = "p1", **overrides) -> Problem:
+    """A generated problem, provenance defaulted."""
+    fields = (
+        {
+            "id": id,
+            "title": id,
+            "statement": "Given an array, return ...",
+        }
+        | PROVENANCE
+        | overrides
+    )
+    return Problem.model_validate(fields)
+
 
 def machine_claim(
     attempt_id: str,
@@ -151,14 +176,7 @@ class FakeTransport:
 
 
 def seed_problem(root, *, id: str, techniques: list[str]) -> None:
-    ProblemStore(root).put(
-        Problem(
-            id=id,
-            title=id,
-            statement="Given an array, return ...",
-            techniques=techniques,
-        )
-    )
+    ProblemStore(root).put(make_problem(id, techniques=techniques))
 
 
 def attempt(
