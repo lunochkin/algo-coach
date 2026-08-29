@@ -235,6 +235,7 @@ def generated_problem(
     title: str,
     statement: str,
     *,
+    generated_for: str,
     model: str,
     effort: str,
     prompt_hash: str,
@@ -263,11 +264,17 @@ def generated_problem(
     The techniques are a view over the problem's canonical solutions, passed
     in rather than read here: the canonical is written in the same act, and
     re-deriving them later is legal.
+
+    `generated_for` names the template the brief asked for. It is what the
+    generator knew rather than what a matcher inferred, which is what makes
+    the first `TemplateMatch` on the pair provenance. It asserts nothing about
+    the templates the problem also exercises.
     """
     return Problem(
         id=new_id(),
         title=title,
         statement=statement,
+        generated_for=generated_for,
         techniques=list(techniques),
         difficulty=difficulty,
         model=model,

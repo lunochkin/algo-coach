@@ -2,7 +2,7 @@ import json
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from helpers import PROVENANCE
+from helpers import GENERATED
 
 from algo_coach import cli
 from algo_coach.board import TechniqueRow
@@ -28,7 +28,7 @@ def seed_problem(root, *, id: str, techniques: list[str]) -> None:
             title=id,
             statement="Given an array, return ...",
             techniques=techniques,
-            **PROVENANCE,
+            **GENERATED,
         )
     )
 

@@ -34,16 +34,20 @@ PROVENANCE = {
     "call_id": "call-1",
 }
 
+# Provenance and the template the brief named. A site caring about neither
+# spreads this. One testing a match against a template names its own.
+GENERATED = PROVENANCE | {"generated_for": "t1"}
+
 
 def make_problem(id: str = "p1", **overrides) -> Problem:
-    """A generated problem, provenance defaulted."""
+    """A generated problem, its provenance and its template defaulted."""
     fields = (
         {
             "id": id,
             "title": id,
             "statement": "Given an array, return ...",
         }
-        | PROVENANCE
+        | GENERATED
         | overrides
     )
     return Problem.model_validate(fields)

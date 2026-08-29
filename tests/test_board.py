@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from helpers import PROVENANCE
+from helpers import GENERATED
 
 from algo_coach.board import TechniqueRow, per_technique, ungrouped
 from algo_coach.log import latest_by_attempt
@@ -40,7 +40,7 @@ def make_problem(id: str, techniques: list[str]) -> Problem:
         title=id,
         statement="Given an array, return ...",
         techniques=techniques,
-        **PROVENANCE,
+        **GENERATED,
     )
 
 

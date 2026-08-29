@@ -15,7 +15,7 @@ until the engine has written problems to annotate.
 
 ### The records
 
-- [ ] `generated_for` on `Problem`, naming the template it was written for. An
+- [x] `generated_for` on `Problem`, naming the template it was written for. An
       assertion rather than a reading, which is what makes the first
       `TemplateMatch` provenance
 - [x] `MachineProvenance` on `Problem`, required as it is on a match. A problem

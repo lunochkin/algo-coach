@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
-from helpers import PROVENANCE
+from helpers import GENERATED
 
 from algo_coach.board import candidates
 from algo_coach.schema import Attempt, Problem
@@ -14,7 +14,7 @@ def make_problem(id: str, techniques: list[str]) -> Problem:
         title=id,
         statement="Given an array, return ...",
         techniques=techniques,
-        **PROVENANCE,
+        **GENERATED,
     )
 
 

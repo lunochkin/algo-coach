@@ -1,4 +1,4 @@
-from helpers import PROVENANCE
+from helpers import GENERATED
 
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Problem
@@ -11,7 +11,7 @@ def make_problem(id: str = "i1", **overrides) -> Problem:
             "title": "Two Sum",
             "statement": "Given an array, return ...",
         }
-        | PROVENANCE
+        | GENERATED
         | overrides
     )
     return Problem.model_validate(fields)

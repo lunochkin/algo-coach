@@ -21,6 +21,10 @@ class Problem(MachineProvenance):
     # what the problem asks; matching reads it, and a problem without one can
     # never be matched
     statement: str = Field(min_length=1)
+    # the template it was written for. An assertion rather than a reading,
+    # which is what makes the first `TemplateMatch` provenance. It never claims
+    # the problem exercises nothing else, which is the matcher's question
+    generated_for: str = Field(min_length=1)
 
     @model_validator(mode="after")
     def _provenance_required(self) -> Problem:

@@ -229,6 +229,7 @@ def generated(**overrides):
     fields = {
         "title": "Two Sum",
         "statement": "Given an array, return ...",
+        "generated_for": "t1",
         "model": "a-model",
         "effort": "medium",
         "prompt_hash": "0123456789ab",
@@ -290,3 +291,11 @@ def test_the_techniques_are_passed_rather_than_read_here():
     """The canonical is written in the same act, so what it used is known by
     the time the problem is minted."""
     assert generated(techniques=["greedy"]).techniques == ["greedy"]
+
+
+def test_a_generated_problem_asserts_the_template_it_was_written_for():
+    """What the generator was told, not what a matcher inferred. That is what
+    makes the first `TemplateMatch` on the pair provenance rather than a
+    reading, and it asserts nothing about the forms the problem also
+    exercises."""
+    assert generated(generated_for="t7").generated_for == "t7"
