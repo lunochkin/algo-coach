@@ -57,6 +57,7 @@ times. Each record class is specified in one of the files beside it.
 | Problems | product | global | append-only | the store |
 | Test cases | product | global | written with the problem | the store |
 | Canonical solutions | product | global | append-only | the store |
+| Verification runs | product | global | append-only | the store |
 | Template matches | product | global | append-only | the store |
 | Card runs | user | private | append-only | the store |
 | Recall attempts | user | private | append-only | the store |

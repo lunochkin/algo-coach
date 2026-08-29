@@ -10,10 +10,10 @@ went the way it did, and the study a card run tracks. Part of the architecture;
   watched the sitting, so nothing else is in a position to assert one.
 - **Identity is the engine's.** It mints the `id`, and there is no other writer
   to accept one from.
-- **The verification result is kept whole**, not only its verdict. It names
-  the cases that passed, as a canonical's result does. `solved` is the
-  projection over it, and the raw result carries what the projection drops.
-  A timeout and a wrong answer are both unsolved, and only one is evidence of
+- **The verification is its own record**, as a canonical's is, and how it
+  keys to an attempt is settled in Phase 8. `solved` is the projection over
+  its results, and the raw result carries what the projection drops. A timeout
+  and a wrong answer are both unsolved, and only one is evidence of
   slowness.
 - **Problem techniques are never denormalized onto an attempt.** They are
   re-derivable and the log is not, so a copy taken when the attempt was written

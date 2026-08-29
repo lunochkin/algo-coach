@@ -10,6 +10,7 @@ Carries no provenance of its own. A case is not a reading, and the problem it
 is keyed to already names the configuration that wrote both.
 """
 
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -33,3 +34,29 @@ class TestCase(BaseModel):
     # case without one decides nothing; `None` is a value a solution may
     # legitimately return, which is why absence cannot stand in for it
     expected: Any
+
+
+class CaseOutcome(StrEnum):
+    """How one case went. The kinds are apart because a failure mode reads
+    them apart: only one of the three is evidence of slowness."""
+
+    PASSED = "passed"
+    # returned something other than the expected value
+    WRONG = "wrong"
+    # exceeded the wall-clock cap, which is what a case sized to force one
+    # is written to do
+    TIMEOUT = "timeout"
+    # raised rather than returning
+    CRASHED = "crashed"
+
+
+class CaseResult(BaseModel):
+    """One case, run against one solution.
+
+    Per case rather than a share, and carrying the outcome rather than a
+    verdict. A share cannot say which input timed out, and a set of the cases
+    that passed cannot say why the rest did not.
+    """
+
+    case_id: str = Field(min_length=1)
+    outcome: CaseOutcome

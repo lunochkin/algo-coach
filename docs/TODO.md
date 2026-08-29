@@ -29,9 +29,11 @@ until the engine has written problems to annotate.
 - [x] `Problem.status` — created, active or retired — beside a
       `retired_reason` of `defective` or `telegraphed`. A validator ties them,
       since only the reason says whether the attempts count
-- [ ] `CanonicalSolution`: the code, its provenance, and which cases it
-      passed. Named rather than counted, since a count cannot separate a
-      timeout on a large input from a wrong answer on an edge case
+- [x] `CanonicalSolution`: the code and its provenance, and nothing about how
+      it ran. Immutable, since whether it passes is a fact about a run
+- [x] `Verification`: one run of a solution, carrying the cap and a result per
+      case. Its own record, since the cap and the machine decide a timeout
+      where the code does not. The run's own outcome folds from the cases
 - [ ] Several canonicals per problem, appended. A rung covers a studied
       template and an optional one only where two approaches are stored
 - [ ] A `MatchSource.GENERATOR` arm, above the matcher and below a hand
@@ -227,6 +229,9 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 - [ ] Settle how a case forcing a timeout carries its input. Literal arguments
       put a megabyte of JSON in the store per case, where a seed and a size do
       not. Triggered when the first performance case is written
+- [ ] Record what the environment contributed to a verification run. The
+      machine and the interpreter version decide a timeout or a crash as much
+      as the cap does. Triggered when two runs of one solution disagree
 - [ ] An outage falls back to another endpoint of the same shape, never to
       Anthropic direct, whose compatibility layer ignores `response_format`,
       `strict` and `reasoning_effort`. Triggered when an outage blocks a run

@@ -142,9 +142,38 @@ attempt: no user and no sitting.
   protecting from variance, and variance is what stops one model's habits
   becoming the whole corpus. The cost is a canonical that is re-runnable and
   never reproducible, which is also why nothing re-derives it.
-- **The verification result names the cases that passed**, never a count. A
-  count cannot separate a timeout on a large input from a wrong answer on an
-  edge case, and that separation is what a failure mode reads. It also survives
-  a case being added, where a denominator taken at one moment does not. Phase 8
-  stores the same result for an attempt.
+- **Immutable once written.** Whether it passes is a fact about a run, so
+  nothing about how it ran is stored here.
 
+## Verification runs
+
+One execution of a solution against a problem's cases.
+
+- **Its own record, because the outcome is a fact about the run.** The cap and
+  the machine decide a timeout, and a crash can come from the runner rather
+  than the solution. A result stored on the solution would claim a permanence
+  it does not have.
+- **Re-running is legal and expected**, as re-deriving a reading is. Two runs
+  of one solution are two records, and neither supersedes the other.
+- **The cap is stored beside the results.** It is what decided any timeout,
+  and two runs under different caps are not comparable. Nothing else would
+  show that they differ.
+- **What the environment contributes is deferred.** The machine and the
+  interpreter version decide a timeout or a crash as much as the cap does, and
+  the shape recording them is not settled.
+- **The verification result is per case, and names how each one went**:
+  passed, wrong, timed out or crashed. A share cannot say which input timed
+  out, and the set of cases that passed cannot say why the rest did not. A
+  failure mode reads both halves. Phase 8 stores the same result for an
+  attempt.
+- **A run covers the whole case set**, including the cases it answered
+  before. One answering only what was added since would fold to their outcome
+  alone and say nothing about the rest. Executing code is cheap where a model
+  call is not.
+- **The outcome over the run is folded, never stored**, and it is the four
+  words a case uses. A timeout is a fact about the run that surfaces at one
+  case, so the level it is read at does not change what it means.
+- **The most severe failure stands in that fold.** A solution that only ran
+  slowly is otherwise correct, which is a different remedy from one returning
+  a wrong answer. An empty set folds to nothing rather than to passed, or it
+  would claim a verification that never ran.

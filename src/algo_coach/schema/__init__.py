@@ -7,8 +7,9 @@ from algo_coach.schema.attempt import (
     TechniqueClaim,
 )
 from algo_coach.schema.call import Call
+from algo_coach.schema.canonical import CanonicalSolution
 from algo_coach.schema.card import Card, Selector, Template, TemplateKind
-from algo_coach.schema.case import TestCase
+from algo_coach.schema.case import CaseOutcome, CaseResult, TestCase
 from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.match import MatchSource, TemplateMatch
 from algo_coach.schema.problem import (
@@ -21,11 +22,15 @@ from algo_coach.schema.provenance import MachineProvenance
 from algo_coach.schema.record import AttemptRecord
 from algo_coach.schema.seed import CardSeed, TemplateSeed
 from algo_coach.schema.technique import Kind, Technique
+from algo_coach.schema.verification import Verification
 
 __all__ = [
     "Attempt",
     "AttemptRecord",
     "Call",
+    "CanonicalSolution",
+    "CaseOutcome",
+    "CaseResult",
     "Card",
     "CardSeed",
     "ClaimSource",
@@ -48,4 +53,5 @@ __all__ = [
     "TemplateMatch",
     "TemplateSeed",
     "TestCase",
+    "Verification",
 ]

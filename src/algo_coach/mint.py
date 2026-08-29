@@ -13,6 +13,8 @@ from typing import Any
 
 from algo_coach.schema import (
     Call,
+    CanonicalSolution,
+    CaseResult,
     ClaimSource,
     Confidence,
     FailureMode,
@@ -23,6 +25,7 @@ from algo_coach.schema import (
     TechniqueClaim,
     TemplateMatch,
     TestCase,
+    Verification,
 )
 from algo_coach.techniques import is_known
 
@@ -302,3 +305,66 @@ def case(problem_id: str, args: Sequence[Any], expected: Any) -> TestCase:
     configuration that wrote both in one call.
     """
     return TestCase(id=new_id(), problem_id=problem_id, args=list(args), expected=expected)
+
+
+def canonical_solution(
+    problem_id: str,
+    code: str,
+    *,
+    model: str,
+    effort: str,
+    prompt_hash: str,
+    call_id: str,
+    pin: str,
+    temperature: float | None = None,
+    provider: str | None = None,
+    cost: float | None = None,
+) -> CanonicalSolution:
+    """An exemplary solution, and how each case went against it.
+
+    A machine record like any other, so it names what produced it. Sampled
+    rather than greedy, which is why nothing re-derives one: generation makes
+    an artifact instead of a verdict, and the variance is what stops one
+    model's habits becoming the whole corpus.
+
+    It says nothing about how it ran. Whether the code passes is a fact about
+    a run, and `verification` mints the record holding that.
+    """
+    return CanonicalSolution(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        problem_id=problem_id,
+        code=code,
+        model=model,
+        effort=effort,
+        prompt_hash=prompt_hash,
+        call_id=call_id,
+        pin=pin,
+        temperature=temperature,
+        provider=provider,
+        cost=cost,
+    )
+
+
+def verification(
+    canonical_id: str,
+    *,
+    timeout_ms: int,
+    results: Sequence[CaseResult] = (),
+) -> Verification:
+    """One run of a solution against a problem's cases.
+
+    Its own record rather than a field on the solution, because the outcome is
+    a fact about the run. The cap and the machine decide a timeout, and a crash
+    can come from the runner, so the same code run twice can differ.
+
+    The cap is stored beside the results. Two runs under different caps are not
+    comparable, and nothing else would show it.
+    """
+    return Verification(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        canonical_id=canonical_id,
+        timeout_ms=timeout_ms,
+        results=list(results),
+    )
