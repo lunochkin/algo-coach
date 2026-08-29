@@ -34,8 +34,10 @@ until the engine has written problems to annotate.
 - [x] `Verification`: one run of a solution, carrying the cap and a result per
       case. Its own record, since the cap and the machine decide a timeout
       where the code does not. The run's own outcome folds from the cases
-- [ ] Several canonicals per problem, appended. A rung covers a studied
+- [x] Several canonicals per problem, appended. A rung covers a studied
       template and an optional one only where two approaches are stored
+- [x] Append-only stores for cases, canonicals and verifications. A case is
+      added and never revised, and two runs of one solution are two records
 - [ ] A `MatchSource.GENERATOR` arm, above the matcher and below a hand
       annotation. The generator knew what it was told to write; the matcher
       inferred
