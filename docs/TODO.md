@@ -81,7 +81,7 @@ until the engine has written problems to annotate.
       variants of one problem, each passing every gate
 - [x] Set `Problem.difficulty` at generation. A selector filters on it and
       nothing writes it, so a ladder's rungs are ordered by nothing
-- [ ] Add `algo-coach generate`, a template in and problems out, through the
+- [x] Add `algo-coach generate`, a template in and problems out, through the
       transport the classifier and the matcher already share
 - [ ] Print progress per problem, as the other run loops report it: the
       template, the case run's verdict, and whether it landed

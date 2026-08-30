@@ -18,6 +18,14 @@ from algo_coach.generation.generator import (
     schema,
     written_for,
 )
+from algo_coach.generation.run import (
+    Drafted,
+    Failed,
+    GenerationResult,
+    Progress,
+    write_one,
+    write_problems,
+)
 
 __all__ = [
     "DEFAULT",
@@ -28,6 +36,10 @@ __all__ = [
     "TEMPERATURE",
     "Configuration",
     "Disagreement",
+    "Drafted",
+    "Failed",
+    "GenerationResult",
+    "Progress",
     "Draft",
     "DraftCase",
     "GenerationError",
@@ -40,5 +52,7 @@ __all__ = [
     "reference",
     "schema",
     "settle",
+    "write_one",
+    "write_problems",
     "written_for",
 ]

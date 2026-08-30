@@ -15,6 +15,7 @@ from algo_coach.cli.annotate import annotate
 from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
+from algo_coach.cli.generate import generate
 from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
 from algo_coach.cli.score import Named, score
@@ -164,6 +165,14 @@ def main() -> None:
         help="ask again even where a stored record answers the same question",
     )
 
+    generate_parser = _command(sub, "generate", "write problems for one of a card's templates")
+    generate_parser.add_argument("--card", required=True, help="the card, by slug")
+    generate_parser.add_argument("--template", required=True, help="its template, by slug")
+    generate_parser.add_argument("--count", type=int, default=1, help="how many problems to write")
+    generate_parser.add_argument(
+        "--code", action="store_true", help="print each canonical beside its statement"
+    )
+
     annotate_parser = _command(
         sub, "annotate", "which of a card's templates a problem exercises, by hand"
     )
@@ -263,6 +272,8 @@ def dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         claim(args, parser, root)
     elif args.command == "classify":
         classify(args, parser, root)
+    elif args.command == "generate":
+        generate(args, parser, root)
     elif args.command == "match":
         match(args, parser, root)
     elif args.command == "annotate":
