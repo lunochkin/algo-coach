@@ -1,11 +1,35 @@
 from algo_coach.generation.generator import (
+    DEFAULT,
+    EFFORT,
+    MODEL,
+    PIN,
     SYSTEM,
+    TEMPERATURE,
+    Configuration,
     Draft,
     DraftCase,
+    GenerationError,
+    generate,
     notes,
     prompt,
     read,
     schema,
 )
 
-__all__ = ["SYSTEM", "Draft", "DraftCase", "notes", "prompt", "read", "schema"]
+__all__ = [
+    "DEFAULT",
+    "EFFORT",
+    "MODEL",
+    "PIN",
+    "SYSTEM",
+    "TEMPERATURE",
+    "Configuration",
+    "Draft",
+    "DraftCase",
+    "GenerationError",
+    "generate",
+    "notes",
+    "prompt",
+    "read",
+    "schema",
+]

@@ -71,10 +71,10 @@ until the engine has written problems to annotate.
 - [ ] Recompute every expected output from the reference, and discard the
       problem where it disagrees with the canonical. A case the canonical
       produced passes by construction
-- [ ] Sample the generation call rather than running it greedy, the exception
+- [x] Sample the generation call rather than running it greedy, the exception
       the provenance rule names. One model's habits would otherwise become the
       whole corpus
-- [ ] Give generation its own configuration, as the matcher has its own.
+- [x] Give generation its own configuration, as the matcher has its own.
       Generation asks for an artifact where a reading asks for a verdict
 - [ ] Pass the statements already written for a template into the generation
       call, and require the new one to differ. Ten runs otherwise produce ten

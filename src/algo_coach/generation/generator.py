@@ -17,7 +17,21 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
-from algo_coach.schema import Card, Template
+from algo_coach.calls import CallLog, Transport, ask
+from algo_coach.schema import Call, Card, Template
+
+# What writes the corpus. Unmeasured: a generator is scored by what its
+# problems survive — the reference agreeing, the mutants dying, the matcher
+# confirming the brief — and none of those gates has run yet.
+MODEL = "anthropic/claude-opus-5"
+EFFORT = "high"
+PIN = "anthropic"
+# Sampled, where every reading in this engine is greedy. Generation produces an
+# artifact rather than a verdict about one, so no verdict needs protecting from
+# variance, and variance is what stops one model's habits becoming the whole
+# corpus. Set rather than left to the provider, so two runs of one
+# configuration were sampled the same way.
+TEMPERATURE: float | None = 1.0
 
 SYSTEM = """You write practice problems for one form of a technique.
 
@@ -187,3 +201,61 @@ def schema() -> dict[str, Any]:
         "required": ["title", "statement", "canonical", "cases"],
         "additionalProperties": False,
     }
+
+
+class Configuration(BaseModel, frozen=True):
+    """Which generator wrote a problem, and what a re-run has to name to write
+    another the same way.
+
+    Its own rather than the matcher's. Generation asks for an artifact where a
+    reading asks for a verdict, so the model that writes a problem well is not
+    by that fact the one that reads a statement well, and the temperature is
+    the opposite of the reading rule.
+    """
+
+    model: str = MODEL
+    effort: str = EFFORT
+    pin: str = PIN
+    temperature: float | None = TEMPERATURE
+
+
+DEFAULT = Configuration()
+
+
+class GenerationError(Exception):
+    """The model wrote nothing — a refusal, or an answer cut short."""
+
+
+def generate(
+    transport: Transport,
+    log: CallLog,
+    card: Card,
+    template: Template,
+    *,
+    configuration: Configuration = DEFAULT,
+) -> tuple[Draft, Call]:
+    """One call for the statement, the canonical and the first cases, and the
+    call that wrote them.
+
+    Nothing is stored here. The draft is what the reference is written against
+    and what the cases judge, and a problem that fails either is discarded
+    whole — so the writer of records is the step that has seen those runs.
+
+    The call is returned beside the draft because the problem, the cases and
+    the solution all name it. One act wrote them, and provenance is what says
+    so.
+    """
+    call, text = ask(
+        transport,
+        log,
+        system=SYSTEM,
+        content=prompt(card, template),
+        model=configuration.model,
+        effort=configuration.effort,
+        pin=configuration.pin,
+        temperature=configuration.temperature,
+        schema=schema(),
+    )
+    if text is None:
+        raise GenerationError(call.error or "no draft")
+    return read(text), call

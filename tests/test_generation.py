@@ -2,12 +2,22 @@
 technique it belongs to."""
 
 import json
+from dataclasses import dataclass, field
 
 import pytest
 from matching import card, seeded, template
 from pydantic import ValidationError
 
-from algo_coach.generation import SYSTEM, prompt, read, schema
+from algo_coach.calls import CallLog, Reply, prompt_hash
+from algo_coach.generation import (
+    SYSTEM,
+    Configuration,
+    GenerationError,
+    generate,
+    prompt,
+    read,
+    schema,
+)
 
 
 def brief(tmp_path, **overrides) -> str:
@@ -136,3 +146,69 @@ def test_a_case_without_an_expected_return_fails():
     it — the same rule `TestCase` holds."""
     with pytest.raises(ValidationError):
         read(draft(cases=[{"args": "[]"}]))
+
+
+@dataclass
+class FakeModel:
+    """Records the request rather than making one, and answers with whatever
+    the test wrote."""
+
+    text: str | None
+    calls: list[dict] = field(default_factory=list)
+
+    def __call__(self, **kwargs) -> Reply:
+        self.calls.append(kwargs)
+        return Reply(text=self.text, stop_reason="stop" if self.text else "length")
+
+
+def written(tmp_path, model: FakeModel, **overrides):
+    (one,) = seeded(tmp_path, card())
+    return generate(model, CallLog(tmp_path), one, one.templates[0], **overrides)
+
+
+def test_one_call_carries_all_three_parts(tmp_path):
+    """Cases asked for in a second call describe the solution that already
+    exists, so the brief and the schema go out together."""
+    model = FakeModel(draft())
+
+    result, call = written(tmp_path, model)
+
+    assert len(model.calls) == 1
+    assert model.calls[0]["schema"] == schema()
+    assert "Template: longest-valid-window" in model.calls[0]["content"]
+    assert result.canonical.startswith("def solve")
+    assert call.prompt_hash == prompt_hash(SYSTEM, model.calls[0]["content"])
+
+
+def test_generation_is_sampled(tmp_path):
+    """The exception to the greedy rule: generation makes an artifact rather
+    than a verdict, and variance is what stops one model's habits becoming the
+    whole corpus."""
+    model = FakeModel(draft())
+
+    _, call = written(tmp_path, model)
+
+    assert model.calls[0]["temperature"] == 1.0
+    assert call.temperature == 1.0
+
+
+def test_the_configuration_is_what_goes_out(tmp_path):
+    """Its own, since generation asks for an artifact where a reading asks for
+    a verdict."""
+    model = FakeModel(draft())
+
+    written(tmp_path, model, configuration=Configuration(model="a-writer", pin="somewhere/fp8"))
+
+    assert model.calls[0]["model"] == "a-writer"
+    assert model.calls[0]["pin"] == "somewhere/fp8"
+
+
+def test_an_answer_cut_short_writes_no_draft(tmp_path):
+    """A reply with no text wrote nothing. The call is recorded as the failure
+    it is, and nothing downstream sees a problem."""
+    model = FakeModel(None)
+
+    with pytest.raises(GenerationError):
+        written(tmp_path, model)
+
+    assert len(CallLog(tmp_path).all()) == 1
