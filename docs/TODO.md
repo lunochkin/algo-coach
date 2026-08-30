@@ -118,7 +118,7 @@ stored result means is settled in `corpus.md`, so neither moves a record.
 - [x] Write the child as a standalone script, reading `{code, args, cap_ms}`
       and writing `{outcome, value, elapsed_ms}`. The container backend runs
       that same script, so the protocol is written once
-- [ ] Add `outputs` over `run`, returning a value or an outcome per case.
+- [x] Add `outputs` over `run`, returning a value or an outcome per case.
       Generation compares two solutions before any `expected` exists, so it
       returns values rather than verdicts
 - [ ] Add `verify` over `outputs`, comparing against each case's `expected` and
