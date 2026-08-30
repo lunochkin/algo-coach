@@ -184,16 +184,21 @@ def test_one_call_carries_all_three_parts(tmp_path):
     assert call.prompt_hash == prompt_hash(SYSTEM, model.calls[0]["content"])
 
 
-def test_generation_is_sampled(tmp_path):
+def test_generation_is_sampled_at_the_provider_default(tmp_path):
     """The exception to the greedy rule: generation makes an artifact rather
     than a verdict, and variance is what stops one model's habits becoming the
-    whole corpus."""
+    whole corpus.
+
+    Left to the provider rather than set here. A model reasoning at an effort
+    accepts no temperature, and its endpoint drops the request the moment one
+    is sent. Recorded absent, which is equal only to itself.
+    """
     model = FakeModel(draft())
 
     _, call = written(tmp_path, model)
 
-    assert model.calls[0]["temperature"] == 1.0
-    assert call.temperature == 1.0
+    assert model.calls[0]["temperature"] is None
+    assert call.temperature is None
 
 
 def test_the_configuration_is_what_goes_out(tmp_path):
