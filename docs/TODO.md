@@ -57,7 +57,7 @@ until the engine has written problems to annotate.
 - [x] Run one generation call on one template, and read the reply out of the
       call log before writing any of the rest. One call yielded all three
       parts, and the statement was Daily Temperatures verbatim
-- [ ] Write the generation prompt: a template and its cue in, a statement, a
+- [x] Write the generation prompt: a template and its cue in, a statement, a
       canonical and the cases out. One call, or the cases describe the solution
       rather than the problem
 - [ ] Exclude from the statement the domains the template's cue and notes name.
