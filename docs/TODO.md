@@ -39,7 +39,7 @@ until the engine has written problems to annotate.
       template and an optional one only where two approaches are stored
 - [x] Append-only stores for cases, solutions and verifications. A case is
       added and never revised, and two runs of one solution are two records
-- [ ] Add `speedup` to `Template`, saying whether the form beats the naive
+- [x] Add `speedup` to `Template`, saying whether the form beats the naive
       solution. Without it a missing separating input reads as a defect on
       backtracking, whose form is its own optimum
 - [ ] Add a field to `TestCase` naming where its expected output came from.

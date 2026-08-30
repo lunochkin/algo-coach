@@ -156,6 +156,11 @@ file in place.
      technique (fixed-width window against expanding; binary search on values
      against an answer space). Recall is per template, so the cue that must fire
      is too. Never a paste of the card's.
+   - **`"speedup": false` where the form is its own optimum** — backtracking,
+     exhaustive search, any form with no naive solution it beats. The default is
+     true, since most forms replace one. Generation searches for the smallest
+     input separating the canonical from the reference only where a speedup is
+     claimed, and a false claim makes a sound problem read as defective.
    - **`notes` for what is true of this form only**: when it applies, its
      unlock, its variations, what it transfers to, and the derivation of the
      line that goes wrong — the derivation, not a warning. Omit when the trigger

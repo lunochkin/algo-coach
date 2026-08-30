@@ -80,6 +80,12 @@ class Template(BaseModel):
     # for by name. A capstone the user may want to derive rather than read, so
     # the card holds the answer and does not volunteer it.
     optional: bool = False
+    # Whether this form beats the naive solution the technique replaces. Nearly
+    # always true, so the exception says so: backtracking and exhaustive search
+    # are their own optimum, and no input separates them from a reference.
+    # Generation searches for that separating input only where it is claimed,
+    # and a missing one is a defect only there.
+    speedup: bool = True
     kind: TemplateKind = TemplateKind.CODE
     # Whatever is blank-filled: a runnable unit, or the numbered steps of a
     # method. The field keeps its name because code is what it holds nearly

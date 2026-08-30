@@ -159,6 +159,14 @@ def test_a_card_says_what_to_read(blank):
         card(**{blank: ""})
 
 
+def test_a_form_is_a_speedup_unless_it_says_otherwise():
+    """Most forms replace a naive solution, so that is the default. Backtracking
+    and exhaustive search are their own optimum: no input separates them from a
+    reference, and only the template can say so."""
+    assert template().speedup is True
+    assert template("used-array-permutations", speedup=False).speedup is False
+
+
 def test_a_card_round_trips():
     original = card()
     assert Card.model_validate_json(original.model_dump_json()) == original

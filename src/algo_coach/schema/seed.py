@@ -27,6 +27,7 @@ class TemplateSeed(BaseModel):
     trigger: str = Field(min_length=1)
     notes: str | None = None
     optional: bool = False
+    speedup: bool = True
     kind: TemplateKind = TemplateKind.CODE
     code: str
 
