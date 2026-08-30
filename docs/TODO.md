@@ -35,6 +35,12 @@ until the engine has written problems to annotate.
 - [x] `Verification`: one run of a solution, carrying the cap and a result per
       case. Its own record, since the cap and the machine decide a timeout
       where the code does not. The run's own outcome folds from the cases
+- [ ] Add `elapsed_ms` to `CaseResult`, what the child measured around
+      `solve`. The speedup search reads those numbers, and a result holding
+      only the outcome makes every search re-run the whole set
+- [ ] Add `runner` to `Verification`, one opaque string naming the backend and
+      the interpreter. Required, since no verification has been written yet and
+      one stored without it carries nothing for good
 - [x] Several solutions per problem, appended. A rung covers a studied
       template and an optional one only where two approaches are stored
 - [x] Append-only stores for cases, solutions and verifications. A case is
@@ -95,22 +101,60 @@ It comes after generation because the convention is fixed by `TestCase` and the
 output is then real. Landing closes here: nothing is stored until a canonical
 has passed.
 
-- [ ] Reject a solution defining no `solve`. The convention is what makes a
-      stored entry point unnecessary, so nothing else checks it
-- [ ] Execute in a subprocess under a wall-clock cap per case. The engine runs
-      code a model wrote, and a non-terminating one must cost one case rather
-      than the run
+Thin on purpose, and behind one boundary. The local backend is a subprocess per
+case, since our own generated code on our own machine is not a threat model. A
+platform serves someone else's code, and that backend is a container. What a
+stored result means is settled in `corpus.md`, so neither moves a record.
+
+- [ ] Add `run(code, args, *, cap_ms, stop_early=False)`, the one call the
+      executor sits behind. JSON in and JSON out, with no path and no callable
+      in the signature, so a remote sandbox takes the same payload
+- [ ] Stop on the first crash or timeout under `stop_early`, and never on a
+      wrong answer. The backend is not told what a case expects, so the
+      mutation loop can use it and the attempt path cannot
+- [ ] Take the whole case set in one `run` call rather than one case per call.
+      A per-case boundary is one network round trip per case once the executor
+      is remote
+- [ ] Write the child as a standalone script, reading `{code, args, cap_ms}`
+      and writing `{outcome, value, elapsed_ms}`. The container backend runs
+      that same script, so the protocol is written once
+- [ ] Add `outputs` over `run`, returning a value or an outcome per case.
+      Generation compares two solutions before any `expected` exists, so it
+      returns values rather than verdicts
+- [ ] Add `verify` over `outputs`, comparing against each case's `expected` and
+      returning a `CaseResult` per case. Comparison stays above the boundary,
+      so a sandbox is never told what `expected` is
+- [ ] Fail every case as `CRASHED` where the code does not parse or defines no
+      module-level `solve`, read from the syntax tree. Phase 8 reads this path
+      for an attempt, so it needs a verdict rather than an error
+- [ ] Execute one case per subprocess, under a wall-clock cap measured in the
+      child around `solve`. Module-level state must not carry from one case to
+      the next
+- [ ] Start the child in its own session and kill the group on a timeout. A
+      solution that spawned a child of its own would otherwise leave it running
+- [ ] Set the parent's timer to the cap plus start-up, and read a child that
+      reported nothing from how it died: the timer as `TIMEOUT`, a signal as
+      `CRASHED`, anything else raised as the runner's own fault
+- [ ] Write the child's result on a path passed in argv, and discard its
+      stdout. A solution that prints would otherwise corrupt the channel
+- [ ] Return the child's own elapsed time per case. Process start is tens of
+      milliseconds, and would swamp the separating input the speedup search
+      looks for
+- [ ] Raise on a runner fault rather than recording `CRASHED`. A subprocess
+      that fails to start says nothing about the solution
 - [ ] Decide every case rather than stopping at the first failure. The
       canonical stores a count, and a count needs every case decided
-- [ ] Separate a wrong answer from a crash and from a timeout. Phase 8 reads
-      the same result for an attempt, where only one of the three is evidence
-      of slowness
-- [ ] Settle how a case compares outputs where several answers are correct, and
-      write the rule into `corpus.md`. Equality on the returned value fails a
-      correct solution to such a problem
+- [ ] Report where the canonical disagrees with the `expected` the generation
+      call declared. `DraftCase.expected` is read nowhere today, and a call
+      whose code and cases disagree wrote one of the two wrong
 - [ ] Run both solutions before anything lands, and discard the problem whole
-      where the canonical fails or the two disagree. The calls are recorded
-      either way, so what was paid for and thrown away stays readable
+      where the canonical yielded no value on some case or the two disagree.
+      There is no `expected` yet, so yielding nothing is the only way the first
+      canonical fails. The calls are recorded either way, so what was paid for
+      and thrown away stays readable
+- [ ] Take the canonical's answer where the reference yielded none, with
+      `expected_from` naming it. That is the ordinary path beyond the
+      reference's reach, not a failure
 - [ ] Write the problem, its cases, both solutions and the asserted match in
       one act. A half-written problem is one the matcher would read as
       finished
@@ -274,9 +318,24 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
       it needs. Literal arguments put a megabyte of JSON in the store per case,
       where a seed and a size do not. Triggered when the first performance case
       is written
-- [ ] Record what the environment contributed to a verification run. The
-      machine and the interpreter version decide a timeout or a crash as much
-      as the cap does. Triggered when two runs of one solution disagree
+- [ ] Replace the per-case subprocess with a fork server, importing the
+      solution once and forking per case. Triggered when a generation run
+      spends minutes on process start, which mutation testing is what brings
+      on
+- [ ] Choose how a case with several correct returns is decided — a normaliser
+      over the returned value, or a checker per problem — and write the choice
+      into `corpus.md`. Triggered when a studied template can only be exercised
+      by a problem whose answer is not unique
+- [ ] Name on the verification the rule that decided a case, once that rule is
+      no longer JSON equality. A verdict stored without it cannot be re-read
+      after the rule moves. Triggered by the item above landing
+- [ ] Add a container implementation of `run`: no network, read-only rootfs,
+      memory and pids limits, non-root, and the cap enforced from outside as
+      well as in the child. Triggered when the platform serves code someone
+      else wrote
+- [ ] Settle the full shape of a verification's environment, which the `runner`
+      string stands in for. The machine decides a timeout as much as the cap
+      does. Triggered when two runs under one backend disagree
 - [ ] Fall back to another endpoint of the same shape on an outage, never to
       Anthropic direct, whose compatibility layer ignores `response_format`,
       `strict` and `reasoning_effort`. Triggered when an outage blocks a run

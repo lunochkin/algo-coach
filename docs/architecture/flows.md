@@ -11,9 +11,11 @@ The order matters because each step can reject what came before.
 1. A card's template, and the brief: write a problem this form solves.
 2. The statement, the canonical solution and the first test cases, from one
    call.
-3. The canonical runs against the cases.
+3. The canonical runs, and its outputs are checked against the expected
+   values the same call declared.
 4. The reference solution, from the statement alone.
-5. The reference runs against the cases.
+5. The reference runs, and the two solutions' outputs are settled: they agree
+   on every case, or the problem is discarded.
 6. Mutants of the canonical run against the cases, and a call asks for the
    cases that kill whichever mutant survived.
 7. Where the template claims a speedup, the smallest input separating the
@@ -37,14 +39,19 @@ The order matters because each step can reject what came before.
   solution's reading of the statement. Agreement then shows only that one model
   is consistent. Blind, agreement is evidence that the statement has one
   reading, and disagreement on any case discards the problem.
+- **The generator's own expected values are a gate, not a source.** The call
+  that wrote the canonical also declared what each case returns, so a
+  disagreement between them means it wrote one of the two wrong. What a landing
+  case stores is still the reference's answer.
 - **A disagreement is the statement's fault, not either solution's.** Two
   correct-looking solutions returning different answers means the prose admits
   two readings. That is what an in-place edit cannot repair, since the cases
   would move with the wording.
 - **Expected outputs come from the reference wherever it can compute them.**
   That is every case at or below the largest input it finishes at generation
-  time, which runs under no cap. Beyond that point the expected output comes
-  from the canonical.
+  time, under a generation cap set well above the drill loop's. Beyond that
+  point the expected output comes from the canonical. Every run is capped: an
+  uncapped one is a non-terminating reference hanging the run.
 - **The scale case is tautological, and harmlessly so.** Correctness was
   established on the cases the reference computed, and this one exists for the
   cap rather than for the verdict. It still catches a crash or a recursion
@@ -94,6 +101,11 @@ The order matters because each step can reject what came before.
   name and sees the form it must display, so it is not an independent reading.
   It cannot discard a problem, and its failure says nothing about the
   statement. The cases judge it, and it substitutes for no step above.
+- **Failing means two things, at two points.** The first canonical is run
+  before any expected value is settled, so it fails only by yielding no value
+  on some case, and the problem is discarded. A later canonical is judged by
+  the cases the problem carries, so it fails as any solution does, and nothing
+  is discarded.
 - **Announcement is measured, not assumed.** What is being trained is reaching
   for a form unprompted, so the enabling property has to be derivable from the
   statement rather than stated in it. A form a matcher names instantly from the

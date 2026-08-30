@@ -176,9 +176,10 @@ One execution of a solution against a problem's cases.
 - **The cap is stored beside the results.** It is what decided any timeout,
   and two runs under different caps are not comparable. Nothing else would
   show that they differ.
-- **What the environment contributes is deferred.** The machine and the
-  interpreter version decide a timeout or a crash as much as the cap does, and
-  the shape recording them is not settled.
+- **The backend and the interpreter are named, as one opaque string.** A local
+  subprocess and a container under a CPU limit decide a timeout differently,
+  and nothing else separates two runs that disagree. Full environment
+  provenance is deferred, and subsumes this field rather than replacing it.
 - **The verification result is per case, and names how each one went**:
   passed, wrong, timed out or crashed. A share cannot say which input timed
   out, and the set of cases that passed cannot say why the rest did not. A
@@ -195,3 +196,63 @@ One execution of a solution against a problem's cases.
   slowly is otherwise correct, which is a different remedy from one returning
   a wrong answer. An empty set folds to nothing rather than to passed, or it
   would claim a verification that never ran.
+
+## Execution
+
+How a solution is run. The runner is a component and can be replaced; a
+`Verification` is append-only and cannot. So what a stored result means is
+fixed here rather than by whatever executed it.
+
+- **The cap is wall clock around the `solve` call, measured in the child.**
+  Interpreter start is excluded, since it moves with the machine's load. Two
+  runs storing one number would otherwise not be comparable.
+- **A case is decided by JSON equality on the returned value**, encoded with
+  sorted keys. A tuple and a list are one answer under that rule, where `True`
+  and `1` are two.
+- **A problem admitting several correct returns does not land.** The
+  alternative is a checker per problem, and every stored verdict would then
+  depend on code the record does not name. The statement says how ties are
+  broken, and a canonical and a reference disagreeing is what catches one that
+  does not. What this excludes is the problem asking for any valid answer of
+  many, and that cost is accepted until a studied template needs one.
+- **A return that JSON cannot encode is `CRASHED`.** The fault is the
+  solution's rather than the case's. `WRONG` would file it beside an answer
+  that was computed and is merely incorrect. The child does the encoding, so
+  every backend uses the encoder `as_json` uses, or the same return would be
+  decided differently by where it ran.
+- **A solution defining no module-level `solve` fails every case as
+  `CRASHED`.** The check reads the syntax tree, so a module whose import does
+  not terminate is rejected rather than reaching the cap, and code that does
+  not parse is rejected the same way. A verdict rather than an error, because
+  Phase 8 reads this path for an attempt, and a submission with a syntax error
+  is the ordinary case.
+- **No case observes another.** A solution memoising in a module global would
+  otherwise answer one case from a cache built for a different one, and a wrong
+  key would pass. Which mechanism gives that isolation is the runner's to
+  choose.
+- **A runner fault is raised, never recorded.** A subprocess that fails to
+  start says nothing about the solution, and a stored `CRASHED` would discard a
+  sound problem over the runner's own defect.
+- **A run is comparable only within one backend.** A CPU limit changes what a
+  timing bar measures, so the smallest input separating a reference from a
+  canonical is a fact about the backend that found it. The `runner` string is
+  what shows a reader that two runs were not measured the same way.
+- **Comparison stays outside the executor.** A backend is handed code, the
+  arguments and a cap, and returns what each call produced. It is never told
+  what a case expects, so the rule deciding a case cannot vary by where the
+  code ran.
+- **A case yielding no value is read by the solution's role.** A canonical that
+  crashed or timed out discards the problem, since nothing establishes what the
+  case returns. A reference that did so is the ordinary path beyond its reach,
+  and the case takes the canonical's answer with `expected_from` naming it.
+- **The cap is enforced twice, and the outer one is slack.** The child times
+  `solve` and reports a timeout it saw. The parent's own timer is the cap plus
+  start-up, and exists for a child stuck where no Python-level timer fires. The
+  stored cap is the child's, since that is the number the case was judged by.
+- **A child reporting nothing is read from how it died.** The parent's timer
+  firing is `TIMEOUT`. A signal is `CRASHED`, which is where a segfault and a
+  kill under memory pressure land. Anything else is the runner's own fault and
+  is raised, since it says nothing about the solution.
+- **A case result carries what the child measured.** The separating input a
+  speedup search looks for is found from those numbers, and a result holding
+  only the outcome would make every later search re-run the whole set.
