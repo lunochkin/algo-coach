@@ -17,16 +17,16 @@ def result(case_id: str, outcome: str) -> CaseResult:
 
 
 def run(**overrides) -> Verification:
-    return verification(**{"canonical_id": "s1", "timeout_ms": 2000} | overrides)
+    return verification(**{"solution_id": "s1", "timeout_ms": 2000} | overrides)
 
 
 def test_a_run_is_keyed_to_what_it_ran():
-    assert run().canonical_id == "s1"
+    assert run().solution_id == "s1"
 
 
 def test_a_run_naming_no_solution_is_rejected():
-    with pytest.raises(ValidationError, match="canonical_id"):
-        run(canonical_id="")
+    with pytest.raises(ValidationError, match="solution_id"):
+        run(solution_id="")
 
 
 def test_a_run_stores_the_cap_that_decided_a_timeout():

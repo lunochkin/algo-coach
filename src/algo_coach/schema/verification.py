@@ -23,9 +23,9 @@ class Verification(BaseModel):
 
     id: str  # engine-minted, as every reference in the log is
     created_at: datetime
-    # the canonical that was run. Phase 8 runs an attempt on the same path,
-    # and what that reference looks like is settled there
-    canonical_id: str = Field(min_length=1)
+    # the solution that was run, in either role. Phase 8 runs an attempt on
+    # the same path, and what that reference looks like is settled there
+    solution_id: str = Field(min_length=1)
     # the wall-clock cap per case, which is what decided any `TIMEOUT`. Stored
     # because two runs under different caps are not comparable, and the
     # outcome is the only thing that would show it

@@ -31,8 +31,8 @@ class VerificationLog:
             if line.strip()
         ]
 
-    def for_canonical(self, canonical_id: str) -> list[Verification]:
+    def for_solution(self, solution_id: str) -> list[Verification]:
         """Every run of one solution, oldest first. Nothing lands until a
-        canonical passes, so what a reader usually wants is whether one of
+        solution passes, so what a reader usually wants is whether one of
         these verified rather than which came last."""
-        return [one for one in self.verifications() if one.canonical_id == canonical_id]
+        return [one for one in self.verifications() if one.solution_id == solution_id]

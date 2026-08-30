@@ -10,14 +10,14 @@ from algo_coach.schema import CaseOutcome, CaseResult
 from algo_coach.verifications import VerificationLog
 
 
-def run(canonical_id: str = "s1", **overrides):
-    fields = {"canonical_id": canonical_id, "timeout_ms": 2000} | overrides
+def run(solution_id: str = "s1", **overrides):
+    fields = {"solution_id": solution_id, "timeout_ms": 2000} | overrides
     return verification(**fields)
 
 
 def test_an_empty_store_reads_as_nothing(tmp_path):
     assert VerificationLog(tmp_path).verifications() == []
-    assert VerificationLog(tmp_path).for_canonical("s1") == []
+    assert VerificationLog(tmp_path).for_solution("s1") == []
 
 
 def test_a_run_reads_back_whole(tmp_path):
@@ -46,21 +46,21 @@ def test_a_second_run_does_not_supersede_the_first(tmp_path):
     assert [one.timeout_ms for one in store.verifications()] == [100, 5000]
 
 
-def test_runs_are_read_per_canonical(tmp_path):
+def test_runs_are_read_per_solution(tmp_path):
     store = VerificationLog(tmp_path)
     mine = [run("s1"), run("s1")]
     theirs = run("s2")
     for one in [*mine, theirs]:
         store.append(one)
 
-    assert store.for_canonical("s1") == mine
-    assert store.for_canonical("s2") == [theirs]
+    assert store.for_solution("s1") == mine
+    assert store.for_solution("s2") == [theirs]
 
 
-def test_a_canonical_never_run_reads_as_nothing(tmp_path):
+def test_a_solution_never_run_reads_as_nothing(tmp_path):
     """Distinct from one that ran and failed, which carries a record saying
     so."""
     store = VerificationLog(tmp_path)
     store.append(run("s1"))
 
-    assert store.for_canonical("s2") == []
+    assert store.for_solution("s2") == []

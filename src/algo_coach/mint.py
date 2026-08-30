@@ -13,7 +13,6 @@ from typing import Any
 
 from algo_coach.schema import (
     Call,
-    CanonicalSolution,
     CaseResult,
     ClaimSource,
     Confidence,
@@ -22,6 +21,8 @@ from algo_coach.schema import (
     Problem,
     ProblemDifficulty,
     SelfLabel,
+    Solution,
+    SolutionRole,
     TechniqueClaim,
     TemplateMatch,
     TestCase,
@@ -329,9 +330,10 @@ def case(problem_id: str, args: Sequence[Any], expected: Any) -> TestCase:
     return TestCase(id=new_id(), problem_id=problem_id, args=list(args), expected=expected)
 
 
-def canonical_solution(
+def solution(
     problem_id: str,
     code: str,
+    role: SolutionRole,
     *,
     model: str,
     effort: str,
@@ -341,21 +343,25 @@ def canonical_solution(
     temperature: float | None = None,
     provider: str | None = None,
     cost: float | None = None,
-) -> CanonicalSolution:
-    """An exemplary solution, and how each case went against it.
+) -> Solution:
+    """One solution the engine wrote, in the role it was written for.
 
     A machine record like any other, so it names what produced it. Sampled
     rather than greedy, which is why nothing re-derives one: generation makes
     an artifact instead of a verdict, and the variance is what stops one
     model's habits becoming the whole corpus.
 
+    The role is passed rather than inferred. Both roles pass the same cases,
+    so nothing about the code says which one this is.
+
     It says nothing about how it ran. Whether the code passes is a fact about
     a run, and `verification` mints the record holding that.
     """
-    return CanonicalSolution(
+    return Solution(
         id=new_id(),
         created_at=datetime.now(UTC),
         problem_id=problem_id,
+        role=role,
         code=code,
         model=model,
         effort=effort,
@@ -369,7 +375,7 @@ def canonical_solution(
 
 
 def verification(
-    canonical_id: str,
+    solution_id: str,
     *,
     timeout_ms: int,
     results: Sequence[CaseResult] = (),
@@ -386,7 +392,7 @@ def verification(
     return Verification(
         id=new_id(),
         created_at=datetime.now(UTC),
-        canonical_id=canonical_id,
+        solution_id=solution_id,
         timeout_ms=timeout_ms,
         results=list(results),
     )
