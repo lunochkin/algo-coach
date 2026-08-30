@@ -12,8 +12,10 @@ from algo_coach.mint import verification
 from algo_coach.schema import CaseOutcome, CaseResult, Verification
 
 
-def result(case_id: str, outcome: str) -> CaseResult:
-    return CaseResult(case_id=case_id, outcome=outcome)
+def result(case_id: str, outcome: str, **overrides) -> CaseResult:
+    """A case that yielded a value was timed, so the helper carries one."""
+    timed = {"elapsed_ms": 1} if outcome in (CaseOutcome.PASSED, CaseOutcome.WRONG) else {}
+    return CaseResult(**{"case_id": case_id, "outcome": outcome} | timed | overrides)
 
 
 def run(**overrides) -> Verification:
@@ -130,3 +132,31 @@ def test_a_run_is_minted_an_id_and_stamped():
     apart."""
     assert run().id != run().id
     assert run().created_at.tzinfo is not None
+
+
+def test_a_result_carries_what_the_child_measured():
+    """The speedup search reads those numbers. A result holding only the
+    outcome would make every later search re-run the whole set."""
+    timed = CaseResult(case_id="c1", outcome="passed", elapsed_ms=17)
+
+    assert timed.elapsed_ms == 17
+
+
+def test_a_case_that_yielded_a_value_carries_its_time():
+    """`PASSED` and `WRONG` come from a child that ran `solve` to completion,
+    so it measured one."""
+    for outcome in (CaseOutcome.PASSED, CaseOutcome.WRONG):
+        with pytest.raises(ValidationError, match="elapsed_ms"):
+            CaseResult(case_id="c1", outcome=outcome)
+
+
+def test_a_case_the_child_never_timed_carries_no_number():
+    """Code that defines no `solve` never reaches one, and a timeout the
+    parent's own timer decided was reported by nothing."""
+    assert result("c1", "crashed").elapsed_ms is None
+    assert result("c1", "timeout").elapsed_ms is None
+
+
+def test_a_negative_measurement_is_rejected():
+    with pytest.raises(ValidationError, match="elapsed_ms"):
+        CaseResult(case_id="c1", outcome="passed", elapsed_ms=-1)

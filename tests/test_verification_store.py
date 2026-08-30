@@ -38,7 +38,9 @@ def test_a_second_run_does_not_supersede_the_first(tmp_path):
     different question, and both stay readable."""
     store = VerificationLog(tmp_path)
     slow = run(timeout_ms=100, results=[CaseResult(case_id="c1", outcome="timeout")])
-    generous = run(timeout_ms=5000, results=[CaseResult(case_id="c1", outcome="passed")])
+    generous = run(
+        timeout_ms=5000, results=[CaseResult(case_id="c1", outcome="passed", elapsed_ms=1)]
+    )
     store.append(slow)
     store.append(generous)
 

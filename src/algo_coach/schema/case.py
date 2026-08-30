@@ -13,7 +13,7 @@ is keyed to already names the configuration that wrote both.
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ExpectedSource(StrEnum):
@@ -79,3 +79,18 @@ class CaseResult(BaseModel):
 
     case_id: str = Field(min_length=1)
     outcome: CaseOutcome
+    # what the child measured around `solve`. The separating input a speedup
+    # search looks for is found from these numbers, and a result holding only
+    # the outcome would make every search re-run the whole set. Absent where
+    # the child measured nothing: code defining no `solve` never reaches one,
+    # and a timeout the parent's own timer decided was reported by nothing
+    elapsed_ms: int | None = Field(default=None, ge=0)
+
+    @model_validator(mode="after")
+    def _a_case_that_yielded_a_value_was_timed(self) -> CaseResult:
+        """`PASSED` and `WRONG` come from a child that ran `solve` to
+        completion, so the measurement exists. Stored without it, the case
+        would be invisible to a search the run already paid for."""
+        if self.outcome in (CaseOutcome.PASSED, CaseOutcome.WRONG) and self.elapsed_ms is None:
+            raise ValueError(f"a {self.outcome} case carries the elapsed_ms the child measured")
+        return self

@@ -35,7 +35,7 @@ until the engine has written problems to annotate.
 - [x] `Verification`: one run of a solution, carrying the cap and a result per
       case. Its own record, since the cap and the machine decide a timeout
       where the code does not. The run's own outcome folds from the cases
-- [ ] Add `elapsed_ms` to `CaseResult`, what the child measured around
+- [x] Add `elapsed_ms` to `CaseResult`, what the child measured around
       `solve`. The speedup search reads those numbers, and a result holding
       only the outcome makes every search re-run the whole set
 - [ ] Add `runner` to `Verification`, one opaque string naming the backend and
