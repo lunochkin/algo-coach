@@ -1,9 +1,13 @@
 """What one generation call is briefed with: a template, its cue, and the
 technique it belongs to."""
 
-from matching import card, seeded, template
+import json
 
-from algo_coach.generation import SYSTEM, prompt
+import pytest
+from matching import card, seeded, template
+from pydantic import ValidationError
+
+from algo_coach.generation import SYSTEM, prompt, read, schema
 
 
 def brief(tmp_path, **overrides) -> str:
@@ -63,3 +67,72 @@ def test_the_cue_s_own_settings_are_off_limits():
 
     assert "Your statement uses none of them." in rule
     assert "Choose a setting neither the cue nor the notes mentions." in rule
+
+
+def draft(**overrides) -> str:
+    return json.dumps(
+        {
+            "title": "Widest fair stretch",
+            "statement": "Given a list of readings, return ...",
+            "canonical": "def solve(xs):\n    return len(xs)\n",
+            "cases": [{"args": "[[1, 2, 3]]", "expected": "3"}],
+        }
+        | overrides
+    )
+
+
+def test_the_three_parts_come_back_together():
+    """One schema over all of them, so a reply carrying two fails rather than
+    landing a problem with a part to fill in later."""
+    written = read(draft())
+
+    assert written.title == "Widest fair stretch"
+    assert written.cases[0].args == [[1, 2, 3]]
+    assert written.cases[0].expected == 3
+
+
+@pytest.mark.parametrize("missing", ["title", "statement", "canonical", "cases"])
+def test_a_reply_missing_any_part_fails(missing):
+    body = json.loads(draft())
+    del body[missing]
+
+    with pytest.raises(ValidationError):
+        read(json.dumps(body))
+
+
+def test_a_draft_carrying_no_case_decides_nothing():
+    """A problem does not land without the cases that judge it."""
+    with pytest.raises(ValidationError):
+        read(draft(cases=[]))
+
+
+def test_arguments_that_are_not_json_fail_on_arrival():
+    """The schema's guarantee ends with the request. Text that does not parse
+    is caught here rather than stored as cases nothing can run."""
+    with pytest.raises(ValidationError):
+        read(draft(cases=[{"args": "[1, 2", "expected": "3"}]))
+
+
+def test_a_string_expected_keeps_its_quotes():
+    """JSON inside a string, so a returned string is a string and not the
+    text of a number."""
+    assert read(draft(cases=[{"args": "[]", "expected": '"ab"'}])).cases[0].expected == "ab"
+
+
+def test_the_schema_is_strict():
+    """Every property required and none added, which is what the endpoint
+    enforces. Anything looser answers with a part missing."""
+    shape = schema()
+    case = shape["properties"]["cases"]["items"]
+
+    assert sorted(shape["required"]) == sorted(shape["properties"])
+    assert shape["additionalProperties"] is False
+    assert sorted(case["required"]) == sorted(case["properties"])
+    assert case["additionalProperties"] is False
+
+
+def test_a_case_without_an_expected_return_fails():
+    """`None` is a value a solution may return, so absence cannot stand in for
+    it — the same rule `TestCase` holds."""
+    with pytest.raises(ValidationError):
+        read(draft(cases=[{"args": "[]"}]))

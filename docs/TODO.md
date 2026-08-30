@@ -63,7 +63,7 @@ until the engine has written problems to annotate.
 - [x] Exclude from the statement the domains the template's cue and notes name.
       The probe was given a cue saying "temperatures" and returned the problem
       that cue was written from
-- [ ] Define one response schema over all three parts, so a reply missing any
+- [x] Define one response schema over all three parts, so a reply missing any
       of them fails rather than landing a problem to repair later
 - [ ] Write the reference call: the statement alone in, a solution out. Neither
       the canonical nor the cases may reach it, or the two share one reading of
