@@ -1,3 +1,4 @@
+from algo_coach.runner.encoding import agrees, as_json
 from algo_coach.runner.execution import (
     CHILD,
     STARTUP_MS,
@@ -8,6 +9,7 @@ from algo_coach.runner.execution import (
     run,
 )
 from algo_coach.runner.outputs import NoValue, outputs
+from algo_coach.runner.verdicts import verify
 
 __all__ = [
     "CHILD",
@@ -16,7 +18,10 @@ __all__ = [
     "NoValue",
     "RunOutcome",
     "RunnerError",
+    "agrees",
+    "as_json",
     "defines_solve",
     "outputs",
     "run",
+    "verify",
 ]

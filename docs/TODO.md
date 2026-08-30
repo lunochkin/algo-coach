@@ -121,7 +121,7 @@ stored result means is settled in `corpus.md`, so neither moves a record.
 - [x] Add `outputs` over `run`, returning a value or an outcome per case.
       Generation compares two solutions before any `expected` exists, so it
       returns values rather than verdicts
-- [ ] Add `verify` over `outputs`, comparing against each case's `expected` and
+- [x] Add `verify` over `outputs`, comparing against each case's `expected` and
       returning a `CaseResult` per case. Comparison stays above the boundary,
       so a sandbox is never told what `expected` is
 - [x] Fail every case as `CRASHED` where the code does not parse or defines no

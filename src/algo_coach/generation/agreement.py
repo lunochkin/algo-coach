@@ -11,15 +11,16 @@ the canonical produced passes by construction, and `verified` would then mean
 only that the solution agrees with itself.
 
 The outputs are passed in rather than produced here. Executing a solution is
-the runner's, and this decides what the run means.
+the runner's, and this decides what the run means. Agreement is agreement as
+JSON, by the rule the runner encodes a return with.
 """
 
-import json
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
 from algo_coach.generation.generator import DraftCase
+from algo_coach.runner.encoding import agrees
 
 
 @dataclass(frozen=True)
@@ -50,21 +51,6 @@ class Settled:
     @property
     def agreed(self) -> bool:
         return not self.disagreements
-
-
-def as_json(value: Any) -> str:
-    """A value as the case will store it.
-
-    Agreement is agreement as JSON, because that is what a stored case holds.
-    A tuple and a list are one answer under that rule, where `True` and `1`
-    are two. A value JSON cannot hold is not a case at all, and the encoder
-    raising here says so.
-    """
-    return json.dumps(value, sort_keys=True)
-
-
-def agrees(canonical: Any, reference: Any) -> bool:
-    return as_json(canonical) == as_json(reference)
 
 
 def settle(
