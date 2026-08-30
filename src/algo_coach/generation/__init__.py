@@ -1,3 +1,4 @@
+from algo_coach.generation.agreement import Disagreement, Settled, agrees, settle
 from algo_coach.generation.blind import reference
 from algo_coach.generation.generator import (
     DEFAULT,
@@ -25,13 +26,17 @@ __all__ = [
     "SYSTEM",
     "TEMPERATURE",
     "Configuration",
+    "Disagreement",
     "Draft",
     "DraftCase",
     "GenerationError",
+    "Settled",
+    "agrees",
     "generate",
     "notes",
     "prompt",
     "read",
     "reference",
     "schema",
+    "settle",
 ]

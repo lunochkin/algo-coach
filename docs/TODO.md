@@ -68,7 +68,7 @@ until the engine has written problems to annotate.
 - [x] Write the reference call: the statement alone in, a solution out. Neither
       the canonical nor the cases may reach it, or the two share one reading of
       the statement
-- [ ] Recompute every expected output from the reference, and discard the
+- [x] Recompute every expected output from the reference, and discard the
       problem where it disagrees with the canonical. A case the canonical
       produced passes by construction
 - [x] Sample the generation call rather than running it greedy, the exception
