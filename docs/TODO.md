@@ -42,7 +42,7 @@ until the engine has written problems to annotate.
 - [x] Add `speedup` to `Template`, saying whether the form beats the naive
       solution. Without it a missing separating input reads as a defect on
       backtracking, whose form is its own optimum
-- [ ] Add a field to `TestCase` naming where its expected output came from.
+- [x] Add a field to `TestCase` naming where its expected output came from.
       Beyond the reference's reach only the canonical can compute one, and two
       cases in a set are then not equally strong evidence
 - [x] A `MatchSource.GENERATOR` arm, carrying no provenance as a hand match

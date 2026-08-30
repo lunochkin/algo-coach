@@ -16,6 +16,7 @@ from algo_coach.schema import (
     CaseResult,
     ClaimSource,
     Confidence,
+    ExpectedSource,
     FailureMode,
     MatchSource,
     Problem,
@@ -316,7 +317,13 @@ def generated_problem(
     )
 
 
-def case(problem_id: str, args: Sequence[Any], expected: Any) -> TestCase:
+def case(
+    problem_id: str,
+    args: Sequence[Any],
+    expected: Any,
+    *,
+    expected_from: ExpectedSource = ExpectedSource.REFERENCE,
+) -> TestCase:
     """One case of the set a generated problem carries.
 
     Named `case` rather than `test_case`: pytest collects any callable whose
@@ -326,8 +333,21 @@ def case(problem_id: str, args: Sequence[Any], expected: Any) -> TestCase:
     Minted here as every stored record is. It carries no provenance: a case is
     not a reading, and the problem it is keyed to already names the
     configuration that wrote both in one call.
+
+    The reference computed the expected output unless the caller says
+    otherwise, since that is the rule: it is different code from a call that
+    saw the statement alone, so a case it computed is a test. Beyond the
+    largest input it finishes at generation time only the canonical can compute
+    one, and that case names it. The field itself has no default, so any writer
+    that is not this one has to answer.
     """
-    return TestCase(id=new_id(), problem_id=problem_id, args=list(args), expected=expected)
+    return TestCase(
+        id=new_id(),
+        problem_id=problem_id,
+        args=list(args),
+        expected=expected,
+        expected_from=expected_from,
+    )
 
 
 def solution(

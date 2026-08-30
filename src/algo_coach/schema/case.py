@@ -16,6 +16,21 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
+class ExpectedSource(StrEnum):
+    """Which solution computed a case's expected output.
+
+    Not `SolutionRole` under another name: it answers how strong the case is
+    rather than what a solution displays. The reference is different code from
+    a call that saw the statement alone, so a case it computed is a test. One
+    only the canonical could compute passes by construction, and is evidence
+    about the cap rather than about the verdict. A third arm — two canonicals
+    of different forms agreeing at scale — is additive if it is ever wanted.
+    """
+
+    REFERENCE = "reference"
+    CANONICAL = "canonical"
+
+
 class TestCase(BaseModel):
     """One call of a solution, and what it must return.
 
@@ -34,6 +49,10 @@ class TestCase(BaseModel):
     # case without one decides nothing; `None` is a value a solution may
     # legitimately return, which is why absence cannot stand in for it
     expected: Any
+    # which solution computed `expected`. Required rather than defaulted: two
+    # cases in a set are not equally strong, and a model default would answer
+    # for a writer that never asked the question. `mint.case` carries the rule
+    expected_from: ExpectedSource
 
 
 class CaseOutcome(StrEnum):

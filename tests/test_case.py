@@ -10,7 +10,7 @@ import pytest
 from pydantic import ValidationError
 
 from algo_coach.mint import case
-from algo_coach.schema import Problem, TestCase
+from algo_coach.schema import ExpectedSource, Problem, TestCase
 
 
 def test_a_case_is_keyed_to_a_problem():
@@ -60,6 +60,29 @@ def test_a_case_carries_no_provenance():
     """It is not a reading. The problem it is keyed to already names the
     configuration that wrote both in one call."""
     assert not [name for name in TestCase.model_fields if name in Problem.RECORDED]
+
+
+def test_a_case_names_where_its_expected_output_came_from():
+    """The reference computes them wherever it reaches, and beyond its reach
+    only the canonical can. A case the canonical answered is evidence about the
+    cap rather than about the verdict, and nothing but this field says so."""
+    at_scale = case("p1", [10**6], 3, expected_from=ExpectedSource.CANONICAL)
+
+    assert at_scale.expected_from is ExpectedSource.CANONICAL
+
+
+def test_expected_outputs_come_from_the_reference_unless_a_case_says_otherwise():
+    """It is different code from a call that saw the statement alone, so a case
+    it computed is a test. One the canonical answered passes by construction."""
+    assert case("p1", [1], 2).expected_from is ExpectedSource.REFERENCE
+
+
+def test_a_case_that_names_no_source_is_rejected():
+    """Two cases in a set are not equally strong evidence. A model default
+    would answer for a writer that never considered the question; the minter
+    answers it once, where the rule is written down."""
+    with pytest.raises(ValidationError, match="expected_from"):
+        TestCase(id="c1", problem_id="p1", args=[1], expected=2)
 
 
 def test_a_case_survives_the_store_round_trip():
