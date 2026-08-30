@@ -1,17 +1,67 @@
-"""What two runs of one case set decide: whose answer is stored, and when the
-statement admits two readings."""
+"""What a run of one case set decides: whether the call that wrote the problem
+wrote its code and its cases from one reading, whose answer is stored, and when
+the statement admits two readings."""
+
+import json
 
 import pytest
 
-from algo_coach.generation import Disagreement, settle
+from algo_coach.generation import Disagreement, Misdeclaration, misdeclared, settle
 from algo_coach.generation.agreement import agrees
 from algo_coach.generation.generator import DraftCase
+from algo_coach.runner import NoValue, RunOutcome
 
 
 def cases(*args) -> list[DraftCase]:
     """Cases as the generation call wrote them, whose JSON arrives as text.
     The model's own expected output is never stored, so these carry none."""
     return [DraftCase(args=list(one), expected="null") for one in args]
+
+
+def declared(*pairs) -> list[DraftCase]:
+    """Cases as the generation call wrote them, each carrying the value it
+    said `solve` returns. Both fields arrive as JSON text."""
+    return [DraftCase(args=json.dumps(list(args)), expected=json.dumps(one)) for args, one in pairs]
+
+
+def test_a_canonical_answering_what_was_declared_reports_nothing():
+    """One call wrote the code and the cases, and they agree."""
+    assert misdeclared(declared(([1, 2], 3), ([], 0)), [3, 0]) == []
+
+
+def test_a_misdeclaration_carries_both_answers():
+    """Which of the two the call wrote wrong is not the question. It wrote one
+    of them wrong, and the pair is what shows it."""
+    assert misdeclared(declared(([1], 2)), [9]) == [
+        Misdeclaration(args=[1], declared=2, returned=9)
+    ]
+
+
+def test_every_case_is_read():
+    """The gate reports what the call declared wrong, and one case says less
+    than all of them."""
+    reported = misdeclared(declared(([1], 1), ([2], 2), ([3], 3)), [1, 9, 8])
+
+    assert [one.args for one in reported] == [[2], [3]]
+
+
+def test_the_declared_value_is_compared_as_json():
+    """By the rule the runner encodes a return with: a tuple and a list are one
+    answer, where a boolean and a number are two."""
+    assert misdeclared(declared(([1], [1, 2])), [(1, 2)]) == []
+    assert misdeclared(declared(([1], 1)), [True]) != []
+
+
+def test_a_case_that_yielded_no_value_is_not_a_misdeclaration():
+    """Nothing was computed to compare. A canonical yielding nothing is what
+    discards the problem a step later."""
+    assert misdeclared(declared(([1], 1)), [NoValue(RunOutcome.TIMEOUT)]) == []
+
+
+def test_a_run_that_answered_a_different_number_of_cases_reports_nothing():
+    """A fault in the runner rather than a call that declared wrong."""
+    with pytest.raises(ValueError):
+        misdeclared(declared(([1], 1), ([2], 2)), [1])
 
 
 def test_the_stored_answer_is_the_reference_s():

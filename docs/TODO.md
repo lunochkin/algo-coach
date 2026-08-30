@@ -144,7 +144,7 @@ stored result means is settled in `corpus.md`, so neither moves a record.
       that fails to start says nothing about the solution
 - [x] Decide every case rather than stopping at the first failure. The
       canonical stores a count, and a count needs every case decided
-- [ ] Report where the canonical disagrees with the `expected` the generation
+- [x] Report where the canonical disagrees with the `expected` the generation
       call declared. `DraftCase.expected` is read nowhere today, and a call
       whose code and cases disagree wrote one of the two wrong
 - [ ] Run both solutions before anything lands, and discard the problem whole

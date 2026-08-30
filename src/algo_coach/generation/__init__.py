@@ -1,4 +1,11 @@
-from algo_coach.generation.agreement import Disagreement, Settled, agrees, settle
+from algo_coach.generation.agreement import (
+    Disagreement,
+    Misdeclaration,
+    Settled,
+    agrees,
+    misdeclared,
+    settle,
+)
 from algo_coach.generation.blind import reference
 from algo_coach.generation.generator import (
     DEFAULT,
@@ -39,6 +46,7 @@ __all__ = [
     "Drafted",
     "Failed",
     "GenerationResult",
+    "Misdeclaration",
     "Progress",
     "Draft",
     "DraftCase",
@@ -46,6 +54,7 @@ __all__ = [
     "Settled",
     "agrees",
     "generate",
+    "misdeclared",
     "notes",
     "prompt",
     "read",
