@@ -38,7 +38,7 @@ until the engine has written problems to annotate.
 - [x] Add `elapsed_ms` to `CaseResult`, what the child measured around
       `solve`. The speedup search reads those numbers, and a result holding
       only the outcome makes every search re-run the whole set
-- [ ] Add `runner` to `Verification`, one opaque string naming the backend and
+- [x] Add `runner` to `Verification`, one opaque string naming the backend and
       the interpreter. Required, since no verification has been written yet and
       one stored without it carries nothing for good
 - [x] Several solutions per problem, appended. A rung covers a studied

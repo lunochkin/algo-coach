@@ -11,7 +11,11 @@ from algo_coach.verifications import VerificationLog
 
 
 def run(solution_id: str = "s1", **overrides):
-    fields = {"solution_id": solution_id, "timeout_ms": 2000} | overrides
+    fields = {
+        "solution_id": solution_id,
+        "timeout_ms": 2000,
+        "runner": "subprocess/cpython-3.14",
+    } | overrides
     return verification(**fields)
 
 

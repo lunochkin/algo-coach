@@ -398,6 +398,7 @@ def verification(
     solution_id: str,
     *,
     timeout_ms: int,
+    runner: str,
     results: Sequence[CaseResult] = (),
 ) -> Verification:
     """One run of a solution against a problem's cases.
@@ -407,12 +408,15 @@ def verification(
     can come from the runner, so the same code run twice can differ.
 
     The cap is stored beside the results. Two runs under different caps are not
-    comparable, and nothing else would show it.
+    comparable, and nothing else would show it. The runner is there for the
+    same reason: a CPU limit changes what a timing bar measures, so two runs
+    under different backends were not measured the same way.
     """
     return Verification(
         id=new_id(),
         created_at=datetime.now(UTC),
         solution_id=solution_id,
         timeout_ms=timeout_ms,
+        runner=runner,
         results=list(results),
     )

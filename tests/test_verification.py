@@ -19,7 +19,8 @@ def result(case_id: str, outcome: str, **overrides) -> CaseResult:
 
 
 def run(**overrides) -> Verification:
-    return verification(**{"solution_id": "s1", "timeout_ms": 2000} | overrides)
+    fields = {"solution_id": "s1", "timeout_ms": 2000, "runner": "subprocess/cpython-3.14"}
+    return verification(**(fields | overrides))
 
 
 def test_a_run_is_keyed_to_what_it_ran():
@@ -35,6 +36,19 @@ def test_a_run_stores_the_cap_that_decided_a_timeout():
     """Two runs under different caps are not comparable, and the outcome is
     the only thing that would show it."""
     assert run(timeout_ms=500).timeout_ms == 500
+
+
+def test_a_run_names_the_backend_and_the_interpreter():
+    """A local subprocess and a container under a CPU limit decide a timeout
+    differently, and nothing else separates two runs that disagree."""
+    assert run(runner="container/cpython-3.14").runner == "container/cpython-3.14"
+
+
+def test_a_run_naming_no_runner_is_rejected():
+    """A run stored without one carries nothing for good: what a CPU limit did
+    to a timing bar cannot be reconstructed later."""
+    with pytest.raises(ValidationError, match="runner"):
+        run(runner="")
 
 
 def test_a_cap_of_nothing_is_rejected():

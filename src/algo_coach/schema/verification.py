@@ -30,6 +30,12 @@ class Verification(BaseModel):
     # because two runs under different caps are not comparable, and the
     # outcome is the only thing that would show it
     timeout_ms: int = Field(gt=0)
+    # the backend and the interpreter, as one opaque string. A local
+    # subprocess and a container under a CPU limit decide a timeout
+    # differently, and nothing else separates two runs that disagree. Never
+    # parsed: full environment provenance subsumes this field rather than
+    # replacing it
+    runner: str = Field(min_length=1)
     # one entry per case the solution was run against
     results: list[CaseResult] = Field(default_factory=list)
 
