@@ -76,6 +76,11 @@ until the engine has written problems to annotate.
       whole corpus
 - [ ] Give generation its own configuration, as the matcher has its own.
       Generation asks for an artifact where a reading asks for a verdict
+- [ ] Pass the statements already written for a template into the generation
+      call, and require the new one to differ. Ten runs otherwise produce ten
+      variants of one problem, each passing every gate
+- [ ] Set `Problem.difficulty` at generation. A selector filters on it and
+      nothing writes it, so a ladder's rungs are ordered by nothing
 - [ ] Add `algo-coach generate`, a template in and problems out, through the
       transport the classifier and the matcher already share
 - [ ] Print progress per problem, as the other run loops report it: the
@@ -192,6 +197,9 @@ largely cancels in the comparison.
 - [ ] Read the generated corpus against that floor before growing it. A problem
       the matcher names instantly was telegraphed, and teaches recognition of
       nothing
+- [ ] Measure how many generated statements are public problems the model
+      retrieved rather than wrote, and record the share. Excluding the cue's
+      domains renames a retrieval instead of preventing it
 
 ### Exit
 - [ ] A card's reported gaps are filled by generated problems, and Phase 7
