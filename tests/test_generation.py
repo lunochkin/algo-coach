@@ -18,6 +18,7 @@ from algo_coach.generation import (
     read,
     schema,
 )
+from algo_coach.schema import ProblemDifficulty
 
 
 def brief(tmp_path, **overrides) -> str:
@@ -85,6 +86,7 @@ def draft(**overrides) -> str:
             "title": "Widest fair stretch",
             "statement": "Given a list of readings, return ...",
             "canonical": "def solve(xs):\n    return len(xs)\n",
+            "difficulty": "medium",
             "cases": [{"args": "[[1, 2, 3]]", "expected": "3"}],
         }
         | overrides
@@ -101,7 +103,7 @@ def test_the_three_parts_come_back_together():
     assert written.cases[0].expected == 3
 
 
-@pytest.mark.parametrize("missing", ["title", "statement", "canonical", "cases"])
+@pytest.mark.parametrize("missing", ["title", "statement", "canonical", "cases", "difficulty"])
 def test_a_reply_missing_any_part_fails(missing):
     body = json.loads(draft())
     del body[missing]
@@ -212,3 +214,16 @@ def test_an_answer_cut_short_writes_no_draft(tmp_path):
         written(tmp_path, model)
 
     assert len(CallLog(tmp_path).all()) == 1
+
+
+def test_the_draft_says_how_hard_the_problem_is():
+    """A card's selector filters on it and a ladder's rungs are ordered by it,
+    so nothing else would write it."""
+    assert read(draft()).difficulty is ProblemDifficulty.MEDIUM
+    assert schema()["properties"]["difficulty"]["enum"] == ["easy", "medium", "hard"]
+
+
+def test_a_difficulty_outside_the_vocabulary_fails():
+    """The enum constrains the request; this is the same check on arrival."""
+    with pytest.raises(ValidationError):
+        read(draft(difficulty="trivial"))

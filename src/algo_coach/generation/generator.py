@@ -1,12 +1,12 @@
-"""Writing a problem for one template: the statement, the canonical solution
-and the first test cases.
+"""Writing a problem for one template: the statement, the canonical solution,
+the first test cases and how hard it is.
 
-One call for all three. Cases asked for after a solution exists describe
+One call for all of them. Cases asked for after a solution exists describe
 whatever that solution happens to do, where cases written beside the statement
 describe what the problem asks. The same call is why the statement comes
 first in the brief: the code and the cases are asked to follow from it.
 
-One response schema over all three parts, so a reply carrying two of them
+One response schema over every part, so a reply missing one of them
 fails at the request rather than landing a problem with a part to fill in
 later. Nothing is stored from here: what the reply becomes is decided after
 the canonical and the reference have run.
@@ -18,7 +18,7 @@ from typing import Any
 from pydantic import BaseModel, Field, field_validator
 
 from algo_coach.calls import CallLog, Transport, ask
-from algo_coach.schema import Call, Card, Template
+from algo_coach.schema import Call, Card, ProblemDifficulty, Template
 
 # What writes the corpus. Unmeasured: a generator is scored by what its
 # problems survive — the reference agreeing, the mutants dying, the matcher
@@ -38,7 +38,7 @@ SYSTEM = """You write practice problems for one form of a technique.
 You are given a template: a form a solver reproduces from memory, its cue, and
 the code it comes back as. Write a problem that this form solves.
 
-Produce three things.
+Produce four things.
 
 1. A statement. Self-contained prose: what the input is, what to return, the
    constraints that bound them, and one worked example. It must not name the
@@ -51,6 +51,10 @@ Produce three things.
    Include the edge cases the statement admits. They must separate a correct
    solution from a plausible wrong one: a solution that handles the ordinary
    input and gets the boundary wrong has to fail at least one case.
+4. A difficulty: easy, medium or hard. Easy is the form applied to what the
+   statement hands over. Medium needs the input transformed, or a state
+   chosen, before the form fits. Hard makes the form one step of a solution
+   whose rest has to be derived. Judge the problem you wrote, not the form.
 
 The cue and the notes name concrete settings so the form is recognisable: a
 domain, an object, a scenario. Your statement uses none of them. Such a setting
@@ -149,6 +153,10 @@ class Draft(BaseModel):
     # what decides the problem. A draft carrying none decides nothing, and a
     # problem does not land without the cases that judge it
     cases: list[DraftCase] = Field(min_length=1)
+    # what orders a ladder's rungs, and what a card's selector filters on.
+    # Asked for rather than derived: nothing else has read the problem yet,
+    # and a corpus written without it is one a ladder cannot order
+    difficulty: ProblemDifficulty
 
 
 def read(text: str) -> Draft:
@@ -179,6 +187,7 @@ def schema() -> dict[str, Any]:
             "title": {"type": "string"},
             "statement": {"type": "string"},
             "canonical": {"type": "string"},
+            "difficulty": {"type": "string", "enum": [one.value for one in ProblemDifficulty]},
             "cases": {
                 "type": "array",
                 "items": {
@@ -198,7 +207,7 @@ def schema() -> dict[str, Any]:
                 },
             },
         },
-        "required": ["title", "statement", "canonical", "cases"],
+        "required": ["title", "statement", "canonical", "difficulty", "cases"],
         "additionalProperties": False,
     }
 

@@ -79,7 +79,7 @@ until the engine has written problems to annotate.
 - [ ] Pass the statements already written for a template into the generation
       call, and require the new one to differ. Ten runs otherwise produce ten
       variants of one problem, each passing every gate
-- [ ] Set `Problem.difficulty` at generation. A selector filters on it and
+- [x] Set `Problem.difficulty` at generation. A selector filters on it and
       nothing writes it, so a ladder's rungs are ordered by nothing
 - [ ] Add `algo-coach generate`, a template in and problems out, through the
       transport the classifier and the matcher already share
