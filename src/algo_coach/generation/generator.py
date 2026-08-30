@@ -30,9 +30,14 @@ PIN = "anthropic"
 # Sampled, where every reading in this engine is greedy. Generation produces an
 # artifact rather than a verdict about one, so no verdict needs protecting from
 # variance, and variance is what stops one model's habits becoming the whole
-# corpus. Set rather than left to the provider, so two runs of one
-# configuration were sampled the same way.
-TEMPERATURE: float | None = 1.0
+# corpus.
+#
+# The provider's own, rather than a number set here. A model reasoning at an
+# effort accepts no temperature, so its endpoint does not advertise the
+# parameter, and `require_parameters` drops it the moment one is sent: the
+# request 404s with no endpoint found rather than being answered greedily.
+# Recorded absent, which is equal only to itself.
+TEMPERATURE: float | None = None
 
 SYSTEM = """You write practice problems for one form of a technique.
 
