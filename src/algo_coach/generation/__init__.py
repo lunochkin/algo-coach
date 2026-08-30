@@ -1,3 +1,4 @@
+from algo_coach.generation.blind import reference
 from algo_coach.generation.generator import (
     DEFAULT,
     EFFORT,
@@ -31,5 +32,6 @@ __all__ = [
     "notes",
     "prompt",
     "read",
+    "reference",
     "schema",
 ]

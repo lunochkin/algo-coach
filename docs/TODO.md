@@ -65,7 +65,7 @@ until the engine has written problems to annotate.
       that cue was written from
 - [x] Define one response schema over all three parts, so a reply missing any
       of them fails rather than landing a problem to repair later
-- [ ] Write the reference call: the statement alone in, a solution out. Neither
+- [x] Write the reference call: the statement alone in, a solution out. Neither
       the canonical nor the cases may reach it, or the two share one reading of
       the statement
 - [ ] Recompute every expected output from the reference, and discard the
