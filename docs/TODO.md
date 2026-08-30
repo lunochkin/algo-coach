@@ -60,7 +60,7 @@ until the engine has written problems to annotate.
 - [x] Write the generation prompt: a template and its cue in, a statement, a
       canonical and the cases out. One call, or the cases describe the solution
       rather than the problem
-- [ ] Exclude from the statement the domains the template's cue and notes name.
+- [x] Exclude from the statement the domains the template's cue and notes name.
       The probe was given a cue saying "temperatures" and returned the problem
       that cue was written from
 - [ ] Define one response schema over all three parts, so a reply missing any

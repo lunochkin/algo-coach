@@ -54,3 +54,12 @@ def test_the_statement_is_asked_for_before_the_solution():
 def test_the_entry_point_convention_is_stated():
     """Nothing stores the name, so the brief is where a solution learns it."""
     assert "`solve`" in SYSTEM
+
+
+def test_the_cue_s_own_settings_are_off_limits():
+    """The monotonic-stack cue says "temperatures", and the probe returned the
+    problem that cue was written from."""
+    rule = " ".join(SYSTEM.split())
+
+    assert "Your statement uses none of them." in rule
+    assert "Choose a setting neither the cue nor the notes mentions." in rule

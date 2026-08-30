@@ -31,6 +31,12 @@ Produce three things.
    solution from a plausible wrong one: a solution that handles the ordinary
    input and gets the boundary wrong has to fail at least one case.
 
+The cue and the notes name concrete settings so the form is recognisable: a
+domain, an object, a scenario. Your statement uses none of them. Such a setting
+is usually the published problem the cue was written from, and a solver who
+recognises that problem has not derived its form. Choose a setting neither the
+cue nor the notes mentions.
+
 Write the statement first, and let the solution and the cases follow from it.
 Cases read off a finished solution test what that code does rather than what
 the problem asks.
