@@ -76,7 +76,7 @@ until the engine has written problems to annotate.
       whole corpus
 - [x] Give generation its own configuration, as the matcher has its own.
       Generation asks for an artifact where a reading asks for a verdict
-- [ ] Pass the statements already written for a template into the generation
+- [x] Pass the statements already written for a template into the generation
       call, and require the new one to differ. Ten runs otherwise produce ten
       variants of one problem, each passing every gate
 - [x] Set `Problem.difficulty` at generation. A selector filters on it and

@@ -13,12 +13,13 @@ the canonical and the reference have run.
 """
 
 import json
+from collections.abc import Iterable, Sequence
 from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
 from algo_coach.calls import CallLog, Transport, ask
-from algo_coach.schema import Call, Card, ProblemDifficulty, Template
+from algo_coach.schema import Call, Card, Problem, ProblemDifficulty, Template
 
 # What writes the corpus. Unmeasured: a generator is scored by what its
 # problems survive — the reference agreeing, the mutants dying, the matcher
@@ -62,6 +63,10 @@ is usually the published problem the cue was written from, and a solver who
 recognises that problem has not derived its form. Choose a setting neither the
 cue nor the notes mentions.
 
+Any statements already written for this form are listed after the brief. Yours
+asks a different question. The same question in a new setting is a variant, and
+ten variants of one problem teach the form once.
+
 Write the statement first, and let the solution and the cases follow from it.
 Cases read off a finished solution test what that code does rather than what
 the problem asks.
@@ -76,7 +81,7 @@ Both are written as JSON inside a string, so a string keeps its quotes and an
 absent value is `null`."""
 
 
-def prompt(card: Card, template: Template) -> str:
+def prompt(card: Card, template: Template, written: Sequence[str] = ()) -> str:
     """The brief: one form, and the technique it belongs to.
 
     The technique's cue is carried beside the template's because they answer
@@ -86,6 +91,10 @@ def prompt(card: Card, template: Template) -> str:
 
     The form itself is sent, as it is to the matcher. A cue and a title name a
     shape the model would otherwise have to guess at.
+
+    `written` is what this form already has. A model that cannot see it writes
+    the problem the form suggests, which is the same problem every run, and
+    every one of them passes every gate.
     """
     return "\n".join(
         [
@@ -97,8 +106,21 @@ def prompt(card: Card, template: Template) -> str:
             *notes(template),
             "Form:",
             *(f"  {line}" for line in template.code.splitlines()),
+            *already(written),
         ]
     )
+
+
+def already(written: Sequence[str]) -> list[str]:
+    """The statements this form carries, delimited: each is data the model is
+    told apart from, rather than instructions it follows."""
+    if not written:
+        return []
+    return [
+        "",
+        "Already written for this form:",
+        *(line for statement in written for line in ("<written>", statement, "</written>")),
+    ]
 
 
 def notes(template: Template) -> list[str]:
@@ -241,6 +263,7 @@ def generate(
     card: Card,
     template: Template,
     *,
+    written: Sequence[str] = (),
     configuration: Configuration = DEFAULT,
 ) -> tuple[Draft, Call]:
     """One call for the statement, the canonical and the first cases, and the
@@ -258,7 +281,7 @@ def generate(
         transport,
         log,
         system=SYSTEM,
-        content=prompt(card, template),
+        content=prompt(card, template, written),
         model=configuration.model,
         effort=configuration.effort,
         pin=configuration.pin,
@@ -268,3 +291,13 @@ def generate(
     if text is None:
         raise GenerationError(call.error or "no draft")
     return read(text), call
+
+
+def written_for(problems: Iterable[Problem], template: Template) -> list[str]:
+    """The statements this template has already produced.
+
+    Every status, retired included. A repeat of a telegraphed problem is still
+    the same problem, and what the next run has to differ from is the corpus
+    rather than the part of it that is served.
+    """
+    return [problem.statement for problem in problems if problem.generated_for == template.id]

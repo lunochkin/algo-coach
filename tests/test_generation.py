@@ -5,6 +5,7 @@ import json
 from dataclasses import dataclass, field
 
 import pytest
+from helpers import PROVENANCE
 from matching import card, seeded, template
 from pydantic import ValidationError
 
@@ -17,8 +18,9 @@ from algo_coach.generation import (
     prompt,
     read,
     schema,
+    written_for,
 )
-from algo_coach.schema import ProblemDifficulty
+from algo_coach.schema import Problem, ProblemDifficulty, ProblemStatus, RetirementReason
 
 
 def brief(tmp_path, **overrides) -> str:
@@ -227,3 +229,58 @@ def test_a_difficulty_outside_the_vocabulary_fails():
     """The enum constrains the request; this is the same check on arrival."""
     with pytest.raises(ValidationError):
         read(draft(difficulty="trivial"))
+
+
+def test_what_the_form_already_has_is_in_the_brief(tmp_path):
+    """A model that cannot see them writes the problem the form suggests,
+    which is the same problem every run."""
+    (one,) = seeded(tmp_path, card())
+    content = prompt(one, one.templates[0], ["A first statement.", "A second one."])
+
+    assert "Already written for this form:" in content
+    assert "<written>\nA first statement.\n</written>" in content
+    assert "<written>\nA second one.\n</written>" in content
+
+
+def test_a_form_with_nothing_written_carries_no_heading(tmp_path):
+    (one,) = seeded(tmp_path, card())
+
+    assert "Already written" not in prompt(one, one.templates[0])
+
+
+def test_the_brief_asks_for_a_different_question(tmp_path):
+    """A new setting for the same question is a variant, and ten variants of
+    one problem teach the form once."""
+    rule = " ".join(SYSTEM.split())
+
+    assert "Yours asks a different question." in rule
+
+
+def test_written_statements_reach_the_call(tmp_path):
+    model = FakeModel(draft())
+
+    written(tmp_path, model, written=["An earlier statement."])
+
+    assert "An earlier statement." in model.calls[0]["content"]
+
+
+def test_the_statements_are_the_template_s_own(tmp_path):
+    """Every status, retired included: a repeat of a telegraphed problem is
+    still the same problem."""
+    (one,) = seeded(tmp_path, card())
+    mine, theirs = one.templates[0], one.templates[1]
+    corpus = [
+        Problem(id="p1", title="p1", statement="Mine.", **PROVENANCE, generated_for=mine.id),
+        Problem(
+            id="p2",
+            title="p2",
+            statement="Retired but mine.",
+            status=ProblemStatus.RETIRED,
+            retired_reason=RetirementReason.TELEGRAPHED,
+            **PROVENANCE,
+            generated_for=mine.id,
+        ),
+        Problem(id="p3", title="p3", statement="Theirs.", **PROVENANCE, generated_for=theirs.id),
+    ]
+
+    assert written_for(corpus, mine) == ["Mine.", "Retired but mine."]

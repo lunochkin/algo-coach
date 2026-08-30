@@ -16,6 +16,7 @@ from algo_coach.generation.generator import (
     prompt,
     read,
     schema,
+    written_for,
 )
 
 __all__ = [
@@ -39,4 +40,5 @@ __all__ = [
     "reference",
     "schema",
     "settle",
+    "written_for",
 ]
