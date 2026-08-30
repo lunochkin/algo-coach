@@ -83,7 +83,7 @@ until the engine has written problems to annotate.
       nothing writes it, so a ladder's rungs are ordered by nothing
 - [x] Add `algo-coach generate`, a template in and problems out, through the
       transport the classifier and the matcher already share
-- [ ] Print progress per problem, as the other run loops report it: the
+- [x] Print progress per problem, as the other run loops report it: the
       template, the case run's verdict, and whether it landed
 
 ### The runner

@@ -72,9 +72,24 @@ def show(progress: Progress) -> None:
     """A line per problem, on stderr as the other run loops report: two calls
     take a minute, and stdout stays the command's own output."""
     counter = f"[{progress.index:>{len(str(progress.total))}}/{progress.total}]"
-    outcome = f"! {progress.reason}" if progress.reason else f"{progress.cases} case(s)"
     print(
-        f"{counter} {progress.template_slug[:24]:<24} {progress.title[:40]:<40}  {outcome}",
+        f"{counter} {progress.template_slug[:24]:<24} {progress.title[:40]:<40}  "
+        f"{verdict(progress)}",
         file=sys.stderr,
         flush=True,
     )
+
+
+def verdict(progress: Progress) -> str:
+    """How the problem went: the case run, and whether it was kept.
+
+    Reported apart, because a written problem can still be discarded — its
+    canonical failing the cases, or the reference disagreeing with it. Nothing
+    is said about landing where nothing ran, since the run is what decides it.
+    """
+    if progress.reason is not None:
+        return f"! {progress.reason}"
+    cases = f"{progress.cases} case(s)"
+    if progress.outcome is None:
+        return f"{cases}  not run"
+    return f"{cases}  {progress.outcome}  {'landed' if progress.landed else 'discarded'}"

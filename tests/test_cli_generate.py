@@ -9,8 +9,10 @@ from matching import card, seeded
 
 from algo_coach import cli
 from algo_coach.calls import CallLog
-from algo_coach.generation import MODEL
+from algo_coach.cli.generate import verdict
+from algo_coach.generation import MODEL, Progress
 from algo_coach.problems import ProblemStore
+from algo_coach.schema import CaseOutcome
 
 TRANSPORT = import_module("algo_coach.cli.transport")
 
@@ -92,3 +94,24 @@ def test_a_run_that_wrote_nothing_exits_nonzero(root, monkeypatch, capsys):
 
     assert exit_info.value.code == 1
     assert "nothing written" in capsys.readouterr().err
+
+
+def line(**fields) -> str:
+    return verdict(Progress(index=1, total=1, template_slug="t", **fields))
+
+
+def test_the_line_reports_the_case_run_and_whether_it_landed():
+    """Apart, because a written problem can still be discarded: its canonical
+    failing the cases, or the reference disagreeing with it."""
+    assert line(cases=4, outcome=CaseOutcome.PASSED, landed=True) == "4 case(s)  passed  landed"
+    assert line(cases=4, outcome=CaseOutcome.WRONG) == "4 case(s)  wrong  discarded"
+
+
+def test_a_problem_nothing_ran_claims_no_landing():
+    """The run is what decides landing, so a report before it says only that
+    the cases have not been run."""
+    assert line(cases=4) == "4 case(s)  not run"
+
+
+def test_a_failure_is_the_whole_line():
+    assert line(reason="RuntimeError('bad key')") == "! RuntimeError('bad key')"

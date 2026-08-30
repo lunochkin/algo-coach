@@ -25,7 +25,7 @@ from algo_coach.generation.generator import (
     written_for,
 )
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Card, Problem, Template
+from algo_coach.schema import Card, CaseOutcome, Problem, Template
 
 
 class Failed(BaseModel):
@@ -51,13 +51,24 @@ class Drafted(BaseModel):
 
 class Progress(BaseModel):
     """One problem, attempted. Reported as the run goes, since two calls per
-    problem make a run of ten minutes long."""
+    problem make a run of ten minutes long.
+
+    The verdict and whether it landed are separate fields. A problem can be
+    written and still not land — its canonical failing, or the two solutions
+    disagreeing — and a report folding the two would say a call succeeded when
+    nothing was kept.
+    """
 
     index: int  # 1-based, over what this run asks for
     total: int
     template_slug: str
     title: str = ""
     cases: int = 0
+    # how the canonical's run over those cases went, folded to its most severe
+    # case. Absent where nothing ran, which is every problem until the runner
+    # lands
+    outcome: CaseOutcome | None = None
+    landed: bool = False  # whether the problem, its cases and its solutions were stored
     reason: str | None = None  # the failure, when there was one
 
 
