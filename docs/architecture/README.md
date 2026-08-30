@@ -30,8 +30,11 @@ a runner rather than a record change.
 - **Attempt** — a user's solution to a problem, successful or failed.
 - **Canonical solution** — an exemplary solution to a problem, written to
   display the approach rather than to pass. Never an attempt.
+- **Reference solution** — a solution written from the statement alone. It
+  computes the expected outputs and calibrates a timing bar. Correct, and
+  deliberately not exemplary.
 - **Verification** — executing a solution against a problem's test cases,
-  yielding pass or fail. An attempt or a canonical solution alike.
+  yielding pass or fail. An attempt or a generated solution in either role.
 - **Diagnosis** — classifying why an attempt failed. A `Diagnosis` record
   stores the result.
 
@@ -43,7 +46,7 @@ times. Each record class is specified in one of the files beside it.
 | File | Holds |
 |---|---|
 | [`content.md`](content.md) | Techniques, cards, template matches |
-| [`corpus.md`](corpus.md) | Problems, test cases, canonical solutions |
+| [`corpus.md`](corpus.md) | Problems, test cases, solutions |
 | [`log.md`](log.md) | Attempts, claims, self-labels, diagnoses, card runs, recall attempts |
 | [`machine.md`](machine.md) | What a model-written record carries, and the call log |
 | [`flows.md`](flows.md) | Generating a problem, the drill loop, adjudicating the eval set |
@@ -56,7 +59,7 @@ times. Each record class is specified in one of the files beside it.
 | Cards | product | global | read-only at runtime | the store, seeded from `content/` |
 | Problems | product | global | append-only | the store |
 | Test cases | product | global | written with the problem | the store |
-| Canonical solutions | product | global | append-only | the store |
+| Solutions | product | global | append-only | the store |
 | Verification runs | product | global | append-only | the store |
 | Template matches | product | global | append-only | the store |
 | Card runs | user | private | append-only | the store |
@@ -80,10 +83,10 @@ times. Each record class is specified in one of the files beside it.
   - It is kept for one measurement. The announcement floor is how often a form
     is named from the statement alone, and a corpus no generator wrote is what
     sets that floor. How it is read is deferred to taking that measurement.
-- **Content generation** — problems, their test cases and their canonical
-  solutions are written by the engine, as a command beside the classifier and
-  the matcher. It reuses one transport, one call log and one provenance base,
-  rather than standing a second copy of each somewhere else.
+- **Content generation** — problems, their test cases and their solutions are
+  written by the engine, as a command beside the classifier and the matcher. It
+  reuses one transport, one call log and one provenance base, rather than
+  standing a second copy of each somewhere else.
   - Extraction to a pipeline of its own stays possible and is not planned. What
     it would have to preserve is the minted ids, since the attempt log
     references them.
@@ -116,9 +119,10 @@ Properties the system holds at all times.
   readable without anything outside the engine.
 - Aggregates are derived views, never stored truth.
 - Every problem is the product's own, written by the engine.
-- A problem never lands without the test cases that decide it and a canonical
-  solution that passed them. One whose canonical fails is not stored for
-  repair; it is not stored.
+- A problem never lands without the test cases that decide it, a canonical
+  solution that passed them, and a reference solution that agreed with it on
+  every one. One whose canonical fails, or whose two solutions disagree, is not
+  stored for repair; it is not stored.
 - The technique vocabulary and the cards are product-owned and global, with no
   user-authored ones of either. Codes are stable identifiers with a migration
   path, since the log references them. The attempt log never references a card;

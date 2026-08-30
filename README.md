@@ -5,11 +5,11 @@ spaced repetition over a technique-mastery model, on a problem corpus the
 engine writes and owns.
 
 **The corpus is the target state.** A problem is generated for one form of one
-technique, carrying the test cases that decide it and a canonical solution that
-passed them. The engine then serves it, times the sitting and judges the
-submission against those cases. One origin, and nothing is fetched from a
-platform — which is what makes a verdict the engine's own rather than a status
-string it copied.
+technique, carrying the test cases that decide it, a canonical solution that
+passed them, and a reference solution that agreed with it on every one. The
+engine then serves it, times the sitting and judges the submission against
+those cases. One origin, and nothing is fetched from a platform — which is
+what makes a verdict the engine's own rather than a status string it copied.
 
 Most practice tools schedule *problems*. algo-coach models mastery of
 *techniques*. What a solution used is read from the code by a model, not
@@ -32,9 +32,11 @@ went](#the-archived-corpus).
 Four places, and nothing is trained anywhere in the engine:
 
 - **Generation** *(next)* — a statement, its test cases and a canonical
-  solution, written together for one template. Nothing lands until the
-  canonical passes the cases, and a problem whose canonical fails is discarded
-  whole rather than stored for repair.
+  solution, written together for one template, then a reference solution
+  written from the statement alone. The reference computes the expected
+  outputs, so nothing is verified against itself. A problem whose canonical
+  fails, or whose two solutions disagree, is discarded whole rather than stored
+  for repair.
 - **Attribution** — a prompted classifier reads the *solution* and names the
   techniques it used, choosing among the problem's own candidates. No training
   data exists for that label. Public corpora tag problems, not solutions, so a

@@ -5,8 +5,8 @@ phase closes it is harvested into `docs/ROADMAP.md` and removed whole.
 
 ## Phase 6 — problem generation (current)
 
-The engine writes problems: a statement, the test cases that decide it, and at
-least one canonical solution. Flow and its rules:
+The engine writes problems: a statement, the test cases that decide it, a
+canonical solution and a reference solution. Flow and its rules:
 `docs/architecture/flows.md`, "Generating a problem".
 
 Generation lands before the matcher is scored. The Phase 5 reset took every
@@ -29,15 +29,22 @@ until the engine has written problems to annotate.
 - [x] `Problem.status` — created, active or retired — beside a
       `retired_reason` of `defective` or `telegraphed`. A validator ties them,
       since only the reason says whether the attempts count
-- [x] `CanonicalSolution`: the code and its provenance, and nothing about how
-      it ran. Immutable, since whether it passes is a fact about a run
+- [x] `Solution`: the code, its provenance and a `role` of canonical or
+      reference, and nothing about how it ran. Both roles pass the same cases,
+      so nothing about the code says which one a solution is
 - [x] `Verification`: one run of a solution, carrying the cap and a result per
       case. Its own record, since the cap and the machine decide a timeout
       where the code does not. The run's own outcome folds from the cases
-- [x] Several canonicals per problem, appended. A rung covers a studied
+- [x] Several solutions per problem, appended. A rung covers a studied
       template and an optional one only where two approaches are stored
-- [x] Append-only stores for cases, canonicals and verifications. A case is
+- [x] Append-only stores for cases, solutions and verifications. A case is
       added and never revised, and two runs of one solution are two records
+- [ ] Add `speedup` to `Template`, saying whether the form beats the naive
+      solution. Without it a missing separating input reads as a defect on
+      backtracking, whose form is its own optimum
+- [ ] Add a field to `TestCase` naming where its expected output came from.
+      Beyond the reference's reach only the canonical can compute one, and two
+      cases in a set are then not equally strong evidence
 - [x] A `MatchSource.GENERATOR` arm, carrying no provenance as a hand match
       does not. The generator knew what it was told to write, where a matcher
       infers it
@@ -47,14 +54,23 @@ until the engine has written problems to annotate.
 
 ### Generation
 
-- [ ] Run one generation call on one template, and read the reply out of the
-      call log before writing any of the rest. Everything below assumes one
-      call yields a statement, a canonical and discriminating cases
+- [x] Run one generation call on one template, and read the reply out of the
+      call log before writing any of the rest. One call yielded all three
+      parts, and the statement was Daily Temperatures verbatim
 - [ ] Write the generation prompt: a template and its cue in, a statement, a
       canonical and the cases out. One call, or the cases describe the solution
       rather than the problem
+- [ ] Exclude from the statement the domains the template's cue and notes name.
+      The probe was given a cue saying "temperatures" and returned the problem
+      that cue was written from
 - [ ] Define one response schema over all three parts, so a reply missing any
       of them fails rather than landing a problem to repair later
+- [ ] Write the reference call: the statement alone in, a solution out. Neither
+      the canonical nor the cases may reach it, or the two share one reading of
+      the statement
+- [ ] Recompute every expected output from the reference, and discard the
+      problem where it disagrees with the canonical. A case the canonical
+      produced passes by construction
 - [ ] Sample the generation call rather than running it greedy, the exception
       the provenance rule names. One model's habits would otherwise become the
       whole corpus
@@ -67,8 +83,8 @@ until the engine has written problems to annotate.
 
 ### The runner
 
-Executing a solution against a problem's cases. One subject today, a canonical.
-Phase 8 puts an attempt on the same path.
+Executing a solution against a problem's cases. Two subjects today, a canonical
+and a reference. Phase 8 puts an attempt on the same path.
 
 It comes after generation because the convention is fixed by `TestCase` and the
 output is then real. Landing closes here: nothing is stored until a canonical
@@ -87,19 +103,21 @@ has passed.
 - [ ] Settle how a case compares outputs where several answers are correct, and
       write the rule into `corpus.md`. Equality on the returned value fails a
       correct solution to such a problem
-- [ ] Run the canonical before anything lands, and discard the problem whole
-      where it fails. The call is recorded either way, so what was paid for and
-      thrown away stays readable
-- [ ] Write the problem, its cases, the canonical and the asserted match in one
-      act. A half-written problem is one the matcher would read as finished
+- [ ] Run both solutions before anything lands, and discard the problem whole
+      where the canonical fails or the two disagree. The calls are recorded
+      either way, so what was paid for and thrown away stays readable
+- [ ] Write the problem, its cases, both solutions and the asserted match in
+      one act. A half-written problem is one the matcher would read as
+      finished
 
 ### What the corpus derives
 
 Folds over what generation and the runner stored. The first run is aimed by
 hand at the studied templates. Every later one is aimed by the report.
 
-- [ ] Derive a problem's techniques from its canonical solutions. A view, so
-      adding a canonical can widen them and re-deriving is legal
+- [ ] Derive a problem's techniques from its canonical solutions, excluding
+      the reference. A view, so adding a canonical can widen them, and counting
+      the reference would credit the naive approach the form replaces
 - [ ] Report a studied template no problem matches. The card claims to teach
       that form, so a corpus that cannot exercise it is a fact about the store
 - [ ] Aim a run at the templates carrying no match. A form the corpus cannot
@@ -107,15 +125,22 @@ hand at the studied templates. Every later one is aimed by the report.
 
 ### The discrimination bar
 
-Settled on the first corpus, then enforced before a problem lands. Cases that
-separate nothing license `verified` on a canonical that is wrong.
+Cases that separate nothing license `verified` on a canonical that is wrong.
+The bar is named in `flows.md`: a blind reference, then mutants of the
+canonical. What the first corpus settles is the operators and the bound.
 
-- [ ] Break a canonical mechanically and require the cases to fail it. The
-      cheapest of the discrimination candidates, and testable before the corpus
-      exists
-- [ ] Run the candidate checks over the first corpus, name one the bar, and
-      enforce it before a problem lands. Which check it is comes from a corpus
-      rather than from an argument
+- [ ] Enumerate mutants from the canonical's syntax tree, one change per
+      mutant. Mechanical, so nothing is stored and the set re-derives when the
+      operators change
+- [ ] Kill a mutant on a wrong answer, a crash or a timeout, and report which
+      ones survived. A survivor names the case that has to exist
+- [ ] Ask for the cases that kill the survivors, arguments only. The reference
+      computes what they return, so no model writes an expected output
+- [ ] Choose the bound the mutation loop stops at, and write the number into
+      `corpus.md`. Equivalent mutants make a full score unreachable
+- [ ] Search for the smallest input separating the reference from the canonical
+      under the cap, and store the case at it. Only where the template claims a
+      speedup
 
 ### Annotating the generated corpus
 
@@ -181,6 +206,9 @@ largely cancels in the comparison.
       optional template offered as the alternative
 - [ ] Re-derive the ladder whenever the corpus moves under it, a started card
       included. Progress is a fold over attempts, so nothing is lost
+- [ ] Generate a canonical for a second template from the statement, judged by
+      the cases the problem already carries. A passing one demonstrates the
+      pair and writes a `generator` match, where the matcher only infers one
 - [ ] Add `CardRun`, minted where a card is started, since the ladder is
       measured from it. Holds when it began and the probes assigned; later
       probes append

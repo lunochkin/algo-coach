@@ -5,22 +5,95 @@ flow says in what order, and what each step may not do.
 
 ## Generating a problem
 
-A problem, its test cases and its canonical solution are written together. The
-order matters because each step can reject what came before.
+A problem, its test cases and its solutions are written across three calls.
+The order matters because each step can reject what came before.
 
 1. A card's template, and the brief: write a problem this form solves.
-2. The statement, the canonical solution and the test cases, from one call.
+2. The statement, the canonical solution and the first test cases, from one
+   call.
 3. The canonical runs against the cases.
-4. All of it lands together, with the template match the generation asserts.
-5. The matcher reads the problem later, for the templates it was not written
+4. The reference solution, from the statement alone.
+5. The reference runs against the cases.
+6. Mutants of the canonical run against the cases, and a call asks for the
+   cases that kill whichever mutant survived.
+7. Where the template claims a speedup, the smallest input separating the
+   reference from the canonical under the cap is searched for, and the case at
+   that size is stored.
+8. All of it lands together, with the template match the generation asserts.
+9. The matcher reads the problem later, for the templates it was not written
    for.
+10. A canonical for one of those templates is generated from the statement,
+    and the cases the problem already carries judge it.
 
-- **Nothing lands half-verified.** A problem whose canonical fails is discarded
-  whole rather than stored for repair. The call is recorded either way, so what
-  was paid for and thrown away stays readable.
+- **Nothing lands half-verified.** A problem failing any step is discarded
+  whole rather than stored for repair. Every call is recorded, so what was paid
+  for and thrown away stays readable.
+- **Two solution roles, and no solution holds both.** The canonical displays
+  the template's form and is what a rung teaches. The reference is written from
+  the statement alone, and is what computes expected outputs and what a timing
+  bar measures against. Independence is the reference's whole purpose, so a
+  solution displaying the form could not also serve as one.
+- **The reference is written blind.** Shown the canonical, it inherits that
+  solution's reading of the statement. Agreement then shows only that one model
+  is consistent. Blind, agreement is evidence that the statement has one
+  reading, and disagreement on any case discards the problem.
+- **A disagreement is the statement's fault, not either solution's.** Two
+  correct-looking solutions returning different answers means the prose admits
+  two readings. That is what an in-place edit cannot repair, since the cases
+  would move with the wording.
+- **Expected outputs come from the reference wherever it can compute them.**
+  That is every case at or below the largest input it finishes at generation
+  time, which runs under no cap. Beyond that point the expected output comes
+  from the canonical.
+- **The scale case is tautological, and harmlessly so.** Correctness was
+  established on the cases the reference computed, and this one exists for the
+  cap rather than for the verdict. It still catches a crash or a recursion
+  limit at size. It cannot catch a canonical correct small and wrong large.
+- **Where an alternative canonical exists, it restores that independence.** It
+  is a second efficient solution from a different form, so a scale case can be
+  cross-checked between two of them rather than taken from one.
+- **Whether the cases are enough is decided by execution, never by a model.** A
+  model asked whether its own cases suffice says yes. A surviving mutant is a
+  case that has to exist, and it names the mistake that case must catch.
+- **A mutant is the canonical with one semantic change**, made on the parsed
+  tree rather than the text, so a comparison inside a string is untouched. It
+  is killed when it fails at least one case, by a wrong answer, a crash or a
+  timeout. Mutants run locally and cost nothing, and only the call that writes
+  the new cases is paid for.
+- **Mutants are made mechanically, with no model call.** A tree walk
+  enumerates them, so the set is deterministic and re-derivable from the
+  canonical. A model asked to break its own solution writes the mistakes it
+  expects a solver to make, which is a sample nobody chose and no run
+  reproduces. No mutant is stored: they are re-derived whenever the operator
+  set changes.
+- **The call that answers a survivor proposes arguments, never returns.** The
+  reference computes what they return, so no model writes an expected output
+  that could agree with the mistake the case was asked for.
+- **Which mutations, and when to stop, are deferred.** A mutant can be
+  equivalent to the original, and equivalence is undecidable, so no case kills
+  it and the score never reaches full. The loop stops on a bound rather than on
+  a score, and which bound is a question a real corpus answers.
+- **Whether a form is a speedup is authored on the template.** Backtracking and
+  exhaustive search are their own optimum, so no input separates the two
+  solutions there. A timing run cannot tell that from a reference written
+  cleverly by mistake. The template states which it is, and a missing
+  separating input is a defect only where a speedup was claimed.
+- **A statement may not name the domain its template's cue names.** The
+  monotonic stack's cue says "temperatures" and "a next warmer day", and the
+  first generation call returned Daily Temperatures verbatim. A solver who
+  recognises a problem has not derived its form.
 - **The generator's assertion is not the matcher's verdict.** They are two
   records on one pair, and a disagreement is how a generator drifting from its
   brief is found.
+- **A canonical that passes demonstrates a match**, where the matcher infers
+  one. So step 10 writes a `generator` record: it is a generation call
+  asserting a pair, and it carries the same provenance as the first. Failing to
+  write the problem in that form is not a negative on the pair, since nothing
+  was shown about the problem.
+- **A canonical for another template is not a reference.** It is asked for by
+  name and sees the form it must display, so it is not an independent reading.
+  It cannot discard a problem, and its failure says nothing about the
+  statement. The cases judge it, and it substitutes for no step above.
 - **Announcement is measured, not assumed.** What is being trained is reaching
   for a form unprompted, so the enabling property has to be derivable from the
   statement rather than stated in it. A form a matcher names instantly from the

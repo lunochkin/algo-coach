@@ -90,6 +90,11 @@ user can solve, per technique, and the two share no data.
   read is one authored block the engine never parses. It is carried at both
   levels — the card's says to reach for the technique, a template's says which
   of its forms — because recall is per template.
+- **A template states whether its form is a speedup** over the naive solution
+  the technique replaces. Backtracking and exhaustive search are their own
+  optimum, so no input separates them from a reference. Generation cannot tell
+  that from a reference written cleverly by mistake, so the template says which
+  it is and a missing separation is a defect only where a speedup was claimed.
 - **One template may sit outside the studied set.** A card carries at most one
   optional template, the capstone, authored whole and surfaced on request
   alone. The hard form is worth deriving before it is read, and a card showing
@@ -124,6 +129,15 @@ problem, so nothing is authored here either.
 - **It is only ever positive.** The generator asserts the form it was briefed
   on. What else the problem exercises is the matcher's question, and a
   generator saying nothing about a template is not a negative on it.
+- **A canonical that passes demonstrates a pair**, and writes a `generator`
+  record on it. Asking for the problem in a second form is a generation call
+  like the first, and the canonical it produced is the evidence. A model that
+  could not write that form has shown nothing about the problem, so a failure
+  is not a negative either.
+- **A demonstration is free ground truth on a pair a matcher read.** It
+  confirms a positive, and on a pair the matcher scored negative it is a caught
+  false negative. It replaces no hand pass: the pairs it reaches are the ones a
+  ladder wanted, which is a sample nobody drew at random.
 - **The same fact sits on the problem and in a match.** `generated_for` names
   the template, and the match is what lets the ladder read one kind of record
   instead of special-casing the problem. They cannot drift, because generation

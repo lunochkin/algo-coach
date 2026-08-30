@@ -1,14 +1,14 @@
 # Corpus
 
 What the engine generates: a problem, the test cases that decide it, and the
-canonical solutions that display the approach. Part of the architecture;
-`README.md` is the map.
+solutions written for it. Part of the architecture; `README.md` is the map.
 
 ## Problems
 
 - **Generated, and that is the only origin.** The engine writes a problem for
-  one of a card's templates: a statement, the test cases that decide it, and at
-  least one canonical solution. Nothing lands until the canonical passes.
+  one of a card's templates: a statement, the test cases that decide it, a
+  canonical solution and a reference solution. Nothing lands until both have
+  passed the cases and agreed on every one of them.
 - **The template it was written for is stored.** `generated_for` is an
   assertion rather than a reading, and it is what makes the first template match
   provenance. It never claims the problem exercises nothing else.
@@ -16,9 +16,11 @@ canonical solutions that display the approach. Part of the architecture;
   record does.
 - **A problem's techniques are derived from its canonical solutions**, and are
   a view rather than stored truth: adding a canonical can widen them, and
-  re-deriving is legal and expected. The card's technique names only what the
-  problem was written for. A canonical that sorts before it searches used two
-  techniques, and only the derivation names the second.
+  re-deriving is legal and expected. The reference is excluded, or the naive
+  approach a form replaces would be credited as one the problem takes. The
+  card's technique names only what the problem was written for. A canonical
+  that sorts before it searches used two techniques, and only the derivation
+  names the second.
 - **Which is why the fallback answers the right question.** They name what
   solving the problem can take, over every canonical it carries, where a claim
   names what one attempt did.
@@ -92,9 +94,15 @@ What decides whether a solution to a generated problem is correct.
 - **Owned, so the git invariant binds nothing the product ships.** The rule
   against third-party test cases in git holds, and the cases a generated problem
   carries are the product's own.
-- **Expected outputs taken from the canonical make verification a tautology.**
-  It passes by construction, and `verified` then means only that the solution
-  agrees with itself. That is the fact a quality bar has to answer.
+- **Expected outputs come from the reference, never from the canonical.** A
+  case the canonical produced passes by construction, and `verified` then means
+  only that the solution agrees with itself. The reference is different code
+  from a call that saw the statement alone, so a case it computed is a test.
+- **A case records where its expected output came from.** Beyond the largest
+  input the reference finishes at generation time, only the canonical can
+  compute one, and that case is evidence about the cap rather than about the
+  verdict. Two cases in a set are not equally strong, and nothing but the field
+  says which is which.
 - **Cases that separate nothing are worse than none**, because they license the
   word `verified` on a canonical that is wrong. A set that does not discriminate
   is a defect in the problem, and a problem carrying one does not land.
@@ -114,16 +122,26 @@ What decides whether a solution to a generated problem is correct.
   except return 7 on this input" is a function nobody can write a statement
   for. Such a problem does not land, and the discrimination bar is what catches
   it.
-- **How discrimination is established is deferred.** Candidates: two canonicals
-  from different approaches agreeing on every case, a mechanically broken
-  canonical failing, the near miss the technique entry names failing. Which is
-  the bar is a question a real corpus answers and an argument does not.
+- **How discrimination is established is in `flows.md`.** A blind reference
+  disagreeing on any case discards the problem, and a surviving mutant of the
+  canonical names a case that has to exist. What stays deferred is the
+  mutation operators and the bound the loop stops on.
 
-## Canonical solutions
+## Solutions
 
-An exemplary solution to a problem, written to display the approach. Not an
-attempt: no user and no sitting.
+A solution the engine wrote for a problem, in one of two roles. Not an attempt:
+no user and no sitting.
 
+- **The canonical displays the template's form**, and is what a rung teaches.
+  Exemplary rather than merely correct.
+- **The reference is written from the statement alone.** It computes the
+  expected outputs and it is what a timing bar measures against. Independence
+  is its whole purpose, so a solution displaying the form could not serve as
+  one.
+- **The role is stored, because both are verified against the same cases.**
+  Passing says nothing about which of the two a solution is, and a reader
+  taking a reference for a canonical would teach the approach the card exists
+  to replace.
 - **Exemplary and verified are different properties**, and the record needs
   both. A user's solved attempt is verified and idiosyncratic. A generated
   solution is exemplary and asserted. Only one that passes the problem's test
