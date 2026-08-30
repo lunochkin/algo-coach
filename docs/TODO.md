@@ -106,16 +106,16 @@ case, since our own generated code on our own machine is not a threat model. A
 platform serves someone else's code, and that backend is a container. What a
 stored result means is settled in `corpus.md`, so neither moves a record.
 
-- [ ] Add `run(code, args, *, cap_ms, stop_early=False)`, the one call the
+- [x] Add `run(code, args, *, cap_ms, stop_early=False)`, the one call the
       executor sits behind. JSON in and JSON out, with no path and no callable
       in the signature, so a remote sandbox takes the same payload
-- [ ] Stop on the first crash or timeout under `stop_early`, and never on a
+- [x] Stop on the first crash or timeout under `stop_early`, and never on a
       wrong answer. The backend is not told what a case expects, so the
       mutation loop can use it and the attempt path cannot
-- [ ] Take the whole case set in one `run` call rather than one case per call.
+- [x] Take the whole case set in one `run` call rather than one case per call.
       A per-case boundary is one network round trip per case once the executor
       is remote
-- [ ] Write the child as a standalone script, reading `{code, args, cap_ms}`
+- [x] Write the child as a standalone script, reading `{code, args, cap_ms}`
       and writing `{outcome, value, elapsed_ms}`. The container backend runs
       that same script, so the protocol is written once
 - [ ] Add `outputs` over `run`, returning a value or an outcome per case.
@@ -124,25 +124,25 @@ stored result means is settled in `corpus.md`, so neither moves a record.
 - [ ] Add `verify` over `outputs`, comparing against each case's `expected` and
       returning a `CaseResult` per case. Comparison stays above the boundary,
       so a sandbox is never told what `expected` is
-- [ ] Fail every case as `CRASHED` where the code does not parse or defines no
+- [x] Fail every case as `CRASHED` where the code does not parse or defines no
       module-level `solve`, read from the syntax tree. Phase 8 reads this path
       for an attempt, so it needs a verdict rather than an error
-- [ ] Execute one case per subprocess, under a wall-clock cap measured in the
+- [x] Execute one case per subprocess, under a wall-clock cap measured in the
       child around `solve`. Module-level state must not carry from one case to
       the next
-- [ ] Start the child in its own session and kill the group on a timeout. A
+- [x] Start the child in its own session and kill the group on a timeout. A
       solution that spawned a child of its own would otherwise leave it running
-- [ ] Set the parent's timer to the cap plus start-up, and read a child that
+- [x] Set the parent's timer to the cap plus start-up, and read a child that
       reported nothing from how it died: the timer as `TIMEOUT`, a signal as
       `CRASHED`, anything else raised as the runner's own fault
-- [ ] Write the child's result on a path passed in argv, and discard its
+- [x] Write the child's result on a path passed in argv, and discard its
       stdout. A solution that prints would otherwise corrupt the channel
-- [ ] Return the child's own elapsed time per case. Process start is tens of
+- [x] Return the child's own elapsed time per case. Process start is tens of
       milliseconds, and would swamp the separating input the speedup search
       looks for
-- [ ] Raise on a runner fault rather than recording `CRASHED`. A subprocess
+- [x] Raise on a runner fault rather than recording `CRASHED`. A subprocess
       that fails to start says nothing about the solution
-- [ ] Decide every case rather than stopping at the first failure. The
+- [x] Decide every case rather than stopping at the first failure. The
       canonical stores a count, and a count needs every case decided
 - [ ] Report where the canonical disagrees with the `expected` the generation
       call declared. `DraftCase.expected` is read nowhere today, and a call
