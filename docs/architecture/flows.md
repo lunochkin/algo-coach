@@ -50,8 +50,9 @@ The order matters because each step can reject what came before.
 - **Expected outputs come from the reference wherever it can compute them.**
   That is every case at or below the largest input it finishes at generation
   time, under a generation cap set well above the drill loop's. Beyond that
-  point the expected output comes from the canonical. Every run is capped: an
-  uncapped one is a non-terminating reference hanging the run.
+  point the expected output comes from the canonical. A reference that computes
+  none of them discards the problem. Every run is capped: an uncapped one is a
+  non-terminating reference hanging the run.
 - **The scale case is tautological, and harmlessly so.** Correctness was
   established on the cases the reference computed, and this one exists for the
   cap rather than for the verdict. It still catches a crash or a recursion

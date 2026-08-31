@@ -245,6 +245,10 @@ fixed here rather than by whatever executed it.
   crashed or timed out discards the problem, since nothing establishes what the
   case returns. A reference that did so is the ordinary path beyond its reach,
   and the case takes the canonical's answer with `expected_from` naming it.
+- **A reference that computed no case discards the problem.** Every expected
+  output would then be the canonical's own, and `verified` would mean only that
+  the solution agrees with itself. Some cases beyond its reach is the ordinary
+  path; all of them is no independent reading at all.
 - **The cap is enforced twice, and the outer one is slack.** The child times
   `solve` and reports a timeout it saw. The parent's own timer is the cap plus
   start-up, and exists for a child stuck where no Python-level timer fires. The

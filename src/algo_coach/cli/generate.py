@@ -28,10 +28,16 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
 
     for drafted in result.drafted:
         print(written(drafted.draft, code=args.code))
-    print(f"{len(result.drafted)} problem(s) written by {MODEL}, effort {EFFORT}")
-    # Nothing is stored but the calls until the runner lands: a problem is
-    # kept once its canonical has passed and the reference has agreed.
-    print("none stored: a problem lands once it has been run")
+    kept = f"{len(result.drafted)} problem(s) written by {MODEL}, effort {EFFORT}"
+    if result.discarded:
+        # Reported here as well as per problem: a run of ten scrolls, and what
+        # the gates rejected is what a template's brief is judged on.
+        kept += f", {len(result.discarded)} discarded"
+    print(kept)
+    # The runs decide a problem, and the act that stores one is not written
+    # yet: a problem, its cases, both solutions and the asserted match land
+    # together or not at all.
+    print("none stored: a problem lands in one act")
     if result.aborted:
         parser.exit(1, f"generate: aborted after {ABORT_AFTER} consecutive failures\n")
     if result.failed and not result.drafted:
@@ -84,12 +90,13 @@ def verdict(progress: Progress) -> str:
     """How the problem went: the case run, and whether it was kept.
 
     Reported apart, because a written problem can still be discarded — its
-    canonical failing the cases, or the reference disagreeing with it. Nothing
-    is said about landing where nothing ran, since the run is what decides it.
+    canonical failing the cases it was written with, or the reference
+    disagreeing with it. A problem that survived its runs is not stored either
+    until the act that lands one is written.
     """
     if progress.reason is not None:
         return f"! {progress.reason}"
     cases = f"{progress.cases} case(s)"
     if progress.outcome is None:
         return f"{cases}  not run"
-    return f"{cases}  {progress.outcome}  {'landed' if progress.landed else 'discarded'}"
+    return f"{cases}  {progress.outcome}  {'landed' if progress.landed else 'not stored'}"

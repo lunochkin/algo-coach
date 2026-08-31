@@ -101,10 +101,16 @@ def line(**fields) -> str:
 
 
 def test_the_line_reports_the_case_run_and_whether_it_landed():
-    """Apart, because a written problem can still be discarded: its canonical
-    failing the cases, or the reference disagreeing with it."""
+    """Apart, because a problem that survived its runs is stored by a later
+    act, and a discarded one is the whole line instead."""
     assert line(cases=4, outcome=CaseOutcome.PASSED, landed=True) == "4 case(s)  passed  landed"
-    assert line(cases=4, outcome=CaseOutcome.WRONG) == "4 case(s)  wrong  discarded"
+    assert line(cases=4, outcome=CaseOutcome.PASSED) == "4 case(s)  passed  not stored"
+
+
+def test_a_discarded_problem_is_reported_by_its_gate():
+    """The outcome says how the canonical ran, and the reason says why nothing
+    was kept."""
+    assert line(cases=4, outcome=CaseOutcome.WRONG, reason="discarded: x") == "! discarded: x"
 
 
 def test_a_problem_nothing_ran_claims_no_landing():

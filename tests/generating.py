@@ -34,17 +34,20 @@ class FakeWriter:
     where the generation brief is a template.
 
     `statements` is what each generation call returns, in order; a `None` in it
-    is a call that answered nothing.
+    is a call that answered nothing. `solution` is what every reference call
+    returns, which is what drives a run into the gates the two solutions
+    decide.
     """
 
     statements: list[str | None] = field(default_factory=lambda: ["A statement."])
+    solution: str = BLIND
     calls: list[dict] = field(default_factory=list)
     written: int = 0
 
     def __call__(self, **kwargs) -> Reply:
         self.calls.append(kwargs)
         if kwargs["content"].startswith("<problem>"):
-            return Reply(text=blind(), stop_reason="stop")
+            return Reply(text=blind(self.solution), stop_reason="stop")
         statement = self.statements[min(self.written, len(self.statements) - 1)]
         self.written += 1
         if statement is None:

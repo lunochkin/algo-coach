@@ -1,5 +1,5 @@
-"""Writing several problems for one template: what each call is shown, and
-what a failure costs."""
+"""Writing several problems for one template: what each call is shown, what a
+failure costs, and what the runs reject."""
 
 from generating import FakeWriter
 from helpers import PROVENANCE
@@ -91,3 +91,50 @@ def test_every_call_is_recorded(tmp_path):
     run(tmp_path, model, count=2)
 
     assert len(CallLog(tmp_path).all()) == 3
+
+
+def test_a_problem_the_runs_reject_is_reported_apart(tmp_path):
+    """A written problem can still be discarded, and a report folding the two
+    would say a call refused where the model wrote and the runs rejected."""
+    model = FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n")
+
+    _, result = run(tmp_path, model)
+
+    assert result.drafted == []
+    assert result.failed == []
+    assert [one.discard for one in result.discarded] == ["disagreed"]
+    assert "disagree on 1 case(s)" in result.discarded[0].reason
+
+
+def test_a_discard_does_not_end_the_run(tmp_path):
+    """`ABORT_AFTER` catches a broken configuration. Every call answered here,
+    and what the runs rejected is the model's writing."""
+    model = FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n")
+
+    _, result = run(tmp_path, model, count=ABORT_AFTER + 1)
+
+    assert not result.aborted
+    assert len(result.discarded) == ABORT_AFTER + 1
+
+
+def test_a_discarded_statement_is_still_shown_to_the_next_call(tmp_path):
+    """It was written for this form, and asking for it again is what the list
+    exists to prevent."""
+    model = FakeWriter(
+        statements=["The first.", "The second."],
+        solution="def solve(xs):\n    return len(xs) + 1\n",
+    )
+
+    run(tmp_path, model, count=2)
+
+    assert "The first." in model.briefs[1]
+
+
+def test_a_surviving_problem_carries_what_the_reference_computed(tmp_path):
+    """The draft's own values were the gate. What would land is the answer the
+    independent solution gave."""
+    _, result = run(tmp_path, FakeWriter())
+
+    (drafted,) = result.drafted
+    assert [one.expected for one in drafted.cases] == [3]
+    assert drafted.beyond == []

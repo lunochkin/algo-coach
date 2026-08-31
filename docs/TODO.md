@@ -147,11 +147,10 @@ stored result means is settled in `corpus.md`, so neither moves a record.
 - [x] Report where the canonical disagrees with the `expected` the generation
       call declared. `DraftCase.expected` is read nowhere today, and a call
       whose code and cases disagree wrote one of the two wrong
-- [ ] Run both solutions before anything lands, and discard the problem whole
-      where the canonical yielded no value on some case or the two disagree.
-      There is no `expected` yet, so yielding nothing is the only way the first
-      canonical fails. The calls are recorded either way, so what was paid for
-      and thrown away stays readable
+- [x] Run both solutions before anything lands, and discard the problem whole
+      where the canonical yielded no value, contradicted the `expected` its own
+      call declared, or disagreed with the reference. The calls are recorded
+      either way, so what was paid for and thrown away stays readable
 - [ ] Take the canonical's answer where the reference yielded none, with
       `expected_from` naming it. That is the ordinary path beyond the
       reference's reach, not a failure

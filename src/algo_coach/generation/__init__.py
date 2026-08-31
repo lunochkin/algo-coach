@@ -7,6 +7,7 @@ from algo_coach.generation.agreement import (
     settle,
 )
 from algo_coach.generation.blind import reference
+from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
 from algo_coach.generation.generator import (
     DEFAULT,
     EFFORT,
@@ -26,6 +27,7 @@ from algo_coach.generation.generator import (
     written_for,
 )
 from algo_coach.generation.run import (
+    Discarded,
     Drafted,
     Failed,
     GenerationResult,
@@ -35,6 +37,7 @@ from algo_coach.generation.run import (
 )
 
 __all__ = [
+    "CAP_MS",
     "DEFAULT",
     "EFFORT",
     "MODEL",
@@ -42,7 +45,10 @@ __all__ = [
     "SYSTEM",
     "TEMPERATURE",
     "Configuration",
+    "Checked",
     "Disagreement",
+    "Discard",
+    "Discarded",
     "Drafted",
     "Failed",
     "GenerationResult",
@@ -53,6 +59,7 @@ __all__ = [
     "GenerationError",
     "Settled",
     "agrees",
+    "check",
     "generate",
     "misdeclared",
     "notes",
