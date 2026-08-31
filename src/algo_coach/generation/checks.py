@@ -1,15 +1,17 @@
 """Running the two solutions, and whether what they answered lets the problem
 land.
 
-Four gates in one pass, in the order `flows.md` runs them. The canonical
-yielding no value on some case discards the problem, since nothing establishes
-what that case returns. The canonical contradicting the `expected` its own call
-declared discards it too: one call wrote the code and the cases, so it wrote
-one of the two wrong. A reference that computed no case at all discards it as
-well — every expected output would then be the canonical's own, and `verified`
-would mean only that the solution agrees with itself. The two solutions
-disagreeing discards it last, and that one is the statement's fault rather than
-either solution's.
+Four gates in one pass. The canonical yielding no value on some case discards
+the problem, since nothing establishes what that case returns. The canonical
+contradicting the `expected` its own call declared discards it next: one call
+wrote the code and the cases, so it wrote one of the two wrong. The two
+solutions disagreeing discards it third, and that one is the statement's fault
+rather than either solution's. A reference that computed no case at all
+discards it last — every expected output would then be the canonical's own, and
+`verified` would mean only that the solution agrees with itself.
+
+Where the reference computed some of them, the rest take the canonical's answer
+and say so. That is its reach rather than a failure.
 
 Nothing is repaired. A problem failing any gate is discarded whole, and the
 calls that wrote it are already in the log, so what was paid for and thrown
@@ -27,6 +29,7 @@ from enum import StrEnum
 from algo_coach.generation.agreement import (
     Disagreement,
     Misdeclaration,
+    SettledCase,
     misdeclared,
     settle,
 )
@@ -59,12 +62,10 @@ class Discard(StrEnum):
 class Checked:
     """What the two runs decided about one drafted problem.
 
-    `cases` is what would land, carrying the reference's answers, and is empty
-    where the problem was discarded. `beyond` is the cases the reference could
-    not compute under the cap; taking the canonical's answer on those is the
-    step after this one, so they are held apart rather than dropped. A problem
-    whose every case is beyond the reference does not survive: nothing
-    independent read the statement.
+    `cases` is what would land, in the order they were written and each naming
+    the solution that computed its answer. Empty where the problem was
+    discarded. A problem whose every case took the canonical's answer does not
+    survive: nothing independent read the statement.
 
     The failures are carried in full rather than counted. A discarded problem
     is reported by what it disagreed on, and one case says less than all of
@@ -75,8 +76,7 @@ class Checked:
     # its most severe case. `None` only where there were no cases to run
     outcome: CaseOutcome | None
     discard: Discard | None = None
-    cases: list[DraftCase] = field(default_factory=list)
-    beyond: list[DraftCase] = field(default_factory=list)
+    cases: list[SettledCase] = field(default_factory=list)
     misdeclarations: list[Misdeclaration] = field(default_factory=list)
     disagreements: list[Disagreement] = field(default_factory=list)
 
@@ -112,24 +112,14 @@ def check(
         return Checked(outcome=outcome, discard=Discard.MISDECLARED, misdeclarations=wrong)
 
     theirs = outputs(reference, args, cap_ms=cap_ms)
-    reached = [not isinstance(one, NoValue) for one in theirs]
-    if not any(reached):
-        return Checked(outcome=outcome, discard=Discard.UNTESTED)
-
-    settled = settle(
-        [case for case, got in zip(cases, reached, strict=True) if got],
-        canonical=[one for one, got in zip(ours, reached, strict=True) if got],
-        reference=[one for one, got in zip(theirs, reached, strict=True) if got],
-    )
+    settled = settle(cases, canonical=ours, reference=theirs)
     if not settled.agreed:
         return Checked(
             outcome=outcome, discard=Discard.DISAGREED, disagreements=settled.disagreements
         )
-    return Checked(
-        outcome=outcome,
-        cases=settled.cases,
-        beyond=[case for case, got in zip(cases, reached, strict=True) if not got],
-    )
+    if not settled.tested:
+        return Checked(outcome=outcome, discard=Discard.UNTESTED)
+    return Checked(outcome=outcome, cases=settled.cases)
 
 
 __all__ = ["CAP_MS", "Checked", "Discard", "check"]

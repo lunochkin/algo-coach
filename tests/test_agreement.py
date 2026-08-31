@@ -10,6 +10,7 @@ from algo_coach.generation import Disagreement, Misdeclaration, misdeclared, set
 from algo_coach.generation.agreement import agrees
 from algo_coach.generation.generator import DraftCase
 from algo_coach.runner import NoValue, RunOutcome
+from algo_coach.schema import ExpectedSource
 
 
 def cases(*args) -> list[DraftCase]:
@@ -113,3 +114,25 @@ def test_a_run_that_answered_a_different_number_of_cases_decides_nothing():
     solutions."""
     with pytest.raises(ValueError):
         settle(cases([1], [2]), canonical=[1], reference=[1, 2])
+
+
+def test_a_case_past_the_reference_takes_the_canonical_s_answer():
+    """Beyond the largest input the reference finishes, only the canonical can
+    compute one. That is its reach rather than a failure, so the case lands."""
+    settled = settle(cases([1]), canonical=[3], reference=[NoValue(RunOutcome.TIMEOUT)])
+
+    assert settled.agreed
+    assert [one.expected for one in settled.cases] == [3]
+    assert [one.expected_from for one in settled.cases] == [ExpectedSource.CANONICAL]
+
+
+def test_a_stored_case_names_the_solution_that_computed_it():
+    """Two cases in a set are not equally strong evidence, and nothing but the
+    field says which is which."""
+    settled = settle(cases([1], [2]), canonical=[1, 2], reference=[1, NoValue(RunOutcome.CRASHED)])
+
+    assert [one.expected_from for one in settled.cases] == [
+        ExpectedSource.REFERENCE,
+        ExpectedSource.CANONICAL,
+    ]
+    assert [one.args for one in settled.tested] == [[1]]

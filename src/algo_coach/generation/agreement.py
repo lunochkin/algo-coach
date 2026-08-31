@@ -15,6 +15,11 @@ Where they agree, the stored expected output is still the reference's. A case
 the canonical produced passes by construction, and `verified` would then mean
 only that the solution agrees with itself.
 
+Where the reference computed nothing, the canonical's answer is taken and the
+case says so. That is the ordinary path beyond the reference's reach rather
+than a failure, and the two cases are not equally strong evidence: nothing but
+the field says which is which.
+
 The outputs are passed in rather than produced here. Executing a solution is
 the runner's, and this decides what the run means. Agreement is agreement as
 JSON, by the rule the runner encodes a return with.
@@ -27,6 +32,7 @@ from typing import Any
 from algo_coach.generation.generator import DraftCase
 from algo_coach.runner.encoding import agrees
 from algo_coach.runner.outputs import NoValue
+from algo_coach.schema import ExpectedSource
 
 
 @dataclass(frozen=True)
@@ -84,6 +90,21 @@ class Disagreement:
 
 
 @dataclass(frozen=True)
+class SettledCase:
+    """One case as it would land: the arguments, the value the problem stores,
+    and which solution computed it.
+
+    Not a `TestCase`, which is keyed to a problem that does not exist yet, and
+    no longer a `DraftCase`, whose `expected` was the generation call's own
+    declaration rather than anything a run established.
+    """
+
+    args: list[Any]
+    expected: Any
+    expected_from: ExpectedSource
+
+
+@dataclass(frozen=True)
 class Settled:
     """What the two runs decided: the cases as they would be stored, and every
     case the solutions answered differently.
@@ -92,12 +113,18 @@ class Settled:
     what it disagreed on, and the cases are what a landing problem carries.
     """
 
-    cases: list[DraftCase] = field(default_factory=list)
+    cases: list[SettledCase] = field(default_factory=list)
     disagreements: list[Disagreement] = field(default_factory=list)
 
     @property
     def agreed(self) -> bool:
         return not self.disagreements
+
+    @property
+    def tested(self) -> list[SettledCase]:
+        """The cases the reference computed, which are the ones that test the
+        canonical rather than restate it."""
+        return [one for one in self.cases if one.expected_from is ExpectedSource.REFERENCE]
 
 
 def settle(
@@ -106,11 +133,17 @@ def settle(
     canonical: Sequence[Any],
     reference: Sequence[Any],
 ) -> Settled:
-    """The cases with the reference's answers, and what the two disagreed on.
+    """The cases with the answers a run established, and what the two solutions
+    disagreed on.
 
     Every case is decided, never stopping at the first disagreement: which
     inputs the two readings differ on is what a discarded problem is reported
     by, and one of them says less than all of them.
+
+    A reference that yielded no value on a case is past its reach, so the
+    canonical's answer is taken there and the case names it. The canonical has
+    answered every case by this point: one that did not has already discarded
+    the problem.
 
     The outputs line up with the cases positionally. A run that answered a
     different number of them decided nothing here, and is a fault in the
@@ -121,10 +154,14 @@ def settle(
 
     settled = Settled()
     for case, ours, theirs in zip(cases, canonical, reference, strict=True):
-        if agrees(ours, theirs):
-            # Copied rather than rebuilt: a case decodes its JSON on the way
-            # in, and a decoded string would be decoded a second time.
-            settled.cases.append(case.model_copy(update={"expected": theirs}))
+        if isinstance(theirs, NoValue):
+            settled.cases.append(
+                SettledCase(args=case.args, expected=ours, expected_from=ExpectedSource.CANONICAL)
+            )
+        elif agrees(ours, theirs):
+            settled.cases.append(
+                SettledCase(args=case.args, expected=theirs, expected_from=ExpectedSource.REFERENCE)
+            )
         else:
             settled.disagreements.append(
                 Disagreement(args=case.args, canonical=ours, reference=theirs)

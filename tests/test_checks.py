@@ -5,7 +5,7 @@ import json
 
 from algo_coach.generation import Discard, check, checks
 from algo_coach.generation.generator import DraftCase
-from algo_coach.schema import CaseOutcome
+from algo_coach.schema import CaseOutcome, ExpectedSource
 
 DOUBLE = "def solve(x):\n    return x * 2\n"
 # the same function reached another way, which is what a blind reference is
@@ -95,17 +95,28 @@ def test_a_canonical_that_passed_its_own_cases_can_still_be_discarded():
     assert not result.survived
 
 
-def test_a_case_beyond_the_reference_is_held_apart_rather_than_discarded():
-    """The ordinary path past the reference's reach. Taking the canonical's
-    answer there is the step after this one, so the case is neither settled
-    nor lost."""
+def test_a_case_beyond_the_reference_takes_the_canonical_s_answer():
+    """The ordinary path past the reference's reach, not a failure. The case
+    lands, and names the solution that computed it."""
     slow = "def solve(x):\n    import time\n\n    time.sleep(9 if x > 5 else 0)\n    return x + x\n"
 
     result = checked(([2], 4), ([9], 18), reference=slow, cap_ms=300)
 
     assert result.survived
-    assert [one.args for one in result.cases] == [[2]]
-    assert [one.args for one in result.beyond] == [[9]]
+    assert [one.args for one in result.cases] == [[2], [9]]
+    assert [one.expected for one in result.cases] == [4, 18]
+    assert [one.expected_from for one in result.cases] == [
+        ExpectedSource.REFERENCE,
+        ExpectedSource.CANONICAL,
+    ]
+
+
+def test_a_case_the_reference_computed_names_it():
+    """Two cases in a set are not equally strong, and nothing but the field
+    says which is which."""
+    result = checked(([2], 4))
+
+    assert [one.expected_from for one in result.cases] == [ExpectedSource.REFERENCE]
 
 
 def test_a_reference_that_computed_no_case_discards_the_problem():

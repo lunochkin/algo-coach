@@ -8,7 +8,7 @@ from matching import card, seeded
 from algo_coach.calls import CallLog
 from algo_coach.generation import write_problems
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Problem
+from algo_coach.schema import ExpectedSource, Problem
 
 
 def run(tmp_path, model: FakeWriter, *, count: int = 1, problems=()):
@@ -132,9 +132,9 @@ def test_a_discarded_statement_is_still_shown_to_the_next_call(tmp_path):
 
 def test_a_surviving_problem_carries_what_the_reference_computed(tmp_path):
     """The draft's own values were the gate. What would land is the answer the
-    independent solution gave."""
+    independent solution gave, and the case names it."""
     _, result = run(tmp_path, FakeWriter())
 
     (drafted,) = result.drafted
     assert [one.expected for one in drafted.cases] == [3]
-    assert drafted.beyond == []
+    assert [one.expected_from for one in drafted.cases] == [ExpectedSource.REFERENCE]

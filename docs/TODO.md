@@ -151,7 +151,7 @@ stored result means is settled in `corpus.md`, so neither moves a record.
       where the canonical yielded no value, contradicted the `expected` its own
       call declared, or disagreed with the reference. The calls are recorded
       either way, so what was paid for and thrown away stays readable
-- [ ] Take the canonical's answer where the reference yielded none, with
+- [x] Take the canonical's answer where the reference yielded none, with
       `expected_from` naming it. That is the ordinary path beyond the
       reference's reach, not a failure
 - [ ] Write the problem, its cases, both solutions and the asserted match in

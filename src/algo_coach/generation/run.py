@@ -16,13 +16,13 @@ from collections.abc import Callable, Iterable
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Transport
+from algo_coach.generation.agreement import SettledCase
 from algo_coach.generation.blind import reference
 from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
 from algo_coach.generation.generator import (
     DEFAULT,
     Configuration,
     Draft,
-    DraftCase,
     generate,
     written_for,
 )
@@ -41,22 +41,19 @@ class Drafted(BaseModel):
     """One problem the two calls wrote, and what its runs left.
 
     Called drafted rather than generated because nothing is stored yet. What
-    would land is `cases` — the same arguments carrying the reference's
-    answers — where `draft.cases` holds the values the generation call
-    declared, which the runs read as a gate rather than as a source.
+    would land is `cases`, each naming the solution that computed its answer,
+    where `draft.cases` holds the values the generation call declared, which
+    the runs read as a gate rather than as a source.
 
-    A discarded problem carries neither, and a run reports it apart.
+    A discarded problem carries none, and a run reports it apart.
     """
 
     draft: Draft
     solution: str  # the reference, written from the statement alone
     call_id: str  # what wrote the problem
     reference_call_id: str
-    # what the reference computed, which is what a landing case stores
-    cases: list[DraftCase] = Field(default_factory=list)
-    # the cases the reference could not compute under the cap. The canonical's
-    # own answer is taken on those, which is the step after this one
-    beyond: list[DraftCase] = Field(default_factory=list)
+    # what the runs established, which is what a landing case stores
+    cases: list[SettledCase] = Field(default_factory=list)
 
 
 class Discarded(BaseModel):
@@ -134,7 +131,6 @@ def write_one(
         call_id=call.id,
         reference_call_id=blind.id,
         cases=checked.cases,
-        beyond=checked.beyond,
     )
     return drafted, checked
 
