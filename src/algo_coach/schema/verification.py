@@ -15,7 +15,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from algo_coach.schema.case import CaseOutcome, CaseResult
+from algo_coach.schema.case import CaseOutcome, CaseResult, severest
 
 
 class Verification(BaseModel):
@@ -53,13 +53,11 @@ class Verification(BaseModel):
 
         `None` where no case was run. An empty set would otherwise fold to
         passed and claim a verification that never happened.
+
+        The fold itself is `severest`, which generation reads over a run no
+        `Verification` was written for.
         """
-        if not self.results:
-            return None
-        for outcome in (CaseOutcome.CRASHED, CaseOutcome.WRONG, CaseOutcome.TIMEOUT):
-            if any(one.outcome is outcome for one in self.results):
-                return outcome
-        return CaseOutcome.PASSED
+        return severest(one.outcome for one in self.results)
 
     @property
     def verified(self) -> bool:

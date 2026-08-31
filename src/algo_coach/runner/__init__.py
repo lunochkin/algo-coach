@@ -8,8 +8,8 @@ from algo_coach.runner.execution import (
     defines_solve,
     run,
 )
-from algo_coach.runner.outputs import NoValue, outputs
-from algo_coach.runner.verdicts import verify
+from algo_coach.runner.outputs import NoValue, answered, outputs
+from algo_coach.runner.verdicts import decide, verify
 
 __all__ = [
     "CHILD",
@@ -19,7 +19,9 @@ __all__ = [
     "RunOutcome",
     "RunnerError",
     "agrees",
+    "answered",
     "as_json",
+    "decide",
     "defines_solve",
     "outputs",
     "run",

@@ -10,6 +10,7 @@ Carries no provenance of its own. A case is not a reading, and the problem it
 is keyed to already names the configuration that wrote both.
 """
 
+from collections.abc import Iterable
 from enum import StrEnum
 from typing import Any
 
@@ -94,3 +95,22 @@ class CaseResult(BaseModel):
         if self.outcome in (CaseOutcome.PASSED, CaseOutcome.WRONG) and self.elapsed_ms is None:
             raise ValueError(f"a {self.outcome} case carries the elapsed_ms the child measured")
         return self
+
+
+def severest(outcomes: Iterable[CaseOutcome]) -> CaseOutcome | None:
+    """How a set of cases went as a whole.
+
+    The most severe failure stands. A solution that only ran slowly is
+    otherwise correct, and that is a different remedy from one returning a
+    wrong answer.
+
+    `None` where no case was run. An empty set would otherwise fold to passed
+    and claim a run that never happened.
+    """
+    seen = list(outcomes)
+    if not seen:
+        return None
+    for outcome in (CaseOutcome.CRASHED, CaseOutcome.WRONG, CaseOutcome.TIMEOUT):
+        if outcome in seen:
+            return outcome
+    return CaseOutcome.PASSED

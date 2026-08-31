@@ -7,6 +7,7 @@ case expects.
 """
 
 from collections.abc import Sequence
+from typing import Any
 
 from algo_coach.runner.encoding import agrees
 from algo_coach.runner.execution import CaseRun, RunOutcome, run
@@ -37,13 +38,22 @@ def verify(
 
 
 def result(case: TestCase, ran: CaseRun) -> CaseResult:
-    """One case's verdict. A call that yielded no value is that outcome
-    whatever the case expected: nothing was computed to compare."""
-    if not ran.returned:
-        return CaseResult(case_id=case.id, outcome=DECIDED[ran.outcome], elapsed_ms=ran.elapsed_ms)
-    passed = agrees(ran.value, case.expected)
+    """One case's verdict, as the record stores it."""
     return CaseResult(
-        case_id=case.id,
-        outcome=CaseOutcome.PASSED if passed else CaseOutcome.WRONG,
-        elapsed_ms=ran.elapsed_ms,
+        case_id=case.id, outcome=decide(ran, case.expected), elapsed_ms=ran.elapsed_ms
     )
+
+
+def decide(ran: CaseRun, expected: Any) -> CaseOutcome:
+    """How one call went against the value it was to return.
+
+    Apart from `result` because generation reads it before any case has an id:
+    the canonical is decided against the `expected` its own call declared, and
+    there is no `TestCase` to key a verdict to yet.
+
+    A call that yielded no value is that outcome whatever was expected:
+    nothing was computed to compare.
+    """
+    if not ran.returned:
+        return DECIDED[ran.outcome]
+    return CaseOutcome.PASSED if agrees(ran.value, expected) else CaseOutcome.WRONG

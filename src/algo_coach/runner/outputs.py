@@ -11,7 +11,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from algo_coach.runner.execution import RunOutcome, run
+from algo_coach.runner.execution import CaseRun, RunOutcome, run
 
 
 @dataclass(frozen=True)
@@ -41,7 +41,14 @@ def outputs(
     dropped here: the speedup search reads it from `run`, where comparing two
     solutions does not.
     """
-    return [
-        each.value if each.returned else NoValue(each.outcome)
-        for each in run(code, args, cap_ms=cap_ms, stop_early=stop_early)
-    ]
+    return [answered(each) for each in run(code, args, cap_ms=cap_ms, stop_early=stop_early)]
+
+
+def answered(ran: CaseRun) -> Any:
+    """One call as a value, or as the `NoValue` saying there is none.
+
+    Its own function because generation runs the canonical once and reads it
+    twice: as a verdict against what the call declared, and as an answer to
+    compare with the reference.
+    """
+    return ran.value if ran.returned else NoValue(ran.outcome)

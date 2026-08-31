@@ -8,7 +8,13 @@ from algo_coach.schema.attempt import (
 )
 from algo_coach.schema.call import Call
 from algo_coach.schema.card import Card, Selector, Template, TemplateKind
-from algo_coach.schema.case import CaseOutcome, CaseResult, ExpectedSource, TestCase
+from algo_coach.schema.case import (
+    CaseOutcome,
+    CaseResult,
+    ExpectedSource,
+    TestCase,
+    severest,
+)
 from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.match import MatchSource, TemplateMatch
 from algo_coach.schema.problem import (
@@ -56,4 +62,5 @@ __all__ = [
     "TemplateSeed",
     "TestCase",
     "Verification",
+    "severest",
 ]
