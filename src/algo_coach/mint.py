@@ -264,12 +264,12 @@ def generated_problem(
     title: str,
     statement: str,
     *,
-    generated_for: str,
     model: str,
     effort: str,
     prompt_hash: str,
     call_id: str,
     pin: str,
+    generated_for: str | None = None,
     techniques: Sequence[str] = (),
     difficulty: ProblemDifficulty | None = None,
     temperature: float | None = None,
@@ -294,10 +294,15 @@ def generated_problem(
     in rather than read here: the canonical is written in the same act, and
     re-deriving them later is legal.
 
-    `generated_for` names the template the brief asked for. It is what the
-    generator knew rather than what a matcher inferred, which is what makes
-    the first `TemplateMatch` on the pair provenance. It asserts nothing about
-    the templates the problem also exercises.
+    `generated_for` names the template the brief asked for, where it named a
+    form at all. It is what the generator knew rather than what a matcher
+    inferred, which is what makes the first `TemplateMatch` on the pair
+    provenance. It asserts nothing about the templates the problem also
+    exercises.
+
+    A problem written from a technique brief carries none. The brief named a
+    skill rather than a form, so there is no pair to assert, and what the
+    problem is about comes from the readings of its canonicals.
     """
     return Problem(
         id=new_id(),

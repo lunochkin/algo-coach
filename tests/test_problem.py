@@ -85,15 +85,15 @@ def test_a_problem_names_the_template_it_was_written_for():
     assert make_problem(generated_for="t7").generated_for == "t7"
 
 
-def test_a_problem_written_for_no_template_is_rejected():
-    """The engine writes a problem for one of a card's templates, so there is
-    no arm where the brief named none."""
-    with pytest.raises(ValidationError, match="generated_for"):
-        Problem.model_validate(CONTENT | PROVENANCE)
+def test_a_problem_written_from_a_technique_brief_names_no_template():
+    """A template is the tightest brief and a technique a looser one. Nothing
+    told this generator a form, so nothing may assert a pair."""
+    assert Problem.model_validate(CONTENT | PROVENANCE).generated_for is None
 
 
-def test_a_blank_template_is_rejected_too():
-    """It passes a presence check while naming nothing."""
+def test_a_blank_template_is_rejected():
+    """It passes a presence check while naming nothing. Absent is the arm for
+    a brief that named no form."""
     with pytest.raises(ValidationError, match="generated_for"):
         make_problem(generated_for="")
 

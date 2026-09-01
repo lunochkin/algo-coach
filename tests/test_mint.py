@@ -307,6 +307,12 @@ def test_a_generated_problem_asserts_the_template_it_was_written_for():
     assert generated(generated_for="t7").generated_for == "t7"
 
 
+def test_a_problem_from_a_technique_brief_names_no_template():
+    """A brief naming a skill rather than a form told the generator no pair to
+    assert. What such a problem is about comes from its canonicals."""
+    assert generated(generated_for=None).generated_for is None
+
+
 def test_a_generated_problem_is_created_rather_than_served():
     """Landing is not clearing. Retirement is a judgement made later still, so
     generation has no say in either and takes no argument for them."""

@@ -44,10 +44,16 @@ class Problem(MachineProvenance):
     # what the problem asks; matching reads it, and a problem without one can
     # never be matched
     statement: str = Field(min_length=1)
-    # the template it was written for. An assertion rather than a reading,
-    # which is what makes the first `TemplateMatch` provenance. It never claims
-    # the problem exercises nothing else, which is the matcher's question
-    generated_for: str = Field(min_length=1)
+    # the template it was written for, where the brief named one. An assertion
+    # rather than a reading, which is what makes the first `TemplateMatch`
+    # provenance. It never claims the problem exercises nothing else, which is
+    # the matcher's question.
+    #
+    # Absent on a problem written from a technique brief: nothing told the
+    # generator a form, so nothing may assert a pair. A technique brief asserts
+    # no technique either — what such a problem is about comes from the
+    # readings of its canonicals, as it does for every other problem
+    generated_for: str | None = Field(default=None, min_length=1)
     # where the problem is in its life. Separate from the reason, since
     # `CREATED` and `ACTIVE` have none and only one transition needs one
     status: ProblemStatus = ProblemStatus.CREATED

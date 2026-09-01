@@ -5,13 +5,27 @@ solutions written for it. Part of the architecture; `README.md` is the map.
 
 ## Problems
 
-- **Generated, and that is the only origin.** The engine writes a problem for
-  one of a card's templates: a statement, the test cases that decide it, a
-  canonical solution and a reference solution. Nothing lands until both have
-  passed the cases and agreed on every one of them.
-- **The template it was written for is stored.** `generated_for` is an
-  assertion rather than a reading, and it is what makes the first template match
-  provenance. It never claims the problem exercises nothing else.
+- **Generated, and that is the only origin.** The engine writes a statement,
+  the test cases that decide it, a canonical solution and a reference solution.
+  Nothing lands until both have passed the cases and agreed on every one of
+  them.
+- **A problem is written from a brief: what it must be solvable by.** A
+  template is the tightest kind, naming the exact form. A technique is a looser
+  one, naming only the skill. Both produce a problem, and the two differ in
+  what the generator knew rather than in how the problem is judged.
+- **The looser brief is what reaches the rest of the vocabulary.** A paradigm
+  and a problem class have no form to reproduce, so no template names them, and
+  a corpus written from templates alone can never exercise them. Templates
+  teach recall, and recall is not what decides which problems exist.
+- **The template it was written for is stored, where there was one.**
+  `generated_for` is an assertion rather than a reading, and it is what makes
+  the first template match provenance. It never claims the problem exercises
+  nothing else. A problem written from a technique brief carries none: nothing
+  told the generator a form, so nothing may assert a pair.
+- **A technique brief asserts no technique either.** What such a problem is
+  about comes from the readings of its canonical solutions, as it does for
+  every other problem. An assertion is what the generator was told, and it was
+  told a skill rather than a solution.
 - **Provenance is required.** A problem names what produced it, as any machine
   record does.
 - **A problem's techniques are derived from its canonical solutions**, and are
