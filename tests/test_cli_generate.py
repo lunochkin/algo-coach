@@ -1,5 +1,5 @@
-"""The generate command: a template in, problems out, and nothing stored until
-they have been run."""
+"""The generate command: a template in, problems out, and each one stored once
+its runs kept it."""
 
 from importlib import import_module
 
@@ -9,10 +9,13 @@ from matching import card, seeded
 
 from algo_coach import cli
 from algo_coach.calls import CallLog
+from algo_coach.cases import CaseLog
 from algo_coach.cli.generate import verdict
 from algo_coach.generation import MODEL, Progress
+from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import CaseOutcome
+from algo_coach.schema import CaseOutcome, MatchSource, SolutionRole
+from algo_coach.solutions import SolutionLog
 
 TRANSPORT = import_module("algo_coach.cli.transport")
 
@@ -42,17 +45,40 @@ def test_the_command_writes_problems(root, monkeypatch, capsys):
 
     out = capsys.readouterr().out
     assert "The first." in out and "The second." in out
-    assert f"2 problem(s) written by {MODEL}" in out
+    assert f"2 problem(s) stored, written by {MODEL}" in out
     assert len(CallLog(root).all()) == 4
 
 
-def test_nothing_is_stored_until_a_problem_has_been_run(root, monkeypatch, capsys):
+def test_a_problem_its_runs_kept_is_stored_whole(root, monkeypatch, capsys):
     """A problem lands once its canonical has passed and the reference has
-    agreed, and neither has run yet."""
+    agreed with it."""
     run(monkeypatch, FakeWriter(), "longest-valid-window")
 
+    (problem,) = ProblemStore(root).all()
+    assert problem.statement == "A statement."
+    assert [one.problem_id for one in CaseLog(root).cases()] == [problem.id]
+    assert [one.role for one in SolutionLog(root).for_problem(problem.id)] == [
+        SolutionRole.CANONICAL,
+        SolutionRole.REFERENCE,
+    ]
+    assert [(one.problem_id, one.source) for one in MatchLog(root).matches()] == [
+        (problem.id, MatchSource.GENERATOR)
+    ]
+
+
+def test_a_discarded_problem_stores_nothing(root, monkeypatch, capsys):
+    """Discarded whole rather than kept for repair, and the calls that wrote it
+    stay in the log."""
+    run(
+        monkeypatch,
+        FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n"),
+        "longest-valid-window",
+    )
+
     assert ProblemStore(root).all() == []
-    assert "none stored" in capsys.readouterr().out
+    assert CaseLog(root).cases() == []
+    assert "1 discarded" in capsys.readouterr().out
+    assert len(CallLog(root).all()) == 2
 
 
 def test_the_canonical_is_printed_only_when_asked_for(root, monkeypatch, capsys):

@@ -6,28 +6,28 @@ would be shown the same list and could write the same problem twice. What
 concurrency would buy is minutes; what it costs is the diversity the brief
 exists to enforce.
 
-Nothing is stored here but the calls. Both solutions are run before a problem
-is kept, and one that fails a gate is discarded whole — so a run reports what
-it wrote apart from what survived.
+Both solutions are run before a problem is kept, and one that fails a gate is
+discarded whole — so a run reports what it wrote apart from what survived. A
+surviving problem lands as it is written rather than at the end of the run: an
+abort or a killed process then costs the problem in flight and nothing else.
 """
 
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Transport
-from algo_coach.generation.agreement import SettledCase
 from algo_coach.generation.blind import reference
 from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
 from algo_coach.generation.generator import (
     DEFAULT,
     Configuration,
-    Draft,
     generate,
     written_for,
 )
+from algo_coach.generation.landing import Corpus, Drafted, land
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Card, CaseOutcome, Problem, Template
+from algo_coach.schema import Card, CaseOutcome, Template
 
 
 class Failed(BaseModel):
@@ -35,25 +35,6 @@ class Failed(BaseModel):
 
     index: int
     reason: str
-
-
-class Drafted(BaseModel):
-    """One problem the two calls wrote, and what its runs left.
-
-    Called drafted rather than generated because nothing is stored yet. What
-    would land is `cases`, each naming the solution that computed its answer,
-    where `draft.cases` holds the values the generation call declared, which
-    the runs read as a gate rather than as a source.
-
-    A discarded problem carries none, and a run reports it apart.
-    """
-
-    draft: Draft
-    solution: str  # the reference, written from the statement alone
-    call_id: str  # what wrote the problem
-    reference_call_id: str
-    # what the runs established, which is what a landing case stores
-    cases: list[SettledCase] = Field(default_factory=list)
 
 
 class Discarded(BaseModel):
@@ -128,8 +109,8 @@ def write_one(
     drafted = Drafted(
         draft=draft,
         solution=solution,
-        call_id=call.id,
-        reference_call_id=blind.id,
+        call=call,
+        reference_call=blind,
         cases=checked.cases,
     )
     return drafted, checked
@@ -140,18 +121,19 @@ def write_problems(
     calls: CallLog,
     card: Card,
     template: Template,
-    problems: Iterable[Problem],
+    corpus: Corpus,
     *,
     count: int = 1,
     configuration: Configuration = DEFAULT,
     cap_ms: int = CAP_MS,
     on_progress: Callable[[Progress], None] | None = None,
 ) -> GenerationResult:
-    """`count` problems for one template, each shown what came before it.
+    """`count` problems for one template, each shown what came before it, and
+    each stored as soon as its runs keep it.
 
     A statement written by this run is added to the list the next call sees,
-    without waiting for the problem to land. Nothing lands yet, and a run of
-    ten would otherwise write ten problems against one list.
+    without waiting for the problem to land. A discarded one is added too, so a
+    run of ten writes ten problems rather than ten variants of one.
 
     A failure is one problem's, and the run continues — except that several in
     a row mean the configuration is broken rather than the model unlucky, which
@@ -163,7 +145,7 @@ def write_problems(
     this form, and asking for it again is what the list exists to prevent.
     """
     result = GenerationResult()
-    written = written_for(problems, template)
+    written = written_for(corpus.problems.all(), template)
     consecutive = 0
 
     for index in range(1, count + 1):
@@ -191,6 +173,7 @@ def write_problems(
         consecutive = 0
         written.append(drafted.draft.statement)
         if checked.survived:
+            land(corpus, template, drafted)
             result.drafted.append(drafted)
         else:
             result.discarded.append(
@@ -204,6 +187,7 @@ def write_problems(
             title=drafted.draft.title,
             cases=len(drafted.draft.cases),
             outcome=checked.outcome,
+            landed=checked.survived,
             reason=None if checked.survived else why(checked),
         )
     return result

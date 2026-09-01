@@ -6,15 +6,15 @@ from helpers import PROVENANCE
 from matching import card, seeded
 
 from algo_coach.calls import CallLog
-from algo_coach.generation import write_problems
+from algo_coach.generation import Corpus, write_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import ExpectedSource, Problem
 
 
-def run(tmp_path, model: FakeWriter, *, count: int = 1, problems=()):
+def run(tmp_path, model: FakeWriter, *, count: int = 1):
     (one,) = seeded(tmp_path, card())
     return one, write_problems(
-        model, CallLog(tmp_path), one, one.templates[0], problems, count=count
+        model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path), count=count
     )
 
 
@@ -44,7 +44,8 @@ def test_each_call_is_shown_what_the_run_wrote_before_it(tmp_path):
 def test_the_corpus_seeds_the_list(tmp_path):
     """What a form already carries is what the first call has to differ from."""
     (one,) = seeded(tmp_path, card())
-    corpus = [
+    corpus = Corpus.at(tmp_path)
+    corpus.problems.put(
         Problem(
             id="p1",
             title="p1",
@@ -52,7 +53,7 @@ def test_the_corpus_seeds_the_list(tmp_path):
             generated_for=one.templates[0].id,
             **PROVENANCE,
         )
-    ]
+    )
     model = FakeWriter()
 
     write_problems(model, CallLog(tmp_path), one, one.templates[0], corpus)

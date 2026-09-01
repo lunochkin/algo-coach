@@ -5,8 +5,7 @@ from pathlib import Path
 from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cli.transport import transport
-from algo_coach.generation import EFFORT, MODEL, Draft, Progress, write_problems
-from algo_coach.problems import ProblemStore
+from algo_coach.generation import EFFORT, MODEL, Corpus, Draft, Progress, write_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Card, Template
 
@@ -21,23 +20,19 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         CallLog(root),
         card,
         template,
-        ProblemStore(root).all(),
+        Corpus.at(root),
         count=args.count,
         on_progress=show,
     )
 
     for drafted in result.drafted:
         print(written(drafted.draft, code=args.code))
-    kept = f"{len(result.drafted)} problem(s) written by {MODEL}, effort {EFFORT}"
+    kept = f"{len(result.drafted)} problem(s) stored, written by {MODEL}, effort {EFFORT}"
     if result.discarded:
         # Reported here as well as per problem: a run of ten scrolls, and what
         # the gates rejected is what a template's brief is judged on.
         kept += f", {len(result.discarded)} discarded"
     print(kept)
-    # The runs decide a problem, and the act that stores one is not written
-    # yet: a problem, its cases, both solutions and the asserted match land
-    # together or not at all.
-    print("none stored: a problem lands in one act")
     if result.aborted:
         parser.exit(1, f"generate: aborted after {ABORT_AFTER} consecutive failures\n")
     if result.failed and not result.drafted:
@@ -91,8 +86,8 @@ def verdict(progress: Progress) -> str:
 
     Reported apart, because a written problem can still be discarded — its
     canonical failing the cases it was written with, or the reference
-    disagreeing with it. A problem that survived its runs is not stored either
-    until the act that lands one is written.
+    disagreeing with it. A discard is the whole line, since there is no run to
+    report where nothing was kept.
     """
     if progress.reason is not None:
         return f"! {progress.reason}"

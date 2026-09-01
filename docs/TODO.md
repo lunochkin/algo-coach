@@ -154,7 +154,7 @@ stored result means is settled in `corpus.md`, so neither moves a record.
 - [x] Take the canonical's answer where the reference yielded none, with
       `expected_from` naming it. That is the ordinary path beyond the
       reference's reach, not a failure
-- [ ] Write the problem, its cases, both solutions and the asserted match in
+- [x] Write the problem, its cases, both solutions and the asserted match in
       one act. A half-written problem is one the matcher would read as
       finished
 
