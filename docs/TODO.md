@@ -158,21 +158,55 @@ stored result means is settled in `corpus.md`, so neither moves a record.
       one act. A half-written problem is one the matcher would read as
       finished
 
+### Solutions beyond the first
+
+A brief writes one canonical. Every other approach is found over the stored
+problem, by the flow in `flows.md`, "Enumerating a problem's other solutions".
+
+- [ ] Re-key `TemplateMatch` from a problem to a solution. A form is displayed
+      by code, so a verdict naming only a problem names no subject. The store
+      holds no match, so this is a rename rather than a migration
+- [ ] Write the enumeration call: a landed problem in, the approaches that
+      solve it out, each a name and a one-line idea. No code in that reply, so
+      one bad proposal costs one call rather than the batch
+- [ ] Generate a canonical per approach, one call each, and store the ones the
+      problem's cases keep. A failure discards nothing, since the cases judge a
+      solution rather than the statement
+- [ ] Assert a `generator` match on the canonical the problem was generated
+      with, and on no other. It is the only one a brief named a form for, so
+      every template the rest display is the matcher's answer
+- [ ] Add `algo-coach enumerate`, a problem in and canonicals out, through the
+      transport the other commands share
+
 ### What the corpus derives
 
-Views over what generation and the runner stored, derived on read rather than
-written down. A problem's techniques come from its canonical solutions, and the
-gaps come from the template matches. The first generation run is aimed by hand
-at the studied templates, since an empty corpus reports no gap. Every later run
-is aimed at the templates the gap report lists.
+Views over what generation, the runner and the readings stored, derived on read
+rather than written down. A problem's techniques come from readings of its
+canonicals, and the gaps come from the template matches. The first generation
+run is aimed by hand at the studied templates, since an empty corpus reports no
+gap. Every later run is aimed at the templates the gap report lists.
 
-- [ ] Derive a problem's techniques from its canonical solutions, excluding
-      the reference. A view, so adding a canonical can widen them, and counting
-      the reference would credit the naive approach the form replaces
-- [ ] Report a studied template no problem matches. The card claims to teach
+- [ ] Add `TechniqueReading`, keyed to a solution: the codes it used, its
+      provenance, and staleness by digest, as a classifier claim carries. Its
+      own class, since a claim is the user's private testimony where this is
+      product data. The derivation has no input until one exists
+- [ ] Read a canonical and an attempt through one classifier, writing the two
+      records apart. Two prompts asking one question would drift, and neither
+      score would compare
+- [ ] Give the canonical reading the whole vocabulary as candidates, where an
+      attempt gets the problem's own techniques. Those are derived from the
+      canonicals, so constraining the reading by them is circular
+- [ ] Read every canonical for its techniques, skipping the ones already read
+      at the current digest. A criteria edit then re-reads what that entry
+      reached and leaves the rest
+- [ ] Derive a problem's techniques as the union over the standing readings of
+      its canonicals, excluding the reference. A view, so a canonical added
+      later widens them, and counting the reference would credit the naive
+      approach the form replaces
+- [ ] Report a studied template no solution displays. The card claims to teach
       that form, so a corpus that cannot exercise it is a fact about the store
-- [ ] Aim a run at the templates carrying no match. A form the corpus cannot
-      exercise names its own remedy
+- [ ] Aim a generation run at the templates carrying no match. A form the
+      corpus cannot exercise is what names the work
 
 ### The discrimination bar
 
@@ -201,8 +235,9 @@ that wandered from its brief shows up there whatever the matcher says.
 
 - [ ] Aim the first run at the studied templates, 38 of the 45 across nine
       cards, and annotate a sample of what lands
-- [ ] Annotate through `algo-coach annotate` unchanged. It already samples
-      across templates, and the cards are seeded
+- [ ] Sample and annotate through `algo-coach annotate`, over pairs of a
+      template and a solution. It already samples across templates, and only
+      the subject of a pair moves
 - [ ] Annotate the eval set from the templates alone, with no matcher reading
       in view. A score over the pairs that drew the line is agreement with
       itself
@@ -218,8 +253,8 @@ generating.
 - [ ] Report the positive verdicts in both directions. Accuracy would score a
       matcher that names nothing in the nineties
 - [ ] Skip a pair the hand settled on the run path, and read it in the eval.
-      The skip needs every template of the card settled, since the call asks
-      about the card whole
+      What a skip needs settled follows from the reading's record shape, which
+      is deferred
 - [ ] Lift the scorer out of `claims` rather than copying it. It already prints
       denominators and reports both directions, which is the shape a per-pair
       score needs
@@ -260,9 +295,6 @@ largely cancels in the comparison.
       optional template offered as the alternative
 - [ ] Re-derive the ladder whenever the corpus moves under it, a started card
       included. Progress is a fold over attempts, so nothing is lost
-- [ ] Generate a canonical for a second template from the statement, judged by
-      the cases the problem already carries. A passing one demonstrates the
-      pair and writes a `generator` match, where the matcher only infers one
 - [ ] Add `CardRun`, minted where a card is started, since the ladder is
       measured from it. Holds when it began and the probes assigned; later
       probes append
@@ -316,6 +348,18 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 - [ ] Classify freely over the whole vocabulary and intersect in code, once the
       hand claims can score it against the constrained one. A verdict outside
       the problem's own techniques is the only signal that they are the gap
+- [ ] Point the matcher at an attempt as well as a canonical, and keep the
+      records apart as the technique readers do. Triggered when a rung or a
+      recall probe needs to know which form the user's own solution used
+- [ ] Write the generation call for a technique brief: a technique and its
+      criteria in, a problem out, carrying no `generated_for`. A paradigm and a
+      problem class have no template, so nothing else reaches them. Triggered
+      when a technique with no card needs problems
+- [ ] Choose what a classifier reading of a solution stores — a verdict per
+      candidate template, or one record naming the templates it found — and
+      write the choice into `content.md`. A card scoped the candidates only
+      while the subject was a problem. Triggered when the matcher is re-pointed
+      at solutions
 - [ ] Settle how a case forcing a timeout carries its input, and add the field
       it needs. Literal arguments put a megabyte of JSON in the store per case,
       where a seed and a size do not. Triggered when the first performance case
