@@ -8,6 +8,7 @@ from algo_coach.cli.transport import transport
 from algo_coach.matches import EFFORT, MODEL, MatchLog, Progress, match_corpus
 from algo_coach.problems import ProblemStore
 from algo_coach.runs import ABORT_AFTER
+from algo_coach.solutions import SolutionLog
 
 
 def match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -23,6 +24,7 @@ def match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         CallLog(root),
         cards,
         ProblemStore(root).all(),
+        SolutionLog(root).solutions(),
         limit=args.limit,
         card_slug=args.card,
         concurrency=args.concurrency,
@@ -30,7 +32,7 @@ def match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         on_progress=show,
     )
 
-    print(f"{result.asked} card/problem question(s) read by {MODEL}, effort {EFFORT}")
+    print(f"{result.asked} card/solution question(s) read by {MODEL}, effort {EFFORT}")
     print(f"{result.matched} match(es), {result.unmatched} non-match(es) recorded")
     if result.aborted:
         parser.exit(1, f"match: aborted after {ABORT_AFTER} consecutive failures\n")

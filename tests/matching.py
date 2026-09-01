@@ -4,12 +4,12 @@ records a verdict needs to exist."""
 import json
 from dataclasses import dataclass, field
 
-from helpers import GENERATED
+from helpers import GENERATED, PROVENANCE, T0
 
 from algo_coach.calls import Reply
 from algo_coach.cards import CardStore, seed_cards
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Card, Problem, TemplateKind
+from algo_coach.schema import Card, Problem, Solution, SolutionRole, TemplateKind
 
 
 @dataclass
@@ -95,6 +95,26 @@ def problem(
         techniques=techniques,
         **GENERATED,
     )
+
+
+def canonical(problem_id: str, *, id: str | None = None, **overrides) -> Solution:
+    """A canonical of one problem, which is what a match is keyed to. Its id
+    follows the problem's, so a test naming a pair reads without a lookup."""
+    fields = {"code": "def solve(xs):\n    return len(xs)\n"} | overrides
+    return Solution(
+        id=id or f"s-{problem_id}",
+        created_at=T0,
+        problem_id=problem_id,
+        role=SolutionRole.CANONICAL,
+        **PROVENANCE,
+        **fields,
+    )
+
+
+def canonicals(*problems: Problem) -> list[Solution]:
+    """One canonical each, for a test that cares about the problems rather
+    than about which solution answered."""
+    return [canonical(one.id) for one in problems]
 
 
 def stored(root, *problems: Problem) -> list[Problem]:

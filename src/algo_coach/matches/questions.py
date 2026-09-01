@@ -1,13 +1,18 @@
-"""Which problems to ask about against which card, and what is already settled.
+"""Which solutions to ask about against which card, and what is already
+settled.
 
-A question is one card and one problem — what a call carries. The record it
-produces is per template and problem, and those are the pairs: independent of
+A question is one card and one canonical — what a call carries. The record it
+produces is per template and solution, and those are the pairs: independent of
 each other, settled one at a time, and never asserted as a set. The question is
 an economy of asking, so nothing but the call is keyed to it.
 
-Pre-filtering is what makes the run affordable: a problem is offered only to
-cards whose technique the problem carries, or the work is every template
-against every problem for an answer that is almost always no.
+Pre-filtering is what makes the run affordable: a solution is offered only to
+cards whose technique its problem carries, or the work is every template
+against every solution for an answer that is almost always no.
+
+References are never asked about. A reference is written to be plainly correct
+rather than to display a form, so a verdict on one says nothing about what the
+problem teaches.
 """
 
 from collections.abc import Iterable, Mapping, Sequence
@@ -15,33 +20,54 @@ from collections.abc import Iterable, Mapping, Sequence
 from pydantic import BaseModel
 
 from algo_coach.matches.matcher import Configuration, candidates
-from algo_coach.schema import Card, MatchSource, Problem, TemplateMatch
+from algo_coach.schema import (
+    Card,
+    MatchSource,
+    Problem,
+    Solution,
+    SolutionRole,
+    TemplateMatch,
+)
 
 
 class Question(BaseModel):
-    """This problem against this card's templates: the unit a call is made
-    for, where a record is one template against one problem."""
+    """This canonical against this card's templates: the unit a call is made
+    for, where a record is one template against one solution.
+
+    The problem travels with it because the statement is context the code
+    leaves implicit, and because its techniques are what offered the solution
+    to this card.
+    """
 
     card: Card
     problem: Problem
+    solution: Solution
 
     @property
     def key(self) -> tuple[str, str]:
-        return (self.card.id, self.problem.id)
+        return (self.card.id, self.solution.id)
 
 
-def questions(cards: Iterable[Card], problems: Iterable[Problem]) -> list[Question]:
+def questions(
+    cards: Iterable[Card], problems: Iterable[Problem], solutions: Iterable[Solution]
+) -> list[Question]:
     """Every question worth a call, before what is already read is taken out.
 
     A card whose every template is a framing procedure asks nothing, so it
     produces no question rather than a call with no candidates.
+
+    A solution whose problem is not stored asks nothing either. It cannot be
+    offered to a card without the techniques that scope the offer, and the
+    statement it was written against is not there to send.
     """
     asking = [card for card in cards if candidates(card)]
+    by_id = {problem.id: problem for problem in problems}
     return [
-        Question(card=card, problem=problem)
-        for problem in problems
+        Question(card=card, problem=by_id[solution.problem_id], solution=solution)
+        for solution in solutions
+        if solution.role is SolutionRole.CANONICAL and solution.problem_id in by_id
         for card in asking
-        if card.technique in problem.techniques
+        if card.technique in by_id[solution.problem_id].techniques
     ]
 
 
@@ -76,7 +102,7 @@ def outstanding(
     """The questions this configuration has not answered as it would ask them
     now.
 
-    `hashes` is what each question would be sent, keyed by card and problem. A
+    `hashes` is what each question would be sent, keyed by card and solution. A
     question stands while any of its pairs carries no record at that text — the
     rule readings already use, one level down. A pair already settled is
     re-answered by the call that goes out for the unsettled one beside it,
@@ -89,17 +115,18 @@ def outstanding(
         for template in candidates(question.card)
     }
     read = {
-        (match.template_id, match.problem_id)
+        (match.template_id, match.solution_id)
         for match in matches
         if match.template_id in card_of
         and at_configuration(
-            match, configuration, hashes.get((card_of[match.template_id], match.problem_id), "")
+            match, configuration, hashes.get((card_of[match.template_id], match.solution_id), "")
         )
     }
     return [
         question
         for question in asking
         if any(
-            (template.id, question.problem.id) not in read for template in candidates(question.card)
+            (template.id, question.solution.id) not in read
+            for template in candidates(question.card)
         )
     ]

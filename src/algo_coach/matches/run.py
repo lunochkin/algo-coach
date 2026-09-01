@@ -2,7 +2,7 @@
 
 Re-derivation is the normal path here, not an exception: a technique claim
 asks about one attempt and the question never changes, where a match is a
-template against a corpus that grows with every generation run.
+template against a corpus of solutions that grows with every run.
 """
 
 from collections.abc import Callable, Iterable, Sequence
@@ -16,12 +16,12 @@ from algo_coach.matches.questions import Question, outstanding, questions
 from algo_coach.matches.store import MatchLog
 from algo_coach.mint import machine_match
 from algo_coach.runs import ABORT_AFTER, CONCURRENCY, as_answered
-from algo_coach.schema import Call, Card, Problem
+from algo_coach.schema import Call, Card, Problem, Solution
 
 
 class Failed(BaseModel):
     card_id: str
-    problem_id: str
+    solution_id: str
     reason: str
 
 
@@ -32,13 +32,13 @@ class Progress(BaseModel):
     index: int  # 1-based, over what this run will ask about
     total: int
     card_slug: str
-    title: str  # the problem's
+    title: str  # the problem the solution answers
     templates: list[str] = Field(default_factory=list)  # the slugs it matched
     reason: str | None = None  # the failure, when there was one
 
 
 class MatchResult(BaseModel):
-    asked: int = 0  # calls made, one per card and problem
+    asked: int = 0  # calls made, one per card and solution
     matched: int = 0  # pairs recorded as exercised
     unmatched: int = 0  # pairs recorded as not; stored, or every re-run re-tests them
     failed: list[Failed] = Field(default_factory=list)
@@ -62,7 +62,14 @@ def read_one(
     The records are the caller's, and the match log has one writer however many
     calls are in flight.
     """
-    return match(transport, calls, question.card, question.problem, configuration=configuration)
+    return match(
+        transport,
+        calls,
+        question.card,
+        question.problem,
+        question.solution,
+        configuration=configuration,
+    )
 
 
 def store(log: MatchLog, question: Question, matched: Sequence[str], call: Call) -> int:
@@ -77,7 +84,7 @@ def store(log: MatchLog, question: Question, matched: Sequence[str], call: Call)
         log.append(
             machine_match(
                 template.id,
-                question.problem.id,
+                question.solution.id,
                 matched=template.slug in named,
                 model=call.model,
                 effort=call.effort,
@@ -97,6 +104,7 @@ def match_corpus(
     calls: CallLog,
     cards: Iterable[Card],
     problems: Iterable[Problem],
+    solutions: Iterable[Solution],
     *,
     configuration: Configuration = DEFAULT,
     limit: int | None = None,
@@ -105,7 +113,7 @@ def match_corpus(
     fresh: bool = False,
     on_progress: Callable[[Progress], None] | None = None,
 ) -> MatchResult:
-    """Test every problem a card's technique reaches against that card's
+    """Test every canonical a card's technique reaches against that card's
     templates, skipping the questions this configuration has already answered.
 
     Written after card import and never before: both references are minted, so
@@ -116,9 +124,14 @@ def match_corpus(
     the run goes; printing is the caller's.
     """
     asking = questions(
-        [card for card in cards if card_slug is None or card.slug == card_slug], problems
+        [card for card in cards if card_slug is None or card.slug == card_slug],
+        problems,
+        solutions,
     )
-    hashes = {question.key: request_hash(question.card, question.problem) for question in asking}
+    hashes = {
+        question.key: request_hash(question.card, question.problem, question.solution)
+        for question in asking
+    }
     if not fresh:
         asking = outstanding(asking, log.matches(), hashes, configuration=configuration)
     asking = asking[:limit]
@@ -150,7 +163,7 @@ def match_corpus(
             result.failed.append(
                 Failed(
                     card_id=question.card.id,
-                    problem_id=question.problem.id,
+                    solution_id=question.solution.id,
                     reason=repr(failure),
                 )
             )
@@ -164,7 +177,7 @@ def match_corpus(
         matched, call = answer if answer is not None else ([], None)
         if call is None:
             # Nothing was asked, so nothing is recorded: a card of framing
-            # procedures alone has no per-problem verdict to give.
+            # procedures alone has no per-solution verdict to give.
             continue
         result.asked += 1
         positive = store(log, question, matched, call)

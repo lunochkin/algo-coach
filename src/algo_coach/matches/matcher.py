@@ -1,9 +1,9 @@
-"""Which of a card's templates a problem exercises.
+"""Which of a card's templates a solution displays.
 
-A question about what the problem asks, so the statement is the evidence: a
-technique says what it is about, and a form is how it is solved. The same shape as
-the technique classifier — candidates in, the subset out — read by a prompted
-model for the same reason, that nobody has labelled which form solves what.
+A form is displayed by code, so the solution is the evidence and the statement
+is the context it was written against. The same shape as the technique
+classifier — candidates in, the subset out — read by a prompted model for the
+same reason, that nobody has labelled which form solves what.
 """
 
 import json
@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 from algo_coach.calls import CallLog, Transport, ask
 from algo_coach.calls import prompt_hash as digest
-from algo_coach.schema import Call, Card, Problem, Template, TemplateKind
+from algo_coach.schema import Call, Card, Problem, Solution, Template, TemplateKind
 
 MODEL = "openai/gpt-oss-120b"
 EFFORT = "medium"
@@ -23,21 +23,23 @@ PIN = "deepinfra/bf16"
 # at 0.9 must not land as a coin flip in a record the ladder is derived from.
 TEMPERATURE: float | None = 0.0
 
-SYSTEM = """You decide which of a card's templates a problem exercises.
+SYSTEM = """You decide which of a card's templates a solution displays.
 
 The candidates are the forms one card teaches, each with the cue that says to
-reach for it and the code it comes back as. Say which of them a correct
-solution to the problem in front of you is built out of.
+reach for it and the code it comes back as. Say which of them the solution in
+front of you is built out of.
 
-Name every one that applies and nothing more. Two approaches to one problem is
-ordinary, so more than one candidate can be right; a candidate that merely
-could be bent to fit is not.
+Name every one that applies and nothing more. One solution can compose two
+forms, so more than one candidate can be right; a candidate that merely could
+be bent to fit is not.
 
-Decide from what the problem asks, not from what it is about. A problem's
-subject is the technique; a template is the shape of the solution, and two
-problems on one technique are often different forms.
+Decide from the code, not from the problem's subject. That subject is the
+technique; a template is the shape of the solution, and two solutions to one
+problem are often different forms.
 
-If the problem exercises none of the candidates, name none of them."""
+The statement is there for what the code leaves implicit, never as the verdict.
+
+If the solution displays none of the candidates, name none of them."""
 
 
 class Configuration(BaseModel, frozen=True):
@@ -64,22 +66,22 @@ class MatcherError(Exception):
 
 
 def candidates(card: Card) -> list[Template]:
-    """The templates a problem is tested against.
+    """The templates a solution is tested against.
 
-    Procedure templates are excluded: a framing procedure is exercised by every
-    problem its technique reaches, so a per-problem verdict on one carries no
+    Procedure templates are excluded: a framing procedure is displayed by every
+    solution its technique reaches, so a per-solution verdict on one carries no
     information. The ladder covers it as a whole instead.
     """
     return [template for template in card.templates if template.kind is not TemplateKind.PROCEDURE]
 
 
-def request_hash(card: Card, problem: Problem) -> str:
+def request_hash(card: Card, problem: Problem, solution: Solution) -> str:
     """The digest of what this pair would be sent, right now.
 
     Per pair for the same reason a claim's is per attempt: a template edited on
     one card re-tests that card's pairs and leaves every other one settled.
     """
-    return digest(SYSTEM, prompt(candidates(card), problem))
+    return digest(SYSTEM, prompt(candidates(card), problem, solution))
 
 
 def match(
@@ -87,13 +89,14 @@ def match(
     log: CallLog,
     card: Card,
     problem: Problem,
+    solution: Solution,
     *,
     configuration: Configuration = DEFAULT,
 ) -> tuple[list[str], Call | None]:
-    """The slugs of the templates this problem exercises, and the call that
+    """The slugs of the templates this solution displays, and the call that
     read them — `None` where there was nothing to ask.
 
-    One call per problem and card, never per pair: the candidates are that
+    One call per solution and card, never per pair: the candidates are that
     card's templates and the answer is the subset, which is the classifier's
     shape and one request rather than six. The records come from the one
     answer.
@@ -110,7 +113,7 @@ def match(
         transport,
         log,
         system=SYSTEM,
-        content=prompt(forms, problem),
+        content=prompt(forms, problem, solution),
         model=configuration.model,
         effort=configuration.effort,
         pin=configuration.pin,
@@ -126,10 +129,14 @@ def match(
     return [template.slug for template in forms if template.slug in named], call
 
 
-def prompt(forms: Sequence[Template], problem: Problem) -> str:
-    """The candidates before the problem, so the reading is made knowing what
-    can be named. Delimited, since a statement is data the model reads rather
-    than instructions it follows."""
+def prompt(forms: Sequence[Template], problem: Problem, solution: Solution) -> str:
+    """The candidates first, so the reading is made knowing what can be named,
+    then the statement and the code that answers it.
+
+    The solution comes last because it is the evidence. Both are delimited,
+    since a statement and a solution are data the model reads rather than
+    instructions it follows.
+    """
     return "\n".join(
         [
             f"Candidates: {', '.join(template.slug for template in forms)}",
@@ -138,6 +145,9 @@ def prompt(forms: Sequence[Template], problem: Problem) -> str:
             f"<problem title={problem.title!r}>",
             problem.statement,
             "</problem>",
+            "<solution>",
+            solution.code.rstrip(),
+            "</solution>",
         ]
     )
 

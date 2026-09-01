@@ -17,7 +17,7 @@ def latest_by_pair(matches: Iterable[TemplateMatch]) -> dict[Pair, TemplateMatch
     """
     standing: dict[Pair, TemplateMatch] = {}
     for match in matches:
-        pair = (match.template_id, match.problem_id)
+        pair = (match.template_id, match.solution_id)
         current = standing.get(pair)
         if current is None or match.created_at >= current.created_at:
             standing[pair] = match
@@ -25,7 +25,7 @@ def latest_by_pair(matches: Iterable[TemplateMatch]) -> dict[Pair, TemplateMatch
 
 
 def standing_matches(matches: Iterable[TemplateMatch]) -> dict[Pair, TemplateMatch]:
-    """The verdict that stands on each pair, keyed by template and problem.
+    """The verdict that stands on each pair, keyed by template and solution.
 
     Ordered by what each writer knew rather than by when it wrote. A hand
     annotation stands over both machine sources. A generator's assertion

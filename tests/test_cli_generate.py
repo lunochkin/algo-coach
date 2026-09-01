@@ -61,8 +61,9 @@ def test_a_problem_its_runs_kept_is_stored_whole(root, monkeypatch, capsys):
         SolutionRole.CANONICAL,
         SolutionRole.REFERENCE,
     ]
-    assert [(one.problem_id, one.source) for one in MatchLog(root).matches()] == [
-        (problem.id, MatchSource.GENERATOR)
+    canonical, _ = SolutionLog(root).for_problem(problem.id)
+    assert [(one.solution_id, one.source) for one in MatchLog(root).matches()] == [
+        (canonical.id, MatchSource.GENERATOR)
     ]
 
 

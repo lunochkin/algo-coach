@@ -1,8 +1,12 @@
-"""The annotation prompt as two panes: the statement, and one form's code.
+"""The annotation prompt as two panes: the solution and its statement, and one
+form's code.
 
-Deciding whether a problem exercises a form means reading the statement
-against that form, then against the next one. So the statement stays put and
-the right pane changes, rather than both scrolling past each other.
+Deciding whether a solution displays a form means reading that solution
+against the form, then against the next one. So the left pane stays put and
+the right one changes, rather than both scrolling past each other.
+
+The statement sits above the solution because it is the context the code
+leaves implicit. The verdict is about the code.
 
 One form at a time because all of them do not fit. A card carries up to six,
 and their code runs to a hundred and thirty lines — more than any pane holds,
@@ -23,6 +27,22 @@ from textual.widgets import Footer, Markdown, Static
 
 from algo_coach.matches import Question, candidates
 from algo_coach.schema import Template, TemplateMatch
+
+
+def reading(question: Question) -> str:
+    """What the left pane holds: the statement, then the solution the verdict
+    is about.
+
+    One markdown block rather than two widgets, so the two scroll together. A
+    reader moving down the statement is reading toward the code.
+    """
+    return "\n\n".join(
+        [
+            question.problem.statement,
+            "---",
+            f"```python\n{question.solution.code.rstrip()}\n```",
+        ]
+    )
 
 # Answering one question: the pairs it settles, positive and negative.
 Answered = Callable[[Question, set[str]], None]
@@ -122,8 +142,8 @@ class Annotating(App[None]):
         # Rendered as markdown, which is how a statement is written: the
         # examples are fenced blocks and the constraints a list. Read as plain text they
         # are the part of the statement that decides the question, printed as
-        # backticks and asterisks.
-        self.query_one("#statement-body", Markdown).update(question.problem.statement)
+        # backticks and asterisks. The solution is fenced for the same reason.
+        self.query_one("#statement-body", Markdown).update(reading(question))
         self.query_one("#forms", Static).update(self.listing())
         self.show_code()
         self.query_one("#statement", VerticalScroll).scroll_home(animate=False)
@@ -173,7 +193,7 @@ class Annotating(App[None]):
         """What the matcher read this pair as, named by the model that
         answered. Shown only where the caller asked for it, and what it costs
         is that the answer is no longer independent of it."""
-        match = self.read.get((form.id, self.question.problem.id))
+        match = self.read.get((form.id, self.question.solution.id))
         if match is None:
             return ""
         return f"\n\n{'yes' if match.matched else 'no'}  ({match.model})"

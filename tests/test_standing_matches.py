@@ -30,13 +30,13 @@ def match(
     matched: bool = True,
     at: datetime = T0,
     template_id: str = "t1",
-    problem_id: str = "p1",
+    solution_id: str = "s1",
 ) -> TemplateMatch:
     fields = {
         "id": f"{source}-{at.isoformat()}-{matched}",
         "created_at": at,
         "template_id": template_id,
-        "problem_id": problem_id,
+        "solution_id": solution_id,
         "matched": matched,
         "source": source,
     }
@@ -52,7 +52,7 @@ def test_nothing_read_stands_for_nothing():
 def test_a_lone_verdict_stands():
     reading = match(MatchSource.CLASSIFIER)
 
-    assert standing_matches([reading]) == {("t1", "p1"): reading}
+    assert standing_matches([reading]) == {("t1", "s1"): reading}
 
 
 def test_a_hand_annotation_stands_over_both_machine_sources():
@@ -62,7 +62,7 @@ def test_a_hand_annotation_stands_over_both_machine_sources():
     asserted = match(MatchSource.GENERATOR, at=T0 + timedelta(days=1))
     read = match(MatchSource.CLASSIFIER, matched=False, at=T0 + timedelta(days=2))
 
-    assert standing_matches([annotation, asserted, read])[("t1", "p1")] is annotation
+    assert standing_matches([annotation, asserted, read])[("t1", "s1")] is annotation
 
 
 def test_a_generator_stands_over_a_matcher_reading_the_same_pair():
@@ -71,7 +71,7 @@ def test_a_generator_stands_over_a_matcher_reading_the_same_pair():
     asserted = match(MatchSource.GENERATOR, at=T0)
     read = match(MatchSource.CLASSIFIER, matched=False, at=T0 + timedelta(days=1))
 
-    assert standing_matches([asserted, read])[("t1", "p1")] is asserted
+    assert standing_matches([asserted, read])[("t1", "s1")] is asserted
 
 
 def test_a_later_matcher_reading_supersedes_an_earlier_one():
@@ -80,14 +80,14 @@ def test_a_later_matcher_reading_supersedes_an_earlier_one():
     first = match(MatchSource.CLASSIFIER, matched=True, at=T0)
     second = match(MatchSource.CLASSIFIER, matched=False, at=T0 + timedelta(days=1))
 
-    assert standing_matches([first, second])[("t1", "p1")] is second
+    assert standing_matches([first, second])[("t1", "s1")] is second
 
 
 def test_append_order_breaks_a_tie_on_time():
     first = match(MatchSource.CLASSIFIER, matched=True, at=T0)
     second = match(MatchSource.CLASSIFIER, matched=False, at=T0)
 
-    assert standing_matches([first, second])[("t1", "p1")] is second
+    assert standing_matches([first, second])[("t1", "s1")] is second
 
 
 def test_order_of_reading_does_not_decide():
@@ -98,7 +98,7 @@ def test_order_of_reading_does_not_decide():
     read = match(MatchSource.CLASSIFIER, at=T0 + timedelta(days=2))
 
     for order in ([annotation, asserted, read], [read, asserted, annotation]):
-        assert standing_matches(order)[("t1", "p1")] is annotation
+        assert standing_matches(order)[("t1", "s1")] is annotation
 
 
 def test_a_negative_stands_as_readily_as_a_positive():
@@ -107,7 +107,7 @@ def test_a_negative_stands_as_readily_as_a_positive():
     annotation = match(MatchSource.USER, matched=False)
     read = match(MatchSource.CLASSIFIER, matched=True, at=T0 + timedelta(days=1))
 
-    assert standing_matches([annotation, read])[("t1", "p1")].matched is False
+    assert standing_matches([annotation, read])[("t1", "s1")].matched is False
 
 
 def test_pairs_resolve_apart():
@@ -118,17 +118,17 @@ def test_pairs_resolve_apart():
 
     standing = standing_matches([mine, theirs])
 
-    assert standing[("t1", "p1")] is mine
-    assert standing[("t2", "p1")] is theirs
+    assert standing[("t1", "s1")] is mine
+    assert standing[("t2", "s1")] is theirs
 
 
-def test_one_template_over_two_problems_resolves_apart():
-    mine = match(MatchSource.CLASSIFIER, problem_id="p1")
-    theirs = match(MatchSource.CLASSIFIER, problem_id="p2", matched=False)
+def test_one_template_over_two_solutions_resolves_apart():
+    mine = match(MatchSource.CLASSIFIER, solution_id="s1")
+    theirs = match(MatchSource.CLASSIFIER, solution_id="s2", matched=False)
 
     standing = standing_matches([mine, theirs])
 
-    assert (standing[("t1", "p1")], standing[("t1", "p2")]) == (mine, theirs)
+    assert (standing[("t1", "s1")], standing[("t1", "s2")]) == (mine, theirs)
 
 
 @pytest.mark.parametrize("source", MatchSource)
@@ -137,4 +137,4 @@ def test_every_writer_can_stand_alone(source):
     disagree on one pair."""
     only = match(source)
 
-    assert standing_matches([only])[("t1", "p1")] is only
+    assert standing_matches([only])[("t1", "s1")] is only

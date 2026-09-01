@@ -10,7 +10,7 @@ template and the ladder is resolved per template — a form with no annotated
 pair is a gap nothing else reports.
 """
 
-from matching import card, problem, seeded, stored, template
+from matching import canonicals, card, problem, seeded, stored, template
 
 from algo_coach.matches import annotatable
 from algo_coach.mint import user_match
@@ -37,7 +37,7 @@ def corpus(root, *, backtracking: int = 3, union: int = 3):
         *(problem(f"b{n}", techniques=["backtracking"]) for n in range(backtracking)),
         *(problem(f"u{n}", techniques=["union-find"]) for n in range(union)),
     )
-    return cards, problems
+    return cards, problems, canonicals(*problems)
 
 
 def slugs(cards):
@@ -49,38 +49,38 @@ def slugs(cards):
 def test_a_card_the_hand_settled_whole_drops_out(tmp_path):
     """The question asks about the card, so it stands until every template of
     it is settled for that problem. Same rule the run path skips a pair by."""
-    cards, problems = corpus(tmp_path)
+    cards, problems, solutions = corpus(tmp_path)
     id = slugs(cards)
     settled = [
-        user_match(id[form], "b0", matched=False)
+        user_match(id[form], "s-b0", matched=False)
         for form in ("subsets", "permutations", "grid-walk")
     ]
-    order = annotatable(cards, problems, settled)
-    assert ("backtracking", "b0") not in {(one.card.slug, one.problem.id) for one in order}
+    order = annotatable(cards, problems, solutions, settled)
+    assert ("backtracking", "s-b0") not in {(one.card.slug, one.solution.id) for one in order}
 
 
 def test_a_card_the_hand_settled_partly_still_asks(tmp_path):
     """A partly annotated card is a question still worth asking — the call
     covers the templates it left, and answering them again settles nothing
     differently."""
-    cards, problems = corpus(tmp_path)
+    cards, problems, solutions = corpus(tmp_path)
     id = slugs(cards)
     part = [user_match(id["subsets"], "b0", matched=True)]
-    order = annotatable(cards, problems, part)
-    assert ("backtracking", "b0") in {(one.card.slug, one.problem.id) for one in order}
+    order = annotatable(cards, problems, solutions, part)
+    assert ("backtracking", "s-b0") in {(one.card.slug, one.solution.id) for one in order}
 
 
 def test_the_least_annotated_template_is_drawn_first(tmp_path):
     """A card whose forms the hand has reached many times waits behind one it
     has never reached."""
-    cards, problems = corpus(tmp_path)
+    cards, problems, solutions = corpus(tmp_path)
     id = slugs(cards)
     ahead = [
         user_match(id[form], f"u{n}", matched=False)
         for form in ("plain-union", "weighted-union")
         for n in range(3)
     ]
-    order = annotatable(cards, problems, ahead)
+    order = annotatable(cards, problems, solutions, ahead)
     assert order[0].card.slug == "backtracking"
 
 
@@ -91,7 +91,7 @@ def test_a_template_nothing_reached_pulls_its_card_forward(tmp_path):
     while the new one carries none. Counted per card the card is the best
     covered there is; counted per template it holds the only gap.
     """
-    cards, problems = corpus(tmp_path)
+    cards, problems, solutions = corpus(tmp_path)
     id = slugs(cards)
     lopsided = [
         # Every backtracking problem annotated, but only for two of the three
@@ -105,46 +105,46 @@ def test_a_template_nothing_reached_pulls_its_card_forward(tmp_path):
         user_match(id[form], "u0", matched=False)
         for form in ("plain-union", "weighted-union")
     ]
-    order = annotatable(cards, problems, lopsided)
+    order = annotatable(cards, problems, solutions, lopsided)
     assert order[0].card.slug == "backtracking"
 
 
 def test_one_card_is_asked_about_alone(tmp_path):
     """Annotating a card just added, without the rest of the corpus in the way.
     The filter narrows what is asked and changes nothing about the order."""
-    cards, problems = corpus(tmp_path)
-    order = annotatable(cards, problems, [], card="union-find")
+    cards, problems, solutions = corpus(tmp_path)
+    order = annotatable(cards, problems, solutions, [], card="union-find")
     assert {one.card.slug for one in order} == {"union-find"}
     assert {one.problem.id for one in order} == {"u0", "u1", "u2"}
 
 
 def test_an_unknown_card_asks_nothing(tmp_path):
-    cards, problems = corpus(tmp_path)
-    assert annotatable(cards, problems, [], card="no-such-card") == []
+    cards, problems, solutions = corpus(tmp_path)
+    assert annotatable(cards, problems, solutions, [], card="no-such-card") == []
 
 
 def test_every_question_is_asked_once(tmp_path):
     """It reorders the pool and never filters it, so a sample cut at any length
     is that length."""
-    cards, problems = corpus(tmp_path, backtracking=4, union=4)
-    order = annotatable(cards, problems, [])
+    cards, problems, solutions = corpus(tmp_path, backtracking=4, union=4)
+    order = annotatable(cards, problems, solutions, [])
     assert len(order) == 8
     assert len({one.key for one in order}) == 8
 
 
 def test_the_same_seed_gives_the_same_order(tmp_path):
-    cards, problems = corpus(tmp_path, backtracking=5, union=5)
-    assert [one.key for one in annotatable(cards, problems, [], seed=7)] == [
-        one.key for one in annotatable(cards, problems, [], seed=7)
+    cards, problems, solutions = corpus(tmp_path, backtracking=5, union=5)
+    assert [one.key for one in annotatable(cards, problems, solutions, [], seed=7)] == [
+        one.key for one in annotatable(cards, problems, solutions, [], seed=7)
     ]
 
 
 def test_another_seed_gives_another_order(tmp_path):
     """Within a card the choice is the seed's, as a claim sample is described
     by its seed rather than by listing what it held."""
-    cards, problems = corpus(tmp_path, backtracking=8, union=8)
-    assert [one.key for one in annotatable(cards, problems, [], seed=0)] != [
-        one.key for one in annotatable(cards, problems, [], seed=1)
+    cards, problems, solutions = corpus(tmp_path, backtracking=8, union=8)
+    assert [one.key for one in annotatable(cards, problems, solutions, [], seed=0)] != [
+        one.key for one in annotatable(cards, problems, solutions, [], seed=1)
     ]
 
 
@@ -153,12 +153,12 @@ def test_a_machine_match_does_not_settle_a_question(tmp_path):
     never takes its own question out of the pool."""
     from algo_coach.mint import machine_match
 
-    cards, problems = corpus(tmp_path)
+    cards, problems, solutions = corpus(tmp_path)
     id = slugs(cards)
     read = [
         machine_match(
             id[form],
-            "b0",
+            "s-b0",
             matched=False,
             model="m",
             effort="medium",
@@ -168,9 +168,9 @@ def test_a_machine_match_does_not_settle_a_question(tmp_path):
         )
         for form in ("subsets", "permutations", "grid-walk")
     ]
-    order = annotatable(cards, problems, read)
-    assert ("backtracking", "b0") in {(one.card.slug, one.problem.id) for one in order}
+    order = annotatable(cards, problems, solutions, read)
+    assert ("backtracking", "s-b0") in {(one.card.slug, one.solution.id) for one in order}
 
 
 def test_an_empty_corpus_asks_nothing(tmp_path):
-    assert annotatable([], [], []) == []
+    assert annotatable([], [], [], []) == []

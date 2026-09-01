@@ -1,7 +1,7 @@
-"""The hand annotation prompt: one card's templates against one problem.
+"""The hand annotation prompt: one card's templates against one canonical.
 
 The question is the card and the record is the pair, so one answer writes a
-row per template — the forms the problem does not exercise included, since a
+row per template — the forms the solution does not display included, since a
 reference that only named matches would score the matcher's "yes" and say
 nothing about its "no".
 
@@ -14,7 +14,7 @@ import argparse
 from contextlib import asynccontextmanager
 
 import pytest
-from matching import PROCEDURE, card, problem, seeded, stored, template
+from matching import PROCEDURE, canonicals, card, problem, seeded, stored, template
 from textual.containers import VerticalScroll
 from textual.widgets import Markdown, Static
 
@@ -23,6 +23,7 @@ from algo_coach.cli.annotate import annotating
 from algo_coach.matches import MatchLog
 from algo_coach.mint import machine_match
 from algo_coach.schema import MatchSource
+from algo_coach.solutions import SolutionLog
 
 # Wide and tall: the layout is two panes, and the pilot's default is one
 # eighty-column screen. Nothing here asserts on wrapping.
@@ -47,12 +48,15 @@ def annotate_root(tmp_path, monkeypatch):
             templates=[template("plain-union"), template("weighted-union")],
         ),
     )
-    stored(
+    corpus = stored(
         root,
         problem("b0", techniques=["backtracking"]),
         problem("b1", techniques=["backtracking"]),
         problem("u0", techniques=["union-find"]),
     )
+    # a match is keyed to a solution, so each problem carries a canonical
+    for one in canonicals(*corpus):
+        SolutionLog(root).append(one)
     return root
 
 
@@ -104,15 +108,15 @@ def by_slug(root):
 
 
 def read_by_matcher(root):
-    """A verdict on `subsets` for every backtracking problem, so whichever the
-    order draws first has one to show. Seeded on both, or the test passes by
-    drawing the problem nothing read."""
+    """A verdict on `subsets` for every backtracking canonical, so whichever
+    the order draws first has one to show. Seeded on both, or the test passes
+    by drawing the solution nothing read."""
     subsets = next(id for id, name in by_slug(root).items() if name == "subsets")
-    for problem_id in ("b0", "b1"):
+    for solution_id in ("s-b0", "s-b1"):
         MatchLog(root).append(
             machine_match(
                 subsets,
-                problem_id,
+                solution_id,
                 matched=True,
                 model="a-matcher",
                 effort="medium",
@@ -181,7 +185,7 @@ async def test_a_skip_writes_nothing_and_moves_on(annotate_root):
     a sitting that could not decide costs the reference nothing."""
     await run(annotate_root, ["s", "space", "enter"], count=2, card="backtracking")
 
-    assert len({one.problem_id for one in annotated(annotate_root)}) == 1
+    assert len({one.solution_id for one in annotated(annotate_root)}) == 1
 
 
 async def test_ending_the_sitting_keeps_what_landed(annotate_root):
@@ -192,11 +196,14 @@ async def test_ending_the_sitting_keeps_what_landed(annotate_root):
     assert len(annotated(annotate_root)) == 3
 
 
-async def test_the_statement_is_what_is_read(annotate_root):
-    """Which form a problem exercises is a question about what it asks, so the
-    statement is shown rather than the tags."""
+async def test_the_solution_is_read_under_its_statement(annotate_root):
+    """A form is displayed by code, so the solution is what the verdict is
+    about. The statement is above it, for what the code leaves implicit."""
     async with sitting(annotate_root, [], count=1, card="backtracking") as app:
-        assert app.query_one("#statement-body", Markdown).source == "Given an array, return ..."
+        source = app.query_one("#statement-body", Markdown).source
+
+    assert source.startswith("Given an array, return ...")
+    assert "def solve(xs):" in source
 
 
 async def test_each_form_is_offered_by_its_own_cue(annotate_root):
@@ -231,8 +238,8 @@ async def test_neither_pane_takes_focus(annotate_root):
 
 
 async def test_a_procedure_template_is_never_offered(annotate_root):
-    """A framing procedure is exercised by every problem its technique reaches,
-    so a per-problem verdict on it carries no information."""
+    """A framing procedure is displayed by every solution its technique
+    reaches, so a per-solution verdict on it carries no information."""
     root = annotate_root
     seeded(
         root,
@@ -242,7 +249,8 @@ async def test_a_procedure_template_is_never_offered(annotate_root):
             templates=[template("next-greater"), template("framing", **PROCEDURE)],
         ),
     )
-    stored(root, problem("m0", techniques=["monotonic-stack"]))
+    for one in canonicals(*stored(root, problem("m0", techniques=["monotonic-stack"]))):
+        SolutionLog(root).append(one)
     await run(root, ["space", "enter"], count=1, card="monotonic-stack")
 
     slug = by_slug(root)

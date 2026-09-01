@@ -165,20 +165,21 @@ def classifier_claim(
 
 def user_match(
     template_id: str,
-    problem_id: str,
+    solution_id: str,
     *,
     matched: bool,
     informed_by: Sequence[str] = (),
 ) -> TemplateMatch:
-    """One pair the user annotated, positive or negative.
+    """One pair the user annotated, positive or negative: whether this
+    solution displays this form.
 
     It carries no configuration because nothing re-derives it. That is what
     makes it the reference a machine reading is scored against, and what makes
     it stand on read however early it was written.
 
     The negative is annotated as deliberately as the positive. The machine
-    answers every candidate of a card, so a reference that only named matches
-    would score its "yes" and say nothing about its "no".
+    answers every candidate it was given, so a reference that only named
+    matches would score its "yes" and say nothing about its "no".
 
     Blind unless the caller says otherwise, as a user claim is. Only an
     annotation asking to see the matcher has a verdict in view, and only it
@@ -188,30 +189,31 @@ def user_match(
         id=new_id(),
         created_at=datetime.now(UTC),
         template_id=template_id,
-        problem_id=problem_id,
+        solution_id=solution_id,
         matched=matched,
         source=MatchSource.USER,
         informed_by=list(informed_by),
     )
 
 
-def generator_match(template_id: str, problem_id: str) -> TemplateMatch:
-    """The pair a generated problem asserts about itself.
+def generator_match(template_id: str, solution_id: str) -> TemplateMatch:
+    """The pair the canonical a problem was generated with asserts about
+    itself.
 
-    It was written for one template, so the pair is provenance rather than a
+    Its brief said which template, so the pair is provenance rather than a
     reading and nothing pays a call to learn it. Carries no configuration for
     the same reason a hand match does not: nothing re-derives it, and the
-    problem already names the call that wrote both.
+    solution already names the call that wrote it.
 
-    Only ever positive. A generator asserts the form it was briefed on and
-    says nothing about the templates it was not, which is the matcher's
-    question.
+    Only ever positive, and only ever on that one canonical. A template is
+    where a problem comes from rather than where its later solutions come
+    from, so every template those display is the matcher's question.
     """
     return TemplateMatch(
         id=new_id(),
         created_at=datetime.now(UTC),
         template_id=template_id,
-        problem_id=problem_id,
+        solution_id=solution_id,
         matched=True,
         source=MatchSource.GENERATOR,
     )
@@ -219,7 +221,7 @@ def generator_match(template_id: str, problem_id: str) -> TemplateMatch:
 
 def machine_match(
     template_id: str,
-    problem_id: str,
+    solution_id: str,
     *,
     matched: bool,
     model: str,
@@ -230,7 +232,8 @@ def machine_match(
     temperature: float | None = None,
     provider: str | None = None,
 ) -> TemplateMatch:
-    """One pair a matcher read, positive or negative.
+    """One pair a matcher read, positive or negative: whether this solution
+    displays this form.
 
     The negative is a record like any other: without it every re-run re-tests
     every non-match forever, which on a growing corpus is nearly all the work.
@@ -241,7 +244,7 @@ def machine_match(
         id=new_id(),
         created_at=datetime.now(UTC),
         template_id=template_id,
-        problem_id=problem_id,
+        solution_id=solution_id,
         matched=matched,
         source=MatchSource.CLASSIFIER,
         model=model,

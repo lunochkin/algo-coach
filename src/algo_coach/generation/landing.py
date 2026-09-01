@@ -95,6 +95,10 @@ def land(corpus: Corpus, template: Template, drafted: Drafted) -> Problem:
     canonical came from the generation call, the reference from its own. The
     problem carries the generation call's, which is the act that wrote it.
 
+    The match is asserted on the canonical rather than on the problem: a form
+    is displayed by code. It is the only assertion the problem will carry, as
+    every later canonical is enumerated rather than asked for by template.
+
     The techniques are left empty. They are a view over the problem's canonical
     solutions, and deriving them is its own step.
     """
@@ -110,11 +114,10 @@ def land(corpus: Corpus, template: Template, drafted: Drafted) -> Problem:
         corpus.cases.append(
             mint.case(problem.id, case.args, case.expected, expected_from=case.expected_from)
         )
-    corpus.solutions.append(
-        mint.solution(
-            problem.id, draft.canonical, SolutionRole.CANONICAL, **written_by(drafted.call)
-        )
+    canonical = mint.solution(
+        problem.id, draft.canonical, SolutionRole.CANONICAL, **written_by(drafted.call)
     )
+    corpus.solutions.append(canonical)
     corpus.solutions.append(
         mint.solution(
             problem.id,
@@ -123,7 +126,7 @@ def land(corpus: Corpus, template: Template, drafted: Drafted) -> Problem:
             **written_by(drafted.reference_call),
         )
     )
-    corpus.matches.append(mint.generator_match(template.id, problem.id))
+    corpus.matches.append(mint.generator_match(template.id, canonical.id))
     corpus.problems.put(problem)
     return problem
 

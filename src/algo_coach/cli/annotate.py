@@ -1,8 +1,8 @@
-"""The hand annotation: which of a card's forms a problem exercises.
+"""The hand annotation: which of a card's forms a solution displays.
 
 The question is the card and the record is the pair. One statement is read
 once and judged against every form of the card, and the answer writes a row per
-template. The ones the problem does not exercise are included: a reference that
+template. The ones the solution does not display are included: a reference that
 only named matches would score the matcher's "yes" and say nothing about its
 "no".
 
@@ -26,6 +26,7 @@ from algo_coach.matches import MatchLog, Question, annotatable, candidates
 from algo_coach.mint import user_match
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import MatchSource, Template, TemplateMatch
+from algo_coach.solutions import SolutionLog
 
 
 class Landing:
@@ -45,7 +46,12 @@ class Landing:
         saw = shown(question, forms, self.read)
         for form in forms:
             self.log.append(
-                user_match(form.id, question.problem.id, matched=form.id in picked, informed_by=saw)
+                user_match(
+                    form.id,
+                    question.solution.id,
+                    matched=form.id in picked,
+                    informed_by=saw,
+                )
             )
             self.written += 1
 
@@ -63,7 +69,14 @@ def annotating(args: argparse.Namespace, parser: argparse.ArgumentParser, root: 
 
     log = MatchLog(root)
     stored = log.matches()
-    pool = annotatable(cards, ProblemStore(root).all(), stored, card=args.card, seed=args.seed)
+    pool = annotatable(
+        cards,
+        ProblemStore(root).all(),
+        SolutionLog(root).solutions(),
+        stored,
+        card=args.card,
+        seed=args.seed,
+    )
     if not pool:
         left = f"left to annotate for {args.card}" if args.card else "left to annotate"
         parser.exit(1, f"annotate: nothing {left}\n")
@@ -73,7 +86,7 @@ def annotating(args: argparse.Namespace, parser: argparse.ArgumentParser, root: 
 
 
 def annotate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """The matcher's question, answered by hand over sampled problems."""
+    """The matcher's question, answered by hand over sampled canonicals."""
     app = annotating(args, parser, root)
     app.run()
     print(f"{app.count} question(s) annotated, {app.answered.written} record(s) written")
@@ -91,7 +104,7 @@ def machine_verdicts(matches: Iterable[TemplateMatch]) -> dict[tuple[str, str], 
     for match in matches:
         if match.source is not MatchSource.CLASSIFIER:
             continue
-        pair = (match.template_id, match.problem_id)
+        pair = (match.template_id, match.solution_id)
         if pair not in latest or match.created_at >= latest[pair].created_at:
             latest[pair] = match
     return latest
@@ -114,7 +127,7 @@ def shown(
     """
     seen: list[str] = []
     for form in forms:
-        match = read.get((form.id, question.problem.id))
+        match = read.get((form.id, question.solution.id))
         if match is not None and match.call_id is not None and match.call_id not in seen:
             seen.append(match.call_id)
     return seen

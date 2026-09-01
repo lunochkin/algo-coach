@@ -17,12 +17,13 @@ from collections.abc import Iterable, Sequence
 
 from algo_coach.matches.matcher import candidates
 from algo_coach.matches.questions import Question, questions
-from algo_coach.schema import Card, MatchSource, Problem, TemplateMatch
+from algo_coach.schema import Card, MatchSource, Problem, Solution, TemplateMatch
 
 
 def annotatable(
     cards: Iterable[Card],
     problems: Iterable[Problem],
+    solutions: Iterable[Solution],
     matches: Iterable[TemplateMatch],
     *,
     card: str | None = None,
@@ -42,11 +43,11 @@ def annotatable(
     """
     asking = [
         question
-        for question in questions(cards, problems)
+        for question in questions(cards, problems, solutions)
         if card is None or question.card.slug == card
     ]
     hand = {
-        (match.template_id, match.problem_id)
+        (match.template_id, match.solution_id)
         for match in matches
         if match.source is MatchSource.USER
     }
@@ -61,14 +62,16 @@ def annotatable(
 
 
 def settled(question: Question, hand: set[tuple[str, str]]) -> bool:
-    """Whether the hand has answered this whole card for this problem.
+    """Whether the hand has answered this whole card for this solution.
 
     Whole, because the question is the card: a partly annotated one is still
     worth asking, and the templates it already settled are re-answered by the
     same sitting at no cost. The rule the run path skips a pair by, one writer
     over.
     """
-    return all((template.id, question.problem.id) in hand for template in candidates(question.card))
+    return all(
+        (template.id, question.solution.id) in hand for template in candidates(question.card)
+    )
 
 
 def spread(asking: Sequence[Question], *, covered: Counter[str], seed: int = 0) -> list[Question]:

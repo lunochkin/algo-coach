@@ -163,7 +163,7 @@ stored result means is settled in `corpus.md`, so neither moves a record.
 A brief writes one canonical. Every other approach is found over the stored
 problem, by the flow in `flows.md`, "Enumerating a problem's other solutions".
 
-- [ ] Re-key `TemplateMatch` from a problem to a solution. A form is displayed
+- [x] Re-key `TemplateMatch` from a problem to a solution. A form is displayed
       by code, so a verdict naming only a problem names no subject. The store
       holds no match, so this is a rename rather than a migration
 - [ ] Write the enumeration call: a landed problem in, the approaches that

@@ -1,10 +1,19 @@
-"""One card's templates against one problem: what is asked, and what a verdict
-turns into."""
+"""One card's templates against one canonical: what is asked, and what a
+verdict turns into."""
 
 import json
 
 import pytest
-from matching import PROCEDURE, FakeTransport, Verdict, card, problem, seeded, template
+from matching import (
+    PROCEDURE,
+    FakeTransport,
+    Verdict,
+    canonical,
+    card,
+    problem,
+    seeded,
+    template,
+)
 
 from algo_coach.calls import CallLog
 from algo_coach.matches import DEFAULT, MatcherError, candidates, match, request_hash
@@ -12,12 +21,13 @@ from algo_coach.matches import DEFAULT, MatcherError, candidates, match, request
 
 def read(tmp_path, client: FakeTransport, cards=None, techniques=("sliding-window",)):
     (one,) = seeded(tmp_path, *(cards or [card()]))
-    return one, match(client, CallLog(tmp_path), one, problem("p1", techniques=list(techniques)))
+    asked = problem("p1", techniques=list(techniques))
+    return one, match(client, CallLog(tmp_path), one, asked, canonical(asked.id))
 
 
 def test_a_procedure_template_is_no_candidate(tmp_path):
-    """A framing procedure is exercised by every problem its technique
-    reaches, so a per-problem verdict on one carries no information."""
+    """A framing procedure is displayed by every solution its technique
+    reaches, so a per-solution verdict on one carries no information."""
     (one,) = seeded(
         tmp_path,
         card(templates=[template("framing", **PROCEDURE), template("longest-valid-window")]),
@@ -43,16 +53,17 @@ def test_one_call_carries_every_candidate(tmp_path):
     ]
 
 
-def test_the_statement_is_the_evidence(tmp_path):
-    """Which form a problem exercises is a question about what it asks; its
-    techniques answer what it is about."""
+def test_the_solution_is_the_evidence(tmp_path):
+    """A form is displayed by code. The statement travels with it for what the
+    code leaves implicit, never as the verdict."""
     client = FakeTransport.answering(Verdict([]))
     (one,) = seeded(tmp_path)
     asked = problem("p1", techniques=["sliding-window"], statement="Find the longest substring ...")
 
-    match(client, CallLog(tmp_path), one, asked)
+    match(client, CallLog(tmp_path), one, asked, canonical(asked.id, code="def solve(): return 1"))
 
     content = client.calls[0]["content"]
+    assert "def solve(): return 1" in content
     assert "Find the longest substring ..." in content
     # The form itself, not only its name: a cue alone would ask the model to
     # match a shape it has to guess.
@@ -106,10 +117,12 @@ def test_the_digest_is_per_pair(tmp_path):
     )
     asked = problem("p1", techniques=["sliding-window"])
     elsewhere = problem("p2", techniques=["sliding-window"], statement="A different question ...")
+    mine, theirs = canonical(asked.id), canonical(elsewhere.id, code="def solve(): return 2")
 
-    assert request_hash(one, asked) == request_hash(one, asked)
-    assert request_hash(one, asked) != request_hash(one, elsewhere)
-    assert request_hash(edited, asked) != request_hash(one, asked)
+    assert request_hash(one, asked, mine) == request_hash(one, asked, mine)
+    assert request_hash(one, asked, mine) != request_hash(one, elsewhere, theirs)
+    assert request_hash(one, asked, mine) != request_hash(one, asked, theirs)
+    assert request_hash(edited, asked, mine) != request_hash(one, asked, mine)
 
 
 def test_the_reading_is_greedy_and_pinned(tmp_path):

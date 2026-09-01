@@ -3,7 +3,17 @@ writes, and what a second run pays for."""
 
 from datetime import UTC, datetime
 
-from matching import PROCEDURE, FakeTransport, Verdict, card, problem, seeded, stored, template
+from matching import (
+    PROCEDURE,
+    FakeTransport,
+    Verdict,
+    canonicals,
+    card,
+    problem,
+    seeded,
+    stored,
+    template,
+)
 
 from algo_coach.calls import CallLog
 from algo_coach.matches import (
@@ -21,14 +31,18 @@ from algo_coach.schema import MatchSource, TemplateMatch
 
 
 def run(root, client: FakeTransport, cards=None, problems=None, **kwargs):
+    corpus = (
+        problems
+        if problems is not None
+        else stored(root, problem("p1", techniques=["sliding-window"]))
+    )
     return match_corpus(
         client,
         MatchLog(root),
         CallLog(root),
         cards if cards is not None else seeded(root),
-        problems
-        if problems is not None
-        else stored(root, problem("p1", techniques=["sliding-window"])),
+        corpus,
+        canonicals(*corpus),
         **kwargs,
     )
 
@@ -44,7 +58,7 @@ def test_candidates_are_pre_filtered_by_technique(tmp_path):
         problem("neither", techniques=[]),
     )
 
-    asked = questions(cards, corpus)
+    asked = questions(cards, corpus, canonicals(*corpus))
 
     assert {(question.card.slug, question.problem.id) for question in asked} == {
         ("sliding-window", "window"),
@@ -55,7 +69,9 @@ def test_candidates_are_pre_filtered_by_technique(tmp_path):
 def test_a_card_with_nothing_to_ask_asks_nothing(tmp_path):
     cards = seeded(tmp_path, card(templates=[template("framing", **PROCEDURE)]))
 
-    assert questions(cards, stored(tmp_path, problem("p1", techniques=["sliding-window"]))) == []
+    corpus = stored(tmp_path, problem("p1", techniques=["sliding-window"]))
+
+    assert questions(cards, corpus, canonicals(*corpus)) == []
 
 
 def test_one_call_per_card_and_a_record_per_pair(tmp_path):
@@ -69,7 +85,7 @@ def test_one_call_per_card_and_a_record_per_pair(tmp_path):
     assert (result.asked, result.matched, result.unmatched) == (1, 1, 1)
     records = MatchLog(tmp_path).matches()
     assert sorted(match.matched for match in records) == [False, True]
-    assert {match.problem_id for match in records} == {"p1"}
+    assert {match.solution_id for match in records} == {"s-p1"}
 
 
 def test_a_record_carries_what_read_it(tmp_path):
@@ -115,7 +131,9 @@ def test_a_new_problem_is_the_only_one_re_read(tmp_path):
     result = run(tmp_path, client, cards, grown)
 
     assert result.asked == 1
-    assert {match.problem_id for match in MatchLog(tmp_path).matches() if match.matched} == {"p2"}
+    matched = {match.solution_id for match in MatchLog(tmp_path).matches() if match.matched}
+
+    assert matched == {"s-p2"}
 
 
 def test_an_edited_template_re_reads_that_card_alone(tmp_path):
@@ -168,20 +186,25 @@ def test_a_hand_annotation_is_never_what_a_run_leans_on(tmp_path):
     """It is the reference a machine run is scored against, so it settles
     nothing about what still has to be read."""
     cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
-    hashes = {(cards[0].id, "p1"): request_hash(cards[0], corpus[0])}
+    hashes = {(cards[0].id, "s-p1"): request_hash(cards[0], corpus[0], canonicals(*corpus)[0])}
     hand = [
         TemplateMatch(
             id=f"m{index}",
             created_at=datetime.now(UTC),
             template_id=template.id,
-            problem_id="p1",
+            solution_id="s-p1",
             matched=True,
             source=MatchSource.USER,
         )
         for index, template in enumerate(cards[0].templates)
     ]
 
-    assert outstanding(questions(cards, corpus), hand, hashes, configuration=DEFAULT) != []
+    assert (
+        outstanding(
+            questions(cards, corpus, canonicals(*corpus)), hand, hashes, configuration=DEFAULT
+        )
+        != []
+    )
 
 
 def test_a_limit_cuts_the_run(tmp_path):
@@ -251,4 +274,4 @@ def test_one_card_at_a_time(tmp_path):
     result = run(tmp_path, client, cards, corpus, card_slug="backtracking")
 
     assert result.asked == 1
-    assert {match.problem_id for match in MatchLog(tmp_path).matches()} == {"search"}
+    assert {match.solution_id for match in MatchLog(tmp_path).matches()} == {"s-search"}

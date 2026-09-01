@@ -10,22 +10,26 @@ class MatchSource(StrEnum):
     USER = "user"  # a hand annotation: the labelled set a machine run is scored against
     # what the generator was told to write. An assertion rather than a
     # reading, so it carries no provenance: nothing re-derives it, and the
-    # problem it points at already names the call that produced both
+    # solution it points at already names the call that wrote it
     GENERATOR = "generator"
     CLASSIFIER = "classifier"
 
 
 class TemplateMatch(MachineProvenance):
-    """Whether one problem exercises one of a card's templates.
+    """Whether one solution displays one of a card's templates.
 
-    The engine's own work, never an author's. A card names no problem, so what
+    A form is displayed by code, so the subject is a solution rather than a
+    problem. A problem reaches a template through its canonicals, which is a
+    fold rather than a record.
+
+    The engine's own work, never an author's. A card names no solution, so what
     a rung covers is read off the corpus rather than written down beside it.
 
-    One record per pair, not a set per template. Problems arrive one at a
+    One record per pair, not a set per template. Solutions arrive one at a
     time, and a set record would rewrite pairs that were already settled
-    whenever the corpus grew. The pairs are independent, and a new problem adds
-    to them. A claim asserts a whole set because the set is the assertion. A
-    match asserts one pair.
+    whenever the corpus grew. The pairs are independent, and a new solution
+    adds to them. A claim asserts a whole set because the set is the assertion.
+    A match asserts one pair.
 
     Append-only, like every other reading. A re-run at a new configuration
     appends its verdict, and what the old one said stays readable.
@@ -33,10 +37,11 @@ class TemplateMatch(MachineProvenance):
 
     id: str  # engine-minted, as every reference in the log is
     created_at: datetime
-    # Both minted: the template at card import, the problem at generation. So
-    # a match cannot be authored — neither reference exists in a seed file.
+    # Both minted: the template at card import, the solution when its problem
+    # lands. So a match cannot be authored — neither reference exists in a seed
+    # file.
     template_id: str
-    problem_id: str
+    solution_id: str
     # The verdict, and a negative is stored: without it every re-run re-tests
     # every non-match forever, which on a growing corpus is nearly all the work.
     matched: bool

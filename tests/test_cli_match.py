@@ -1,10 +1,11 @@
 from importlib import import_module
 
 import pytest
-from matching import FakeTransport, Verdict, card, problem, seeded, stored
+from matching import FakeTransport, Verdict, canonicals, card, problem, seeded, stored
 
 from algo_coach import cli
 from algo_coach.matches import EFFORT, MODEL, MatchLog
+from algo_coach.solutions import SolutionLog
 
 TRANSPORT = import_module("algo_coach.cli.transport")
 
@@ -20,7 +21,10 @@ def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
 def root(tmp_path, monkeypatch):
     data = tmp_path / "data"
     seeded(data, card())
-    stored(data, problem("p1", techniques=["sliding-window"]))
+    corpus = stored(data, problem("p1", techniques=["sliding-window"]))
+    # a match is keyed to a solution, so a corpus with none asks nothing
+    for one in canonicals(*corpus):
+        SolutionLog(data).append(one)
     monkeypatch.setattr(cli, "DATA_ROOT", data)
     return data
 
@@ -31,7 +35,7 @@ def test_the_command_matches_the_corpus(root, monkeypatch, capsys):
     records = MatchLog(root).matches()
     assert sorted(match.matched for match in records) == [False, True]
     out = capsys.readouterr().out
-    assert f"1 card/problem question(s) read by {MODEL}, effort {EFFORT}" in out
+    assert f"1 card/solution question(s) read by {MODEL}, effort {EFFORT}" in out
     assert "1 match(es), 1 non-match(es) recorded" in out
 
 

@@ -1,4 +1,4 @@
-"""A template match: one template against one problem, and what came back.
+"""A template match: one template against one solution, and what came back.
 
 Not a claim about an attempt — a fact about the corpus — so it shares the
 provenance rules and nothing else.
@@ -19,7 +19,7 @@ def make_match(source: MatchSource, **overrides) -> TemplateMatch:
         "id": "m1",
         "created_at": datetime.now(UTC),
         "template_id": "t1",
-        "problem_id": "p1",
+        "solution_id": "s1",
         "matched": True,
         "source": source,
     } | overrides
@@ -31,7 +31,7 @@ def test_a_match_is_one_template_against_one_problem():
     would rewrite pairs already settled whenever the corpus grew."""
     match = make_match(MatchSource.USER)
 
-    assert (match.template_id, match.problem_id) == ("t1", "p1")
+    assert (match.template_id, match.solution_id) == ("t1", "s1")
     assert not [name for name in TemplateMatch.model_fields if name.endswith("_ids")]
 
 
@@ -81,7 +81,7 @@ def test_a_match_records_its_source():
                 "id": "m1",
                 "created_at": datetime.now(UTC),
                 "template_id": "t1",
-                "problem_id": "p1",
+                "solution_id": "s1",
                 "matched": True,
             }
         )
@@ -149,19 +149,19 @@ def test_a_match_names_no_card():
     assert not [name for name in TemplateMatch.model_fields if "card" in name]
 
 
-def test_a_generated_problem_asserts_its_own_first_match():
-    """It was written for one template, so the pair is provenance rather than
-    a reading and nothing pays a call to learn it."""
-    match = generator_match("t1", "p1")
+def test_the_canonical_a_problem_was_generated_with_asserts_its_own_match():
+    """Its brief said which template, so the pair is provenance rather than a
+    reading and nothing pays a call to learn it."""
+    match = generator_match("t1", "s1")
 
-    assert (match.template_id, match.problem_id) == ("t1", "p1")
+    assert (match.template_id, match.solution_id) == ("t1", "s1")
     assert match.source is MatchSource.GENERATOR
 
 
 def test_a_generator_match_carries_no_configuration():
-    """Nothing re-derives it, and the problem it points at already names the
-    call that wrote both."""
-    match = generator_match("t1", "p1")
+    """Nothing re-derives it, and the solution it points at already names the
+    call that wrote it."""
+    match = generator_match("t1", "s1")
 
     assert [field for field in match.RECORDED if getattr(match, field) is not None] == []
 
@@ -169,13 +169,13 @@ def test_a_generator_match_carries_no_configuration():
 def test_a_generator_only_ever_asserts_a_positive():
     """It asserts the form it was briefed on and says nothing about the
     templates it was not, which is the matcher's question."""
-    assert generator_match("t1", "p1").matched is True
+    assert generator_match("t1", "s1").matched is True
 
 
 def test_a_generator_match_has_seen_nothing():
     """The brief named a template. No reading of the pair was in view, and
-    none could have been before the problem existed."""
-    assert generator_match("t1", "p1").informed_by == []
+    none could have been before the solution existed."""
+    assert generator_match("t1", "s1").informed_by == []
 
 
 def test_the_three_writers_are_named_apart():
