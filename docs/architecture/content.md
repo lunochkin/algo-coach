@@ -162,11 +162,16 @@ is authored here either.
   Each answers one pair, and pairs are independent: solutions arrive one at a
   time, and a set record would rewrite pairs already settled every time the
   corpus grew.
-- **What a classifier reading stores is deferred**, and only that. Per-pair
-  verdicts need a bounded candidate set, and a card scoped them only while the
-  subject was a problem offered to one card. A solution belongs to no card. What
-  the record must give either way is staleness by configuration: a re-run reads
-  what has not been read at the current digest, and nothing else.
+- **The candidates are scoped through the problem.** A solution is offered to
+  the cards whose technique its problem carries, which bounds the pairs a call
+  asks about and keeps a per-pair negative finite. The scoping survived the
+  subject moving, because a solution answers exactly one problem.
+- **What a classifier reading stores is deferred** where that scoping does not
+  reach: a solution displaying a form outside its problem's carded techniques
+  is a pair nothing offers. Whether the record then becomes one naming the
+  templates it found is the open question. What it must give either way is
+  staleness by configuration: a re-run reads what has not been read at the
+  current digest, and nothing else.
 - **Written after the solution lands, never before.** Both references are
   minted: the template at card import, the solution when the problem lands. So
   a match cannot be authored against a seed file.

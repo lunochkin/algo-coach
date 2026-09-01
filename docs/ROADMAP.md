@@ -148,11 +148,16 @@ test cases at all.
   model produced, so a generator drifting from its brief shows up there.
 - Generation is a command in the engine, beside the classifier and the matcher.
   One transport, one call log, one provenance base. No second pipeline.
-- A generated problem asserts the template it was written for. The matcher
-  reads it later for the templates it was not written for, and audits that
-  assertion.
-- A problem's techniques derive from its canonical solutions. That is also what
-  gives the attribution classifier its candidates on a generated problem.
+- A problem is written from a brief: a template, naming the form it must be
+  solvable by, or a technique, naming only the skill. A template is where a
+  problem comes from and never where its later solutions come from.
+- A template match is keyed to a solution rather than a problem, since a form
+  is displayed by code. The canonical a problem was generated with asserts its
+  own pair, and the matcher reads solutions for the forms nobody named.
+- A problem's techniques derive from readings of its canonical solutions.
+  `TechniqueReading` is its own class: product data, where a claim is the
+  user's private testimony about an attempt. That derivation is also what gives
+  the attribution classifier its candidates on a generated problem.
 - The discrimination bar is settled on the first corpus, then enforced before
   a problem lands. Cases that separate nothing license the word `verified` on a
   canonical that is wrong. Which check is the bar comes from a corpus rather
@@ -174,8 +179,10 @@ test cases at all.
 What a card needs once there are problems to fill it.
 
 - The ladder resolved at import, from the selector and the template matches, at
-  least one rung per studied template. A studied template with no match is a
-  reported gap, and the gap is what a generation run is aimed at.
+  least one rung per studied template. A match is a fact about a solution, so a
+  rung is filled by the problem that solution answers. A studied template no
+  solution displays is a reported gap, and the gap is what a generation run is
+  aimed at.
 - Studying a card is an explicit act: the ladder is measured from it, and
   probes are assigned at it.
 - A recall attempt is not an `Attempt`: no problem, no platform, no submission.
@@ -225,28 +232,49 @@ Sessions land here too. A sitting is several submissions, and counting each as
 an attempt over-weights the ones that took a retry. It is a derived view over
 the log, grouped on read, and never a field a client sets.
 
-## Phase 10 — Program-analysis-grounded diagnosis
+## Phase 10 — Alternative solutions
+
+Every other way to solve a stored problem, enumerated over the corpus rather
+than asked for by template. A call proposes the approaches, each becomes its
+own canonical, and the problem's own cases judge them. Exit: one rung covers a
+studied template and an optional one, through two canonicals of one problem.
+
+A template brief reaches only the forms someone authored, and templates are
+about half the vocabulary: a paradigm and a problem class have no form to
+reproduce. Enumeration is what reaches the rest, and what widens a problem's
+techniques past the one form its brief named.
+
+It also restores an independence generation gives up. A scale case beyond the
+reference's reach is taken from the canonical alone; a second efficient
+solution cross-checks it.
+
+What it costs is duplicates execution cannot separate — top-down and
+bottom-up dynamic programming pass the same cases — and a later canonical
+carrying less assurance than the first, since the case set was built to kill
+mutants of that one.
+
+## Phase 11 — Program-analysis-grounded diagnosis
 
 Ground the classifier in evidence: AST-diff against canonical solutions,
 execution-trace comparison, empirical complexity measurement. Needs the test
 cases and canonicals Phase 6 brings. Deliverable: measured accuracy delta
 against LLM-only diagnosis.
 
-## Phase 11 — Retrieval
+## Phase 12 — Retrieval
 
 Similar problems, patterns, and technique briefs retrieved from the corpus and
 the user's own attempts; weak-spot patterns surfaced.
 
-## Phase 12 — MCP + autonomy
+## Phase 13 — MCP + autonomy
 
 Corpus and tools exposed as an MCP server. A scheduled agent runs the practice
 loop: it picks drills and adapts to history.
 
-## Phase 13 — Multi-agent (conditional)
+## Phase 14 — Multi-agent (conditional)
 
 Only if a real pipeline earns it: diagnose → retrieve → brief → schedule.
 
-## Phase 14 — Soundness-checked synthesis
+## Phase 15 — Soundness-checked synthesis
 
 An upgrade to Phase 6's generation rather than its first appearance. Formal
 constraint specs, property-based test-case generation, adversarial validation.

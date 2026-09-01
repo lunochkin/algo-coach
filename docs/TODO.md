@@ -158,25 +158,18 @@ stored result means is settled in `corpus.md`, so neither moves a record.
       one act. A half-written problem is one the matcher would read as
       finished
 
-### Solutions beyond the first
+### What a match is keyed to
 
-A brief writes one canonical. Every other approach is found over the stored
-problem, by the flow in `flows.md`, "Enumerating a problem's other solutions".
+A form is displayed by code, so the subject of a verdict is a solution. The
+corpus carries one canonical per problem until enumeration lands, which is
+Phase 10.
 
 - [x] Re-key `TemplateMatch` from a problem to a solution. A form is displayed
       by code, so a verdict naming only a problem names no subject. The store
       holds no match, so this is a rename rather than a migration
-- [ ] Write the enumeration call: a landed problem in, the approaches that
-      solve it out, each a name and a one-line idea. No code in that reply, so
-      one bad proposal costs one call rather than the batch
-- [ ] Generate a canonical per approach, one call each, and store the ones the
-      problem's cases keep. A failure discards nothing, since the cases judge a
-      solution rather than the statement
-- [ ] Assert a `generator` match on the canonical the problem was generated
+- [x] Assert a `generator` match on the canonical the problem was generated
       with, and on no other. It is the only one a brief named a form for, so
       every template the rest display is the matcher's answer
-- [ ] Add `algo-coach enumerate`, a problem in and canonicals out, through the
-      transport the other commands share
 
 ### What the corpus derives
 
@@ -335,9 +328,54 @@ The first attempts the engine produces itself.
 ### Exit
 - [ ] Daily practice runs here, on problems the engine wrote and judged
 
+## Phase 9 — mastery, scheduling, failure mode
+- [ ] Land rust against gap with the mastery model, or drop it. Only whether
+      the technique was ever fluent separates them, and a single attempt does
+      not carry that
+- [ ] Settle what `SPEED` means before anything writes it. "Solved but too
+      slowly" is about the user, a timeout is about the solution's complexity,
+      and only the second is in the record
+- [ ] Narrow the failure classifier to what the record supports: a mechanical
+      slip against a conceptual miss. A four-way router would ask it for what
+      it cannot see
+- [ ] Write the verdict as a `Diagnosis` with model and prompt version. It
+      never supersedes a self-label, because the eval scores one against the
+      other
+- [ ] Score the diagnoser per mode rather than overall, against self-labels the
+      loop produced. A router that only ever says `gap` would score well on a
+      corpus of gaps
+
+## Phase 10 — alternative solutions
+
+Every other way to solve a stored problem, by the flow in `flows.md`,
+"Enumerating a problem's other solutions". The schema and the match's subject
+are in place already; nothing before this phase writes a second canonical.
+
+What it buys is a rung covering two forms at once, a scale case cross-checked
+between two efficient solutions, and a problem's techniques widening past the
+one form its brief named.
+
+- [ ] Write the enumeration call: a landed problem in, the approaches that
+      solve it out, each a name and a one-line idea. No code in that reply, so
+      one bad proposal costs one call rather than the batch
+- [ ] Generate a canonical per approach, one call each, and store the ones the
+      problem's cases keep. A failure discards nothing, since the cases judge a
+      solution rather than the statement
+- [ ] Add `algo-coach enumerate`, a problem in and canonicals out, through the
+      transport the other commands share
+- [ ] Decide what two canonicals of one form cost, once a corpus shows how
+      often enumeration proposes them. Execution cannot separate them: top-down
+      and bottom-up dynamic programming pass the same cases
+- [ ] Re-run the mutation loop over a canonical enumeration added, or record
+      that a later canonical carries less assurance. The case set was built to
+      kill mutants of the first
+
 ## Deferred
 
-Known gaps with a trigger, not a date. Each names what has to happen first.
+An unstructured backlog, outside the phase order and last because nothing
+sequences it. Known gaps with a trigger rather than a date: each names what has
+to happen before the item is worth doing, and it is picked up when that fires,
+whatever phase is current.
 
 - [ ] Re-annotate thirty attempts with the earlier readings hidden, for the
       annotator's own ceiling. Triggered when mastery estimation reads claims,
@@ -357,9 +395,9 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
       when a technique with no card needs problems
 - [ ] Choose what a classifier reading of a solution stores — a verdict per
       candidate template, or one record naming the templates it found — and
-      write the choice into `content.md`. A card scoped the candidates only
-      while the subject was a problem. Triggered when the matcher is re-pointed
-      at solutions
+      write the choice into `content.md`. Scoping through the problem's
+      techniques bounds the pairs today. Triggered when a canonical displays a
+      form outside them, which enumeration is what produces
 - [ ] Settle how a case forcing a timeout carries its input, and add the field
       it needs. Literal arguments put a megabyte of JSON in the store per case,
       where a seed and a size do not. Triggered when the first performance case
@@ -385,22 +423,3 @@ Known gaps with a trigger, not a date. Each names what has to happen first.
 - [ ] Fall back to another endpoint of the same shape on an outage, never to
       Anthropic direct, whose compatibility layer ignores `response_format`,
       `strict` and `reasoning_effort`. Triggered when an outage blocks a run
-
-## Later phases
-
-### Phase 9 — mastery, scheduling, failure mode
-- [ ] Land rust against gap with the mastery model, or drop it. Only whether
-      the technique was ever fluent separates them, and a single attempt does
-      not carry that
-- [ ] Settle what `SPEED` means before anything writes it. "Solved but too
-      slowly" is about the user, a timeout is about the solution's complexity,
-      and only the second is in the record
-- [ ] Narrow the failure classifier to what the record supports: a mechanical
-      slip against a conceptual miss. A four-way router would ask it for what
-      it cannot see
-- [ ] Write the verdict as a `Diagnosis` with model and prompt version. It
-      never supersedes a self-label, because the eval scores one against the
-      other
-- [ ] Score the diagnoser per mode rather than overall, against self-labels the
-      loop produced. A router that only ever says `gap` would score well on a
-      corpus of gaps
