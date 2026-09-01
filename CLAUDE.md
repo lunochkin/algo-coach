@@ -35,6 +35,9 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 - A closed phase is harvested into `docs/ROADMAP.md`, then removed whole. What
   survives is what it measured, since nothing re-derives it. How the work was
   sequenced is in the commits.
+- A roadmap section is compact: what ships as a short bullet list, what the
+  phase exits on, and for a closed one what it measured. No argument for why,
+  and no detail a reader can get from `docs/architecture/` or the commits.
 
 ## Sequencing
 

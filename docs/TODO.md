@@ -5,6 +5,9 @@ phase closes it is harvested into `docs/ROADMAP.md` and removed whole.
 
 ## Phase 6 — problem generation (current)
 
+Re-cut 2026-09-02: what makes a problem **sound** stays here; what a corpus is
+worth measured against another one moved to Phase 7.
+
 The engine writes problems: a statement, the test cases that decide it, a
 canonical solution and a reference solution. Flow and its rules:
 `docs/architecture/flows.md`, "Generating a problem".
@@ -162,7 +165,7 @@ stored result means is settled in `corpus.md`, so neither moves a record.
 
 A form is displayed by code, so the subject of a verdict is a solution. The
 corpus carries one canonical per problem until enumeration lands, which is
-Phase 10.
+Phase 12.
 
 - [x] Re-key `TemplateMatch` from a problem to a solution. A form is displayed
       by code, so a verdict naming only a problem names no subject. The store
@@ -222,6 +225,16 @@ canonical. What the first corpus settles is the operators and the bound.
       under the cap, and store the case at it. Only where the template claims a
       speedup
 
+### Exit
+- [ ] Every landed problem carries techniques derived from its canonicals and
+      a case set measured against the mutation bound, and the gap report names
+      the templates the next run is aimed at
+
+## Phase 7 — the corpus, measured
+
+What a generated corpus is worth, measured rather than asserted. Split from
+Phase 6 on 2026-09-02: every item here needs a corpus to exist first.
+
 ### Annotating the generated corpus
 
 The hand pass does two jobs at once. It writes the matcher's reference, and it
@@ -278,10 +291,76 @@ largely cancels in the comparison.
       domains renames a retrieval instead of preventing it
 
 ### Exit
-- [ ] A card's reported gaps are filled by generated problems, and Phase 7
-      resolves a ladder over them
+- [ ] The matcher carries a per-template score in both directions, the floor
+      is measured across both corpora, and every created problem has been
+      promoted or retired
 
-## Phase 7 — ladder, recall and card runs
+## Phase 8 — the engine serves
+
+The first attempts the engine produces itself, through the interface they are
+produced in. The interface is part of the phase rather than a later skin: a
+practice loop is used or it is not, and a command line is not where a sitting
+happens.
+
+- [ ] Serve active problems, and created ones while the floor has not run.
+      Reading only active would serve nothing until the gate exists
+- [ ] Serve a generated problem, time the sitting, run the submission against
+      the problem's own cases, and mint the attempt
+- [ ] Store the verification result on `Attempt`. Additive, and meaningless
+      before Phase 6
+- [ ] Feed the claim classifier its candidates from the problem's derived
+      techniques. Nothing else supplies them now the tag mapping is gone
+- [ ] Offer marking a problem defective in place of the self-label. A statement
+      that asked the wrong thing would otherwise be recorded as the user's own
+      gap
+- [ ] Exclude a defective problem's attempts from the board, both directions.
+      Dropping only the failures would raise a technique's solve rate because
+      a problem was broken
+- [ ] Ask for a claim and a self-label as Phase 2 asked them. What changes is
+      who witnessed the sitting, not who writes
+
+- [ ] Serve the statement, take a submission and show the per-case verdict in
+      one view. A sitting is one screen or it is a workflow, and a workflow is
+      not practised daily
+- [ ] Time the sitting in the interface rather than asking for a number. What
+      the loop witnessed is the only timing it may record
+- [ ] Show the board and the day's due work as the entry point, so the loop
+      starts from what to practise rather than from a problem id
+
+### Exit
+- [ ] Daily practice runs here, in the app, on problems the engine wrote and
+      judged
+
+## Phase 9 — the engine hosted
+
+The same loop, for people who are not the author. What changes is entirely
+what may be trusted: the local backend is a subprocess per case because our
+own generated code on our own machine is not a threat model, and another
+person's is.
+
+- [ ] Add a sandboxed backend behind `runner.run`. Same signature, same child
+      protocol, JSON in and JSON out — a second backend rather than a second
+      runner, which is what that boundary was written for
+- [ ] Keep the comparison against `expected` above the boundary, as it already
+      is. A sandbox is never told what a case expects
+- [ ] Cap wall clock, memory and output per run, and give the sandbox no
+      network. A submission that spawns or dials is a submission that failed
+- [ ] Key `AttemptLog` by user. It is the only store that changes: problems,
+      cases, solutions, matches and cards are shared product data
+- [ ] Make one user's log readable and deletable without touching another's.
+      The author's own log is the dogfooding evidence and the measurement
+      substrate, and must not mix with a user's
+- [ ] Buy the account system rather than building one. No credential handling
+      of our own
+- [ ] Gate access on an invitation. Untrusted execution behind open
+      registration is an abuse surface with no upside at this size
+- [ ] Deploy it, and write down what the deployment holds and for how long.
+      Hosting someone's attempts is a promise about them
+
+### Exit
+- [ ] Someone other than the author completes a sitting
+
+## Phase 10 — ladder, recall and card runs
 
 - [ ] Resolve the ladder from the matches, the selector filling out to `size`.
       A retired problem fills no rung
@@ -306,31 +385,7 @@ largely cancels in the comparison.
 ### Exit
 - [ ] Recall and the ladder run daily
 
-## Phase 8 — in-engine drill loop
-
-The first attempts the engine produces itself.
-
-- [ ] Serve active problems, and created ones while the floor has not run.
-      Reading only active would serve nothing until the gate exists
-- [ ] Serve a generated problem, time the sitting, run the submission against
-      the problem's own cases, and mint the attempt
-- [ ] Store the verification result on `Attempt`. Additive, and meaningless
-      before Phase 6
-- [ ] Feed the claim classifier its candidates from the problem's derived
-      techniques. Nothing else supplies them now the tag mapping is gone
-- [ ] Offer marking a problem defective in place of the self-label. A statement
-      that asked the wrong thing would otherwise be recorded as the user's own
-      gap
-- [ ] Exclude a defective problem's attempts from the board, both directions.
-      Dropping only the failures would raise a technique's solve rate because
-      a problem was broken
-- [ ] Ask for a claim and a self-label as Phase 2 asked them. What changes is
-      who witnessed the sitting, not who writes
-
-### Exit
-- [ ] Daily practice runs here, on problems the engine wrote and judged
-
-## Phase 9 — mastery, scheduling, failure mode
+## Phase 11 — mastery, scheduling, failure mode
 - [ ] Land rust against gap with the mastery model, or drop it. Only whether
       the technique was ever fluent separates them, and a single attempt does
       not carry that
@@ -347,7 +402,7 @@ The first attempts the engine produces itself.
       loop produced. A router that only ever says `gap` would score well on a
       corpus of gaps
 
-## Phase 10 — alternative solutions
+## Phase 12 — alternative solutions
 
 Every other way to solve a stored problem, by the flow in `flows.md`,
 "Enumerating a problem's other solutions". The schema and the match's subject
