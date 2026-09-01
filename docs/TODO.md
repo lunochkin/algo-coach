@@ -179,10 +179,12 @@ canonicals, and the gaps come from the template matches. The first generation
 run is aimed by hand at the studied templates, since an empty corpus reports no
 gap. Every later run is aimed at the templates the gap report lists.
 
-- [ ] Add `TechniqueReading`, keyed to a solution: the codes it used, its
+- [x] Add `TechniqueReading`, keyed to a solution: the codes it used, its
       provenance, and staleness by digest, as a classifier claim carries. Its
       own class, since a claim is the user's private testimony where this is
       product data. The derivation has no input until one exists
+- [ ] Add an append-only store for readings, as the matches have. A record
+      with nowhere to land leaves the reading run with nothing to append to
 - [ ] Read a canonical and an attempt through one classifier, writing the two
       records apart. Two prompts asking one question would drift, and neither
       score would compare

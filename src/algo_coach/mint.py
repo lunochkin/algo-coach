@@ -21,10 +21,12 @@ from algo_coach.schema import (
     MatchSource,
     Problem,
     ProblemDifficulty,
+    ReadingSource,
     SelfLabel,
     Solution,
     SolutionRole,
     TechniqueClaim,
+    TechniqueReading,
     TemplateMatch,
     TestCase,
     Verification,
@@ -152,6 +154,75 @@ def classifier_claim(
         attempt_id=attempt_id,
         techniques=techniques,
         source=ClaimSource.CLASSIFIER,
+        model=model,
+        effort=effort,
+        prompt_hash=prompt_hash,
+        call_id=call_id,
+        pin=pin,
+        temperature=temperature,
+        provider=provider,
+        cost=cost,
+    )
+
+
+def user_reading(
+    solution_id: str,
+    techniques: list[str],
+    *,
+    informed_by: Sequence[str] = (),
+) -> TechniqueReading:
+    """One solution read by hand, which is what a machine reading is scored
+    against.
+
+    It carries no configuration because nothing re-derives it, and it stands
+    over any machine reading however late that one was written.
+
+    An adjudication rather than testimony: nobody sat for a canonical, so what
+    the user writes here is a verdict on code they did not produce. Blind
+    unless the caller says otherwise, as a user claim is.
+    """
+    return TechniqueReading(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        solution_id=solution_id,
+        techniques=techniques,
+        source=ReadingSource.USER,
+        informed_by=list(informed_by),
+    )
+
+
+def machine_reading(
+    solution_id: str,
+    techniques: list[str],
+    *,
+    model: str,
+    effort: str,
+    prompt_hash: str,
+    call_id: str,
+    pin: str,
+    temperature: float | None = None,
+    provider: str | None = None,
+    cost: float | None = None,
+) -> TechniqueReading:
+    """One solution read by a model, and the configuration that read it.
+
+    All of the configuration, never a subset: a reading whose configuration is
+    partly unknown compares with nothing. The digest is what makes it stale, so
+    editing one criterion re-reads the solutions that criterion reached.
+
+    Membership is checked here as it is on a classifier claim: this is a write
+    path that could introduce an unrecognised code. Rejected whole rather than
+    per code, since a reading asserts one set.
+    """
+    unknown = [code for code in techniques if not is_known(code)]
+    if unknown:
+        raise ValueError(f"unknown technique code(s): {', '.join(unknown)}")
+    return TechniqueReading(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        solution_id=solution_id,
+        techniques=techniques,
+        source=ReadingSource.CLASSIFIER,
         model=model,
         effort=effort,
         prompt_hash=prompt_hash,

@@ -29,7 +29,7 @@ from algo_coach.matches import Question, candidates
 from algo_coach.schema import Template, TemplateMatch
 
 
-def reading(question: Question) -> str:
+def evidence(question: Question) -> str:
     """What the left pane holds: the statement, then the solution the verdict
     is about.
 
@@ -43,6 +43,7 @@ def reading(question: Question) -> str:
             f"```python\n{question.solution.code.rstrip()}\n```",
         ]
     )
+
 
 # Answering one question: the pairs it settles, positive and negative.
 Answered = Callable[[Question, set[str]], None]
@@ -143,7 +144,7 @@ class Annotating(App[None]):
         # examples are fenced blocks and the constraints a list. Read as plain text they
         # are the part of the statement that decides the question, printed as
         # backticks and asterisks. The solution is fenced for the same reason.
-        self.query_one("#statement-body", Markdown).update(reading(question))
+        self.query_one("#statement-body", Markdown).update(evidence(question))
         self.query_one("#forms", Static).update(self.listing())
         self.show_code()
         self.query_one("#statement", VerticalScroll).scroll_home(animate=False)

@@ -24,6 +24,7 @@ from algo_coach.schema.problem import (
     RetirementReason,
 )
 from algo_coach.schema.provenance import MachineProvenance
+from algo_coach.schema.reading import ReadingSource, TechniqueReading
 from algo_coach.schema.record import AttemptRecord
 from algo_coach.schema.seed import CardSeed, TemplateSeed
 from algo_coach.schema.solution import Solution, SolutionRole
@@ -51,11 +52,13 @@ __all__ = [
     "ProblemStatus",
     "RetirementReason",
     "Selector",
+    "ReadingSource",
     "SelfLabel",
     "Solution",
     "SolutionRole",
     "Technique",
     "TechniqueClaim",
+    "TechniqueReading",
     "Template",
     "TemplateKind",
     "TemplateMatch",
