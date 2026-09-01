@@ -160,8 +160,11 @@ stored result means is settled in `corpus.md`, so neither moves a record.
 
 ### What the corpus derives
 
-Folds over what generation and the runner stored. The first run is aimed by
-hand at the studied templates. Every later one is aimed by the report.
+Views over what generation and the runner stored, derived on read rather than
+written down. A problem's techniques come from its canonical solutions, and the
+gaps come from the template matches. The first generation run is aimed by hand
+at the studied templates, since an empty corpus reports no gap. Every later run
+is aimed at the templates the gap report lists.
 
 - [ ] Derive a problem's techniques from its canonical solutions, excluding
       the reference. A view, so adding a canonical can widen them, and counting
