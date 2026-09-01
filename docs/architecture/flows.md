@@ -8,7 +8,8 @@ flow says in what order, and what each step may not do.
 A problem, its test cases and its solutions are written across three calls.
 The order matters because each step can reject what came before.
 
-1. A card's template, and the brief: write a problem this form solves.
+1. The brief: a template, naming the form the problem must be solvable by, or
+   a technique, naming only the skill.
 2. The statement, the canonical solution and the first test cases, from one
    call.
 3. The canonical runs, and its outputs are checked against the expected
@@ -21,11 +22,8 @@ The order matters because each step can reject what came before.
 7. Where the template claims a speedup, the smallest input separating the
    reference from the canonical under the cap is searched for, and the case at
    that size is stored.
-8. All of it lands together, with the template match the generation asserts.
-9. The matcher reads the problem later, for the templates it was not written
-   for.
-10. A canonical for one of those templates is generated from the statement,
-    and the cases the problem already carries judge it.
+8. All of it lands together, with the template match the generation asserts on
+   its canonical.
 
 - **Nothing lands half-verified.** A problem failing any step is discarded
   whole rather than stored for repair. Every call is recorded, so what was paid
@@ -59,7 +57,9 @@ The order matters because each step can reject what came before.
   limit at size. It cannot catch a canonical correct small and wrong large.
 - **Where an alternative canonical exists, it restores that independence.** It
   is a second efficient solution from a different form, so a scale case can be
-  cross-checked between two of them rather than taken from one.
+  cross-checked between two of them rather than taken from one. Enumeration is
+  what produces one, so the cross-check is available on a later pass rather
+  than at landing.
 - **Whether the cases are enough is decided by execution, never by a model.** A
   model asked whether its own cases suffice says yes. A surviving mutant is a
   case that has to exist, and it names the mistake that case must catch.
@@ -94,14 +94,8 @@ The order matters because each step can reject what came before.
   records on one pair, and a disagreement is how a generator drifting from its
   brief is found.
 - **A canonical that passes demonstrates a match**, where the matcher infers
-  one. So step 10 writes a `generator` record: it is a generation call
-  asserting a pair, and it carries the same provenance as the first. Failing to
-  write the problem in that form is not a negative on the pair, since nothing
-  was shown about the problem.
-- **A canonical for another template is not a reference.** It is asked for by
-  name and sees the form it must display, so it is not an independent reading.
-  It cannot discard a problem, and its failure says nothing about the
-  statement. The cases judge it, and it substitutes for no step above.
+  one. The assertion is stored only for a canonical the cases kept: one that
+  failed showed nothing about the form.
 - **Failing means two things, at two points.** The first canonical is run
   before any expected value is settled, so it fails only by yielding no value
   on some case, and the problem is discarded. A later canonical is judged by
@@ -113,6 +107,44 @@ The order matters because each step can reject what came before.
   statement alone was telegraphed, and such a problem teaches recognition of
   nothing. The archived corpus sets that floor and the generated one is read
   against it.
+
+## Enumerating a problem's other solutions
+
+A landed problem carries one canonical, written for what its brief named. Every
+other way to solve it is found afterwards, over the stored problem.
+
+1. The statement, the cases it carries and the canonical it already has.
+2. A call proposes the approaches that solve it, each as a name and a one-line
+   idea.
+3. A canonical is generated per approach, one call each.
+4. Each runs against the cases the problem already carries, and one that fails
+   is not stored.
+5. Each stored canonical is read for its techniques and for the templates it
+   displays.
+
+- **It runs over the corpus, never in the landing path.** Enumeration cannot
+  gate a problem, since a proposal nobody could write says nothing about the
+  statement. In the landing path it would discard problems for reasons
+  unrelated to their own correctness.
+- **The list needs no gate, because execution is the gate.** Its length tracks
+  the model's verbosity rather than the problem. A proposal that is wrong costs
+  one call and lands nothing.
+- **One call per approach, never one reply carrying all of them.** A single bad
+  entry would otherwise fail the whole batch, where each canonical is judged on
+  its own.
+- **It replaces asking a matcher which templates the problem could use.** That
+  question reaches only forms someone authored a template for. Enumeration
+  reaches the techniques no card covers, which is most of the vocabulary.
+- **It sees the first canonical.** Independence is the reference's purpose
+  rather than this call's. The point is to propose approaches that differ from
+  what is stored, and that needs the stored one in view.
+- **A canonical it produced is not a reference.** It saw the statement, the
+  cases and another solution, so it is no independent reading. It cannot
+  discard a problem, and its failure says nothing about the statement.
+- **Duplicates are what execution cannot catch.** Top-down and bottom-up
+  dynamic programming pass the same cases, and only a reading separates them.
+  What to do with two canonicals of one form is deferred until a corpus shows
+  how often it happens.
 
 ## Drill loop
 

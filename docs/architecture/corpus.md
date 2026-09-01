@@ -28,19 +28,23 @@ solutions written for it. Part of the architecture; `README.md` is the map.
   told a skill rather than a solution.
 - **Provenance is required.** A problem names what produced it, as any machine
   record does.
-- **A problem's techniques are derived from its canonical solutions**, and are
-  a view rather than stored truth: adding a canonical can widen them, and
-  re-deriving is legal and expected. The reference is excluded, or the naive
-  approach a form replaces would be credited as one the problem takes. The
-  card's technique names only what the problem was written for. A canonical
-  that sorts before it searches used two techniques, and only the derivation
-  names the second.
+- **A problem's techniques are derived from readings of its canonical
+  solutions**, and are a view rather than stored truth: adding a canonical can
+  widen them, and re-deriving is legal and expected. The reference is excluded,
+  or the naive approach a form replaces would be credited as one the problem
+  takes. A canonical that sorts before it searches used two techniques, and
+  only a reading names the second.
+- **Never derived from templates.** A template is defined by whether it can be
+  reproduced from memory, not by what it classifies. A paradigm and a problem
+  class have no form to type out, so templates reach about half the vocabulary,
+  and a technique set folded from them would be capped by which cards happen to
+  exist. Templates are the recall layer, techniques the classification one.
 - **Which is why the fallback answers the right question.** They name what
   solving the problem can take, over every canonical it carries, where a claim
   names what one attempt did.
-- **The statement is stored, because the matcher reads it.** Which template a
-  problem exercises is a question about what it asks. Its techniques answer
-  only what it is about. Required and non-blank.
+- **The statement is stored, because it is what a solver is served.** The
+  announcement floor reads it, and a matcher reads it beside the canonical it
+  classifies. Required and non-blank.
 - **A problem is created, cleared, then served.** `created` is written and
   verified, which is not the same as fit to serve. The announcement floor is
   what clears it: whether a statement telegraphs its form is a question about
@@ -160,13 +164,24 @@ no user and no sitting.
   both. A user's solved attempt is verified and idiosyncratic. A generated
   solution is exemplary and asserted. Only one that passes the problem's test
   cases is both.
-- **It is what a template match reads.** Which form a problem exercises is a
-  question about the solution, and a statement only implies one. The matcher
-  reads the canonical beside the statement.
+- **It is what a template match is keyed to.** A form is displayed by code, so
+  which form is a question about the solution and a statement only implies one.
+  The matcher reads the canonical beside the statement, and the verdict is
+  about the canonical.
 - **Several per problem, and the set is the assertion.** Two approaches to one
   problem is the ordinary case, and it is what lets one rung cover a studied
   template and an optional one. A problem carrying one canonical can teach one
   form.
+- **A template is where a problem comes from, never where its later solutions
+  come from.** The rest are enumerated: a call over a landed problem proposes
+  the approaches that solve it, and each proposal is generated as its own
+  canonical. Asking for one by template would reach only forms someone
+  authored, where enumeration reaches the techniques no card covers.
+- **A later canonical carries less assurance than the first.** The case set was
+  built to kill mutants of the first canonical, so a second approach passing
+  those cases was never tested on its own failure modes. It is stored and it
+  teaches, and re-running the mutation loop over it is what would close the
+  gap.
 - **Never counted as an attempt.** It answers no board row and earns no
   progress. A user who reads one has not solved the problem.
 - **Sampled, not greedy — the exception Machine records names.** Generation
@@ -176,6 +191,34 @@ no user and no sitting.
   never reproducible, which is also why nothing re-derives it.
 - **Immutable once written.** Whether it passes is a fact about a run, so
   nothing about how it ran is stored here.
+
+## Technique readings
+
+Which techniques a solution used. Product-owned and global, as the solution is.
+
+- **Its own record, not a technique claim.** The question is the same and
+  everything else differs. A claim is testimony about the user's own attempt
+  and is private; a reading is a verdict about code the engine wrote, and it
+  ships with the corpus.
+- **The candidates are the whole vocabulary**, where an attempt is classified
+  against the problem's own techniques. Those techniques are derived from these
+  readings, so constraining a reading by them is circular.
+- **Which is also why one record could not serve both.** A reading is what the
+  fallback is derived from, and the fallback is what an unclaimed attempt
+  resolves to. One record type would make the fallback a fold over records of
+  the type it falls back for.
+- **One reader, two records.** The prompt, the transport and the staleness rule
+  are shared with the attempt classifier. Two prompts asking one question would
+  drift, and neither score would compare.
+- **A machine record like any other**: provenance whole, staleness keyed on the
+  digest of what was sent, and re-derivable at any time. A criteria edit
+  re-reads what that entry reached and leaves the rest.
+- **Two writers, user first**, as a claim resolves. A hand record here
+  adjudicates rather than testifies: nobody sat for a canonical, so what the
+  user writes is a reading of code they did not produce. It stands all the
+  same, and it is the reference a configuration is scored against.
+- **It is what a problem's techniques are folded from.** The union over the
+  standing readings of its canonicals, with the reference excluded.
 
 ## Verification runs
 

@@ -71,19 +71,20 @@ user can solve, per technique, and the two share no data.
   a selector ships anywhere.
 - **The ladder covers every studied template.** Its rungs come from the
   template matches, at least one per template, and the selector fills the rest
-  out to `size`. Drawn from the selector alone it would exercise the technique
-  and leave some forms untouched, since a technique says what a problem is
-  about rather than which form solves it.
+  out to `size`. A match is a fact about a solution, so a rung is filled by the
+  problem that solution answers. Drawn from the selector alone the ladder would
+  exercise the technique and leave some forms untouched, since a technique says
+  what a problem is about rather than which form solves it.
 - **Requiredness is derived from what a rung covers**, never stored. A rung
   covering a studied template is required. A rung covering only the optional
   template is optional. A rung covering both is required, and the optional
   template is offered on it as the alternative approach. That last case is why
   a problem matching several templates is wanted rather than a nuisance.
-- **A studied template with no match is a reported gap**, not a quietly shorter
-  ladder, and the gap is the input to the next generation run: a form the
-  corpus cannot exercise names its own remedy. It creates the work and never
-  does it — a ladder that filled itself would be one nobody inspected, and the
-  corpus is the product.
+- **A studied template no solution displays is a reported gap**, not a quietly
+  shorter ladder, and the gap is the input to the next generation run. A form
+  the corpus cannot exercise is what names the work, and the ladder never does
+  that work itself: one that filled itself would be one nobody inspected, and
+  the corpus is the product.
 - **The recognition cue is its own field**, apart from the prose it could sit
   in, because a probe asks exactly that question: is the form recognised
   unprompted. So it is shown and withheld on its own, where the rest of what to
@@ -114,36 +115,42 @@ user can solve, per technique, and the two share no data.
 
 ## Template matches
 
-Which problems exercise which of a card's templates. The ladder's coverage is
-computed from these records. They are the engine's own work: an author names no
-problem, so nothing is authored here either.
+Which solutions display which of a card's templates. A form is displayed by
+code, so the subject is a solution rather than a problem. A problem reaches a
+template through its canonicals, and the ladder's coverage is computed from
+that. They are the engine's own work: an author names no solution, so nothing
+is authored here either.
 
-- **A generated problem asserts its own first match.** It was written for one
-  template, so that pair is provenance rather than a reading, and the record
-  names `generator` as its source. Nothing pays a call to learn what the
-  generator was told to write.
+- **The canonical a problem was generated with asserts its own match.** Its
+  brief said which template, so the pair is provenance rather than a reading,
+  and the record names `generator` as its source. Nothing pays a call to learn
+  what the generator was told to write.
+- **No other canonical asserts anything.** A template is where a problem comes
+  from, never where its later solutions come from: the rest are enumerated from
+  the problem itself, and nobody named a form for them. So every template they
+  display is the matcher's answer, and one assertion per problem is the most
+  there can be.
 - **A generator's assertion carries no configuration**, as a hand annotation
   carries none. The all-or-none rule is about readings, which are re-derivable
   and so must say by what. Nothing re-derives this pair short of writing the
-  problem again, and the problem already names the call that wrote both.
+  solution again, and the solution already names the call that wrote it.
 - **It is only ever positive.** The generator asserts the form it was briefed
-  on. What else the problem exercises is the matcher's question, and a
+  on. What else the solution displays is the matcher's question, and a
   generator saying nothing about a template is not a negative on it.
-- **A canonical that passes demonstrates a pair**, and writes a `generator`
-  record on it. Asking for the problem in a second form is a generation call
-  like the first, and the canonical it produced is the evidence. A model that
-  could not write that form has shown nothing about the problem, so a failure
-  is not a negative either.
+- **The assertion is stored only for a canonical that passed.** A solution that
+  failed the cases demonstrates nothing about the form, so a failure is not a
+  negative either.
 - **A demonstration is free ground truth on a pair a matcher read.** It
   confirms a positive, and on a pair the matcher scored negative it is a caught
   false negative. It replaces no hand pass: the pairs it reaches are the ones a
   ladder wanted, which is a sample nobody drew at random.
 - **The same fact sits on the problem and in a match.** `generated_for` names
-  the template, and the match is what lets the ladder read one kind of record
-  instead of special-casing the problem. They cannot drift, because generation
-  writes both in one act.
+  the template the problem's brief asked for, and the first canonical's match
+  names the same one. They cannot drift, because generation writes both in one
+  act. A problem written from a technique brief names none, and its canonicals
+  still carry their own matches.
 - **The matcher answers what generation cannot assert**: which templates a
-  problem exercises besides the one it was written for, and whether the
+  solution displays besides the one it was written for, and whether the
   generator's own claim holds. The first is why a rung can cover a studied
   template and an optional one at once, the second the only check on a
   generator drifting from its brief.
@@ -151,37 +158,33 @@ problem, so nothing is authored here either.
   stands over both machine sources. A generator's assertion stands over a
   matcher's reading of the same pair, because the generator knew and the
   matcher inferred.
-- **One record per template and problem, carrying a verdict.** Not a set per
-  template: problems arrive one at a time, and a set record would rewrite pairs
-  already settled every time the corpus grew. A claim asserts a whole set
-  because the set is the assertion; a match asserts one pair, and pairs are
-  independent. A problem matching several templates is the ordinary case.
-- **A negative is stored.** Otherwise every re-run re-tests every non-match
-  forever. What still needs testing is the pairs carrying no record at the
-  current configuration, which is the rule `score` already uses for readings.
-- **Written after card import, never before.** Both references are minted: the
-  template at import, the problem at generation. So a match cannot be authored
-  against a seed file.
-- **A call is per problem and card, a record is per pair.** The candidates are
-  that card's templates, and the answer is the subset the problem exercises,
-  which is the classifier's shape. The records come from one answer.
-- **Not every pair is asked about.** A problem is offered only to cards whose
-  technique it carries, or the work is every template against every problem for
-  an answer that is almost always no. Procedure templates are excluded
-  outright: a framing procedure is exercised by every problem its technique
-  reaches, so a per-problem verdict carries no information.
-- **A card's relation to a problem is a fold over its templates**, never a
-  record of its own. A rung is earned when the technique reaches the problem
-  and some template matches. Nothing asserts in one place that a problem
-  belongs to a card, so nothing is rewritten when one verdict changes.
+- **An assertion and an annotation are one record per template and solution.**
+  Each answers one pair, and pairs are independent: solutions arrive one at a
+  time, and a set record would rewrite pairs already settled every time the
+  corpus grew.
+- **What a classifier reading stores is deferred**, and only that. Per-pair
+  verdicts need a bounded candidate set, and a card scoped them only while the
+  subject was a problem offered to one card. A solution belongs to no card. What
+  the record must give either way is staleness by configuration: a re-run reads
+  what has not been read at the current digest, and nothing else.
+- **Written after the solution lands, never before.** Both references are
+  minted: the template at card import, the solution when the problem lands. So
+  a match cannot be authored against a seed file.
+- **Procedure templates are excluded.** A framing procedure is displayed by
+  every solution its technique reaches, so a per-solution verdict carries no
+  information.
+- **A card's relation to a problem is a fold over its canonicals**, never a
+  record of its own. A rung is earned when some canonical of the problem
+  displays some template of the card. Nothing asserts in one place that a
+  problem belongs to a card, so nothing is rewritten when one verdict changes.
 - **Re-derivation is the normal path, not an exception.** A technique claim
-  asks about one attempt, and the question never changes. A match is a template
-  against a corpus that grows with every generation run.
+  asks about one attempt, and the question never changes. A match asks about a
+  template against a corpus of solutions that grows with every enumeration run.
 - **A hand record settles what stands, not what has been read.** The run path
-  skips a pair only where the hand pass settled every template of that card.
-  The call asks about the card whole, and a partly annotated card is a question
-  still worth asking. The eval reads annotated pairs on purpose, because that
-  reading is the measurement.
+  skips a solution only where the hand pass settled every pair the call would
+  have asked about, which is why what a skip needs follows the deferred shape.
+  The eval reads annotated pairs on purpose, because that reading is the
+  measurement.
 - **Agreement is per pair, grouped per template.** A call carrying six pairs
   saves requests; it is not a unit of truth. Grouping follows the ladder: a
   form the matcher over-matches fills its rung with problems that do not teach
@@ -195,18 +198,18 @@ problem, so nothing is authored here either.
   not.
 - **An empty answer is negatives, not a decline.** A claim naming nothing
   answers nothing, and the problem's own techniques keep standing. A call
-  naming no template asserts that each of them does not match, which is a
-  verdict on every pair and is scored as one. The record shape decides this,
-  not the model's behaviour.
+  naming no template asserts that each candidate it was given does not match.
+  What that becomes on disk follows the deferred shape, and either way it is a
+  reading rather than a refusal to read. The record shape decides this, not the
+  model's behaviour.
 - **An annotation records the verdicts its author saw**, as a claim does.
   `informed_by` names them one by one, so a record made after seeing one
   matcher is still independent of another. It is written on every pair the
   answer settles, negatives included, because what the reader saw is a fact
   about the sitting rather than about the verdict.
 - **The first hand pass calibrates, a blind one measures.** Annotating is where
-  the line gets drawn between exercising a form and merely admitting it. A
+  the line gets drawn between displaying a form and merely admitting it. A
   score taken over the pairs that drew that line measures agreement with
   itself. The eval set is annotated from the templates alone, and
   configurations are compared over the pairs both read — the claims rule,
   unchanged.
-
