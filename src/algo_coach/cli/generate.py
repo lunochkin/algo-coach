@@ -141,7 +141,19 @@ def verdict(progress: Progress) -> str:
     if progress.outcome is None:
         return f"{cases}  not run"
     landed = "landed" if progress.landed else "not stored"
-    return f"{cases}  {progress.outcome}  {landed}{timing(progress)}"
+    return f"{cases}  {progress.outcome}  {landed}{bar(progress)}{timing(progress)}"
+
+
+def bar(progress: Progress) -> str:
+    """What the mutation loop left: the mutants the set caught, and the cases
+    the rounds added. Silent where the canonical yielded no mutant."""
+    if progress.unmeasured is not None:
+        return f"  unmeasured: {progress.unmeasured}"
+    if not progress.mutants:
+        return ""
+    killed = progress.mutants - progress.survived
+    won = f", +{progress.won} case(s)" if progress.won else ""
+    return f"  kills {killed}/{progress.mutants}{won}"
 
 
 def timing(progress: Progress) -> str:

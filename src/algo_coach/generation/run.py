@@ -19,6 +19,7 @@ from algo_coach.generation.generator import (
     generate,
     written_for,
 )
+from algo_coach.generation.hardening import harden
 from algo_coach.generation.inputs import builder
 from algo_coach.generation.landing import Corpus, Drafted, land
 from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, Searched, search
@@ -63,6 +64,12 @@ class Progress(BaseModel):
     # not
     separating: int | None = None
     unseparated: str | None = None
+    # what the mutation loop did to the set: the mutants it enumerated, the
+    # ones no case caught, and the cases the rounds appended
+    mutants: int = 0
+    survived: int = 0
+    won: int = 0
+    unmeasured: str | None = None  # the round's call failed, and the set is unmeasured
 
 
 class Timing(BaseModel):
@@ -71,6 +78,16 @@ class Timing(BaseModel):
 
     separating: int | None = None  # the size the naive solution stops fitting at
     unseparated: str | None = None  # why there was none, where one was looked for
+
+
+class Bar(BaseModel):
+    """What the mutation loop reported. `unmeasured` is a call that failed,
+    which costs the round rather than the problem."""
+
+    mutants: int = 0
+    survived: int = 0
+    won: int = 0  # cases the rounds appended to the set
+    unmeasured: str | None = None
 
 
 class GenerationResult(BaseModel):
@@ -89,7 +106,7 @@ def write_one(
     *,
     configuration: Configuration = DEFAULT,
     cap_ms: int = CAP_MS,
-) -> tuple[Drafted, Checked, Timing]:
+) -> tuple[Drafted, Checked, Timing, Bar]:
     # the `Checked` is returned rather than raised: a discard is a fact about
     # the problem, and the run reports what it cost
     draft, call = generate(
@@ -105,11 +122,60 @@ def write_one(
         cases=checked.cases,
     )
     if not checked.survived:
-        return drafted, checked, Timing()
+        return drafted, checked, Timing(), Bar()
+    # the mutation loop before the timing case: what it wins is judged by the
+    # cap a sitting judges under, and the separating input is chosen last
+    checked, bar = measured(
+        transport, calls, drafted, checked, configuration=configuration, cap_ms=cap_ms
+    )
+    if not checked.survived:
+        return drafted, checked, Timing(), bar
     checked, timing = timed(
         transport, calls, template, drafted, checked, configuration=configuration, cap_ms=cap_ms
     )
-    return drafted, checked, timing
+    return drafted, checked, timing, bar
+
+
+def measured(
+    transport: Transport,
+    calls: CallLog,
+    drafted: Drafted,
+    checked: Checked,
+    *,
+    configuration: Configuration,
+    cap_ms: int,
+) -> tuple[Checked, Bar]:
+    """The mutation loop's cases, appended to the set the problem carries.
+
+    A round's call that fails costs the round rather than the problem, as the
+    speedup search's does.
+    """
+    try:
+        hardened = harden(
+            transport,
+            calls,
+            drafted.draft.statement,
+            canonical=drafted.draft.canonical,
+            reference=drafted.solution,
+            cases=drafted.cases,
+            cap_ms=cap_ms,
+            configuration=configuration,
+        )
+    except Exception as failure:
+        return checked, Bar(unmeasured=repr(failure))
+
+    bar = Bar(mutants=hardened.mutants, survived=hardened.survived, won=len(hardened.cases))
+    if hardened.disagreement is not None:
+        # a boundary input the first case set never reached, answered two ways.
+        # A canonical wrong there is what the loop exists to find
+        discarded = Checked(
+            outcome=checked.outcome,
+            discard=Discard.DISAGREED,
+            disagreements=[hardened.disagreement],
+        )
+        return discarded, bar
+    drafted.cases.extend(hardened.cases)
+    return checked, bar
 
 
 def timed(
@@ -208,7 +274,7 @@ def write_problems(
 
     for index in range(1, count + 1):
         try:
-            drafted, checked, timing = write_one(
+            drafted, checked, timing, bar = write_one(
                 transport,
                 calls,
                 card,
@@ -249,6 +315,10 @@ def write_problems(
             reason=None if checked.survived else why(checked),
             separating=timing.separating,
             unseparated=timing.unseparated,
+            mutants=bar.mutants,
+            survived=bar.survived,
+            won=bar.won,
+            unmeasured=bar.unmeasured,
         )
     return result
 

@@ -210,3 +210,80 @@ def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
     assert result.drafted == []
     assert [one.discard for one in result.discarded] == ["disagreed"]
     assert CaseLog(tmp_path).cases() == []
+
+
+# the mutation loop's subject: a boundary the one written case never reaches
+BOUNDED = "def solve(n):\n    return 1 if n > 3 else 0\n"
+BOUNDED_BLIND = "def solve(n):\n    return int(n > 3)\n"
+ONE_CASE = [{"args": "[10]", "expected": "1"}]
+
+
+def bounded(**overrides) -> FakeWriter:
+    written = {"canonical": BOUNDED, "solution": BOUNDED_BLIND, "cases": ONE_CASE}
+    return FakeWriter(**(written | overrides))
+
+
+def test_the_cases_the_mutation_loop_wins_land_with_the_others(tmp_path):
+    """A submission is judged by them, which is what measures the set against
+    the bound rather than against the generator's own judgement."""
+    model = bounded(separators=[[[3], [4]]])
+
+    _, result = run(tmp_path, model)
+
+    assert len(result.drafted) == 1
+    assert [one.args for one in CaseLog(tmp_path).cases()] == [[10], [3], [4]]
+
+
+def test_a_won_case_carries_the_reference_s_answer(tmp_path):
+    """Settled as the first set is: a case the canonical produced would pass by
+    construction."""
+    run(tmp_path, bounded(separators=[[[3]]]))
+
+    stored = CaseLog(tmp_path).cases()
+    assert stored[-1].expected == 0
+    assert stored[-1].expected_from is ExpectedSource.REFERENCE
+
+
+def test_a_set_that_kills_every_mutant_pays_for_no_round(tmp_path):
+    """Nothing survived the cases the generation call wrote, so no case has to
+    exist."""
+    model = FakeWriter()
+
+    run(tmp_path, model)
+
+    assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM]
+
+
+def test_a_round_that_fails_costs_the_round_and_not_the_problem(tmp_path):
+    """The problem passed every gate that judges it. What is lost is the
+    measurement, and the run reports the set unmeasured."""
+    reported: list = []
+    (one,) = seeded(tmp_path, card())
+
+    result = write_problems(
+        bounded(),
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        on_progress=reported.append,
+    )
+
+    assert len(result.drafted) == 1
+    assert len(CaseLog(tmp_path).cases()) == 1
+    assert reported[0].unmeasured is not None
+
+
+def test_a_proposed_case_the_two_solutions_answer_differently_discards_it(tmp_path):
+    """A canonical wrong at a boundary the first set never reached, which is
+    what the loop exists to find."""
+    model = bounded(
+        solution="def solve(n):\n    return 99 if n == 4 else int(n > 3)\n",
+        separators=[[[4]]],
+    )
+
+    _, result = run(tmp_path, model)
+
+    assert result.drafted == []
+    assert [one.discard for one in result.discarded] == ["disagreed"]
+    assert CaseLog(tmp_path).cases() == []

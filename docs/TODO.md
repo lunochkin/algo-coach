@@ -229,7 +229,7 @@ canonical. What the first corpus settles is the bound.
       run without one
 - [x] Store the separating case beside the others, so a submission is judged
       at that size. The search finds one and nothing writes it down
-- [ ] Run the mutation loop in the landing path, between `check` and `land`,
+- [x] Run the mutation loop in the landing path, between `check` and `land`,
       and append the cases it wins to the set the problem carries. Nothing
       calls `mutation` today, so no landed problem is measured against the
       bound

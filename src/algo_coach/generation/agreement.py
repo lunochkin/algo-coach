@@ -72,28 +72,27 @@ class Settled:
 
 
 def settle(
-    cases: Sequence[DraftCase],
+    args: Sequence[Sequence[Any]],
     *,
     canonical: Sequence[Any],
     reference: Sequence[Any],
 ) -> Settled:
     # every case is decided, never stopping at the first disagreement: a
     # discarded problem is reported by every input the two readings differ on
-    if not (len(cases) == len(canonical) == len(reference)):
+    if not (len(args) == len(canonical) == len(reference)):
         raise ValueError("one output per case, from each solution")
 
     settled = Settled()
-    for case, ours, theirs in zip(cases, canonical, reference, strict=True):
+    for one, ours, theirs in zip(args, canonical, reference, strict=True):
+        case = list(one)
         if isinstance(theirs, NoValue):
             settled.cases.append(
-                SettledCase(args=case.args, expected=ours, expected_from=ExpectedSource.CANONICAL)
+                SettledCase(args=case, expected=ours, expected_from=ExpectedSource.CANONICAL)
             )
         elif agrees(ours, theirs):
             settled.cases.append(
-                SettledCase(args=case.args, expected=theirs, expected_from=ExpectedSource.REFERENCE)
+                SettledCase(args=case, expected=theirs, expected_from=ExpectedSource.REFERENCE)
             )
         else:
-            settled.disagreements.append(
-                Disagreement(args=case.args, canonical=ours, reference=theirs)
-            )
+            settled.disagreements.append(Disagreement(args=case, canonical=ours, reference=theirs))
     return settled

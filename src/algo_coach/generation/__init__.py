@@ -29,9 +29,11 @@ from algo_coach.generation.generator import (
     schema,
     written_for,
 )
+from algo_coach.generation.hardening import Hardened, harden
 from algo_coach.generation.inputs import Built, builder
 from algo_coach.generation.landing import Corpus, Drafted, land, written_by
 from algo_coach.generation.run import (
+    Bar,
     Discarded,
     Failed,
     GenerationResult,
@@ -50,6 +52,7 @@ __all__ = [
     "PIN",
     "SYSTEM",
     "TEMPERATURE",
+    "Bar",
     "Configuration",
     "Corpus",
     "Checked",
@@ -60,6 +63,7 @@ __all__ = [
     "Drafted",
     "Failed",
     "GenerationResult",
+    "Hardened",
     "Misdeclaration",
     "Missing",
     "Progress",
@@ -76,6 +80,7 @@ __all__ = [
     "check",
     "land",
     "generate",
+    "harden",
     "misdeclared",
     "notes",
     "prompt",

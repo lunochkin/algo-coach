@@ -71,7 +71,7 @@ def check(
         return Checked(outcome=outcome, discard=Discard.MISDECLARED, misdeclarations=wrong)
 
     theirs = outputs(reference, args, cap_ms=cap_ms)
-    settled = settle(cases, canonical=ours, reference=theirs)
+    settled = settle(args, canonical=ours, reference=theirs)
     if not settled.agreed:
         return Checked(
             outcome=outcome, discard=Discard.DISAGREED, disagreements=settled.disagreements

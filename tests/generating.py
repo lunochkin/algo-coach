@@ -5,7 +5,7 @@ import json
 from dataclasses import dataclass, field
 
 from algo_coach.calls import Reply
-from algo_coach.generation import blind, inputs
+from algo_coach.generation import blind, discrimination, inputs
 
 CANONICAL = "def solve(xs):\n    return len(xs)\n"
 BLIND = "def solve(xs):\n    return sum(1 for _ in xs)\n"
@@ -26,6 +26,10 @@ def draft(statement: str = "Given a list of readings, return ...", **overrides) 
 
 def solved(solution: str = BLIND) -> str:
     return json.dumps({"solution": solution})
+
+
+def proposed(*args) -> str:
+    return json.dumps({"cases": [{"args": json.dumps(list(one))} for one in args]})
 
 
 # one element per size, which separates nothing: a run that wanted a timing
@@ -51,8 +55,16 @@ class FakeWriter:
     statements: list[str | None] = field(default_factory=lambda: ["A statement."])
     solution: str = BLIND
     generator: str | None = None
+    # what each discrimination call proposes, in order. `None` is a call that
+    # answered nothing, which costs the round
+    separators: list[list | None] = field(default_factory=lambda: [None])
+    # the solution the mutation loop enumerates from, and the cases it runs
+    # the mutants against
+    canonical: str = CANONICAL
+    cases: list[dict] | None = None
     calls: list[dict] = field(default_factory=list)
     written: int = 0
+    answered: int = 0
 
     def __call__(self, **kwargs) -> Reply:
         self.calls.append(kwargs)
@@ -60,6 +72,12 @@ class FakeWriter:
         # the input generator are both handed the statement alone
         if kwargs["system"] == blind.SYSTEM:
             return Reply(text=solved(self.solution), stop_reason="stop")
+        if kwargs["system"] == discrimination.SYSTEM:
+            asked = self.separators[min(self.answered, len(self.separators) - 1)]
+            self.answered += 1
+            if asked is None:
+                return Reply(text=None, stop_reason="length")
+            return Reply(text=proposed(*asked), stop_reason="stop")
         if kwargs["system"] == inputs.SYSTEM:
             if self.generator is None:
                 return Reply(text=None, stop_reason="length")
@@ -68,7 +86,10 @@ class FakeWriter:
         self.written += 1
         if statement is None:
             return Reply(text=None, stop_reason="length")
-        return Reply(text=draft(statement), stop_reason="stop")
+        written = {"canonical": self.canonical}
+        if self.cases is not None:
+            written["cases"] = self.cases
+        return Reply(text=draft(statement, **written), stop_reason="stop")
 
     @property
     def briefs(self) -> list[str]:
@@ -76,5 +97,5 @@ class FakeWriter:
         return [
             one["content"]
             for one in self.calls
-            if one["system"] not in (blind.SYSTEM, inputs.SYSTEM)
+            if one["system"] not in (blind.SYSTEM, discrimination.SYSTEM, inputs.SYSTEM)
         ]

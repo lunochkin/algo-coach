@@ -252,3 +252,23 @@ def test_a_form_that_separated_at_nothing_says_why():
 
 def test_a_form_that_is_its_own_optimum_says_nothing():
     assert line(cases=4, outcome=CaseOutcome.PASSED, landed=True) == "4 case(s)  passed  landed"
+
+
+def test_the_line_reports_what_the_mutation_loop_caught():
+    """Which mistakes the stored set catches, since a survivor is a case the
+    problem landed without."""
+    landed = line(cases=4, outcome=CaseOutcome.PASSED, landed=True, mutants=12, survived=2, won=3)
+
+    assert landed == "4 case(s)  passed  landed  kills 10/12, +3 case(s)"
+
+
+def test_a_set_no_round_measured_says_so():
+    """A call that failed costs the round, and a line falling silent would read
+    as a set the mutants could not beat."""
+    landed = line(cases=4, outcome=CaseOutcome.PASSED, landed=True, unmeasured="no cases")
+
+    assert landed.endswith("unmeasured: no cases")
+
+
+def test_a_canonical_with_no_mutant_says_nothing():
+    assert line(cases=4, outcome=CaseOutcome.PASSED, landed=True) == "4 case(s)  passed  landed"

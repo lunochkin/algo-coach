@@ -91,6 +91,13 @@ The order matters because each step can reject what came before.
   gives, so a crash or a timeout there is as likely to be an input the problem
   excludes as a defect in the solution. The canonical was already run against
   the cases written with the statement, and those are what decide it.
+- **A proposed case the two solutions answer differently discards the
+  problem**, as a disagreement on any other case does. The round asks for
+  boundary inputs, and a canonical wrong at a boundary the first set never
+  reached is what the loop exists to find.
+- **A round whose call fails costs the measurement, not the problem.** The
+  problem passed every gate that judges it, and the run reports its set as
+  unmeasured against the bound.
 - **The loop stops on a bound, never on a score.** A mutant can be equivalent
   to the original, and equivalence is undecidable, so no case kills it and the
   score never reaches full. `corpus.md` carries the number of rounds.

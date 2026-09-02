@@ -13,10 +13,10 @@ from algo_coach.runner import NoValue, RunOutcome
 from algo_coach.schema import ExpectedSource
 
 
-def cases(*args) -> list[DraftCase]:
-    """Cases as the generation call wrote them, whose JSON arrives as text.
-    The model's own expected output is never stored, so these carry none."""
-    return [DraftCase(args=list(one), expected="null") for one in args]
+def cases(*args) -> list[list]:
+    """The arguments settling reads. What a case expects is what a run
+    establishes, so nothing carries one on the way in."""
+    return [list(one) for one in args]
 
 
 def declared(*pairs) -> list[DraftCase]:
