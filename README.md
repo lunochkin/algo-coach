@@ -189,7 +189,6 @@ is why the engine runs them rather than the frontier.
 | Cards | 9 authored, 45 templates between them |
 | Attribution | 85–98% exact set match across five classifiers (n=60), at $0.04–3.15 per 1k decisions |
 | Store | empty of problems and attempts; generation refills it |
-| Tests | 602 |
 
 Built: the technique vocabulary, the attribution classifier and its eval, the
 call log and transport, cards, and template matching. Next: the engine writing
