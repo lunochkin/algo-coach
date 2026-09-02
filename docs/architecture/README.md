@@ -148,10 +148,10 @@ Rules on how this repo is built, rather than properties of the running system.
   generated corpus could be committed, since the product owns it, and is not:
   those directories also hold the private log, and storage moves to a database
   before the corpus ships anywhere.
-- Prefer tools and functions over agents. A pipeline earns multi-agent, not the
-  other way around.
+- Prefer tools and functions over agents. Multi-agent is adopted once a
+  pipeline needs it, never as the starting structure.
 
 ## Meta-rule
 
-Ship thin on features, and let the record schema run one phase ahead.
+Ship thin on features, and design the record schema one phase ahead of them.
 Component boundaries can be refactored. An append-only log cannot.

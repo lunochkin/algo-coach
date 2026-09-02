@@ -39,8 +39,7 @@ The vocabulary the append-only log references.
   problem's own techniques, and those nest already. Under an exclusive rule a
   claimed attempt and an unclaimed one on the same problem would be counted
   differently, so board numbers would move as classification progressed while
-  the practice behind them did not. A claim narrows a row; it never
-  re-partitions it.
+  the practice behind them did not.
 - **The criteria are the prompt.** They reach the classifier beside the
   candidates and the reader beside the code, so one rulebook answers both.
   Editing an entry changes readings, but only for the attempts carrying that
@@ -84,10 +83,10 @@ user can solve, per technique, and the two share no data.
   template is offered on it as the alternative approach. That last case is why
   a problem matching several templates is wanted rather than a nuisance.
 - **A studied template no solution displays is a reported gap**, not a quietly
-  shorter ladder, and the gap is the input to the next generation run. A form
-  the corpus cannot exercise is what names the work, and the ladder never does
-  that work itself: one that filled itself would be one nobody inspected, and
-  the corpus is the product.
+  shorter ladder. The gap is the input to the next generation run: it names the
+  template the next problem must be written for. The ladder never substitutes
+  another problem, because a substitution hides the gap and the missing problem
+  is then never written.
 - **The recognition cue is its own field**, apart from the prose it could sit
   in, because a probe asks exactly that question: is the form recognised
   unprompted. So it is shown and withheld on its own, where the rest of what to

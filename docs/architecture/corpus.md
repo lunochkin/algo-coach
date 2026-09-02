@@ -15,8 +15,7 @@ solutions written for it. Part of the architecture; `README.md` is the map.
   what the generator knew rather than in how the problem is judged.
 - **The looser brief is what reaches the rest of the vocabulary.** A paradigm
   and a problem class have no form to reproduce, so no template names them, and
-  a corpus written from templates alone can never exercise them. Templates
-  teach recall, and recall is not what decides which problems exist.
+  a corpus written from templates alone can never exercise them.
 - **The template it was written for is stored, where there was one.**
   `generated_for` is an assertion rather than a reading, and it is what makes
   the first template match provenance. It never claims the problem exercises
@@ -38,7 +37,7 @@ solutions written for it. Part of the architecture; `README.md` is the map.
   reproduced from memory, not by what it classifies. A paradigm and a problem
   class have no form to type out, so templates reach about half the vocabulary,
   and a technique set folded from them would be capped by which cards happen to
-  exist. Templates are the recall layer, techniques the classification one.
+  exist.
 - **Which is why the fallback answers the right question.** They name what
   solving the problem can take, over every canonical it carries, where a claim
   names what one attempt did.
@@ -126,7 +125,7 @@ What decides whether a solution to a generated problem is correct.
   is a defect in the problem, and a problem carrying one does not land.
 - **The cases define the problem, and the statement is what can disagree.** A
   finite set of arguments and returns describes some function. The statement is
-  prose, and prose is where the mistake lands.
+  prose, so a mistake lands in the statement rather than in the cases.
 - **A case set a deterministic canonical passes is already consistent.** Two
   cases with the same arguments and different returns fit no function, so no
   canonical can pass both. Nothing checks this separately.

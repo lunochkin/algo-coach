@@ -140,7 +140,7 @@ other way to solve it is found afterwards, over the stored problem.
   question reaches only forms someone authored a template for. Enumeration
   reaches the techniques no card covers, which is most of the vocabulary.
 - **It sees the first canonical.** Independence is the reference's purpose
-  rather than this call's. The point is to propose approaches that differ from
+  rather than this call's. This call is asked for approaches that differ from
   what is stored, and that needs the stored one in view.
 - **A canonical it produced is not a reference.** It saw the statement, the
   cases and another solution, so it is no independent reading. It cannot
@@ -218,8 +218,8 @@ divergence resolved by hand.
   with a reading in view therefore records what it saw, and never stands in for
   pass one.
 - **Which way the divergences went is the check on the process.** Mostly claim
-  edits means the rulebook is becoming a transcript of one model. A real share
-  of criteria edits means it is doing its own work.
+  edits means the eval set is becoming a copy of one model's readings. A real
+  share of criteria edits means the criteria are being corrected instead.
 - **What the set cannot show** is a classifier that is right where the frontier
   was wrong. Such a case is recorded as an error, and the attempts both readers
   got wrong the same way are never detected. That is the cost of a fixed

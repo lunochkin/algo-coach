@@ -134,7 +134,8 @@ What a generated corpus is worth, measured rather than asserted.
 
 The first attempts the engine produces itself. It serves a generated problem,
 times the sitting, runs the submission against the problem's own cases, and
-records the verdict. The interface is part of the phase, not a later skin.
+records the verdict. The interface ships in this phase rather than a later
+one.
 
 - `Attempt` gains the verification result.
 - The loop can mark a problem defective in place of a self-label, and the board
@@ -211,7 +212,7 @@ loop: it picks drills and adapts to history.
 
 ## Phase 16 — Multi-agent (conditional)
 
-Only if a real pipeline earns it: diagnose → retrieve → brief → schedule.
+Only once a real pipeline needs it: diagnose → retrieve → brief → schedule.
 
 ## Phase 17 — Soundness-checked synthesis
 

@@ -203,8 +203,8 @@ gap. Every later run is aimed at the templates the gap report lists.
       approach the form replaces
 - [ ] Report a studied template no solution displays. The card claims to teach
       that form, so a corpus that cannot exercise it is a fact about the store
-- [ ] Aim a generation run at the templates carrying no match. A form the
-      corpus cannot exercise is what names the work
+- [ ] Aim a generation run at the templates carrying no match. Otherwise the
+      selector fills the ladder and the missing form is never written
 
 ### The discrimination bar
 
@@ -344,7 +344,8 @@ person's is.
 - [ ] Keep the comparison against `expected` above the boundary, as it already
       is. A sandbox is never told what a case expects
 - [ ] Cap wall clock, memory and output per run, and give the sandbox no
-      network. A submission that spawns or dials is a submission that failed
+      network. A submission that spawns a process or opens a connection
+      fails
 - [ ] Key `AttemptLog` by user. It is the only store that changes: problems,
       cases, solutions, matches and cards are shared product data
 - [ ] Make one user's log readable and deletable without touching another's.
@@ -355,7 +356,7 @@ person's is.
 - [ ] Gate access on an invitation. Untrusted execution behind open
       registration is an abuse surface with no upside at this size
 - [ ] Deploy it, and write down what the deployment holds and for how long.
-      Hosting someone's attempts is a promise about them
+      A user cannot check a retention claim that was never written down
 
 ### Exit
 - [ ] Someone other than the author completes a sitting

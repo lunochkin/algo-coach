@@ -46,7 +46,7 @@ Neither big batches nor detailed design up front.
 
 A design pass settles boundaries, record shapes and what is irreversible, then
 stops. A detail only real use can answer is named as deferred rather than
-reasoned out — the schema runs a phase ahead, features do not.
+reasoned out. The schema is designed a phase ahead of the features.
 
 ## Writing
 

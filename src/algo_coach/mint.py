@@ -254,7 +254,7 @@ def machine_match(
 ) -> TemplateMatch:
     """One pair a matcher read, positive or negative. The negative is stored, or
     every re-run re-tests every non-match forever, which on a growing corpus is
-    nearly all the work."""
+    nearly every pair."""
     return TemplateMatch(
         id=new_id(),
         created_at=datetime.now(UTC),

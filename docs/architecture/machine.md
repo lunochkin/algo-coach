@@ -30,7 +30,8 @@ stated here once.
   one says which weights answered, the other how they were sampled. A
   temperature nobody set is the provider's own default — recorded absent, and
   equal only to itself, which keeps records taken before the parameter existed
-  scorable rather than discarded. Generation is the exception, and says why.
+  scorable rather than discarded. Generation is the exception, and
+  `corpus.md` gives the reason.
 - **What a reading cost is recorded and never compared.** A price says when a
   reading was taken rather than which reader took it, so two readings compare
   whether or not either carries one. It sits outside the all-or-none rule with

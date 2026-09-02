@@ -17,10 +17,9 @@ inferred from a problem's tags. Scheduling will target the weakest technique
 rather than the oldest problem. Procedural-skill SRS, not fact SRS: built for
 experienced engineers restoring fluency, not beginners learning concepts.
 
-The interesting part is not that an LLM is in the loop. It is what the log does
-with what the LLM said. Every reading is stored with the configuration that
-produced it, scored against hand claims, and outranked by the user's own record
-forever.
+What matters is not that an LLM is in the loop, but how the log treats what it
+said. Every reading is stored with the configuration that produced it, scored
+against hand claims, and outranked by the user's own record forever.
 
 Built and measured: the technique vocabulary, the attribution classifier, cards
 and template matching. Generation is next, and the numbers below were taken on
@@ -216,8 +215,8 @@ third-party platform, ingested and read. That corpus is archived under
 caps the product at what a single user already solved. It also carries no test
 cases, which is the harder problem: with nothing to run a submission against,
 the engine can only copy a platform's verdict, and an attempt on such a problem
-can never be verified. Generation answers both, so the second origin stopped
-earning the branch it cost in every record.
+can never be verified. Generation answers both, so the second origin was no
+longer worth the branch it cost in every record.
 
 **Why it is kept.** It sets the announcement floor. A generated problem must
 not telegraph its own form — if a matcher names the form from the statement
@@ -321,8 +320,8 @@ The load-bearing ones:
 
 - **[The log is append-only.](docs/architecture/README.md#invariants)** No
   record is revised or removed in place. Component boundaries can therefore be
-  refactored, and the record schema cannot. The schema runs a phase ahead of
-  the features on purpose.
+  refactored, and the record schema cannot. The schema is designed a phase
+  ahead of the features on purpose.
 - **[Identity is the engine's.](docs/architecture/corpus.md#problems)** Every
   reference in an append-only record is one the engine minted, so the log stays
   readable on its own.
