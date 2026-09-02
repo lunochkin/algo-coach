@@ -113,7 +113,7 @@ file in place.
 
    ### What earns a template
 
-   **Three to five studied templates per card** — not per technique, and the
+   **Three to five core templates per card** — not per technique, and the
    optional one sits outside the count. One template means the card was scoped
    as a definition rather than as what gets typed.
 
@@ -146,7 +146,7 @@ file in place.
 
    Optional means *reserved for deriving*, never *rare* or *advanced-looking*.
    A faster idiom the reader would reach for in an ordinary solve — a bitset
-   standing in for a boolean array — is studied however clever it looks, because
+   standing in for a boolean array — is core however clever it looks, because
    it is a tool rather than a challenge. What earns the flag is that meeting it
    cold is worth more than reading it.
 
@@ -216,7 +216,7 @@ file in place.
 6. **Write the selector** — `technique`, optional `difficulty`, `size`. The
    ladder is resolved from the corpus at import, so authoring names no problem:
    the selector says what to draw from and how many rungs. Size it by what the
-   technique needs, not by what the store happens to hold. A studied template
+   technique needs, not by what the store happens to hold. A core template
    no problem matches is a reported gap, and generation writes for that gap.
 
 7. **Validate**, and fix what it reports:

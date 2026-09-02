@@ -71,18 +71,18 @@ user can solve, per technique, and the two share no data.
   filters that narrow it. The ladder is derived from the corpus. Ids are minted
   per engine, so a card holding them would mean nothing in another store, where
   a selector ships anywhere.
-- **The ladder covers every studied template.** Its rungs come from the
+- **The ladder covers every core template.** Its rungs come from the
   template matches, at least one per template, and the selector fills the rest
   out to `size`. A match is a fact about a solution, so a rung is filled by the
   problem that solution answers. Drawn from the selector alone the ladder would
   exercise the technique and leave some forms untouched, since a technique says
   what a problem is about rather than which form solves it.
 - **Requiredness is derived from what a rung covers**, never stored. A rung
-  covering a studied template is required. A rung covering only the optional
+  covering a core template is required. A rung covering only the optional
   template is optional. A rung covering both is required, and the optional
   template is offered on it as the alternative approach. That last case is why
   a problem matching several templates is wanted rather than a nuisance.
-- **A studied template no solution displays is a reported gap**, not a quietly
+- **A core template no solution displays is a reported gap**, not a quietly
   shorter ladder. The gap is the input to the next generation run: it names the
   template the next problem must be written for. The ladder never substitutes
   another problem, because a substitution hides the gap and the missing problem
@@ -98,8 +98,9 @@ user can solve, per technique, and the two share no data.
   optimum, so no input separates them from a reference. Generation cannot tell
   that from a reference written cleverly by mistake, so the template says which
   it is and a missing separation is a defect only where a speedup was claimed.
-- **One template may sit outside the studied set.** A card carries at most one
-  optional template, the capstone, authored whole and surfaced on request
+- **One template may sit outside the core set.** A card's templates are core by
+  default: the ladder covers them, and a rung on one is required. At most one
+  is marked optional — the capstone, authored whole and surfaced on request
   alone. The hard form is worth deriving before it is read, and a card showing
   it unasked would remove that chance permanently.
 - **The ladder is resolved at import and re-derived whenever the corpus moves
@@ -153,7 +154,7 @@ is authored here either.
   still carry their own matches.
 - **The matcher answers what generation cannot assert**: which templates a
   solution displays besides the one it was written for, and whether the
-  generator's own claim holds. The first is why a rung can cover a studied
+  generator's own claim holds. The first is why a rung can cover a core
   template and an optional one at once, the second the only check on a
   generator drifting from its brief.
 - **Three writers, ordered by what each of them knew.** A hand annotation

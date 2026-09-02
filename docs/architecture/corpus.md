@@ -168,7 +168,7 @@ no user and no sitting.
   The matcher reads the canonical beside the statement, and the verdict is
   about the canonical.
 - **Several per problem, and the set is the assertion.** Two approaches to one
-  problem is the ordinary case, and it is what lets one rung cover a studied
+  problem is the ordinary case, and it is what lets one rung cover a core
   template and an optional one. A problem carrying one canonical can teach one
   form.
 - **A template is where a problem comes from, never where its later solutions
@@ -271,7 +271,7 @@ fixed here rather than by whatever executed it.
   depend on code the record does not name. The statement says how ties are
   broken, and a canonical and a reference disagreeing is what catches one that
   does not. What this excludes is the problem asking for any valid answer of
-  many, and that cost is accepted until a studied template needs one.
+  many, and that cost is accepted until a core template needs one.
 - **A return that JSON cannot encode is `CRASHED`.** The fault is the
   solution's rather than the case's. `WRONG` would file it beside an answer
   that was computed and is merely incorrect. The child does the encoding, so

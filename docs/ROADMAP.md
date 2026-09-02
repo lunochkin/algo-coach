@@ -163,7 +163,7 @@ be trusted.
 What a card needs once there are problems to fill it.
 
 - The ladder resolved at import from the selector and the template matches, at
-  least one rung per studied template. An unfilled studied template is a
+  least one rung per core template. An unfilled core template is a
   reported gap.
 - Studying a card is an explicit act: the ladder is measured from it, and
   probes are assigned at it.
@@ -191,7 +191,7 @@ Every other way to solve a stored problem, enumerated over the corpus rather
 than asked for by template. A call proposes the approaches, each becomes its
 own canonical, and the problem's own cases judge them.
 
-Exit: one rung covers a studied template and an optional one, through two
+Exit: one rung covers a core template and an optional one, through two
 canonicals of one problem.
 
 ## Phase 13 — Program-analysis-grounded diagnosis

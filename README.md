@@ -267,7 +267,7 @@ anywhere, and the same card teaches from your backlog or someone else's.
 flowchart LR
   C["card<br/>templates + selector"] --> M["template matching<br/><i>which problems exercise which form</i>"]
   P["the problem corpus"] --> M
-  M --> L["ladder<br/><i>a rung per studied template,<br/>the selector fills the rest</i>"]
+  M --> L["ladder<br/><i>a rung per core template,<br/>the selector fills the rest</i>"]
   C --> R["recall<br/><i>per template, blank-filled cold</i>"]
   P --> PR["probes<br/><i>unseen problems: is the form<br/>recognised unprompted?</i>"]
 ```
@@ -278,11 +278,11 @@ Why it is shaped this way:
   learned and lost separately, and a card-level number would average them
   together and show neither. A hinted pass is recorded as hinted, or a decaying
   form scores the same as a fluent one.
-- **Coverage is derived, not authored.** The ladder must exercise every studied
+- **Coverage is derived, not authored.** The ladder must exercise every core
   form, and a technique says what a problem is *about*, not which form solves
   it. So
   which problems exercise which template is read from the statement and stored
-  per pair, negatives included. A studied form no problem matches is a reported
+  per pair, negatives included. A core form no problem matches is a reported
   gap, never a quietly shorter ladder.
 - **Recall fluency is not solving fluency.** Reproducing a form cold is not
   recognising it unprompted. A probe — an unseen problem, no card in view —

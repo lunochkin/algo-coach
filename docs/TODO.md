@@ -44,7 +44,7 @@ until the engine has written problems to annotate.
 - [x] Add `runner` to `Verification`, one opaque string naming the backend and
       the interpreter. Required, since no verification has been written yet and
       one stored without it carries nothing for good
-- [x] Several solutions per problem, appended. A rung covers a studied
+- [x] Several solutions per problem, appended. A rung covers a core
       template and an optional one only where two approaches are stored
 - [x] Append-only stores for cases, solutions and verifications. A case is
       added and never revised, and two runs of one solution are two records
@@ -179,7 +179,7 @@ Phase 12.
 Views over what generation, the runner and the readings stored, derived on read
 rather than written down. A problem's techniques come from readings of its
 canonicals, and the gaps come from the template matches. The first generation
-run is aimed by hand at the studied templates, since an empty corpus reports no
+run is aimed by hand at the core templates, since an empty corpus reports no
 gap. Every later run is aimed at the templates the gap report lists.
 
 - [x] Add `TechniqueReading`, keyed to a solution: the codes it used, its
@@ -201,7 +201,7 @@ gap. Every later run is aimed at the templates the gap report lists.
       its canonicals, excluding the reference. A view, so a canonical added
       later widens them, and counting the reference would credit the naive
       approach the form replaces
-- [ ] Report a studied template no solution displays. The card claims to teach
+- [ ] Report a core template no solution displays. The card claims to teach
       that form, so a corpus that cannot exercise it is a fact about the store
 - [ ] Aim a generation run at the templates carrying no match. Otherwise the
       selector fills the ladder and the missing form is never written
@@ -241,7 +241,7 @@ The hand pass does two jobs at once. It writes the matcher's reference, and it
 is the only reading of a generated problem that no model produced. A generator
 that wandered from its brief shows up there whatever the matcher says.
 
-- [ ] Aim the first run at the studied templates, 38 of the 45 across nine
+- [ ] Aim the first run at the core templates, 38 of the 45 across nine
       cards, and annotate a sample of what lands
 - [ ] Sample and annotate through `algo-coach annotate`, over pairs of a
       template and a solution. It already samples across templates, and only
@@ -365,7 +365,7 @@ person's is.
 
 - [ ] Resolve the ladder from the matches, the selector filling out to `size`.
       A retired problem fills no rung
-- [ ] Derive requiredness from what a rung covers: studied means required, the
+- [ ] Derive requiredness from what a rung covers: core means required, the
       optional template alone means optional, both means required with the
       optional template offered as the alternative
 - [ ] Re-derive the ladder whenever the corpus moves under it, a started card
@@ -466,7 +466,7 @@ whatever phase is current.
       on
 - [ ] Choose how a case with several correct returns is decided — a normaliser
       over the returned value, or a checker per problem — and write the choice
-      into `corpus.md`. Triggered when a studied template can only be exercised
+      into `corpus.md`. Triggered when a core template can only be exercised
       by a problem whose answer is not unique
 - [ ] Name on the verification the rule that decided a case, once that rule is
       no longer JSON equality. A verdict stored without it cannot be re-read
