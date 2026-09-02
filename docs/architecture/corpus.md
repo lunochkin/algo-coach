@@ -141,8 +141,8 @@ What decides whether a solution to a generated problem is correct.
   it.
 - **How discrimination is established is in `flows.md`.** A blind reference
   disagreeing on any case discards the problem, and a surviving mutant of the
-  canonical names a case that has to exist. What stays deferred is the
-  mutation operators and the bound the loop stops on.
+  canonical names a case that has to exist. What stays deferred is the bound
+  the loop stops on.
 
 ## Solutions
 

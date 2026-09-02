@@ -78,13 +78,18 @@ The order matters because each step can reject what came before.
   expects a solver to make, which is a sample nobody chose and no run
   reproduces. No mutant is stored: they are re-derived whenever the operator
   set changes.
+- **An operator changes one decision the code makes**: a comparison's boundary
+  or its direction, an arithmetic operator, a connector, a dropped `not`, an
+  integer by one, `min` against `max`, `break` against `continue`. Each is a
+  mistake a solver makes, where a mutant nobody would write asks for a case
+  that catches nothing.
 - **The call that answers a survivor proposes arguments, never returns.** The
   reference computes what they return, so no model writes an expected output
   that could agree with the mistake the case was asked for.
-- **Which mutations, and when to stop, are deferred.** A mutant can be
-  equivalent to the original, and equivalence is undecidable, so no case kills
-  it and the score never reaches full. The loop stops on a bound rather than on
-  a score, and which bound is a question a real corpus answers.
+- **When the loop stops is deferred.** A mutant can be equivalent to the
+  original, and equivalence is undecidable, so no case kills it and the score
+  never reaches full. The loop stops on a bound rather than on a score, and
+  which bound is a question a real corpus answers.
 - **Whether a form is a speedup is authored on the template.** Backtracking and
   exhaustive search are their own optimum, so no input separates the two
   solutions there. A timing run cannot tell that from a reference written

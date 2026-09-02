@@ -212,7 +212,7 @@ Cases that separate nothing license `verified` on a canonical that is wrong.
 The bar is named in `flows.md`: a blind reference, then mutants of the
 canonical. What the first corpus settles is the operators and the bound.
 
-- [ ] Enumerate mutants from the canonical's syntax tree, one change per
+- [x] Enumerate mutants from the canonical's syntax tree, one change per
       mutant. Mechanical, so nothing is stored and the set re-derives when the
       operators change
 - [ ] Kill a mutant on a wrong answer, a crash or a timeout, and report which
