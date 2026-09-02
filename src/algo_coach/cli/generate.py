@@ -12,6 +12,7 @@ from algo_coach.generation import (
     Draft,
     GenerationResult,
     Progress,
+    Step,
     Target,
     targets,
     write_problems,
@@ -19,7 +20,7 @@ from algo_coach.generation import (
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Card
+from algo_coach.schema import Call, Card
 from algo_coach.solutions import SolutionLog
 
 
@@ -38,6 +39,7 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
             corpus,
             count=args.count,
             on_progress=show,
+            on_step=stage,
         )
         results.append(result)
         for drafted in result.drafted:
@@ -119,6 +121,32 @@ def written(draft: Draft, *, code: bool) -> str:
     if code:
         block += ["", "```python", draft.canonical.rstrip(), "```"]
     return "\n".join(block)
+
+
+def stage(step: Step) -> None:
+    """One line per stage, on stderr and flushed as the run goes."""
+    print(staged(step), file=sys.stderr, flush=True)
+
+
+def staged(step: Step) -> str:
+    """What a stage is doing and what it left: three calls and a mutation loop
+    take minutes, and a line per problem shows none of it."""
+    counter = f"[{step.index:>{len(str(step.total))}}/{step.total}]"
+    return f"{counter} {step.name:<10} {step.detail}{spent(step.call)}"
+
+
+def spent(call: Call | None) -> str:
+    """What a stage's call cost, where it made one."""
+    if call is None:
+        return ""
+    tokens = f"{count(call.input_tokens)}/{count(call.output_tokens)} tok"
+    waited = f"{call.elapsed_ms / 1000:.1f}s" if call.elapsed_ms is not None else "?"
+    price = f", ${call.cost:.4f}" if call.cost else ""
+    return f"  ({tokens}, {waited}{price})"
+
+
+def count(tokens: int | None) -> str:
+    return "?" if tokens is None else f"{tokens:,}"
 
 
 def show(progress: Progress) -> None:

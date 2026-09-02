@@ -43,6 +43,7 @@ from algo_coach.generation.run import (
     write_problems,
 )
 from algo_coach.generation.speedup import Missing, Searched, search
+from algo_coach.generation.steps import SILENT, Notes, Step
 
 __all__ = [
     "CAP_MS",
@@ -66,7 +67,10 @@ __all__ = [
     "Hardened",
     "Misdeclaration",
     "Missing",
+    "SILENT",
+    "Notes",
     "Progress",
+    "Step",
     "Draft",
     "DraftCase",
     "GenerationError",

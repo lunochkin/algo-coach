@@ -287,3 +287,28 @@ def test_a_proposed_case_the_two_solutions_answer_differently_discards_it(tmp_pa
     assert result.drafted == []
     assert [one.discard for one in result.discarded] == ["disagreed"]
     assert CaseLog(tmp_path).cases() == []
+
+
+def test_a_run_reports_every_stage_as_it_goes(tmp_path):
+    """What the run is waiting on, and what each call cost. A problem takes
+    minutes, and the line per problem prints when it is over."""
+    reported: list = []
+    (one,) = seeded(tmp_path, card())
+
+    write_problems(
+        bounded(separators=[[[3], [4]]]),
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        on_step=reported.append,
+    )
+
+    assert [step.name for step in reported][:4] == [
+        "statement",
+        "statement",
+        "reference",
+        "reference",
+    ]
+    assert "mutants" in [step.name for step in reported]
+    assert [step.call for step in reported].count(None) < len(reported)

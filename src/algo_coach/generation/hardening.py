@@ -6,6 +6,7 @@ call per round asks for it. `corpus.md` gives the bound the loop stops at.
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from time import monotonic
 from typing import Any
 
 from algo_coach.calls import CallLog, Transport
@@ -13,6 +14,7 @@ from algo_coach.generation.agreement import Disagreement, Settled, SettledCase, 
 from algo_coach.generation.checks import CAP_MS
 from algo_coach.generation.discrimination import separators
 from algo_coach.generation.generator import DEFAULT, Configuration
+from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.mutation import ROUNDS, Case, kill, mutants, survivors
 from algo_coach.runner import NoValue, outputs
 
@@ -42,6 +44,7 @@ def harden(
     cap_ms: int = CAP_MS,
     configuration: Configuration = DEFAULT,
     rounds: int = ROUNDS,
+    notes: Notes = SILENT,
 ) -> Hardened:
     """The cases the mutants force, settled as the first set was.
 
@@ -50,13 +53,20 @@ def harden(
     """
     standing = mutants(canonical)
     enumerated = len(standing)
+    notes("mutants", f"{enumerated} enumerated, running them against the set")
     against: Sequence[Case] = cases
     won: list[SettledCase] = []
     dropped = played = 0
 
     while True:
-        before = len(standing)
+        before, started = len(standing), monotonic()
         standing = [one.mutant for one in survivors(kill(standing, against, cap_ms=cap_ms))]
+        # the runner's own time, which is what the fork server would cut
+        notes(
+            "mutants",
+            f"{before - len(standing)} killed, {len(standing)} standing"
+            f", {monotonic() - started:.1f}s in the runner",
+        )
         if not standing or played == rounds:
             break
         # a round that killed nothing stops the loop: the next one asks the
@@ -65,7 +75,8 @@ def harden(
             break
 
         played += 1
-        proposed, _ = separators(
+        notes("round", f"{played} of {rounds}: asking for the cases that kill {len(standing)}")
+        proposed, call = separators(
             transport,
             calls,
             statement,
@@ -74,8 +85,10 @@ def harden(
             known=[one.args for one in [*cases, *won]],
             configuration=configuration,
         )
+        notes("round", f"{played}: {len(proposed)} case(s) proposed", call)
         settled = _settled(proposed, canonical=canonical, reference=reference, cap_ms=cap_ms)
         dropped += len(proposed) - len(settled.cases) - len(settled.disagreements)
+        notes("round", f"{played}: {len(settled.cases)} won, {dropped} dropped")
         if settled.disagreements:
             return _left(won, enumerated, standing, played, dropped, settled.disagreements[0])
         if not settled.cases:

@@ -1,6 +1,7 @@
 """The generate command: a template in, problems out, and each one stored once
 its runs kept it."""
 
+from datetime import UTC, datetime
 from importlib import import_module
 
 import pytest
@@ -11,11 +12,11 @@ from algo_coach import cli
 from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
-from algo_coach.cli.generate import verdict
-from algo_coach.generation import MODEL, Progress
+from algo_coach.cli.generate import staged, verdict
+from algo_coach.generation import MODEL, Progress, Step
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import CaseOutcome, MatchSource, SolutionRole
+from algo_coach.schema import Call, CaseOutcome, MatchSource, SolutionRole
 from algo_coach.solutions import SolutionLog
 
 TRANSPORT = import_module("algo_coach.cli.transport")
@@ -272,3 +273,35 @@ def test_a_set_no_round_measured_says_so():
 
 def test_a_canonical_with_no_mutant_says_nothing():
     assert line(cases=4, outcome=CaseOutcome.PASSED, landed=True) == "4 case(s)  passed  landed"
+
+
+def reported(**fields) -> str:
+    return staged(Step(index=1, total=1, **fields))
+
+
+def test_a_stage_line_names_what_is_happening():
+    """A run reporting one line per problem shows nothing for the minutes the
+    calls take."""
+    assert reported(name="reference", detail="written") == "[1/1] reference  written"
+
+
+def test_a_stage_that_paid_for_a_call_reports_what_it_cost():
+    """Tokens and the wait are what a corpus is budgeted from, and the call log
+    is not read while a run is going."""
+    call = Call(
+        id="c1",
+        created_at=datetime(2026, 9, 3, tzinfo=UTC),
+        model="m",
+        effort="high",
+        prompt="p",
+        prompt_hash="h",
+        response="{}",
+        input_tokens=1200,
+        output_tokens=3400,
+        elapsed_ms=38_100,
+        cost=0.0421,
+    )
+
+    assert reported(name="statement", detail="'A title'", call=call).endswith(
+        "(1,200/3,400 tok, 38.1s, $0.0421)"
+    )

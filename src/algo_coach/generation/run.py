@@ -5,6 +5,7 @@ form already has, and two in flight would be shown the same list.
 """
 
 from collections.abc import Callable
+from time import monotonic
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -23,6 +24,7 @@ from algo_coach.generation.hardening import harden
 from algo_coach.generation.inputs import builder
 from algo_coach.generation.landing import Corpus, Drafted, land
 from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, Searched, search
+from algo_coach.generation.steps import SILENT, Notes, Step
 from algo_coach.runner import NoValue, outputs
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Card, CaseOutcome, Template
@@ -106,14 +108,24 @@ def write_one(
     *,
     configuration: Configuration = DEFAULT,
     cap_ms: int = CAP_MS,
+    notes: Notes = SILENT,
 ) -> tuple[Drafted, Checked, Timing, Bar]:
     # the `Checked` is returned rather than raised: a discard is a fact about
     # the problem, and the run reports what it cost
+    notes("statement", "writing the statement, the canonical and the cases")
     draft, call = generate(
         transport, calls, card, template, written=written, configuration=configuration
     )
+    notes("statement", f"{draft.title!r}, {len(draft.cases)} case(s)", call)
+
+    notes("reference", "writing the reference from the statement alone")
     solution, blind = reference(transport, calls, draft.statement, configuration=configuration)
+    notes("reference", "written", blind)
+
+    notes("cases", "running both solutions")
+    started = monotonic()
     checked = check(draft.cases, canonical=draft.canonical, reference=solution, cap_ms=cap_ms)
+    notes("cases", f"{settled(checked)}, {monotonic() - started:.1f}s in the runner")
     drafted = Drafted(
         draft=draft,
         solution=solution,
@@ -126,14 +138,28 @@ def write_one(
     # the mutation loop before the timing case: what it wins is judged by the
     # cap a sitting judges under, and the separating input is chosen last
     checked, bar = measured(
-        transport, calls, drafted, checked, configuration=configuration, cap_ms=cap_ms
+        transport, calls, drafted, checked, configuration=configuration, cap_ms=cap_ms, notes=notes
     )
     if not checked.survived:
         return drafted, checked, Timing(), bar
     checked, timing = timed(
-        transport, calls, template, drafted, checked, configuration=configuration, cap_ms=cap_ms
+        transport,
+        calls,
+        template,
+        drafted,
+        checked,
+        configuration=configuration,
+        cap_ms=cap_ms,
+        notes=notes,
     )
     return drafted, checked, timing, bar
+
+
+def settled(checked: Checked) -> str:
+    """What the two runs left, as the stage line reports it."""
+    if not checked.survived:
+        return why(checked)
+    return f"{checked.outcome}, {len(checked.cases)} case(s) settled"
 
 
 def measured(
@@ -144,6 +170,7 @@ def measured(
     *,
     configuration: Configuration,
     cap_ms: int,
+    notes: Notes = SILENT,
 ) -> tuple[Checked, Bar]:
     """The mutation loop's cases, appended to the set the problem carries.
 
@@ -160,8 +187,10 @@ def measured(
             cases=drafted.cases,
             cap_ms=cap_ms,
             configuration=configuration,
+            notes=notes,
         )
     except Exception as failure:
+        notes("mutants", f"unmeasured: {failure!r}")
         return checked, Bar(unmeasured=repr(failure))
 
     bar = Bar(mutants=hardened.mutants, survived=hardened.survived, won=len(hardened.cases))
@@ -187,6 +216,7 @@ def timed(
     *,
     configuration: Configuration,
     cap_ms: int,
+    notes: Notes = SILENT,
 ) -> tuple[Checked, Timing]:
     """The timing case, appended to the set where one was found.
 
@@ -195,14 +225,20 @@ def timed(
     """
     if not template.speedup:
         return checked, Timing()
+    notes("timing", "searching for the input that separates the two solutions")
     try:
-        found = separating(transport, calls, drafted, configuration=configuration, cap_ms=cap_ms)
+        found = separating(
+            transport, calls, drafted, configuration=configuration, cap_ms=cap_ms, notes=notes
+        )
     except Exception as failure:
+        notes("timing", f"unsearched: {failure!r}")
         return checked, Timing(unseparated=repr(failure))
 
     if found.found:
         drafted.cases.append(found.case)
+        notes("timing", f"separates at {found.size}")
         return checked, Timing(separating=found.size)
+    notes("timing", f"no separation: {found.missing}")
     if found.missing is Missing.DISAGREED:
         # one input the small cases could not reach, answered two ways. A
         # canonical correct small and wrong large is discarded here
@@ -222,10 +258,12 @@ def separating(
     *,
     configuration: Configuration,
     cap_ms: int,
+    notes: Notes = SILENT,
 ) -> Searched:
     """One call for the input generator, then the search over the sizes it
     builds. The generation cap measures, and the sitting's cap is separated."""
-    built, _ = builder(transport, calls, drafted.draft.statement, configuration=configuration)
+    built, call = builder(transport, calls, drafted.draft.statement, configuration=configuration)
+    notes("timing", f"input generator written, up to {built.largest}", call)
     return search(
         make(built.code, cap_ms),
         canonical=drafted.draft.canonical,
@@ -260,6 +298,7 @@ def write_problems(
     configuration: Configuration = DEFAULT,
     cap_ms: int = CAP_MS,
     on_progress: Callable[[Progress], None] | None = None,
+    on_step: Callable[[Step], None] | None = None,
 ) -> GenerationResult:
     """`count` problems for one template, each shown what came before it, and
     each stored as soon as its runs keep it.
@@ -282,6 +321,7 @@ def write_problems(
                 written,
                 configuration=configuration,
                 cap_ms=cap_ms,
+                notes=Notes(on_step, index=index, total=count),
             )
         except Exception as failure:
             # broad on purpose: a refusal, a rate limit or a reply that does
