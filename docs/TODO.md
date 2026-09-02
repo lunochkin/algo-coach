@@ -210,12 +210,12 @@ gap. Every later run is aimed at the templates the gap report lists.
 
 Cases that separate nothing license `verified` on a canonical that is wrong.
 The bar is named in `flows.md`: a blind reference, then mutants of the
-canonical. What the first corpus settles is the operators and the bound.
+canonical. What the first corpus settles is the bound.
 
 - [x] Enumerate mutants from the canonical's syntax tree, one change per
       mutant. Mechanical, so nothing is stored and the set re-derives when the
       operators change
-- [ ] Kill a mutant on a wrong answer, a crash or a timeout, and report which
+- [x] Kill a mutant on a wrong answer, a crash or a timeout, and report which
       ones survived. A survivor names the case that has to exist
 - [ ] Ask for the cases that kill the survivors, arguments only. The reference
       computes what they return, so no model writes an expected output
@@ -224,6 +224,10 @@ canonical. What the first corpus settles is the operators and the bound.
 - [ ] Search for the smallest input separating the reference from the canonical
       under the cap, and store the case at it. Only where the template claims a
       speedup
+- [ ] Run the mutation loop in the landing path, between `check` and `land`,
+      and append the cases it wins to the set the problem carries. Nothing
+      calls `mutation` today, so no landed problem is measured against the
+      bound
 
 ### Exit
 - [ ] Every landed problem carries techniques derived from its canonicals and
