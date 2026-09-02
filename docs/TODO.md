@@ -203,7 +203,7 @@ gap. Every later run is aimed at the templates the gap report lists.
       approach the form replaces
 - [x] Report a core template no solution displays. The card claims to teach
       that form, so a corpus that cannot exercise it is a fact about the store
-- [ ] Aim a generation run at the templates carrying no match. Otherwise the
+- [x] Aim a generation run at the templates carrying no match. Otherwise the
       selector fills the ladder and the missing form is never written
 
 ### The discrimination bar

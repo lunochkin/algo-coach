@@ -175,8 +175,13 @@ def main() -> None:
     )
 
     generate_parser = _command(sub, "generate", "write problems for one of a card's templates")
-    generate_parser.add_argument("--card", required=True, help="the card, by slug")
-    generate_parser.add_argument("--template", required=True, help="its template, by slug")
+    generate_parser.add_argument("--card", help="the card, by slug; narrows --gaps to it")
+    generate_parser.add_argument("--template", help="its template, by slug")
+    generate_parser.add_argument(
+        "--gaps",
+        action="store_true",
+        help="write for every core template carrying no match, rather than one named",
+    )
     generate_parser.add_argument("--count", type=int, default=1, help="how many problems to write")
     generate_parser.add_argument(
         "--code", action="store_true", help="print each canonical beside its statement"

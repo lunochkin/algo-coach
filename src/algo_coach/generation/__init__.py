@@ -7,6 +7,7 @@ from algo_coach.generation.agreement import (
     misdeclared,
     settle,
 )
+from algo_coach.generation.aim import Target, targets
 from algo_coach.generation.blind import reference
 from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
 from algo_coach.generation.generator import (
@@ -60,6 +61,7 @@ __all__ = [
     "DraftCase",
     "GenerationError",
     "Settled",
+    "Target",
     "SettledCase",
     "agrees",
     "check",
@@ -72,6 +74,7 @@ __all__ = [
     "reference",
     "schema",
     "settle",
+    "targets",
     "write_one",
     "write_problems",
     "written_by",

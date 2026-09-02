@@ -5,10 +5,11 @@ from importlib import import_module
 
 import pytest
 from generating import FakeWriter
-from matching import card, seeded
+from matching import card, seeded, template
 
 from algo_coach import cli
 from algo_coach.calls import CallLog
+from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
 from algo_coach.cli.generate import verdict
 from algo_coach.generation import MODEL, Progress
@@ -148,3 +149,85 @@ def test_a_problem_nothing_ran_claims_no_landing():
 
 def test_a_failure_is_the_whole_line():
     assert line(reason="RuntimeError('bad key')") == "! RuntimeError('bad key')"
+
+
+def aimed(monkeypatch, model: FakeWriter, *argv: str) -> None:
+    """A run aimed by the gap report rather than at a template named by hand."""
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
+    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: model)
+    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--gaps", *argv])
+    cli.main()
+
+
+def test_a_gap_run_writes_for_every_core_template(root, monkeypatch, capsys):
+    """Both forms the seeded card carries, since nothing displays either."""
+    model = FakeWriter(statements=["The first.", "The second."])
+
+    aimed(monkeypatch, model)
+
+    out = capsys.readouterr().out
+    assert "2 problem(s) stored" in out and "over 2 template(s)" in out
+    written = {one.generated_for for one in ProblemStore(root).all()}
+    card = CardStore(root).by_slug("sliding-window")
+    assert written == {one.id for one in card.templates}
+
+
+def test_a_covered_form_is_not_written_again(root, monkeypatch, capsys):
+    """One form is displayed already, so the run is aimed at what is left."""
+    run(monkeypatch, FakeWriter(statements=["The first."]), "fixed-window")
+    capsys.readouterr()
+
+    aimed(monkeypatch, FakeWriter(statements=["The second."]))
+
+    out = capsys.readouterr().out
+    assert "1 problem(s) stored" in out and "template(s)" not in out
+    written = [one.generated_for for one in ProblemStore(root).all()]
+    assert len(set(written)) == 2
+
+
+def test_a_corpus_with_no_gap_asks_for_nothing(root, monkeypatch, capsys):
+    aimed(monkeypatch, FakeWriter(statements=["The first.", "The second."]))
+    capsys.readouterr()
+
+    with pytest.raises(SystemExit) as exit_info:
+        aimed(monkeypatch, FakeWriter())
+
+    assert exit_info.value.code == 0
+    assert "no gap" in capsys.readouterr().err
+
+
+def test_a_named_template_says_nothing_beside_gaps(root, monkeypatch, capsys):
+    """The report names the templates, so the two would contradict each other."""
+    with pytest.raises(SystemExit) as exit_info:
+        aimed(monkeypatch, FakeWriter(), "--template", "fixed-window")
+
+    assert exit_info.value.code == 2
+    assert "--template says nothing" in capsys.readouterr().err
+
+
+def test_a_run_names_a_template_or_aims_itself(root, monkeypatch, capsys):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
+    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: FakeWriter())
+    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--card", "sliding-window"])
+
+    with pytest.raises(SystemExit) as exit_info:
+        cli.main()
+
+    assert exit_info.value.code == 2
+    assert "name a --card and a --template" in capsys.readouterr().err
+
+
+def test_a_card_narrows_what_the_gaps_aim_at(root, monkeypatch, capsys):
+    """Every core template of one card, where the report covers the store."""
+    seeded(root, card("union-find", technique="union-find", templates=[template("plain-union")]))
+
+    aimed(
+        monkeypatch,
+        FakeWriter(statements=["The first.", "The second."]),
+        "--card",
+        "sliding-window",
+    )
+
+    assert "over 2 template(s)" in capsys.readouterr().out
+    cards = {one.generated_for for one in ProblemStore(root).all()}
+    assert len(cards) == 2
