@@ -3,14 +3,8 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from textwrap import fill
 
-from algo_coach.claims import (
-    against,
-    claimable,
-    contested,
-    readings_at,
-    request_hash,
-    revisable,
-)
+from algo_coach.claims import against, claimable, contested, readings_at, revisable
+from algo_coach.classifier import request_hash
 from algo_coach.cli.display import verdict
 from algo_coach.cli.prompts import NONE, ask_choice, numbered
 from algo_coach.cli.score import configurations, labels

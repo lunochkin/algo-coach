@@ -6,15 +6,9 @@ from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_pro
 
 from algo_coach import cli
 from algo_coach.calls import CallLog
-from algo_coach.claims import (
-    EFFORT,
-    MODEL,
-    ClassifierError,
-    Configuration,
-    classify_backlog,
-    request_hash,
-)
+from algo_coach.claims import classify_backlog
 from algo_coach.claims.run import ABORT_AFTER, Progress
+from algo_coach.classifier import EFFORT, MODEL, ClassifierError, Configuration, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore

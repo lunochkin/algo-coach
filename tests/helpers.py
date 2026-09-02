@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
 from algo_coach.calls import Reply
-from algo_coach.claims import PIN, TEMPERATURE, Configuration
+from algo_coach.classifier import PIN, TEMPERATURE, Configuration
 from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Attempt, Problem, TechniqueClaim

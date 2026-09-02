@@ -4,7 +4,7 @@ import pytest
 from helpers import GENERATED
 
 from algo_coach import cli
-from algo_coach.claims import PIN, TEMPERATURE, request_hash
+from algo_coach.classifier import PIN, TEMPERATURE, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_claim
 from algo_coach.problems import ProblemStore

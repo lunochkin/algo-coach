@@ -7,17 +7,17 @@ from pathlib import Path
 import pytest
 
 from algo_coach.calls import UNSENT, CallLog, Reply
-from algo_coach.claims import (
+from algo_coach.classifier import (
     DEFAULT,
     EFFORT,
     MODEL,
     PIN,
+    SYSTEM,
     ClassifierError,
     Configuration,
     request_hash,
 )
-from algo_coach.claims import classify as _classify
-from algo_coach.claims.classifier import SYSTEM
+from algo_coach.classifier import classify as _classify
 from algo_coach.schema import Kind
 from algo_coach.techniques import criteria
 

@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from typing import TextIO
 
 from algo_coach.calls import Retry
-from algo_coach.claims import Configuration
+from algo_coach.classifier import Configuration
 from algo_coach.cli.display import held, sampled
 
 # Cells in the bar. Ten, so a cell is a readable ten per cent rather than a

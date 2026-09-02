@@ -1,8 +1,20 @@
-"""Which of a problem's techniques a solution used.
+"""Which techniques a piece of code used, chosen from the candidates it is given.
+
+One reader, two records. A `TechniqueClaim` answers for a user's attempt and a
+`TechniqueReading` for a canonical the engine wrote, and both are this question
+asked of different code. Two prompts asking it would drift, and neither score
+would compare. What the callers do not share is the candidate set — an attempt
+is read against its problem's own techniques, a canonical against the whole
+vocabulary — so the candidates are an argument rather than something this
+derives.
 
 A prompted model reading the code, not a trained one: public corpora tag
 problems, not solutions, so a model trained on them would predict the fallback
 rather than improve on it.
+
+It lives here rather than under `claims`, for the reason `runs.py` gives: the
+second loop that needed it would otherwise import the first, and a reading is
+product data where a claim is the user's private testimony.
 """
 
 import json
@@ -132,11 +144,11 @@ def classify(
     *,
     configuration: Configuration = DEFAULT,
 ) -> tuple[list[str], Call | None]:
-    """The techniques a solution used, chosen from the problem's own, and the
-    call that read them — `None` where the answer cost nothing.
+    """The techniques the code used, chosen from the candidates, and the call
+    that read them — `None` where the answer cost nothing.
 
     The candidates appear twice, doing different jobs. The response schema
-    enforces them, so the classifier cannot name one the problem does not.
+    enforces them, so the classifier cannot name one it was not offered.
     The prompt informs them: thinking is not schema-constrained, so a model
     that met the candidates only at emission time would reason about the code
     without knowing which answers exist, then be forced into the nearest one.

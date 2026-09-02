@@ -7,7 +7,7 @@ read. A user's claim names nothing, and nothing re-derives it.
 
 from collections.abc import Iterable, Mapping
 
-from algo_coach.claims.classifier import Configuration
+from algo_coach.classifier import Configuration
 from algo_coach.log import latest_by_attempt
 from algo_coach.schema import ClaimSource, TechniqueClaim
 

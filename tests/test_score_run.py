@@ -7,16 +7,9 @@ import pytest
 from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach.calls import CallLog, Reply
-from algo_coach.claims import (
-    DEFAULT,
-    EFFORT,
-    MODEL,
-    PIN,
-    Configuration,
-    request_hash,
-    score_backlog,
-)
+from algo_coach.claims import score_backlog
 from algo_coach.claims.run import ABORT_AFTER
+from algo_coach.classifier import DEFAULT, EFFORT, MODEL, PIN, Configuration, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore

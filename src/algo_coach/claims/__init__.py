@@ -1,14 +1,3 @@
-from algo_coach.claims.classifier import (
-    DEFAULT,
-    EFFORT,
-    MODEL,
-    PIN,
-    TEMPERATURE,
-    ClassifierError,
-    Configuration,
-    classify,
-    request_hash,
-)
 from algo_coach.claims.reading import Plan, ReadResult, absorb, select
 from algo_coach.claims.revision import against, contested, revisable
 from algo_coach.claims.run import (
@@ -42,16 +31,9 @@ from algo_coach.claims.stale import at_configuration, is_stale, readings_at
 from algo_coach.runs import as_answered_grouped
 
 __all__ = [
-    "DEFAULT",
-    "EFFORT",
-    "MODEL",
-    "PIN",
-    "TEMPERATURE",
     "CONCURRENCY",
-    "ClassifierError",
     "ClassifyResult",
     "Comparison",
-    "Configuration",
     "ConfigurationScore",
     "Failed",
     "Plan",
@@ -59,6 +41,7 @@ __all__ = [
     "Score",
     "Split",
     "TechniqueScore",
+    "absorb",
     "against",
     "answered_by_hand",
     "as_answered",
@@ -66,21 +49,18 @@ __all__ = [
     "ask",
     "at_configuration",
     "claimable",
-    "classify",
-    "request_hash",
     "classify_backlog",
     "contested",
     "decides_something",
     "eligible",
     "is_stale",
     "one_per_problem",
-    "select",
-    "absorb",
     "read_one",
     "readings_at",
     "revisable",
     "score",
     "score_backlog",
+    "select",
     "spread",
     "store",
 ]

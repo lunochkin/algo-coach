@@ -9,7 +9,7 @@ import re
 import threading
 
 from algo_coach.calls import Retry
-from algo_coach.claims import Configuration
+from algo_coach.classifier import Configuration
 from algo_coach.cli.status import BAR, Status
 
 

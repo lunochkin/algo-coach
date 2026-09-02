@@ -7,7 +7,7 @@ from helpers import T0, FakeTransport, Verdict, attempt, seed_problem
 
 from algo_coach import cli
 from algo_coach.calls import UNSENT
-from algo_coach.claims import EFFORT, MODEL, PIN, TEMPERATURE, request_hash
+from algo_coach.classifier import EFFORT, MODEL, PIN, TEMPERATURE, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_claim
 from algo_coach.schema import ClaimSource
