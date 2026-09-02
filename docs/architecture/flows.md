@@ -25,6 +25,10 @@ The order matters because each step can reject what came before.
 8. All of it lands together, with the template match the generation asserts on
    its canonical.
 
+- **Problems for one template are written one at a time.** Each call is shown
+  the statements the form already has, so two in flight would be shown the same
+  list and could write the same problem twice. Concurrency saves minutes and
+  costs the diversity the brief exists to enforce.
 - **Nothing lands half-verified.** A problem failing any step is discarded
   whole rather than stored for repair. Every call is recorded, so what was paid
   for and thrown away stays readable.

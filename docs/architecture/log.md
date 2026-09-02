@@ -61,6 +61,13 @@ rather than a field on the attempt.
   Claiming inclusively removes the reason to withhold a code, so the way it
   fails is by naming all of them — which is the fallback, and agrees with it
   whenever the fallback is right. Set equality cannot catch that.
+- **How sure its author was is a level, not a float.** A judgement made in
+  seconds carries no more resolution. It is absent on every claim written
+  before it was asked for, and a level nobody gave is not a low one.
+- **One list of columns, whichever renderer prints a score.** A metric added to
+  one renderer and not the other prints a number that stopped being true. The
+  single-configuration summary said a decline was unscored long after declines
+  were scored, because two renderers named their own columns.
 - **The hand claims are an eval set and a correction path**, never training
   data. Nothing in the engine is trained.
 - **What invalidates a label is which reader informed it, not that one did.** A

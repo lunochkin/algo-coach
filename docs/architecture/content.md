@@ -47,6 +47,9 @@ The vocabulary the append-only log references.
   candidate.
 - **A code is never deleted**, because records carrying it outlive it.
   Retirement means an entry in an alias map, applied when grouping.
+- **The vocabulary is read-only once loaded.** Its entries reach a prompt and
+  a reader unchanged. One edited in memory would be a criterion the file does
+  not carry, and nothing could re-derive the readings it produced.
 - **Membership is checked on the write path only.** A model that validated
   codes on read would make the log unreadable by its own schema the moment a
   code was retired.

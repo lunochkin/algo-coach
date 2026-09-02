@@ -31,6 +31,11 @@ stated here once.
   temperature nobody set is the provider's own default — recorded absent, and
   equal only to itself, which keeps records taken before the parameter existed
   scorable rather than discarded. Generation is the exception, and says why.
+- **What a reading cost is recorded and never compared.** A price says when a
+  reading was taken rather than which reader took it, so two readings compare
+  whether or not either carries one. It sits outside the all-or-none rule with
+  the temperature: a reading stored before the field existed carries none, and
+  so does one a provider priced at nothing.
 - **Staleness keys on the digest of what was sent**, never on a version over
   the rulebook. A criterion travels with its candidate, so editing one entry
   re-derives what that entry reached and leaves the rest. An author can forget
@@ -90,6 +95,15 @@ holds nothing about what the answer was for.
   requests that took, beside what the last request took alone. Their difference
   is the endpoint's backoff, and without it a run held behind a per-minute cap
   reads as a slow model.
+- **A rate cap and a gateway failure are absorbed here, never reported
+  upward.** Both are facts about the endpoint rather than about the
+  configuration, and a run's abort exists to catch a broken configuration. The
+  waits cover a minute between them, since that is the window a per-minute cap
+  is stated in. The endpoint's own reset time is not read: where it is carried
+  varies by provider, and a wrong parse would sleep for hours.
+- **Every other failure is raised on the first request.** A rejected schema, an
+  unset key and a model that does not exist are answered the same way twice, so
+  retrying them spends the abort count slowly instead of at once.
 - **Nothing on the run path reads it back.** Whether to ask again is decided
   from the claims, which carry the configuration already. The file is written
   by every run and loaded only to analyse one.
