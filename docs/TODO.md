@@ -197,7 +197,7 @@ gap. Every later run is aimed at the templates the gap report lists.
 - [x] Read every canonical for its techniques, skipping the ones already read
       at the current digest. Every criterion reaches every reading, so a
       criteria edit re-reads the whole corpus
-- [ ] Derive a problem's techniques as the union over the standing readings of
+- [x] Derive a problem's techniques as the union over the standing readings of
       its canonicals, excluding the reference. A view, so a canonical added
       later widens them, and counting the reference would credit the naive
       approach the form replaces

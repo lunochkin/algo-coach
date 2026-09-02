@@ -1,6 +1,7 @@
 from algo_coach.readings.reader import candidates, read, read_one, store
 from algo_coach.readings.run import Failed, Progress, ReadingResult, read_corpus
 from algo_coach.readings.stale import at_configuration, outstanding
+from algo_coach.readings.standing import latest_by_solution, standing_readings
 from algo_coach.readings.store import ReadingLog
 
 __all__ = [
@@ -10,9 +11,11 @@ __all__ = [
     "ReadingResult",
     "at_configuration",
     "candidates",
+    "latest_by_solution",
     "outstanding",
     "read",
     "read_corpus",
     "read_one",
+    "standing_readings",
     "store",
 ]
