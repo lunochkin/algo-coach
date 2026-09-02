@@ -23,15 +23,15 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
   durable context, and they got cheap to write exactly when they got valuable.
 - They carry intent, reasons, and the shape of the system — what a model
   cannot infer and would otherwise reinvent differently each session.
-- Facts go where they can be enforced: tests, then hooks and types. Prose is
-  the residue, for what nothing can execute.
+- Facts go where they can be enforced: tests, then hooks and types. Prose
+  carries what nothing can execute.
 - Implementation follows from tests and shape, and feeds back: what it
   discovers revises the doc.
-- Divergence is checked on purpose. An unchecked doc becomes fiction, and a
-  model implements fiction without complaint.
+- Divergence is checked on purpose. An unchecked doc describes a system that
+  does not exist, and a model implements that description anyway.
 - `docs/TODO.md` is a task list, not a log. It holds the phases still open.
-- A ticked item stays while its phase is open. The phase is the unit, not the
-  item, so nothing is removed as it lands.
+- A ticked item stays while its phase is open. Items are removed a whole phase
+  at a time, never one by one as each lands.
 - A closed phase is harvested into `docs/ROADMAP.md`, then removed whole. What
   survives is what it measured, since nothing re-derives it. How the work was
   sequenced is in the commits.
@@ -56,6 +56,13 @@ Docs, `README.md`, commits, comments.
   sentence that only rephrases the one before.
 - **No aphorisms.** State the rule, then the reason, both literally. Don't
   compress an argument into a metaphor the reader has to unpack.
+- **Name what every noun refers to.** A noun the doc has not defined — `the
+  work`, `the point`, `the product`, `the unit` — means the sentence restates
+  the previous one in more abstract words rather than adding a fact. Cut it,
+  or name what it stands for.
+- **A bullet ends on its reason, never on a summary.** A closing clause that
+  can be deleted without losing a fact is a summary. Check the last sentence
+  of every bullet against the test above.
 - **No personification.** Records don't wear, ride, go quiet, or flatter. Say
   what the code does.
 - **One idea per sentence.** Split at the em-dash and the semicolon instead
