@@ -211,8 +211,9 @@ Which techniques a solution used. Product-owned and global, as the solution is.
   are shared with the attempt classifier. Two prompts asking one question would
   drift, and neither score would compare.
 - **A machine record like any other**: provenance whole, staleness keyed on the
-  digest of what was sent, and re-derivable at any time. A criteria edit
-  re-reads what that entry reached and leaves the rest.
+  digest of what was sent, and re-derivable at any time. Where a claim carries
+  one problem's criteria, a reading carries the whole vocabulary's, so any
+  criteria edit re-reads every canonical.
 - **Two writers, user first**, as a claim resolves. A hand record here
   adjudicates rather than testifies: nobody sat for a canonical, so what the
   user writes is a reading of code they did not produce. It stands all the
