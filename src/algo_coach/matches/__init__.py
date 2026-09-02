@@ -1,3 +1,4 @@
+from algo_coach.matches.gaps import Coverage, core, coverage, uncovered
 from algo_coach.matches.matcher import (
     DEFAULT,
     EFFORT,
@@ -24,6 +25,7 @@ __all__ = [
     "TEMPERATURE",
     "BY_WHAT_EACH_KNEW",
     "Configuration",
+    "Coverage",
     "Failed",
     "MatchLog",
     "MatchResult",
@@ -33,6 +35,8 @@ __all__ = [
     "annotatable",
     "at_configuration",
     "candidates",
+    "core",
+    "coverage",
     "latest_by_pair",
     "match",
     "match_corpus",
@@ -41,5 +45,6 @@ __all__ = [
     "read_one",
     "request_hash",
     "standing_matches",
+    "uncovered",
     "store",
 ]

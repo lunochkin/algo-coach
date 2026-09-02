@@ -201,7 +201,7 @@ gap. Every later run is aimed at the templates the gap report lists.
       its canonicals, excluding the reference. A view, so a canonical added
       later widens them, and counting the reference would credit the naive
       approach the form replaces
-- [ ] Report a core template no solution displays. The card claims to teach
+- [x] Report a core template no solution displays. The card claims to teach
       that form, so a corpus that cannot exercise it is a fact about the store
 - [ ] Aim a generation run at the templates carrying no match. Otherwise the
       selector fills the ladder and the missing form is never written

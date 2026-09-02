@@ -11,6 +11,7 @@ from algo_coach.cli.annotate import annotate
 from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
+from algo_coach.cli.gaps import gaps
 from algo_coach.cli.generate import generate
 from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
@@ -181,6 +182,11 @@ def main() -> None:
         "--code", action="store_true", help="print each canonical beside its statement"
     )
 
+    gaps_parser = _command(sub, "gaps", "core templates no stored solution displays")
+    gaps_parser.add_argument(
+        "--all", action="store_true", help="every core template; only the gaps otherwise"
+    )
+
     annotate_parser = _command(
         sub, "annotate", "which of a card's templates a problem exercises, by hand"
     )
@@ -275,6 +281,8 @@ def dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         claim(args, parser, root)
     elif args.command == "classify":
         classify(args, parser, root)
+    elif args.command == "gaps":
+        gaps(args, root)
     elif args.command == "generate":
         generate(args, parser, root)
     elif args.command == "read":
