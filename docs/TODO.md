@@ -241,7 +241,7 @@ The hand pass does two jobs at once. It writes the matcher's reference, and it
 is the only reading of a generated problem that no model produced. A generator
 that wandered from its brief shows up there whatever the matcher says.
 
-- [ ] Aim the first run at the core templates, 38 of the 45 across nine
+- [ ] Aim the first run at the core templates, 37 of the 45 across nine
       cards, and annotate a sample of what lands
 - [ ] Sample and annotate through `algo-coach annotate`, over pairs of a
       template and a solution. It already samples across templates, and only
