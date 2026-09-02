@@ -48,6 +48,11 @@ A design pass settles boundaries, record shapes and what is irreversible, then
 stops. A detail only real use can answer is named as deferred rather than
 reasoned out. The schema is designed a phase ahead of the features.
 
+A phase's exit depends on its own items alone. Working ahead into the next
+phase is fine. An exit that waits on an item there is not: nothing then decides
+when the phase closes, and two phases close together on whichever item lands
+last.
+
 ## Writing
 
 Docs, `README.md`, commits, comments.
