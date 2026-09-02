@@ -234,10 +234,43 @@ canonical. What the first corpus settles is the bound.
       calls `mutation` today, so no landed problem is measured against the
       bound
 
+### The first run
+
+Nothing on this path has run against a model: every gate above is unit-tested
+against a fake. Each item is one run and the number it writes down, and the
+numbers go in the commit unless the item names a file.
+
+- [ ] Run `generate --card binary-search --template predicate-first-true
+      --count 1` and read what it stored: the problem, its cases, both
+      solutions and the generator match
+- [ ] Record what one problem costs, from the call log: tokens and wall clock
+      per call. How large a corpus is affordable follows from that number
+- [ ] Record how many mutants a real canonical yields and how many each round
+      kills. Revise `ROUNDS` in `corpus.md` where the second round kills
+      nothing
+- [ ] Record what the mutation loop spends in the runner. A per-case
+      subprocess is what the deferred fork server replaces, and nothing has
+      measured it
+- [ ] Run `generate --count 10` on one template and record the discard rate
+      per gate: no_value, misdeclared, untested, disagreed. A gate rejecting
+      most problems is a defect in the prompt rather than a bar
+- [ ] Count how many of those ten reuse a domain their template's cue names.
+      The exclusion is prompted and nothing enforces it
+- [ ] Count how many of those ten ask the same question in a new setting. The
+      list of what a form already carries is what prevents that
+- [ ] Run `generate` on a template claiming a speedup and record the
+      separating size, or which `unseparated` reason came back
+- [ ] Run `read` over the stored canonicals and record the techniques each
+      problem derives. Nothing has read a generated solution
+- [ ] Run `gaps`, then `generate --gaps --count 1`, and record which templates
+      the run was aimed at
+
 ### Exit
-- [ ] Every landed problem carries techniques derived from its canonicals and
-      a case set measured against the mutation bound, and the gap report names
-      the templates the next run is aimed at
+- [ ] A run has stored problems, each carrying techniques derived from its
+      canonicals and a case set measured against the mutation bound, and the
+      gap report names the templates the next run is aimed at
+- [ ] What one problem costs and what each mutation round kills are recorded.
+      Nothing re-derives them once the corpus has grown past that run
 
 ## Phase 7 — the corpus, measured
 
