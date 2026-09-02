@@ -91,10 +91,9 @@ The order matters because each step can reject what came before.
   gives, so a crash or a timeout there is as likely to be an input the problem
   excludes as a defect in the solution. The canonical was already run against
   the cases written with the statement, and those are what decide it.
-- **When the loop stops is deferred.** A mutant can be equivalent to the
-  original, and equivalence is undecidable, so no case kills it and the score
-  never reaches full. The loop stops on a bound rather than on a score, and
-  which bound is a question a real corpus answers.
+- **The loop stops on a bound, never on a score.** A mutant can be equivalent
+  to the original, and equivalence is undecidable, so no case kills it and the
+  score never reaches full. `corpus.md` carries the number of rounds.
 - **Whether a form is a speedup is authored on the template.** Backtracking and
   exhaustive search are their own optimum, so no input separates the two
   solutions there. A timing run cannot tell that from a reference written

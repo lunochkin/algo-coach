@@ -141,8 +141,14 @@ What decides whether a solution to a generated problem is correct.
   it.
 - **How discrimination is established is in `flows.md`.** A blind reference
   disagreeing on any case discards the problem, and a surviving mutant of the
-  canonical names a case that has to exist. What stays deferred is the bound
-  the loop stops on.
+  canonical names a case that has to exist.
+- **The mutation loop stops after two rounds.** A round is one call: the
+  survivors go out, and the cases that come back are run against them. A
+  survivor two rounds did not kill is usually equivalent to the canonical, and
+  no case kills an equivalent mutant. A round that kills nothing stops the loop
+  early, since the next one asks the same question of the same survivors. The
+  number was set before a corpus existed, and what revises it is how much the
+  second round still kills.
 
 ## Solutions
 

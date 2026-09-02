@@ -12,6 +12,10 @@ from algo_coach.mutation.mutants import Mutant
 from algo_coach.runner import decide, run
 from algo_coach.schema import CaseOutcome
 
+# how many times the loop asks for cases before it stops. `corpus.md` gives
+# the reason; a round that kills nothing stops it earlier
+ROUNDS = 2
+
 
 class Case(Protocol):
     """A case on either side of landing: a `SettledCase` before, a `TestCase`
@@ -56,4 +60,4 @@ def _against(mutant: Mutant, cases: Sequence[Case], *, cap_ms: int) -> Verdict:
     return Verdict(mutant)
 
 
-__all__ = ["Case", "Verdict", "kill", "survivors"]
+__all__ = ["ROUNDS", "Case", "Verdict", "kill", "survivors"]

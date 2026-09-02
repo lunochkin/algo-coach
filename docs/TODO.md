@@ -219,7 +219,7 @@ canonical. What the first corpus settles is the bound.
       ones survived. A survivor names the case that has to exist
 - [x] Ask for the cases that kill the survivors, arguments only. The reference
       computes what they return, so no model writes an expected output
-- [ ] Choose the bound the mutation loop stops at, and write the number into
+- [x] Choose the bound the mutation loop stops at, and write the number into
       `corpus.md`. Equivalent mutants make a full score unreachable
 - [ ] Search for the smallest input separating the reference from the canonical
       under the cap, and store the case at it. Only where the template claims a
