@@ -224,7 +224,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Search for the smallest input separating the reference from the canonical
       under the cap, doubling then halving. Only where the template claims a
       speedup
-- [ ] Write the generation call for an input generator: the statement in, code
+- [x] Write the generation call for an input generator: the statement in, code
       building an input of a given size out. The speedup search has no input to
       run without one
 - [ ] Store the separating case beside the others, so a submission is judged

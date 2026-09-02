@@ -29,6 +29,7 @@ from algo_coach.generation.generator import (
     schema,
     written_for,
 )
+from algo_coach.generation.inputs import Built, builder
 from algo_coach.generation.landing import Corpus, Drafted, land, written_by
 from algo_coach.generation.run import (
     Discarded,
@@ -53,6 +54,7 @@ __all__ = [
     "Checked",
     "Disagreement",
     "Discard",
+    "Built",
     "Discarded",
     "Drafted",
     "Failed",
@@ -68,6 +70,7 @@ __all__ = [
     "Target",
     "SettledCase",
     "agrees",
+    "builder",
     "check",
     "land",
     "generate",

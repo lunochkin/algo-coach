@@ -69,7 +69,7 @@ def search(
     if smallest > largest:
         raise ValueError("the smallest size the search starts at is within the constraints")
 
-    under, over, over_ms, capped = smallest, None, None, False
+    under, over, over_ms, over_args, capped = smallest, None, None, [], False
     size = smallest
     while True:
         args = list(make(size))
@@ -82,7 +82,7 @@ def search(
         if exceeded is None:
             return Searched(missing=Missing.REFERENCE_CRASHED)
         if exceeded:
-            over, over_ms = size, elapsed
+            over, over_ms, over_args = size, elapsed, args
             break
         under = size
         if size >= largest:
@@ -98,18 +98,19 @@ def search(
     # short of running every size in between would establish it
     while over - under > 1:
         middle = (under + over) // 2
-        exceeded, elapsed = _reference(
-            reference, make(middle), cap_ms=cap_ms, measure_ms=measure_ms
-        )
+        args = list(make(middle))
+        exceeded, elapsed = _reference(reference, args, cap_ms=cap_ms, measure_ms=measure_ms)
         if exceeded is None:
             return Searched(missing=Missing.REFERENCE_CRASHED)
         if exceeded:
-            over, over_ms = middle, elapsed
+            over, over_ms, over_args = middle, elapsed, args
         else:
             under = middle
 
+    # the input that was measured rather than one built again: a generator is
+    # asked to be deterministic, and the stored case is what the run decided
     return _settled(
-        list(make(over)),
+        over_args,
         over,
         canonical=canonical,
         cap_ms=cap_ms,
