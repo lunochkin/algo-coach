@@ -47,7 +47,7 @@ def test_the_command_writes_problems(root, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "The first." in out and "The second." in out
     assert f"2 problem(s) stored, written by {MODEL}" in out
-    assert len(CallLog(root).all()) == 4
+    assert len(CallLog(root).all()) == 6
 
 
 def test_a_problem_its_runs_kept_is_stored_whole(root, monkeypatch, capsys):
@@ -231,3 +231,24 @@ def test_a_card_narrows_what_the_gaps_aim_at(root, monkeypatch, capsys):
     assert "over 2 template(s)" in capsys.readouterr().out
     cards = {one.generated_for for one in ProblemStore(root).all()}
     assert len(cards) == 2
+
+
+def test_the_line_reports_the_separating_size():
+    """What a timing case was stored at, since a run that found none teaches
+    the form without enforcing it."""
+    landed = line(cases=4, outcome=CaseOutcome.PASSED, landed=True, separating=2048)
+
+    assert landed == "4 case(s)  passed  landed  separates at 2048"
+
+
+def test_a_form_that_separated_at_nothing_says_why():
+    """A defect where the template claimed a speedup, so it is not silent."""
+    landed = line(
+        cases=4, outcome=CaseOutcome.PASSED, landed=True, unseparated="reference_finished"
+    )
+
+    assert landed.endswith("no separation: reference_finished")
+
+
+def test_a_form_that_is_its_own_optimum_says_nothing():
+    assert line(cases=4, outcome=CaseOutcome.PASSED, landed=True) == "4 case(s)  passed  landed"

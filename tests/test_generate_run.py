@@ -3,10 +3,11 @@ failure costs, and what the runs reject."""
 
 from generating import FakeWriter
 from helpers import PROVENANCE
-from matching import card, seeded
+from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
-from algo_coach.generation import Corpus, write_problems
+from algo_coach.cases import CaseLog
+from algo_coach.generation import Corpus, blind, generator, inputs, write_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import ExpectedSource, Problem
 
@@ -18,14 +19,14 @@ def run(tmp_path, model: FakeWriter, *, count: int = 1):
     )
 
 
-def test_a_problem_takes_two_calls_in_one_order(tmp_path):
-    """The reference is written from the statement, so it cannot be asked for
-    before there is a statement to test."""
+def test_a_problem_takes_three_calls_in_one_order(tmp_path):
+    """The reference and the input generator are both written from the
+    statement, so neither can be asked for before there is one."""
     model = FakeWriter()
 
     _, result = run(tmp_path, model)
 
-    assert [one["content"].startswith("<problem>") for one in model.calls] == [False, True]
+    assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM]
     assert len(result.drafted) == 1
     assert result.drafted[0].solution.startswith("def solve")
 
@@ -85,13 +86,14 @@ def test_several_failures_in_a_row_end_the_run(tmp_path):
 
 
 def test_every_call_is_recorded(tmp_path):
-    """Both of them, the failed one included: what a run paid for stays
-    readable whatever it produced."""
+    """Every one, the failed one included: what a run paid for stays readable
+    whatever it produced. One problem failed at its first call, and the other
+    took three."""
     model = FakeWriter(statements=[None, "The second."])
 
     run(tmp_path, model, count=2)
 
-    assert len(CallLog(tmp_path).all()) == 3
+    assert len(CallLog(tmp_path).all()) == 4
 
 
 def test_a_problem_the_runs_reject_is_reported_apart(tmp_path):
@@ -139,3 +141,72 @@ def test_a_surviving_problem_carries_what_the_reference_computed(tmp_path):
     (drafted,) = result.drafted
     assert [one.expected for one in drafted.cases] == [3]
     assert [one.expected_from for one in drafted.cases] == [ExpectedSource.REFERENCE]
+
+
+SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.15)\n    return len(xs)\n"
+BUILDS = "def solve(size):\n    return [list(range(size))]\n"
+
+
+def timed(tmp_path, monkeypatch, model: FakeWriter, **overrides):
+    """A run whose sitting cap is small enough to separate in a test."""
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 200)
+    (one,) = seeded(tmp_path, card(**overrides))
+    return one, write_problems(model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path))
+
+
+def test_the_separating_case_is_stored_beside_the_others(tmp_path, monkeypatch):
+    """A submission is judged at that size, so the naive solution the form
+    replaces fails the problem."""
+    model = FakeWriter(solution=SLOW, generator=BUILDS)
+
+    timed(tmp_path, monkeypatch, model)
+
+    stored = CaseLog(tmp_path).cases()
+    assert [one.args for one in stored] == [[[1, 2, 3]], [[0, 1]]]
+    assert stored[-1].expected_from is ExpectedSource.REFERENCE
+
+
+def test_a_form_that_is_its_own_optimum_is_not_searched(tmp_path, monkeypatch):
+    """Backtracking and exhaustive search have no naive solution to beat, so
+    no input separates them and no call is paid for."""
+    model = FakeWriter(solution=SLOW, generator=BUILDS)
+
+    timed(
+        tmp_path,
+        monkeypatch,
+        model,
+        templates=[template("longest-valid-window", speedup=False)],
+    )
+
+    assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM]
+    assert len(CaseLog(tmp_path).cases()) == 1
+
+
+def test_a_search_that_fails_costs_the_case_and_not_the_problem(tmp_path, monkeypatch):
+    """The problem passed every gate that judges it, and the timing case is
+    what the run reports it did not get."""
+    model = FakeWriter(solution=SLOW)
+
+    _, result = timed(tmp_path, monkeypatch, model)
+
+    assert len(result.drafted) == 1
+    assert len(CaseLog(tmp_path).cases()) == 1
+
+
+def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
+    tmp_path, monkeypatch
+):
+    """A canonical correct on the small cases and wrong at scale, which only
+    the separating input reaches."""
+    blind_solution = (
+        "import time\n\n\ndef solve(xs):\n"
+        "    time.sleep(len(xs) * 0.15)\n"
+        "    return len(xs) + (1 if 0 in xs else 0)\n"
+    )
+    model = FakeWriter(solution=blind_solution, generator=BUILDS)
+
+    _, result = timed(tmp_path, monkeypatch, model)
+
+    assert result.drafted == []
+    assert [one.discard for one in result.discarded] == ["disagreed"]
+    assert CaseLog(tmp_path).cases() == []

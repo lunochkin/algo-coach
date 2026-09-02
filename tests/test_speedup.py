@@ -4,6 +4,7 @@ cap and the canonical answers under it."""
 import pytest
 
 from algo_coach.generation.speedup import CEILING, Missing, search
+from algo_coach.schema import ExpectedSource
 
 # a reference whose cost is the size, in tens of milliseconds, so a separating
 # size is decided by the clock rather than by the machine's speed
@@ -124,7 +125,12 @@ def test_an_input_over_the_ceiling_is_not_a_case():
 def test_a_returned_value_over_the_ceiling_is_not_a_case():
     """The arguments fit and the answer does not, which the case carries
     together."""
-    found = searched(canonical="def solve(n):\n    return list(range(10000))\n", ceiling=200)
+    big = "    return list(range(10000))\n"
+    found = searched(
+        canonical="def solve(n):\n" + big,
+        reference="import time\n\n\ndef solve(n):\n    time.sleep(n / 100)\n" + big,
+        ceiling=200,
+    )
 
     assert found.missing is Missing.INPUT_TOO_LARGE
 
@@ -133,3 +139,30 @@ def test_a_reference_that_finishes_is_told_from_an_input_that_does_not_fit():
     """One is a defect where a speedup was claimed, the other a problem whose
     separating input is out of reach."""
     assert searched(largest=2).missing is Missing.REFERENCE_FINISHED
+
+
+def test_the_expected_value_is_the_reference_s_where_it_computed_one():
+    """The settle rule the first case set uses. A case the canonical produced
+    passes by construction, and this one is a test of it."""
+    found = searched()
+
+    assert found.case.expected == 6
+    assert found.case.expected_from is ExpectedSource.REFERENCE
+
+
+def test_the_expected_value_is_the_canonical_s_beyond_the_reference_s_reach():
+    """Nothing else can compute it, and the case is then evidence about the
+    cap rather than about the verdict."""
+    found = searched(reference="def solve(n):\n    while True:\n        pass\n", measure_ms=200)
+
+    assert found.case.expected_from is ExpectedSource.CANONICAL
+
+
+def test_two_solutions_disagreeing_at_that_size_is_not_a_case():
+    """A canonical correct on the small cases and wrong at scale is what the
+    separating input catches."""
+    found = searched(canonical="def solve(n):\n    return n + 1\n")
+
+    assert found.missing is Missing.DISAGREED
+    assert found.disagreement.canonical == 7
+    assert found.disagreement.reference == 6

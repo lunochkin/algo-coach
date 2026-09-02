@@ -141,6 +141,9 @@ What decides whether a solution to a generated problem is correct.
   from a linear one takes a few thousand elements. A seed and a size would
   store less, at the cost of a case naming how it is built rather than what it
   holds, and of a run that builds an input before it can judge one.
+- **The separating case is chosen against the sitting's cap**, never
+  generation's. It is the size at which a submission that did not use the form
+  fails, so the number a sitting judges under is what decides it.
 - **A separating input over the ceiling stores no case.** The problem lands
   without one, and the run reports it. What goes unenforced is a speedup whose
   separating size is a million elements, which is a log factor rather than the

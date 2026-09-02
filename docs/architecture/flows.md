@@ -99,6 +99,18 @@ The order matters because each step can reject what came before.
   solutions there. A timing run cannot tell that from a reference written
   cleverly by mistake. The template states which it is, and a missing
   separating input is a defect only where a speedup was claimed.
+- **The separating case is settled as any other case.** The reference is
+  measured well above the sitting's cap, so it usually computes the value the
+  case stores. A disagreement there discards the problem, and it is what
+  catches a canonical correct on the small cases and wrong at scale.
+- **The input the search measured is the input the case stores.** A generator
+  is asked to build one input per size, and building it again would be a second
+  run of model-written code. What was measured is what the verdict was taken
+  on.
+- **A search that fails costs the case, not the problem.** The generator call
+  can refuse and the code it wrote can crash, and neither says anything about
+  the statement. What is lost is the timing case, and the run reports that it
+  went unwritten.
 - **A statement may not name the domain its template's cue names.** The
   monotonic stack's cue says "temperatures" and "a next warmer day", and the
   first generation call returned Daily Temperatures verbatim. A solver who

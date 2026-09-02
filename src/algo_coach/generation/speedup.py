@@ -7,12 +7,18 @@ and a missing separation says nothing about them.
 """
 
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
+from algo_coach.generation.agreement import Disagreement, SettledCase
 from algo_coach.generation.checks import CAP_MS
-from algo_coach.runner import RunOutcome, as_json, run
+from algo_coach.runner import RunOutcome, agrees, as_json, run
+from algo_coach.schema import ExpectedSource
+
+# the cap a sitting judges a submission under, which is what the separating
+# case is chosen against. Phase 8 reads it; generation's own cap sits above it
+DRILL_CAP_MS = 2_000
 
 # the most a stored case may weigh, arguments and expected value together.
 # `corpus.md` gives the reason and what a case over it costs
@@ -27,23 +33,31 @@ class Missing(StrEnum):
     REFERENCE_CRASHED = "reference_crashed"
     CANONICAL_FAILED = "canonical_failed"
     INPUT_TOO_LARGE = "input_too_large"
+    DISAGREED = "disagreed"
 
 
 @dataclass(frozen=True)
 class Searched:
-    """The separating input, or why there was none. The two are exclusive."""
+    """The separating case, or why there was none. The two are exclusive."""
 
     size: int | None = None
-    args: list[Any] = field(default_factory=list)
+    case: SettledCase | None = None
     # what the child measured at that size. The reference's is absent where it
     # exceeded the measuring cap rather than merely the drill loop's
     canonical_ms: int | None = None
     reference_ms: int | None = None
     missing: Missing | None = None
+    # the two solutions at that size, where they answered differently. A
+    # canonical correct small and wrong large is what this catches
+    disagreement: Disagreement | None = None
 
     @property
     def found(self) -> bool:
         return self.missing is None
+
+    @property
+    def args(self) -> list[Any]:
+        return self.case.args if self.case else []
 
 
 def search(
@@ -69,7 +83,7 @@ def search(
     if smallest > largest:
         raise ValueError("the smallest size the search starts at is within the constraints")
 
-    under, over, over_ms, over_args, capped = smallest, None, None, [], False
+    under, over, over_ms, over_args, over_value, capped = smallest, None, None, [], None, False
     size = smallest
     while True:
         args = list(make(size))
@@ -78,11 +92,11 @@ def search(
         if _weighs(args) > ceiling:
             capped = True
             break
-        exceeded, elapsed = _reference(reference, args, cap_ms=cap_ms, measure_ms=measure_ms)
+        exceeded, elapsed, value = _reference(reference, args, cap_ms=cap_ms, measure_ms=measure_ms)
         if exceeded is None:
             return Searched(missing=Missing.REFERENCE_CRASHED)
         if exceeded:
-            over, over_ms, over_args = size, elapsed, args
+            over, over_ms, over_args, over_value = size, elapsed, args, value
             break
         under = size
         if size >= largest:
@@ -99,11 +113,11 @@ def search(
     while over - under > 1:
         middle = (under + over) // 2
         args = list(make(middle))
-        exceeded, elapsed = _reference(reference, args, cap_ms=cap_ms, measure_ms=measure_ms)
+        exceeded, elapsed, value = _reference(reference, args, cap_ms=cap_ms, measure_ms=measure_ms)
         if exceeded is None:
             return Searched(missing=Missing.REFERENCE_CRASHED)
         if exceeded:
-            over, over_ms, over_args = middle, elapsed, args
+            over, over_ms, over_args, over_value = middle, elapsed, args, value
         else:
             under = middle
 
@@ -115,6 +129,7 @@ def search(
         canonical=canonical,
         cap_ms=cap_ms,
         reference_ms=over_ms,
+        reference_value=over_value,
         ceiling=ceiling,
     )
 
@@ -126,6 +141,7 @@ def _settled(
     canonical: str,
     cap_ms: int,
     reference_ms: int | None,
+    reference_value: Any,
     ceiling: int,
 ) -> Searched:
     # the canonical is run under the cap it has to beat rather than the
@@ -133,10 +149,27 @@ def _settled(
     [ran] = run(canonical, [args], cap_ms=cap_ms)
     if not ran.returned:
         return Searched(missing=Missing.CANONICAL_FAILED)
+
+    measured = {"size": size, "canonical_ms": ran.elapsed_ms, "reference_ms": reference_ms}
+    # the settle rule the first case set uses: the reference's answer wherever
+    # it computed one, and the canonical's only beyond its reach
+    if reference_ms is None:
+        expected, source = ran.value, ExpectedSource.CANONICAL
+    elif agrees(ran.value, reference_value):
+        expected, source = reference_value, ExpectedSource.REFERENCE
+    else:
+        return Searched(
+            missing=Missing.DISAGREED,
+            disagreement=Disagreement(args=args, canonical=ran.value, reference=reference_value),
+            **measured,
+        )
+
     # the returned value weighs on the case as the arguments do
-    if _weighs(args) + _weighs(ran.value) > ceiling:
+    if _weighs(args) + _weighs(expected) > ceiling:
         return Searched(missing=Missing.INPUT_TOO_LARGE)
-    return Searched(size=size, args=args, canonical_ms=ran.elapsed_ms, reference_ms=reference_ms)
+    return Searched(
+        case=SettledCase(args=args, expected=expected, expected_from=source), **measured
+    )
 
 
 def _weighs(value: Any) -> int:
@@ -149,15 +182,19 @@ def _reference(
     *,
     cap_ms: int,
     measure_ms: int,
-) -> tuple[bool | None, int | None]:
-    """Whether the reference exceeds `cap_ms` at this size, and what it took.
-    `None` where it crashed, which is neither."""
+) -> tuple[bool | None, int | None, Any]:
+    """Whether the reference exceeds `cap_ms` at this size, what it took, and
+    what it answered. The first is `None` where it crashed, which is neither.
+
+    Measured well above the cap, so a run that a sitting would have cut short
+    still returns a value, and the case it becomes is not the canonical's own.
+    """
     [ran] = run(code, [list(args)], cap_ms=measure_ms)
     if ran.outcome is RunOutcome.TIMEOUT:
-        return True, None
+        return True, None, None
     if not ran.returned:
-        return None, None
-    return ran.elapsed_ms > cap_ms, ran.elapsed_ms
+        return None, None, None
+    return ran.elapsed_ms > cap_ms, ran.elapsed_ms, ran.value
 
 
-__all__ = ["CEILING", "Missing", "Searched", "search"]
+__all__ = ["CEILING", "DRILL_CAP_MS", "Missing", "Searched", "search"]

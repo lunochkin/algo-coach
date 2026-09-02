@@ -227,7 +227,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Write the generation call for an input generator: the statement in, code
       building an input of a given size out. The speedup search has no input to
       run without one
-- [ ] Store the separating case beside the others, so a submission is judged
+- [x] Store the separating case beside the others, so a submission is judged
       at that size. The search finds one and nothing writes it down
 - [ ] Run the mutation loop in the landing path, between `check` and `land`,
       and append the cases it wins to the set the problem carries. Nothing

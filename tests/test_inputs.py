@@ -15,6 +15,7 @@ from algo_coach.runner import defines_solve, outputs
 
 STATEMENT = "Given a list of at most 1000 readings, return the widest fair stretch."
 BUILDS = "def solve(size):\n    return [list(range(size))]\n"
+SLEEPS = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) / 100)\n    return len(xs)\n"
 
 
 @dataclass
@@ -72,7 +73,7 @@ def test_the_search_runs_a_generated_builder():
     found = search(
         lambda size: outputs(BUILDS, [[size]], cap_ms=1000)[0],
         canonical="def solve(xs):\n    return len(xs)\n",
-        reference="import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) / 100)\n    return 0\n",
+        reference=SLEEPS,
         cap_ms=55,
         largest=16,
         measure_ms=2000,

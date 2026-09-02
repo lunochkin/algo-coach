@@ -140,4 +140,13 @@ def verdict(progress: Progress) -> str:
     cases = f"{progress.cases} case(s)"
     if progress.outcome is None:
         return f"{cases}  not run"
-    return f"{cases}  {progress.outcome}  {'landed' if progress.landed else 'not stored'}"
+    landed = "landed" if progress.landed else "not stored"
+    return f"{cases}  {progress.outcome}  {landed}{timing(progress)}"
+
+
+def timing(progress: Progress) -> str:
+    """What the speedup search left. Silent where the form is its own optimum,
+    since nothing was looked for."""
+    if progress.separating is not None:
+        return f"  separates at {progress.separating}"
+    return f"  no separation: {progress.unseparated}" if progress.unseparated else ""

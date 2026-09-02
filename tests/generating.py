@@ -5,6 +5,7 @@ import json
 from dataclasses import dataclass, field
 
 from algo_coach.calls import Reply
+from algo_coach.generation import blind, inputs
 
 CANONICAL = "def solve(xs):\n    return len(xs)\n"
 BLIND = "def solve(xs):\n    return sum(1 for _ in xs)\n"
@@ -23,8 +24,16 @@ def draft(statement: str = "Given a list of readings, return ...", **overrides) 
     )
 
 
-def blind(solution: str = BLIND) -> str:
+def solved(solution: str = BLIND) -> str:
     return json.dumps({"solution": solution})
+
+
+# one element per size, which separates nothing: a run that wanted a timing
+# case builds its own writer
+def built(
+    code: str = "def solve(size):\n    return [list(range(size))]\n", largest: int = 8
+) -> str:
+    return json.dumps({"code": code, "largest": largest})
 
 
 @dataclass
@@ -41,13 +50,20 @@ class FakeWriter:
 
     statements: list[str | None] = field(default_factory=lambda: ["A statement."])
     solution: str = BLIND
+    generator: str | None = None
     calls: list[dict] = field(default_factory=list)
     written: int = 0
 
     def __call__(self, **kwargs) -> Reply:
         self.calls.append(kwargs)
-        if kwargs["content"].startswith("<problem>"):
-            return Reply(text=blind(self.solution), stop_reason="stop")
+        # told apart by the brief rather than by the content: the reference and
+        # the input generator are both handed the statement alone
+        if kwargs["system"] == blind.SYSTEM:
+            return Reply(text=solved(self.solution), stop_reason="stop")
+        if kwargs["system"] == inputs.SYSTEM:
+            if self.generator is None:
+                return Reply(text=None, stop_reason="length")
+            return Reply(text=built(self.generator), stop_reason="stop")
         statement = self.statements[min(self.written, len(self.statements) - 1)]
         self.written += 1
         if statement is None:
@@ -57,4 +73,8 @@ class FakeWriter:
     @property
     def briefs(self) -> list[str]:
         """What the generation calls were sent, in order."""
-        return [one["content"] for one in self.calls if not one["content"].startswith("<problem>")]
+        return [
+            one["content"]
+            for one in self.calls
+            if one["system"] not in (blind.SYSTEM, inputs.SYSTEM)
+        ]
