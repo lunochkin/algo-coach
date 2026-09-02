@@ -234,6 +234,74 @@ canonical. What the first corpus settles is the bound.
       calls `mutation` today, so no landed problem is measured against the
       bound
 
+### One configuration per call site
+
+- [ ] Add `Bench`: one `Configuration` per generation call site — generator,
+      blind, discrimination, inputs — defaulting to the one all four share
+      today. A run then names four configurations rather than one
+- [ ] Take a per-site bench override on `algo-coach generate`, so a cheaper
+      model is tried without an edit
+- [ ] Set the bench defaults: sampled for the generator, `temperature: 0` for
+      the other three. `require_parameters` drops an endpoint sent a
+      temperature it cannot honour, so greedy and non-reasoning are one choice
+- [ ] Write the per-site configuration into `machine.md`. A record copies its
+      own call's, so four models in one run stay readable
+- [ ] Run `discrimination` at low effort over a stored problem and record kills
+      per round against high. It spent 5,263 reasoning tokens on cases that
+      killed nothing
+
+### What an eval reads back
+
+- [ ] Add an outcome record per call site and item, carrying the gate verdicts,
+      the configuration and the digest of what was sent. A printed line is lost
+      when the run ends
+- [ ] Skip an item a configuration has already read at the current digest, as
+      the classifier skips a claim. A second configuration is then paid for
+      only where it has not read
+
+### What a case carries
+
+- [ ] Add provenance to `TestCase`, naming the call that proposed its
+      arguments. A case won by a round was written by a different call from the
+      problem's, and `mint.case` still says otherwise
+- [ ] Add the round that won a case, zero for the set written with the
+      statement. Replaying `discrimination` needs the set as it stood: it
+      decides the survivors and it is in the prompt
+- [ ] State in `corpus.md` that a won case carries its own provenance, beside
+      the rule that the first set is written with the problem
+
+### Killing without a call
+
+- [ ] Run the input builder for every problem rather than only where the
+      template claims a speedup. The fuzz pass has no inputs without one
+- [ ] Kill mutants with built inputs across sizes and seeds before any round,
+      keeping the first input that kills each. No call is paid for, and only
+      the deep survivors reach one
+- [ ] Shrink a killing input by delta debugging before it is stored. A random
+      input that kills is large, and the ceiling and every later verification
+      pay for it
+- [ ] Record which source killed each mutant: the set written with the
+      statement, the fuzz pass, or round n. That is what says whether a round
+      earns its call
+- [ ] Record per proposed case which mutants it killed, and land only the ones
+      that killed. The first run stored fifteen that killed nothing, and every
+      verification runs them forever
+
+### The speedup that nothing enforces
+
+- [ ] Separate the search's two empty answers: the reference finished at the
+      largest legal input, against the built input crossing the ceiling.
+      `input_too_large` hid which happened on the first run
+- [ ] Decide what enforces a speedup where the blind reference writes the same
+      form — a third solution written deliberately naive, or `speedup` claiming
+      less — and write the choice into `corpus.md`
+
+### Transport
+
+- [ ] Retry once on a 404 whose message names no endpoints for the model. It is
+      router state rather than a bad request, and a wrong model id then costs
+      one extra request before it fails
+
 ### The first run
 
 Nothing on this path has run against a model: every gate above is unit-tested
