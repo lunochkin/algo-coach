@@ -1,21 +1,4 @@
-"""Which techniques a piece of code used, chosen from the candidates it is given.
-
-One reader, two records. A `TechniqueClaim` answers for a user's attempt and a
-`TechniqueReading` for a canonical the engine wrote, and both are this question
-asked of different code. Two prompts asking it would drift, and neither score
-would compare. What the callers do not share is the candidate set — an attempt
-is read against its problem's own techniques, a canonical against the whole
-vocabulary — so the candidates are an argument rather than something this
-derives.
-
-A prompted model reading the code, not a trained one: public corpora tag
-problems, not solutions, so a model trained on them would predict the fallback
-rather than improve on it.
-
-It lives here rather than under `claims`, for the reason `runs.py` gives: the
-second loop that needed it would otherwise import the first, and a reading is
-product data where a claim is the user's private testimony.
-"""
+"""Which techniques a piece of code used, chosen from candidates the caller gives."""
 
 import json
 from collections.abc import Sequence
@@ -28,32 +11,14 @@ from algo_coach.calls import prompt_hash as digest
 from algo_coach.schema import Call
 from algo_coach.techniques import criterion
 
-# Twenty configurations read the same 80 hand-claimed attempts, and the readers
-# do not share a ceiling: the spread is 70% to 95%, and of the sixteen attempts
-# any of the leaders got wrong, none defeated all of them and ten were wrong for
-# exactly one. So the choice is not only cost — an earlier note here claimed
-# every model that reached the ceiling erred on the same attempts, and the eval
-# set has since disproved it.
-#
-# This one agrees with the best reader to within a single attempt, which is
-# inside the noise its own effort arms measured, at a twentieth of the price.
-# What that buys is re-derivation: a criteria edit re-reads the attempts it
-# reaches, and at this rate the whole backlog is under a dollar rather than a
-# decision. The cost is time — it is the slowest of the leaders by an order of
-# magnitude, and a full sweep is hours rather than minutes.
+# Twenty configurations over the same 80 hand-claimed attempts spread 70% to
+# 95%, and the leaders miss different attempts. This one is within a single
+# attempt of the best at a twentieth of the price, and the slowest of them.
 MODEL = "google/gemma-4-31b-it"
 EFFORT = "medium"
-# Which endpoint may serve it, named to the quantization. A router picks one
-# per request from whoever carries the model, so without a pin two runs of one
-# configuration are answered by different builds of the same weights — and fp4
-# and bf16 are different weights, not one model behind two doors.
+# Named to the quantization: unpinned, the router picks a build per request.
 PIN = "coreweave/fp4"
-# Greedy. Classification over a fixed candidate set has one right answer per
-# decision, and sampling turns a verdict the model holds at 0.9 into one it
-# gives four times in five. That noise is tolerable in an eval, which is
-# repeated and averaged; the backlog sweep writes into an append-only log the
-# board reads forever, so the same 1% would be permanent and would move
-# readings a criteria edit never touched.
+# Greedy: the sweep writes into an append-only log, so noise would be permanent.
 TEMPERATURE: float | None = 0.0
 SYSTEM = """You name which techniques a solution used.
 
@@ -79,42 +44,21 @@ If the code used none of the candidates, name none of them."""
 
 
 class Configuration(BaseModel, frozen=True):
-    """Which classifier a reading came from, and the key it is found under.
-
-    The prompt is not among them. It varies per attempt, since a candidate's
-    criterion travels with it. So what rulebook a reading came from is a digest
-    of what that attempt was actually sent, and never a property of the
-    classifier. Frozen because it is an identity: compared whole, never
-    ordered, so a rollback is naming the earlier one.
-    """
+    """Which classifier a reading came from. The prompt is not among them: a
+    criterion travels with its candidate, so the rulebook is a per-attempt
+    digest."""
 
     model: str = MODEL
     effort: str = EFFORT
-    # Which build read it. Quantization changes the weights, so an fp4
-    # endpoint and a bf16 one answer as two readers and a reading from one
-    # does not answer for the other. Required rather than optional: unpinned,
-    # the router chooses per request, and the readings under that key would be
-    # a mixture no later run could take apart.
     pin: str = PIN
-    # Identity beside the pin, and for the same kind of reason: the pin fixes
-    # which weights answered, this fixes how they were sampled. `None`
-    # is the provider's own default — a named arm rather than a gap, as an
-    # unsent effort is, so every reading taken before this field existed stays
-    # comparable instead of being discarded.
+    # `None` is the provider's own default: a named arm rather than a gap.
     temperature: float | None = TEMPERATURE
 
+    # What meters a request: OpenRouter caps nothing on a paid model, the
+    # provider caps per model per endpoint. Account-wide caps on free models
+    # and one key driven by two runs at once are not covered.
     @property
     def deployment(self) -> tuple[str, str]:
-        """Which deployment answers, and so whose cap a call is metered against.
-
-        OpenRouter imposes no request limit on a paid model; every 429 comes
-        from the provider, and a provider meters per model per endpoint. Two
-        configurations differing only in effort or temperature reach one
-        deployment and share one budget.
-
-        What it does not cover: the account-wide caps on free models, and one
-        key driven by two runs at once. Neither is a property of a reading.
-        """
         return self.model, self.pin
 
 
@@ -126,13 +70,6 @@ class ClassifierError(Exception):
 
 
 def request_hash(candidates: Sequence[str], code: str) -> str:
-    """The digest of what this attempt would be sent, right now.
-
-    What decides whether a reading is worth paying for again. A criterion
-    travels with its candidate, so editing one entry changes this for the
-    attempts carrying that code and for no others. That is the whole reason it
-    is computed per attempt rather than carried on the configuration.
-    """
     return digest(SYSTEM, prompt(candidates, code))
 
 
@@ -144,28 +81,11 @@ def classify(
     *,
     configuration: Configuration = DEFAULT,
 ) -> tuple[list[str], Call | None]:
-    """The techniques the code used, chosen from the candidates, and the call
-    that read them — `None` where the answer cost nothing.
-
-    The candidates appear twice, doing different jobs. The response schema
-    enforces them, so the classifier cannot name one it was not offered.
-    The prompt informs them: thinking is not schema-constrained, so a model
-    that met the candidates only at emission time would reason about the code
-    without knowing which answers exist, then be forced into the nearest one.
-
-    The code is the only evidence beyond them: a title or a statement
-    describes what the problem admits, which is the question the fallback
-    already answers.
-
-    Naming nothing is legal — the candidates may not cover what the code did,
-    and no claim leaves the fallback standing rather than asserting a wrong
-    one. A
-    reply cut short by the token cap names nothing for a different reason, and
-    the call's `stop_reason` is what separates the two.
-    """
+    """The techniques the code used, and the call that read them — `None` where
+    the answer cost nothing. The candidates appear twice: the schema enforces
+    them, and the prompt informs them, thinking being unconstrained."""
+    # A schema offering one choice would ask the model to agree with itself.
     if len(candidates) < 2:
-        # Nothing to decide: the fallback already says this, and a schema
-        # offering one choice would ask the model to agree with itself.
         return list(candidates), None
 
     call, text = ask(
@@ -180,34 +100,21 @@ def classify(
         schema=schema(candidates),
     )
     if call.stop_reason == "length":
-        # The decoder ran out of tokens, so whatever came back is truncated and
-        # carries no verdict. Named as nothing rather than raised, because this
-        # one repeats: a reading is greedy, so the same prompt runs the same
-        # way and every later run pays the whole cap again to fail identically.
-        # What is stored is a fact about this configuration on this prompt, and
-        # the call beside it says which — `stop_reason` tells an exhausted
-        # reading from a considered decline.
+        # Truncated, so no verdict. Named as nothing rather than raised: greedy,
+        # so a re-run pays the whole cap to fail identically.
         return [], call
     if text is None:
         raise ClassifierError(call.error or "no verdict")
 
-    # Checked again because the schema's guarantee ends with the request and
-    # the record does not: an append-only log has no pass that fixes a bad
-    # code later.
+    # Checked again: the schema's guarantee ends with the request, and an
+    # append-only log has no later pass that fixes a bad code.
     named = set(json.loads(text)["techniques"])
     return [technique for technique in candidates if technique in named], call
 
 
 def prompt(candidates: Sequence[str], code: str) -> str:
-    """The candidates and their criteria before the code, so the reading is
-    made knowing what can be named and what earns each one. Delimited, since
-    the code is data the model reads rather than instructions it follows.
-
-    Beside the candidates rather than in the system text. A criterion is a
-    per-code rule, and one carried by every call is paid for on the calls where
-    its code is not a candidate. Over a vocabulary of this size, that is nearly
-    all of them.
-    """
+    """Criteria go here rather than in the system text: a per-code rule carried
+    by every call is paid for on the calls where its code is not a candidate."""
     return "\n".join(
         [
             f"Candidates: {', '.join(candidates)}",
@@ -220,17 +127,14 @@ def prompt(candidates: Sequence[str], code: str) -> str:
     )
 
 
+# One candidate's rule and the blank that separates it from the next. A retired
+# code costs its own lines, not the separator around a rule that is not there.
 def block(candidate: str) -> list[str]:
-    """The prompt's copy of one rule: the shared lines, and the blank that
-    separates one candidate from the next. A retired code costs its own lines,
-    not the separator around a rule that is not there."""
     lines = criterion(candidate)
     return [*lines, ""] if lines else []
 
 
 def schema(candidates: Sequence[str]) -> dict[str, Any]:
-    """The same candidates as an enum. The prompt informs the reading; this
-    enforces it — an instruction can be violated, a response format cannot."""
     return {
         "type": "object",
         "properties": {

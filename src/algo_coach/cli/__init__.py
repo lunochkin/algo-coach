@@ -1,8 +1,4 @@
-"""The CLI: one adapter over the engine, one module per command.
-
-Commands take the data root rather than reaching for it, so `main` is the only
-place that decides where the store lives.
-"""
+"""The CLI: one adapter over the engine, one module per command."""
 
 import argparse
 import os
@@ -30,8 +26,7 @@ __all__ = ["BadLine", "DATA_ROOT", "INTERRUPTED", "main"]
 
 
 class _Defaults(argparse.ArgumentDefaultsHelpFormatter):
-    """Show a default only where there is one to show: `None` and `False` are
-    the absence of a flag, not a value it carries."""
+    """`None` and `False` are the absence of a flag, so no default is shown for them."""
 
     def _get_help_string(self, action: argparse.Action) -> str | None:
         if action.default is None or action.default is False:
@@ -53,9 +48,8 @@ def _user_argument(parser: argparse.ArgumentParser) -> None:
 
 def main() -> None:
     # Before the parser, since a default reads the environment too. An exported
-    # variable wins over the file: the shell is the deliberate one. Found from
-    # the working directory, like the data root — not from the package, which
-    # sits elsewhere once installed.
+    # variable wins over the file, and the file is found from the working
+    # directory rather than from the installed package.
     load_dotenv(find_dotenv(usecwd=True))
 
     parser = argparse.ArgumentParser(prog="algo-coach")
@@ -79,8 +73,6 @@ def main() -> None:
     )
     claim_parser.add_argument("--lines", type=int, default=120, help="lines of code to show")
     claim_parser.add_argument("--seed", type=int, default=0, help="sampling order")
-    # Revising asks about what the hand pass answered rather than what it did
-    # not, and shows what each named classifier read the same code as.
     claim_parser.add_argument(
         "--revise", action="store_true", help="ask again about attempts already claimed"
     )
@@ -112,9 +104,8 @@ def main() -> None:
         metavar="TEMPERATURE",
         help="what the --model before it sampled at; 'default' for the provider's own",
     )
-    # Unset rather than 0, so "not passed" is a state instead of a value the
-    # flag could also be given. Every claim by default: reviewing only what a
-    # classifier contests corrects the hand claims in one direction.
+    # Unset rather than 0: "not passed" has to be a state the flag cannot
+    # also be given as a value.
     claim_parser.add_argument(
         "--disputed",
         type=int,
@@ -179,8 +170,6 @@ def main() -> None:
     annotate_parser.add_argument("--count", type=int, default=10, help="how many to ask about")
     annotate_parser.add_argument("--card", help="one card by slug; every seeded card otherwise")
     annotate_parser.add_argument("--seed", type=int, default=0, help="sampling order")
-    # Off by default: the first pass is what the line gets drawn by, and an
-    # annotation made with a verdict in view records what it reviewed.
     annotate_parser.add_argument(
         "--verdict", action="store_true", help="show what the matcher read the same pairs as"
     )
@@ -192,9 +181,7 @@ def main() -> None:
         help="how many attempts to read per classifier; every unread one otherwise",
     )
     # One destination for all of them, so which setting followed which model
-    # survives. Named more than once, they are scored side
-    # by side over what all of them read; named not at all, the built-in
-    # classifier is the one scored.
+    # survives. See `Named` in score.py.
     score_parser.add_argument(
         "--model",
         dest="named",
@@ -257,9 +244,8 @@ def main() -> None:
     try:
         dispatch(args, parser, root)
     except KeyboardInterrupt:
-        # Ctrl-C is an answer, not a fault: every command appends as it goes,
-        # so what landed is kept. A traceback would name the line the prompt
-        # was waiting on — where the user was, not what went wrong.
+        # Not a fault: every command appends as it goes, so what landed is
+        # kept and a traceback would name only where the user was.
         parser.exit(INTERRUPTED, "\ninterrupted\n")
 
 

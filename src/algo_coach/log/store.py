@@ -4,9 +4,7 @@ from algo_coach.schema import Attempt, Diagnosis, SelfLabel, TechniqueClaim
 
 
 class AttemptLog:
-    """Append-only JSONL store for attempts and the records keyed to them:
-    technique claims, self-labels and diagnoses. One line per record; the
-    files are the longitudinal dataset — no rewrites."""
+    """Append-only JSONL store for attempts, claims, self-labels and diagnoses."""
 
     def __init__(self, root: Path):
         self.root = root
@@ -31,11 +29,9 @@ class AttemptLog:
         return [Attempt.model_validate_json(line) for line in self._lines(self.attempts_path)]
 
     def claims(self) -> list[TechniqueClaim]:
-        """In append order: a tie on `created_at` is broken by what landed last."""
         return [TechniqueClaim.model_validate_json(line) for line in self._lines(self.claims_path)]
 
     def self_labels(self) -> list[SelfLabel]:
-        """In append order, like `claims`."""
         return [SelfLabel.model_validate_json(line) for line in self._lines(self.self_labels_path)]
 
     def diagnoses(self) -> list[Diagnosis]:

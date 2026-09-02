@@ -11,17 +11,11 @@ _NEVER = datetime.min.replace(tzinfo=UTC)
 
 
 class ProblemRow(BaseModel):
-    """A problem offered for a drill, with the history behind the offer.
-
-    Carries the problem itself: the loop hands over its URL, and re-looking it
-    up by id would be the caller doing what this already did.
-    """
+    """A problem offered for a drill, with the history behind the offer."""
 
     problem: Problem
     attempt_count: int
     solved_count: int
-    # None when never attempted — nothing has been retrieved, so nothing is
-    # stale yet, and it ranks ahead of everything that has.
     last_attempt_at: datetime | None = None
 
 
@@ -30,14 +24,9 @@ def candidates(
 ) -> list[ProblemRow]:
     """What could be drilled for a technique, least recently attempted first.
 
-    Membership is the problem's own techniques, not the claims on its
-    attempts: selection asks what a problem could exercise, while a claim says
-    what one past solution did. A problem nobody has
-    attempted is a candidate on the same terms as one attempted last year.
-
-    Ranked by staleness, lowest solve rate breaking a tie, which is the row a
-    retrieval drill wants first. Problem id breaks a remaining tie, so two
-    renders of the same log offer the same order.
+    Membership is the problem's own techniques, never the claims on its
+    attempts. Problem id breaks a remaining tie, so two renders of one log
+    offer the same order.
     """
     by_problem: dict[str, list[Attempt]] = defaultdict(list)
     for attempt in attempts:

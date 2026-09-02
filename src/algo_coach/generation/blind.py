@@ -1,13 +1,7 @@
 """The reference solution: the statement in, a solution out, and nothing else.
 
-Blind is the whole point. Shown the canonical or its cases, the reference
-inherits that solution's reading of the statement, and agreement then shows
-only that one model is consistent with itself. Shown nothing but the prose,
-agreement is evidence that the prose has one reading, and a disagreement on
-any case discards the problem.
-
-Its own brief for the same reason: the technique, the template and the cue are
-what the statement is written to withhold, so none of them may appear here.
+Its own brief, naming no technique, template or cue: those are what the
+statement withholds.
 """
 
 from typing import Any
@@ -35,29 +29,23 @@ alone: no input is read and nothing is printed."""
 
 
 class Blind(BaseModel):
-    """What the reference call returns: one solution and nothing about it.
-
-    No cases, since the ones it would write would be its own reading of the
-    statement rather than a test of it. No commentary, since nothing reads it.
-    """
-
+    # no cases: the ones it would write are its own reading of the statement
+    # rather than a test of it
     solution: str = Field(min_length=1)
 
 
 def prompt(statement: str) -> str:
-    """The statement alone, delimited: it is data the model solves rather than
-    instructions it follows."""
+    # delimited: the statement is data the model solves, not instructions
     return f"<problem>\n{statement}\n</problem>"
 
 
 def read(text: str) -> str:
-    """The solution, checked again on arrival as the draft is."""
     return Blind.model_validate_json(text).solution
 
 
 def schema() -> dict[str, Any]:
-    """One string, required. An object rather than bare text, so the code
-    arrives as a value instead of inside whatever fences a model likes."""
+    # an object rather than bare text, so the code arrives as a value instead
+    # of inside whatever fences a model likes
     return {
         "type": "object",
         "properties": {
@@ -75,13 +63,8 @@ def reference(
     *,
     configuration: Configuration = DEFAULT,
 ) -> tuple[str, Call]:
-    """One solution written from the statement, and the call that wrote it.
-
-    The same configuration as the generation call by default. Independence is
-    what the model was shown, not which model it was: a second model reading
-    the canonical would inherit its reading all the same, and one model reading
-    only the prose does not.
-    """
+    # the generation call's configuration by default: independence is what the
+    # model was shown, not which model it was
     call, text = ask(
         transport,
         log,

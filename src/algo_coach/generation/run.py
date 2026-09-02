@@ -1,15 +1,7 @@
 """Writing several problems for one template, one after another.
 
-Sequential on purpose, where the matcher runs its questions in parallel. Each
-call is shown the statements the form already has, so two calls in flight
-would be shown the same list and could write the same problem twice. What
-concurrency would buy is minutes; what it costs is the diversity the brief
-exists to enforce.
-
-Both solutions are run before a problem is kept, and one that fails a gate is
-discarded whole — so a run reports what it wrote apart from what survived. A
-surviving problem lands as it is written rather than at the end of the run: an
-abort or a killed process then costs the problem in flight and nothing else.
+Sequential where the matcher is parallel: each call is shown the statements the
+form already has, and two in flight would be shown the same list.
 """
 
 from collections.abc import Callable
@@ -38,12 +30,8 @@ class Failed(BaseModel):
 
 
 class Discarded(BaseModel):
-    """One problem that was written and did not survive its runs.
-
-    Apart from `Failed`, which is a call that returned nothing. Both cost the
-    same request and neither is kept, and a report folding them would say a
-    model refused where it wrote a problem the runs rejected.
-    """
+    """One problem that was written and did not survive its runs. Apart from
+    `Failed`, which is a call that returned nothing."""
 
     index: int
     discard: str  # which gate rejected it
@@ -52,25 +40,19 @@ class Discarded(BaseModel):
 
 class Progress(BaseModel):
     """One problem, attempted. Reported as the run goes, since two calls per
-    problem make a run of ten minutes long.
-
-    The verdict and whether it landed are separate fields. A problem can be
-    written and still not land — its canonical failing, or the two solutions
-    disagreeing — and a report folding the two would say a call succeeded when
-    nothing was kept.
-    """
+    problem make a run of ten minutes long."""
 
     index: int  # 1-based, over what this run asks for
     total: int
     template_slug: str
     title: str = ""
     cases: int = 0
-    # how the canonical's run over those cases went, folded to its most severe
-    # case. Absent where the problem never reached a run, which is a call that
-    # returned nothing
+    # the canonical's run over those cases, folded to its severest. Absent
+    # where the problem never reached a run
     outcome: CaseOutcome | None = None
-    landed: bool = False  # whether the problem, its cases and its solutions were stored
-    reason: str | None = None  # the failure, when there was one
+    # apart from `outcome`: a problem can be written, run and still not land
+    landed: bool = False
+    reason: str | None = None
 
 
 class GenerationResult(BaseModel):
@@ -90,17 +72,8 @@ def write_one(
     configuration: Configuration = DEFAULT,
     cap_ms: int = CAP_MS,
 ) -> tuple[Drafted, Checked]:
-    """One problem: the statement, canonical and cases, then a reference
-    written from the statement alone.
-
-    The two calls in that order and never the reverse. The reference is what
-    the statement is tested by, so it cannot exist before there is a statement
-    to test.
-
-    Then both solutions run, and the `Checked` beside the problem says whether
-    it survived. It is returned rather than raised: a discard is a fact about
-    the problem, and the run reports what it cost.
-    """
+    # the `Checked` is returned rather than raised: a discard is a fact about
+    # the problem, and the run reports what it cost
     draft, call = generate(
         transport, calls, card, template, written=written, configuration=configuration
     )
@@ -131,18 +104,9 @@ def write_problems(
     """`count` problems for one template, each shown what came before it, and
     each stored as soon as its runs keep it.
 
-    A statement written by this run is added to the list the next call sees,
-    without waiting for the problem to land. A discarded one is added too, so a
-    run of ten writes ten problems rather than ten variants of one.
-
-    A failure is one problem's, and the run continues — except that several in
-    a row mean the configuration is broken rather than the model unlucky, which
-    is what `ABORT_AFTER` catches. A discard is not counted there: the calls
-    answered, and what the runs rejected is the model's writing rather than the
-    configuration.
-
-    A discarded statement is still shown to the next call. It was written for
-    this form, and asking for it again is what the list exists to prevent.
+    A statement joins the list the next call sees without waiting for the
+    problem to land, discarded ones included. `ABORT_AFTER` counts failures
+    only: a discard means the calls answered and the runs rejected the writing.
     """
     result = GenerationResult()
     written = written_for(corpus.problems.all(), template)
@@ -160,8 +124,8 @@ def write_problems(
                 cap_ms=cap_ms,
             )
         except Exception as failure:
-            # Broad on purpose: a refusal, a rate limit or a reply that does
-            # not parse costs this problem and not the run.
+            # broad on purpose: a refusal, a rate limit or a reply that does
+            # not parse costs this problem and not the run
             result.failed.append(Failed(index=index, reason=repr(failure)))
             report(on_progress, index, count, template, reason=repr(failure))
             consecutive += 1
@@ -194,12 +158,7 @@ def write_problems(
 
 
 def why(checked: Checked) -> str:
-    """The discard as one line, naming what it was decided on.
-
-    A count rather than the cases themselves: the gate is what a run reports,
-    and the arguments that failed are on the `Checked` for a reader who wants
-    them.
-    """
+    # a count rather than the cases: the failing arguments are on the `Checked`
     match checked.discard:
         case Discard.NO_VALUE:
             return f"discarded: the canonical {checked.outcome} on some case"

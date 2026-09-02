@@ -1,10 +1,4 @@
-"""Making a call and recording it, with nothing said about what it was for.
-
-The half of a classification that is not the transport: a caller hands over
-the text and the schema it wants back, and gets the answer and the id of the
-record that now holds it. What the answer means is the caller's; how it was
-fetched is the transport's.
-"""
+"""Making a call and recording it, with nothing said about what it was for."""
 
 from hashlib import sha256
 from time import monotonic
@@ -15,18 +9,13 @@ from algo_coach.calls.transport import MAX_TOKENS, Reply, Transport, traced
 from algo_coach.mint import call as mint_call
 from algo_coach.schema import Call
 
-# Twelve hex characters of sha256. Only ever compared for equality, so the
-# collision margin is irrelevant beside carrying sixty-four of them on every
-# line of an append-only log.
+# Hex characters of sha256, compared only for equality; sixty-four of them
+# would be carried on every line of an append-only log.
 HASH_LENGTH = 12
 
 
+# Hashed and stored in this form, so a stored prompt digests to the hash beside it.
 def payload(system: str, content: str) -> str:
-    """The prompt as one string: what was sent, in the order it was sent.
-
-    Hashed and stored in this form, so the stored text digests to the hash
-    beside it and a renderer that changes cannot make an old record unreadable.
-    """
     return f"{system}\n\n---\n\n{content}"
 
 
@@ -49,23 +38,14 @@ def ask(
 ) -> tuple[Call, str | None]:
     """Send one prompt, record what happened, and return the call and its text.
 
-    A failure is recorded too, then raised. The caller decides whether one
-    attempt's problem ends the run, and the record is what makes a run that
-    broke overnight readable afterwards. Only the message and the exception's
-    type are kept. A repr can carry request context, and this file outlives the
-    terminal it would have been printed to.
-
-    The output schema is not part of the hash. It is built from the candidates,
-    which already appear verbatim in the content, so it varies with nothing the
-    hash does not already cover.
-
-    The whole wait is timed here, so a retried call records what it cost the
-    run. The last request's time and the count come back from the transport,
-    which is the only thing that sees them. A monotonic clock is used: a wall
-    clock stepping backwards would record a negative wait.
+    A failure is recorded before it is re-raised, keeping the message and the
+    exception type but never a repr, which can carry request context. The
+    schema is not part of the hash: it is built from the candidates, which
+    appear verbatim in the content already.
     """
     text = payload(system, content)
     digest = prompt_hash(system, content)
+    # Monotonic: a wall clock stepping backwards would record a negative wait.
     started = monotonic()
 
     try:
@@ -102,9 +82,8 @@ def ask(
         prompt_hash=digest,
         pin=pin,
         temperature=temperature,
-        # A reply with no text answered nothing — a refusal, or an answer cut
-        # short. Recorded as the failure it is, so the log does not claim an
-        # empty verdict was a reading.
+        # No text is a refusal or a cut-short answer, recorded as the failure it
+        # is rather than as an empty verdict.
         response=reply.text,
         error=None if reply.text is not None else f"no verdict: {reply.stop_reason}",
         thinking=reply.thinking,
@@ -123,15 +102,12 @@ def ask(
 
 
 def failed(exc: Exception) -> dict[str, int]:
-    """What the transport stamped, or nothing — which leaves the fields absent
-    rather than claiming a request nobody counted."""
+    """What the transport stamped, or nothing where it never retried."""
     trace = traced(exc)
     return {} if trace is None else {"attempts": trace.attempts, "request_ms": trace.request_ms}
 
 
 def elapsed(started: float) -> int:
-    """Milliseconds, since nothing reads a call's timing more finely than that
-    and a float would carry precision the clock never had."""
     return round((monotonic() - started) * 1000)
 
 

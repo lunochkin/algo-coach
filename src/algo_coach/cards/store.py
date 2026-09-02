@@ -4,12 +4,7 @@ from algo_coach.schema import Card
 
 
 class CardStore:
-    """One file per card, named by its engine-minted id.
-
-    A cache of what an author wrote, as the problem store is of what a client
-    minted: a re-seed refreshes the fields and never moves the id, because a
-    card run references it.
-    """
+    """One file per card, named by its engine-minted id."""
 
     def __init__(self, root: Path):
         self.cards_path = root / "cards"
@@ -26,7 +21,6 @@ class CardStore:
         return Card.model_validate_json(path.read_text())
 
     def by_slug(self, slug: str) -> Card | None:
-        """Identity across seedings: the same slug is the same card."""
         for card in self.all():
             if card.slug == slug:
                 return card

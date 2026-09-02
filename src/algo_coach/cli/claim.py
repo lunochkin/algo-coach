@@ -19,12 +19,9 @@ LEVELS = list(Confidence)
 
 
 def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """The drill loop's technique question, pointed at attempts already in the
-    log. No sitting to be present at — the evidence is the code, which stays.
+    """The drill loop's technique question, over attempts already in the log.
 
-    With `--revise`, the same question over what the hand pass already
-    answered: a claim is open to revision, and a reading that disagrees is the
-    only place a mislabelled one surfaces.
+    With `--revise`, the same question over what the hand pass already answered.
     """
     log = AttemptLog(root)
     problems = {problem.id: problem for problem in ProblemStore(root).all()}
@@ -49,21 +46,19 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             [],
         )
     if not pool:
-        # "disputed" only where that is what emptied it. The revision pool is
-        # every claim by default, so an empty one means none were made.
+        # "disputed" only where that is what emptied it: the revision pool is
+        # every claim by default.
         left = "left to claim"
         if args.revise:
             left = "disputed" if args.disputed else "to revise"
-        # Zero, because an empty pool is a completed query rather than a
-        # fault. Nothing disputed is what adjudication stops on, so the status
-        # would contradict the message it prints. Misuse still exits 2.
+        # Zero: an empty pool is a completed query, and nothing disputed is
+        # what adjudication stops on. Misuse still exits 2.
         parser.exit(0, f"claim: nothing {left} for {args.user}\n")
 
     # Once, unlike the candidates: the levels are the same at every attempt.
     print(f"\nconfidence: {numbered(LEVELS)}")
-    # What each answer does, said before the first prompt rather than only in
-    # the retry hint. `0` and `s` are the pair worth spelling out: one is a
-    # verdict about the code, the other leaves the attempt unanswered.
+    # `0` and `s` are the pair worth spelling out: one is a verdict about the
+    # code, the other leaves the attempt unanswered.
     kept = "keeps the claim" if args.revise else "skips"
     print(f"keys: numbers to name, 0 for {NONE}, s skips, enter {kept}, a stops.")
 
@@ -87,10 +82,8 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             problem.techniques,
             [],
             empty="keep" if args.revise else "skip",
-            # Naming none of them is a verdict about the code, and the
-            # classifier can already record it. Without it here, a hand claim
-            # could only be overturned by deleting it, which drops the attempt
-            # out of the eval set entirely.
+            # Without `0`, a hand claim could only be overturned by deleting
+            # it, which drops the attempt out of the eval set.
             none=NONE,
         )
         if answer is None or answer.rest:
@@ -99,8 +92,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             continue
         chosen = [problem.techniques[int(number) - 1] for number in answer.picked]
 
-        # Empty leaves it unsaid rather than defaulting to the middle: a level
-        # nobody gave is not a level, and the eval reads the absence.
+        # Empty leaves it unsaid rather than defaulting to the middle.
         level = ask_choice("confidence", LEVELS, [], empty="unsaid")
         if level is None:
             break
@@ -108,8 +100,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             user_claim(
                 attempt.id,
                 chosen,
-                # `0` came back as an empty list, which no other reply gives.
-                # Stated rather than inferred: the schema refuses an empty
+                # `0` came back as an empty list; the schema refuses an empty
                 # claim that does not say it is one.
                 declined=not chosen,
                 confidence=LEVELS[int(level.picked[0]) - 1] if level.picked else None,
@@ -117,8 +108,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             )
         )
         written += 1
-        # `a` at either prompt stops outright, as the drill loop's do — but
-        # after the append here, since the techniques answer already landed.
+        # After the append, since the techniques answer already landed.
         if level.rest:
             break
 
@@ -133,12 +123,7 @@ def disputed(
     problems: Mapping[str, Problem],
     standing: Mapping[str, TechniqueClaim],
 ) -> tuple[list[Attempt], list[Mapping[str, TechniqueClaim]], list[str]]:
-    """The revision pool and what each named classifier read it as.
-
-    Named configurations rather than every one in the log: which readings are
-    worth seeing beside a claim is the reader's question, and a column per
-    configuration ever run would answer it for them.
-    """
+    """The revision pool and what each named classifier read it as."""
     named = configurations(args, parser)
     pool = revisable(
         log.attempts(),
@@ -147,9 +132,8 @@ def disputed(
         user_id=args.user,
         technique=args.technique,
     )
-    # What each attempt would be asked now. A reading of an older rulebook
-    # answered a different question, so showing it beside a claim would put a
-    # disagreement with text nobody sends any more in front of the reader.
+    # What each attempt would be asked now: a reading of an older rulebook
+    # answered a different question.
     asked = {
         attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
         for attempt in pool
@@ -164,13 +148,9 @@ def disputed(
     return pool, readings, labels(named)
 
 
+# The calls whose verdicts `read_as` showed. The pool only promises that one
+# configuration disagreed, not that all answered.
 def shown(attempt: Attempt, readings: Sequence[Mapping[str, TechniqueClaim]]) -> list[str]:
-    """The calls whose verdicts `read_as` put in front of the reader.
-
-    A named configuration that never read this attempt showed nothing, so it
-    informed nothing — the pool only promises that one of them disagreed, not
-    that all of them answered.
-    """
     return [
         reading.call_id
         for stored in readings
@@ -184,12 +164,7 @@ def read_as(
     readings: Sequence[Mapping[str, TechniqueClaim]],
     names: Sequence[str],
 ) -> str:
-    """The standing claim and what each classifier read the same code as.
-
-    Shown before the answer, which is the reader's choice and has a cost: a
-    claim made with the readings in view is no longer independent of them, and
-    the agreement it is later scored on measures rather less than it did.
-    """
+    """The standing claim and what each classifier read the same code as."""
     width = max(len(name) for name in ("you", *names)) + 1
     lines = [f"  {'you:'.ljust(width)} {' '.join(claim.techniques)}"]
     for name, stored in zip(names, readings, strict=True):
@@ -208,9 +183,8 @@ def code_excerpt(code: str, limit: int) -> str:
 
 
 def rule(code: str) -> str:
-    """One candidate's criterion, in the classifier's own words and wrapped for
-    a terminal. The words are the vocabulary's; only the wrapping is this
-    reader's, so what the two annotators are asked cannot drift apart."""
+    """One candidate's criterion, verbatim from the vocabulary and wrapped for a
+    terminal. Only the wrapping is this reader's."""
     return "\n".join(
         fill(line, width=WIDTH, initial_indent="  ", subsequent_indent="      ")
         for line in criterion(code)

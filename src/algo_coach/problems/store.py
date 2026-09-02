@@ -4,11 +4,7 @@ from algo_coach.schema import Problem
 
 
 class ProblemStore:
-    """One file per problem, named by its engine-minted id.
-
-    A write replaces the file whole, unlike the attempt log's append. Identity
-    never moves.
-    """
+    """One file per problem, named by its engine-minted id; a write replaces it."""
 
     def __init__(self, root: Path):
         self.problems_path = root / "problems"

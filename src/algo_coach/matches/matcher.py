@@ -1,10 +1,5 @@
-"""Which of a card's templates a solution displays.
-
-A form is displayed by code, so the solution is the evidence and the statement
-is the context it was written against. The same shape as the technique
-classifier — candidates in, the subset out — read by a prompted model for the
-same reason, that nobody has labelled which form solves what.
-"""
+"""Which of a card's templates a solution displays. Candidates in, the subset
+out, as the technique classifier works."""
 
 import json
 from collections.abc import Sequence
@@ -19,8 +14,7 @@ from algo_coach.schema import Call, Card, Problem, Solution, Template, TemplateK
 MODEL = "openai/gpt-oss-120b"
 EFFORT = "medium"
 PIN = "deepinfra/bf16"
-# Greedy, as every reading written into the log is: the verdict a model holds
-# at 0.9 must not land as a coin flip in a record the ladder is derived from.
+# Greedy, as every reading written into the log is.
 TEMPERATURE: float | None = 0.0
 
 SYSTEM = """You decide which of a card's templates a solution displays.
@@ -43,14 +37,9 @@ If the solution displays none of the candidates, name none of them."""
 
 
 class Configuration(BaseModel, frozen=True):
-    """Which matcher read a pair, and the key its records are found under.
-
-    Its own rather than the claim classifier's: the two ask different
-    questions, and the model that reads code well is not by that fact the one
-    that reads a statement well. The prompt is not among the fields — it varies
-    per pair, so what rulebook a reading came from is the digest of what that
-    pair was sent.
-    """
+    """Which matcher read a pair, and the key its records are found under. The
+    prompt is not a field: it varies per pair, so what a reading came from is
+    the digest of what that pair was sent."""
 
     model: str = MODEL
     effort: str = EFFORT
@@ -66,21 +55,12 @@ class MatcherError(Exception):
 
 
 def candidates(card: Card) -> list[Template]:
-    """The templates a solution is tested against.
-
-    Procedure templates are excluded: a framing procedure is displayed by every
-    solution its technique reaches, so a per-solution verdict on one carries no
-    information. The ladder covers it as a whole instead.
-    """
     return [template for template in card.templates if template.kind is not TemplateKind.PROCEDURE]
 
 
+# Per pair, so a template edited on one card re-tests that card and leaves every
+# other pair settled.
 def request_hash(card: Card, problem: Problem, solution: Solution) -> str:
-    """The digest of what this pair would be sent, right now.
-
-    Per pair for the same reason a claim's is per attempt: a template edited on
-    one card re-tests that card's pairs and leaves every other one settled.
-    """
     return digest(SYSTEM, prompt(candidates(card), problem, solution))
 
 
@@ -96,14 +76,9 @@ def match(
     """The slugs of the templates this solution displays, and the call that
     read them — `None` where there was nothing to ask.
 
-    One call per solution and card, never per pair: the candidates are that
-    card's templates and the answer is the subset, which is the classifier's
-    shape and one request rather than six. The records come from the one
-    answer.
-
-    A single candidate is still asked about, unlike a lone technique: there
-    the problem's own techniques already answer, here the verdict is the
-    record, and yes and no are both readings that have to be paid for once.
+    One call per solution and card, never per pair: every record comes from the
+    one answer. A lone candidate is still asked about, since a negative verdict
+    is a record too.
     """
     forms = candidates(card)
     if not forms:
@@ -123,20 +98,15 @@ def match(
     if text is None:
         raise MatcherError(call.error or "no verdict")
 
-    # Checked again because the schema's guarantee ends with the request and
-    # the record does not.
+    # Checked again: the schema binds the request, not the record.
     named = set(json.loads(text)["templates"])
     return [template.slug for template in forms if template.slug in named], call
 
 
 def prompt(forms: Sequence[Template], problem: Problem, solution: Solution) -> str:
     """The candidates first, so the reading is made knowing what can be named,
-    then the statement and the code that answers it.
-
-    The solution comes last because it is the evidence. Both are delimited,
-    since a statement and a solution are data the model reads rather than
-    instructions it follows.
-    """
+    then the statement and the code that answers it. Both are delimited: they
+    are data the model reads rather than instructions it follows."""
     return "\n".join(
         [
             f"Candidates: {', '.join(template.slug for template in forms)}",
@@ -153,9 +123,8 @@ def prompt(forms: Sequence[Template], problem: Problem, solution: Solution) -> s
 
 
 def block(template: Template) -> list[str]:
-    """One candidate as its reader meets it: what it is, when it fires, and
-    the form itself. The code is what a template *is* — a cue alone would ask
-    the model to match a name it has to guess the shape of."""
+    """One candidate: what it is, when it fires, and the form itself. A cue
+    without the code would ask the model to guess the shape of a name."""
     return [
         f"{template.slug} — {template.title}",
         f"  Cue: {template.trigger}",

@@ -1,15 +1,8 @@
-"""Storing a problem the runs kept: the statement, its cases, both solutions
-and the match generation asserts.
+"""Storing a problem the runs kept: its cases, both solutions and the match.
 
-One act, because the parts are only a problem together. A statement with no
-cases is one nothing can judge, and a problem with no canonical is a rung that
-teaches nothing — yet the matcher reads whatever the problem store holds and
-has no way to tell either from a finished one.
-
-Four stores cannot be written atomically, so the order stands in for it.
-Everything keyed to the problem is written first and the problem itself last:
-a run that dies part way leaves records pointing at a problem no reader finds,
-rather than a problem whose parts are missing.
+Four stores and no atomic write, so the order stands in for one: the problem
+is written last, and a run that dies part way leaves orphans rather than a
+problem whose parts are missing.
 """
 
 from dataclasses import dataclass
@@ -29,35 +22,21 @@ from algo_coach.solutions import SolutionLog
 
 
 class Drafted(BaseModel):
-    """One problem the two calls wrote, and what its runs left.
-
-    Called drafted rather than generated because nothing is stored yet. What
-    lands is `cases`, each naming the solution that computed its answer, where
-    `draft.cases` holds the values the generation call declared, which the runs
-    read as a gate rather than as a source.
-
-    Both calls are carried whole rather than by id. Every record this becomes
-    copies its configuration from one of them, and a record whose configuration
-    is partly unknown compares with nothing.
-    """
+    """One problem the two calls wrote, and what its runs left. Nothing is
+    stored yet."""
 
     draft: Draft
     solution: str  # the reference, written from the statement alone
-    call: Call  # what wrote the problem
+    # whole rather than by id: every record this becomes copies a configuration
+    call: Call
     reference_call: Call
-    # what the runs established, which is what a landing case stores
+    # what the runs established, where `draft.cases` holds what was declared
     cases: list[SettledCase] = Field(default_factory=list)
 
 
 @dataclass(frozen=True)
 class Corpus:
-    """The stores one landing writes to, and the run reads its history from.
-
-    Held together because a problem lands in all four or in none of them. A
-    caller handed three of them would write a problem missing a part, which is
-    what the one act exists to prevent.
-    """
-
+    # held together because a problem lands in all four or in none of them
     problems: ProblemStore
     cases: CaseLog
     solutions: SolutionLog
@@ -69,11 +48,8 @@ class Corpus:
 
 
 def written_by(call: Call) -> dict[str, Any]:
-    """The configuration a record copies from the call that produced it.
-
-    All of it or none, so it travels as one mapping rather than as fields a
-    call site can fill partly.
-    """
+    # one mapping rather than fields a call site can fill partly: a record
+    # carries all of a configuration or none of it
     return {
         "model": call.model,
         "effort": call.effort,
@@ -86,22 +62,8 @@ def written_by(call: Call) -> dict[str, Any]:
 
 
 def land(corpus: Corpus, template: Template, drafted: Drafted) -> Problem:
-    """Store one problem whole, and return it.
-
-    The problem is minted first, since every other record names its id, and
-    written last, since it is what a reader finds.
-
-    Each solution carries the configuration of the call that wrote it: the
-    canonical came from the generation call, the reference from its own. The
-    problem carries the generation call's, which is the act that wrote it.
-
-    The match is asserted on the canonical rather than on the problem: a form
-    is displayed by code. It is the only assertion the problem will carry, as
-    every later canonical is enumerated rather than asked for by template.
-
-    The techniques are left empty. They are a view over the problem's canonical
-    solutions, and deriving them is its own step.
-    """
+    # minted first, since every other record names its id, and put last, since
+    # it is what a reader finds
     draft = drafted.draft
     problem = mint.generated_problem(
         draft.title,

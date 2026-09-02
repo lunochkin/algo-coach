@@ -1,25 +1,6 @@
-"""Running the two solutions, and whether what they answered lets the problem
-land.
+"""Running the two solutions, and whether what they answered lets the problem land.
 
-Four gates in one pass. The canonical yielding no value on some case discards
-the problem, since nothing establishes what that case returns. The canonical
-contradicting the `expected` its own call declared discards it next: one call
-wrote the code and the cases, so it wrote one of the two wrong. The two
-solutions disagreeing discards it third, and that one is the statement's fault
-rather than either solution's. A reference that computed no case at all
-discards it last — every expected output would then be the canonical's own, and
-`verified` would mean only that the solution agrees with itself.
-
-Where the reference computed some of them, the rest take the canonical's answer
-and say so. That is its reach rather than a failure.
-
-Nothing is repaired. A problem failing any gate is discarded whole, and the
-calls that wrote it are already in the log, so what was paid for and thrown
-away stays readable.
-
-Executing is the runner's. This decides what the runs mean, and stores
-nothing: the ids a case and a solution need do not exist until the problem
-lands.
+Stores nothing: the ids a case and a solution need do not exist until it lands.
 """
 
 from collections.abc import Sequence
@@ -37,21 +18,13 @@ from algo_coach.generation.generator import DraftCase
 from algo_coach.runner import NoValue, answered, decide, outputs, run
 from algo_coach.schema import CaseOutcome, severest
 
-# The wall-clock cap per case at generation, well above the drill loop's. It
-# is what the reference has to finish under, and a case beyond it is where the
-# canonical's own answer is taken instead.
+# the per-case cap at generation, well above the drill loop's: what the
+# reference has to finish under
 CAP_MS = 10_000
 
 
 class Discard(StrEnum):
-    """Why a problem did not survive its runs.
-
-    Named rather than a boolean, because the four are different faults and a
-    run reports how its problems were lost. `NO_VALUE` and `MISDECLARED` are
-    the generation call's, `DISAGREED` is the statement's, and `UNTESTED` is
-    the reference's own reach.
-    """
-
+    # named rather than a boolean: a run reports how its problems were lost
     NO_VALUE = "no_value"
     MISDECLARED = "misdeclared"
     UNTESTED = "untested"
@@ -60,20 +33,11 @@ class Discard(StrEnum):
 
 @dataclass(frozen=True)
 class Checked:
-    """What the two runs decided about one drafted problem.
+    """What the two runs decided about one drafted problem. `cases` is empty
+    where it was discarded."""
 
-    `cases` is what would land, in the order they were written and each naming
-    the solution that computed its answer. Empty where the problem was
-    discarded. A problem whose every case took the canonical's answer does not
-    survive: nothing independent read the statement.
-
-    The failures are carried in full rather than counted. A discarded problem
-    is reported by what it disagreed on, and one case says less than all of
-    them.
-    """
-
-    # how the canonical's run went against what the call declared, folded to
-    # its most severe case. `None` only where there were no cases to run
+    # the canonical's run against what its call declared, folded to the
+    # severest case. `None` only where there were no cases to run
     outcome: CaseOutcome | None
     discard: Discard | None = None
     cases: list[SettledCase] = field(default_factory=list)
@@ -92,13 +56,8 @@ def check(
     reference: str,
     cap_ms: int = CAP_MS,
 ) -> Checked:
-    """Run both solutions against the cases, and say whether the problem
-    survives.
-
-    The canonical runs first and alone. Where it fails, the reference is never
-    run: the two solutions are compared to test the statement, and there is
-    nothing to test where the call that wrote the problem contradicted itself.
-    """
+    # the canonical first and alone: comparing the two tests the statement,
+    # and a call that contradicted itself leaves nothing to test
     args = [case.args for case in cases]
     ran = run(canonical, args, cap_ms=cap_ms)
     ours = [answered(one) for one in ran]

@@ -4,10 +4,8 @@ from algo_coach.schema import TemplateMatch
 
 
 class MatchLog:
-    """Append-only JSONL store for template matches. One line per pair and
-    reading; a re-run appends rather than rewriting, so what an older
-    configuration answered stays readable.
-    """
+    """Append-only JSONL store for template matches, one line per pair and
+    reading."""
 
     def __init__(self, root: Path):
         self.root = root

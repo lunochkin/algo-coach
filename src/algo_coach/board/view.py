@@ -9,9 +9,7 @@ from algo_coach.techniques import resolve_techniques
 
 
 class TechniqueRow(BaseModel):
-    """One technique's standing, derived from the log on every read. Never
-    stored: an aggregate that outlived the records under it would be a second
-    truth."""
+    """One technique's standing, derived from the log on every read."""
 
     technique: str
     attempt_count: int
@@ -34,14 +32,9 @@ def per_technique(
 ) -> list[TechniqueRow]:
     """The drill board: one row per technique the log reaches, ordered by code.
 
-    Each attempt is resolved through `resolve_techniques` and counted once in
-    every technique it names — a solution using two techniques is evidence
-    about both. An attempt resolving to no code produces no row: a problem
-    naming no technique blocks nothing and invents nothing.
-
-    `problems` is keyed by the engine-minted id. A reference it cannot answer
-    is a broken invariant, not an empty row. `claims` and `labels` are keyed
-    by attempt id, each holding the record that stands.
+    An attempt counts once in every technique it resolves to. `problems` is
+    keyed by problem id, `claims` and `labels` by attempt id; a missing problem
+    raises rather than dropping the attempt.
     """
     grouped: dict[str, list[Attempt]] = defaultdict(list)
     for attempt in attempts:
@@ -68,12 +61,7 @@ def ungrouped(
     problems: Mapping[str, Problem],
     claims: Mapping[str, TechniqueClaim],
 ) -> list[Attempt]:
-    """The attempts `per_technique` reaches no row for.
-
-    Real work that the board cannot show: a problem naming no technique, and
-    an unclaimed attempt on it, leave no code to group by. Counted beside the rows so the
-    omission is visible rather than silent.
-    """
+    """The attempts `per_technique` reaches no row for, shown beside the rows."""
     return [
         attempt
         for attempt in attempts

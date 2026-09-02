@@ -12,7 +12,6 @@ from algo_coach.problems import ProblemStore
 
 
 def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """Claim the backlog."""
     api = transport(args, parser)
     log = AttemptLog(root)
     calls = CallLog(root)
@@ -36,22 +35,16 @@ def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         print(f"{result.redone} stale machine claim(s) re-derived")
     if result.undecided:
         print(f"{result.undecided} named no candidate — the fallback stands")
-    # Each failure was reported by `show` as it happened; a second list here
-    # would say it twice, and the counts are what stdout is for.
+    # Failures were named by `show` as they happened; only the counts here.
     if result.aborted:
-        # Nonzero even when claims landed: the backlog was left unfinished for
-        # a reason nothing in it can fix.
+        # Nonzero even when claims landed: the backlog was left unfinished.
         parser.exit(1, f"classify: aborted after {ABORT_AFTER} consecutive failures\n")
     if result.failed and not result.written:
         parser.exit(1, "classify: nothing landed\n")
 
 
 def show(progress: Progress) -> None:
-    """A line per attempt, flushed: a call takes seconds, so a run that printed
-    only at the end would look hung for minutes.
-
-    To stderr, so the counts on stdout stay the command's output.
-    """
+    """One line per attempt, on stderr and flushed: a call takes seconds."""
     counter = f"[{progress.index:>{len(str(progress.total))}}/{progress.total}]"
     if progress.reason is not None:
         verdict = f"! {progress.reason}"

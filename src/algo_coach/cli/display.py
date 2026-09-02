@@ -16,9 +16,7 @@ def verdict(attempt: Attempt) -> str:
     return "solved" if attempt.solved else "unsolved"
 
 
-# What a temperature nobody set is called. A named arm rather than an empty
-# cell: the provider's own default is a fact about the reading, and it compares
-# only with itself.
+# What a temperature nobody set prints as: a named arm, not an empty cell.
 UNSET = "default"
 
 
@@ -27,11 +25,7 @@ def sampled(temperature: float | None) -> str:
 
 
 def held(retry: Retry) -> str:
-    """One wait, named by what caused it and how long it will last.
-
-    The endpoint rather than the model alone: a cap is per endpoint, and two
-    configurations sharing one are held by the same limit.
-    """
+    """One wait. The endpoint too, since a cap is per endpoint rather than per model."""
     return (
         f"! {retry.status or 'failed'} {retry.model} @ {retry.pin}, "
         f"try {retry.tries}/{retry.of}, waiting {retry.pause:g}s"

@@ -12,7 +12,6 @@ from algo_coach.solutions import SolutionLog
 
 
 def match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """Match the corpus against the imported cards."""
     api = transport(args, parser)
     cards = CardStore(root).all()
     if args.card and not any(card.slug == args.card for card in cards):
@@ -41,8 +40,7 @@ def match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
 
 
 def show(progress: Progress) -> None:
-    """A line per question, flushed and on stderr, as the classifier reports: a
-    call takes seconds, and stdout stays the command's own output."""
+    """One line per question, on stderr and flushed: a call takes seconds."""
     counter = f"[{progress.index:>{len(str(progress.total))}}/{progress.total}]"
     if progress.reason is not None:
         verdict = f"! {progress.reason}"

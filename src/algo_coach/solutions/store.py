@@ -4,14 +4,7 @@ from algo_coach.schema import Solution, SolutionRole
 
 
 class SolutionLog:
-    """Append-only JSONL store for the solutions a problem carries.
-
-    Several per problem is the ordinary case, and the set is the assertion:
-    two approaches to one problem are what let a rung cover a studied template
-    and an optional one at once. So a second solution appends beside the first
-    rather than replacing it, which a one-file-per-problem store could not
-    express.
-    """
+    """Append-only JSONL store for the solutions a problem carries."""
 
     def __init__(self, root: Path):
         self.root = root
@@ -23,7 +16,6 @@ class SolutionLog:
             f.write(solution.model_dump_json() + "\n")
 
     def solutions(self) -> list[Solution]:
-        """In append order: a tie on `created_at` is broken by what landed last."""
         if not self.solutions_path.exists():
             return []
         return [
@@ -33,13 +25,6 @@ class SolutionLog:
         ]
 
     def for_problem(self, problem_id: str, role: SolutionRole | None = None) -> list[Solution]:
-        """What a problem's techniques are derived from, and what a matcher
-        reads beside the statement.
-
-        Both of those read canonicals alone: a reference is the naive approach
-        the form replaces, so counting it would credit the problem with a
-        technique nothing about it teaches.
-        """
         return [
             one
             for one in self.solutions()

@@ -1,11 +1,6 @@
 """One solution, one case, and what the call produced.
 
-Standalone by rule: it imports nothing from the package, because the container
-backend runs this same script. One protocol, written once — a request on
-stdin, a result on the path in argv.
-
-Stdout belongs to the solution. A solution that prints would corrupt the
-channel, so the result never travels on it.
+Imports nothing from the package: the container backend runs this same script.
 """
 
 import json
@@ -19,24 +14,18 @@ CRASHED = "crashed"
 
 
 class Expired(Exception):
-    """The cap fired around `solve`. Its own exception, so a solution catching
-    `Exception` broadly cannot swallow the cap."""
+    """Its own exception, so a solution catching `Exception` cannot swallow the cap."""
 
 
 def encode(value):
-    """A value as the case will hold it, with the encoder every backend
-    shares. Encoding here rather than above the boundary is what keeps the
-    same return from being decided differently by where it ran."""
+    # must stay the encoder `encoding.as_json` uses, or a return would be
+    # decided differently by where it ran
     return json.dumps(value, sort_keys=True)
 
 
 def execute(code, args, cap_ms):
-    """The module, then `solve` under the cap.
-
-    The cap is wall clock around the call alone. Interpreter start and the
-    module's own top level are outside it, since both move with the machine's
-    load and the parent's timer is what catches a module that never finishes.
-    """
+    # the cap times the `solve` call alone; interpreter start and the module's
+    # top level are the parent timer's to catch
     namespace = {"__name__": "__solution__"}
     try:
         exec(compile(code, "<solution>", "exec"), namespace)  # noqa: S102 - the subject
@@ -60,8 +49,7 @@ def execute(code, args, cap_ms):
     try:
         encoded = encode(value)
     except TypeError, ValueError:
-        # The fault is the solution's rather than the case's. `WRONG` would
-        # file it beside an answer that was computed and is merely incorrect.
+        # a return JSON cannot encode is the solution's fault, not a wrong answer
         return {"outcome": CRASHED, "value": None, "elapsed_ms": elapsed}
     return {"outcome": RETURNED, "value": encoded, "elapsed_ms": elapsed}
 
@@ -77,6 +65,7 @@ def _since(started):
 def main():
     request = json.loads(sys.stdin.read())
     result = execute(request["code"], request["args"], request["cap_ms"])
+    # to a file rather than stdout, which belongs to the solution
     with open(sys.argv[1], "w") as handle:
         json.dump(result, handle)
 

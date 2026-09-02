@@ -6,28 +6,18 @@ class Answer(NamedTuple):
     rest: bool  # apply the defaults to every attempt still to come
 
 
-# What `0` answers, worded once. The prompt shows it, the loops announce it,
-# and the retry hint repeats it — three places that must not drift.
+# What `0` answers. Worded once: the prompt, the loops and the retry hint
+# all show it.
 NONE = "none of these"
 
 
 def ask_choice(
     what: str, options: list, default: list[str], *, empty: str = "skip", none: str | None = None
 ) -> Answer | None:
-    """One prompt over a numbered list. None on EOF, which ends the recording
-    with whatever already landed — the log is append-only either way.
+    """One prompt over a numbered list. `None` on EOF or a skip.
 
-    `empty` names what an empty answer does where "skip" would mislead: over an
-    attempt already claimed, writing nothing keeps the claim rather than
-    leaving it unanswered.
-
-    `none` opens `0`, for the question where naming nothing is an answer rather
-    than a decline. A match asserts a pair, so a problem exercising none of a
-    card's forms is a verdict on every one of them. It comes back as an empty
-    list, which no other reply gives. A skip is `None`, and the two must not be
-    read as one, since only one of them is evidence. Closed unless a caller
-    names it: an empty claim would be indistinguishable from a stated one, and
-    a skipped answer would read as an answer given.
+    `empty` names what an empty answer does. `none` opens `0`, which comes back
+    as an empty list — a stated verdict, and no other reply gives one.
     """
     shown = ",".join(default) if default else empty
     while True:
@@ -50,5 +40,4 @@ def ask_choice(
 
 
 def numbered(items: list) -> str:
-    """The candidates on one line, as the prompt numbers them."""
     return "   ".join(f"{index} {item}" for index, item in enumerate(items, start=1))

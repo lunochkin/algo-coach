@@ -1,20 +1,5 @@
-"""The hand annotation: which of a card's forms a solution displays.
-
-The question is the card and the record is the pair. One statement is read
-once and judged against every form of the card, and the answer writes a row per
-template. The ones the solution does not display are included: a reference that
-only named matches would score the matcher's "yes" and say nothing about its
-"no".
-
-Blind by default. The first pass is where the line gets drawn between
-exercising a form and merely admitting it. An annotation made with a verdict in
-view records what it reviewed rather than what it read, and `informed_by` names
-the calls it saw.
-
-The prompt is a two-pane screen rather than a scroll, and `annotating.py` holds
-it. What is asked and what is written stay here, so a sitting can be driven
-without a terminal.
-"""
+"""The hand annotation: which of a card's forms a solution displays. What is
+asked and written stays here; `annotating.py` holds the two-pane prompt."""
 
 import argparse
 from collections.abc import Iterable, Mapping, Sequence
@@ -30,11 +15,8 @@ from algo_coach.solutions import SolutionLog
 
 
 class Landing:
-    """What one answer writes: every pair of the card, positive and negative.
-
-    Held apart from the prompt so a sitting cut short keeps what was answered.
-    The log is append-only, and each question is a whole write.
-    """
+    """Every pair of the card, positive and negative. Apart from the prompt, so
+    a sitting cut short keeps what was answered."""
 
     def __init__(self, log: MatchLog, read: Mapping[tuple[str, str], TemplateMatch]):
         self.log = log
@@ -57,12 +39,7 @@ class Landing:
 
 
 def annotating(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> Annotating:
-    """The sitting, built but not run.
-
-    What the matcher is scored against, so it writes `MatchSource.USER` records
-    carrying no configuration: nothing re-derives them, which is what makes
-    them stand on read however early they were written.
-    """
+    """The sitting, built but not run."""
     cards = CardStore(root).all()
     if args.card and not any(card.slug == args.card for card in cards):
         parser.exit(2, f"annotate: no card {args.card!r} — seed it first\n")
@@ -86,20 +63,14 @@ def annotating(args: argparse.Namespace, parser: argparse.ArgumentParser, root: 
 
 
 def annotate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """The matcher's question, answered by hand over sampled canonicals."""
     app = annotating(args, parser, root)
     app.run()
     print(f"{app.count} question(s) annotated, {app.answered.written} record(s) written")
 
 
 def machine_verdicts(matches: Iterable[TemplateMatch]) -> dict[tuple[str, str], TemplateMatch]:
-    """The latest reading per pair, whatever configuration produced it.
-
-    Every configuration's, not one named on the command line: this is shown to
-    a reader rather than scored, and which matcher answered is printed beside
-    the verdict. A pair the hand has settled is not among them — the reader is
-    being shown what a machine read, not what they wrote.
-    """
+    """The latest reading per pair, from any configuration: this is shown to a
+    reader rather than scored."""
     latest: dict[tuple[str, str], TemplateMatch] = {}
     for match in matches:
         if match.source is not MatchSource.CLASSIFIER:
@@ -115,16 +86,8 @@ def shown(
     forms: Sequence[Template],
     read: Mapping[tuple[str, str], TemplateMatch],
 ) -> list[str]:
-    """The calls whose verdicts the prompt put in front of the annotator.
-
-    One call answers a whole card, so the forms of one question usually name
-    the same one; it is listed once. A form no matcher has read showed nothing,
-    so it informed nothing.
-
-    Recorded on every pair the answer writes, positive and negative alike. What
-    the reader saw is a fact about the sitting rather than about the verdict,
-    and the negatives are scored as the positives are.
-    """
+    """The calls whose verdicts the prompt showed. One call answers a whole
+    card, so it is listed once."""
     seen: list[str] = []
     for form in forms:
         match = read.get((form.id, question.solution.id))

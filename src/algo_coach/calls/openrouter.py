@@ -1,11 +1,6 @@
-"""The one transport: chat completions, spoken to OpenRouter.
-
-Every model is reached through one endpoint and one request shape, so adding a
-model is a string and adding a provider is a base URL. An outage falls back to
-another endpoint of the same shape, never to Anthropic's own compatibility
-layer. That layer ignores `response_format`, `strict` and `reasoning_effort`,
-so it answers with the schema unenforced and the effort dropped.
-"""
+"""The one transport: chat completions, spoken to OpenRouter. Never fall back
+to Anthropic's own compatibility layer: it ignores `response_format`, `strict`
+and `reasoning_effort`, so the schema goes unenforced and the effort dropped."""
 
 import time
 from collections.abc import Callable
@@ -16,46 +11,32 @@ from algo_coach.calls.transport import MAX_TOKENS, ProviderError, Reply, Retry, 
 
 BASE_URL = "https://openrouter.ai/api/v1"
 
-# What every request constrains, whatever it asks for. `require_parameters`
-# drops any provider that cannot honour what was sent — without it a provider
-# lacking structured outputs still answers, and the schema stops being the
-# thing that keeps a verdict inside the candidates. `allow_fallbacks` off means
-# a request fails rather than being served by a second backend after the first
-# one did not answer.
+# `require_parameters` drops a provider that cannot honour what was sent, and
+# `allow_fallbacks` off fails the request rather than serving it elsewhere.
 ROUTING = {"require_parameters": True, "allow_fallbacks": False}
 
-# The effort of a model that is asked for none — some reject the parameter
-# outright. A named level rather than an absent field, since a reading whose
-# configuration is partly unknown compares with nothing.
+# The effort recorded for a model asked for none; some reject the parameter.
 UNSENT = "default"
 
-# The schema's name reaches the model, so it says what the object is rather
-# than that it is an object.
+# The name reaches the model, so it says what the object is.
 FORMAT = "verdict"
 
-# How long to hold off before asking again, and how many times. Absorbed here
-# rather than reported upward: a cap and a gateway failure are facts about the
-# endpoint, and a run that abandons a backlog over one is spending the wrong
-# thing — the abort exists to catch a broken configuration, which neither is.
-# The waits cover a minute between them, since that is the window a per-minute
-# cap is stated in; the endpoint's own reset time is not read, because where it
-# is carried varies by provider and a wrong parse would sleep for hours.
+# The waits cover a minute between them, the window a per-minute cap is stated
+# in. The endpoint's reset time is not read: a wrong parse would sleep for hours.
 BACKOFF = (5.0, 15.0, 30.0, 60.0)
 
 # Worth asking again: too many requests, and the gateway failing between the
-# router and whoever it picked. Everything else is answered the same way twice —
-# a rejected schema, an unset key, a model that does not exist.
+# router and whoever it picked. A rejected schema or an unset key would not be.
 TRANSIENT = frozenset({429, 500, 502, 503, 504})
 
 
+# The same failure arrives as an SDK status or as a code inside a 200,
+# depending on where it happened.
 def status(exc: Exception) -> int | None:
-    """A status from the SDK, or the code a router carried inside a 200 — the
-    same failure reaches us both ways depending on where it happened."""
     return getattr(exc, "status_code", None) or getattr(exc, "code", None)
 
 
 def transient(exc: Exception) -> bool:
-    """Whether asking again is worth anything."""
     return status(exc) in TRANSIENT
 
 
@@ -67,8 +48,8 @@ def failure(error: Any) -> tuple[str, int | None]:
 
 
 def extra(obj: Any, name: str) -> Any:
-    """A field the SDK does not model. Reasoning and the serving provider are
-    OpenRouter's own additions, so they arrive beside the typed ones."""
+    """A field the SDK does not model: OpenRouter's own additions arrive beside
+    the typed ones."""
     value = getattr(obj, name, None)
     if value is None:
         value = (getattr(obj, "model_extra", None) or {}).get(name)
@@ -80,8 +61,7 @@ class OpenRouter:
     """A transport over an OpenAI-shaped client pointed at OpenRouter."""
 
     client: Any
-    # Called as a transient failure is waited out, on the thread that made the
-    # request. Reporting is the caller's: the CLI warns, a web API would not.
+    # Called on the requesting thread as a transient failure is waited out.
     on_retry: Callable[[Retry], None] | None = None
 
     def __call__(
@@ -96,23 +76,15 @@ class OpenRouter:
         schema: dict[str, Any] | None = None,
         max_tokens: int = MAX_TOKENS,
     ) -> Reply:
-        # `allow_fallbacks` bounds what happens after a provider fails; the
-        # first choice among those carrying the model is still the router's
-        # until an order names one. Both together are what make a model id
-        # resolve to one backend.
-        # `allow_fallbacks` bounds what happens after the pinned endpoint
-        # fails; the order is what makes a model id resolve to one build in
-        # the first place. Both together, or a reading names a model and not
-        # a reader.
+        # `order` is what makes a model id resolve to one build; without it the
+        # router picks among the providers carrying the model.
         body: dict[str, Any] = {"provider": {**ROUTING, "order": [pin]}}
         if effort != UNSENT:
             body["reasoning"] = {"effort": effort}
 
         request: dict[str, Any] = {}
-        # Top level, not inside `provider`: it is the API's own parameter, and
-        # one sent as routing would be read as routing. Omitted rather than
-        # defaulted, so the provider's own choice stays distinguishable from a
-        # number we picked that happens to match it.
+        # Top level, not inside `provider`: it is the API's own parameter.
+        # Omitted rather than defaulted, so a provider's own choice stays visible.
         if temperature is not None:
             request["temperature"] = temperature
         if schema is not None:
@@ -134,17 +106,8 @@ class OpenRouter:
         )
 
     def send(self, *, pin: str, **request: Any) -> Reply:
-        """One reading, held and repeated while the endpoint answers with a
-        reason to ask again.
-
-        Every other failure is raised on the first try: a bad key and a
-        rejected schema do not improve by being asked again, and a run that
-        retried them would burn its abort count slowly instead of at once.
-
-        The count and the last request's time ride back with the outcome,
-        whichever it is: a caller sees one call however many requests it took,
-        and only this loop knows how many that was.
-        """
+        """One reading, repeated while the endpoint answers with a reason to ask
+        again. Every other failure is raised on the first try."""
         for tries, pause in enumerate(BACKOFF, start=1):
             try:
                 return self.once(tries, **request)
@@ -156,12 +119,7 @@ class OpenRouter:
         return self.once(len(BACKOFF) + 1, **request)
 
     def held(self, exc: Exception, *, pin: str, model: str, tries: int, pause: float) -> None:
-        """Report one wait, if anyone asked to hear about it.
-
-        Before the sleep rather than after it, since the wait is what the
-        report is about. A caller that raises here is reporting badly, and
-        that surfaces rather than being folded into the retry.
-        """
+        """Report one wait, before the sleep it is about."""
         if self.on_retry is not None:
             self.on_retry(
                 Retry(
@@ -191,15 +149,13 @@ class OpenRouter:
         choices = getattr(response, "choices", None)
         if not choices:
             # A 200 with an error and no choices: the router reporting that the
-            # provider it chose failed. The body says whose and why, and it is
-            # the only place that says it.
+            # provider it chose failed. The body is the only place that says so.
             raise ProviderError(*failure(extra(response, "error")))
 
         choice = choices[0]
         if choice.finish_reason == "error" and not choice.message.content:
-            # The same failure, arriving with a choice around it. Read as an
-            # empty verdict it would be recorded as the model declining, which
-            # is a claim about the model rather than about the gateway.
+            # The same failure with a choice around it. Read as an empty verdict
+            # it would record the gateway's fault as the model declining.
             raise ProviderError(*failure(extra(response, "error") or "stopped on error"))
 
         usage = getattr(response, "usage", None)
@@ -216,12 +172,8 @@ class OpenRouter:
 
 
 def reasoning(usage: Any) -> int | None:
-    """How much of the completion was spent thinking, where the router said.
-
-    Nested a level down, and absent rather than zero on a model that reports
-    no split — a model that thought nothing and one that does not say are
-    different facts about the reading.
-    """
+    """How much of the completion was spent thinking, where the router said it.
+    Absent rather than zero: thinking nothing and not reporting a split differ."""
     details = getattr(usage, "completion_tokens_details", None) if usage is not None else None
     if details is None:
         return None
@@ -232,5 +184,4 @@ def reasoning(usage: Any) -> int | None:
 
 
 def since(started: float) -> int:
-    """Milliseconds, since nothing reads a request's timing more finely."""
     return round((time.monotonic() - started) * 1000)

@@ -1,21 +1,5 @@
-"""The annotation prompt as two panes: the solution and its statement, and one
-form's code.
-
-Deciding whether a solution displays a form means reading that solution
-against the form, then against the next one. So the left pane stays put and
-the right one changes, rather than both scrolling past each other.
-
-The statement sits above the solution because it is the context the code
-leaves implicit. The verdict is about the code.
-
-One form at a time because all of them do not fit. A card carries up to six,
-and their code runs to a hundred and thirty lines — more than any pane holds,
-however the screen is divided. Which form is in view is the same question the
-annotator is already answering.
-
-The prompt only collects. What lands is the caller's, so a sitting cut short
-keeps every answer that was given, as an append-only log requires.
-"""
+"""The annotation prompt as two panes: the statement with its solution, and one
+form's code. It only collects; what lands is the caller's."""
 
 from collections.abc import Callable, Mapping, Sequence
 
@@ -30,12 +14,7 @@ from algo_coach.schema import Template, TemplateMatch
 
 
 def evidence(question: Question) -> str:
-    """What the left pane holds: the statement, then the solution the verdict
-    is about.
-
-    One markdown block rather than two widgets, so the two scroll together. A
-    reader moving down the statement is reading toward the code.
-    """
+    """One markdown block rather than two widgets, so the two scroll together."""
     return "\n\n".join(
         [
             question.problem.statement,
@@ -51,16 +30,14 @@ Answered = Callable[[Question, set[str]], None]
 CUE = 60  # how much of a trigger the list shows; the code pane carries it whole
 
 # The editor's palette rather than the terminal's: a form is read here and
-# written there, and two colourings of one function are two things to learn.
+# typed out there.
 SYNTAX = "xcode"
 
 
+# One question at a time, over the pool the caller sampled.
 class Annotating(App[None]):
-    """One question at a time, over the pool the caller sampled."""
-
-    # Light, and stated rather than inherited. A sitting is an hour of reading
-    # prose and code side by side, and the panes have to agree with each other
-    # whatever the terminal is set to.
+    # Stated rather than inherited, so the panes agree whatever the terminal
+    # is set to.
     theme = "textual-light"
 
     CSS = """
@@ -78,9 +55,7 @@ class Annotating(App[None]):
         Binding("c", "clear", "clear"),
         Binding("q", "quit", "end"),
         *[Binding(str(n), f"view({n})", "", show=False) for n in range(1, 10)],
-        # The statement on the plain arrows, the code on shifted ones. The
-        # statement is what is read at length, and the pane holding it is the
-        # one an unmodified key should move.
+        # Plain arrows move the statement, which is what is read at length.
         Binding("down", "scroll('#statement', 3)", "", show=False),
         Binding("up", "scroll('#statement', -3)", "", show=False),
         Binding("pagedown", "scroll('#statement', 20)", "", show=False),
@@ -113,9 +88,8 @@ class Annotating(App[None]):
         return candidates(self.question.card)
 
     def compose(self) -> ComposeResult:
-        # Markup off on everything the author wrote. A statement is full of
-        # `[i]` and `[1, 2, 3]`, and a renderer reading those as tags would
-        # drop the part of the text the annotator is deciding on.
+        # Markup off on everything the author wrote: a statement is full of
+        # `[i]` and `[1, 2, 3]`, which a renderer would eat as tags.
         yield Static(id="head", markup=False)
         with Horizontal():
             yield VerticalScroll(Markdown(id="statement-body"), id="statement")
@@ -127,9 +101,8 @@ class Annotating(App[None]):
         yield Footer()
 
     def on_mount(self) -> None:
-        # Neither pane takes focus. A focused scrollable claims space for a
-        # page down, and space is how a form is picked — the one key the
-        # sitting cannot afford to lose to whatever was last clicked.
+        # Neither pane takes focus: a focused scrollable claims space for a
+        # page down, and space is how a form is picked.
         for pane in self.query(VerticalScroll):
             pane.can_focus = False
         self.show()
@@ -140,24 +113,18 @@ class Annotating(App[None]):
         self.query_one("#head", Static).update(
             f"{self.index + 1}/{len(self.pool)}  {question.card.slug}  {question.problem.title}"
         )
-        # Rendered as markdown, which is how a statement is written: the
-        # examples are fenced blocks and the constraints a list. Read as plain text they
-        # are the part of the statement that decides the question, printed as
-        # backticks and asterisks. The solution is fenced for the same reason.
+        # Markdown, which is how a statement is written: as plain text the
+        # examples and constraints print as backticks and asterisks.
         self.query_one("#statement-body", Markdown).update(evidence(question))
         self.query_one("#forms", Static).update(self.listing())
         self.show_code()
         self.query_one("#statement", VerticalScroll).scroll_home(animate=False)
 
     def listing(self) -> str:
-        """The card's forms, which is picked, and which is in the code pane.
-
-        The cue is truncated here and whole in the code pane. The list says
-        which form is which; deciding on one is done with it in view.
-        """
+        """The card's forms, which is picked, and which is in the code pane."""
         lines = []
-        # The slug column takes the widest of this card's, since a fixed width
-        # either wraps the cue on one card or wastes the pane on another.
+        # Widest slug of this card's, since a fixed width wraps the cue on one
+        # card and wastes the pane on another.
         width = max(len(form.slug) for form in self.forms)
         for number, form in enumerate(self.forms, start=1):
             mark = "x" if form.id in self.picked else " "
@@ -167,22 +134,14 @@ class Annotating(App[None]):
             lines.append(f"{here} {number} [{mark}] {form.slug:<{width}}  {cue}")
         picked = len(self.picked)
         # Spelled out, because an empty answer is a verdict here rather than a
-        # skip: it asserts that none of the forms match, and writes a negative
-        # on every pair. A footer key alone would leave the two looking alike.
+        # skip.
         state = f"{picked} picked" if picked else "none picked — enter records no template"
         return "\n".join([*lines, "", f"1-{len(self.forms)} view    {state}"])
 
+    # The focused form: its cue whole, then its code. Two widgets composed once
+    # and updated, since mounting a fresh pair per redraw leaks a widget a
+    # keystroke.
     def show_code(self) -> None:
-        """The focused form: its cue whole, then what has to be reproduced.
-
-        Two widgets composed once and updated, never mounted per redraw. The
-        cue is prose and the code is highlighted, so one renderable cannot
-        carry both — and mounting a fresh one each time leaks a widget a
-        keystroke.
-
-        Highlighted to match the screen rather than the terminal: the code sits
-        beside a rendered statement, and the two panes are read together.
-        """
         form = self.forms[self.focused_form]
         self.query_one("#cue", Static).update(form.trigger + self.verdict(form) + "\n")
         self.query_one("#code-body", Static).update(
@@ -191,17 +150,14 @@ class Annotating(App[None]):
         self.query_one("#code", VerticalScroll).scroll_home(animate=False)
 
     def verdict(self, form: Template) -> str:
-        """What the matcher read this pair as, named by the model that
-        answered. Shown only where the caller asked for it, and what it costs
-        is that the answer is no longer independent of it."""
+        """What the matcher read this pair as, named by the model that answered."""
         match = self.read.get((form.id, self.question.solution.id))
         if match is None:
             return ""
         return f"\n\n{'yes' if match.matched else 'no'}  ({match.model})"
 
+    # Either pane from the keyboard, since neither can hold focus.
     def action_scroll(self, pane: str, amount: int) -> None:
-        """Either pane from the keyboard, since neither can hold focus. The
-        mouse wheel reaches both without this."""
         self.query_one(pane, VerticalScroll).scroll_relative(y=amount, animate=False)
 
     def action_view(self, number: int) -> None:
@@ -225,9 +181,9 @@ class Annotating(App[None]):
         self.count += 1
         self.advance()
 
+    # Nothing written, and the pair stays in the pool. Not the same as
+    # recording no template, which is a verdict.
     def action_skip(self) -> None:
-        """Nothing written, and the pair stays in the pool for a later
-        sitting. Not the same as recording no template, which is a verdict."""
         self.advance()
 
     def advance(self) -> None:

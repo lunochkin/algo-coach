@@ -7,17 +7,11 @@ from algo_coach.cards import CardStore, seed_cards
 
 
 class BadLine(Exception):
-    """Not JSON at all: corrupt file, not an invalid record. Seeding never sees
-    it, so it cannot come back as a rejection."""
+    """Not JSON at all: a corrupt file, not an invalid record."""
 
 
 def read_json(source: str) -> Iterator[dict]:
-    """One authored file per record: a directory of them, or a single file.
-
-    Reading is the adapter's, so what the engine seeds from is a sequence of
-    records — the private repo this content moves behind later replaces this
-    function and nothing below it.
-    """
+    """One authored file per record: a directory of them, or a single file."""
     path = Path(source)
     paths = sorted(path.glob("*.json")) if path.is_dir() else [path]
     for file in paths:

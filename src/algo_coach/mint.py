@@ -1,10 +1,5 @@
-"""Where the engine's identity comes from.
-
-Every stored record carries an id the engine minted and a client never sees.
-Kept in one module so the policy is one line to read and one line to change. A
-schema model states what a record holds, not where its id came from, and the
-clock has no place there either.
-"""
+"""Where every stored record's id and timestamp come from, kept in one module so
+the policy is one line to change."""
 
 import uuid
 from collections.abc import Sequence
@@ -34,9 +29,9 @@ from algo_coach.schema import (
 from algo_coach.techniques import is_known
 
 
+# Opaque and unguessable: nothing derives an id from a record's content, or two
+# engines would mint the same id for different records.
 def new_id() -> str:
-    """Opaque and unguessable: nothing may derive one from a record's content,
-    or two engines would mint the same id for different attempts."""
     return uuid.uuid4().hex
 
 
@@ -61,7 +56,6 @@ def call(
     request_ms: int | None = None,
     attempts: int | None = None,
 ) -> Call:
-    """One request to a model, minted where every other id is minted."""
     return Call(
         id=new_id(),
         created_at=datetime.now(UTC),
@@ -94,17 +88,12 @@ def user_claim(
     informed_by: Sequence[str] = (),
     declined: bool = False,
 ) -> TechniqueClaim:
-    """A claim the user made, in the drill loop or over the stored log. It
-    carries no model or prompt version because nothing re-derives it.
+    """A claim the user made. It carries no provenance because nothing
+    re-derives it.
 
-    `declined` is how they name none of the candidates. Passed rather than
-    inferred from an empty list, so a writer that lost an answer cannot record
-    a verdict nobody gave.
-
-    Blind and unsure unless the caller says otherwise: the drill loop asks
-    before any classifier has read the attempt, and the hand pass asks from the
-    code and the candidates. Only a revision has readings in view, and only it says
-    so — a default that guessed would record independence nobody claimed.
+    `declined` is passed rather than inferred from an empty list, so a writer
+    that lost an answer cannot record a verdict nobody gave. `informed_by` is
+    empty unless the caller says otherwise: only a revision has readings in view.
     """
     return TechniqueClaim(
         id=new_id(),
@@ -131,19 +120,11 @@ def classifier_claim(
     provider: str | None = None,
     cost: float | None = None,
 ) -> TechniqueClaim:
-    """A claim a model made. It names what produced it, since a better
-    classifier can recompute it and a user's claim cannot be recomputed at all.
-
-    All of them, never a subset. A reading whose configuration is partly
-    unknown cannot be compared with one whose configuration is known. The model
-    and effort are copied from the call rather than read through it, so the
-    claims file says what produced each claim without opening the call log.
+    """A claim a model made, naming its configuration whole.
 
     Membership is checked here because this is the only write path that could
-    introduce an unrecognised code. Every other one draws on the vocabulary
-    already. Rejected whole rather than
-    per code: a claim asserts one set, and writing the half that passed would
-    record a set nobody made.
+    introduce an unrecognised code; every other draws on the vocabulary already.
+    Rejected whole rather than per code, since a claim asserts one set.
     """
     unknown = [code for code in techniques if not is_known(code)]
     if unknown:
@@ -172,15 +153,8 @@ def user_reading(
     informed_by: Sequence[str] = (),
 ) -> TechniqueReading:
     """One solution read by hand, which is what a machine reading is scored
-    against.
-
-    It carries no configuration because nothing re-derives it, and it stands
-    over any machine reading however late that one was written.
-
-    An adjudication rather than testimony: nobody sat for a canonical, so what
-    the user writes here is a verdict on code they did not produce. Blind
-    unless the caller says otherwise, as a user claim is.
-    """
+    against. An adjudication rather than testimony: nobody sat for a canonical,
+    so this is a verdict on code the user did not produce."""
     return TechniqueReading(
         id=new_id(),
         created_at=datetime.now(UTC),
@@ -204,16 +178,8 @@ def machine_reading(
     provider: str | None = None,
     cost: float | None = None,
 ) -> TechniqueReading:
-    """One solution read by a model, and the configuration that read it.
-
-    All of the configuration, never a subset: a reading whose configuration is
-    partly unknown compares with nothing. The digest is what makes it stale, so
-    editing one criterion re-reads the solutions that criterion reached.
-
-    Membership is checked here as it is on a classifier claim: this is a write
-    path that could introduce an unrecognised code. Rejected whole rather than
-    per code, since a reading asserts one set.
-    """
+    """One solution read by a model, naming its configuration whole. Membership
+    is checked here as it is on a classifier claim, and rejected whole."""
     unknown = [code for code in techniques if not is_known(code)]
     if unknown:
         raise ValueError(f"unknown technique code(s): {', '.join(unknown)}")
@@ -241,20 +207,12 @@ def user_match(
     matched: bool,
     informed_by: Sequence[str] = (),
 ) -> TemplateMatch:
-    """One pair the user annotated, positive or negative: whether this
-    solution displays this form.
+    """One pair the user annotated, positive or negative: whether this solution
+    displays this form.
 
-    It carries no configuration because nothing re-derives it. That is what
-    makes it the reference a machine reading is scored against, and what makes
-    it stand on read however early it was written.
-
-    The negative is annotated as deliberately as the positive. The machine
-    answers every candidate it was given, so a reference that only named
-    matches would score its "yes" and say nothing about its "no".
-
-    Blind unless the caller says otherwise, as a user claim is. Only an
-    annotation asking to see the matcher has a verdict in view, and only it
-    records one.
+    The negative is annotated as deliberately as the positive, since the machine
+    answers every candidate it was given. `informed_by` is empty unless the
+    caller says otherwise.
     """
     return TemplateMatch(
         id=new_id(),
@@ -268,18 +226,9 @@ def user_match(
 
 
 def generator_match(template_id: str, solution_id: str) -> TemplateMatch:
-    """The pair the canonical a problem was generated with asserts about
-    itself.
-
-    Its brief said which template, so the pair is provenance rather than a
-    reading and nothing pays a call to learn it. Carries no configuration for
-    the same reason a hand match does not: nothing re-derives it, and the
-    solution already names the call that wrote it.
-
-    Only ever positive, and only ever on that one canonical. A template is
-    where a problem comes from rather than where its later solutions come
-    from, so every template those display is the matcher's question.
-    """
+    """The pair the canonical a problem was generated with asserts about itself.
+    Provenance rather than a reading, so it carries no configuration: nothing
+    re-derives it, and the solution already names the call that wrote it."""
     return TemplateMatch(
         id=new_id(),
         created_at=datetime.now(UTC),
@@ -303,14 +252,9 @@ def machine_match(
     temperature: float | None = None,
     provider: str | None = None,
 ) -> TemplateMatch:
-    """One pair a matcher read, positive or negative: whether this solution
-    displays this form.
-
-    The negative is a record like any other: without it every re-run re-tests
-    every non-match forever, which on a growing corpus is nearly all the work.
-    The provenance is the claim's, since what a re-run has to know to supersede
-    a reading does not change with the question it answers.
-    """
+    """One pair a matcher read, positive or negative. The negative is stored, or
+    every re-run re-tests every non-match forever, which on a growing corpus is
+    nearly all the work."""
     return TemplateMatch(
         id=new_id(),
         created_at=datetime.now(UTC),
@@ -329,8 +273,6 @@ def machine_match(
 
 
 def self_label(attempt_id: str, mode: FailureMode) -> SelfLabel:
-    """Only ever the user's — a machine answering the same question produces a
-    `Diagnosis`."""
     return SelfLabel(id=new_id(), created_at=datetime.now(UTC), attempt_id=attempt_id, mode=mode)
 
 
@@ -350,33 +292,12 @@ def generated_problem(
     provider: str | None = None,
     cost: float | None = None,
 ) -> Problem:
-    """A problem the engine wrote, and the configuration that wrote it.
+    """A problem the engine wrote, with its configuration whole.
 
-    Generated is a problem's only origin, so there is no hand arm to exempt as
-    there is for a claim or a match. Provenance is required, and this is the
-    one place that supplies it: a call site spelling the fields out could fill
-    them partly, and a problem stored that way names a configuration nothing
-    can compare it on.
-
-    Sampled rather than greedy, which a reading never is. Generation produces
-    an artifact instead of a verdict about one, so no verdict needs protecting
-    from variance, and variance is what stops one model's habits becoming the
-    whole corpus. The temperature is recorded either way, since a corpus
-    written at one is not the corpus written at another.
-
-    The techniques are a view over the problem's canonical solutions, passed
-    in rather than read here: the canonical is written in the same act, and
-    re-deriving them later is legal.
-
-    `generated_for` names the template the brief asked for, where it named a
-    form at all. It is what the generator knew rather than what a matcher
-    inferred, which is what makes the first `TemplateMatch` on the pair
-    provenance. It asserts nothing about the templates the problem also
-    exercises.
-
-    A problem written from a technique brief carries none. The brief named a
-    skill rather than a form, so there is no pair to assert, and what the
-    problem is about comes from the readings of its canonicals.
+    The one place that supplies provenance: a call site spelling the fields out
+    could fill them partly. The techniques are passed in rather than read here,
+    since the canonical is written in the same act. `generated_for` is the
+    template the brief asked for, and is absent where the brief named a skill.
     """
     return Problem(
         id=new_id(),
@@ -406,19 +327,10 @@ def case(
     """One case of the set a generated problem carries.
 
     Named `case` rather than `test_case`: pytest collects any callable whose
-    name begins with `test_`, so the minter would be run as a test wherever a
-    test module imported it.
-
-    Minted here as every stored record is. It carries no provenance: a case is
-    not a reading, and the problem it is keyed to already names the
-    configuration that wrote both in one call.
-
-    The reference computed the expected output unless the caller says
-    otherwise, since that is the rule: it is different code from a call that
-    saw the statement alone, so a case it computed is a test. Beyond the
-    largest input it finishes at generation time only the canonical can compute
-    one, and that case names it. The field itself has no default, so any writer
-    that is not this one has to answer.
+    name begins with `test_`, and would run the minter as a test. It carries no
+    provenance — the problem it is keyed to names the configuration that wrote
+    both in one call. `TestCase.expected_from` has no default of its own, so any
+    writer that is not this one has to answer.
     """
     return TestCase(
         id=new_id(),
@@ -443,19 +355,9 @@ def solution(
     provider: str | None = None,
     cost: float | None = None,
 ) -> Solution:
-    """One solution the engine wrote, in the role it was written for.
-
-    A machine record like any other, so it names what produced it. Sampled
-    rather than greedy, which is why nothing re-derives one: generation makes
-    an artifact instead of a verdict, and the variance is what stops one
-    model's habits becoming the whole corpus.
-
-    The role is passed rather than inferred. Both roles pass the same cases,
-    so nothing about the code says which one this is.
-
-    It says nothing about how it ran. Whether the code passes is a fact about
-    a run, and `verification` mints the record holding that.
-    """
+    """One solution the engine wrote, in the role it was written for. The role is
+    passed rather than inferred: both roles pass the same cases, so nothing about
+    the code says which this is."""
     return Solution(
         id=new_id(),
         created_at=datetime.now(UTC),
@@ -480,17 +382,9 @@ def verification(
     runner: str,
     results: Sequence[CaseResult] = (),
 ) -> Verification:
-    """One run of a solution against a problem's cases.
-
-    Its own record rather than a field on the solution, because the outcome is
-    a fact about the run. The cap and the machine decide a timeout, and a crash
-    can come from the runner, so the same code run twice can differ.
-
-    The cap is stored beside the results. Two runs under different caps are not
-    comparable, and nothing else would show it. The runner is there for the
-    same reason: a CPU limit changes what a timing bar measures, so two runs
-    under different backends were not measured the same way.
-    """
+    """One run of a solution against a problem's cases. The cap and the runner
+    are stored beside the results: two runs under different ones are not
+    comparable, and nothing else would show it."""
     return Verification(
         id=new_id(),
         created_at=datetime.now(UTC),

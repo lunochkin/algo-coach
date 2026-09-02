@@ -1,9 +1,4 @@
-"""The matcher over the corpus.
-
-Re-derivation is the normal path here, not an exception: a technique claim
-asks about one attempt and the question never changes, where a match is a
-template against a corpus of solutions that grows with every run.
-"""
+"""The matcher over the corpus."""
 
 from collections.abc import Callable, Iterable, Sequence
 from typing import Any
@@ -26,8 +21,7 @@ class Failed(BaseModel):
 
 
 class Progress(BaseModel):
-    """One question, answered. Reported as the run goes: a call per question
-    makes a corpus run minutes long."""
+    """One question, answered, reported as the run goes."""
 
     index: int  # 1-based, over what this run will ask about
     total: int
@@ -58,9 +52,8 @@ def read_one(
 ) -> tuple[list[str], Call | None]:
     """What one matcher reads one question as, and the call that read it.
 
-    Makes the call and writes no record, so it is safe to run several at once.
-    The records are the caller's, and the match log has one writer however many
-    calls are in flight.
+    Writes no record, so it is safe to run several at once: the match log keeps
+    one writer however many calls are in flight.
     """
     return match(
         transport,
@@ -75,9 +68,8 @@ def read_one(
 def store(log: MatchLog, question: Question, matched: Sequence[str], call: Call) -> int:
     """Append a verdict per template, returning how many were positive.
 
-    Every candidate gets a record, not only the ones named: the answer is the
-    whole subset, so what it says about the rest is that they do not match, and
-    that is the reading a later run must not pay for again.
+    Every candidate gets a record, not only the ones named: a negative is a
+    reading a later run must not pay for again.
     """
     named = set(matched)
     for template in candidates(question.card):
@@ -116,12 +108,8 @@ def match_corpus(
     """Test every canonical a card's technique reaches against that card's
     templates, skipping the questions this configuration has already answered.
 
-    Written after card import and never before: both references are minted, so
-    a match cannot exist until the templates do.
-
     `fresh` asks again where a record already answers the same question, which
-    is what measuring a matcher against itself needs. `on_progress` reports as
-    the run goes; printing is the caller's.
+    is what measuring a matcher against itself needs.
     """
     asking = questions(
         [card for card in cards if card_slug is None or card.slug == card_slug],
@@ -158,8 +146,8 @@ def match_corpus(
     ):
         index += 1
         if failure is not None:
-            # Broad on purpose: a refusal, a rate limit or a dropped connection
-            # is one question's problem, and the corpus behind it must still run.
+            # Broad on purpose: a refusal or a dropped connection is one
+            # question's problem, and the corpus behind it must still run.
             result.failed.append(
                 Failed(
                     card_id=question.card.id,
@@ -176,8 +164,7 @@ def match_corpus(
         consecutive = 0
         matched, call = answer if answer is not None else ([], None)
         if call is None:
-            # Nothing was asked, so nothing is recorded: a card of framing
-            # procedures alone has no per-solution verdict to give.
+            # Nothing was asked, so nothing is recorded.
             continue
         result.asked += 1
         positive = store(log, question, matched, call)

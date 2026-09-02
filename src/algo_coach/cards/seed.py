@@ -20,8 +20,8 @@ class CardSeedResult(BaseModel):
 
 
 def reason(exc: ValidationError) -> str:
-    """Flatten to one line: pydantic's own rendering is a multi-line block,
-    which reads badly inside JSON a caller has to parse."""
+    # Flattened: pydantic renders a multi-line block, which a caller parsing
+    # JSON cannot use.
     return "; ".join(
         f"{'.'.join(str(part) for part in error['loc'])}: {error['msg']}" for error in exc.errors()
     )
@@ -30,19 +30,8 @@ def reason(exc: ValidationError) -> str:
 def seed_cards(records: Iterable[Mapping], *, store: CardStore) -> CardSeedResult:
     """Validate authored cards, mint what identifies them, upsert each one.
 
-    Records rather than paths: where the content lives is the caller's, so
-    moving it behind a private repo changes the reader and not this.
-
-    The rules, in the order they bite:
-
-    - `CardSeed` carries no id, so an author supplies none; the card's and each
-      template's are minted here.
-    - The slug is the idempotency key, at both levels: a known card slug
-      refreshes and counts as `updated`, and a template keeps the id its slug
-      already had. A new slug is a new card, and the old one stays.
-    - The technique is checked against the vocabulary, on the card and on its
-      selector — the one write path that could introduce an unrecognised code.
-    - Rejection is per record, by index, as at every other boundary.
+    Records rather than paths: the caller owns where the content lives. The
+    slug is the idempotency key at both levels, and rejection is per record.
     """
     result = CardSeedResult()
 

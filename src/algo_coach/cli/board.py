@@ -39,7 +39,6 @@ def board(args: argparse.Namespace, root: Path) -> None:
 
 
 def render(rows: list[TechniqueRow], now: datetime) -> str:
-    """Fixed-width columns, in the order the caller settled on."""
     header = ("technique", "attempts", "solved", "last", "labels")
     body = [
         (

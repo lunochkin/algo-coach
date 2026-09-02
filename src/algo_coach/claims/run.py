@@ -1,9 +1,4 @@
-"""The classifier over the stored log.
-
-Every attempt carries its code, so the backlog is classifiable today — the
-loop's own claims reach only what it touched, and the board's numbers are read
-from all of it.
-"""
+"""The classifier over the stored log."""
 
 from collections.abc import Callable, Mapping, Sequence
 from typing import Any
@@ -27,8 +22,8 @@ class Failed(BaseModel):
 
 
 class Progress(BaseModel):
-    """One attempt, answered. Reported as the run goes rather than counted at
-    the end, since a call per attempt makes a backlog run minutes long."""
+    """One attempt, answered. Reported as the run goes, since a call per attempt
+    makes a backlog run minutes long."""
 
     index: int  # 1-based, over what this run will ask about
     total: int
@@ -58,12 +53,8 @@ def read_one(
     *,
     configuration: Configuration = DEFAULT,
 ) -> tuple[list[str], Call | None]:
-    """What one classifier reads one attempt as, and the call that read it.
-
-    Makes the call and writes no claim, so it is safe to run several at once.
-    The claim is the caller's, and the claims log has one writer however many
-    calls are in flight. The call log is its own file and its own append.
-    """
+    """Makes the call and writes no claim, so several can run at once. The claim
+    is the caller's, and the claims log has one writer."""
     return classify(
         transport, calls, problem.techniques, attempt.code or "", configuration=configuration
     )
@@ -77,12 +68,9 @@ def store(
 ) -> None:
     """Append what a classifier read, on the calling thread.
 
-    Only ever after a call. A reading served from an earlier claim was already
-    written by the run that paid for it, and appending it again would say a
-    question was asked twice. The model, effort, temperature and digest are
-    copied from the call so the claims file reads without opening the call log.
-    The call is cited for what only it holds: the tokens, the response, the
-    reasoning.
+    Only ever after a call: a reading served from an earlier claim was already
+    written by the run that paid for it, and appending it again would say the
+    question was asked twice.
     """
     log.append_claim(
         classifier_claim(
@@ -111,10 +99,8 @@ def ask(
 ) -> list[str]:
     """Classify one attempt and store the verdict, returning what was named.
 
-    An empty verdict is undecided rather than a claim: a claim cannot say "none
-    of these", so nothing is written and whatever already answers the attempt
-    keeps answering it — the call log still records that it was asked. Failures
-    are the caller's: a backlog run aborts on a broken key and an eval does not.
+    An empty verdict writes no claim; the call log still records that it was
+    asked. Failures are the caller's.
     """
     techniques, call = read_one(transport, calls, attempt, problem, configuration=configuration)
     if techniques and call is not None:
@@ -137,23 +123,14 @@ def classify_backlog(
     fresh: bool = False,
     on_progress: Callable[[Progress], None] | None = None,
 ) -> ClassifyResult:
-    """Claim every attempt nothing has claimed yet, and with `redo`, every one
-    an older classifier claimed.
+    """Claim every unclaimed attempt, and with `redo`, every one an older
+    classifier claimed.
 
-    `on_progress` is called once per attempt asked about, so a caller can
-    report a run as it goes. Reporting is the caller's, not this loop's: the
-    CLI prints, a web API would not.
-
-    Newest first, so a run cut short by `limit` improves the numbers the board
-    is showing rather than the oldest ones. Claims are appended as they are
-    made and a current claim is skipped, so a run resumes where the last one
-    stopped instead of paying for it twice.
-
-    Unclaimed before stale, since a first claim buys a number the board does
-    not have and a re-derivation only revises one it does. A hand-claimed
-    attempt is neither, and is skipped as an economy rather than as what
-    protects the eval — a verdict there could never stand, since the user's
-    claim wins on read. What protects the eval is the reader.
+    Newest first, and unclaimed before stale: a first claim buys a number the
+    board does not have, where a re-derivation revises one it does. Claims are
+    appended as they are made and a current one is skipped, so a run resumes
+    where the last stopped. `on_progress` fires once per attempt asked about;
+    reporting is the caller's.
     """
     standing = standing_claims(log.claims())
     candidates = sorted(
@@ -161,9 +138,8 @@ def classify_backlog(
         key=recency,
         reverse=True,
     )
-    # What each attempt would be sent now. A claim already answering that exact
-    # question is not stale however old it is, and `fresh` says to ask anyway —
-    # which is what a run measuring a model against itself needs.
+    # What each attempt would be sent now. A claim answering that exact question
+    # is not stale however old it is; `fresh` asks again regardless.
     asked = {
         attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
         for attempt in candidates
@@ -201,36 +177,30 @@ def classify_backlog(
         asking,
         concurrency=concurrency,
     ):
-        # Counted as answers arrive rather than taken from the order asked in:
-        # with several calls in flight a position in that order jumps about,
-        # and what a reader wants is a count that climbs.
+        # Counted as answers arrive: with several calls in flight a position in
+        # the order asked in jumps about, and a reader wants a count that climbs.
         index += 1
         problem = problems[attempt.problem_id]
         techniques, call = answer if answer is not None else ([], None)
         if failure is not None:
-            # Broad on purpose: a refusal, a rate limit or a dropped connection
-            # is one attempt's problem, and a backlog run must not lose the
-            # ones behind it.
+            # Broad on purpose: a refusal or a dropped connection is one
+            # attempt's problem, and the run must not lose the ones behind it.
             result.failed.append(Failed(attempt_id=attempt.id, reason=repr(failure)))
             report(index, attempt, problem.title, reason=repr(failure))
             consecutive += 1
             if consecutive == ABORT_AFTER:
-                # Consecutive by the order answered. What is already in flight
-                # still lands, so a broken key costs up to `concurrency`
-                # failures rather than `ABORT_AFTER` — time on calls that fail
-                # before they are billed, which is the price of not waiting.
+                # Consecutive by the order answered. What is in flight still
+                # lands, so a broken key costs up to `concurrency` failures
+                # rather than `ABORT_AFTER`.
                 result.aborted = True
                 break
             continue
-        # Answered, so the classifier is reachable — an undecided verdict is a
+        # Answered, so the classifier is reachable: an undecided verdict is a
         # reading, not a failure.
         consecutive = 0
         if not techniques:
-            # Stored rather than dropped: the classifier read the code and
-            # found the candidates did not cover it, and that answer does not
-            # change while the question does not. What answers the attempt is
-            # unchanged — the resolver reads an empty claim as no answer, so
-            # the problem's own techniques keep standing.
+            # Stored rather than dropped: the candidates did not cover the
+            # code, and that answer holds while the question does not change.
             if call is not None:
                 store(log, attempt.id, techniques, call)
             result.undecided += 1

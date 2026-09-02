@@ -1,10 +1,6 @@
 """How far the classifier's claims move the board off the fallback.
 
-A sanity check, never a criterion. Narrowing two or three candidates to one
-removes credit by arithmetic. A board that barely moves therefore says the
-classifier named the whole candidate set, agreeing with the fallback and
-deciding nothing. Movement says it decided something. Only the hand claims say it
-decided right.
+A sanity check, never a criterion: only the hand claims say a claim is right.
 """
 
 from collections.abc import Iterable, Mapping
@@ -27,13 +23,7 @@ def movement(
     problems: Mapping[str, Problem],
     claims: Mapping[str, TechniqueClaim],
 ) -> list[TechniqueMovement]:
-    """The board with the claims against the board without them.
-
-    Both sides are counted by `per_technique`, so these are the board's own
-    numbers rather than a second implementation that could disagree with it.
-    The caller decides whose claims to pass: the check is about what the
-    classifier narrowed, and a hand claim narrows for a different reason.
-    """
+    """The board with the claims against the board without them."""
     attempts = list(attempts)
     fallback = counts(attempts, problems, {})
     claimed = counts(attempts, problems, claims)

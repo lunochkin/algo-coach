@@ -4,13 +4,7 @@ from algo_coach.schema import TestCase
 
 
 class CaseLog:
-    """Append-only JSONL store for the cases that decide a problem.
-
-    A case is never revised. One found wrong is discarded with the problem it
-    belonged to, since the cases define the problem and the statement is what
-    can disagree with them. What does happen is addition: an edge case, or one
-    sized to force a timeout, lands beside the set written with the statement.
-    """
+    """Append-only JSONL store for the cases that decide a problem."""
 
     def __init__(self, root: Path):
         self.root = root
@@ -22,7 +16,6 @@ class CaseLog:
             f.write(case.model_dump_json() + "\n")
 
     def cases(self) -> list[TestCase]:
-        """In append order, which is the order a run decides them in."""
         if not self.cases_path.exists():
             return []
         return [
@@ -32,6 +25,4 @@ class CaseLog:
         ]
 
     def for_problem(self, problem_id: str) -> list[TestCase]:
-        """The set a run covers whole. Every problem carries the cases that
-        decide it, so this is what the engine judges a submission against."""
         return [one for one in self.cases() if one.problem_id == problem_id]

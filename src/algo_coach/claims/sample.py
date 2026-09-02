@@ -16,30 +16,17 @@ def claimable(
     seed: int = 0,
 ) -> list[Attempt]:
     """The attempts a hand claim would decide something about, in the order to
-    ask about them.
-
-    Carrying their code, one per problem, on a problem whose own techniques
-    leave a choice to make. Spread across techniques, so a sample cut at any
-    length is not carried by whichever technique the corpus holds most of.
-
-    A machine claim does not take an attempt out of the pool. The classifier
-    fills what no hand reached, and a user claim is what corrects it. Only the
-    user's own answer settles a problem, since asking again would ask what has
-    been answered.
-
-    Spread against the claims already made rather than within the batch, since
-    the eval set is grown and never redrawn.
-    """
-    # Claimed drops out after the collapse, not before: filtering first would
-    # promote an older attempt and ask the same problem twice.
+    ask about them. A machine claim does not take one out of the pool; only the
+    user's own answer does. Spread against the claims already made rather than
+    within the batch, since the eval set is grown and never redrawn."""
+    # Collapse before the filter, or an older attempt is promoted and the same
+    # problem asked about twice.
     collapsed = one_per_problem(eligible(attempts, problems, user_id=user_id, technique=technique))
     answered = [attempt for attempt in collapsed if answered_by_hand(claimed.get(attempt.id))]
     return spread(
         [attempt for attempt in collapsed if not answered_by_hand(claimed.get(attempt.id))],
         problems,
-        # What the answered attempts covered, carried past the filter that
-        # removed them. They are what the sample joins, so levelling the batch
-        # alone would spend it on whatever the eval set already holds most of.
+        # What the answered attempts covered: the sample joins them.
         covered=Counter(
             code for attempt in answered for code in problems[attempt.problem_id].techniques
         ),
@@ -60,21 +47,10 @@ def spread(
 ) -> list[Attempt]:
     """The pool ordered so no single technique carries the estimate.
 
-    Each step takes an attempt on the technique the order has covered least so
-    far, so any prefix of it is spread. A backlog is skewed. A uniform shuffle
-    puts most of a thirty-attempt sample on the two or three techniques that
-    dominate it, and the score the sample estimates is read per technique.
-
-    An attempt counts toward every technique its problem carries, since a claim
-    on it decides all of them. What is levelled is coverage, not how many times
-    each technique was drawn from. Shuffled within a technique by `seed`, so a
-    sample is described by its seed rather than by listing what it held.
-
-    `covered` is what the order starts from: the techniques a caller has
-    already reached, so a code the eval set holds fifteen of waits behind one
-    it holds four of. It reorders and never filters. An attempt on a covered
-    technique is later, not gone, so a sample cut at any length is still that
-    length. Empty by default, which is the levelling a first pass wants.
+    Each step takes an attempt on the technique covered least so far; an attempt
+    counts toward every technique its problem carries, so what is levelled is
+    coverage rather than draws. Shuffled within a technique by `seed`. `covered`
+    is what the order starts from, and it reorders rather than filters.
     """
     pool = list(attempts)
     random.Random(seed).shuffle(pool)
@@ -89,8 +65,8 @@ def spread(
     cursors: Counter[str] = Counter()
 
     def untaken(code: str) -> Attempt | None:
-        """The bucket's next attempt nothing has drawn. The cursor never goes
-        back, so the scan is paid once per attempt rather than once per step."""
+        # The cursor never goes back, so the scan is paid once per attempt
+        # rather than once per step.
         bucket = buckets[code]
         while cursors[code] < len(bucket) and bucket[cursors[code]].id in taken:
             cursors[code] += 1
@@ -118,12 +94,8 @@ def eligible(
     user_id: str,
     technique: str | None = None,
 ) -> list[Attempt]:
-    """The user's attempts a claim could be made about: carrying their code,
-    on a problem whose own techniques leave a choice.
-
-    What a hand pass and the classifier both draw from — they differ in how
-    many they take, not in what qualifies.
-    """
+    """The user's attempts a claim could be made about, which is what a hand pass
+    and the classifier both draw from."""
     return [
         attempt
         for attempt in attempts
@@ -134,13 +106,8 @@ def eligible(
 
 
 def one_per_problem(attempts: Iterable[Attempt]) -> list[Attempt]:
-    """Each problem's latest attempt, ordered by problem id.
-
-    A retry asks the identical question — same solution, same candidates — so
-    counting both would weight that problem twice. `(finished_at, id)` is
-    the order the drill loop reads a sitting in, so latest means one thing
-    wherever the log is grouped.
-    """
+    """Each problem's latest attempt, by `(finished_at, id)` — the order the
+    drill loop reads a sitting in, so latest means one thing everywhere."""
     latest: dict[str, Attempt] = {}
     for attempt in sorted(attempts, key=recency):
         latest[attempt.problem_id] = attempt
@@ -152,8 +119,6 @@ def recency(attempt: Attempt) -> tuple[datetime, str]:
 
 
 def decides_something(problem: Problem | None, technique: str | None) -> bool:
-    """A problem naming one technique needs no claim — the fallback already
-    answers it, and a claim there would assert what nothing disputes."""
     if problem is None or len(problem.techniques) < 2:
         return False
     return technique is None or technique in problem.techniques

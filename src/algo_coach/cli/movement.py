@@ -9,18 +9,11 @@ from algo_coach.techniques import standing_claims
 
 
 def moved(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """How far the classifier's claims move the board off the fallback.
-
-    The classifier's only: a hand claim narrows for a different reason, and
-    mixing the two would credit the machine with what the user decided.
-
-    Standing ones only, and for the same reason: a machine claim on a
-    hand-claimed attempt is a reading that never reaches the board, so counting
-    it would report movement nothing moved.
-    """
     log = AttemptLog(root)
     attempts = [attempt for attempt in log.attempts() if attempt.user_id == args.user]
     problems = {problem.id: problem for problem in ProblemStore(root).all()}
+    # Standing classifier claims only: a hand claim narrows for its own
+    # reason, and a machine reading that never stands moved nothing.
     claims = {
         attempt_id: claim
         for attempt_id, claim in standing_claims(log.claims()).items()

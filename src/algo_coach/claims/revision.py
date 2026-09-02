@@ -1,13 +1,4 @@
-"""The hand pass run a second time, over what it already answered.
-
-A claim is open to revision — that is why it is its own record rather than a
-field on the attempt. What makes a revision worth asking for is a reading that
-disagrees with it: the hand claims are ground truth by construction, not by
-being right, and a disagreement is the only place a mislabelled one surfaces.
-
-Which attempts to revisit is a question about the log, not about the terminal,
-so it is answered here. What the user is shown while deciding is the adapter's.
-"""
+"""The hand pass run again over what a reading disagrees with."""
 
 from collections.abc import Iterable, Mapping, Sequence
 
@@ -23,24 +14,15 @@ def revisable(
     user_id: str,
     technique: str | None = None,
 ) -> list[Attempt]:
-    """The attempts a revision could change — `claimable`'s mirror.
-
-    Same pool, same collapse, the opposite filter: what the hand pass has
-    already answered rather than what it has not. Collapsed before the filter
-    for the same reason, so a revision asks about the attempt that was scored.
-    """
+    """`claimable`'s mirror: what the hand pass has answered, collapsed before
+    the filter so a revision asks about the attempt that was scored."""
     collapsed = one_per_problem(eligible(attempts, problems, user_id=user_id, technique=technique))
     return [attempt for attempt in collapsed if answered_by_hand(claimed.get(attempt.id))]
 
 
 def against(claim: TechniqueClaim, readings: Sequence[Mapping[str, TechniqueClaim]]) -> int:
-    """How many of these configurations read the attempt differently.
-
-    Set equality, as the score uses: a reading naming a subset of the claim
-    disagrees with it exactly as one naming something else does. A
-    configuration that never read the attempt is not a dissenter and is not
-    counted — it is silent, which is a third thing.
-    """
+    """How many of these configurations read the attempt differently, by set
+    equality. One that never read it is silent rather than dissenting."""
     wanted = set(claim.techniques)
     return sum(
         1
@@ -57,17 +39,9 @@ def contested(
     *,
     at_least: int = 1,
 ) -> list[Attempt]:
-    """The disputed ones, most disputed first.
-
-    Every configuration disagreeing says either the claim is wrong or the
-    vocabulary is ambiguous, and both are worth an answer; one configuration
-    disagreeing usually says that configuration is wrong. Ordering by the count
-    puts the attempts that decide something first, and `at_least` is where a
-    reader draws the line between the two.
-
-    Stable, so attempts tied on the count keep the pool's order — by problem,
-    which is what makes two runs of the same review comparable.
-    """
+    """The disputed ones, most disputed first. `at_least` draws the line between
+    a wrong claim and one wrong configuration. Stable, so ties keep the pool's
+    order, which makes two runs of the same review comparable."""
     counted = [
         (attempt, against(standing[attempt.id], readings))
         for attempt in attempts

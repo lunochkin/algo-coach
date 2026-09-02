@@ -1,10 +1,4 @@
-"""A problem, what produced it, and what it was written for.
-
-Generated is the only origin, so unlike a match there is no hand arm to
-exempt: provenance is unconditional. A problem written before the field
-existed carries none for good, since nothing re-derives a statement, and no
-configuration could then be compared over the corpus.
-"""
+"""A problem, what produced it, and what it was written for."""
 
 import pytest
 from helpers import GENERATED, PROVENANCE

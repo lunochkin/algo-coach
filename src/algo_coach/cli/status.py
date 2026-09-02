@@ -1,14 +1,6 @@
-"""What a run of several classifiers shows while it is running.
-
-One row per configuration rather than a line per attempt. Several
-configurations answer at once, and a line in that stream cannot say which
-produced it without carrying the whole configuration on every one of them.
-
-The only thing that writes to the stream while a run is going. Progress
-arrives on the consuming thread and a wait arrives on whichever worker hit the
-cap, so both are serialised here. A warning written beside a block being
-redrawn would scroll the block and leave the cursor arithmetic wrong.
-"""
+"""One row per configuration while a run of several classifiers is going. The
+only writer to the stream during a run: progress arrives on the consuming
+thread and a wait on whichever worker hit the cap, so both are serialised."""
 
 import shutil
 import threading
@@ -19,20 +11,16 @@ from algo_coach.calls import Retry
 from algo_coach.classifier import Configuration
 from algo_coach.cli.display import held, sampled
 
-# Cells in the bar. Ten, so a cell is a readable ten per cent rather than a
-# resolution nobody acts on.
+# Cells in the bar, so one cell is ten per cent.
 BAR = 10
 
-# Updates a row prints when nobody is watching it redraw. A run of minutes must
-# not go silent, and a line per attempt is what the board replaced.
+# Updates a row prints when it cannot redraw: a run of minutes must not go
+# silent, and a line per attempt is what the board replaced.
 STEPS = 10
 
 
 @dataclass
 class Row:
-    """One configuration's standing. Counted here rather than read from the
-    run, since each answer reaches the board exactly once."""
-
     configuration: Configuration
     total: int = 0
     answered: int = 0
@@ -44,8 +32,7 @@ class Row:
 
 @dataclass
 class Widths:
-    """Column widths, measured once. A row that wrapped would make the
-    up-count wrong, which is the one failure that corrupts the display."""
+    """Measured once. A row that wrapped would make `redraw`'s up-count wrong."""
 
     model: int = 0
     effort: int = 0
@@ -60,18 +47,13 @@ class Status:
         self.stream = stream
         self.rows = [Row(configuration) for configuration in configurations]
         self.lock = threading.Lock()
-        # Chosen once, from what the stream is rather than from a flag. A pipe
-        # cannot act on an escape sequence, and a file full of them is worse
-        # than no report at all.
+        # From what the stream is rather than from a flag: a pipe cannot act
+        # on an escape sequence.
         self.terminal = getattr(stream, "isatty", lambda: False)()
         self.drawn = False
         self.widths = self.measure()
 
     def measure(self) -> Widths:
-        """Every field of every configuration is shown, so two that differ only
-        in effort are told apart. The full identity costs width on a run where
-        nothing collides, and reads the same in a pasted fragment as on screen.
-        """
         if not self.rows:
             return Widths()
         one = [row.configuration for row in self.rows]
@@ -96,17 +78,14 @@ class Status:
         bar = f"[{'#' * filled}{'-' * (BAR - filled)}]"
         counts = f"{row.answered:>{widths.total}}/{row.total}"
         standing = f"  {bar}  {counts}{self.tail(row)}"
-        # The name gives way, never the standing. A narrow terminal that cut
-        # the line would take the counts and the failure tally first, which are
-        # what the row is for — the name is the part a reader already knows.
+        # The name gives way, never the standing: a cut line would otherwise
+        # lose the counts and the failure tally first.
         room = self.widths.line - len(standing)
         if self.widths.line and len(name) > room:
             name = name[: max(room - 1, 0)] + "…"
         return name + standing
 
     def tail(self, row: Row) -> str:
-        """What is worth saying beside the count, in the order it matters: a
-        wait happening now, then what the row has been through."""
         parts = []
         if row.holding:
             parts.append(f"held {row.holding:g}s")
@@ -117,12 +96,8 @@ class Status:
         return "   " + ", ".join(parts) if parts else ""
 
     def planned(self, totals: list[int]) -> None:
-        """What each row will pay for, before the first call.
-
-        Totals are known only once every configuration has selected, and a
-        configuration whose readings are all reused asks nothing — without this
-        it would never appear, having no answer to report.
-        """
+        """What each row will pay for. A configuration whose readings are all
+        reused asks nothing, so without this it would never appear."""
         with self.lock:
             for row, total in zip(self.rows, totals, strict=True):
                 row.total = total
@@ -141,16 +116,8 @@ class Status:
             self.draw()
 
     def waiting(self, retry: Retry) -> None:
-        """A cap, marked on every row the deployment holds.
-
-        Two configurations pinned to one endpoint are held by the same limit,
-        so the mark belongs on both — but only on the ones that will call. A
-        row asking nothing is answered from the log and never approaches the
-        cap, so marking it would report a wait it is not in.
-
-        The wait is shown rather than printed: a line of its own would scroll
-        the block being redrawn.
-        """
+        """A cap, marked on every row the endpoint holds that will call. Shown
+        rather than printed: a line of its own would scroll the block."""
         with self.lock:
             marked = False
             for row in self.rows:
@@ -166,8 +133,8 @@ class Status:
                 self.write(held(retry) + "\n")
 
     def close(self) -> None:
-        """The finished board, left on screen. It is the run's cost, and the
-        report that follows says nothing about what each call took."""
+        """The finished board, left on screen: nothing after it says what the
+        calls took."""
         with self.lock:
             if not any(row.total for row in self.rows):
                 return
@@ -184,21 +151,21 @@ class Status:
         if self.terminal:
             self.redraw()
             return
-        # Appended rather than redrawn, and thinned: a pipe cannot move a
-        # cursor, and a line per answer is the stream the board replaced.
+        # Appended and thinned rather than redrawn: a pipe cannot move a
+        # cursor.
         for row in self.rows:
             step = max(row.total // STEPS, 1)
             if row.answered and (row.answered - row.shown >= step or row.answered == row.total):
                 self.write(self.line(row) + "\n")
                 row.shown = row.answered
 
+    # One write of the whole block: split, a wait arriving between the writes
+    # would land inside it.
     def redraw(self) -> None:
-        """One write of the whole block. Split across writes, a wait arriving
-        between them would land inside it."""
         lines = [self.line(row)[: self.widths.line] for row in self.rows]
         up = f"\x1b[{len(lines)}A" if self.drawn else ""
-        # Each line is erased before it is written, or a shorter row leaves the
-        # tail of the longer one it replaced.
+        # Erased before written, or a shorter row leaves the tail of the
+        # longer one it replaced.
         self.write(up + "".join(f"\x1b[2K{line}\n" for line in lines))
         self.drawn = True
 

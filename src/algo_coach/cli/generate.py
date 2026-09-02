@@ -11,7 +11,6 @@ from algo_coach.schema import Card, Template
 
 
 def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """Write problems for one of a card's templates."""
     api = transport(args, parser)
     card, template = resolve(args, parser, root)
 
@@ -29,8 +28,7 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         print(written(drafted.draft, code=args.code))
     kept = f"{len(result.drafted)} problem(s) stored, written by {MODEL}, effort {EFFORT}"
     if result.discarded:
-        # Reported here as well as per problem: a run of ten scrolls, and what
-        # the gates rejected is what a template's brief is judged on.
+        # Repeated from the per-problem lines: a run of ten scrolls past them.
         kept += f", {len(result.discarded)} discarded"
     print(kept)
     if result.aborted:
@@ -42,11 +40,7 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
 def resolve(
     args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path
 ) -> tuple[Card, Template]:
-    """The card and the template the brief is built from.
-
-    Named before the run rather than after a call: a slug nothing was seeded
-    under would otherwise cost a request to discover.
-    """
+    """The card and the template the brief is built from, resolved before any call."""
     card = next((one for one in CardStore(root).all() if one.slug == args.card), None)
     if card is None:
         parser.exit(2, f"generate: no card {args.card!r} — seed it first\n")
@@ -58,7 +52,7 @@ def resolve(
 
 
 def written(draft: Draft, *, code: bool) -> str:
-    """One problem as it was written, since nothing stores it yet."""
+    """One problem as it was written."""
     block = [
         f"\n# {draft.title} ({draft.difficulty}, {len(draft.cases)} case(s))",
         "",
@@ -70,8 +64,7 @@ def written(draft: Draft, *, code: bool) -> str:
 
 
 def show(progress: Progress) -> None:
-    """A line per problem, on stderr as the other run loops report: two calls
-    take a minute, and stdout stays the command's own output."""
+    """One line per problem, on stderr and flushed: two calls take a minute."""
     counter = f"[{progress.index:>{len(str(progress.total))}}/{progress.total}]"
     print(
         f"{counter} {progress.template_slug[:24]:<24} {progress.title[:40]:<40}  "
@@ -82,13 +75,8 @@ def show(progress: Progress) -> None:
 
 
 def verdict(progress: Progress) -> str:
-    """How the problem went: the case run, and whether it was kept.
-
-    Reported apart, because a written problem can still be discarded — its
-    canonical failing the cases it was written with, or the reference
-    disagreeing with it. A discard is the whole line, since there is no run to
-    report where nothing was kept.
-    """
+    """The case run and whether it was kept, apart: a written problem can still
+    be discarded."""
     if progress.reason is not None:
         return f"! {progress.reason}"
     cases = f"{progress.cases} case(s)"
