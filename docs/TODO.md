@@ -188,7 +188,7 @@ gap. Every later run is aimed at the templates the gap report lists.
       product data. The derivation has no input until one exists
 - [x] Add an append-only store for readings, as the matches have. A record
       with nowhere to land leaves the reading run with nothing to append to
-- [ ] Read a canonical and an attempt through one classifier, writing the two
+- [x] Read a canonical and an attempt through one classifier, writing the two
       records apart. Two prompts asking one question would drift, and neither
       score would compare
 - [ ] Give the canonical reading the whole vocabulary as candidates, where an
