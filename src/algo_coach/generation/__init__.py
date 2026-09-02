@@ -10,6 +10,7 @@ from algo_coach.generation.agreement import (
 from algo_coach.generation.aim import Target, targets
 from algo_coach.generation.blind import reference
 from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
+from algo_coach.generation.discrimination import separators
 from algo_coach.generation.generator import (
     DEFAULT,
     EFFORT,
@@ -73,6 +74,7 @@ __all__ = [
     "read",
     "reference",
     "schema",
+    "separators",
     "settle",
     "targets",
     "write_one",

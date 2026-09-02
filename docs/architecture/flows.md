@@ -86,6 +86,11 @@ The order matters because each step can reject what came before.
 - **The call that answers a survivor proposes arguments, never returns.** The
   reference computes what they return, so no model writes an expected output
   that could agree with the mistake the case was asked for.
+- **A proposed input the canonical cannot answer drops the case, not the
+  problem.** Nothing checks an input against the constraints the statement
+  gives, so a crash or a timeout there is as likely to be an input the problem
+  excludes as a defect in the solution. The canonical was already run against
+  the cases written with the statement, and those are what decide it.
 - **When the loop stops is deferred.** A mutant can be equivalent to the
   original, and equivalence is undecidable, so no case kills it and the score
   never reaches full. The loop stops on a bound rather than on a score, and
@@ -105,11 +110,11 @@ The order matters because each step can reject what came before.
 - **A canonical that passes demonstrates a match**, where the matcher infers
   one. The assertion is stored only for a canonical the cases kept: one that
   failed showed nothing about the form.
-- **Failing means two things, at two points.** The first canonical is run
-  before any expected value is settled, so it fails only by yielding no value
-  on some case, and the problem is discarded. A later canonical is judged by
-  the cases the problem carries, so it fails as any solution does, and nothing
-  is discarded.
+- **Failing means two things on the cases written with the statement.** The
+  first canonical is run before any expected value is settled, so it fails only
+  by yielding no value on some case, and the problem is discarded. A later
+  canonical is judged by the cases the problem carries, so it fails as any
+  solution does, and nothing is discarded.
 - **Announcement is measured, not assumed.** What is being trained is reaching
   for a form unprompted, so the enabling property has to be derivable from the
   statement rather than stated in it. A form a matcher names instantly from the

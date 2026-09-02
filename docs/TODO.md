@@ -217,7 +217,7 @@ canonical. What the first corpus settles is the bound.
       operators change
 - [x] Kill a mutant on a wrong answer, a crash or a timeout, and report which
       ones survived. A survivor names the case that has to exist
-- [ ] Ask for the cases that kill the survivors, arguments only. The reference
+- [x] Ask for the cases that kill the survivors, arguments only. The reference
       computes what they return, so no model writes an expected output
 - [ ] Choose the bound the mutation loop stops at, and write the number into
       `corpus.md`. Equivalent mutants make a full score unreachable
@@ -460,6 +460,10 @@ whatever phase is current.
       write the choice into `content.md`. Scoping through the problem's
       techniques bounds the pairs today. Triggered when a canonical displays a
       form outside them, which enumeration is what produces
+- [ ] Decide whether a canonical that yields no value on a proposed case is a
+      defect rather than an input the statement excludes, and write the choice
+      into `flows.md`. Triggered when a run drops such cases often enough to
+      show in its report
 - [ ] Settle how a case forcing a timeout carries its input, and add the field
       it needs. Literal arguments put a megabyte of JSON in the store per case,
       where a seed and a size do not. Triggered when the first performance case
