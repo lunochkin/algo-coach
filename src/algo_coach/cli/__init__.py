@@ -14,6 +14,7 @@ from algo_coach.cli.classify import classify
 from algo_coach.cli.generate import generate
 from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
+from algo_coach.cli.read import read
 from algo_coach.cli.score import Named, score
 from algo_coach.cli.seed import BadLine, seed
 
@@ -156,6 +157,22 @@ def main() -> None:
         help="ask again even where a stored record answers the same question",
     )
 
+    read_parser = _command(sub, "read", "name the techniques each stored canonical used")
+    read_parser.add_argument(
+        "--limit", type=int, help="how many canonicals to read; every unread one otherwise"
+    )
+    read_parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=CONCURRENCY,
+        help="calls in flight at once; one at a time otherwise",
+    )
+    read_parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help="ask again even where a stored reading answers the same prompt",
+    )
+
     generate_parser = _command(sub, "generate", "write problems for one of a card's templates")
     generate_parser.add_argument("--card", required=True, help="the card, by slug")
     generate_parser.add_argument("--template", required=True, help="its template, by slug")
@@ -260,6 +277,8 @@ def dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         classify(args, parser, root)
     elif args.command == "generate":
         generate(args, parser, root)
+    elif args.command == "read":
+        read(args, parser, root)
     elif args.command == "match":
         match(args, parser, root)
     elif args.command == "annotate":

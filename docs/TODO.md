@@ -194,9 +194,9 @@ gap. Every later run is aimed at the templates the gap report lists.
 - [x] Give the canonical reading the whole vocabulary as candidates, where an
       attempt gets the problem's own techniques. Those are derived from the
       canonicals, so constraining the reading by them is circular
-- [ ] Read every canonical for its techniques, skipping the ones already read
-      at the current digest. A criteria edit then re-reads what that entry
-      reached and leaves the rest
+- [x] Read every canonical for its techniques, skipping the ones already read
+      at the current digest. Every criterion reaches every reading, so a
+      criteria edit re-reads the whole corpus
 - [ ] Derive a problem's techniques as the union over the standing readings of
       its canonicals, excluding the reference. A view, so a canonical added
       later widens them, and counting the reference would credit the naive
