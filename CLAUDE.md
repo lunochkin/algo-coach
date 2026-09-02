@@ -90,9 +90,22 @@ carrying nothing."
 
 ## Code style
 
-- Comments sparse; explain why, never what. Match pydantic/pytest idiom.
-- Keep slices thin: a feature is done when it runs on real daily practice,
-  not when it's feature-complete.
+- Match pydantic/pytest idiom. Keep slices thin: a feature is done when it runs
+  on real daily practice, not when it's feature-complete.
+- **A docstring and its comments stay shorter than the code they sit on.** Over
+  that, the reason belongs in `docs/architecture/` and the code cites it.
+- **No docstring where the name and the signature already say it.**
+  `candidates() -> list[str]` returning `sorted(codes())` needs none.
+- **Never restate a reason `docs/architecture/` already gives.** Docs are the
+  durable context; a copy in the code drifts from it. Point instead:
+  `# sorted: the digest is taken over this order`.
+- **One comment carries one non-obvious fact** — the alternative rejected, the
+  invariant that would break. Not the argument for it.
+- The `## Writing` rules are for docs and commits. They do not license prose in
+  a module.
+- Tests are the exception to the budget. A test keeps a one-line docstring
+  saying what it pins, since the body is two lines and the name cannot carry
+  the reason. The module docstring still goes.
 
 ## Git
 
