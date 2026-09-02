@@ -14,13 +14,29 @@ from algo_coach.classifier import DEFAULT, Configuration, classify
 from algo_coach.mint import machine_reading
 from algo_coach.readings.store import ReadingLog
 from algo_coach.schema import Call, Solution, TechniqueReading
+from algo_coach.techniques import codes
+
+
+def candidates() -> list[str]:
+    """What a solution is read against: the whole vocabulary.
+
+    An attempt is read against its problem's own techniques, where those
+    techniques are folded from readings of the problem's canonicals.
+    Constraining a reading by them would make the fallback a fold over records
+    of the type it falls back for, so a reading is offered every code there is.
+
+    Sorted, because the order reaches the prompt and the prompt is what a
+    reading's digest is taken over. `codes()` is a frozenset, so its own
+    iteration order moves with the interpreter's hash seed, and every stored
+    reading would read as stale on the next process.
+    """
+    return sorted(codes())
 
 
 def read_one(
     transport: Transport,
     calls: CallLog,
     solution: Solution,
-    candidates: Sequence[str],
     *,
     configuration: Configuration = DEFAULT,
 ) -> tuple[list[str], Call | None]:
@@ -30,12 +46,11 @@ def read_one(
     The record is the caller's, and the reading log has one writer however many
     calls are in flight.
 
-    The candidates are the caller's too. An attempt is read against its
-    problem's own techniques; a solution is read against the whole vocabulary,
-    since those techniques are folded from these readings and constraining one
-    by them would be circular.
+    The candidates are not the caller's, unlike the attempt classifier's. They
+    are the whole vocabulary every time, since a narrower set is what would
+    make the reading circular.
     """
-    return classify(transport, calls, candidates, solution.code, configuration=configuration)
+    return classify(transport, calls, candidates(), solution.code, configuration=configuration)
 
 
 def store(
@@ -72,7 +87,6 @@ def read(
     log: ReadingLog,
     calls: CallLog,
     solution: Solution,
-    candidates: Sequence[str],
     *,
     configuration: Configuration = DEFAULT,
 ) -> list[str]:
@@ -84,12 +98,13 @@ def read(
     about the code, and unstored it would be paid for again.
 
     Nothing is stored where no call was made. A reading carries its whole
-    configuration, so a verdict nobody read cannot be written down; the
-    candidate set that short-circuits the reader is the whole vocabulary here,
-    so a corpus run never reaches it. Failures are the caller's, as they are
-    for a claim.
+    configuration, so a verdict nobody read cannot be written down. The reader
+    answers without a call only where it was offered fewer than two candidates,
+    which the vocabulary never is — that branch is the return type's, not a
+    state this path reaches. Failures are the caller's, as they are for a
+    claim.
     """
-    techniques, call = read_one(transport, calls, solution, candidates, configuration=configuration)
+    techniques, call = read_one(transport, calls, solution, configuration=configuration)
     if call is not None:
         store(log, solution.id, techniques, call)
     return techniques

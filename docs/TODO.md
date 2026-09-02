@@ -191,7 +191,7 @@ gap. Every later run is aimed at the templates the gap report lists.
 - [x] Read a canonical and an attempt through one classifier, writing the two
       records apart. Two prompts asking one question would drift, and neither
       score would compare
-- [ ] Give the canonical reading the whole vocabulary as candidates, where an
+- [x] Give the canonical reading the whole vocabulary as candidates, where an
       attempt gets the problem's own techniques. Those are derived from the
       canonicals, so constraining the reading by them is circular
 - [ ] Read every canonical for its techniques, skipping the ones already read

@@ -2,9 +2,13 @@
 apart.
 
 Two prompts asking one question would drift, and neither score would compare.
-So what these assert is that the reader is the same one — same system text,
-same digest for the same code and candidates — while the record written differs
-in kind, in store and in who owns it.
+So what these assert is that the reader is the same one — one system text, one
+rendering of a criterion — while the record written differs in kind, in store
+and in who owns it.
+
+What the two do not share is the candidate set. An attempt is read against its
+problem's own techniques; a solution is read against the whole vocabulary,
+since those techniques are folded from these readings.
 """
 
 import pytest
@@ -15,12 +19,15 @@ from algo_coach.claims import ask as claim_one
 from algo_coach.classifier import request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import solution as mint_solution
-from algo_coach.readings import ReadingLog, read, read_one
+from algo_coach.readings import ReadingLog, candidates, read, read_one
 from algo_coach.schema import ReadingSource, SolutionRole
+from algo_coach.techniques import codes
 
 answering = FakeTransport.answering
 
 CODE = "def solve(xs):\n    return sorted(xs)[0]\n"
+# What the problem carries, and so what its attempts are read against. The
+# solution reading is offered the vocabulary instead.
 CANDIDATES = ["greedy", "sorting"]
 
 
@@ -42,15 +49,8 @@ def log(tmp_path) -> ReadingLog:
     return ReadingLog(tmp_path)
 
 
-def run(client, log, *, candidates=CANDIDATES, code=CODE):
-    return read(
-        client,
-        log,
-        CallLog(log.root),
-        canonical(code),
-        candidates,
-        configuration=CONFIGURATION,
-    )
+def run(client, log, *, code=CODE):
+    return read(client, log, CallLog(log.root), canonical(code), configuration=CONFIGURATION)
 
 
 def test_a_verdict_is_written_as_a_classifier_reading(log):
@@ -70,7 +70,7 @@ def test_the_reading_is_keyed_to_the_solution(log):
     client = answering(Verdict(["sorting"]))
     one = canonical()
 
-    read(client, log, CallLog(log.root), one, CANDIDATES, configuration=CONFIGURATION)
+    read(client, log, CallLog(log.root), one, configuration=CONFIGURATION)
 
     (reading,) = log.readings()
     assert reading.solution_id == one.id
@@ -109,22 +109,30 @@ def test_an_empty_verdict_is_stored(log):
     assert reading.techniques == []
 
 
-def test_nothing_is_stored_where_nothing_was_read(log):
-    """A reading carries its whole configuration, so a verdict no call
-    produced cannot be written down."""
-    client = answering()
+def test_the_candidates_are_the_whole_vocabulary(log):
+    """Never the problem's own techniques. Those are folded from readings like
+    this one, so a reading constrained by them would answer with what it was
+    asked to establish."""
+    client = answering(Verdict(["sorting"]))
 
-    named = run(client, log, candidates=["sorting"])
+    run(client, log)
 
-    assert named == ["sorting"]
-    assert log.readings() == []
-    assert client.calls == []
+    offered = client.calls[0]["schema"]["properties"]["techniques"]["items"]["enum"]
+    assert set(offered) == codes()
+    assert offered == candidates()
 
 
-def test_the_same_question_is_asked_of_an_attempt_and_a_canonical(log, tmp_path):
-    """One reader, two records. The digest is what a re-run compares, so the
-    same code against the same candidates has to reach the same text — two
-    prompts would drift, and neither score would compare."""
+def test_the_candidate_order_is_fixed(log):
+    """The order reaches the prompt and the prompt is what the digest is taken
+    over. Drawn from a frozenset it would move with the hash seed, and every
+    stored reading would read as stale on the next process."""
+    assert candidates() == sorted(codes())
+
+
+def test_one_reader_asks_both_and_the_candidates_are_what_differ(log, tmp_path):
+    """One rulebook: the system text and the rendering of a criterion are the
+    same, so a disagreement between the two records is about the code. What
+    separates them is the candidate set, which is why the digests differ."""
     client = answering(Verdict(["sorting"]), Verdict(["sorting"]))
     attempts = AttemptLog(tmp_path)
     attempts.append_attempt(attempt("a1", "p1", code=CODE))
@@ -142,8 +150,10 @@ def test_the_same_question_is_asked_of_an_attempt_and_a_canonical(log, tmp_path)
 
     (reading,) = log.readings()
     (claim,) = attempts.claims()
-    assert reading.prompt_hash == claim.prompt_hash == request_hash(CANDIDATES, CODE)
-    assert client.asked("content") == {client.calls[0]["content"]}
+    assert reading.prompt_hash == request_hash(candidates(), CODE)
+    assert claim.prompt_hash == request_hash(CANDIDATES, CODE)
+    assert reading.prompt_hash != claim.prompt_hash
+    assert client.asked("system") == {client.calls[0]["system"]}
 
 
 def test_the_two_records_land_apart(log, tmp_path):
@@ -172,9 +182,7 @@ def test_a_reading_makes_the_call_and_writes_nothing(log):
     is the caller's, so the log keeps one writer."""
     client = answering(Verdict(["sorting"]))
 
-    named, call = read_one(
-        client, CallLog(log.root), canonical(), CANDIDATES, configuration=CONFIGURATION
-    )
+    named, call = read_one(client, CallLog(log.root), canonical(), configuration=CONFIGURATION)
 
     assert named == ["sorting"]
     assert call is not None
