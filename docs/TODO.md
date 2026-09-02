@@ -221,9 +221,14 @@ canonical. What the first corpus settles is the bound.
       computes what they return, so no model writes an expected output
 - [x] Choose the bound the mutation loop stops at, and write the number into
       `corpus.md`. Equivalent mutants make a full score unreachable
-- [ ] Search for the smallest input separating the reference from the canonical
-      under the cap, and store the case at it. Only where the template claims a
+- [x] Search for the smallest input separating the reference from the canonical
+      under the cap, doubling then halving. Only where the template claims a
       speedup
+- [ ] Write the generation call for an input generator: the statement in, code
+      building an input of a given size out. The speedup search has no input to
+      run without one
+- [ ] Store the separating case beside the others, so a submission is judged
+      at that size. The search finds one and nothing writes it down
 - [ ] Run the mutation loop in the landing path, between `check` and `land`,
       and append the cases it wins to the set the problem carries. Nothing
       calls `mutation` today, so no landed problem is measured against the
@@ -464,10 +469,6 @@ whatever phase is current.
       defect rather than an input the statement excludes, and write the choice
       into `flows.md`. Triggered when a run drops such cases often enough to
       show in its report
-- [ ] Settle how a case forcing a timeout carries its input, and add the field
-      it needs. Literal arguments put a megabyte of JSON in the store per case,
-      where a seed and a size do not. Triggered when the first performance case
-      is written
 - [ ] Replace the per-case subprocess with a fork server, importing the
       solution once and forking per case. Triggered when a generation run
       spends minutes on process start, which mutation testing is what brings

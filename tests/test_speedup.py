@@ -1,0 +1,135 @@
+"""The separating input: the smallest size at which the reference exceeds the
+cap and the canonical answers under it."""
+
+import pytest
+
+from algo_coach.generation.speedup import CEILING, Missing, search
+
+# a reference whose cost is the size, in tens of milliseconds, so a separating
+# size is decided by the clock rather than by the machine's speed
+SLEEPS = "import time\n\n\ndef solve(n):\n    time.sleep(n / 100)\n    return n\n"
+FAST = "def solve(n):\n    return n\n"
+CAP_MS = 55
+MEASURE_MS = 2000
+
+
+def searched(canonical: str = FAST, reference: str = SLEEPS, **overrides):
+    return search(
+        lambda size: [size],
+        canonical=canonical,
+        reference=reference,
+        cap_ms=overrides.pop("cap_ms", CAP_MS),
+        largest=overrides.pop("largest", 16),
+        measure_ms=overrides.pop("measure_ms", MEASURE_MS),
+        ceiling=overrides.pop("ceiling", CEILING),
+        **overrides,
+    )
+
+
+def test_the_smallest_size_the_reference_exceeds_the_cap_at_is_found():
+    """Five sleeps 50ms and six sleeps 60ms, so six is where the naive
+    solution stops fitting in the sitting."""
+    found = searched()
+
+    assert found.found
+    assert found.size == 6
+
+
+def test_the_case_carries_the_arguments_at_that_size():
+    """A size names no input on its own, so what is stored is what the
+    generator built there."""
+    found = searched()
+
+    assert found.args == [6]
+
+
+def test_both_measurements_are_carried():
+    """A later search reads these rather than running the whole set again."""
+    found = searched()
+
+    assert found.reference_ms >= CAP_MS
+    assert found.canonical_ms < CAP_MS
+
+
+def test_a_reference_that_finishes_everywhere_separates_nothing():
+    """A defect where the template claimed a speedup, and nothing at all where
+    it did not."""
+    found = searched(largest=2)
+
+    assert not found.found
+    assert found.missing is Missing.REFERENCE_FINISHED
+
+
+def test_the_largest_legal_size_is_tried_before_the_search_gives_up():
+    """Doubling from one reaches four and then eight, and a bound of six is
+    where the separation is."""
+    found = searched(largest=6)
+
+    assert found.size == 6
+
+
+def test_a_canonical_that_cannot_answer_at_that_size_separates_nothing():
+    """The form gives no usable speedup at this cap, which is not a case."""
+    found = searched(canonical=SLEEPS)
+
+    assert found.missing is Missing.CANONICAL_FAILED
+
+
+def test_a_reference_that_crashes_is_neither():
+    """A recursion limit at size says nothing about how long the naive
+    solution takes."""
+    found = searched(reference="def solve(n):\n    raise ValueError(n)\n")
+
+    assert found.missing is Missing.REFERENCE_CRASHED
+
+
+def test_a_reference_beyond_the_measuring_cap_carries_no_time():
+    """It exceeded the cap being separated, and by how much was never
+    measured."""
+    found = searched(reference="def solve(n):\n    while True:\n        pass\n", measure_ms=200)
+
+    assert found.found
+    assert found.size == 1
+    assert found.reference_ms is None
+
+
+def test_the_measuring_cap_sits_above_the_cap_being_separated():
+    """Measured at the cap itself, every separating run is a timeout and no
+    time is read from it."""
+    with pytest.raises(ValueError):
+        searched(measure_ms=CAP_MS)
+
+
+def test_the_search_starts_within_the_constraints():
+    with pytest.raises(ValueError):
+        searched(smallest=20, largest=16)
+
+
+def test_an_input_over_the_ceiling_is_not_a_case():
+    """A stored case is read whole on every verification, so what it may weigh
+    is bounded rather than left to the separating size."""
+    found = search(
+        lambda size: [list(range(size))],
+        canonical="def solve(xs):\n    return len(xs)\n",
+        reference="def solve(xs):\n    return len(xs)\n",
+        cap_ms=CAP_MS,
+        largest=10_000,
+        measure_ms=MEASURE_MS,
+        ceiling=64,
+    )
+
+    assert found.missing is Missing.INPUT_TOO_LARGE
+
+
+def test_a_returned_value_over_the_ceiling_is_not_a_case():
+    """The arguments fit and the answer does not, which the case carries
+    together."""
+    found = searched(canonical="def solve(n):\n    return list(range(10000))\n", ceiling=200)
+
+    assert found.missing is Missing.INPUT_TOO_LARGE
+
+
+def test_a_reference_that_finishes_is_told_from_an_input_that_does_not_fit():
+    """One is a defect where a speedup was claimed, the other a problem whose
+    separating input is out of reach."""
+    assert searched(largest=2).missing is Missing.REFERENCE_FINISHED

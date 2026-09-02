@@ -38,6 +38,7 @@ from algo_coach.generation.run import (
     write_one,
     write_problems,
 )
+from algo_coach.generation.speedup import Missing, Searched, search
 
 __all__ = [
     "CAP_MS",
@@ -57,10 +58,12 @@ __all__ = [
     "Failed",
     "GenerationResult",
     "Misdeclaration",
+    "Missing",
     "Progress",
     "Draft",
     "DraftCase",
     "GenerationError",
+    "Searched",
     "Settled",
     "Target",
     "SettledCase",
@@ -74,6 +77,7 @@ __all__ = [
     "read",
     "reference",
     "schema",
+    "search",
     "separators",
     "settle",
     "targets",
