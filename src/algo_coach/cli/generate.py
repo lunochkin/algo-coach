@@ -4,6 +4,7 @@ from pathlib import Path
 
 from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
+from algo_coach.cli.bench import bench as chosen_bench
 from algo_coach.cli.transport import transport
 from algo_coach.generation import (
     BENCH,
@@ -28,7 +29,7 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
     aimed = resolve(args, parser, root)
     api = transport(args, parser)
     calls, corpus = CallLog(root), Corpus.at(root)
-    bench = BENCH
+    bench = chosen_bench(args, parser)
 
     results = []
     for target in aimed:

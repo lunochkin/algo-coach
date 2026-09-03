@@ -239,7 +239,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Add `Bench`: one `Configuration` per generation call site — generator,
       blind, discrimination, inputs — defaulting to the one all four share
       today. A run then names four configurations rather than one
-- [ ] Take a per-site bench override on `algo-coach generate`, so a cheaper
+- [x] Take a per-site bench override on `algo-coach generate`, so a cheaper
       model is tried without an edit
 - [ ] Set the bench defaults: sampled for the generator, `temperature: 0` for
       the other three. `require_parameters` drops an endpoint sent a

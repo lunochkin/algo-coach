@@ -8,6 +8,7 @@ from dotenv import find_dotenv, load_dotenv
 
 from algo_coach.claims import CONCURRENCY
 from algo_coach.cli.annotate import annotate
+from algo_coach.cli.bench import SITES, Sited
 from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
@@ -185,6 +186,44 @@ def main() -> None:
     generate_parser.add_argument("--count", type=int, default=1, help="how many problems to write")
     generate_parser.add_argument(
         "--code", action="store_true", help="print each canonical beside its statement"
+    )
+    # One destination for all of them, so which setting followed which site
+    # survives. See `Sited` in bench.py.
+    generate_parser.add_argument(
+        "--site",
+        dest="sites",
+        action=Sited,
+        metavar="SITE",
+        choices=SITES,
+        help=f"the call site the settings after it configure: {', '.join(SITES)}; repeatable",
+    )
+    generate_parser.add_argument(
+        "--model",
+        dest="sites",
+        action=Sited,
+        metavar="MODEL",
+        help="the model writing the --site before it",
+    )
+    generate_parser.add_argument(
+        "--effort",
+        dest="sites",
+        action=Sited,
+        metavar="EFFORT",
+        help="the effort of the --site before it",
+    )
+    generate_parser.add_argument(
+        "--provider",
+        dest="sites",
+        action=Sited,
+        metavar="PROVIDER",
+        help="the backend to pin the --site before it to",
+    )
+    generate_parser.add_argument(
+        "--temperature",
+        dest="sites",
+        action=Sited,
+        metavar="TEMPERATURE",
+        help="what the --site before it samples at; 'default' for the provider's own",
     )
 
     gaps_parser = _command(sub, "gaps", "core templates no stored solution displays")

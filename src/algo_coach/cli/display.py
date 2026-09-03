@@ -1,3 +1,4 @@
+import argparse
 from datetime import datetime
 
 from algo_coach.calls import Retry
@@ -22,6 +23,26 @@ UNSET = "default"
 
 def sampled(temperature: float | None) -> str:
     return UNSET if temperature is None else str(temperature)
+
+
+def chosen(
+    temperature: str,
+    parser: argparse.ArgumentParser,
+    *,
+    command: str,
+    fallback: float | None,
+) -> float | None:
+    """`None` only where `default` was asked for by name; the flag left off
+    takes the built-in temperature."""
+    if not temperature:
+        return fallback
+    if temperature == UNSET:
+        return None
+    try:
+        return float(temperature)
+    except ValueError:
+        parser.exit(2, f"{command}: --temperature {temperature} is not a number or {UNSET!r}\n")
+        raise
 
 
 def held(retry: Retry) -> str:

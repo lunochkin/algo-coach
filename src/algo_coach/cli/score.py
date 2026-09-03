@@ -8,7 +8,7 @@ from algo_coach.claims import Comparison, ConfigurationScore, Score, TechniqueSc
 from algo_coach.claims.reading import Plan
 from algo_coach.claims.run import ABORT_AFTER, Progress
 from algo_coach.classifier import DEFAULT, Configuration
-from algo_coach.cli.display import UNSET, sampled
+from algo_coach.cli.display import UNSET, chosen, sampled
 from algo_coach.cli.status import Status
 from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
@@ -60,7 +60,7 @@ def configurations(
             pin=provider or DEFAULT.pin,
             # Unlike the provider, part of what identifies a reading: a model
             # named without one runs at the built-in temperature.
-            temperature=chosen(temperature, parser),
+            temperature=chosen(temperature, parser, command="score", fallback=DEFAULT.temperature),
         )
         for model, effort, provider, temperature in named
     )
@@ -68,20 +68,6 @@ def configurations(
         # Twice would measure sampling noise, which nothing here consumes yet.
         parser.exit(2, "score: the same configuration named twice\n")
     return built
-
-
-def chosen(temperature: str, parser: argparse.ArgumentParser) -> float | None:
-    """`None` only where `default` was asked for by name; the flag left off
-    takes the built-in temperature."""
-    if not temperature:
-        return DEFAULT.temperature
-    if temperature == UNSET:
-        return None
-    try:
-        return float(temperature)
-    except ValueError:
-        parser.exit(2, f"score: --temperature {temperature} is not a number or {UNSET!r}\n")
-        raise
 
 
 def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:

@@ -13,7 +13,19 @@ from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
 from algo_coach.cli.generate import staged, summary, verdict
-from algo_coach.generation import BENCH, MODEL, Bench, Configuration, Progress, Step
+from algo_coach.generation import (
+    BENCH,
+    EFFORT,
+    MODEL,
+    Bench,
+    Configuration,
+    Progress,
+    Step,
+    blind,
+    discrimination,
+    generator,
+    inputs,
+)
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Call, CaseOutcome, MatchSource, SolutionRole
@@ -320,3 +332,112 @@ def test_the_summary_names_every_site_where_the_bench_mixes_them():
 
     assert "generator " + MODEL in named
     assert "discrimination cheap at low" in named
+
+
+BOUNDED = "def solve(n):\n    return 1 if n > 3 else 0\n"
+BOUNDED_BLIND = "def solve(n):\n    return int(n > 3)\n"
+
+
+def bounded(**overrides) -> FakeWriter:
+    """A canonical with a boundary, so the mutation loop pays for a round and
+    the discrimination site is reached."""
+    written = {
+        "canonical": BOUNDED,
+        "solution": BOUNDED_BLIND,
+        "cases": [{"args": "[10]", "expected": "1"}],
+        "separators": [[[3], [4]]],
+    }
+    return FakeWriter(**(written | overrides))
+
+
+def asked(model: FakeWriter) -> dict[str, dict]:
+    """What each site was asked of, by the brief it was sent."""
+    named = {
+        generator.SYSTEM: "generator",
+        blind.SYSTEM: "blind",
+        discrimination.SYSTEM: "discrimination",
+        inputs.SYSTEM: "inputs",
+    }
+    return {named[one["system"]]: one for one in model.calls}
+
+
+def test_a_site_is_configured_alone(root, monkeypatch, capsys):
+    """A cheaper model is tried on one call without an edit, and the other
+    three keep the built-in configuration."""
+    model = bounded()
+
+    run(monkeypatch, model, "longest-valid-window", "--site", "discrimination", "--effort", "low")
+
+    sites = asked(model)
+    assert sites["discrimination"]["effort"] == "low"
+    assert sites["generator"]["effort"] == EFFORT
+    assert "discrimination " + MODEL + " at low" in capsys.readouterr().out
+
+
+def test_a_named_model_and_temperature_reach_their_site(root, monkeypatch):
+    """Greedy is what makes a site's records comparable, and it is per site."""
+    model = bounded()
+
+    run(
+        monkeypatch,
+        model,
+        "longest-valid-window",
+        "--site",
+        "blind",
+        "--model",
+        "another/model",
+        "--provider",
+        "somewhere",
+        "--temperature",
+        "0",
+    )
+
+    reference = asked(model)["blind"]
+    assert (reference["model"], reference["pin"], reference["temperature"]) == (
+        "another/model",
+        "somewhere",
+        0.0,
+    )
+
+
+def test_a_setting_before_any_site_is_refused(root, monkeypatch, capsys):
+    """A model meant for one call would otherwise land on whichever site the
+    list happens to open with."""
+    with pytest.raises(SystemExit) as exit_info:
+        run(monkeypatch, FakeWriter(), "longest-valid-window", "--model", "cheap")
+
+    assert exit_info.value.code == 2
+    assert "name a --site" in capsys.readouterr().err
+
+
+def test_a_model_from_elsewhere_needs_its_provider(root, monkeypatch, capsys):
+    """An endpoint carries some models and not others, so an unpinned one is
+    routed anywhere."""
+    with pytest.raises(SystemExit) as exit_info:
+        run(
+            monkeypatch,
+            FakeWriter(),
+            "longest-valid-window",
+            "--site",
+            "blind",
+            "--model",
+            "another/model",
+        )
+
+    assert exit_info.value.code == 2
+    assert "--provider needed" in capsys.readouterr().err
+
+
+def test_one_site_named_twice_is_refused(root, monkeypatch):
+    with pytest.raises(SystemExit) as exit_info:
+        run(
+            monkeypatch,
+            FakeWriter(),
+            "longest-valid-window",
+            "--site",
+            "blind",
+            "--site",
+            "blind",
+        )
+
+    assert exit_info.value.code == 2
