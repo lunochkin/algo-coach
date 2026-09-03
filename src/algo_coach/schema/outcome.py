@@ -37,7 +37,9 @@ class SiteOutcome(MachineProvenance):
     # minted per attempt at one problem, so the four sites of one attempt group
     # and a discarded draft still has an identity
     writing_id: str = Field(min_length=1)
-    template_id: str = Field(min_length=1)
+    # absent where the problem was written from a technique brief, which
+    # names no form
+    template_id: str | None = None
     problem_id: str | None = None  # only where the attempt landed
     # what rejected this site's answer, absent where nothing did. The gate is
     # filed under the site whose output made it decidable

@@ -455,3 +455,38 @@ def test_one_site_named_twice_is_refused(root, monkeypatch):
         )
 
     assert exit_info.value.code == 2
+
+
+def replaying(monkeypatch, model: FakeWriter, *argv: str) -> None:
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
+    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: model)
+    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--replay", *argv])
+    cli.main()
+
+
+# what the input generator returns, so the site answers rather than failing
+BUILDS = "def solve(size):\n    return [list(range(size))]\n"
+ANOTHER = ("--site", "blind", "--model", "another", "--provider", "one")
+
+
+def test_replay_pays_for_a_second_configuration_once(root, monkeypatch, capsys):
+    """The corpus is the input, so a configuration reads a statement once. The
+    run that wrote it already answers for the bench it was written with."""
+    run(monkeypatch, FakeWriter(generator=BUILDS), "longest-valid-window")
+    capsys.readouterr()
+
+    replaying(monkeypatch, FakeWriter(generator=BUILDS), *ANOTHER)
+    first = capsys.readouterr().out
+    replaying(monkeypatch, FakeWriter(generator=BUILDS), *ANOTHER)
+    second = capsys.readouterr().out
+
+    assert "1 pair(s) asked, 1 skipped" in first
+    assert "0 pair(s) asked, 2 skipped" in second
+
+
+def test_replay_is_aimed_at_nothing(root, monkeypatch, capsys):
+    """It reads the stored corpus, so the flags that aim a write name nothing."""
+    with pytest.raises(SystemExit):
+        replaying(monkeypatch, FakeWriter(), "--gaps")
+
+    assert "aimed at nothing" in capsys.readouterr().err

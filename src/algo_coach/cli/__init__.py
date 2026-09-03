@@ -187,6 +187,19 @@ def main() -> None:
     generate_parser.add_argument(
         "--code", action="store_true", help="print each canonical beside its statement"
     )
+    generate_parser.add_argument(
+        "--replay",
+        action="store_true",
+        help="re-ask the answering sites about the stored problems, writing nothing to the corpus",
+    )
+    generate_parser.add_argument(
+        "--limit", type=int, help="how many stored problems to replay; every one otherwise"
+    )
+    generate_parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help="replay a pair even where a record answers the same prompt",
+    )
     # One destination for all of them, so which setting followed which site
     # survives. See `Sited` in bench.py.
     generate_parser.add_argument(

@@ -14,7 +14,7 @@ from algo_coach.generation.agreement import Disagreement, Settled, SettledCase, 
 from algo_coach.generation.checks import CAP_MS
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
 from algo_coach.generation.steps import SILENT, Notes
-from algo_coach.mutation import ROUNDS, Case, kill, mutants, pace, survivors
+from algo_coach.mutation import ROUNDS, Case, Mutant, kill, mutants, pace, survivors
 from algo_coach.runner import NoValue, outputs
 from algo_coach.schema import Call
 
@@ -34,6 +34,24 @@ class Hardened:
     # a proposed input the two solutions answered differently. The caller
     # discards the problem on it, as it does on any disagreement
     disagreement: Disagreement | None = None
+
+
+def standing(
+    canonical: str,
+    cases: Sequence[Case],
+    *,
+    slowest_ms: int | None = None,
+    cap_ms: int = CAP_MS,
+) -> list[Mutant]:
+    """The mutants the case set leaves alive, which is what a round is asked
+    about.
+
+    `harden` runs the same pass itself. A replay needs the survivors before the
+    call, since they are in the prompt whose digest decides whether to ask, and
+    killing costs subprocesses rather than a call.
+    """
+    against_ms = pace(slowest_ms, cap_ms=cap_ms)
+    return [one.mutant for one in survivors(kill(mutants(canonical), cases, cap_ms=against_ms))]
 
 
 def harden(
@@ -157,4 +175,4 @@ def _left(
     )
 
 
-__all__ = ["Hardened", "harden"]
+__all__ = ["Hardened", "harden", "standing"]

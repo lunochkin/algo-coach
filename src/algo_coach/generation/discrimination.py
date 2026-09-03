@@ -10,7 +10,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
-from algo_coach.calls import CallLog, Configuration, Transport, ask
+from algo_coach.calls import CallLog, Configuration, Transport, ask, prompt_hash
 from algo_coach.generation.errors import GenerationError
 from algo_coach.mutation import Mutant
 from algo_coach.schema import Call
@@ -109,6 +109,15 @@ def read(text: str) -> list[list[Any]]:
     return [case.args for case in Proposed.model_validate_json(text).cases]
 
 
+def request_hash(
+    statement: str,
+    canonical: str,
+    survivors: Sequence[Mutant],
+    known: Sequence[Sequence[Any]] = (),
+) -> str:
+    return prompt_hash(SYSTEM, prompt(statement, canonical, survivors, known))
+
+
 def schema() -> dict[str, Any]:
     return {
         "type": "object",
@@ -174,6 +183,7 @@ __all__ = [
     "already",
     "prompt",
     "read",
+    "request_hash",
     "schema",
     "separators",
     "shown",

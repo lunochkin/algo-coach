@@ -8,7 +8,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog, Configuration, Transport, ask
+from algo_coach.calls import CallLog, Configuration, Transport, ask, prompt_hash
 from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call
 
@@ -49,6 +49,10 @@ def read(text: str) -> str:
     return Blind.model_validate_json(text).solution
 
 
+def request_hash(statement: str) -> str:
+    return prompt_hash(SYSTEM, prompt(statement))
+
+
 def schema() -> dict[str, Any]:
     # an object rather than bare text, so the code arrives as a value instead
     # of inside whatever fences a model likes
@@ -87,4 +91,4 @@ def reference(
     return read(text), call
 
 
-__all__ = ["SYSTEM", "Blind", "prompt", "read", "reference", "schema"]
+__all__ = ["SYSTEM", "Blind", "prompt", "read", "reference", "request_hash", "schema"]

@@ -185,6 +185,32 @@ other way to solve it is found afterwards, over the stored problem.
   What to do with two canonicals of one form is deferred until a corpus shows
   how often it happens.
 
+## Replaying a site
+
+The three answering sites over a stored problem, at a configuration the corpus
+has not been read by. Generation writes a new problem every call, so nothing
+there is ever asked twice and no two configurations meet the same item.
+
+1. The stored problems, minus the retired ones and any missing a solution in
+   either role.
+2. Per site, the digest it would send now. A pair this configuration has
+   answered at that digest is skipped.
+3. The blind site writes a reference from the statement, settled against the
+   cases the problem carries rather than against the canonical.
+4. The discrimination site runs the mutation loop over the stored canonical.
+5. The inputs site builds and searches, where the template claims a speedup.
+6. Each site's answer is recorded as its outcome, keyed to the problem.
+
+- **It writes nothing to the corpus.** A case a round wins here is discarded,
+  or the next configuration would be measured against a different problem.
+- **The generator is not replayed.** It answers no item, and asking it again is
+  what `generate` does.
+- **The discrimination digest is known only after the local kill pass.** The
+  survivors are in the prompt, and killing costs subprocesses rather than a
+  call, so the skip is decided after that pass and before the call.
+- **A retired problem is not replayed.** A defective one was never a fair test,
+  and a telegraphed one is not what a later corpus will hold.
+
 ## Drill loop
 
 Practice on a generated problem. The engine serves the statement, times the

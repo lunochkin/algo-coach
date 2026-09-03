@@ -49,7 +49,7 @@ times. Each record class is specified in one of the files beside it.
 | [`corpus.md`](corpus.md) | Problems, test cases, solutions, technique readings |
 | [`log.md`](log.md) | Attempts, claims, self-labels, diagnoses, card runs, recall attempts |
 | [`machine.md`](machine.md) | What a model-written record carries, what a generation run's call sites leave, and the call log |
-| [`flows.md`](flows.md) | Generating a problem, the drill loop, adjudicating the eval set |
+| [`flows.md`](flows.md) | Generating a problem, replaying a site, the drill loop, adjudicating the eval set |
 
 ## Data classes
 

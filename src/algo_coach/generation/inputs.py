@@ -10,7 +10,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog, Configuration, Transport, ask
+from algo_coach.calls import CallLog, Configuration, Transport, ask, prompt_hash
 from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call
 
@@ -61,6 +61,10 @@ def read(text: str) -> Built:
     return Built.model_validate_json(text)
 
 
+def request_hash(statement: str) -> str:
+    return prompt_hash(SYSTEM, prompt(statement))
+
+
 def schema() -> dict[str, Any]:
     return {
         "type": "object",
@@ -99,4 +103,4 @@ def builder(
     return read(text), call
 
 
-__all__ = ["SYSTEM", "Built", "builder", "prompt", "read", "schema"]
+__all__ = ["SYSTEM", "Built", "builder", "prompt", "read", "request_hash", "schema"]

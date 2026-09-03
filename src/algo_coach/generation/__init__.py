@@ -25,9 +25,16 @@ from algo_coach.generation.generator import (
     schema,
     written_for,
 )
-from algo_coach.generation.hardening import Hardened, harden
+from algo_coach.generation.hardening import Hardened, harden, standing
 from algo_coach.generation.inputs import INPUTS_DEFAULT, Built, builder
 from algo_coach.generation.landing import Corpus, Drafted, land, written_by
+from algo_coach.generation.replay import (
+    REPLAYED,
+    ReplayResult,
+    Subject,
+    replay,
+    subjects,
+)
 from algo_coach.generation.run import (
     Bar,
     Discarded,
@@ -46,6 +53,7 @@ __all__ = [
     "CAP_MS",
     "SYSTEM",
     "BENCH",
+    "REPLAYED",
     "BLIND_DEFAULT",
     "DISCRIMINATION_DEFAULT",
     "GENERATOR_DEFAULT",
@@ -68,6 +76,8 @@ __all__ = [
     "UNRECORDED",
     "Notes",
     "Progress",
+    "ReplayResult",
+    "Subject",
     "Step",
     "Draft",
     "DraftCase",
@@ -89,10 +99,13 @@ __all__ = [
     "prompt",
     "read",
     "reference",
+    "replay",
     "schema",
     "search",
     "separators",
     "settle",
+    "standing",
+    "subjects",
     "targets",
     "write_one",
     "write_problems",

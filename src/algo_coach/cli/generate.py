@@ -14,8 +14,10 @@ from algo_coach.generation import (
     Draft,
     GenerationResult,
     Progress,
+    ReplayResult,
     Step,
     Target,
+    replay,
     targets,
     write_problems,
 )
@@ -28,6 +30,8 @@ from algo_coach.solutions import SolutionLog
 
 
 def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+    if args.replay:
+        return replayed(args, parser, root)
     aimed = resolve(args, parser, root)
     api = transport(args, parser)
     calls, corpus = CallLog(root), Corpus.at(root)
@@ -62,6 +66,43 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
     failed = any(result.failed for result in results)
     if failed and not any(result.drafted for result in results):
         parser.exit(1, "generate: nothing written\n")
+
+
+def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+    """The answering sites over the stored problems, at the bench the flags name.
+
+    The corpus is the input rather than a template, so the flags that aim a
+    write name nothing here.
+    """
+    if args.card or args.template or args.gaps:
+        parser.exit(2, "generate: --replay reads the stored corpus, so it is aimed at nothing\n")
+    api = transport(args, parser)
+    bench = chosen_bench(args, parser)
+    result = replay(
+        api,
+        CallLog(root),
+        Corpus.at(root),
+        OutcomeLog(root),
+        CardStore(root).all(),
+        bench=bench,
+        limit=args.limit,
+        fresh=args.fresh,
+        on_step=stage,
+    )
+    print(replay_summary(result, bench))
+    if result.aborted:
+        parser.exit(1, f"generate: aborted after {ABORT_AFTER} consecutive failures\n")
+
+
+def replay_summary(result: ReplayResult, bench: Bench = BENCH) -> str:
+    """What the replay paid for, beside what it did not have to."""
+    line = f"{result.asked} pair(s) asked, {result.skipped} skipped, {wrote(bench)}"
+    if result.unasked:
+        # apart from a skip: nothing was there to ask about, at no cost
+        line += f", {result.unasked} with nothing to ask"
+    if result.failed:
+        line += f", {len(result.failed)} failed"
+    return line
 
 
 def summary(results: list[GenerationResult], aimed: list[Target], bench: Bench = BENCH) -> str:

@@ -255,7 +255,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Add an outcome record per call site and item, carrying the gate verdicts,
       the configuration and the digest of what was sent. A printed line is lost
       when the run ends
-- [ ] Skip an item a configuration has already read at the current digest, as
+- [x] Skip an item a configuration has already read at the current digest, as
       the classifier skips a claim. A second configuration is then paid for
       only where it has not read
 

@@ -109,6 +109,14 @@ a call returned, which is why it sits beside the call log.
 - **The verdicts are named fields rather than a mapping.** A report groups by
   gate and averages the counters, and a mapping makes every key a field nothing
   enforces.
+- **A site skips an item it has answered at the current digest**, as the
+  classifier skips a claim. So a second configuration is paid for only where it
+  has not read, and the run that wrote the problem answers for the bench it was
+  written with.
+- **The item is the problem, and the generator has none.** It writes a problem
+  rather than answering one, and asking it again is a new problem by design.
+  The other three sites are re-asked about a statement the store already
+  holds.
 
 ## Calls
 
