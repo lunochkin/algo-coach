@@ -112,11 +112,16 @@ What decides whether a solution to a generated problem is correct.
   problem's own wherever a mutation round or the speedup search won it. Three
   sites write cases at three configurations, and a reader taking the problem's
   provenance would attribute a round's case to the generator.
-- **A case names the round that won it, zero for the set written with the
-  statement.** Replaying the discrimination site needs that set as it stood:
+- **A case names the round that won it, zero for the set the first round was
+  run against.** Replaying the discrimination site needs that set as it stood:
   it decides which mutants survive and it goes into the prompt. A loop shown a
   case a round already won reaches other survivors and sends another digest,
   so the verdict the generation run recorded is paid for a second time.
+- **Zero covers two writers, and provenance is what separates them.** The
+  statement's own cases name the generator's call; a fuzz case names the call
+  that wrote the input generator. Both were in the set before any round ran,
+  which is what zero says, and no field has to repeat what the call already
+  names.
 - **The separating case names no round.** It is appended after the loop, so it
   was never in the set the survivors were decided against. Zero would put it
   in the set a replay rebuilds, and absent is the only answer that keeps it
@@ -159,6 +164,25 @@ What decides whether a solution to a generated problem is correct.
   early, since the next one asks the same question of the same survivors. The
   number was set before a corpus existed, and what revises it is how much the
   second round still kills.
+- **The fuzz pass runs before the first round, and costs no call.** The input
+  generator builds at several sizes and seeds, and the mutants still standing
+  are run against those inputs. Only what survives it reaches a round.
+- **The canonical is the oracle for killing, and the reference still settles
+  the case.** A mutant is killed by answering a built input differently from
+  the solution it is a copy of, which needs no expected value. What is then
+  stored carries the reference's answer, as every other case does.
+- **Only an input that killed is kept.** One that killed nothing catches
+  nothing, and every later verification would run it. The reference is run on
+  the kept ones alone, so the rest cost one execution each.
+- **The first input that kills a mutant is the one kept.** The pass builds
+  smallest first, so the kept case is the smallest that separates. A second
+  input killing the same mutant adds a case that decides nothing new.
+- **A built input the canonical cannot answer drops the case**, as a proposed
+  one does. Nothing checks a built input against the constraints the statement
+  gives, so a crash there is as likely to be an input the problem excludes.
+- **A kept input the two solutions answer differently discards the problem**,
+  as a round's proposal does. The pass reaches boundaries the first set never
+  did, and a canonical wrong at one of them is what it exists to find.
 
 ## Solutions
 

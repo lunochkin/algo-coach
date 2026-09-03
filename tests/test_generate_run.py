@@ -151,7 +151,7 @@ def test_a_surviving_problem_carries_what_the_reference_computed(tmp_path):
 
 
 SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
-BUILDS = "def solve(size):\n    return [list(range(size))]\n"
+BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 
 
 def timed(tmp_path, monkeypatch, model: FakeWriter, **overrides):
@@ -190,7 +190,7 @@ def test_a_form_that_is_its_own_optimum_is_still_built_for(tmp_path, monkeypatch
     assert len(CaseLog(tmp_path).cases()) == 1
 
 
-CRASHES = "def solve(size):\n    raise ValueError\n"
+CRASHES = "def solve(size, seed):\n    raise ValueError\n"
 
 
 def reported(tmp_path, monkeypatch, model: FakeWriter, **overrides) -> Progress:
@@ -308,6 +308,33 @@ def test_a_builder_that_failed_costs_the_inputs_and_not_the_round(tmp_path):
 
     assert len(result.drafted) == 1
     assert [one.args for one in CaseLog(tmp_path).cases()] == [[10], [3], [4]]
+
+
+# one argument per pair, so the fuzz grid reaches the boundary `BOUNDED` turns on
+COUNTS = "def solve(size, seed):\n    return [size + seed]\n"
+
+
+def test_the_fuzz_pass_kills_what_a_round_would_have_been_paid_for(tmp_path):
+    """The inputs cost subprocesses where a round costs a call, so a mutant the
+    pass reaches is never asked about."""
+    model = bounded(separators=[[[3], [4]]], generator=COUNTS)
+
+    _, result = run(tmp_path, model)
+
+    assert len(result.drafted) == 1
+    assert discrimination.SYSTEM not in [one["system"] for one in model.calls]
+
+
+def test_what_the_fuzz_pass_kept_lands_with_the_others(tmp_path):
+    """A submission is judged by them, and the first round's survivors were
+    decided against them, which is what `round` zero names."""
+    model = bounded(separators=[[[3], [4]]], generator=COUNTS)
+
+    run(tmp_path, model)
+
+    stored = CaseLog(tmp_path).cases()
+    assert [one.args for one in stored[1:]] == [[3], [4]]
+    assert {one.round for one in stored} == {0}
 
 
 def test_a_set_that_kills_every_mutant_pays_for_no_round(tmp_path):

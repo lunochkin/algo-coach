@@ -272,6 +272,16 @@ def test_the_line_reports_what_the_mutation_loop_caught():
     assert landed == "4 case(s)  passed  landed  kills 10/12, +3 case(s)"
 
 
+def test_the_line_separates_what_a_call_was_paid_for():
+    """The fuzz pass costs subprocesses and a round costs a call, so one number
+    over both would hide which of them the corpus is paying for."""
+    landed = line(
+        cases=4, outcome=CaseOutcome.PASSED, landed=True, mutants=12, survived=2, kept=2, won=3
+    )
+
+    assert landed == "4 case(s)  passed  landed  kills 10/12, +2 fuzzed, +3 case(s)"
+
+
 def test_a_set_no_round_measured_says_so():
     """A call that failed costs the round, and a line falling silent would read
     as a set the mutants could not beat."""
@@ -462,7 +472,7 @@ def replaying(monkeypatch, model: FakeWriter, *argv: str) -> None:
 
 
 # what the input generator returns, so the site answers rather than failing
-BUILDS = "def solve(size):\n    return [list(range(size))]\n"
+BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 ANOTHER = ("--site", "blind", "--model", "another", "--provider", "one")
 
 

@@ -24,18 +24,21 @@ INPUTS_DEFAULT = Configuration(
 SYSTEM = """You write a program that builds an input for a problem statement.
 
 The statement is all you are given. Write Python defining one module-level
-function named `solve`, taking a single positional argument `size`. It returns
-an array: the positional arguments of a case, in the order the statement
-describes them. `solve` is the name every module this engine runs defines, and
-says nothing about what yours computes.
+function named `solve`, taking two positional arguments, `size` and `seed`. It
+returns an array: the positional arguments of a case, in the order the
+statement describes them. `solve` is the name every module this engine runs
+defines, and says nothing about what yours computes.
 
 `size` scales the input. What it counts is yours to choose where the statement
 describes several inputs: the length of the collection, the number of rows,
 whatever the work grows with. Size 1 is the smallest input the statement
 admits.
 
-The same size builds the same input every time. Seed any randomness from `size`
-itself, so an input is reproducible from the size alone.
+`seed` varies the input at one size. Two seeds are two different inputs of the
+same size, and both satisfy the statement.
+
+The same pair builds the same input every time. Seed any randomness from `size`
+and `seed` alone, so an input is reproducible from the two numbers.
 
 The input satisfies every constraint the statement gives, at every size. Values
 stay inside the ranges it states, and the shape stays what it describes.
@@ -70,7 +73,7 @@ def schema() -> dict[str, Any]:
     return {
         "type": "object",
         "properties": {
-            "code": {"type": "string", "description": "Python defining `solve(size)`"},
+            "code": {"type": "string", "description": "Python defining `solve(size, seed)`"},
             "largest": {
                 "type": "integer",
                 "description": "the largest size the statement's constraints allow",

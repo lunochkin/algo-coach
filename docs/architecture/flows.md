@@ -17,9 +17,11 @@ The order matters because each step can reject what came before.
 4. The reference solution, from the statement alone.
 5. The reference runs, and the two solutions' outputs are settled: they agree
    on every case, or the problem is discarded.
-6. Code that builds an input of a given size, from the statement alone.
-7. Mutants of the canonical run against the cases, and a call asks for the
-   cases that kill whichever mutant survived.
+6. Code that builds an input of a given size and seed, from the statement
+   alone.
+7. Mutants of the canonical run against the cases, then against inputs that
+   code builds. A call asks for the cases that kill whichever mutant survived
+   both.
 8. Where the template claims a speedup, the smallest input separating the
    reference from the canonical under the cap is searched for, and the case at
    that size is stored.
@@ -99,6 +101,12 @@ The order matters because each step can reject what came before.
 - **The input generator is written for every problem**, whatever the brief
   named, and before the mutation loop. The fuzz pass kills mutants with the
   inputs it builds, so a round is paid for the survivors alone.
+- **The fuzz pass runs only where a mutant is standing.** A case set that
+  already kills every one of them builds nothing, so a problem the statement's
+  own cases decide costs no execution here.
+- **A round is shown what the pass kept.** Those cases are in the set the
+  survivors were decided against, so re-proposing one would win a case that
+  kills nothing.
 - **A search that fails costs the case, not the problem.** The generator call
   can refuse and the code it wrote can crash, and neither says anything about
   the statement. What is lost is the timing case, and the run reports that it

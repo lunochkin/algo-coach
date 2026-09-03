@@ -11,6 +11,7 @@ from algo_coach.calls import CallLog, Transport
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import reference
 from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
+from algo_coach.generation.fuzzing import Fuzzing, pass_over
 from algo_coach.generation.generator import (
     Configuration,
     GenerationError,
@@ -27,6 +28,10 @@ from algo_coach.outcomes import OutcomeLog
 from algo_coach.runner import NoValue, outputs
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Call, CallSite, Card, CaseOutcome, SiteOutcome, Template
+
+# the seed the speedup search builds at, which never varies: the halving
+# compares one size against another, so two inputs of one shape are needed
+SEARCH_SEED = 0
 
 
 class Failed(BaseModel):
@@ -71,6 +76,9 @@ class Progress(BaseModel):
     mutants: int = 0
     survived: int = 0
     won: int = 0
+    # the fuzz pass before the rounds: what it built and what it kept
+    built: int = 0
+    kept: int = 0
     unmeasured: str | None = None  # the round's call failed, and the set is unmeasured
 
 
@@ -98,6 +106,10 @@ class Bar(BaseModel):
     mutants: int = 0
     survived: int = 0
     won: int = 0  # cases the rounds appended to the set
+    # the fuzz pass before them: the inputs it built and the ones it kept,
+    # which cost subprocesses rather than a call
+    built: int = 0
+    kept: int = 0
     unmeasured: str | None = None
 
 
@@ -155,11 +167,12 @@ def write_one(
     # builds are what a fuzz pass kills mutants with, and a round is then paid
     # for the survivors alone
     inputs = building(transport, calls, draft.statement, configuration=bench.inputs, notes=notes)
-    checked, bar = measured(
+    checked, inputs, bar = measured(
         transport,
         calls,
         drafted,
         checked,
+        inputs,
         configuration=bench.discrimination,
         cap_ms=cap_ms,
         notes=notes,
@@ -199,13 +212,18 @@ def measured(
     calls: CallLog,
     drafted: Drafted,
     checked: Checked,
+    inputs: Inputs,
     *,
     configuration: Configuration,
     cap_ms: int,
     notes: Notes = SILENT,
     writing: Writing = UNRECORDED,
-) -> tuple[Checked, Bar]:
+) -> tuple[Checked, Inputs, Bar]:
     """The mutation loop's cases, appended to the set the problem carries.
+
+    `inputs` is returned because the fuzz pass runs inside the loop: a built
+    input the two solutions answer differently is the inputs site's gate, since
+    nothing was decidable before its code built one.
 
     A round's call that fails costs the round rather than the problem, as the
     speedup search's does.
@@ -221,13 +239,23 @@ def measured(
             slowest_ms=checked.slowest_ms,
             cap_ms=cap_ms,
             configuration=configuration,
+            fuzzing=fuzzing(drafted, inputs, cap_ms=cap_ms),
             notes=notes,
         )
     except Exception as failure:
         notes("mutants", f"unmeasured: {failure!r}")
-        return checked, Bar(unmeasured=repr(failure))
+        return checked, inputs, Bar(unmeasured=repr(failure))
 
-    bar = Bar(mutants=hardened.mutants, survived=hardened.survived, won=len(hardened.cases))
+    kept = len(hardened.fuzzed.cases) if hardened.fuzzed else 0
+    bar = Bar(
+        mutants=hardened.mutants,
+        survived=hardened.survived,
+        # the rounds' own, which is what the site is scored on. The pass before
+        # them paid for no call
+        won=len(hardened.cases) - kept,
+        built=hardened.fuzzed.built if hardened.fuzzed else 0,
+        kept=kept,
+    )
     # the loop's counters as the last round left them, which is why the record
     # cites that round's call. A loop needing none paid for no configuration
     writing(
@@ -238,16 +266,19 @@ def measured(
         survived=bar.survived,
         won=bar.won,
     )
-    if hardened.disagreement is not None:
-        # a boundary input the first case set never reached, answered two ways
-        discarded = Checked(
-            outcome=checked.outcome,
-            discard=Discard.DISAGREED,
-            disagreements=[hardened.disagreement],
-        )
-        return discarded, bar
-    drafted.cases.extend(hardened.cases)
-    return checked, bar
+    if hardened.disagreement is None:
+        drafted.cases.extend(hardened.cases)
+        return checked, inputs, bar
+
+    # a boundary input the first case set never reached, answered two ways
+    discarded = Checked(
+        outcome=checked.outcome,
+        discard=Discard.DISAGREED,
+        disagreements=[hardened.disagreement],
+    )
+    if hardened.fuzzed is not None and hardened.fuzzed.disagreement is not None:
+        inputs = inputs.model_copy(update={"gate": Discard.DISAGREED})
+    return discarded, inputs, bar
 
 
 def building(
@@ -271,6 +302,20 @@ def building(
         return Inputs(unbuilt=repr(failure))
     notes("inputs", f"written, up to {built.largest}", call)
     return Inputs(call=call, built=built)
+
+
+def fuzzing(drafted: Drafted, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:
+    """The pass `harden` runs before its first round, or nothing where no
+    generator was written for it to build with."""
+    if inputs.built is None or inputs.call is None:
+        return None
+    return pass_over(
+        inputs.built,
+        canonical=drafted.draft.canonical,
+        reference=drafted.solution,
+        call=inputs.call,
+        cap_ms=cap_ms,
+    )
 
 
 def timed(
@@ -327,12 +372,15 @@ def timed(
     return discarded, searched
 
 
-def make(code: str, cap_ms: int) -> Callable[[int], list[Any]]:
+def make(code: str, cap_ms: int, *, seed: int = SEARCH_SEED) -> Callable[[int], list[Any]]:
     """The generator behind the callable the search takes: run through the
-    executor as any other code, so nothing model-written runs in this process."""
+    executor as any other code, so nothing model-written runs in this process.
+
+    One seed throughout, or the halving would compare two different inputs.
+    """
 
     def built(size: int) -> list[Any]:
-        [args] = outputs(code, [[size]], cap_ms=cap_ms)
+        [args] = outputs(code, [[size, seed]], cap_ms=cap_ms)
         if isinstance(args, NoValue) or not isinstance(args, list):
             raise GenerationError(f"the input generator built nothing at size {size}")
         return args
@@ -421,6 +469,8 @@ def write_problems(
             mutants=bar.mutants,
             survived=bar.survived,
             won=bar.won,
+            built=bar.built,
+            kept=bar.kept,
             unmeasured=bar.unmeasured,
         )
     return result

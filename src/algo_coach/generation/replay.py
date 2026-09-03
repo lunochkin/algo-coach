@@ -74,10 +74,10 @@ class Subject:
 
     @property
     def declared(self) -> list[TestCase]:
-        """The set written with the statement, which is what the mutation loop
-        was first run against. A later round's own cases and the separating one
-        were not there, and a loop shown them decides other survivors and sends
-        another digest."""
+        """The set the first round's survivors were decided against: what the
+        statement was written with, and what the fuzz pass kept. A later round's
+        own cases and the separating one were not there, and a loop shown them
+        decides other survivors and sends another digest."""
         return [one for one in self.cases if one.round == 0]
 
 

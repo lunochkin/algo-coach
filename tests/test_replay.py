@@ -9,7 +9,7 @@ from algo_coach.problems import ProblemStore
 from algo_coach.schema import CallSite, Discard, ProblemStatus, RetirementReason
 from algo_coach.solutions import SolutionLog
 
-BUILDS = "def solve(size):\n    return [list(range(size))]\n"
+BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 BRANCHING = "def solve(n):\n    return n > 3\n"
 AGREES = "def solve(n):\n    return not n <= 3\n"
 DECIDES = [{"args": "[0]", "expected": "false"}]

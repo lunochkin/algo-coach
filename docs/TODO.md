@@ -277,7 +277,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Cap a mutant's run against what the canonical took, rather than at the
       generation cap. Seven mutants killed by timeout spent 70 of one run's 76
       seconds in the runner
-- [ ] Kill mutants with built inputs across sizes and seeds before any round,
+- [x] Kill mutants with built inputs across sizes and seeds before any round,
       keeping the first input that kills each. No call is paid for, and only
       the deep survivors reach one
 - [ ] Shrink a killing input by delta debugging before it is stored. A random

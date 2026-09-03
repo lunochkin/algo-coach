@@ -12,7 +12,7 @@ from algo_coach.generation.speedup import search
 from algo_coach.runner import defines_solve, outputs
 
 STATEMENT = "Given a list of at most 1000 readings, return the widest fair stretch."
-BUILDS = "def solve(size):\n    return [list(range(size))]\n"
+BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 SLEEPS = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) / 100)\n    return len(xs)\n"
 
 
@@ -65,7 +65,7 @@ def test_the_generator_defines_the_entry_point_every_module_defines():
 def test_what_it_builds_is_the_arguments_of_a_case():
     """The reply is code, and what makes it usable is that its return is the
     positional arguments a solution takes."""
-    [built] = outputs(BUILDS, [[4]], cap_ms=1000)
+    [built] = outputs(BUILDS, [[4, 0]], cap_ms=1000)
 
     assert built == [[0, 1, 2, 3]]
 
@@ -73,7 +73,7 @@ def test_what_it_builds_is_the_arguments_of_a_case():
 def test_the_search_runs_a_generated_builder():
     """What the call exists for: the search had no input to run without one."""
     found = search(
-        lambda size: outputs(BUILDS, [[size]], cap_ms=1000)[0],
+        lambda size: outputs(BUILDS, [[size, 0]], cap_ms=1000)[0],
         canonical="def solve(xs):\n    return len(xs)\n",
         reference=SLEEPS,
         call=a_call(),
@@ -107,10 +107,10 @@ def test_an_answer_cut_short_writes_no_generator(tmp_path):
     assert len(CallLog(tmp_path).all()) == 1
 
 
-def test_the_brief_asks_for_one_input_per_size(tmp_path):
-    """Two runs at one size would build two cases, and the stored one could
-    not be reproduced from the size."""
-    assert "same size builds the same input" in SYSTEM
+def test_the_brief_asks_for_one_input_per_pair(tmp_path):
+    """Two runs at one size and seed would build two cases, and the stored one
+    could not be reproduced from the two numbers."""
+    assert "same pair builds the same input" in SYSTEM
 
 
 def test_the_brief_names_no_technique_and_no_form():

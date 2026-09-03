@@ -13,6 +13,16 @@ from algo_coach.generation.blind import BLIND_DEFAULT, reference
 from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
 from algo_coach.generation.errors import GenerationError
+from algo_coach.generation.fuzzing import (
+    SEEDS,
+    SIZES,
+    Candidate,
+    Fuzzed,
+    Fuzzing,
+    fuzz,
+    grid,
+    pass_over,
+)
 from algo_coach.generation.generator import (
     GENERATOR_DEFAULT,
     SYSTEM,
@@ -69,7 +79,12 @@ __all__ = [
     "Drafted",
     "Failed",
     "GenerationResult",
+    "Candidate",
+    "Fuzzed",
+    "Fuzzing",
     "Hardened",
+    "SEEDS",
+    "SIZES",
     "Misdeclaration",
     "Missing",
     "SILENT",
@@ -93,6 +108,9 @@ __all__ = [
     "check",
     "land",
     "generate",
+    "fuzz",
+    "grid",
+    "pass_over",
     "harden",
     "misdeclared",
     "notes",

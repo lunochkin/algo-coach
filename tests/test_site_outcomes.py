@@ -7,7 +7,7 @@ from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import CallSite, Discard
 
-BUILDS = "def solve(size):\n    return [list(range(size))]\n"
+BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 # four mutation sites, where `len(xs)` has none: what makes the loop ask
 BRANCHING = "def solve(n):\n    return n > 3\n"
 AGREES = "def solve(n):\n    return not n <= 3\n"
@@ -164,6 +164,28 @@ def test_the_discrimination_record_carries_what_the_loop_left(tmp_path):
     one = sites(outcomes)[CallSite.DISCRIMINATION]
     assert one.mutants > 0
     assert one.won > 0
+
+
+# one argument per pair, so the grid reaches the boundary `BRANCHING` turns on
+COUNTS = "def solve(size, seed):\n    return [size + seed]\n"
+
+
+def test_a_fuzz_disagreement_is_the_inputs_site_s_gate(tmp_path):
+    """Nothing was decidable before the site's code built the input the two
+    solutions answered differently, and the discrimination site was never
+    asked."""
+    model = FakeWriter(
+        canonical=BRANCHING,
+        solution="def solve(n):\n    return n > 2\n",
+        cases=DECIDES,
+        generator=COUNTS,
+    )
+
+    _, result, outcomes = run(tmp_path, model)
+
+    assert [one.discard for one in result.discarded] == ["disagreed"]
+    assert sites(outcomes)[CallSite.INPUTS].gate is Discard.DISAGREED
+    assert CallSite.DISCRIMINATION not in sites(outcomes)
 
 
 def test_the_sites_are_the_ones_the_bench_names(tmp_path):

@@ -13,6 +13,7 @@ from algo_coach.calls import CallLog, Configuration, Transport
 from algo_coach.generation.agreement import Disagreement, Settled, SettledCase, settle
 from algo_coach.generation.checks import CAP_MS
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
+from algo_coach.generation.fuzzing import Fuzzed, Fuzzing
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.mutation import ROUNDS, Case, Mutant, kill, mutants, pace, survivors
 from algo_coach.runner import NoValue, outputs
@@ -27,6 +28,7 @@ class Hardened:
     mutants: int = 0
     survived: int = 0  # mutants no case killed when the loop stopped
     rounds: int = 0  # rounds paid for, at one call each
+    fuzzed: Fuzzed | None = None  # the pass before the rounds, where one ran
     # the last round's call, which is what the counters above were left
     # by. `None` where the first case set killed every mutant
     call: Call | None = None
@@ -66,12 +68,16 @@ def harden(
     cap_ms: int = CAP_MS,
     configuration: Configuration = DISCRIMINATION_DEFAULT,
     rounds: int = ROUNDS,
+    fuzzing: Fuzzing | None = None,
     notes: Notes = SILENT,
 ) -> Hardened:
     """The cases the mutants force, settled as the first set was.
 
     A round runs the survivors against what the round before it won alone. The
     cases they already passed cannot kill them.
+
+    `fuzzing` is the pass before the first round: it costs subprocesses rather
+    than a call, so what it kills is never asked about.
     """
     standing = mutants(canonical)
     enumerated = len(standing)
@@ -87,6 +93,7 @@ def harden(
     against: Sequence[Case] = cases
     won: list[SettledCase] = []
     paid: Call | None = None
+    fuzzed: Fuzzed | None = None
     dropped = played = 0
 
     while True:
@@ -104,6 +111,23 @@ def harden(
         # same question of the same survivors
         if played and len(standing) == before:
             break
+
+        if fuzzing is not None and fuzzed is None:
+            fuzzed = fuzzing(standing, against_ms)
+            notes(
+                "fuzz",
+                f"{fuzzed.built} built, {len(fuzzed.cases)} kept, {len(fuzzed.standing)} standing",
+            )
+            won.extend(fuzzed.cases)
+            standing = fuzzed.standing
+            if fuzzed.disagreement is not None:
+                return _left(
+                    won, enumerated, standing, played, dropped, paid, fuzzed.disagreement, fuzzed
+                )
+            # no re-run against what it kept: the pass decided these survivors
+            # against exactly those cases
+            if not standing:
+                break
 
         played += 1
         notes("round", f"{played} of {rounds}: asking for the cases that kill {len(standing)}")
@@ -129,13 +153,15 @@ def harden(
         dropped += len(proposed) - len(settled.cases) - len(settled.disagreements)
         notes("round", f"{played}: {len(settled.cases)} won, {dropped} dropped")
         if settled.disagreements:
-            return _left(won, enumerated, standing, played, dropped, paid, settled.disagreements[0])
+            return _left(
+                won, enumerated, standing, played, dropped, paid, settled.disagreements[0], fuzzed
+            )
         if not settled.cases:
             break
         won.extend(settled.cases)
         against = settled.cases
 
-    return _left(won, enumerated, standing, played, dropped, paid)
+    return _left(won, enumerated, standing, played, dropped, paid, None, fuzzed)
 
 
 def _settled(
@@ -177,6 +203,7 @@ def _left(
     dropped: int,
     call: Call | None,
     disagreement: Disagreement | None = None,
+    fuzzed: Fuzzed | None = None,
 ) -> Hardened:
     return Hardened(
         cases=won,
@@ -186,6 +213,7 @@ def _left(
         dropped=dropped,
         call=call,
         disagreement=disagreement,
+        fuzzed=fuzzed,
     )
 
 

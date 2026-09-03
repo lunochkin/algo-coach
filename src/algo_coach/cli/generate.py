@@ -241,15 +241,18 @@ def verdict(progress: Progress) -> str:
 
 
 def bar(progress: Progress) -> str:
-    """What the mutation loop left: the mutants the set caught, and the cases
-    the rounds added. Silent where the canonical yielded no mutant."""
+    """What the mutation loop left: the mutants the set caught, the inputs the
+    fuzz pass kept and the cases the rounds added. The two are apart because
+    only the second was paid for. Silent where the canonical yielded no
+    mutant."""
     if progress.unmeasured is not None:
         return f"  unmeasured: {progress.unmeasured}"
     if not progress.mutants:
         return ""
     killed = progress.mutants - progress.survived
+    kept = f", +{progress.kept} fuzzed" if progress.kept else ""
     won = f", +{progress.won} case(s)" if progress.won else ""
-    return f"  kills {killed}/{progress.mutants}{won}"
+    return f"  kills {killed}/{progress.mutants}{kept}{won}"
 
 
 def timing(progress: Progress) -> str:

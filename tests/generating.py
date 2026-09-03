@@ -35,7 +35,7 @@ def proposed(*args) -> str:
 # one element per size, which separates nothing: a run that wanted a timing
 # case builds its own writer
 def built(
-    code: str = "def solve(size):\n    return [list(range(size))]\n", largest: int = 8
+    code: str = "def solve(size, seed):\n    return [list(range(size))]\n", largest: int = 8
 ) -> str:
     return json.dumps({"code": code, "largest": largest})
 
