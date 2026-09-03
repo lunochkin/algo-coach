@@ -1,15 +1,3 @@
-"""The hand annotation prompt: one card's templates against one canonical.
-
-The question is the card and the record is the pair, so one answer writes a
-row per template — the forms the solution does not display included, since a
-reference that only named matches would score the matcher's "yes" and say
-nothing about its "no".
-
-Driven through the pilot rather than the terminal. What is asked and what is
-written are the command's, so a sitting can be run headless and the screen is
-read back off the widgets.
-"""
-
 import argparse
 from contextlib import asynccontextmanager
 

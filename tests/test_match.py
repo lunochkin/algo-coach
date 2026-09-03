@@ -1,9 +1,3 @@
-"""A template match: one template against one solution, and what came back.
-
-Not a claim about an attempt — a fact about the corpus — so it shares the
-provenance rules and nothing else.
-"""
-
 from datetime import UTC, datetime
 
 import pytest

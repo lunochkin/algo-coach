@@ -1,11 +1,3 @@
-"""Which verdict stands on a pair.
-
-Ordered by what each writer knew rather than by when it wrote, as a claim
-resolves user-first. A matcher runs over a corpus that grows, so latest-wins
-would let it overwrite the assertion it audits and the reference it is scored
-against.
-"""
-
 from datetime import UTC, datetime, timedelta
 
 import pytest

@@ -1,10 +1,3 @@
-"""The order a hand-claim sample is drawn in.
-
-The pool is skewed the way a corpus is: many problems on one pair of
-techniques, a few on the rest. What these check is that a prefix of the order is spread
-across techniques rather than drawn from whatever dominates.
-"""
-
 from collections import Counter
 
 from helpers import attempt, seed_problem

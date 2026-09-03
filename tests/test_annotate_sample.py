@@ -1,15 +1,3 @@
-"""The order a hand annotation is asked in.
-
-The pool is skewed the way the corpus is: three cards on one technique take
-every problem tagged with it, and a card on a rare tag takes eleven. What these
-check is that a prefix is spread across templates rather than drawn from
-whichever card the backlog feeds most.
-
-Levelled on template rather than card, because the score is grouped per
-template and the ladder is resolved per template — a form with no annotated
-pair is a gap nothing else reports.
-"""
-
 from matching import canonicals, card, problem, seeded, stored, template
 
 from algo_coach.matches import annotatable

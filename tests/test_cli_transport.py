@@ -1,10 +1,3 @@
-"""The transport as the CLI builds it, and what it says while it waits.
-
-A cap is absorbed by the transport on purpose — it is a fact about the
-endpoint, not a reason to abandon a backlog. Absorbing it silently is what
-made a held run read as a slow one.
-"""
-
 import argparse
 
 import pytest

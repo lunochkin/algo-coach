@@ -1,11 +1,3 @@
-"""A problem's techniques: the union over the standing readings of its
-canonicals.
-
-A view rather than stored truth. A canonical added later widens it, a
-re-reading can narrow it, and the reference is never counted: it is the naive
-approach the canonical's form replaces.
-"""
-
 from datetime import timedelta
 
 import pytest

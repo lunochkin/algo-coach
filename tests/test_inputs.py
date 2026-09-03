@@ -1,6 +1,3 @@
-"""The input generator call: the statement in, code building an input at a
-size out, and the bound its constraints put on that size."""
-
 import json
 from dataclasses import dataclass, field
 

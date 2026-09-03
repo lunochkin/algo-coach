@@ -1,10 +1,3 @@
-"""Running a solution against arguments, and what each call produced.
-
-The one boundary an executor sits behind. What a result means is fixed here
-rather than by whatever executed it, since a `Verification` outlives the
-runner that wrote one.
-"""
-
 import json
 import os
 import time

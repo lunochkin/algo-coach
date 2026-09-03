@@ -1,10 +1,3 @@
-"""A technique reading: which techniques one solution used.
-
-The same question a claim answers about an attempt, and a different record —
-the subject is code the engine wrote, and the answer is product data rather
-than the user's own testimony.
-"""
-
 from datetime import UTC, datetime
 
 import pytest

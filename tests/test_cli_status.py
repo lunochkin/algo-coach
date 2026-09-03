@@ -1,9 +1,3 @@
-"""The board a run of several classifiers shows while it is running.
-
-What it must get right is who a line belongs to and that nothing tears: two
-configurations answer at once, and a wait arrives on a thread of its own.
-"""
-
 import os
 import re
 import threading

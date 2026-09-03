@@ -1,6 +1,3 @@
-"""The reference call: the statement in, a solution out, and nothing that
-would let it inherit the canonical's reading."""
-
 import json
 from dataclasses import dataclass, field
 

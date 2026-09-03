@@ -1,9 +1,3 @@
-"""Running a solution against a problem's cases, and what each one decided.
-
-Comparison sits above the executor boundary: the backend is handed code, the
-arguments and a cap, and is never told what a case expects.
-"""
-
 from helpers import PROVENANCE
 
 from algo_coach.mint import case

@@ -1,9 +1,3 @@
-"""What each call site left, appended.
-
-A second run of one site over one item is a second record, as a second
-verification is: neither answers for the other.
-"""
-
 import pytest
 from helpers import PROVENANCE
 from pydantic import ValidationError

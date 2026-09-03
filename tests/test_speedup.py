@@ -1,6 +1,3 @@
-"""The separating input: the smallest size at which the reference exceeds the
-cap and the canonical answers under it."""
-
 import pytest
 from helpers import a_call
 

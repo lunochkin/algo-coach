@@ -1,5 +1,3 @@
-"""The driver both run loops share, on the path where calls overlap."""
-
 import threading
 import time
 

@@ -1,11 +1,3 @@
-"""A test case: one call of a solution, and what it must return.
-
-Written with the problem rather than after it. What enforces that is the act
-that writes them, not this model — cases derived from a finished solution
-describe whatever it happens to do, where cases written with the statement
-describe what the problem asks.
-"""
-
 import pytest
 from helpers import PROVENANCE
 from pydantic import ValidationError

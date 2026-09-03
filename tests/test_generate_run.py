@@ -1,6 +1,3 @@
-"""Writing several problems for one template: what each call is shown, what a
-failure costs, and what the runs reject."""
-
 from generating import FakeWriter
 from helpers import PROVENANCE
 from matching import card, seeded, template

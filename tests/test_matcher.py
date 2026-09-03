@@ -1,6 +1,3 @@
-"""One card's templates against one canonical: what is asked, and what a
-verdict turns into."""
-
 import json
 
 import pytest

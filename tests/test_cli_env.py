@@ -1,6 +1,3 @@
-"""`.env` at the working directory, loaded before anything reads the
-environment. The key never reaches the store or a command line."""
-
 import os
 from importlib import import_module
 

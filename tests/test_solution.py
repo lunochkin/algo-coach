@@ -1,11 +1,3 @@
-"""A solution the engine wrote: the code, what produced it, and its role.
-
-Exemplary and verified are different properties. A user's solved attempt is
-verified and idiosyncratic, a generated solution is exemplary and asserted, and
-only one that passes the problem's cases is both. The reference role is the
-other half: verified and deliberately not exemplary.
-"""
-
 import pytest
 from helpers import PROVENANCE, T0
 from pydantic import ValidationError

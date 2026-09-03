@@ -1,11 +1,3 @@
-"""The cases that decide a problem, appended.
-
-A case is never revised: one found wrong is discarded with its problem, since
-the cases define the problem and the statement is what can disagree. What does
-happen is addition, and an added case lands beside the set written with the
-statement.
-"""
-
 from helpers import PROVENANCE
 
 from algo_coach import mint

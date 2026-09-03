@@ -1,5 +1,3 @@
-"""A problem, what produced it, and what it was written for."""
-
 import pytest
 from helpers import GENERATED, PROVENANCE
 from pydantic import ValidationError

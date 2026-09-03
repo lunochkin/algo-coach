@@ -1,16 +1,3 @@
-"""One classifier reads a canonical and an attempt, and the two records land
-apart.
-
-Two prompts asking one question would drift, and neither score would compare.
-So what these assert is that the reader is the same one — one system text, one
-rendering of a criterion — while the record written differs in kind, in store
-and in who owns it.
-
-What the two do not share is the candidate set. An attempt is read against its
-problem's own techniques; a solution is read against the whole vocabulary,
-since those techniques are folded from these readings.
-"""
-
 import pytest
 from helpers import CONFIGURATION, FakeTransport, Verdict, attempt, make_problem
 

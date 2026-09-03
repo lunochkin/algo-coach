@@ -1,9 +1,3 @@
-"""What a generation run is aimed at: the core templates carrying no match.
-
-The selector fills a ladder from whatever the corpus holds, so a form nothing
-displays is never asked for unless the run names it.
-"""
-
 import pytest
 from matching import PROCEDURE, canonical, card, problem, seeded, template
 

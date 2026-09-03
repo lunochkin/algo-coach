@@ -1,10 +1,3 @@
-"""Several solutions per problem, appended.
-
-Two approaches to one problem is the ordinary case, and the set is the
-assertion. It is what lets one rung cover a studied template and an optional
-one, so a second solution has to land beside the first rather than over it.
-"""
-
 from helpers import PROVENANCE
 
 from algo_coach.mint import solution

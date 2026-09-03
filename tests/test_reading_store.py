@@ -1,7 +1,3 @@
-"""The reading log: append-only, as the match log is and for the same reason —
-a re-run appends its verdict where an earlier one stays readable.
-"""
-
 from helpers import PROVENANCE
 
 from algo_coach.mint import machine_reading, user_reading

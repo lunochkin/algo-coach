@@ -1,9 +1,3 @@
-"""Which claims a second hand pass asks about.
-
-The hand claims are ground truth by construction, not by being right — a
-reading that disagrees is the only place a mislabelled one surfaces.
-"""
-
 from datetime import timedelta
 
 from helpers import T0, attempt, machine_claim, seed_problem

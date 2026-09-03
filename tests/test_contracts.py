@@ -1,9 +1,3 @@
-"""A payload is what someone outside the engine writes, and seeding builds a
-record straight from one. Nothing but these tests keeps the two shapes aligned.
-
-One rule: identity is the engine's, so the payload has no field for it.
-"""
-
 import pytest
 
 from algo_coach.schema import Card, CardSeed, Template, TemplateSeed
@@ -16,6 +10,7 @@ CONTRACTS = [(CardSeed, Card), (TemplateSeed, Template)]
 
 @pytest.mark.parametrize(("seed", "record"), CONTRACTS)
 def test_every_payload_field_lands_on_the_record(seed, record):
+    """Nothing but this keeps the authored shape and the stored one aligned."""
     assert set(seed.model_fields) <= set(record.model_fields)
 
 

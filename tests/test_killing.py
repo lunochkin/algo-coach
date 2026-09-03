@@ -1,6 +1,3 @@
-"""What the cases do to the mutants: a kill on a wrong answer, a crash or a
-timeout, and the survivors the next call is asked about."""
-
 from dataclasses import dataclass
 from typing import Any
 

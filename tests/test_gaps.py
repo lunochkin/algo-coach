@@ -1,10 +1,3 @@
-"""Which core templates the corpus cannot exercise.
-
-A card claims to teach every core form it carries. A form no stored solution
-displays is reported, never resolved by another problem: a substitution hides
-the gap, and the missing problem is then never written.
-"""
-
 import pytest
 from matching import PROCEDURE, canonical, card, problem, seeded, template
 

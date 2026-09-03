@@ -119,7 +119,11 @@ carrying nothing."
   a module.
 - Tests are the exception to the budget. A test keeps a one-line docstring
   saying what it pins, since the body is two lines and the name cannot carry
-  the reason. The module docstring still goes.
+  the reason.
+- **A test module carries no docstring**, and one already there is deleted. The
+  exception above is per test. A module-level one restates what the filename
+  says or what `docs/architecture/` already carries, and a fact it holds alone
+  belongs on the test that pins it.
 
 ## Git
 

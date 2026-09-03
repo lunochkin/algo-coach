@@ -1,9 +1,3 @@
-"""What each case produced, as a value where there was one.
-
-The layer generation reads: two solutions are compared before any `expected`
-exists, so a run answers rather than judges.
-"""
-
 from algo_coach.runner import NoValue, RunOutcome, outputs
 
 DOUBLE = "def solve(n):\n    return n * 2\n"

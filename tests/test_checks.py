@@ -1,6 +1,3 @@
-"""What the two runs decide about a drafted problem: which gate rejects it,
-and what a surviving one carries."""
-
 import json
 
 from helpers import a_call

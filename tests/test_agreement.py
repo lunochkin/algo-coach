@@ -1,7 +1,3 @@
-"""What a run of one case set decides: whether the call that wrote the problem
-wrote its code and its cases from one reading, whose answer is stored, and when
-the statement admits two readings."""
-
 import json
 
 import pytest

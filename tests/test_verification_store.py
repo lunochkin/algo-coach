@@ -1,10 +1,3 @@
-"""Verification runs, appended.
-
-Re-running is legal and expected. Two runs of one solution are two records and
-neither supersedes the other, since a run under a different cap answers a
-different question.
-"""
-
 from algo_coach.mint import verification
 from algo_coach.schema import CaseOutcome, CaseResult
 from algo_coach.verifications import VerificationLog

@@ -1,6 +1,3 @@
-"""The matcher over the corpus: which pairs are asked about, what each answer
-writes, and what a second run pays for."""
-
 from datetime import UTC, datetime
 
 from matching import (

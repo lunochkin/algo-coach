@@ -1,6 +1,3 @@
-"""Re-asking a site about a stored problem: what is asked, what is skipped
-because this configuration already answered it, and what the corpus keeps."""
-
 from generating import FakeWriter
 from matching import card, seeded, template
 

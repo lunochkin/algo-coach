@@ -1,10 +1,3 @@
-"""The classifier over the stored canonicals.
-
-What a run adds to reading one solution is which ones to ask about: canonicals
-only, and only where this configuration has not already answered the prompt it
-would send now.
-"""
-
 import pytest
 from helpers import CONFIGURATION, PROVENANCE, T0, FakeTransport, Verdict
 

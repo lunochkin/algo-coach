@@ -1,5 +1,3 @@
-"""The gap report: the core templates the next generation run is aimed at."""
-
 import pytest
 from matching import canonical, card, problem, seeded, stored, template
 

@@ -1,7 +1,3 @@
-"""The match log: append-only, like the attempt log and for the same reason —
-a verdict re-read is a verdict paid for twice.
-"""
-
 from datetime import UTC, datetime, timedelta
 
 from algo_coach.matches import MatchLog

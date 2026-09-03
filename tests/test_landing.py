@@ -1,5 +1,3 @@
-"""Storing a problem the runs kept: what one act writes, and in what order."""
-
 from datetime import UTC, datetime
 
 import pytest

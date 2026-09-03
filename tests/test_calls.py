@@ -1,9 +1,3 @@
-"""The call log: what was asked of a model and what came back.
-
-Domain-free on purpose — nothing here knows what a technique is, which is what
-lets a second consumer read the log without being taught anything.
-"""
-
 from dataclasses import dataclass, field, replace
 from hashlib import sha256
 from importlib import import_module

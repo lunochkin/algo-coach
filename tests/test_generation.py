@@ -1,6 +1,3 @@
-"""What one generation call is briefed with: a template, its cue, and the
-technique it belongs to."""
-
 import json
 from dataclasses import dataclass, field
 

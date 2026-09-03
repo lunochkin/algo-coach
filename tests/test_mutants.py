@@ -1,5 +1,3 @@
-"""Mutants of a canonical: one semantic change each, read off the syntax tree."""
-
 import ast
 
 from algo_coach.mutation import Operator, mutants

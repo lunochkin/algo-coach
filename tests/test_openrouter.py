@@ -1,9 +1,3 @@
-"""The transport: what leaves for OpenRouter, and what comes back as a `Reply`.
-
-The request shape lives here rather than with the call log, which is the point
-of the split — one file knows an API, the other knows a record.
-"""
-
 from dataclasses import dataclass, field
 from typing import Any
 

@@ -1,6 +1,3 @@
-"""What each generation call site leaves behind: which gate rejected its
-answer, at what configuration, and what survives a draft that never landed."""
-
 from generating import FakeWriter
 from matching import card, seeded, template
 

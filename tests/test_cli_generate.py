@@ -1,6 +1,3 @@
-"""The generate command: a template in, problems out, and each one stored once
-its runs kept it."""
-
 from datetime import UTC, datetime
 from importlib import import_module
 

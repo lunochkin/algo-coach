@@ -1,9 +1,3 @@
-"""The configuration comparison itself, rather than through a backlog run.
-
-Two readers depend on it now: the write path skips what it has already
-derived, and the eval reuses what it has already paid to read.
-"""
-
 from helpers import CONFIGURATION, PROMPT_HASH, machine_claim
 
 from algo_coach.claims import at_configuration, is_stale, readings_at

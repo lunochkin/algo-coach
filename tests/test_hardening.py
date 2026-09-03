@@ -1,6 +1,3 @@
-"""The mutation loop over a drafted problem: when it asks for a case, what it
-does with the ones it is given, and where it stops."""
-
 from dataclasses import dataclass, field
 
 import pytest

@@ -1,6 +1,3 @@
-"""The call that answers a survivor: arguments in the reply, and no expected
-value a model could write to agree with the mutant."""
-
 import json
 from dataclasses import dataclass, field
 

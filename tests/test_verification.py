@@ -1,10 +1,3 @@
-"""One run of a solution against a problem's cases.
-
-Its own record because the outcome is a fact about the run rather than about
-the code. The cap and the machine decide a timeout, and a crash can come from
-the runner, so the same solution run twice can differ.
-"""
-
 import pytest
 from pydantic import ValidationError
 
