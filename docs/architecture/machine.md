@@ -80,6 +80,36 @@ stated here once.
   The reader still supplies the judgement that the harder sample reads as the
   worse reader.
 
+## Site outcomes
+
+What one generation call site left on one attempt at writing a problem. A
+model wrote no part of it. It records what the run's gates said about the answer
+a call returned, which is why it sits beside the call log.
+
+- **What a site left is stored rather than only printed.** A run's stage lines
+  end with the process. The gate that rejected an answer, the configuration
+  behind it and the digest it was sent are readable nowhere else.
+- **One record per site and per attempt.** The four sites can run at four
+  configurations, and one record over the attempt could not say which of them a
+  gate rejected.
+- **A gate is filed under the site whose answer made it decidable.** A canonical
+  contradicting the cases its own call declared is the generator's. A
+  disagreement is the blind site's, since nothing disagrees before a second
+  reading of the statement exists.
+- **The attempt carries an id the run mints.** A discarded draft has no problem
+  to key to, and it is the attempt whose cost nothing else records.
+- **The problem is named where one landed.** Its id exists only once the problem
+  is stored, so the records are written at that point rather than as each site
+  answers.
+- **A site that made no call writes no record.** Provenance is all or none, and
+  a record carrying none compares with nothing. Absence on a site means it was
+  never asked, which is where the first case set already killed every mutant.
+- **The discrimination record cites the last round's call.** A loop pays for up
+  to two rounds, and the counters the record carries are what the last one left.
+- **The verdicts are named fields rather than a mapping.** A report groups by
+  gate and averages the counters, and a mapping makes every key a field nothing
+  enforces.
+
 ## Calls
 
 One request to a model and what came back. A layer below the claims. A claim

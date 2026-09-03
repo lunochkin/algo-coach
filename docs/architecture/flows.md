@@ -122,6 +122,9 @@ The order matters because each step can reject what came before.
   can refuse and the code it wrote can crash, and neither says anything about
   the statement. What is lost is the timing case, and the run reports that it
   went unwritten.
+- **Every step's verdict is recorded, not only reported.** A run prints each
+  stage and the process then ends, so a discarded draft would leave only the
+  calls it paid for. `machine.md` gives what a site's record carries.
 - **A statement may not name the domain its template's cue names.** The
   monotonic stack's cue says "temperatures" and "a next warmer day", and the
   first generation call returned Daily Temperatures verbatim. A solver who

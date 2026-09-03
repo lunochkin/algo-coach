@@ -252,7 +252,7 @@ canonical. What the first corpus settles is the bound.
 
 ### What an eval reads back
 
-- [ ] Add an outcome record per call site and item, carrying the gate verdicts,
+- [x] Add an outcome record per call site and item, carrying the gate verdicts,
       the configuration and the digest of what was sent. A printed line is lost
       when the run ends
 - [ ] Skip an item a configuration has already read at the current digest, as

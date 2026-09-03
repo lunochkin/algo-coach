@@ -48,7 +48,7 @@ times. Each record class is specified in one of the files beside it.
 | [`content.md`](content.md) | Techniques, cards, template matches |
 | [`corpus.md`](corpus.md) | Problems, test cases, solutions, technique readings |
 | [`log.md`](log.md) | Attempts, claims, self-labels, diagnoses, card runs, recall attempts |
-| [`machine.md`](machine.md) | What a model-written record carries, and the call log |
+| [`machine.md`](machine.md) | What a model-written record carries, what a generation run's call sites leave, and the call log |
 | [`flows.md`](flows.md) | Generating a problem, the drill loop, adjudicating the eval set |
 
 ## Data classes
@@ -63,6 +63,7 @@ times. Each record class is specified in one of the files beside it.
 | Technique readings | product | global | append-only | the store |
 | Verification runs | product | global | append-only | the store |
 | Template matches | product | global | append-only | the store |
+| Site outcomes | product | global | append-only | the store |
 | Card runs | user | private | append-only | the store |
 | Recall attempts | user | private | append-only | the store |
 | Attempts | user | private | append-only | the store |

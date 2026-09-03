@@ -5,7 +5,6 @@ Stores nothing: the ids a case and a solution need do not exist until it lands.
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from enum import StrEnum
 
 from algo_coach.generation.agreement import (
     Disagreement,
@@ -16,19 +15,11 @@ from algo_coach.generation.agreement import (
 )
 from algo_coach.generation.generator import DraftCase
 from algo_coach.runner import NoValue, answered, decide, outputs, run
-from algo_coach.schema import CaseOutcome, severest
+from algo_coach.schema import CaseOutcome, Discard, severest
 
 # the per-case cap at generation, well above the drill loop's: what the
 # reference has to finish under
 CAP_MS = 10_000
-
-
-class Discard(StrEnum):
-    # named rather than a boolean: a run reports how its problems were lost
-    NO_VALUE = "no_value"
-    MISDECLARED = "misdeclared"
-    UNTESTED = "untested"
-    DISAGREED = "disagreed"
 
 
 @dataclass(frozen=True)

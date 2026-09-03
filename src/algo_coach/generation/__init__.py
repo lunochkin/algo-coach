@@ -40,6 +40,7 @@ from algo_coach.generation.run import (
 )
 from algo_coach.generation.speedup import Missing, Searched, search
 from algo_coach.generation.steps import SILENT, Notes, Step
+from algo_coach.generation.writing import UNRECORDED, Writing
 
 __all__ = [
     "CAP_MS",
@@ -64,6 +65,7 @@ __all__ = [
     "Misdeclaration",
     "Missing",
     "SILENT",
+    "UNRECORDED",
     "Notes",
     "Progress",
     "Step",
@@ -74,6 +76,7 @@ __all__ = [
     "Settled",
     "Target",
     "Timing",
+    "Writing",
     "SettledCase",
     "agrees",
     "builder",

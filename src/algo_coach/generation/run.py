@@ -25,9 +25,11 @@ from algo_coach.generation.inputs import builder
 from algo_coach.generation.landing import Corpus, Drafted, land
 from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, Searched, search
 from algo_coach.generation.steps import SILENT, Notes, Step
+from algo_coach.generation.writing import UNRECORDED, Writing
+from algo_coach.outcomes import OutcomeLog
 from algo_coach.runner import NoValue, outputs
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Card, CaseOutcome, Template
+from algo_coach.schema import Call, CallSite, Card, CaseOutcome, SiteOutcome, Template
 
 
 class Failed(BaseModel):
@@ -109,6 +111,7 @@ def write_one(
     bench: Bench = BENCH,
     cap_ms: int = CAP_MS,
     notes: Notes = SILENT,
+    writing: Writing = UNRECORDED,
 ) -> tuple[Drafted, Checked, Timing, Bar]:
     # the `Checked` is returned rather than raised: a discard is a fact about
     # the problem, and the run reports what it cost
@@ -126,6 +129,10 @@ def write_one(
     started = monotonic()
     checked = check(draft.cases, canonical=draft.canonical, reference=solution, cap_ms=cap_ms)
     notes("cases", f"{settled(checked)}, {monotonic() - started:.1f}s in the runner")
+    # both sites are recorded here rather than as they answer: what a gate
+    # said about an answer is what the record carries, and the runs decide it
+    writing(CallSite.GENERATOR, call, **gated(checked, Discard.NO_VALUE, Discard.MISDECLARED))
+    writing(CallSite.BLIND, blind, **gated(checked, Discard.UNTESTED, Discard.DISAGREED))
     drafted = Drafted(
         draft=draft,
         solution=solution,
@@ -145,6 +152,7 @@ def write_one(
         configuration=bench.discrimination,
         cap_ms=cap_ms,
         notes=notes,
+        writing=writing,
     )
     if not checked.survived:
         return drafted, checked, Timing(), bar
@@ -157,8 +165,17 @@ def write_one(
         configuration=bench.inputs,
         cap_ms=cap_ms,
         notes=notes,
+        writing=writing,
     )
     return drafted, checked, timing, bar
+
+
+def gated(checked: Checked, *gates: Discard) -> dict[str, object]:
+    """The gate this site's answer was rejected by, and what it said. A discard
+    belongs to the site whose output made it decidable."""
+    if checked.discard not in gates:
+        return {}
+    return {"gate": checked.discard, "detail": why(checked)}
 
 
 def settled(checked: Checked) -> str:
@@ -177,6 +194,7 @@ def measured(
     configuration: Configuration,
     cap_ms: int,
     notes: Notes = SILENT,
+    writing: Writing = UNRECORDED,
 ) -> tuple[Checked, Bar]:
     """The mutation loop's cases, appended to the set the problem carries.
 
@@ -201,6 +219,16 @@ def measured(
         return checked, Bar(unmeasured=repr(failure))
 
     bar = Bar(mutants=hardened.mutants, survived=hardened.survived, won=len(hardened.cases))
+    # the loop's counters as the last round left them, which is why the record
+    # cites that round's call. A loop needing none paid for no configuration
+    writing(
+        CallSite.DISCRIMINATION,
+        hardened.call,
+        gate=None if hardened.disagreement is None else Discard.DISAGREED,
+        mutants=bar.mutants,
+        survived=bar.survived,
+        won=bar.won,
+    )
     if hardened.disagreement is not None:
         # a boundary input the first case set never reached, answered two ways.
         # A canonical wrong there is what the loop exists to find
@@ -224,6 +252,7 @@ def timed(
     configuration: Configuration,
     cap_ms: int,
     notes: Notes = SILENT,
+    writing: Writing = UNRECORDED,
 ) -> tuple[Checked, Timing]:
     """The timing case, appended to the set where one was found.
 
@@ -234,13 +263,20 @@ def timed(
         return checked, Timing()
     notes("timing", "searching for the input that separates the two solutions")
     try:
-        found = separating(
+        found, built = separating(
             transport, calls, drafted, configuration=configuration, cap_ms=cap_ms, notes=notes
         )
     except Exception as failure:
         notes("timing", f"unsearched: {failure!r}")
         return checked, Timing(unseparated=repr(failure))
 
+    writing(
+        CallSite.INPUTS,
+        built,
+        gate=Discard.DISAGREED if found.missing is Missing.DISAGREED else None,
+        separating=found.size,
+        unseparated=found.missing,
+    )
     if found.found:
         drafted.cases.append(found.case)
         notes("timing", f"separates at {found.size}")
@@ -266,12 +302,16 @@ def separating(
     configuration: Configuration,
     cap_ms: int,
     notes: Notes = SILENT,
-) -> Searched:
+) -> tuple[Searched, Call]:
     """One call for the input generator, then the search over the sizes it
-    builds. The generation cap measures, and the sitting's cap is separated."""
+    builds. The generation cap measures, and the sitting's cap is separated.
+
+    The call is returned beside what the search found: the site's outcome is
+    what the search decided about the code this call wrote.
+    """
     built, call = builder(transport, calls, drafted.draft.statement, configuration=configuration)
     notes("timing", f"input generator written, up to {built.largest}", call)
-    return search(
+    found = search(
         make(built.code, cap_ms),
         canonical=drafted.draft.canonical,
         reference=drafted.solution,
@@ -279,6 +319,7 @@ def separating(
         largest=built.largest,
         measure_ms=cap_ms,
     )
+    return found, call
 
 
 def make(code: str, cap_ms: int) -> Callable[[int], list[Any]]:
@@ -306,6 +347,7 @@ def write_problems(
     cap_ms: int = CAP_MS,
     on_progress: Callable[[Progress], None] | None = None,
     on_step: Callable[[Step], None] | None = None,
+    outcomes: OutcomeLog | None = None,
 ) -> GenerationResult:
     """`count` problems for one template, each shown what came before it, and
     each stored as soon as its runs keep it.
@@ -319,6 +361,10 @@ def write_problems(
     consecutive = 0
 
     for index in range(1, count + 1):
+        # filled as the sites answer and stored once the problem's fate is
+        # known, which is the first point there is a problem id to name
+        left: list[SiteOutcome] = []
+        writing = Writing(template_id=template.id, into=left)
         try:
             drafted, checked, timing, bar = write_one(
                 transport,
@@ -329,11 +375,13 @@ def write_problems(
                 bench=bench,
                 cap_ms=cap_ms,
                 notes=Notes(on_step, index=index, total=count),
+                writing=writing,
             )
         except Exception as failure:
             # broad on purpose: a refusal, a rate limit or a reply that does
             # not parse costs this problem and not the run
             result.failed.append(Failed(index=index, reason=repr(failure)))
+            record(outcomes, left)
             report(on_progress, index, count, template, reason=repr(failure))
             consecutive += 1
             if consecutive == ABORT_AFTER:
@@ -344,9 +392,11 @@ def write_problems(
         consecutive = 0
         written.append(drafted.draft.statement)
         if checked.survived:
-            land(corpus, template, drafted)
+            problem = land(corpus, template, drafted)
+            record(outcomes, left, problem_id=problem.id)
             result.drafted.append(drafted)
         else:
+            record(outcomes, left)
             result.discarded.append(
                 Discarded(index=index, discard=checked.discard, reason=why(checked))
             )
@@ -368,6 +418,17 @@ def write_problems(
             unmeasured=bar.unmeasured,
         )
     return result
+
+
+def record(
+    outcomes: OutcomeLog | None, left: list[SiteOutcome], *, problem_id: str | None = None
+) -> None:
+    """Appended after landing, since only then is there a problem to name. The
+    `writing_id` groups them either way, which is what a discarded draft has."""
+    if outcomes is None:
+        return
+    for outcome in left:
+        outcomes.append(outcome.model_copy(update={"problem_id": problem_id}))
 
 
 def why(checked: Checked) -> str:

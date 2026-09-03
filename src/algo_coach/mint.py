@@ -8,9 +8,11 @@ from typing import Any
 
 from algo_coach.schema import (
     Call,
+    CallSite,
     CaseResult,
     ClaimSource,
     Confidence,
+    Discard,
     ExpectedSource,
     FailureMode,
     MatchSource,
@@ -18,6 +20,7 @@ from algo_coach.schema import (
     ProblemDifficulty,
     ReadingSource,
     SelfLabel,
+    SiteOutcome,
     Solution,
     SolutionRole,
     TechniqueClaim,
@@ -392,4 +395,56 @@ def verification(
         timeout_ms=timeout_ms,
         runner=runner,
         results=list(results),
+    )
+
+
+def site_outcome(
+    site: CallSite,
+    writing_id: str,
+    template_id: str,
+    *,
+    model: str,
+    effort: str,
+    prompt_hash: str,
+    call_id: str,
+    pin: str,
+    temperature: float | None = None,
+    provider: str | None = None,
+    cost: float | None = None,
+    problem_id: str | None = None,
+    gate: Discard | None = None,
+    detail: str = "",
+    mutants: int = 0,
+    survived: int = 0,
+    won: int = 0,
+    separating: int | None = None,
+    unseparated: str | None = None,
+) -> SiteOutcome:
+    """What one call site left on one attempt at writing a problem.
+
+    `problem_id` is filled by the caller that lands the problem: a discarded
+    draft mints none, and `writing_id` is what groups the four sites either way.
+    """
+    return SiteOutcome(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        site=site,
+        writing_id=writing_id,
+        template_id=template_id,
+        problem_id=problem_id,
+        gate=gate,
+        detail=detail,
+        mutants=mutants,
+        survived=survived,
+        won=won,
+        separating=separating,
+        unseparated=unseparated,
+        model=model,
+        effort=effort,
+        prompt_hash=prompt_hash,
+        call_id=call_id,
+        pin=pin,
+        temperature=temperature,
+        provider=provider,
+        cost=cost,
     )

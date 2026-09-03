@@ -17,6 +17,7 @@ from algo_coach.schema.case import (
 )
 from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.match import MatchSource, TemplateMatch
+from algo_coach.schema.outcome import CallSite, Discard, SiteOutcome
 from algo_coach.schema.problem import (
     Problem,
     ProblemDifficulty,
@@ -38,11 +39,13 @@ __all__ = [
     "CaseOutcome",
     "CaseResult",
     "ExpectedSource",
+    "CallSite",
     "Card",
     "CardSeed",
     "ClaimSource",
     "Confidence",
     "Diagnosis",
+    "Discard",
     "FailureMode",
     "Kind",
     "MachineProvenance",
@@ -52,6 +55,7 @@ __all__ = [
     "ProblemStatus",
     "RetirementReason",
     "Selector",
+    "SiteOutcome",
     "ReadingSource",
     "SelfLabel",
     "Solution",

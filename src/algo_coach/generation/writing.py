@@ -1,0 +1,65 @@
+"""One attempt at writing a problem, and what its call sites leave behind.
+
+A run prints each stage and the process then ends. A site's verdict, its
+configuration and the digest it was sent survive only as a record, and a
+discarded draft is exactly the attempt with nothing else to point at.
+"""
+
+from dataclasses import dataclass, field
+
+from algo_coach import mint
+from algo_coach.generation.landing import written_by
+from algo_coach.schema import Call, CallSite, Discard, SiteOutcome
+
+
+@dataclass(frozen=True)
+class Writing:
+    """The four sites of one attempt, grouped by a minted id.
+
+    Silent by default, so `write_one` and `harden` are callable without a
+    store and a test needs none.
+    """
+
+    template_id: str = ""
+    into: list[SiteOutcome] | None = None
+    id: str = field(default_factory=mint.new_id)
+
+    def __call__(
+        self,
+        site: CallSite,
+        call: Call | None,
+        *,
+        gate: Discard | None = None,
+        detail: str = "",
+        mutants: int = 0,
+        survived: int = 0,
+        won: int = 0,
+        separating: int | None = None,
+        unseparated: str | None = None,
+    ) -> None:
+        # a site that made no call left no configuration to compare, so it
+        # writes nothing rather than a record with provenance missing
+        if self.into is None or call is None:
+            return
+        self.into.append(
+            mint.site_outcome(
+                site,
+                self.id,
+                self.template_id,
+                gate=gate,
+                detail=detail,
+                mutants=mutants,
+                survived=survived,
+                won=won,
+                separating=separating,
+                unseparated=unseparated,
+                **written_by(call),
+            )
+        )
+
+
+# the default: an attempt that was given no list records nothing
+UNRECORDED = Writing()
+
+
+__all__ = ["UNRECORDED", "Writing"]

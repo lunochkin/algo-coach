@@ -16,6 +16,7 @@ from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separat
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.mutation import ROUNDS, Case, kill, mutants, pace, survivors
 from algo_coach.runner import NoValue, outputs
+from algo_coach.schema import Call
 
 
 @dataclass(frozen=True)
@@ -26,6 +27,9 @@ class Hardened:
     mutants: int = 0
     survived: int = 0  # mutants no case killed when the loop stopped
     rounds: int = 0  # rounds paid for, at one call each
+    # the last round's call, which is what the counters above were left
+    # by. `None` where the first case set killed every mutant
+    call: Call | None = None
     dropped: int = 0  # proposals the canonical could not answer
     # a proposed input the two solutions answered differently. The caller
     # discards the problem on it, as it does on any disagreement
@@ -64,6 +68,7 @@ def harden(
     )
     against: Sequence[Case] = cases
     won: list[SettledCase] = []
+    paid: Call | None = None
     dropped = played = 0
 
     while True:
@@ -93,18 +98,19 @@ def harden(
             known=[one.args for one in [*cases, *won]],
             configuration=configuration,
         )
+        paid = call
         notes("round", f"{played}: {len(proposed)} case(s) proposed", call)
         settled = _settled(proposed, canonical=canonical, reference=reference, cap_ms=cap_ms)
         dropped += len(proposed) - len(settled.cases) - len(settled.disagreements)
         notes("round", f"{played}: {len(settled.cases)} won, {dropped} dropped")
         if settled.disagreements:
-            return _left(won, enumerated, standing, played, dropped, settled.disagreements[0])
+            return _left(won, enumerated, standing, played, dropped, paid, settled.disagreements[0])
         if not settled.cases:
             break
         won.extend(settled.cases)
         against = settled.cases
 
-    return _left(won, enumerated, standing, played, dropped)
+    return _left(won, enumerated, standing, played, dropped, paid)
 
 
 def _settled(
@@ -137,6 +143,7 @@ def _left(
     standing: Sequence[Any],
     played: int,
     dropped: int,
+    call: Call | None,
     disagreement: Disagreement | None = None,
 ) -> Hardened:
     return Hardened(
@@ -145,6 +152,7 @@ def _left(
         survived=len(standing),
         rounds=played,
         dropped=dropped,
+        call=call,
         disagreement=disagreement,
     )
 
