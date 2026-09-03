@@ -8,8 +8,8 @@ would send now.
 import pytest
 from helpers import CONFIGURATION, PROVENANCE, T0, FakeTransport, Verdict
 
-from algo_coach.calls import CallLog
-from algo_coach.classifier import Configuration, request_hash
+from algo_coach.calls import CallLog, Configuration
+from algo_coach.classifier import DEFAULT, request_hash
 from algo_coach.mint import machine_reading, user_reading
 from algo_coach.readings import Progress, ReadingLog, candidates, outstanding, read_corpus
 from algo_coach.runs import ABORT_AFTER
@@ -125,7 +125,8 @@ def test_another_configuration_reads_again(log):
     """A reading is scored per configuration, so what one model answered is no
     answer from another."""
     one = solution("s1")
-    log.append(already_read(one, configuration=Configuration(model="another-model")))
+    another = DEFAULT.model_copy(update={"model": "another-model"})
+    log.append(already_read(one, configuration=another))
     client = answering(Verdict(["greedy"]))
 
     result = run(client, log, [one])

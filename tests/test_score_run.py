@@ -9,7 +9,7 @@ from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_pro
 from algo_coach.calls import CallLog, Reply
 from algo_coach.claims import score_backlog
 from algo_coach.claims.run import ABORT_AFTER
-from algo_coach.classifier import DEFAULT, EFFORT, MODEL, PIN, Configuration, request_hash
+from algo_coach.classifier import DEFAULT, EFFORT, MODEL, PIN, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
@@ -78,7 +78,7 @@ def machine_claims(log):
 
 # A second classifier to put beside the built-in one. Cheaper only in the story
 # the tests tell; what matters is that it is another configuration.
-CHEAP = Configuration(model="a-cheap-model")
+CHEAP = DEFAULT.model_copy(update={"model": "a-cheap-model"})
 
 
 def test_agreement_is_scored_against_the_users_claim(hand_claimed):
@@ -425,8 +425,8 @@ def test_a_cap_of_no_calls_scores_what_is_already_stored(hand_claimed):
 
 # Two configurations of one model on one endpoint: the same deployment answers
 # both, so they share whatever meters it.
-LOW = Configuration(effort="low")
-HIGH = Configuration(effort="high")
+LOW = DEFAULT.model_copy(update={"effort": "low"})
+HIGH = DEFAULT.model_copy(update={"effort": "high"})
 
 
 class Counting:
@@ -479,7 +479,7 @@ def test_configurations_on_different_deployments_run_at_once(tmp_path):
     """The whole change: one budget each, spent together. The barrier clears
     only if both deployments have a call in flight."""
     ready = threading.Barrier(2, timeout=5)
-    other = Configuration(model="b-model", pin="b-host")
+    other = DEFAULT.model_copy(update={"model": "b-model", "pin": "b-host"})
 
     def client(**kwargs):
         ready.wait()
@@ -524,7 +524,7 @@ def test_the_log_has_one_writer_however_many_configurations_run(tmp_path, monkey
         appended(claim)
 
     monkeypatch.setattr(log, "append_claim", watched)
-    other = Configuration(model="b-model", pin="b-host")
+    other = DEFAULT.model_copy(update={"model": "b-model", "pin": "b-host"})
 
     compare(Counting(), log, configurations=(DEFAULT, other), concurrency=3)
 

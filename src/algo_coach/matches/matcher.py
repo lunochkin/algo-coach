@@ -5,9 +5,7 @@ import json
 from collections.abc import Sequence
 from typing import Any
 
-from pydantic import BaseModel
-
-from algo_coach.calls import CallLog, Transport, ask
+from algo_coach.calls import CallLog, Configuration, Transport, ask
 from algo_coach.calls import prompt_hash as digest
 from algo_coach.schema import Call, Card, Problem, Solution, Template, TemplateKind
 
@@ -36,18 +34,9 @@ The statement is there for what the code leaves implicit, never as the verdict.
 If the solution displays none of the candidates, name none of them."""
 
 
-class Configuration(BaseModel, frozen=True):
-    """Which matcher read a pair, and the key its records are found under. The
-    prompt is not a field: it varies per pair, so what a reading came from is
-    the digest of what that pair was sent."""
-
-    model: str = MODEL
-    effort: str = EFFORT
-    pin: str = PIN
-    temperature: float | None = TEMPERATURE
-
-
-DEFAULT = Configuration()
+# Which matcher read a pair. The prompt is not among them: it varies per pair,
+# so what a reading came from is the digest of what that pair was sent.
+DEFAULT = Configuration(model=MODEL, effort=EFFORT, pin=PIN, temperature=TEMPERATURE)
 
 
 class MatcherError(Exception):

@@ -18,7 +18,6 @@ from matching import (
 from algo_coach.calls import CallLog
 from algo_coach.matches import (
     DEFAULT,
-    Configuration,
     MatchLog,
     Progress,
     match_corpus,
@@ -163,7 +162,7 @@ def test_a_reading_at_another_configuration_is_not_an_answer(tmp_path):
     cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
     run(tmp_path, FakeTransport.answering(Verdict([])), cards, corpus)
 
-    other = Configuration(model="another-model")
+    other = DEFAULT.model_copy(update={"model": "another-model"})
     client = FakeTransport.answering(Verdict([]))
     result = run(tmp_path, client, cards, corpus, configuration=other)
 

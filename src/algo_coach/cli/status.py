@@ -7,8 +7,7 @@ import threading
 from dataclasses import dataclass
 from typing import TextIO
 
-from algo_coach.calls import Retry
-from algo_coach.classifier import Configuration
+from algo_coach.calls import Configuration, Retry
 from algo_coach.cli.display import held, sampled
 
 # Cells in the bar, so one cell is ten per cent.

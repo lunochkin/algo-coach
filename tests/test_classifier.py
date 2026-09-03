@@ -14,7 +14,6 @@ from algo_coach.classifier import (
     PIN,
     SYSTEM,
     ClassifierError,
-    Configuration,
     request_hash,
 )
 from algo_coach.classifier import classify as _classify
@@ -224,7 +223,7 @@ def test_an_unsent_effort_is_left_off_the_call():
         client,
         ["greedy", "sorting"],
         CODE,
-        configuration=Configuration(model="a-model", effort=UNSENT),
+        configuration=DEFAULT.model_copy(update={"model": "a-model", "effort": UNSENT}),
     )
 
     (call,) = client.calls
@@ -244,7 +243,9 @@ def test_the_pin_travels_with_the_model_it_belongs_to():
         client,
         ["greedy", "sorting"],
         CODE,
-        configuration=Configuration(model="a-model", effort="low", pin="a-host"),
+        configuration=DEFAULT.model_copy(
+            update={"model": "a-model", "effort": "low", "pin": "a-host"}
+        ),
     )
 
     (call,) = client.calls
@@ -269,7 +270,7 @@ def test_a_named_configuration_is_what_the_call_carries():
         client,
         ["greedy", "sorting"],
         CODE,
-        configuration=Configuration(model="a-cheap-model", effort="low"),
+        configuration=DEFAULT.model_copy(update={"model": "a-cheap-model", "effort": "low"}),
     )
 
     (call,) = client.calls

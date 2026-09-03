@@ -8,7 +8,7 @@ from algo_coach import cli
 from algo_coach.calls import CallLog
 from algo_coach.claims import classify_backlog
 from algo_coach.claims.run import ABORT_AFTER, Progress
-from algo_coach.classifier import EFFORT, MODEL, ClassifierError, Configuration, request_hash
+from algo_coach.classifier import DEFAULT, EFFORT, MODEL, ClassifierError, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import ProblemStore
@@ -538,7 +538,9 @@ def test_the_claim_carries_what_the_reading_was_sampled_at(backlog):
     run(
         backlog_client := answering(Verdict(["greedy"])),
         backlog,
-        configuration=Configuration(model="a-model", effort="low", temperature=0.0),
+        configuration=DEFAULT.model_copy(
+            update={"model": "a-model", "effort": "low", "temperature": 0.0}
+        ),
     )
 
     (claim,) = backlog.claims()

@@ -17,5 +17,12 @@ class Configuration(BaseModel, frozen=True):
     pin: str  # the endpoint, named to the quantization
     temperature: float | None = None  # absent is the provider's own, and a real answer
 
+    # What meters a request: OpenRouter caps nothing on a paid model, the
+    # provider caps per model per endpoint. Account-wide caps on free models
+    # and one key driven by two runs at once are not covered.
+    @property
+    def deployment(self) -> tuple[str, str]:
+        return self.model, self.pin
+
 
 __all__ = ["Configuration"]

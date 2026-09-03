@@ -5,8 +5,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog, Transport
-from algo_coach.classifier import DEFAULT, Configuration, request_hash
+from algo_coach.calls import CallLog, Configuration, Transport
+from algo_coach.classifier import DEFAULT, request_hash
 from algo_coach.readings.reader import candidates, read_one, store
 from algo_coach.readings.stale import outstanding
 from algo_coach.readings.store import ReadingLog

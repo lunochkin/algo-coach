@@ -4,7 +4,8 @@ from collections.abc import Iterable, Mapping, Sequence
 
 from pydantic import BaseModel
 
-from algo_coach.matches.matcher import Configuration, candidates
+from algo_coach.calls import Configuration
+from algo_coach.matches.matcher import candidates
 from algo_coach.schema import (
     Card,
     MatchSource,

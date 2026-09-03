@@ -7,8 +7,8 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
-from algo_coach.calls import Reply
-from algo_coach.classifier import PIN, TEMPERATURE, Configuration
+from algo_coach.calls import Configuration, Reply
+from algo_coach.classifier import PIN, TEMPERATURE
 from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Attempt, Problem, TechniqueClaim
@@ -17,7 +17,7 @@ T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
 # The configuration `machine_claim` defaults to, so a test can look a claim up
 # without restating what produced it.
-CONFIGURATION = Configuration(model="a-model", effort="medium")
+CONFIGURATION = Configuration(model="a-model", effort="medium", pin=PIN, temperature=TEMPERATURE)
 
 # The digest `machine_claim` defaults to. A test naming a different one is
 # saying the prompt changed, which is the only thing that makes a claim stale.

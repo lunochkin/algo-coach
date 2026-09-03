@@ -2,7 +2,7 @@
 
 from collections.abc import Iterable, Mapping, Sequence
 
-from algo_coach.classifier import Configuration
+from algo_coach.calls import Configuration
 from algo_coach.schema import ReadingSource, Solution, TechniqueReading
 
 

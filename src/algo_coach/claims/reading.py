@@ -5,10 +5,11 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from algo_coach.calls import Configuration
 from algo_coach.claims.run import ABORT_AFTER, Failed, store
 from algo_coach.claims.sample import recency
 from algo_coach.claims.stale import readings_at
-from algo_coach.classifier import DEFAULT, Configuration, request_hash
+from algo_coach.classifier import DEFAULT, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.schema import Attempt, Call, Problem, TechniqueClaim
 

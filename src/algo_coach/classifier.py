@@ -4,9 +4,7 @@ import json
 from collections.abc import Sequence
 from typing import Any
 
-from pydantic import BaseModel
-
-from algo_coach.calls import CallLog, Transport, ask
+from algo_coach.calls import CallLog, Configuration, Transport, ask
 from algo_coach.calls import prompt_hash as digest
 from algo_coach.schema import Call
 from algo_coach.techniques import criterion
@@ -43,26 +41,9 @@ the syntax, and let each candidate's near miss say where that line falls.
 If the code used none of the candidates, name none of them."""
 
 
-class Configuration(BaseModel, frozen=True):
-    """Which classifier a reading came from. The prompt is not among them: a
-    criterion travels with its candidate, so the rulebook is a per-attempt
-    digest."""
-
-    model: str = MODEL
-    effort: str = EFFORT
-    pin: str = PIN
-    # `None` is the provider's own default: a named arm rather than a gap.
-    temperature: float | None = TEMPERATURE
-
-    # What meters a request: OpenRouter caps nothing on a paid model, the
-    # provider caps per model per endpoint. Account-wide caps on free models
-    # and one key driven by two runs at once are not covered.
-    @property
-    def deployment(self) -> tuple[str, str]:
-        return self.model, self.pin
-
-
-DEFAULT = Configuration()
+# Which classifier a reading came from. The prompt is not among them: a
+# criterion travels with its candidate, so the rulebook is a per-attempt digest.
+DEFAULT = Configuration(model=MODEL, effort=EFFORT, pin=PIN, temperature=TEMPERATURE)
 
 
 class ClassifierError(Exception):
