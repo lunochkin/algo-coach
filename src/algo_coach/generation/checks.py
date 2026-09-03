@@ -39,6 +39,9 @@ class Checked:
     # the canonical's run against what its call declared, folded to the
     # severest case. `None` only where there were no cases to run
     outcome: CaseOutcome | None
+    # what the canonical's slowest case took in that run. The mutation loop
+    # paces its cap by it rather than running the canonical again
+    slowest_ms: int | None = None
     discard: Discard | None = None
     cases: list[SettledCase] = field(default_factory=list)
     misdeclarations: list[Misdeclaration] = field(default_factory=list)
@@ -62,23 +65,32 @@ def check(
     ran = run(canonical, args, cap_ms=cap_ms)
     ours = [answered(one) for one in ran]
     outcome = severest(decide(one, case.expected) for case, one in zip(cases, ran, strict=True))
+    slowest = max((one.elapsed_ms or 0 for one in ran if one.returned), default=0)
 
     if any(isinstance(one, NoValue) for one in ours):
-        return Checked(outcome=outcome, discard=Discard.NO_VALUE)
+        return Checked(outcome=outcome, slowest_ms=slowest, discard=Discard.NO_VALUE)
 
     wrong = misdeclared(cases, ours)
     if wrong:
-        return Checked(outcome=outcome, discard=Discard.MISDECLARED, misdeclarations=wrong)
+        return Checked(
+            outcome=outcome,
+            slowest_ms=slowest,
+            discard=Discard.MISDECLARED,
+            misdeclarations=wrong,
+        )
 
     theirs = outputs(reference, args, cap_ms=cap_ms)
     settled = settle(args, canonical=ours, reference=theirs)
     if not settled.agreed:
         return Checked(
-            outcome=outcome, discard=Discard.DISAGREED, disagreements=settled.disagreements
+            outcome=outcome,
+            slowest_ms=slowest,
+            discard=Discard.DISAGREED,
+            disagreements=settled.disagreements,
         )
     if not settled.tested:
-        return Checked(outcome=outcome, discard=Discard.UNTESTED)
-    return Checked(outcome=outcome, cases=settled.cases)
+        return Checked(outcome=outcome, slowest_ms=slowest, discard=Discard.UNTESTED)
+    return Checked(outcome=outcome, slowest_ms=slowest, cases=settled.cases)
 
 
 __all__ = ["CAP_MS", "Checked", "Discard", "check"]

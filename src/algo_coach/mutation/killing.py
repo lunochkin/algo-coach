@@ -45,17 +45,15 @@ class Verdict:
         return self.outcome is None
 
 
-def paced(code: str, cases: Sequence[Case], *, cap_ms: int) -> int:
-    """The cap the mutants run under: the canonical's own slowest case, times
+def pace(slowest_ms: int | None, *, cap_ms: int) -> int:
+    """The cap the mutants run under: the canonical's slowest case, times
     `PACE`, floored and clamped.
 
-    A mutant whose change breaks the loop's progress never returns, and under
-    the cap the reference needs it costs seconds. What it has to beat is the
-    solution it is a copy of.
+    Arithmetic over a measurement the caller already has. Whoever runs the
+    mutants ran the canonical over the same cases first, and re-running it to
+    time it would cost a subprocess per case.
     """
-    ran = run(code, [case.args for case in cases], cap_ms=cap_ms)
-    slowest = max((one.elapsed_ms or 0 for one in ran if one.returned), default=0)
-    return min(max(slowest * PACE, FLOOR_MS), cap_ms)
+    return min(max((slowest_ms or 0) * PACE, FLOOR_MS), cap_ms)
 
 
 def kill(mutants: Sequence[Mutant], cases: Sequence[Case], *, cap_ms: int) -> list[Verdict]:
@@ -79,4 +77,4 @@ def _against(mutant: Mutant, cases: Sequence[Case], *, cap_ms: int) -> Verdict:
     return Verdict(mutant)
 
 
-__all__ = ["FLOOR_MS", "PACE", "ROUNDS", "Case", "Verdict", "kill", "paced", "survivors"]
+__all__ = ["FLOOR_MS", "PACE", "ROUNDS", "Case", "Verdict", "kill", "pace", "survivors"]

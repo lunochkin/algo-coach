@@ -127,3 +127,15 @@ def test_a_reference_that_computed_no_case_discards_the_problem():
     assert result.discard is Discard.UNTESTED
     assert result.outcome is CaseOutcome.PASSED
     assert result.cases == []
+
+
+def test_the_run_reports_what_the_canonical_s_slowest_case_took():
+    """The mutation loop paces its cap by it, and running the canonical again
+    to time it costs a subprocess per case."""
+    slow = "import time\n\n\ndef solve(x):\n    time.sleep(0.05)\n    return x * 2\n"
+
+    result = checked(([2], 4), canonical=slow)
+
+    assert result.survived
+    assert result.slowest_ms is not None
+    assert result.slowest_ms >= 50

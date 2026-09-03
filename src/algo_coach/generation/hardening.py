@@ -14,7 +14,7 @@ from algo_coach.generation.agreement import Disagreement, Settled, SettledCase, 
 from algo_coach.generation.checks import CAP_MS
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
 from algo_coach.generation.steps import SILENT, Notes
-from algo_coach.mutation import ROUNDS, Case, kill, mutants, paced, survivors
+from algo_coach.mutation import ROUNDS, Case, kill, mutants, pace, survivors
 from algo_coach.runner import NoValue, outputs
 
 
@@ -40,6 +40,7 @@ def harden(
     canonical: str,
     reference: str,
     cases: Sequence[Case],
+    slowest_ms: int | None = None,
     cap_ms: int = CAP_MS,
     configuration: Configuration = DISCRIMINATION_DEFAULT,
     rounds: int = ROUNDS,
@@ -54,8 +55,9 @@ def harden(
     enumerated = len(standing)
     # paced by the canonical rather than run under the cap the reference needs:
     # a mutant that breaks the loop's progress never returns, and there are
-    # dozens of them
-    against_ms = paced(canonical, cases, cap_ms=cap_ms)
+    # dozens of them. `slowest_ms` is what the run that decided the problem
+    # measured, so nothing runs the canonical again to time it
+    against_ms = pace(slowest_ms, cap_ms=cap_ms)
     notes(
         "mutants",
         f"{enumerated} enumerated, running them under a {against_ms}ms cap",

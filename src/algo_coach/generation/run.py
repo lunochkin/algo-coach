@@ -191,6 +191,7 @@ def measured(
             canonical=drafted.draft.canonical,
             reference=drafted.solution,
             cases=drafted.cases,
+            slowest_ms=checked.slowest_ms,
             cap_ms=cap_ms,
             configuration=configuration,
             notes=notes,

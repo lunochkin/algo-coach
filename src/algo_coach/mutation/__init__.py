@@ -5,7 +5,7 @@ from algo_coach.mutation.killing import (
     Case,
     Verdict,
     kill,
-    paced,
+    pace,
     survivors,
 )
 from algo_coach.mutation.mutants import Mutant, Operator, mutants
@@ -20,6 +20,6 @@ __all__ = [
     "Verdict",
     "kill",
     "mutants",
-    "paced",
+    "pace",
     "survivors",
 ]
