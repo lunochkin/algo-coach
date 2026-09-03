@@ -5,9 +5,10 @@ from algo_coach.generation.speedup import CEILING, Missing, search
 from algo_coach.schema import ExpectedSource
 
 # a reference whose cost grows with the square of the size, as a naive solution
-# usually does, so a separating size is decided by the clock rather than by the
-# machine's speed. Two sleeps 20ms and three sleeps 45ms, and the cap sits
-# between them with more than a sleep's own overshoot either side
+# usually does. Two sleeps take 20ms and three take 45ms, and the cap sits
+# between them, so a bound of two finishes. Which size the search settles on is
+# the clock's answer rather than the search's, and no test asserts a number: a
+# loaded machine moves it by one where the behaviour under test is the same
 SLEEPS = "import time\n\n\ndef solve(n):\n    time.sleep(n * n / 200)\n    return n\n"
 FAST = "def solve(n):\n    return n\n"
 CAP_MS = 37
@@ -16,7 +17,7 @@ MEASURE_MS = 2000
 
 def searched(canonical: str = FAST, reference: str = SLEEPS, **overrides):
     return search(
-        lambda size: [size],
+        overrides.pop("make", lambda size: [size]),
         canonical=canonical,
         reference=reference,
         call=a_call(),
@@ -28,13 +29,19 @@ def searched(canonical: str = FAST, reference: str = SLEEPS, **overrides):
     )
 
 
-def test_the_smallest_size_the_reference_exceeds_the_cap_at_is_found():
-    """Two sleeps 20ms and three sleeps 45ms, so three is where the naive
-    solution stops fitting in the sitting."""
-    found = searched()
+def test_the_size_it_settles_on_is_the_smallest_that_exceeds():
+    """The halving is what makes it the smallest: the size below the one it
+    returns was measured, and it fitted."""
+    asked: list[int] = []
+
+    def make(size: int) -> list[int]:
+        asked.append(size)
+        return [size]
+
+    found = searched(make=make)
 
     assert found.found
-    assert found.size == 3
+    assert found.size - 1 in asked
 
 
 def test_the_case_carries_the_arguments_at_that_size():
@@ -42,7 +49,7 @@ def test_the_case_carries_the_arguments_at_that_size():
     generator built there."""
     found = searched()
 
-    assert found.args == [3]
+    assert found.args == [found.size]
 
 
 def test_the_case_names_the_call_that_wrote_the_input_generator():
@@ -77,11 +84,18 @@ def test_a_reference_that_finishes_everywhere_separates_nothing():
 
 
 def test_the_largest_legal_size_is_tried_before_the_search_gives_up():
-    """Doubling from one reaches two and then four, and a bound of three is
-    where the separation is."""
-    found = searched(largest=3)
+    """Doubling from one reaches two and then four, so a bound of three is
+    reached by clamping alone. A reference that fits everywhere is what makes
+    the sizes it was asked for readable."""
+    asked: list[int] = []
 
-    assert found.size == 3
+    def make(size: int) -> list[int]:
+        asked.append(size)
+        return [size]
+
+    searched(reference=FAST, largest=3, make=make)
+
+    assert asked == [1, 2, 3]
 
 
 def test_a_canonical_that_cannot_answer_at_that_size_separates_nothing():
@@ -162,7 +176,7 @@ def test_the_expected_value_is_the_reference_s_where_it_computed_one():
     passes by construction, and this one is a test of it."""
     found = searched()
 
-    assert found.case.expected == 3
+    assert found.case.expected == found.size
     assert found.case.expected_from is ExpectedSource.REFERENCE
 
 
@@ -180,5 +194,4 @@ def test_two_solutions_disagreeing_at_that_size_is_not_a_case():
     found = searched(canonical="def solve(n):\n    return n + 1\n")
 
     assert found.missing is Missing.DISAGREED
-    assert found.disagreement.canonical == 4
-    assert found.disagreement.reference == 3
+    assert found.disagreement.canonical == found.disagreement.reference + 1

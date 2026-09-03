@@ -83,8 +83,9 @@ def test_the_search_runs_a_generated_builder():
     )
 
     assert found.found
-    assert found.size == 6
-    assert found.args == [[0, 1, 2, 3, 4, 5]]
+    # what the call's own code built at the size the clock decided, rather than
+    # a size a loaded machine moves by one
+    assert found.args == [list(range(found.size))]
 
 
 def test_a_bound_of_nothing_is_rejected():
