@@ -277,6 +277,9 @@ canonical. What the first corpus settles is the bound.
 
 - [ ] Run the input builder for every problem rather than only where the
       template claims a speedup. The fuzz pass has no inputs without one
+- [ ] Cap a mutant's run against what the canonical took, rather than at the
+      generation cap. Seven mutants killed by timeout spent 70 of one run's 76
+      seconds in the runner
 - [ ] Kill mutants with built inputs across sizes and seeds before any round,
       keeping the first input that kills each. No call is paid for, and only
       the deep survivors reach one
@@ -311,15 +314,15 @@ Nothing on this path has run against a model: every gate above is unit-tested
 against a fake. Each item is one run and the number it writes down, and the
 numbers go in the commit unless the item names a file.
 
-- [ ] Run `generate --card binary-search --template predicate-first-true
+- [x] Run `generate --card binary-search --template predicate-first-true
       --count 1` and read what it stored: the problem, its cases, both
       solutions and the generator match
-- [ ] Record what one problem costs, from the call log: tokens and wall clock
+- [x] Record what one problem costs, from the call log: tokens and wall clock
       per call. How large a corpus is affordable follows from that number
-- [ ] Record how many mutants a real canonical yields and how many each round
+- [x] Record how many mutants a real canonical yields and how many each round
       kills. Revise `ROUNDS` in `corpus.md` where the second round kills
       nothing
-- [ ] Record what the mutation loop spends in the runner. A per-case
+- [x] Record what the mutation loop spends in the runner. A per-case
       subprocess is what the deferred fork server replaces, and nothing has
       measured it
 - [ ] Run `generate --count 10` on one template and record the discard rate
@@ -329,7 +332,7 @@ numbers go in the commit unless the item names a file.
       The exclusion is prompted and nothing enforces it
 - [ ] Count how many of those ten ask the same question in a new setting. The
       list of what a form already carries is what prevents that
-- [ ] Run `generate` on a template claiming a speedup and record the
+- [x] Run `generate` on a template claiming a speedup and record the
       separating size, or which `unseparated` reason came back
 - [ ] Run `read` over the stored canonicals and record the techniques each
       problem derives. Nothing has read a generated solution
