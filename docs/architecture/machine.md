@@ -15,6 +15,16 @@ stated here once.
   partly unknown compares with nothing. A model asked for no effort, or one
   that rejects the parameter, records the level it ran at rather than an empty
   field.
+- **A configuration is per call site, not per run.** Writing a problem takes
+  four calls, and they ask for different things: a statement and a solution, an
+  independent reading of that statement, the inputs that catch a wrong
+  solution, and code that builds an input of a given size. One configuration
+  over all four makes the cheapest of them pay the price of the hardest.
+- **A run mixing models stays readable, because each record copies its own
+  call's configuration.** The problem names the call that wrote it, its
+  reference names the call written blind, and a case won by a round names the
+  call that proposed it. Nothing reads a run-wide configuration, so there is
+  none to be wrong.
 - **A pin is part of the reading, not a note about routing.** A model id
   resolves to as many builds as there are endpoints serving it, and
   quantization changes the weights. Unpinned, the router chooses per request,
@@ -32,6 +42,15 @@ stated here once.
   equal only to itself, which keeps records taken before the parameter existed
   scorable rather than discarded. Generation is the exception, and
   `corpus.md` gives the reason.
+- **The generator alone is sampled**, where the exception is stated over
+  generation as a whole. What sampling buys is diversity across a corpus of
+  statements, and the other three sites write against a statement that already
+  exists. They are greedy, which is what makes two configurations of one site
+  comparable over the same item.
+- **Greedy and non-reasoning are one choice.** A model asked at an effort
+  advertises no temperature, and `require_parameters` drops such an endpoint
+  the moment one is sent. The request then fails rather than running greedy, so
+  a site pinned to `0` is a site asked for no effort.
 - **What a reading cost is recorded and never compared.** A price says when a
   reading was taken rather than which reader took it, so two readings compare
   whether or not either carries one. It sits outside the all-or-none rule with

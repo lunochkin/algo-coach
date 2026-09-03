@@ -207,6 +207,10 @@ no user and no sitting.
   protecting from variance, and variance is what stops one model's habits
   becoming the whole corpus. The cost is a canonical that is re-runnable and
   never reproducible, which is also why nothing re-derives it.
+- **The reference is greedy, where the canonical is not.** It is written
+  against a statement that already exists, so its variance buys no diversity.
+  Greedy is what makes two configurations of that site comparable over one
+  statement.
 - **Immutable once written.** Whether it passes is a fact about a run, so
   nothing about how it ran is stored here.
 

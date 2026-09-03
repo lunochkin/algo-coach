@@ -244,7 +244,7 @@ canonical. What the first corpus settles is the bound.
 - [ ] Set the bench defaults: sampled for the generator, `temperature: 0` for
       the other three. `require_parameters` drops an endpoint sent a
       temperature it cannot honour, so greedy and non-reasoning are one choice
-- [ ] Write the per-site configuration into `machine.md`. A record copies its
+- [x] Write the per-site configuration into `machine.md`. A record copies its
       own call's, so four models in one run stay readable
 - [ ] Run `discrimination` at low effort over a stored problem and record kills
       per round against high. It spent 5,263 reasoning tokens on cases that
