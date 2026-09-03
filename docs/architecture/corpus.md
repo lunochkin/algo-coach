@@ -177,6 +177,25 @@ What decides whether a solution to a generated problem is correct.
 - **The first input that kills a mutant is the one kept.** The pass builds
   smallest first, so the kept case is the smallest that separates. A second
   input killing the same mutant adds a case that decides nothing new.
+- **A kept input is shrunk before it is stored.** It is as large as the size it
+  was built at, where the mistake it catches usually needs a few elements. The
+  shrink is paid once, and what it saves is paid back by every verification
+  that runs the case.
+- **What it shrinks against is the mutants that input killed**, not the whole
+  set. A smaller input killing fewer of them would lose a kill the pass already
+  counted, and nothing else would catch it.
+- **Only lists shrink.** A shorter list is the same question asked of less,
+  where a smaller number is a different question the statement answers, and
+  nothing says the smaller one is still legal.
+- **The shrunk input carries its own answer.** The canonical is run again on
+  it, since a case keeping the answer to the input it was shrunk from would
+  fail the solution it was written from.
+- **The ceiling is checked after the shrink.** An input over it is storable
+  once it is only as large as the kill needs, where checking first would
+  discard the kill with the size.
+- **The shrink runs on a budget of candidate inputs.** Each costs a run of the
+  canonical and one per mutant it must keep killing, so an input nothing
+  shrinks would otherwise spend the pass's whole runtime.
 - **A built input the canonical cannot answer drops the case**, as a proposed
   one does. Nothing checks a built input against the constraints the statement
   gives, so a crash there is as likely to be an input the problem excludes.

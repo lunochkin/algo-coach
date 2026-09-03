@@ -280,7 +280,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Kill mutants with built inputs across sizes and seeds before any round,
       keeping the first input that kills each. No call is paid for, and only
       the deep survivors reach one
-- [ ] Shrink a killing input by delta debugging before it is stored. A random
+- [x] Shrink a killing input by delta debugging before it is stored. A random
       input that kills is large, and the ceiling and every later verification
       pay for it
 - [ ] Record which source killed each mutant: the set written with the
