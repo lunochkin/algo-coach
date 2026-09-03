@@ -18,7 +18,7 @@ class Step(BaseModel):
 
     index: int  # 1-based, over what the run asks for
     total: int
-    name: str  # the stage: statement, reference, cases, mutants, round, timing
+    name: str  # the stage: statement, reference, cases, inputs, mutants, round, timing
     detail: str = ""
     # what the stage paid for, where it made a call. Whole rather than by id:
     # the renderer reads the tokens and the wait, and the log is not loaded

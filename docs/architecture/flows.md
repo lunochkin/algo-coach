@@ -5,7 +5,7 @@ flow says in what order, and what each step may not do.
 
 ## Generating a problem
 
-A problem, its test cases and its solutions are written across three calls.
+A problem, its test cases and its solutions are written across four calls.
 The order matters because each step can reject what came before.
 
 1. The brief: a template, naming the form the problem must be solvable by, or
@@ -17,12 +17,13 @@ The order matters because each step can reject what came before.
 4. The reference solution, from the statement alone.
 5. The reference runs, and the two solutions' outputs are settled: they agree
    on every case, or the problem is discarded.
-6. Mutants of the canonical run against the cases, and a call asks for the
+6. Code that builds an input of a given size, from the statement alone.
+7. Mutants of the canonical run against the cases, and a call asks for the
    cases that kill whichever mutant survived.
-7. Where the template claims a speedup, the smallest input separating the
+8. Where the template claims a speedup, the smallest input separating the
    reference from the canonical under the cap is searched for, and the case at
    that size is stored.
-8. All of it lands together, with the template match the generation asserts on
+9. All of it lands together, with the template match the generation asserts on
    its canonical.
 
 - **Problems for one template are written one at a time.** Each call is shown
@@ -95,10 +96,14 @@ The order matters because each step can reject what came before.
 - **The input the search measured is the input the case stores.** A generator
   is asked to build one input per size, and building it again would be a second
   run of model-written code.
+- **The input generator is written for every problem**, whatever the brief
+  named, and before the mutation loop. The fuzz pass kills mutants with the
+  inputs it builds, so a round is paid for the survivors alone.
 - **A search that fails costs the case, not the problem.** The generator call
   can refuse and the code it wrote can crash, and neither says anything about
   the statement. What is lost is the timing case, and the run reports that it
-  went unwritten.
+  went unwritten. A generator call that fails costs the same, and the fuzz pass
+  besides.
 - **Every step's verdict is recorded, not only reported.** A run prints each
   stage and the process then ends, so a discarded draft would leave only the
   calls it paid for. `machine.md` gives what a site's record carries.
@@ -176,6 +181,10 @@ there is ever asked twice and no two configurations meet the same item.
   call, so the skip is decided after that pass and before the call.
 - **A retired problem is not replayed.** A defective one was never a fair test,
   and a telegraphed one is not what a later corpus will hold.
+- **The inputs site is asked only where a speedup is claimed**, where the
+  landing path builds for every problem. What a replay records is the verdict a
+  gate reached on an answer, and nothing here runs the code the call wrote
+  unless a search does.
 
 ## Drill loop
 

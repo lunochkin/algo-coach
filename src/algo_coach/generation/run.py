@@ -18,9 +18,9 @@ from algo_coach.generation.generator import (
     written_for,
 )
 from algo_coach.generation.hardening import harden
-from algo_coach.generation.inputs import builder
+from algo_coach.generation.inputs import Built, builder
 from algo_coach.generation.landing import Corpus, Drafted, land
-from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, Searched, search
+from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, search
 from algo_coach.generation.steps import SILENT, Notes, Step
 from algo_coach.generation.writing import UNRECORDED, Writing
 from algo_coach.outcomes import OutcomeLog
@@ -65,6 +65,7 @@ class Progress(BaseModel):
     # not
     separating: int | None = None
     unseparated: str | None = None
+    unbuilt: str | None = None  # the input generator's call failed, so nothing was built
     # what the mutation loop did to the set: the mutants it enumerated, the
     # ones no case caught, and the cases the rounds appended
     mutants: int = 0
@@ -73,12 +74,21 @@ class Progress(BaseModel):
     unmeasured: str | None = None  # the round's call failed, and the set is unmeasured
 
 
-class Timing(BaseModel):
-    """What the speedup search left. Both absent where the form is its own
-    optimum and nothing was searched for."""
+class Inputs(BaseModel):
+    """What the inputs site left: the code it wrote to build an input, and what
+    the speedup search made of that code.
 
+    The generator is written for every problem, so `built` stands where the
+    search never ran. Both search fields are absent where the form is its own
+    optimum and nothing was looked for.
+    """
+
+    call: Call | None = None
+    built: Built | None = None
+    unbuilt: str | None = None  # the call failed, and no code was written
     separating: int | None = None  # the size the naive solution stops fitting at
     unseparated: str | None = None  # why there was none, where one was looked for
+    gate: Discard | None = None  # the two solutions disagreed at that size
 
 
 class Bar(BaseModel):
@@ -109,7 +119,7 @@ def write_one(
     cap_ms: int = CAP_MS,
     notes: Notes = SILENT,
     writing: Writing = UNRECORDED,
-) -> tuple[Drafted, Checked, Timing, Bar]:
+) -> tuple[Drafted, Checked, Inputs, Bar]:
     # the `Checked` is returned rather than raised: a discard is a fact about
     # the problem, and the run reports what it cost
     notes("statement", "writing the statement, the canonical and the cases")
@@ -140,9 +150,11 @@ def write_one(
         cases=checked.cases,
     )
     if not checked.survived:
-        return drafted, checked, Timing(), Bar()
-    # the mutation loop before the timing case: what it wins is judged by the
-    # cap a sitting judges under, and the separating input is chosen last
+        return drafted, checked, Inputs(), Bar()
+    # written before the mutation loop, and for every problem: the inputs it
+    # builds are what a fuzz pass kills mutants with, and a round is then paid
+    # for the survivors alone
+    inputs = building(transport, calls, draft.statement, configuration=bench.inputs, notes=notes)
     checked, bar = measured(
         transport,
         calls,
@@ -153,20 +165,18 @@ def write_one(
         notes=notes,
         writing=writing,
     )
-    if not checked.survived:
-        return drafted, checked, Timing(), bar
-    checked, timing = timed(
-        transport,
-        calls,
-        template,
-        drafted,
-        checked,
-        configuration=bench.inputs,
-        cap_ms=cap_ms,
-        notes=notes,
-        writing=writing,
+    if checked.survived:
+        # the search after the loop: the separating case it appends was never
+        # in the set the survivors were decided against
+        checked, inputs = timed(template, drafted, checked, inputs, cap_ms=cap_ms, notes=notes)
+    writing(
+        CallSite.INPUTS,
+        inputs.call,
+        gate=inputs.gate,
+        separating=inputs.separating,
+        unseparated=inputs.unseparated,
     )
-    return drafted, checked, timing, bar
+    return drafted, checked, inputs, bar
 
 
 def gated(checked: Checked, *gates: Discard) -> dict[str, object]:
@@ -240,84 +250,81 @@ def measured(
     return checked, bar
 
 
-def timed(
+def building(
     transport: Transport,
     calls: CallLog,
+    statement: str,
+    *,
+    configuration: Configuration,
+    notes: Notes = SILENT,
+) -> Inputs:
+    """The code that builds an input of a given size, for every problem.
+
+    A call that fails costs the inputs rather than the problem: it says nothing
+    about the statement, as a failed search does not.
+    """
+    notes("inputs", "writing the input generator")
+    try:
+        built, call = builder(transport, calls, statement, configuration=configuration)
+    except Exception as failure:
+        notes("inputs", f"unbuilt: {failure!r}")
+        return Inputs(unbuilt=repr(failure))
+    notes("inputs", f"written, up to {built.largest}", call)
+    return Inputs(call=call, built=built)
+
+
+def timed(
     template: Template,
     drafted: Drafted,
     checked: Checked,
+    inputs: Inputs,
     *,
-    configuration: Configuration,
     cap_ms: int,
     notes: Notes = SILENT,
-    writing: Writing = UNRECORDED,
-) -> tuple[Checked, Timing]:
-    """The timing case, appended to the set where one was found.
+) -> tuple[Checked, Inputs]:
+    """The timing case, appended to the set where one was found. The generation
+    cap measures, and the sitting's cap is what a size is separated against.
 
     A search that fails costs the case rather than the problem, so its failure
     is caught here instead of reaching the run's abort count.
     """
-    if not template.speedup:
-        return checked, Timing()
+    if not template.speedup or inputs.built is None:
+        return checked, inputs
     notes("timing", "searching for the input that separates the two solutions")
     try:
-        found, built = separating(
-            transport, calls, drafted, configuration=configuration, cap_ms=cap_ms, notes=notes
+        found = search(
+            make(inputs.built.code, cap_ms),
+            canonical=drafted.draft.canonical,
+            reference=drafted.solution,
+            call=inputs.call,
+            cap_ms=DRILL_CAP_MS,
+            largest=inputs.built.largest,
+            measure_ms=cap_ms,
         )
     except Exception as failure:
         notes("timing", f"unsearched: {failure!r}")
-        return checked, Timing(unseparated=repr(failure))
+        return checked, inputs.model_copy(update={"unseparated": repr(failure)})
 
-    writing(
-        CallSite.INPUTS,
-        built,
-        gate=Discard.DISAGREED if found.missing is Missing.DISAGREED else None,
-        separating=found.size,
-        unseparated=found.missing,
-    )
     if found.found:
         drafted.cases.append(found.case)
         notes("timing", f"separates at {found.size}")
-        return checked, Timing(separating=found.size)
+        return checked, inputs.model_copy(update={"separating": found.size})
     notes("timing", f"no separation: {found.missing}")
-    if found.missing is Missing.DISAGREED:
-        # one input the small cases could not reach, answered two ways
-        discarded = Checked(
-            outcome=checked.outcome,
-            discard=Discard.DISAGREED,
-            disagreements=[found.disagreement],
-        )
-        return discarded, Timing(unseparated=found.missing)
-    return checked, Timing(unseparated=found.missing)
-
-
-def separating(
-    transport: Transport,
-    calls: CallLog,
-    drafted: Drafted,
-    *,
-    configuration: Configuration,
-    cap_ms: int,
-    notes: Notes = SILENT,
-) -> tuple[Searched, Call]:
-    """One call for the input generator, then the search over the sizes it
-    builds. The generation cap measures, and the sitting's cap is separated.
-
-    The call is returned beside what the search found: the site's outcome is
-    what the search decided about the code this call wrote.
-    """
-    built, call = builder(transport, calls, drafted.draft.statement, configuration=configuration)
-    notes("timing", f"input generator written, up to {built.largest}", call)
-    found = search(
-        make(built.code, cap_ms),
-        canonical=drafted.draft.canonical,
-        reference=drafted.solution,
-        call=call,
-        cap_ms=DRILL_CAP_MS,
-        largest=built.largest,
-        measure_ms=cap_ms,
+    searched = inputs.model_copy(
+        update={
+            "unseparated": found.missing,
+            "gate": Discard.DISAGREED if found.missing is Missing.DISAGREED else None,
+        }
     )
-    return found, call
+    if found.missing is not Missing.DISAGREED:
+        return checked, searched
+    # one input the small cases could not reach, answered two ways
+    discarded = Checked(
+        outcome=checked.outcome,
+        discard=Discard.DISAGREED,
+        disagreements=[found.disagreement],
+    )
+    return discarded, searched
 
 
 def make(code: str, cap_ms: int) -> Callable[[int], list[Any]]:
@@ -364,7 +371,7 @@ def write_problems(
         left: list[SiteOutcome] = []
         writing = Writing(template_id=template.id, into=left)
         try:
-            drafted, checked, timing, bar = write_one(
+            drafted, checked, inputs, bar = write_one(
                 transport,
                 calls,
                 card,
@@ -408,8 +415,9 @@ def write_problems(
             outcome=checked.outcome,
             landed=checked.survived,
             reason=None if checked.survived else why(checked),
-            separating=timing.separating,
-            unseparated=timing.unseparated,
+            separating=inputs.separating,
+            unseparated=inputs.unseparated,
+            unbuilt=inputs.unbuilt,
             mutants=bar.mutants,
             survived=bar.survived,
             won=bar.won,

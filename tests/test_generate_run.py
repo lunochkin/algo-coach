@@ -8,6 +8,7 @@ from algo_coach.generation import (
     GENERATOR_DEFAULT,
     Bench,
     Corpus,
+    Progress,
     blind,
     discrimination,
     generator,
@@ -172,9 +173,10 @@ def test_the_separating_case_is_stored_beside_the_others(tmp_path, monkeypatch):
     assert stored[-1].expected_from is ExpectedSource.REFERENCE
 
 
-def test_a_form_that_is_its_own_optimum_is_not_searched(tmp_path, monkeypatch):
+def test_a_form_that_is_its_own_optimum_is_still_built_for(tmp_path, monkeypatch):
     """Backtracking and exhaustive search have no naive solution to beat, so
-    no input separates them and no call is paid for."""
+    nothing is searched for. The input generator is written all the same, since
+    a fuzz pass has no inputs without one."""
     model = FakeWriter(solution=SLOW, generator=BUILDS)
 
     timed(
@@ -184,11 +186,31 @@ def test_a_form_that_is_its_own_optimum_is_not_searched(tmp_path, monkeypatch):
         templates=[template("longest-valid-window", speedup=False)],
     )
 
-    assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM]
+    assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM]
     assert len(CaseLog(tmp_path).cases()) == 1
 
 
-def test_a_search_that_fails_costs_the_case_and_not_the_problem(tmp_path, monkeypatch):
+CRASHES = "def solve(size):\n    raise ValueError\n"
+
+
+def reported(tmp_path, monkeypatch, model: FakeWriter, **overrides) -> Progress:
+    """The line one problem left, which is where a site's failure is read."""
+    seen: list[Progress] = []
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    (one,) = seeded(tmp_path, card(**overrides))
+    write_problems(
+        model,
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        on_progress=seen.append,
+    )
+    (line,) = seen
+    return line
+
+
+def test_a_builder_that_fails_costs_the_case_and_not_the_problem(tmp_path, monkeypatch):
     """The problem passed every gate that judges it, and the timing case is
     what the run reports it did not get."""
     model = FakeWriter(solution=SLOW)
@@ -197,6 +219,18 @@ def test_a_search_that_fails_costs_the_case_and_not_the_problem(tmp_path, monkey
 
     assert len(result.drafted) == 1
     assert len(CaseLog(tmp_path).cases()) == 1
+
+
+def test_a_call_that_wrote_no_builder_is_reported_apart_from_a_search(tmp_path, monkeypatch):
+    """A site that answered nothing and a search that separated nothing are
+    different facts, and the fuzz pass is lost only by the first."""
+    unwritten = reported(tmp_path, monkeypatch, FakeWriter(solution=SLOW))
+    crashing = reported(tmp_path, monkeypatch, FakeWriter(solution=SLOW, generator=CRASHES))
+
+    assert unwritten.unbuilt is not None
+    assert unwritten.unseparated is None
+    assert crashing.unbuilt is None
+    assert "built nothing at size 1" in crashing.unseparated
 
 
 def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
@@ -248,6 +282,32 @@ def test_a_won_case_carries_the_reference_s_answer(tmp_path):
     stored = CaseLog(tmp_path).cases()
     assert stored[-1].expected is False
     assert stored[-1].expected_from is ExpectedSource.REFERENCE
+
+
+def test_the_input_generator_is_written_before_the_rounds(tmp_path):
+    """A fuzz pass kills mutants with the inputs it builds, and a round is then
+    paid for the survivors alone."""
+    model = bounded(separators=[[[3], [4]]], generator=BUILDS)
+
+    run(tmp_path, model)
+
+    assert [one["system"] for one in model.calls] == [
+        generator.SYSTEM,
+        blind.SYSTEM,
+        inputs.SYSTEM,
+        discrimination.SYSTEM,
+    ]
+
+
+def test_a_builder_that_failed_costs_the_inputs_and_not_the_round(tmp_path):
+    """The call says nothing about the statement, so the loop still runs and
+    the problem still lands."""
+    model = bounded(separators=[[[3], [4]]])
+
+    _, result = run(tmp_path, model)
+
+    assert len(result.drafted) == 1
+    assert [one.args for one in CaseLog(tmp_path).cases()] == [[10], [3], [4]]
 
 
 def test_a_set_that_kills_every_mutant_pays_for_no_round(tmp_path):

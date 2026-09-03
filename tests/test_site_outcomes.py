@@ -123,14 +123,34 @@ def test_each_record_carries_the_configuration_of_its_own_call(tmp_path):
 
 
 def test_a_site_that_made_no_call_writes_nothing(tmp_path):
-    """A form that is its own optimum is never searched, and a site that paid
-    for no configuration leaves nothing for an eval to compare."""
+    """The set written with the statement killed every mutant, so no round was
+    asked and the site paid for no configuration an eval could compare."""
+    _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS))
+
+    assert CallSite.DISCRIMINATION not in sites(outcomes)
+
+
+def test_a_form_that_is_its_own_optimum_records_the_builder_it_paid_for(tmp_path):
+    """The input generator is written for every problem, so the site answered.
+    Nothing was searched for, and the record carries neither a size nor a
+    reason there was none."""
     _, _, outcomes = run(
         tmp_path,
         FakeWriter(generator=BUILDS),
         templates=[template("longest-valid-window", speedup=False)],
     )
 
+    one = sites(outcomes)[CallSite.INPUTS]
+    assert one.separating is None
+    assert one.unseparated is None
+
+
+def test_a_builder_call_that_failed_leaves_no_record(tmp_path):
+    """Provenance is all or none, and a call that answered nothing carries
+    none. The problem lands: the site says nothing about the statement."""
+    _, result, outcomes = run(tmp_path, FakeWriter())
+
+    assert len(result.drafted) == 1
     assert CallSite.INPUTS not in sites(outcomes)
 
 

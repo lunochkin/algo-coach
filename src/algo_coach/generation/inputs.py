@@ -1,9 +1,10 @@
 """The input generator: the statement in, code building an input of a given
 size out.
 
-What the speedup search runs to reach a size. Its own brief, naming no
-technique and no form: the constraints are what it reads, and the statement is
-where they are stated.
+Written for every problem, whatever its brief named: the speedup search runs it
+to reach a size, and a fuzz pass has no inputs without it. Its own brief, naming
+no technique and no form: the constraints are what it reads, and the statement
+is where they are stated.
 """
 
 from typing import Any

@@ -272,7 +272,7 @@ canonical. What the first corpus settles is the bound.
 
 ### Killing without a call
 
-- [ ] Run the input builder for every problem rather than only where the
+- [x] Run the input builder for every problem rather than only where the
       template claims a speedup. The fuzz pass has no inputs without one
 - [x] Cap a mutant's run against what the canonical took, rather than at the
       generation cap. Seven mutants killed by timeout spent 70 of one run's 76

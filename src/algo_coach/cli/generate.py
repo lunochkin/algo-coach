@@ -253,8 +253,10 @@ def bar(progress: Progress) -> str:
 
 
 def timing(progress: Progress) -> str:
-    """What the speedup search left. Silent where the form is its own optimum,
-    since nothing was looked for."""
+    """What the inputs site left. Silent where the generator was written and
+    the form is its own optimum, since nothing was looked for."""
+    if progress.unbuilt is not None:
+        return f"  unbuilt: {progress.unbuilt}"
     if progress.separating is not None:
         return f"  separates at {progress.separating}"
     return f"  no separation: {progress.unseparated}" if progress.unseparated else ""

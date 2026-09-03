@@ -40,8 +40,8 @@ from algo_coach.generation.run import (
     Discarded,
     Failed,
     GenerationResult,
+    Inputs,
     Progress,
-    Timing,
     write_one,
     write_problems,
 )
@@ -85,7 +85,7 @@ __all__ = [
     "Searched",
     "Settled",
     "Target",
-    "Timing",
+    "Inputs",
     "Writing",
     "SettledCase",
     "agrees",

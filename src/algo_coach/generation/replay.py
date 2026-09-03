@@ -282,8 +282,10 @@ def inputs_replay(
     fresh: bool,
     notes: Notes,
 ) -> Asked:
-    """The input builder and the search it feeds. Run only where the template
-    claims a speedup, as the landing path runs it."""
+    """The input builder and the search it feeds. Asked only where the template
+    claims a speedup, where the landing path builds for every problem: a replay
+    records what a site's answer was judged by, and without a search there is
+    no verdict on the code this call wrote."""
     if subject.template is None or not subject.template.speedup:
         return Asked()
     configuration = bench.inputs
