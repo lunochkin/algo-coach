@@ -244,9 +244,9 @@ canonical. What the first corpus settles is the bound.
       drift, and a score compares what two of them named
 - [x] Take a per-site bench override on `algo-coach generate`, so a cheaper
       model is tried without an edit
-- [ ] Set the bench defaults: sampled for the generator, `temperature: 0` for
-      the other three. `require_parameters` drops an endpoint sent a
-      temperature it cannot honour, so greedy and non-reasoning are one choice
+- [x] Pin `temperature: 0` on blind, discrimination and inputs, leaving the
+      generator sampled. The endpoints the bench is pinned to advertise a
+      temperature beside an effort, so greedy costs it no reasoning
 - [x] Write the per-site configuration into `machine.md`. A record copies its
       own call's, so four models in one run stay readable
 - [ ] Run `discrimination` at low effort over a stored problem and record kills

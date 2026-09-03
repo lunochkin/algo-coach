@@ -47,10 +47,12 @@ stated here once.
   statements, and the other three sites write against a statement that already
   exists. They are greedy, which is what makes two configurations of one site
   comparable over the same item.
-- **Greedy and non-reasoning are one choice.** A model asked at an effort
-  advertises no temperature, and `require_parameters` drops such an endpoint
-  the moment one is sent. The request then fails rather than running greedy, so
-  a site pinned to `0` is a site asked for no effort.
+- **Whether a site can be greedy is the endpoint's answer.** A request naming
+  a parameter its endpoint does not advertise is refused rather than served, so
+  a temperature sent where none is offered fails the call instead of running
+  greedy. Some endpoints serving a model at an effort advertise no temperature
+  and others carry both, so pinning a site to `0` costs the effort in one place
+  and nothing in another.
 - **What a reading cost is recorded and never compared.** A price says when a
   reading was taken rather than which reader took it, so two readings compare
   whether or not either carries one. It sits outside the all-or-none rule with

@@ -15,9 +15,10 @@ from algo_coach.generation.errors import GenerationError
 from algo_coach.mutation import Mutant
 from algo_coach.schema import Call
 
-# unmeasured, as every site's is
+# unmeasured, as every site's is. Greedy: this site writes against a statement
+# that already exists, so its variance buys no diversity
 DISCRIMINATION_DEFAULT = Configuration(
-    model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio"
+    model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio", temperature=0.0
 )
 
 SYSTEM = """You write the inputs that catch a wrong solution.

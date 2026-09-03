@@ -5,6 +5,7 @@ from pathlib import Path
 from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cli.bench import bench as chosen_bench
+from algo_coach.cli.display import sampled
 from algo_coach.cli.transport import transport
 from algo_coach.generation import (
     BENCH,
@@ -75,17 +76,22 @@ def summary(results: list[GenerationResult], aimed: list[Target], bench: Bench =
 
 def wrote(bench: Bench) -> str:
     """Which model wrote what. One name where every site shares a
-    configuration, and four where a run mixed them."""
+    configuration, and one line per site where they differ."""
     shared = bench.shared
     if shared is not None:
-        return f"written by {shared.model}, effort {shared.effort}"
-    # one line per site: four models on one line is a line nobody reads to the
-    # end, and what wrote a problem is what a re-run has to name
-    sites = (
-        f"  {name} {getattr(bench, name).model} at {getattr(bench, name).effort}"
-        for name in Bench.model_fields
+        return f"written by {shared.model}, effort {shared.effort} @{sampled(shared.temperature)}"
+    # one line per site: four configurations on one line is a line nobody reads
+    # to the end, and what wrote a problem is what a re-run has to name
+    return "written by\n" + "\n".join(
+        f"  {name} {named(bench, name)}" for name in Bench.model_fields
     )
-    return "written by\n" + "\n".join(sites)
+
+
+def named(bench: Bench, site: str) -> str:
+    """One site's configuration, the temperature included: two sites on one
+    model differ by how they were sampled and by nothing a name shows."""
+    one = getattr(bench, site)
+    return f"{one.model} at {one.effort} @{sampled(one.temperature)}"
 
 
 def resolve(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> list[Target]:

@@ -58,7 +58,8 @@ def test_the_command_writes_problems(root, monkeypatch, capsys):
 
     out = capsys.readouterr().out
     assert "The first." in out and "The second." in out
-    assert f"2 problem(s) stored, written by {GENERATOR_DEFAULT.model}" in out
+    assert "2 problem(s) stored, written by" in out
+    assert f"generator {GENERATOR_DEFAULT.model} at {GENERATOR_DEFAULT.effort}" in out
     assert len(CallLog(root).all()) == 6
 
 
@@ -318,8 +319,22 @@ def test_a_stage_that_paid_for_a_call_reports_what_it_cost():
     )
 
 
-def test_the_summary_names_one_model_where_the_bench_is_shared():
-    assert "written by " + GENERATOR_DEFAULT.model in summary([], [], BENCH)
+def test_the_summary_names_one_model_where_every_site_shares_one():
+    """A bench nobody mixed reads as one name rather than as four lines."""
+    one = GENERATOR_DEFAULT.model_copy(update={"temperature": 0.0})
+
+    assert "written by " + one.model in summary(
+        [], [], Bench(generator=one, blind=one, discrimination=one, inputs=one)
+    )
+
+
+def test_the_summary_names_how_each_site_was_sampled():
+    """The built-in bench samples the generator and runs the rest greedy, and
+    two sites on one model differ by nothing else a name shows."""
+    named = summary([], [], BENCH)
+
+    assert f"generator {GENERATOR_DEFAULT.model} at {GENERATOR_DEFAULT.effort} @default" in named
+    assert "blind " + GENERATOR_DEFAULT.model + " at " + GENERATOR_DEFAULT.effort + " @0.0" in named
 
 
 def test_the_summary_names_every_site_where_the_bench_mixes_them():
