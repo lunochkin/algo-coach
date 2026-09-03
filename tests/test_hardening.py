@@ -11,8 +11,10 @@ from algo_coach.generation import GenerationError, harden
 from algo_coach.mutation import ROUNDS
 from algo_coach.schema import ExpectedSource
 
-CANONICAL = "def solve(n):\n    return 1 if n > 3 else 0\n"
-BLIND = "def solve(n):\n    return int(n > 3)\n"
+# four mutation sites rather than eight: the same kill structure, at half
+# the subprocesses a pass costs
+CANONICAL = "def solve(n):\n    return n > 3\n"
+BLIND = "def solve(n):\n    return not n <= 3\n"
 CAP_MS = 2_000
 
 
@@ -50,7 +52,7 @@ def run(tmp_path, model: Answers, cases: list[Case], *, canonical=CANONICAL, ref
 
 
 # every mutant of the canonical differs from it at one of these
-WEAK = [Case(args=[0], expected=0), Case(args=[10], expected=1)]
+WEAK = [Case(args=[0], expected=False), Case(args=[10], expected=True)]
 # the boundary the weak set never reaches: `n > 4`, `n > 2` and `n >= 3`
 BOUNDARY = [[4], [3]]
 
@@ -69,7 +71,7 @@ def test_a_canonical_with_no_mutant_asks_nothing(tmp_path):
 def test_a_set_that_kills_every_mutant_asks_no_call(tmp_path):
     """The bar is met by the cases the generation call already wrote."""
     model = Answers()
-    kills = WEAK + [Case(args=[3], expected=0), Case(args=[4], expected=1)]
+    kills = WEAK + [Case(args=[3], expected=False), Case(args=[4], expected=True)]
 
     hardened = run(tmp_path, model, kills)
 
@@ -96,7 +98,7 @@ def test_a_won_case_carries_the_reference_s_answer(tmp_path):
     construction."""
     hardened = run(tmp_path, Answers(rounds=[BOUNDARY]), WEAK)
 
-    assert [one.expected for one in hardened.cases] == [1, 0]
+    assert [one.expected for one in hardened.cases] == [True, False]
     assert {one.expected_from for one in hardened.cases} == {ExpectedSource.REFERENCE}
 
 
@@ -125,13 +127,13 @@ def test_a_proposal_the_canonical_cannot_answer_drops_the_case(tmp_path):
 def test_a_proposal_the_two_solutions_answer_differently_is_reported(tmp_path):
     """A boundary the first set never reached, read two ways. The caller
     discards the problem on it."""
-    reference = "def solve(n):\n    return 99 if n == 4 else int(n > 3)\n"
+    reference = "def solve(n):\n    return 99 if n == 4 else n > 3\n"
     model = Answers(rounds=[[[4]]])
 
     hardened = run(tmp_path, model, WEAK, reference=reference)
 
     assert hardened.disagreement is not None
-    assert hardened.disagreement.canonical == 1
+    assert hardened.disagreement.canonical is True
     assert hardened.disagreement.reference == 99
     assert hardened.cases == []
 

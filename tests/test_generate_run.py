@@ -152,13 +152,13 @@ def test_a_surviving_problem_carries_what_the_reference_computed(tmp_path):
     assert [one.expected_from for one in drafted.cases] == [ExpectedSource.REFERENCE]
 
 
-SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.15)\n    return len(xs)\n"
+SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 BUILDS = "def solve(size):\n    return [list(range(size))]\n"
 
 
 def timed(tmp_path, monkeypatch, model: FakeWriter, **overrides):
     """A run whose sitting cap is small enough to separate in a test."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 200)
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
     (one,) = seeded(tmp_path, card(**overrides))
     return one, write_problems(model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path))
 
@@ -209,7 +209,7 @@ def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
     the separating input reaches."""
     blind_solution = (
         "import time\n\n\ndef solve(xs):\n"
-        "    time.sleep(len(xs) * 0.15)\n"
+        "    time.sleep(len(xs) * 0.04)\n"
         "    return len(xs) + (1 if 0 in xs else 0)\n"
     )
     model = FakeWriter(solution=blind_solution, generator=BUILDS)
@@ -222,9 +222,9 @@ def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
 
 
 # the mutation loop's subject: a boundary the one written case never reaches
-BOUNDED = "def solve(n):\n    return 1 if n > 3 else 0\n"
-BOUNDED_BLIND = "def solve(n):\n    return int(n > 3)\n"
-ONE_CASE = [{"args": "[10]", "expected": "1"}]
+BOUNDED = "def solve(n):\n    return n > 3\n"
+BOUNDED_BLIND = "def solve(n):\n    return not n <= 3\n"
+ONE_CASE = [{"args": "[10]", "expected": "true"}]
 
 
 def bounded(**overrides) -> FakeWriter:
@@ -249,7 +249,7 @@ def test_a_won_case_carries_the_reference_s_answer(tmp_path):
     run(tmp_path, bounded(separators=[[[3]]]))
 
     stored = CaseLog(tmp_path).cases()
-    assert stored[-1].expected == 0
+    assert stored[-1].expected is False
     assert stored[-1].expected_from is ExpectedSource.REFERENCE
 
 
@@ -287,7 +287,7 @@ def test_a_proposed_case_the_two_solutions_answer_differently_discards_it(tmp_pa
     """A canonical wrong at a boundary the first set never reached, which is
     what the loop exists to find."""
     model = bounded(
-        solution="def solve(n):\n    return 99 if n == 4 else int(n > 3)\n",
+        solution="def solve(n):\n    return 99 if n == 4 else n > 3\n",
         separators=[[[4]]],
     )
 

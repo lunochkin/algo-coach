@@ -6,11 +6,13 @@ import pytest
 from algo_coach.generation.speedup import CEILING, Missing, search
 from algo_coach.schema import ExpectedSource
 
-# a reference whose cost is the size, in tens of milliseconds, so a separating
-# size is decided by the clock rather than by the machine's speed
-SLEEPS = "import time\n\n\ndef solve(n):\n    time.sleep(n / 100)\n    return n\n"
+# a reference whose cost grows with the square of the size, as a naive solution
+# usually does, so a separating size is decided by the clock rather than by the
+# machine's speed. Two sleeps 20ms and three sleeps 45ms, and the cap sits
+# between them with more than a sleep's own overshoot either side
+SLEEPS = "import time\n\n\ndef solve(n):\n    time.sleep(n * n / 200)\n    return n\n"
 FAST = "def solve(n):\n    return n\n"
-CAP_MS = 55
+CAP_MS = 37
 MEASURE_MS = 2000
 
 
@@ -28,12 +30,12 @@ def searched(canonical: str = FAST, reference: str = SLEEPS, **overrides):
 
 
 def test_the_smallest_size_the_reference_exceeds_the_cap_at_is_found():
-    """Five sleeps 50ms and six sleeps 60ms, so six is where the naive
+    """Two sleeps 20ms and three sleeps 45ms, so three is where the naive
     solution stops fitting in the sitting."""
     found = searched()
 
     assert found.found
-    assert found.size == 6
+    assert found.size == 3
 
 
 def test_the_case_carries_the_arguments_at_that_size():
@@ -41,7 +43,7 @@ def test_the_case_carries_the_arguments_at_that_size():
     generator built there."""
     found = searched()
 
-    assert found.args == [6]
+    assert found.args == [3]
 
 
 def test_both_measurements_are_carried():
@@ -62,11 +64,11 @@ def test_a_reference_that_finishes_everywhere_separates_nothing():
 
 
 def test_the_largest_legal_size_is_tried_before_the_search_gives_up():
-    """Doubling from one reaches four and then eight, and a bound of six is
+    """Doubling from one reaches two and then four, and a bound of three is
     where the separation is."""
-    found = searched(largest=6)
+    found = searched(largest=3)
 
-    assert found.size == 6
+    assert found.size == 3
 
 
 def test_a_canonical_that_cannot_answer_at_that_size_separates_nothing():
@@ -146,7 +148,7 @@ def test_the_expected_value_is_the_reference_s_where_it_computed_one():
     passes by construction, and this one is a test of it."""
     found = searched()
 
-    assert found.case.expected == 6
+    assert found.case.expected == 3
     assert found.case.expected_from is ExpectedSource.REFERENCE
 
 
@@ -164,5 +166,5 @@ def test_two_solutions_disagreeing_at_that_size_is_not_a_case():
     found = searched(canonical="def solve(n):\n    return n + 1\n")
 
     assert found.missing is Missing.DISAGREED
-    assert found.disagreement.canonical == 7
-    assert found.disagreement.reference == 6
+    assert found.disagreement.canonical == 4
+    assert found.disagreement.reference == 3
