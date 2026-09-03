@@ -7,9 +7,9 @@ from dataclasses import dataclass, field
 import pytest
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import Configuration, GenerationError, separators
-from algo_coach.generation.discrimination import prompt, read, schema
+from algo_coach.calls import CallLog, Configuration, Reply
+from algo_coach.generation import GenerationError, separators
+from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, prompt, read, schema
 from algo_coach.mutation import Mutant, Operator
 
 STATEMENT = "Given a list of readings, return the widest stretch that stays fair."
@@ -40,6 +40,10 @@ def asked(model: FakeModel, **overrides):
     return separators(
         model, CallLog(overrides.pop("tmp_path")), STATEMENT, canonical=CANONICAL, **overrides
     )
+
+
+# a site aimed elsewhere: every field is named, since none has a default
+ELSEWHERE = Configuration(model="another", effort="low", pin="somewhere")
 
 
 def test_the_reply_carries_arguments_alone(tmp_path):
@@ -149,16 +153,15 @@ def test_the_schema_is_strict():
     assert shape["properties"]["cases"]["items"]["additionalProperties"] is False
 
 
-def test_the_configuration_is_the_generator_s_unless_named(tmp_path):
+def test_the_site_s_own_configuration_is_the_default(tmp_path):
+    """A site names its own model, and a run may aim this call elsewhere."""
     model = FakeModel(answer([[1]]))
 
     asked(model, survivors=[SURVIVOR], tmp_path=tmp_path)
-    asked(
-        model, survivors=[SURVIVOR], configuration=Configuration(model="another"), tmp_path=tmp_path
-    )
+    asked(model, survivors=[SURVIVOR], configuration=ELSEWHERE, tmp_path=tmp_path)
 
-    assert model.calls[0]["model"] == Configuration().model
-    assert model.calls[1]["model"] == "another"
+    assert model.calls[0]["model"] == DISCRIMINATION_DEFAULT.model
+    assert model.calls[1]["model"] == ELSEWHERE.model
 
 
 def test_a_known_case_is_shown_as_arguments_alone():

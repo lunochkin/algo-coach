@@ -10,10 +10,15 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
-from algo_coach.calls import CallLog, Transport, ask
-from algo_coach.generation.generator import DEFAULT, Configuration, GenerationError
+from algo_coach.calls import CallLog, Configuration, Transport, ask
+from algo_coach.generation.errors import GenerationError
 from algo_coach.mutation import Mutant
 from algo_coach.schema import Call
+
+# unmeasured, as every site's is
+DISCRIMINATION_DEFAULT = Configuration(
+    model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio"
+)
 
 SYSTEM = """You write the inputs that catch a wrong solution.
 
@@ -135,7 +140,7 @@ def separators(
     canonical: str,
     survivors: Sequence[Mutant],
     known: Sequence[Sequence[Any]] = (),
-    configuration: Configuration = DEFAULT,
+    configuration: Configuration = DISCRIMINATION_DEFAULT,
 ) -> tuple[list[list[Any]], Call]:
     """The arguments proposed for the survivors, and the call that wrote them.
 

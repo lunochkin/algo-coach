@@ -8,9 +8,9 @@ import pytest
 from matching import card, seeded
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import Configuration, GenerationError, reference
-from algo_coach.generation.blind import SYSTEM, prompt, read, schema
+from algo_coach.calls import CallLog, Configuration, Reply
+from algo_coach.generation import GenerationError, reference
+from algo_coach.generation.blind import BLIND_DEFAULT, SYSTEM, prompt, read, schema
 from algo_coach.generation.generator import prompt as brief
 
 STATEMENT = "Given a list of readings, return the widest stretch that stays fair."
@@ -28,6 +28,10 @@ class FakeModel:
 
 def answer(solution: str = "def solve(xs):\n    return len(xs)\n") -> str:
     return json.dumps({"solution": solution})
+
+
+# a site aimed elsewhere: every field is named, since none has a default
+ELSEWHERE = Configuration(model="another", effort="low", pin="somewhere")
 
 
 def test_the_statement_is_the_whole_of_the_request(tmp_path):
@@ -69,15 +73,16 @@ def test_an_answer_cut_short_writes_no_solution(tmp_path):
     assert len(CallLog(tmp_path).all()) == 1
 
 
-def test_the_configuration_is_the_generator_s_unless_named(tmp_path):
-    """Independence is what the model was shown, not which model it was."""
+def test_the_site_s_own_configuration_is_the_default(tmp_path):
+    """A site names its own model. Independence is what this call was shown,
+    so it may run the model that wrote the statement."""
     model = FakeModel(answer())
 
     reference(model, CallLog(tmp_path), STATEMENT)
-    reference(model, CallLog(tmp_path), STATEMENT, configuration=Configuration(model="another"))
+    reference(model, CallLog(tmp_path), STATEMENT, configuration=ELSEWHERE)
 
-    assert model.calls[0]["model"] == Configuration().model
-    assert model.calls[1]["model"] == "another"
+    assert model.calls[0]["model"] == BLIND_DEFAULT.model
+    assert model.calls[1]["model"] == ELSEWHERE.model
 
 
 def test_the_schema_is_strict():

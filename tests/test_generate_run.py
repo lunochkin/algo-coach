@@ -5,12 +5,11 @@ from generating import FakeWriter
 from helpers import PROVENANCE
 from matching import card, seeded, template
 
-from algo_coach.calls import CallLog
+from algo_coach.calls import CallLog, Configuration
 from algo_coach.cases import CaseLog
 from algo_coach.generation import (
-    MODEL,
+    GENERATOR_DEFAULT,
     Bench,
-    Configuration,
     Corpus,
     blind,
     discrimination,
@@ -339,10 +338,10 @@ def test_every_site_is_asked_of_its_own_model(tmp_path):
     """Four calls asking for different things, where one configuration made
     the cheapest of them pay the price of the hardest."""
     bench = Bench(
-        generator=Configuration(model="writes-problems"),
-        blind=Configuration(model="reads-statements"),
-        discrimination=Configuration(model="writes-cases"),
-        inputs=Configuration(model="builds-inputs"),
+        generator=Configuration(model="writes-problems", effort="medium", pin="test"),
+        blind=Configuration(model="reads-statements", effort="medium", pin="test"),
+        discrimination=Configuration(model="writes-cases", effort="medium", pin="test"),
+        inputs=Configuration(model="builds-inputs", effort="medium", pin="test"),
     )
     model = bounded(separators=[[[3], [4]]], generator=BUILDS)
     (one,) = seeded(tmp_path, card())
@@ -366,4 +365,4 @@ def test_a_run_naming_no_bench_asks_one_model(tmp_path):
 
     run(tmp_path, model)
 
-    assert set(models(model).values()) == {MODEL}
+    assert set(models(model).values()) == {GENERATOR_DEFAULT.model}

@@ -79,11 +79,13 @@ def wrote(bench: Bench) -> str:
     shared = bench.shared
     if shared is not None:
         return f"written by {shared.model}, effort {shared.effort}"
+    # one line per site: four models on one line is a line nobody reads to the
+    # end, and what wrote a problem is what a re-run has to name
     sites = (
-        f"{name} {getattr(bench, name).model} at {getattr(bench, name).effort}"
+        f"  {name} {getattr(bench, name).model} at {getattr(bench, name).effort}"
         for name in Bench.model_fields
     )
-    return "written by " + ", ".join(sites)
+    return "written by\n" + "\n".join(sites)
 
 
 def resolve(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> list[Target]:

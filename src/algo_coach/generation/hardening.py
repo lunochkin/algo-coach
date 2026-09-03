@@ -9,11 +9,10 @@ from dataclasses import dataclass, field
 from time import monotonic
 from typing import Any
 
-from algo_coach.calls import CallLog, Transport
+from algo_coach.calls import CallLog, Configuration, Transport
 from algo_coach.generation.agreement import Disagreement, Settled, SettledCase, settle
 from algo_coach.generation.checks import CAP_MS
-from algo_coach.generation.discrimination import separators
-from algo_coach.generation.generator import DEFAULT, Configuration
+from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.mutation import ROUNDS, Case, kill, mutants, survivors
 from algo_coach.runner import NoValue, outputs
@@ -42,7 +41,7 @@ def harden(
     reference: str,
     cases: Sequence[Case],
     cap_ms: int = CAP_MS,
-    configuration: Configuration = DEFAULT,
+    configuration: Configuration = DISCRIMINATION_DEFAULT,
     rounds: int = ROUNDS,
     notes: Notes = SILENT,
 ) -> Hardened:

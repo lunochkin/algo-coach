@@ -8,9 +8,14 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog, Transport, ask
-from algo_coach.generation.generator import DEFAULT, Configuration, GenerationError
+from algo_coach.calls import CallLog, Configuration, Transport, ask
+from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call
+
+# unmeasured, as every site's is
+BLIND_DEFAULT = Configuration(
+    model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio"
+)
 
 SYSTEM = """You write a correct solution to a problem statement.
 
@@ -61,10 +66,10 @@ def reference(
     log: CallLog,
     statement: str,
     *,
-    configuration: Configuration = DEFAULT,
+    configuration: Configuration = BLIND_DEFAULT,
 ) -> tuple[str, Call]:
-    # the generation call's configuration by default: independence is what the
-    # model was shown, not which model it was
+    # the site's own configuration by default: independence is what the model
+    # was shown, so this call may run the model that wrote the statement
     call, text = ask(
         transport,
         log,

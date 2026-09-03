@@ -7,17 +7,17 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
-from algo_coach.calls import CallLog, Transport, ask
+from algo_coach.calls import CallLog, Configuration, Transport, ask
+from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call, Card, Problem, ProblemDifficulty, Template
 
-# unmeasured: none of the gates a generator is scored by has run yet
-MODEL = "anthropic/claude-opus-5"
-EFFORT = "high"
-PIN = "anthropic"
-# the provider's own rather than a number set here. A model reasoning at an
-# effort advertises no temperature, and `require_parameters` drops such an
-# endpoint the moment one is sent: the request 404s rather than running greedy
-TEMPERATURE: float | None = None
+# unmeasured: none of the gates a generator is scored by has run yet. The
+# temperature is the provider's own rather than a number set here, and
+# `machine.md` gives what sending one costs a site asked at an effort. The AI
+# Studio endpoint carries it where the Vertex one does not
+GENERATOR_DEFAULT = Configuration(
+    model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio"
+)
 
 SYSTEM = """You write practice problems for one form of a technique.
 
@@ -178,23 +178,6 @@ def schema() -> dict[str, Any]:
     }
 
 
-class Configuration(BaseModel, frozen=True):
-    """Which generator wrote a problem, and what a re-run has to name to write
-    another the same way."""
-
-    model: str = MODEL
-    effort: str = EFFORT
-    pin: str = PIN
-    temperature: float | None = TEMPERATURE
-
-
-DEFAULT = Configuration()
-
-
-class GenerationError(Exception):
-    """The model wrote nothing — a refusal, or an answer cut short."""
-
-
 def generate(
     transport: Transport,
     log: CallLog,
@@ -202,7 +185,7 @@ def generate(
     template: Template,
     *,
     written: Sequence[str] = (),
-    configuration: Configuration = DEFAULT,
+    configuration: Configuration = GENERATOR_DEFAULT,
 ) -> tuple[Draft, Call]:
     # the call is returned beside the draft because the problem, the cases and
     # the solution all copy their provenance from it

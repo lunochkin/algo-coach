@@ -9,10 +9,9 @@ from helpers import PROVENANCE
 from matching import card, seeded, template
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog, Reply, prompt_hash
+from algo_coach.calls import CallLog, Configuration, Reply, prompt_hash
 from algo_coach.generation import (
     SYSTEM,
-    Configuration,
     GenerationError,
     generate,
     prompt,
@@ -206,7 +205,11 @@ def test_the_configuration_is_what_goes_out(tmp_path):
     a verdict."""
     model = FakeModel(draft())
 
-    written(tmp_path, model, configuration=Configuration(model="a-writer", pin="somewhere/fp8"))
+    written(
+        tmp_path,
+        model,
+        configuration=Configuration(model="a-writer", effort="medium", pin="somewhere/fp8"),
+    )
 
     assert model.calls[0]["model"] == "a-writer"
     assert model.calls[0]["pin"] == "somewhere/fp8"

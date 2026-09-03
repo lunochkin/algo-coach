@@ -7,9 +7,9 @@ from dataclasses import dataclass, field
 import pytest
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import Configuration, GenerationError
-from algo_coach.generation.inputs import SYSTEM, builder, prompt, read, schema
+from algo_coach.calls import CallLog, Configuration, Reply
+from algo_coach.generation import GenerationError
+from algo_coach.generation.inputs import INPUTS_DEFAULT, SYSTEM, builder, prompt, read, schema
 from algo_coach.generation.speedup import search
 from algo_coach.runner import defines_solve, outputs
 
@@ -30,6 +30,10 @@ class FakeModel:
 
 def answer(code: str = BUILDS, largest: int = 1000) -> str:
     return json.dumps({"code": code, "largest": largest})
+
+
+# a site aimed elsewhere: every field is named, since none has a default
+ELSEWHERE = Configuration(model="another", effort="low", pin="somewhere")
 
 
 def test_the_statement_is_the_whole_of_the_request(tmp_path):
@@ -126,11 +130,12 @@ def test_the_schema_is_strict():
     assert shape["additionalProperties"] is False
 
 
-def test_the_configuration_is_the_generator_s_unless_named(tmp_path):
+def test_the_site_s_own_configuration_is_the_default(tmp_path):
+    """A site names its own model, and a run may aim this call elsewhere."""
     model = FakeModel(answer())
 
     builder(model, CallLog(tmp_path), STATEMENT)
-    builder(model, CallLog(tmp_path), STATEMENT, configuration=Configuration(model="another"))
+    builder(model, CallLog(tmp_path), STATEMENT, configuration=ELSEWHERE)
 
-    assert model.calls[0]["model"] == Configuration().model
-    assert model.calls[1]["model"] == "another"
+    assert model.calls[0]["model"] == INPUTS_DEFAULT.model
+    assert model.calls[1]["model"] == ELSEWHERE.model

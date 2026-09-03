@@ -9,20 +9,15 @@ from algo_coach.generation.agreement import (
 )
 from algo_coach.generation.aim import Target, targets
 from algo_coach.generation.bench import BENCH, Bench
-from algo_coach.generation.blind import reference
+from algo_coach.generation.blind import BLIND_DEFAULT, reference
 from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
-from algo_coach.generation.discrimination import separators
+from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
+from algo_coach.generation.errors import GenerationError
 from algo_coach.generation.generator import (
-    DEFAULT,
-    EFFORT,
-    MODEL,
-    PIN,
+    GENERATOR_DEFAULT,
     SYSTEM,
-    TEMPERATURE,
-    Configuration,
     Draft,
     DraftCase,
-    GenerationError,
     generate,
     notes,
     prompt,
@@ -31,7 +26,7 @@ from algo_coach.generation.generator import (
     written_for,
 )
 from algo_coach.generation.hardening import Hardened, harden
-from algo_coach.generation.inputs import Built, builder
+from algo_coach.generation.inputs import INPUTS_DEFAULT, Built, builder
 from algo_coach.generation.landing import Corpus, Drafted, land, written_by
 from algo_coach.generation.run import (
     Bar,
@@ -48,16 +43,14 @@ from algo_coach.generation.steps import SILENT, Notes, Step
 
 __all__ = [
     "CAP_MS",
-    "DEFAULT",
-    "EFFORT",
-    "MODEL",
-    "PIN",
     "SYSTEM",
-    "TEMPERATURE",
     "BENCH",
+    "BLIND_DEFAULT",
+    "DISCRIMINATION_DEFAULT",
+    "GENERATOR_DEFAULT",
+    "INPUTS_DEFAULT",
     "Bar",
     "Bench",
-    "Configuration",
     "Corpus",
     "Checked",
     "Disagreement",

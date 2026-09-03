@@ -9,20 +9,25 @@ hardest.
 
 from pydantic import BaseModel
 
-from algo_coach.generation.generator import DEFAULT, Configuration
+from algo_coach.calls import Configuration
+from algo_coach.generation.blind import BLIND_DEFAULT
+from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT
+from algo_coach.generation.generator import GENERATOR_DEFAULT
+from algo_coach.generation.inputs import INPUTS_DEFAULT
 
 
 class Bench(BaseModel, frozen=True):
     """One configuration per generation call site.
 
-    Every site defaults to the one they shared before there was a bench, so a
-    run that names none is the run that ran yesterday.
+    Each site defaults to its own, which the site's module names. Four
+    identical defaults are one bench rather than a shared setting, so changing
+    a site changes one file.
     """
 
-    generator: Configuration = DEFAULT
-    blind: Configuration = DEFAULT
-    discrimination: Configuration = DEFAULT
-    inputs: Configuration = DEFAULT
+    generator: Configuration = GENERATOR_DEFAULT
+    blind: Configuration = BLIND_DEFAULT
+    discrimination: Configuration = DISCRIMINATION_DEFAULT
+    inputs: Configuration = INPUTS_DEFAULT
 
     @property
     def shared(self) -> Configuration | None:

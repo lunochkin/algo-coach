@@ -10,9 +10,14 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog, Transport, ask
-from algo_coach.generation.generator import DEFAULT, Configuration, GenerationError
+from algo_coach.calls import CallLog, Configuration, Transport, ask
+from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call
+
+# unmeasured, as every site's is
+INPUTS_DEFAULT = Configuration(
+    model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio"
+)
 
 SYSTEM = """You write a program that builds an input for a problem statement.
 
@@ -75,7 +80,7 @@ def builder(
     log: CallLog,
     statement: str,
     *,
-    configuration: Configuration = DEFAULT,
+    configuration: Configuration = INPUTS_DEFAULT,
 ) -> tuple[Built, Call]:
     call, text = ask(
         transport,

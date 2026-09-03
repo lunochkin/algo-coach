@@ -9,16 +9,15 @@ from generating import FakeWriter
 from matching import card, seeded, template
 
 from algo_coach import cli
-from algo_coach.calls import CallLog
+from algo_coach.calls import CallLog, Configuration
 from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
 from algo_coach.cli.generate import staged, summary, verdict
 from algo_coach.generation import (
     BENCH,
-    EFFORT,
-    MODEL,
+    DISCRIMINATION_DEFAULT,
+    GENERATOR_DEFAULT,
     Bench,
-    Configuration,
     Progress,
     Step,
     blind,
@@ -59,7 +58,7 @@ def test_the_command_writes_problems(root, monkeypatch, capsys):
 
     out = capsys.readouterr().out
     assert "The first." in out and "The second." in out
-    assert f"2 problem(s) stored, written by {MODEL}" in out
+    assert f"2 problem(s) stored, written by {GENERATOR_DEFAULT.model}" in out
     assert len(CallLog(root).all()) == 6
 
 
@@ -320,17 +319,17 @@ def test_a_stage_that_paid_for_a_call_reports_what_it_cost():
 
 
 def test_the_summary_names_one_model_where_the_bench_is_shared():
-    assert "written by " + MODEL in summary([], [], BENCH)
+    assert "written by " + GENERATOR_DEFAULT.model in summary([], [], BENCH)
 
 
 def test_the_summary_names_every_site_where_the_bench_mixes_them():
     """A run that mixed models is unreadable as one name, and what wrote a
     problem is what a re-run has to name."""
-    bench = Bench(discrimination=Configuration(model="cheap", effort="low"))
+    bench = Bench(discrimination=Configuration(model="cheap", effort="low", pin="test"))
 
     named = summary([], [], bench)
 
-    assert "generator " + MODEL in named
+    assert "generator " + GENERATOR_DEFAULT.model in named
     assert "discrimination cheap at low" in named
 
 
@@ -370,8 +369,8 @@ def test_a_site_is_configured_alone(root, monkeypatch, capsys):
 
     sites = asked(model)
     assert sites["discrimination"]["effort"] == "low"
-    assert sites["generator"]["effort"] == EFFORT
-    assert "discrimination " + MODEL + " at low" in capsys.readouterr().out
+    assert sites["generator"]["effort"] == GENERATOR_DEFAULT.effort
+    assert "discrimination " + DISCRIMINATION_DEFAULT.model + " at low" in capsys.readouterr().out
 
 
 def test_a_named_model_and_temperature_reach_their_site(root, monkeypatch):
