@@ -7,10 +7,17 @@ describe what the problem asks.
 """
 
 import pytest
+from helpers import PROVENANCE
 from pydantic import ValidationError
 
-from algo_coach.mint import case
-from algo_coach.schema import ExpectedSource, Problem, TestCase
+from algo_coach import mint
+from algo_coach.schema import ExpectedSource, TestCase
+
+
+def case(*args, **overrides) -> TestCase:
+    """The minter with a configuration spread over it, so a test naming none is
+    about the case rather than about what proposed it."""
+    return mint.case(*args, **(PROVENANCE | overrides))
 
 
 def test_a_case_is_keyed_to_a_problem():
@@ -56,10 +63,29 @@ def test_a_case_is_minted_an_id():
     assert case("p1", [1], 2).id != case("p1", [1], 2).id
 
 
-def test_a_case_carries_no_provenance():
-    """It is not a reading. The problem it is keyed to already names the
-    configuration that wrote both in one call."""
-    assert not [name for name in TestCase.model_fields if name in Problem.RECORDED]
+def test_a_case_names_the_call_that_proposed_its_arguments():
+    """Not the problem's own call: a mutation round and the speedup search each
+    propose arguments at their own configuration."""
+    one = case("p1", [1], 2, call_id="round-2")
+
+    assert (one.call_id, one.model) == ("round-2", "a-model")
+
+
+def test_a_case_missing_part_of_its_configuration_is_rejected():
+    """All of it or none, as every machine record. A case whose configuration
+    is partly unknown compares with nothing."""
+    with pytest.raises(ValidationError, match="needs pin"):
+        TestCase(
+            id="c1",
+            problem_id="p1",
+            args=[1],
+            expected=2,
+            expected_from=ExpectedSource.REFERENCE,
+            model="a-model",
+            effort="medium",
+            prompt_hash="0123456789ab",
+            call_id="call-1",
+        )
 
 
 def test_a_case_names_where_its_expected_output_came_from():

@@ -6,8 +6,15 @@ happen is addition, and an added case lands beside the set written with the
 statement.
 """
 
+from helpers import PROVENANCE
+
+from algo_coach import mint
 from algo_coach.cases import CaseLog
-from algo_coach.mint import case
+from algo_coach.schema import TestCase
+
+
+def case(*args, **overrides) -> TestCase:
+    return mint.case(*args, **(PROVENANCE | overrides))
 
 
 def test_an_empty_store_reads_as_nothing(tmp_path):

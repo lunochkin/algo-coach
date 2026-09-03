@@ -127,7 +127,9 @@ def write_one(
 
     notes("cases", "running both solutions")
     started = monotonic()
-    checked = check(draft.cases, canonical=draft.canonical, reference=solution, cap_ms=cap_ms)
+    checked = check(
+        draft.cases, canonical=draft.canonical, reference=solution, call=call, cap_ms=cap_ms
+    )
     notes("cases", f"{settled(checked)}, {monotonic() - started:.1f}s in the runner")
     # both sites are recorded here rather than as they answer: what a gate
     # said about an answer is what the record carries, and the runs decide it
@@ -315,6 +317,7 @@ def separating(
         make(built.code, cap_ms),
         canonical=drafted.draft.canonical,
         reference=drafted.solution,
+        call=call,
         cap_ms=DRILL_CAP_MS,
         largest=built.largest,
         measure_ms=cap_ms,

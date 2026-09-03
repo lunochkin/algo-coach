@@ -5,9 +5,9 @@ Part of the architecture; `README.md` is the map.
 
 ## Machine records
 
-Claims, template matches, technique readings and canonical solutions are
-written by a model. What each carries to stay comparable is the same, and is
-stated here once.
+Claims, template matches, technique readings, canonical solutions and the
+arguments of a test case are written by a model. What each carries to stay
+comparable is the same, and is stated here once.
 
 - **Provenance is the configuration**: model, effort, the endpoint it was
   pinned to, temperature, the digest of what that record was sent, and the call

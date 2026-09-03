@@ -295,6 +295,7 @@ def inputs_replay(
         make(built.code, cap_ms),
         canonical=subject.canonical,
         reference=subject.reference,
+        call=call,
         cap_ms=DRILL_CAP_MS,
         largest=built.largest,
         measure_ms=cap_ms,

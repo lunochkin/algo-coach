@@ -14,7 +14,7 @@ from typing import Any
 from algo_coach.generation.agreement import Disagreement, SettledCase
 from algo_coach.generation.checks import CAP_MS
 from algo_coach.runner import RunOutcome, agrees, as_json, run
-from algo_coach.schema import ExpectedSource
+from algo_coach.schema import Call, ExpectedSource
 
 # the cap a sitting judges a submission under, which is what the separating
 # case is chosen against. Phase 8 reads it; generation's own cap sits above it
@@ -65,6 +65,7 @@ def search(
     *,
     canonical: str,
     reference: str,
+    call: Call,
     cap_ms: int,
     largest: int,
     smallest: int = 1,
@@ -127,6 +128,7 @@ def search(
         over_args,
         over,
         canonical=canonical,
+        call=call,
         cap_ms=cap_ms,
         reference_ms=over_ms,
         reference_value=over_value,
@@ -139,6 +141,7 @@ def _settled(
     size: int,
     *,
     canonical: str,
+    call: Call,
     cap_ms: int,
     reference_ms: int | None,
     reference_value: Any,
@@ -168,7 +171,8 @@ def _settled(
     if _weighs(args) + _weighs(expected) > ceiling:
         return Searched(missing=Missing.INPUT_TOO_LARGE)
     return Searched(
-        case=SettledCase(args=args, expected=expected, expected_from=source), **measured
+        case=SettledCase(args=args, expected=expected, expected_from=source, call=call),
+        **measured,
     )
 
 

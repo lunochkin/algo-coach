@@ -11,7 +11,7 @@ from typing import Any
 from algo_coach.generation.generator import DraftCase
 from algo_coach.runner.encoding import agrees
 from algo_coach.runner.outputs import NoValue
-from algo_coach.schema import ExpectedSource
+from algo_coach.schema import Call, ExpectedSource
 
 
 @dataclass(frozen=True)
@@ -54,6 +54,9 @@ class SettledCase:
     args: list[Any]
     expected: Any
     expected_from: ExpectedSource
+    # the call that proposed the arguments, whole rather than by id: the
+    # `TestCase` this becomes copies the configuration
+    call: Call
 
 
 @dataclass(frozen=True)
@@ -76,6 +79,7 @@ def settle(
     *,
     canonical: Sequence[Any],
     reference: Sequence[Any],
+    call: Call,
 ) -> Settled:
     # every case is decided, never stopping at the first disagreement: a
     # discarded problem is reported by every input the two readings differ on
@@ -87,11 +91,21 @@ def settle(
         case = list(one)
         if isinstance(theirs, NoValue):
             settled.cases.append(
-                SettledCase(args=case, expected=ours, expected_from=ExpectedSource.CANONICAL)
+                SettledCase(
+                    args=case,
+                    expected=ours,
+                    expected_from=ExpectedSource.CANONICAL,
+                    call=call,
+                )
             )
         elif agrees(ours, theirs):
             settled.cases.append(
-                SettledCase(args=case, expected=theirs, expected_from=ExpectedSource.REFERENCE)
+                SettledCase(
+                    args=case,
+                    expected=theirs,
+                    expected_from=ExpectedSource.REFERENCE,
+                    call=call,
+                )
             )
         else:
             settled.disagreements.append(Disagreement(args=case, canonical=ours, reference=theirs))

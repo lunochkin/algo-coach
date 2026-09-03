@@ -120,6 +120,10 @@ What decides whether a solution to a generated problem is correct.
   compute one, and that case is evidence about the cap rather than about the
   verdict. Two cases in a set are not equally strong, and nothing but the field
   says which is which.
+- **A case names the call that proposed its arguments**, which is not the
+  problem's own wherever a mutation round or the speedup search won it. Three
+  sites write cases at three configurations, and a reader taking the problem's
+  provenance would attribute a round's case to the generator.
 - **Cases that separate nothing are worse than none**, because they license the
   word `verified` on a canonical that is wrong. A set that does not discriminate
   is a defect in the problem, and a problem carrying one does not land.

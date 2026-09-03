@@ -11,7 +11,7 @@ from algo_coach.calls import Configuration, Reply
 from algo_coach.classifier import PIN, TEMPERATURE
 from algo_coach.mint import classifier_claim
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, Problem, TechniqueClaim
+from algo_coach.schema import Attempt, Call, Problem, TechniqueClaim
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -37,6 +37,23 @@ PROVENANCE = {
 # Provenance and the template the brief named. A site caring about neither
 # spreads this. One testing a match against a template names its own.
 GENERATED = PROVENANCE | {"generated_for": "t1"}
+
+
+def a_call(id: str = "call-1", **overrides) -> Call:
+    """One recorded request. A case, a solution and a problem all copy a call's
+    configuration, so a test that is not about provenance takes this one."""
+    fields = {
+        "id": id,
+        "created_at": T0,
+        "model": "a-model",
+        "effort": "medium",
+        "prompt": "a brief",
+        "prompt_hash": PROMPT_HASH,
+        "response": "{}",
+        "pin": PIN,
+        "provider": "a-provider",
+    } | overrides
+    return Call.model_validate(fields)
 
 
 def make_problem(id: str = "p1", **overrides) -> Problem:

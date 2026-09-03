@@ -4,6 +4,8 @@ Comparison sits above the executor boundary: the backend is handed code, the
 arguments and a cap, and is never told what a case expects.
 """
 
+from helpers import PROVENANCE
+
 from algo_coach.mint import case
 from algo_coach.runner import verify
 from algo_coach.schema import CaseOutcome
@@ -12,7 +14,7 @@ DOUBLE = "def solve(n):\n    return n * 2\n"
 
 
 def cases(*pairs):
-    return [case("p1", args, expected) for args, expected in pairs]
+    return [case("p1", args, expected, **PROVENANCE) for args, expected in pairs]
 
 
 def test_a_case_the_solution_answered_correctly_passed():

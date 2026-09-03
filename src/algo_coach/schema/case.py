@@ -6,6 +6,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
+from algo_coach.schema.provenance import MachineProvenance
+
 
 class ExpectedSource(StrEnum):
     """Which solution computed a case's expected output. Not `SolutionRole`
@@ -15,12 +17,22 @@ class ExpectedSource(StrEnum):
     CANONICAL = "canonical"
 
 
-class TestCase(BaseModel):
+class TestCase(MachineProvenance):
+    """One case of a generated problem's set. The provenance names the call
+    that proposed the arguments, which is not the problem's own wherever a
+    mutation round or the speedup search won the case."""
+
     id: str
     problem_id: str = Field(min_length=1)
     args: list[Any] = Field(default_factory=list)  # positional; empty is legal
     expected: Any  # required: `None` is a value a solution may return, so absence cannot stand in
     expected_from: ExpectedSource  # required; `mint.case` carries the rule
+
+    @model_validator(mode="after")
+    def _provenance_required(self) -> TestCase:
+        """A model proposed every case's arguments, so there is no hand arm."""
+        self.check_provenance(True)
+        return self
 
 
 class CaseOutcome(StrEnum):

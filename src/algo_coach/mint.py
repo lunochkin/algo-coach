@@ -326,14 +326,24 @@ def case(
     expected: Any,
     *,
     expected_from: ExpectedSource = ExpectedSource.REFERENCE,
+    model: str,
+    effort: str,
+    prompt_hash: str,
+    call_id: str,
+    pin: str,
+    temperature: float | None = None,
+    provider: str | None = None,
+    cost: float | None = None,
 ) -> TestCase:
-    """One case of the set a generated problem carries.
+    """One case of the set a generated problem carries, and the call that
+    proposed its arguments.
 
     Named `case` rather than `test_case`: pytest collects any callable whose
-    name begins with `test_`, and would run the minter as a test. It carries no
-    provenance — the problem it is keyed to names the configuration that wrote
-    both in one call. `TestCase.expected_from` has no default of its own, so any
-    writer that is not this one has to answer.
+    name begins with `test_`, and would run the minter as a test. The
+    provenance is the proposing call's rather than the problem's: a mutation
+    round and the speedup search each write cases at their own configuration.
+    `TestCase.expected_from` has no default of its own, so any writer that is
+    not this one has to answer.
     """
     return TestCase(
         id=new_id(),
@@ -341,6 +351,14 @@ def case(
         args=list(args),
         expected=expected,
         expected_from=expected_from,
+        model=model,
+        effort=effort,
+        prompt_hash=prompt_hash,
+        call_id=call_id,
+        pin=pin,
+        temperature=temperature,
+        provider=provider,
+        cost=cost,
     )
 
 

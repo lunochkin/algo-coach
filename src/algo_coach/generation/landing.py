@@ -73,8 +73,16 @@ def land(corpus: Corpus, template: Template, drafted: Drafted) -> Problem:
         **written_by(drafted.call),
     )
     for case in drafted.cases:
+        # the case's own call rather than the problem's: a mutation round and
+        # the speedup search propose arguments at their own configuration
         corpus.cases.append(
-            mint.case(problem.id, case.args, case.expected, expected_from=case.expected_from)
+            mint.case(
+                problem.id,
+                case.args,
+                case.expected,
+                expected_from=case.expected_from,
+                **written_by(case.call),
+            )
         )
     canonical = mint.solution(
         problem.id, draft.canonical, SolutionRole.CANONICAL, **written_by(drafted.call)

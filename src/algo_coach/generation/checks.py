@@ -15,7 +15,7 @@ from algo_coach.generation.agreement import (
 )
 from algo_coach.generation.generator import DraftCase
 from algo_coach.runner import NoValue, answered, decide, outputs, run
-from algo_coach.schema import CaseOutcome, Discard, severest
+from algo_coach.schema import Call, CaseOutcome, Discard, severest
 
 # the per-case cap at generation, well above the drill loop's: what the
 # reference has to finish under
@@ -48,6 +48,7 @@ def check(
     *,
     canonical: str,
     reference: str,
+    call: Call,
     cap_ms: int = CAP_MS,
 ) -> Checked:
     # the canonical first and alone: comparing the two tests the statement,
@@ -71,7 +72,7 @@ def check(
         )
 
     theirs = outputs(reference, args, cap_ms=cap_ms)
-    settled = settle(args, canonical=ours, reference=theirs)
+    settled = settle(args, canonical=ours, reference=theirs, call=call)
     if not settled.agreed:
         return Checked(
             outcome=outcome,

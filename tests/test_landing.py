@@ -38,7 +38,14 @@ def drafted(**overrides) -> Drafted:
         cases=[{"args": "[[1, 2, 3]]", "expected": "3"}],
     )
     fields = {
-        "cases": [SettledCase(args=[[1, 2, 3]], expected=3, expected_from=ExpectedSource.REFERENCE)]
+        "cases": [
+            SettledCase(
+                args=[[1, 2, 3]],
+                expected=3,
+                expected_from=ExpectedSource.REFERENCE,
+                call=call("call-3"),
+            )
+        ]
     } | overrides
     return Drafted(
         draft=draft,
@@ -121,10 +128,26 @@ def test_a_case_keeps_the_solution_that_computed_it(tmp_path, template):
     """Two cases in a set are not equally strong evidence, and the field is
     what says which is which."""
     beyond = drafted(
-        cases=[SettledCase(args=[[1]], expected=1, expected_from=ExpectedSource.CANONICAL)]
+        cases=[
+            SettledCase(
+                args=[[1]],
+                expected=1,
+                expected_from=ExpectedSource.CANONICAL,
+                call=call("call-3"),
+            )
+        ]
     )
 
     problem = land(Corpus.at(tmp_path), template, beyond)
 
-    (case,) = Corpus.at(tmp_path).cases.for_problem(problem.id)
-    assert case.expected_from is ExpectedSource.CANONICAL
+    (one,) = Corpus.at(tmp_path).cases.for_problem(problem.id)
+    assert one.expected_from is ExpectedSource.CANONICAL
+
+
+def test_a_case_names_the_call_that_proposed_it(tmp_path, template):
+    """A mutation round and the speedup search propose arguments at their own
+    configuration, so the problem's call does not answer for every case."""
+    problem = land(Corpus.at(tmp_path), template, drafted())
+
+    (one,) = Corpus.at(tmp_path).cases.for_problem(problem.id)
+    assert one.call_id == "call-3"

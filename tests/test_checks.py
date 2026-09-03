@@ -3,6 +3,8 @@ and what a surviving one carries."""
 
 import json
 
+from helpers import a_call
+
 from algo_coach.generation import Discard, check, checks
 from algo_coach.generation.generator import DraftCase
 from algo_coach.schema import CaseOutcome, ExpectedSource
@@ -20,7 +22,9 @@ def cases(*pairs) -> list[DraftCase]:
 
 
 def checked(*pairs, canonical: str = DOUBLE, reference: str = TWICE, cap_ms: int = CAP_MS):
-    return check(cases(*pairs), canonical=canonical, reference=reference, cap_ms=cap_ms)
+    return check(
+        cases(*pairs), canonical=canonical, reference=reference, call=a_call(), cap_ms=cap_ms
+    )
 
 
 def test_a_problem_both_solutions_answer_the_same_way_survives():

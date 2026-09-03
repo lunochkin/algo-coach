@@ -5,6 +5,7 @@ import json
 from dataclasses import dataclass, field
 
 import pytest
+from helpers import a_call
 from pydantic import ValidationError
 
 from algo_coach.calls import CallLog, Configuration, Reply
@@ -78,6 +79,7 @@ def test_the_search_runs_a_generated_builder():
         lambda size: outputs(BUILDS, [[size]], cap_ms=1000)[0],
         canonical="def solve(xs):\n    return len(xs)\n",
         reference=SLEEPS,
+        call=a_call(),
         cap_ms=55,
         largest=16,
         measure_ms=2000,
