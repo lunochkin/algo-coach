@@ -6,8 +6,8 @@ from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cli.transport import transport
 from algo_coach.generation import (
-    EFFORT,
-    MODEL,
+    BENCH,
+    Bench,
     Corpus,
     Draft,
     GenerationResult,
@@ -28,6 +28,7 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
     aimed = resolve(args, parser, root)
     api = transport(args, parser)
     calls, corpus = CallLog(root), Corpus.at(root)
+    bench = BENCH
 
     results = []
     for target in aimed:
@@ -38,6 +39,7 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
             target.template,
             corpus,
             count=args.count,
+            bench=bench,
             on_progress=show,
             on_step=stage,
         )
@@ -49,7 +51,7 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         if result.aborted:
             break
 
-    print(summary(results, aimed))
+    print(summary(results, aimed, bench))
     if any(result.aborted for result in results):
         parser.exit(1, f"generate: aborted after {ABORT_AFTER} consecutive failures\n")
     failed = any(result.failed for result in results)
@@ -57,10 +59,10 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         parser.exit(1, "generate: nothing written\n")
 
 
-def summary(results: list[GenerationResult], aimed: list[Target]) -> str:
+def summary(results: list[GenerationResult], aimed: list[Target], bench: Bench = BENCH) -> str:
     """What the run stored, over every template it was aimed at."""
     stored = sum(len(result.drafted) for result in results)
-    kept = f"{stored} problem(s) stored, written by {MODEL}, effort {EFFORT}"
+    kept = f"{stored} problem(s) stored, {wrote(bench)}"
     if len(aimed) > 1:
         kept += f", over {len(aimed)} template(s)"
     discarded = sum(len(result.discarded) for result in results)
@@ -68,6 +70,19 @@ def summary(results: list[GenerationResult], aimed: list[Target]) -> str:
         # Repeated from the per-problem lines: a run of ten scrolls past them.
         kept += f", {discarded} discarded"
     return kept
+
+
+def wrote(bench: Bench) -> str:
+    """Which model wrote what. One name where every site shares a
+    configuration, and four where a run mixed them."""
+    shared = bench.shared
+    if shared is not None:
+        return f"written by {shared.model}, effort {shared.effort}"
+    sites = (
+        f"{name} {getattr(bench, name).model} at {getattr(bench, name).effort}"
+        for name in Bench.model_fields
+    )
+    return "written by " + ", ".join(sites)
 
 
 def resolve(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> list[Target]:

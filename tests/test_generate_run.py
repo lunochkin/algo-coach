@@ -7,7 +7,17 @@ from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
 from algo_coach.cases import CaseLog
-from algo_coach.generation import Corpus, blind, generator, inputs, write_problems
+from algo_coach.generation import (
+    MODEL,
+    Bench,
+    Configuration,
+    Corpus,
+    blind,
+    discrimination,
+    generator,
+    inputs,
+    write_problems,
+)
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import ExpectedSource, Problem
 
@@ -312,3 +322,48 @@ def test_a_run_reports_every_stage_as_it_goes(tmp_path):
     ]
     assert "mutants" in [step.name for step in reported]
     assert [step.call for step in reported].count(None) < len(reported)
+
+
+def models(model: FakeWriter) -> dict[str, str]:
+    """Which model each call site was asked of, by the brief it was sent."""
+    named = {
+        generator.SYSTEM: "generator",
+        blind.SYSTEM: "blind",
+        discrimination.SYSTEM: "discrimination",
+        inputs.SYSTEM: "inputs",
+    }
+    return {named[one["system"]]: one["model"] for one in model.calls}
+
+
+def test_every_site_is_asked_of_its_own_model(tmp_path):
+    """Four calls asking for different things, where one configuration made
+    the cheapest of them pay the price of the hardest."""
+    bench = Bench(
+        generator=Configuration(model="writes-problems"),
+        blind=Configuration(model="reads-statements"),
+        discrimination=Configuration(model="writes-cases"),
+        inputs=Configuration(model="builds-inputs"),
+    )
+    model = bounded(separators=[[[3], [4]]], generator=BUILDS)
+    (one,) = seeded(tmp_path, card())
+
+    write_problems(
+        model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path), bench=bench
+    )
+
+    assert models(model) == {
+        "generator": "writes-problems",
+        "blind": "reads-statements",
+        "discrimination": "writes-cases",
+        "inputs": "builds-inputs",
+    }
+
+
+def test_a_run_naming_no_bench_asks_one_model(tmp_path):
+    """The bench a run was given none of is the run that ran before there was
+    one."""
+    model = bounded(separators=[[[3], [4]]], generator=BUILDS)
+
+    run(tmp_path, model)
+
+    assert set(models(model).values()) == {MODEL}

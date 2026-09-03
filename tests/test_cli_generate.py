@@ -12,8 +12,8 @@ from algo_coach import cli
 from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
-from algo_coach.cli.generate import staged, verdict
-from algo_coach.generation import MODEL, Progress, Step
+from algo_coach.cli.generate import staged, summary, verdict
+from algo_coach.generation import BENCH, MODEL, Bench, Configuration, Progress, Step
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Call, CaseOutcome, MatchSource, SolutionRole
@@ -305,3 +305,18 @@ def test_a_stage_that_paid_for_a_call_reports_what_it_cost():
     assert reported(name="statement", detail="'A title'", call=call).endswith(
         "(1,200/3,400 tok, 38.1s, $0.0421)"
     )
+
+
+def test_the_summary_names_one_model_where_the_bench_is_shared():
+    assert "written by " + MODEL in summary([], [], BENCH)
+
+
+def test_the_summary_names_every_site_where_the_bench_mixes_them():
+    """A run that mixed models is unreadable as one name, and what wrote a
+    problem is what a re-run has to name."""
+    bench = Bench(discrimination=Configuration(model="cheap", effort="low"))
+
+    named = summary([], [], bench)
+
+    assert "generator " + MODEL in named
+    assert "discrimination cheap at low" in named

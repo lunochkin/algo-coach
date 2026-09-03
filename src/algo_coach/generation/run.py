@@ -11,10 +11,10 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Transport
+from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import reference
 from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
 from algo_coach.generation.generator import (
-    DEFAULT,
     Configuration,
     GenerationError,
     generate,
@@ -106,7 +106,7 @@ def write_one(
     template: Template,
     written: list[str],
     *,
-    configuration: Configuration = DEFAULT,
+    bench: Bench = BENCH,
     cap_ms: int = CAP_MS,
     notes: Notes = SILENT,
 ) -> tuple[Drafted, Checked, Timing, Bar]:
@@ -114,12 +114,12 @@ def write_one(
     # the problem, and the run reports what it cost
     notes("statement", "writing the statement, the canonical and the cases")
     draft, call = generate(
-        transport, calls, card, template, written=written, configuration=configuration
+        transport, calls, card, template, written=written, configuration=bench.generator
     )
     notes("statement", f"{draft.title!r}, {len(draft.cases)} case(s)", call)
 
     notes("reference", "writing the reference from the statement alone")
-    solution, blind = reference(transport, calls, draft.statement, configuration=configuration)
+    solution, blind = reference(transport, calls, draft.statement, configuration=bench.blind)
     notes("reference", "written", blind)
 
     notes("cases", "running both solutions")
@@ -138,7 +138,13 @@ def write_one(
     # the mutation loop before the timing case: what it wins is judged by the
     # cap a sitting judges under, and the separating input is chosen last
     checked, bar = measured(
-        transport, calls, drafted, checked, configuration=configuration, cap_ms=cap_ms, notes=notes
+        transport,
+        calls,
+        drafted,
+        checked,
+        configuration=bench.discrimination,
+        cap_ms=cap_ms,
+        notes=notes,
     )
     if not checked.survived:
         return drafted, checked, Timing(), bar
@@ -148,7 +154,7 @@ def write_one(
         template,
         drafted,
         checked,
-        configuration=configuration,
+        configuration=bench.inputs,
         cap_ms=cap_ms,
         notes=notes,
     )
@@ -295,7 +301,7 @@ def write_problems(
     corpus: Corpus,
     *,
     count: int = 1,
-    configuration: Configuration = DEFAULT,
+    bench: Bench = BENCH,
     cap_ms: int = CAP_MS,
     on_progress: Callable[[Progress], None] | None = None,
     on_step: Callable[[Step], None] | None = None,
@@ -319,7 +325,7 @@ def write_problems(
                 card,
                 template,
                 written,
-                configuration=configuration,
+                bench=bench,
                 cap_ms=cap_ms,
                 notes=Notes(on_step, index=index, total=count),
             )

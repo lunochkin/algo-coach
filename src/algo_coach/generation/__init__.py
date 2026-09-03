@@ -8,6 +8,7 @@ from algo_coach.generation.agreement import (
     settle,
 )
 from algo_coach.generation.aim import Target, targets
+from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import reference
 from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
 from algo_coach.generation.discrimination import separators
@@ -53,7 +54,9 @@ __all__ = [
     "PIN",
     "SYSTEM",
     "TEMPERATURE",
+    "BENCH",
     "Bar",
+    "Bench",
     "Configuration",
     "Corpus",
     "Checked",

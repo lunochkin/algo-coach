@@ -236,7 +236,7 @@ canonical. What the first corpus settles is the bound.
 
 ### One configuration per call site
 
-- [ ] Add `Bench`: one `Configuration` per generation call site — generator,
+- [x] Add `Bench`: one `Configuration` per generation call site — generator,
       blind, discrimination, inputs — defaulting to the one all four share
       today. A run then names four configurations rather than one
 - [ ] Take a per-site bench override on `algo-coach generate`, so a cheaper
