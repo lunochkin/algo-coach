@@ -197,7 +197,8 @@ there is ever asked twice and no two configurations meet the same item.
    answered at that digest is skipped.
 3. The blind site writes a reference from the statement, settled against the
    cases the problem carries rather than against the canonical.
-4. The discrimination site runs the mutation loop over the stored canonical.
+4. The discrimination site runs the mutation loop over the stored canonical,
+   against the cases written with the statement alone.
 5. The inputs site builds and searches, where the template claims a speedup.
 6. Each site's answer is recorded as its outcome, keyed to the problem.
 
@@ -205,6 +206,10 @@ there is ever asked twice and no two configurations meet the same item.
   or the next configuration would be measured against a different problem.
 - **The generator is not replayed.** It answers no item, and asking it again is
   what `generate` does.
+- **The loop is replayed against the set as it stood.** A case a later round
+  won and the separating case are excluded, since neither was there when the
+  survivors were decided. Counting them changes the survivors and the digest,
+  and the generation run's own record would then answer for nothing.
 - **The discrimination digest is known only after the local kill pass.** The
   survivors are in the prompt, and killing costs subprocesses rather than a
   call, so the skip is decided after that pass and before the call.

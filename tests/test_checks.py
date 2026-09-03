@@ -37,6 +37,12 @@ def test_a_problem_both_solutions_answer_the_same_way_survives():
     assert [one.args for one in result.cases] == [[2], [5]]
 
 
+def test_the_set_written_with_the_statement_was_won_by_no_round():
+    """Zero rather than absent: it is the set the mutation loop is first run
+    against, and a replay rebuilds it from exactly these."""
+    assert {one.round for one in checked(([2], 4), ([5], 10)).cases} == {0}
+
+
 def test_a_landing_case_carries_the_reference_s_answer():
     """A case the canonical produced passes by construction, so the stored
     value is the one the independent solution computed."""

@@ -144,6 +144,27 @@ def test_a_case_keeps_the_solution_that_computed_it(tmp_path, template):
     assert one.expected_from is ExpectedSource.CANONICAL
 
 
+def test_a_case_keeps_the_round_that_won_it(tmp_path, template):
+    """A replay rebuilds the set the mutation loop was run against, and only
+    this separates a won case from the set written with the statement."""
+    won = drafted(
+        cases=[
+            SettledCase(
+                args=[[1]],
+                expected=1,
+                expected_from=ExpectedSource.REFERENCE,
+                call=call("call-3"),
+                round=2,
+            )
+        ]
+    )
+
+    problem = land(Corpus.at(tmp_path), template, won)
+
+    (one,) = Corpus.at(tmp_path).cases.for_problem(problem.id)
+    assert one.round == 2
+
+
 def test_a_case_names_the_call_that_proposed_it(tmp_path, template):
     """A mutation round and the speedup search propose arguments at their own
     configuration, so the problem's call does not answer for every case."""

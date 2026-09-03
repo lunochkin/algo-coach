@@ -181,6 +181,37 @@ def test_the_discrimination_site_is_asked_where_a_mutant_survives(tmp_path):
     assert one.mutants > 0
 
 
+def test_the_loop_is_replayed_against_the_set_as_it_stood(tmp_path):
+    """A case a round won was not in the set the survivors were decided
+    against. Counted, it would send another digest, and the verdict the landing
+    run recorded at the same configuration would be paid for twice."""
+    log = OutcomeLog(tmp_path)
+    (one,) = seeded(tmp_path, card())
+    write_problems(
+        FakeWriter(
+            generator=BUILDS,
+            canonical=BRANCHING,
+            solution=AGREES,
+            cases=DECIDES,
+            separators=[[[4], [3]]],
+        ),
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        outcomes=log,
+    )
+    assert {case.round for case in CaseLog(tmp_path).cases()} == {0, 1}
+
+    second = FakeWriter(generator=BUILDS, canonical=BRANCHING, solution=AGREES)
+    result, _ = replayed(tmp_path, second, [one], log=log)
+
+    # skipped rather than unasked: shown the won case the loop kills every
+    # mutant, and the site would go unasked for the wrong reason
+    assert (result.skipped, result.unasked) == (3, 0)
+    assert second.answered == 0
+
+
 def test_the_sites_a_replay_asks_exclude_the_generator(tmp_path):
     """It writes a problem rather than answering one, so asking it again is
     `generate`."""

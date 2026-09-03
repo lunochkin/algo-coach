@@ -76,6 +76,14 @@ class Subject:
     cases: list[TestCase]
     template: Template | None  # absent where the brief named a technique
 
+    @property
+    def declared(self) -> list[TestCase]:
+        """The set written with the statement, which is what the mutation loop
+        was first run against. A later round's own cases and the separating one
+        were not there, and a loop shown them decides other survivors and sends
+        another digest."""
+        return [one for one in self.cases if one.round == 0]
+
 
 @dataclass(frozen=True)
 class Asked:
@@ -232,7 +240,7 @@ def discrimination_replay(
     """The mutation loop over the stored canonical. The survivors are in the
     prompt, so they are computed before the digest can be known."""
     configuration = bench.discrimination
-    alive = standing(subject.canonical, subject.cases, cap_ms=cap_ms)
+    alive = standing(subject.canonical, subject.declared, cap_ms=cap_ms)
     if not alive:
         notes("mutants", "the stored cases kill every mutant")
         return Asked()
@@ -241,7 +249,7 @@ def discrimination_replay(
         subject.problem.statement,
         subject.canonical,
         alive,
-        [one.args for one in subject.cases],
+        [one.args for one in subject.declared],
     )
     if not fresh and asked_already(stored, CallSite.DISCRIMINATION, subject, configuration, digest):
         notes("mutants", "answered at this digest")
@@ -253,7 +261,7 @@ def discrimination_replay(
         subject.problem.statement,
         canonical=subject.canonical,
         reference=subject.reference,
-        cases=subject.cases,
+        cases=subject.declared,
         cap_ms=cap_ms,
         configuration=configuration,
         notes=notes,

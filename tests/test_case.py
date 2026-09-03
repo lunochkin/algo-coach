@@ -81,10 +81,37 @@ def test_a_case_missing_part_of_its_configuration_is_rejected():
             args=[1],
             expected=2,
             expected_from=ExpectedSource.REFERENCE,
+            round=0,
             model="a-model",
             effort="medium",
             prompt_hash="0123456789ab",
             call_id="call-1",
+        )
+
+
+def test_a_case_names_the_round_that_won_it():
+    """Zero is the set written with the statement, which is what the mutation
+    loop was first run against."""
+    assert (case("p1", [1], 2).round, case("p1", [1], 2, round=2).round) == (0, 2)
+
+
+def test_a_case_no_round_won_and_the_statement_did_not_write_carries_none():
+    """The separating case is appended after the loop, so a replay rebuilding
+    the set the survivors were decided against leaves it out."""
+    assert case("p1", [10**6], 3, round=None).round is None
+
+
+def test_a_case_that_names_no_round_is_rejected():
+    """A model default would answer for a writer that never considered which
+    call put the case in the set. The minter answers it once."""
+    with pytest.raises(ValidationError, match="round"):
+        TestCase(
+            id="c1",
+            problem_id="p1",
+            args=[1],
+            expected=2,
+            expected_from=ExpectedSource.REFERENCE,
+            **PROVENANCE,
         )
 
 

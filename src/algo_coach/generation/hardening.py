@@ -119,7 +119,12 @@ def harden(
         paid = call
         notes("round", f"{played}: {len(proposed)} case(s) proposed", call)
         settled = _settled(
-            proposed, canonical=canonical, reference=reference, call=call, cap_ms=cap_ms
+            proposed,
+            canonical=canonical,
+            reference=reference,
+            call=call,
+            round=played,
+            cap_ms=cap_ms,
         )
         dropped += len(proposed) - len(settled.cases) - len(settled.disagreements)
         notes("round", f"{played}: {len(settled.cases)} won, {dropped} dropped")
@@ -139,6 +144,7 @@ def _settled(
     canonical: str,
     reference: str,
     call: Call,
+    round: int,
     cap_ms: int,
 ) -> Settled:
     """The proposals the canonical answered, settled by the rule the first case
@@ -155,7 +161,13 @@ def _settled(
     ]
     args = [one for one, _ in answered]
     theirs = outputs(reference, args, cap_ms=cap_ms)
-    return settle(args, canonical=[value for _, value in answered], reference=theirs, call=call)
+    return settle(
+        args,
+        canonical=[value for _, value in answered],
+        reference=theirs,
+        call=call,
+        round=round,
+    )
 
 
 def _left(

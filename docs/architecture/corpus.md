@@ -124,6 +124,15 @@ What decides whether a solution to a generated problem is correct.
   problem's own wherever a mutation round or the speedup search won it. Three
   sites write cases at three configurations, and a reader taking the problem's
   provenance would attribute a round's case to the generator.
+- **A case names the round that won it, zero for the set written with the
+  statement.** Replaying the discrimination site needs that set as it stood:
+  it decides which mutants survive and it goes into the prompt. A loop shown a
+  case a round already won reaches other survivors and sends another digest,
+  so the verdict the generation run recorded is paid for a second time.
+- **The separating case names no round.** It is appended after the loop, so it
+  was never in the set the survivors were decided against. Zero would put it
+  in the set a replay rebuilds, and absent is the only answer that keeps it
+  out without inventing a round nothing ran.
 - **Cases that separate nothing are worse than none**, because they license the
   word `verified` on a canonical that is wrong. A set that does not discriminate
   is a defect in the problem, and a problem carrying one does not land.

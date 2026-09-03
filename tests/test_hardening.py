@@ -110,6 +110,14 @@ def test_a_won_case_names_the_round_that_proposed_it(tmp_path):
     assert {one.call.id for one in hardened.cases} == {hardened.call.id}
 
 
+def test_a_won_case_names_the_round_that_won_it(tmp_path):
+    """A replay rebuilds the set as it stood, so which round appended a case is
+    what separates it from the set written with the statement."""
+    hardened = run(tmp_path, Answers(rounds=[BOUNDARY]), WEAK)
+
+    assert {one.round for one in hardened.cases} == {1}
+
+
 def test_the_cases_the_set_already_has_reach_the_call(tmp_path):
     """A proposal repeating one of them catches what that case already
     catches."""

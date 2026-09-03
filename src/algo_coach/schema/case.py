@@ -27,6 +27,11 @@ class TestCase(MachineProvenance):
     args: list[Any] = Field(default_factory=list)  # positional; empty is legal
     expected: Any  # required: `None` is a value a solution may return, so absence cannot stand in
     expected_from: ExpectedSource  # required; `mint.case` carries the rule
+    # Which mutation round won the case. `0` is the set written with the
+    # statement, which is what the loop was first run against. Absent where no
+    # round won it and it was not in that set, which today is the separating
+    # case the speedup search appended after the loop.
+    round: int | None = Field(ge=0)
 
     @model_validator(mode="after")
     def _provenance_required(self) -> TestCase:

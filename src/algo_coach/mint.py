@@ -326,6 +326,7 @@ def case(
     expected: Any,
     *,
     expected_from: ExpectedSource = ExpectedSource.REFERENCE,
+    round: int | None = 0,
     model: str,
     effort: str,
     prompt_hash: str,
@@ -342,8 +343,8 @@ def case(
     name begins with `test_`, and would run the minter as a test. The
     provenance is the proposing call's rather than the problem's: a mutation
     round and the speedup search each write cases at their own configuration.
-    `TestCase.expected_from` has no default of its own, so any writer that is
-    not this one has to answer.
+    `TestCase.expected_from` and `TestCase.round` have no default of their own,
+    so any writer that is not this one has to answer.
     """
     return TestCase(
         id=new_id(),
@@ -351,6 +352,7 @@ def case(
         args=list(args),
         expected=expected,
         expected_from=expected_from,
+        round=round,
         model=model,
         effort=effort,
         prompt_hash=prompt_hash,

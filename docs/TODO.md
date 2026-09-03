@@ -264,7 +264,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Add provenance to `TestCase`, naming the call that proposed its
       arguments. A case won by a round was written by a different call from the
       problem's, and `mint.case` still says otherwise
-- [ ] Add the round that won a case, zero for the set written with the
+- [x] Add the round that won a case, zero for the set written with the
       statement. Replaying `discrimination` needs the set as it stood: it
       decides the survivors and it is in the prompt
 - [x] State in `corpus.md` that a won case carries its own provenance, beside

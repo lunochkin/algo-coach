@@ -57,6 +57,9 @@ class SettledCase:
     # the call that proposed the arguments, whole rather than by id: the
     # `TestCase` this becomes copies the configuration
     call: Call
+    # the round that won it, zero for the set written with the statement.
+    # `corpus.md` gives what the absent case is
+    round: int | None = 0
 
 
 @dataclass(frozen=True)
@@ -80,6 +83,7 @@ def settle(
     canonical: Sequence[Any],
     reference: Sequence[Any],
     call: Call,
+    round: int | None = 0,
 ) -> Settled:
     # every case is decided, never stopping at the first disagreement: a
     # discarded problem is reported by every input the two readings differ on
@@ -96,6 +100,7 @@ def settle(
                     expected=ours,
                     expected_from=ExpectedSource.CANONICAL,
                     call=call,
+                    round=round,
                 )
             )
         elif agrees(ours, theirs):
@@ -105,6 +110,7 @@ def settle(
                     expected=theirs,
                     expected_from=ExpectedSource.REFERENCE,
                     call=call,
+                    round=round,
                 )
             )
         else:

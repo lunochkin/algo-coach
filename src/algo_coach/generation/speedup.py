@@ -171,7 +171,9 @@ def _settled(
     if _weighs(args) + _weighs(expected) > ceiling:
         return Searched(missing=Missing.INPUT_TOO_LARGE)
     return Searched(
-        case=SettledCase(args=args, expected=expected, expected_from=source, call=call),
+        # no round won it: the search runs after the loop, and the case was
+        # never in the set the survivors were decided against
+        case=SettledCase(args=args, expected=expected, expected_from=source, call=call, round=None),
         **measured,
     )
 

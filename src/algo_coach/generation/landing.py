@@ -81,6 +81,7 @@ def land(corpus: Corpus, template: Template, drafted: Drafted) -> Problem:
                 case.args,
                 case.expected,
                 expected_from=case.expected_from,
+                round=case.round,
                 **written_by(case.call),
             )
         )

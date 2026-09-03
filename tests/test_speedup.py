@@ -56,6 +56,12 @@ def test_the_case_names_the_call_that_wrote_the_input_generator():
     assert found.case.call.id == "call-1"
 
 
+def test_the_separating_case_was_won_by_no_round():
+    """The search runs after the loop, so the case was never in the set the
+    survivors were decided against."""
+    assert searched().case.round is None
+
+
 def test_both_measurements_are_carried():
     """A later search reads these rather than running the whole set again."""
     found = searched()
