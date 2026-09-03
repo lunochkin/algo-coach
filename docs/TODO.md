@@ -576,10 +576,11 @@ whatever phase is current.
       defect rather than an input the statement excludes, and write the choice
       into `flows.md`. Triggered when a run drops such cases often enough to
       show in its report
-- [ ] Replace the per-case subprocess with a fork server, importing the
-      solution once and forking per case. Triggered when a generation run
-      spends minutes on process start, which mutation testing is what brings
-      on
+- [ ] Run each case in its own subinterpreter inside a pooled worker, where
+      the children are started ahead of their cases today. A subinterpreter
+      cannot be preempted, so a case over the cap costs its worker rather than
+      a signal. Triggered when interpreter start is again what a run spends its
+      seconds on
 - [ ] Choose how a case with several correct returns is decided — a normaliser
       over the returned value, or a checker per problem — and write the choice
       into `corpus.md`. Triggered when a core template can only be exercised

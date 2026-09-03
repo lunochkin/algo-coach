@@ -20,6 +20,12 @@ STARTUP_MS = 2000
 
 CHILD = Path(__file__).with_name("child.py")
 
+# how many children are started before the batch they answer. Interpreter start
+# is what a case costs, and starting them together spends it on several cores
+# at once. Bounded rather than the whole set: a run of a thousand cases would
+# otherwise hold a thousand idle interpreters
+BATCH = 16
+
 
 class RunnerError(RuntimeError):
     """The runner's own fault, raised rather than recorded as a verdict."""
@@ -64,13 +70,26 @@ def run(
         return [CaseRun(RunOutcome.CRASHED) for _ in cases]
 
     results: list[CaseRun] = []
-    for one in cases:
-        result = _one_case(code, one, cap_ms)
-        results.append(result)
-        # never at a returned value, however wrong: the backend is not told
-        # what a case expects
-        if stop_early and not result.returned:
-            break
+    with TemporaryDirectory() as work:
+        for start in range(0, len(cases), BATCH):
+            batch = cases[start : start + BATCH]
+            # started together and fed one at a time: the cases stay sequential,
+            # so nothing a run measures is timed against another case
+            waiting = [
+                _started(Path(work) / f"{start + index}.json") for index in range(len(batch))
+            ]
+            stopped = False
+            for one, (child, path) in zip(batch, waiting, strict=True):
+                if stopped:
+                    _kill(child.pid)
+                    continue
+                result = _answered(child, path, code, one, cap_ms)
+                results.append(result)
+                # never at a returned value, however wrong: the backend is not
+                # told what a case expects
+                stopped = stop_early and not result.returned
+            if stopped:
+                break
     return results
 
 
@@ -96,32 +115,45 @@ def _defines(node: ast.stmt) -> bool:
             return False
 
 
-def _one_case(code: str, args: list[Any], cap_ms: int) -> CaseRun:
-    # one case per subprocess: a solution memoising in a module global would
+def _started(result_path: Path) -> tuple[subprocess.Popen[str], Path]:
+    """One child, blocked on the request it has not been sent.
+
+    It carries no case yet: what it is waiting through is its own interpreter
+    start, which is what a case costs where the solution is fast.
+    """
+    child = subprocess.Popen(
+        [sys.executable, str(CHILD), str(result_path)],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        # its own session, so a solution's own children die with it
+        start_new_session=True,
+    )
+    return child, result_path
+
+
+def _answered(
+    child: subprocess.Popen[str],
+    result_path: Path,
+    code: str,
+    args: list[Any],
+    cap_ms: int,
+) -> CaseRun:
+    # one case per child: a solution memoising in a module global would
     # otherwise answer one case from a cache built for another
     request = json.dumps({"code": code, "args": args, "cap_ms": cap_ms})
-    with TemporaryDirectory() as work:
-        result_path = Path(work) / "result.json"
-        child = subprocess.Popen(
-            [sys.executable, str(CHILD), str(result_path)],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            text=True,
-            # its own session, so a solution's own children die with it
-            start_new_session=True,
-        )
-        try:
-            child.communicate(request, timeout=(cap_ms + STARTUP_MS) / 1000)
-        except subprocess.TimeoutExpired:
-            _kill(child.pid)
-            child.communicate()
-            return CaseRun(RunOutcome.TIMEOUT)
-        finally:
-            # on every path: what the solution spawned outlives a child that
-            # reported its own timeout
-            _kill(child.pid)
-        return _reported(result_path, child.returncode)
+    try:
+        child.communicate(request, timeout=(cap_ms + STARTUP_MS) / 1000)
+    except subprocess.TimeoutExpired:
+        _kill(child.pid)
+        child.communicate()
+        return CaseRun(RunOutcome.TIMEOUT)
+    finally:
+        # on every path: what the solution spawned outlives a child that
+        # reported its own timeout
+        _kill(child.pid)
+    return _reported(result_path, child.returncode)
 
 
 def _kill(pid: int) -> None:

@@ -329,6 +329,10 @@ fixed here rather than by whatever executed it.
   output would then be the canonical's own, and `verified` would mean only that
   the solution agrees with itself. Some cases beyond its reach is the ordinary
   path; all of them is no independent reading at all.
+- **A child is started before the case it answers.** Interpreter start is what
+  a case costs where the solution is fast, and starting a batch of children
+  together spends it on several cores at once. They are still fed one at a
+  time, so nothing a run measures is timed beside another case.
 - **The cap is enforced twice, and the outer one is slack.** The child times
   `solve` and reports a timeout it saw. The parent's own timer is the cap plus
   start-up, and exists for a child stuck where no Python-level timer fires. The
