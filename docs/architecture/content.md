@@ -55,11 +55,10 @@ The vocabulary the append-only log references.
 
 ## Cards
 
-Teaching content about a technique, not the vocabulary itself.
-
 A card organises studying one technique: what to read, what to reproduce from
-memory, and what to solve. It is not an ability estimate. Mastery is what a
-user can solve, per technique, and the two share no data.
+memory, and what to solve. Not the vocabulary itself, and not an ability
+estimate — mastery is what a user can solve, per technique, and the two share
+no data.
 
 - **Product data, not code.** Cards live in the engine datastore, seeded from
   `content/`, which is gitignored like `data/`. One location, whatever the
@@ -80,8 +79,7 @@ user can solve, per technique, and the two share no data.
 - **Requiredness is derived from what a rung covers**, never stored. A rung
   covering a core template is required. A rung covering only the optional
   template is optional. A rung covering both is required, and the optional
-  template is offered on it as the alternative approach. That last case is why
-  a problem matching several templates is wanted rather than a nuisance.
+  template is offered on it as the alternative approach.
 - **A core template no solution displays is a reported gap**, not a quietly
   shorter ladder. The gap is the input to the next generation run: it names the
   template the next problem must be written for. The ladder never substitutes
@@ -98,11 +96,10 @@ user can solve, per technique, and the two share no data.
   optimum, so no input separates them from a reference. Generation cannot tell
   that from a reference written cleverly by mistake, so the template says which
   it is and a missing separation is a defect only where a speedup was claimed.
-- **One template may sit outside the core set.** A card's templates are core by
-  default: the ladder covers them, and a rung on one is required. At most one
-  is marked optional — the capstone, authored whole and surfaced on request
-  alone. The hard form is worth deriving before it is read, and a card showing
-  it unasked would remove that chance permanently.
+- **One template may sit outside the core set.** Templates are core by
+  default, and at most one is marked optional — the capstone, authored whole
+  and surfaced on request alone. The hard form is worth deriving before it is
+  read, and a card showing it unasked would remove that chance permanently.
 - **The ladder is resolved at import and re-derived whenever the corpus moves
   under it.** The selector is the truth and the ladder a derived view, so
   resolving it again costs nothing. A started card is re-derived too. Ladder
@@ -119,18 +116,15 @@ user can solve, per technique, and the two share no data.
 ## Template matches
 
 Which solutions display which of a card's templates. A form is displayed by
-code, so the subject is a solution rather than a problem. A problem reaches a
-template through its canonicals, and the ladder's coverage is computed from
-that. They are the engine's own work: an author names no solution, so nothing
-is authored here either.
+code, so the subject is a solution rather than a problem. They are the engine's
+own work: an author names no solution, so nothing is authored here either.
 
 - **The canonical a problem was generated with asserts its own match.** Its
   brief said which template, so the pair is provenance rather than a reading,
   and the record names `generator` as its source. Nothing pays a call to learn
   what the generator was told to write.
-- **No other canonical asserts anything.** A template is where a problem comes
-  from, never where its later solutions come from: the rest are enumerated from
-  the problem itself, and nobody named a form for them. So every template they
+- **No other canonical asserts anything.** The rest are enumerated from the
+  problem itself, and nobody named a form for them. So every template they
   display is the matcher's answer, and one assertion per problem is the most
   there can be.
 - **A generator's assertion carries no configuration**, as a hand annotation
@@ -150,8 +144,8 @@ is authored here either.
 - **The same fact sits on the problem and in a match.** `generated_for` names
   the template the problem's brief asked for, and the first canonical's match
   names the same one. They cannot drift, because generation writes both in one
-  act. A problem written from a technique brief names none, and its canonicals
-  still carry their own matches.
+  act. The canonicals of a problem written from a technique brief still carry
+  their own matches.
 - **The matcher answers what generation cannot assert**: which templates a
   solution displays besides the one it was written for, and whether the
   generator's own claim holds. The first is why a rung can cover a core
@@ -204,17 +198,14 @@ is authored here either.
   is scored is the positive verdicts, both directions: what the annotator named
   and the machine missed, and what the machine named and the annotator did
   not.
-- **An empty answer is negatives, not a decline.** A claim naming nothing
-  answers nothing, and the problem's own techniques keep standing. A call
-  naming no template asserts that each candidate it was given does not match.
-  What that becomes on disk follows the deferred shape, and either way it is a
-  reading rather than a refusal to read. The record shape decides this, not the
-  model's behaviour.
-- **An annotation records the verdicts its author saw**, as a claim does.
-  `informed_by` names them one by one, so a record made after seeing one
-  matcher is still independent of another. It is written on every pair the
-  answer settles, negatives included, because what the reader saw is a fact
-  about the sitting rather than about the verdict.
+- **An empty answer is negatives, not a decline.** Where a claim naming nothing
+  answers nothing, a call naming no template asserts that each candidate it was
+  given does not match. What that becomes on disk follows the deferred shape,
+  and either way it is a reading rather than a refusal to read. The record shape
+  decides this, not the model's behaviour.
+- **An annotation records the verdicts its author saw**, as a claim does. It is
+  written on every pair the answer settles, negatives included, because what the
+  reader saw is a fact about the sitting rather than about the verdict.
 - **The first hand pass calibrates, a blind one measures.** Annotating is where
   the line gets drawn between displaying a form and merely admitting it. A
   score taken over the pairs that drew that line measures agreement with

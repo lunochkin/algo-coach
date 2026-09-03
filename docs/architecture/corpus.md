@@ -6,9 +6,8 @@ solutions written for it. Part of the architecture; `README.md` is the map.
 ## Problems
 
 - **Generated, and that is the only origin.** The engine writes a statement,
-  the test cases that decide it, a canonical solution and a reference solution.
-  Nothing lands until both have passed the cases and agreed on every one of
-  them.
+  the test cases that decide it, a canonical solution and a reference
+  solution.
 - **A problem is written from a brief: what it must be solvable by.** A
   template is the tightest kind, naming the exact form. A technique is a looser
   one, naming only the skill. Both produce a problem, and the two differ in
@@ -21,10 +20,8 @@ solutions written for it. Part of the architecture; `README.md` is the map.
   the first template match provenance. It never claims the problem exercises
   nothing else. A problem written from a technique brief carries none: nothing
   told the generator a form, so nothing may assert a pair.
-- **A technique brief asserts no technique either.** What such a problem is
-  about comes from the readings of its canonical solutions, as it does for
-  every other problem. An assertion is what the generator was told, and it was
-  told a skill rather than a solution.
+- **A technique brief asserts no technique either.** An assertion is what the
+  generator was told, and it was told a skill rather than a solution.
 - **Provenance is required.** A problem names what produced it, as any machine
   record does.
 - **A problem's techniques are derived from readings of its canonical
@@ -38,9 +35,6 @@ solutions written for it. Part of the architecture; `README.md` is the map.
   class have no form to type out, so templates reach about half the vocabulary,
   and a technique set folded from them would be capped by which cards happen to
   exist.
-- **Which is why the fallback answers the right question.** They name what
-  solving the problem can take, over every canonical it carries, where a claim
-  names what one attempt did.
 - **The statement is stored, because it is what a solver is served.** The
   announcement floor reads it, and a matcher reads it beside the canonical it
   classifies. Required and non-blank.
@@ -51,9 +45,6 @@ solutions written for it. Part of the architecture; `README.md` is the map.
 - **`created` is not a resting state.** Every created problem is promoted or
   retired. Until the floor is measured, selection reads created problems too,
   so the corpus is usable before the gate exists.
-- **Retirement does not imply the problem was served.** One failing the floor
-  is retired as telegraphed having never been active. The rule that its
-  attempts are kept holds either way, and is about nothing where it has none.
 - **The two bars sit at different points.** Discrimination is checked at
   generation, so a problem whose cases separate nothing never lands. The floor
   is checked over the corpus, so a problem that telegraphs its form lands and
@@ -63,8 +54,7 @@ solutions written for it. Part of the architecture; `README.md` is the map.
   something else mints a new problem, and the old one keeps its attempts.
 - **A corrected statement usually drags cases with it**, which is why the edit
   cannot stand. The new wording needs cases that pin it, and those would fail
-  attempts already made. So the verdicts an in-place edit meant to preserve do
-  not survive it.
+  attempts already made.
 - **Retirement names its reason, because readers treat the two apart.**
   `defective` is a statement that asked for something its cases do not decide.
   `telegraphed` is one that names the approach, which the announcement floor
@@ -77,15 +67,15 @@ solutions written for it. Part of the architecture; `README.md` is the map.
   cases decide, so the verdict is a fact about the solution. Whether such a
   solve counts for less than an unprompted one is deferred, since it needs a
   weighting nothing has.
-- **Exclusion is a read-time rule, never a deletion.** Aggregates are derived
-  views. The attempts stay readable, and the board stops counting them.
+- **Exclusion is a read-time rule, never a deletion.** The attempts stay
+  readable, and the board stops counting them.
 
 ## Test cases
 
 What decides whether a solution to a generated problem is correct.
 
 - **The first set is written with the problem, in the same call.** Cases
-  derived afterwards describe whatever the solution happens to do. Cases
+  derived afterwards describe whatever the solution happens to do, where cases
   written with the statement describe what the problem asks. Later additions
   append to that set rather than replacing it.
 - **A case is arguments and an expected return.** Parsing stdin would make a
@@ -105,12 +95,10 @@ What decides whether a solution to a generated problem is correct.
   is accepted. A structure asked for by its operations has no single function.
   If one is ever wanted, `entrypoint` is an additive field whose absence means
   the convention.
-- **They are what makes verification reachable.** Every problem carries the
-  cases that decide it, so the engine judges a submission itself rather than
-  recording a verdict it did not produce.
-- **Owned, so the git invariant binds nothing the product ships.** The rule
-  against third-party test cases in git holds, and the cases a generated problem
-  carries are the product's own.
+- **They are what makes verification reachable.** The engine judges a
+  submission itself rather than recording a verdict it did not produce.
+- **Owned, so the git invariant binds nothing the product ships.** The cases a
+  generated problem carries are the product's own.
 - **Expected outputs come from the reference, never from the canonical.** A
   case the canonical produced passes by construction, and `verified` then means
   only that the solution agrees with itself. The reference is different code
@@ -145,9 +133,6 @@ What decides whether a solution to a generated problem is correct.
 - **Cases are appended, never revised.** An edge case, or one that forces a
   timeout, is added. What an addition leaves behind is a canonical needing
   re-verification rather than a record that is now wrong.
-- **A case that turns out to be wrong is discarded with its problem.** Under
-  the rule above the fault is the statement's, so the repair mints a new
-  problem and the old cases go with the old one.
 - **A case carries its arguments literally, and weighs at most 64 KiB.** The
   ceiling covers the arguments and the expected value together. A separating
   input is the largest a case ever holds, and separating a quadratic solution
@@ -168,18 +153,16 @@ What decides whether a solution to a generated problem is correct.
 - **How discrimination is established is in `flows.md`.** A blind reference
   disagreeing on any case discards the problem, and a surviving mutant of the
   canonical names a case that has to exist.
-- **The mutation loop stops after two rounds.** A round is one call: the
-  survivors go out, and the cases that come back are run against them. A
-  survivor two rounds did not kill is usually equivalent to the canonical, and
-  no case kills an equivalent mutant. A round that kills nothing stops the loop
+- **The mutation loop stops after two rounds**, at one call each. A survivor
+  two rounds did not kill is usually equivalent to the canonical, and no case
+  kills an equivalent mutant. A round that kills nothing stops the loop
   early, since the next one asks the same question of the same survivors. The
   number was set before a corpus existed, and what revises it is how much the
   second round still kills.
 
 ## Solutions
 
-A solution the engine wrote for a problem, in one of two roles. Not an attempt:
-no user and no sitting.
+A solution the engine wrote for a problem, in one of two roles.
 
 - **The canonical displays the template's form**, and is what a rung teaches.
   Exemplary rather than merely correct.
@@ -191,10 +174,6 @@ no user and no sitting.
   Passing says nothing about which of the two a solution is, and a reader
   taking a reference for a canonical would teach the approach the card exists
   to replace.
-- **Exemplary and verified are different properties**, and the record needs
-  both. A user's solved attempt is verified and idiosyncratic. A generated
-  solution is exemplary and asserted. Only one that passes the problem's test
-  cases is both.
 - **It is what a template match is keyed to.** A form is displayed by code, so
   which form is a question about the solution and a statement only implies one.
   The matcher reads the canonical beside the statement, and the verdict is
@@ -213,17 +192,14 @@ no user and no sitting.
   those cases was never tested on its own failure modes. It is stored and it
   teaches, and re-running the mutation loop over it is what would close the
   gap.
-- **Never counted as an attempt.** It answers no board row and earns no
-  progress. A user who reads one has not solved the problem.
+- **Never counted as an attempt**: no user and no sitting. It answers no board
+  row and earns no progress, and a user who reads one has not solved the
+  problem.
 - **Sampled, not greedy — the exception Machine records names.** Generation
   produces the artifact rather than a verdict about one, so no verdict needs
   protecting from variance, and variance is what stops one model's habits
   becoming the whole corpus. The cost is a canonical that is re-runnable and
   never reproducible, which is also why nothing re-derives it.
-- **The reference is greedy, where the canonical is not.** It is written
-  against a statement that already exists, so its variance buys no diversity.
-  Greedy is what makes two configurations of that site comparable over one
-  statement.
 - **Immutable once written.** Whether it passes is a fact about a run, so
   nothing about how it ran is stored here.
 
@@ -231,17 +207,13 @@ no user and no sitting.
 
 Which techniques a solution used. Product-owned and global, as the solution is.
 
-- **Its own record, not a technique claim.** The question is the same and
-  everything else differs. A claim is testimony about the user's own attempt
-  and is private; a reading is a verdict about code the engine wrote, and it
-  ships with the corpus.
+- **Its own record, not a technique claim.** A claim is testimony about the
+  user's own attempt and is private; a reading is a verdict about code the
+  engine wrote, and it ships with the corpus. One record type would also make
+  the fallback a fold over records of the type it falls back for.
 - **The candidates are the whole vocabulary**, where an attempt is classified
   against the problem's own techniques. Those techniques are derived from these
   readings, so constraining a reading by them is circular.
-- **Which is also why one record could not serve both.** A reading is what the
-  fallback is derived from, and the fallback is what an unclaimed attempt
-  resolves to. One record type would make the fallback a fold over records of
-  the type it falls back for.
 - **One reader, two records.** The prompt, the transport and the staleness rule
   are shared with the attempt classifier. Two prompts asking one question would
   drift, and neither score would compare.
@@ -314,9 +286,8 @@ fixed here rather than by whatever executed it.
   every backend uses the encoder `as_json` uses, or the same return would be
   decided differently by where it ran.
 - **A solution defining no module-level `solve` fails every case as
-  `CRASHED`.** The check reads the syntax tree, so a module whose import does
-  not terminate is rejected rather than reaching the cap, and code that does
-  not parse is rejected the same way. A verdict rather than an error, because
+  `CRASHED`.** Code that does not parse is rejected the same way. A verdict
+  rather than an error, because
   Phase 8 reads this path for an attempt, and a submission with a syntax error
   is the ordinary case.
 - **No case observes another.** A solution memoising in a module global would
@@ -328,8 +299,7 @@ fixed here rather than by whatever executed it.
   sound problem over the runner's own defect.
 - **A run is comparable only within one backend.** A CPU limit changes what a
   timing bar measures, so the smallest input separating a reference from a
-  canonical is a fact about the backend that found it. The `runner` string is
-  what shows a reader that two runs were not measured the same way.
+  canonical is a fact about the backend that found it.
 - **Comparison stays outside the executor.** A backend is handed code, the
   arguments and a cap, and returns what each call produced. It is never told
   what a case expects, so the rule deciding a case cannot vary by where the
@@ -342,14 +312,8 @@ fixed here rather than by whatever executed it.
   output would then be the canonical's own, and `verified` would mean only that
   the solution agrees with itself. Some cases beyond its reach is the ordinary
   path; all of them is no independent reading at all.
-- **A child is started before the case it answers.** Interpreter start is what
-  a case costs where the solution is fast, and starting a batch of children
-  together spends it on several cores at once. They are still fed one at a
-  time, so nothing a run measures is timed beside another case.
-- **The cap is enforced twice, and the outer one is slack.** The child times
-  `solve` and reports a timeout it saw. The parent's own timer is the cap plus
-  start-up, and exists for a child stuck where no Python-level timer fires. The
-  stored cap is the child's, since that is the number the case was judged by.
+- **The stored cap is the child's**, since that is the number the case was
+  judged by. The parent runs a slack timer of its own, which the runner owns.
 - **A child reporting nothing is read from how it died.** The parent's timer
   firing is `TIMEOUT`. A signal is `CRASHED`, which is where a segfault and a
   kill under memory pressure land. Anything else is the runner's own fault and

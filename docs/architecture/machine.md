@@ -40,13 +40,12 @@ comparable is the same, and is stated here once.
   one says which weights answered, the other how they were sampled. A
   temperature nobody set is the provider's own default — recorded absent, and
   equal only to itself, which keeps records taken before the parameter existed
-  scorable rather than discarded. Generation is the exception, and
-  `corpus.md` gives the reason.
-- **The generator alone is sampled**, where the exception is stated over
-  generation as a whole. What sampling buys is diversity across a corpus of
-  statements, and the other three sites write against a statement that already
-  exists. They are greedy, which is what makes two configurations of one site
-  comparable over the same item.
+  scorable rather than discarded.
+- **The generator alone is sampled**, for the reason `corpus.md` gives. What
+  sampling buys is diversity across a
+  corpus of statements, and the other three sites write against a statement
+  that already exists. They are greedy, which is what makes two configurations
+  of one site comparable over the same item.
 - **Whether a site can be greedy is the endpoint's answer.** A request naming
   a parameter its endpoint does not advertise is refused rather than served, so
   a temperature sent where none is offered fails the call instead of running
@@ -68,11 +67,10 @@ comparable is the same, and is stated here once.
   is append-only and the copy is made in the same write. It is there so the log
   reads alone: loading the calls to learn which model produced a record would
   put a megabyte-scale read on every command.
-- **The user's record stands over the machine's answer to the same question**,
-  whichever was written later. The machine's is stored and scored, never
-  promoted. A reader that prefers the user's makes overwriting the evidence
-  unrepresentable, where a write path that skips what the user answered depends
-  on every writer remembering to.
+- **The precedence is a reader, not a write path.** Preferring the user's
+  record on read makes overwriting the evidence unrepresentable, where a write
+  path that skips what the user answered depends on every writer remembering
+  to.
 - **Each configuration is scored over what it read**, and the denominator is
   printed rather than assumed. Scoring over the intersection alone charges
   every column for the records one of them failed on. A share prints as
@@ -142,12 +140,9 @@ holds nothing about what the answer was for.
   base URL. Two provider shapes maintained by hand would create pressure to
   adopt a library that reconciles them, and such a library can downgrade a
   schema into a prompt where the record cannot show it happened.
-- **Every request names one endpoint, and records who answered.** A provider
-  that cannot honour the response schema is never chosen, and a request fails
-  rather than falling back to a backend the record would not name. The pin says
-  which build was asked for and is what a re-run needs; the server says whether
-  anything answered at all. What it was sampled at is recorded beside them, and
-  a claim's copy is taken from here.
+- **Every request names one endpoint.** A provider that cannot honour the
+  response schema is never chosen, and a request fails rather than falling back
+  to a backend the record would not name.
 - **Reasoning is what the reading produced, not what was asked for.** A model
   that decides a question needs no thought returns none, and the empty field is
   a fact about the reading rather than a gap in the record.

@@ -32,11 +32,6 @@ The order matters because each step can reject what came before.
 - **Nothing lands half-verified.** A problem failing any step is discarded
   whole rather than stored for repair. Every call is recorded, so what was paid
   for and thrown away stays readable.
-- **Two solution roles, and no solution holds both.** The canonical displays
-  the template's form and is what a rung teaches. The reference is written from
-  the statement alone, and is what computes expected outputs and what a timing
-  bar measures against. Independence is the reference's whole purpose, so a
-  solution displaying the form could not also serve as one.
 - **The reference is written blind.** Shown the canonical, it inherits that
   solution's reading of the statement. Agreement then shows only that one model
   is consistent. Blind, agreement is evidence that the statement has one
@@ -49,12 +44,9 @@ The order matters because each step can reject what came before.
   correct-looking solutions returning different answers means the prose admits
   two readings. That is what an in-place edit cannot repair, since the cases
   would move with the wording.
-- **Expected outputs come from the reference wherever it can compute them.**
-  That is every case at or below the largest input it finishes at generation
-  time, under a generation cap set well above the drill loop's. Beyond that
-  point the expected output comes from the canonical. A reference that computes
-  none of them discards the problem. Every run is capped: an uncapped one is a
-  non-terminating reference hanging the run.
+- **Every run at generation is capped**, well above the drill loop's cap. The
+  largest input the reference finishes at is what decides which cases carry its
+  answer, and an uncapped run is a non-terminating reference hanging the run.
 - **The scale case is tautological, and harmlessly so.** Correctness was
   established on the cases the reference computed, and this one exists for the
   cap rather than for the verdict. It still catches a crash or a recursion
@@ -64,29 +56,21 @@ The order matters because each step can reject what came before.
   cross-checked between two of them rather than taken from one. Enumeration is
   what produces one, so the cross-check is available on a later pass rather
   than at landing.
-- **Whether the cases are enough is decided by execution, never by a model.** A
-  model asked whether its own cases suffice says yes. A surviving mutant is a
-  case that has to exist, and it names the mistake that case must catch.
+- **No model is asked how good the cases are.** One asked whether its own cases
+  suffice says yes, and one asked to break its own solution writes the mistakes
+  it expects a solver to make — a sample nobody chose and no run reproduces. A
+  tree walk enumerates the mutants instead, so the set is deterministic and
+  re-derivable, and nothing about it is stored.
 - **A mutant is the canonical with one semantic change**, made on the parsed
   tree rather than the text, so a comparison inside a string is untouched. It
-  is killed when it fails at least one case, by a wrong answer, a crash or a
-  timeout. Mutants run locally and cost nothing, and only the call that writes
-  the new cases is paid for.
+  is killed when it fails at least one case, and a surviving one is a case that
+  has to exist.
 - **A mutant runs under a cap paced by the canonical**, never under the one the
-  reference needs. A change that breaks a loop's progress never returns, and a
-  handful of those at the generation cap cost more seconds than every call in
-  the run. What a mutant has to beat is the solution it is a copy of.
-- **Mutants are made mechanically, with no model call.** A tree walk
-  enumerates them, so the set is deterministic and re-derivable from the
-  canonical. A model asked to break its own solution writes the mistakes it
-  expects a solver to make, which is a sample nobody chose and no run
-  reproduces. No mutant is stored: they are re-derived whenever the operator
-  set changes.
-- **An operator changes one decision the code makes**: a comparison's boundary
-  or its direction, an arithmetic operator, a connector, a dropped `not`, an
-  integer by one, `min` against `max`, `break` against `continue`. Each is a
-  mistake a solver makes, where a mutant nobody would write asks for a case
-  that catches nothing.
+  reference needs. A change that breaks a loop's progress never returns, and
+  what a mutant has to beat is the solution it is a copy of.
+- **An operator changes one decision the code makes**, and each is a mistake a
+  solver makes. A mutant nobody would write asks for a case that catches
+  nothing. The set itself is in `algo_coach.mutation`.
 - **The call that answers a survivor proposes arguments, never returns.** The
   reference computes what they return, so no model writes an expected output
   that could agree with the mistake the case was asked for.
@@ -102,22 +86,15 @@ The order matters because each step can reject what came before.
 - **A round whose call fails costs the measurement, not the problem.** The
   problem passed every gate that judges it, and the run reports its set as
   unmeasured against the bound.
-- **The loop stops on a bound, never on a score.** A mutant can be equivalent
-  to the original, and equivalence is undecidable, so no case kills it and the
-  score never reaches full. `corpus.md` carries the number of rounds.
-- **Whether a form is a speedup is authored on the template.** Backtracking and
-  exhaustive search are their own optimum, so no input separates the two
-  solutions there. A timing run cannot tell that from a reference written
-  cleverly by mistake. The template states which it is, and a missing
-  separating input is a defect only where a speedup was claimed.
+- **The loop stops on a bound, never on a score**, for the reason `corpus.md`
+  gives.
 - **The separating case is settled as any other case.** The reference is
   measured well above the sitting's cap, so it usually computes the value the
   case stores. A disagreement there discards the problem, and it is what
   catches a canonical correct on the small cases and wrong at scale.
 - **The input the search measured is the input the case stores.** A generator
   is asked to build one input per size, and building it again would be a second
-  run of model-written code. What was measured is what the verdict was taken
-  on.
+  run of model-written code.
 - **A search that fails costs the case, not the problem.** The generator call
   can refuse and the code it wrote can crash, and neither says anything about
   the statement. What is lost is the timing case, and the run reports that it
@@ -126,15 +103,8 @@ The order matters because each step can reject what came before.
   stage and the process then ends, so a discarded draft would leave only the
   calls it paid for. `machine.md` gives what a site's record carries.
 - **A statement may not name the domain its template's cue names.** The
-  monotonic stack's cue says "temperatures" and "a next warmer day", and the
-  first generation call returned Daily Temperatures verbatim. A solver who
-  recognises a problem has not derived its form.
-- **The generator's assertion is not the matcher's verdict.** They are two
-  records on one pair, and a disagreement is how a generator drifting from its
-  brief is found.
-- **A canonical that passes demonstrates a match**, where the matcher infers
-  one. The assertion is stored only for a canonical the cases kept: one that
-  failed showed nothing about the form.
+  monotonic stack's cue says "temperatures" and "a next warmer day". A solver
+  who recognises a problem has not derived its form.
 - **Failing means two things on the cases written with the statement.** The
   first canonical is run before any expected value is settled, so it fails only
   by yielding no value on some case, and the problem is discarded. A later
@@ -144,8 +114,7 @@ The order matters because each step can reject what came before.
   for a form unprompted, so the enabling property has to be derivable from the
   statement rather than stated in it. A form a matcher names instantly from the
   statement alone was telegraphed, and such a problem teaches recognition of
-  nothing. The archived corpus sets that floor and the generated one is read
-  against it.
+  nothing.
 
 ## Enumerating a problem's other solutions
 
@@ -161,19 +130,13 @@ other way to solve it is found afterwards, over the stored problem.
 5. Each stored canonical is read for its techniques and for the templates it
    displays.
 
-- **It runs over the corpus, never in the landing path.** Enumeration cannot
-  gate a problem, since a proposal nobody could write says nothing about the
-  statement. In the landing path it would discard problems for reasons
-  unrelated to their own correctness.
-- **The list needs no gate, because execution is the gate.** Its length tracks
-  the model's verbosity rather than the problem. A proposal that is wrong costs
-  one call and lands nothing.
+- **It runs over the corpus, never in the landing path.** A proposal nobody
+  could write says nothing about the statement, so enumeration cannot gate a
+  problem. The list needs no gate of its own either: its length tracks the
+  model's verbosity, and a wrong proposal costs one call and lands nothing.
 - **One call per approach, never one reply carrying all of them.** A single bad
   entry would otherwise fail the whole batch, where each canonical is judged on
   its own.
-- **It replaces asking a matcher which templates the problem could use.** That
-  question reaches only forms someone authored a template for. Enumeration
-  reaches the techniques no card covers, which is most of the vocabulary.
 - **It sees the first canonical.** Independence is the reference's purpose
   rather than this call's. This call is asked for approaches that differ from
   what is stored, and that needs the stored one in view.
@@ -204,8 +167,6 @@ there is ever asked twice and no two configurations meet the same item.
 
 - **It writes nothing to the corpus.** A case a round wins here is discarded,
   or the next configuration would be measured against a different problem.
-- **The generator is not replayed.** It answers no item, and asking it again is
-  what `generate` does.
 - **The loop is replayed against the set as it stood.** A case a later round
   won and the separating case are excluded, since neither was there when the
   survivors were decided. Counting them changes the survivors and the digest,
@@ -235,9 +196,8 @@ are answered by using it.
 6. Keyed to each attempt, the loop asks for a technique claim and a
    self-label, or the user marks the problem defective instead.
 
-- **The engine witnessed the sitting, so it mints the attempt.** Serving,
-  timing and judging are one act. An attempt nobody timed stays untimed, rather
-  than carrying a duration reconstructed after the fact.
+- **An attempt nobody timed stays untimed**, rather than carrying a duration
+  reconstructed after the fact.
 - **A drill can mint several attempts**, and each is asked about in turn. A
   submission that failed on syntax and the one that passed are different
   evidence, and labelling only the last would leave the counts on two

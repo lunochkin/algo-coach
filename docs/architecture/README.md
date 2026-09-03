@@ -6,33 +6,26 @@ they differ, the doc wins.
 ## Shape
 
 Engine public, content private. Everything the practice loop reads is local to
-the engine. Problems, cards and attempts live in datastores the engine
-controls, and the technique vocabulary ships with the package. The engine never
-contacts external platforms.
+the engine, which never contacts external platforms.
 
 Consequence: no third-party dependency in the drill loop.
 
 **Problems are the product's own, and the engine writes them.** A statement
 scraped from a platform cannot ship, which is what forces the question, but the
-answer is a capability rather than a licence fix. A generated problem carries
-the test cases that decide it. Test cases are what make verification reachable,
-and verification is what turns a canonical solution from an assertion into a
-fact.
+answer is a capability rather than a licence fix.
 
 **The engine is the platform.** It serves a generated problem, times the
 sitting, runs the submission against the problem's own test cases, and records
-the verdict. Serving, timing and judging are all its own. Python only: a
-canonical is Python, the test cases are Python-shaped, and a second language is
-a runner rather than a record change.
+the verdict. Python only: a canonical is Python, the test cases are
+Python-shaped, and a second language is a runner rather than a record change.
 
 ## Terminology
 
 - **Attempt** — a user's solution to a problem, successful or failed.
-- **Canonical solution** — an exemplary solution to a problem, written to
-  display the approach rather than to pass. Never an attempt.
-- **Reference solution** — a solution written from the statement alone. It
-  computes the expected outputs and calibrates a timing bar. Correct, and
-  deliberately not exemplary.
+- **Canonical solution** — an exemplary solution, written to display the
+  approach rather than to pass.
+- **Reference solution** — a solution written from the statement alone.
+  Correct, and deliberately not exemplary.
 - **Verification** — executing a solution against a problem's test cases,
   yielding pass or fail. An attempt or a generated solution in either role.
 - **Diagnosis** — classifying why an attempt failed. A `Diagnosis` record
@@ -74,14 +67,14 @@ times. Each record class is specified in one of the files beside it.
 
 ## Boundaries
 
-- **Verification** — runs locally, against test cases the engine owns. Every
-  problem carries them, so every submission is judged by whatever ran it.
+- **Verification** — runs locally, so every submission is judged by whatever
+  ran it.
 - **Storage** — concrete for now (JSON files under a gitignored directory), a
   database later. The schema is the contract, and storage swaps underneath it.
 - **Calibration corpus** — what the pivot to generated problems left behind,
   under `data/old/`: a platform's problems, the attempts against them, the
-  claims and the calls. It is a corpus, not a store. No store points there, and
-  nothing on the run path reads it.
+  claims and the calls. A corpus rather than a store: no store points there,
+  and nothing on the run path reads it.
   - It is kept for one measurement. The announcement floor is how often a form
     is named from the statement alone, and a corpus no generator wrote is what
     sets that floor. How it is read is deferred to taking that measurement.
@@ -112,7 +105,7 @@ Properties the system holds at all times.
   wholesale while it holds nothing irreplaceable is a different act, and that
   window closes the first time a record is worth keeping.
 - Every record keyed to an attempt carries an engine-minted `id`, its
-  `attempt_id` and `created_at`, so one reader orders any of them.
+  `attempt_id` and `created_at`.
 - The user's own record stands over the machine's answer to the same question,
   whichever was written later: a technique claim resolves user-first, and a
   diagnosis never supersedes a self-label. What the machine wrote is kept and
@@ -123,13 +116,9 @@ Properties the system holds at all times.
 - Every problem is the product's own, written by the engine.
 - A problem never lands without the test cases that decide it, a canonical
   solution that passed them, and a reference solution that agreed with it on
-  every one. One whose canonical fails, or whose two solutions disagree, is not
-  stored for repair; it is not stored.
+  every one.
 - The technique vocabulary and the cards are product-owned and global, with no
-  user-authored ones of either. Codes are stable identifiers with a migration
-  path, since the log references them. The attempt log never references a card;
-  a template match does, but it is a fact about the corpus rather than about a
-  sitting, and mastery reads no card.
+  user-authored ones of either.
 - Domain logic stays adapter-free and directly callable. The CLI is one
   adapter, and a web API will be another.
 - No third-party problem statements or test cases in git — in any repo.

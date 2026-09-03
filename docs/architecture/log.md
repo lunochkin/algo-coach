@@ -8,8 +8,6 @@ went the way it did, and the study a card run tracks. Part of the architecture;
 
 - **The drill loop is the only source.** The engine served the problem and
   watched the sitting, so nothing else is in a position to assert one.
-- **Identity is the engine's.** It mints the `id`, and there is no other writer
-  to accept one from.
 - **The verification is its own record**, as a canonical's is, and how it
   keys to an attempt is settled in Phase 8. `solved` is the projection over
   its results, and the raw result carries what the projection drops. A timeout
@@ -26,9 +24,9 @@ A claim rather than a fact, and open to revision, so it is its own record
 rather than a field on the attempt.
 
 - **Attribution resolves, it is not required.** The claim that stands if one
-  exists, otherwise the problem's techniques. Nothing has to be labelled for an
-  attempt to count. Resolution happens on read and is never stored, so
-  re-deriving a problem's techniques reaches every unclaimed attempt.
+  exists, otherwise the problem's techniques. Resolution happens on read and is
+  never stored, so re-deriving a problem's techniques reaches every unclaimed
+  attempt.
 - **The fallback answers a different question.** A problem's techniques say
   what solving it can take, a claim what one solution did. The fallback
   over-credits techniques a canonical used incidentally, which skews scheduling
@@ -65,9 +63,7 @@ rather than a field on the attempt.
   seconds carries no more resolution. It is absent on every claim written
   before it was asked for, and a level nobody gave is not a low one.
 - **One list of columns, whichever renderer prints a score.** A metric added to
-  one renderer and not the other prints a number that stopped being true. The
-  single-configuration summary said a decline was unscored long after declines
-  were scored, because two renderers named their own columns.
+  one renderer and not the other prints a number that stopped being true.
 - **The hand claims are an eval set and a correction path**, never training
   data. Nothing in the engine is trained.
 - **What invalidates a label is which reader informed it, not that one did.** A
@@ -92,8 +88,7 @@ rather than a field on the attempt.
 - **An empty claim answers nothing, so the fallback stands.** The resolver
   reads a claim's *techniques* rather than its existence, so the problem's own
   keep answering an attempt whose reading declined. A later decline supersedes
-  an earlier claim as any reading does, and what that costs is the older
-  answer giving way to the fallback.
+  an earlier claim as any reading does.
 - **A decline is scored all the same.** It asserts that none of these
   candidates apply, so a hand claim naming one is a miss against every
   technique the user named. Unscored, declining would pay: each one would leave
@@ -123,8 +118,8 @@ rather than a field on the attempt.
 ## Self-labels
 
 The user's own verdict on why an attempt went the way it did. Reported, not
-inferred. A judgement made after the fact and open to revision, so it is its
-own record rather than a field on the attempt, for the same reason a claim is.
+inferred. Its own record rather than a field on the attempt, for the same
+reason a claim is.
 
 - **Only ever the user's.** A machine answering the same question produces a
   `Diagnosis`. The two are separate records because the eval scores one against
@@ -157,10 +152,8 @@ latest first, with append order breaking a tie. The `id` lets a record be
 cited, by an eval naming the diagnosis it scored or by a user correcting a
 claim.
 
-Ordering is not what stands. A self-label has one writer, so the latest stands.
-A claim has two, and the user's stands over any machine claim however late. A
-diagnosis never supersedes a self-label at all. The shared reader answers "in
-what order", and each record says who wins.
+Ordering is not what stands. The shared reader answers "in what order", and
+each record's own section says who wins.
 
 ## Card runs
 
@@ -174,9 +167,9 @@ Studying a card is an explicit act, not a state the system infers.
   was given. Later probes append rather than replacing the set, so what was
   offered and when stays readable.
 - **Derived from it, never stored**: ladder progress, recall state per
-  template, and whether the card is done. Aggregates are views. "Done" is only
-  a view for now. Graduation becomes a process later, once there are numbers to
-  set its box and its probe count from.
+  template, and whether the card is done. "Done" is only a view for now.
+  Graduation becomes a process later, once there are numbers to set its box and
+  its probe count from.
 
 ## Recall attempts
 
