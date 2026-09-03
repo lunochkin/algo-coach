@@ -13,11 +13,8 @@ class MatchSource(StrEnum):
 
 
 class TemplateMatch(MachineProvenance):
-    """Whether one solution displays one of a card's templates.
-
-    One record per pair: solutions arrive one at a time, and a set record
-    would rewrite pairs already settled.
-    """
+    """Whether one solution displays one of a card's templates. One record per
+    pair — `content.md` gives why not a set."""
 
     id: str
     created_at: datetime

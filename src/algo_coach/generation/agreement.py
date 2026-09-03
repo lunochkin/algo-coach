@@ -57,9 +57,7 @@ class SettledCase:
     # the call that proposed the arguments, whole rather than by id: the
     # `TestCase` this becomes copies the configuration
     call: Call
-    # the round that won it, zero for the set written with the statement.
-    # `corpus.md` gives what the absent case is
-    round: int | None = 0
+    round: int | None = 0  # as `TestCase.round`
 
 
 @dataclass(frozen=True)

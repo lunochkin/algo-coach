@@ -1,8 +1,7 @@
 """One attempt at writing a problem, and what its call sites leave behind.
 
-A run prints each stage and the process then ends. A site's verdict, its
-configuration and the digest it was sent survive only as a record, and a
-discarded draft is exactly the attempt with nothing else to point at.
+`machine.md` gives what a site outcome carries and why a run's stage lines do
+not suffice.
 """
 
 from dataclasses import dataclass, field

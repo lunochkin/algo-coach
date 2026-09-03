@@ -18,19 +18,16 @@ class ExpectedSource(StrEnum):
 
 
 class TestCase(MachineProvenance):
-    """One case of a generated problem's set. The provenance names the call
-    that proposed the arguments, which is not the problem's own wherever a
-    mutation round or the speedup search won the case."""
+    """One case of a generated problem's set. The provenance is the proposing
+    call's rather than the problem's — `corpus.md` gives why."""
 
     id: str
     problem_id: str = Field(min_length=1)
     args: list[Any] = Field(default_factory=list)  # positional; empty is legal
     expected: Any  # required: `None` is a value a solution may return, so absence cannot stand in
     expected_from: ExpectedSource  # required; `mint.case` carries the rule
-    # Which mutation round won the case. `0` is the set written with the
-    # statement, which is what the loop was first run against. Absent where no
-    # round won it and it was not in that set, which today is the separating
-    # case the speedup search appended after the loop.
+    # `0` is the set written with the statement; absent is a case no round won
+    # and the statement did not write, today the separating one
     round: int | None = Field(ge=0)
 
     @model_validator(mode="after")

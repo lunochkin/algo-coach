@@ -1,5 +1,4 @@
-"""What solving a problem can take: the union over the standing readings of its
-canonicals. A view, never stored truth."""
+"""What solving a problem can take. A view, never stored truth."""
 
 from collections.abc import Iterable
 
@@ -14,10 +13,9 @@ def derive(
 ) -> dict[str, list[str]]:
     """The techniques each problem's canonicals were read as, keyed by problem.
 
-    The reference is excluded: it is written from the statement alone, so
-    counting it would credit the naive approach the canonical's form replaces.
-    A canonical nothing has read contributes nothing, which is not a verdict
-    that it used no technique.
+    The reference is excluded, for the reason `corpus.md` gives. A canonical
+    nothing has read contributes nothing, which is not a verdict that it used
+    no technique.
     """
     standing = standing_readings(readings)
     derived: dict[str, set[str]] = {problem.id: set() for problem in problems}

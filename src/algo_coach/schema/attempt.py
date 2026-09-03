@@ -48,7 +48,7 @@ class TechniqueClaim(AttemptRecord, MachineProvenance):
     """Which techniques an attempt used, as one writer claimed them."""
 
     techniques: list[str] = Field(default_factory=list)  # empty is a verdict, and is stored
-    declined: bool = False  # the user's, stated: the loop records nothing where they skip
+    declined: bool = False  # the user's, stated rather than inferred from an empty set
     source: ClaimSource  # required: a mislabelled claim cannot be corrected later
     informed_by: list[str] = Field(default_factory=list)  # calls its author saw, not provenance
     confidence: Confidence | None = None  # absent on claims written before it was asked for

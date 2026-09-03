@@ -7,8 +7,7 @@ from algo_coach.schema import CallSite, SiteOutcome
 
 
 def at_configuration(outcome: SiteOutcome, configuration: Configuration, prompt_hash: str) -> bool:
-    """Whether this configuration, asked this question, produced the record.
-    The provider that served it is recorded and never compared."""
+    """Whether this configuration, asked this question, produced the record."""
     return (
         outcome.model,
         outcome.effort,

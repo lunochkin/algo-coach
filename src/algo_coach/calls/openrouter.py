@@ -21,8 +21,6 @@ UNSENT = "default"
 # The name reaches the model, so it says what the object is.
 FORMAT = "verdict"
 
-# The waits cover a minute between them, the window a per-minute cap is stated
-# in. The endpoint's reset time is not read: a wrong parse would sleep for hours.
 BACKOFF = (5.0, 15.0, 30.0, 60.0)
 
 # Worth asking again: too many requests, and the gateway failing between the
@@ -107,7 +105,7 @@ class OpenRouter:
 
     def send(self, *, pin: str, **request: Any) -> Reply:
         """One reading, repeated while the endpoint answers with a reason to ask
-        again. Every other failure is raised on the first try."""
+        again, and raised on the first try otherwise."""
         for tries, pause in enumerate(BACKOFF, start=1):
             try:
                 return self.once(tries, **request)

@@ -17,5 +17,4 @@ def resolve_techniques(
 ) -> list[str]:
     """The claim's techniques if it names any, otherwise the problem's."""
     claim = claims.get(attempt.id)
-    # A claim naming none answers nothing, so the fallback stands.
     return sorted(set(claim.techniques if claim and claim.techniques else problem.techniques))

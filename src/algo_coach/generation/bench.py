@@ -1,11 +1,5 @@
-"""Which model writes what, per call site.
-
-Writing a problem takes four calls, and they ask for different things: a
-statement and a solution, an independent reading of that statement, the inputs
-that catch a wrong solution, and code that builds an input of a given size. One
-configuration over all four makes the cheapest of them pay the price of the
-hardest.
-"""
+"""Which model writes what, per call site. `machine.md`: a configuration is per
+call site, not per run."""
 
 from pydantic import BaseModel
 
@@ -17,12 +11,9 @@ from algo_coach.generation.inputs import INPUTS_DEFAULT
 
 
 class Bench(BaseModel, frozen=True):
-    """One configuration per generation call site.
-
-    Each site defaults to its own, which the site's module names. Four
-    identical defaults are one bench rather than a shared setting, so changing
-    a site changes one file.
-    """
+    """Each site defaults to its own, which the site's module names. Four
+    identical defaults are one bench rather than a shared setting, so changing a
+    site changes one file."""
 
     generator: Configuration = GENERATOR_DEFAULT
     blind: Configuration = BLIND_DEFAULT

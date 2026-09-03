@@ -1,12 +1,8 @@
-"""Re-asking a call site about a problem the store already holds.
+"""Re-asking a call site about a problem the store already holds: the three
+answering sites over a stored statement, skipping the pairs this configuration
+has answered at the digest it would send now.
 
-Generation writes a new problem every time, so nothing there is ever asked
-twice and no configuration can be compared with another. A replay asks the
-three answering sites about a stored statement instead, and skips the pairs
-this configuration has answered at the digest it would send now.
-
-Read-only over the corpus. A case a round wins here is not appended, or the
-next configuration would be measured against a different problem.
+Read-only over the corpus, for the reason `flows.md` gives.
 """
 
 from collections.abc import Callable, Iterable, Sequence
@@ -98,8 +94,7 @@ def subjects(corpus: Corpus, cards: Iterable[Card]) -> list[Subject]:
     """The problems a site can be re-asked about: served, and carrying both
     roles and the cases that decide them.
 
-    A retired problem is excluded. A defective one was never a fair test, and a
-    telegraphed one is not what a later corpus will hold.
+    A retired problem is excluded, for the reason `flows.md` gives.
     """
     forms = {one.id: one for card in cards for one in card.templates}
     solutions = corpus.solutions.solutions()

@@ -1,8 +1,5 @@
-"""Writing several problems for one template, one after another.
-
-Sequential where the matcher is parallel: each call is shown the statements the
-form already has, and two in flight would be shown the same list.
-"""
+"""Writing several problems for one template, one after another. Sequential
+where the matcher is parallel — `flows.md` gives why."""
 
 from collections.abc import Callable
 from time import monotonic
@@ -232,8 +229,7 @@ def measured(
         won=bar.won,
     )
     if hardened.disagreement is not None:
-        # a boundary input the first case set never reached, answered two ways.
-        # A canonical wrong there is what the loop exists to find
+        # a boundary input the first case set never reached, answered two ways
         discarded = Checked(
             outcome=checked.outcome,
             discard=Discard.DISAGREED,
@@ -285,8 +281,7 @@ def timed(
         return checked, Timing(separating=found.size)
     notes("timing", f"no separation: {found.missing}")
     if found.missing is Missing.DISAGREED:
-        # one input the small cases could not reach, answered two ways. A
-        # canonical correct small and wrong large is discarded here
+        # one input the small cases could not reach, answered two ways
         discarded = Checked(
             outcome=checked.outcome,
             discard=Discard.DISAGREED,

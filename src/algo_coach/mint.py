@@ -91,8 +91,7 @@ def user_claim(
     informed_by: Sequence[str] = (),
     declined: bool = False,
 ) -> TechniqueClaim:
-    """A claim the user made. It carries no provenance because nothing
-    re-derives it.
+    """A claim the user made, carrying no provenance.
 
     `declined` is passed rather than inferred from an empty list, so a writer
     that lost an answer cannot record a verdict nobody gave. `informed_by` is
@@ -229,9 +228,7 @@ def user_match(
 
 
 def generator_match(template_id: str, solution_id: str) -> TemplateMatch:
-    """The pair the canonical a problem was generated with asserts about itself.
-    Provenance rather than a reading, so it carries no configuration: nothing
-    re-derives it, and the solution already names the call that wrote it."""
+    """Provenance rather than a reading, so it carries no configuration."""
     return TemplateMatch(
         id=new_id(),
         created_at=datetime.now(UTC),
@@ -405,9 +402,8 @@ def verification(
     runner: str,
     results: Sequence[CaseResult] = (),
 ) -> Verification:
-    """One run of a solution against a problem's cases. The cap and the runner
-    are stored beside the results: two runs under different ones are not
-    comparable, and nothing else would show it."""
+    """One run of a solution against a problem's cases, with the cap and the
+    runner that decided it."""
     return Verification(
         id=new_id(),
         created_at=datetime.now(UTC),
@@ -440,11 +436,9 @@ def site_outcome(
     separating: int | None = None,
     unseparated: str | None = None,
 ) -> SiteOutcome:
-    """What one call site left on one attempt at writing a problem.
-
-    `problem_id` is filled by the caller that lands the problem: a discarded
-    draft mints none, and `writing_id` is what groups the four sites either way.
-    """
+    """`problem_id` is filled by the caller that lands the problem: a discarded
+    draft mints none, and `writing_id` is what groups the four sites either
+    way."""
     return SiteOutcome(
         id=new_id(),
         created_at=datetime.now(UTC),

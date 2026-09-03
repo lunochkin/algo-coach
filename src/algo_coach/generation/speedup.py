@@ -1,10 +1,5 @@
 """The smallest input under which the reference exceeds the cap and the
-canonical does not.
-
-Run only where the template claims a speedup. Backtracking and exhaustive
-search are their own optimum, so no input separates the two solutions there,
-and a missing separation says nothing about them.
-"""
+canonical does not. Run only where the template claims a speedup."""
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -47,8 +42,7 @@ class Searched:
     canonical_ms: int | None = None
     reference_ms: int | None = None
     missing: Missing | None = None
-    # the two solutions at that size, where they answered differently. A
-    # canonical correct small and wrong large is what this catches
+    # the two solutions at that size, where they answered differently
     disagreement: Disagreement | None = None
 
     @property
@@ -171,8 +165,7 @@ def _settled(
     if _weighs(args) + _weighs(expected) > ceiling:
         return Searched(missing=Missing.INPUT_TOO_LARGE)
     return Searched(
-        # no round won it: the search runs after the loop, and the case was
-        # never in the set the survivors were decided against
+        # no round won it: the search runs after the loop
         case=SettledCase(args=args, expected=expected, expected_from=source, call=call, round=None),
         **measured,
     )

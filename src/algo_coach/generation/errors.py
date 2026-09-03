@@ -1,8 +1,5 @@
-"""How a generation call fails.
-
-Its own module because every site raises it and none of them owns it, where a
-classifier keeps its error beside the one reader that raises it.
-"""
+"""How a generation call fails. Its own module because every site raises it and
+none of them owns it."""
 
 
 class GenerationError(Exception):

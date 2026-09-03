@@ -150,8 +150,7 @@ def _settled(
     """The proposals the canonical answered, settled by the rule the first case
     set uses.
 
-    One it cannot answer costs the case rather than the problem: nothing checks
-    a proposed input against the constraints the statement gives.
+    One it cannot answer costs the case rather than the problem.
     """
     ours = outputs(canonical, proposed, cap_ms=cap_ms)
     answered = [

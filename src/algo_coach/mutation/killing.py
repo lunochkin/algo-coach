@@ -1,8 +1,5 @@
-"""What the case set does to a mutant: kills it, or leaves it standing.
-
-A survivor is a mistake no case catches, so it names a case that has to exist.
-Nothing is stored: the verdicts are re-derived with the mutants.
-"""
+"""What the case set does to a mutant: kills it, or leaves it standing. Nothing
+is stored, as no mutant is."""
 
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
@@ -12,8 +9,7 @@ from algo_coach.mutation.mutants import Mutant
 from algo_coach.runner import decide, run
 from algo_coach.schema import CaseOutcome
 
-# how many times the loop asks for cases before it stops. `corpus.md` gives
-# the reason; a round that kills nothing stops it earlier
+# how many times the loop asks for cases before it stops. `corpus.md` gives why
 ROUNDS = 2
 
 # what a mutant may take against what the canonical took on the same case, and
@@ -47,12 +43,8 @@ class Verdict:
 
 def pace(slowest_ms: int | None, *, cap_ms: int) -> int:
     """The cap the mutants run under: the canonical's slowest case, times
-    `PACE`, floored and clamped.
-
-    Arithmetic over a measurement the caller already has. Whoever runs the
-    mutants ran the canonical over the same cases first, and re-running it to
-    time it would cost a subprocess per case.
-    """
+    `PACE`, floored and clamped. Arithmetic over a measurement the caller
+    already has."""
     return min(max((slowest_ms or 0) * PACE, FLOOR_MS), cap_ms)
 
 
@@ -62,7 +54,6 @@ def kill(mutants: Sequence[Mutant], cases: Sequence[Case], *, cap_ms: int) -> li
 
 
 def survivors(verdicts: Iterable[Verdict]) -> list[Verdict]:
-    """The mutants the set left standing. Each names a case that has to exist."""
     return [one for one in verdicts if one.survived]
 
 

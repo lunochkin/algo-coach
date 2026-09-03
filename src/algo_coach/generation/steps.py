@@ -43,7 +43,6 @@ class Notes:
         self.on_step(Step(index=self.index, total=self.total, name=name, detail=detail, call=call))
 
 
-# the default reporter: a run that was given none prints nothing
 SILENT = Notes()
 
 

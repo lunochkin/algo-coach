@@ -57,8 +57,7 @@ def read_corpus(
     """Read every stored canonical for its techniques, skipping the ones this
     configuration has already read at the current digest.
 
-    References are never read: a problem's techniques are folded from its
-    canonicals. Readings are appended as they are made, so a run resumes where
+    References are never read. Readings are appended as they are made, so a run resumes where
     the last stopped. `fresh` asks again where a stored reading answers the
     same prompt, which is what measuring a reader against itself needs.
     """

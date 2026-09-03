@@ -94,8 +94,8 @@ def run(
 
 
 def defines_solve(code: str) -> bool:
-    # read from the tree, so a module whose import does not terminate is
-    # rejected rather than reaching the cap
+    # read from the tree: a module whose import does not terminate must not
+    # reach the cap
     try:
         tree = ast.parse(code)
     except SyntaxError:
@@ -140,8 +140,7 @@ def _answered(
     args: list[Any],
     cap_ms: int,
 ) -> CaseRun:
-    # one case per child: a solution memoising in a module global would
-    # otherwise answer one case from a cache built for another
+    # one case per child: `corpus.md` requires that no case observes another
     request = json.dumps({"code": code, "args": args, "cap_ms": cap_ms})
     try:
         child.communicate(request, timeout=(cap_ms + STARTUP_MS) / 1000)

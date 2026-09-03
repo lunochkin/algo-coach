@@ -1,8 +1,5 @@
-"""The call that answers a survivor: the arguments of a case that catches it.
-
-Arguments alone. The reference computes what they return, so no model writes an
-expected output that could agree with the mistake the case was asked for.
-"""
+"""The call that answers a survivor: the arguments of a case that catches it,
+and never what it returns. `flows.md` gives why."""
 
 import json
 from collections.abc import Sequence
@@ -15,8 +12,7 @@ from algo_coach.generation.errors import GenerationError
 from algo_coach.mutation import Mutant
 from algo_coach.schema import Call
 
-# unmeasured, as every site's is. Greedy: this site writes against a statement
-# that already exists, so its variance buys no diversity
+# unmeasured, as every site's is, and greedy as every site but the generator
 DISCRIMINATION_DEFAULT = Configuration(
     model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio", temperature=0.0
 )
