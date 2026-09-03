@@ -72,6 +72,10 @@ The order matters because each step can reject what came before.
   is killed when it fails at least one case, by a wrong answer, a crash or a
   timeout. Mutants run locally and cost nothing, and only the call that writes
   the new cases is paid for.
+- **A mutant runs under a cap paced by the canonical**, never under the one the
+  reference needs. A change that breaks a loop's progress never returns, and a
+  handful of those at the generation cap cost more seconds than every call in
+  the run. What a mutant has to beat is the solution it is a copy of.
 - **Mutants are made mechanically, with no model call.** A tree walk
   enumerates them, so the set is deterministic and re-derivable from the
   canonical. A model asked to break its own solution writes the mistakes it

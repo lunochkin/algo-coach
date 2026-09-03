@@ -4,7 +4,7 @@ timeout, and the survivors the next call is asked about."""
 from dataclasses import dataclass
 from typing import Any
 
-from algo_coach.mutation import Mutant, Operator, kill, mutants, survivors
+from algo_coach.mutation import FLOOR_MS, PACE, Mutant, Operator, kill, mutants, paced, survivors
 from algo_coach.schema import CaseOutcome
 
 CAP_MS = 1000
@@ -105,3 +105,35 @@ def test_an_empty_case_set_kills_nothing():
     verdicts = kill(mutants(DOUBLE), [], cap_ms=CAP_MS)
 
     assert survivors(verdicts) == verdicts
+
+
+FAST = "def solve(x):\n    return x * 2\n"
+SLOW = "import time\n\n\ndef solve(x):\n    time.sleep(0.2)\n    return x * 2\n"
+
+
+def test_a_canonical_too_fast_to_time_takes_the_floor():
+    """A case answered in under a millisecond would otherwise cap the mutants
+    at nothing."""
+    assert paced(FAST, cases(([2], 4)), cap_ms=CAP_MS) == FLOOR_MS
+
+
+def test_the_cap_follows_the_canonical_s_slowest_case():
+    """What a mutant has to beat is the solution it is a copy of."""
+    assert paced(SLOW, cases(([2], 4)), cap_ms=10_000) >= 200 * PACE
+
+
+def test_the_cap_never_exceeds_the_one_it_was_given():
+    """The run's own cap is the ceiling: a mutant may not outlast what the
+    reference is allowed."""
+    assert paced(SLOW, cases(([2], 4)), cap_ms=500) == 500
+
+
+def test_a_mutant_far_slower_than_the_canonical_is_killed_by_the_clock():
+    """A mutant whose change breaks the loop's progress never returns, and
+    dozens of them at the reference's cap cost more than the calls."""
+    [verdict] = kill(
+        [mutant(SLOW)], cases(([2], 4)), cap_ms=paced(FAST, cases(([2], 4)), cap_ms=CAP_MS)
+    )
+
+    assert not verdict.survived
+    assert verdict.outcome is CaseOutcome.TIMEOUT

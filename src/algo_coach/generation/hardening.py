@@ -14,7 +14,7 @@ from algo_coach.generation.agreement import Disagreement, Settled, SettledCase, 
 from algo_coach.generation.checks import CAP_MS
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
 from algo_coach.generation.steps import SILENT, Notes
-from algo_coach.mutation import ROUNDS, Case, kill, mutants, survivors
+from algo_coach.mutation import ROUNDS, Case, kill, mutants, paced, survivors
 from algo_coach.runner import NoValue, outputs
 
 
@@ -52,14 +52,21 @@ def harden(
     """
     standing = mutants(canonical)
     enumerated = len(standing)
-    notes("mutants", f"{enumerated} enumerated, running them against the set")
+    # paced by the canonical rather than run under the cap the reference needs:
+    # a mutant that breaks the loop's progress never returns, and there are
+    # dozens of them
+    against_ms = paced(canonical, cases, cap_ms=cap_ms)
+    notes(
+        "mutants",
+        f"{enumerated} enumerated, running them under a {against_ms}ms cap",
+    )
     against: Sequence[Case] = cases
     won: list[SettledCase] = []
     dropped = played = 0
 
     while True:
         before, started = len(standing), monotonic()
-        standing = [one.mutant for one in survivors(kill(standing, against, cap_ms=cap_ms))]
+        standing = [one.mutant for one in survivors(kill(standing, against, cap_ms=against_ms))]
         # the runner's own time, which is what the fork server would cut
         notes(
             "mutants",

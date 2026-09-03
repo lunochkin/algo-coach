@@ -16,6 +16,12 @@ from algo_coach.schema import CaseOutcome
 # the reason; a round that kills nothing stops it earlier
 ROUNDS = 2
 
+# what a mutant may take against what the canonical took on the same case, and
+# the floor under it. A mutant an order of magnitude slower is one nobody would
+# ship, and the floor covers a canonical too fast to time
+PACE = 10
+FLOOR_MS = 50
+
 
 class Case(Protocol):
     """A case on either side of landing: a `SettledCase` before, a `TestCase`
@@ -39,6 +45,19 @@ class Verdict:
         return self.outcome is None
 
 
+def paced(code: str, cases: Sequence[Case], *, cap_ms: int) -> int:
+    """The cap the mutants run under: the canonical's own slowest case, times
+    `PACE`, floored and clamped.
+
+    A mutant whose change breaks the loop's progress never returns, and under
+    the cap the reference needs it costs seconds. What it has to beat is the
+    solution it is a copy of.
+    """
+    ran = run(code, [case.args for case in cases], cap_ms=cap_ms)
+    slowest = max((one.elapsed_ms or 0 for one in ran if one.returned), default=0)
+    return min(max(slowest * PACE, FLOOR_MS), cap_ms)
+
+
 def kill(mutants: Sequence[Mutant], cases: Sequence[Case], *, cap_ms: int) -> list[Verdict]:
     """A verdict per mutant, in the order they were enumerated."""
     return [_against(one, cases, cap_ms=cap_ms) for one in mutants]
@@ -60,4 +79,4 @@ def _against(mutant: Mutant, cases: Sequence[Case], *, cap_ms: int) -> Verdict:
     return Verdict(mutant)
 
 
-__all__ = ["ROUNDS", "Case", "Verdict", "kill", "survivors"]
+__all__ = ["FLOOR_MS", "PACE", "ROUNDS", "Case", "Verdict", "kill", "paced", "survivors"]
