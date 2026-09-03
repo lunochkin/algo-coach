@@ -6,8 +6,9 @@ from typing import Any, Protocol
 
 # Thinking and answer together: no model reached through this transport accepts
 # a separate reasoning budget. Sized against a runaway, not against a reading —
-# thinking ran past 4000 tokens on one model and never above 1220 on another.
-MAX_TOKENS = 12000
+# one generation call spent 11,520 tokens thinking and had 466 left for a
+# statement, which arrived cut in half and parsed as nothing.
+MAX_TOKENS = 32000
 
 
 class ProviderError(Exception):
