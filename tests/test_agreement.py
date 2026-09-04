@@ -7,13 +7,13 @@ from algo_coach.generation import Disagreement, Misdeclaration, misdeclared
 from algo_coach.generation import settle as settle_by
 from algo_coach.generation.agreement import agrees
 from algo_coach.runner import NoValue, RunOutcome
-from algo_coach.schema import DraftCase, ExpectedSource
+from algo_coach.schema import DraftCase, ExpectedSource, MachineProvenance
 
 
 def settle(args, **kwargs):
     """The settler with a call spread over it: what proposed the arguments is
     another test's subject."""
-    return settle_by(args, call=a_call(), **kwargs)
+    return settle_by(args, written=MachineProvenance.of(a_call()), **kwargs)
 
 
 def cases(*args) -> list[list]:

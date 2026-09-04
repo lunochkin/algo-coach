@@ -2,7 +2,7 @@ import pytest
 from helpers import a_call
 
 from algo_coach.generation.speedup import CEILING, Missing, search
-from algo_coach.schema import ExpectedSource
+from algo_coach.schema import ExpectedSource, MachineProvenance
 
 # a reference whose cost grows with the square of the size, as a naive solution
 # usually does. Two sleeps take 20ms and three take 45ms, and the cap sits
@@ -20,7 +20,7 @@ def searched(canonical: str = FAST, reference: str = SLEEPS, **overrides):
         overrides.pop("make", lambda size: [size]),
         canonical=canonical,
         reference=reference,
-        call=a_call(),
+        written=MachineProvenance.of(a_call()),
         cap_ms=overrides.pop("cap_ms", CAP_MS),
         largest=overrides.pop("largest", 16),
         measure_ms=overrides.pop("measure_ms", MEASURE_MS),
@@ -142,7 +142,7 @@ def test_an_input_over_the_ceiling_is_not_a_case():
         lambda size: [list(range(size))],
         canonical="def solve(xs):\n    return len(xs)\n",
         reference="def solve(xs):\n    return len(xs)\n",
-        call=a_call(),
+        written=MachineProvenance.of(a_call()),
         cap_ms=CAP_MS,
         largest=10_000,
         measure_ms=MEASURE_MS,

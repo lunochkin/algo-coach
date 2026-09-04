@@ -21,6 +21,41 @@ ANSWERED = (
     (WritingState.HARDENED, "discrimination"),
 )
 
+# every state in the order the steps reach it. `rejected` is terminal rather
+# than a point in the sequence, so it is not among them
+ORDER = (
+    WritingState.DRAFTED,
+    WritingState.CHECKED,
+    WritingState.REFERENCED,
+    WritingState.AGREED,
+    WritingState.BUILT,
+    WritingState.SEARCHED,
+    WritingState.HARDENED,
+    WritingState.LANDED,
+)
+
+
+def reaches(start: WritingState, step: WritingState) -> bool:
+    """Whether a run starting there takes this step, rather than reusing what
+    the draft already holds."""
+    return ORDER.index(step) >= ORDER.index(start)
+
+
+def later(one: WritingState, other: WritingState) -> WritingState:
+    """The further of two states along the sequence."""
+    return max(one, other, key=ORDER.index)
+
+
+def next_step(draft: Draft) -> WritingState:
+    """The step a draft that stopped has not taken."""
+    return ORDER[min(ORDER.index(draft.state) + 1, len(ORDER) - 1)]
+
+
+def starts_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingState:
+    """Where a resume of this draft begins: the first step whose configuration
+    or digest moved, and otherwise the one it never took."""
+    return moved_at(draft, template, bench) or next_step(draft)
+
 
 def sending(draft: Draft, site: str) -> str | None:
     """The digest that site would send about this draft now, or `None` where
@@ -58,4 +93,4 @@ def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingS
     return None
 
 
-__all__ = ["ANSWERED", "moved_at", "sending"]
+__all__ = ["ANSWERED", "ORDER", "later", "moved_at", "next_step", "reaches", "sending", "starts_at"]

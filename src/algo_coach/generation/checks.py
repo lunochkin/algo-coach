@@ -19,7 +19,7 @@ from algo_coach.generation.agreement import (
     settle,
 )
 from algo_coach.runner import NoValue, answered, decide, outputs, run
-from algo_coach.schema import Call, CaseOutcome, Discard, DraftCase, severest
+from algo_coach.schema import CaseOutcome, Discard, DraftCase, MachineProvenance, severest
 
 # the per-case cap at generation, well above the drill loop's: what the
 # reference has to finish under
@@ -102,14 +102,18 @@ def agree(
     cases: Sequence[DraftCase],
     *,
     reference: str,
-    call: Call,
+    written: MachineProvenance,
     cap_ms: int = CAP_MS,
 ) -> Checked:
     """The reference against the canonical's answers, which is what settles a
-    case. The canonical is not run again: `ran` carries what it returned."""
+    case. The canonical is not run again: `ran` carries what it returned.
+
+    `written` is the generator's configuration rather than the blind call's:
+    the arguments are the statement's own cases, whoever computed what they
+    return."""
     args = [case.args for case in cases]
     theirs = outputs(reference, args, cap_ms=cap_ms)
-    settled = settle(args, canonical=ran.returned, reference=theirs, call=call)
+    settled = settle(args, canonical=ran.returned, reference=theirs, written=written)
     kept = {"outcome": ran.outcome, "slowest_ms": ran.slowest_ms}
     if not settled.agreed:
         return Checked(**kept, discard=Discard.DISAGREED, disagreements=settled.disagreements)

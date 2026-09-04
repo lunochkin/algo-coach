@@ -17,7 +17,7 @@ from algo_coach.generation.fuzzing import Fuzzed, Fuzzing
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.mutation import ROUNDS, Case, Mutant, kill, mutants, pace, survivors
 from algo_coach.runner import NoValue, outputs
-from algo_coach.schema import Call
+from algo_coach.schema import Call, MachineProvenance
 
 
 @dataclass(frozen=True)
@@ -251,7 +251,7 @@ def _settled(
         args,
         canonical=[value for _, value in answered],
         reference=theirs,
-        call=call,
+        written=MachineProvenance.of(call),
         round=round,
     )
 

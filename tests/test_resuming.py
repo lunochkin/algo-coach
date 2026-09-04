@@ -1,10 +1,21 @@
-from generating import CANONICAL, FakeWriter
+import pytest
+from generating import CANONICAL, FakeWriter, Raises
 from matching import card, seeded, template
 
 from algo_coach.calls import CallLog, Configuration
 from algo_coach.drafts import DraftStore
-from algo_coach.generation import BENCH, Bench, Corpus, moved_at, write_problems
-from algo_coach.schema import Draft, Template, WritingState
+from algo_coach.generation import (
+    BENCH,
+    Bench,
+    Corpus,
+    Notes,
+    blind,
+    moved_at,
+    resume,
+    write_problems,
+)
+from algo_coach.outcomes import OutcomeLog
+from algo_coach.schema import CallSite, Draft, Template, WritingState
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 # four mutation sites, so a survivor reaches a round and the loop pays a call
@@ -149,3 +160,127 @@ def test_a_moved_configuration_is_returned_over_a_corrected_flag(tmp_path):
     bench = BENCH.model_copy(update={"blind": OTHER})
 
     assert moved_at(held(tmp_path), OPTIMUM, bench) is WritingState.REFERENCED
+
+
+SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
+CLAIMED = [template("longest-valid-window", speedup=True)]
+WRONG = "def solve(xs):\n    return len(xs) + 1\n"
+
+
+def written(tmp_path, model: FakeWriter, drafts: DraftStore, **overrides):
+    """One card, and what a run that stopped left in the store."""
+    (one,) = seeded(tmp_path, card(**overrides))
+    result = write_problems(
+        model,
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        drafts=drafts,
+        outcomes=OutcomeLog(tmp_path),
+    )
+    return one, result
+
+
+def test_a_resume_pays_for_the_step_that_had_no_answer_and_no_other(tmp_path, monkeypatch):
+    """The draft holds the reference the first run bought, so the resume is
+    charged for the input generator alone."""
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    drafts = DraftStore(tmp_path)
+    one, first = written(tmp_path, FakeWriter(solution=SLOW), drafts, templates=CLAIMED)
+    (stopped,) = first.held
+    stages: list[str] = []
+    model = FakeWriter(generator=BUILDS)
+
+    result = resume(
+        model,
+        CallLog(tmp_path),
+        one.templates[0],
+        stopped.draft,
+        Corpus.at(tmp_path),
+        notes=Notes(lambda step: stages.append(f"{step.name}: {step.detail}")),
+        drafts=drafts,
+    )
+
+    assert result.started_at is WritingState.BUILT
+    assert "resume: starting at built" in stages
+    assert blind.SYSTEM not in [asked["system"] for asked in model.calls]
+    assert len(result.drafted) == 1
+    # cleared, since the problem it became is what a reader finds
+    assert drafts.all() == []
+
+
+def test_a_draft_a_raised_call_left_resumes_at_that_call(tmp_path):
+    """The steps before it stand, and the one that answered nothing is where
+    the resume starts."""
+    drafts = DraftStore(tmp_path)
+    one, first = written(tmp_path, Raises(), drafts)
+    (stopped,) = first.held
+    assert stopped.draft.state is WritingState.CHECKED
+
+    result = resume(
+        FakeWriter(),
+        CallLog(tmp_path),
+        one.templates[0],
+        stopped.draft,
+        Corpus.at(tmp_path),
+        drafts=drafts,
+    )
+
+    assert result.started_at is WritingState.REFERENCED
+    assert len(result.drafted) == 1
+
+
+def test_a_resumed_step_writes_a_second_site_outcome(tmp_path):
+    """Never an amendment, as a re-run of any site over one item does. Both
+    group under the writing id the draft carries."""
+    drafts = DraftStore(tmp_path)
+    one, first = written(tmp_path, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
+    (stopped,) = first.held
+
+    resume(
+        FakeWriter(generator=BUILDS),
+        CallLog(tmp_path),
+        one.templates[0],
+        stopped.draft,
+        Corpus.at(tmp_path),
+        bench=BENCH.model_copy(update={"blind": OTHER}),
+        outcomes=OutcomeLog(tmp_path),
+        drafts=drafts,
+    )
+
+    read = [left for left in OutcomeLog(tmp_path).outcomes() if left.site is CallSite.BLIND]
+    assert [left.model for left in read] == [BENCH.blind.model, OTHER.model]
+    assert {left.writing_id for left in read} == {stopped.draft.id}
+
+
+def test_a_resume_that_holds_again_leaves_the_draft_where_it_stopped(tmp_path):
+    """Forward only: the local steps run again, and a draft moved back would
+    re-pay the calls it holds if the run then died."""
+    drafts = DraftStore(tmp_path)
+    one, first = written(tmp_path, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
+    (stopped,) = first.held
+
+    result = resume(
+        FakeWriter(generator=BUILDS),
+        CallLog(tmp_path),
+        one.templates[0],
+        stopped.draft,
+        Corpus.at(tmp_path),
+        drafts=drafts,
+    )
+
+    (again,) = result.held
+    assert again.draft.state is WritingState.SEARCHED
+    assert drafts.get(stopped.draft.id).state is WritingState.SEARCHED
+
+
+def test_a_rejected_draft_is_not_resumed(tmp_path):
+    """Its gate said the answer was wrong, so a resume skipping that gate would
+    land what the gate rejected."""
+    drafts = DraftStore(tmp_path)
+    one, _ = written(tmp_path, FakeWriter(canonical=WRONG), drafts)
+    (gated,) = drafts.all()
+
+    with pytest.raises(ValueError, match="rejected"):
+        resume(FakeWriter(), CallLog(tmp_path), one.templates[0], gated, Corpus.at(tmp_path))

@@ -10,6 +10,7 @@ from algo_coach.generation import GenerationError
 from algo_coach.generation.inputs import INPUTS_DEFAULT, SYSTEM, builder, prompt, read, schema
 from algo_coach.generation.speedup import search
 from algo_coach.runner import defines_solve, outputs
+from algo_coach.schema import MachineProvenance
 
 STATEMENT = "Given a list of at most 1000 readings, return the widest fair stretch."
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
@@ -76,7 +77,7 @@ def test_the_search_runs_a_generated_builder():
         lambda size: outputs(BUILDS, [[size, 0]], cap_ms=1000)[0],
         canonical="def solve(xs):\n    return len(xs)\n",
         reference=SLEEPS,
-        call=a_call(),
+        written=MachineProvenance.of(a_call()),
         cap_ms=55,
         largest=16,
         measure_ms=2000,

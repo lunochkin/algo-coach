@@ -9,7 +9,7 @@ from typing import Any
 from algo_coach.generation.agreement import Disagreement, SettledCase
 from algo_coach.generation.checks import CAP_MS
 from algo_coach.runner import RunOutcome, agrees, as_json, run
-from algo_coach.schema import Call, ExpectedSource, MachineProvenance
+from algo_coach.schema import ExpectedSource, MachineProvenance
 
 # the cap a sitting judges a submission under, which is what the separating
 # case is chosen against. Phase 8 reads it; generation's own cap sits above it
@@ -69,7 +69,7 @@ def search(
     *,
     canonical: str,
     reference: str,
-    call: Call,
+    written: MachineProvenance,
     cap_ms: int,
     largest: int,
     smallest: int = 1,
@@ -132,7 +132,7 @@ def search(
         over_args,
         over,
         canonical=canonical,
-        call=call,
+        written=written,
         cap_ms=cap_ms,
         reference_ms=over_ms,
         reference_value=over_value,
@@ -145,7 +145,7 @@ def _settled(
     size: int,
     *,
     canonical: str,
-    call: Call,
+    written: MachineProvenance,
     cap_ms: int,
     reference_ms: int | None,
     reference_value: Any,
@@ -181,7 +181,7 @@ def _settled(
             args=args,
             expected=expected,
             expected_from=source,
-            written=MachineProvenance.of(call),
+            written=written,
             round=None,
         ),
         **measured,

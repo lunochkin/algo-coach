@@ -14,7 +14,7 @@ from algo_coach.generation.inputs import Built
 from algo_coach.generation.speedup import CEILING
 from algo_coach.mutation import Mutant, kill, survivors
 from algo_coach.runner import NoValue, as_json, outputs
-from algo_coach.schema import Call
+from algo_coach.schema import MachineProvenance
 
 # what the pass builds at, size-major and smallest first: the input a mutant is
 # killed by is the first that kills it, and a small one is a small case
@@ -74,7 +74,7 @@ def pass_over(
     *,
     canonical: str,
     reference: str,
-    call: Call,
+    written: MachineProvenance,
     cap_ms: int,
 ) -> Fuzzing:
     """`fuzz` bound to one problem, which is the shape `harden` runs.
@@ -90,7 +90,7 @@ def pass_over(
             build(built.code, pairs, cap_ms=cap_ms),
             canonical=canonical,
             reference=reference,
-            call=call,
+            written=written,
             cap_ms=cap_ms,
             against_ms=against_ms,
         )
@@ -104,7 +104,7 @@ def fuzz(
     *,
     canonical: str,
     reference: str,
-    call: Call,
+    written: MachineProvenance,
     cap_ms: int,
     against_ms: int,
     ceiling: int = CEILING,
@@ -161,7 +161,7 @@ def fuzz(
         args,
         canonical=[one.expected for one in kept],
         reference=outputs(reference, args, cap_ms=cap_ms),
-        call=call,
+        written=written,
         # in the set the first round's survivors are decided against, which is
         # what `round` zero names
         round=0,

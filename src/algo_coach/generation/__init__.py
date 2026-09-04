@@ -51,7 +51,7 @@ from algo_coach.generation.replay import (
     replay,
     subjects,
 )
-from algo_coach.generation.resuming import moved_at, sending
+from algo_coach.generation.resuming import moved_at, next_step, sending, starts_at
 from algo_coach.generation.run import (
     Bar,
     Discarded,
@@ -60,7 +60,9 @@ from algo_coach.generation.run import (
     Held,
     Inputs,
     Progress,
+    Resumed,
     reject,
+    resume,
     write_one,
     write_problems,
 )
@@ -91,6 +93,7 @@ __all__ = [
     "Failed",
     "GenerationResult",
     "Held",
+    "Resumed",
     "Candidate",
     "Fuzzed",
     "Fuzzing",
@@ -130,8 +133,11 @@ __all__ = [
     "read",
     "reference",
     "moved_at",
+    "next_step",
+    "starts_at",
     "reject",
     "replay",
+    "resume",
     "sending",
     "schema",
     "search",

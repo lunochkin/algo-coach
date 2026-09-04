@@ -199,7 +199,16 @@ before it away.
   outcomes are written once the loop has run, so a draft that stopped before
   that has none to read a configuration from.
 - **What a resume starts at** is the first step whose configuration or digest
-  moved, which is why both are on the draft rather than only the outputs.
+  moved, which is why both are on the draft rather than only the outputs. Where
+  nothing moved it starts at the step the draft never took.
+- **A step before that one is reused rather than asked again**, so a resume
+  pays for the calls that moved and for none of the others.
+- **The local steps are taken again either way.** Running the canonical and
+  settling the cases cost subprocesses rather than a call, so the draft stores
+  neither, and what follows them needs both.
+- **A draft's state moves forward only.** The local steps reach states the
+  draft passed long ago, and one moved back would have the next resume re-pay
+  the calls this draft already holds.
 - **A draft held at `searched` starts at the loop once its template drops the
   claim.** The flag is read beside the bench, since a corrected one moves
   neither a configuration nor a digest.

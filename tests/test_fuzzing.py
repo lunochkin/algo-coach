@@ -11,7 +11,7 @@ from algo_coach.generation.fuzzing import (
 )
 from algo_coach.mutation import kill, mutants, survivors
 from algo_coach.runner import outputs
-from algo_coach.schema import ExpectedSource
+from algo_coach.schema import ExpectedSource, MachineProvenance
 
 # a boundary decision, and a reference that agrees with it by another route
 BOUNDED = "def solve(n):\n    return n > 3\n"
@@ -28,7 +28,7 @@ def fuzzed(inputs, *, canonical: str = BOUNDED, reference: str = AGREES):
         inputs,
         canonical=canonical,
         reference=reference,
-        call=a_call(),
+        written=MachineProvenance.of(a_call()),
         cap_ms=CAP_MS,
         against_ms=CAP_MS,
     )
@@ -203,7 +203,7 @@ def test_an_input_over_the_ceiling_is_kept_once_it_fits():
         [[list(range(12))]],
         canonical=LONGEST,
         reference=LONGEST_BLIND,
-        call=a_call(),
+        written=MachineProvenance.of(a_call()),
         cap_ms=CAP_MS,
         against_ms=CAP_MS,
         ceiling=40,
@@ -220,7 +220,7 @@ def test_an_input_the_shrink_cannot_bring_under_the_ceiling_is_not_kept():
         [[list(range(12))]],
         canonical=LONGEST,
         reference=LONGEST_BLIND,
-        call=a_call(),
+        written=MachineProvenance.of(a_call()),
         cap_ms=CAP_MS,
         against_ms=CAP_MS,
         ceiling=1,

@@ -347,8 +347,11 @@ exit criteria reads a draft.
 - [x] Add `template_id` to `Draft`, optional as on `SiteOutcome`, since a
       technique brief names no form. `moved_at` reads the template's `speedup`,
       and a sweep over held drafts has only the site outcomes to find it from
-- [ ] Resume a draft from that step, reporting which step it started at
+- [x] Resume a draft from that step, reporting which step it started at
 - [ ] Refuse to resume a rejected draft, minting a new one that cites it
+- [ ] Skip a step a resume re-runs whose own configuration and digest stand, as
+      a replay skips a pair. A moved blind configuration re-pays the input
+      generator today, and that prompt is the statement alone
 - [ ] Draw the states into `flows.md` as a mermaid diagram: each step, the
       state it moves the draft to, and the three ways one leaves — landed,
       rejected, or held for a resume. Prose names an exit per step, and which
