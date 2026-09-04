@@ -7,6 +7,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Configuration, Transport, ask
+from algo_coach.generation.contract import ALONE, ENTRY, RUNTIME
 from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call, Card, DraftCase, Problem, ProblemDifficulty, Template
 
@@ -17,7 +18,7 @@ GENERATOR_DEFAULT = Configuration(
     model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio"
 )
 
-SYSTEM = """You write practice problems for one form of a technique.
+SYSTEM = f"""You write practice problems for one form of a technique.
 
 You are given a template: a form a solver reproduces from memory, its cue, and
 the code it comes back as. Write a problem that this form solves.
@@ -28,9 +29,10 @@ Produce four things.
    constraints that bound them, and one worked example. It must not name the
    technique, the template, or the data structure the solution uses. The solver
    has to derive the form from what is asked.
-2. A canonical solution. Python, one module-level function named `solve`,
+2. A canonical solution. {RUNTIME}, {ENTRY},
    taking its arguments positionally. Written to display the form rather than
    to be clever.
+   {ALONE}
 3. Test cases. Each is the positional arguments and the expected return.
    Include the edge cases the statement admits. They must separate a correct
    solution from a plausible wrong one: a solution that handles the ordinary

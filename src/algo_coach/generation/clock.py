@@ -11,6 +11,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Configuration, Transport, ask, prompt_hash
+from algo_coach.generation.contract import ALONE, ENTRY, RUNTIME
 from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call
 
@@ -21,7 +22,7 @@ CLOCK_DEFAULT = Configuration(
     model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio"
 )
 
-SYSTEM = """You write the slowest correct solution to a problem statement.
+SYSTEM = f"""You write the slowest correct solution to a problem statement.
 
 Another solution to the same statement is fast, and yours is what its speed is
 measured against. Correctness is the only thing asked of you. Being slow is
@@ -39,9 +40,9 @@ and do not stop a loop early. A loop that runs to the end is what is wanted.
 You are told which approach to avoid. Do not use it, and do not use another
 approach that reaches the same running time by a different route.
 
-Python, one module-level function named `solve`, taking its arguments
-positionally in the order the statement describes them. The code stands
-alone: no input is read and nothing is printed."""
+{RUNTIME}, {ENTRY}, taking its arguments
+positionally in the order the statement describes them.
+{ALONE}"""
 
 
 class Naive(BaseModel):

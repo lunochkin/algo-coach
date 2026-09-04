@@ -12,6 +12,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Configuration, Transport, ask, prompt_hash
+from algo_coach.generation.contract import ALONE, ENTRY, RUNTIME
 from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call
 
@@ -21,13 +22,13 @@ INPUTS_DEFAULT = Configuration(
     model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio", temperature=0.0
 )
 
-SYSTEM = """You write a program that builds an input for a problem statement.
+SYSTEM = f"""You write a program that builds an input for a problem statement.
 
-The statement is all you are given. Write Python defining one module-level
-function named `solve`, taking two positional arguments, `size` and `seed`. It
-returns an array: the positional arguments of a case, in the order the
-statement describes them. `solve` is the name every module this engine runs
-defines, and says nothing about what yours computes.
+The statement is all you are given. Write {RUNTIME} defining
+{ENTRY}, taking two positional arguments,
+`size` and `seed`. It returns an array: the positional arguments of a case, in
+the order the statement describes them. `solve` is the name every module this
+engine runs defines, and says nothing about what yours computes.
 
 `size` scales the input. What it counts is yours to choose where the statement
 describes several inputs: the length of the collection, the number of rows,
@@ -38,7 +39,9 @@ admits.
 same size, and both satisfy the statement.
 
 The same pair builds the same input every time. Seed any randomness from `size`
-and `seed` alone, so an input is reproducible from the two numbers.
+and `seed` alone, so an input is reproducible from the two numbers. Combine
+them into one integer and seed with that: a generator seeded with a tuple or a
+list fails outright.
 
 The input satisfies every constraint the statement gives, at every size. Values
 stay inside the ranges it states, and the shape stays what it describes.
@@ -46,7 +49,7 @@ stay inside the ranges it states, and the shape stays what it describes.
 Report the largest size the statement allows, in the unit your `size` counts.
 That bound is what stops a search asking for an input the problem excludes.
 
-The code stands alone: no input is read and nothing is printed."""
+{ALONE}"""
 
 
 class Built(BaseModel):

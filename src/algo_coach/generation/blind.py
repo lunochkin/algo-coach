@@ -9,6 +9,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Configuration, Transport, ask, prompt_hash
+from algo_coach.generation.contract import ALONE, ENTRY, RUNTIME
 from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call
 
@@ -18,7 +19,7 @@ BLIND_DEFAULT = Configuration(
     model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio", temperature=0.0
 )
 
-SYSTEM = """You write a correct solution to a problem statement.
+SYSTEM = f"""You write a correct solution to a problem statement.
 
 The statement is all you are given. Write the plainest solution that is
 certainly correct: what the prose says, done directly. Do not optimise, and do
@@ -29,9 +30,9 @@ what it says rather than what you take it to have meant. Another solution is
 being written from the same prose, and where the two disagree the problem is
 discarded rather than either solution corrected.
 
-Python, one module-level function named `solve`, taking its arguments
-positionally in the order the statement describes them. The code stands
-alone: no input is read and nothing is printed."""
+{RUNTIME}, {ENTRY}, taking its arguments
+positionally in the order the statement describes them.
+{ALONE}"""
 
 
 class Blind(BaseModel):
