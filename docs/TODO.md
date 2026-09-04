@@ -363,7 +363,7 @@ is in `corpus.md`.
 - [x] Add the naive step to `ANSWERED` in `resuming.py`, so a moved naive
       configuration re-pays that call alone. A test pins that the reference and
       the builder are reused
-- [ ] Re-ask the naive site on a resume where the search separated nothing,
+- [x] Re-ask the naive site on a resume where the search separated nothing,
       though its configuration and digest stand. It is sampled, so a second
       call is a second draw rather than the answer already stored
 - [ ] Run `generate --count 5` on `answer-space` and record the separating size

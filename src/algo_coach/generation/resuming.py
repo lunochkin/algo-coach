@@ -95,6 +95,16 @@ def re_asks(draft: Draft, site: str, template: Template, bench: Bench = BENCH) -
     return not at_configuration(taken, getattr(bench, site), digest)
 
 
+def draws_again(draft: Draft, template: Template) -> bool:
+    """Whether a resume asks the clock again though nothing about the bench
+    moved.
+
+    The search stopped with no case, and the clock is the one sampled site: a
+    second call is a second draw rather than the answer already stored.
+    """
+    return draft.state is WritingState.SEARCHED and template.speedup and draft.separating is None
+
+
 def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingState | None:
     """The first step to re-run, or `None` where the bench and the template
     answer this draft as it stands.
@@ -110,6 +120,10 @@ def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingS
     # step that has not run
     if draft.state is WritingState.SEARCHED and not template.speedup:
         return WritingState.HARDENED
+    # read after the flag: a corrected claim releases the draft without paying
+    # for a draw the search no longer needs
+    if draws_again(draft, template):
+        return WritingState.PACED
     return None
 
 
@@ -117,6 +131,7 @@ __all__ = [
     "ANSWERED",
     "ORDER",
     "later",
+    "draws_again",
     "moved_at",
     "next_step",
     "re_asks",

@@ -31,7 +31,7 @@ from algo_coach.generation.generator import (
 from algo_coach.generation.hardening import harden
 from algo_coach.generation.inputs import Built, builder
 from algo_coach.generation.landing import Corpus, land, written_by
-from algo_coach.generation.resuming import later, re_asks, reaches, starts_at
+from algo_coach.generation.resuming import draws_again, later, re_asks, reaches, starts_at
 from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, search
 from algo_coach.generation.steps import SILENT, Notes, Step
 from algo_coach.generation.writing import UNRECORDED, Writing
@@ -346,7 +346,9 @@ def carried(
             configuration=bench.clock,
             cap_ms=cap_ms,
             notes=notes,
-            reuse=not re_asks(draft, "clock", template, bench),
+            # drawn again where the search separated nothing, though nothing
+            # about the bench moved: the site is the one that is sampled
+            reuse=not re_asks(draft, "clock", template, bench) and not draws_again(draft, template),
         )
         if clock.code is not None and clock.call is not None:
             draft = advanced(

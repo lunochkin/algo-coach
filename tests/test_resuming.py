@@ -15,6 +15,7 @@ from algo_coach.generation import (
     inputs,
     moved_at,
     resume,
+    sending,
     write_problems,
 )
 from algo_coach.outcomes import OutcomeLog
@@ -151,10 +152,10 @@ def held(tmp_path) -> Draft:
     return one.draft
 
 
-def test_a_claim_that_still_stands_leaves_the_draft_at_the_search(tmp_path):
-    """Nothing separated the two solutions, and the claim is what says a case
-    has to."""
-    assert moved_at(held(tmp_path), CLAIMS, BENCH) is None
+def test_an_unseparated_draft_draws_the_clock_again(tmp_path):
+    """Nothing about the bench moved, and the site is the one that is sampled:
+    a second call is a second draw rather than the answer already stored."""
+    assert moved_at(held(tmp_path), CLAIMS, BENCH) is WritingState.PACED
 
 
 def test_a_corrected_speedup_resumes_the_draft_the_search_held(tmp_path):
@@ -173,11 +174,13 @@ def test_a_moved_clock_configuration_starts_at_the_naive_solution(tmp_path):
 
 def test_an_edited_trigger_re_asks_the_clock_alone(tmp_path):
     """The one prompt carrying more than the statement, so editing a form
-    re-asks the drafts written for it and leaves the rest."""
+    moves the digest of the drafts written for it and no others."""
     edited = Template(id="t1", **template("longest-valid-window", speedup=True, trigger="Else."))
 
-    assert moved_at(held(tmp_path), CLAIMS, BENCH) is None
+    written_at = held(tmp_path).clock.prompt_hash
+
     assert moved_at(held(tmp_path), edited, BENCH) is WritingState.PACED
+    assert sending(held(tmp_path), "clock", edited) != written_at
 
 
 def test_a_moved_configuration_is_returned_over_a_corrected_flag(tmp_path):
@@ -206,6 +209,31 @@ def written(tmp_path, model: FakeWriter, drafts: DraftStore, **overrides):
         outcomes=OutcomeLog(tmp_path),
     )
     return one, result
+
+
+def test_a_resumed_draw_separates_where_the_stored_clock_did_not(tmp_path, monkeypatch):
+    """The exit a held draft takes where nothing was wrong with the run: the
+    site is asked again and this answer is slow."""
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    drafts = DraftStore(tmp_path)
+    one, first = written(tmp_path, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
+    (stopped,) = first.held
+    assert stopped.draft.state is WritingState.SEARCHED
+    model = FakeWriter(generator=BUILDS, slow=SLOW)
+
+    result = resume(
+        model,
+        CallLog(tmp_path),
+        one.templates[0],
+        stopped.draft,
+        Corpus.at(tmp_path),
+        drafts=drafts,
+    )
+
+    asked = [call["system"] for call in model.calls]
+    assert asked == [clock.SYSTEM]
+    assert result.started_at is WritingState.PACED
+    assert len(result.drafted) == 1
 
 
 def test_a_moved_clock_re_pays_that_call_and_no_other(tmp_path, monkeypatch):

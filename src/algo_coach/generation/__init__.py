@@ -52,7 +52,14 @@ from algo_coach.generation.replay import (
     replay,
     subjects,
 )
-from algo_coach.generation.resuming import ORDER, moved_at, next_step, sending, starts_at
+from algo_coach.generation.resuming import (
+    ORDER,
+    draws_again,
+    moved_at,
+    next_step,
+    sending,
+    starts_at,
+)
 from algo_coach.generation.run import (
     Bar,
     Discarded,
@@ -136,6 +143,7 @@ __all__ = [
     "read",
     "reference",
     "ORDER",
+    "draws_again",
     "moved_at",
     "naive",
     "next_step",
