@@ -1,4 +1,4 @@
-from helpers import PROVENANCE, a_call
+from helpers import PROVENANCE
 
 from algo_coach.drafts import DraftStore
 from algo_coach.schema import Discard, Draft, ExpectedSource, WritingState
@@ -51,7 +51,7 @@ def test_what_a_step_left_reads_back_whole(tmp_path):
                 "args": [[1, 2]],
                 "expected": 2,
                 "expected_from": "reference",
-                "call": a_call().model_dump(mode="json"),
+                "written": PROVENANCE,
             }
         ],
         builder="def solve(size, seed): ...",

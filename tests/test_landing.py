@@ -54,7 +54,7 @@ def drafted(**overrides) -> Draft:
                 args=[[1, 2, 3]],
                 expected=3,
                 expected_from=ExpectedSource.REFERENCE,
-                call=call("call-3"),
+                written=MachineProvenance.of(call("call-3")),
             )
         ]
     } | overrides
@@ -150,7 +150,7 @@ def test_a_case_keeps_the_solution_that_computed_it(tmp_path, template):
                 args=[[1]],
                 expected=1,
                 expected_from=ExpectedSource.CANONICAL,
-                call=call("call-3"),
+                written=MachineProvenance.of(call("call-3")),
             )
         ]
     )
@@ -170,7 +170,7 @@ def test_a_case_keeps_the_round_that_won_it(tmp_path, template):
                 args=[[1]],
                 expected=1,
                 expected_from=ExpectedSource.REFERENCE,
-                call=call("call-3"),
+                written=MachineProvenance.of(call("call-3")),
                 round=2,
             )
         ]

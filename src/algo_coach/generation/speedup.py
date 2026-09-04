@@ -9,7 +9,7 @@ from typing import Any
 from algo_coach.generation.agreement import Disagreement, SettledCase
 from algo_coach.generation.checks import CAP_MS
 from algo_coach.runner import RunOutcome, agrees, as_json, run
-from algo_coach.schema import Call, ExpectedSource
+from algo_coach.schema import Call, ExpectedSource, MachineProvenance
 
 # the cap a sitting judges a submission under, which is what the separating
 # case is chosen against. Phase 8 reads it; generation's own cap sits above it
@@ -177,7 +177,13 @@ def _settled(
         return Searched(missing=Missing.CASE_TOO_LARGE, **measured)
     return Searched(
         # no round won it: the search runs after the loop
-        case=SettledCase(args=args, expected=expected, expected_from=source, call=call, round=None),
+        case=SettledCase(
+            args=args,
+            expected=expected,
+            expected_from=source,
+            written=MachineProvenance.of(call),
+            round=None,
+        ),
         **measured,
     )
 

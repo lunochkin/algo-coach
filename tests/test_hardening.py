@@ -148,7 +148,7 @@ def test_a_won_case_names_the_round_that_proposed_it(tmp_path):
     configuration, and the stored case copies that one."""
     hardened = run(tmp_path, Answers(rounds=[BOUNDARY]), WEAK)
 
-    assert {one.call.id for one in hardened.cases} == {hardened.call.id}
+    assert {one.written.call_id for one in hardened.cases} == {hardened.call.id}
 
 
 def test_a_won_case_names_the_round_that_won_it(tmp_path):

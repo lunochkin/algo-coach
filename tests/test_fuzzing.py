@@ -82,7 +82,7 @@ def test_the_case_names_the_call_that_built_it():
     call that wrote the statement."""
     found = fuzzed([[3]])
 
-    assert found.cases[0].call.id == "call-1"
+    assert found.cases[0].written.call_id == "call-1"
 
 
 def test_an_input_the_canonical_cannot_answer_is_dropped():

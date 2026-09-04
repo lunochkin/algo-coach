@@ -57,7 +57,7 @@ def test_the_case_names_the_call_that_wrote_the_input_generator():
     is what the stored case compares under."""
     found = searched()
 
-    assert found.case.call.id == "call-1"
+    assert found.case.written.call_id == "call-1"
 
 
 def test_the_separating_case_was_won_by_no_round():

@@ -10,7 +10,7 @@ from typing import Any
 
 from algo_coach.runner.encoding import agrees
 from algo_coach.runner.outputs import NoValue
-from algo_coach.schema import Call, DraftCase, ExpectedSource, SettledCase
+from algo_coach.schema import Call, DraftCase, ExpectedSource, MachineProvenance, SettledCase
 
 
 @dataclass(frozen=True)
@@ -75,6 +75,8 @@ def settle(
         raise ValueError("one output per case, from each solution")
 
     settled = Settled()
+    # copied once: every case of one call carries the same configuration
+    written = MachineProvenance.of(call)
     for one, ours, theirs in zip(args, canonical, reference, strict=True):
         case = list(one)
         if isinstance(theirs, NoValue):
@@ -83,7 +85,7 @@ def settle(
                     args=case,
                     expected=ours,
                     expected_from=ExpectedSource.CANONICAL,
-                    call=call,
+                    written=written,
                     round=round,
                 )
             )
@@ -93,7 +95,7 @@ def settle(
                     args=case,
                     expected=theirs,
                     expected_from=ExpectedSource.REFERENCE,
-                    call=call,
+                    written=written,
                     round=round,
                 )
             )

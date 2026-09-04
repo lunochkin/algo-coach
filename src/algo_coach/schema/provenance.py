@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 from typing import ClassVar
 
 from pydantic import BaseModel
+
+from algo_coach.schema.call import Call
 
 
 class MachineProvenance(BaseModel):
@@ -19,6 +23,23 @@ class MachineProvenance(BaseModel):
 
     PROVENANCE: ClassVar[tuple[str, ...]] = ("model", "effort", "pin", "prompt_hash", "call_id")
     RECORDED: ClassVar[tuple[str, ...]] = (*PROVENANCE, "provider", "temperature", "cost")
+
+    @classmethod
+    def of(cls, call: Call) -> MachineProvenance:
+        """What one call's record copies onto its own: all of the
+        configuration, since a record carrying part of it compares with
+        nothing. `pin` reads as empty rather than absent, or an unpinned call
+        would write a provenance no machine record may have."""
+        return cls(
+            model=call.model,
+            effort=call.effort,
+            prompt_hash=call.prompt_hash,
+            call_id=call.id,
+            pin=call.pin or "",
+            temperature=call.temperature,
+            provider=call.provider,
+            cost=call.cost,
+        )
 
     def check_provenance(self, machine: bool) -> None:
         """All of it on a machine reading, none of it on a hand one."""

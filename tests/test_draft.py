@@ -6,6 +6,7 @@ from algo_coach.schema import (
     Discard,
     Draft,
     ExpectedSource,
+    MachineProvenance,
     ProblemDifficulty,
     ProblemStatus,
     SiteOutcome,
@@ -29,7 +30,7 @@ def a_settled_case(**overrides) -> dict:
         "args": [[1, 2]],
         "expected": 2,
         "expected_from": "reference",
-        "call": a_call(),
+        "written": MachineProvenance.of(a_call()),
     } | overrides
 
 
@@ -186,7 +187,7 @@ def test_a_draft_holds_the_cases_the_runs_settled():
     draft = make_draft(cases=[a_settled_case()])
 
     assert draft.cases[0].expected_from is ExpectedSource.REFERENCE
-    assert draft.cases[0].call.id == "call-1"
+    assert draft.cases[0].written.call_id == "call-1"
 
 
 def test_a_draft_holds_the_builder_and_its_bound():

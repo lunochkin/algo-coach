@@ -12,7 +12,6 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from algo_coach.schema.call import Call
 from algo_coach.schema.case import ExpectedSource
 from algo_coach.schema.outcome import Discard
 from algo_coach.schema.problem import ProblemDifficulty
@@ -62,9 +61,10 @@ class SettledCase(BaseModel):
     args: list[Any]
     expected: Any
     expected_from: ExpectedSource
-    # the call whole rather than by id: the `TestCase` this becomes copies the
-    # configuration
-    call: Call
+    # the configuration rather than the call: the `TestCase` this becomes
+    # copies it, and a call carries its prompt whole, which every case of one
+    # draft would then hold a copy of
+    written: MachineProvenance
     round: int | None = 0  # as `TestCase.round`
 
 

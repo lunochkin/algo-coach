@@ -41,15 +41,7 @@ class Corpus:
 def written_by(call: Call) -> dict[str, Any]:
     # one mapping rather than fields a call site can fill partly: a record
     # carries all of a configuration or none of it
-    return {
-        "model": call.model,
-        "effort": call.effort,
-        "prompt_hash": call.prompt_hash,
-        "call_id": call.id,
-        "pin": call.pin or "",
-        "temperature": call.temperature,
-        "provider": call.provider,
-    }
+    return MachineProvenance.of(call).model_dump()
 
 
 def copied(provenance: MachineProvenance | None) -> dict[str, Any]:
@@ -88,7 +80,7 @@ def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
                 case.expected,
                 expected_from=case.expected_from,
                 round=case.round,
-                **written_by(case.call),
+                **case.written.model_dump(),
             )
         )
     canonical = mint.solution(problem.id, draft.canonical, SolutionRole.CANONICAL, **written)
