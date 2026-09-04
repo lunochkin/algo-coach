@@ -32,24 +32,38 @@ from algo_coach.matches import MatchLog
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Call, Card, Draft, WritingState
+from algo_coach.schema import (
+    Call,
+    Card,
+    Draft,
+    MachineProvenance,
+    SettledCase,
+    SiteOutcome,
+    WritingState,
+)
 from algo_coach.solutions import SolutionLog
 
-# the three inputs a run can be aimed at. Each reads a different store, so a
-# run doing two would report both under one summary
-MODES = ("replay", "resume", "drafts")
+# the modes a run can be put in. Each reads its own input and reports its own
+# summary, so a run doing two would print both under one
+MODES = ("replay", "resume", "drafts", "draft")
+
+# how wide one case prints before it is cut. A separating input runs to
+# thousands of elements, and the line is there to identify a case
+CASE_WIDTH = 96
 
 
 def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
     if len([one for one in MODES if getattr(args, one)]) > 1:
         named = ", ".join(f"--{one}" for one in MODES)
-        parser.exit(2, f"generate: {named} read different stores, so one at a time\n")
+        parser.exit(2, f"generate: {named} each do their own work, so one at a time\n")
     if args.replay:
         return replayed(args, parser, root)
     if args.resume:
         return resumed(args, parser, root)
     if args.drafts:
         return listed(args, parser, root)
+    if args.draft:
+        return shown(args, parser, root)
     aimed = resolve(args, parser, root)
     api = transport(args, parser)
     calls, corpus = CallLog(root), Corpus.at(root)
@@ -193,6 +207,142 @@ def drafts_summary(waiting: list[tuple[Draft, Target | None]], bench: Bench = BE
         if target is not None and draft.state not in (WritingState.REJECTED, WritingState.LANDED)
     ]
     return f"{len(waiting)} draft(s) stored, {len(resuming)} would resume, {wrote(bench)}"
+
+
+def shown(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+    """One stored draft, whole: what each step left and what a resume would do
+    with it. The listing names a draft, and this is what reads one.
+
+    It makes no call, as `--drafts` makes none.
+    """
+    if args.card or args.template or args.gaps:
+        parser.exit(2, "generate: --draft names the draft it reads, so it is aimed at nothing\n")
+    draft = one_of(DraftStore(root).all(), args.draft, parser)
+    print(
+        report(
+            draft,
+            written_for(CardStore(root).all(), draft),
+            OutcomeLog(root).for_writing(draft.id),
+            chosen_bench(args, parser),
+        )
+    )
+
+
+def one_of(stored: list[Draft], wanted: str, parser: argparse.ArgumentParser) -> Draft:
+    """The draft that id names, by prefix: an id is 32 hex characters, and a
+    debugging read should not need all of them."""
+    matched = [draft for draft in stored if draft.id.startswith(wanted)]
+    if not matched:
+        parser.exit(1, f"generate: no draft {wanted}\n")
+    if len(matched) > 1:
+        named = ", ".join(draft.id for draft in matched)
+        parser.exit(2, f"generate: {wanted} names {len(matched)} drafts: {named}\n")
+    return matched[0]
+
+
+def report(draft: Draft, target: Target | None, outcomes: list[SiteOutcome], bench: Bench) -> str:
+    """One draft as a page: where it stands, what each step was written at, the
+    problem itself, and what the sites left."""
+    return "\n".join(
+        [
+            f"# {draft.title} ({draft.id})",
+            "",
+            heading(draft, target),
+            waiting_on(draft, target, bench),
+            "",
+            "## configurations",
+            *(f"  {name:<15} {configured(getattr(draft, name))}" for name in Bench.model_fields),
+            "",
+            "## statement",
+            "",
+            draft.statement,
+            "",
+            *cases(draft),
+            *listing_code("canonical", draft.canonical),
+            *listing_code("reference", draft.reference),
+            *listing_code(f"input generator (up to {draft.largest})", draft.builder),
+            *sites(outcomes),
+        ]
+    )
+
+
+def heading(draft: Draft, target: Target | None) -> str:
+    """The form it was briefed on and how far it was written. A technique brief
+    names no form, and neither does a draft whose card is gone."""
+    form = target.template.slug if target is not None else str(draft.template_id)
+    return f"{form}, {draft.difficulty}, {draft.state}"
+
+
+def configured(written: MachineProvenance | None) -> str:
+    """What one step ran at, or that it never ran. The digest too: it is half of
+    what a resume compares, and a prompt edit moves it alone."""
+    if written is None:
+        return "not taken"
+    at = sampled(written.temperature)
+    return f"{written.model}, effort {written.effort} @{at}, {written.prompt_hash} @ {written.pin}"
+
+
+def cases(draft: Draft) -> list[str]:
+    """The set as the steps left it: what the two solutions settled, what the
+    rounds won, and the case the search stored. The declared set stands where
+    no reference has settled it yet."""
+    if not draft.cases:
+        declared = [f"  {shortened(one.args, one.expected)}" for one in draft.declared]
+        return ["## cases (declared, unsettled)", *declared, ""]
+    separating = [draft.separating] if draft.separating is not None else []
+    counted = f"{len(draft.cases)} settled, {len(draft.won)} won, {len(separating)} separating"
+    return [
+        f"## cases ({counted})",
+        *(f"  {settled(one)}" for one in [*draft.cases, *draft.won, *separating]),
+        "",
+    ]
+
+
+def settled(case: SettledCase) -> str:
+    """One case, and whose answer it carries. The round is what a replay
+    rebuilds the set from, so it prints beside the source."""
+    return f"{shortened(case.args, case.expected)}  [{case.expected_from}, round {case.round}]"
+
+
+def shortened(args: object, expected: object) -> str:
+    """Arguments and return on one line, cut to a width. A separating input runs
+    to thousands of elements, where the line is here to identify a case."""
+    line = f"{args} -> {expected}"
+    return line if len(line) <= CASE_WIDTH else line[: CASE_WIDTH - 1] + "…"
+
+
+def listing_code(name: str, code: str | None) -> list[str]:
+    """One step's code, fenced. A step that never ran says so rather than
+    printing an empty block."""
+    if code is None:
+        return [f"## {name}", "", "not written", ""]
+    return [f"## {name}", "", "```python", code.rstrip(), "```", ""]
+
+
+def sites(outcomes: list[SiteOutcome]) -> list[str]:
+    """What each call site left on this writing, in the order they were
+    written. A resumed step wrote a second record, so a site can appear twice."""
+    if not outcomes:
+        return ["## sites", "", "none recorded: they are written once the loop has run"]
+    return ["## sites", *(f"  {left(one)}" for one in outcomes)]
+
+
+def left(one: SiteOutcome) -> str:
+    """One site outcome: its gate, then the counters that are not zero. Every
+    counter would print three zeroes for the sites that carry none."""
+    parts = [f"{one.site:<15} {one.model}"]
+    if one.gate is not None:
+        parts.append(f"gate {one.gate}{f': {one.detail}' if one.detail else ''}")
+    for name in ("mutants", "survived", "killed", "won", "offered"):
+        if getattr(one, name):
+            parts.append(f"{name} {getattr(one, name)}")
+    if one.rounds:
+        parts.append(f"rounds {one.rounds}")
+    if one.separating is not None:
+        parts.append(f"separating at {one.separating}")
+    if one.unseparated is not None:
+        parts.append(f"unseparated: {one.unseparated}")
+    return "  ".join(parts)
 
 
 def written_for(cards: list[Card], draft: Draft) -> Target | None:

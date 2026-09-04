@@ -203,6 +203,11 @@ def main() -> None:
         help="list the stored drafts, naming the step each would resume at, without calling",
     )
     generate_parser.add_argument(
+        "--draft",
+        metavar="ID",
+        help="read one stored draft whole, by id or a prefix of one, without calling",
+    )
+    generate_parser.add_argument(
         "--limit", type=int, help="how many stored problems to replay; every one otherwise"
     )
     generate_parser.add_argument(

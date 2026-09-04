@@ -743,3 +743,93 @@ def test_a_listing_is_aimed_at_nothing(root, monkeypatch, capsys):
 
     assert exit_info.value.code == 2
     assert "aimed at nothing" in capsys.readouterr().err
+
+
+def reading(monkeypatch, wanted: str, *argv: str) -> None:
+    """One stored draft, read whole. It makes no call, as a listing makes
+    none."""
+    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--draft", wanted, *argv])
+    cli.main()
+
+
+def searched_draft(root, monkeypatch, capsys):
+    """What the search leaves: every call answered, and no input separated the
+    two solutions."""
+    seeded(root, card(templates=CLAIMS))
+    run(monkeypatch, FakeWriter(generator=BUILDS), "longest-valid-window")
+    capsys.readouterr()
+    (stored,) = DraftStore(root).all()
+    return stored
+
+
+def test_a_draft_is_read_whole_by_its_id(root, monkeypatch, capsys):
+    """What a listing cannot hold: the statement, both solutions and the set
+    the steps settled."""
+    stored = searched_draft(root, monkeypatch, capsys)
+    spent = len(CallLog(root).all())
+
+    reading(monkeypatch, stored.id)
+
+    out = capsys.readouterr().out
+    assert f"# {stored.title} ({stored.id})" in out
+    assert "longest-valid-window, medium, searched" in out
+    assert stored.statement in out
+    assert out.count("```python") == 3  # the canonical, the reference and the builder
+    assert f"## cases ({len(stored.cases)} settled, 0 won, 0 separating)" in out
+    # the loop never ran, so the step that would have paid for it took nothing
+    assert "discrimination  not taken" in out
+    assert len(CallLog(root).all()) == spent
+
+
+def test_the_sites_say_which_step_left_the_draft_where_it_is(root, monkeypatch, capsys):
+    """The gate, the configuration behind it and the counters are readable
+    nowhere else."""
+    stored = searched_draft(root, monkeypatch, capsys)
+
+    reading(monkeypatch, stored.id)
+
+    out = capsys.readouterr().out
+    assert "## sites" in out
+    assert "unseparated: reference_finished" in out
+
+
+def test_a_draft_is_named_by_a_prefix_of_its_id(root, monkeypatch, capsys):
+    """An id is 32 hex characters, and a debugging read should not need all of
+    them."""
+    stored = searched_draft(root, monkeypatch, capsys)
+
+    reading(monkeypatch, stored.id[:8])
+
+    assert stored.statement in capsys.readouterr().out
+
+
+def test_a_prefix_naming_two_drafts_is_refused(root, monkeypatch, capsys):
+    """Reading whichever sorted first would answer about a draft nobody named."""
+    stored = searched_draft(root, monkeypatch, capsys)
+    drafts = DraftStore(root)
+    drafts.put(stored.model_copy(update={"id": stored.id[:4] + "f" * 28}))
+
+    with pytest.raises(SystemExit) as exit_info:
+        reading(monkeypatch, stored.id[:4])
+
+    assert exit_info.value.code == 2
+    assert "names 2 drafts" in capsys.readouterr().err
+
+
+def test_a_draft_that_is_not_stored_says_so(root, monkeypatch, capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        reading(monkeypatch, "beef")
+
+    assert exit_info.value.code == 1
+    assert "no draft beef" in capsys.readouterr().err
+
+
+def test_reading_a_draft_is_aimed_at_nothing(root, monkeypatch, capsys):
+    """It names the draft it reads, as a listing reads them all."""
+    stored = searched_draft(root, monkeypatch, capsys)
+
+    with pytest.raises(SystemExit) as exit_info:
+        reading(monkeypatch, stored.id, "--gaps")
+
+    assert exit_info.value.code == 2
+    assert "aimed at nothing" in capsys.readouterr().err

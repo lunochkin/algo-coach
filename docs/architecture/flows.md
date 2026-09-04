@@ -278,6 +278,10 @@ a second one writes a different problem.
   state, its gate and the step a resume would start at. A sweep is aimed at
   every held draft, so what it will spend is otherwise readable only once it
   has spent it.
+- **One draft is read whole by `generate --draft <id>`**: the statement, both
+  solutions, the set the steps settled, and the site outcomes of its writing
+  id. A listing is a line per draft, where reading why one stopped needs the
+  text its calls produced.
 - **A rejected draft is listed too.** Its gate is readable nowhere else, and a
   listing that dropped it would leave a run reporting one fewer draft than the
   store holds.
