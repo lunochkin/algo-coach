@@ -312,7 +312,7 @@ exit criteria reads a draft.
 
 - [x] Write the states, what a draft holds and what a resume may not do into
       `flows.md`
-- [ ] Add `WritingState` — drafted, checked, referenced, agreed, built,
+- [x] Add `WritingState` — drafted, checked, referenced, agreed, built,
       searched, hardened, landed, rejected — and tie `rejected` to the gate
       that reached it, as `Problem` ties a retirement to its reason
 - [ ] Add `Draft`, holding each step's output and the provenance of the call
