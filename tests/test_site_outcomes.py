@@ -262,6 +262,22 @@ SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    ret
 CLAIMS = template("longest-valid-window", speedup=True)
 
 
+def test_the_clock_leaves_a_record_where_it_answered(tmp_path):
+    """A site that made a call writes one, or what the run paid for is
+    readable nowhere."""
+    _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
+
+    assert sites(outcomes)[CallSite.CLOCK].model == BENCH.clock.model
+
+
+def test_a_form_that_is_its_own_optimum_leaves_no_clock_record(tmp_path):
+    """Absence on a site means it was never asked, and nothing measures a form
+    the naive approach does not beat."""
+    _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS))
+
+    assert CallSite.CLOCK not in sites(outcomes)
+
+
 def test_the_inputs_record_carries_the_size_the_search_found(tmp_path, monkeypatch):
     """What the site is scored on: the code it wrote is what the search ran to
     reach a size."""

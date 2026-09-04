@@ -455,6 +455,8 @@ def stopped_by(one: Held) -> str:
         return f"the call raised: {one.failed}"
     if one.unbuilt is not None:
         return f"no input generator: {one.unbuilt}"
+    if one.unpaced is not None:
+        return f"no naive solution: {one.unpaced}"
     if one.unseparated is not None:
         # the size where a separation was proved and no case stored it, since
         # printing it alone would read as a case the problem carries

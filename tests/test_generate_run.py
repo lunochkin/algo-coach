@@ -1,15 +1,18 @@
-from generating import FakeWriter
+from generating import NAIVE, FakeWriter
 from helpers import PROVENANCE
 from matching import card, seeded, template
 
 from algo_coach.calls import CallLog, Configuration
 from algo_coach.cases import CaseLog
+from algo_coach.drafts import DraftStore
 from algo_coach.generation import (
+    BENCH,
     GENERATOR_DEFAULT,
     Bench,
     Corpus,
     Progress,
     blind,
+    clock,
     discrimination,
     generator,
     inputs,
@@ -296,6 +299,78 @@ def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
     assert result.drafted == []
     assert [one.discard for one in result.discarded] == ["disagreed"]
     assert CaseLog(tmp_path).cases() == []
+
+
+def test_the_clock_is_written_between_the_builder_and_the_search(tmp_path, monkeypatch):
+    """The builder is written for every problem, since the fuzz pass builds its
+    inputs with it, and the search measures against what this step writes."""
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    (one,) = seeded(tmp_path, card(**claiming({})))
+    stages: list[str] = []
+
+    write_problems(
+        FakeWriter(solution=SLOW, generator=BUILDS),
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        on_step=lambda step: stages.append(step.name),
+    )
+
+    assert stages.index("inputs") < stages.index("clock") < stages.index("timing")
+
+
+def test_a_form_that_is_its_own_optimum_pays_for_no_clock(tmp_path):
+    """Nothing measures a solution the naive approach does not beat, so the
+    site is asked exactly where the search is run."""
+    (one,) = seeded(tmp_path, card())
+    model = FakeWriter(generator=BUILDS)
+
+    write_problems(model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path))
+
+    assert clock.SYSTEM not in [asked["system"] for asked in model.calls]
+
+
+def test_a_clock_that_was_not_written_holds_the_draft(tmp_path):
+    """The search has nothing to measure the canonical against, so the draft
+    stops here rather than landing undemonstrated."""
+    (one,) = seeded(tmp_path, card(**claiming({})))
+    drafts = DraftStore(tmp_path)
+
+    result = write_problems(
+        FakeWriter(generator=BUILDS, slow=None),
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        drafts=drafts,
+    )
+
+    (held,) = result.held
+    assert held.unpaced is not None
+    assert held.draft.state is WritingState.BUILT
+    assert held.draft.naive is None
+
+
+def test_a_written_clock_is_held_on_the_draft(tmp_path):
+    """A resume re-deriving it would re-pay the call, so the code and the
+    configuration it was written at are both stored."""
+    (one,) = seeded(tmp_path, card(**claiming({})))
+    drafts = DraftStore(tmp_path)
+
+    write_problems(
+        FakeWriter(generator=BUILDS),
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        drafts=drafts,
+    )
+
+    (stored,) = drafts.all()
+    assert stored.state is WritingState.SEARCHED
+    assert stored.naive == NAIVE
+    assert stored.clock.model == BENCH.clock.model
 
 
 def test_the_search_runs_before_the_mutation_loop(tmp_path, monkeypatch):

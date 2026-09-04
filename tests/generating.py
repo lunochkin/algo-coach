@@ -5,10 +5,13 @@ import json
 from dataclasses import dataclass, field
 
 from algo_coach.calls import Reply
-from algo_coach.generation import blind, discrimination, inputs
+from algo_coach.generation import blind, clock, discrimination, inputs
 
 CANONICAL = "def solve(xs):\n    return len(xs)\n"
 BLIND = "def solve(xs):\n    return sum(1 for _ in xs)\n"
+# the clock: correct and no slower here, since a run that wants a separation
+# writes its own
+NAIVE = "def solve(xs):\n    return len([one for one in xs])\n"
 
 
 def draft(statement: str = "Given a list of readings, return ...", **overrides) -> str:
@@ -61,6 +64,9 @@ class FakeWriter:
     # the solution the mutation loop enumerates from, and the cases it runs
     # the mutants against
     canonical: str = CANONICAL
+    # what every clock call returns, which is the solution the search measures
+    # the canonical against
+    slow: str | None = NAIVE
     cases: list[dict] | None = None
     calls: list[dict] = field(default_factory=list)
     written: int = 0
@@ -78,6 +84,10 @@ class FakeWriter:
             if asked is None:
                 return Reply(text=None, stop_reason="length")
             return Reply(text=proposed(*asked), stop_reason="stop")
+        if kwargs["system"] == clock.SYSTEM:
+            if self.slow is None:
+                return Reply(text=None, stop_reason="length")
+            return Reply(text=solved(self.slow), stop_reason="stop")
         if kwargs["system"] == inputs.SYSTEM:
             if self.generator is None:
                 return Reply(text=None, stop_reason="length")
@@ -97,7 +107,8 @@ class FakeWriter:
         return [
             one["content"]
             for one in self.calls
-            if one["system"] not in (blind.SYSTEM, discrimination.SYSTEM, inputs.SYSTEM)
+            if one["system"]
+            not in (blind.SYSTEM, clock.SYSTEM, discrimination.SYSTEM, inputs.SYSTEM)
         ]
 
 

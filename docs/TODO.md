@@ -342,7 +342,7 @@ is in `corpus.md`.
 - [x] Sample the naive site, where the other three answering sites are greedy.
       It produces an artifact rather than a verdict, so variance costs no
       comparability — the rule `machine.md` states for the generator
-- [ ] Write the naive solution after the builder and before the search, and
+- [x] Write the naive solution after the builder and before the search, and
       only where the template claims a speedup. The builder is written for
       every problem, since the fuzz pass builds its inputs with it
 - [ ] Verify the naive solution against the problem's cases, storing nothing

@@ -12,6 +12,7 @@ from algo_coach.drafts import DraftStore
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import reference
 from algo_coach.generation.checks import CAP_MS, Checked, Discard, agree, check, stopped
+from algo_coach.generation.clock import naive
 from algo_coach.generation.fuzzing import Fuzzing, pass_over
 from algo_coach.generation.generator import (
     Configuration,
@@ -121,6 +122,21 @@ class Inputs(BaseModel):
     gate: Discard | None = None  # the two solutions disagreed at that size
 
 
+class Clock(BaseModel):
+    """What the clock site left: the naive solution the search measures the
+    canonical against, or why there is none.
+
+    Empty where the template claims no speedup, as the search's own fields are.
+    """
+
+    call: Call | None = None
+    code: str | None = None
+    # the configuration the solution was written at. A resume past this step
+    # reuses it where there is no call
+    written: MachineProvenance | None = None
+    unpaced: str | None = None  # the call failed, and no clock was written
+
+
 class Bar(BaseModel):
     """What the mutation loop reported. `unmeasured` is a call that failed,
     which costs the round rather than the problem."""
@@ -160,6 +176,7 @@ class Held(BaseModel):
     separating: int | None = None
     unseparated: str | None = None
     unbuilt: str | None = None  # no input generator, so no search ran at all
+    unpaced: str | None = None  # no naive solution, so the search had no clock
     unmeasured: str | None = None  # the round's call failed
     # a call that raised, which ends the writing where the others answer
     # nothing and let it go on. The draft the run wrote before it stands
@@ -195,7 +212,7 @@ def write_one(
     notes: Notes = SILENT,
     writing: Writing = UNRECORDED,
     drafts: DraftStore | None = None,
-) -> tuple[Draft, Checked, Inputs, Bar]:
+) -> tuple[Draft, Checked, Inputs, Clock, Bar]:
     # the `Checked` is returned rather than raised: a discard is a fact about
     # the problem, and the run reports what it cost
     notes("statement", "writing the statement, the canonical and the cases")
@@ -232,7 +249,7 @@ def carried(
     notes: Notes = SILENT,
     writing: Writing = UNRECORDED,
     drafts: DraftStore | None = None,
-) -> tuple[Draft, Checked, Inputs, Bar]:
+) -> tuple[Draft, Checked, Inputs, Clock, Bar]:
     """Every step after the statement. Each site is asked again only where its
     own configuration or digest moved, so a resume pays for the calls that
     moved and for no others.
@@ -253,8 +270,8 @@ def carried(
         verdict = stopped(ran)
         notes("cases", why(verdict))
         draft = rejected(drafts, draft, ran.discard)
-        sites(writing, generator, None, verdict, Inputs(), Bar())
-        return draft, verdict, Inputs(), Bar()
+        sites(writing, generator, None, verdict, Inputs(), Clock(), Bar())
+        return draft, verdict, Inputs(), Clock(), Bar()
     draft = advanced(drafts, draft, WritingState.CHECKED)
 
     blind = None
@@ -282,8 +299,8 @@ def carried(
     first = checked
     if not checked.survived:
         draft = rejected(drafts, draft, checked.discard)
-        sites(writing, generator, blind, first, Inputs(), Bar())
-        return draft, checked, Inputs(), Bar()
+        sites(writing, generator, blind, first, Inputs(), Clock(), Bar())
+        return draft, checked, Inputs(), Clock(), Bar()
     draft = advanced(drafts, draft, WritingState.AGREED, cases=checked.cases)
 
     # written before the mutation loop, and for every problem: the inputs it
@@ -306,6 +323,28 @@ def carried(
         notes("inputs", "reused, at the configuration that wrote it")
         inputs = stored(draft)
 
+    # after the builder and only where a speedup is claimed: the builder is
+    # written for every problem, since the fuzz pass builds its inputs with it,
+    # and nothing measures a form that is its own optimum
+    clock = Clock()
+    if template.speedup and inputs.built is not None:
+        # a draft with no builder stops at the step before this one, so paying
+        # for a clock here would buy a step the draft cannot record
+        clock = paced(transport, calls, draft, template, configuration=bench.clock, notes=notes)
+        if clock.code is not None and draft.naive is None:
+            draft = advanced(
+                drafts,
+                draft,
+                WritingState.PACED,
+                naive=clock.code,
+                clock=copied_from(clock.call),
+            )
+        if clock.code is None:
+            # the search has nothing to measure the canonical against, so the
+            # draft stops here rather than at the step after it
+            sites(writing, generator, blind, first, inputs, clock, Bar())
+            return draft, checked, inputs, clock, Bar()
+
     # before the loop, so a canonical wrong at scale costs no round. The case
     # is held back until after it: the survivors are decided against the set as
     # the statement left it
@@ -316,16 +355,16 @@ def carried(
         )
         if not checked.survived:
             draft = rejected(drafts, draft, checked.discard)
-            sites(writing, generator, blind, first, inputs, Bar())
-            return draft, checked, inputs, Bar()
+            sites(writing, generator, blind, first, inputs, clock, Bar())
+            return draft, checked, inputs, clock, Bar()
         if template.speedup and inputs.built is not None:
             draft = advanced(drafts, draft, WritingState.SEARCHED, separating=separating)
     if template.speedup and separating is None:
         # the claim is what a rung teaches, and a landed problem is repaired
         # nowhere: the draft stops at the step that has no answer, and a resume
         # is what carries it forward
-        sites(writing, generator, blind, first, inputs, Bar())
-        return draft, checked, inputs, Bar()
+        sites(writing, generator, blind, first, inputs, clock, Bar())
+        return draft, checked, inputs, clock, Bar()
 
     checked, inputs, bar, won = measured(
         transport,
@@ -339,19 +378,19 @@ def carried(
     )
     if not checked.survived:
         draft = rejected(drafts, draft, checked.discard)
-        sites(writing, generator, blind, first, inputs, bar)
-        return draft, checked, inputs, bar
+        sites(writing, generator, blind, first, inputs, clock, bar)
+        return draft, checked, inputs, clock, bar
     if bar.unmeasured is not None:
         # the round's call failed, so the set is what the statement left. Held
         # at the step before the loop, since a resume asks again where landing
         # would store a set no round was paid for
-        sites(writing, generator, blind, first, inputs, bar)
-        return draft, checked, inputs, bar
+        sites(writing, generator, blind, first, inputs, clock, bar)
+        return draft, checked, inputs, clock, bar
     draft = advanced(
         drafts, draft, WritingState.HARDENED, won=won, discrimination=copied_from(bar.call)
     )
-    sites(writing, generator, blind, first, inputs, bar)
-    return draft, checked, inputs, bar
+    sites(writing, generator, blind, first, inputs, clock, bar)
+    return draft, checked, inputs, clock, bar
 
 
 def stored(draft: Draft) -> Inputs:
@@ -436,6 +475,7 @@ def sites(
     blind: Call | None,
     ran: Checked,
     inputs: Inputs,
+    clock: Clock,
     bar: Bar,
 ) -> None:
     """The four records of one attempt, written once the loop's numbers are
@@ -475,6 +515,9 @@ def sites(
         separating=inputs.separating,
         unseparated=inputs.unseparated,
     )
+    # no counter of its own: it writes one solution, and what the search made
+    # of it is the inputs site's to report
+    writing(CallSite.CLOCK, clock.call)
 
 
 def gated(checked: Checked, *gates: Discard) -> dict[str, object]:
@@ -582,6 +625,35 @@ def building(
         return Inputs(unbuilt=repr(failure))
     notes("inputs", f"written, up to {built.largest}", call)
     return Inputs(call=call, built=built, written=copied_from(call))
+
+
+def paced(
+    transport: Transport,
+    calls: CallLog,
+    draft: Draft,
+    template: Template,
+    *,
+    configuration: Configuration,
+    notes: Notes = SILENT,
+) -> Clock:
+    """The naive solution, or the one the draft already holds.
+
+    A call that fails costs the clock rather than the problem: it says nothing
+    about the statement, as a failed builder does not.
+    """
+    if draft.naive is not None:
+        notes("clock", "reused, at the configuration that wrote it")
+        return Clock(code=draft.naive, written=draft.clock)
+    notes("clock", "writing the solution the search measures against")
+    try:
+        code, call = naive(
+            transport, calls, draft.statement, template.trigger, configuration=configuration
+        )
+    except Exception as failure:
+        notes("clock", f"unpaced: {failure!r}")
+        return Clock(unpaced=repr(failure))
+    notes("clock", "written", call)
+    return Clock(call=call, code=code, written=copied_from(call))
 
 
 def fuzzing(draft: Draft, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:
@@ -705,7 +777,7 @@ def write_problems(
         left: list[SiteOutcome] = []
         writing = Writing(template_id=template.id, into=left)
         try:
-            draft, checked, inputs, bar = write_one(
+            draft, checked, inputs, clock, bar = write_one(
                 transport,
                 calls,
                 card,
@@ -743,6 +815,7 @@ def write_problems(
             draft,
             checked,
             inputs,
+            clock,
             bar,
             index=index,
             left=left,
@@ -783,6 +856,7 @@ def finished(
     draft: Draft,
     checked: Checked,
     inputs: Inputs,
+    clock: Clock,
     bar: Bar,
     *,
     index: int,
@@ -803,6 +877,7 @@ def finished(
                 separating=inputs.separating,
                 unseparated=inputs.unseparated,
                 unbuilt=inputs.unbuilt,
+                unpaced=clock.unpaced,
                 unmeasured=bar.unmeasured,
             )
         )
@@ -852,7 +927,7 @@ def resume(
     result = Resumed(started_at=start)
 
     try:
-        draft, checked, inputs, bar = carried(
+        draft, checked, inputs, clock, bar = carried(
             transport,
             calls,
             template,
@@ -881,6 +956,7 @@ def resume(
         draft,
         checked,
         inputs,
+        clock,
         bar,
         index=1,
         left=left,
