@@ -306,7 +306,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Add a `Discard` arm for a reference that wrote the form, and reject a
       held draft with it. The four existing arms all say the statement, the
       canonical or the cases were wrong, and this one says none of them was
-- [ ] Add the template's `speedup` flag to what `moved_at` reads, so correcting
+- [x] Add the template's `speedup` flag to what `moved_at` reads, so correcting
       it resumes the drafts the search held. A flag edit moves neither a
       configuration nor a digest
 - [ ] Report the held drafts at the end of a run, naming the template and what
@@ -344,6 +344,9 @@ exit criteria reads a draft.
 - [x] Find the first step of a draft whose configuration or digest moved. That
       is where a resume starts, and a test pins that an unchanged bench finds
       none
+- [ ] Add `template_id` to `Draft`, optional as on `SiteOutcome`, since a
+      technique brief names no form. `moved_at` reads the template's `speedup`,
+      and a sweep over held drafts has only the site outcomes to find it from
 - [ ] Resume a draft from that step, reporting which step it started at
 - [ ] Refuse to resume a rejected draft, minting a new one that cites it
 - [ ] Draw the states into `flows.md` as a mermaid diagram: each step, the

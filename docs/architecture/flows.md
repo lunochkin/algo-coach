@@ -200,6 +200,10 @@ before it away.
   that has none to read a configuration from.
 - **What a resume starts at** is the first step whose configuration or digest
   moved, which is why both are on the draft rather than only the outputs.
+- **A draft held at `searched` starts at the loop once its template drops the
+  claim.** The flag is read beside the bench, since a corrected one moves
+  neither a configuration nor a digest. It is read from the template rather
+  than the draft, which names no template.
 - **A resume goes forward only.** A step's prompt is a function of the outputs
   before it, so editing one site's prompt invalidates that step and what
   follows it.
