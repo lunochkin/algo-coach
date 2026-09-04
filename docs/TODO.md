@@ -330,7 +330,7 @@ exit criteria reads a draft.
 - [x] Clear the draft at landing, naming the problem it became. A crash between
       the two then leaves a draft the next run clears rather than one it writes
       a second time
-- [ ] Find the first step of a draft whose configuration or digest moved. That
+- [x] Find the first step of a draft whose configuration or digest moved. That
       is where a resume starts, and a test pins that an unchanged bench finds
       none
 - [ ] Resume a draft from that step, reporting which step it started at
