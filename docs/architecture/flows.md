@@ -159,6 +159,31 @@ The sequence above, held as durable state. A draft is stored as it is written,
 so a step that fails leaves it where it stopped instead of throwing the calls
 before it away.
 
+```mermaid
+flowchart TB
+  D["drafted"] -->|"the canonical answers every case its own call declared"| C["checked"]
+  C -->|"<b>blind</b>: the reference, from the statement alone"| R["referenced"]
+  R -->|"the two solutions agree on every case"| A["agreed"]
+  A -->|"<b>inputs</b>: code that builds an input of a given size"| B["built"]
+  B -->|"the input separating the two, where a speedup is claimed"| S["searched"]
+  S -->|"<b>discrimination</b>: the fuzz pass, then the rounds"| H["hardened"]
+  H -->|"the problem, its cases, both solutions and the match"| L(["landed"])
+
+  D -.->|"no_value · misdeclared"| X(["rejected<br/><i>terminal, and names the gate</i>"])
+  R -.->|"untested · disagreed"| X
+  B -.->|"disagreed"| X
+  S -.->|"disagreed"| X
+
+  C ==>|"the blind call failed"| Z(["held<br/><i>at the state it reached; a resume re-enters at the<br/>first step whose configuration or digest moved</i>"])
+  A ==>|"no input generator, and a speedup is claimed"| Z
+  B ==>|"the round's call failed"| Z
+  S ==>|"nothing separated · the round's call failed"| Z
+  Z -.->|"unexercised, by hand"| X
+```
+
+The generator is not an edge: a draft exists only once that call answered, and
+a second one writes a different problem.
+
 - **Two machines, meeting at landing.** `ProblemStatus` governs a problem that
   exists: created, active, retired. This one governs the writing, and its last
   state is that one's first.

@@ -360,7 +360,7 @@ exit criteria reads a draft.
 - [x] Skip a step a resume re-runs whose own configuration and digest stand, as
       a replay skips a pair. A moved blind configuration re-pays the input
       generator today, and that prompt is the statement alone
-- [ ] Draw the states into `flows.md` as a mermaid diagram: each step, the
+- [x] Draw the states into `flows.md` as a mermaid diagram: each step, the
       state it moves the draft to, and the three ways one leaves — landed,
       rejected, or held for a resume. Prose names an exit per step, and which
       failure stops where is read by following eight bullets

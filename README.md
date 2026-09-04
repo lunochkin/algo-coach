@@ -30,12 +30,10 @@ went](#the-archived-corpus).
 
 Four places, and nothing is trained anywhere in the engine:
 
-- **Generation** *(next)* — a statement, its test cases and a canonical
-  solution, written together for one template, then a reference solution
-  written from the statement alone. The reference computes the expected
-  outputs, so nothing is verified against itself. A problem whose canonical
-  fails, or whose two solutions disagree, is discarded whole rather than stored
-  for repair.
+- **Generation** — a statement, its test cases and a canonical solution,
+  written together for one form, then three more calls that test what the
+  first one wrote. [How a problem gets written](#how-a-problem-gets-written)
+  is the shape of it.
 - **Attribution** — a prompted classifier reads the *solution* and names the
   techniques it used, choosing among the problem's own candidates. No training
   data exists for that label. Public corpora tag problems, not solutions, so a
@@ -241,6 +239,52 @@ from an external platform, and no third-party client sits in the loop.
 The board, the hand claim and the classifier ran daily over the archived
 corpus. Writing the problems is next; serving one, judging it and asking for
 the label follow, and the loop above is whole then.
+
+## How a problem gets written
+
+The corpus feeding that loop is the engine's own. A problem is written for a
+brief: a template naming the exact form, or a technique naming only the skill.
+Four calls write one. Nothing lands half-verified, since every step after the
+first can reject what came before it.
+
+```mermaid
+flowchart LR
+  T["a brief<br/><i>a template naming the form,<br/>or a technique naming the skill</i>"] --> W
+
+  subgraph W["four calls, each able to reject what came before"]
+    direction LR
+    G["<b>generate</b><br/>the statement, a canonical<br/>and the first test cases"] --> R["<b>reference</b><br/>a second solution, written<br/>from the statement alone"]
+    R --> B["<b>build inputs</b><br/>code that builds one<br/>at any size"]
+    B --> M["<b>harden</b><br/>mutate the canonical, ask for<br/>the cases that kill the survivors"]
+  end
+
+  W --> L(["<b>landed</b><br/><i>the statement, the cases that decide it<br/>and both solutions</i>"])
+  W -.-> X(["<b>rejected</b><br/><i>a gate refused an answer; the gate, the<br/>configuration behind it and the calls are kept</i>"])
+  W ==> H(["<b>held</b><br/><i>a step had no answer; a resume re-pays<br/>only the calls whose prompt or model moved</i>"])
+```
+
+- **The reference is written blind.** Shown the canonical, it would inherit
+  that solution's reading of the statement, and agreement would then show only
+  that one model is consistent. Written from the prose alone, agreement is
+  evidence that the prose has one reading. It is also the reference, never the
+  canonical, that computes what each case returns — a case the canonical
+  produced passes by construction.
+- **No model is asked whether the cases are good enough.** One asked that about
+  its own cases says yes. So a tree walk enumerates mutants of the canonical
+  instead, built inputs kill what the cases already catch, and a call is paid
+  only for the survivors. A proposed case that killed nothing does not land.
+- **A step with no answer holds the draft where it stopped.** The calls before
+  it are stored, so a fixed prompt resumes from the step that moved rather than
+  paying for the whole problem again. A rejected draft is kept too: which gate
+  refused which configuration is readable nowhere else.
+
+Each state and every exit is in
+[`docs/architecture/flows.md`](docs/architecture/flows.md#writing-a-problem-as-states).
+
+**Where it stands:** the four calls, the gates between them and the draft store
+are built, and have written problems end to end. Not yet measured: the discard
+rate per gate over a run of ten, and the announcement floor that says whether a
+statement telegraphs its own form.
 
 ## Cards — how a technique gets studied
 
