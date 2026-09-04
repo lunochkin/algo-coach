@@ -63,6 +63,31 @@ DERIVED = {
         select c.id card_id, c.slug card_slug, c.technique, t.*
         from cards c, unnest(c.templates) as u(t)
     """,
+    "corpus": """
+        -- One row per stored problem: how it stands, the form it was written
+        -- for, and what it carries. The counts are what a reader checks before
+        -- naming one, and joining four stores by hand is what they replace.
+        select p.id problem_id, p.title, p.status, p.retired_reason,
+               p.difficulty, t.card_slug, t.slug as form,
+               (select count(*) from cases c where c.problem_id = p.id) cases,
+               (select count(*) from solutions s where s.problem_id = p.id
+                  and s.role = 'canonical') canonicals,
+               (select count(*) from solutions s where s.problem_id = p.id
+                  and s.role = 'reference') as blind,
+               (select count(*) from solutions s where s.problem_id = p.id
+                  and s.role = 'naive') clocks,
+               p.model, p.effort, p.temperature, p.pin, p.call_id
+        from problems p
+        left join card_templates t on t.id = p.generated_for
+    """,
+    "problem_solutions": """
+        -- One row per solution, named by the problem it answers. A form is
+        -- displayed by code, so this is what a match and a reading key to.
+        select s.id solution_id, s.role, s.problem_id, p.title, p.status,
+               s.model, s.effort, s.temperature, s.pin, s.call_id, s.created_at
+        from solutions s
+        join problems p on p.id = s.problem_id
+    """,
     "writings": """
         -- One row per attempt at writing a problem: which sites answered, what
         -- their gates said, and the draft where one is still stored. A draft is

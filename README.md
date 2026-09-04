@@ -403,6 +403,7 @@ uv run algo-coach <command>
 | `classify` | claim stored attempts with the classifier |
 | `match` | which problems exercise a card's templates |
 | `read` | name the techniques each stored canonical used |
+| `problem` | read one stored problem, or list the corpus |
 | `generate` | write problems for one of a card's templates |
 | `gaps` | core templates no stored solution displays |
 | `annotate` | which of a card's templates a problem exercises, by hand |

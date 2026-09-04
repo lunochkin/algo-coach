@@ -432,6 +432,13 @@ exit criteria reads a draft.
 - [x] Print the naive solution in that listing, beside the two solutions and
       the input generator. A draft held at `searched` is read to find out why,
       and the clock is what the search measured against
+- [x] Add `algo-coach problem`: the corpus listed, or one problem read whole —
+      its statement, the cases that decide it, every solution, the matches and
+      the site outcomes of the run that wrote it. Its own command, since a
+      problem outlives the run that wrote it
+- [x] Add `corpus` and `problem_solutions` to `scripts/views.py`. Reading how a
+      problem stands joined four stores by hand, and the counts are what a
+      reader checks before naming one
 
 ### What a brief asks for
 

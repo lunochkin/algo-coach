@@ -16,6 +16,7 @@ from algo_coach.cli.gaps import gaps
 from algo_coach.cli.generate import generate
 from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
+from algo_coach.cli.problem import problem
 from algo_coach.cli.read import read
 from algo_coach.cli.score import Named, score
 from algo_coach.cli.seed import BadLine, seed
@@ -255,6 +256,11 @@ def main() -> None:
         help="what the --site before it samples at; 'default' for the provider's own",
     )
 
+    problem_parser = _command(sub, "problem", "read one stored problem, or list the corpus")
+    problem_parser.add_argument(
+        "id", nargs="?", help="the problem, by id or a prefix of one; every one otherwise"
+    )
+
     gaps_parser = _command(sub, "gaps", "core templates no stored solution displays")
     gaps_parser.add_argument(
         "--all", action="store_true", help="every core template; only the gaps otherwise"
@@ -354,6 +360,8 @@ def dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         claim(args, parser, root)
     elif args.command == "classify":
         classify(args, parser, root)
+    elif args.command == "problem":
+        problem(args, parser, root)
     elif args.command == "gaps":
         gaps(args, root)
     elif args.command == "generate":

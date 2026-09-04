@@ -6,7 +6,7 @@ from pathlib import Path
 from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cli.bench import bench as chosen_bench
-from algo_coach.cli.display import sampled
+from algo_coach.cli.display import configured, left, listing_code, one_of, sampled, shortened
 from algo_coach.cli.transport import transport
 from algo_coach.drafts import DraftStore
 from algo_coach.generation import (
@@ -36,7 +36,6 @@ from algo_coach.schema import (
     Call,
     Card,
     Draft,
-    MachineProvenance,
     SettledCase,
     SiteOutcome,
     WritingState,
@@ -46,10 +45,6 @@ from algo_coach.solutions import SolutionLog
 # the modes a run can be put in. Each reads its own input and reports its own
 # summary, so a run doing two would print both under one
 MODES = ("replay", "resume", "drafts", "draft")
-
-# how wide one case prints before it is cut. A separating input runs to
-# thousands of elements, and the line is there to identify a case
-CASE_WIDTH = 96
 
 
 def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -217,7 +212,7 @@ def shown(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     """
     if args.card or args.template or args.gaps:
         parser.exit(2, "generate: --draft names the draft it reads, so it is aimed at nothing\n")
-    draft = one_of(DraftStore(root).all(), args.draft, parser)
+    draft = one_of(DraftStore(root).all(), args.draft, parser, "draft")
     print(
         report(
             draft,
@@ -226,18 +221,6 @@ def shown(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             chosen_bench(args, parser),
         )
     )
-
-
-def one_of(stored: list[Draft], wanted: str, parser: argparse.ArgumentParser) -> Draft:
-    """The draft that id names, by prefix: an id is 32 hex characters, and a
-    debugging read should not need all of them."""
-    matched = [draft for draft in stored if draft.id.startswith(wanted)]
-    if not matched:
-        parser.exit(1, f"generate: no draft {wanted}\n")
-    if len(matched) > 1:
-        named = ", ".join(draft.id for draft in matched)
-        parser.exit(2, f"generate: {wanted} names {len(matched)} drafts: {named}\n")
-    return matched[0]
 
 
 def report(draft: Draft, target: Target | None, outcomes: list[SiteOutcome], bench: Bench) -> str:
@@ -274,15 +257,6 @@ def heading(draft: Draft, target: Target | None) -> str:
     return f"{form}, {draft.difficulty}, {draft.state}"
 
 
-def configured(written: MachineProvenance | None) -> str:
-    """What one step ran at, or that it never ran. The digest too: it is half
-    of what a resume compares, and a prompt edit moves it alone."""
-    if written is None:
-        return "not taken"
-    at = sampled(written.temperature)
-    return f"{written.model}, effort {written.effort} @{at}, {written.prompt_hash} @ {written.pin}"
-
-
 def cases(draft: Draft) -> list[str]:
     """The set as the steps left it: what the two solutions settled, what the
     rounds won, and the case the search stored. The declared set stands where
@@ -305,22 +279,6 @@ def settled(case: SettledCase) -> str:
     return f"{shortened(case.args, case.expected)}  [{case.expected_from}, round {case.round}]"
 
 
-def shortened(args: object, expected: object) -> str:
-    """Arguments and return on one line, cut to a width. A separating input
-    runs to thousands of elements, where the line is here to identify a
-    case."""
-    line = f"{args} -> {expected}"
-    return line if len(line) <= CASE_WIDTH else line[: CASE_WIDTH - 1] + "…"
-
-
-def listing_code(name: str, code: str | None) -> list[str]:
-    """One step's code, fenced. A step that never ran says so rather than
-    printing an empty block."""
-    if code is None:
-        return [f"## {name}", "", "not written", ""]
-    return [f"## {name}", "", "```python", code.rstrip(), "```", ""]
-
-
 def sites(outcomes: list[SiteOutcome]) -> list[str]:
     """What each call site left on this writing, in the order they were
     written. A resumed step wrote a second record, so a site can appear
@@ -328,24 +286,6 @@ def sites(outcomes: list[SiteOutcome]) -> list[str]:
     if not outcomes:
         return ["## sites", "", "none recorded: they are written once the loop has run"]
     return ["## sites", *(f"  {left(one)}" for one in outcomes)]
-
-
-def left(one: SiteOutcome) -> str:
-    """One site outcome: its gate, then the counters that are not zero. Every
-    counter would print three zeroes for the sites that carry none."""
-    parts = [f"{one.site:<15} {one.model}"]
-    if one.gate is not None:
-        parts.append(f"gate {one.gate}{f': {one.detail}' if one.detail else ''}")
-    for name in ("mutants", "survived", "killed", "won", "offered"):
-        if getattr(one, name):
-            parts.append(f"{name} {getattr(one, name)}")
-    if one.rounds:
-        parts.append(f"rounds {one.rounds}")
-    if one.separating is not None:
-        parts.append(f"separating at {one.separating}")
-    if one.unseparated is not None:
-        parts.append(f"unseparated: {one.unseparated}")
-    return "  ".join(parts)
 
 
 def written_for(cards: list[Card], draft: Draft) -> Target | None:
