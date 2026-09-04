@@ -4,6 +4,7 @@ from matching import (
     PROCEDURE,
     FakeTransport,
     Verdict,
+    canonical,
     canonicals,
     card,
     problem,
@@ -23,7 +24,7 @@ from algo_coach.matches import (
     request_hash,
 )
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import MatchSource, TemplateMatch
+from algo_coach.schema import MatchSource, SolutionRole, TemplateMatch
 
 
 def run(root, client: FakeTransport, cards=None, problems=None, **kwargs):
@@ -68,6 +69,19 @@ def test_a_card_with_nothing_to_ask_asks_nothing(tmp_path):
     corpus = stored(tmp_path, problem("p1", techniques=["sliding-window"]))
 
     assert questions(cards, corpus, canonicals(*corpus)) == []
+
+
+def test_a_naive_solution_is_never_asked_about(tmp_path):
+    """A form is displayed by code, and this code was written not to display
+    one. A verdict on it would fill a rung with the approach the card
+    replaces."""
+    cards = seeded(tmp_path, card())
+    corpus = stored(tmp_path, problem("p1", techniques=["sliding-window"]))
+    slow = canonical("p1", id="s-slow").model_copy(update={"role": SolutionRole.NAIVE})
+
+    asked = questions(cards, corpus, [slow, *canonicals(*corpus)])
+
+    assert [question.solution.id for question in asked] == ["s-p1"]
 
 
 def test_one_call_per_card_and_a_record_per_pair(tmp_path):

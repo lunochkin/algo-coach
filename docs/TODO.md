@@ -327,7 +327,7 @@ is in `corpus.md`.
       reading alone, and a third solution written deliberately naive is what a
       timing bar measures against. One sentence there gives the reference both
       jobs, and every item below cites it
-- [ ] Add a `naive` arm to `SolutionRole`, and a test that such a solution
+- [x] Add a `naive` arm to `SolutionRole`, and a test that such a solution
       reaches neither the technique reader nor the matcher. Both select
       `CANONICAL` today, so the exclusion holds and nothing pins it
 - [ ] Add `paced` to `WritingState`, between `built` and `searched`, and the

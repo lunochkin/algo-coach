@@ -74,6 +74,17 @@ def test_a_reference_is_never_read(log):
     assert [one.solution_id for one in log.readings()] == ["s2"]
 
 
+def test_a_naive_solution_is_never_read(log):
+    """It is the approach the form replaces, so a reading of it would credit
+    the problem with the technique the card exists to teach past."""
+    client = answering(Verdict(["sorting"]))
+
+    result = run(client, log, [solution("s1", role=SolutionRole.NAIVE), solution("s2")])
+
+    assert result.read == 1
+    assert [one.solution_id for one in log.readings()] == ["s2"]
+
+
 def test_a_canonical_read_at_this_digest_is_skipped(log):
     """The reading answers the prompt this run would send, so paying for it
     again would buy the same verdict."""

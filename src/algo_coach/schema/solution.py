@@ -7,10 +7,13 @@ from algo_coach.schema.provenance import MachineProvenance
 
 
 class SolutionRole(StrEnum):
-    """Stored rather than inferred: both pass the same cases."""
+    """Stored rather than inferred: all three pass the same cases."""
 
     CANONICAL = "canonical"
     REFERENCE = "reference"
+    # the clock a speedup is measured against, written to be the slowest
+    # correct approach. `corpus.md` gives what it may never do
+    NAIVE = "naive"
 
 
 class Solution(MachineProvenance):
