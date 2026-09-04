@@ -140,10 +140,12 @@ The order matters because each step can reject what came before.
   claimed. No search ran, so the claim is undemonstrated for the same reason,
   and a resume starts at the builder rather than at the search. It costs the
   fuzz pass besides.
-- **A naive solution that failed the cases holds the draft, and discards
-  nothing.** It is the clock rather than a reading, so being wrong says nothing
-  about the statement, and what is missing is only the thing the search
-  measures against.
+- **The naive solution has to be correct on every case it answers**, and one
+  that is not holds the draft. A clock that is wrong measures nothing, so a
+  search against it would separate on a mistake rather than on the form.
+- **It discards nothing all the same.** It is the clock rather than a reading
+  of the statement, so what its being wrong establishes is that this solution
+  cannot serve, and nothing about the problem.
 - **Nothing is repaired after landing.** A stored problem carries attempts and
   its cases are append-only, so every fix is a resumed draft. A step that has
   no answer therefore stops the writing rather than lowering what a landing

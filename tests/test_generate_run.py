@@ -352,6 +352,55 @@ def test_a_clock_that_was_not_written_holds_the_draft(tmp_path):
     assert held.draft.naive is None
 
 
+WRONG_CLOCK = "def solve(xs):\n    return len(xs) + 1\n"
+# slow where it matters and correct: the statement's own case is small enough
+# for it to answer
+UNFINISHED = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs))\n    return len(xs)\n"
+
+
+def test_a_clock_that_answers_a_case_wrongly_holds_the_draft(tmp_path):
+    """It measures nothing, and what it discards is nothing: being wrong says
+    nothing about the statement."""
+    (one,) = seeded(tmp_path, card(**claiming({})))
+    drafts = DraftStore(tmp_path)
+
+    result = write_problems(
+        FakeWriter(generator=BUILDS, slow=WRONG_CLOCK),
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        drafts=drafts,
+    )
+
+    (held,) = result.held
+    assert held.unpaced == "wrong on 1 case(s)"
+    assert result.discarded == []
+    (stored,) = drafts.all()
+    assert stored.state is WritingState.BUILT
+    assert stored.naive is None
+
+
+def test_a_clock_answering_no_case_is_not_wrong(tmp_path):
+    """A case it does not finish is what the search is looking for at size, so
+    a solution too slow to answer one is the clock working."""
+    (one,) = seeded(tmp_path, card(**claiming({})))
+    drafts = DraftStore(tmp_path)
+
+    write_problems(
+        FakeWriter(generator=BUILDS, slow=UNFINISHED),
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        cap_ms=100,
+        drafts=drafts,
+    )
+
+    (stored,) = drafts.all()
+    assert stored.naive == UNFINISHED
+
+
 def test_a_written_clock_is_held_on_the_draft(tmp_path):
     """A resume re-deriving it would re-pay the call, so the code and the
     configuration it was written at are both stored."""

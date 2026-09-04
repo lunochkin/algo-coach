@@ -20,7 +20,7 @@ from algo_coach.generation.agreement import (
     misdeclared,
     settle,
 )
-from algo_coach.runner import NoValue, answered, decide, outputs, run
+from algo_coach.runner import NoValue, agrees, answered, decide, outputs, run
 from algo_coach.schema import CaseOutcome, Discard, DraftCase, MachineProvenance, severest
 
 # the per-case cap at generation, well above the drill loop's: what the
@@ -63,6 +63,20 @@ class Checked:
     @property
     def survived(self) -> bool:
         return self.discard is None
+
+
+def mistakes(cases: Sequence[SettledCase], *, code: str, cap_ms: int = CAP_MS) -> list[SettledCase]:
+    """The cases a solution answered and got wrong.
+
+    A case it did not finish is not among them: being slow is what the clock is
+    for, and only a computed answer can be wrong.
+    """
+    ran = outputs(code, [case.args for case in cases], cap_ms=cap_ms)
+    return [
+        case
+        for case, value in zip(cases, ran, strict=True)
+        if not isinstance(value, NoValue) and not agrees(value, case.expected)
+    ]
 
 
 def check(cases: Sequence[DraftCase], *, canonical: str, cap_ms: int = CAP_MS) -> Ran:
@@ -124,4 +138,4 @@ def agree(
     return Checked(**kept, cases=settled.cases)
 
 
-__all__ = ["CAP_MS", "Checked", "Discard", "Ran", "agree", "check", "stopped"]
+__all__ = ["CAP_MS", "Checked", "Discard", "Ran", "agree", "check", "mistakes", "stopped"]

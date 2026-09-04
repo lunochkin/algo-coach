@@ -272,8 +272,12 @@ A solution the engine wrote for a problem, in one of three roles.
   rather than a verdict, so asking again is a second draw rather than the
   answer already stored.
 - **It is verified, and a failure is its own.** A wrong clock measures nothing,
-  so one that fails the problem's cases is not stored and the draft is held. It
+  so one that answers a case wrongly is not stored and the draft is held. It
   never discards the problem: being wrong says nothing about the statement.
+- **A case it does not finish is not a failure.** Being slow is what it is for,
+  and only a computed answer can be wrong. The cases written with the statement
+  are small, so one it cannot answer there is the same evidence the search
+  looks for at size.
 - **Written only where the template claims a speedup**, as the search is run
   only there. A form that is its own optimum has nothing to be measured
   against.

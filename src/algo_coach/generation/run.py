@@ -11,7 +11,15 @@ from algo_coach.calls import CallLog, Transport
 from algo_coach.drafts import DraftStore
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import reference
-from algo_coach.generation.checks import CAP_MS, Checked, Discard, agree, check, stopped
+from algo_coach.generation.checks import (
+    CAP_MS,
+    Checked,
+    Discard,
+    agree,
+    check,
+    mistakes,
+    stopped,
+)
 from algo_coach.generation.clock import naive
 from algo_coach.generation.fuzzing import Fuzzing, pass_over
 from algo_coach.generation.generator import (
@@ -330,7 +338,15 @@ def carried(
     if template.speedup and inputs.built is not None:
         # a draft with no builder stops at the step before this one, so paying
         # for a clock here would buy a step the draft cannot record
-        clock = paced(transport, calls, draft, template, configuration=bench.clock, notes=notes)
+        clock = paced(
+            transport,
+            calls,
+            draft,
+            template,
+            configuration=bench.clock,
+            cap_ms=cap_ms,
+            notes=notes,
+        )
         if clock.code is not None and draft.naive is None:
             draft = advanced(
                 drafts,
@@ -634,26 +650,40 @@ def paced(
     template: Template,
     *,
     configuration: Configuration,
+    cap_ms: int,
     notes: Notes = SILENT,
 ) -> Clock:
-    """The naive solution, or the one the draft already holds.
+    """The naive solution, or the one the draft already holds, run against the
+    set the two solutions settled.
 
-    A call that fails costs the clock rather than the problem: it says nothing
-    about the statement, as a failed builder does not.
+    A call that fails costs the clock rather than the problem, as a failed
+    builder does. So does one whose answer is wrong: what it says is that this
+    solution measures nothing, not that the statement is unsound.
     """
     if draft.naive is not None:
         notes("clock", "reused, at the configuration that wrote it")
-        return Clock(code=draft.naive, written=draft.clock)
-    notes("clock", "writing the solution the search measures against")
-    try:
-        code, call = naive(
-            transport, calls, draft.statement, template.trigger, configuration=configuration
-        )
-    except Exception as failure:
-        notes("clock", f"unpaced: {failure!r}")
-        return Clock(unpaced=repr(failure))
-    notes("clock", "written", call)
-    return Clock(call=call, code=code, written=copied_from(call))
+        clock = Clock(code=draft.naive, written=draft.clock)
+    else:
+        notes("clock", "writing the solution the search measures against")
+        try:
+            code, call = naive(
+                transport, calls, draft.statement, template.trigger, configuration=configuration
+            )
+        except Exception as failure:
+            notes("clock", f"unpaced: {failure!r}")
+            return Clock(unpaced=repr(failure))
+        notes("clock", "written", call)
+        clock = Clock(call=call, code=code, written=copied_from(call))
+
+    # run again on a reuse: the draft stores the code rather than the verdict,
+    # and a subprocess answers this for nothing
+    wrong = mistakes(draft.cases, code=clock.code or "", cap_ms=cap_ms)
+    if not wrong:
+        return clock
+    notes("clock", f"wrong on {len(wrong)} case(s)")
+    # the call is kept, since the site answered and the record is what says
+    # what it cost. Nothing is stored, so the draft stops at the step before
+    return clock.model_copy(update={"code": None, "unpaced": f"wrong on {len(wrong)} case(s)"})
 
 
 def fuzzing(draft: Draft, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:

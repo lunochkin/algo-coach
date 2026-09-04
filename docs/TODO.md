@@ -345,7 +345,7 @@ is in `corpus.md`.
 - [x] Write the naive solution after the builder and before the search, and
       only where the template claims a speedup. The builder is written for
       every problem, since the fuzz pass builds its inputs with it
-- [ ] Verify the naive solution against the problem's cases, storing nothing
+- [x] Verify the naive solution against the problem's cases, storing nothing
       and holding the draft where it fails. A wrong clock measures nothing, and
       being wrong says nothing about the statement
 - [ ] Measure the search against the naive solution rather than the reference,
