@@ -95,7 +95,8 @@ no data.
   the technique replaces. Backtracking and exhaustive search are their own
   optimum, so no input separates them from a reference. Generation cannot tell
   that from a reference written cleverly by mistake, so the template says which
-  it is and a missing separation is a defect only where a speedup was claimed.
+  it is. A missing separation where a speedup was claimed is a defect in the
+  run, and `corpus.md` names the three things that produce one.
 - **One template may sit outside the core set.** Templates are core by
   default, and at most one is marked optional — the capstone, authored whole
   and surfaced on request alone. The hard form is worth deriving before it is

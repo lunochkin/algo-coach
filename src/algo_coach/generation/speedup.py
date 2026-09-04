@@ -25,9 +25,10 @@ class Missing(StrEnum):
     because the three ceiling and bound answers assert different things about
     the speedup a template claimed.
 
-    `REFERENCE_FINISHED` disproves it within the constraints, and is the defect.
     `INPUT_TOO_LARGE` asserts nothing: the walk stopped before it could look.
     `CASE_TOO_LARGE` proves it and carries the size, and only the case is lost.
+    `REFERENCE_FINISHED` is a defect in the run rather than in the problem, and
+    `corpus.md` gives the three things that produce it.
     """
 
     REFERENCE_FINISHED = "reference_finished"

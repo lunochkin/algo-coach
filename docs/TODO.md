@@ -295,9 +295,11 @@ canonical. What the first corpus settles is the bound.
 - [x] Separate the search's two empty answers: the reference finished at the
       largest legal input, against the built input crossing the ceiling.
       `input_too_large` hid which happened on the first run
-- [ ] Decide what enforces a speedup where the blind reference writes the same
+- [x] Decide what enforces a speedup where the blind reference writes the same
       form — a third solution written deliberately naive, or `speedup` claiming
       less — and write the choice into `corpus.md`
+- [ ] Move the search ahead of the mutation loop, appending its case after it.
+      A disagreement at the separating size then costs no round
 
 ### Transport
 
@@ -325,6 +327,8 @@ numbers go in the commit unless the item names a file.
 - [ ] Run `generate --count 10` on one template and record the discard rate
       per gate: no_value, misdeclared, untested, disagreed. A gate rejecting
       most problems is a defect in the prompt rather than a bar
+- [ ] Count how many of those ten came back `reference_finished`. That rate is
+      what says whether a deliberately naive third solution is ever needed
 - [ ] Count how many of those ten reuse a domain their template's cue names.
       The exclusion is prompted and nothing enforces it
 - [ ] Count how many of those ten ask the same question in a new setting. The

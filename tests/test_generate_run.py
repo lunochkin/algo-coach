@@ -15,6 +15,7 @@ from algo_coach.generation import (
     inputs,
     write_problems,
 )
+from algo_coach.generation import run as run_module
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import ExpectedSource, Problem
 
@@ -171,6 +172,24 @@ def test_the_separating_case_is_stored_beside_the_others(tmp_path, monkeypatch):
     stored = CaseLog(tmp_path).cases()
     assert [one.args for one in stored] == [[[1, 2, 3]], [[0, 1]]]
     assert stored[-1].expected_from is ExpectedSource.REFERENCE
+
+
+def test_the_mutation_loop_never_sees_the_separating_case(tmp_path, monkeypatch):
+    """The survivors are decided against the set as the statement left it, so
+    the case the search won cannot be in it whichever ran first."""
+    seen: list[list] = []
+    loop = run_module.harden
+
+    def capture(*args, cases, **kwargs):
+        seen.append([one.args for one in cases])
+        return loop(*args, cases=cases, **kwargs)
+
+    monkeypatch.setattr("algo_coach.generation.run.harden", capture)
+
+    timed(tmp_path, monkeypatch, FakeWriter(solution=SLOW, generator=BUILDS))
+
+    assert seen == [[[[1, 2, 3]]]]
+    assert [one.args for one in CaseLog(tmp_path).cases()] == [[[1, 2, 3]], [[0, 1]]]
 
 
 def test_a_form_that_is_its_own_optimum_is_still_built_for(tmp_path, monkeypatch):

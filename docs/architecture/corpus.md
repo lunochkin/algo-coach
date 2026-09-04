@@ -154,11 +154,28 @@ What decides whether a solution to a generated problem is correct.
   established the speedup, and it reports the size and both measurements. One
   whose walk crossed the ceiling before the reference ever exceeded the cap has
   established nothing: a separation may sit at a size it could not look at.
-- **Neither is the defect.** That is the reference finishing at the largest
-  legal input, which disproves the speedup within the constraints. A run
-  reading the three as one answer cannot tell a defect from an unknown.
+- **Neither is a defect.** A run reading the three as one answer cannot tell a
+  defect from an unknown.
+- **The reference finishing at the largest legal input is a defect in the run,
+  not in the problem.** It is briefed for the plainest solution and is never
+  told which technique to avoid, so where the plain solution is the form it
+  writes the form.
+- **Three things produce that answer**, and nothing in the run separates them:
+  the reference reached the form, the input generator built a shape the form
+  does not beat, or the template claims a speedup its form does not have.
+- **The problem lands all the same.** Nothing about its statement or its cases
+  was rejected. Discarding here would keep only the problems the blind model
+  was slow at.
 - **What goes unenforced is a speedup whose separating size is a million
   elements**, which is a log factor rather than the quadratic a card teaches.
+- **So nothing enforces a claimed speedup at generation.** The search reports,
+  and the corpus carries the unseparated problem until the search is resumed.
+- **A problem that landed unseparated is searched again once the system is
+  fixed**, and the case it finds is appended as any other addition is.
+- **What a resumed search reaches is bounded.** It repairs an input generator
+  that built the wrong shape and a template whose flag was wrong. It does not
+  reach a reference that wrote the form: that solution is immutable and it is
+  still the clock.
 - **Consistent is not the same as statable.** A set fitting only "compute f,
   except return 7 on this input" is a function nobody can write a statement
   for. Such a problem does not land, and the discrimination bar is what catches

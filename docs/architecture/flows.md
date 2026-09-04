@@ -19,14 +19,14 @@ The order matters because each step can reject what came before.
    on every case, or the problem is discarded.
 6. Code that builds an input of a given size and seed, from the statement
    alone.
-7. Mutants of the canonical run against the cases, then against inputs that
+7. Where the template claims a speedup, the smallest input separating the
+   reference from the canonical under the cap is searched for.
+8. Mutants of the canonical run against the cases, then against inputs that
    code builds. A call asks for the cases that kill whichever mutant survived
    both, and the ones that killed are appended to the set.
-8. Where the template claims a speedup, the smallest input separating the
-   reference from the canonical under the cap is searched for, and the case at
-   that size is stored.
-9. All of it lands together, with the template match the generation asserts on
-   its canonical.
+9. The case at the separating size is appended after them.
+10. All of it lands together, with the template match the generation asserts
+    on its canonical.
 
 - **Problems for one template are written one at a time.** Each call is shown
   the statements the form already has, so two in flight would be shown the same
@@ -104,6 +104,10 @@ The order matters because each step can reject what came before.
   unmeasured against the bound.
 - **The loop stops on a bound, never on a score**, for the reason `corpus.md`
   gives.
+- **The search runs before the loop and its case is appended after it.** The
+  survivors are decided against the set as the statement left it, so what the
+  case may not do is join that set. Searching first catches a canonical wrong
+  at scale before a round is paid for.
 - **The separating case is settled as any other case.** The reference is
   measured well above the sitting's cap, so it usually computes the value the
   case stores. A disagreement there discards the problem, and it is what
