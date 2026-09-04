@@ -11,7 +11,7 @@ from algo_coach.generation import (
     BENCH,
     Bench,
     Corpus,
-    Draft,
+    Generated,
     GenerationResult,
     Progress,
     ReplayResult,
@@ -179,7 +179,7 @@ def aimed_at_gaps(
     return aimed
 
 
-def written(draft: Draft, *, code: bool) -> str:
+def written(draft: Generated, *, code: bool) -> str:
     """One problem as it was written."""
     block = [
         f"\n# {draft.title} ({draft.difficulty}, {len(draft.cases)} case(s))",

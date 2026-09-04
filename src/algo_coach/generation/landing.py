@@ -13,11 +13,10 @@ from pydantic import BaseModel, Field
 
 from algo_coach import mint
 from algo_coach.cases import CaseLog
-from algo_coach.generation.agreement import SettledCase
-from algo_coach.generation.generator import Draft
+from algo_coach.generation.generator import Generated
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Call, Problem, SolutionRole, Template
+from algo_coach.schema import Call, Problem, SettledCase, SolutionRole, Template
 from algo_coach.solutions import SolutionLog
 
 
@@ -25,7 +24,7 @@ class Drafted(BaseModel):
     """One problem the two calls wrote, and what its runs left. Nothing is
     stored yet."""
 
-    draft: Draft
+    draft: Generated
     solution: str  # the reference, written from the statement alone
     # whole rather than by id: every record this becomes copies a configuration
     call: Call

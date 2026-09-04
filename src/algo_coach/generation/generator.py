@@ -1,15 +1,14 @@
 """Writing a problem for one template: the statement, the canonical solution,
 the first test cases and how hard it is. One call for all of them."""
 
-import json
 from collections.abc import Iterable, Sequence
 from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Configuration, Transport, ask
 from algo_coach.generation.errors import GenerationError
-from algo_coach.schema import Call, Card, Problem, ProblemDifficulty, Template
+from algo_coach.schema import Call, Card, DraftCase, Problem, ProblemDifficulty, Template
 
 # unmeasured: none of the gates a generator is scored by has run yet. Sampled
 # where the other three are greedy, and `machine.md` gives the reason. Pinned to
@@ -108,25 +107,9 @@ def notes(template: Template) -> list[str]:
     return ["Notes:", *(f"  {line}" for line in template.notes.splitlines())]
 
 
-class DraftCase(BaseModel):
-    """One case as the generator wrote it: the arguments and what `solve` must
-    return."""
-
-    # no id, no problem and no `expected_from`: none of the three exists until
-    # the problem lands, and the reference recomputes `expected` before it does
-    args: list[Any]
-    expected: Any
-
-    @field_validator("args", "expected", mode="before")
-    @classmethod
-    def _decoded(cls, value: Any) -> Any:
-        # strict structured output cannot express an unconstrained JSON value,
-        # so the two arrive as text and are checked here, not by the provider
-        return json.loads(value) if isinstance(value, str) else value
-
-
-class Draft(BaseModel):
-    """What one generation call returns, before anything has run."""
+class Generated(BaseModel):
+    """What one generation call returns, before anything has run. Apart from
+    `Draft`, which is what the steps after it leave."""
 
     title: str = Field(min_length=1)
     statement: str = Field(min_length=1)
@@ -138,9 +121,9 @@ class Draft(BaseModel):
     difficulty: ProblemDifficulty
 
 
-def read(text: str) -> Draft:
+def read(text: str) -> Generated:
     # checked again on arrival: the schema's guarantee ends with the request
-    return Draft.model_validate_json(text)
+    return Generated.model_validate_json(text)
 
 
 def schema() -> dict[str, Any]:
@@ -185,7 +168,7 @@ def generate(
     *,
     written: Sequence[str] = (),
     configuration: Configuration = GENERATOR_DEFAULT,
-) -> tuple[Draft, Call]:
+) -> tuple[Generated, Call]:
     # the call is returned beside the draft because the problem, the cases and
     # the solution all copy their provenance from it
     call, text = ask(

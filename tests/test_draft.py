@@ -1,9 +1,36 @@
 import pytest
+from helpers import PROVENANCE, a_call
 from pydantic import ValidationError
 
-from algo_coach.schema import Discard, Draft, ProblemStatus, SiteOutcome, WritingState
+from algo_coach.schema import (
+    Discard,
+    Draft,
+    ExpectedSource,
+    ProblemDifficulty,
+    ProblemStatus,
+    SiteOutcome,
+    WritingState,
+)
 
-CONTENT = {"id": "w1"}
+# what the generator's call returned, which is the whole of a draft before any
+# step after it has run
+CONTENT = {
+    "id": "w1",
+    "title": "Two Sum",
+    "statement": "Given an array, return ...",
+    "canonical": "def solve(xs):\n    return len(xs)\n",
+    "declared": [{"args": [[1, 2]], "expected": 2}],
+    "difficulty": "easy",
+}
+
+
+def a_settled_case(**overrides) -> dict:
+    return {
+        "args": [[1, 2]],
+        "expected": 2,
+        "expected_from": "reference",
+        "call": a_call(),
+    } | overrides
 
 
 def make_draft(**overrides) -> Draft:
@@ -92,3 +119,125 @@ def test_an_unnamed_state_is_rejected():
 def test_an_unnamed_gate_is_rejected():
     with pytest.raises(ValidationError, match="gate"):
         make_draft(state="rejected", gate="wrong")
+
+
+def test_a_draft_holds_what_the_generator_returned():
+    """The five parts of one call. A draft exists only once they do, since a
+    call that returned nothing left no step to resume from."""
+    draft = make_draft()
+
+    assert draft.title == "Two Sum"
+    assert draft.statement.startswith("Given an array")
+    assert draft.canonical.startswith("def solve")
+    assert [case.expected for case in draft.declared] == [2]
+    assert draft.difficulty is ProblemDifficulty.EASY
+
+
+@pytest.mark.parametrize("field", ["title", "statement", "canonical", "difficulty"])
+def test_the_generator_step_is_required_whole(field):
+    """One call wrote all of it, so a draft missing a part of it describes a
+    reply that never arrived."""
+    with pytest.raises(ValidationError, match=field):
+        Draft.model_validate({name: value for name, value in CONTENT.items() if name != field})
+
+
+def test_a_draft_with_no_declared_case_is_rejected():
+    """The set written with the statement is what every later step is judged
+    against, and a resume cannot re-derive it."""
+    with pytest.raises(ValidationError, match="declared"):
+        make_draft(declared=[])
+
+
+def test_the_declared_cases_carry_what_the_call_said_they_return():
+    """`expected` is the generator's own declaration, which the check step
+    reads as a gate rather than as a source."""
+    assert make_draft().declared[0].expected == 2
+
+
+def test_the_steps_after_the_generator_start_empty():
+    """A draft is written at the first step and revised at each one after it,
+    so absence is how far it got."""
+    draft = make_draft()
+
+    assert draft.reference is None
+    assert draft.cases == []
+    assert draft.builder is None and draft.largest is None
+    assert draft.separating is None
+    assert draft.won == []
+
+
+def test_a_draft_holds_the_reference_it_was_written_with():
+    """A second call from the statement alone, which no local run re-derives."""
+    assert make_draft(reference="def solve(xs): ...").reference == "def solve(xs): ..."
+
+
+def test_a_draft_holds_the_cases_the_runs_settled():
+    """Whose answer each case carries is what the two runs established, where
+    `declared` holds what the generator asserted."""
+    draft = make_draft(cases=[a_settled_case()])
+
+    assert draft.cases[0].expected_from is ExpectedSource.REFERENCE
+    assert draft.cases[0].call.id == "call-1"
+
+
+def test_a_draft_holds_the_builder_and_its_bound():
+    """One call returned both: the code that builds an input of a given size,
+    and the largest size the statement admits."""
+    draft = make_draft(builder="def solve(size, seed): ...", largest=1000)
+
+    assert draft.builder.startswith("def solve")
+    assert draft.largest == 1000
+
+
+@pytest.mark.parametrize("half", [{"builder": "def solve(size, seed): ..."}, {"largest": 1000}])
+def test_half_a_builder_is_rejected(half):
+    """A bound without code stops no search, and code without one lets a search
+    ask for an input the problem excludes."""
+    with pytest.raises(ValidationError, match="bound"):
+        make_draft(**half)
+
+
+def test_a_draft_holds_the_separating_case_apart_from_the_set():
+    """It is appended after the loop, so a draft holding it in `cases` would
+    put it in the set the survivors were decided against."""
+    draft = make_draft(separating=a_settled_case(round=None))
+
+    assert draft.separating.round is None
+    assert draft.cases == []
+
+
+def test_a_draft_holds_the_cases_the_rounds_won():
+    """A proposal that killed nothing never lands, so this is what the rounds
+    were paid for."""
+    draft = make_draft(won=[a_settled_case(round=1)])
+
+    assert [case.round for case in draft.won] == [1]
+
+
+def test_a_draft_carries_the_configuration_of_each_step():
+    """A resume starts at the first step whose configuration or digest moved,
+    which is why both are held here rather than only the outputs."""
+    for site in ("generator", "blind", "inputs", "discrimination"):
+        draft = make_draft(**{site: PROVENANCE})
+
+        assert getattr(draft, site).call_id == "call-1"
+
+
+def test_a_step_runs_at_no_configuration_until_it_has_run():
+    """Absence says the step was never asked, as it does on a site outcome."""
+    assert make_draft().generator is None
+
+
+@pytest.mark.parametrize("missing", PROVENANCE)
+def test_a_step_copies_a_whole_configuration(missing):
+    """All of it or none: a step whose configuration is partly unknown cannot
+    be compared with the one a resume would run."""
+    kept = {field: value for field, value in PROVENANCE.items() if field != missing}
+    with pytest.raises(ValidationError, match=missing):
+        make_draft(generator=kept)
+
+
+def test_the_mutants_and_the_counters_are_not_held():
+    """A tree walk enumerates the first and subprocesses kill them, so a resume
+    re-derives both. The counters sit on the site outcomes of this id."""
+    assert not {"mutants", "survived", "won_count", "rounds"} & set(Draft.model_fields)

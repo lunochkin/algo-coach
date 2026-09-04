@@ -8,10 +8,9 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from algo_coach.generation.generator import DraftCase
 from algo_coach.runner.encoding import agrees
 from algo_coach.runner.outputs import NoValue
-from algo_coach.schema import Call, ExpectedSource
+from algo_coach.schema import Call, DraftCase, ExpectedSource, SettledCase
 
 
 @dataclass(frozen=True)
@@ -45,19 +44,6 @@ class Disagreement:
     args: list[Any]
     canonical: Any
     reference: Any
-
-
-@dataclass(frozen=True)
-class SettledCase:
-    # neither a `TestCase`, which needs a problem id, nor a `DraftCase`, whose
-    # `expected` was declared rather than established by a run
-    args: list[Any]
-    expected: Any
-    expected_from: ExpectedSource
-    # the call that proposed the arguments, whole rather than by id: the
-    # `TestCase` this becomes copies the configuration
-    call: Call
-    round: int | None = 0  # as `TestCase.round`
 
 
 @dataclass(frozen=True)

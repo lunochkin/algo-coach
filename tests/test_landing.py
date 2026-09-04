@@ -3,10 +3,9 @@ from datetime import UTC, datetime
 import pytest
 from matching import card, seeded
 
-from algo_coach.generation import Corpus, Draft, land
-from algo_coach.generation.agreement import SettledCase
+from algo_coach.generation import Corpus, Generated, land
 from algo_coach.generation.landing import Drafted
-from algo_coach.schema import Call, ExpectedSource, MatchSource, SolutionRole
+from algo_coach.schema import Call, ExpectedSource, MatchSource, SettledCase, SolutionRole
 
 CANONICAL = "def solve(xs):\n    return len(xs)\n"
 BLIND = "def solve(xs):\n    return sum(1 for _ in xs)\n"
@@ -28,7 +27,7 @@ def call(id: str, **overrides) -> Call:
 
 
 def drafted(**overrides) -> Drafted:
-    draft = Draft(
+    draft = Generated(
         title="Widest fair stretch",
         statement="Given a list of readings, return ...",
         canonical=CANONICAL,

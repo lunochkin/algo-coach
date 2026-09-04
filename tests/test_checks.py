@@ -3,8 +3,7 @@ import json
 from helpers import a_call
 
 from algo_coach.generation import Discard, check, checks
-from algo_coach.generation.generator import DraftCase
-from algo_coach.schema import CaseOutcome, ExpectedSource
+from algo_coach.schema import CaseOutcome, DraftCase, ExpectedSource
 
 DOUBLE = "def solve(x):\n    return x * 2\n"
 # the same function reached another way, which is what a blind reference is

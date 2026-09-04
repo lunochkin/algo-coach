@@ -315,7 +315,7 @@ exit criteria reads a draft.
 - [x] Add `WritingState` — drafted, checked, referenced, agreed, built,
       searched, hardened, landed, rejected — and tie `rejected` to the gate
       that reached it, as `Problem` ties a retirement to its reason
-- [ ] Add `Draft`, holding each step's output and the provenance of the call
+- [x] Add `Draft`, holding each step's output and the provenance of the call
       behind it
 - [ ] Add to `Draft` the draft it was re-run from, absent on a first attempt.
       A rejected draft is not resumed, so re-running its failing step is a new
