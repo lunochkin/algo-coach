@@ -47,6 +47,7 @@ def test_the_states_are_the_steps_that_can_fail():
         "referenced",
         "agreed",
         "built",
+        "paced",
         "searched",
         "hardened",
         "landed",
@@ -172,6 +173,7 @@ def test_the_steps_after_the_generator_start_empty():
     assert draft.reference is None
     assert draft.cases == []
     assert draft.builder is None and draft.largest is None
+    assert draft.naive is None
     assert draft.separating is None
     assert draft.won == []
 
@@ -197,6 +199,15 @@ def test_a_draft_holds_the_builder_and_its_bound():
 
     assert draft.builder.startswith("def solve")
     assert draft.largest == 1000
+
+
+def test_a_draft_holds_the_clock_the_search_measures_against():
+    """A resume holding neither the code nor its configuration would re-pay
+    the call that wrote it."""
+    draft = make_draft(naive="def solve(xs): ...", clock=PROVENANCE)
+
+    assert draft.naive.startswith("def solve")
+    assert draft.clock.call_id == "call-1"
 
 
 @pytest.mark.parametrize("half", [{"builder": "def solve(size, seed): ..."}, {"largest": 1000}])
@@ -227,7 +238,7 @@ def test_a_draft_holds_the_cases_the_rounds_won():
 def test_a_draft_carries_the_configuration_of_each_step():
     """A resume starts at the first step whose configuration or digest moved,
     which is why both are held here rather than only the outputs."""
-    for site in ("generator", "blind", "inputs", "discrimination"):
+    for site in ("generator", "blind", "inputs", "clock", "discrimination"):
         draft = make_draft(**{site: PROVENANCE})
 
         assert getattr(draft, site).call_id == "call-1"

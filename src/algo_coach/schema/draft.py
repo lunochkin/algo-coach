@@ -27,6 +27,7 @@ class WritingState(StrEnum):
     REFERENCED = "referenced"
     AGREED = "agreed"
     BUILT = "built"
+    PACED = "paced"
     SEARCHED = "searched"
     HARDENED = "hardened"
     LANDED = "landed"
@@ -105,6 +106,9 @@ class Draft(BaseModel):
     # size the statement admits
     builder: str | None = Field(default=None, min_length=1)
     largest: int | None = Field(default=None, gt=0)
+    # paced: the clock the search measures the canonical against, written to be
+    # the slowest correct approach. Absent where no speedup is claimed
+    naive: str | None = Field(default=None, min_length=1)
     # searched: the case at the size the naive solution stops fitting, absent
     # where the form is its own optimum or nothing separated
     separating: SettledCase | None = None
@@ -119,6 +123,7 @@ class Draft(BaseModel):
     generator: MachineProvenance | None = None
     blind: MachineProvenance | None = None
     inputs: MachineProvenance | None = None  # the builder and the search it fed
+    clock: MachineProvenance | None = None  # the naive solution a search measures against
     discrimination: MachineProvenance | None = None
 
     @model_validator(mode="after")
@@ -155,7 +160,7 @@ class Draft(BaseModel):
     def _each_step_copies_a_whole_configuration(self) -> Draft:
         """A step whose configuration is partly unknown could not be compared
         with the one a resume would run."""
-        for site in ("generator", "blind", "inputs", "discrimination"):
+        for site in ("generator", "blind", "inputs", "clock", "discrimination"):
             copied = getattr(self, site)
             if copied is not None:
                 copied.check_provenance(True)

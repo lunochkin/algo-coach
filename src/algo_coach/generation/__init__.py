@@ -51,7 +51,7 @@ from algo_coach.generation.replay import (
     replay,
     subjects,
 )
-from algo_coach.generation.resuming import moved_at, next_step, sending, starts_at
+from algo_coach.generation.resuming import ORDER, moved_at, next_step, sending, starts_at
 from algo_coach.generation.run import (
     Bar,
     Discarded,
@@ -133,6 +133,7 @@ __all__ = [
     "prompt",
     "read",
     "reference",
+    "ORDER",
     "moved_at",
     "next_step",
     "starts_at",

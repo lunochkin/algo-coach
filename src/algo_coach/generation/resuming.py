@@ -32,6 +32,7 @@ ORDER = (
     WritingState.REFERENCED,
     WritingState.AGREED,
     WritingState.BUILT,
+    WritingState.PACED,
     WritingState.SEARCHED,
     WritingState.HARDENED,
     WritingState.LANDED,

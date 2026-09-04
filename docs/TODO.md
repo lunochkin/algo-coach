@@ -330,12 +330,12 @@ is in `corpus.md`.
 - [x] Add a `naive` arm to `SolutionRole`, and a test that such a solution
       reaches neither the technique reader nor the matcher. Both select
       `CANONICAL` today, so the exclusion holds and nothing pins it
-- [ ] Add `paced` to `WritingState`, between `built` and `searched`, and the
+- [x] Add `paced` to `WritingState`, between `built` and `searched`, and the
       naive code and its configuration to `Draft`. A resume holding neither
       would re-pay the call that wrote the clock
-- [ ] Add `CallSite.NAIVE` and the fifth `Bench` field. A configuration is per
-      call site, and the test pinning the two lists together is what fails
-      until both move
+- [ ] Add `CallSite.CLOCK` and the fifth `Bench` field, named as `Draft.clock`
+      already is. A configuration is per call site, and the test pinning the
+      two lists together is what fails until both move
 - [ ] Write the naive prompt: the statement and the template's trigger in, a
       solution out. It may name the form to avoid, since it settles no case and
       discards no problem

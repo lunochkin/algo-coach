@@ -6,6 +6,7 @@ from algo_coach.calls import CallLog, Configuration
 from algo_coach.drafts import DraftStore
 from algo_coach.generation import (
     BENCH,
+    ORDER,
     Bench,
     Corpus,
     Notes,
@@ -52,6 +53,12 @@ def drafted(tmp_path) -> Draft:
     )
     (stored,) = result.drafted
     return stored
+
+
+def test_every_state_but_the_terminal_one_is_in_the_order():
+    """`reaches` indexes into it, so a state added to the enum and not here
+    would raise on the draft that reached it."""
+    assert list(ORDER) == [state for state in WritingState if state is not WritingState.REJECTED]
 
 
 def test_an_unchanged_bench_moves_nothing(tmp_path):
