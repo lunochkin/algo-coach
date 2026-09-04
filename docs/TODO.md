@@ -320,7 +320,7 @@ exit criteria reads a draft.
 - [x] Add to `Draft` the draft it was re-run from, absent on a first attempt.
       A rejected draft is not resumed, so re-running its failing step is a new
       draft
-- [ ] Add the draft store under `data/`, revised in place where every other
+- [x] Add the draft store under `data/`, revised in place where every other
       store appends. `README.md` already names its write semantics
 - [ ] Mint the draft where `writing_id` is minted today, so the four site
       outcomes and the draft carry one id
