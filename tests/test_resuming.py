@@ -10,6 +10,7 @@ from algo_coach.generation import (
     Corpus,
     Notes,
     blind,
+    inputs,
     moved_at,
     resume,
     write_problems,
@@ -82,8 +83,8 @@ def test_a_moved_discrimination_configuration_starts_at_the_loop(tmp_path):
 
 
 def test_the_earliest_moved_step_is_the_one_returned(tmp_path):
-    """A resume goes forward only: a step's prompt is a function of the outputs
-    before it, so the first moved step invalidates what follows."""
+    """Where a resume starts, which is what the local steps after it run
+    from."""
     bench = BENCH.model_copy(update={"blind": OTHER, "discrimination": OTHER})
 
     assert moved_at(drafted(tmp_path), OPTIMUM, bench) is WritingState.REFERENCED
@@ -155,8 +156,8 @@ def test_a_corrected_speedup_resumes_the_draft_the_search_held(tmp_path):
 
 
 def test_a_moved_configuration_is_returned_over_a_corrected_flag(tmp_path):
-    """A resume goes forward only, and the reference is written before the
-    search."""
+    """The reference is written before the search, and the earliest moved step
+    is where the resume starts."""
     bench = BENCH.model_copy(update={"blind": OTHER})
 
     assert moved_at(held(tmp_path), OPTIMUM, bench) is WritingState.REFERENCED
@@ -273,6 +274,31 @@ def test_a_resume_that_holds_again_leaves_the_draft_where_it_stopped(tmp_path):
     (again,) = result.held
     assert again.draft.state is WritingState.SEARCHED
     assert drafts.get(stopped.draft.id).state is WritingState.SEARCHED
+
+
+def test_a_moved_blind_configuration_re_pays_no_input_generator(tmp_path):
+    """Both prompts are the statement alone, so neither site invalidates the
+    other."""
+    drafts = DraftStore(tmp_path)
+    one, first = written(tmp_path, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
+    (stopped,) = first.held
+    model = FakeWriter(generator=BUILDS)
+
+    result = resume(
+        model,
+        CallLog(tmp_path),
+        one.templates[0],
+        stopped.draft,
+        Corpus.at(tmp_path),
+        bench=BENCH.model_copy(update={"blind": OTHER}),
+        drafts=drafts,
+    )
+
+    asked = [call["system"] for call in model.calls]
+    assert blind.SYSTEM in asked
+    assert inputs.SYSTEM not in asked
+    (again,) = result.held
+    assert again.draft.inputs == stopped.draft.inputs
 
 
 def test_a_rejected_draft_is_not_resumed(tmp_path):

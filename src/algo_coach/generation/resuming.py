@@ -2,6 +2,9 @@
 digest is no longer what the bench would send, or the loop where a corrected
 `speedup` released the draft the search held.
 
+Where it starts and what it pays for are two questions: a site past the start
+is asked again only where its own configuration or digest moved.
+
 The generator is not among them. The draft is that step's output, and a new
 prompt writes a different problem rather than the same one again, so editing it
 invalidates no stored draft.
@@ -69,6 +72,22 @@ def sending(draft: Draft, site: str) -> str | None:
     return None
 
 
+def re_asks(draft: Draft, site: str, bench: Bench = BENCH) -> bool:
+    """Whether a resume pays this site again: it never answered, or its own
+    configuration or digest moved.
+
+    Per site rather than per position: the blind and the inputs prompts are the
+    statement alone, so neither invalidates the other.
+    """
+    taken = getattr(draft, site)
+    if taken is None:
+        return True
+    # its own digest where a local pass decides one, so the configuration is
+    # what answers there
+    digest = sending(draft, site) or taken.prompt_hash or ""
+    return not at_configuration(taken, getattr(bench, site), digest)
+
+
 def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingState | None:
     """The first step to re-run, or `None` where the bench and the template
     answer this draft as it stands.
@@ -77,13 +96,7 @@ def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingS
     draft's state rather than the bench's.
     """
     for state, site in ANSWERED:
-        taken = getattr(draft, site)
-        if taken is None:
-            continue
-        # its own digest where a local pass decides one, so the configuration
-        # is what answers there
-        digest = sending(draft, site) or taken.prompt_hash or ""
-        if not at_configuration(taken, getattr(bench, site), digest):
+        if getattr(draft, site) is not None and re_asks(draft, site, bench):
             return state
     # a flag edit moves neither a configuration nor a digest, and it is what
     # releases a draft the search held: with no speedup claimed the loop is the
@@ -93,4 +106,14 @@ def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingS
     return None
 
 
-__all__ = ["ANSWERED", "ORDER", "later", "moved_at", "next_step", "reaches", "sending", "starts_at"]
+__all__ = [
+    "ANSWERED",
+    "ORDER",
+    "later",
+    "moved_at",
+    "next_step",
+    "re_asks",
+    "reaches",
+    "sending",
+    "starts_at",
+]

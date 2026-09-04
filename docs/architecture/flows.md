@@ -201,8 +201,12 @@ before it away.
 - **What a resume starts at** is the first step whose configuration or digest
   moved, which is why both are on the draft rather than only the outputs. Where
   nothing moved it starts at the step the draft never took.
-- **A step before that one is reused rather than asked again**, so a resume
-  pays for the calls that moved and for none of the others.
+- **A site is asked again on its own configuration and digest**, as a replay
+  skips a pair. The blind and the inputs prompts are the statement alone, so a
+  moved blind configuration re-pays no input generator.
+- **The steps after those two read both answers.** The search runs the builder
+  against the reference, and the loop's survivors are decided against a set the
+  reference settled. Either site moving takes them again.
 - **The local steps are taken again either way.** Running the canonical and
   settling the cases cost subprocesses rather than a call, so the draft stores
   neither, and what follows them needs both.
@@ -215,9 +219,6 @@ before it away.
 - **The draft names the form its brief asked for**, absent where a technique
   brief named none, as on a site outcome. A sweep over the store resolves the
   template from the draft rather than from the outcomes of the same writing id.
-- **A resume goes forward only.** A step's prompt is a function of the outputs
-  before it, so editing one site's prompt invalidates that step and what
-  follows it.
 - **Editing the generator's prompt invalidates no stored draft.** The draft is
   that step's output, and the new prompt writes a different problem rather than
   the same one again.

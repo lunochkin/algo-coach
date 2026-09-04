@@ -357,7 +357,7 @@ exit criteria reads a draft.
 - [x] List the stored drafts under a flag of `generate`, naming the state, the
       gate and the step each would start at. A sweep names what it will spend
       before it spends it
-- [ ] Skip a step a resume re-runs whose own configuration and digest stand, as
+- [x] Skip a step a resume re-runs whose own configuration and digest stand, as
       a replay skips a pair. A moved blind configuration re-pays the input
       generator today, and that prompt is the statement alone
 - [ ] Draw the states into `flows.md` as a mermaid diagram: each step, the

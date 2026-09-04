@@ -22,7 +22,7 @@ from algo_coach.generation.generator import (
 from algo_coach.generation.hardening import harden
 from algo_coach.generation.inputs import Built, builder
 from algo_coach.generation.landing import Corpus, land, written_by
-from algo_coach.generation.resuming import later, reaches, starts_at
+from algo_coach.generation.resuming import later, re_asks, reaches, starts_at
 from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, search
 from algo_coach.generation.steps import SILENT, Notes, Step
 from algo_coach.generation.writing import UNRECORDED, Writing
@@ -233,9 +233,12 @@ def carried(
     writing: Writing = UNRECORDED,
     drafts: DraftStore | None = None,
 ) -> tuple[Draft, Checked, Inputs, Bar]:
-    """Every step after the statement, from `start` onward. A step before it
-    reuses what the draft holds, so a resume pays for the calls that moved and
-    for no others.
+    """Every step after the statement. Each site is asked again only where its
+    own configuration or digest moved, so a resume pays for the calls that
+    moved and for no others.
+
+    `start` is where the resume began, and it is what the search reads: it runs
+    the builder against the reference, so either site moving takes it again.
 
     The local runs are taken again either way: the draft stores what a call
     produced, and a subprocess answers the rest for nothing.
@@ -255,7 +258,7 @@ def carried(
     draft = advanced(drafts, draft, WritingState.CHECKED)
 
     blind = None
-    if reaches(start, WritingState.REFERENCED) or draft.reference is None:
+    if re_asks(draft, "blind", bench) or draft.reference is None:
         notes("reference", "writing the reference from the statement alone")
         solution, blind = reference(transport, calls, draft.statement, configuration=bench.blind)
         notes("reference", "written", blind)
@@ -286,7 +289,7 @@ def carried(
     # written before the mutation loop, and for every problem: the inputs it
     # builds are what a fuzz pass kills mutants with, and a round is then paid
     # for the survivors alone
-    if reaches(start, WritingState.BUILT) or draft.builder is None:
+    if re_asks(draft, "inputs", bench) or draft.builder is None:
         inputs = building(
             transport, calls, draft.statement, configuration=bench.inputs, notes=notes
         )
