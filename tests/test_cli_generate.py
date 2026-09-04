@@ -720,16 +720,29 @@ def test_the_drafts_are_listed_with_the_step_each_would_resume_at(root, monkeypa
     assert len(CallLog(root).all()) == spent
 
 
-def test_a_rejected_draft_is_listed_by_its_gate(root, monkeypatch, capsys):
-    """Rejected is terminal, so what a resume would do with it is nothing, and
-    the gate is what says why."""
+def test_a_rejected_draft_is_counted_and_not_listed(root, monkeypatch, capsys):
+    """Nothing resumes it, so a sweep's listing is what it will reach. The
+    count still covers the store, or the summary would report fewer drafts than
+    there are."""
     reject(DraftStore(root), held_draft(root, monkeypatch, capsys))
 
     listing(monkeypatch)
 
     out = capsys.readouterr().out
-    assert "rejected by unexercised" in out
+    assert "rejected by unexercised" not in out
     assert "1 draft(s) stored, 0 would resume" in out
+    assert "1 rejected draft(s) not listed" in out
+
+
+def test_the_rejected_drafts_are_listed_on_request(root, monkeypatch, capsys):
+    """Its gate is readable nowhere else, so the listing is what prints it."""
+    reject(DraftStore(root), held_draft(root, monkeypatch, capsys))
+
+    listing(monkeypatch, "--all")
+
+    out = capsys.readouterr().out
+    assert "rejected by unexercised" in out
+    assert "not listed" not in out
 
 
 def test_a_listing_of_no_draft_says_so(root, monkeypatch, capsys):

@@ -205,6 +205,11 @@ def main() -> None:
         help="list the stored drafts, naming the step each would resume at, without calling",
     )
     generate_parser.add_argument(
+        "--all",
+        action="store_true",
+        help="with --drafts, list the rejected ones too; only what a sweep reaches otherwise",
+    )
+    generate_parser.add_argument(
         "--draft",
         metavar="ID",
         help="read one stored draft whole, by id or a prefix of one, without calling",

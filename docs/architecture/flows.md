@@ -309,9 +309,10 @@ a second one writes a different problem.
   solutions, the set the steps settled, and the site outcomes of its writing
   id. A listing is a line per draft, where reading why one stopped needs the
   text its calls produced.
-- **A rejected draft is listed too.** Its gate is readable nowhere else, and a
-  listing that dropped it would leave a run reporting one fewer draft than the
-  store holds.
+- **A rejected draft is counted and not listed.** Nothing resumes it, so what
+  the listing shows is what a sweep will reach. The count still covers the
+  store, or the summary would report fewer drafts than there are, and the
+  listing names how many it held back.
 - **Deferred: how long a rejected draft is kept.** It needs a corpus of drafts
   to answer.
 

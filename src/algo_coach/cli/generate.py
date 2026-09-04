@@ -153,11 +153,12 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
 
 
 def listed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """Every stored draft, and what a resume at this bench would do with each.
+    """The drafts a sweep would carry, and what a resume at this bench would do
+    with each.
 
     It makes no call, so what a sweep would spend is readable before it is
-    spent. A rejected draft is listed too: its gate is what says why nothing
-    resumes it.
+    spent. A rejected draft is terminal, so it is counted and not listed:
+    `--all` prints it, and its gate is what says why nothing resumes it.
     """
     if args.card or args.template or args.gaps:
         parser.exit(2, "generate: --drafts reads the stored drafts, so it is aimed at nothing\n")
@@ -168,8 +169,9 @@ def listed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path
     cards = CardStore(root).all()
     waiting = [(draft, written_for(cards, draft)) for draft in stored]
     for draft, target in waiting:
-        print(listing(draft, target, bench))
-    print(drafts_summary(waiting, bench))
+        if args.all or draft.state is not WritingState.REJECTED:
+            print(listing(draft, target, bench))
+    print(drafts_summary(waiting, listed=args.all))
 
 
 def listing(draft: Draft, target: Target | None, bench: Bench) -> str:
@@ -193,15 +195,28 @@ def waiting_on(draft: Draft, target: Target | None, bench: Bench) -> str:
     return f"starts at {starts_at(draft, target.template, bench)}"
 
 
-def drafts_summary(waiting: list[tuple[Draft, Target | None]], bench: Bench = BENCH) -> str:
+def drafts_summary(waiting: list[tuple[Draft, Target | None]], *, listed: bool = True) -> str:
     """How many drafts a sweep would carry, apart from the ones it would pass
-    over, and the configuration it would pay at."""
+    over.
+
+    Counted over the store rather than over the lines above: a summary reading
+    only what was printed would report fewer drafts than the store holds.
+
+    The bench is not named. It is what a resume would pay at rather than what
+    wrote any of these, and each draft carries its own — `--draft` prints one.
+    """
     resuming = [
         draft
         for draft, target in waiting
         if target is not None and draft.state not in (WritingState.REJECTED, WritingState.LANDED)
     ]
-    return f"{len(waiting)} draft(s) stored, {len(resuming)} would resume, {wrote(bench)}"
+    line = f"{len(waiting)} draft(s) stored, {len(resuming)} would resume"
+    rejected = sum(draft.state is WritingState.REJECTED for draft, _ in waiting)
+    if rejected and not listed:
+        # named rather than dropped: nothing resumes one, and its gate is
+        # readable nowhere else
+        line += f"\n{rejected} rejected draft(s) not listed; --all prints them"
+    return line
 
 
 def shown(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
