@@ -7,8 +7,9 @@ not suffice.
 from dataclasses import dataclass, field
 
 from algo_coach import mint
+from algo_coach.generation.generator import Generated
 from algo_coach.generation.landing import written_by
-from algo_coach.schema import Call, CallSite, Discard, SiteOutcome
+from algo_coach.schema import Call, CallSite, Discard, Draft, SiteOutcome
 
 
 @dataclass(frozen=True)
@@ -22,6 +23,20 @@ class Writing:
     template_id: str = ""
     into: list[SiteOutcome] | None = None
     id: str = field(default_factory=mint.new_id)
+
+    def draft(self, generated: Generated, call: Call, *, rerun_of: str | None = None) -> Draft:
+        """The draft this attempt writes, carrying the id its site outcomes
+        group under."""
+        return mint.draft(
+            self.id,
+            title=generated.title,
+            statement=generated.statement,
+            canonical=generated.canonical,
+            declared=generated.cases,
+            difficulty=generated.difficulty,
+            rerun_of=rerun_of,
+            **written_by(call),
+        )
 
     def __call__(
         self,

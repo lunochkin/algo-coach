@@ -13,8 +13,11 @@ from algo_coach.schema import (
     ClaimSource,
     Confidence,
     Discard,
+    Draft,
+    DraftCase,
     ExpectedSource,
     FailureMode,
+    MachineProvenance,
     MatchSource,
     Problem,
     ProblemDifficulty,
@@ -28,6 +31,7 @@ from algo_coach.schema import (
     TemplateMatch,
     TestCase,
     Verification,
+    WritingState,
 )
 from algo_coach.techniques import is_known
 
@@ -467,4 +471,50 @@ def site_outcome(
         temperature=temperature,
         provider=provider,
         cost=cost,
+    )
+
+
+def draft(
+    writing_id: str,
+    *,
+    title: str,
+    statement: str,
+    canonical: str,
+    declared: Sequence[DraftCase],
+    difficulty: ProblemDifficulty,
+    rerun_of: str | None = None,
+    model: str,
+    effort: str,
+    prompt_hash: str,
+    call_id: str,
+    pin: str,
+    temperature: float | None = None,
+    provider: str | None = None,
+    cost: float | None = None,
+) -> Draft:
+    """One attempt at writing a problem, as the generator's call left it.
+
+    The writing id rather than an id of its own: the four site outcomes of this
+    attempt already group under it, and a second identity would need a
+    reference nothing else carries. The only minter here that is passed its id.
+    """
+    return Draft(
+        id=writing_id,
+        state=WritingState.DRAFTED,
+        rerun_of=rerun_of,
+        title=title,
+        statement=statement,
+        canonical=canonical,
+        declared=list(declared),
+        difficulty=difficulty,
+        generator=MachineProvenance(
+            model=model,
+            effort=effort,
+            prompt_hash=prompt_hash,
+            call_id=call_id,
+            pin=pin,
+            temperature=temperature,
+            provider=provider,
+            cost=cost,
+        ),
     )

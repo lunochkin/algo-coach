@@ -1,7 +1,8 @@
 import pytest
-from helpers import machine_claim
+from helpers import PROVENANCE, machine_claim
 
 from algo_coach.mint import (
+    draft,
     generated_problem,
     machine_match,
     new_id,
@@ -15,7 +16,17 @@ from algo_coach.schema import (
     FailureMode,
     MatchSource,
     ProblemStatus,
+    WritingState,
 )
+
+# what the generator's call returned, which is what a draft is minted from
+DRAFTED = {
+    "title": "Two Sum",
+    "statement": "Given an array, return ...",
+    "canonical": "def solve(xs):\n    return len(xs)\n",
+    "declared": [{"args": [[1, 2]], "expected": 2}],
+    "difficulty": "easy",
+}
 
 
 def test_ids_do_not_repeat():
@@ -320,3 +331,31 @@ def test_a_generated_problem_is_created_rather_than_served():
     assert generated().retired_reason is None
     with pytest.raises(TypeError):
         generated(status="active")
+
+
+def test_a_draft_is_minted_with_the_writing_id_it_was_given():
+    """The only minter passed its id. The four site outcomes of one attempt
+    already group under it, and a second identity would need a reference
+    nothing carries."""
+    made = draft("w1", **DRAFTED, **PROVENANCE)
+
+    assert made.id == "w1"
+
+
+def test_a_minted_draft_starts_at_the_first_step():
+    """The generator answered and nothing has checked it, which is the state a
+    draft exists in before any step after it."""
+    made = draft("w1", **DRAFTED, **PROVENANCE)
+
+    assert made.state is WritingState.DRAFTED
+    assert made.gate is None
+    assert (made.reference, made.builder, made.separating) == (None, None, None)
+
+
+def test_a_minted_draft_copies_the_generator_configuration_whole():
+    """The one place that supplies it, as `generated_problem` is for a problem:
+    a call site spelling the fields out could fill them partly."""
+    made = draft("w1", **DRAFTED, **PROVENANCE)
+
+    assert made.generator.call_id == "call-1"
+    assert (made.blind, made.inputs, made.discrimination) == (None, None, None)

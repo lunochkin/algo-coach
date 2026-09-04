@@ -322,7 +322,7 @@ exit criteria reads a draft.
       draft
 - [x] Add the draft store under `data/`, revised in place where every other
       store appends. `README.md` already names its write semantics
-- [ ] Mint the draft where `writing_id` is minted today, so the four site
+- [x] Mint the draft where `writing_id` is minted today, so the four site
       outcomes and the draft carry one id
 - [ ] Write the draft after each step and move its state, replacing the tuple
       `write_one` returns. A test reads the state left by a run stopped at each
