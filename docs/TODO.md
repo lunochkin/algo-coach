@@ -433,6 +433,23 @@ exit criteria reads a draft.
       the input generator. A draft held at `searched` is read to find out why,
       and the clock is what the search measured against
 
+### What a brief asks for
+
+- [x] Name the interpreter in all four code-writing briefs. A model writing for
+      an older one reaches stdlib behaviour this rejects, and the crash costs
+      the call that wrote the code
+- [x] Tell the input generator to seed from one integer. `random.seed` has
+      taken integers alone since 3.11, and a builder seeded with a tuple
+      crashed the search on a stored draft
+- [x] Factor the code contract into `generation/contract.py`: the interpreter,
+      the entry point and the standing-alone rule. Four briefs stated the same
+      three facts in four wordings, and a test now pins each one against every
+      brief
+
+- [x] Add the search's `unseparated` reason to `Draft`, and fire `draws_again`
+      only on `naive_finished`. A crashed builder is the inputs site's to
+      repair, and a draw there pays for a call the search cannot use
+
 ### Transport
 
 - [x] Retry once on a 404 whose message names no endpoints for the model. It is

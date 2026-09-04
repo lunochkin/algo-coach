@@ -377,7 +377,13 @@ def carried(
             sites(writing, generator, blind, first, inputs, clock, Bar())
             return draft, checked, inputs, clock, Bar()
         if template.speedup and inputs.built is not None:
-            draft = advanced(drafts, draft, WritingState.SEARCHED, separating=separating)
+            draft = advanced(
+                drafts,
+                draft,
+                WritingState.SEARCHED,
+                separating=separating,
+                unseparated=inputs.unseparated,
+            )
     if template.speedup and separating is None:
         # the claim is what a rung teaches, and a landed problem is repaired
         # nowhere: the draft stops at the step that has no answer, and a resume

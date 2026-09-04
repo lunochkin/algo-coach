@@ -182,10 +182,13 @@ What decides whether a solution to a generated problem is correct.
 - **A corrected `speedup` is what a resume watches besides the digest.** A flag
   edit moves neither a configuration nor a prompt, so a resume reading only
   those would leave the draft where the search stopped it.
-- **A resume asks the naive site again where the search separated nothing**,
-  though its configuration and its digest both stand. The site is sampled, so
-  the skip that spares every other site would spend the exit that costs one
-  call.
+- **A resume asks the naive site again where the clock finished at every size
+  the builder reached**, though its configuration and its digest both stand.
+  The site is sampled, so the skip that spares every other site would spend the
+  exit that costs one call.
+- **The draft carries why the search stored no case**, since the exits differ
+  by it. A crashed builder is the inputs site's to repair, and a draw there
+  buys a call the search still cannot use.
 - **The reference is not asked again for this.** It is immutable, it is no
   longer the clock, and a second blind reading answers a question nothing here
   asked.

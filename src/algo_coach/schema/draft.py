@@ -112,6 +112,9 @@ class Draft(BaseModel):
     # searched: the case at the size the naive solution stops fitting, absent
     # where the form is its own optimum or nothing separated
     separating: SettledCase | None = None
+    # why the search stored no case, as the inputs site records it. A resume
+    # reads it: the exits a held draft leaves by differ by what stopped it
+    unseparated: str | None = Field(default=None, min_length=1)
     # hardened: what the loop appended to the set — the inputs the fuzz pass
     # kept, then the cases the rounds won. Neither lands where it killed
     # nothing, so this is what the step was paid for

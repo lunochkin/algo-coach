@@ -155,7 +155,31 @@ def held(tmp_path) -> Draft:
 def test_an_unseparated_draft_draws_the_clock_again(tmp_path):
     """Nothing about the bench moved, and the site is the one that is sampled:
     a second call is a second draw rather than the answer already stored."""
-    assert moved_at(held(tmp_path), CLAIMS, BENCH) is WritingState.PACED
+    stopped = held(tmp_path)
+
+    assert stopped.unseparated == "naive_finished"
+    assert moved_at(stopped, CLAIMS, BENCH) is WritingState.PACED
+
+
+CRASHES = "def solve(size, seed):\n    raise ValueError\n"
+
+
+def test_a_search_that_never_ran_draws_no_clock(tmp_path):
+    """The builder's code crashed, so nothing timed the solution this draft
+    holds. A draw would pay for a call the search still cannot use."""
+    (one,) = seeded(tmp_path, card(templates=[template("longest-valid-window", speedup=True)]))
+    result = write_problems(
+        FakeWriter(generator=CRASHES),
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        drafts=DraftStore(tmp_path),
+    )
+
+    (stopped,) = result.held
+    assert "built nothing at size 1" in stopped.draft.unseparated
+    assert moved_at(stopped.draft, CLAIMS, BENCH) is None
 
 
 def test_a_corrected_speedup_resumes_the_draft_the_search_held(tmp_path):

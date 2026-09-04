@@ -252,9 +252,13 @@ a second one writes a different problem.
 - **The steps after them read what they left.** The search runs the builder
   against the naive solution, and the loop's survivors are decided against a set
   the reference settled. A site moving takes the steps that read it again.
-- **The naive site is asked again where the search separated nothing**, though
-  its configuration and its digest stand. It is the one sampled answering site,
-  so a second call is a second draw — `corpus.md` gives it as an exit.
+- **The naive site is asked again where the clock finished at every size**,
+  though its configuration and its digest stand. It is the one sampled
+  answering site, so a second call is a second draw — `corpus.md` gives it as
+  an exit.
+- **Only that reason draws again.** A search that never ran, or one whose walk
+  crossed the case ceiling, is the inputs site's to repair, and the draft holds
+  the reason so a resume can tell them apart.
 - **The local steps are taken again either way.** Running the canonical and
   settling the cases cost subprocesses rather than a call, so the draft stores
   neither, and what follows them needs both.

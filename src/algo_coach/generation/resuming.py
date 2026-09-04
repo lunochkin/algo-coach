@@ -14,6 +14,7 @@ from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import request_hash as blind_hash
 from algo_coach.generation.clock import request_hash as clock_hash
 from algo_coach.generation.inputs import request_hash as inputs_hash
+from algo_coach.generation.speedup import Missing
 from algo_coach.outcomes import at_configuration
 from algo_coach.schema import Draft, Template, WritingState
 
@@ -99,10 +100,18 @@ def draws_again(draft: Draft, template: Template) -> bool:
     """Whether a resume asks the clock again though nothing about the bench
     moved.
 
-    The search stopped with no case, and the clock is the one sampled site: a
-    second call is a second draw rather than the answer already stored.
+    The clock finished at every size the builder reached, and it is the one
+    sampled site: a second call is a second draw rather than the answer already
+    stored.
+
+    Only that reason. A search that never ran is the inputs site's to repair,
+    and a draw there pays for a call the search cannot use.
     """
-    return draft.state is WritingState.SEARCHED and template.speedup and draft.separating is None
+    return (
+        draft.state is WritingState.SEARCHED
+        and template.speedup
+        and draft.unseparated == Missing.NAIVE_FINISHED
+    )
 
 
 def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingState | None:
