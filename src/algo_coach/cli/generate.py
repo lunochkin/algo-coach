@@ -261,6 +261,7 @@ def report(draft: Draft, target: Target | None, outcomes: list[SiteOutcome], ben
             *listing_code("canonical", draft.canonical),
             *listing_code("reference", draft.reference),
             *listing_code(f"input generator (up to {draft.largest})", draft.builder),
+            *listing_code("naive solution", draft.naive),
             *sites(outcomes),
         ]
     )

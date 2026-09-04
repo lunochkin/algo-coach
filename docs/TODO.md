@@ -429,6 +429,9 @@ exit criteria reads a draft.
       both solutions, the settled cases, and the site outcomes of its writing
       id. On `generate` rather than a `view` command, since the draft store is
       generation's own working state and `--drafts` already reads it
+- [x] Print the naive solution in that listing, beside the two solutions and
+      the input generator. A draft held at `searched` is read to find out why,
+      and the clock is what the search measured against
 
 ### Transport
 

@@ -778,7 +778,8 @@ def test_a_draft_is_read_whole_by_its_id(root, monkeypatch, capsys):
     assert f"# {stored.title} ({stored.id})" in out
     assert "longest-valid-window, medium, searched" in out
     assert stored.statement in out
-    assert out.count("```python") == 3  # the canonical, the reference and the builder
+    # the canonical, the reference, the builder and the clock
+    assert out.count("```python") == 4
     assert f"## cases ({len(stored.cases)} settled, 0 won, 0 separating)" in out
     # the loop never ran, so the step that would have paid for it took nothing
     assert "discrimination  not taken" in out
