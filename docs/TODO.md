@@ -457,6 +457,15 @@ exit criteria reads a draft.
       only on `naive_finished`. A crashed builder is the inputs site's to
       repair, and a draw there pays for a call the search cannot use
 
+- [x] Bound the clock's candidates by the statement in its brief: every value
+      between the bounds, not the values the input contains. A stored draft's
+      clock narrowed the range the way the fast solution does, and separated
+      nothing within the case ceiling
+- [ ] Report a held draft no resume would advance as held rather than by the
+      step it would nominally start at. `--drafts` counts one whose search
+      never ran as resumable, where `carried` holds it before reaching that
+      step
+
 ### Transport
 
 - [x] Retry once on a 404 whose message names no endpoints for the model. It is

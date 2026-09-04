@@ -34,6 +34,13 @@ Compute the answer the way the statement defines it. Enumerate every candidate
 and check each one against that definition; where the statement asks for the
 best of something, try them all and keep the best.
 
+The candidates are what the statement's own bounds admit. Where the answer is a
+number, try every value between the bounds the statement gives it. Do not
+narrow that range to the values the input happens to contain, and do not skip a
+value because an argument shows the answer cannot be there. Such an argument is
+what the fast solution is built on, and using it here leaves nothing to
+measure.
+
 Do not precompute, do not cache a result, do not reach for a data structure,
 and do not stop a loop early. A loop that runs to the end is what is wanted.
 
