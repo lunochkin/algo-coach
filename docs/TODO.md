@@ -300,6 +300,9 @@ canonical. What the first corpus settles is the bound.
       less — and write the choice into `corpus.md`
 - [x] Move the search ahead of the mutation loop, appending its case after it.
       A disagreement at the separating size then costs no round
+- [ ] Search again over the problems that landed unseparated, appending the
+      case. The draft is cleared at landing, so this reads the stored problem
+      rather than a draft
 
 ### Writing a problem as states
 
@@ -309,10 +312,29 @@ exit criteria reads a draft.
 
 - [x] Write the states, what a draft holds and what a resume may not do into
       `flows.md`
-- [ ] Add the draft store and the state a step leaves, replacing the tuple
-      `write_one` returns
-- [ ] Resume a draft at the first step whose configuration or digest moved, and
-      report which step that was
+- [ ] Add `WritingState` — drafted, checked, referenced, agreed, built,
+      searched, hardened, landed, rejected — and tie `rejected` to the gate
+      that reached it, as `Problem` ties a retirement to its reason
+- [ ] Add `Draft`, holding each step's output and the provenance of the call
+      behind it
+- [ ] Add to `Draft` the draft it was re-run from, absent on a first attempt.
+      A rejected draft is not resumed, so re-running its failing step is a new
+      draft
+- [ ] Add the draft store under `data/`, revised in place where every other
+      store appends. `README.md` already names its write semantics
+- [ ] Mint the draft where `writing_id` is minted today, so the four site
+      outcomes and the draft carry one id
+- [ ] Write the draft after each step and move its state, replacing the tuple
+      `write_one` returns. A test reads the state left by a run stopped at each
+      step
+- [ ] Clear the draft at landing, naming the problem it became. A crash between
+      the two then leaves a draft the next run clears rather than one it writes
+      a second time
+- [ ] Find the first step of a draft whose configuration or digest moved. That
+      is where a resume starts, and a test pins that an unchanged bench finds
+      none
+- [ ] Resume a draft from that step, reporting which step it started at
+- [ ] Refuse to resume a rejected draft, minting a new one that cites it
 
 ### Transport
 
@@ -595,6 +617,14 @@ whatever phase is current.
       cannot be preempted, so a case over the cap costs its worker rather than
       a signal. Triggered when interpreter start is again what a run spends its
       seconds on
+- [ ] Choose how a resume is invoked — a flag on `generate` or a command of
+      its own — and write the choice into `flows.md`. Triggered when a run
+      leaves drafts that a fixed step would resume
+- [ ] List the stored drafts, naming the state and the step each stopped at.
+      Triggered when a run leaves more of them than a reader holds
+- [ ] Decide how long a rejected draft is kept, and write the choice into
+      `flows.md`. Triggered when the draft store outgrows the corpus it
+      produced
 - [ ] Choose how a case with several correct returns is decided — a normaliser
       over the returned value, or a checker per problem — and write the choice
       into `corpus.md`. Triggered when a core template can only be exercised

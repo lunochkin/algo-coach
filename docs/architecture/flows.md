@@ -177,9 +177,9 @@ before it away.
   and subprocesses kill them, so a resume re-derives both without a call.
 - **The loop's counters are not in it either.** They sit on the site outcomes
   of the same writing id, which is where a report reads them.
-- **Each step's configuration is copied onto the draft**, as every machine
-  record copies its own. A draft citing a call id alone would read the call log
-  to answer what its own site outcome answers already.
+- **Each step's configuration is copied onto the draft.** The four site
+  outcomes are written once the loop has run, so a draft that stopped before
+  that has none to read a configuration from.
 - **What a resume starts at** is the first step whose configuration or digest
   moved, which is why both are on the draft rather than only the outputs.
 - **A resume goes forward only.** A step's prompt is a function of the outputs
