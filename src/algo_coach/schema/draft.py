@@ -104,8 +104,9 @@ class Draft(BaseModel):
     # searched: the case at the size the naive solution stops fitting, absent
     # where the form is its own optimum or nothing separated
     separating: SettledCase | None = None
-    # hardened: what the rounds appended to the set. A proposal that killed
-    # nothing never lands, so this is what they were paid for
+    # hardened: what the loop appended to the set — the inputs the fuzz pass
+    # kept, then the cases the rounds won. Neither lands where it killed
+    # nothing, so this is what the step was paid for
     won: list[SettledCase] = Field(default_factory=list)
 
     # the configuration each step ran at, copied as its call returned. A resume

@@ -36,7 +36,7 @@ def test_a_problem_takes_three_calls_in_one_order(tmp_path):
 
     assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM]
     assert len(result.drafted) == 1
-    assert result.drafted[0].solution.startswith("def solve")
+    assert result.drafted[0].reference.startswith("def solve")
 
 
 def test_each_call_is_shown_what_the_run_wrote_before_it(tmp_path):
@@ -445,9 +445,10 @@ def test_a_run_reports_every_stage_as_it_goes(tmp_path):
         on_step=reported.append,
     )
 
-    assert [step.name for step in reported][:4] == [
+    assert [step.name for step in reported][:5] == [
         "statement",
         "statement",
+        "cases",
         "reference",
         "reference",
     ]

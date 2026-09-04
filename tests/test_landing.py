@@ -3,9 +3,17 @@ from datetime import UTC, datetime
 import pytest
 from matching import card, seeded
 
-from algo_coach.generation import Corpus, Generated, land
-from algo_coach.generation.landing import Drafted
-from algo_coach.schema import Call, ExpectedSource, MatchSource, SettledCase, SolutionRole
+from algo_coach.generation import Corpus, land
+from algo_coach.schema import (
+    Call,
+    Draft,
+    ExpectedSource,
+    MachineProvenance,
+    MatchSource,
+    SettledCase,
+    SolutionRole,
+    WritingState,
+)
 
 CANONICAL = "def solve(xs):\n    return len(xs)\n"
 BLIND = "def solve(xs):\n    return sum(1 for _ in xs)\n"
@@ -26,14 +34,20 @@ def call(id: str, **overrides) -> Call:
     )
 
 
-def drafted(**overrides) -> Drafted:
-    draft = Generated(
-        title="Widest fair stretch",
-        statement="Given a list of readings, return ...",
-        canonical=CANONICAL,
-        difficulty="medium",
-        cases=[{"args": "[[1, 2, 3]]", "expected": "3"}],
+def written(one: Call) -> MachineProvenance:
+    """The configuration a step copied off its call, as a draft holds it."""
+    return MachineProvenance(
+        model=one.model,
+        effort=one.effort,
+        prompt_hash=one.prompt_hash,
+        call_id=one.id,
+        pin=one.pin or "",
+        temperature=one.temperature,
+        provider=one.provider,
     )
+
+
+def drafted(**overrides) -> Draft:
     fields = {
         "cases": [
             SettledCase(
@@ -44,11 +58,17 @@ def drafted(**overrides) -> Drafted:
             )
         ]
     } | overrides
-    return Drafted(
-        draft=draft,
-        solution=BLIND,
-        call=call("call-1"),
-        reference_call=call("call-2", temperature=0.0),
+    return Draft(
+        id="w1",
+        state=WritingState.HARDENED,
+        title="Widest fair stretch",
+        statement="Given a list of readings, return ...",
+        canonical=CANONICAL,
+        declared=[{"args": [[1, 2, 3]], "expected": 3}],
+        difficulty="medium",
+        reference=BLIND,
+        generator=written(call("call-1")),
+        blind=written(call("call-2", temperature=0.0)),
         **fields,
     )
 

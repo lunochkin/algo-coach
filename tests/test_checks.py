@@ -2,7 +2,7 @@ import json
 
 from helpers import a_call
 
-from algo_coach.generation import Discard, check, checks
+from algo_coach.generation import Discard, agree, check, checks, stopped
 from algo_coach.schema import CaseOutcome, DraftCase, ExpectedSource
 
 DOUBLE = "def solve(x):\n    return x * 2\n"
@@ -18,9 +18,13 @@ def cases(*pairs) -> list[DraftCase]:
 
 
 def checked(*pairs, canonical: str = DOUBLE, reference: str = TWICE, cap_ms: int = CAP_MS):
-    return check(
-        cases(*pairs), canonical=canonical, reference=reference, call=a_call(), cap_ms=cap_ms
-    )
+    """The two steps as a run takes them: the canonical alone, and only where
+    it survived, the reference against what it returned."""
+    written = cases(*pairs)
+    ran = check(written, canonical=canonical, cap_ms=cap_ms)
+    if not ran.survived:
+        return stopped(ran)
+    return agree(ran, written, reference=reference, call=a_call(), cap_ms=cap_ms)
 
 
 def test_a_problem_both_solutions_answer_the_same_way_survives():

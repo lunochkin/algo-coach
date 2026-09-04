@@ -171,8 +171,8 @@ before it away.
   no record.
 - **A draft holds what a call produced and no local run re-derives**: the
   statement, the canonical, the declared cases and the difficulty; the
-  reference; the settled cases; the builder's code and its bound; the cases a
-  round won; the separating case.
+  reference; the settled cases; the builder's code and its bound; the cases the
+  mutation loop appended; the separating case.
 - **The mutants and the survivors are not in it.** A tree walk enumerates them
   and subprocesses kill them, so a resume re-derives both without a call.
 - **The loop's counters are not in it either.** They sit on the site outcomes

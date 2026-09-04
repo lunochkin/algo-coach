@@ -324,7 +324,7 @@ exit criteria reads a draft.
       store appends. `README.md` already names its write semantics
 - [x] Mint the draft where `writing_id` is minted today, so the four site
       outcomes and the draft carry one id
-- [ ] Write the draft after each step and move its state, replacing the tuple
+- [x] Write the draft after each step and move its state, replacing the tuple
       `write_one` returns. A test reads the state left by a run stopped at each
       step
 - [ ] Clear the draft at landing, naming the problem it became. A crash between

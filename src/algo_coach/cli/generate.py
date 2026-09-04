@@ -7,11 +7,11 @@ from algo_coach.cards import CardStore
 from algo_coach.cli.bench import bench as chosen_bench
 from algo_coach.cli.display import sampled
 from algo_coach.cli.transport import transport
+from algo_coach.drafts import DraftStore
 from algo_coach.generation import (
     BENCH,
     Bench,
     Corpus,
-    Generated,
     GenerationResult,
     Progress,
     ReplayResult,
@@ -25,7 +25,7 @@ from algo_coach.matches import MatchLog
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Call, Card
+from algo_coach.schema import Call, Card, Draft
 from algo_coach.solutions import SolutionLog
 
 
@@ -51,10 +51,11 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
             on_progress=show,
             on_step=stage,
             outcomes=outcomes,
+            drafts=DraftStore(root),
         )
         results.append(result)
         for drafted in result.drafted:
-            print(written(drafted.draft, code=args.code))
+            print(written(drafted, code=args.code))
         # A broken configuration fails the next template the same way, so the
         # run stops rather than spending its abort count once per gap.
         if result.aborted:
@@ -179,10 +180,10 @@ def aimed_at_gaps(
     return aimed
 
 
-def written(draft: Generated, *, code: bool) -> str:
+def written(draft: Draft, *, code: bool) -> str:
     """One problem as it was written."""
     block = [
-        f"\n# {draft.title} ({draft.difficulty}, {len(draft.cases)} case(s))",
+        f"\n# {draft.title} ({draft.difficulty}, {len(draft.declared)} case(s))",
         "",
         draft.statement,
     ]

@@ -8,10 +8,10 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Transport
-from algo_coach.generation.agreement import SettledCase
+from algo_coach.drafts import DraftStore
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import reference
-from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
+from algo_coach.generation.checks import CAP_MS, Checked, Discard, agree, check, stopped
 from algo_coach.generation.fuzzing import Fuzzing, pass_over
 from algo_coach.generation.generator import (
     Configuration,
@@ -21,14 +21,25 @@ from algo_coach.generation.generator import (
 )
 from algo_coach.generation.hardening import harden
 from algo_coach.generation.inputs import Built, builder
-from algo_coach.generation.landing import Corpus, Drafted, land
+from algo_coach.generation.landing import Corpus, land, written_by
 from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, search
 from algo_coach.generation.steps import SILENT, Notes, Step
 from algo_coach.generation.writing import UNRECORDED, Writing
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.runner import NoValue, outputs
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Call, CallSite, Card, CaseOutcome, SiteOutcome, Template
+from algo_coach.schema import (
+    Call,
+    CallSite,
+    Card,
+    CaseOutcome,
+    Draft,
+    MachineProvenance,
+    SettledCase,
+    SiteOutcome,
+    Template,
+    WritingState,
+)
 
 # the seed the speedup search builds at, which never varies: the halving
 # compares one size against another, so two inputs of one shape are needed
@@ -132,7 +143,7 @@ class Bar(BaseModel):
 
 
 class GenerationResult(BaseModel):
-    drafted: list[Drafted] = Field(default_factory=list)
+    drafted: list[Draft] = Field(default_factory=list)
     discarded: list[Discarded] = Field(default_factory=list)
     failed: list[Failed] = Field(default_factory=list)
     aborted: bool = False
@@ -149,71 +160,124 @@ def write_one(
     cap_ms: int = CAP_MS,
     notes: Notes = SILENT,
     writing: Writing = UNRECORDED,
-) -> tuple[Drafted, Checked, Inputs, Bar]:
+    drafts: DraftStore | None = None,
+) -> tuple[Draft, Checked, Inputs, Bar]:
     # the `Checked` is returned rather than raised: a discard is a fact about
     # the problem, and the run reports what it cost
     notes("statement", "writing the statement, the canonical and the cases")
-    draft, call = generate(
+    generated, call = generate(
         transport, calls, card, template, written=written, configuration=bench.generator
     )
-    notes("statement", f"{draft.title!r}, {len(draft.cases)} case(s)", call)
+    notes("statement", f"{generated.title!r}, {len(generated.cases)} case(s)", call)
+    draft = held(drafts, writing.draft(generated, call))
+
+    notes("cases", "running the canonical against what its own call declared")
+    started = monotonic()
+    ran = check(generated.cases, canonical=generated.canonical, cap_ms=cap_ms)
+    if not ran.survived:
+        rejected = stopped(ran)
+        notes("cases", why(rejected))
+        draft = held(drafts, moved(draft, WritingState.REJECTED, gate=ran.discard))
+        sites(writing, call, None, rejected, Inputs(), Bar())
+        return draft, rejected, Inputs(), Bar()
+    draft = held(drafts, moved(draft, WritingState.CHECKED))
 
     notes("reference", "writing the reference from the statement alone")
-    solution, blind = reference(transport, calls, draft.statement, configuration=bench.blind)
+    solution, blind = reference(transport, calls, generated.statement, configuration=bench.blind)
     notes("reference", "written", blind)
-
-    notes("cases", "running both solutions")
-    started = monotonic()
-    checked = check(
-        draft.cases, canonical=draft.canonical, reference=solution, call=call, cap_ms=cap_ms
+    draft = held(
+        drafts,
+        moved(draft, WritingState.REFERENCED, reference=solution, blind=copied_from(blind)),
     )
+
+    checked = agree(ran, generated.cases, reference=solution, call=call, cap_ms=cap_ms)
     notes("cases", f"{settled(checked)}, {monotonic() - started:.1f}s in the runner")
     # kept because `checked` is replaced by a later gate: the first two sites
     # are judged by the runs of the first case set and by nothing after them
-    ran = checked
-    drafted = Drafted(
-        draft=draft,
-        solution=solution,
-        call=call,
-        reference_call=blind,
-        cases=checked.cases,
-    )
+    first = checked
     if not checked.survived:
-        sites(writing, call, blind, ran, Inputs(), Bar())
-        return drafted, checked, Inputs(), Bar()
+        draft = held(drafts, moved(draft, WritingState.REJECTED, gate=checked.discard))
+        sites(writing, call, blind, first, Inputs(), Bar())
+        return draft, checked, Inputs(), Bar()
+    draft = held(drafts, moved(draft, WritingState.AGREED, cases=checked.cases))
+
     # written before the mutation loop, and for every problem: the inputs it
     # builds are what a fuzz pass kills mutants with, and a round is then paid
     # for the survivors alone
-    inputs = building(transport, calls, draft.statement, configuration=bench.inputs, notes=notes)
+    inputs = building(
+        transport, calls, generated.statement, configuration=bench.inputs, notes=notes
+    )
+    if inputs.built is not None:
+        draft = held(
+            drafts,
+            moved(
+                draft,
+                WritingState.BUILT,
+                builder=inputs.built.code,
+                largest=inputs.built.largest,
+                inputs=copied_from(inputs.call),
+            ),
+        )
     # before the loop, so a canonical wrong at scale costs no round. The case
     # is held back until after it: the survivors are decided against the set as
     # the statement left it
     checked, inputs, separating = timed(
-        template, drafted, checked, inputs, cap_ms=cap_ms, notes=notes
+        template, draft, checked, inputs, cap_ms=cap_ms, notes=notes
     )
     if not checked.survived:
-        sites(writing, call, blind, ran, inputs, Bar())
-        return drafted, checked, inputs, Bar()
-    checked, inputs, bar = measured(
+        draft = held(drafts, moved(draft, WritingState.REJECTED, gate=checked.discard))
+        sites(writing, call, blind, first, inputs, Bar())
+        return draft, checked, inputs, Bar()
+    if template.speedup and inputs.built is not None:
+        draft = held(drafts, moved(draft, WritingState.SEARCHED, separating=separating))
+
+    checked, inputs, bar, won = measured(
         transport,
         calls,
-        drafted,
+        draft,
         checked,
         inputs,
         configuration=bench.discrimination,
         cap_ms=cap_ms,
         notes=notes,
     )
-    if separating is not None and checked.survived:
-        drafted.cases.append(separating)
-    sites(writing, call, blind, ran, inputs, bar)
-    return drafted, checked, inputs, bar
+    if not checked.survived:
+        draft = held(drafts, moved(draft, WritingState.REJECTED, gate=checked.discard))
+        sites(writing, call, blind, first, inputs, bar)
+        return draft, checked, inputs, bar
+    draft = held(
+        drafts,
+        moved(draft, WritingState.HARDENED, won=won, discrimination=copied_from(bar.call)),
+    )
+    sites(writing, call, blind, first, inputs, bar)
+    return draft, checked, inputs, bar
+
+
+def held(drafts: DraftStore | None, draft: Draft) -> Draft:
+    """Written after every step that moved it, so a run that dies leaves the
+    draft where it stopped. Silent without a store, as `Writing` is."""
+    if drafts is not None:
+        drafts.put(draft)
+    return draft
+
+
+def moved(draft: Draft, state: WritingState, **fields: Any) -> Draft:
+    """Revised in place rather than appended: the draft store is working state,
+    and a step's answer moves the draft it was written on."""
+    return Draft.model_validate(draft.model_dump() | {"state": state} | fields)
+
+
+def copied_from(call: Call | None) -> MachineProvenance | None:
+    """The configuration of one step's call, as a site outcome copies it."""
+    if call is None:
+        return None
+    return MachineProvenance.model_validate(written_by(call))
 
 
 def sites(
     writing: Writing,
     call: Call,
-    blind: Call,
+    blind: Call | None,
     ran: Checked,
     inputs: Inputs,
     bar: Bar,
@@ -275,14 +339,14 @@ def settled(checked: Checked) -> str:
 def measured(
     transport: Transport,
     calls: CallLog,
-    drafted: Drafted,
+    draft: Draft,
     checked: Checked,
     inputs: Inputs,
     *,
     configuration: Configuration,
     cap_ms: int,
     notes: Notes = SILENT,
-) -> tuple[Checked, Inputs, Bar]:
+) -> tuple[Checked, Inputs, Bar, list[SettledCase]]:
     """The mutation loop's cases, appended to the set the problem carries.
 
     `inputs` is returned because the fuzz pass runs inside the loop: a built
@@ -296,19 +360,19 @@ def measured(
         hardened = harden(
             transport,
             calls,
-            drafted.draft.statement,
-            canonical=drafted.draft.canonical,
-            reference=drafted.solution,
-            cases=drafted.cases,
+            draft.statement,
+            canonical=draft.canonical,
+            reference=draft.reference or "",
+            cases=draft.cases,
             slowest_ms=checked.slowest_ms,
             cap_ms=cap_ms,
             configuration=configuration,
-            fuzzing=fuzzing(drafted, inputs, cap_ms=cap_ms),
+            fuzzing=fuzzing(draft, inputs, cap_ms=cap_ms),
             notes=notes,
         )
     except Exception as failure:
         notes("mutants", f"unmeasured: {failure!r}")
-        return checked, inputs, Bar(unmeasured=repr(failure))
+        return checked, inputs, Bar(unmeasured=repr(failure)), []
 
     kept = len(hardened.fuzzed.cases) if hardened.fuzzed else 0
     bar = Bar(
@@ -326,8 +390,7 @@ def measured(
         call=hardened.call,
     )
     if hardened.disagreement is None:
-        drafted.cases.extend(hardened.cases)
-        return checked, inputs, bar
+        return checked, inputs, bar, hardened.cases
 
     # a boundary input the first case set never reached, answered two ways
     discarded = Checked(
@@ -338,8 +401,8 @@ def measured(
     # the fuzz pass's input was built by the inputs site's code, so its gate is
     # filed there and the round answered for nothing
     if hardened.fuzzed is not None and hardened.fuzzed.disagreement is not None:
-        return discarded, inputs.model_copy(update={"gate": Discard.DISAGREED}), bar
-    return discarded, inputs, bar.model_copy(update={"gate": Discard.DISAGREED})
+        return discarded, inputs.model_copy(update={"gate": Discard.DISAGREED}), bar, []
+    return discarded, inputs, bar.model_copy(update={"gate": Discard.DISAGREED}), []
 
 
 def building(
@@ -365,15 +428,15 @@ def building(
     return Inputs(call=call, built=built)
 
 
-def fuzzing(drafted: Drafted, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:
+def fuzzing(draft: Draft, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:
     """The pass `harden` runs before its first round, or nothing where no
     generator was written for it to build with."""
     if inputs.built is None or inputs.call is None:
         return None
     return pass_over(
         inputs.built,
-        canonical=drafted.draft.canonical,
-        reference=drafted.solution,
+        canonical=draft.canonical,
+        reference=draft.reference or "",
         call=inputs.call,
         cap_ms=cap_ms,
     )
@@ -381,7 +444,7 @@ def fuzzing(drafted: Drafted, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:
 
 def timed(
     template: Template,
-    drafted: Drafted,
+    draft: Draft,
     checked: Checked,
     inputs: Inputs,
     *,
@@ -401,8 +464,8 @@ def timed(
     try:
         found = search(
             make(inputs.built.code, cap_ms),
-            canonical=drafted.draft.canonical,
-            reference=drafted.solution,
+            canonical=draft.canonical,
+            reference=draft.reference or "",
             call=inputs.call,
             cap_ms=DRILL_CAP_MS,
             largest=inputs.built.largest,
@@ -465,6 +528,7 @@ def write_problems(
     on_progress: Callable[[Progress], None] | None = None,
     on_step: Callable[[Step], None] | None = None,
     outcomes: OutcomeLog | None = None,
+    drafts: DraftStore | None = None,
 ) -> GenerationResult:
     """`count` problems for one template, each shown what came before it, and
     each stored as soon as its runs keep it.
@@ -483,7 +547,7 @@ def write_problems(
         left: list[SiteOutcome] = []
         writing = Writing(template_id=template.id, into=left)
         try:
-            drafted, checked, inputs, bar = write_one(
+            draft, checked, inputs, bar = write_one(
                 transport,
                 calls,
                 card,
@@ -493,6 +557,7 @@ def write_problems(
                 cap_ms=cap_ms,
                 notes=Notes(on_step, index=index, total=count),
                 writing=writing,
+                drafts=drafts,
             )
         except Exception as failure:
             # broad on purpose: a refusal, a rate limit or a reply that does
@@ -507,11 +572,11 @@ def write_problems(
             continue
 
         consecutive = 0
-        written.append(drafted.draft.statement)
+        written.append(draft.statement)
         if checked.survived:
-            problem = land(corpus, template, drafted)
+            problem = land(corpus, template, draft)
             record(outcomes, left, problem_id=problem.id)
-            result.drafted.append(drafted)
+            result.drafted.append(draft)
         else:
             record(outcomes, left)
             result.discarded.append(
@@ -522,8 +587,8 @@ def write_problems(
             index,
             count,
             template,
-            title=drafted.draft.title,
-            cases=len(drafted.draft.cases),
+            title=draft.title,
+            cases=len(draft.declared),
             outcome=checked.outcome,
             landed=checked.survived,
             reason=None if checked.survived else why(checked),

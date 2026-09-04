@@ -9,28 +9,20 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field
-
 from algo_coach import mint
 from algo_coach.cases import CaseLog
-from algo_coach.generation.generator import Generated
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Call, Problem, SettledCase, SolutionRole, Template
+from algo_coach.schema import (
+    Call,
+    Draft,
+    MachineProvenance,
+    Problem,
+    SettledCase,
+    SolutionRole,
+    Template,
+)
 from algo_coach.solutions import SolutionLog
-
-
-class Drafted(BaseModel):
-    """One problem the two calls wrote, and what its runs left. Nothing is
-    stored yet."""
-
-    draft: Generated
-    solution: str  # the reference, written from the statement alone
-    # whole rather than by id: every record this becomes copies a configuration
-    call: Call
-    reference_call: Call
-    # what the runs established, where `draft.cases` holds what was declared
-    cases: list[SettledCase] = Field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -60,18 +52,33 @@ def written_by(call: Call) -> dict[str, Any]:
     }
 
 
-def land(corpus: Corpus, template: Template, drafted: Drafted) -> Problem:
+def copied(provenance: MachineProvenance | None) -> dict[str, Any]:
+    """The configuration a draft already holds, as `written_by` reads one off a
+    call. A step that answered copied it whole, so a missing one is a step the
+    draft never took."""
+    if provenance is None:
+        raise ValueError("a landing draft carries the configuration of every step it took")
+    return provenance.model_dump()
+
+
+def landing(draft: Draft) -> list[SettledCase]:
+    """The set the problem carries, in the order it was built: what the two
+    solutions settled, then what the rounds won, then the separating case."""
+    return [*draft.cases, *draft.won, *([draft.separating] if draft.separating else [])]
+
+
+def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
     # minted first, since every other record names its id, and put last, since
     # it is what a reader finds
-    draft = drafted.draft
+    written = copied(draft.generator)
     problem = mint.generated_problem(
         draft.title,
         draft.statement,
         generated_for=template.id,
         difficulty=draft.difficulty,
-        **written_by(drafted.call),
+        **written,
     )
-    for case in drafted.cases:
+    for case in landing(draft):
         # the case's own call rather than the problem's: a mutation round and
         # the speedup search propose arguments at their own configuration
         corpus.cases.append(
@@ -84,21 +91,17 @@ def land(corpus: Corpus, template: Template, drafted: Drafted) -> Problem:
                 **written_by(case.call),
             )
         )
-    canonical = mint.solution(
-        problem.id, draft.canonical, SolutionRole.CANONICAL, **written_by(drafted.call)
-    )
+    canonical = mint.solution(problem.id, draft.canonical, SolutionRole.CANONICAL, **written)
     corpus.solutions.append(canonical)
+    blind = copied(draft.blind)
+    if draft.reference is None:
+        raise ValueError("a landing draft carries the reference its blind call wrote")
     corpus.solutions.append(
-        mint.solution(
-            problem.id,
-            drafted.solution,
-            SolutionRole.REFERENCE,
-            **written_by(drafted.reference_call),
-        )
+        mint.solution(problem.id, draft.reference, SolutionRole.REFERENCE, **blind)
     )
     corpus.matches.append(mint.generator_match(template.id, canonical.id))
     corpus.problems.put(problem)
     return problem
 
 
-__all__ = ["Corpus", "Drafted", "land", "written_by"]
+__all__ = ["Corpus", "copied", "land", "landing", "written_by"]

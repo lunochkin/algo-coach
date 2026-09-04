@@ -9,7 +9,15 @@ from algo_coach.generation.agreement import (
 from algo_coach.generation.aim import Target, targets
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import BLIND_DEFAULT, reference
-from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
+from algo_coach.generation.checks import (
+    CAP_MS,
+    Checked,
+    Discard,
+    Ran,
+    agree,
+    check,
+    stopped,
+)
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
 from algo_coach.generation.errors import GenerationError
 from algo_coach.generation.fuzzing import (
@@ -35,7 +43,7 @@ from algo_coach.generation.generator import (
 )
 from algo_coach.generation.hardening import Hardened, harden, standing
 from algo_coach.generation.inputs import INPUTS_DEFAULT, Built, builder
-from algo_coach.generation.landing import Corpus, Drafted, land, written_by
+from algo_coach.generation.landing import Corpus, copied, land, landing, written_by
 from algo_coach.generation.replay import (
     REPLAYED,
     ReplayResult,
@@ -70,11 +78,13 @@ __all__ = [
     "Bench",
     "Corpus",
     "Checked",
+    "Ran",
     "Disagreement",
     "Discard",
     "Built",
     "Discarded",
-    "Drafted",
+    "copied",
+    "landing",
     "Failed",
     "GenerationResult",
     "Candidate",
@@ -101,7 +111,9 @@ __all__ = [
     "Writing",
     "agrees",
     "builder",
+    "agree",
     "check",
+    "stopped",
     "land",
     "generate",
     "fuzz",
