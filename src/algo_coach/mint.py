@@ -482,6 +482,7 @@ def draft(
     canonical: str,
     declared: Sequence[DraftCase],
     difficulty: ProblemDifficulty,
+    template_id: str | None = None,
     rerun_of: str | None = None,
     model: str,
     effort: str,
@@ -501,6 +502,7 @@ def draft(
     return Draft(
         id=writing_id,
         state=WritingState.DRAFTED,
+        template_id=template_id,
         rerun_of=rerun_of,
         title=title,
         statement=statement,

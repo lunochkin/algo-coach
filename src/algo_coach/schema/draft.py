@@ -89,6 +89,10 @@ class Draft(BaseModel):
     # rejected draft is not resumed, so re-running the step its gate reached
     # mints a draft that cites it rather than moving the one it came from
     rerun_of: str | None = Field(default=None, min_length=1)
+    # the form the brief named, absent where a technique brief named none, as
+    # on `SiteOutcome`. A resume reads the template's `speedup`, and a sweep
+    # over the store has nothing else to find it from
+    template_id: str | None = Field(default=None, min_length=1)
 
     # drafted: one call wrote all five, so a draft exists only once they do
     title: str = Field(min_length=1)

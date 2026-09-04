@@ -75,6 +75,15 @@ def test_a_draft_is_identified_by_the_writing_id():
     assert "writing_id" in SiteOutcome.model_fields
 
 
+def test_the_form_a_draft_was_briefed_on_is_optional():
+    """A technique brief names no form, as on `SiteOutcome`. A blank one is
+    rejected: it passes a presence check while naming nothing."""
+    assert make_draft().template_id is None
+    assert make_draft(template_id="t1").template_id == "t1"
+    with pytest.raises(ValidationError, match="template_id"):
+        make_draft(template_id="")
+
+
 def test_a_blank_id_is_rejected():
     """It passes a presence check while naming nothing, and the site outcomes
     would then group under it."""

@@ -344,7 +344,7 @@ exit criteria reads a draft.
 - [x] Find the first step of a draft whose configuration or digest moved. That
       is where a resume starts, and a test pins that an unchanged bench finds
       none
-- [ ] Add `template_id` to `Draft`, optional as on `SiteOutcome`, since a
+- [x] Add `template_id` to `Draft`, optional as on `SiteOutcome`, since a
       technique brief names no form. `moved_at` reads the template's `speedup`,
       and a sweep over held drafts has only the site outcomes to find it from
 - [ ] Resume a draft from that step, reporting which step it started at

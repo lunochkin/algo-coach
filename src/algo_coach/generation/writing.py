@@ -26,7 +26,7 @@ class Writing:
 
     def draft(self, generated: Generated, call: Call, *, rerun_of: str | None = None) -> Draft:
         """The draft this attempt writes, carrying the id its site outcomes
-        group under."""
+        group under and the form it was briefed on."""
         return mint.draft(
             self.id,
             title=generated.title,
@@ -34,6 +34,9 @@ class Writing:
             canonical=generated.canonical,
             declared=generated.cases,
             difficulty=generated.difficulty,
+            # empty where nothing recorded the attempt, as it is on the site
+            # outcomes this id groups
+            template_id=self.template_id or None,
             rerun_of=rerun_of,
             **written_by(call),
         )

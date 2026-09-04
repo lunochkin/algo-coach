@@ -202,8 +202,10 @@ before it away.
   moved, which is why both are on the draft rather than only the outputs.
 - **A draft held at `searched` starts at the loop once its template drops the
   claim.** The flag is read beside the bench, since a corrected one moves
-  neither a configuration nor a digest. It is read from the template rather
-  than the draft, which names no template.
+  neither a configuration nor a digest.
+- **The draft names the form its brief asked for**, absent where a technique
+  brief named none, as on a site outcome. A sweep over the store resolves the
+  template from the draft rather than from the outcomes of the same writing id.
 - **A resume goes forward only.** A step's prompt is a function of the outputs
   before it, so editing one site's prompt invalidates that step and what
   follows it.

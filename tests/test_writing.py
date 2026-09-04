@@ -37,6 +37,18 @@ def test_the_draft_copies_the_generator_call_whole():
     assert made.blind is None
 
 
+def test_the_draft_names_the_form_it_was_briefed_on():
+    """A resume reads the template's `speedup`, and a sweep over the store has
+    nothing else to find it from."""
+    assert Writing(template_id="t1").draft(GENERATED, a_call()).template_id == "t1"
+
+
+def test_an_unrecorded_attempt_names_no_form():
+    """As its site outcomes name none: nothing recorded the attempt, so there
+    is no template to read back."""
+    assert Writing().draft(GENERATED, a_call()).template_id is None
+
+
 def test_a_first_attempt_cites_no_draft():
     """Most drafts are written rather than re-run."""
     assert Writing().draft(GENERATED, a_call()).rerun_of is None
