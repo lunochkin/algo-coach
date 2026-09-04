@@ -54,6 +54,7 @@ from algo_coach.generation.replay import (
 )
 from algo_coach.generation.resuming import (
     ORDER,
+    advances,
     draws_again,
     moved_at,
     next_step,
@@ -143,6 +144,7 @@ __all__ = [
     "read",
     "reference",
     "ORDER",
+    "advances",
     "draws_again",
     "moved_at",
     "naive",

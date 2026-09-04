@@ -466,7 +466,7 @@ exit criteria reads a draft.
       between the bounds, not the values the input contains. A stored draft's
       clock narrowed the range the way the fast solution does, and separated
       nothing within the case ceiling
-- [ ] Report a held draft no resume would advance as held rather than by the
+- [x] Report a held draft no resume would advance as held rather than by the
       step it would nominally start at. `--drafts` counts one whose search
       never ran as resumable, where `carried` holds it before reaching that
       step

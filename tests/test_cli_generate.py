@@ -720,6 +720,25 @@ def test_the_drafts_are_listed_with_the_step_each_would_resume_at(root, monkeypa
     assert len(CallLog(root).all()) == spent
 
 
+CRASHES = "def solve(size, seed):\n    raise ValueError\n"
+
+
+def test_a_draft_no_resume_would_advance_is_listed_as_held(root, monkeypatch, capsys):
+    """The builder crashed, so the search never ran and nothing about the bench
+    moved. The step a resume would nominally start at is past the search, and
+    the run holds the draft before reaching it."""
+    seeded(root, card(templates=CLAIMS))
+    run(monkeypatch, FakeWriter(generator=CRASHES), "longest-valid-window")
+    capsys.readouterr()
+
+    listing(monkeypatch)
+
+    out = capsys.readouterr().out
+    assert "starts at" not in out
+    assert "held before the loop" in out and "built nothing at size 1" in out
+    assert "1 draft(s) stored, 0 would resume" in out
+
+
 def test_a_rejected_draft_is_counted_and_not_listed(root, monkeypatch, capsys):
     """Nothing resumes it, so a sweep's listing is what it will reach. The
     count still covers the store, or the summary would report fewer drafts than

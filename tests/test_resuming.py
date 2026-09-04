@@ -10,6 +10,7 @@ from algo_coach.generation import (
     Bench,
     Corpus,
     Notes,
+    advances,
     blind,
     clock,
     inputs,
@@ -164,9 +165,9 @@ def test_an_unseparated_draft_draws_the_clock_again(tmp_path):
 CRASHES = "def solve(size, seed):\n    raise ValueError\n"
 
 
-def test_a_search_that_never_ran_draws_no_clock(tmp_path):
-    """The builder's code crashed, so nothing timed the solution this draft
-    holds. A draw would pay for a call the search still cannot use."""
+def unbuilt(tmp_path) -> Draft:
+    """A draft the search never ran for: the builder's code crashed, so nothing
+    timed the solution it holds."""
     (one,) = seeded(tmp_path, card(templates=[template("longest-valid-window", speedup=True)]))
     result = write_problems(
         FakeWriter(generator=CRASHES),
@@ -176,10 +177,34 @@ def test_a_search_that_never_ran_draws_no_clock(tmp_path):
         Corpus.at(tmp_path),
         drafts=DraftStore(tmp_path),
     )
-
     (stopped,) = result.held
-    assert "built nothing at size 1" in stopped.draft.unseparated
-    assert moved_at(stopped.draft, CLAIMS, BENCH) is None
+    return stopped.draft
+
+
+def test_a_search_that_never_ran_draws_no_clock(tmp_path):
+    """A draw would pay for a call the search still cannot use."""
+    stopped = unbuilt(tmp_path)
+
+    assert "built nothing at size 1" in stopped.unseparated
+    assert moved_at(stopped, CLAIMS, BENCH) is None
+
+
+def test_a_draft_a_resume_starts_past_the_search_on_advances_nowhere(tmp_path):
+    """Nothing about the bench moved, so a resume starts at the loop, and a
+    draft with no separating case is held before it."""
+    assert not advances(unbuilt(tmp_path), CLAIMS, BENCH)
+
+
+def test_a_draft_whose_clock_is_drawn_again_advances(tmp_path):
+    """The resume starts at the naive site, so the search runs again against
+    the second draw."""
+    assert advances(held(tmp_path), CLAIMS, BENCH)
+
+
+def test_a_form_that_is_its_own_optimum_advances(tmp_path):
+    """No search runs where no speedup is claimed, so nothing waits on the case
+    one would have stored."""
+    assert advances(held(tmp_path), OPTIMUM, BENCH)
 
 
 def test_a_corrected_speedup_resumes_the_draft_the_search_held(tmp_path):

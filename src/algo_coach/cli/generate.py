@@ -21,6 +21,7 @@ from algo_coach.generation import (
     Resumed,
     Step,
     Target,
+    advances,
     replay,
     resume,
     starts_at,
@@ -171,7 +172,7 @@ def listed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path
     for draft, target in waiting:
         if args.all or draft.state is not WritingState.REJECTED:
             print(listing(draft, target, bench))
-    print(drafts_summary(waiting, listed=args.all))
+    print(drafts_summary(waiting, bench, listed=args.all))
 
 
 def listing(draft: Draft, target: Target | None, bench: Bench) -> str:
@@ -192,10 +193,17 @@ def waiting_on(draft: Draft, target: Target | None, bench: Bench) -> str:
         # the form its brief named is not seeded, and a search reads `speedup`
         # from it
         return f"no template {draft.template_id}"
+    if not advances(draft, target.template, bench):
+        # the step `starts_at` names is past the search, and a draft with no
+        # separating case is held before the loop: reporting that step would
+        # name work the resume never does
+        return f"held before the loop: {draft.unseparated}"
     return f"starts at {starts_at(draft, target.template, bench)}"
 
 
-def drafts_summary(waiting: list[tuple[Draft, Target | None]], *, listed: bool = True) -> str:
+def drafts_summary(
+    waiting: list[tuple[Draft, Target | None]], bench: Bench, *, listed: bool = True
+) -> str:
     """How many drafts a sweep would carry, apart from the ones it would pass
     over.
 
@@ -208,7 +216,9 @@ def drafts_summary(waiting: list[tuple[Draft, Target | None]], *, listed: bool =
     resuming = [
         draft
         for draft, target in waiting
-        if target is not None and draft.state not in (WritingState.REJECTED, WritingState.LANDED)
+        if target is not None
+        and draft.state not in (WritingState.REJECTED, WritingState.LANDED)
+        and advances(draft, target.template, bench)
     ]
     line = f"{len(waiting)} draft(s) stored, {len(resuming)} would resume"
     rejected = sum(draft.state is WritingState.REJECTED for draft, _ in waiting)

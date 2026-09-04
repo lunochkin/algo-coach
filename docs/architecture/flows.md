@@ -305,6 +305,9 @@ a second one writes a different problem.
   state, its gate and the step a resume would start at. A sweep is aimed at
   every held draft, so what it will spend is otherwise readable only once it
   has spent it.
+- **A draft no resume would advance is named held**, rather than by the step it
+  would start at. A search that stored no case holds the draft before the loop,
+  and a resume starting past the search runs no other one.
 - **One draft is read whole by `generate --draft <id>`**: the statement, both
   solutions, the set the steps settled, and the site outcomes of its writing
   id. A listing is a line per draft, where reading why one stopped needs the

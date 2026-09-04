@@ -114,6 +114,19 @@ def draws_again(draft: Draft, template: Template) -> bool:
     )
 
 
+def advances(draft: Draft, template: Template, bench: Bench = BENCH) -> bool:
+    """Whether a resume would carry this draft past the state it stopped at.
+
+    A draft whose template claims a speedup and whose search stored no case is
+    held before the loop, so a resume starting after the search reaches neither
+    the step that would separate it nor the one that would land it. `starts_at`
+    still names a step, and it is one the run never takes.
+    """
+    if not (template.speedup and draft.separating is None):
+        return True
+    return reaches(starts_at(draft, template, bench), WritingState.SEARCHED)
+
+
 def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingState | None:
     """The first step to re-run, or `None` where the bench and the template
     answer this draft as it stands.
@@ -139,6 +152,7 @@ def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingS
 __all__ = [
     "ANSWERED",
     "ORDER",
+    "advances",
     "later",
     "draws_again",
     "moved_at",
