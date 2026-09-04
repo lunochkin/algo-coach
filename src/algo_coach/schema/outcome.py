@@ -13,13 +13,14 @@ from algo_coach.schema.provenance import MachineProvenance
 
 
 class CallSite(StrEnum):
-    """The four calls writing a problem takes. `Bench` names one configuration
-    per entry, and a test pins the two lists together."""
+    """The calls writing a problem takes. `Bench` names one configuration per
+    entry, and a test pins the two lists together."""
 
     GENERATOR = "generator"
     BLIND = "blind"
     DISCRIMINATION = "discrimination"
     INPUTS = "inputs"
+    CLOCK = "clock"
 
 
 class Discard(StrEnum):

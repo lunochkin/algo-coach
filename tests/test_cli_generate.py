@@ -164,7 +164,8 @@ def test_a_failure_is_the_whole_line():
 
 
 def aimed(monkeypatch, model: FakeWriter, *argv: str) -> None:
-    """A run aimed by the gap report rather than at a template named by hand."""
+    """A run aimed by the gap report rather than at a template named by
+    hand."""
     monkeypatch.setenv("OPENROUTER_API_KEY", "test")
     monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: model)
     monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--gaps", *argv])
@@ -209,7 +210,8 @@ def test_a_corpus_with_no_gap_asks_for_nothing(root, monkeypatch, capsys):
 
 
 def test_a_named_template_says_nothing_beside_gaps(root, monkeypatch, capsys):
-    """The report names the templates, so the two would contradict each other."""
+    """The report names the templates, so the two would contradict each
+    other."""
     with pytest.raises(SystemExit) as exit_info:
         aimed(monkeypatch, FakeWriter(), "--template", "fixed-window")
 
@@ -380,20 +382,22 @@ def test_a_stage_that_paid_for_a_call_reports_what_it_cost():
 
 
 def test_the_summary_names_one_model_where_every_site_shares_one():
-    """A bench nobody mixed reads as one name rather than as four lines."""
+    """A bench nobody mixed reads as one name rather than as a line per
+    site."""
     one = GENERATOR_DEFAULT.model_copy(update={"temperature": 0.0})
 
     assert "written by " + one.model in summary(
-        [], [], Bench(generator=one, blind=one, discrimination=one, inputs=one)
+        [], [], Bench(**dict.fromkeys(Bench.model_fields, one))
     )
 
 
 def test_the_summary_names_how_each_site_was_sampled():
-    """The built-in bench samples the generator and runs the rest greedy, and
-    two sites on one model differ by nothing else a name shows."""
+    """The built-in bench samples the generator and the clock and runs the rest
+    greedy, and two sites on one model differ by nothing else a name shows."""
     named = summary([], [], BENCH)
 
     assert f"generator {GENERATOR_DEFAULT.model} at {GENERATOR_DEFAULT.effort} @default" in named
+    assert f"clock {GENERATOR_DEFAULT.model} at {GENERATOR_DEFAULT.effort} @default" in named
     assert "blind " + GENERATOR_DEFAULT.model + " at " + GENERATOR_DEFAULT.effort + " @0.0" in named
 
 
@@ -551,7 +555,8 @@ def test_replay_pays_for_a_second_configuration_once(root, monkeypatch, capsys):
 
 
 def test_replay_is_aimed_at_nothing(root, monkeypatch, capsys):
-    """It reads the stored corpus, so the flags that aim a write name nothing."""
+    """It reads the stored corpus, so the flags that aim a write name
+    nothing."""
     with pytest.raises(SystemExit):
         replaying(monkeypatch, FakeWriter(), "--gaps")
 
@@ -678,7 +683,8 @@ def test_resume_with_no_draft_waiting_says_so(root, monkeypatch, capsys):
 
 
 def test_resume_is_aimed_at_nothing(root, monkeypatch, capsys):
-    """It reads the stored drafts, so the flags that aim a write name nothing."""
+    """It reads the stored drafts, so the flags that aim a write name
+    nothing."""
     with pytest.raises(SystemExit):
         resuming(monkeypatch, FakeWriter(), "--gaps")
 
@@ -804,7 +810,8 @@ def test_a_draft_is_named_by_a_prefix_of_its_id(root, monkeypatch, capsys):
 
 
 def test_a_prefix_naming_two_drafts_is_refused(root, monkeypatch, capsys):
-    """Reading whichever sorted first would answer about a draft nobody named."""
+    """Reading whichever sorted first would answer about a draft nobody
+    named."""
     stored = searched_draft(root, monkeypatch, capsys)
     drafts = DraftStore(root)
     drafts.put(stored.model_copy(update={"id": stored.id[:4] + "f" * 28}))

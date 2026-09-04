@@ -18,6 +18,7 @@ from algo_coach.generation.checks import (
     check,
     stopped,
 )
+from algo_coach.generation.clock import CLOCK_DEFAULT
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
 from algo_coach.generation.errors import GenerationError
 from algo_coach.generation.fuzzing import (
@@ -77,6 +78,7 @@ __all__ = [
     "BENCH",
     "REPLAYED",
     "BLIND_DEFAULT",
+    "CLOCK_DEFAULT",
     "DISCRIMINATION_DEFAULT",
     "GENERATOR_DEFAULT",
     "INPUTS_DEFAULT",

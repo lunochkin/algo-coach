@@ -333,7 +333,7 @@ is in `corpus.md`.
 - [x] Add `paced` to `WritingState`, between `built` and `searched`, and the
       naive code and its configuration to `Draft`. A resume holding neither
       would re-pay the call that wrote the clock
-- [ ] Add `CallSite.CLOCK` and the fifth `Bench` field, named as `Draft.clock`
+- [x] Add `CallSite.CLOCK` and the fifth `Bench` field, named as `Draft.clock`
       already is. A configuration is per call site, and the test pinning the
       two lists together is what fails until both move
 - [ ] Write the naive prompt: the statement and the template's trigger in, a
