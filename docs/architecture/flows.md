@@ -182,6 +182,11 @@ before it away.
 - **`rejected` is terminal and names the gate that reached it**, which is the
   same `Discard` a site outcome carries. Terminal means no resume rather than
   no record.
+- **One gate is a draft's alone.** A held draft rejected by hand names
+  `unexercised`: every site answered and none of them was wrong, so there is no
+  site outcome to file it under. The run never writes it, since it cannot tell
+  a reference that reached the form from an input generator that built the
+  wrong shape.
 - **A draft holds what a call produced and no local run re-derives**: the
   statement, the canonical, the declared cases and the difficulty; the
   reference; the settled cases; the builder's code and its bound; the cases the

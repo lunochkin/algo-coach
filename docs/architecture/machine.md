@@ -107,6 +107,10 @@ a call returned, which is why it sits beside the call log.
   contradicting the cases its own call declared is the generator's. A
   disagreement is the blind site's, since nothing disagrees before a second
   reading of the statement exists.
+- **The exception is the gate no answer was rejected by.** A held draft is
+  rejected where the problem does not exercise the form its template claims,
+  and every site answered. It is read from the draft, which is the record that
+  outlives the run.
 - **The attempt carries an id the run mints.** A discarded draft has no problem
   to key to, and it is the attempt whose cost nothing else records.
 - **The problem is named where one landed.** Its id exists only once the problem

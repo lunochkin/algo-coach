@@ -303,7 +303,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Hold a draft at `searched` where its template claims a speedup and the
       search stored no case, so nothing lands undemonstrated. A test lands a
       separated problem and holds an unseparated one
-- [ ] Add a `Discard` arm for a reference that wrote the form, and reject a
+- [x] Add a `Discard` arm for a reference that wrote the form, and reject a
       held draft with it. The four existing arms all say the statement, the
       canonical or the cases were wrong, and this one says none of them was
 - [ ] Add the template's `speedup` flag to what `moved_at` reads, so correcting

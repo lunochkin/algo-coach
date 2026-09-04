@@ -28,6 +28,11 @@ class Discard(StrEnum):
     MISDECLARED = "misdeclared"
     UNTESTED = "untested"
     DISAGREED = "disagreed"
+    # the four above say the statement, the canonical or the cases were wrong.
+    # This one says none of them was: the problem does not exercise the form
+    # its template claims, so no site's answer was rejected and no site outcome
+    # carries it
+    UNEXERCISED = "unexercised"
 
 
 class SiteOutcome(MachineProvenance):

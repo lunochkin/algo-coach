@@ -59,6 +59,7 @@ from algo_coach.generation.run import (
     GenerationResult,
     Inputs,
     Progress,
+    reject,
     write_one,
     write_problems,
 )
@@ -127,6 +128,7 @@ __all__ = [
     "read",
     "reference",
     "moved_at",
+    "reject",
     "replay",
     "sending",
     "schema",

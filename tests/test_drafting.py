@@ -1,9 +1,10 @@
+import pytest
 from generating import CANONICAL, FakeWriter
 from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
 from algo_coach.drafts import DraftStore
-from algo_coach.generation import Corpus, write_problems
+from algo_coach.generation import Corpus, reject, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Discard, Draft, WritingState
@@ -177,6 +178,33 @@ def a_landed_draft(problem_id: str) -> Draft:
         declared=[{"args": [[1, 2, 3]], "expected": 3}],
         difficulty="medium",
     )
+
+
+def test_a_held_draft_is_rejected_where_the_reference_wrote_the_form(tmp_path):
+    """The exit no resume reaches: that solution is immutable and it is still
+    the clock, so the claim holds and this problem does not exercise it."""
+    result, drafts = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
+    (stored,) = result.held
+
+    rejected = reject(drafts, stored)
+
+    assert rejected.state is WritingState.REJECTED
+    assert rejected.gate is Discard.UNEXERCISED
+    assert drafts.get(stored.id).gate is Discard.UNEXERCISED
+
+
+def test_a_landed_draft_is_not_rejected():
+    """Its problem carries attempts, and what answers there is a retirement."""
+    with pytest.raises(ValueError, match="landed"):
+        reject(None, a_landed_draft("p1"))
+
+
+def test_a_rejected_draft_is_not_rejected_a_second_time(tmp_path):
+    """Terminal, and a second gate would overwrite what the first one said."""
+    stored = written(tmp_path, FakeWriter(canonical=WRONG))
+
+    with pytest.raises(ValueError, match="rejected"):
+        reject(None, stored)
 
 
 def test_a_run_without_a_store_writes_no_draft(tmp_path):

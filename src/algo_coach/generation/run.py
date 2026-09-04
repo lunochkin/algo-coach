@@ -302,6 +302,21 @@ def moved(draft: Draft, state: WritingState, **fields: Any) -> Draft:
     return Draft.model_validate(draft.model_dump() | {"state": state} | fields)
 
 
+def reject(drafts: DraftStore | None, draft: Draft, gate: Discard = Discard.UNEXERCISED) -> Draft:
+    """The exit a held draft takes where no resume would separate it: the
+    reference wrote the form, so the claim holds and this problem does not
+    exercise it. Read by hand, since the run cannot tell that answer from an
+    input generator that built the wrong shape.
+
+    A landed draft is not rejected. It names a problem a reader already finds,
+    and clearing it is what landing means, so one still in the store is a
+    crash's leftover rather than a writing to reject.
+    """
+    if draft.state in (WritingState.LANDED, WritingState.REJECTED):
+        raise ValueError(f"a {draft.state} draft is not rejected")
+    return held(drafts, moved(draft, WritingState.REJECTED, gate=gate))
+
+
 def copied_from(call: Call | None) -> MachineProvenance | None:
     """The configuration of one step's call, as a site outcome copies it."""
     if call is None:
