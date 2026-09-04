@@ -69,7 +69,9 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         parser.exit(1, f"generate: aborted after {ABORT_AFTER} consecutive failures\n")
     failed = any(result.failed for result in results)
     if failed and not any(result.drafted for result in results):
-        parser.exit(1, "generate: nothing written\n")
+        # not "nothing written": a call that raised leaves the draft the steps
+        # before it wrote, and the block above names it
+        parser.exit(1, "generate: no problem stored\n")
 
 
 def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -141,8 +143,11 @@ def holding(target: Target, one: Held) -> str:
 
 
 def stopped_by(one: Held) -> str:
-    """Which step had no answer. The order is the one the steps run in, so the
-    earliest missing answer is what a reader is told about."""
+    """Which step had no answer. A raised call comes first, since it ended the
+    writing where the rest let it go on; the others read in the order the steps
+    run, so the earliest missing answer is what a reader is told about."""
+    if one.failed is not None:
+        return f"the call raised: {one.failed}"
     if one.unbuilt is not None:
         return f"no input generator: {one.unbuilt}"
     if one.unseparated is not None:

@@ -1,5 +1,5 @@
 import pytest
-from generating import CANONICAL, FakeWriter
+from generating import CANONICAL, FakeWriter, Raises
 from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
@@ -180,6 +180,18 @@ def a_landed_draft(problem_id: str) -> Draft:
         declared=[{"args": [[1, 2, 3]], "expected": 3}],
         difficulty="medium",
     )
+
+
+def test_a_draft_a_raised_call_left_is_held_with_its_reason(tmp_path):
+    """The steps before it wrote to the store, so a run reporting only the
+    failure would read as a problem nothing was paid for."""
+    result, drafts = run(tmp_path, Raises())
+
+    (one,) = result.held
+    assert one.draft.state is WritingState.CHECKED
+    assert "gateway" in one.failed
+    assert [failed.index for failed in result.failed] == [1]
+    assert drafts.all() == [one.draft]
 
 
 def test_a_held_draft_is_rejected_where_the_reference_wrote_the_form(tmp_path):

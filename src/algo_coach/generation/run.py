@@ -157,6 +157,9 @@ class Held(BaseModel):
     unseparated: str | None = None
     unbuilt: str | None = None  # no input generator, so no search ran at all
     unmeasured: str | None = None  # the round's call failed
+    # a call that raised, which ends the writing where the others answer
+    # nothing and let it go on. The draft the run wrote before it stands
+    failed: str | None = None
 
 
 class GenerationResult(BaseModel):
@@ -631,6 +634,11 @@ def write_problems(
             # not parse costs this problem and not the run
             result.failed.append(Failed(index=index, reason=repr(failure)))
             record(outcomes, left)
+            # read back rather than returned: the exception carried no draft,
+            # and what the steps before it wrote is in the store
+            stopped = drafts.get(writing.id) if drafts is not None else None
+            if stopped is not None:
+                result.held.append(Held(index=index, draft=stopped, failed=repr(failure)))
             report(on_progress, index, count, template, reason=repr(failure))
             consecutive += 1
             if consecutive == ABORT_AFTER:

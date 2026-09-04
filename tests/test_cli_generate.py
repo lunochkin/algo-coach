@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from importlib import import_module
 
 import pytest
-from generating import FakeWriter
+from generating import FakeWriter, Raises
 from matching import card, seeded, template
 
 from algo_coach import cli
@@ -131,7 +131,7 @@ def test_a_run_that_wrote_nothing_exits_nonzero(root, monkeypatch, capsys):
         run(monkeypatch, model, "longest-valid-window")
 
     assert exit_info.value.code == 1
-    assert "nothing written" in capsys.readouterr().err
+    assert "no problem stored" in capsys.readouterr().err
 
 
 def line(**fields) -> str:
@@ -593,3 +593,17 @@ def test_the_summary_counts_the_held_apart_from_the_discarded(root, monkeypatch,
     out = capsys.readouterr().out
     assert "0 problem(s) stored" in out
     assert "1 held" in out
+
+
+def test_a_draft_a_raised_call_left_is_named_too(root, monkeypatch, capsys):
+    """The statement and the canonical are in the store, so a run reporting
+    only that the call failed would read as a problem to write again."""
+    seeded(root, card(templates=CLAIMS))
+
+    with pytest.raises(SystemExit):
+        run(monkeypatch, Raises(), "longest-valid-window")
+
+    out, err = capsys.readouterr()
+    assert "# held: Widest fair stretch (longest-valid-window, checked)" in out
+    assert "the call raised: RuntimeError('the gateway is down')" in out
+    assert "no problem stored" in err

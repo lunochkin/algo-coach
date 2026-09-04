@@ -99,3 +99,13 @@ class FakeWriter:
             for one in self.calls
             if one["system"] not in (blind.SYSTEM, discrimination.SYSTEM, inputs.SYSTEM)
         ]
+
+
+class Raises(FakeWriter):
+    """Answers the generation call and fails the blind one, which is the call
+    that can raise once a draft exists."""
+
+    def __call__(self, **kwargs) -> Reply:
+        if kwargs["system"] == blind.SYSTEM:
+            raise RuntimeError("the gateway is down")
+        return super().__call__(**kwargs)

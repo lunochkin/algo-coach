@@ -311,7 +311,7 @@ canonical. What the first corpus settles is the bound.
       configuration nor a digest
 - [x] Report the held drafts at the end of a run, naming the template and what
       the search found. They are the gap the next generation run aims at
-- [ ] Count the draft a raised call left in that report. It is stored at the
+- [x] Count the draft a raised call left in that report. It is stored at the
       step it stopped and a resume reaches it, where the run prints only that
       the call failed
 
