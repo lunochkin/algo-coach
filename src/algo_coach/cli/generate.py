@@ -23,6 +23,7 @@ from algo_coach.generation import (
     Target,
     replay,
     resume,
+    starts_at,
     swept,
     targets,
     write_problems,
@@ -34,14 +35,21 @@ from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Call, Card, Draft, WritingState
 from algo_coach.solutions import SolutionLog
 
+# the three inputs a run can be aimed at. Each reads a different store, so a
+# run doing two would report both under one summary
+MODES = ("replay", "resume", "drafts")
+
 
 def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    if args.replay and args.resume:
-        parser.exit(2, "generate: --replay reads the corpus and --resume the drafts, so not both\n")
+    if len([one for one in MODES if getattr(args, one)]) > 1:
+        named = ", ".join(f"--{one}" for one in MODES)
+        parser.exit(2, f"generate: {named} read different stores, so one at a time\n")
     if args.replay:
         return replayed(args, parser, root)
     if args.resume:
         return resumed(args, parser, root)
+    if args.drafts:
+        return listed(args, parser, root)
     aimed = resolve(args, parser, root)
     api = transport(args, parser)
     calls, corpus = CallLog(root), Corpus.at(root)
@@ -133,6 +141,58 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
     print(resume_summary(results, bench, unaimed=unaimed))
     if not any(result.drafted for result in results):
         parser.exit(1, "generate: no problem stored\n")
+
+
+def listed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+    """Every stored draft, and what a resume at this bench would do with each.
+
+    It makes no call, so what a sweep would spend is readable before it is
+    spent. A rejected draft is listed too: its gate is what says why nothing
+    resumes it.
+    """
+    if args.card or args.template or args.gaps:
+        parser.exit(2, "generate: --drafts reads the stored drafts, so it is aimed at nothing\n")
+    stored = DraftStore(root).all()
+    if not stored:
+        parser.exit(0, "generate: no draft is stored\n")
+    bench = chosen_bench(args, parser)
+    cards = CardStore(root).all()
+    waiting = [(draft, written_for(cards, draft)) for draft in stored]
+    for draft, target in waiting:
+        print(listing(draft, target, bench))
+    print(drafts_summary(waiting, bench))
+
+
+def listing(draft: Draft, target: Target | None, bench: Bench) -> str:
+    """One stored draft: the form it was briefed on, how far it was written,
+    and what it is waiting on."""
+    form = target.template.slug if target is not None else str(draft.template_id)
+    return f"{draft.id}  {form[:24]:<24}  {draft.state:<10}  {waiting_on(draft, target, bench)}"
+
+
+def waiting_on(draft: Draft, target: Target | None, bench: Bench) -> str:
+    """What a resume would do with this draft. A terminal state names what put
+    it there, since no step follows it."""
+    if draft.state is WritingState.REJECTED:
+        return f"rejected by {draft.gate}"
+    if draft.state is WritingState.LANDED:
+        return f"landed as {draft.problem_id}, cleared by the next run"
+    if target is None:
+        # the form its brief named is not seeded, and a search reads `speedup`
+        # from it
+        return f"no template {draft.template_id}"
+    return f"starts at {starts_at(draft, target.template, bench)}"
+
+
+def drafts_summary(waiting: list[tuple[Draft, Target | None]], bench: Bench = BENCH) -> str:
+    """How many drafts a sweep would carry, apart from the ones it would pass
+    over, and the configuration it would pay at."""
+    resuming = [
+        draft
+        for draft, target in waiting
+        if target is not None and draft.state not in (WritingState.REJECTED, WritingState.LANDED)
+    ]
+    return f"{len(waiting)} draft(s) stored, {len(resuming)} would resume, {wrote(bench)}"
 
 
 def written_for(cards: list[Card], draft: Draft) -> Target | None:

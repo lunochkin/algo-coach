@@ -354,7 +354,7 @@ exit criteria reads a draft.
 - [x] Add `--resume` to `generate`, carrying every held draft forward and
       reporting the step each started at. Nothing calls the library's resume,
       so a prompt edit cannot be spent on the drafts it repairs
-- [ ] List the stored drafts under a flag of `generate`, naming the state, the
+- [x] List the stored drafts under a flag of `generate`, naming the state, the
       gate and the step each would start at. A sweep names what it will spend
       before it spends it
 - [ ] Skip a step a resume re-runs whose own configuration and digest stand, as

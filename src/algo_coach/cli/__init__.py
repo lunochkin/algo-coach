@@ -198,6 +198,11 @@ def main() -> None:
         help="carry every held draft forward, from the step its bench or its own state moved",
     )
     generate_parser.add_argument(
+        "--drafts",
+        action="store_true",
+        help="list the stored drafts, naming the step each would resume at, without calling",
+    )
+    generate_parser.add_argument(
         "--limit", type=int, help="how many stored problems to replay; every one otherwise"
     )
     generate_parser.add_argument(

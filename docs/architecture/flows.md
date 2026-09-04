@@ -248,8 +248,15 @@ before it away.
 - **A draft whose template is not seeded is skipped**, not resumed. The form
   its brief named is what a search reads `speedup` from, and the run reports
   the ones it could not aim.
-- **Deferred: whether drafts are listed from the CLI, and how long a rejected
-  draft is kept.** Each needs a corpus of drafts to answer.
+- **The store is listed by `generate --drafts`**, each draft named by its
+  state, its gate and the step a resume would start at. A sweep is aimed at
+  every held draft, so what it will spend is otherwise readable only once it
+  has spent it.
+- **A rejected draft is listed too.** Its gate is readable nowhere else, and a
+  listing that dropped it would leave a run reporting one fewer draft than the
+  store holds.
+- **Deferred: how long a rejected draft is kept.** It needs a corpus of drafts
+  to answer.
 
 ## Enumerating a problem's other solutions
 

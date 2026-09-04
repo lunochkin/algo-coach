@@ -22,6 +22,7 @@ from algo_coach.generation import (
     discrimination,
     generator,
     inputs,
+    reject,
 )
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
@@ -691,4 +692,54 @@ def test_a_replay_is_not_a_resume(root, monkeypatch, capsys):
         resuming(monkeypatch, FakeWriter(), "--replay")
 
     assert exit_info.value.code == 2
-    assert "not both" in capsys.readouterr().err
+    assert "one at a time" in capsys.readouterr().err
+
+
+def listing(monkeypatch, *argv: str) -> None:
+    """No key and no transport: a listing names what a sweep would spend and
+    spends none of it."""
+    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--drafts", *argv])
+    cli.main()
+
+
+def test_the_drafts_are_listed_with_the_step_each_would_resume_at(root, monkeypatch, capsys):
+    """A sweep names what it will spend before it spends it."""
+    stored = held_draft(root, monkeypatch, capsys)
+    spent = len(CallLog(root).all())
+
+    listing(monkeypatch)
+
+    out = capsys.readouterr().out
+    assert f"{stored.id}  longest-valid-window" in out
+    assert "checked" in out and "starts at referenced" in out
+    assert "1 draft(s) stored, 1 would resume" in out
+    assert len(CallLog(root).all()) == spent
+
+
+def test_a_rejected_draft_is_listed_by_its_gate(root, monkeypatch, capsys):
+    """Rejected is terminal, so what a resume would do with it is nothing, and
+    the gate is what says why."""
+    reject(DraftStore(root), held_draft(root, monkeypatch, capsys))
+
+    listing(monkeypatch)
+
+    out = capsys.readouterr().out
+    assert "rejected by unexercised" in out
+    assert "1 draft(s) stored, 0 would resume" in out
+
+
+def test_a_listing_of_no_draft_says_so(root, monkeypatch, capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        listing(monkeypatch)
+
+    assert exit_info.value.code == 0
+    assert "no draft is stored" in capsys.readouterr().err
+
+
+def test_a_listing_is_aimed_at_nothing(root, monkeypatch, capsys):
+    """It reads the stored drafts, as a resume does."""
+    with pytest.raises(SystemExit) as exit_info:
+        listing(monkeypatch, "--gaps")
+
+    assert exit_info.value.code == 2
+    assert "aimed at nothing" in capsys.readouterr().err
