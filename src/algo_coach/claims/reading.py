@@ -1,4 +1,5 @@
-"""One configuration's pass over the eval set: plan the calls, fold the answers."""
+"""One configuration's pass over the eval set: plan the calls, fold the
+answers."""
 
 from collections.abc import Mapping, Sequence
 from typing import Any
@@ -31,8 +32,8 @@ class ReadResult(BaseModel):
 
 
 class Plan(BaseModel):
-    """One configuration's share of a run. Selecting is separated from asking so
-    one consumer drives several of them, appending on its own thread."""
+    """One configuration's share of a run. Selecting is separated from asking
+    so one consumer drives several of them, appending on its own thread."""
 
     configuration: Configuration
     asking: list[Attempt] = Field(default_factory=list)  # newest first, after `limit`
@@ -50,10 +51,12 @@ def select(
     limit: int | None = None,
     fresh: bool = False,
 ) -> Plan:
-    """What one classifier still has to pay for, and what the log already answers.
+    """What one classifier still has to pay for, and what the log already
+    answers.
 
     `limit` caps the calls, not the attempts — a stored reading is free, so a
-    capped run adds to what earlier runs read. Makes no call and writes nothing.
+    capped run adds to what earlier runs read. Makes no call and writes
+    nothing.
     """
     asked = {
         attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
@@ -93,7 +96,8 @@ def absorb(
     answer: tuple[list[str], Call | None] | None,
     failure: Exception | None,
 ) -> dict[str, Any]:
-    """Fold one answer into the plan that asked for it, returning what to report.
+    """Fold one answer into the plan that asked for it, returning what to
+    report.
 
     Writes on the calling thread, the one consumer however many calls are in
     flight. A run of failures ends this plan alone; the others keep reading.

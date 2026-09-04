@@ -72,7 +72,8 @@ def test_the_standing_verdict_decides(cards):
 
 
 def test_a_retired_problem_fills_no_rung(cards):
-    """It is not served, so a form only its canonical displays is still a gap."""
+    """It is not served, so a form only its canonical displays is still a
+    gap."""
     retired = problem("p1", techniques=["sliding-window"]).model_copy(
         update={
             "status": ProblemStatus.RETIRED,

@@ -15,7 +15,8 @@ from algo_coach.schema import DraftCase, ExpectedSource, MachineProvenance, Sett
 
 @dataclass(frozen=True)
 class Misdeclaration:
-    """One case the canonical answered differently from its call's own `expected`."""
+    """One case the canonical answered differently from its call's own
+    `expected`."""
 
     args: list[Any]
     declared: Any

@@ -31,7 +31,8 @@ class Row:
 
 @dataclass
 class Widths:
-    """Measured once. A row that wrapped would make `redraw`'s up-count wrong."""
+    """Measured once. A row that wrapped would make `redraw`'s up-count
+    wrong."""
 
     model: int = 0
     effort: int = 0

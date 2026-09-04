@@ -19,7 +19,8 @@ def cases(*pairs) -> list[Case]:
 
 
 def mutant(code: str) -> Mutant:
-    """A mutant by hand, where the test is about the run rather than the walk."""
+    """A mutant by hand, where the test is about the run rather than the
+    walk."""
     return Mutant(code=code, operator=Operator.CONSTANT, change="1 → 2", line=1)
 
 

@@ -172,7 +172,8 @@ def _settled(
         )
 
     # the returned value weighs on the case as the arguments do. `measured` is
-    # carried: the speedup is established at this size, and only the case is not
+    # carried: the speedup is established at this size, and only the case is
+    # not
     if _weighs(args) + _weighs(expected) > ceiling:
         return Searched(missing=Missing.CASE_TOO_LARGE, **measured)
     return Searched(

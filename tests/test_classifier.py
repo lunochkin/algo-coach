@@ -148,7 +148,8 @@ def test_the_system_text_carries_no_per_code_rule():
 
 def test_a_retired_candidate_carries_no_criterion_and_still_asks():
     """Records outlive the vocabulary, so a stored problem can name a code the
-    criteria no longer hold. A missing rule costs its own line, not the call."""
+    criteria no longer hold. A missing rule costs its own line, not the
+    call."""
     client = answering("greedy")
 
     verdict(client, ["greedy", "dynamic-programming-2d"], CODE)
@@ -175,7 +176,8 @@ def test_the_verdict_is_ordered_by_the_candidates():
 
 def test_naming_nothing_is_a_legal_verdict():
     """The tags may not cover what the code did. An empty verdict writes no
-    claim and leaves the fallback standing, rather than asserting a wrong one."""
+    claim and leaves the fallback standing, rather than asserting a wrong
+    one."""
     client = answering()
 
     assert verdict(client, ["greedy", "sorting"], CODE) == []
@@ -191,7 +193,8 @@ def test_the_code_is_what_it_reads():
 
 
 def test_one_candidate_decides_nothing_and_costs_no_call():
-    """The fallback already answers it, and the schema would offer one choice."""
+    """The fallback already answers it, and the schema would offer one
+    choice."""
     client = answering("greedy")
 
     assert verdict(client, ["greedy"], CODE) == ["greedy"]

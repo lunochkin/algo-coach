@@ -16,7 +16,8 @@ def read(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) 
     titles = {problem.id: problem.title for problem in ProblemStore(root).all()}
 
     def show(progress: Progress) -> None:
-        """One line per canonical, on stderr and flushed: a call takes seconds."""
+        """One line per canonical, on stderr and flushed: a call takes
+        seconds."""
         counter = f"[{progress.index:>{len(str(progress.total))}}/{progress.total}]"
         if progress.reason is not None:
             verdict = f"! {progress.reason}"

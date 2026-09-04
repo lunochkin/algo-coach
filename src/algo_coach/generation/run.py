@@ -638,7 +638,8 @@ def timed(
     searched = inputs.model_copy(
         update={
             # carried where the search proved a separation and stored nothing,
-            # which `unseparated` beside it is what tells apart from a stored one
+            # which `unseparated` beside it is what tells apart from a stored
+            # one
             "separating": found.size,
             "unseparated": found.missing,
             "gate": Discard.DISAGREED if found.missing is Missing.DISAGREED else None,
@@ -893,7 +894,8 @@ def record(
     outcomes: OutcomeLog | None, left: list[SiteOutcome], *, problem_id: str | None = None
 ) -> None:
     """Appended after landing, since only then is there a problem to name. The
-    `writing_id` groups them either way, which is what a discarded draft has."""
+    `writing_id` groups them either way, which is what a discarded draft
+    has."""
     if outcomes is None:
         return
     for outcome in left:

@@ -17,7 +17,8 @@ class MatchLog:
             f.write(match.model_dump_json() + "\n")
 
     def matches(self) -> list[TemplateMatch]:
-        """In append order: a tie on `created_at` is broken by what landed last."""
+        """In append order: a tie on `created_at` is broken by what landed
+        last."""
         if not self.matches_path.exists():
             return []
         return [

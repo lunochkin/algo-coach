@@ -29,7 +29,8 @@ __all__ = ["BadLine", "DATA_ROOT", "INTERRUPTED", "main"]
 
 
 class _Defaults(argparse.ArgumentDefaultsHelpFormatter):
-    """`None` and `False` are the absence of a flag, so no default is shown for them."""
+    """`None` and `False` are the absence of a flag, so no default is shown for
+    them."""
 
     def _get_help_string(self, action: argparse.Action) -> str | None:
         if action.default is None or action.default is False:

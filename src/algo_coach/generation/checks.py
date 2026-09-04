@@ -1,8 +1,10 @@
-"""Running the two solutions, and whether what they answered lets the problem land.
+"""Running the two solutions, and whether what they answered lets the problem
+land.
 
 Two steps rather than one, in the order `flows.md` gives: the canonical is run
 and checked against what its own call declared, and only then is it settled
-against a reference. A canonical that contradicts itself pays for no blind call.
+against a reference. A canonical that contradicts itself pays for no blind
+call.
 
 Stores nothing: the ids a case and a solution need do not exist until it lands.
 """

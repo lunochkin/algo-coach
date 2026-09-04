@@ -90,7 +90,8 @@ def test_a_later_claim_replaces_the_whole_set():
 
 
 def test_the_earlier_claim_never_wins_on_input_order():
-    """The log is append-only, but a reader may hand them over sorted any way."""
+    """The log is append-only, but a reader may hand them over sorted any
+    way."""
     late = make_claim(["greedy"], id="c2", created_at=T0 + timedelta(hours=1))
     early = make_claim(["backtracking"], id="c1", created_at=T0)
 
@@ -98,7 +99,8 @@ def test_the_earlier_claim_never_wins_on_input_order():
 
 
 def test_a_tie_on_created_at_is_broken_by_append_order():
-    """Two claims minted in the same instant: the one that landed last stands."""
+    """Two claims minted in the same instant: the one that landed last
+    stands."""
     claims = standing_claims(
         [
             make_claim(["backtracking"], id="c1"),

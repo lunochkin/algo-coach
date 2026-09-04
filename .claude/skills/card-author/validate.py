@@ -5,7 +5,8 @@ Three things the author cannot see by reading the file: whether it matches
 whether each template parses. Compiling is not passing — the trainer runs the
 templates for real — but it catches a truncated paste at authoring time.
 
-Usage: uv run python .claude/skills/card-author/validate.py content/cards/*.json
+Usage: uv run python .claude/skills/card-author/validate.py
+content/cards/*.json
 """
 
 import sys

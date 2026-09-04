@@ -1,4 +1,5 @@
-"""Which techniques a piece of code used, chosen from candidates the caller gives."""
+"""Which techniques a piece of code used, chosen from candidates the caller
+gives."""
 
 import json
 from collections.abc import Sequence
@@ -81,8 +82,8 @@ def classify(
         schema=schema(candidates),
     )
     if call.stop_reason == "length":
-        # Truncated, so no verdict. Named as nothing rather than raised: greedy,
-        # so a re-run pays the whole cap to fail identically.
+        # Truncated, so no verdict. Named as nothing rather than raised:
+        # greedy, so a re-run pays the whole cap to fail identically.
         return [], call
     if text is None:
         raise ClassifierError(call.error or "no verdict")
@@ -95,7 +96,8 @@ def classify(
 
 def prompt(candidates: Sequence[str], code: str) -> str:
     """Criteria go here rather than in the system text: a per-code rule carried
-    by every call is paid for on the calls where its code is not a candidate."""
+    by every call is paid for on the calls where its code is not a
+    candidate."""
     return "\n".join(
         [
             f"Candidates: {', '.join(candidates)}",

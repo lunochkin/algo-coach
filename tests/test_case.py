@@ -118,7 +118,8 @@ def test_a_case_names_where_its_expected_output_came_from():
 
 def test_expected_outputs_come_from_the_reference_unless_a_case_says_otherwise():
     """It is different code from a call that saw the statement alone, so a case
-    it computed is a test. One the canonical answered passes by construction."""
+    it computed is a test. One the canonical answered passes by
+    construction."""
     assert case("p1", [1], 2).expected_from is ExpectedSource.REFERENCE
 
 

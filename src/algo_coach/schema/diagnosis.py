@@ -5,7 +5,8 @@ from algo_coach.schema.record import AttemptRecord
 
 
 class Diagnosis(AttemptRecord):
-    """Why an attempt failed, inferred. The machine counterpart of `SelfLabel`."""
+    """Why an attempt failed, inferred. The machine counterpart of
+    `SelfLabel`."""
 
     mode: FailureMode
     confidence: float = Field(ge=0.0, le=1.0)

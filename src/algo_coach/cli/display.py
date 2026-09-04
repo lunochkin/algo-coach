@@ -46,7 +46,8 @@ def chosen(
 
 
 def held(retry: Retry) -> str:
-    """One wait. The endpoint too, since a cap is per endpoint rather than per model."""
+    """One wait. The endpoint too, since a cap is per endpoint rather than per
+    model."""
     return (
         f"! {retry.status or 'failed'} {retry.model} @ {retry.pin}, "
         f"try {retry.tries}/{retry.of}, waiting {retry.pause:g}s"

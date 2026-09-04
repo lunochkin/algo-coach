@@ -63,7 +63,8 @@ def test_several_cards_per_technique():
 
 def test_a_card_carries_both_identities():
     """The minted id is what a run references; the slug is what a re-import
-    matches, so re-seeding refreshes a card rather than minting a second one."""
+    matches, so re-seeding refreshes a card rather than minting a second
+    one."""
     assert card().id != card().slug
 
 
@@ -89,7 +90,8 @@ def test_a_slug_is_a_stable_lowercase_code(slug):
 
 
 def test_a_card_needs_something_to_reproduce():
-    """A card with no template is a reading list: recall is what it organises."""
+    """A card with no template is a reading list: recall is what it
+    organises."""
     with pytest.raises(ValidationError):
         card(templates=[])
 
@@ -160,9 +162,9 @@ def test_a_card_says_what_to_read(blank):
 
 
 def test_a_form_is_a_speedup_unless_it_says_otherwise():
-    """Most forms replace a naive solution, so that is the default. Backtracking
-    and exhaustive search are their own optimum: no input separates them from a
-    reference, and only the template can say so."""
+    """Most forms replace a naive solution, so that is the default.
+    Backtracking and exhaustive search are their own optimum: no input
+    separates them from a reference, and only the template can say so."""
     assert template().speedup is True
     assert template("used-array-permutations", speedup=False).speedup is False
 

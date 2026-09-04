@@ -1,4 +1,5 @@
-"""What a run decided, case by case. Comparison sits here, never in the backend."""
+"""What a run decided, case by case. Comparison sits here, never in the
+backend."""
 
 from collections.abc import Sequence
 from typing import Any

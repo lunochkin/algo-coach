@@ -47,8 +47,8 @@ def candidates(card: Card) -> list[Template]:
     return [template for template in card.templates if template.kind is not TemplateKind.PROCEDURE]
 
 
-# Per pair, so a template edited on one card re-tests that card and leaves every
-# other pair settled.
+# Per pair, so a template edited on one card re-tests that card and leaves
+# every other pair settled.
 def request_hash(card: Card, problem: Problem, solution: Solution) -> str:
     return digest(SYSTEM, prompt(candidates(card), problem, solution))
 

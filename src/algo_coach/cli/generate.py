@@ -274,8 +274,8 @@ def heading(draft: Draft, target: Target | None) -> str:
 
 
 def configured(written: MachineProvenance | None) -> str:
-    """What one step ran at, or that it never ran. The digest too: it is half of
-    what a resume compares, and a prompt edit moves it alone."""
+    """What one step ran at, or that it never ran. The digest too: it is half
+    of what a resume compares, and a prompt edit moves it alone."""
     if written is None:
         return "not taken"
     at = sampled(written.temperature)
@@ -305,8 +305,9 @@ def settled(case: SettledCase) -> str:
 
 
 def shortened(args: object, expected: object) -> str:
-    """Arguments and return on one line, cut to a width. A separating input runs
-    to thousands of elements, where the line is here to identify a case."""
+    """Arguments and return on one line, cut to a width. A separating input
+    runs to thousands of elements, where the line is here to identify a
+    case."""
     line = f"{args} -> {expected}"
     return line if len(line) <= CASE_WIDTH else line[: CASE_WIDTH - 1] + "…"
 
@@ -321,7 +322,8 @@ def listing_code(name: str, code: str | None) -> list[str]:
 
 def sites(outcomes: list[SiteOutcome]) -> list[str]:
     """What each call site left on this writing, in the order they were
-    written. A resumed step wrote a second record, so a site can appear twice."""
+    written. A resumed step wrote a second record, so a site can appear
+    twice."""
     if not outcomes:
         return ["## sites", "", "none recorded: they are written once the loop has run"]
     return ["## sites", *(f"  {left(one)}" for one in outcomes)]
@@ -377,7 +379,8 @@ def resume_summary(results: list[Resumed], bench: Bench = BENCH, *, unaimed: int
 
 
 def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    """The answering sites over the stored problems, at the bench the flags name.
+    """The answering sites over the stored problems, at the bench the flags
+    name.
 
     The corpus is the input rather than a template, so the flags that aim a
     write name nothing here.
@@ -585,8 +588,8 @@ def verdict(progress: Progress) -> str:
 def bar(progress: Progress) -> str:
     """What the mutation loop left: which source killed what, and the cases the
     rounds added. The sources are apart because only the last was paid for, and
-    whether a round earns its call is read from that. Silent where the canonical
-    yielded no mutant."""
+    whether a round earns its call is read from that. Silent where the
+    canonical yielded no mutant."""
     if progress.unmeasured is not None:
         return f"  unmeasured: {progress.unmeasured}"
     if not progress.mutants:

@@ -5,7 +5,8 @@ from algo_coach.schema import Attempt, ClaimSource, Problem, TechniqueClaim
 
 
 def standing_claims(claims: Iterable[TechniqueClaim]) -> dict[str, TechniqueClaim]:
-    """The claim that stands: the user's own if any, however late the machine's."""
+    """The claim that stands: the user's own if any, however late the
+    machine's."""
     claims = list(claims)
     return latest_by_attempt(claims) | latest_by_attempt(
         [claim for claim in claims if claim.source is ClaimSource.USER]

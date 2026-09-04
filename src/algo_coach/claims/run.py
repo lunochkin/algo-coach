@@ -22,8 +22,8 @@ class Failed(BaseModel):
 
 
 class Progress(BaseModel):
-    """One attempt, answered. Reported as the run goes, since a call per attempt
-    makes a backlog run minutes long."""
+    """One attempt, answered. Reported as the run goes, since a call per
+    attempt makes a backlog run minutes long."""
 
     index: int  # 1-based, over what this run will ask about
     total: int
@@ -53,8 +53,8 @@ def read_one(
     *,
     configuration: Configuration = DEFAULT,
 ) -> tuple[list[str], Call | None]:
-    """Makes the call and writes no claim, so several can run at once. The claim
-    is the caller's, and the claims log has one writer."""
+    """Makes the call and writes no claim, so several can run at once. The
+    claim is the caller's, and the claims log has one writer."""
     return classify(
         transport, calls, problem.techniques, attempt.code or "", configuration=configuration
     )
@@ -138,8 +138,8 @@ def classify_backlog(
         key=recency,
         reverse=True,
     )
-    # What each attempt would be sent now. A claim answering that exact question
-    # is not stale however old it is; `fresh` asks again regardless.
+    # What each attempt would be sent now. A claim answering that exact
+    # question is not stale however old it is; `fresh` asks again regardless.
     asked = {
         attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
         for attempt in candidates
@@ -178,7 +178,8 @@ def classify_backlog(
         concurrency=concurrency,
     ):
         # Counted as answers arrive: with several calls in flight a position in
-        # the order asked in jumps about, and a reader wants a count that climbs.
+        # the order asked in jumps about, and a reader wants a count that
+        # climbs.
         index += 1
         problem = problems[attempt.problem_id]
         techniques, call = answer if answer is not None else ([], None)

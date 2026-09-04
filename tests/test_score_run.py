@@ -270,7 +270,8 @@ def test_only_the_latest_attempt_of_a_problem_is_scored(tmp_path):
 
 
 def test_one_failure_does_not_cost_the_rest(two_problems):
-    """An eval that dies on the first refusal reports nothing about the rest."""
+    """An eval that dies on the first refusal reports nothing about the
+    rest."""
     result = run(
         FakeTransport.answering(Verdict(error=RuntimeError("refused")), Verdict(["greedy"])),
         two_problems,

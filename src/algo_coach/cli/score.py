@@ -125,7 +125,8 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             f"\nscore: {', '.join(aborted)} aborted after {ABORT_AFTER} consecutive failures\n",
         )
     if not result.common:
-        # Apart from the abort above: ground truth exists, no reading of it does.
+        # Apart from the abort above: ground truth exists, no reading of it
+        # does.
         parser.exit(1, "score: nothing every configuration named has read\n")
 
     if len(result.scores) == 1:
@@ -171,7 +172,8 @@ def columns(scores: Sequence[Score]) -> list[tuple[str, Callable[[Score], str]]]
 
 
 def alone(result: Comparison) -> None:
-    """One configuration: what it read, and every disagreement with the user."""
+    """One configuration: what it read, and every disagreement with the
+    user."""
     only = result.scores[0].score
     print(describe(result.scores[0].configuration))
     print(exactly(only))
@@ -209,7 +211,8 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
     scores = [scored.score for scored in ranked]
     keys = [str(index) for index in range(1, len(scores) + 1)]
 
-    # Each share carries its own denominator; this line is how far they overlap.
+    # Each share carries its own denominator; this line is how far they
+    # overlap.
     print(f"{result.eval_set} hand-claimed attempts, {result.common} read by all")
     print()
 
@@ -229,7 +232,8 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
             row.append(cell(scored))
     print(table(head, body))
 
-    # Behind the splits flag: a column per configuration, so forty is unreadable.
+    # Behind the splits flag: a column per configuration, so forty is
+    # unreadable.
     per_technique = rows(ranked)
     if splits:
         print()
@@ -253,8 +257,8 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
 
 
 def describe(configuration: Configuration) -> str:
-    """The whole configuration in a sentence, which `labels` says in a token. No
-    rulebook: the criteria vary per attempt within one run."""
+    """The whole configuration in a sentence, which `labels` says in a token.
+    No rulebook: the criteria vary per attempt within one run."""
     temperature = UNSET if configuration.temperature is None else configuration.temperature
     return (
         f"{configuration.model}, effort {configuration.effort}, "
@@ -307,8 +311,8 @@ def considered(scored: Score) -> str:
 
 
 def tokens(scored: Score) -> str:
-    """In, out and of that how much was thinking, per attempt. One column, since
-    a verdict is a dozen tokens and everything above that is the model
+    """In, out and of that how much was thinking, per attempt. One column,
+    since a verdict is a dozen tokens and everything above that is the model
     deciding."""
     if not scored.tokened:
         return "—"

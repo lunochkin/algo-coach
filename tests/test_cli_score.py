@@ -235,7 +235,8 @@ def test_an_unsupported_effort_can_be_left_unset(hand_claimed, monkeypatch, caps
 
 
 def test_a_stored_run_makes_no_call_and_needs_no_key(hand_claimed, monkeypatch, capsys):
-    """What makes it the reproducible mode: it can be run anywhere, and twice."""
+    """What makes it the reproducible mode: it can be run anywhere, and
+    twice."""
     hand_claimed.append_claim(reading("a1", ["greedy"]))
     for name in TRANSPORT.CREDENTIALS:
         monkeypatch.delenv(name, raising=False)

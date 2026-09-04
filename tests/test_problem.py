@@ -108,7 +108,8 @@ def test_a_problem_starts_created_rather_than_served():
 
 def test_a_problem_is_retired_for_a_named_reason():
     """Named rather than flagged: only a defective problem's attempts are
-    excluded, and a bare status would make every reader guess which happened."""
+    excluded, and a bare status would make every reader guess which
+    happened."""
     for reason in RetirementReason:
         problem = make_problem(status="retired", retired_reason=reason)
 

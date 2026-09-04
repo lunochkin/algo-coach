@@ -24,7 +24,8 @@ class TechniqueScore(BaseModel):
     exact: int = 0  # of `attempts`, those the classifier's whole set agreed on
     missed: int = 0  # of `attempts`, those the classifier did not name it on
     over: int = 0  # attempts it was named on that the user's claim did not —
-    # counted outside `attempts`, so the two are not a rate over one denominator
+    # counted outside `attempts`, so the two are not a rate over one
+    # denominator
 
 
 class Disagreement(BaseModel):
@@ -289,7 +290,8 @@ def score_backlog(
     # The whole eval set, not the intersection: `score` and `per_decision` both
     # skip an attempt a configuration has no verdict for, so each is measured
     # over what it read. The trade is that two configurations reading different
-    # attempts no longer share a denominator; `common` shows where they diverge.
+    # attempts no longer share a denominator; `common` shows where they
+    # diverge.
     truth: dict[str, Sequence[str]] = {
         attempt.id: standing[attempt.id].techniques for attempt in hand_claimed
     }

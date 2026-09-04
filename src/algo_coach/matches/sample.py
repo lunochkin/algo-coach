@@ -43,24 +43,25 @@ def annotatable(
 
 
 def settled(question: Question, hand: set[tuple[str, str]]) -> bool:
-    """Whether the hand has answered every candidate of this card for this solution."""
+    """Whether the hand has answered every candidate of this card for this
+    solution."""
     return all(
         (template.id, question.solution.id) in hand for template in candidates(question.card)
     )
 
 
 def spread(asking: Sequence[Question], *, covered: Counter[str], seed: int = 0) -> list[Question]:
-    """The pool ordered so no single card's forms carry the reference: each step
-    takes from the card holding the least annotated template, so any prefix is
-    spread. Shuffled within a card by `seed`."""
+    """The pool ordered so no single card's forms carry the reference: each
+    step takes from the card holding the least annotated template, so any
+    prefix is spread. Shuffled within a card by `seed`."""
     pool = list(asking)
     random.Random(seed).shuffle(pool)
 
     queues: dict[str, list[Question]] = {}
     forms: dict[str, list[str]] = {}
     for question in pool:
-        # Keyed by slug, not by the minted id, which differs per store: a tie on
-        # coverage breaks on this key.
+        # Keyed by slug, not by the minted id, which differs per store: a tie
+        # on coverage breaks on this key.
         queues.setdefault(question.card.slug, []).append(question)
         forms[question.card.slug] = [template.id for template in candidates(question.card)]
 

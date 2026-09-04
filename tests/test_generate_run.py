@@ -51,7 +51,8 @@ def test_each_call_is_shown_what_the_run_wrote_before_it(tmp_path):
 
 
 def test_the_corpus_seeds_the_list(tmp_path):
-    """What a form already carries is what the first call has to differ from."""
+    """What a form already carries is what the first call has to differ
+    from."""
     (one,) = seeded(tmp_path, card())
     corpus = Corpus.at(tmp_path)
     corpus.problems.put(
@@ -384,7 +385,8 @@ def test_a_builder_that_failed_costs_the_inputs_and_not_the_round(tmp_path):
     assert [one.args for one in CaseLog(tmp_path).cases()] == [[10], [3], [4]]
 
 
-# one argument per pair, so the fuzz grid reaches the boundary `BOUNDED` turns on
+# one argument per pair, so the fuzz grid reaches the boundary `BOUNDED` turns
+# on
 COUNTS = "def solve(size, seed):\n    return [size + seed]\n"
 
 
@@ -438,7 +440,8 @@ def test_a_round_that_fails_holds_the_draft_for_a_resume(tmp_path):
     )
 
     (one,) = result.held
-    # no input generator was written for it either, so it stopped a step earlier
+    # no input generator was written for it either, so it stopped a step
+    # earlier
     assert one.draft.state is WritingState.AGREED
     assert one.unmeasured is not None
     assert (result.drafted, CaseLog(tmp_path).cases()) == ([], [])

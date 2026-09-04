@@ -35,8 +35,8 @@ Fuzzing = Callable[[Sequence["Mutant"], int], "Fuzzed"]
 @dataclass(frozen=True)
 class Candidate:
     """One built input and the canonical's answer to it, which is what a mutant
-    is killed by disagreeing with. Named apart from `inputs.Built`, which is the
-    code that produced it."""
+    is killed by disagreeing with. Named apart from `inputs.Built`, which is
+    the code that produced it."""
 
     args: list[Any]
     expected: Any
@@ -65,7 +65,8 @@ def grid(
 
 def build(code: str, pairs: Sequence[Sequence[int]], *, cap_ms: int) -> list[list[Any]]:
     """Every pair in one batch. The generator is model-written code, so it runs
-    through the executor as any other does, and a pair it fails on is dropped."""
+    through the executor as any other does, and a pair it fails on is
+    dropped."""
     return [one for one in outputs(code, pairs, cap_ms=cap_ms) if isinstance(one, list)]
 
 
@@ -112,9 +113,9 @@ def fuzz(
     """Each input against the mutants still standing, keeping the first that
     kills.
 
-    An input that killed nothing is not kept: every later verification would run
-    it and it catches nothing. The reference settles the kept ones alone, so an
-    input that killed nothing costs no run of it either.
+    An input that killed nothing is not kept: every later verification would
+    run it and it catches nothing. The reference settles the kept ones alone,
+    so an input that killed nothing costs no run of it either.
     """
     standing = list(mutants)
     # one batch, though the loop stops as soon as nothing stands: the runner

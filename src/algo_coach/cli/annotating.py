@@ -14,7 +14,8 @@ from algo_coach.schema import Template, TemplateMatch
 
 
 def evidence(question: Question) -> str:
-    """One markdown block rather than two widgets, so the two scroll together."""
+    """One markdown block rather than two widgets, so the two scroll
+    together."""
     return "\n\n".join(
         [
             question.problem.statement,
@@ -150,7 +151,8 @@ class Annotating(App[None]):
         self.query_one("#code", VerticalScroll).scroll_home(animate=False)
 
     def verdict(self, form: Template) -> str:
-        """What the matcher read this pair as, named by the model that answered."""
+        """What the matcher read this pair as, named by the model that
+        answered."""
         match = self.read.get((form.id, self.question.solution.id))
         if match is None:
             return ""

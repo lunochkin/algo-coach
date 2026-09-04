@@ -4,7 +4,8 @@ from algo_coach.schema import Attempt, Diagnosis, SelfLabel, TechniqueClaim
 
 
 class AttemptLog:
-    """Append-only JSONL store for attempts, claims, self-labels and diagnoses."""
+    """Append-only JSONL store for attempts, claims, self-labels and
+    diagnoses."""
 
     def __init__(self, root: Path):
         self.root = root

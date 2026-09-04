@@ -47,10 +47,11 @@ def spread(
 ) -> list[Attempt]:
     """The pool ordered so no single technique carries the estimate.
 
-    Each step takes an attempt on the technique covered least so far; an attempt
-    counts toward every technique its problem carries, so what is levelled is
-    coverage rather than draws. Shuffled within a technique by `seed`. `covered`
-    is what the order starts from, and it reorders rather than filters.
+    Each step takes an attempt on the technique covered least so far; an
+    attempt counts toward every technique its problem carries, so what is
+    levelled is coverage rather than draws. Shuffled within a technique by
+    `seed`. `covered` is what the order starts from, and it reorders rather
+    than filters.
     """
     pool = list(attempts)
     random.Random(seed).shuffle(pool)
@@ -94,8 +95,8 @@ def eligible(
     user_id: str,
     technique: str | None = None,
 ) -> list[Attempt]:
-    """The user's attempts a claim could be made about, which is what a hand pass
-    and the classifier both draw from."""
+    """The user's attempts a claim could be made about, which is what a hand
+    pass and the classifier both draw from."""
     return [
         attempt
         for attempt in attempts

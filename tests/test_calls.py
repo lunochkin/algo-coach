@@ -233,7 +233,8 @@ def test_a_failure_records_both_levels_too(tmp_path, monkeypatch):
 
 
 def test_a_transport_that_never_retried_stamps_nothing(tmp_path):
-    """Absent rather than claimed: a count nothing kept is not a count of one."""
+    """Absent rather than claimed: a count nothing kept is not a count of
+    one."""
     log = CallLog(tmp_path)
 
     with pytest.raises(RuntimeError):

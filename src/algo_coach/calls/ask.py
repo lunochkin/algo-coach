@@ -14,7 +14,8 @@ from algo_coach.schema import Call
 HASH_LENGTH = 12
 
 
-# Hashed and stored in this form, so a stored prompt digests to the hash beside it.
+# Hashed and stored in this form, so a stored prompt digests to the hash beside
+# it.
 def payload(system: str, content: str) -> str:
     return f"{system}\n\n---\n\n{content}"
 
@@ -82,8 +83,8 @@ def ask(
         prompt_hash=digest,
         pin=pin,
         temperature=temperature,
-        # No text is a refusal or a cut-short answer, recorded as the failure it
-        # is rather than as an empty verdict.
+        # No text is a refusal or a cut-short answer, recorded as the failure
+        # it is rather than as an empty verdict.
         response=reply.text,
         error=None if reply.text is not None else f"no verdict: {reply.stop_reason}",
         thinking=reply.thinking,

@@ -10,7 +10,8 @@ from algo_coach.schema import Technique
 @cache
 def criteria() -> Mapping[str, Technique]:
     """Each code with what earns it, read through `importlib.resources` rather
-    than a path relative to the working directory: it ships inside the wheel."""
+    than a path relative to the working directory: it ships inside the
+    wheel."""
     raw = json.loads(
         resources.files("algo_coach.techniques").joinpath("vocabulary.json").read_text()
     )
@@ -19,9 +20,10 @@ def criteria() -> Mapping[str, Technique]:
 
 
 def criterion(code: str) -> list[str]:
-    """One code's rule in the words both annotators meet, and nothing for a code
-    the vocabulary no longer carries: records outlive it, so a retired code can
-    still be a candidate and then reaches its reader as a bare name."""
+    """One code's rule in the words both annotators meet, and nothing for a
+    code the vocabulary no longer carries: records outlive it, so a retired
+    code can still be a candidate and then reaches its reader as a bare
+    name."""
     entry = criteria().get(code)
     if entry is None:
         return []

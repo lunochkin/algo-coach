@@ -15,7 +15,8 @@ from tempfile import TemporaryDirectory
 from typing import Any
 
 # slack on the parent's own timer, beyond the cap the child enforces. It covers
-# interpreter start and catches a child stuck where no Python-level timer fires.
+# interpreter start and catches a child stuck where no Python-level timer
+# fires.
 STARTUP_MS = 2000
 
 CHILD = Path(__file__).with_name("child.py")
@@ -32,7 +33,8 @@ class RunnerError(RuntimeError):
 
 
 class RunOutcome(StrEnum):
-    # three rather than four: nothing below this boundary knows what was expected
+    # three rather than four: nothing below this boundary knows what was
+    # expected
     RETURNED = "returned"
     TIMEOUT = "timeout"
     CRASHED = "crashed"
@@ -73,8 +75,9 @@ def run(
     with TemporaryDirectory() as work:
         for start in range(0, len(cases), BATCH):
             batch = cases[start : start + BATCH]
-            # started together and fed one at a time: the cases stay sequential,
-            # so nothing a run measures is timed against another case
+            # started together and fed one at a time: the cases stay
+            # sequential, so nothing a run measures is timed against another
+            # case
             waiting = [
                 _started(Path(work) / f"{start + index}.json") for index in range(len(batch))
             ]
@@ -156,7 +159,8 @@ def _answered(
 
 
 def _kill(pid: int) -> None:
-    """The group, not the process: `start_new_session` made the child its leader."""
+    """The group, not the process: `start_new_session` made the child its
+    leader."""
     with contextlib.suppress(ProcessLookupError, PermissionError):
         os.killpg(pid, signal.SIGKILL)
 

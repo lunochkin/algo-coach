@@ -100,7 +100,8 @@ def test_a_boolean_or_a_string_constant_is_not_shifted():
 
 
 def test_an_extremum_is_swapped():
-    """Which end a greedy step takes is the mistake, and both calls type-check."""
+    """Which end a greedy step takes is the mistake, and both calls
+    type-check."""
     code = "def solve(a, b):\n    return min(a, b)\n"
 
     assert changes(code, Operator.EXTREMUM) == ["min → max"]
@@ -113,7 +114,8 @@ def test_a_jump_is_swapped():
 
 
 def test_a_comparison_inside_a_string_is_untouched():
-    """The reason the change is made on the parsed tree rather than the text."""
+    """The reason the change is made on the parsed tree rather than the
+    text."""
     code = 'def solve(x):\n    return "a < b"\n'
 
     assert mutants(code) == []

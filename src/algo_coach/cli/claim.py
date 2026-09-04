@@ -21,7 +21,8 @@ LEVELS = list(Confidence)
 def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
     """The drill loop's technique question, over attempts already in the log.
 
-    With `--revise`, the same question over what the hand pass already answered.
+    With `--revise`, the same question over what the hand pass already
+    answered.
     """
     log = AttemptLog(root)
     problems = {problem.id: problem for problem in ProblemStore(root).all()}
@@ -183,8 +184,8 @@ def code_excerpt(code: str, limit: int) -> str:
 
 
 def rule(code: str) -> str:
-    """One candidate's criterion, verbatim from the vocabulary and wrapped for a
-    terminal. Only the wrapping is this reader's."""
+    """One candidate's criterion, verbatim from the vocabulary and wrapped for
+    a terminal. Only the wrapping is this reader's."""
     return "\n".join(
         fill(line, width=WIDTH, initial_indent="  ", subsequent_indent="      ")
         for line in criterion(code)

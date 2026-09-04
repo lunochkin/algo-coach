@@ -30,8 +30,8 @@ def as_answered_grouped[K, T, R](
     """Run `work` over every group at once, yielding each item as it finishes.
 
     `concurrency` is one key's budget, not the run's: the deployment answering
-    meters the request. Order is completion, not submission, which is bounded so
-    a consumer that stops early has not paid for the tail. Each draw happens
+    meters the request. Order is completion, not submission, which is bounded
+    so a consumer that stops early has not paid for the tail. Each draw happens
     after the previous answer was consumed, so a caller needs no lock.
     """
     queues = {key: iter(stream) for key, stream in streams.items()}

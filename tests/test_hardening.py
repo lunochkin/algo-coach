@@ -17,7 +17,8 @@ CAP_MS = 2_000
 
 @dataclass
 class Answers:
-    """One reply per round, in order. `None` is a call that answered nothing."""
+    """One reply per round, in order. `None` is a call that answered
+    nothing."""
 
     rounds: list[list | None] = field(default_factory=lambda: [None])
     calls: list[dict] = field(default_factory=list)
@@ -55,7 +56,8 @@ BOUNDARY = [[4], [3]]
 
 
 def test_a_canonical_with_no_mutant_asks_nothing(tmp_path):
-    """Nothing was changed, so no case has to exist and no round is paid for."""
+    """Nothing was changed, so no case has to exist and no round is paid
+    for."""
     model = Answers()
 
     hardened = run(tmp_path, model, WEAK, canonical="def solve(n):\n    return len([n])\n")

@@ -1,4 +1,5 @@
-"""Which solutions to ask about against which card, and what is already settled."""
+"""Which solutions to ask about against which card, and what is already
+settled."""
 
 from collections.abc import Iterable, Mapping, Sequence
 

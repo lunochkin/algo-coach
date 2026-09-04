@@ -98,7 +98,8 @@ def test_the_schema_is_sent_strict_or_it_guarantees_nothing():
 
 def test_the_route_is_pinned_rather_than_left_to_the_router():
     """A provider that cannot honour the schema must never be chosen, and a
-    silent second backend would make one configuration key mean two readings."""
+    silent second backend would make one configuration key mean two
+    readings."""
     api = client()
 
     OpenRouter(api)(system="s", content="c", model="m", effort="low", pin="a-host", schema=SCHEMA)
@@ -145,7 +146,8 @@ def test_an_effort_that_was_asked_for_is_sent():
 
 def test_an_unsent_effort_reaches_the_request_as_nothing():
     """A model that rejects the parameter rejects every call carrying it,
-    whatever the level — `UNSENT` is how a caller says this model takes none."""
+    whatever the level — `UNSENT` is how a caller says this model takes
+    none."""
     api = client()
 
     OpenRouter(api)(system="s", content="c", model="m", effort=UNSENT, pin="a-host", schema=None)
@@ -339,7 +341,8 @@ def test_a_404_naming_something_else_is_raised_on_the_first_try(monkeypatch):
 
 
 def test_an_unrouted_wait_reports_the_one_retry_it_will_make(monkeypatch):
-    """A line saying 1 of 5 would promise four more waits the loop never makes."""
+    """A line saying 1 of 5 would promise four more waits the loop never
+    makes."""
     monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
     reported: list[Retry] = []
     api = client(raises=[NotFound(NO_ENDPOINTS)])

@@ -1,4 +1,5 @@
-"""Mutants of a canonical: the same solution with one change to its syntax tree.
+"""Mutants of a canonical: the same solution with one change to its syntax
+tree.
 
 Nothing is stored. The set re-derives from the canonical whenever the operators
 below change, and a mutant no case kills names a case that has to exist.
@@ -164,7 +165,8 @@ class _Walk(ast.NodeTransformer):
 
     def visit_Constant(self, node: ast.Constant) -> ast.AST:
         # `is int` rather than `isinstance`: a shifted `True` is 2, which is
-        # neither a boundary nor a value the solution could have been written with
+        # neither a boundary nor a value the solution could have been written
+        # with
         if type(node.value) is not int:
             return node
         out: ast.AST = node

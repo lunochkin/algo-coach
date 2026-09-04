@@ -57,9 +57,10 @@ def read_corpus(
     """Read every stored canonical for its techniques, skipping the ones this
     configuration has already read at the current digest.
 
-    References are never read. Readings are appended as they are made, so a run resumes where
-    the last stopped. `fresh` asks again where a stored reading answers the
-    same prompt, which is what measuring a reader against itself needs.
+    References are never read. Readings are appended as they are made, so a run
+    resumes where the last stopped. `fresh` asks again where a stored reading
+    answers the same prompt, which is what measuring a reader against itself
+    needs.
     """
     asking = [one for one in solutions if one.role is SolutionRole.CANONICAL]
     offered = candidates()
@@ -89,7 +90,8 @@ def read_corpus(
         concurrency=concurrency,
     ):
         # Counted as answers arrive: with several calls in flight a position in
-        # the order asked in jumps about, and a reader wants a count that climbs.
+        # the order asked in jumps about, and a reader wants a count that
+        # climbs.
         index += 1
         if failure is not None:
             # Broad on purpose: a refusal or a dropped connection is one
@@ -108,7 +110,8 @@ def read_corpus(
         techniques, call = answer if answer is not None else ([], None)
         if call is None:
             # Fewer than two candidates were offered, which the whole
-            # vocabulary never is; a reading with no configuration is unstorable.
+            # vocabulary never is; a reading with no configuration is
+            # unstorable.
             continue
         store(log, solution.id, techniques, call)
         if techniques:

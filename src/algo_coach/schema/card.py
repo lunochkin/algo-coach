@@ -31,7 +31,8 @@ def optional_budget(optional: list[bool]) -> None:
 
 
 def unique_slugs(slugs: list[str]) -> None:
-    """Rejects a repeated slug: a re-import would have no rule for which id to keep."""
+    """Rejects a repeated slug: a re-import would have no rule for which id to
+    keep."""
     if len(set(slugs)) != len(slugs):
         raise ValueError("template slugs are unique within a card")
 
@@ -51,7 +52,8 @@ class Template(BaseModel):
 
 
 class Card(BaseModel):
-    """Teaching content for one technique: forms to reproduce, and a selector."""
+    """Teaching content for one technique: forms to reproduce, and a
+    selector."""
 
     id: str  # what a card run references
     slug: Slug  # authored; the idempotency key a re-seed matches on

@@ -4,7 +4,8 @@ from algo_coach.schema import TechniqueReading
 
 
 class ReadingLog:
-    """Append-only JSONL store for technique readings, hand and machine alike."""
+    """Append-only JSONL store for technique readings, hand and machine
+    alike."""
 
     def __init__(self, root: Path):
         self.root = root

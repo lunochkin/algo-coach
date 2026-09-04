@@ -239,7 +239,8 @@ def test_a_fuzz_disagreement_is_the_inputs_site_s_gate(tmp_path):
 
 
 def test_the_sites_are_the_ones_the_bench_names(tmp_path):
-    """One list, or a configuration would be set for a site no record can name."""
+    """One list, or a configuration would be set for a site no record can
+    name."""
     assert set(Bench.model_fields) == {one.value for one in CallSite}
 
 

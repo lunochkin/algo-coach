@@ -39,9 +39,9 @@ def contested(
     *,
     at_least: int = 1,
 ) -> list[Attempt]:
-    """The disputed ones, most disputed first. `at_least` draws the line between
-    a wrong claim and one wrong configuration. Stable, so ties keep the pool's
-    order, which makes two runs of the same review comparable."""
+    """The disputed ones, most disputed first. `at_least` draws the line
+    between a wrong claim and one wrong configuration. Stable, so ties keep the
+    pool's order, which makes two runs of the same review comparable."""
     counted = [
         (attempt, against(standing[attempt.id], readings))
         for attempt in attempts

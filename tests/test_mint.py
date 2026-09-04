@@ -106,8 +106,8 @@ def test_an_unknown_code_is_rejected():
 
 
 def test_a_known_code_beside_an_unknown_one_does_not_save_it():
-    """A claim names every technique the attempt used, so it lands whole or
-    not at all — writing the half that passed would assert a set nobody made."""
+    """A claim names every technique the attempt used, so it lands whole or not
+    at all — writing the half that passed would assert a set nobody made."""
     with pytest.raises(ValueError, match="not-a-technique"):
         machine_claim("a1", ["greedy", "not-a-technique"])
 

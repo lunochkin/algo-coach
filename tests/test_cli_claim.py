@@ -205,7 +205,8 @@ def test_a_long_solution_is_cut_and_says_so(tmp_path, monkeypatch, capsys):
 
 
 def retried(root, monkeypatch, *attempts: Attempt) -> AttemptLog:
-    """Several attempts on one two-tag problem — a problem that took retries."""
+    """Several attempts on one two-tag problem — a problem that took
+    retries."""
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     monkeypatch.setattr(cli, "DATA_ROOT", root)
     log = AttemptLog(root)
@@ -267,7 +268,8 @@ def test_the_id_breaks_a_tie_on_the_same_timestamp(tmp_path, monkeypatch, capsys
 
 def test_an_earlier_attempt_stands_in_when_the_latest_has_no_code(tmp_path, monkeypatch, capsys):
     """The latest *carrying code*: an attempt without code is no evidence, and
-    dropping the problem over it would lose a solution that is still readable."""
+    dropping the problem over it would lose a solution that is still
+    readable."""
     log = retried(
         tmp_path / "data",
         monkeypatch,

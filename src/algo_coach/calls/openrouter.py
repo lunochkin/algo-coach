@@ -1,6 +1,7 @@
 """The one transport: chat completions, spoken to OpenRouter. Never fall back
 to Anthropic's own compatibility layer: it ignores `response_format`, `strict`
-and `reasoning_effort`, so the schema goes unenforced and the effort dropped."""
+and `reasoning_effort`, so the schema goes unenforced and the effort
+dropped."""
 
 import time
 from collections.abc import Callable
@@ -91,7 +92,8 @@ class OpenRouter:
 
         request: dict[str, Any] = {}
         # Top level, not inside `provider`: it is the API's own parameter.
-        # Omitted rather than defaulted, so a provider's own choice stays visible.
+        # Omitted rather than defaulted, so a provider's own choice stays
+        # visible.
         if temperature is not None:
             request["temperature"] = temperature
         if schema is not None:
@@ -113,8 +115,8 @@ class OpenRouter:
         )
 
     def send(self, *, pin: str, **request: Any) -> Reply:
-        """One reading, repeated while the endpoint answers with a reason to ask
-        again, and raised on the first try otherwise."""
+        """One reading, repeated while the endpoint answers with a reason to
+        ask again, and raised on the first try otherwise."""
         rerouted = False  # the one retry an unrouted 404 is given
         for tries, pause in enumerate(BACKOFF, start=1):
             try:
@@ -165,13 +167,15 @@ class OpenRouter:
         choices = getattr(response, "choices", None)
         if not choices:
             # A 200 with an error and no choices: the router reporting that the
-            # provider it chose failed. The body is the only place that says so.
+            # provider it chose failed. The body is the only place that says
+            # so.
             raise ProviderError(*failure(extra(response, "error")))
 
         choice = choices[0]
         if choice.finish_reason == "error" and not choice.message.content:
-            # The same failure with a choice around it. Read as an empty verdict
-            # it would record the gateway's fault as the model declining.
+            # The same failure with a choice around it. Read as an empty
+            # verdict it would record the gateway's fault as the model
+            # declining.
             raise ProviderError(*failure(extra(response, "error") or "stopped on error"))
 
         usage = getattr(response, "usage", None)
@@ -189,7 +193,8 @@ class OpenRouter:
 
 def reasoning(usage: Any) -> int | None:
     """How much of the completion was spent thinking, where the router said it.
-    Absent rather than zero: thinking nothing and not reporting a split differ."""
+    Absent rather than zero: thinking nothing and not reporting a split
+    differ."""
     details = getattr(usage, "completion_tokens_details", None) if usage is not None else None
     if details is None:
         return None

@@ -61,7 +61,8 @@ def ungrouped(
     problems: Mapping[str, Problem],
     claims: Mapping[str, TechniqueClaim],
 ) -> list[Attempt]:
-    """The attempts `per_technique` reaches no row for, shown beside the rows."""
+    """The attempts `per_technique` reaches no row for, shown beside the
+    rows."""
     return [
         attempt
         for attempt in attempts

@@ -182,7 +182,8 @@ def test_rows_are_ordered_by_technique_code():
 
 
 def test_a_technique_only_a_claim_names_still_gets_a_row():
-    """The vocabulary is wider than what the tags of the log happen to reach."""
+    """The vocabulary is wider than what the tags of the log happen to
+    reach."""
     claims = standing_claims([make_claim(["binary-search"], attempt_id="a2")])
     attempts = [make_attempt("a1"), make_attempt("a2")]
 

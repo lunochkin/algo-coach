@@ -179,7 +179,8 @@ def test_the_steps_after_the_generator_start_empty():
 
 
 def test_a_draft_holds_the_reference_it_was_written_with():
-    """A second call from the statement alone, which no local run re-derives."""
+    """A second call from the statement alone, which no local run
+    re-derives."""
     assert make_draft(reference="def solve(xs): ...").reference == "def solve(xs): ..."
 
 

@@ -38,7 +38,8 @@ class Hardened:
     call: Call | None = None
     dropped: int = 0  # proposals the canonical could not answer
     # proposals a round put to the set, landed or not. What the rounds landed
-    # is `cases` minus the fuzz pass's, so the difference is what killed nothing
+    # is `cases` minus the fuzz pass's, so the difference is what killed
+    # nothing
     offered: int = 0
     # a proposed input the two solutions answered differently. The caller
     # discards the problem on it, as it does on any disagreement

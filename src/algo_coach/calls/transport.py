@@ -39,7 +39,8 @@ class Reply:
 @dataclass(frozen=True)
 class Trace:
     """A failure's own count and timing. Stamped on the exception rather than
-    wrapped around it, so every caller still catches the type it caught before."""
+    wrapped around it, so every caller still catches the type it caught
+    before."""
 
     attempts: int
     request_ms: int

@@ -14,7 +14,8 @@ CRASHED = "crashed"
 
 
 class Expired(Exception):
-    """Its own exception, so a solution catching `Exception` cannot swallow the cap."""
+    """Its own exception, so a solution catching `Exception` cannot swallow the
+    cap."""
 
 
 def encode(value):
@@ -49,7 +50,8 @@ def execute(code, args, cap_ms):
     try:
         encoded = encode(value)
     except TypeError, ValueError:
-        # a return JSON cannot encode is the solution's fault, not a wrong answer
+        # a return JSON cannot encode is the solution's fault, not a wrong
+        # answer
         return {"outcome": CRASHED, "value": None, "elapsed_ms": elapsed}
     return {"outcome": RETURNED, "value": encoded, "elapsed_ms": elapsed}
 

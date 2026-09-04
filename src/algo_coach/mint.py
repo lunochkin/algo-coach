@@ -1,5 +1,5 @@
-"""Where every stored record's id and timestamp come from, kept in one module so
-the policy is one line to change."""
+"""Where every stored record's id and timestamp come from, kept in one module
+so the policy is one line to change."""
 
 import uuid
 from collections.abc import Sequence
@@ -99,7 +99,8 @@ def user_claim(
 
     `declined` is passed rather than inferred from an empty list, so a writer
     that lost an answer cannot record a verdict nobody gave. `informed_by` is
-    empty unless the caller says otherwise: only a revision has readings in view.
+    empty unless the caller says otherwise: only a revision has readings in
+    view.
     """
     return TechniqueClaim(
         id=new_id(),
@@ -129,8 +130,9 @@ def classifier_claim(
     """A claim a model made, naming its configuration whole.
 
     Membership is checked here because this is the only write path that could
-    introduce an unrecognised code; every other draws on the vocabulary already.
-    Rejected whole rather than per code, since a claim asserts one set.
+    introduce an unrecognised code; every other draws on the vocabulary
+    already. Rejected whole rather than per code, since a claim asserts one
+    set.
     """
     unknown = [code for code in techniques if not is_known(code)]
     if unknown:
@@ -216,9 +218,9 @@ def user_match(
     """One pair the user annotated, positive or negative: whether this solution
     displays this form.
 
-    The negative is annotated as deliberately as the positive, since the machine
-    answers every candidate it was given. `informed_by` is empty unless the
-    caller says otherwise.
+    The negative is annotated as deliberately as the positive, since the
+    machine answers every candidate it was given. `informed_by` is empty unless
+    the caller says otherwise.
     """
     return TemplateMatch(
         id=new_id(),
@@ -256,9 +258,9 @@ def machine_match(
     temperature: float | None = None,
     provider: str | None = None,
 ) -> TemplateMatch:
-    """One pair a matcher read, positive or negative. The negative is stored, or
-    every re-run re-tests every non-match forever, which on a growing corpus is
-    nearly every pair."""
+    """One pair a matcher read, positive or negative. The negative is stored,
+    or every re-run re-tests every non-match forever, which on a growing corpus
+    is nearly every pair."""
     return TemplateMatch(
         id=new_id(),
         created_at=datetime.now(UTC),
@@ -379,9 +381,9 @@ def solution(
     provider: str | None = None,
     cost: float | None = None,
 ) -> Solution:
-    """One solution the engine wrote, in the role it was written for. The role is
-    passed rather than inferred: both roles pass the same cases, so nothing about
-    the code says which this is."""
+    """One solution the engine wrote, in the role it was written for. The role
+    is passed rather than inferred: both roles pass the same cases, so nothing
+    about the code says which this is."""
     return Solution(
         id=new_id(),
         created_at=datetime.now(UTC),

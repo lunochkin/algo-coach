@@ -4,7 +4,8 @@ from algo_coach.schema import Problem
 
 
 class ProblemStore:
-    """One file per problem, named by its engine-minted id; a write replaces it."""
+    """One file per problem, named by its engine-minted id; a write replaces
+    it."""
 
     def __init__(self, root: Path):
         self.problems_path = root / "problems"
