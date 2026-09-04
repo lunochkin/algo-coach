@@ -367,7 +367,7 @@ exit criteria reads a draft.
 
 ### Transport
 
-- [ ] Retry once on a 404 whose message names no endpoints for the model. It is
+- [x] Retry once on a 404 whose message names no endpoints for the model. It is
       router state rather than a bad request, and a wrong model id then costs
       one extra request before it fails
 

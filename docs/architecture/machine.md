@@ -183,9 +183,16 @@ holds nothing about what the answer was for.
   waits cover a minute between them, since that is the window a per-minute cap
   is stated in. The endpoint's own reset time is not read: where it is carried
   varies by provider, and a wrong parse would sleep for hours.
-- **Every other failure is raised on the first request.** A rejected schema, an
-  unset key and a model that does not exist are answered the same way twice, so
-  retrying them spends the abort count slowly instead of at once.
+- **A 404 naming no endpoints is asked once more, at the shortest wait.** The
+  router's list of endpoints serving a model moves under a pinned request, so
+  the answer is state rather than a rejected request. What the retry decides is
+  whether the list moved, not whether a cap window passed.
+- **A model id that does not exist answers the same way**, and pays one extra
+  request before it fails. Nothing in the message separates it from a list that
+  moved, and one request is cheaper than a wrong pin failing a whole backlog.
+- **Every other failure is raised on the first request.** A rejected schema and
+  an unset key are answered the same way twice, so retrying them spends the
+  abort count slowly instead of at once.
 - **Nothing on the run path reads it back.** Whether to ask again is decided
   from the claims, which carry the configuration already. The file is written
   by every run and loaded only to analyse one.

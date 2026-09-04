@@ -27,6 +27,11 @@ BACKOFF = (5.0, 15.0, 30.0, 60.0)
 # router and whoever it picked. A rejected schema or an unset key would not be.
 TRANSIENT = frozenset({429, 500, 502, 503, 504})
 
+# The router answering that nothing serves this model right now. Its list moves
+# under a pinned request, so this reports state rather than a rejected request.
+# A model id that does not exist says the same, and pays the one retry.
+UNROUTED = "no endpoints"
+
 
 # The same failure arrives as an SDK status or as a code inside a 200,
 # depending on where it happened.
@@ -36,6 +41,10 @@ def status(exc: Exception) -> int | None:
 
 def transient(exc: Exception) -> bool:
     return status(exc) in TRANSIENT
+
+
+def unrouted(exc: Exception) -> bool:
+    return status(exc) == 404 and UNROUTED in str(exc).lower()
 
 
 def failure(error: Any) -> tuple[str, int | None]:
@@ -106,17 +115,26 @@ class OpenRouter:
     def send(self, *, pin: str, **request: Any) -> Reply:
         """One reading, repeated while the endpoint answers with a reason to ask
         again, and raised on the first try otherwise."""
+        rerouted = False  # the one retry an unrouted 404 is given
         for tries, pause in enumerate(BACKOFF, start=1):
             try:
                 return self.once(tries, **request)
             except Exception as exc:
-                if not transient(exc):
+                if unrouted(exc) and not rerouted:
+                    # the shortest wait: what this asks is whether the router's
+                    # list moved, not whether a cap window passed
+                    rerouted, pause, of = True, BACKOFF[0], tries + 1
+                elif transient(exc):
+                    of = len(BACKOFF) + 1
+                else:
                     raise
-                self.held(exc, pin=pin, model=request["model"], tries=tries, pause=pause)
+                self.held(exc, pin=pin, model=request["model"], tries=tries, of=of, pause=pause)
                 time.sleep(pause)
         return self.once(len(BACKOFF) + 1, **request)
 
-    def held(self, exc: Exception, *, pin: str, model: str, tries: int, pause: float) -> None:
+    def held(
+        self, exc: Exception, *, pin: str, model: str, tries: int, of: int, pause: float
+    ) -> None:
         """Report one wait, before the sleep it is about."""
         if self.on_retry is not None:
             self.on_retry(
@@ -125,7 +143,7 @@ class OpenRouter:
                     model=model,
                     pin=pin,
                     tries=tries,
-                    of=len(BACKOFF) + 1,
+                    of=of,
                     pause=pause,
                     reason=str(exc),
                 )

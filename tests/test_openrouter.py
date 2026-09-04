@@ -39,6 +39,15 @@ class Rejected(Exception):
         self.status_code = status_code
 
 
+class NotFound(Exception):
+    """A 404 carrying the router's own message: the text is what separates a
+    list that moved from a request nothing serves."""
+
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.status_code = 404
+
+
 @dataclass
 class FakeCompletions:
     reply: Completion
@@ -279,6 +288,67 @@ def test_every_other_failure_is_raised_on_the_first_try(monkeypatch):
 
     assert len(api.chat.completions.calls) == 1
     assert slept == []
+
+
+NO_ENDPOINTS = "No endpoints found matching your data policy"
+
+
+def test_a_404_naming_no_endpoints_is_asked_once_more(monkeypatch):
+    """The router's list of endpoints moves under a pinned request, so this is
+    state rather than a rejected request."""
+    slept: list[float] = []
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    api = client(raises=[NotFound(NO_ENDPOINTS)])
+
+    reply = OpenRouter(api)(
+        system="s", content="c", model="m", effort="low", pin="a-host", schema=None
+    )
+
+    assert reply.attempts == 2
+    assert len(api.chat.completions.calls) == 2
+    # the shortest wait: what this asks is whether the list moved
+    assert slept == [5.0]
+
+
+def test_a_model_that_does_not_exist_pays_one_extra_request(monkeypatch):
+    """Nothing in the message separates a wrong id from a list that moved, so
+    the one retry is what it costs before it fails."""
+    slept: list[float] = []
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    api = client(raises=[NotFound(NO_ENDPOINTS)] * 4)
+
+    with pytest.raises(NotFound):
+        OpenRouter(api)(system="s", content="c", model="m", effort="low", pin="a-host", schema=None)
+
+    assert len(api.chat.completions.calls) == 2
+    assert slept == [5.0]
+
+
+def test_a_404_naming_something_else_is_raised_on_the_first_try(monkeypatch):
+    """A path the router does not serve is a bad request, and asking again
+    answers it the same way."""
+    slept: list[float] = []
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    api = client(raises=[NotFound("Not found")])
+
+    with pytest.raises(NotFound):
+        OpenRouter(api)(system="s", content="c", model="m", effort="low", pin="a-host", schema=None)
+
+    assert len(api.chat.completions.calls) == 1
+    assert slept == []
+
+
+def test_an_unrouted_wait_reports_the_one_retry_it_will_make(monkeypatch):
+    """A line saying 1 of 5 would promise four more waits the loop never makes."""
+    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    reported: list[Retry] = []
+    api = client(raises=[NotFound(NO_ENDPOINTS)])
+
+    OpenRouter(api, on_retry=reported.append)(
+        system="s", content="c", model="m", effort="low", pin="a-host", schema=None
+    )
+
+    assert [(one.status, one.tries, one.of) for one in reported] == [(404, 1, 2)]
 
 
 def test_a_cap_that_never_lifts_is_reported_in_the_end(monkeypatch):
