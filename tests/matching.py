@@ -48,11 +48,14 @@ class FakeTransport:
 
 
 def template(slug: str, **overrides) -> dict:
+    # its own optimum unless a test says otherwise: a claimed speedup holds the
+    # draft where nothing separated, which every landing test would then arrange
     return {
         "slug": slug,
         "title": slug,
         "trigger": f"the cue for {slug}",
         "code": f"def {slug.replace('-', '_')}(): pass",
+        "speedup": False,
     } | overrides
 
 

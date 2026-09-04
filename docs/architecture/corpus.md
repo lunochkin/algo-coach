@@ -167,6 +167,9 @@ What decides whether a solution to a generated problem is correct.
   separates it, or it does not land.** The claim is what a rung teaches, and a
   corpus carrying problems that do not demonstrate it teaches the form on
   problems the naive solution also solves.
+- **The same holds where no search ran.** A call that wrote no input generator
+  leaves the claim undemonstrated as an empty search does, and the draft stops
+  at the step before it.
 - **It is held as a draft rather than discarded.** The statement, the cases and
   both solutions passed every gate that judges them, and discarding here would
   keep only the problems the blind model was slow at. The draft is resumed

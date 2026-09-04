@@ -244,6 +244,8 @@ def test_the_sites_are_the_ones_the_bench_names(tmp_path):
 
 
 SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
+# the search runs where a speedup is claimed, and nowhere else
+CLAIMS = template("longest-valid-window", speedup=True)
 
 
 def test_the_inputs_record_carries_the_size_the_search_found(tmp_path, monkeypatch):
@@ -252,7 +254,7 @@ def test_the_inputs_record_carries_the_size_the_search_found(tmp_path, monkeypat
     monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
     model = FakeWriter(solution=SLOW, generator=BUILDS)
 
-    _, _, outcomes = run(tmp_path, model)
+    _, _, outcomes = run(tmp_path, model, templates=[CLAIMS])
 
     one = sites(outcomes)[CallSite.INPUTS]
     assert one.separating == 2
@@ -262,7 +264,7 @@ def test_the_inputs_record_carries_the_size_the_search_found(tmp_path, monkeypat
 def test_a_search_that_separated_nothing_says_why(tmp_path):
     """A missing separation is a defect only where a speedup was claimed, and
     the reason is what tells the two apart."""
-    _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS))
+    _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
 
     one = sites(outcomes)[CallSite.INPUTS]
     assert one.separating is None

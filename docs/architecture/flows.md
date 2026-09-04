@@ -99,9 +99,9 @@ The order matters because each step can reject what came before.
   problem**, as a disagreement on any other case does. The round asks for
   boundary inputs, and a canonical wrong at a boundary the first set never
   reached is what the loop exists to find.
-- **A round whose call fails costs the measurement, not the problem.** The
-  problem passed every gate that judges it, and the run reports its set as
-  unmeasured against the bound.
+- **A round whose call fails holds the draft.** The problem passed every gate
+  that judges it, and its set was never measured against the bound. Landing it
+  would store a set no round was paid for, where a resume asks the loop again.
 - **The loop stops on a bound, never on a score**, for the reason `corpus.md`
   gives.
 - **The search runs before the loop and its case is appended after it.** The
@@ -124,11 +124,18 @@ The order matters because each step can reject what came before.
 - **A round is shown what the pass kept.** Those cases are in the set the
   survivors were decided against, so re-proposing one would win a case that
   kills nothing.
-- **A search that fails costs the case, not the problem.** The generator call
-  can refuse and the code it wrote can crash, and neither says anything about
-  the statement. What is lost is the timing case, and the run reports that it
-  went unwritten. A generator call that fails costs the same, and the fuzz pass
-  besides.
+- **A search that fails holds the draft, as one that separated nothing does.**
+  The input generator's code can crash, which says nothing about the statement.
+  What is missing is the case a landing needs, and the run reports what the
+  search stopped at.
+- **A call that wrote no input generator holds it too**, where a speedup is
+  claimed. No search ran, so the claim is undemonstrated for the same reason,
+  and a resume starts at the builder rather than at the search. It costs the
+  fuzz pass besides.
+- **Nothing is repaired after landing.** A stored problem carries attempts and
+  its cases are append-only, so every fix is a resumed draft. A step that has
+  no answer therefore stops the writing rather than lowering what a landing
+  requires.
 - **Every step's verdict is recorded, not only reported.** A run prints each
   stage and the process then ends, so a discarded draft would leave only the
   calls it paid for. `machine.md` gives what a site's record carries.
@@ -166,6 +173,12 @@ before it away.
 - **A search that separated nothing stops the draft at `searched`.** What it
   found is recorded either way, and `corpus.md` gives the three exits a held
   draft leaves by.
+- **A draft that never reached the search stops earlier.** A speedup is
+  claimed and no input generator was written, so it is held at `agreed` and a
+  resume runs the builder.
+- **A loop whose round failed stops the draft before `hardened`**, at whatever
+  the steps before it reached. A resume runs the loop over the set as the
+  statement left it, which is the set the survivors were decided against.
 - **`rejected` is terminal and names the gate that reached it**, which is the
   same `Discard` a site outcome carries. Terminal means no resume rather than
   no record.

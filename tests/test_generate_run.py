@@ -17,7 +17,7 @@ from algo_coach.generation import (
 )
 from algo_coach.generation import run as run_module
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import ExpectedSource, Problem
+from algo_coach.schema import ExpectedSource, Problem, WritingState
 
 
 def run(tmp_path, model: FakeWriter, *, count: int = 1):
@@ -155,10 +155,17 @@ SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    ret
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 
 
+def claiming(overrides: dict) -> dict:
+    """A card whose template claims a speedup, which is what the search is run
+    for and what holds the draft where nothing separated."""
+    return {"templates": [template("longest-valid-window", speedup=True)]} | overrides
+
+
 def timed(tmp_path, monkeypatch, model: FakeWriter, **overrides):
-    """A run whose sitting cap is small enough to separate in a test."""
+    """A run whose sitting cap is small enough to separate in a test, over a
+    template claiming the speedup that makes the search run."""
     monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
-    (one,) = seeded(tmp_path, card(**overrides))
+    (one,) = seeded(tmp_path, card(**claiming(overrides)))
     return one, write_problems(model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path))
 
 
@@ -216,7 +223,7 @@ def reported(tmp_path, monkeypatch, model: FakeWriter, **overrides) -> Progress:
     """The line one problem left, which is where a site's failure is read."""
     seen: list[Progress] = []
     monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
-    (one,) = seeded(tmp_path, card(**overrides))
+    (one,) = seeded(tmp_path, card(**claiming(overrides)))
     write_problems(
         model,
         CallLog(tmp_path),
@@ -229,12 +236,30 @@ def reported(tmp_path, monkeypatch, model: FakeWriter, **overrides) -> Progress:
     return line
 
 
-def test_a_builder_that_fails_costs_the_case_and_not_the_problem(tmp_path, monkeypatch):
-    """The problem passed every gate that judges it, and the timing case is
-    what the run reports it did not get."""
+def test_a_builder_that_fails_holds_a_draft_claiming_a_speedup(tmp_path, monkeypatch):
+    """No code to build with, so no search, so nothing demonstrates the claim.
+    A landed problem is repaired nowhere, which is why the draft stops at the
+    step the call failed before."""
     model = FakeWriter(solution=SLOW)
 
     _, result = timed(tmp_path, monkeypatch, model)
+
+    (stored,) = result.held
+    assert stored.state is WritingState.AGREED
+    assert (result.drafted, CaseLog(tmp_path).cases()) == ([], [])
+
+
+def test_a_builder_that_fails_lands_a_form_that_is_its_own_optimum(tmp_path, monkeypatch):
+    """Nothing was searched for, so the case the call cost was never one the
+    problem needed."""
+    model = FakeWriter(solution=SLOW)
+
+    _, result = timed(
+        tmp_path,
+        monkeypatch,
+        model,
+        templates=[template("longest-valid-window", speedup=False)],
+    )
 
     assert len(result.drafted) == 1
     assert len(CaseLog(tmp_path).cases()) == 1
@@ -275,7 +300,7 @@ def test_the_search_runs_before_the_mutation_loop(tmp_path, monkeypatch):
     """A canonical wrong at scale discards the problem, and the loop is what
     that saves: a round is paid for after the search rather than before it."""
     monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
-    (one,) = seeded(tmp_path, card())
+    (one,) = seeded(tmp_path, card(**claiming({})))
     stages: list[str] = []
 
     write_problems(
@@ -395,9 +420,10 @@ def test_a_set_that_kills_every_mutant_pays_for_no_round(tmp_path):
     assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM]
 
 
-def test_a_round_that_fails_costs_the_round_and_not_the_problem(tmp_path):
-    """The problem passed every gate that judges it. What is lost is the
-    measurement, and the run reports the set unmeasured."""
+def test_a_round_that_fails_holds_the_draft_for_a_resume(tmp_path):
+    """The problem passed every gate that judges it and its set was never
+    measured against the bound, so the loop is asked again rather than the set
+    stored as it stands."""
     reported: list = []
     (one,) = seeded(tmp_path, card())
 
@@ -410,8 +436,10 @@ def test_a_round_that_fails_costs_the_round_and_not_the_problem(tmp_path):
         on_progress=reported.append,
     )
 
-    assert len(result.drafted) == 1
-    assert len(CaseLog(tmp_path).cases()) == 1
+    (stored,) = result.held
+    # no input generator was written for it either, so it stopped a step earlier
+    assert stored.state is WritingState.AGREED
+    assert (result.drafted, CaseLog(tmp_path).cases()) == ([], [])
     assert reported[0].unmeasured is not None
 
 

@@ -300,7 +300,7 @@ canonical. What the first corpus settles is the bound.
       less — and write the choice into `corpus.md`
 - [x] Move the search ahead of the mutation loop, appending its case after it.
       A disagreement at the separating size then costs no round
-- [ ] Hold a draft at `searched` where its template claims a speedup and the
+- [x] Hold a draft at `searched` where its template claims a speedup and the
       search stored no case, so nothing lands undemonstrated. A test lands a
       separated problem and holds an unseparated one
 - [ ] Add a `Discard` arm for a reference that wrote the form, and reject a
@@ -311,6 +311,9 @@ canonical. What the first corpus settles is the bound.
       configuration nor a digest
 - [ ] Report the held drafts at the end of a run, naming the template and what
       the search found. They are the gap the next generation run aims at
+- [ ] Count the draft a raised call left in that report. It is stored at the
+      step it stopped and a resume reaches it, where the run prints only that
+      the call failed
 
 ### Writing a problem as states
 
@@ -343,6 +346,10 @@ exit criteria reads a draft.
       none
 - [ ] Resume a draft from that step, reporting which step it started at
 - [ ] Refuse to resume a rejected draft, minting a new one that cites it
+- [ ] Draw the states into `flows.md` as a mermaid diagram: each step, the
+      state it moves the draft to, and the three ways one leaves — landed,
+      rejected, or held for a resume. Prose names an exit per step, and which
+      failure stops where is read by following eight bullets
 
 ### Transport
 

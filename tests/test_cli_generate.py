@@ -524,13 +524,19 @@ def replaying(monkeypatch, model: FakeWriter, *argv: str) -> None:
 
 # what the input generator returns, so the site answers rather than failing
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
+# slow enough to separate at the cap the test lowers
+SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 ANOTHER = ("--site", "blind", "--model", "another", "--provider", "one")
 
 
 def test_replay_pays_for_a_second_configuration_once(root, monkeypatch, capsys):
     """The corpus is the input, so a configuration reads a statement once. The
     run that wrote it already answers for the bench it was written with."""
-    run(monkeypatch, FakeWriter(generator=BUILDS), "longest-valid-window")
+    # a template claiming a speedup, so the inputs site has a pair to answer.
+    # The problem then lands only where the search separated the two solutions
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    seeded(root, card(templates=[template("longest-valid-window", speedup=True)]))
+    run(monkeypatch, FakeWriter(solution=SLOW, generator=BUILDS), "longest-valid-window")
     capsys.readouterr()
 
     replaying(monkeypatch, FakeWriter(generator=BUILDS), *ANOTHER)

@@ -1,15 +1,19 @@
 from generating import CANONICAL, FakeWriter
-from matching import card, seeded
+from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
 from algo_coach.drafts import DraftStore
 from algo_coach.generation import Corpus, write_problems
 from algo_coach.outcomes import OutcomeLog
+from algo_coach.problems import ProblemStore
 from algo_coach.schema import Discard, Draft, WritingState
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 WRONG = "def solve(xs):\n    return len(xs) + 1\n"
+# the search runs where a speedup is claimed, and holds the draft where nothing
+# separated
+CLAIMS = template("longest-valid-window", speedup=True)
 
 
 def run(tmp_path, model: FakeWriter, **overrides):
@@ -94,7 +98,7 @@ def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
     """The statement's own cases, the reference, the builder and its bound,
     each written as the step that produced it answered."""
     monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
-    result, _ = run(tmp_path, FakeWriter(solution=SLOW, generator=BUILDS))
+    result, _ = run(tmp_path, FakeWriter(solution=SLOW, generator=BUILDS), templates=[CLAIMS])
     (stored,) = result.drafted
 
     assert stored.canonical == CANONICAL
@@ -131,6 +135,34 @@ def test_the_draft_and_its_site_outcomes_carry_one_id(tmp_path):
 
     (stored,) = result.drafted
     assert {left.writing_id for left in outcomes.outcomes()} == {stored.id}
+
+
+def test_a_separated_problem_lands(tmp_path, monkeypatch):
+    """The case that demonstrates the claim is stored, so the draft runs on
+    through the loop."""
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    model = FakeWriter(solution=SLOW, generator=BUILDS)
+
+    result, drafts = run(tmp_path, model, templates=[CLAIMS])
+
+    (landed,) = result.drafted
+    assert landed.state is WritingState.LANDED
+    assert landed.separating is not None
+    assert (result.held, drafts.all()) == ([], [])
+
+
+def test_an_unseparated_draft_is_held_at_the_search(tmp_path):
+    """The reference finished at every size the builder wrote, so nothing
+    demonstrates the speedup its template claims and the problem does not
+    land."""
+    result, drafts = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
+
+    (stored,) = result.held
+    assert stored.state is WritingState.SEARCHED
+    assert (stored.separating, stored.problem_id) == (None, None)
+    # kept where it stopped, since a resume is what separates it
+    assert drafts.all() == [stored]
+    assert (result.drafted, ProblemStore(tmp_path).all()) == ([], [])
 
 
 def a_landed_draft(problem_id: str) -> Draft:

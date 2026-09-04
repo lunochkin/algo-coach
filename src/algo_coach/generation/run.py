@@ -144,6 +144,10 @@ class Bar(BaseModel):
 
 class GenerationResult(BaseModel):
     drafted: list[Draft] = Field(default_factory=list)
+    # written whole and separated by nothing, so held at `searched` until a
+    # resume separates it, the template's `speedup` is corrected, or it is
+    # rejected
+    held: list[Draft] = Field(default_factory=list)
     discarded: list[Discarded] = Field(default_factory=list)
     failed: list[Failed] = Field(default_factory=list)
     aborted: bool = False
@@ -230,6 +234,12 @@ def write_one(
         return draft, checked, inputs, Bar()
     if template.speedup and inputs.built is not None:
         draft = held(drafts, moved(draft, WritingState.SEARCHED, separating=separating))
+    if template.speedup and separating is None:
+        # the claim is what a rung teaches, and a landed problem is repaired
+        # nowhere: the draft stops at the step that has no answer, and a resume
+        # is what carries it forward
+        sites(writing, call, blind, first, inputs, Bar())
+        return draft, checked, inputs, Bar()
 
     checked, inputs, bar, won = measured(
         transport,
@@ -243,6 +253,12 @@ def write_one(
     )
     if not checked.survived:
         draft = held(drafts, moved(draft, WritingState.REJECTED, gate=checked.discard))
+        sites(writing, call, blind, first, inputs, bar)
+        return draft, checked, inputs, bar
+    if bar.unmeasured is not None:
+        # the round's call failed, so the set is what the statement left. Held
+        # at the step before the loop, since a resume asks again where landing
+        # would store a set no round was paid for
         sites(writing, call, blind, first, inputs, bar)
         return draft, checked, inputs, bar
     draft = held(
@@ -593,7 +609,12 @@ def write_problems(
 
         consecutive = 0
         written.append(draft.statement)
-        if checked.survived:
+        if checked.survived and draft.state is not WritingState.HARDENED:
+            # every gate that judges the problem passed, and a step of the
+            # writing did not: held where it stopped rather than landed
+            record(outcomes, left)
+            result.held.append(draft)
+        elif checked.survived:
             problem = land(corpus, template, draft)
             # named before it is cleared: a crash between the two then leaves a
             # draft the next run clears rather than a problem written twice
@@ -614,7 +635,7 @@ def write_problems(
             title=draft.title,
             cases=len(draft.declared),
             outcome=checked.outcome,
-            landed=checked.survived,
+            landed=draft.state is WritingState.LANDED,
             reason=None if checked.survived else why(checked),
             separating=inputs.separating,
             unseparated=inputs.unseparated,

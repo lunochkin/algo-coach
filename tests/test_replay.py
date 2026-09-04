@@ -10,17 +10,29 @@ from algo_coach.schema import CallSite, Discard, ProblemStatus, RetirementReason
 from algo_coach.solutions import SolutionLog
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
+# slow enough to separate at the cap the tests lower: a reference the search
+# cannot leave behind holds the draft rather than landing it
+SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 BRANCHING = "def solve(n):\n    return n > 3\n"
 AGREES = "def solve(n):\n    return not n <= 3\n"
 DECIDES = [{"args": "[0]", "expected": "false"}]
 
 
-def landed(tmp_path, model: FakeWriter | None = None, **overrides):
+def landed(tmp_path, monkeypatch, model: FakeWriter | None = None, **overrides):
     """One stored problem, written by a run that recorded no outcome of its
-    own, so a replay's store starts empty."""
+    own, so a replay's store starts empty.
+
+    Over a template claiming a speedup, since that is what the inputs site is
+    asked about. A run under the real sitting cap holds the draft instead: the
+    reference finishes at every size the builder writes.
+    """
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    overrides.setdefault(
+        "templates", [template("longest-valid-window", speedup=True), template("fixed-window")]
+    )
     (one,) = seeded(tmp_path, card(**overrides))
     write_problems(
-        model or FakeWriter(generator=BUILDS),
+        model or FakeWriter(solution=SLOW, generator=BUILDS),
         CallLog(tmp_path),
         one,
         one.templates[0],
@@ -39,10 +51,10 @@ def sites(outcomes) -> dict[CallSite, object]:
     return {one.site: one for one in outcomes}
 
 
-def test_a_replay_asks_the_answering_sites_about_a_stored_problem(tmp_path):
+def test_a_replay_asks_the_answering_sites_about_a_stored_problem(tmp_path, monkeypatch):
     """Generation writes a new problem every time, so a configuration is
     compared with another only over a statement that already exists."""
-    cards = landed(tmp_path)
+    cards = landed(tmp_path, monkeypatch)
 
     result, outcomes = replayed(tmp_path, FakeWriter(generator=BUILDS), cards)
 
@@ -50,10 +62,10 @@ def test_a_replay_asks_the_answering_sites_about_a_stored_problem(tmp_path):
     assert result.asked == 2
 
 
-def test_a_replayed_record_names_the_problem_it_answered(tmp_path):
+def test_a_replayed_record_names_the_problem_it_answered(tmp_path, monkeypatch):
     """The item is the stored problem, which is what two configurations are
     compared over."""
-    cards = landed(tmp_path)
+    cards = landed(tmp_path, monkeypatch)
 
     _, outcomes = replayed(tmp_path, FakeWriter(generator=BUILDS), cards)
 
@@ -61,10 +73,10 @@ def test_a_replayed_record_names_the_problem_it_answered(tmp_path):
     assert {one.problem_id for one in outcomes} == {stored.id}
 
 
-def test_a_pair_this_configuration_answered_is_skipped(tmp_path):
+def test_a_pair_this_configuration_answered_is_skipped(tmp_path, monkeypatch):
     """The second run buys the same verdict at the same digest, so it is not
     paid for."""
-    cards = landed(tmp_path)
+    cards = landed(tmp_path, monkeypatch)
     log = OutcomeLog(tmp_path)
     replayed(tmp_path, FakeWriter(generator=BUILDS), cards, log=log)
 
@@ -77,10 +89,10 @@ def test_a_pair_this_configuration_answered_is_skipped(tmp_path):
     assert len(outcomes) == 2
 
 
-def test_a_second_configuration_is_paid_for(tmp_path):
+def test_a_second_configuration_is_paid_for(tmp_path, monkeypatch):
     """A record answers for the configuration that wrote it and no other, or a
     cheaper model would be scored on what the first one read."""
-    cards = landed(tmp_path)
+    cards = landed(tmp_path, monkeypatch)
     log = OutcomeLog(tmp_path)
     replayed(tmp_path, FakeWriter(generator=BUILDS), cards, log=log)
 
@@ -92,10 +104,10 @@ def test_a_second_configuration_is_paid_for(tmp_path):
     assert [one.model for one in outcomes if one.site is CallSite.BLIND][-1] == "another"
 
 
-def test_fresh_asks_again_where_a_record_answers(tmp_path):
+def test_fresh_asks_again_where_a_record_answers(tmp_path, monkeypatch):
     """Measuring a reader against itself is what the skip would otherwise
     make unreachable."""
-    cards = landed(tmp_path)
+    cards = landed(tmp_path, monkeypatch)
     log = OutcomeLog(tmp_path)
     replayed(tmp_path, FakeWriter(generator=BUILDS), cards, log=log)
 
@@ -105,10 +117,12 @@ def test_fresh_asks_again_where_a_record_answers(tmp_path):
     assert len(outcomes) == 4
 
 
-def test_a_replayed_reference_that_disagrees_is_recorded(tmp_path):
+def test_a_replayed_reference_that_disagrees_is_recorded(tmp_path, monkeypatch):
     """The site's answer is settled against the cases the problem already
     carries, so a second reading of the statement is what is being scored."""
-    cards = landed(tmp_path)
+    cards = landed(
+        tmp_path, monkeypatch, templates=[template("longest-valid-window", speedup=False)]
+    )
     apart = FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n", generator=BUILDS)
 
     _, outcomes = replayed(tmp_path, apart, cards)
@@ -118,10 +132,10 @@ def test_a_replayed_reference_that_disagrees_is_recorded(tmp_path):
     assert "disagrees on 1 case(s)" in one.detail
 
 
-def test_a_replay_writes_nothing_to_the_corpus(tmp_path):
+def test_a_replay_writes_nothing_to_the_corpus(tmp_path, monkeypatch):
     """A case a round wins here is not appended, or the next configuration
     would be measured against a different problem."""
-    cards = landed(tmp_path)
+    cards = landed(tmp_path, monkeypatch)
     before = len(CaseLog(tmp_path).cases()), len(SolutionLog(tmp_path).solutions())
 
     replayed(tmp_path, FakeWriter(generator=BUILDS), cards)
@@ -129,10 +143,10 @@ def test_a_replay_writes_nothing_to_the_corpus(tmp_path):
     assert (len(CaseLog(tmp_path).cases()), len(SolutionLog(tmp_path).solutions())) == before
 
 
-def test_a_retired_problem_is_not_replayed(tmp_path):
+def test_a_retired_problem_is_not_replayed(tmp_path, monkeypatch):
     """A defective problem was never a fair test, and a telegraphed one is not
     what a later corpus will hold."""
-    cards = landed(tmp_path)
+    cards = landed(tmp_path, monkeypatch)
     store = ProblemStore(tmp_path)
     (one,) = store.all()
     store.put(
@@ -150,10 +164,12 @@ def test_a_retired_problem_is_not_replayed(tmp_path):
     assert outcomes == []
 
 
-def test_a_form_that_is_its_own_optimum_is_not_asked(tmp_path):
+def test_a_form_that_is_its_own_optimum_is_not_asked(tmp_path, monkeypatch):
     """Nothing separates the two solutions there, so the site has no question
     and the pair costs nothing rather than being skipped."""
-    cards = landed(tmp_path, templates=[template("longest-valid-window", speedup=False)])
+    cards = landed(
+        tmp_path, monkeypatch, templates=[template("longest-valid-window", speedup=False)]
+    )
 
     result, outcomes = replayed(tmp_path, FakeWriter(), cards)
 
@@ -161,12 +177,20 @@ def test_a_form_that_is_its_own_optimum_is_not_asked(tmp_path):
     assert result.asked == 1  # the reference alone
 
 
-def test_the_discrimination_site_is_asked_where_a_mutant_survives(tmp_path):
+def test_the_discrimination_site_is_asked_where_a_mutant_survives(tmp_path, monkeypatch):
     """The survivors are in the prompt, so the digest that decides the skip is
     known only after the local kill pass."""
-    # the landing run's own round answered nothing, so the stored set is the
-    # one written with the statement and a mutant is still standing
-    cards = landed(tmp_path, FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES))
+    # the landing run's own round proposed a case that killed nothing, so the
+    # stored set is the one written with the statement and a mutant is still
+    # standing
+    cards = landed(
+        tmp_path,
+        monkeypatch,
+        FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES, separators=[[[0]]]),
+        # no input generator is written for it, which holds a draft claiming a
+        # speedup: nothing then demonstrates the claim
+        templates=[template("longest-valid-window", speedup=False)],
+    )
 
     _, outcomes = replayed(
         tmp_path,
@@ -204,8 +228,9 @@ def test_the_loop_is_replayed_against_the_set_as_it_stood(tmp_path):
     result, _ = replayed(tmp_path, second, [one], log=log)
 
     # skipped rather than unasked: shown the won case the loop kills every
-    # mutant, and the site would go unasked for the wrong reason
-    assert (result.skipped, result.unasked) == (3, 0)
+    # mutant, and the site would go unasked for the wrong reason. The inputs
+    # site is the unasked one, since the form claims no speedup
+    assert (result.skipped, result.unasked) == (2, 1)
     assert second.answered == 0
 
 
