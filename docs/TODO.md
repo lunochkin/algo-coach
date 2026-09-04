@@ -298,7 +298,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Decide what enforces a speedup where the blind reference writes the same
       form — a third solution written deliberately naive, or `speedup` claiming
       less — and write the choice into `corpus.md`
-- [ ] Move the search ahead of the mutation loop, appending its case after it.
+- [x] Move the search ahead of the mutation loop, appending its case after it.
       A disagreement at the separating size then costs no round
 
 ### Writing a problem as states

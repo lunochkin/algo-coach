@@ -271,6 +271,25 @@ def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
     assert CaseLog(tmp_path).cases() == []
 
 
+def test_the_search_runs_before_the_mutation_loop(tmp_path, monkeypatch):
+    """A canonical wrong at scale discards the problem, and the loop is what
+    that saves: a round is paid for after the search rather than before it."""
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    (one,) = seeded(tmp_path, card())
+    stages: list[str] = []
+
+    write_problems(
+        FakeWriter(solution=SLOW, generator=BUILDS),
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        on_step=lambda step: stages.append(step.name),
+    )
+
+    assert stages.index("timing") < stages.index("mutants")
+
+
 # the mutation loop's subject: a boundary the one written case never reaches
 BOUNDED = "def solve(n):\n    return n > 3\n"
 BOUNDED_BLIND = "def solve(n):\n    return not n <= 3\n"

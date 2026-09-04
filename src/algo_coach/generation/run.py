@@ -8,6 +8,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Transport
+from algo_coach.generation.agreement import SettledCase
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import reference
 from algo_coach.generation.checks import CAP_MS, Checked, Discard, check
@@ -184,6 +185,15 @@ def write_one(
     # builds are what a fuzz pass kills mutants with, and a round is then paid
     # for the survivors alone
     inputs = building(transport, calls, draft.statement, configuration=bench.inputs, notes=notes)
+    # before the loop, so a canonical wrong at scale costs no round. The case
+    # is held back until after it: the survivors are decided against the set as
+    # the statement left it
+    checked, inputs, separating = timed(
+        template, drafted, checked, inputs, cap_ms=cap_ms, notes=notes
+    )
+    if not checked.survived:
+        sites(writing, call, blind, ran, inputs, Bar())
+        return drafted, checked, inputs, Bar()
     checked, inputs, bar = measured(
         transport,
         calls,
@@ -194,10 +204,8 @@ def write_one(
         cap_ms=cap_ms,
         notes=notes,
     )
-    if checked.survived:
-        # the search after the loop: the separating case it appends was never
-        # in the set the survivors were decided against
-        checked, inputs = timed(template, drafted, checked, inputs, cap_ms=cap_ms, notes=notes)
+    if separating is not None and checked.survived:
+        drafted.cases.append(separating)
     sites(writing, call, blind, ran, inputs, bar)
     return drafted, checked, inputs, bar
 
@@ -379,15 +387,16 @@ def timed(
     *,
     cap_ms: int,
     notes: Notes = SILENT,
-) -> tuple[Checked, Inputs]:
-    """The timing case, appended to the set where one was found. The generation
-    cap measures, and the sitting's cap is what a size is separated against.
+) -> tuple[Checked, Inputs, SettledCase | None]:
+    """The timing case, returned rather than appended: the caller holds it back
+    until the mutation loop has run. The generation cap measures, and the
+    sitting's cap is what a size is separated against.
 
     A search that fails costs the case rather than the problem, so its failure
     is caught here instead of reaching the run's abort count.
     """
     if not template.speedup or inputs.built is None:
-        return checked, inputs
+        return checked, inputs, None
     notes("timing", "searching for the input that separates the two solutions")
     try:
         found = search(
@@ -401,12 +410,11 @@ def timed(
         )
     except Exception as failure:
         notes("timing", f"unsearched: {failure!r}")
-        return checked, inputs.model_copy(update={"unseparated": repr(failure)})
+        return checked, inputs.model_copy(update={"unseparated": repr(failure)}), None
 
     if found.found:
-        drafted.cases.append(found.case)
         notes("timing", f"separates at {found.size}")
-        return checked, inputs.model_copy(update={"separating": found.size})
+        return checked, inputs.model_copy(update={"separating": found.size}), found.case
     notes("timing", f"no case: {found.missing}")
     searched = inputs.model_copy(
         update={
@@ -418,14 +426,14 @@ def timed(
         }
     )
     if found.missing is not Missing.DISAGREED:
-        return checked, searched
+        return checked, searched, None
     # one input the small cases could not reach, answered two ways
     discarded = Checked(
         outcome=checked.outcome,
         discard=Discard.DISAGREED,
         disagreements=[found.disagreement],
     )
-    return discarded, searched
+    return discarded, searched, None
 
 
 def make(code: str, cap_ms: int, *, seed: int = SEARCH_SEED) -> Callable[[int], list[Any]]:
