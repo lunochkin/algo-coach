@@ -63,6 +63,7 @@ from algo_coach.generation.run import (
     Resumed,
     reject,
     resume,
+    swept,
     write_one,
     write_problems,
 )
@@ -138,6 +139,7 @@ __all__ = [
     "reject",
     "replay",
     "resume",
+    "swept",
     "sending",
     "schema",
     "search",

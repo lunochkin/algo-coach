@@ -1,5 +1,6 @@
 import argparse
 import sys
+from collections import Counter
 from pathlib import Path
 
 from algo_coach.calls import CallLog
@@ -14,11 +15,15 @@ from algo_coach.generation import (
     Corpus,
     GenerationResult,
     Held,
+    Notes,
     Progress,
     ReplayResult,
+    Resumed,
     Step,
     Target,
     replay,
+    resume,
+    swept,
     targets,
     write_problems,
 )
@@ -26,13 +31,17 @@ from algo_coach.matches import MatchLog
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Call, Card, Draft
+from algo_coach.schema import Call, Card, Draft, WritingState
 from algo_coach.solutions import SolutionLog
 
 
 def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+    if args.replay and args.resume:
+        parser.exit(2, "generate: --replay reads the corpus and --resume the drafts, so not both\n")
     if args.replay:
         return replayed(args, parser, root)
+    if args.resume:
+        return resumed(args, parser, root)
     aimed = resolve(args, parser, root)
     api = transport(args, parser)
     calls, corpus = CallLog(root), Corpus.at(root)
@@ -72,6 +81,89 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         # not "nothing written": a call that raised leaves the draft the steps
         # before it wrote, and the block above names it
         parser.exit(1, "generate: no problem stored\n")
+
+
+def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+    """Every held draft carried forward, at the bench the flags name.
+
+    The store is the input rather than a template, so the flags that aim a
+    write name nothing here. A rejected draft is terminal and is not among
+    them.
+    """
+    if args.card or args.template or args.gaps:
+        parser.exit(2, "generate: --resume reads the stored drafts, so it is aimed at nothing\n")
+    drafts = DraftStore(root)
+    swept(drafts)
+    waiting = [one for one in drafts.all() if one.state is not WritingState.REJECTED]
+    if not waiting:
+        parser.exit(0, "generate: no draft is waiting on a step\n")
+
+    api = transport(args, parser)
+    bench = chosen_bench(args, parser)
+    cards = CardStore(root).all()
+    calls, corpus = CallLog(root), Corpus.at(root)
+    outcomes = OutcomeLog(root)
+
+    results, unaimed = [], 0
+    for index, draft in enumerate(waiting, start=1):
+        target = written_for(cards, draft)
+        if target is None:
+            # the form it was briefed on is gone, so nothing says what its
+            # search or its ladder would be
+            unaimed += 1
+            print(f"draft {draft.id}: no template {draft.template_id}", file=sys.stderr)
+            continue
+        result = resume(
+            api,
+            calls,
+            target.template,
+            draft,
+            corpus,
+            bench=bench,
+            notes=Notes(stage, index=index, total=len(waiting)),
+            outcomes=outcomes,
+            drafts=drafts,
+        )
+        results.append(result)
+        for landed in result.drafted:
+            print(written(landed, code=args.code))
+        for one in result.held:
+            print(holding(target, one))
+
+    print(resume_summary(results, bench, unaimed=unaimed))
+    if not any(result.drafted for result in results):
+        parser.exit(1, "generate: no problem stored\n")
+
+
+def written_for(cards: list[Card], draft: Draft) -> Target | None:
+    """The card and template a draft was briefed on, by the id it carries."""
+    for card in cards:
+        for template in card.templates:
+            if template.id == draft.template_id:
+                return Target(card=card, template=template)
+    return None
+
+
+def resume_summary(results: list[Resumed], bench: Bench = BENCH, *, unaimed: int = 0) -> str:
+    """What the resumed drafts became, and where each run started."""
+    stored = sum(len(result.drafted) for result in results)
+    line = f"{len(results)} draft(s) resumed, {stored} stored, {wrote(bench)}"
+    on_hold = sum(len(result.held) for result in results)
+    if on_hold:
+        line += f", {on_hold} held again"
+    failed = sum(len(result.failed) for result in results)
+    if failed:
+        line += f", {failed} failed"
+    if unaimed:
+        # apart from a failure: nothing was asked, since the form it names is
+        # not among the seeded cards
+        line += f", {unaimed} naming no template"
+    started = Counter(result.started_at for result in results)
+    if started:
+        line += ", from " + ", ".join(
+            f"{count} at {state}" for state, count in started.most_common()
+        )
+    return line
 
 
 def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:

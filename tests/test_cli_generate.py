@@ -10,6 +10,7 @@ from algo_coach.calls import CallLog, Configuration
 from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
 from algo_coach.cli.generate import staged, summary, verdict
+from algo_coach.drafts import DraftStore
 from algo_coach.generation import (
     BENCH,
     DISCRIMINATION_DEFAULT,
@@ -607,3 +608,87 @@ def test_a_draft_a_raised_call_left_is_named_too(root, monkeypatch, capsys):
     assert "# held: Widest fair stretch (longest-valid-window, checked)" in out
     assert "the call raised: RuntimeError('the gateway is down')" in out
     assert "no problem stored" in err
+
+
+def resuming(monkeypatch, model: FakeWriter, *argv: str) -> None:
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
+    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: model)
+    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--resume", *argv])
+    cli.main()
+
+
+def held_draft(root, monkeypatch, capsys):
+    """What a run whose blind call died leaves in the store."""
+    with pytest.raises(SystemExit):
+        run(monkeypatch, Raises(), "longest-valid-window")
+    capsys.readouterr()
+    (stored,) = DraftStore(root).all()
+    return stored
+
+
+def test_resume_carries_a_held_draft_forward(root, monkeypatch, capsys):
+    """A prompt edit is spent on the drafts it repairs, where the library's
+    resume was reachable from nothing."""
+    held_draft(root, monkeypatch, capsys)
+
+    resuming(monkeypatch, FakeWriter())
+
+    out = capsys.readouterr().out
+    assert "1 draft(s) resumed, 1 stored" in out
+    assert "from 1 at referenced" in out
+    assert len(ProblemStore(root).all()) == 1
+    # cleared at landing, so the next resume finds nothing
+    assert DraftStore(root).all() == []
+
+
+def test_resume_reports_a_draft_that_is_held_again(root, monkeypatch, capsys):
+    """The step it stopped at is what the next run aims at, so a resume that
+    did not land it says so rather than falling silent."""
+    held_draft(root, monkeypatch, capsys)
+
+    with pytest.raises(SystemExit) as exit_info:
+        resuming(monkeypatch, Raises())
+
+    out = capsys.readouterr().out
+    assert "1 held again" in out and "1 failed" in out
+    assert exit_info.value.code == 1
+
+
+def test_resume_skips_a_draft_naming_no_seeded_template(root, monkeypatch, capsys):
+    """The form it was briefed on is gone, so nothing says what its search
+    would be."""
+    stored = held_draft(root, monkeypatch, capsys)
+    DraftStore(root).put(stored.model_copy(update={"template_id": "gone"}))
+
+    with pytest.raises(SystemExit):
+        resuming(monkeypatch, FakeWriter())
+
+    printed = capsys.readouterr()
+    assert "no template gone" in printed.err
+    assert "1 naming no template" in printed.out
+
+
+def test_resume_with_no_draft_waiting_says_so(root, monkeypatch, capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        resuming(monkeypatch, FakeWriter())
+
+    assert exit_info.value.code == 0
+    assert "no draft is waiting" in capsys.readouterr().err
+
+
+def test_resume_is_aimed_at_nothing(root, monkeypatch, capsys):
+    """It reads the stored drafts, so the flags that aim a write name nothing."""
+    with pytest.raises(SystemExit):
+        resuming(monkeypatch, FakeWriter(), "--gaps")
+
+    assert "aimed at nothing" in capsys.readouterr().err
+
+
+def test_a_replay_is_not_a_resume(root, monkeypatch, capsys):
+    """One reads the corpus and the other the drafts, and a run doing both
+    would report two things under one summary."""
+    with pytest.raises(SystemExit) as exit_info:
+        resuming(monkeypatch, FakeWriter(), "--replay")
+
+    assert exit_info.value.code == 2
+    assert "not both" in capsys.readouterr().err

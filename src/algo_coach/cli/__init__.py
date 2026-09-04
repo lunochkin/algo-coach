@@ -193,6 +193,11 @@ def main() -> None:
         help="re-ask the answering sites about the stored problems, writing nothing to the corpus",
     )
     generate_parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="carry every held draft forward, from the step its bench or its own state moved",
+    )
+    generate_parser.add_argument(
         "--limit", type=int, help="how many stored problems to replay; every one otherwise"
     )
     generate_parser.add_argument(

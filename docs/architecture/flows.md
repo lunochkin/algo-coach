@@ -240,9 +240,16 @@ before it away.
 - **A draft names the problem it landed as.** A crash between landing and
   clearing then leaves a draft the next run can clear, rather than one it would
   write a second time.
-- **Deferred: how a resume is invoked, whether drafts are listed from the CLI,
-  and how long a rejected draft is kept.** Each needs a corpus of drafts to
-  answer.
+- **A resume is invoked as `generate --resume`**, over every held draft rather
+  than one named. A prompt edit reaches the drafts it repairs in one run, and
+  which of them moved is what the digests already answer.
+- **It is aimed at nothing**, as a replay is: the store is the input, so the
+  flags that aim a write name no draft.
+- **A draft whose template is not seeded is skipped**, not resumed. The form
+  its brief named is what a search reads `speedup` from, and the run reports
+  the ones it could not aim.
+- **Deferred: whether drafts are listed from the CLI, and how long a rejected
+  draft is kept.** Each needs a corpus of drafts to answer.
 
 ## Enumerating a problem's other solutions
 
