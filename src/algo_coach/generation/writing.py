@@ -24,7 +24,7 @@ class Writing:
     into: list[SiteOutcome] | None = None
     id: str = field(default_factory=mint.new_id)
 
-    def draft(self, generated: Generated, call: Call, *, rerun_of: str | None = None) -> Draft:
+    def draft(self, generated: Generated, call: Call) -> Draft:
         """The draft this attempt writes, carrying the id its site outcomes
         group under and the form it was briefed on."""
         return mint.draft(
@@ -37,7 +37,6 @@ class Writing:
             # empty where nothing recorded the attempt, as it is on the site
             # outcomes this id groups
             template_id=self.template_id or None,
-            rerun_of=rerun_of,
             **written_by(call),
         )
 

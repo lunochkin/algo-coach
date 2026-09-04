@@ -348,7 +348,17 @@ exit criteria reads a draft.
       technique brief names no form. `moved_at` reads the template's `speedup`,
       and a sweep over held drafts has only the site outcomes to find it from
 - [x] Resume a draft from that step, reporting which step it started at
-- [ ] Refuse to resume a rejected draft, minting a new one that cites it
+- [x] Refuse to resume a rejected draft. Rejected is terminal: the generator's
+      gates leave nothing to ask again but a call that writes a different
+      problem, and a disagreement is evidence about the statement
+- [ ] Add `--resume` to `generate`, carrying every held draft forward and
+      reporting the step each started at. Nothing calls the library's resume,
+      so a prompt edit cannot be spent on the drafts it repairs
+- [ ] List the stored drafts under a flag of `generate`, naming the state, the
+      gate and the step each would start at. A sweep names what it will spend
+      before it spends it
+- [ ] Replace the line in `flows.md` deferring how a resume is invoked with
+      what the flags do. It is the doc a reader checks before the CLI help
 - [ ] Skip a step a resume re-runs whose own configuration and digest stand, as
       a replay skips a pair. A moved blind configuration re-pays the input
       generator today, and that prompt is the statement alone
@@ -638,11 +648,6 @@ whatever phase is current.
       cannot be preempted, so a case over the cap costs its worker rather than
       a signal. Triggered when interpreter start is again what a run spends its
       seconds on
-- [ ] Choose how a resume is invoked — a flag on `generate` or a command of
-      its own — and write the choice into `flows.md`. Triggered when a run
-      leaves drafts that a fixed step would resume
-- [ ] List the stored drafts, naming the state and the step each stopped at.
-      Triggered when a run leaves more of them than a reader holds
 - [ ] Decide how long a rejected draft is kept, and write the choice into
       `flows.md`. Triggered when the draft store outgrows the corpus it
       produced

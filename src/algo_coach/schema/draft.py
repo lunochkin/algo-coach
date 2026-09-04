@@ -85,10 +85,6 @@ class Draft(BaseModel):
     # landing and clearing leaves a draft naming one, which is what tells the
     # next run to clear it rather than write the problem a second time
     problem_id: str | None = Field(default=None, min_length=1)
-    # the draft this one re-runs a step of, absent on a first attempt. A
-    # rejected draft is not resumed, so re-running the step its gate reached
-    # mints a draft that cites it rather than moving the one it came from
-    rerun_of: str | None = Field(default=None, min_length=1)
     # the form the brief named, absent where a technique brief named none, as
     # on `SiteOutcome`. A resume reads the template's `speedup`, and a sweep
     # over the store has nothing else to find it from
@@ -145,14 +141,6 @@ class Draft(BaseModel):
             raise ValueError("a landed draft names the problem_id it became")
         if not landed and self.problem_id is not None:
             raise ValueError(f"a {self.state} draft carries no problem_id")
-        return self
-
-    @model_validator(mode="after")
-    def _a_draft_is_not_its_own_source(self) -> Draft:
-        """A draft citing itself would make a resume's chain a loop, and the
-        attempt it came from unreadable."""
-        if self.rerun_of == self.id:
-            raise ValueError("a draft's rerun_of names the draft it came from, not itself")
         return self
 
     @model_validator(mode="after")

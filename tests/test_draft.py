@@ -253,30 +253,10 @@ def test_the_mutants_and_the_counters_are_not_held():
     assert not {"mutants", "survived", "won_count", "rounds"} & set(Draft.model_fields)
 
 
-def test_a_first_attempt_names_no_draft_it_came_from():
-    """Most drafts are written rather than re-run, and absence is what says
-    so."""
-    assert make_draft().rerun_of is None
-
-
-def test_a_re_run_draft_cites_the_one_it_came_from():
-    """A rejected draft is not resumed: its gate says the answer was wrong, so
-    the step is re-run into a new draft and the old one stays readable."""
-    assert make_draft(rerun_of="w0").rerun_of == "w0"
-
-
-def test_a_blank_source_is_rejected():
-    """It passes a presence check while citing nothing, where absent is the
-    arm for a first attempt."""
-    with pytest.raises(ValidationError, match="rerun_of"):
-        make_draft(rerun_of="")
-
-
-def test_a_draft_does_not_cite_itself():
-    """The chain a resume reads back would be a loop, and the attempt it came
-    from unreadable."""
-    with pytest.raises(ValidationError, match="rerun_of"):
-        make_draft(rerun_of="w1")
+def test_a_rejected_draft_cites_nothing_and_nothing_cites_it():
+    """Terminal: its gate says the answer was wrong, and no draft is written
+    from it. What it is kept for is the record of what the gate rejected."""
+    assert "rerun_of" not in Draft.model_fields
 
 
 def test_a_draft_that_has_not_landed_names_no_problem():

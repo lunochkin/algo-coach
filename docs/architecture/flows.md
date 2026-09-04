@@ -225,9 +225,15 @@ before it away.
   re-run of any site over one item does.
 - **A resume never serves.** Landing is the only transition into `created`, and
   it still requires every gate this flow requires.
-- **A rejected draft is not resumed.** Its gate says the answer was wrong, so a
-  resume skipping that gate would land what the gate rejected. Re-running the
-  rejecting step mints a new draft, citing the one it came from.
+- **A rejected draft is terminal, and nothing re-runs it.** Its gate says the
+  answer was wrong, so a resume skipping that gate would land what the gate
+  rejected. The generator's gates leave nothing to ask again but the generation
+  call, which writes a different problem. A disagreement is evidence that the
+  statement admits two readings, and a second reference is a draw against the
+  same prose.
+- **What a rejected draft is kept for is the record.** The gate, the
+  configuration behind it and the calls it paid for are readable nowhere else,
+  and a report over them is what says a site is rejecting more than it did.
 - **The draft store is working state rather than a log.** States move and
   records are revised, so it can be refactored where the append-only logs
   cannot.

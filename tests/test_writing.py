@@ -49,19 +49,6 @@ def test_an_unrecorded_attempt_names_no_form():
     assert Writing().draft(GENERATED, a_call()).template_id is None
 
 
-def test_a_first_attempt_cites_no_draft():
-    """Most drafts are written rather than re-run."""
-    assert Writing().draft(GENERATED, a_call()).rerun_of is None
-
-
-def test_a_re_run_cites_the_draft_it_came_from():
-    """Re-running a rejected draft's failing step mints a new draft, and the
-    one the gate stopped stays readable."""
-    made = Writing().draft(GENERATED, a_call(), rerun_of="w0")
-
-    assert made.rerun_of == "w0"
-
-
 def test_two_attempts_are_two_drafts():
     """The id is minted per attempt, so nothing written for one reaches
     another."""
