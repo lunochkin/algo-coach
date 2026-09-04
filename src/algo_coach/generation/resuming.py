@@ -12,6 +12,7 @@ invalidates no stored draft.
 
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import request_hash as blind_hash
+from algo_coach.generation.clock import request_hash as clock_hash
 from algo_coach.generation.inputs import request_hash as inputs_hash
 from algo_coach.outcomes import at_configuration
 from algo_coach.schema import Draft, Template, WritingState
@@ -21,6 +22,7 @@ from algo_coach.schema import Draft, Template, WritingState
 ANSWERED = (
     (WritingState.REFERENCED, "blind"),
     (WritingState.BUILT, "inputs"),
+    (WritingState.PACED, "clock"),
     (WritingState.HARDENED, "discrimination"),
 )
 
@@ -61,31 +63,35 @@ def starts_at(draft: Draft, template: Template, bench: Bench = BENCH) -> Writing
     return moved_at(draft, template, bench) or next_step(draft)
 
 
-def sending(draft: Draft, site: str) -> str | None:
+def sending(draft: Draft, site: str, template: Template) -> str | None:
     """The digest that site would send about this draft now, or `None` where
     only a local pass can say."""
     if site == "blind":
         return blind_hash(draft.statement)
     if site == "inputs":
         return inputs_hash(draft.statement)
+    if site == "clock":
+        # the one prompt carrying more than the statement, so an edited trigger
+        # re-asks the drafts written for that form and no others
+        return clock_hash(draft.statement, template.trigger)
     # the discrimination prompt carries the survivors, and which mutants stand
     # is known only after the kill pass a resume runs
     return None
 
 
-def re_asks(draft: Draft, site: str, bench: Bench = BENCH) -> bool:
+def re_asks(draft: Draft, site: str, template: Template, bench: Bench = BENCH) -> bool:
     """Whether a resume pays this site again: it never answered, or its own
     configuration or digest moved.
 
-    Per site rather than per position: the blind and the inputs prompts are the
-    statement alone, so neither invalidates the other.
+    Per site rather than per position: three of the four prompts are a function
+    of the statement, so none of them invalidates another.
     """
     taken = getattr(draft, site)
     if taken is None:
         return True
     # its own digest where a local pass decides one, so the configuration is
     # what answers there
-    digest = sending(draft, site) or taken.prompt_hash or ""
+    digest = sending(draft, site, template) or taken.prompt_hash or ""
     return not at_configuration(taken, getattr(bench, site), digest)
 
 
@@ -97,7 +103,7 @@ def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingS
     draft's state rather than the bench's.
     """
     for state, site in ANSWERED:
-        if getattr(draft, site) is not None and re_asks(draft, site, bench):
+        if getattr(draft, site) is not None and re_asks(draft, site, template, bench):
             return state
     # a flag edit moves neither a configuration nor a digest, and it is what
     # releases a draft the search held: with no speedup claimed the loop is the

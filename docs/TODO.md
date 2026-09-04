@@ -360,7 +360,7 @@ is in `corpus.md`.
 - [x] Ask the naive site on a replay, where a speedup is claimed, as the inputs
       site is asked. What a replay compares is whether a configuration writes
       the dumber solution
-- [ ] Add the naive step to `ANSWERED` in `resuming.py`, so a moved naive
+- [x] Add the naive step to `ANSWERED` in `resuming.py`, so a moved naive
       configuration re-pays that call alone. A test pins that the reference and
       the builder are reused
 - [ ] Re-ask the naive site on a resume where the search separated nothing,

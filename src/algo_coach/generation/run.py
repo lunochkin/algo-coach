@@ -283,7 +283,7 @@ def carried(
     draft = advanced(drafts, draft, WritingState.CHECKED)
 
     blind = None
-    if re_asks(draft, "blind", bench) or draft.reference is None:
+    if re_asks(draft, "blind", template, bench) or draft.reference is None:
         notes("reference", "writing the reference from the statement alone")
         solution, blind = reference(transport, calls, draft.statement, configuration=bench.blind)
         notes("reference", "written", blind)
@@ -314,7 +314,7 @@ def carried(
     # written before the mutation loop, and for every problem: the inputs it
     # builds are what a fuzz pass kills mutants with, and a round is then paid
     # for the survivors alone
-    if re_asks(draft, "inputs", bench) or draft.builder is None:
+    if re_asks(draft, "inputs", template, bench) or draft.builder is None:
         inputs = building(
             transport, calls, draft.statement, configuration=bench.inputs, notes=notes
         )
@@ -346,8 +346,9 @@ def carried(
             configuration=bench.clock,
             cap_ms=cap_ms,
             notes=notes,
+            reuse=not re_asks(draft, "clock", template, bench),
         )
-        if clock.code is not None and draft.naive is None:
+        if clock.code is not None and clock.call is not None:
             draft = advanced(
                 drafts,
                 draft,
@@ -652,6 +653,7 @@ def paced(
     configuration: Configuration,
     cap_ms: int,
     notes: Notes = SILENT,
+    reuse: bool = True,
 ) -> Clock:
     """The naive solution, or the one the draft already holds, run against the
     set the two solutions settled.
@@ -660,7 +662,7 @@ def paced(
     builder does. So does one whose answer is wrong: what it says is that this
     solution measures nothing, not that the statement is unsound.
     """
-    if draft.naive is not None:
+    if reuse and draft.naive is not None:
         notes("clock", "reused, at the configuration that wrote it")
         clock = Clock(code=draft.naive, written=draft.clock)
     else:

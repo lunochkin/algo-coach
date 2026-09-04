@@ -11,6 +11,7 @@ from algo_coach.generation import (
     Corpus,
     Notes,
     blind,
+    clock,
     inputs,
     moved_at,
     resume,
@@ -162,6 +163,23 @@ def test_a_corrected_speedup_resumes_the_draft_the_search_held(tmp_path):
     assert moved_at(held(tmp_path), OPTIMUM, BENCH) is WritingState.HARDENED
 
 
+def test_a_moved_clock_configuration_starts_at_the_naive_solution(tmp_path):
+    """A draft holds one only where a speedup is claimed, which is where the
+    search that reads it runs."""
+    bench = BENCH.model_copy(update={"clock": OTHER})
+
+    assert moved_at(held(tmp_path), CLAIMS, bench) is WritingState.PACED
+
+
+def test_an_edited_trigger_re_asks_the_clock_alone(tmp_path):
+    """The one prompt carrying more than the statement, so editing a form
+    re-asks the drafts written for it and leaves the rest."""
+    edited = Template(id="t1", **template("longest-valid-window", speedup=True, trigger="Else."))
+
+    assert moved_at(held(tmp_path), CLAIMS, BENCH) is None
+    assert moved_at(held(tmp_path), edited, BENCH) is WritingState.PACED
+
+
 def test_a_moved_configuration_is_returned_over_a_corrected_flag(tmp_path):
     """The reference is written before the search, and the earliest moved step
     is where the resume starts."""
@@ -188,6 +206,33 @@ def written(tmp_path, model: FakeWriter, drafts: DraftStore, **overrides):
         outcomes=OutcomeLog(tmp_path),
     )
     return one, result
+
+
+def test_a_moved_clock_re_pays_that_call_and_no_other(tmp_path, monkeypatch):
+    """The reference and the input generator are written from the statement,
+    which this bench did not move."""
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    drafts = DraftStore(tmp_path)
+    one, first = written(tmp_path, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
+    (stopped,) = first.held
+    model = FakeWriter(generator=BUILDS, slow=SLOW)
+
+    result = resume(
+        model,
+        CallLog(tmp_path),
+        one.templates[0],
+        stopped.draft,
+        Corpus.at(tmp_path),
+        bench=BENCH.model_copy(update={"clock": OTHER}),
+        drafts=drafts,
+    )
+
+    asked = [call["system"] for call in model.calls]
+    assert clock.SYSTEM in asked
+    assert blind.SYSTEM not in asked and inputs.SYSTEM not in asked
+    assert result.started_at is WritingState.PACED
+    # the new clock separated where the stored one did not, so the draft lands
+    assert len(result.drafted) == 1
 
 
 def test_a_resume_pays_for_the_step_that_had_no_answer_and_no_other(tmp_path, monkeypatch):

@@ -246,8 +246,9 @@ a second one writes a different problem.
   moved, which is why both are on the draft rather than only the outputs. Where
   nothing moved it starts at the step the draft never took.
 - **A site is asked again on its own configuration and digest**, as a replay
-  skips a pair. The blind and the inputs prompts are the statement alone, so a
-  moved blind configuration re-pays no input generator.
+  skips a pair. The blind and the inputs prompts are the statement alone, and
+  the clock's is the statement and the form to avoid, so a moved configuration
+  re-pays its own call and no other.
 - **The steps after them read what they left.** The search runs the builder
   against the naive solution, and the loop's survivors are decided against a set
   the reference settled. A site moving takes the steps that read it again.
