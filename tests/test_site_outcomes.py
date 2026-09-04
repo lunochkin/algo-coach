@@ -244,6 +244,19 @@ def test_the_sites_are_the_ones_the_bench_names(tmp_path):
     assert set(Bench.model_fields) == {one.value for one in CallSite}
 
 
+# the sites making an artifact rather than a verdict about one
+SAMPLED = {"generator", "clock"}
+
+
+def test_only_the_sites_making_an_artifact_are_sampled():
+    """A verdict needs protecting from variance, so two configurations of one
+    answering site stay comparable over the same item. An artifact needs no
+    such protection, and a second draw is what variance buys."""
+    for name in Bench.model_fields:
+        sampled = getattr(BENCH, name).temperature is None
+        assert sampled is (name in SAMPLED), name
+
+
 SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 # the search runs where a speedup is claimed, and nowhere else
 CLAIMS = template("longest-valid-window", speedup=True)

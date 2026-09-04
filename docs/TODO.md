@@ -339,7 +339,7 @@ is in `corpus.md`.
 - [x] Write the naive prompt: the statement and the template's trigger in, a
       solution out. It may name the form to avoid, since it settles no case and
       discards no problem
-- [ ] Sample the naive site, where the other three answering sites are greedy.
+- [x] Sample the naive site, where the other three answering sites are greedy.
       It produces an artifact rather than a verdict, so variance costs no
       comparability — the rule `machine.md` states for the generator
 - [ ] Write the naive solution after the builder and before the search, and

@@ -91,10 +91,20 @@ def test_the_site_s_own_configuration_is_the_default(tmp_path):
     assert model.calls[1]["model"] == ELSEWHERE.model
 
 
-def test_the_site_is_sampled_where_the_other_answering_ones_are_greedy():
+def test_the_site_is_sampled_where_the_other_answering_ones_are_greedy(tmp_path):
     """It produces an artifact rather than a verdict, so a second call is a
-    second draw where the first wrote the form."""
-    assert CLOCK_DEFAULT.temperature is None
+    second draw where the first wrote the form.
+
+    Left to the provider rather than set here, as generation's is: a model
+    reasoning at an effort accepts no temperature, and its endpoint drops the
+    request the moment one is sent.
+    """
+    model = FakeModel(answer())
+
+    _, call = naive(model, CallLog(tmp_path), STATEMENT, AVOID)
+
+    assert model.calls[0]["temperature"] is None
+    assert call.temperature is None
 
 
 def test_two_forms_to_avoid_are_two_questions(tmp_path):
