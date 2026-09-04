@@ -301,6 +301,19 @@ canonical. What the first corpus settles is the bound.
 - [ ] Move the search ahead of the mutation loop, appending its case after it.
       A disagreement at the separating size then costs no round
 
+### Writing a problem as states
+
+A draft is stored as it is written, so a step that fails leaves it where it
+stopped. Repair is then resumption. Phase 6 exits without these: none of its
+exit criteria reads a draft.
+
+- [x] Write the states, what a draft holds and what a resume may not do into
+      `flows.md`
+- [ ] Add the draft store and the state a step leaves, replacing the tuple
+      `write_one` returns
+- [ ] Resume a draft at the first step whose configuration or digest moved, and
+      report which step that was
+
 ### Transport
 
 - [ ] Retry once on a 404 whose message names no endpoints for the model. It is

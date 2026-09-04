@@ -32,9 +32,9 @@ The order matters because each step can reject what came before.
   the statements the form already has, so two in flight would be shown the same
   list and could write the same problem twice. Concurrency saves minutes and
   costs the diversity the brief exists to enforce.
-- **Nothing lands half-verified.** A problem failing any step is discarded
-  whole rather than stored for repair. Every call is recorded, so what was paid
-  for and thrown away stays readable.
+- **Nothing lands half-verified.** A draft failing any step stops there, and
+  only one that passed every gate becomes a problem. It is kept where it
+  stopped rather than discarded, which is what lets a fixed step resume.
 - **The reference is written blind.** Shown the canonical, it inherits that
   solution's reading of the statement. Agreement then shows only that one model
   is consistent. Blind, agreement is evidence that the statement has one
@@ -145,6 +145,65 @@ The order matters because each step can reject what came before.
   statement rather than stated in it. A form a matcher names instantly from the
   statement alone was telegraphed, and such a problem teaches recognition of
   nothing.
+
+## Writing a problem, as states
+
+The sequence above, held as durable state. A draft is stored as it is written,
+so a step that fails leaves it where it stopped instead of throwing the calls
+before it away.
+
+- **Two machines, meeting at landing.** `ProblemStatus` governs a problem that
+  exists: created, active, retired. This one governs the writing, and its last
+  state is that one's first.
+- **They stay apart.** One enum carrying both would put `drafted` beside
+  `active`, and every reader would have to know which half it was looking at.
+- **The draft is identified by the writing id.** `SiteOutcome` already mints
+  one per attempt, so the four site records of one draft group with no new
+  reference.
+- **A state per step that can fail**: drafted, checked, referenced, agreed,
+  built, searched, hardened, landed. The names are the steps above and the
+  order is theirs.
+- **A search that separated nothing does not stop the draft.** What it found
+  is recorded either way, and `corpus.md` gives why an empty answer is not the
+  problem's defect.
+- **`rejected` is terminal and names the gate that reached it**, which is the
+  same `Discard` a site outcome carries. Terminal means no resume rather than
+  no record.
+- **A draft holds what a call produced and no local run re-derives**: the
+  statement, the canonical, the declared cases and the difficulty; the
+  reference; the settled cases; the builder's code and its bound; the cases a
+  round won; the separating case.
+- **The mutants and the survivors are not in it.** A tree walk enumerates them
+  and subprocesses kill them, so a resume re-derives both without a call.
+- **The loop's counters are not in it either.** They sit on the site outcomes
+  of the same writing id, which is where a report reads them.
+- **Each step's configuration is copied onto the draft**, as every machine
+  record copies its own. A draft citing a call id alone would read the call log
+  to answer what its own site outcome answers already.
+- **What a resume starts at** is the first step whose configuration or digest
+  moved, which is why both are on the draft rather than only the outputs.
+- **A resume goes forward only.** A step's prompt is a function of the outputs
+  before it, so editing one site's prompt invalidates that step and what
+  follows it.
+- **Editing the generator's prompt invalidates no stored draft.** The draft is
+  that step's output, and the new prompt writes a different problem rather than
+  the same one again.
+- **A resumed step writes a second site outcome**, never an amendment, as a
+  re-run of any site over one item does.
+- **A resume never serves.** Landing is the only transition into `created`, and
+  it still requires every gate this flow requires.
+- **A rejected draft is not resumed.** Its gate says the answer was wrong, so a
+  resume skipping that gate would land what the gate rejected. Re-running the
+  rejecting step mints a new draft, citing the one it came from.
+- **The draft store is working state rather than a log.** States move and
+  records are revised, so it can be refactored where the append-only logs
+  cannot.
+- **A draft names the problem it landed as.** A crash between landing and
+  clearing then leaves a draft the next run can clear, rather than one it would
+  write a second time.
+- **Deferred: how a resume is invoked, whether drafts are listed from the CLI,
+  and how long a rejected draft is kept.** Each needs a corpus of drafts to
+  answer.
 
 ## Enumerating a problem's other solutions
 
