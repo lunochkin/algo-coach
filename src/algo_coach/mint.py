@@ -433,6 +433,8 @@ def site_outcome(
     mutants: int = 0,
     survived: int = 0,
     won: int = 0,
+    killed: int = 0,
+    rounds: list[int] | None = None,
     separating: int | None = None,
     unseparated: str | None = None,
 ) -> SiteOutcome:
@@ -451,6 +453,8 @@ def site_outcome(
         mutants=mutants,
         survived=survived,
         won=won,
+        killed=killed,
+        rounds=list(rounds or []),
         separating=separating,
         unseparated=unseparated,
         model=model,

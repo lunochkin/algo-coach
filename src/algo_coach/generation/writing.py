@@ -33,6 +33,8 @@ class Writing:
         mutants: int = 0,
         survived: int = 0,
         won: int = 0,
+        killed: int = 0,
+        rounds: list[int] | None = None,
         separating: int | None = None,
         unseparated: str | None = None,
     ) -> None:
@@ -50,6 +52,8 @@ class Writing:
                 mutants=mutants,
                 survived=survived,
                 won=won,
+                killed=killed,
+                rounds=rounds,
                 separating=separating,
                 unseparated=unseparated,
                 **written_by(call),

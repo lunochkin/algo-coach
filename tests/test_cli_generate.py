@@ -267,19 +267,35 @@ def test_a_form_that_is_its_own_optimum_says_nothing():
 def test_the_line_reports_what_the_mutation_loop_caught():
     """Which mistakes the stored set catches, since a survivor is a case the
     problem landed without."""
-    landed = line(cases=4, outcome=CaseOutcome.PASSED, landed=True, mutants=12, survived=2, won=3)
-
-    assert landed == "4 case(s)  passed  landed  kills 10/12, +3 case(s)"
-
-
-def test_the_line_separates_what_a_call_was_paid_for():
-    """The fuzz pass costs subprocesses and a round costs a call, so one number
-    over both would hide which of them the corpus is paying for."""
     landed = line(
-        cases=4, outcome=CaseOutcome.PASSED, landed=True, mutants=12, survived=2, kept=2, won=3
+        cases=4,
+        outcome=CaseOutcome.PASSED,
+        landed=True,
+        mutants=12,
+        survived=2,
+        won=3,
+        declared=6,
+        fuzzed=2,
+        caught=[2],
     )
 
-    assert landed == "4 case(s)  passed  landed  kills 10/12, +2 fuzzed, +3 case(s)"
+    assert landed == "4 case(s)  passed  landed  kills 10/12 (6 set, 2 fuzz, 2 round 1), +3 case(s)"
+
+
+def test_a_round_that_killed_nothing_still_prints_its_zero():
+    """Whether a round earns its call is read from the split, and a source left
+    out reads as one nobody tried."""
+    landed = line(
+        cases=4,
+        outcome=CaseOutcome.PASSED,
+        landed=True,
+        mutants=12,
+        survived=2,
+        declared=10,
+        caught=[0, 0],
+    )
+
+    assert "(10 set, 0 fuzz, 0 round 1, 0 round 2)" in landed
 
 
 def test_a_set_no_round_measured_says_so():

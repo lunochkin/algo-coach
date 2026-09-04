@@ -12,6 +12,8 @@ BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 BRANCHING = "def solve(n):\n    return n > 3\n"
 AGREES = "def solve(n):\n    return not n <= 3\n"
 DECIDES = [{"args": "[0]", "expected": "false"}]
+# one argument per pair, so the grid reaches the boundary `BRANCHING` turns on
+COUNTS = "def solve(size, seed):\n    return [size + seed]\n"
 
 
 def run(tmp_path, model: FakeWriter, *, count: int = 1, bench: Bench = BENCH, **overrides):
@@ -155,19 +157,53 @@ def test_a_builder_call_that_failed_leaves_no_record(tmp_path):
 
 
 def test_the_discrimination_record_carries_what_the_loop_left(tmp_path):
-    """A round is what the site is scored on: the mutants it was shown and the
-    cases it won against them."""
+    """A round is what the site is scored on: the cases it won and the mutants
+    they caught, one entry per round."""
     model = FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES, separators=[[[4], [3]]])
 
     _, _, outcomes = run(tmp_path, model)
 
     one = sites(outcomes)[CallSite.DISCRIMINATION]
-    assert one.mutants > 0
     assert one.won > 0
+    assert one.killed == sum(one.rounds)
+    assert one.rounds[0] > 0
 
 
-# one argument per pair, so the grid reaches the boundary `BRANCHING` turns on
-COUNTS = "def solve(size, seed):\n    return [size + seed]\n"
+def test_the_canonical_s_mutants_are_the_generator_s_own_count(tmp_path):
+    """It wrote the solution the set is enumerated from, and its record is the
+    one every attempt leaves."""
+    model = FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES, separators=[[[4], [3]]])
+
+    _, _, outcomes = run(tmp_path, model)
+
+    assert sites(outcomes)[CallSite.GENERATOR].mutants > 0
+
+
+def test_each_source_is_filed_under_the_site_whose_output_killed(tmp_path):
+    """Whether a round earns its call is what the split answers, so the three
+    sum to the mutants the canonical yielded."""
+    model = FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES, separators=[[[4], [3]]])
+
+    _, _, outcomes = run(tmp_path, model)
+
+    at = sites(outcomes)
+    killed = at[CallSite.GENERATOR].killed + at[CallSite.DISCRIMINATION].killed
+    assert killed + at[CallSite.DISCRIMINATION].survived == at[CallSite.GENERATOR].mutants
+
+
+def test_a_pass_that_needed_no_round_still_records_what_killed(tmp_path):
+    """The attempt a round was never paid for is the one the measurement wants,
+    and no discrimination record exists to carry it."""
+    model = FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES, generator=COUNTS)
+
+    _, _, outcomes = run(tmp_path, model)
+
+    at = sites(outcomes)
+    assert CallSite.DISCRIMINATION not in at
+    assert at[CallSite.INPUTS].killed > 0
+    assert (
+        at[CallSite.GENERATOR].killed + at[CallSite.INPUTS].killed == at[CallSite.GENERATOR].mutants
+    )
 
 
 def test_a_fuzz_disagreement_is_the_inputs_site_s_gate(tmp_path):

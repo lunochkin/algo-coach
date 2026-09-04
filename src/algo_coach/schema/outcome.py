@@ -45,10 +45,20 @@ class SiteOutcome(MachineProvenance):
     # filed under the site whose output made it decidable
     gate: Discard | None = None
     detail: str = ""
-    # the mutation loop, where this site ran one. Zero elsewhere
+    # the mutation loop. `mutants` is what the canonical yielded, on the site
+    # that wrote it
     mutants: int = 0
     survived: int = 0
     won: int = 0
+    # mutants this site's own output killed, so the three sources sum over the
+    # records of one attempt. Each is written where its counter can be other
+    # than zero: the generator's cases always leave a record, the fuzz pass
+    # runs only where a generator was written, and a round kills only where one
+    # was asked
+    killed: int = 0
+    # what each round killed, in order, summing to `killed`. A list rather than
+    # a field per round, since `ROUNDS` is what a corpus revises
+    rounds: list[int] = Field(default_factory=list)
     # the speedup search, where this site ran one
     separating: int | None = None
     unseparated: str | None = None

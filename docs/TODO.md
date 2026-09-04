@@ -283,7 +283,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Shrink a killing input by delta debugging before it is stored. A random
       input that kills is large, and the ceiling and every later verification
       pay for it
-- [ ] Record which source killed each mutant: the set written with the
+- [x] Record which source killed each mutant: the set written with the
       statement, the fuzz pass, or round n. That is what says whether a round
       earns its call
 - [ ] Record per proposed case which mutants it killed, and land only the ones

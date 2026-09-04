@@ -90,6 +90,19 @@ a call returned, which is why it sits beside the call log.
 - **One record per site and per attempt.** The four sites can run at four
   configurations, and one record over the attempt could not say which of them a
   gate rejected.
+- **A kill is filed under the site whose output did it**, as a gate is filed
+  under the site whose answer made it decidable. The mutants the statement's own
+  cases caught are the generator's, the ones built inputs caught are the inputs
+  site's, and a round's are the discrimination site's.
+- **That attribution is what makes the split complete.** Each site's record
+  exists exactly where its own count can be other than zero: the generator
+  always answered, the fuzz pass ran only where a generator was written, and a
+  round killed only where one was asked. Held on the discrimination record
+  alone, the three sources would go unrecorded on every attempt the fuzz pass
+  finished — which is the attempt that says a round was not needed.
+- **The mutants a canonical yielded sit on the site that wrote it.** The count
+  is a fact about that solution, so it is readable on an attempt no round
+  reached, and two generator configurations compare on it.
 - **A gate is filed under the site whose answer made it decidable.** A canonical
   contradicting the cases its own call declared is the generator's. A
   disagreement is the blind site's, since nothing disagrees before a second
@@ -104,6 +117,13 @@ a call returned, which is why it sits beside the call log.
   never asked, which is where the first case set already killed every mutant.
 - **The discrimination record cites the last round's call.** A loop pays for up
   to two rounds, and the counters the record carries are what the last one left.
+- **What each round killed is a list, in order.** A field per round would fix
+  the bound in the schema, where `ROUNDS` is what a corpus revises. It is the
+  one ordered counter, and a report reads position rather than a key.
+- **The four records are written at one point, once the loop has run.** A site
+  answers before its counters are known, so writing as each answers would need
+  a record amended later. What this costs is holding the first case set's
+  verdict, since a gate raised after it belongs to another site.
 - **The verdicts are named fields rather than a mapping.** A report groups by
   gate and averages the counters, and a mapping makes every key a field nothing
   enforces.

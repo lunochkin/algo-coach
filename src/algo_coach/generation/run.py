@@ -79,6 +79,11 @@ class Progress(BaseModel):
     # the fuzz pass before the rounds: what it built and what it kept
     built: int = 0
     kept: int = 0
+    # which source killed what: the cases written with the statement, the fuzz
+    # pass's built inputs, and one entry per round
+    declared: int = 0
+    fuzzed: int = 0
+    caught: list[int] = Field(default_factory=list)
     unmeasured: str | None = None  # the round's call failed, and the set is unmeasured
 
 
@@ -110,6 +115,16 @@ class Bar(BaseModel):
     # which cost subprocesses rather than a call
     built: int = 0
     kept: int = 0
+    # which source killed what, each written on the site whose output did it
+    declared: int = 0
+    fuzzed: int = 0
+    caught: list[int] = Field(default_factory=list)
+    # the last round's call, which is what the counters were left by. Absent
+    # where nothing reached a round
+    call: Call | None = None
+    # a round's proposal the two solutions answered differently. The fuzz
+    # pass's own is the inputs site's, since its code built the input
+    gate: Discard | None = None
     unmeasured: str | None = None
 
 
@@ -150,10 +165,9 @@ def write_one(
         draft.cases, canonical=draft.canonical, reference=solution, call=call, cap_ms=cap_ms
     )
     notes("cases", f"{settled(checked)}, {monotonic() - started:.1f}s in the runner")
-    # both sites are recorded here rather than as they answer: what a gate
-    # said about an answer is what the record carries, and the runs decide it
-    writing(CallSite.GENERATOR, call, **gated(checked, Discard.NO_VALUE, Discard.MISDECLARED))
-    writing(CallSite.BLIND, blind, **gated(checked, Discard.UNTESTED, Discard.DISAGREED))
+    # kept because `checked` is replaced by a later gate: the first two sites
+    # are judged by the runs of the first case set and by nothing after them
+    ran = checked
     drafted = Drafted(
         draft=draft,
         solution=solution,
@@ -162,6 +176,7 @@ def write_one(
         cases=checked.cases,
     )
     if not checked.survived:
+        sites(writing, call, blind, ran, Inputs(), Bar())
         return drafted, checked, Inputs(), Bar()
     # written before the mutation loop, and for every problem: the inputs it
     # builds are what a fuzz pass kills mutants with, and a round is then paid
@@ -176,20 +191,59 @@ def write_one(
         configuration=bench.discrimination,
         cap_ms=cap_ms,
         notes=notes,
-        writing=writing,
     )
     if checked.survived:
         # the search after the loop: the separating case it appends was never
         # in the set the survivors were decided against
         checked, inputs = timed(template, drafted, checked, inputs, cap_ms=cap_ms, notes=notes)
+    sites(writing, call, blind, ran, inputs, bar)
+    return drafted, checked, inputs, bar
+
+
+def sites(
+    writing: Writing,
+    call: Call,
+    blind: Call,
+    ran: Checked,
+    inputs: Inputs,
+    bar: Bar,
+) -> None:
+    """The four records of one attempt, written once the loop's numbers are
+    known.
+
+    A gate belongs to the site whose answer made it decidable, and a kill to
+    the site whose output did it. Each is written where its own counter can be
+    other than zero, so the three sources sum whatever the run stopped at: the
+    generator always answered, the fuzz pass ran only where a generator was
+    written, and a round killed only where one was asked.
+    """
+    writing(
+        CallSite.GENERATOR,
+        call,
+        **gated(ran, Discard.NO_VALUE, Discard.MISDECLARED),
+        mutants=bar.mutants,
+        killed=bar.declared,
+    )
+    writing(CallSite.BLIND, blind, **gated(ran, Discard.UNTESTED, Discard.DISAGREED))
+    # the counters as the last round left them, which is why the record cites
+    # that round's call. A loop needing none paid for no configuration
+    writing(
+        CallSite.DISCRIMINATION,
+        bar.call,
+        gate=bar.gate,
+        survived=bar.survived,
+        won=bar.won,
+        killed=sum(bar.caught),
+        rounds=bar.caught,
+    )
     writing(
         CallSite.INPUTS,
         inputs.call,
         gate=inputs.gate,
+        killed=bar.fuzzed,
         separating=inputs.separating,
         unseparated=inputs.unseparated,
     )
-    return drafted, checked, inputs, bar
 
 
 def gated(checked: Checked, *gates: Discard) -> dict[str, object]:
@@ -217,7 +271,6 @@ def measured(
     configuration: Configuration,
     cap_ms: int,
     notes: Notes = SILENT,
-    writing: Writing = UNRECORDED,
 ) -> tuple[Checked, Inputs, Bar]:
     """The mutation loop's cases, appended to the set the problem carries.
 
@@ -255,16 +308,10 @@ def measured(
         won=len(hardened.cases) - kept,
         built=hardened.fuzzed.built if hardened.fuzzed else 0,
         kept=kept,
-    )
-    # the loop's counters as the last round left them, which is why the record
-    # cites that round's call. A loop needing none paid for no configuration
-    writing(
-        CallSite.DISCRIMINATION,
-        hardened.call,
-        gate=None if hardened.disagreement is None else Discard.DISAGREED,
-        mutants=bar.mutants,
-        survived=bar.survived,
-        won=bar.won,
+        declared=hardened.declared,
+        fuzzed=hardened.fuzzed.killed if hardened.fuzzed else 0,
+        caught=hardened.caught,
+        call=hardened.call,
     )
     if hardened.disagreement is None:
         drafted.cases.extend(hardened.cases)
@@ -276,9 +323,11 @@ def measured(
         discard=Discard.DISAGREED,
         disagreements=[hardened.disagreement],
     )
+    # the fuzz pass's input was built by the inputs site's code, so its gate is
+    # filed there and the round answered for nothing
     if hardened.fuzzed is not None and hardened.fuzzed.disagreement is not None:
-        inputs = inputs.model_copy(update={"gate": Discard.DISAGREED})
-    return discarded, inputs, bar
+        return discarded, inputs.model_copy(update={"gate": Discard.DISAGREED}), bar
+    return discarded, inputs, bar.model_copy(update={"gate": Discard.DISAGREED})
 
 
 def building(
@@ -471,6 +520,9 @@ def write_problems(
             won=bar.won,
             built=bar.built,
             kept=bar.kept,
+            declared=bar.declared,
+            fuzzed=bar.fuzzed,
+            caught=bar.caught,
             unmeasured=bar.unmeasured,
         )
     return result

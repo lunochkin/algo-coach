@@ -29,6 +29,10 @@ class Hardened:
     survived: int = 0  # mutants no case killed when the loop stopped
     rounds: int = 0  # rounds paid for, at one call each
     fuzzed: Fuzzed | None = None  # the pass before the rounds, where one ran
+    # which source killed what, so a report can say whether a round earned its
+    # call: the set the loop was given, then one entry per round it played
+    declared: int = 0
+    caught: list[int] = field(default_factory=list)
     # the last round's call, which is what the counters above were left
     # by. `None` where the first case set killed every mutant
     call: Call | None = None
@@ -94,11 +98,19 @@ def harden(
     won: list[SettledCase] = []
     paid: Call | None = None
     fuzzed: Fuzzed | None = None
+    declared = 0
+    caught: list[int] = []
     dropped = played = 0
 
     while True:
         before, started = len(standing), monotonic()
         standing = [one.mutant for one in survivors(kill(standing, against, cap_ms=against_ms))]
+        # `played` names what this pass ran against: none yet is the set the
+        # loop was given, and otherwise the cases that round won
+        if played:
+            caught.append(before - len(standing))
+        else:
+            declared = before - len(standing)
         # the runner's own time, which is what the fork server would cut
         notes(
             "mutants",
@@ -122,7 +134,16 @@ def harden(
             standing = fuzzed.standing
             if fuzzed.disagreement is not None:
                 return _left(
-                    won, enumerated, standing, played, dropped, paid, fuzzed.disagreement, fuzzed
+                    won,
+                    enumerated,
+                    standing,
+                    played,
+                    dropped,
+                    paid,
+                    fuzzed.disagreement,
+                    fuzzed,
+                    declared,
+                    caught,
                 )
             # no re-run against what it kept: the pass decided these survivors
             # against exactly those cases
@@ -154,14 +175,23 @@ def harden(
         notes("round", f"{played}: {len(settled.cases)} won, {dropped} dropped")
         if settled.disagreements:
             return _left(
-                won, enumerated, standing, played, dropped, paid, settled.disagreements[0], fuzzed
+                won,
+                enumerated,
+                standing,
+                played,
+                dropped,
+                paid,
+                settled.disagreements[0],
+                fuzzed,
+                declared,
+                caught,
             )
         if not settled.cases:
             break
         won.extend(settled.cases)
         against = settled.cases
 
-    return _left(won, enumerated, standing, played, dropped, paid, None, fuzzed)
+    return _left(won, enumerated, standing, played, dropped, paid, None, fuzzed, declared, caught)
 
 
 def _settled(
@@ -204,6 +234,8 @@ def _left(
     call: Call | None,
     disagreement: Disagreement | None = None,
     fuzzed: Fuzzed | None = None,
+    declared: int = 0,
+    caught: list[int] | None = None,
 ) -> Hardened:
     return Hardened(
         cases=won,
@@ -214,6 +246,8 @@ def _left(
         call=call,
         disagreement=disagreement,
         fuzzed=fuzzed,
+        declared=declared,
+        caught=list(caught or []),
     )
 
 

@@ -48,6 +48,7 @@ class Fuzzed:
 
     cases: list[SettledCase] = field(default_factory=list)
     standing: list[Mutant] = field(default_factory=list)
+    killed: int = 0  # mutants the kept inputs caught
     built: int = 0  # inputs the generator's code produced
     dropped: int = 0  # of those, the ones the canonical could not answer
     # a kept input the two solutions answered differently. The caller discards
@@ -149,7 +150,12 @@ def fuzz(
         kept.append(one)
 
     if not kept:
-        return Fuzzed(standing=standing, built=len(inputs), dropped=dropped)
+        return Fuzzed(
+            standing=standing,
+            killed=len(mutants) - len(standing),
+            built=len(inputs),
+            dropped=dropped,
+        )
     args = [one.args for one in kept]
     settled = settle(
         args,
@@ -163,6 +169,7 @@ def fuzz(
     return Fuzzed(
         cases=settled.cases,
         standing=standing,
+        killed=len(mutants) - len(standing),
         built=len(inputs),
         dropped=dropped,
         disagreement=settled.disagreements[0] if settled.disagreements else None,
