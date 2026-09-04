@@ -375,9 +375,13 @@ there is ever asked twice and no two configurations meet the same item.
   landing path builds for every problem. What a replay records is the verdict a
   gate reached on an answer, and nothing here runs the code the call wrote
   unless a search does.
-- **The naive site is asked there too**, and its answer is what the replayed
-  search measures against. A configuration is compared on whether it writes the
-  slower solution, which is the whole of what the site is for.
+- **The naive site is asked there too**, where a speedup is claimed. What its
+  record carries is the configuration and whether the solution it wrote answers
+  the problem's cases, since a wrong clock rejects no problem and so names no
+  gate.
+- **The search stays measured against the stored clock**, not the one this run
+  just wrote. Moving the builder and the clock together would leave neither
+  configuration readable from the verdict.
 
 ## Drill loop
 

@@ -1,4 +1,4 @@
-"""Re-asking a call site about a problem the store already holds: the three
+"""Re-asking a call site about a problem the store already holds: the four
 answering sites over a stored statement, skipping the pairs this configuration
 has answered at the digest it would send now.
 
@@ -16,6 +16,8 @@ from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import reference
 from algo_coach.generation.blind import request_hash as blind_hash
 from algo_coach.generation.checks import CAP_MS
+from algo_coach.generation.clock import naive
+from algo_coach.generation.clock import request_hash as clock_hash
 from algo_coach.generation.discrimination import request_hash as discrimination_hash
 from algo_coach.generation.hardening import harden, standing
 from algo_coach.generation.inputs import builder
@@ -44,9 +46,9 @@ from algo_coach.schema import (
     TestCase,
 )
 
-# the three sites a stored problem can be re-asked about. The generator writes
-# a problem rather than answering one, so asking it again is `generate`
-REPLAYED = (CallSite.BLIND, CallSite.DISCRIMINATION, CallSite.INPUTS)
+# the sites a stored problem can be re-asked about. The generator writes a
+# problem rather than answering one, so asking it again is `generate`
+REPLAYED = (CallSite.BLIND, CallSite.DISCRIMINATION, CallSite.INPUTS, CallSite.CLOCK)
 
 
 class Failed(BaseModel):
@@ -228,6 +230,51 @@ def graded(results: Sequence[CaseResult]) -> dict[str, Any]:
     return {}
 
 
+def clock_replay(
+    transport: Transport,
+    calls: CallLog,
+    subject: Subject,
+    stored: Sequence[SiteOutcome],
+    bench: Bench,
+    cap_ms: int,
+    fresh: bool,
+    notes: Notes,
+) -> Asked:
+    """Another naive solution for a stored statement, judged by the cases the
+    problem carries. Asked where the template claims a speedup, since that is
+    where the generation path writes one."""
+    if subject.template is None or not subject.template.speedup:
+        return Asked()
+    configuration = bench.clock
+    digest = clock_hash(subject.problem.statement, subject.template.trigger)
+    if not fresh and asked_already(stored, CallSite.CLOCK, subject, configuration, digest):
+        notes("clock", "answered at this digest")
+        return Asked(skipped=True)
+
+    notes("clock", "writing the solution the search measures against")
+    solution, call = naive(
+        transport,
+        calls,
+        subject.problem.statement,
+        subject.template.trigger,
+        configuration=configuration,
+    )
+    verdicts = clocked(verify(solution, subject.cases, cap_ms=cap_ms))
+    notes("clock", verdicts.get("detail") or "correct on every case it answered", call)
+    return Asked(call=call, verdicts=verdicts)
+
+
+def clocked(results: Sequence[CaseResult]) -> dict[str, Any]:
+    """What a replayed clock is judged by. It names no gate: being wrong
+    rejects no problem, and every `Discard` arm says one was rejected.
+
+    A case it did not compute is what a clock is for, so only a computed answer
+    counts against it.
+    """
+    wrong = [one for one in results if one.outcome is CaseOutcome.WRONG]
+    return {"detail": f"wrong on {len(wrong)} case(s)"} if wrong else {}
+
+
 def discrimination_replay(
     transport: Transport,
     calls: CallLog,
@@ -353,6 +400,7 @@ ASK = {
     CallSite.BLIND: blind_replay,
     CallSite.DISCRIMINATION: discrimination_replay,
     CallSite.INPUTS: inputs_replay,
+    CallSite.CLOCK: clock_replay,
 }
 
 

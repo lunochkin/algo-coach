@@ -64,23 +64,40 @@ def test_a_replay_asks_the_answering_sites_about_a_stored_problem(tmp_path, monk
 
     result, outcomes = replayed(tmp_path, FakeWriter(generator=BUILDS), cards)
 
-    assert set(sites(outcomes)) == {CallSite.BLIND, CallSite.INPUTS}
-    assert result.asked == 2
+    assert set(sites(outcomes)) == {CallSite.BLIND, CallSite.INPUTS, CallSite.CLOCK}
+    assert result.asked == 3
 
 
 def test_the_search_measures_against_the_stored_clock(tmp_path, monkeypatch):
-    """A replay re-runs the search, and asking for a naive solution again would
-    re-pay the call the landing already bought."""
+    """The clock site answers for itself. A search measured against what it
+    just wrote would move two configurations at once, and neither could be
+    read."""
     cards = landed(tmp_path, monkeypatch)
-    model = FakeWriter(generator=BUILDS)
+    # a clock that crashes where the stored one runs: which of the two the
+    # search timed is what the reason it reports says
+    model = FakeWriter(generator=BUILDS, slow="def solve(xs):\n    raise ValueError(1)\n")
 
-    replayed(tmp_path, model, cards)
+    _, outcomes = replayed(tmp_path, model, cards)
 
-    assert clock.SYSTEM not in [asked["system"] for asked in model.calls]
+    assert clock.SYSTEM in [asked["system"] for asked in model.calls]
+    assert sites(outcomes)[CallSite.INPUTS].unseparated == "naive_finished"
     (stored,) = SolutionLog(tmp_path).for_problem(
         ProblemStore(tmp_path).all()[0].id, SolutionRole.NAIVE
     )
     assert stored.code == SLOW
+
+
+def test_a_replayed_clock_that_answers_wrongly_names_no_gate(tmp_path, monkeypatch):
+    """Being wrong rejects no problem, and every `Discard` arm says one was
+    rejected. What the record carries is what the run saw."""
+    cards = landed(tmp_path, monkeypatch)
+    wrong = "def solve(xs):\n    return len(xs) + 1\n"
+
+    _, outcomes = replayed(tmp_path, FakeWriter(generator=BUILDS, slow=wrong), cards)
+
+    one = sites(outcomes)[CallSite.CLOCK]
+    assert one.gate is None
+    assert one.detail == "wrong on 2 case(s)"
 
 
 def test_a_problem_with_no_stored_clock_is_not_searched_over(tmp_path, monkeypatch):
@@ -119,8 +136,8 @@ def test_a_pair_this_configuration_answered_is_skipped(tmp_path, monkeypatch):
 
     assert second.calls == []
     assert result.asked == 0
-    assert result.skipped == 2
-    assert len(outcomes) == 2
+    assert result.skipped == 3
+    assert len(outcomes) == 3
 
 
 def test_a_second_configuration_is_paid_for(tmp_path, monkeypatch):
@@ -134,7 +151,7 @@ def test_a_second_configuration_is_paid_for(tmp_path, monkeypatch):
     result, outcomes = replayed(tmp_path, FakeWriter(generator=BUILDS), cards, log=log, bench=other)
 
     assert result.asked == 1
-    assert result.skipped == 1
+    assert result.skipped == 2
     assert [one.model for one in outcomes if one.site is CallSite.BLIND][-1] == "another"
 
 
@@ -147,8 +164,8 @@ def test_fresh_asks_again_where_a_record_answers(tmp_path, monkeypatch):
 
     result, outcomes = replayed(tmp_path, FakeWriter(generator=BUILDS), cards, log=log, fresh=True)
 
-    assert result.asked == 2
-    assert len(outcomes) == 4
+    assert result.asked == 3
+    assert len(outcomes) == 6
 
 
 def test_a_replayed_reference_that_disagrees_is_recorded(tmp_path, monkeypatch):
@@ -208,6 +225,7 @@ def test_a_form_that_is_its_own_optimum_is_not_asked(tmp_path, monkeypatch):
     result, outcomes = replayed(tmp_path, FakeWriter(), cards)
 
     assert CallSite.INPUTS not in sites(outcomes)
+    assert CallSite.CLOCK not in sites(outcomes)
     assert result.asked == 1  # the reference alone
 
 
@@ -263,8 +281,8 @@ def test_the_loop_is_replayed_against_the_set_as_it_stood(tmp_path):
 
     # skipped rather than unasked: shown the won case the loop kills every
     # mutant, and the site would go unasked for the wrong reason. The inputs
-    # site is the unasked one, since the form claims no speedup
-    assert (result.skipped, result.unasked) == (2, 1)
+    # and clock sites are the unasked ones, since the form claims no speedup
+    assert (result.skipped, result.unasked) == (2, 2)
     assert second.answered == 0
 
 
@@ -274,4 +292,9 @@ def test_the_sites_a_replay_asks_exclude_the_generator(tmp_path):
     from algo_coach.generation import REPLAYED
 
     assert CallSite.GENERATOR not in REPLAYED
-    assert set(REPLAYED) == {CallSite.BLIND, CallSite.DISCRIMINATION, CallSite.INPUTS}
+    assert set(REPLAYED) == {
+        CallSite.BLIND,
+        CallSite.DISCRIMINATION,
+        CallSite.INPUTS,
+        CallSite.CLOCK,
+    }

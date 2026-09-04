@@ -357,7 +357,7 @@ is in `corpus.md`.
 - [x] Store the naive solution at landing, as the reference is stored. A replay
       and a resume both re-run the search, and neither should re-pay the call
       that wrote the clock
-- [ ] Ask the naive site on a replay, where a speedup is claimed, as the inputs
+- [x] Ask the naive site on a replay, where a speedup is claimed, as the inputs
       site is asked. What a replay compares is whether a configuration writes
       the dumber solution
 - [ ] Add the naive step to `ANSWERED` in `resuming.py`, so a moved naive

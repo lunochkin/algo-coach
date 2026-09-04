@@ -548,8 +548,8 @@ def test_replay_pays_for_a_second_configuration_once(root, monkeypatch, capsys):
     replaying(monkeypatch, FakeWriter(generator=BUILDS), *ANOTHER)
     second = capsys.readouterr().out
 
-    assert "1 pair(s) asked, 1 skipped" in first
-    assert "0 pair(s) asked, 2 skipped" in second
+    assert "1 pair(s) asked, 2 skipped" in first
+    assert "0 pair(s) asked, 3 skipped" in second
 
 
 def test_replay_is_aimed_at_nothing(root, monkeypatch, capsys):
