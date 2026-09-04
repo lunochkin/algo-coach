@@ -315,6 +315,60 @@ canonical. What the first corpus settles is the bound.
       step it stopped and a resume reaches it, where the run prints only that
       the call failed
 
+### The naive solution
+
+The blind reference holds two jobs that pull apart: an independent reading of
+the statement, and the clock a speedup is measured against. Two blind
+configurations wrote the canonical's own form on two drafts, so the second job
+moves to a site of its own. What that site may do, and what it may never do,
+is in `corpus.md`.
+
+- [ ] Write the split into `corpus.md`: the reference is the independent
+      reading alone, and a third solution written deliberately naive is what a
+      timing bar measures against. One sentence there gives the reference both
+      jobs, and every item below cites it
+- [ ] Add a `naive` arm to `SolutionRole`, and a test that such a solution
+      reaches neither the technique reader nor the matcher. Both select
+      `CANONICAL` today, so the exclusion holds and nothing pins it
+- [ ] Add `paced` to `WritingState`, between `built` and `searched`, and the
+      naive code and its configuration to `Draft`. A resume holding neither
+      would re-pay the call that wrote the clock
+- [ ] Add `CallSite.NAIVE` and the fifth `Bench` field. A configuration is per
+      call site, and the test pinning the two lists together is what fails
+      until both move
+- [ ] Write the naive prompt: the statement and the template's trigger in, a
+      solution out. It may name the form to avoid, since it settles no case and
+      discards no problem
+- [ ] Sample the naive site, where the other three answering sites are greedy.
+      It produces an artifact rather than a verdict, so variance costs no
+      comparability — the rule `machine.md` states for the generator
+- [ ] Write the naive solution after the builder and before the search, and
+      only where the template claims a speedup. The builder is written for
+      every problem, since the fuzz pass builds its inputs with it
+- [ ] Verify the naive solution against the problem's cases, storing nothing
+      and holding the draft where it fails. A wrong clock measures nothing, and
+      being wrong says nothing about the statement
+- [ ] Measure the search against the naive solution rather than the reference,
+      and rename `Missing.REFERENCE_FINISHED` to `NAIVE_FINISHED`. A stored
+      `unseparated` is free text, so no record carries the arm being renamed
+- [ ] Settle the separating case from the reference, as every other case is
+      settled. A naive solution is slow at every size, so the separating input
+      is small enough for the reference to answer it
+- [ ] Store the naive solution at landing, as the reference is stored. A replay
+      and a resume both re-run the search, and neither should re-pay the call
+      that wrote the clock
+- [ ] Ask the naive site on a replay, where a speedup is claimed, as the inputs
+      site is asked. What a replay compares is whether a configuration writes
+      the dumber solution
+- [ ] Add the naive step to `ANSWERED` in `resuming.py`, so a moved naive
+      configuration re-pays that call alone. A test pins that the reference and
+      the builder are reused
+- [ ] Re-ask the naive site on a resume where the search separated nothing,
+      though its configuration and digest stand. It is sampled, so a second
+      call is a second draw rather than the answer already stored
+- [ ] Run `generate --count 5` on `answer-space` and record the separating size
+      each landed problem carries. That number is what says the site works
+
 ### Writing a problem as states
 
 A draft is stored as it is written, so a step that fails leaves it where it
@@ -402,8 +456,9 @@ numbers go in the commit unless the item names a file.
 - [ ] Run `generate --count 10` on one template and record the discard rate
       per gate: no_value, misdeclared, untested, disagreed. A gate rejecting
       most problems is a defect in the prompt rather than a bar
-- [ ] Count how many of those ten came back `reference_finished`. That rate is
-      what says whether a deliberately naive third solution is ever needed
+- [ ] Count how many of those ten held at `searched`, and which `unseparated`
+      reason each gave. Counting `reference_finished` alone reads zero, since
+      the case ceiling reports `input_too_large` before the reference is judged
 - [ ] Count how many of those ten reuse a domain their template's cue names.
       The exclusion is prompted and nothing enforces it
 - [ ] Count how many of those ten ask the same question in a new setting. The
