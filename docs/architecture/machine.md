@@ -16,10 +16,11 @@ comparable is the same, and is stated here once.
   that rejects the parameter, records the level it ran at rather than an empty
   field.
 - **A configuration is per call site, not per run.** Writing a problem takes
-  four calls, and they ask for different things: a statement and a solution, an
+  five calls, and they ask for different things: a statement and a solution, an
   independent reading of that statement, the inputs that catch a wrong
-  solution, and code that builds an input of a given size. One configuration
-  over all four makes the cheapest of them pay the price of the hardest.
+  solution, code that builds an input of a given size, and the slowest correct
+  solution a timing bar measures against. One configuration over all five makes
+  the cheapest of them pay the price of the hardest.
 - **A run mixing models stays readable, because each record copies its own
   call's configuration.** The problem names the call that wrote it, its
   reference names the call written blind, and a case won by a round names the
@@ -41,11 +42,13 @@ comparable is the same, and is stated here once.
   temperature nobody set is the provider's own default — recorded absent, and
   equal only to itself, which keeps records taken before the parameter existed
   scorable rather than discarded.
-- **The generator alone is sampled**, for the reason `corpus.md` gives. What
-  sampling buys is diversity across a
-  corpus of statements, and the other three sites write against a statement
-  that already exists. They are greedy, which is what makes two configurations
-  of one site comparable over the same item.
+- **The generator and the naive site are sampled**, for the reason `corpus.md`
+  gives: each produces an artifact rather than a verdict about one. The
+  generator's variance buys diversity across a corpus of statements, and the
+  naive site's buys a second draw where the first one wrote the form.
+- **The other three are greedy**, which is what makes two configurations of one
+  site comparable over the same item. They answer about a statement that
+  already exists, and each answer decides something.
 - **Whether a site can be greedy is the endpoint's answer.** A request naming
   a parameter its endpoint does not advertise is refused rather than served, so
   a temperature sent where none is offered fails the call instead of running
@@ -87,7 +90,7 @@ a call returned, which is why it sits beside the call log.
 - **What a site left is stored rather than only printed.** A run's stage lines
   end with the process. The gate that rejected an answer, the configuration
   behind it and the digest it was sent are readable nowhere else.
-- **One record per site and per attempt.** The four sites can run at four
+- **One record per site and per attempt.** The five sites can run at five
   configurations, and one record over the attempt could not say which of them a
   gate rejected.
 - **A kill is filed under the site whose output did it**, as a gate is filed
@@ -127,7 +130,7 @@ a call returned, which is why it sits beside the call log.
 - **What each round killed is a list, in order.** A field per round would fix
   the bound in the schema, where `ROUNDS` is what a corpus revises. It is the
   one ordered counter, and a report reads position rather than a key.
-- **The four records are written at one point, once the loop has run.** A site
+- **The records are written at one point, once the loop has run.** A site
   answers before its counters are known, so writing as each answers would need
   a record amended later. What this costs is holding the first case set's
   verdict, since a gate raised after it belongs to another site.

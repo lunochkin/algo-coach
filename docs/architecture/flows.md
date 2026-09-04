@@ -5,7 +5,7 @@ flow says in what order, and what each step may not do.
 
 ## Generating a problem
 
-A problem, its test cases and its solutions are written across four calls.
+A problem, its test cases and its solutions are written across five calls.
 The order matters because each step can reject what came before.
 
 1. The brief: a template, naming the form the problem must be solvable by, or
@@ -19,13 +19,15 @@ The order matters because each step can reject what came before.
    on every case, or the problem is discarded.
 6. Code that builds an input of a given size and seed, from the statement
    alone.
-7. Where the template claims a speedup, the smallest input separating the
-   reference from the canonical under the cap is searched for.
-8. Mutants of the canonical run against the cases, then against inputs that
+7. Where the template claims a speedup, a deliberately naive solution, from
+   the statement and the form it may not use.
+8. The smallest input separating that solution from the canonical under the
+   cap is searched for.
+9. Mutants of the canonical run against the cases, then against inputs that
    code builds. A call asks for the cases that kill whichever mutant survived
    both, and the ones that killed are appended to the set.
-9. The case at the separating size is appended after them.
-10. All of it lands together, with the template match the generation asserts
+10. The case at the separating size is appended after them.
+11. All of it lands together, with the template match the generation asserts
     on its canonical.
 
 - **Problems for one template are written one at a time.** Each call is shown
@@ -39,6 +41,9 @@ The order matters because each step can reject what came before.
   solution's reading of the statement. Agreement then shows only that one model
   is consistent. Blind, agreement is evidence that the statement has one
   reading, and disagreement on any case discards the problem.
+- **The naive solution is written the opposite way**, and told the form it may
+  not use. It settles no case and discards no problem, so nothing it is shown
+  can reach a verdict. `corpus.md` gives what it may never do.
 - **The generator's own expected values are a gate, not a source.** The call
   that wrote the canonical also declared what each case returns, so a
   disagreement between them means it wrote one of the two wrong. What a landing
@@ -108,6 +113,9 @@ The order matters because each step can reject what came before.
   survivors are decided against the set as the statement left it, so what the
   case may not do is join that set. Searching first catches a canonical wrong
   at scale before a round is paid for.
+- **The naive solution is written after the input generator.** The generator is
+  written for every problem, since the fuzz pass builds with it, and the naive
+  one only where a speedup is claimed.
 - **The separating case is settled as any other case.** The reference is
   measured well above the sitting's cap, so it usually computes the value the
   case stores. A disagreement there discards the problem, and it is what
@@ -132,6 +140,10 @@ The order matters because each step can reject what came before.
   claimed. No search ran, so the claim is undemonstrated for the same reason,
   and a resume starts at the builder rather than at the search. It costs the
   fuzz pass besides.
+- **A naive solution that failed the cases holds the draft, and discards
+  nothing.** It is the clock rather than a reading, so being wrong says nothing
+  about the statement, and what is missing is only the thing the search
+  measures against.
 - **Nothing is repaired after landing.** A stored problem carries attempts and
   its cases are append-only, so every fix is a resumed draft. A step that has
   no answer therefore stops the writing rather than lowering what a landing
@@ -165,18 +177,20 @@ flowchart TB
   C -->|"<b>blind</b>: the reference, from the statement alone"| R["referenced"]
   R -->|"the two solutions agree on every case"| A["agreed"]
   A -->|"<b>inputs</b>: code that builds an input of a given size"| B["built"]
-  B -->|"the input separating the two, where a speedup is claimed"| S["searched"]
+  B -->|"<b>naive</b>: the clock, where a speedup is claimed"| P["paced"]
+  P -->|"the input separating it from the canonical"| S["searched"]
   S -->|"<b>discrimination</b>: the fuzz pass, then the rounds"| H["hardened"]
-  H -->|"the problem, its cases, both solutions and the match"| L(["landed"])
+  H -->|"the problem, its cases, its solutions and the match"| L(["landed"])
 
   D -.->|"no_value · misdeclared"| X(["rejected<br/><i>terminal, and names the gate</i>"])
   R -.->|"untested · disagreed"| X
-  B -.->|"disagreed"| X
+  P -.->|"disagreed"| X
   S -.->|"disagreed"| X
 
   C ==>|"the blind call failed"| Z(["held<br/><i>at the state it reached; a resume re-enters at the<br/>first step whose configuration or digest moved</i>"])
   A ==>|"no input generator, and a speedup is claimed"| Z
-  B ==>|"the round's call failed"| Z
+  B ==>|"no naive solution, or one the cases failed"| Z
+  P ==>|"the round's call failed"| Z
   S ==>|"nothing separated · the round's call failed"| Z
   Z -.->|"unexercised, by hand"| X
 ```
@@ -190,17 +204,20 @@ a second one writes a different problem.
 - **They stay apart.** One enum carrying both would put `drafted` beside
   `active`, and every reader would have to know which half it was looking at.
 - **The draft is identified by the writing id.** `SiteOutcome` already mints
-  one per attempt, so the four site records of one draft group with no new
+  one per attempt, so the site records of one draft group with no new
   reference.
 - **A state per step that can fail**: drafted, checked, referenced, agreed,
-  built, searched, hardened, landed. The names are the steps above and the
-  order is theirs.
+  built, paced, searched, hardened, landed. The names are the steps above and
+  the order is theirs.
 - **A search that separated nothing stops the draft at `searched`.** What it
-  found is recorded either way, and `corpus.md` gives the three exits a held
+  found is recorded either way, and `corpus.md` gives the four exits a held
   draft leaves by.
 - **A draft that never reached the search stops earlier.** A speedup is
   claimed and no input generator was written, so it is held at `agreed` and a
   resume runs the builder.
+- **A draft with no clock stops at `built`.** The naive call failed, or what it
+  wrote did not pass the problem's cases, and the search has nothing to measure
+  the canonical against.
 - **A loop whose round failed stops the draft before `hardened`**, at whatever
   the steps before it reached. A resume runs the loop over the set as the
   statement left it, which is the set the survivors were decided against.
@@ -210,12 +227,12 @@ a second one writes a different problem.
 - **One gate is a draft's alone.** A held draft rejected by hand names
   `unexercised`: every site answered and none of them was wrong, so there is no
   site outcome to file it under. The run never writes it, since it cannot tell
-  a reference that reached the form from an input generator that built the
+  a naive solution that reached the form from an input generator that built the
   wrong shape.
 - **A draft holds what a call produced and no local run re-derives**: the
   statement, the canonical, the declared cases and the difficulty; the
-  reference; the settled cases; the builder's code and its bound; the cases the
-  mutation loop appended; the separating case.
+  reference; the settled cases; the builder's code and its bound; the naive
+  solution; the cases the mutation loop appended; the separating case.
 - **The mutants and the survivors are not in it.** A tree walk enumerates them
   and subprocesses kill them, so a resume re-derives both without a call.
 - **The loop's counters are not in it either.** They sit on the site outcomes
@@ -229,9 +246,12 @@ a second one writes a different problem.
 - **A site is asked again on its own configuration and digest**, as a replay
   skips a pair. The blind and the inputs prompts are the statement alone, so a
   moved blind configuration re-pays no input generator.
-- **The steps after those two read both answers.** The search runs the builder
-  against the reference, and the loop's survivors are decided against a set the
-  reference settled. Either site moving takes them again.
+- **The steps after them read what they left.** The search runs the builder
+  against the naive solution, and the loop's survivors are decided against a set
+  the reference settled. A site moving takes the steps that read it again.
+- **The naive site is asked again where the search separated nothing**, though
+  its configuration and its digest stand. It is the one sampled answering site,
+  so a second call is a second draw — `corpus.md` gives it as an exit.
 - **The local steps are taken again either way.** Running the canonical and
   settling the cases cost subprocesses rather than a call, so the draft stores
   neither, and what follows them needs both.
@@ -322,7 +342,7 @@ other way to solve it is found afterwards, over the stored problem.
 
 ## Replaying a site
 
-The three answering sites over a stored problem, at a configuration the corpus
+The four answering sites over a stored problem, at a configuration the corpus
 has not been read by. Generation writes a new problem every call, so nothing
 there is ever asked twice and no two configurations meet the same item.
 
@@ -334,7 +354,8 @@ there is ever asked twice and no two configurations meet the same item.
    cases the problem carries rather than against the canonical.
 4. The discrimination site runs the mutation loop over the stored canonical,
    against the cases written with the statement alone.
-5. The inputs site builds and searches, where the template claims a speedup.
+5. The naive site writes the clock, and the inputs site builds and searches
+   against it, where the template claims a speedup.
 6. Each site's answer is recorded as its outcome, keyed to the problem.
 
 - **It writes nothing to the corpus.** A case a round wins here is discarded,
@@ -352,6 +373,9 @@ there is ever asked twice and no two configurations meet the same item.
   landing path builds for every problem. What a replay records is the verdict a
   gate reached on an answer, and nothing here runs the code the call wrote
   unless a search does.
+- **The naive site is asked there too**, and its answer is what the replayed
+  search measures against. A configuration is compared on whether it writes the
+  slower solution, which is the whole of what the site is for.
 
 ## Drill loop
 

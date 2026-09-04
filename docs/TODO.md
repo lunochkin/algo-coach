@@ -323,7 +323,7 @@ configurations wrote the canonical's own form on two drafts, so the second job
 moves to a site of its own. What that site may do, and what it may never do,
 is in `corpus.md`.
 
-- [ ] Write the split into `corpus.md`: the reference is the independent
+- [x] Write the split into `corpus.md`: the reference is the independent
       reading alone, and a third solution written deliberately naive is what a
       timing bar measures against. One sentence there gives the reference both
       jobs, and every item below cites it

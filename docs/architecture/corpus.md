@@ -152,40 +152,46 @@ What decides whether a solution to a generated problem is correct.
 - **The two ways that happens assert opposite things, and are named apart.** A
   search that reached a separating size and could not store the case has
   established the speedup, and it reports the size and both measurements. One
-  whose walk crossed the ceiling before the reference ever exceeded the cap has
-  established nothing: a separation may sit at a size it could not look at.
+  whose walk crossed the ceiling before the naive solution ever exceeded the
+  cap has established nothing: a separation may sit at a size it could not look
+  at.
 - **Neither is a defect.** A run reading the three as one answer cannot tell a
   defect from an unknown.
-- **The reference finishing at the largest legal input is a defect in the run,
-  not in the problem.** It is briefed for the plainest solution and is never
-  told which technique to avoid, so where the plain solution is the form it
-  writes the form.
+- **The naive solution finishing at the largest legal input is a defect in the
+  run, not in the problem.** It is briefed to be slow and told which form to
+  avoid, so finishing means the brief did not take.
 - **Three things produce that answer**, and nothing in the run separates them:
-  the reference reached the form, the input generator built a shape the form
-  does not beat, or the template claims a speedup its form does not have.
+  the naive solution reached the form, the input generator built a shape the
+  form does not beat, or the template claims a speedup its form does not have.
 - **A problem whose template claims a speedup lands with the case that
   separates it, or it does not land.** The claim is what a rung teaches, and a
   corpus carrying problems that do not demonstrate it teaches the form on
   problems the naive solution also solves.
-- **The same holds where no search ran.** A call that wrote no input generator
-  leaves the claim undemonstrated as an empty search does, and the draft stops
-  at the step before it.
+- **The same holds where no search ran.** A call that wrote no input generator,
+  or none that wrote a naive solution, leaves the claim undemonstrated as an
+  empty search does, and the draft stops at the step before it.
 - **It is held as a draft rather than discarded.** The statement, the cases and
-  both solutions passed every gate that judges them, and discarding here would
-  keep only the problems the blind model was slow at. The draft is resumed
+  every solution passed every gate that judges them, and discarding here would
+  keep only the problems one model happened to be slow at. The draft is resumed
   where it stopped, so nothing the calls bought is thrown away.
-- **A held draft leaves by one of three exits**, and each names a different
-  thing the run got wrong. A resumed search separates it. The template's
-  `speedup` is corrected, and the next resume skips the search. Or the draft is
-  rejected, which is the answer where the reference reached the form: the
-  claim holds and this problem does not exercise it.
+- **A held draft leaves by one of four exits**, and each names a different
+  thing the run got wrong. A resumed search separates it. A second naive
+  solution is drawn and that one is slow. The template's `speedup` is
+  corrected, and the next resume skips the search. Or the draft is rejected:
+  the claim holds and this problem does not exercise it.
 - **A corrected `speedup` is what a resume watches besides the digest.** A flag
   edit moves neither a configuration nor a prompt, so a resume reading only
   those would leave the draft where the search stopped it.
-- **What a resumed search reaches is bounded.** It repairs an input generator
-  that built the wrong shape. It does not reach a reference that wrote the
-  form: that solution is immutable and it is still the clock, so the exit
-  there is the flag or the rejection.
+- **A resume asks the naive site again where the search separated nothing**,
+  though its configuration and its digest both stand. The site is sampled, so
+  the skip that spares every other site would spend the exit that costs one
+  call.
+- **The reference is not asked again for this.** It is immutable, it is no
+  longer the clock, and a second blind reading answers a question nothing here
+  asked.
+- **Rejection is what is left when the draws run out.** A model briefed to be
+  slow and told the form to avoid, writing the form anyway, is the strongest
+  evidence the run can produce that the problem does not exercise it.
 - **What goes unenforced is a speedup whose separating size is a million
   elements**, which is a log factor rather than the quadratic a card teaches.
   The bar is that some input separates the two, not that the separation is
@@ -248,16 +254,34 @@ What decides whether a solution to a generated problem is correct.
 
 ## Solutions
 
-A solution the engine wrote for a problem, in one of two roles.
+A solution the engine wrote for a problem, in one of three roles.
 
 - **The canonical displays the template's form**, and is what a rung teaches.
   Exemplary rather than merely correct.
-- **The reference is written from the statement alone.** It computes the
-  expected outputs and it is what a timing bar measures against. Independence
-  is its whole purpose, so a solution displaying the form could not serve as
-  one.
-- **The role is stored, because both are verified against the same cases.**
-  Passing says nothing about which of the two a solution is, and a reader
+- **The reference is written from the statement alone**, and it computes the
+  expected outputs. Independence is its whole purpose, so a solution displaying
+  the form could not serve as one.
+- **The naive solution is the clock.** It is written to be the slowest correct
+  approach, and the speedup search measures the canonical against it. The
+  reference held both jobs and they pull apart: one wants a blind reading, the
+  other wants a solution that does not reach the form.
+- **It may be told which form to avoid**, where the reference may not. It
+  settles no case, discards no problem and is scored against nothing, so what
+  it is shown cannot reach a verdict.
+- **It is sampled, for the reason the generator is.** It produces an artifact
+  rather than a verdict, so asking again is a second draw rather than the
+  answer already stored.
+- **It is verified, and a failure is its own.** A wrong clock measures nothing,
+  so one that fails the problem's cases is not stored and the draft is held. It
+  never discards the problem: being wrong says nothing about the statement.
+- **Written only where the template claims a speedup**, as the search is run
+  only there. A form that is its own optimum has nothing to be measured
+  against.
+- **Excluded from what a canonical answers for**, as the reference is: no
+  technique reading, no template match, no rung. It is the approach the card
+  exists to replace.
+- **The role is stored, because all three are verified against the same
+  cases.** Passing says nothing about which of them a solution is, and a reader
   taking a reference for a canonical would teach the approach the card exists
   to replace.
 - **It is what a template match is keyed to.** A form is displayed by code, so
@@ -384,7 +408,7 @@ fixed here rather than by whatever executed it.
   start says nothing about the solution, and a stored `CRASHED` would discard a
   sound problem over the runner's own defect.
 - **A run is comparable only within one backend.** A CPU limit changes what a
-  timing bar measures, so the smallest input separating a reference from a
+  timing bar measures, so the smallest input separating a naive solution from a
   canonical is a fact about the backend that found it.
 - **Comparison stays outside the executor.** A backend is handed code, the
   arguments and a cap, and returns what each call produced. It is never told
