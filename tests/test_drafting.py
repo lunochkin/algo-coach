@@ -99,7 +99,7 @@ def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
     """The statement's own cases, the reference, the builder and its bound,
     each written as the step that produced it answered."""
     monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
-    result, _ = run(tmp_path, FakeWriter(solution=SLOW, generator=BUILDS), templates=[CLAIMS])
+    result, _ = run(tmp_path, FakeWriter(slow=SLOW, generator=BUILDS), templates=[CLAIMS])
     (stored,) = result.drafted
 
     assert stored.canonical == CANONICAL
@@ -142,7 +142,7 @@ def test_a_separated_problem_lands(tmp_path, monkeypatch):
     """The case that demonstrates the claim is stored, so the draft runs on
     through the loop."""
     monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
-    model = FakeWriter(solution=SLOW, generator=BUILDS)
+    model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     result, drafts = run(tmp_path, model, templates=[CLAIMS])
 
@@ -161,7 +161,7 @@ def test_an_unseparated_draft_is_held_at_the_search(tmp_path):
     (one,) = result.held
     stored = one.draft
     assert stored.state is WritingState.SEARCHED
-    assert one.unseparated == "reference_finished"
+    assert one.unseparated == "naive_finished"
     assert (stored.separating, stored.problem_id) == (None, None)
     # kept where it stopped, since a resume is what separates it
     assert drafts.all() == [stored]

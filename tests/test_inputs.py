@@ -76,7 +76,8 @@ def test_the_search_runs_a_generated_builder():
     found = search(
         lambda size: outputs(BUILDS, [[size, 0]], cap_ms=1000)[0],
         canonical="def solve(xs):\n    return len(xs)\n",
-        reference=SLEEPS,
+        naive=SLEEPS,
+        reference="def solve(xs):\n    return len(xs)\n",
         written=MachineProvenance.of(a_call()),
         cap_ms=55,
         largest=16,

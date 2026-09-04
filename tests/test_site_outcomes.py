@@ -282,7 +282,7 @@ def test_the_inputs_record_carries_the_size_the_search_found(tmp_path, monkeypat
     """What the site is scored on: the code it wrote is what the search ran to
     reach a size."""
     monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
-    model = FakeWriter(solution=SLOW, generator=BUILDS)
+    model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     _, _, outcomes = run(tmp_path, model, templates=[CLAIMS])
 
@@ -298,4 +298,4 @@ def test_a_search_that_separated_nothing_says_why(tmp_path):
 
     one = sites(outcomes)[CallSite.INPUTS]
     assert one.separating is None
-    assert one.unseparated == "reference_finished"
+    assert one.unseparated == "naive_finished"

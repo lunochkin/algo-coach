@@ -301,6 +301,9 @@ def inputs_replay(
     found = search(
         make(built.code, cap_ms),
         canonical=subject.canonical,
+        # the reference stands in for the clock until a naive solution is
+        # stored with the problem and this site is asked for one
+        naive=subject.reference,
         reference=subject.reference,
         written=MachineProvenance.of(call),
         cap_ms=DRILL_CAP_MS,

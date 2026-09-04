@@ -257,11 +257,9 @@ def test_the_line_reports_the_separating_size():
 
 def test_a_form_that_separated_at_nothing_says_why():
     """A defect where the template claimed a speedup, so it is not silent."""
-    landed = line(
-        cases=4, outcome=CaseOutcome.PASSED, landed=True, unseparated="reference_finished"
-    )
+    landed = line(cases=4, outcome=CaseOutcome.PASSED, landed=True, unseparated="naive_finished")
 
-    assert landed.endswith("no case: reference_finished")
+    assert landed.endswith("no case: naive_finished")
 
 
 def test_a_separation_proved_and_not_stored_is_not_read_as_a_stored_one():
@@ -542,7 +540,7 @@ def test_replay_pays_for_a_second_configuration_once(root, monkeypatch, capsys):
     # The problem then lands only where the search separated the two solutions
     monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
     seeded(root, card(templates=[template("longest-valid-window", speedup=True)]))
-    run(monkeypatch, FakeWriter(solution=SLOW, generator=BUILDS), "longest-valid-window")
+    run(monkeypatch, FakeWriter(slow=SLOW, generator=BUILDS), "longest-valid-window")
     capsys.readouterr()
 
     replaying(monkeypatch, FakeWriter(generator=BUILDS), *ANOTHER)
@@ -575,7 +573,7 @@ def test_a_held_draft_is_named_by_the_template_and_what_stopped_it(root, monkeyp
 
     out = capsys.readouterr().out
     assert "# held: Widest fair stretch (longest-valid-window, searched)" in out
-    assert "no separating case: reference_finished" in out
+    assert "no separating case: naive_finished" in out
 
 
 def test_a_draft_held_before_the_search_names_the_step_that_answered_nothing(
@@ -796,7 +794,7 @@ def test_the_sites_say_which_step_left_the_draft_where_it_is(root, monkeypatch, 
 
     out = capsys.readouterr().out
     assert "## sites" in out
-    assert "unseparated: reference_finished" in out
+    assert "unseparated: naive_finished" in out
 
 
 def test_a_draft_is_named_by_a_prefix_of_its_id(root, monkeypatch, capsys):

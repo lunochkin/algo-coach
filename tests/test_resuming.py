@@ -195,10 +195,10 @@ def test_a_resume_pays_for_the_step_that_had_no_answer_and_no_other(tmp_path, mo
     charged for the input generator alone."""
     monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
     drafts = DraftStore(tmp_path)
-    one, first = written(tmp_path, FakeWriter(solution=SLOW), drafts, templates=CLAIMED)
+    one, first = written(tmp_path, FakeWriter(slow=SLOW), drafts, templates=CLAIMED)
     (stopped,) = first.held
     stages: list[str] = []
-    model = FakeWriter(generator=BUILDS)
+    model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     result = resume(
         model,

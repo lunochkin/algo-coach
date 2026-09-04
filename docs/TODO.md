@@ -348,10 +348,10 @@ is in `corpus.md`.
 - [x] Verify the naive solution against the problem's cases, storing nothing
       and holding the draft where it fails. A wrong clock measures nothing, and
       being wrong says nothing about the statement
-- [ ] Measure the search against the naive solution rather than the reference,
+- [x] Measure the search against the naive solution rather than the reference,
       and rename `Missing.REFERENCE_FINISHED` to `NAIVE_FINISHED`. A stored
       `unseparated` is free text, so no record carries the arm being renamed
-- [ ] Settle the separating case from the reference, as every other case is
+- [x] Settle the separating case from the reference, as every other case is
       settled. A naive solution is slow at every size, so the separating input
       is small enough for the reference to answer it
 - [ ] Store the naive solution at landing, as the reference is stored. A replay
@@ -457,8 +457,8 @@ numbers go in the commit unless the item names a file.
       per gate: no_value, misdeclared, untested, disagreed. A gate rejecting
       most problems is a defect in the prompt rather than a bar
 - [ ] Count how many of those ten held at `searched`, and which `unseparated`
-      reason each gave. Counting `reference_finished` alone reads zero, since
-      the case ceiling reports `input_too_large` before the reference is judged
+      reason each gave. Counting `naive_finished` alone reads zero, since the
+      case ceiling reports `input_too_large` before the clock is judged
 - [ ] Count how many of those ten reuse a domain their template's cue names.
       The exclusion is prompted and nothing enforces it
 - [ ] Count how many of those ten ask the same question in a new setting. The

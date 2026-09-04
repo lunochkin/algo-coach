@@ -32,7 +32,7 @@ def landed(tmp_path, monkeypatch, model: FakeWriter | None = None, **overrides):
     )
     (one,) = seeded(tmp_path, card(**overrides))
     write_problems(
-        model or FakeWriter(solution=SLOW, generator=BUILDS),
+        model or FakeWriter(slow=SLOW, generator=BUILDS),
         CallLog(tmp_path),
         one,
         one.templates[0],

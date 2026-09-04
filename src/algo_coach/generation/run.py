@@ -367,7 +367,7 @@ def carried(
     separating = draft.separating
     if reaches(start, WritingState.SEARCHED):
         checked, inputs, separating = timed(
-            template, draft, checked, inputs, cap_ms=cap_ms, notes=notes
+            template, draft, checked, inputs, clock, cap_ms=cap_ms, notes=notes
         )
         if not checked.survived:
             draft = rejected(drafts, draft, checked.discard)
@@ -705,6 +705,7 @@ def timed(
     draft: Draft,
     checked: Checked,
     inputs: Inputs,
+    clock: Clock,
     *,
     cap_ms: int,
     notes: Notes = SILENT,
@@ -718,11 +719,14 @@ def timed(
     """
     if not template.speedup or inputs.built is None or inputs.written is None:
         return checked, inputs, None
+    if clock.code is None:
+        raise ValueError("the search measures the canonical against a naive solution")
     notes("timing", "searching for the input that separates the two solutions")
     try:
         found = search(
             make(inputs.built.code, cap_ms),
             canonical=draft.canonical,
+            naive=clock.code,
             reference=draft.reference or "",
             written=inputs.written,
             cap_ms=DRILL_CAP_MS,

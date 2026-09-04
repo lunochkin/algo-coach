@@ -176,7 +176,7 @@ def timed(tmp_path, monkeypatch, model: FakeWriter, **overrides):
 def test_the_separating_case_is_stored_beside_the_others(tmp_path, monkeypatch):
     """A submission is judged at that size, so the naive solution the form
     replaces fails the problem."""
-    model = FakeWriter(solution=SLOW, generator=BUILDS)
+    model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     timed(tmp_path, monkeypatch, model)
 
@@ -197,7 +197,7 @@ def test_the_mutation_loop_never_sees_the_separating_case(tmp_path, monkeypatch)
 
     monkeypatch.setattr("algo_coach.generation.run.harden", capture)
 
-    timed(tmp_path, monkeypatch, FakeWriter(solution=SLOW, generator=BUILDS))
+    timed(tmp_path, monkeypatch, FakeWriter(slow=SLOW, generator=BUILDS))
 
     assert seen == [[[[1, 2, 3]]]]
     assert [one.args for one in CaseLog(tmp_path).cases()] == [[[1, 2, 3]], [[0, 1]]]
@@ -207,7 +207,7 @@ def test_a_form_that_is_its_own_optimum_is_still_built_for(tmp_path, monkeypatch
     """Backtracking and exhaustive search have no naive solution to beat, so
     nothing is searched for. The input generator is written all the same, since
     a fuzz pass has no inputs without one."""
-    model = FakeWriter(solution=SLOW, generator=BUILDS)
+    model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     timed(
         tmp_path,
@@ -244,7 +244,7 @@ def test_a_builder_that_fails_holds_a_draft_claiming_a_speedup(tmp_path, monkeyp
     """No code to build with, so no search, so nothing demonstrates the claim.
     A landed problem is repaired nowhere, which is why the draft stops at the
     step the call failed before."""
-    model = FakeWriter(solution=SLOW)
+    model = FakeWriter(slow=SLOW)
 
     _, result = timed(tmp_path, monkeypatch, model)
 
@@ -257,7 +257,7 @@ def test_a_builder_that_fails_holds_a_draft_claiming_a_speedup(tmp_path, monkeyp
 def test_a_builder_that_fails_lands_a_form_that_is_its_own_optimum(tmp_path, monkeypatch):
     """Nothing was searched for, so the case the call cost was never one the
     problem needed."""
-    model = FakeWriter(solution=SLOW)
+    model = FakeWriter(slow=SLOW)
 
     _, result = timed(
         tmp_path,
@@ -273,8 +273,8 @@ def test_a_builder_that_fails_lands_a_form_that_is_its_own_optimum(tmp_path, mon
 def test_a_call_that_wrote_no_builder_is_reported_apart_from_a_search(tmp_path, monkeypatch):
     """A site that answered nothing and a search that separated nothing are
     different facts, and the fuzz pass is lost only by the first."""
-    unwritten = reported(tmp_path, monkeypatch, FakeWriter(solution=SLOW))
-    crashing = reported(tmp_path, monkeypatch, FakeWriter(solution=SLOW, generator=CRASHES))
+    unwritten = reported(tmp_path, monkeypatch, FakeWriter(slow=SLOW))
+    crashing = reported(tmp_path, monkeypatch, FakeWriter(slow=SLOW, generator=CRASHES))
 
     assert unwritten.unbuilt is not None
     assert unwritten.unseparated is None
@@ -287,12 +287,10 @@ def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
 ):
     """A canonical correct on the small cases and wrong at scale, which only
     the separating input reaches."""
-    blind_solution = (
-        "import time\n\n\ndef solve(xs):\n"
-        "    time.sleep(len(xs) * 0.04)\n"
-        "    return len(xs) + (1 if 0 in xs else 0)\n"
-    )
-    model = FakeWriter(solution=blind_solution, generator=BUILDS)
+    # correct on the statement's own case and wrong on what the builder makes,
+    # which is the size only the search reaches
+    blind_solution = "def solve(xs):\n    return len(xs) + (1 if 0 in xs else 0)\n"
+    model = FakeWriter(solution=blind_solution, slow=SLOW, generator=BUILDS)
 
     _, result = timed(tmp_path, monkeypatch, model)
 
@@ -309,7 +307,7 @@ def test_the_clock_is_written_between_the_builder_and_the_search(tmp_path, monke
     stages: list[str] = []
 
     write_problems(
-        FakeWriter(solution=SLOW, generator=BUILDS),
+        FakeWriter(slow=SLOW, generator=BUILDS),
         CallLog(tmp_path),
         one,
         one.templates[0],
@@ -430,7 +428,7 @@ def test_the_search_runs_before_the_mutation_loop(tmp_path, monkeypatch):
     stages: list[str] = []
 
     write_problems(
-        FakeWriter(solution=SLOW, generator=BUILDS),
+        FakeWriter(slow=SLOW, generator=BUILDS),
         CallLog(tmp_path),
         one,
         one.templates[0],

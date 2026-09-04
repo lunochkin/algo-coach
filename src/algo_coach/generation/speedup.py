@@ -1,5 +1,9 @@
-"""The smallest input under which the reference exceeds the cap and the
-canonical does not. Run only where the template claims a speedup."""
+"""The smallest input under which the naive solution exceeds the cap and the
+canonical does not. Run only where the template claims a speedup.
+
+Two solutions, two jobs: the naive one is the clock, and the reference settles
+what the case at that size returns.
+"""
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -27,14 +31,14 @@ class Missing(StrEnum):
 
     `INPUT_TOO_LARGE` asserts nothing: the walk stopped before it could look.
     `CASE_TOO_LARGE` proves it and carries the size, and only the case is lost.
-    `REFERENCE_FINISHED` is a defect in the run rather than in the problem, and
+    `NAIVE_FINISHED` is a defect in the run rather than in the problem, and
     `corpus.md` gives the three things that produce it.
     """
 
-    REFERENCE_FINISHED = "reference_finished"
-    REFERENCE_CRASHED = "reference_crashed"
+    NAIVE_FINISHED = "naive_finished"
+    NAIVE_CRASHED = "naive_crashed"
     CANONICAL_FAILED = "canonical_failed"
-    # the built input crossed the ceiling before the reference exceeded the cap
+    # the built input crossed the ceiling before the clock exceeded the cap
     INPUT_TOO_LARGE = "input_too_large"
     # a separating size was found, and the case at it weighs too much
     CASE_TOO_LARGE = "case_too_large"
@@ -47,10 +51,10 @@ class Searched:
 
     size: int | None = None
     case: SettledCase | None = None
-    # what the child measured at that size. The reference's is absent where it
+    # what the child measured at that size. The clock's is absent where it
     # exceeded the measuring cap rather than merely the drill loop's
     canonical_ms: int | None = None
-    reference_ms: int | None = None
+    naive_ms: int | None = None
     missing: Missing | None = None
     # the two solutions at that size, where they answered differently
     disagreement: Disagreement | None = None
@@ -68,6 +72,7 @@ def search(
     make: Callable[[int], Sequence[Any]],
     *,
     canonical: str,
+    naive: str,
     reference: str,
     written: MachineProvenance,
     cap_ms: int,
@@ -76,9 +81,10 @@ def search(
     measure_ms: int = CAP_MS,
     ceiling: int = CEILING,
 ) -> Searched:
-    """Double until the reference exceeds `cap_ms`, then halve to the smallest
-    size that does. `largest` is what the statement's constraints allow: an
-    input above it separates nothing, because no solution owes an answer there.
+    """Double until the naive solution exceeds `cap_ms`, then halve to the
+    smallest size that does. `largest` is what the statement's constraints
+    allow: an input above it separates nothing, because no solution owes an
+    answer there.
     """
     # measured well above the cap, so one run reads as a time rather than as a
     # timeout, and no later search re-runs what this one already measured
@@ -88,20 +94,20 @@ def search(
     if smallest > largest:
         raise ValueError("the smallest size the search starts at is within the constraints")
 
-    under, over, over_ms, over_args, over_value, capped = smallest, None, None, [], None, False
+    under, over, over_ms, over_args, capped = smallest, None, None, [], False
     size = smallest
     while True:
         args = list(make(size))
         # stopped before the run rather than after it: an input over the
-        # ceiling is one no case can carry, whatever the reference does on it
+        # ceiling is one no case can carry, whatever the clock does on it
         if _weighs(args) > ceiling:
             capped = True
             break
-        exceeded, elapsed, value = _reference(reference, args, cap_ms=cap_ms, measure_ms=measure_ms)
+        exceeded, elapsed = _paces(naive, args, cap_ms=cap_ms, measure_ms=measure_ms)
         if exceeded is None:
-            return Searched(missing=Missing.REFERENCE_CRASHED)
+            return Searched(missing=Missing.NAIVE_CRASHED)
         if exceeded:
-            over, over_ms, over_args, over_value = size, elapsed, args, value
+            over, over_ms, over_args = size, elapsed, args
             break
         under = size
         if size >= largest:
@@ -111,18 +117,18 @@ def search(
         size = min(size * 2, largest)
 
     if over is None:
-        return Searched(missing=Missing.INPUT_TOO_LARGE if capped else Missing.REFERENCE_FINISHED)
+        return Searched(missing=Missing.INPUT_TOO_LARGE if capped else Missing.NAIVE_FINISHED)
 
     # runtime is taken to grow with the size: the halving needs it, and nothing
     # short of running every size in between would establish it
     while over - under > 1:
         middle = (under + over) // 2
         args = list(make(middle))
-        exceeded, elapsed, value = _reference(reference, args, cap_ms=cap_ms, measure_ms=measure_ms)
+        exceeded, elapsed = _paces(naive, args, cap_ms=cap_ms, measure_ms=measure_ms)
         if exceeded is None:
-            return Searched(missing=Missing.REFERENCE_CRASHED)
+            return Searched(missing=Missing.NAIVE_CRASHED)
         if exceeded:
-            over, over_ms, over_args, over_value = middle, elapsed, args, value
+            over, over_ms, over_args = middle, elapsed, args
         else:
             under = middle
 
@@ -132,10 +138,11 @@ def search(
         over_args,
         over,
         canonical=canonical,
+        reference=reference,
         written=written,
         cap_ms=cap_ms,
-        reference_ms=over_ms,
-        reference_value=over_value,
+        measure_ms=measure_ms,
+        naive_ms=over_ms,
         ceiling=ceiling,
     )
 
@@ -145,10 +152,11 @@ def _settled(
     size: int,
     *,
     canonical: str,
+    reference: str,
     written: MachineProvenance,
     cap_ms: int,
-    reference_ms: int | None,
-    reference_value: Any,
+    measure_ms: int,
+    naive_ms: int | None,
     ceiling: int,
 ) -> Searched:
     # the canonical is run under the cap it has to beat rather than the
@@ -157,17 +165,20 @@ def _settled(
     if not ran.returned:
         return Searched(missing=Missing.CANONICAL_FAILED)
 
-    measured = {"size": size, "canonical_ms": ran.elapsed_ms, "reference_ms": reference_ms}
+    measured = {"size": size, "canonical_ms": ran.elapsed_ms, "naive_ms": naive_ms}
+    # the reference rather than the clock: what a case stores is the answer of
+    # the solution written from the statement alone, whichever one was timed
+    [theirs] = run(reference, [args], cap_ms=measure_ms)
     # the settle rule the first case set uses: the reference's answer wherever
     # it computed one, and the canonical's only beyond its reach
-    if reference_ms is None:
+    if not theirs.returned:
         expected, source = ran.value, ExpectedSource.CANONICAL
-    elif agrees(ran.value, reference_value):
-        expected, source = reference_value, ExpectedSource.REFERENCE
+    elif agrees(ran.value, theirs.value):
+        expected, source = theirs.value, ExpectedSource.REFERENCE
     else:
         return Searched(
             missing=Missing.DISAGREED,
-            disagreement=Disagreement(args=args, canonical=ran.value, reference=reference_value),
+            disagreement=Disagreement(args=args, canonical=ran.value, reference=theirs.value),
             **measured,
         )
 
@@ -193,25 +204,26 @@ def _weighs(value: Any) -> int:
     return len(as_json(value).encode())
 
 
-def _reference(
+def _paces(
     code: str,
     args: Sequence[Any],
     *,
     cap_ms: int,
     measure_ms: int,
-) -> tuple[bool | None, int | None, Any]:
-    """Whether the reference exceeds `cap_ms` at this size, what it took, and
-    what it answered. The first is `None` where it crashed, which is neither.
+) -> tuple[bool | None, int | None]:
+    """Whether the clock exceeds `cap_ms` at this size and what it took. The
+    first is `None` where it crashed, which is neither.
 
-    Measured well above the cap, so a run that a sitting would have cut short
-    still returns a value, and the case it becomes is not the canonical's own.
+    Measured well above the cap, so a run a sitting would have cut short still
+    reads as a time rather than as a timeout. What it answered is not read: the
+    reference settles the case.
     """
     [ran] = run(code, [list(args)], cap_ms=measure_ms)
     if ran.outcome is RunOutcome.TIMEOUT:
-        return True, None, None
+        return True, None
     if not ran.returned:
-        return None, None, None
-    return ran.elapsed_ms > cap_ms, ran.elapsed_ms, ran.value
+        return None, None
+    return ran.elapsed_ms > cap_ms, ran.elapsed_ms
 
 
 __all__ = ["CEILING", "DRILL_CAP_MS", "Missing", "Searched", "search"]
