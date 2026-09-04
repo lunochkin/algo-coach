@@ -257,7 +257,22 @@ def test_a_form_that_separated_at_nothing_says_why():
         cases=4, outcome=CaseOutcome.PASSED, landed=True, unseparated="reference_finished"
     )
 
-    assert landed.endswith("no separation: reference_finished")
+    assert landed.endswith("no case: reference_finished")
+
+
+def test_a_separation_proved_and_not_stored_is_not_read_as_a_stored_one():
+    """The search reached a size and the case at it weighs too much, so the
+    size is evidence the speedup holds rather than a case a sitting is judged
+    by."""
+    landed = line(
+        cases=4,
+        outcome=CaseOutcome.PASSED,
+        landed=True,
+        separating=4096,
+        unseparated="case_too_large",
+    )
+
+    assert landed.endswith("no case at 4096: case_too_large")
 
 
 def test_a_form_that_is_its_own_optimum_says_nothing():

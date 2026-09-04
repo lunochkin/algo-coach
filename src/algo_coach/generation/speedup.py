@@ -21,13 +21,22 @@ CEILING = 65_536
 
 
 class Missing(StrEnum):
-    """Why a search found no separating input. Named rather than a boolean:
-    only the first is a defect where a speedup was claimed."""
+    """Why a search stored no separating case. Named rather than a boolean,
+    because the three ceiling and bound answers assert different things about
+    the speedup a template claimed.
+
+    `REFERENCE_FINISHED` disproves it within the constraints, and is the defect.
+    `INPUT_TOO_LARGE` asserts nothing: the walk stopped before it could look.
+    `CASE_TOO_LARGE` proves it and carries the size, and only the case is lost.
+    """
 
     REFERENCE_FINISHED = "reference_finished"
     REFERENCE_CRASHED = "reference_crashed"
     CANONICAL_FAILED = "canonical_failed"
+    # the built input crossed the ceiling before the reference exceeded the cap
     INPUT_TOO_LARGE = "input_too_large"
+    # a separating size was found, and the case at it weighs too much
+    CASE_TOO_LARGE = "case_too_large"
     DISAGREED = "disagreed"
 
 
@@ -161,9 +170,10 @@ def _settled(
             **measured,
         )
 
-    # the returned value weighs on the case as the arguments do
+    # the returned value weighs on the case as the arguments do. `measured` is
+    # carried: the speedup is established at this size, and only the case is not
     if _weighs(args) + _weighs(expected) > ceiling:
-        return Searched(missing=Missing.INPUT_TOO_LARGE)
+        return Searched(missing=Missing.CASE_TOO_LARGE, **measured)
     return Searched(
         # no round won it: the search runs after the loop
         case=SettledCase(args=args, expected=expected, expected_from=source, call=call, round=None),

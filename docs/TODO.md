@@ -292,7 +292,7 @@ canonical. What the first corpus settles is the bound.
 
 ### The speedup that nothing enforces
 
-- [ ] Separate the search's two empty answers: the reference finished at the
+- [x] Separate the search's two empty answers: the reference finished at the
       largest legal input, against the built input crossing the ceiling.
       `input_too_large` hid which happened on the first run
 - [ ] Decide what enforces a speedup where the blind reference writes the same

@@ -148,9 +148,17 @@ What decides whether a solution to a generated problem is correct.
   generation's. It is the size at which a submission that did not use the form
   fails, so the number a sitting judges under is what decides it.
 - **A separating input over the ceiling stores no case.** The problem lands
-  without one, and the run reports it. What goes unenforced is a speedup whose
-  separating size is a million elements, which is a log factor rather than the
-  quadratic a card teaches.
+  without one, and the run reports it.
+- **The two ways that happens assert opposite things, and are named apart.** A
+  search that reached a separating size and could not store the case has
+  established the speedup, and it reports the size and both measurements. One
+  whose walk crossed the ceiling before the reference ever exceeded the cap has
+  established nothing: a separation may sit at a size it could not look at.
+- **Neither is the defect.** That is the reference finishing at the largest
+  legal input, which disproves the speedup within the constraints. A run
+  reading the three as one answer cannot tell a defect from an unknown.
+- **What goes unenforced is a speedup whose separating size is a million
+  elements**, which is a log factor rather than the quadratic a card teaches.
 - **Consistent is not the same as statable.** A set fitting only "compute f,
   except return 7 on this input" is a function nobody can write a statement
   for. Such a problem does not land, and the discrimination bar is what catches

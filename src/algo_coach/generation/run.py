@@ -407,9 +407,12 @@ def timed(
         drafted.cases.append(found.case)
         notes("timing", f"separates at {found.size}")
         return checked, inputs.model_copy(update={"separating": found.size})
-    notes("timing", f"no separation: {found.missing}")
+    notes("timing", f"no case: {found.missing}")
     searched = inputs.model_copy(
         update={
+            # carried where the search proved a separation and stored nothing,
+            # which `unseparated` beside it is what tells apart from a stored one
+            "separating": found.size,
             "unseparated": found.missing,
             "gate": Discard.DISAGREED if found.missing is Missing.DISAGREED else None,
         }

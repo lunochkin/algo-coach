@@ -152,17 +152,35 @@ def test_an_input_over_the_ceiling_is_not_a_case():
     assert found.missing is Missing.INPUT_TOO_LARGE
 
 
-def test_a_returned_value_over_the_ceiling_is_not_a_case():
-    """The arguments fit and the answer does not, which the case carries
-    together."""
+def unstorable():
+    """A search that reaches a separating size and cannot store the case: the
+    arguments fit and the answer does not, which the case carries together."""
     big = "    return list(range(10000))\n"
-    found = searched(
+    return searched(
         canonical="def solve(n):\n" + big,
         reference="import time\n\n\ndef solve(n):\n    time.sleep(n / 100)\n" + big,
         ceiling=200,
     )
 
-    assert found.missing is Missing.INPUT_TOO_LARGE
+
+def test_a_returned_value_over_the_ceiling_is_not_a_case():
+    assert unstorable().missing is Missing.CASE_TOO_LARGE
+
+
+def test_a_case_over_the_ceiling_is_told_from_a_walk_that_never_reached_one():
+    """One proves the speedup and loses the case, the other looked nowhere. A
+    run reading them as one answer cannot tell a defect from an unknown."""
+    assert unstorable().missing is not Missing.INPUT_TOO_LARGE
+
+
+def test_a_separation_it_proved_carries_the_size_and_both_times():
+    """The speedup holds at that size, and the measurements are what say so.
+    Without them the run reports nothing it paid to establish."""
+    found = unstorable()
+
+    assert found.size is not None
+    assert found.reference_ms >= CAP_MS
+    assert found.canonical_ms < CAP_MS
 
 
 def test_a_reference_that_finishes_is_told_from_an_input_that_does_not_fit():

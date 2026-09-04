@@ -268,6 +268,9 @@ def timing(progress: Progress) -> str:
     the form is its own optimum, since nothing was looked for."""
     if progress.unbuilt is not None:
         return f"  unbuilt: {progress.unbuilt}"
-    if progress.separating is not None:
-        return f"  separates at {progress.separating}"
-    return f"  no separation: {progress.unseparated}" if progress.unseparated else ""
+    # checked before the size: a search that proved a separation and stored no
+    # case carries both, and printing the size alone would read as a stored one
+    if progress.unseparated:
+        at = f" at {progress.separating}" if progress.separating is not None else ""
+        return f"  no case{at}: {progress.unseparated}"
+    return f"  separates at {progress.separating}" if progress.separating is not None else ""
