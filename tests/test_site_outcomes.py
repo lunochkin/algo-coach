@@ -291,6 +291,18 @@ def test_the_inputs_record_carries_the_size_the_search_found(tmp_path, monkeypat
     assert one.unseparated is None
 
 
+def test_the_clock_record_carries_the_search_it_was_judged_by(tmp_path, monkeypatch):
+    """The search timed this answer against the canonical, so what it found is
+    a verdict about the clock as much as about the builder."""
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    model = FakeWriter(slow=SLOW, generator=BUILDS)
+
+    _, _, outcomes = run(tmp_path, model, templates=[CLAIMS])
+
+    assert sites(outcomes)[CallSite.CLOCK].separating is not None
+    assert sites(outcomes)[CallSite.INPUTS].separating is not None
+
+
 def test_a_search_that_separated_nothing_says_why(tmp_path):
     """A missing separation is a defect only where a speedup was claimed, and
     the reason is what tells the two apart."""

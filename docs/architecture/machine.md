@@ -110,6 +110,15 @@ a call returned, which is why it sits beside the call log.
   contradicting the cases its own call declared is the generator's. A
   disagreement is the blind site's, since nothing disagrees before a second
   reading of the statement exists.
+- **The search's verdict is filed under every site it judged.** It times the
+  clock against the canonical on an input the builder made, so neither answer
+  alone makes it decidable. A resume that re-asked one of the two writes that
+  record and no other, and the size would otherwise be lost with the site it
+  reused.
+- **Two of a problem's records can carry different verdicts.** The builder's
+  answers for the search that judged it when it was written, and a later
+  clock's for the search that judged the redraw. Each says what one answer was
+  worth at one configuration, which is what a record is for.
 - **The exception is the gate no answer was rejected by.** A held draft is
   rejected where the problem does not exercise the form its template claims,
   and every site answered. It is read from the draft, which is the record that

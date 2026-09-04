@@ -249,7 +249,7 @@ canonical. What the first corpus settles is the bound.
       temperature beside an effort, so greedy costs it no reasoning
 - [x] Write the per-site configuration into `machine.md`. A record copies its
       own call's, so four models in one run stay readable
-- [ ] Decide which site outcome carries the separating size where a resume
+- [x] Decide which site outcome carries the separating size where a resume
       re-asked the clock alone, and write the choice into `machine.md`. It is
       filed under inputs today, which writes no record when the builder is
       reused, so a resumed problem's size is readable only from the arguments

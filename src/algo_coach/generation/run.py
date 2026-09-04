@@ -540,9 +540,14 @@ def sites(
         separating=inputs.separating,
         unseparated=inputs.unseparated,
     )
-    # no counter of its own: it writes one solution, and what the search made
-    # of it is the inputs site's to report
-    writing(CallSite.CLOCK, clock.call)
+    # the search judged this answer as much as the builder's, so both records
+    # carry its verdict. A resume that re-asked one writes only that one
+    writing(
+        CallSite.CLOCK,
+        clock.call,
+        separating=inputs.separating,
+        unseparated=inputs.unseparated,
+    )
 
 
 def gated(checked: Checked, *gates: Discard) -> dict[str, object]:

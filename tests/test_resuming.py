@@ -260,6 +260,30 @@ def test_a_resumed_draw_separates_where_the_stored_clock_did_not(tmp_path, monke
     assert len(result.drafted) == 1
 
 
+def test_a_redrawn_clock_carries_the_size_its_search_found(tmp_path, monkeypatch):
+    """The builder was reused, so the inputs site made no call and wrote no
+    record. Filed nowhere, the size a resumed problem landed on would be
+    readable only from the arguments of its own case."""
+    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    drafts = DraftStore(tmp_path)
+    one, first = written(tmp_path, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
+    (stopped,) = first.held
+
+    resume(
+        FakeWriter(generator=BUILDS, slow=SLOW),
+        CallLog(tmp_path),
+        one.templates[0],
+        stopped.draft,
+        Corpus.at(tmp_path),
+        outcomes=OutcomeLog(tmp_path),
+        drafts=drafts,
+    )
+
+    left = {one.site: one for one in OutcomeLog(tmp_path).outcomes() if one.problem_id}
+    assert set(left) == {CallSite.CLOCK}
+    assert left[CallSite.CLOCK].separating is not None
+
+
 def test_a_moved_clock_re_pays_that_call_and_no_other(tmp_path, monkeypatch):
     """The reference and the input generator are written from the statement,
     which this bench did not move."""
