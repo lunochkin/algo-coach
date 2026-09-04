@@ -81,6 +81,10 @@ class Draft(BaseModel):
     # what rejected the answer, as the same gate on the site whose output made
     # it decidable. A field rather than a record: nothing but the run writes it
     gate: Discard | None = None
+    # the draft this one re-runs a step of, absent on a first attempt. A
+    # rejected draft is not resumed, so re-running the step its gate reached
+    # mints a draft that cites it rather than moving the one it came from
+    rerun_of: str | None = Field(default=None, min_length=1)
 
     # drafted: one call wrote all five, so a draft exists only once they do
     title: str = Field(min_length=1)
@@ -121,6 +125,14 @@ class Draft(BaseModel):
             raise ValueError("a rejected draft names the gate that reached it")
         if not rejected and self.gate is not None:
             raise ValueError(f"a {self.state} draft carries no gate")
+        return self
+
+    @model_validator(mode="after")
+    def _a_draft_is_not_its_own_source(self) -> Draft:
+        """A draft citing itself would make a resume's chain a loop, and the
+        attempt it came from unreadable."""
+        if self.rerun_of == self.id:
+            raise ValueError("a draft's rerun_of names the draft it came from, not itself")
         return self
 
     @model_validator(mode="after")

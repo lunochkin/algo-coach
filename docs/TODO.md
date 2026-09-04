@@ -317,7 +317,7 @@ exit criteria reads a draft.
       that reached it, as `Problem` ties a retirement to its reason
 - [x] Add `Draft`, holding each step's output and the provenance of the call
       behind it
-- [ ] Add to `Draft` the draft it was re-run from, absent on a first attempt.
+- [x] Add to `Draft` the draft it was re-run from, absent on a first attempt.
       A rejected draft is not resumed, so re-running its failing step is a new
       draft
 - [ ] Add the draft store under `data/`, revised in place where every other
