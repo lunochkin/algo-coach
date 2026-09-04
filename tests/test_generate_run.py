@@ -244,8 +244,9 @@ def test_a_builder_that_fails_holds_a_draft_claiming_a_speedup(tmp_path, monkeyp
 
     _, result = timed(tmp_path, monkeypatch, model)
 
-    (stored,) = result.held
-    assert stored.state is WritingState.AGREED
+    (one,) = result.held
+    assert one.draft.state is WritingState.AGREED
+    assert one.unbuilt is not None
     assert (result.drafted, CaseLog(tmp_path).cases()) == ([], [])
 
 
@@ -436,9 +437,10 @@ def test_a_round_that_fails_holds_the_draft_for_a_resume(tmp_path):
         on_progress=reported.append,
     )
 
-    (stored,) = result.held
+    (one,) = result.held
     # no input generator was written for it either, so it stopped a step earlier
-    assert stored.state is WritingState.AGREED
+    assert one.draft.state is WritingState.AGREED
+    assert one.unmeasured is not None
     assert (result.drafted, CaseLog(tmp_path).cases()) == ([], [])
     assert reported[0].unmeasured is not None
 

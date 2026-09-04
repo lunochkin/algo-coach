@@ -13,6 +13,7 @@ from algo_coach.generation import (
     Bench,
     Corpus,
     GenerationResult,
+    Held,
     Progress,
     ReplayResult,
     Step,
@@ -56,6 +57,8 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         results.append(result)
         for drafted in result.drafted:
             print(written(drafted, code=args.code))
+        for one in result.held:
+            print(holding(target, one))
         # A broken configuration fails the next template the same way, so the
         # run stops rather than spending its abort count once per gap.
         if result.aborted:
@@ -116,7 +119,38 @@ def summary(results: list[GenerationResult], aimed: list[Target], bench: Bench =
     if discarded:
         # Repeated from the per-problem lines: a run of ten scrolls past them.
         kept += f", {discarded} discarded"
+    on_hold = sum(len(result.held) for result in results)
+    if on_hold:
+        # apart from a discard: the calls are kept and the form still has no
+        # problem, which is what the next run is aimed at
+        kept += f", {on_hold} held"
     return kept
+
+
+def holding(target: Target, one: Held) -> str:
+    """One draft the run left short of landing, named by the form it was
+    written for. It is the gap the next run aims at: the template carries no
+    problem until this draft is resumed or rejected."""
+    return "\n".join(
+        [
+            f"\n# held: {one.draft.title} ({target.template.slug}, {one.draft.state})",
+            "",
+            f"{stopped_by(one)}. Held as draft {one.draft.id}.",
+        ]
+    )
+
+
+def stopped_by(one: Held) -> str:
+    """Which step had no answer. The order is the one the steps run in, so the
+    earliest missing answer is what a reader is told about."""
+    if one.unbuilt is not None:
+        return f"no input generator: {one.unbuilt}"
+    if one.unseparated is not None:
+        # the size where a separation was proved and no case stored it, since
+        # printing it alone would read as a case the problem carries
+        at = f" at {one.separating}" if one.separating is not None else ""
+        return f"no separating case{at}: {one.unseparated}"
+    return f"the mutation loop went unmeasured: {one.unmeasured}"
 
 
 def wrote(bench: Bench) -> str:

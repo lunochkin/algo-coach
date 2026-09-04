@@ -142,12 +142,28 @@ class Bar(BaseModel):
     unmeasured: str | None = None
 
 
+class Held(BaseModel):
+    """One draft that passed every gate and stopped short of landing: where it
+    stopped, and what the step that stopped it left.
+
+    The reason is carried rather than read back from the site outcomes, since
+    a run reports what it did before anything reads its log.
+    """
+
+    index: int
+    draft: Draft
+    # the size the search proved a separation at, and why it stored no case
+    separating: int | None = None
+    unseparated: str | None = None
+    unbuilt: str | None = None  # no input generator, so no search ran at all
+    unmeasured: str | None = None  # the round's call failed
+
+
 class GenerationResult(BaseModel):
     drafted: list[Draft] = Field(default_factory=list)
-    # written whole and separated by nothing, so held at `searched` until a
-    # resume separates it, the template's `speedup` is corrected, or it is
-    # rejected
-    held: list[Draft] = Field(default_factory=list)
+    # written whole and demonstrating nothing, so held until a resume separates
+    # it, the template's `speedup` is corrected, or it is rejected
+    held: list[Held] = Field(default_factory=list)
     discarded: list[Discarded] = Field(default_factory=list)
     failed: list[Failed] = Field(default_factory=list)
     aborted: bool = False
@@ -628,7 +644,16 @@ def write_problems(
             # every gate that judges the problem passed, and a step of the
             # writing did not: held where it stopped rather than landed
             record(outcomes, left)
-            result.held.append(draft)
+            result.held.append(
+                Held(
+                    index=index,
+                    draft=draft,
+                    separating=inputs.separating,
+                    unseparated=inputs.unseparated,
+                    unbuilt=inputs.unbuilt,
+                    unmeasured=bar.unmeasured,
+                )
+            )
         elif checked.survived:
             problem = land(corpus, template, draft)
             # named before it is cleared: a crash between the two then leaves a

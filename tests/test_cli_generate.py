@@ -554,3 +554,42 @@ def test_replay_is_aimed_at_nothing(root, monkeypatch, capsys):
         replaying(monkeypatch, FakeWriter(), "--gaps")
 
     assert "aimed at nothing" in capsys.readouterr().err
+
+
+CLAIMS = [template("longest-valid-window", speedup=True)]
+
+
+def test_a_held_draft_is_named_by_the_template_and_what_stopped_it(root, monkeypatch, capsys):
+    """A run's stage lines scroll past, and a held draft is the gap the next
+    run is aimed at."""
+    seeded(root, card(templates=CLAIMS))
+
+    run(monkeypatch, FakeWriter(generator=BUILDS), "longest-valid-window")
+
+    out = capsys.readouterr().out
+    assert "# held: Widest fair stretch (longest-valid-window, searched)" in out
+    assert "no separating case: reference_finished" in out
+
+
+def test_a_draft_held_before_the_search_names_the_step_that_answered_nothing(
+    root, monkeypatch, capsys
+):
+    """No input generator was written, so the search never ran and the reason
+    is not the one a search reports."""
+    seeded(root, card(templates=CLAIMS))
+
+    run(monkeypatch, FakeWriter(), "longest-valid-window")
+
+    assert "no input generator" in capsys.readouterr().out
+
+
+def test_the_summary_counts_the_held_apart_from_the_discarded(root, monkeypatch, capsys):
+    """The calls a held draft paid for are kept, where a discarded one is
+    lost."""
+    seeded(root, card(templates=CLAIMS))
+
+    run(monkeypatch, FakeWriter(generator=BUILDS), "longest-valid-window")
+
+    out = capsys.readouterr().out
+    assert "0 problem(s) stored" in out
+    assert "1 held" in out

@@ -158,8 +158,10 @@ def test_an_unseparated_draft_is_held_at_the_search(tmp_path):
     land."""
     result, drafts = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
 
-    (stored,) = result.held
+    (one,) = result.held
+    stored = one.draft
     assert stored.state is WritingState.SEARCHED
+    assert one.unseparated == "reference_finished"
     assert (stored.separating, stored.problem_id) == (None, None)
     # kept where it stopped, since a resume is what separates it
     assert drafts.all() == [stored]
@@ -184,7 +186,8 @@ def test_a_held_draft_is_rejected_where_the_reference_wrote_the_form(tmp_path):
     """The exit no resume reaches: that solution is immutable and it is still
     the clock, so the claim holds and this problem does not exercise it."""
     result, drafts = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
-    (stored,) = result.held
+    (one,) = result.held
+    stored = one.draft
 
     rejected = reject(drafts, stored)
 

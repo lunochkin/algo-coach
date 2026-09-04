@@ -127,8 +127,8 @@ def held(tmp_path) -> Draft:
         Corpus.at(tmp_path),
         drafts=DraftStore(tmp_path),
     )
-    (stored,) = result.held
-    return stored
+    (one,) = result.held
+    return one.draft
 
 
 def test_a_claim_that_still_stands_leaves_the_draft_at_the_search(tmp_path):

@@ -309,7 +309,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Add the template's `speedup` flag to what `moved_at` reads, so correcting
       it resumes the drafts the search held. A flag edit moves neither a
       configuration nor a digest
-- [ ] Report the held drafts at the end of a run, naming the template and what
+- [x] Report the held drafts at the end of a run, naming the template and what
       the search found. They are the gap the next generation run aims at
 - [ ] Count the draft a raised call left in that report. It is stored at the
       step it stopped and a resume reaches it, where the run prints only that
