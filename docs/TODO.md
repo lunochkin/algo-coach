@@ -365,6 +365,17 @@ exit criteria reads a draft.
       rejected, or held for a resume. Prose names an exit per step, and which
       failure stops where is read by following eight bullets
 
+### Reading what a run left
+
+- [x] Add the stores generation writes to `scripts/views.py`: site outcomes,
+      test cases, solutions, verifications, readings, and the problems, cards
+      and drafts directories. Seven of the fourteen stores are queryable, and
+      every question about a run joins across the ones that are not
+- [ ] Render one draft under `generate --draft <id>`: its state, the statement,
+      both solutions, the settled cases, and the site outcomes of its writing
+      id. On `generate` rather than a `view` command, since the draft store is
+      generation's own working state and `--drafts` already reads it
+
 ### Transport
 
 - [x] Retry once on a 404 whose message names no endpoints for the model. It is

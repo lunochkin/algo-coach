@@ -1,4 +1,4 @@
-"""Build `views.duckdb` — SQL views over the JSONL logs, no copy of the data.
+"""Build `views.duckdb` — SQL views over the stores, no copy of the data.
 
 The file holds view definitions and nothing else, so it stays a few hundred
 kilobytes however large the logs grow, and every query reads them live. Any
@@ -6,8 +6,8 @@ DuckDB front end opens it: `duckdb -ui views.duckdb`, Harlequin, DBeaver.
 
     uv run --with duckdb python scripts/views.py
 
-A log that does not exist yet is skipped rather than failing the build: the
-store fills in as phases land, and re-running picks up what appeared.
+A store that does not exist yet is skipped rather than failing the build: it
+fills in as phases land, and re-running picks up what appeared.
 """
 
 import sys
@@ -28,7 +28,16 @@ LOGS = {
     "matches": "template_matches.jsonl",
     "self_labels": "self_labels.jsonl",
     "diagnoses": "diagnoses.jsonl",
+    "cases": "test_cases.jsonl",
+    "solutions": "solutions.jsonl",
+    "verifications": "verifications.jsonl",
+    "readings": "technique_readings.jsonl",
+    "site_outcomes": "site_outcomes.jsonl",
 }
+
+# The stores holding one file per record. Read by glob, so a store whose
+# directory exists and is empty is skipped like a log that is not there.
+DIRS = ("problems", "cards", "drafts")
 
 # A call holds its whole prompt, so the reader's default object cap is too low.
 BIG = {"calls"}
@@ -46,6 +55,26 @@ DERIVED = {
     "problem_techniques": """
         select p.id problem_id, p.title, unnest(p.techniques) technique
         from problems p
+    """,
+    "card_templates": """
+        -- One row per card and template, which is what turns the template_id
+        -- on a match, a draft or a site outcome into a slug. The card's own
+        -- columns are prefixed: a template carries a `slug` and a `title` too.
+        select c.id card_id, c.slug card_slug, c.technique, t.*
+        from cards c, unnest(c.templates) as u(t)
+    """,
+    "writings": """
+        -- One row per attempt at writing a problem: which sites answered, what
+        -- their gates said, and the draft where one is still stored. A draft is
+        -- cleared at landing, so a row with none is an attempt that finished.
+        select o.writing_id, any_value(o.template_id) template_id,
+               any_value(o.problem_id) problem_id,
+               list(o.site order by o.site) answered,
+               list(o.gate order by o.site) filter (o.gate is not null) gates,
+               any_value(d.state) state, any_value(d.gate) rejected_by
+        from site_outcomes o
+        left join drafts d on d.id = o.writing_id
+        group by o.writing_id
     """,
     "standing_claims": """
         -- MIRRORS `algo_coach.techniques.standing_claims`. The user's claim
@@ -99,12 +128,13 @@ def main() -> int:
         con.sql(f"create view {name} as select * from read_json_auto('{path}'{cap})")
         made.append(name)
 
-    problems = DATA / "problems"
-    if any(problems.glob("*.json")):
-        con.sql(f"create view problems as select * from read_json_auto('{problems}/*.json')")
-        made.append("problems")
-    else:
-        skipped.append("problems")
+    for name in DIRS:
+        directory = DATA / name
+        if not any(directory.glob("*.json")):
+            skipped.append(name)
+            continue
+        con.sql(f"create view {name} as select * from read_json_auto('{directory}/*.json')")
+        made.append(name)
 
     for name, sql in DERIVED.items():
         # A derived view over a log that is not there yet cannot be created,
