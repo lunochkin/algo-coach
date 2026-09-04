@@ -336,7 +336,7 @@ is in `corpus.md`.
 - [x] Add `CallSite.CLOCK` and the fifth `Bench` field, named as `Draft.clock`
       already is. A configuration is per call site, and the test pinning the
       two lists together is what fails until both move
-- [ ] Write the naive prompt: the statement and the template's trigger in, a
+- [x] Write the naive prompt: the statement and the template's trigger in, a
       solution out. It may name the form to avoid, since it settles no case and
       discards no problem
 - [ ] Sample the naive site, where the other three answering sites are greedy.

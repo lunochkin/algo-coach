@@ -18,7 +18,7 @@ from algo_coach.generation.checks import (
     check,
     stopped,
 )
-from algo_coach.generation.clock import CLOCK_DEFAULT
+from algo_coach.generation.clock import CLOCK_DEFAULT, naive
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
 from algo_coach.generation.errors import GenerationError
 from algo_coach.generation.fuzzing import (
@@ -137,6 +137,7 @@ __all__ = [
     "reference",
     "ORDER",
     "moved_at",
+    "naive",
     "next_step",
     "starts_at",
     "reject",
