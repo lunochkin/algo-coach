@@ -164,6 +164,10 @@ What decides whether a solution to a generated problem is correct.
   early, since the next one asks the same question of the same survivors. The
   number was set before a corpus existed, and what revises it is how much the
   second round still kills.
+- **A round's proposal lands only where it killed.** The round is paid for by
+  the call rather than by the cases it returns, so a proposal no mutant fails
+  is a case every later verification runs for nothing. `flows.md` gives how the
+  kill is attributed.
 - **The fuzz pass runs before the first round, and costs no call.** The input
   generator builds at several sizes and seeds, and the mutants still standing
   are run against those inputs. Only what survives it reaches a round.

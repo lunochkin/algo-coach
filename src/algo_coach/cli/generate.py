@@ -250,7 +250,7 @@ def bar(progress: Progress) -> str:
     if not progress.mutants:
         return ""
     killed = progress.mutants - progress.survived
-    won = f", +{progress.won} case(s)" if progress.won else ""
+    won = f", +{progress.won}/{progress.offered} case(s)" if progress.offered else ""
     return f"  kills {killed}/{progress.mutants} ({sources(progress)}){won}"
 
 

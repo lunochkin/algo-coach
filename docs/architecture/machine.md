@@ -117,6 +117,9 @@ a call returned, which is why it sits beside the call log.
   never asked, which is where the first case set already killed every mutant.
 - **The discrimination record cites the last round's call.** A loop pays for up
   to two rounds, and the counters the record carries are what the last one left.
+- **A round records what it proposed beside what landed.** A proposal that
+  killed nothing is not stored, so the set alone cannot say what the call was
+  paid for. The difference is what the round bought nothing with.
 - **What each round killed is a list, in order.** A field per round would fix
   the bound in the schema, where `ROUNDS` is what a corpus revises. It is the
   one ordered counter, and a report reads position rather than a key.

@@ -37,6 +37,9 @@ class Hardened:
     # by. `None` where the first case set killed every mutant
     call: Call | None = None
     dropped: int = 0  # proposals the canonical could not answer
+    # proposals a round put to the set, landed or not. What the rounds landed
+    # is `cases` minus the fuzz pass's, so the difference is what killed nothing
+    offered: int = 0
     # a proposed input the two solutions answered differently. The caller
     # discards the problem on it, as it does on any disagreement
     disagreement: Disagreement | None = None
@@ -94,62 +97,48 @@ def harden(
         "mutants",
         f"{enumerated} enumerated, running them under a {against_ms}ms cap",
     )
-    against: Sequence[Case] = cases
     won: list[SettledCase] = []
+    # every settled proposal, landed or not: a dropped one leaves `won`, and a
+    # round shown neither can propose an input that already killed nothing
+    asked: list[Sequence[Any]] = []
     paid: Call | None = None
     fuzzed: Fuzzed | None = None
-    declared = 0
     caught: list[int] = []
-    dropped = played = 0
+    dropped = played = offered = 0
 
-    while True:
-        before, started = len(standing), monotonic()
-        standing = [one.mutant for one in survivors(kill(standing, against, cap_ms=against_ms))]
-        # `played` names what this pass ran against: none yet is the set the
-        # loop was given, and otherwise the cases that round won
-        if played:
-            caught.append(before - len(standing))
-        else:
-            declared = before - len(standing)
-        # the runner's own time, which is what the fork server would cut
+    started = monotonic()
+    standing = [one.mutant for one in survivors(kill(standing, cases, cap_ms=against_ms))]
+    declared = enumerated - len(standing)
+    # the runner's own time, which is what the fork server would cut
+    notes(
+        "mutants",
+        f"{declared} killed, {len(standing)} standing, {monotonic() - started:.1f}s in the runner",
+    )
+
+    if standing and fuzzing is not None:
+        fuzzed = fuzzing(standing, against_ms)
         notes(
-            "mutants",
-            f"{before - len(standing)} killed, {len(standing)} standing"
-            f", {monotonic() - started:.1f}s in the runner",
+            "fuzz",
+            f"{fuzzed.built} built, {len(fuzzed.cases)} kept, {len(fuzzed.standing)} standing",
         )
-        if not standing or played == rounds:
-            break
-        # a round that killed nothing stops the loop: the next one asks the
-        # same question of the same survivors
-        if played and len(standing) == before:
-            break
-
-        if fuzzing is not None and fuzzed is None:
-            fuzzed = fuzzing(standing, against_ms)
-            notes(
-                "fuzz",
-                f"{fuzzed.built} built, {len(fuzzed.cases)} kept, {len(fuzzed.standing)} standing",
+        won.extend(fuzzed.cases)
+        standing = fuzzed.standing
+        if fuzzed.disagreement is not None:
+            return _left(
+                won=won,
+                enumerated=enumerated,
+                standing=standing,
+                played=played,
+                dropped=dropped,
+                offered=offered,
+                declared=declared,
+                caught=caught,
+                call=paid,
+                fuzzed=fuzzed,
+                disagreement=fuzzed.disagreement,
             )
-            won.extend(fuzzed.cases)
-            standing = fuzzed.standing
-            if fuzzed.disagreement is not None:
-                return _left(
-                    won,
-                    enumerated,
-                    standing,
-                    played,
-                    dropped,
-                    paid,
-                    fuzzed.disagreement,
-                    fuzzed,
-                    declared,
-                    caught,
-                )
-            # no re-run against what it kept: the pass decided these survivors
-            # against exactly those cases
-            if not standing:
-                break
 
+    while standing and played < rounds:
         played += 1
         notes("round", f"{played} of {rounds}: asking for the cases that kill {len(standing)}")
         proposed, call = separators(
@@ -158,7 +147,7 @@ def harden(
             statement,
             canonical=canonical,
             survivors=standing,
-            known=[one.args for one in [*cases, *won]],
+            known=[*[one.args for one in [*cases, *won]], *asked],
             configuration=configuration,
         )
         paid = call
@@ -172,26 +161,68 @@ def harden(
             cap_ms=cap_ms,
         )
         dropped += len(proposed) - len(settled.cases) - len(settled.disagreements)
-        notes("round", f"{played}: {len(settled.cases)} won, {dropped} dropped")
         if settled.disagreements:
             return _left(
-                won,
-                enumerated,
-                standing,
-                played,
-                dropped,
-                paid,
-                settled.disagreements[0],
-                fuzzed,
-                declared,
-                caught,
+                won=won,
+                enumerated=enumerated,
+                standing=standing,
+                played=played,
+                dropped=dropped,
+                offered=offered,
+                declared=declared,
+                caught=caught,
+                call=paid,
+                fuzzed=fuzzed,
+                disagreement=settled.disagreements[0],
             )
         if not settled.cases:
             break
-        won.extend(settled.cases)
-        against = settled.cases
 
-    return _left(won, enumerated, standing, played, dropped, paid, None, fuzzed, declared, caught)
+        offered += len(settled.cases)
+        asked.extend(one.args for one in settled.cases)
+        before, started = len(standing), monotonic()
+        killers, standing = _killers(standing, settled.cases, cap_ms=against_ms)
+        caught.append(before - len(standing))
+        notes(
+            "round",
+            f"{played}: {len(killers)} of {len(settled.cases)} landed"
+            f", {len(standing)} standing, {monotonic() - started:.1f}s in the runner",
+        )
+        won.extend(killers)
+        # a round whose proposals killed nothing stops the loop: the next one
+        # asks the same question of the same survivors
+        if not killers:
+            break
+
+    return _left(
+        won=won,
+        enumerated=enumerated,
+        standing=standing,
+        played=played,
+        dropped=dropped,
+        offered=offered,
+        declared=declared,
+        caught=caught,
+        call=paid,
+        fuzzed=fuzzed,
+    )
+
+
+def _killers(
+    standing: Sequence[Mutant], cases: Sequence[Case], *, cap_ms: int
+) -> tuple[list[Any], list[Mutant]]:
+    """The proposals that killed, and the mutants left standing.
+
+    A mutant names the first case that failed it, so a proposal no mutant names
+    killed nothing. Two proposals killing one mutant land the first: the second
+    decides nothing the set does not already decide.
+    """
+    verdicts = kill(standing, cases, cap_ms=cap_ms)
+    named = {one.case for one in verdicts if not one.survived}
+    return (
+        [one for at, one in enumerate(cases) if at in named],
+        [one.mutant for one in survivors(verdicts)],
+    )
 
 
 def _settled(
@@ -226,16 +257,18 @@ def _settled(
 
 
 def _left(
+    *,
     won: list[SettledCase],
     enumerated: int,
     standing: Sequence[Any],
     played: int,
     dropped: int,
+    offered: int,
+    declared: int,
+    caught: list[int],
     call: Call | None,
-    disagreement: Disagreement | None = None,
     fuzzed: Fuzzed | None = None,
-    declared: int = 0,
-    caught: list[int] | None = None,
+    disagreement: Disagreement | None = None,
 ) -> Hardened:
     return Hardened(
         cases=won,
@@ -243,11 +276,12 @@ def _left(
         survived=len(standing),
         rounds=played,
         dropped=dropped,
+        offered=offered,
         call=call,
         disagreement=disagreement,
         fuzzed=fuzzed,
         declared=declared,
-        caught=list(caught or []),
+        caught=list(caught),
     )
 
 

@@ -35,6 +35,7 @@ class Writing:
         won: int = 0,
         killed: int = 0,
         rounds: list[int] | None = None,
+        offered: int = 0,
         separating: int | None = None,
         unseparated: str | None = None,
     ) -> None:
@@ -54,6 +55,7 @@ class Writing:
                 won=won,
                 killed=killed,
                 rounds=rounds,
+                offered=offered,
                 separating=separating,
                 unseparated=unseparated,
                 **written_by(call),

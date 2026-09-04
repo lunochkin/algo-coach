@@ -274,6 +274,16 @@ def test_the_cases_the_mutation_loop_wins_land_with_the_others(tmp_path):
     assert [one.args for one in CaseLog(tmp_path).cases()] == [[10], [3], [4]]
 
 
+def test_a_proposal_that_killed_nothing_never_reaches_the_store(tmp_path):
+    """The first run stored fifteen that killed nothing, and every later
+    verification would run them."""
+    model = bounded(separators=[[[100], [3], [4]]])
+
+    run(tmp_path, model)
+
+    assert [one.args for one in CaseLog(tmp_path).cases()] == [[10], [3], [4]]
+
+
 def test_a_won_case_carries_the_reference_s_answer(tmp_path):
     """Settled as the first set is: a case the canonical produced would pass by
     construction."""

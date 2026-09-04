@@ -268,6 +268,7 @@ def discrimination_replay(
             "mutants": hardened.mutants,
             "survived": hardened.survived,
             "won": len(hardened.cases),
+            "offered": hardened.offered,
         },
     )
 

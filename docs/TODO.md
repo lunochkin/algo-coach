@@ -286,7 +286,7 @@ canonical. What the first corpus settles is the bound.
 - [x] Record which source killed each mutant: the set written with the
       statement, the fuzz pass, or round n. That is what says whether a round
       earns its call
-- [ ] Record per proposed case which mutants it killed, and land only the ones
+- [x] Record per proposed case which mutants it killed, and land only the ones
       that killed. The first run stored fifteen that killed nothing, and every
       verification runs them forever
 

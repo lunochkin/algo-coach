@@ -77,6 +77,50 @@ def test_a_set_that_kills_every_mutant_asks_no_call(tmp_path):
     assert hardened.cases == []
 
 
+def test_a_proposal_that_killed_nothing_does_not_land(tmp_path):
+    """Every later verification runs a stored case, and one no mutant names
+    catches nothing."""
+    model = Answers(rounds=[[[100], *BOUNDARY]])
+
+    hardened = run(tmp_path, model, WEAK)
+
+    assert [one.args for one in hardened.cases] == BOUNDARY
+    assert hardened.offered == 3
+
+
+def test_two_proposals_killing_one_mutant_land_the_first(tmp_path):
+    """The second decides nothing the set does not already decide, so the
+    order the round proposed them in is what settles it."""
+    model = Answers(rounds=[[[3], [3], [4]]])
+
+    hardened = run(tmp_path, model, WEAK)
+
+    assert [one.args for one in hardened.cases] == [[3], [4]]
+    assert hardened.survived == 0
+
+
+def test_a_round_whose_proposals_all_killed_nothing_stops_the_loop(tmp_path):
+    """The next one asks the same question of the same survivors."""
+    model = Answers(rounds=[[[100]], BOUNDARY])
+
+    hardened = run(tmp_path, model, WEAK)
+
+    assert len(model.calls) == 1
+    assert hardened.cases == []
+    assert hardened.survived == 3
+
+
+def test_a_dropped_proposal_is_still_shown_to_the_next_round(tmp_path):
+    """It is not in the set, and a round shown neither could propose an input
+    that already killed nothing."""
+    model = Answers(rounds=[[[100], [4]], [[3]]])
+
+    run(tmp_path, model, WEAK)
+
+    assert len(model.calls) == 2
+    assert "100" in model.calls[1]["content"]
+
+
 def test_a_survivor_draws_one_call_and_the_cases_it_wins_land(tmp_path):
     """A mutant no case kills names a case that has to exist, and the round is
     what writes it."""

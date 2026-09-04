@@ -21,7 +21,7 @@ The order matters because each step can reject what came before.
    alone.
 7. Mutants of the canonical run against the cases, then against inputs that
    code builds. A call asks for the cases that kill whichever mutant survived
-   both.
+   both, and the ones that killed are appended to the set.
 8. Where the template claims a speedup, the smallest input separating the
    reference from the canonical under the cap is searched for, and the case at
    that size is stored.
@@ -77,6 +77,19 @@ The order matters because each step can reject what came before.
 - **The call that answers a survivor proposes arguments, never returns.** The
   reference computes what they return, so no model writes an expected output
   that could agree with the mistake the case was asked for.
+- **A proposed case that killed nothing does not land.** Every later
+  verification runs the stored set, and a case no mutant fails catches nothing
+  a case already there does not. Which mutants each proposal killed is read
+  from the kill pass the round already pays for, so nothing extra runs.
+- **Two proposals killing one mutant land the first.** The second decides
+  nothing the set does not already decide, so what settles it is the order the
+  round proposed them in. The fuzz pass keeps its inputs by the same rule.
+- **A dropped proposal is still shown to the next round.** It is not in the
+  set, and a round shown neither the set nor it could propose an input that
+  already killed nothing.
+- **The set written with the statement is exempt.** Those cases describe what
+  the problem asks rather than what a mutant fails, so they land whether or not
+  they kill.
 - **A proposed input the canonical cannot answer drops the case, not the
   problem.** Nothing checks an input against the constraints the statement
   gives, so a crash or a timeout there is as likely to be an input the problem

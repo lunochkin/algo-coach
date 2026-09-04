@@ -274,12 +274,32 @@ def test_the_line_reports_what_the_mutation_loop_caught():
         mutants=12,
         survived=2,
         won=3,
+        offered=18,
         declared=6,
         fuzzed=2,
         caught=[2],
     )
 
-    assert landed == "4 case(s)  passed  landed  kills 10/12 (6 set, 2 fuzz, 2 round 1), +3 case(s)"
+    assert landed == (
+        "4 case(s)  passed  landed  kills 10/12 (6 set, 2 fuzz, 2 round 1), +3/18 case(s)"
+    )
+
+
+def test_the_line_reports_what_a_round_proposed_and_what_landed():
+    """A proposal that killed nothing is not stored, and the two numbers are
+    what says how much of the call was waste."""
+    landed = line(
+        cases=4,
+        outcome=CaseOutcome.PASSED,
+        landed=True,
+        mutants=12,
+        survived=2,
+        won=3,
+        offered=18,
+        caught=[10],
+    )
+
+    assert landed.endswith("+3/18 case(s)")
 
 
 def test_a_round_that_killed_nothing_still_prints_its_zero():

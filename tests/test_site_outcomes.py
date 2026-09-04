@@ -169,6 +169,20 @@ def test_the_discrimination_record_carries_what_the_loop_left(tmp_path):
     assert one.rounds[0] > 0
 
 
+def test_the_record_says_what_a_round_proposed_and_what_landed(tmp_path):
+    """A proposal that killed nothing is not stored, and the difference is what
+    the call was paid for and got nothing from."""
+    model = FakeWriter(
+        canonical=BRANCHING, solution=AGREES, cases=DECIDES, separators=[[[100], [4], [3]]]
+    )
+
+    _, _, outcomes = run(tmp_path, model)
+
+    one = sites(outcomes)[CallSite.DISCRIMINATION]
+    assert one.offered == 3
+    assert one.won == 2
+
+
 def test_the_canonical_s_mutants_are_the_generator_s_own_count(tmp_path):
     """It wrote the solution the set is enumerated from, and its record is the
     one every attempt leaves."""

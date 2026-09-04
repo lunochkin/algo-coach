@@ -76,6 +76,7 @@ class Progress(BaseModel):
     mutants: int = 0
     survived: int = 0
     won: int = 0
+    offered: int = 0  # what the rounds proposed, so the difference killed nothing
     # the fuzz pass before the rounds: what it built and what it kept
     built: int = 0
     kept: int = 0
@@ -111,6 +112,7 @@ class Bar(BaseModel):
     mutants: int = 0
     survived: int = 0
     won: int = 0  # cases the rounds appended to the set
+    offered: int = 0  # what they proposed to it, so the difference killed nothing
     # the fuzz pass before them: the inputs it built and the ones it kept,
     # which cost subprocesses rather than a call
     built: int = 0
@@ -233,6 +235,7 @@ def sites(
         gate=bar.gate,
         survived=bar.survived,
         won=bar.won,
+        offered=bar.offered,
         killed=sum(bar.caught),
         rounds=bar.caught,
     )
@@ -306,6 +309,7 @@ def measured(
         # the rounds' own, which is what the site is scored on. The pass before
         # them paid for no call
         won=len(hardened.cases) - kept,
+        offered=hardened.offered,
         built=hardened.fuzzed.built if hardened.fuzzed else 0,
         kept=kept,
         declared=hardened.declared,
@@ -518,6 +522,7 @@ def write_problems(
             mutants=bar.mutants,
             survived=bar.survived,
             won=bar.won,
+            offered=bar.offered,
             built=bar.built,
             kept=bar.kept,
             declared=bar.declared,

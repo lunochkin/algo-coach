@@ -435,6 +435,7 @@ def site_outcome(
     won: int = 0,
     killed: int = 0,
     rounds: list[int] | None = None,
+    offered: int = 0,
     separating: int | None = None,
     unseparated: str | None = None,
 ) -> SiteOutcome:
@@ -455,6 +456,7 @@ def site_outcome(
         won=won,
         killed=killed,
         rounds=list(rounds or []),
+        offered=offered,
         separating=separating,
         unseparated=unseparated,
         model=model,
