@@ -22,9 +22,9 @@ said. Every reading is stored with the configuration that produced it, scored
 against hand claims, and outranked by the user's own record forever.
 
 Built and measured: the technique vocabulary, the attribution classifier, cards
-and template matching. Generation is next, and the numbers below were taken on
-the corpus it replaces — [what that corpus was, and why it
-went](#the-archived-corpus).
+and template matching. Problem generation is built and has written no corpus
+yet, so the numbers below were taken on the archived corpus it replaces —
+[what that corpus was, and why it went](#the-archived-corpus).
 
 ## Where the model sits
 
@@ -37,10 +37,13 @@ Four places, and nothing is trained anywhere in the engine:
 - **Attribution** — a prompted classifier reads the *solution* and names the
   techniques it used, choosing among the problem's own candidates. No training
   data exists for that label. Public corpora tag problems, not solutions, so a
-  trained model would predict the fallback it is meant to improve on.
-- **Template matching** — which problems exercise which form of a card, read
-  from the statement, because a technique says what a problem is *about* and
-  not which form solves it.
+  trained model would predict the fallback it is meant to improve on. The same
+  reader, given the whole vocabulary instead, reads each canonical the engine
+  wrote — which is what a problem's own techniques are folded from.
+- **Template matching** — which of a card's forms a *solution* displays, read
+  from the code with the statement beside it for what the code leaves implicit.
+  A technique says what a problem is *about*, not which form solves it, so the
+  verdict is keyed to the solution rather than to the problem.
 - **Card authoring** — a skill turns notes into structured cards; every code
   template is checked against a brute force before it lands.
 
@@ -189,9 +192,11 @@ is why the engine runs them rather than the frontier.
 | Store | empty of problems and attempts; generation refills it |
 
 Built: the technique vocabulary, the attribution classifier and its eval, the
-call log and transport, cards, and template matching. Next: the engine writing
-its own problems, then the ladder and recall, then the drill loop it serves and
-judges. Not started: failure-mode diagnosis, mastery estimation, scheduling.
+call log and transport, cards, template matching, and the four calls that write
+a problem. Next: what a generated corpus is worth — the matcher scored against
+a hand pass, and the announcement floor — then the drill loop the engine
+serves and judges. Not started: the ladder and recall, failure-mode diagnosis,
+mastery estimation, scheduling.
 Sequencing lives in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## The archived corpus
@@ -237,8 +242,8 @@ the problem, the test cases that decide it, and the log. Nothing is fetched
 from an external platform, and no third-party client sits in the loop.
 
 The board, the hand claim and the classifier ran daily over the archived
-corpus. Writing the problems is next; serving one, judging it and asking for
-the label follow, and the loop above is whole then.
+corpus. Writing the problems is built. Serving one, judging it and asking for
+the label are next, and the loop above is whole then.
 
 ## How a problem gets written
 
@@ -308,7 +313,7 @@ anywhere, and the same card teaches from your backlog or someone else's.
 
 ```mermaid
 flowchart LR
-  C["card<br/>templates + selector"] --> M["template matching<br/><i>which problems exercise which form</i>"]
+  C["card<br/>templates + selector"] --> M["template matching<br/><i>which solutions display which form</i>"]
   P["the problem corpus"] --> M
   M --> L["ladder<br/><i>a rung per core template,<br/>the selector fills the rest</i>"]
   C --> R["recall<br/><i>per template, blank-filled cold</i>"]
@@ -323,10 +328,10 @@ Why it is shaped this way:
   form scores the same as a fluent one.
 - **Coverage is derived, not authored.** The ladder must exercise every core
   form, and a technique says what a problem is *about*, not which form solves
-  it. So
-  which problems exercise which template is read from the statement and stored
-  per pair, negatives included. A core form no problem matches is a reported
-  gap, never a quietly shorter ladder.
+  it. So which template a solution displays is read from its code and stored
+  per pair, negatives included, and a rung is filled by the problem that
+  solution answers. A core form no solution displays is a reported gap, never a
+  quietly shorter ladder.
 - **Recall fluency is not solving fluency.** Reproducing a form cold is not
   recognising it unprompted. A probe — an unseen problem, no card in view —
   asks the second question. The gap between the two is exactly the false
@@ -335,9 +340,10 @@ Why it is shaped this way:
 **Where it stands:** the card record, the authoring skill and its nine cards,
 seeding, the template matcher and the hand-annotation prompt are built. Against
 the archived corpus, nine cards pre-filtered to ~2.8k questions and ~14k pair
-verdicts. Next: the matcher's score against a hand-annotated reference, then a
-corpus generated for the forms the cards teach, then ladder resolution, card
-runs and the recall trainer. Item by item in
+verdicts. Next: a corpus written for the forms the cards teach, since the reset
+left no pair carrying a hand reference and none can until problems exist to
+annotate. Then the matcher's score against that hand pass, then ladder
+resolution, card runs and the recall trainer. Item by item in
 [`docs/TODO.md`](docs/TODO.md), phases 6 and 7.
 
 ## Design
@@ -365,7 +371,7 @@ The load-bearing ones:
   record is revised or removed in place. Component boundaries can therefore be
   refactored, and the record schema cannot. The schema is designed a phase
   ahead of the features on purpose.
-- **[Identity is the engine's.](docs/architecture/corpus.md#problems)** Every
+- **[Identity is the engine's.](docs/architecture/README.md#invariants)** Every
   reference in an append-only record is one the engine minted, so the log stays
   readable on its own.
 - **[The user's record stands over the machine's](docs/architecture/log.md#technique-claims)**
@@ -396,6 +402,10 @@ uv run algo-coach <command>
 | `claim` | hand-label which techniques a stored attempt used |
 | `classify` | claim stored attempts with the classifier |
 | `match` | which problems exercise a card's templates |
+| `read` | name the techniques each stored canonical used |
+| `generate` | write problems for one of a card's templates |
+| `gaps` | core templates no stored solution displays |
+| `annotate` | which of a card's templates a problem exercises, by hand |
 | `score` | the classifier against the hand claims, per technique |
 | `movement` | how far the classifier's claims move the board off the fallback |
 
@@ -405,13 +415,19 @@ uv run algo-coach <command>
 src/algo_coach/schema/       the record contracts — the public part
 src/algo_coach/techniques/   the vocabulary: 27 codes, each with its criterion
 src/algo_coach/claims/       the attribution classifier and its scoring
-src/algo_coach/matches/      which problems exercise which card template
+src/algo_coach/matches/      which solutions display which card template
 src/algo_coach/calls/        the model transport (OpenRouter) and the call log
 src/algo_coach/board/        the per-technique view, derived on read
-src/algo_coach/{log,cards,problems}/
-docs/architecture/        concepts, boundaries, invariants, flows
+src/algo_coach/generation/   the four calls that write a problem, and its gates
+src/algo_coach/drafts/       one attempt at writing a problem, held as it goes
+src/algo_coach/outcomes/     what each call site left on one such attempt
+src/algo_coach/mutation/     the mutants a case set has to kill
+src/algo_coach/runner/       running a solution against a problem's cases
+src/algo_coach/{log,cards,problems,cases,solutions,readings,verifications}/
+docs/architecture/           concepts, boundaries, invariants, flows
 docs/{ROADMAP,TODO}.md       sequencing, and what is open
 .claude/skills/card-author/  the skill that authors cards
+content/cards/               the authored cards — never committed
 data/                        your attempts and solutions — never committed
 data/old/                    the archived corpus: calibration, not a store
 ```
