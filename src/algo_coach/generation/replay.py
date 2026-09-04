@@ -70,6 +70,9 @@ class Subject:
     problem: Problem
     canonical: str
     reference: str
+    # the clock the search times against, absent on a problem whose template
+    # claims no speedup and on one landed before the role existed
+    naive: str | None
     cases: list[TestCase]
     template: Template | None  # absent where the brief named a technique
 
@@ -107,6 +110,7 @@ def subjects(corpus: Corpus, cards: Iterable[Card]) -> list[Subject]:
         mine = [one for one in solutions if one.problem_id == problem.id]
         canonical = next((one for one in mine if one.role is SolutionRole.CANONICAL), None)
         blind = next((one for one in mine if one.role is SolutionRole.REFERENCE), None)
+        slow = next((one for one in mine if one.role is SolutionRole.NAIVE), None)
         theirs = [one for one in cases if one.problem_id == problem.id]
         if canonical is None or blind is None or not theirs:
             continue
@@ -115,6 +119,7 @@ def subjects(corpus: Corpus, cards: Iterable[Card]) -> list[Subject]:
                 problem=problem,
                 canonical=canonical.code,
                 reference=blind.code,
+                naive=slow.code if slow is not None else None,
                 cases=theirs,
                 template=forms.get(problem.generated_for or ""),
             )
@@ -290,6 +295,11 @@ def inputs_replay(
     no verdict on the code this call wrote."""
     if subject.template is None or not subject.template.speedup:
         return Asked()
+    if subject.naive is None:
+        # a problem landed before the clock was stored with it. The site's own
+        # answer would be judged by a search that cannot run
+        notes("timing", "no naive solution stored")
+        return Asked()
     configuration = bench.inputs
     digest = inputs_hash(subject.problem.statement)
     if not fresh and asked_already(stored, CallSite.INPUTS, subject, configuration, digest):
@@ -301,9 +311,7 @@ def inputs_replay(
     found = search(
         make(built.code, cap_ms),
         canonical=subject.canonical,
-        # the reference stands in for the clock until a naive solution is
-        # stored with the problem and this site is asked for one
-        naive=subject.reference,
+        naive=subject.naive,
         reference=subject.reference,
         written=MachineProvenance.of(call),
         cap_ms=DRILL_CAP_MS,

@@ -99,6 +99,34 @@ def test_one_act_writes_every_part(tmp_path, template):
     ]
 
 
+NAIVE = "def solve(xs):\n    return len([one for one in xs])\n"
+
+
+def test_the_clock_lands_beside_the_two_other_solutions(tmp_path, template):
+    """A replay re-runs the search over the stored problem, and re-deriving the
+    solution it measures against would re-pay the call that wrote it."""
+    corpus = Corpus.at(tmp_path)
+
+    problem = land(
+        corpus, template, drafted(naive=NAIVE, clock=written(call("call-4", temperature=None)))
+    )
+
+    stored = corpus.solutions.for_problem(problem.id, SolutionRole.NAIVE)
+    assert [one.code for one in stored] == [NAIVE]
+    # its own call rather than the problem's: a configuration is per call site
+    assert [one.call_id for one in stored] == ["call-4"]
+
+
+def test_a_form_that_is_its_own_optimum_lands_no_clock(tmp_path, template):
+    """Nothing measures it, so the draft carries none and the corpus stores
+    none."""
+    corpus = Corpus.at(tmp_path)
+
+    problem = land(corpus, template, drafted())
+
+    assert corpus.solutions.for_problem(problem.id, SolutionRole.NAIVE) == []
+
+
 def test_the_problem_is_written_last(tmp_path, template, monkeypatch):
     """Four stores cannot be written atomically. A run that dies part way
     leaves records pointing at a problem no reader finds, rather than a problem

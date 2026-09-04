@@ -91,6 +91,13 @@ def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
     corpus.solutions.append(
         mint.solution(problem.id, draft.reference, SolutionRole.REFERENCE, **blind)
     )
+    if draft.naive is not None:
+        # stored so a later search measures against the solution this run paid
+        # for. Absent where the template claims no speedup, since nothing
+        # measures a form that is its own optimum
+        corpus.solutions.append(
+            mint.solution(problem.id, draft.naive, SolutionRole.NAIVE, **copied(draft.clock))
+        )
     corpus.matches.append(mint.generator_match(template.id, canonical.id))
     corpus.problems.put(problem)
     return problem

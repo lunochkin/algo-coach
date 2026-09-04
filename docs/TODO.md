@@ -354,7 +354,7 @@ is in `corpus.md`.
 - [x] Settle the separating case from the reference, as every other case is
       settled. A naive solution is slow at every size, so the separating input
       is small enough for the reference to answer it
-- [ ] Store the naive solution at landing, as the reference is stored. A replay
+- [x] Store the naive solution at landing, as the reference is stored. A replay
       and a resume both re-run the search, and neither should re-pay the call
       that wrote the clock
 - [ ] Ask the naive site on a replay, where a speedup is claimed, as the inputs

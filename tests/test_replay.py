@@ -3,10 +3,16 @@ from matching import card, seeded, template
 
 from algo_coach.calls import CallLog, Configuration
 from algo_coach.cases import CaseLog
-from algo_coach.generation import Bench, Corpus, replay, write_problems
+from algo_coach.generation import Bench, Corpus, clock, replay, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import CallSite, Discard, ProblemStatus, RetirementReason
+from algo_coach.schema import (
+    CallSite,
+    Discard,
+    ProblemStatus,
+    RetirementReason,
+    SolutionRole,
+)
 from algo_coach.solutions import SolutionLog
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
@@ -60,6 +66,34 @@ def test_a_replay_asks_the_answering_sites_about_a_stored_problem(tmp_path, monk
 
     assert set(sites(outcomes)) == {CallSite.BLIND, CallSite.INPUTS}
     assert result.asked == 2
+
+
+def test_the_search_measures_against_the_stored_clock(tmp_path, monkeypatch):
+    """A replay re-runs the search, and asking for a naive solution again would
+    re-pay the call the landing already bought."""
+    cards = landed(tmp_path, monkeypatch)
+    model = FakeWriter(generator=BUILDS)
+
+    replayed(tmp_path, model, cards)
+
+    assert clock.SYSTEM not in [asked["system"] for asked in model.calls]
+    (stored,) = SolutionLog(tmp_path).for_problem(
+        ProblemStore(tmp_path).all()[0].id, SolutionRole.NAIVE
+    )
+    assert stored.code == SLOW
+
+
+def test_a_problem_with_no_stored_clock_is_not_searched_over(tmp_path, monkeypatch):
+    """One landed before the role existed. The site's own answer would be
+    judged by a search that cannot run."""
+    cards = landed(tmp_path, monkeypatch)
+    log = SolutionLog(tmp_path)
+    kept = [one for one in log.solutions() if one.role is not SolutionRole.NAIVE]
+    log.solutions_path.write_text("".join(one.model_dump_json() + "\n" for one in kept))
+
+    _, outcomes = replayed(tmp_path, FakeWriter(generator=BUILDS), cards)
+
+    assert CallSite.INPUTS not in sites(outcomes)
 
 
 def test_a_replayed_record_names_the_problem_it_answered(tmp_path, monkeypatch):

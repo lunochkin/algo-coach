@@ -284,6 +284,9 @@ A solution the engine wrote for a problem, in one of three roles.
 - **Excluded from what a canonical answers for**, as the reference is: no
   technique reading, no template match, no rung. It is the approach the card
   exists to replace.
+- **Stored at landing, as the reference is.** A replay re-runs the search over
+  the stored problem, and re-deriving the clock would re-pay the call that
+  wrote it.
 - **The role is stored, because all three are verified against the same
   cases.** Passing says nothing about which of them a solution is, and a reader
   taking a reference for a canonical would teach the approach the card exists
