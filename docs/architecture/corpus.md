@@ -147,8 +147,8 @@ What decides whether a solution to a generated problem is correct.
 - **The separating case is chosen against the sitting's cap**, never
   generation's. It is the size at which a submission that did not use the form
   fails, so the number a sitting judges under is what decides it.
-- **A separating input over the ceiling stores no case.** The problem lands
-  without one, and the run reports it.
+- **A separating input over the ceiling stores no case.** The draft stops at
+  the search, and the run reports what the walk found.
 - **The two ways that happens assert opposite things, and are named apart.** A
   search that reached a separating size and could not store the case has
   established the speedup, and it reports the size and both measurements. One
@@ -163,19 +163,30 @@ What decides whether a solution to a generated problem is correct.
 - **Three things produce that answer**, and nothing in the run separates them:
   the reference reached the form, the input generator built a shape the form
   does not beat, or the template claims a speedup its form does not have.
-- **The problem lands all the same.** Nothing about its statement or its cases
-  was rejected. Discarding here would keep only the problems the blind model
-  was slow at.
+- **A problem whose template claims a speedup lands with the case that
+  separates it, or it does not land.** The claim is what a rung teaches, and a
+  corpus carrying problems that do not demonstrate it teaches the form on
+  problems the naive solution also solves.
+- **It is held as a draft rather than discarded.** The statement, the cases and
+  both solutions passed every gate that judges them, and discarding here would
+  keep only the problems the blind model was slow at. The draft is resumed
+  where it stopped, so nothing the calls bought is thrown away.
+- **A held draft leaves by one of three exits**, and each names a different
+  thing the run got wrong. A resumed search separates it. The template's
+  `speedup` is corrected, and the next resume skips the search. Or the draft is
+  rejected, which is the answer where the reference reached the form: the
+  claim holds and this problem does not exercise it.
+- **A corrected `speedup` is what a resume watches besides the digest.** A flag
+  edit moves neither a configuration nor a prompt, so a resume reading only
+  those would leave the draft where the search stopped it.
+- **What a resumed search reaches is bounded.** It repairs an input generator
+  that built the wrong shape. It does not reach a reference that wrote the
+  form: that solution is immutable and it is still the clock, so the exit
+  there is the flag or the rejection.
 - **What goes unenforced is a speedup whose separating size is a million
   elements**, which is a log factor rather than the quadratic a card teaches.
-- **So nothing enforces a claimed speedup at generation.** The search reports,
-  and the corpus carries the unseparated problem until the search is resumed.
-- **A problem that landed unseparated is searched again once the system is
-  fixed**, and the case it finds is appended as any other addition is.
-- **What a resumed search reaches is bounded.** It repairs an input generator
-  that built the wrong shape and a template whose flag was wrong. It does not
-  reach a reference that wrote the form: that solution is immutable and it is
-  still the clock.
+  The bar is that some input separates the two, not that the separation is
+  worth the card.
 - **Consistent is not the same as statable.** A set fitting only "compute f,
   except return 7 on this input" is a function nobody can write a statement
   for. Such a problem does not land, and the discrimination bar is what catches

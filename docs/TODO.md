@@ -290,7 +290,7 @@ canonical. What the first corpus settles is the bound.
       that killed. The first run stored fifteen that killed nothing, and every
       verification runs them forever
 
-### The speedup that nothing enforces
+### Enforcing a claimed speedup
 
 - [x] Separate the search's two empty answers: the reference finished at the
       largest legal input, against the built input crossing the ceiling.
@@ -300,9 +300,17 @@ canonical. What the first corpus settles is the bound.
       less — and write the choice into `corpus.md`
 - [x] Move the search ahead of the mutation loop, appending its case after it.
       A disagreement at the separating size then costs no round
-- [ ] Search again over the problems that landed unseparated, appending the
-      case. The draft is cleared at landing, so this reads the stored problem
-      rather than a draft
+- [ ] Hold a draft at `searched` where its template claims a speedup and the
+      search stored no case, so nothing lands undemonstrated. A test lands a
+      separated problem and holds an unseparated one
+- [ ] Add a `Discard` arm for a reference that wrote the form, and reject a
+      held draft with it. The four existing arms all say the statement, the
+      canonical or the cases were wrong, and this one says none of them was
+- [ ] Add the template's `speedup` flag to what `moved_at` reads, so correcting
+      it resumes the drafts the search held. A flag edit moves neither a
+      configuration nor a digest
+- [ ] Report the held drafts at the end of a run, naming the template and what
+      the search found. They are the gap the next generation run aims at
 
 ### Writing a problem as states
 

@@ -163,9 +163,9 @@ before it away.
 - **A state per step that can fail**: drafted, checked, referenced, agreed,
   built, searched, hardened, landed. The names are the steps above and the
   order is theirs.
-- **A search that separated nothing does not stop the draft.** What it found
-  is recorded either way, and `corpus.md` gives why an empty answer is not the
-  problem's defect.
+- **A search that separated nothing stops the draft at `searched`.** What it
+  found is recorded either way, and `corpus.md` gives the three exits a held
+  draft leaves by.
 - **`rejected` is terminal and names the gate that reached it**, which is the
   same `Discard` a site outcome carries. Terminal means no resume rather than
   no record.
