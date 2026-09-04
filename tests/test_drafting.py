@@ -5,36 +5,57 @@ from algo_coach.calls import CallLog
 from algo_coach.drafts import DraftStore
 from algo_coach.generation import Corpus, write_problems
 from algo_coach.outcomes import OutcomeLog
-from algo_coach.schema import Discard, WritingState
+from algo_coach.schema import Discard, Draft, WritingState
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 WRONG = "def solve(xs):\n    return len(xs) + 1\n"
 
 
-def written(tmp_path, model: FakeWriter, **overrides):
-    """One problem, with the draft store the run writes each step to."""
+def run(tmp_path, model: FakeWriter, **overrides):
+    """One problem, with the store the run writes each step's draft to."""
     (one,) = seeded(tmp_path, card(**overrides))
     drafts = DraftStore(tmp_path)
-    write_problems(
-        model,
-        CallLog(tmp_path),
-        one,
-        one.templates[0],
-        Corpus.at(tmp_path),
-        drafts=drafts,
+    result = write_problems(
+        model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path), drafts=drafts
     )
+    return result, drafts
+
+
+def written(tmp_path, model: FakeWriter, **overrides):
+    """The draft a stopped run left behind."""
+    _, drafts = run(tmp_path, model, **overrides)
     (stored,) = drafts.all()
     return stored
 
 
-def test_a_run_that_reached_the_end_leaves_the_draft_hardened(tmp_path):
-    """The last step that can fail. Landing is what moves it further, and
-    nothing clears it yet."""
-    stored = written(tmp_path, FakeWriter())
+def test_a_landed_draft_is_cleared(tmp_path):
+    """The problem it became is what a reader finds, and nothing in the draft
+    is re-derivable from anywhere else."""
+    result, drafts = run(tmp_path, FakeWriter())
 
-    assert stored.state is WritingState.HARDENED
-    assert stored.gate is None
+    (landed,) = result.drafted
+    assert landed.state is WritingState.LANDED
+    assert landed.problem_id is not None
+    assert drafts.all() == []
+
+
+def test_a_draft_naming_a_problem_is_cleared_by_the_next_run(tmp_path):
+    """A run that died between landing and clearing leaves one, and writing
+    its problem a second time is the only other way to finish it."""
+    (one,) = seeded(tmp_path, card())
+    drafts = DraftStore(tmp_path)
+    write_problems(
+        FakeWriter(), CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path), drafts=drafts
+    )
+    corpus = Corpus.at(tmp_path)
+    (problem,) = corpus.problems.all()
+    drafts.put(a_landed_draft(problem.id))
+
+    write_problems(FakeWriter(), CallLog(tmp_path), one, one.templates[0], corpus, drafts=drafts)
+
+    assert drafts.all() == []
+    assert len(corpus.problems.all()) == 2
 
 
 def test_a_canonical_yielding_no_value_stops_at_the_first_gate(tmp_path):
@@ -73,7 +94,8 @@ def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
     """The statement's own cases, the reference, the builder and its bound,
     each written as the step that produced it answered."""
     monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
-    stored = written(tmp_path, FakeWriter(solution=SLOW, generator=BUILDS))
+    result, _ = run(tmp_path, FakeWriter(solution=SLOW, generator=BUILDS))
+    (stored,) = result.drafted
 
     assert stored.canonical == CANONICAL
     assert [case.expected for case in stored.declared] == [3]
@@ -85,8 +107,9 @@ def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
 def test_each_step_copies_the_configuration_of_its_own_call(tmp_path):
     """A resume starts at the first step whose configuration or digest moved,
     so a draft holding one for the run would answer for every step."""
-    stored = written(tmp_path, FakeWriter(generator=BUILDS))
+    result, _ = run(tmp_path, FakeWriter(generator=BUILDS))
 
+    (stored,) = result.drafted
     assert stored.generator.call_id != stored.blind.call_id
     assert stored.inputs.call_id not in (stored.generator.call_id, stored.blind.call_id)
 
@@ -95,19 +118,33 @@ def test_the_draft_and_its_site_outcomes_carry_one_id(tmp_path):
     """The writing id, which is what groups the four records of one attempt
     with the draft they were written through."""
     (one,) = seeded(tmp_path, card())
-    drafts, outcomes = DraftStore(tmp_path), OutcomeLog(tmp_path)
-    write_problems(
+    outcomes = OutcomeLog(tmp_path)
+    result = write_problems(
         FakeWriter(),
         CallLog(tmp_path),
         one,
         one.templates[0],
         Corpus.at(tmp_path),
-        drafts=drafts,
+        drafts=DraftStore(tmp_path),
         outcomes=outcomes,
     )
 
-    (stored,) = drafts.all()
+    (stored,) = result.drafted
     assert {left.writing_id for left in outcomes.outcomes()} == {stored.id}
+
+
+def a_landed_draft(problem_id: str) -> Draft:
+    """What a run that died between landing and clearing leaves behind."""
+    return Draft(
+        id="w0",
+        state=WritingState.LANDED,
+        problem_id=problem_id,
+        title="Widest fair stretch",
+        statement="Given a list of readings, return ...",
+        canonical=CANONICAL,
+        declared=[{"args": [[1, 2, 3]], "expected": 3}],
+        difficulty="medium",
+    )
 
 
 def test_a_run_without_a_store_writes_no_draft(tmp_path):

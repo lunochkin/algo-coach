@@ -267,3 +267,30 @@ def test_a_draft_does_not_cite_itself():
     from unreadable."""
     with pytest.raises(ValidationError, match="rerun_of"):
         make_draft(rerun_of="w1")
+
+
+def test_a_draft_that_has_not_landed_names_no_problem():
+    """The id exists only once the problem is stored, so absence is every state
+    before it."""
+    assert make_draft().problem_id is None
+
+
+def test_a_landed_draft_names_the_problem_it_became():
+    """A crash between landing and clearing leaves this, and it is what tells
+    the next run to clear rather than write the problem a second time."""
+    assert make_draft(state="landed", problem_id="p1").problem_id == "p1"
+
+
+def test_a_landed_draft_must_say_which_problem():
+    """Without it the next run cannot tell a landed draft from one that stopped
+    before landing, and would write the problem twice."""
+    with pytest.raises(ValidationError, match="problem_id"):
+        make_draft(state="landed")
+
+
+@pytest.mark.parametrize("state", [WritingState.HARDENED, WritingState.REJECTED])
+def test_a_draft_that_did_not_land_carries_no_problem(state):
+    """It would name a landing that did not happen."""
+    gate = {"gate": "disagreed"} if state is WritingState.REJECTED else {}
+    with pytest.raises(ValidationError, match="problem_id"):
+        make_draft(state=state, problem_id="p1", **gate)

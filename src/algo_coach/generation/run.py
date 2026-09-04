@@ -261,6 +261,25 @@ def held(drafts: DraftStore | None, draft: Draft) -> Draft:
     return draft
 
 
+def cleared(drafts: DraftStore | None, draft: Draft) -> None:
+    """The draft is working state, and the problem it became is what a reader
+    finds. Nothing in it is re-derivable from anywhere else, so clearing it is
+    what landing means."""
+    if drafts is not None:
+        drafts.remove(draft.id)
+
+
+def swept(drafts: DraftStore | None) -> None:
+    """A draft naming a problem landed and was not cleared, so the run that
+    wrote it died between the two. Cleared here, since writing the problem
+    again is the only other way to finish it."""
+    if drafts is None:
+        return
+    for draft in drafts.all():
+        if draft.state is WritingState.LANDED:
+            drafts.remove(draft.id)
+
+
 def moved(draft: Draft, state: WritingState, **fields: Any) -> Draft:
     """Revised in place rather than appended: the draft store is working state,
     and a step's answer moves the draft it was written on."""
@@ -538,6 +557,7 @@ def write_problems(
     only: a discard means the calls answered and the runs rejected the writing.
     """
     result = GenerationResult()
+    swept(drafts)
     written = written_for(corpus.problems.all(), template)
     consecutive = 0
 
@@ -575,6 +595,10 @@ def write_problems(
         written.append(draft.statement)
         if checked.survived:
             problem = land(corpus, template, draft)
+            # named before it is cleared: a crash between the two then leaves a
+            # draft the next run clears rather than a problem written twice
+            draft = held(drafts, moved(draft, WritingState.LANDED, problem_id=problem.id))
+            cleared(drafts, draft)
             record(outcomes, left, problem_id=problem.id)
             result.drafted.append(draft)
         else:

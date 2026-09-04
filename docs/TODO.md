@@ -327,7 +327,7 @@ exit criteria reads a draft.
 - [x] Write the draft after each step and move its state, replacing the tuple
       `write_one` returns. A test reads the state left by a run stopped at each
       step
-- [ ] Clear the draft at landing, naming the problem it became. A crash between
+- [x] Clear the draft at landing, naming the problem it became. A crash between
       the two then leaves a draft the next run clears rather than one it writes
       a second time
 - [ ] Find the first step of a draft whose configuration or digest moved. That

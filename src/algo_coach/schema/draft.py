@@ -81,6 +81,10 @@ class Draft(BaseModel):
     # what rejected the answer, as the same gate on the site whose output made
     # it decidable. A field rather than a record: nothing but the run writes it
     gate: Discard | None = None
+    # the problem this draft landed as, absent until it did. A crash between
+    # landing and clearing leaves a draft naming one, which is what tells the
+    # next run to clear it rather than write the problem a second time
+    problem_id: str | None = Field(default=None, min_length=1)
     # the draft this one re-runs a step of, absent on a first attempt. A
     # rejected draft is not resumed, so re-running the step its gate reached
     # mints a draft that cites it rather than moving the one it came from
@@ -126,6 +130,17 @@ class Draft(BaseModel):
             raise ValueError("a rejected draft names the gate that reached it")
         if not rejected and self.gate is not None:
             raise ValueError(f"a {self.state} draft carries no gate")
+        return self
+
+    @model_validator(mode="after")
+    def _landing_names_the_problem(self) -> Draft:
+        """Rejects a landed draft naming no problem, and a problem named by one
+        that has not landed."""
+        landed = self.state is WritingState.LANDED
+        if landed and self.problem_id is None:
+            raise ValueError("a landed draft names the problem_id it became")
+        if not landed and self.problem_id is not None:
+            raise ValueError(f"a {self.state} draft carries no problem_id")
         return self
 
     @model_validator(mode="after")
