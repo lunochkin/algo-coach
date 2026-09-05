@@ -36,7 +36,7 @@ from algo_coach.generation.run import (
 from algo_coach.generation.steps import Notes, Step
 from algo_coach.generation.writing import Writing
 from algo_coach.outcomes import OutcomeLog, answered
-from algo_coach.runs import ABORT_AFTER
+from algo_coach.runs import Bounded, as_answered
 from algo_coach.schema import (
     Call,
     CallSite,
@@ -158,39 +158,41 @@ def replay(
     """
     asking = subjects(corpus, cards)[:limit]
     result = ReplayResult()
-    consecutive = 0
     stored = outcomes.outcomes()
+    # one item per site and subject, asked one at a time: each site reads the
+    # records the one before it appended
+    pairs = [
+        (Notes(on_step, index=index, total=len(asking)), subject, site)
+        for index, subject in enumerate(asking, start=1)
+        for site in REPLAYED
+    ]
 
-    for index, subject in enumerate(asking, start=1):
-        notes = Notes(on_step, index=index, total=len(asking))
-        for site in REPLAYED:
-            left: list[SiteOutcome] = []
-            writing = Writing(template_id=problem_template(subject), into=left)
-            try:
-                asked = ASK[site](transport, calls, subject, stored, bench, cap_ms, fresh, notes)
-            except Exception as failure:
-                result.failed.append(
-                    Failed(problem_id=subject.problem.id, site=site, reason=repr(failure))
-                )
-                notes(site, f"failed: {failure!r}")
-                consecutive += 1
-                if consecutive == ABORT_AFTER:
-                    result.aborted = True
-                    return result
-                continue
+    def ask(pair: tuple[Notes, Subject, CallSite]) -> Asked:
+        notes, subject, site = pair
+        return ASK[site](transport, calls, subject, stored, bench, cap_ms, fresh, notes)
 
-            consecutive = 0
-            if asked.skipped:
-                result.skipped += 1
-                continue
-            if asked.call is None:
-                result.unasked += 1
-                continue
-            writing(site, asked.call, **asked.verdicts)
-            for one in left:
-                outcomes.append(one.model_copy(update={"problem_id": subject.problem.id}))
-            stored = [*stored, *left]
-            result.asked += 1
+    answers = Bounded(as_answered(ask, pairs, concurrency=1))
+    for _, (notes, subject, site), asked, failure in answers:
+        if failure is not None or asked is None:
+            result.failed.append(
+                Failed(problem_id=subject.problem.id, site=site, reason=repr(failure))
+            )
+            notes(site, f"failed: {failure!r}")
+            continue
+        if asked.skipped:
+            result.skipped += 1
+            continue
+        if asked.call is None:
+            result.unasked += 1
+            continue
+        left: list[SiteOutcome] = []
+        writing = Writing(template_id=problem_template(subject), into=left)
+        writing(site, asked.call, **asked.verdicts)
+        for one in left:
+            outcomes.append(one.model_copy(update={"problem_id": subject.problem.id}))
+        stored = [*stored, *left]
+        result.asked += 1
+    result.aborted = answers.aborted
     return result
 
 

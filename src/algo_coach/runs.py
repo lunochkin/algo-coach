@@ -2,6 +2,7 @@
 
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
+from dataclasses import dataclass
 from itertools import islice
 
 # Consecutive failures that mean broken rather than unlucky: a rejected key
@@ -19,6 +20,33 @@ def as_answered[T, R](
     concurrency: int = CONCURRENCY,
 ) -> Iterator[tuple[T, R | None, Exception | None]]:
     yield from as_answered_grouped(work, {None: items}, concurrency=concurrency)
+
+
+@dataclass
+class Bounded[T, R]:
+    """The answers of one run, numbered as they arrive and stopped after
+    `ABORT_AFTER` consecutive failures. `aborted` says whether they were.
+
+    Consecutive by the order answered, so with calls in flight a broken key
+    costs up to `concurrency` failures rather than `ABORT_AFTER`. The failure
+    that reached the bound is still yielded: the caller records it, and the
+    stream ends after.
+    """
+
+    answers: Iterable[tuple[T, R | None, Exception | None]]
+    aborted: bool = False
+
+    def __iter__(self) -> Iterator[tuple[int, T, R | None, Exception | None]]:
+        consecutive = 0
+        for index, (item, answer, failure) in enumerate(self.answers, start=1):
+            yield index, item, answer, failure
+            if failure is None:
+                consecutive = 0
+                continue
+            consecutive += 1
+            if consecutive == ABORT_AFTER:
+                self.aborted = True
+                return
 
 
 def as_answered_grouped[K, T, R](

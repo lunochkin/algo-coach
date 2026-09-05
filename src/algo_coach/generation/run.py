@@ -38,7 +38,7 @@ from algo_coach.generation.steps import SILENT, Notes, Step
 from algo_coach.generation.writing import UNRECORDED, Writing
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.runner import NoValue, outputs
-from algo_coach.runs import ABORT_AFTER
+from algo_coach.runs import Bounded, as_answered
 from algo_coach.schema import (
     Call,
     CallSite,
@@ -897,29 +897,32 @@ def write_problems(
     result = GenerationResult()
     swept(drafts)
     written = written_for(corpus.problems.all(), template)
-    consecutive = 0
+    # one recorder per problem, filled as the sites answer and stored once the
+    # problem's fate is known, which is the first point there is an id to name
+    writings = [(index, Writing(template_id=template.id, into=[])) for index in range(1, count + 1)]
 
-    for index in range(1, count + 1):
-        # filled as the sites answer and stored once the problem's fate is
-        # known, which is the first point there is a problem id to name
-        records: list[SiteOutcome] = []
-        writing = Writing(template_id=template.id, into=records)
-        # the tail this problem appends, which is what its row is priced over
-        paid = len(calls.appended)
-        try:
-            passage = write_one(
-                transport,
-                calls,
-                card,
-                template,
-                written,
-                bench=bench,
-                cap_ms=cap_ms,
-                notes=Notes(on_step, index=index, total=count),
-                writing=writing,
-                drafts=drafts,
-            )
-        except Exception as failure:
+    def ask(item: tuple[int, Writing]) -> Passage:
+        index, writing = item
+        return write_one(
+            transport,
+            calls,
+            card,
+            template,
+            written,
+            bench=bench,
+            cap_ms=cap_ms,
+            notes=Notes(on_step, index=index, total=count),
+            writing=writing,
+            drafts=drafts,
+        )
+
+    # one at a time: each call is shown the statements the ones before it wrote
+    answers = Bounded(as_answered(ask, writings, concurrency=1))
+    # the tail this problem appends, which is what its row is priced over
+    paid = len(calls.appended)
+    for index, (_, writing), passage, failure in answers:
+        records = writing.into or []
+        if failure is not None or passage is None:
             # broad on purpose: a refusal, a rate limit or a reply that does
             # not parse costs this problem and not the run
             raised(
@@ -939,13 +942,9 @@ def write_problems(
                 reason=repr(failure),
                 cost=priced(calls.appended[paid:]),
             )
-            consecutive += 1
-            if consecutive == ABORT_AFTER:
-                result.aborted = True
-                break
+            paid = len(calls.appended)
             continue
 
-        consecutive = 0
         written.append(passage.draft.statement)
         finished(result, corpus, passage, index=index, records=records, outcomes=outcomes)
         p = passage
@@ -975,6 +974,8 @@ def write_problems(
             unmeasured=p.bar.unmeasured,
             cost=priced(calls.appended[paid:]),
         )
+        paid = len(calls.appended)
+    result.aborted = answers.aborted
     return result
 
 

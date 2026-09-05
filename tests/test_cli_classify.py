@@ -4,9 +4,9 @@ import pytest
 from helpers import FakeTransport, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach import cli
-from algo_coach.claims.run import ABORT_AFTER
 from algo_coach.classifier import EFFORT, MODEL
 from algo_coach.log import AttemptLog
+from algo_coach.runs import ABORT_AFTER
 from algo_coach.techniques import standing_claims
 
 TRANSPORT = import_module("algo_coach.cli.transport")

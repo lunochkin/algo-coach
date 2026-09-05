@@ -10,7 +10,7 @@ from algo_coach.classifier import DEFAULT, request_hash
 from algo_coach.readings.reader import candidates, read_one, store
 from algo_coach.readings.stale import outstanding
 from algo_coach.readings.store import ReadingLog
-from algo_coach.runs import ABORT_AFTER, CONCURRENCY, as_answered
+from algo_coach.runs import CONCURRENCY, Bounded, as_answered
 from algo_coach.schema import Configuration, Solution, SolutionRole
 
 
@@ -82,31 +82,20 @@ def read_corpus(
             )
 
     result = ReadingResult()
-    consecutive = 0
-    index = 0
-    for solution, answer, failure in as_answered(
-        lambda solution: read_one(transport, calls, solution, configuration=configuration),
-        asking,
-        concurrency=concurrency,
-    ):
-        # Counted as answers arrive: with several calls in flight a position in
-        # the order asked in jumps about, and a reader wants a count that
-        # climbs.
-        index += 1
+    answers = Bounded(
+        as_answered(
+            lambda solution: read_one(transport, calls, solution, configuration=configuration),
+            asking,
+            concurrency=concurrency,
+        )
+    )
+    for index, solution, answer, failure in answers:
         if failure is not None:
             # Broad on purpose: a refusal or a dropped connection is one
             # solution's problem, and the corpus behind it must still run.
             result.failed.append(Failed(solution_id=solution.id, reason=repr(failure)))
             report(index, solution, reason=repr(failure))
-            consecutive += 1
-            if consecutive == ABORT_AFTER:
-                # Consecutive by the order answered. What is in flight still
-                # lands, so a broken key costs up to `concurrency` failures
-                # rather than `ABORT_AFTER`.
-                result.aborted = True
-                break
             continue
-        consecutive = 0
         techniques, call = answer if answer is not None else ([], None)
         if call is None:
             # Fewer than two candidates were offered, which the whole
@@ -119,4 +108,5 @@ def read_corpus(
         else:
             result.undecided += 1
         report(index, solution, techniques=techniques)
+    result.aborted = answers.aborted
     return result

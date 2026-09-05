@@ -11,7 +11,7 @@ from algo_coach.claims.stale import is_stale
 from algo_coach.classifier import DEFAULT, classify, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim
-from algo_coach.runs import ABORT_AFTER, CONCURRENCY, as_answered
+from algo_coach.runs import CONCURRENCY, Bounded, as_answered
 from algo_coach.schema import Attempt, Call, Configuration, MachineProvenance, Problem
 from algo_coach.techniques import standing_claims
 
@@ -157,19 +157,16 @@ def classify_backlog(
             )
 
     result = ClassifyResult()
-    consecutive = 0
-    index = 0
-    for attempt, answer, failure in as_answered(
-        lambda attempt: read_one(
-            transport, calls, attempt, problems[attempt.problem_id], configuration=configuration
-        ),
-        asking,
-        concurrency=concurrency,
-    ):
-        # Counted as answers arrive: with several calls in flight a position in
-        # the order asked in jumps about, and a reader wants a count that
-        # climbs.
-        index += 1
+    answers = Bounded(
+        as_answered(
+            lambda attempt: read_one(
+                transport, calls, attempt, problems[attempt.problem_id], configuration=configuration
+            ),
+            asking,
+            concurrency=concurrency,
+        )
+    )
+    for index, attempt, answer, failure in answers:
         problem = problems[attempt.problem_id]
         techniques, call = answer if answer is not None else ([], None)
         if failure is not None:
@@ -177,17 +174,9 @@ def classify_backlog(
             # attempt's problem, and the run must not lose the ones behind it.
             result.failed.append(Failed(attempt_id=attempt.id, reason=repr(failure)))
             report(index, attempt, problem.title, reason=repr(failure))
-            consecutive += 1
-            if consecutive == ABORT_AFTER:
-                # Consecutive by the order answered. What is in flight still
-                # lands, so a broken key costs up to `concurrency` failures
-                # rather than `ABORT_AFTER`.
-                result.aborted = True
-                break
             continue
         # Answered, so the classifier is reachable: an undecided verdict is a
         # reading, not a failure.
-        consecutive = 0
         if not techniques:
             # Stored rather than dropped: the candidates did not cover the
             # code, and that answer holds while the question does not change.
@@ -203,4 +192,5 @@ def classify_backlog(
         else:
             result.classified += 1
         report(index, attempt, problem.title, techniques=techniques)
+    result.aborted = answers.aborted
     return result

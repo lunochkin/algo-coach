@@ -8,11 +8,11 @@ from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_pro
 
 from algo_coach.calls import CallLog, Reply
 from algo_coach.claims import score_backlog
-from algo_coach.claims.run import ABORT_AFTER
 from algo_coach.classifier import DEFAULT, EFFORT, MODEL, PIN, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import load_problems
+from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import ClaimSource
 from algo_coach.techniques import standing_claims
 

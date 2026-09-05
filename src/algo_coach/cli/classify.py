@@ -4,11 +4,12 @@ from pathlib import Path
 
 from algo_coach.calls import CallLog
 from algo_coach.claims import classify_backlog
-from algo_coach.claims.run import ABORT_AFTER, Progress
+from algo_coach.claims.run import Progress
 from algo_coach.classifier import EFFORT, MODEL
 from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
 from algo_coach.problems import load_problems
+from algo_coach.runs import ABORT_AFTER
 
 
 def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:

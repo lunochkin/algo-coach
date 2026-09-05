@@ -10,7 +10,7 @@ from algo_coach.matches.matcher import DEFAULT, candidates, match, request_hash
 from algo_coach.matches.questions import Question, outstanding, questions
 from algo_coach.matches.store import MatchLog
 from algo_coach.mint import machine_match
-from algo_coach.runs import ABORT_AFTER, CONCURRENCY, as_answered
+from algo_coach.runs import CONCURRENCY, Bounded, as_answered
 from algo_coach.schema import Call, Card, Configuration, MachineProvenance, Problem, Solution
 
 
@@ -132,14 +132,14 @@ def match_corpus(
             )
 
     result = MatchResult()
-    consecutive = 0
-    index = 0
-    for question, answer, failure in as_answered(
-        lambda question: read_one(transport, calls, question, configuration=configuration),
-        asking,
-        concurrency=concurrency,
-    ):
-        index += 1
+    answers = Bounded(
+        as_answered(
+            lambda question: read_one(transport, calls, question, configuration=configuration),
+            asking,
+            concurrency=concurrency,
+        )
+    )
+    for index, question, answer, failure in answers:
         if failure is not None:
             # Broad on purpose: a refusal or a dropped connection is one
             # question's problem, and the corpus behind it must still run.
@@ -151,12 +151,7 @@ def match_corpus(
                 )
             )
             report(index, question, reason=repr(failure))
-            consecutive += 1
-            if consecutive == ABORT_AFTER:
-                result.aborted = True
-                break
             continue
-        consecutive = 0
         matched, call = answer if answer is not None else ([], None)
         if call is None:
             # Nothing was asked, so nothing is recorded.
@@ -166,4 +161,5 @@ def match_corpus(
         result.matched += positive
         result.unmatched += len(candidates(question.card)) - positive
         report(index, question, templates=matched)
+    result.aborted = answers.aborted
     return result
