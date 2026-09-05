@@ -134,3 +134,7 @@ carrying nothing."
   untracked, since it names exactly what must never be committed. Without the
   list the hooks fail rather than pass. A guard that silently allows everything
   when unconfigured is worse than no guard.
+- Pre-commit also runs ruff, pyright and `tests/test_architecture.py` when
+  code is staged: the import contracts in `pyproject.toml`, the module size
+  limit, and that a name is imported from where it is defined. The full suite
+  is `just test`, by hand.

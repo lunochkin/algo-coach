@@ -32,4 +32,15 @@ if [ -n "$HITS" ]; then
     echo "(word list: .githooks/words)" >&2
     exit 1
 fi
+
+# The fitness functions, where the staging touches code: lint and format,
+# types, and the architecture tests (import contracts, module size, import
+# paths, package exports). Under five seconds together. The full suite is
+# `just test`, run by hand: sixteen seconds per commit is not.
+if echo "$FILES" | grep -qE '\.py$|^pyproject\.toml$'; then
+    uv run ruff check src tests || exit 1
+    uv run ruff format --check src tests || exit 1
+    uv run pyright || exit 1
+    uv run pytest -q tests/test_architecture.py || exit 1
+fi
 exit 0
