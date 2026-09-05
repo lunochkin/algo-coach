@@ -15,7 +15,7 @@ from algo_coach.calls import CallLog, Transport
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import reference
 from algo_coach.generation.blind import request_hash as blind_hash
-from algo_coach.generation.checks import CAP_MS
+from algo_coach.generation.checks import CAP_MS, Ran, agree, wrong_on
 from algo_coach.generation.clock import naive
 from algo_coach.generation.clock import request_hash as clock_hash
 from algo_coach.generation.discrimination import request_hash as discrimination_hash
@@ -23,19 +23,25 @@ from algo_coach.generation.hardening import harden, standing
 from algo_coach.generation.inputs import builder
 from algo_coach.generation.inputs import request_hash as inputs_hash
 from algo_coach.generation.landing import Corpus
-from algo_coach.generation.run import make
-from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, search
+from algo_coach.generation.run import (
+    Inputs,
+    barred,
+    blind_verdicts,
+    found_in,
+    loop_verdicts,
+    search_verdicts,
+    searched_note,
+    separated,
+)
 from algo_coach.generation.steps import Notes, Step
 from algo_coach.generation.writing import Writing
 from algo_coach.outcomes import OutcomeLog, answered
-from algo_coach.runner import verify
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import (
     Call,
     CallSite,
     Card,
     CaseOutcome,
-    CaseResult,
     Configuration,
     Discard,
     MachineProvenance,
@@ -214,21 +220,16 @@ def blind_replay(
     solution, call = reference(
         transport, calls, subject.problem.statement, configuration=configuration
     )
-    verdicts = graded(verify(solution, subject.cases, cap_ms=cap_ms))
-    notes("blind", verdicts.get("detail") or "agrees on every case", call)
+    # settled as the first reading was, against what the canonical answered:
+    # the stored values are its answers, since it passed them when the problem
+    # landed. The settled cases are discarded with the run
+    ran = Ran(outcome=CaseOutcome.PASSED, returned=[one.expected for one in subject.cases])
+    checked = agree(
+        ran, subject.cases, reference=solution, written=MachineProvenance.of(call), cap_ms=cap_ms
+    )
+    verdicts = blind_verdicts(checked)
+    notes("blind", str(verdicts.get("detail") or "agrees on every case"), call)
     return Asked(call=call, verdicts=verdicts)
-
-
-def graded(results: Sequence[CaseResult]) -> dict[str, Any]:
-    """The gate a replayed reference met. A case it could not compute is the
-    ordinary path beyond its reach, and computing none of them is not."""
-    computed = [one for one in results if one.outcome in (CaseOutcome.PASSED, CaseOutcome.WRONG)]
-    if not computed:
-        return {"gate": Discard.UNTESTED, "detail": "computed no case"}
-    wrong = [one for one in computed if one.outcome is CaseOutcome.WRONG]
-    if wrong:
-        return {"gate": Discard.DISAGREED, "detail": f"disagrees on {len(wrong)} case(s)"}
-    return {}
 
 
 def clock_replay(
@@ -260,20 +261,11 @@ def clock_replay(
         subject.template.trigger,
         configuration=configuration,
     )
-    verdicts = clocked(verify(solution, subject.cases, cap_ms=cap_ms))
-    notes("clock", verdicts.get("detail") or "correct on every case it answered", call)
-    return Asked(call=call, verdicts=verdicts)
-
-
-def clocked(results: Sequence[CaseResult]) -> dict[str, Any]:
-    """What a replayed clock is judged by. It names no gate: being wrong
-    rejects no problem, and every `Discard` arm says one was rejected.
-
-    A case it did not compute is what a clock is for, so only a computed answer
-    counts against it.
-    """
-    wrong = [one for one in results if one.outcome is CaseOutcome.WRONG]
-    return {"detail": f"wrong on {len(wrong)} case(s)"} if wrong else {}
+    # no gate: being wrong rejects no problem, and every `Discard` arm says one
+    # was rejected
+    detail = wrong_on(subject.cases, code=solution, cap_ms=cap_ms)
+    notes("clock", detail or "correct on every case it answered", call)
+    return Asked(call=call, verdicts={"detail": detail} if detail else {})
 
 
 def discrimination_replay(
@@ -315,16 +307,12 @@ def discrimination_replay(
         configuration=configuration,
         notes=notes,
     )
-    return Asked(
-        call=hardened.call,
-        verdicts={
-            "gate": None if hardened.disagreement is None else Discard.DISAGREED,
-            "mutants": hardened.mutants,
-            "survived": hardened.survived,
-            "won": len(hardened.cases),
-            "offered": hardened.offered,
-        },
+    bar = barred(hardened).model_copy(
+        update={"gate": None if hardened.disagreement is None else Discard.DISAGREED}
     )
+    # the mutants on this record, since a replay writes no generator record to
+    # file them under
+    return Asked(call=hardened.call, verdicts={**loop_verdicts(bar), "mutants": bar.mutants})
 
 
 def inputs_replay(
@@ -356,30 +344,16 @@ def inputs_replay(
 
     notes("timing", "writing the input generator")
     built, call = builder(transport, calls, subject.problem.statement, configuration=configuration)
-    found = search(
-        make(built.code, cap_ms),
+    found = separated(
+        built,
         canonical=subject.canonical,
         naive=subject.naive,
         reference=subject.reference,
         written=MachineProvenance.of(call),
-        cap_ms=DRILL_CAP_MS,
-        largest=built.largest,
-        measure_ms=cap_ms,
+        cap_ms=cap_ms,
     )
-    notes(
-        "timing",
-        f"separates at {found.size}" if found.found else f"no separation: {found.missing}",
-        call,
-    )
-    return Asked(
-        call=call,
-        verdicts={
-            "gate": Discard.DISAGREED if found.missing is Missing.DISAGREED else None,
-            "separating": found.size,
-            "unseparated": found.missing,
-            "largest": built.largest,
-        },
-    )
+    notes("timing", searched_note(found), call)
+    return Asked(call=call, verdicts=search_verdicts(found_in(Inputs(built=built), found)))
 
 
 def asked_already(

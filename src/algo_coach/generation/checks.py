@@ -19,6 +19,7 @@ from algo_coach.generation.agreement import (
     misdeclared,
     settle,
 )
+from algo_coach.mutation import Case
 from algo_coach.runner import NoValue, agrees, answered, decide, outputs, run
 from algo_coach.schema import CaseOutcome, Discard, DraftCase, MachineProvenance, severest
 
@@ -64,7 +65,7 @@ class Checked:
         return self.discard is None
 
 
-def mistakes(cases: Sequence[SettledCase], *, code: str, cap_ms: int = CAP_MS) -> list[SettledCase]:
+def mistakes[C: Case](cases: Sequence[C], *, code: str, cap_ms: int = CAP_MS) -> list[C]:
     """The cases a solution answered and got wrong.
 
     A case it did not finish is not among them: being slow is what the clock is
@@ -76,6 +77,13 @@ def mistakes(cases: Sequence[SettledCase], *, code: str, cap_ms: int = CAP_MS) -
         for case, value in zip(cases, ran, strict=True)
         if not isinstance(value, NoValue) and not agrees(value, case.expected)
     ]
+
+
+def wrong_on(cases: Sequence[Case], *, code: str, cap_ms: int = CAP_MS) -> str | None:
+    """The clock's verdict as its record carries it, or nothing where every case
+    it answered was right."""
+    wrong = mistakes(cases, code=code, cap_ms=cap_ms)
+    return f"wrong on {len(wrong)} case(s)" if wrong else None
 
 
 def check(cases: Sequence[DraftCase], *, canonical: str, cap_ms: int = CAP_MS) -> Ran:
@@ -115,7 +123,7 @@ def stopped(ran: Ran) -> Checked:
 
 def agree(
     ran: Ran,
-    cases: Sequence[DraftCase],
+    cases: Sequence[Case],
     *,
     reference: str,
     written: MachineProvenance,
@@ -144,4 +152,14 @@ def agree(
     return Checked(**kept, cases=settled.cases)
 
 
-__all__ = ["CAP_MS", "Checked", "Discard", "Ran", "agree", "check", "mistakes", "stopped"]
+__all__ = [
+    "CAP_MS",
+    "Checked",
+    "Discard",
+    "Ran",
+    "agree",
+    "check",
+    "mistakes",
+    "stopped",
+    "wrong_on",
+]

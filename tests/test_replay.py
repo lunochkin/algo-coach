@@ -74,14 +74,15 @@ def test_the_search_measures_against_the_stored_clock(tmp_path, monkeypatch):
     just wrote would move two configurations at once, and neither could be
     read."""
     cards = landed(tmp_path, monkeypatch)
-    # a clock that crashes where the stored one runs: which of the two the
-    # search timed is what the reason it reports says
+    # a clock that crashes where the stored one runs: a search timing the new
+    # one would report `naive_crashed`, where the stored one separates
     model = FakeWriter(generator=BUILDS, slow="def solve(xs):\n    raise ValueError(1)\n")
 
     _, outcomes = replayed(tmp_path, model, cards)
 
     assert clock.SYSTEM in [asked["system"] for asked in model.calls]
-    assert sites(outcomes)[CallSite.INPUTS].unseparated == "naive_finished"
+    one = sites(outcomes)[CallSite.INPUTS]
+    assert (one.separating, one.unseparated) == (2, None)
     (stored,) = SolutionLog(tmp_path).for_problem(
         ProblemStore(tmp_path).all()[0].id, SolutionRole.NAIVE
     )
@@ -191,7 +192,7 @@ def test_a_replayed_reference_that_disagrees_is_recorded(tmp_path, monkeypatch):
 
     one = sites(outcomes)[CallSite.BLIND]
     assert one.gate is Discard.DISAGREED
-    assert "disagrees on 1 case(s)" in one.detail
+    assert "disagree on 1 case(s)" in one.detail
 
 
 def test_a_replay_writes_nothing_to_the_corpus(tmp_path, monkeypatch):

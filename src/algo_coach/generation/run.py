@@ -2,6 +2,7 @@
 where the matcher is parallel — `flows.md` gives why."""
 
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field
 from time import monotonic
 from typing import Any
 
@@ -17,8 +18,8 @@ from algo_coach.generation.checks import (
     Discard,
     agree,
     check,
-    mistakes,
     stopped,
+    wrong_on,
 )
 from algo_coach.generation.clock import naive
 from algo_coach.generation.fuzzing import Fuzzing, pass_over
@@ -28,11 +29,11 @@ from algo_coach.generation.generator import (
     generate,
     written_for,
 )
-from algo_coach.generation.hardening import harden
+from algo_coach.generation.hardening import Hardened, harden
 from algo_coach.generation.inputs import Built, builder
 from algo_coach.generation.landing import Corpus, land
 from algo_coach.generation.resuming import draws_again, later, re_asks, reaches, starts_at
-from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, search
+from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, Searched, search
 from algo_coach.generation.steps import SILENT, Notes, Step
 from algo_coach.generation.writing import UNRECORDED, Writing
 from algo_coach.outcomes import OutcomeLog
@@ -213,6 +214,40 @@ class Resumed(GenerationResult):
     started_at: WritingState
 
 
+@dataclass
+class Passage:
+    """One draft carried through the steps after the statement: what the steps
+    are handed, and what each of them left.
+
+    `first` is the first case set's verdict, which the first two sites are
+    judged by. A later gate replaces `checked` and leaves it. `start` is where
+    a resume began, and the search reads it: it runs the builder against the
+    clock, so either site moving takes it again.
+    """
+
+    transport: Transport
+    calls: CallLog
+    template: Template
+    draft: Draft
+    start: WritingState
+    bench: Bench = BENCH
+    cap_ms: int = CAP_MS
+    notes: Notes = SILENT
+    drafts: DraftStore | None = None
+    checked: Checked = field(default_factory=lambda: Checked(outcome=None))
+    first: Checked = field(default_factory=lambda: Checked(outcome=None))
+    blind: Call | None = None
+    inputs: Inputs = field(default_factory=Inputs)
+    clock: Clock = field(default_factory=Clock)
+    bar: Bar = field(default_factory=Bar)
+
+    @property
+    def measurable(self) -> bool:
+        """Whether a search has anything to run: a speedup is claimed and there
+        is a builder to make inputs with."""
+        return self.template.speedup and self.inputs.built is not None
+
+
 def write_one(
     transport: Transport,
     calls: CallLog,
@@ -225,7 +260,7 @@ def write_one(
     notes: Notes = SILENT,
     writing: Writing = UNRECORDED,
     drafts: DraftStore | None = None,
-) -> tuple[Draft, Checked, Inputs, Clock, Bar]:
+) -> Passage:
     # the `Checked` is returned rather than raised: a discard is a fact about
     # the problem, and the run reports what it cost
     notes("statement", "writing the statement, the canonical and the cases")
@@ -234,193 +269,197 @@ def write_one(
     )
     notes("statement", f"{generated.title!r}, {len(generated.cases)} case(s)", call)
     draft = held(drafts, writing.draft(generated, call))
-    return carried(
+    passage = Passage(
         transport,
         calls,
         template,
         draft,
         WritingState.CHECKED,
-        generator=call,
         bench=bench,
         cap_ms=cap_ms,
         notes=notes,
-        writing=writing,
         drafts=drafts,
     )
+    return carried(passage, writing, generator=call)
 
 
-def carried(
-    transport: Transport,
-    calls: CallLog,
-    template: Template,
-    draft: Draft,
-    start: WritingState,
-    *,
-    generator: Call | None,
-    bench: Bench = BENCH,
-    cap_ms: int = CAP_MS,
-    notes: Notes = SILENT,
-    writing: Writing = UNRECORDED,
-    drafts: DraftStore | None = None,
-) -> tuple[Draft, Checked, Inputs, Clock, Bar]:
+def carried(passage: Passage, writing: Writing, *, generator: Call | None) -> Passage:
     """Every step after the statement. Each site is asked again only where its
     own configuration or digest moved, so a resume pays for the calls that
     moved and for no others.
 
-    `start` is where the resume began, and it is what the search reads: it runs
-    the builder against the reference, so either site moving takes it again.
-
     The local runs are taken again either way: the draft stores what a call
-    produced, and a subprocess answers the rest for nothing.
+    produced, and a subprocess answers the rest for nothing. The steps stop at
+    the first that rejects or holds the draft, and the site records are written
+    once, over whatever they left.
     """
-    if draft.generator is None:
+    if passage.draft.generator is None:
         raise ValueError("a draft carries the configuration of the call that wrote it")
+    for step in STEPS:
+        if not step(passage):
+            break
+    sites(writing, generator, passage)
+    return passage
 
-    notes("cases", "running the canonical against what its own call declared")
+
+def to_agreed(p: Passage) -> bool:
+    """The canonical against its own declarations, then the blind reference
+    against the canonical."""
+    p.notes("cases", "running the canonical against what its own call declared")
     started = monotonic()
-    ran = check(draft.declared, canonical=draft.canonical, cap_ms=cap_ms)
+    ran = check(p.draft.declared, canonical=p.draft.canonical, cap_ms=p.cap_ms)
     if not ran.survived:
-        verdict = stopped(ran)
-        notes("cases", why(verdict))
-        draft = rejected(drafts, draft, ran.discard)
-        sites(writing, generator, None, verdict, Inputs(), Clock(), Bar())
-        return draft, verdict, Inputs(), Clock(), Bar()
-    draft = advanced(drafts, draft, WritingState.CHECKED)
+        p.checked = p.first = stopped(ran)
+        p.notes("cases", why(p.first))
+        p.draft = rejected(p.drafts, p.draft, ran.discard)
+        return False
+    p.draft = advanced(p.drafts, p.draft, WritingState.CHECKED)
 
-    blind = None
-    if re_asks(draft, "blind", template, bench) or draft.reference is None:
-        notes("reference", "writing the reference from the statement alone")
-        solution, blind = reference(transport, calls, draft.statement, configuration=bench.blind)
-        notes("reference", "written", blind)
-        draft = advanced(
-            drafts,
-            draft,
+    if re_asks(p.draft, "blind", p.template, p.bench) or p.draft.reference is None:
+        p.notes("reference", "writing the reference from the statement alone")
+        solution, p.blind = reference(
+            p.transport, p.calls, p.draft.statement, configuration=p.bench.blind
+        )
+        p.notes("reference", "written", p.blind)
+        p.draft = advanced(
+            p.drafts,
+            p.draft,
             WritingState.REFERENCED,
             reference=solution,
-            blind=MachineProvenance.of(blind),
+            blind=MachineProvenance.of(p.blind),
         )
     else:
-        notes("reference", "reused, at the configuration that wrote it")
-        solution = draft.reference
+        p.notes("reference", "reused, at the configuration that wrote it")
+        solution = p.draft.reference
 
     # the generator's configuration rather than the blind call's: the arguments
     # are the statement's own cases, whoever computed what they return
-    checked = agree(ran, draft.declared, reference=solution, written=draft.generator, cap_ms=cap_ms)
-    notes("cases", f"{settled(checked)}, {monotonic() - started:.1f}s in the runner")
-    # kept because `checked` is replaced by a later gate: the first two sites
-    # are judged by the runs of the first case set and by nothing after them
-    first = checked
-    if not checked.survived:
-        draft = rejected(drafts, draft, checked.discard)
-        sites(writing, generator, blind, first, Inputs(), Clock(), Bar())
-        return draft, checked, Inputs(), Clock(), Bar()
-    draft = advanced(drafts, draft, WritingState.AGREED, cases=checked.cases)
+    p.checked = p.first = agree(
+        ran, p.draft.declared, reference=solution, written=p.draft.generator, cap_ms=p.cap_ms
+    )
+    p.notes("cases", f"{settled(p.first)}, {monotonic() - started:.1f}s in the runner")
+    if not p.first.survived:
+        p.draft = rejected(p.drafts, p.draft, p.first.discard)
+        return False
+    p.draft = advanced(p.drafts, p.draft, WritingState.AGREED, cases=p.first.cases)
+    return True
 
-    # written before the mutation loop, and for every problem: the inputs it
-    # builds are what a fuzz pass kills mutants with, and a round is then paid
-    # for the survivors alone
-    if re_asks(draft, "inputs", template, bench) or draft.builder is None:
-        inputs = building(
-            transport, calls, draft.statement, configuration=bench.inputs, notes=notes
+
+def to_built(p: Passage) -> bool:
+    """The input generator, before the mutation loop and for every problem: the
+    inputs it builds are what a fuzz pass kills mutants with, and a round is
+    then paid for the survivors alone. A call that fails stops nothing here:
+    the draft is held at the step that has no answer."""
+    if re_asks(p.draft, "inputs", p.template, p.bench) or p.draft.builder is None:
+        p.inputs = building(
+            p.transport, p.calls, p.draft.statement, configuration=p.bench.inputs, notes=p.notes
         )
-        if inputs.built is not None:
-            draft = advanced(
-                drafts,
-                draft,
+        if p.inputs.built is not None:
+            p.draft = advanced(
+                p.drafts,
+                p.draft,
                 WritingState.BUILT,
-                builder=inputs.built.code,
-                largest=inputs.built.largest,
-                inputs=MachineProvenance.of(inputs.call),
+                builder=p.inputs.built.code,
+                largest=p.inputs.built.largest,
+                inputs=MachineProvenance.of(p.inputs.call),
             )
     else:
-        notes("inputs", "reused, at the configuration that wrote it")
-        inputs = stored(draft)
+        p.notes("inputs", "reused, at the configuration that wrote it")
+        p.inputs = stored(p.draft)
+    return True
 
-    # after the builder and only where a speedup is claimed: the builder is
-    # written for every problem, since the fuzz pass builds its inputs with it,
-    # and nothing measures a form that is its own optimum
-    clock = Clock()
-    if template.speedup and inputs.built is not None:
-        # a draft with no builder stops at the step before this one, so paying
-        # for a clock here would buy a step the draft cannot record
-        clock = paced(
-            transport,
-            calls,
-            draft,
-            template,
-            configuration=bench.clock,
-            cap_ms=cap_ms,
-            notes=notes,
-            # drawn again where the search separated nothing, though nothing
-            # about the bench moved: the site is the one that is sampled
-            reuse=not re_asks(draft, "clock", template, bench) and not draws_again(draft, template),
-        )
-        if clock.code is not None and clock.call is not None:
-            draft = advanced(
-                drafts,
-                draft,
-                WritingState.PACED,
-                naive=clock.code,
-                clock=MachineProvenance.of(clock.call),
-            )
-        if clock.code is None:
-            # the search has nothing to measure the canonical against, so the
-            # draft stops here rather than at the step after it
-            sites(writing, generator, blind, first, inputs, clock, Bar())
-            return draft, checked, inputs, clock, Bar()
 
-    # before the loop, so a canonical wrong at scale costs no round. The case
-    # is held back until after it: the survivors are decided against the set as
-    # the statement left it
-    separating = draft.separating
-    if reaches(start, WritingState.SEARCHED):
-        checked, inputs, separating = timed(
-            template, draft, checked, inputs, clock, cap_ms=cap_ms, notes=notes
+def to_paced(p: Passage) -> bool:
+    """The clock, after the builder and only where a speedup is claimed: the
+    builder is written for every problem, and nothing measures a form that is
+    its own optimum. A draft with no builder stops at the step before this one,
+    so paying for a clock here would buy a step the draft cannot record."""
+    if not p.measurable:
+        return True
+    p.clock = paced(
+        p.transport,
+        p.calls,
+        p.draft,
+        p.template,
+        configuration=p.bench.clock,
+        cap_ms=p.cap_ms,
+        notes=p.notes,
+        # drawn again where the search separated nothing, though nothing about
+        # the bench moved: the site is the one that is sampled
+        reuse=not re_asks(p.draft, "clock", p.template, p.bench)
+        and not draws_again(p.draft, p.template),
+    )
+    if p.clock.code is not None and p.clock.call is not None:
+        p.draft = advanced(
+            p.drafts,
+            p.draft,
+            WritingState.PACED,
+            naive=p.clock.code,
+            clock=MachineProvenance.of(p.clock.call),
         )
-        if not checked.survived:
-            draft = rejected(drafts, draft, checked.discard)
-            sites(writing, generator, blind, first, inputs, clock, Bar())
-            return draft, checked, inputs, clock, Bar()
-        if template.speedup and inputs.built is not None:
-            draft = advanced(
-                drafts,
-                draft,
+    # without a clock the search has nothing to measure the canonical against,
+    # so the draft stops here rather than at the step after it
+    return p.clock.code is not None
+
+
+def to_searched(p: Passage) -> bool:
+    """The separating case, before the loop so a canonical wrong at scale costs
+    no round. It is held back until after the loop: the survivors are decided
+    against the set as the statement left it."""
+    separating = p.draft.separating
+    if reaches(p.start, WritingState.SEARCHED):
+        p.checked, p.inputs, separating = timed(
+            p.template, p.draft, p.checked, p.inputs, p.clock, cap_ms=p.cap_ms, notes=p.notes
+        )
+        if not p.checked.survived:
+            p.draft = rejected(p.drafts, p.draft, p.checked.discard)
+            return False
+        if p.measurable:
+            p.draft = advanced(
+                p.drafts,
+                p.draft,
                 WritingState.SEARCHED,
                 separating=separating,
-                unseparated=inputs.unseparated,
+                unseparated=p.inputs.unseparated,
             )
-    if template.speedup and separating is None:
-        # the claim is what a rung teaches, and a landed problem is repaired
-        # nowhere: the draft stops at the step that has no answer, and a resume
-        # is what carries it forward
-        sites(writing, generator, blind, first, inputs, clock, Bar())
-        return draft, checked, inputs, clock, Bar()
+    # the claim is what a rung teaches, and a landed problem is repaired
+    # nowhere: the draft stops at the step that has no answer, and a resume is
+    # what carries it forward
+    return not (p.template.speedup and separating is None)
 
-    checked, inputs, bar, won = measured(
-        transport,
-        calls,
-        draft,
-        checked,
-        inputs,
-        configuration=bench.discrimination,
-        cap_ms=cap_ms,
-        notes=notes,
+
+def to_hardened(p: Passage) -> bool:
+    """The mutation loop over the set the two solutions settled."""
+    p.checked, p.inputs, p.bar, won = measured(
+        p.transport,
+        p.calls,
+        p.draft,
+        p.checked,
+        p.inputs,
+        configuration=p.bench.discrimination,
+        cap_ms=p.cap_ms,
+        notes=p.notes,
     )
-    if not checked.survived:
-        draft = rejected(drafts, draft, checked.discard)
-        sites(writing, generator, blind, first, inputs, clock, bar)
-        return draft, checked, inputs, clock, bar
-    if bar.unmeasured is not None:
+    if not p.checked.survived:
+        p.draft = rejected(p.drafts, p.draft, p.checked.discard)
+        return False
+    if p.bar.unmeasured is not None:
         # the round's call failed, so the set is what the statement left. Held
         # at the step before the loop, since a resume asks again where landing
         # would store a set no round was paid for
-        sites(writing, generator, blind, first, inputs, clock, bar)
-        return draft, checked, inputs, clock, bar
-    draft = advanced(
-        drafts, draft, WritingState.HARDENED, won=won, discrimination=MachineProvenance.of(bar.call)
+        return False
+    p.draft = advanced(
+        p.drafts,
+        p.draft,
+        WritingState.HARDENED,
+        won=won,
+        discrimination=MachineProvenance.of(p.bar.call),
     )
-    sites(writing, generator, blind, first, inputs, clock, bar)
-    return draft, checked, inputs, clock, bar
+    return True
+
+
+# in the order `flows.md` gives, each named by the state it reaches
+STEPS = (to_agreed, to_built, to_paced, to_searched, to_hardened)
 
 
 def stored(draft: Draft) -> Inputs:
@@ -492,16 +531,8 @@ def reject(drafts: DraftStore | None, draft: Draft, gate: Discard = Discard.UNEX
     return held(drafts, moved(draft, WritingState.REJECTED, gate=gate))
 
 
-def sites(
-    writing: Writing,
-    call: Call,
-    blind: Call | None,
-    ran: Checked,
-    inputs: Inputs,
-    clock: Clock,
-    bar: Bar,
-) -> None:
-    """The four records of one attempt, written once the loop's numbers are
+def sites(writing: Writing, call: Call | None, p: Passage) -> None:
+    """The five records of one attempt, written once the loop's numbers are
     known.
 
     A gate belongs to the site whose answer made it decidable, and a kill to
@@ -513,43 +544,54 @@ def sites(
     writing(
         CallSite.GENERATOR,
         call,
-        **gated(ran, Discard.NO_VALUE),
-        mutants=bar.mutants,
-        killed=bar.declared,
-        misdeclared=len(ran.misdeclarations),
+        **gated(p.first, Discard.NO_VALUE),
+        mutants=p.bar.mutants,
+        killed=p.bar.declared,
+        misdeclared=len(p.first.misdeclarations),
     )
-    writing(CallSite.BLIND, blind, **gated(ran, Discard.UNTESTED, Discard.DISAGREED))
+    writing(CallSite.BLIND, p.blind, **blind_verdicts(p.first))
     # the counters as the last round left them, which is why the record cites
     # that round's call. A loop needing none paid for no configuration
-    writing(
-        CallSite.DISCRIMINATION,
-        bar.call,
-        gate=bar.gate,
-        survived=bar.survived,
-        won=bar.won,
-        offered=bar.offered,
-        killed=sum(bar.caught),
-        rounds=bar.caught,
-    )
-    writing(
-        CallSite.INPUTS,
-        inputs.call,
-        gate=inputs.gate,
-        killed=bar.fuzzed,
-        separating=inputs.separating,
-        unseparated=inputs.unseparated,
-        # the bound the search ran under, which a landed problem keeps
-        # nowhere else once its draft is cleared
-        largest=inputs.built.largest if inputs.built is not None else None,
-    )
+    writing(CallSite.DISCRIMINATION, p.bar.call, **loop_verdicts(p.bar))
+    writing(CallSite.INPUTS, p.inputs.call, **search_verdicts(p.inputs), killed=p.bar.fuzzed)
     # the search judged this answer as much as the builder's, so both records
     # carry its verdict. A resume that re-asked one writes only that one
     writing(
         CallSite.CLOCK,
-        clock.call,
-        separating=inputs.separating,
-        unseparated=inputs.unseparated,
+        p.clock.call,
+        separating=p.inputs.separating,
+        unseparated=p.inputs.unseparated,
     )
+
+
+def blind_verdicts(checked: Checked) -> dict[str, object]:
+    """What the blind site's record carries: the gate its reading was rejected
+    by, where one was."""
+    return gated(checked, Discard.UNTESTED, Discard.DISAGREED)
+
+
+def loop_verdicts(bar: Bar) -> dict[str, object]:
+    """What the discrimination site's record carries. The mutants are not among
+    them: they sit on the site that wrote the canonical."""
+    return {
+        "gate": bar.gate,
+        "survived": bar.survived,
+        "won": bar.won,
+        "offered": bar.offered,
+        "killed": sum(bar.caught),
+        "rounds": bar.caught,
+    }
+
+
+def search_verdicts(inputs: Inputs) -> dict[str, object]:
+    """What the inputs site's record carries of the search that judged it. The
+    bound is kept here, since a landed problem clears the draft that held it."""
+    return {
+        "gate": inputs.gate,
+        "separating": inputs.separating,
+        "unseparated": inputs.unseparated,
+        "largest": inputs.built.largest if inputs.built is not None else None,
+    }
 
 
 def gated(checked: Checked, *gates: Discard) -> dict[str, object]:
@@ -557,7 +599,7 @@ def gated(checked: Checked, *gates: Discard) -> dict[str, object]:
     belongs to the site whose output made it decidable."""
     if checked.discard not in gates:
         return {}
-    return {"gate": checked.discard, "detail": why(checked)}
+    return {"gate": checked.discard, "detail": reason(checked)}
 
 
 def settled(checked: Checked) -> str:
@@ -608,21 +650,7 @@ def measured(
         notes("mutants", f"unmeasured: {failure!r}")
         return checked, inputs, Bar(unmeasured=repr(failure)), []
 
-    kept = len(hardened.fuzzed.cases) if hardened.fuzzed else 0
-    bar = Bar(
-        mutants=hardened.mutants,
-        survived=hardened.survived,
-        # the rounds' own, which is what the site is scored on. The pass before
-        # them paid for no call
-        won=len(hardened.cases) - kept,
-        offered=hardened.offered,
-        built=hardened.fuzzed.built if hardened.fuzzed else 0,
-        kept=kept,
-        declared=hardened.declared,
-        fuzzed=hardened.fuzzed.killed if hardened.fuzzed else 0,
-        caught=hardened.caught,
-        call=hardened.call,
-    )
+    bar = barred(hardened)
     if hardened.disagreement is None:
         return checked, inputs, bar, hardened.cases
 
@@ -637,6 +665,25 @@ def measured(
     if hardened.fuzzed is not None and hardened.fuzzed.disagreement is not None:
         return discarded, inputs.model_copy(update={"gate": Discard.DISAGREED}), bar, []
     return discarded, inputs, bar.model_copy(update={"gate": Discard.DISAGREED}), []
+
+
+def barred(hardened: Hardened) -> Bar:
+    """What the loop left, as the discrimination site's record counts it."""
+    kept = len(hardened.fuzzed.cases) if hardened.fuzzed else 0
+    return Bar(
+        mutants=hardened.mutants,
+        survived=hardened.survived,
+        # the rounds' own, which is what the site is scored on. The pass before
+        # them paid for no call
+        won=len(hardened.cases) - kept,
+        offered=hardened.offered,
+        built=hardened.fuzzed.built if hardened.fuzzed else 0,
+        kept=kept,
+        declared=hardened.declared,
+        fuzzed=hardened.fuzzed.killed if hardened.fuzzed else 0,
+        caught=hardened.caught,
+        call=hardened.call,
+    )
 
 
 def building(
@@ -697,13 +744,13 @@ def paced(
 
     # run again on a reuse: the draft stores the code rather than the verdict,
     # and a subprocess answers this for nothing
-    wrong = mistakes(draft.cases, code=clock.code or "", cap_ms=cap_ms)
-    if not wrong:
+    detail = wrong_on(draft.cases, code=clock.code or "", cap_ms=cap_ms)
+    if detail is None:
         return clock
-    notes("clock", f"wrong on {len(wrong)} case(s)")
+    notes("clock", detail)
     # the call is kept, since the site answered and the record is what says
     # what it cost. Nothing is stored, so the draft stops at the step before
-    return clock.model_copy(update={"code": None, "unpaced": f"wrong on {len(wrong)} case(s)"})
+    return clock.model_copy(update={"code": None, "unpaced": detail})
 
 
 def fuzzing(draft: Draft, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:
@@ -731,8 +778,7 @@ def timed(
     notes: Notes = SILENT,
 ) -> tuple[Checked, Inputs, SettledCase | None]:
     """The timing case, returned rather than appended: the caller holds it back
-    until the mutation loop has run. The generation cap measures, and the
-    sitting's cap is what a size is separated against.
+    until the mutation loop has run.
 
     A search that fails costs the case rather than the problem, so its failure
     is caught here instead of reaching the run's abort count.
@@ -743,34 +789,22 @@ def timed(
         raise ValueError("the search measures the canonical against a naive solution")
     notes("timing", "searching for the input that separates the two solutions")
     try:
-        found = search(
-            make(inputs.built.code, cap_ms),
+        found = separated(
+            inputs.built,
             canonical=draft.canonical,
             naive=clock.code,
             reference=draft.reference or "",
             written=inputs.written,
-            cap_ms=DRILL_CAP_MS,
-            largest=inputs.built.largest,
-            measure_ms=cap_ms,
+            cap_ms=cap_ms,
         )
     except Exception as failure:
         notes("timing", f"unsearched: {failure!r}")
         return checked, inputs.model_copy(update={"unseparated": repr(failure)}), None
 
+    notes("timing", searched_note(found))
+    searched = found_in(inputs, found)
     if found.found:
-        notes("timing", f"separates at {found.size}")
-        return checked, inputs.model_copy(update={"separating": found.size}), found.case
-    notes("timing", f"no case: {found.missing}")
-    searched = inputs.model_copy(
-        update={
-            # carried where the search proved a separation and stored nothing,
-            # which `unseparated` beside it is what tells apart from a stored
-            # one
-            "separating": found.size,
-            "unseparated": found.missing,
-            "gate": Discard.DISAGREED if found.missing is Missing.DISAGREED else None,
-        }
-    )
+        return checked, searched, found.case
     if found.missing is not Missing.DISAGREED:
         return checked, searched, None
     # one input the small cases could not reach, answered two ways
@@ -780,6 +814,46 @@ def timed(
         disagreements=[found.disagreement],
     )
     return discarded, searched, None
+
+
+def separated(
+    built: Built,
+    *,
+    canonical: str,
+    naive: str,
+    reference: str,
+    written: MachineProvenance,
+    cap_ms: int,
+) -> Searched:
+    """The search over the builder's inputs. The generation cap measures, and
+    the sitting's cap is what a size is separated against."""
+    return search(
+        make(built.code, cap_ms),
+        canonical=canonical,
+        naive=naive,
+        reference=reference,
+        written=written,
+        cap_ms=DRILL_CAP_MS,
+        largest=built.largest,
+        measure_ms=cap_ms,
+    )
+
+
+def found_in(inputs: Inputs, found: Searched) -> Inputs:
+    """What the search left on the inputs site. `separating` is carried where
+    the search proved a separation and stored nothing, which `unseparated`
+    beside it is what tells apart from a stored one."""
+    return inputs.model_copy(
+        update={
+            "separating": found.size,
+            "unseparated": found.missing,
+            "gate": Discard.DISAGREED if found.missing is Missing.DISAGREED else None,
+        }
+    )
+
+
+def searched_note(found: Searched) -> str:
+    return f"separates at {found.size}" if found.found else f"no case: {found.missing}"
 
 
 def make(code: str, cap_ms: int, *, seed: int = SEARCH_SEED) -> Callable[[int], list[Any]]:
@@ -828,12 +902,12 @@ def write_problems(
     for index in range(1, count + 1):
         # filled as the sites answer and stored once the problem's fate is
         # known, which is the first point there is a problem id to name
-        left: list[SiteOutcome] = []
-        writing = Writing(template_id=template.id, into=left)
+        records: list[SiteOutcome] = []
+        writing = Writing(template_id=template.id, into=records)
         # the tail this problem appends, which is what its row is priced over
         paid = len(calls.appended)
         try:
-            draft, checked, inputs, clock, bar = write_one(
+            passage = write_one(
                 transport,
                 calls,
                 card,
@@ -848,13 +922,15 @@ def write_problems(
         except Exception as failure:
             # broad on purpose: a refusal, a rate limit or a reply that does
             # not parse costs this problem and not the run
-            result.failed.append(Failed(index=index, reason=repr(failure)))
-            record(outcomes, left)
-            # read back rather than returned: the exception carried no draft,
-            # and what the steps before it wrote is in the store
-            stopped = drafts.get(writing.id) if drafts is not None else None
-            if stopped is not None:
-                result.held.append(Held(index=index, draft=stopped, failed=repr(failure)))
+            raised(
+                result,
+                failure,
+                index=index,
+                writing=writing,
+                records=records,
+                outcomes=outcomes,
+                drafts=drafts,
+            )
             report(
                 on_progress,
                 index,
@@ -870,96 +946,97 @@ def write_problems(
             continue
 
         consecutive = 0
-        written.append(draft.statement)
-        draft = finished(
-            result,
-            corpus,
-            template,
-            draft,
-            checked,
-            inputs,
-            clock,
-            bar,
-            index=index,
-            left=left,
-            outcomes=outcomes,
-            drafts=drafts,
-        )
+        written.append(passage.draft.statement)
+        finished(result, corpus, passage, index=index, records=records, outcomes=outcomes)
+        p = passage
         report(
             on_progress,
             index,
             count,
             template,
-            title=draft.title,
-            cases=len(draft.declared),
-            outcome=checked.outcome,
-            misdeclared=len(checked.misdeclarations),
-            landed=draft.state is WritingState.LANDED,
-            reason=None if checked.survived else why(checked),
-            separating=inputs.separating,
-            unseparated=inputs.unseparated,
-            unbuilt=inputs.unbuilt,
-            mutants=bar.mutants,
-            survived=bar.survived,
-            won=bar.won,
-            offered=bar.offered,
-            built=bar.built,
-            kept=bar.kept,
-            declared=bar.declared,
-            fuzzed=bar.fuzzed,
-            caught=bar.caught,
-            unmeasured=bar.unmeasured,
+            title=p.draft.title,
+            cases=len(p.draft.declared),
+            outcome=p.checked.outcome,
+            misdeclared=len(p.checked.misdeclarations),
+            landed=p.draft.state is WritingState.LANDED,
+            reason=None if p.checked.survived else why(p.checked),
+            separating=p.inputs.separating,
+            unseparated=p.inputs.unseparated,
+            unbuilt=p.inputs.unbuilt,
+            mutants=p.bar.mutants,
+            survived=p.bar.survived,
+            won=p.bar.won,
+            offered=p.bar.offered,
+            built=p.bar.built,
+            kept=p.bar.kept,
+            declared=p.bar.declared,
+            fuzzed=p.bar.fuzzed,
+            caught=p.bar.caught,
+            unmeasured=p.bar.unmeasured,
             cost=priced(calls.appended[paid:]),
         )
     return result
 
 
+def raised(
+    result: GenerationResult,
+    failure: Exception,
+    *,
+    index: int,
+    writing: Writing,
+    records: list[SiteOutcome],
+    outcomes: OutcomeLog | None,
+    drafts: DraftStore | None,
+) -> None:
+    """A call that raised. The site records the steps before it left are kept,
+    and the draft they wrote is read back rather than returned: the exception
+    carried none, and what was written is in the store."""
+    result.failed.append(Failed(index=index, reason=repr(failure)))
+    record(outcomes, records)
+    stopped_at = drafts.get(writing.id) if drafts is not None else None
+    if stopped_at is not None:
+        result.held.append(Held(index=index, draft=stopped_at, failed=repr(failure)))
+
+
 def finished(
     result: GenerationResult,
     corpus: Corpus,
-    template: Template,
-    draft: Draft,
-    checked: Checked,
-    inputs: Inputs,
-    clock: Clock,
-    bar: Bar,
+    p: Passage,
     *,
     index: int,
-    left: list[SiteOutcome],
+    records: list[SiteOutcome],
     outcomes: OutcomeLog | None,
-    drafts: DraftStore | None,
-) -> Draft:
+) -> None:
     """What one draft ends as: landed, held short of it, or discarded. Shared
     with a resume, which reaches the same three ends by the same rules."""
-    if checked.survived and draft.state is not WritingState.HARDENED:
+    if p.checked.survived and p.draft.state is not WritingState.HARDENED:
         # every gate that judges the problem passed, and a step of the writing
         # did not: held where it stopped rather than landed
-        record(outcomes, left)
+        record(outcomes, records)
         result.held.append(
             Held(
                 index=index,
-                draft=draft,
-                separating=inputs.separating,
-                unseparated=inputs.unseparated,
-                unbuilt=inputs.unbuilt,
-                unpaced=clock.unpaced,
-                unmeasured=bar.unmeasured,
+                draft=p.draft,
+                separating=p.inputs.separating,
+                unseparated=p.inputs.unseparated,
+                unbuilt=p.inputs.unbuilt,
+                unpaced=p.clock.unpaced,
+                unmeasured=p.bar.unmeasured,
             )
         )
-    elif checked.survived:
-        problem = land(corpus, template, draft)
+    elif p.checked.survived:
+        problem = land(corpus, p.template, p.draft)
         # named before it is cleared: a crash between the two then leaves a
         # draft the next run clears rather than a problem written twice
-        draft = held(drafts, moved(draft, WritingState.LANDED, problem_id=problem.id))
-        cleared(drafts, draft)
-        record(outcomes, left, problem_id=problem.id)
-        result.drafted.append(draft)
+        p.draft = held(p.drafts, moved(p.draft, WritingState.LANDED, problem_id=problem.id))
+        cleared(p.drafts, p.draft)
+        record(outcomes, records, problem_id=problem.id)
+        result.drafted.append(p.draft)
     else:
-        record(outcomes, left)
+        record(outcomes, records)
         result.discarded.append(
-            Discarded(index=index, discard=checked.discard, reason=why(checked))
+            Discarded(index=index, discard=p.checked.discard, reason=why(p.checked))
         )
-    return draft
 
 
 def resume(
@@ -987,47 +1064,35 @@ def resume(
     notes("resume", f"starting at {start}")
     # the draft's own id, so a resumed step's site outcome groups with the
     # records of the writing it continues
-    left: list[SiteOutcome] = []
-    writing = Writing(template_id=template.id, into=left, id=draft.id)
+    records: list[SiteOutcome] = []
+    writing = Writing(template_id=template.id, into=records, id=draft.id)
     result = Resumed(started_at=start)
-
-    try:
-        draft, checked, inputs, clock, bar = carried(
-            transport,
-            calls,
-            template,
-            draft,
-            start,
-            # the generator wrote nothing here, so its site records nothing
-            generator=None,
-            bench=bench,
-            cap_ms=cap_ms,
-            notes=notes,
-            writing=writing,
-            drafts=drafts,
-        )
-    except Exception as failure:
-        result.failed.append(Failed(index=1, reason=repr(failure)))
-        record(outcomes, left)
-        stopped_at = drafts.get(draft.id) if drafts is not None else None
-        if stopped_at is not None:
-            result.held.append(Held(index=1, draft=stopped_at, failed=repr(failure)))
-        return result
-
-    finished(
-        result,
-        corpus,
+    passage = Passage(
+        transport,
+        calls,
         template,
         draft,
-        checked,
-        inputs,
-        clock,
-        bar,
-        index=1,
-        left=left,
-        outcomes=outcomes,
+        start,
+        bench=bench,
+        cap_ms=cap_ms,
+        notes=notes,
         drafts=drafts,
     )
+    try:
+        # the generator wrote nothing here, so its site records nothing
+        carried(passage, writing, generator=None)
+    except Exception as failure:
+        raised(
+            result,
+            failure,
+            index=1,
+            writing=writing,
+            records=records,
+            outcomes=outcomes,
+            drafts=drafts,
+        )
+        return result
+    finished(result, corpus, passage, index=1, records=records, outcomes=outcomes)
     return result
 
 
@@ -1043,15 +1108,20 @@ def record(
         outcomes.append(outcome.model_copy(update={"problem_id": problem_id}))
 
 
-def why(checked: Checked) -> str:
-    # a count rather than the cases: the failing arguments are on the `Checked`
+def reason(checked: Checked) -> str:
+    """What the gate said, as a site outcome's detail carries it. A count
+    rather than the cases: the failing arguments are on the `Checked`."""
     match checked.discard:
         case Discard.NO_VALUE:
-            return f"discarded: the canonical {checked.outcome} on some case"
+            return f"the canonical {checked.outcome} on some case"
         case Discard.UNTESTED:
-            return "discarded: the reference computed no case"
+            return "the reference computed no case"
         case _:
-            return f"discarded: the two solutions disagree on {len(checked.disagreements)} case(s)"
+            return f"the two solutions disagree on {len(checked.disagreements)} case(s)"
+
+
+def why(checked: Checked) -> str:
+    return f"discarded: {reason(checked)}"
 
 
 def priced(paid: Sequence[Call]) -> float | None:
