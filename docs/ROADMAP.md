@@ -86,32 +86,66 @@ One origin end to end. The ingest path removed before generation was written.
   the platform fields removed.
 - The eval set did not survive: 138 hand claims key to pushed attempts.
 
-## Phase 6 — Problem generation (current)
+## Phase 6 — Problem generation — done
 
-The engine writes problems: a statement, the test cases that decide it, and at
-least one canonical solution. Everything that makes a generated problem sound.
+The engine writes problems: a statement, the test cases that decide it, a
+canonical solution and a reference solution. Everything that makes a generated
+problem sound.
 
-- `Problem` gains provenance before the first run.
-- The records first, then generation, then the runner. The first generation
-  run lands nothing and is read back from the call log.
-- Generation is a command in the engine, beside the classifier and the matcher.
-- A problem is written from a brief: a template or a technique.
-- A template match is keyed to a solution. The generating canonical asserts its
-  own pair; the matcher reads the rest.
-- A problem's techniques derive from `TechniqueReading` over its canonicals,
-  which is also what gives the attribution classifier its candidates.
-- The discrimination bar is settled on the first corpus, then enforced before a
-  problem lands.
-- The gap report, which is what aims a generation run.
-- A problem is created, cleared, then served. Until Phase 7 measures the
-  clearing, selection reads created problems too.
-- A defective problem is retired rather than edited; one naming its own
-  approach is retired as telegraphed.
-- Exit: every landed problem carries techniques derived from its canonicals and
-  a case set measured against the mutation bound, and the gap report names the
-  templates the next run is aimed at.
+- Five call sites, each at its own configuration: the generator, the blind
+  reference, the input builder, the naive clock, the discrimination round.
+- A blind reference settles every expected value; a disagreement discards.
+- Mutants of the canonical, killed by the statement's cases, then by built
+  inputs, then by at most two rounds of proposed cases. A proposal lands only
+  where it killed.
+- A separating case where the template claims a speedup: the smallest input
+  the naive clock exceeds the drill cap on, under a 64 KiB case ceiling.
+- The statement ends on its `solve` signature, checked against the canonical.
+- Site outcomes: what each site's gates said, per attempt, beside the call log.
+- Drafts as states, held where a step failed, resumed by `generate --resume`,
+  listed by `--drafts`.
+- A template match keyed to a solution; the generating canonical asserts its
+  own pair.
+- Technique readings over canonicals, and problem techniques derived from them
+  wherever a command loads problems.
+- The gap report, and `generate --gaps` aimed at what it lists.
+- Exit: every landed problem carries techniques derived from its canonicals
+  and a case set measured against the mutation bound, and the gap report names
+  the templates the next run is aimed at.
 
-## Phase 7 — The corpus, measured
+Measured:
+
+- One problem: Opus 5 at high $0.41 over 6 calls and 190 s of model time, 70 s
+  of it the round; Gemini 3.7 Flash at medium $0.031 over 4 calls and 28 s.
+  Reasoning is the output: 5,263 of the round's 5,573 tokens. Ten attempts on
+  one template cost $0.47 to $0.55 over 36 to 49 calls, $0.095 per landed
+  problem.
+- Mutants: 53 and 22 on the first two canonicals, 46 and 17 killed by the
+  statement's own cases. Round one killed nothing on either; the survivors were
+  equivalent by inspection. `ROUNDS` stays at two. Later landings killed 4 of 4,
+  7 of 7 and 11 of 13, the round proposing nothing.
+- The runner spent 76.3 s on 22 mutants, 70 s of it seven timeout kills at the
+  generation cap. Process start is not the cost, so no fork server.
+- Ten attempts on `answer-space`: 5 landed, 4 rejected as `misdeclared`, 1 held.
+  Two rejections checked by hand had the canonical right and the declared value
+  wrong, so the gate became a count. Re-run: 8 landed, 1 `untested` on an
+  argument order the prose left open, 1 held on `input_too_large`.
+- Separating sizes: the first two searches gave `input_too_large`, the blind
+  reference having written the form, which is why the clock is its own site.
+  Five then separated at 1, 2, 6, 13 and 21 against a legal 100000, the clock
+  briefed too slow. Fifteen over the corpus: eight at one or two where the
+  clock scans the values, six at 13 to 27 where it is exponential, four over
+  the ceiling. The builder's bound is not a denominator.
+- Of ten statements on one template, 1 reused a domain the cue names and 2
+  asked a question a listed statement already asked, both with the twin in the
+  list. Held drafts are not listed.
+- 28 canonicals read at two cents, none undecided. Every problem derives
+  `binary-search`; 12 that alone, 7 one code more, 5 two more.
+- `generate --gaps --count 1` aimed at 35 of 37 core templates. Seven reached
+  before a stop by hand: 4 landed, 2 held on `input_too_large`, 1 cut.
+  `--count` is per template.
+
+## Phase 7 — The corpus, measured (current)
 
 What a generated corpus is worth, measured rather than asserted.
 
