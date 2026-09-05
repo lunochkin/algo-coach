@@ -12,20 +12,8 @@ def at_configuration(
     """Whether this classifier, asked this question, produced the record. The
     provider that served it is recorded and never compared, and a hand reading
     is at no configuration at all."""
-    if reading.source is not ReadingSource.CLASSIFIER:
-        return False
-    return (
-        reading.model,
-        reading.effort,
-        reading.pin,
-        reading.temperature,
-        reading.prompt_hash,
-    ) == (
-        configuration.model,
-        configuration.effort,
-        configuration.pin,
-        configuration.temperature,
-        prompt_hash,
+    return reading.source is ReadingSource.CLASSIFIER and reading.at_configuration(
+        configuration, prompt_hash
     )
 
 

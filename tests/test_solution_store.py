@@ -1,4 +1,4 @@
-from helpers import PROVENANCE
+from helpers import WRITTEN
 
 from algo_coach.mint import solution
 from algo_coach.schema import SolutionRole
@@ -10,7 +10,7 @@ def make_canonical(
     code: str = "def solve(n):\n    return n\n",
     role: SolutionRole = SolutionRole.CANONICAL,
 ):
-    return solution(problem_id=problem_id, code=code, role=role, **PROVENANCE)
+    return solution(problem_id=problem_id, code=code, role=role, written=WRITTEN)
 
 
 def test_an_empty_store_reads_as_nothing(tmp_path):

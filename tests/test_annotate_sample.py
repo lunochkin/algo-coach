@@ -2,6 +2,7 @@ from matching import canonicals, card, problem, seeded, stored, template
 
 from algo_coach.matches import annotatable
 from algo_coach.mint import user_match
+from algo_coach.schema import MachineProvenance
 
 
 def corpus(root, *, backtracking: int = 3, union: int = 3):
@@ -148,11 +149,13 @@ def test_a_machine_match_does_not_settle_a_question(tmp_path):
             id[form],
             "s-b0",
             matched=False,
-            model="m",
-            effort="medium",
-            prompt_hash="h",
-            call_id="c",
-            pin="p",
+            written=MachineProvenance(
+                model="m",
+                effort="medium",
+                prompt_hash="h",
+                call_id="c",
+                pin="p",
+            ),
         )
         for form in ("subsets", "permutations", "grid-walk")
     ]

@@ -15,7 +15,6 @@ from algo_coach.generation.blind import request_hash as blind_hash
 from algo_coach.generation.clock import request_hash as clock_hash
 from algo_coach.generation.inputs import request_hash as inputs_hash
 from algo_coach.generation.speedup import Missing
-from algo_coach.outcomes import at_configuration
 from algo_coach.schema import Draft, Template, WritingState
 
 # the steps a call answers, in the order they run. `checked`, `agreed` and
@@ -93,7 +92,7 @@ def re_asks(draft: Draft, site: str, template: Template, bench: Bench = BENCH) -
     # its own digest where a local pass decides one, so the configuration is
     # what answers there
     digest = sending(draft, site, template) or taken.prompt_hash or ""
-    return not at_configuration(taken, getattr(bench, site), digest)
+    return not taken.at_configuration(getattr(bench, site), digest)
 
 
 def draws_again(draft: Draft, template: Template) -> bool:

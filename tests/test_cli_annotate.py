@@ -10,7 +10,7 @@ from algo_coach.cards import CardStore
 from algo_coach.cli.annotate import annotating
 from algo_coach.matches import MatchLog
 from algo_coach.mint import machine_match
-from algo_coach.schema import MatchSource
+from algo_coach.schema import MachineProvenance, MatchSource
 from algo_coach.solutions import SolutionLog
 
 # Wide and tall: the layout is two panes, and the pilot's default is one
@@ -106,11 +106,13 @@ def read_by_matcher(root):
                 subsets,
                 solution_id,
                 matched=True,
-                model="a-matcher",
-                effort="medium",
-                prompt_hash="h",
-                call_id="c",
-                pin="p",
+                written=MachineProvenance(
+                    model="a-matcher",
+                    effort="medium",
+                    prompt_hash="h",
+                    call_id="c",
+                    pin="p",
+                ),
             )
         )
 

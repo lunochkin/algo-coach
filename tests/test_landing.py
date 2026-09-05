@@ -36,15 +36,7 @@ def call(id: str, **overrides) -> Call:
 
 def written(one: Call) -> MachineProvenance:
     """The configuration a step copied off its call, as a draft holds it."""
-    return MachineProvenance(
-        model=one.model,
-        effort=one.effort,
-        prompt_hash=one.prompt_hash,
-        call_id=one.id,
-        pin=one.pin or "",
-        temperature=one.temperature,
-        provider=one.provider,
-    )
+    return MachineProvenance.of(one)
 
 
 def drafted(**overrides) -> Draft:

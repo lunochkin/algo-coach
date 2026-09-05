@@ -6,7 +6,7 @@ from algo_coach.calls import CallLog, Configuration, Transport
 from algo_coach.classifier import DEFAULT, classify
 from algo_coach.mint import machine_reading
 from algo_coach.readings.store import ReadingLog
-from algo_coach.schema import Call, Solution, TechniqueReading
+from algo_coach.schema import Call, MachineProvenance, Solution, TechniqueReading
 from algo_coach.techniques import codes
 
 
@@ -37,18 +37,7 @@ def store(
     call: Call,
 ) -> TechniqueReading:
     """Append what a classifier read, on the calling thread."""
-    reading = machine_reading(
-        solution_id,
-        list(techniques),
-        model=call.model,
-        effort=call.effort,
-        prompt_hash=call.prompt_hash,
-        call_id=call.id,
-        pin=call.pin or "",
-        temperature=call.temperature,
-        provider=call.provider,
-        cost=call.cost,
-    )
+    reading = machine_reading(solution_id, list(techniques), written=MachineProvenance.of(call))
     log.append(reading)
     return reading
 

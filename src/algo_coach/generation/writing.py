@@ -8,8 +8,7 @@ from dataclasses import dataclass, field
 
 from algo_coach import mint
 from algo_coach.generation.generator import Generated
-from algo_coach.generation.landing import written_by
-from algo_coach.schema import Call, CallSite, Discard, Draft, SiteOutcome
+from algo_coach.schema import Call, CallSite, Discard, Draft, MachineProvenance, SiteOutcome
 
 
 @dataclass(frozen=True)
@@ -37,7 +36,7 @@ class Writing:
             # empty where nothing recorded the attempt, as it is on the site
             # outcomes this id groups
             template_id=self.template_id or None,
-            **written_by(call),
+            written=MachineProvenance.of(call),
         )
 
     def __call__(
@@ -79,7 +78,7 @@ class Writing:
                 separating=separating,
                 unseparated=unseparated,
                 largest=largest,
-                **written_by(call),
+                written=MachineProvenance.of(call),
             )
         )
 

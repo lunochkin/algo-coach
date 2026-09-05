@@ -7,14 +7,12 @@ problem whose parts are missing.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 from algo_coach import mint
 from algo_coach.cases import CaseLog
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
-    Call,
     Draft,
     MachineProvenance,
     Problem,
@@ -38,19 +36,12 @@ class Corpus:
         return cls(ProblemStore(root), CaseLog(root), SolutionLog(root), MatchLog(root))
 
 
-def written_by(call: Call) -> dict[str, Any]:
-    # one mapping rather than fields a call site can fill partly: a record
-    # carries all of a configuration or none of it
-    return MachineProvenance.of(call).model_dump()
-
-
-def copied(provenance: MachineProvenance | None) -> dict[str, Any]:
-    """The configuration a draft already holds, as `written_by` reads one off a
-    call. A step that answered copied it whole, so a missing one is a step the
-    draft never took."""
+def copied(provenance: MachineProvenance | None) -> MachineProvenance:
+    """The configuration a draft already holds. A step that answered copied it
+    whole, so a missing one is a step the draft never took."""
     if provenance is None:
         raise ValueError("a landing draft carries the configuration of every step it took")
-    return provenance.model_dump()
+    return provenance
 
 
 def landing(draft: Draft) -> list[SettledCase]:
@@ -68,7 +59,7 @@ def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
         draft.statement,
         generated_for=template.id,
         difficulty=draft.difficulty,
-        **written,
+        written=written,
     )
     for case in landing(draft):
         # the case's own call rather than the problem's: a mutation round and
@@ -80,27 +71,27 @@ def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
                 case.expected,
                 expected_from=case.expected_from,
                 round=case.round,
-                **case.written.model_dump(),
+                written=case.written,
             )
         )
-    canonical = mint.solution(problem.id, draft.canonical, SolutionRole.CANONICAL, **written)
+    canonical = mint.solution(problem.id, draft.canonical, SolutionRole.CANONICAL, written=written)
     corpus.solutions.append(canonical)
     blind = copied(draft.blind)
     if draft.reference is None:
         raise ValueError("a landing draft carries the reference its blind call wrote")
     corpus.solutions.append(
-        mint.solution(problem.id, draft.reference, SolutionRole.REFERENCE, **blind)
+        mint.solution(problem.id, draft.reference, SolutionRole.REFERENCE, written=blind)
     )
     if draft.naive is not None:
         # stored so a later search measures against the solution this run paid
         # for. Absent where the template claims no speedup, since nothing
         # measures a form that is its own optimum
         corpus.solutions.append(
-            mint.solution(problem.id, draft.naive, SolutionRole.NAIVE, **copied(draft.clock))
+            mint.solution(problem.id, draft.naive, SolutionRole.NAIVE, written=copied(draft.clock))
         )
     corpus.matches.append(mint.generator_match(template.id, canonical.id))
     corpus.problems.put(problem)
     return problem
 
 
-__all__ = ["Corpus", "copied", "land", "landing", "written_by"]
+__all__ = ["Corpus", "copied", "land", "landing"]

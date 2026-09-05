@@ -12,7 +12,7 @@ from algo_coach.classifier import DEFAULT, classify, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim
 from algo_coach.runs import ABORT_AFTER, CONCURRENCY, as_answered
-from algo_coach.schema import Attempt, Call, Problem
+from algo_coach.schema import Attempt, Call, MachineProvenance, Problem
 from algo_coach.techniques import standing_claims
 
 
@@ -73,18 +73,7 @@ def store(
     question was asked twice.
     """
     log.append_claim(
-        classifier_claim(
-            attempt_id,
-            list(techniques),
-            model=call.model,
-            effort=call.effort,
-            prompt_hash=call.prompt_hash,
-            call_id=call.id,
-            pin=call.pin or "",
-            temperature=call.temperature,
-            provider=call.provider,
-            cost=call.cost,
-        )
+        classifier_claim(attempt_id, list(techniques), written=MachineProvenance.of(call))
     )
 
 

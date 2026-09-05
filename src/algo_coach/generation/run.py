@@ -30,7 +30,7 @@ from algo_coach.generation.generator import (
 )
 from algo_coach.generation.hardening import harden
 from algo_coach.generation.inputs import Built, builder
-from algo_coach.generation.landing import Corpus, land, written_by
+from algo_coach.generation.landing import Corpus, land
 from algo_coach.generation.resuming import draws_again, later, re_asks, reaches, starts_at
 from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, search
 from algo_coach.generation.steps import SILENT, Notes, Step
@@ -297,7 +297,7 @@ def carried(
             draft,
             WritingState.REFERENCED,
             reference=solution,
-            blind=copied_from(blind),
+            blind=MachineProvenance.of(blind),
         )
     else:
         notes("reference", "reused, at the configuration that wrote it")
@@ -330,7 +330,7 @@ def carried(
                 WritingState.BUILT,
                 builder=inputs.built.code,
                 largest=inputs.built.largest,
-                inputs=copied_from(inputs.call),
+                inputs=MachineProvenance.of(inputs.call),
             )
     else:
         notes("inputs", "reused, at the configuration that wrote it")
@@ -361,7 +361,7 @@ def carried(
                 draft,
                 WritingState.PACED,
                 naive=clock.code,
-                clock=copied_from(clock.call),
+                clock=MachineProvenance.of(clock.call),
             )
         if clock.code is None:
             # the search has nothing to measure the canonical against, so the
@@ -417,7 +417,7 @@ def carried(
         sites(writing, generator, blind, first, inputs, clock, bar)
         return draft, checked, inputs, clock, bar
     draft = advanced(
-        drafts, draft, WritingState.HARDENED, won=won, discrimination=copied_from(bar.call)
+        drafts, draft, WritingState.HARDENED, won=won, discrimination=MachineProvenance.of(bar.call)
     )
     sites(writing, generator, blind, first, inputs, clock, bar)
     return draft, checked, inputs, clock, bar
@@ -490,13 +490,6 @@ def reject(drafts: DraftStore | None, draft: Draft, gate: Discard = Discard.UNEX
     if draft.state in (WritingState.LANDED, WritingState.REJECTED):
         raise ValueError(f"a {draft.state} draft is not rejected")
     return held(drafts, moved(draft, WritingState.REJECTED, gate=gate))
-
-
-def copied_from(call: Call | None) -> MachineProvenance | None:
-    """The configuration of one step's call, as a site outcome copies it."""
-    if call is None:
-        return None
-    return MachineProvenance.model_validate(written_by(call))
 
 
 def sites(
@@ -666,7 +659,7 @@ def building(
         notes("inputs", f"unbuilt: {failure!r}")
         return Inputs(unbuilt=repr(failure))
     notes("inputs", f"written, up to {built.largest}", call)
-    return Inputs(call=call, built=built, written=copied_from(call))
+    return Inputs(call=call, built=built, written=MachineProvenance.of(call))
 
 
 def paced(
@@ -700,7 +693,7 @@ def paced(
             notes("clock", f"unpaced: {failure!r}")
             return Clock(unpaced=repr(failure))
         notes("clock", "written", call)
-        clock = Clock(call=call, code=code, written=copied_from(call))
+        clock = Clock(call=call, code=code, written=MachineProvenance.of(call))
 
     # run again on a reuse: the draft stores the code rather than the verdict,
     # and a subprocess answers this for nothing

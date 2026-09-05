@@ -51,14 +51,8 @@ def at_configuration(match: TemplateMatch, configuration: Configuration, prompt_
     """Whether this matcher, asked this question, produced the record. The
     provider that served it is recorded and never compared, and a hand
     annotation is at no configuration at all."""
-    if match.source is not MatchSource.CLASSIFIER:
-        return False
-    return (match.model, match.effort, match.pin, match.temperature, match.prompt_hash) == (
-        configuration.model,
-        configuration.effort,
-        configuration.pin,
-        configuration.temperature,
-        prompt_hash,
+    return match.source is MatchSource.CLASSIFIER and match.at_configuration(
+        configuration, prompt_hash
     )
 
 

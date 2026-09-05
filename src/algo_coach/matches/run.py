@@ -11,7 +11,7 @@ from algo_coach.matches.questions import Question, outstanding, questions
 from algo_coach.matches.store import MatchLog
 from algo_coach.mint import machine_match
 from algo_coach.runs import ABORT_AFTER, CONCURRENCY, as_answered
-from algo_coach.schema import Call, Card, Problem, Solution
+from algo_coach.schema import Call, Card, MachineProvenance, Problem, Solution
 
 
 class Failed(BaseModel):
@@ -72,19 +72,14 @@ def store(log: MatchLog, question: Question, matched: Sequence[str], call: Call)
     reading a later run must not pay for again.
     """
     named = set(matched)
+    written = MachineProvenance.of(call)
     for template in candidates(question.card):
         log.append(
             machine_match(
                 template.id,
                 question.solution.id,
                 matched=template.slug in named,
-                model=call.model,
-                effort=call.effort,
-                prompt_hash=call.prompt_hash,
-                call_id=call.id,
-                pin=call.pin or "",
-                temperature=call.temperature,
-                provider=call.provider,
+                written=written,
             )
         )
     return len(named)

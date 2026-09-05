@@ -1,5 +1,5 @@
 import pytest
-from helpers import PROVENANCE, machine_claim
+from helpers import WRITTEN, machine_claim
 
 from algo_coach.mint import (
     draft,
@@ -14,6 +14,7 @@ from algo_coach.schema import (
     ClaimSource,
     Confidence,
     FailureMode,
+    MachineProvenance,
     MatchSource,
     ProblemStatus,
     WritingState,
@@ -202,11 +203,13 @@ def test_a_machine_match_has_seen_nothing():
         "t1",
         "s1",
         matched=True,
-        model="a-model",
-        effort="medium",
-        prompt_hash="0123456789ab",
-        call_id="call-1",
-        pin="a-host",
+        written=MachineProvenance(
+            model="a-model",
+            effort="medium",
+            prompt_hash="0123456789ab",
+            call_id="call-1",
+            pin="a-host",
+        ),
     )
 
     assert match.informed_by == []
@@ -223,13 +226,15 @@ def test_a_machine_match_names_what_produced_it():
         "t1",
         "s1",
         matched=True,
-        model="a-model",
-        effort="medium",
-        prompt_hash="0123456789ab",
-        call_id="call-1",
-        pin="a-host",
-        temperature=0.0,
-        provider="fake",
+        written=MachineProvenance(
+            model="a-model",
+            effort="medium",
+            prompt_hash="0123456789ab",
+            call_id="call-1",
+            pin="a-host",
+            temperature=0.0,
+            provider="fake",
+        ),
     )
 
     assert match.source is MatchSource.CLASSIFIER
@@ -247,11 +252,13 @@ def generated(**overrides):
         "title": "Two Sum",
         "statement": "Given an array, return ...",
         "generated_for": "t1",
-        "model": "a-model",
-        "effort": "medium",
-        "prompt_hash": "0123456789ab",
-        "call_id": "call-1",
-        "pin": "a-host",
+        "written": MachineProvenance(
+            model="a-model",
+            effort="medium",
+            prompt_hash="0123456789ab",
+            call_id="call-1",
+            pin="a-host",
+        ),
     } | overrides
     return generated_problem(**fields)
 
@@ -285,18 +292,18 @@ def test_a_generated_problem_is_minted_an_id():
 def test_generation_records_what_it_sampled_at():
     """Sampled rather than greedy, which a reading never is: variance is what
     stops one model's habits becoming the whole corpus."""
-    assert generated(temperature=1.0).temperature == 1.0
+    assert generated(written=WRITTEN.model_copy(update={"temperature": 1.0})).temperature == 1.0
     assert generated().temperature is None
 
 
 def test_who_served_a_generated_problem_is_recorded():
-    assert generated(provider="fake").provider == "fake"
+    assert generated(written=WRITTEN.model_copy(update={"provider": "fake"})).provider == "fake"
 
 
 def test_what_a_generated_problem_cost_is_recorded():
     """A match cannot record this and a claim can. Generation is the expensive
     call of the three, so the corpus says what it was paid for."""
-    assert generated(cost=0.02).cost == 0.02
+    assert generated(written=WRITTEN.model_copy(update={"cost": 0.02})).cost == 0.02
 
 
 def test_a_generated_problem_starts_with_no_techniques():
@@ -337,7 +344,7 @@ def test_a_draft_is_minted_with_the_writing_id_it_was_given():
     """The only minter passed its id. The four site outcomes of one attempt
     already group under it, and a second identity would need a reference
     nothing carries."""
-    made = draft("w1", **DRAFTED, **PROVENANCE)
+    made = draft("w1", **DRAFTED, written=WRITTEN)
 
     assert made.id == "w1"
 
@@ -345,7 +352,7 @@ def test_a_draft_is_minted_with_the_writing_id_it_was_given():
 def test_a_minted_draft_starts_at_the_first_step():
     """The generator answered and nothing has checked it, which is the state a
     draft exists in before any step after it."""
-    made = draft("w1", **DRAFTED, **PROVENANCE)
+    made = draft("w1", **DRAFTED, written=WRITTEN)
 
     assert made.state is WritingState.DRAFTED
     assert made.gate is None
@@ -355,7 +362,7 @@ def test_a_minted_draft_starts_at_the_first_step():
 def test_a_minted_draft_copies_the_generator_configuration_whole():
     """The one place that supplies it, as `generated_problem` is for a problem:
     a call site spelling the fields out could fill them partly."""
-    made = draft("w1", **DRAFTED, **PROVENANCE)
+    made = draft("w1", **DRAFTED, written=WRITTEN)
 
     assert made.generator.call_id == "call-1"
     assert (made.blind, made.inputs, made.discrimination) == (None, None, None)

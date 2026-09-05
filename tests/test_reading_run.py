@@ -7,7 +7,7 @@ from algo_coach.classifier import request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import solution as mint_solution
 from algo_coach.readings import ReadingLog, candidates, read, read_one
-from algo_coach.schema import ReadingSource, SolutionRole
+from algo_coach.schema import MachineProvenance, ReadingSource, SolutionRole
 from algo_coach.techniques import codes
 
 answering = FakeTransport.answering
@@ -23,11 +23,9 @@ def canonical(code: str = CODE):
         problem_id="p1",
         code=code,
         role=SolutionRole.CANONICAL,
-        model="a-model",
-        effort="medium",
-        pin="a/pin",
-        prompt_hash="deadbeef",
-        call_id="call-0",
+        written=MachineProvenance(
+            model="a-model", effort="medium", pin="a/pin", prompt_hash="deadbeef", call_id="call-0"
+        ),
     )
 
 

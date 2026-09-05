@@ -1,4 +1,4 @@
-from helpers import PROVENANCE
+from helpers import WRITTEN
 
 from algo_coach.mint import case
 from algo_coach.runner import verify
@@ -8,7 +8,7 @@ DOUBLE = "def solve(n):\n    return n * 2\n"
 
 
 def cases(*pairs):
-    return [case("p1", args, expected, **PROVENANCE) for args, expected in pairs]
+    return [case("p1", args, expected, written=WRITTEN) for args, expected in pairs]
 
 
 def test_a_case_the_solution_answered_correctly_passed():

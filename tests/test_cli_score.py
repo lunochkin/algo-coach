@@ -10,7 +10,7 @@ from algo_coach.calls import UNSENT
 from algo_coach.classifier import EFFORT, MODEL, PIN, TEMPERATURE, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_claim
-from algo_coach.schema import ClaimSource
+from algo_coach.schema import ClaimSource, MachineProvenance
 
 TRANSPORT = import_module("algo_coach.cli.transport")
 
@@ -26,12 +26,14 @@ def reading(attempt_id: str, techniques: list[str], *, model: str = MODEL):
     return classifier_claim(
         attempt_id,
         techniques,
-        model=model,
-        effort=EFFORT,
-        prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
-        call_id="call-1",
-        pin=PIN,
-        temperature=TEMPERATURE,
+        written=MachineProvenance(
+            model=model,
+            effort=EFFORT,
+            prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
+            call_id="call-1",
+            pin=PIN,
+            temperature=TEMPERATURE,
+        ),
     )
 
 

@@ -1,11 +1,11 @@
-from helpers import PROVENANCE
+from helpers import WRITTEN
 
 from algo_coach.mint import machine_reading, user_reading
 from algo_coach.readings import ReadingLog
 
 
 def make_reading(solution_id: str = "s1", techniques: list[str] | None = None):
-    return machine_reading(solution_id, techniques or ["two-pointers"], **PROVENANCE)
+    return machine_reading(solution_id, techniques or ["two-pointers"], written=WRITTEN)
 
 
 def test_an_empty_store_reads_as_nothing(tmp_path):

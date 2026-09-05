@@ -12,7 +12,15 @@ from algo_coach.classifier import PIN, TEMPERATURE
 from algo_coach.mint import classifier_claim, user_reading
 from algo_coach.problems import ProblemStore
 from algo_coach.readings import ReadingLog
-from algo_coach.schema import Attempt, Call, Problem, Solution, SolutionRole, TechniqueClaim
+from algo_coach.schema import (
+    Attempt,
+    Call,
+    MachineProvenance,
+    Problem,
+    Solution,
+    SolutionRole,
+    TechniqueClaim,
+)
 from algo_coach.solutions import SolutionLog
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
@@ -39,6 +47,9 @@ PROVENANCE = {
 # Provenance and the template the brief named. A site caring about neither
 # spreads this. One testing a match against a template names its own.
 GENERATED = PROVENANCE | {"generated_for": "t1"}
+
+# The same, as the record a minter takes.
+WRITTEN = MachineProvenance(**PROVENANCE)
 
 
 def a_call(id: str = "call-1", **overrides) -> Call:
@@ -89,13 +100,15 @@ def machine_claim(
     return classifier_claim(
         attempt_id,
         techniques,
-        model=model,
-        effort=effort,
-        prompt_hash=prompt_hash,
-        call_id=call_id,
-        pin=pin,
-        temperature=temperature,
-        cost=cost,
+        written=MachineProvenance(
+            model=model,
+            effort=effort,
+            prompt_hash=prompt_hash,
+            call_id=call_id,
+            pin=pin,
+            temperature=temperature,
+            cost=cost,
+        ),
     )
 
 

@@ -45,7 +45,7 @@ from algo_coach.generation.generator import (
 )
 from algo_coach.generation.hardening import Hardened, harden, standing
 from algo_coach.generation.inputs import INPUTS_DEFAULT, Built, builder
-from algo_coach.generation.landing import Corpus, copied, land, landing, written_by
+from algo_coach.generation.landing import Corpus, copied, land, landing
 from algo_coach.generation.replay import (
     REPLAYED,
     ReplayResult,
@@ -166,6 +166,5 @@ __all__ = [
     "targets",
     "write_one",
     "write_problems",
-    "written_by",
     "written_for",
 ]

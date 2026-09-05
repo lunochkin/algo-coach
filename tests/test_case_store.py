@@ -1,4 +1,4 @@
-from helpers import PROVENANCE
+from helpers import WRITTEN
 
 from algo_coach import mint
 from algo_coach.cases import CaseLog
@@ -6,7 +6,7 @@ from algo_coach.schema import TestCase
 
 
 def case(*args, **overrides) -> TestCase:
-    return mint.case(*args, **(PROVENANCE | overrides))
+    return mint.case(*args, written=WRITTEN, **overrides)
 
 
 def test_an_empty_store_reads_as_nothing(tmp_path):

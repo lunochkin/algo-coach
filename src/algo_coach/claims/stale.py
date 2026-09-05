@@ -18,14 +18,8 @@ def at_configuration(claim: TechniqueClaim, configuration: Configuration, prompt
     """Not `not is_stale`: that means "not known-stale", and a user's claim is
     at no configuration at all. The provider is not compared, being unknown
     here."""
-    if claim.source is not ClaimSource.CLASSIFIER:
-        return False
-    return (claim.model, claim.effort, claim.pin, claim.temperature, claim.prompt_hash) == (
-        configuration.model,
-        configuration.effort,
-        configuration.pin,
-        configuration.temperature,
-        prompt_hash,
+    return claim.source is ClaimSource.CLASSIFIER and claim.at_configuration(
+        configuration, prompt_hash
     )
 
 

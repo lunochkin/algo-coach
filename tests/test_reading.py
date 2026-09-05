@@ -5,7 +5,7 @@ from helpers import PROVENANCE
 from pydantic import ValidationError
 
 from algo_coach.mint import machine_reading, user_reading
-from algo_coach.schema import ReadingSource, TechniqueClaim, TechniqueReading
+from algo_coach.schema import MachineProvenance, ReadingSource, TechniqueClaim, TechniqueReading
 
 
 def make_reading(source: ReadingSource, **overrides) -> TechniqueReading:
@@ -95,12 +95,14 @@ def test_a_machine_reading_names_what_produced_it():
     reading = machine_reading(
         "s1",
         ["sliding-window"],
-        model="a-model",
-        effort="medium",
-        prompt_hash="0123456789ab",
-        call_id="call-1",
-        pin="a-host",
-        temperature=0.0,
+        written=MachineProvenance(
+            model="a-model",
+            effort="medium",
+            prompt_hash="0123456789ab",
+            call_id="call-1",
+            pin="a-host",
+            temperature=0.0,
+        ),
     )
 
     assert reading.source is ReadingSource.CLASSIFIER
@@ -118,9 +120,11 @@ def test_a_code_outside_the_vocabulary_is_rejected_whole():
         machine_reading(
             "s1",
             ["sliding-window", "invented"],
-            model="a-model",
-            effort="medium",
-            prompt_hash="0123456789ab",
-            call_id="call-1",
-            pin="a-host",
+            written=MachineProvenance(
+                model="a-model",
+                effort="medium",
+                prompt_hash="0123456789ab",
+                call_id="call-1",
+                pin="a-host",
+            ),
         )

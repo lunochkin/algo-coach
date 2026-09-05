@@ -11,6 +11,7 @@ from algo_coach.schema import (
     Attempt,
     ClaimSource,
     Kind,
+    MachineProvenance,
     TechniqueClaim,
 )
 from algo_coach.techniques import criteria, criterion, standing_claims
@@ -116,12 +117,14 @@ def test_a_machine_claimed_attempt_is_still_offered(claim_root, monkeypatch, cap
         classifier_claim(
             "a1",
             ["sorting"],
-            model="a-model",
-            effort="medium",
-            prompt_hash="0123456789ab",
-            call_id="call-1",
-            pin=PIN,
-            temperature=TEMPERATURE,
+            written=MachineProvenance(
+                model="a-model",
+                effort="medium",
+                prompt_hash="0123456789ab",
+                call_id="call-1",
+                pin=PIN,
+                temperature=TEMPERATURE,
+            ),
         )
     )
 
@@ -139,12 +142,14 @@ def test_the_machine_verdict_is_never_shown(claim_root, monkeypatch, capsys):
         classifier_claim(
             "a1",
             ["sorting"],
-            model="a-model",
-            effort="medium",
-            prompt_hash="0123456789ab",
-            call_id="call-1",
-            pin=PIN,
-            temperature=TEMPERATURE,
+            written=MachineProvenance(
+                model="a-model",
+                effort="medium",
+                prompt_hash="0123456789ab",
+                call_id="call-1",
+                pin=PIN,
+                temperature=TEMPERATURE,
+            ),
         )
     )
 
@@ -443,12 +448,14 @@ def test_revise_shows_a_named_classifier_s_reading_of_the_same_prompt(
         classifier_claim(
             "a1",
             ["sorting"],
-            model="claude-opus-5",
-            effort="medium",
-            prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
-            call_id="call-1",
-            pin=PIN,
-            temperature=TEMPERATURE,
+            written=MachineProvenance(
+                model="claude-opus-5",
+                effort="medium",
+                prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
+                call_id="call-1",
+                pin=PIN,
+                temperature=TEMPERATURE,
+            ),
         )
     )
 
@@ -466,12 +473,14 @@ def disputing(log, techniques: list[str], *, call_id: str = "call-1") -> None:
         classifier_claim(
             "a1",
             techniques,
-            model="claude-opus-5",
-            effort="medium",
-            prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
-            call_id=call_id,
-            pin=PIN,
-            temperature=TEMPERATURE,
+            written=MachineProvenance(
+                model="claude-opus-5",
+                effort="medium",
+                prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
+                call_id=call_id,
+                pin=PIN,
+                temperature=TEMPERATURE,
+            ),
         )
     )
 
@@ -551,12 +560,14 @@ def test_the_most_disputed_are_still_asked_about_first(claim_root, monkeypatch, 
         classifier_claim(
             "a3",
             ["greedy"],
-            model="claude-opus-5",
-            effort="medium",
-            prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
-            call_id="call-2",
-            pin=PIN,
-            temperature=TEMPERATURE,
+            written=MachineProvenance(
+                model="claude-opus-5",
+                effort="medium",
+                prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
+                call_id="call-2",
+                pin=PIN,
+                temperature=TEMPERATURE,
+            ),
         )
     )
 
@@ -593,12 +604,14 @@ def test_revise_ignores_a_reading_of_a_prompt_nobody_sends_now(claim_root, monke
         classifier_claim(
             "a1",
             ["sorting"],
-            model="claude-opus-5",
-            effort="medium",
-            prompt_hash="ffffffffffff",
-            call_id="call-1",
-            pin=PIN,
-            temperature=TEMPERATURE,
+            written=MachineProvenance(
+                model="claude-opus-5",
+                effort="medium",
+                prompt_hash="ffffffffffff",
+                call_id="call-1",
+                pin=PIN,
+                temperature=TEMPERATURE,
+            ),
         )
     )
 

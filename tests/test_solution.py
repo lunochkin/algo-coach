@@ -1,5 +1,5 @@
 import pytest
-from helpers import PROVENANCE, T0
+from helpers import PROVENANCE, T0, WRITTEN
 from pydantic import ValidationError
 
 from algo_coach.mint import solution
@@ -9,15 +9,12 @@ CODE = "def solve(n):\n    return n\n"
 
 
 def make_canonical(**overrides) -> Solution:
-    fields = (
-        {
-            "problem_id": "p1",
-            "code": CODE,
-            "role": SolutionRole.CANONICAL,
-        }
-        | PROVENANCE
-        | overrides
-    )
+    fields = {
+        "problem_id": "p1",
+        "code": CODE,
+        "role": SolutionRole.CANONICAL,
+        "written": WRITTEN,
+    } | overrides
     return solution(**fields)
 
 

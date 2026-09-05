@@ -7,23 +7,6 @@ from algo_coach.calls import Configuration
 from algo_coach.schema import CallSite, SiteOutcome
 
 
-def at_configuration(outcome: SiteOutcome, configuration: Configuration, prompt_hash: str) -> bool:
-    """Whether this configuration, asked this question, produced the record."""
-    return (
-        outcome.model,
-        outcome.effort,
-        outcome.pin,
-        outcome.temperature,
-        outcome.prompt_hash,
-    ) == (
-        configuration.model,
-        configuration.effort,
-        configuration.pin,
-        configuration.temperature,
-        prompt_hash,
-    )
-
-
 def answered(
     outcomes: Iterable[SiteOutcome],
     *,
@@ -38,6 +21,6 @@ def answered(
     return any(
         one.site is site
         and one.problem_id == problem_id
-        and at_configuration(one, configuration, prompt_hash)
+        and one.at_configuration(configuration, prompt_hash)
         for one in outcomes
     )

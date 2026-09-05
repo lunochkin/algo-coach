@@ -118,14 +118,7 @@ def classifier_claim(
     attempt_id: str,
     techniques: list[str],
     *,
-    model: str,
-    effort: str,
-    prompt_hash: str,
-    call_id: str,
-    pin: str,
-    temperature: float | None = None,
-    provider: str | None = None,
-    cost: float | None = None,
+    written: MachineProvenance,
 ) -> TechniqueClaim:
     """A claim a model made, naming its configuration whole.
 
@@ -143,14 +136,7 @@ def classifier_claim(
         attempt_id=attempt_id,
         techniques=techniques,
         source=ClaimSource.CLASSIFIER,
-        model=model,
-        effort=effort,
-        prompt_hash=prompt_hash,
-        call_id=call_id,
-        pin=pin,
-        temperature=temperature,
-        provider=provider,
-        cost=cost,
+        **written.model_dump(),
     )
 
 
@@ -177,14 +163,7 @@ def machine_reading(
     solution_id: str,
     techniques: list[str],
     *,
-    model: str,
-    effort: str,
-    prompt_hash: str,
-    call_id: str,
-    pin: str,
-    temperature: float | None = None,
-    provider: str | None = None,
-    cost: float | None = None,
+    written: MachineProvenance,
 ) -> TechniqueReading:
     """One solution read by a model, naming its configuration whole. Membership
     is checked here as it is on a classifier claim, and rejected whole."""
@@ -197,14 +176,7 @@ def machine_reading(
         solution_id=solution_id,
         techniques=techniques,
         source=ReadingSource.CLASSIFIER,
-        model=model,
-        effort=effort,
-        prompt_hash=prompt_hash,
-        call_id=call_id,
-        pin=pin,
-        temperature=temperature,
-        provider=provider,
-        cost=cost,
+        **written.model_dump(),
     )
 
 
@@ -250,13 +222,7 @@ def machine_match(
     solution_id: str,
     *,
     matched: bool,
-    model: str,
-    effort: str,
-    prompt_hash: str,
-    call_id: str,
-    pin: str,
-    temperature: float | None = None,
-    provider: str | None = None,
+    written: MachineProvenance,
 ) -> TemplateMatch:
     """One pair a matcher read, positive or negative. The negative is stored,
     or every re-run re-tests every non-match forever, which on a growing corpus
@@ -268,13 +234,7 @@ def machine_match(
         solution_id=solution_id,
         matched=matched,
         source=MatchSource.CLASSIFIER,
-        model=model,
-        effort=effort,
-        prompt_hash=prompt_hash,
-        call_id=call_id,
-        pin=pin,
-        temperature=temperature,
-        provider=provider,
+        **written.model_dump(),
     )
 
 
@@ -286,17 +246,10 @@ def generated_problem(
     title: str,
     statement: str,
     *,
-    model: str,
-    effort: str,
-    prompt_hash: str,
-    call_id: str,
-    pin: str,
+    written: MachineProvenance,
     generated_for: str | None = None,
     techniques: Sequence[str] = (),
     difficulty: ProblemDifficulty | None = None,
-    temperature: float | None = None,
-    provider: str | None = None,
-    cost: float | None = None,
 ) -> Problem:
     """A problem the engine wrote, with its configuration whole.
 
@@ -312,14 +265,7 @@ def generated_problem(
         generated_for=generated_for,
         techniques=list(techniques),
         difficulty=difficulty,
-        model=model,
-        effort=effort,
-        prompt_hash=prompt_hash,
-        call_id=call_id,
-        pin=pin,
-        temperature=temperature,
-        provider=provider,
-        cost=cost,
+        **written.model_dump(),
     )
 
 
@@ -330,14 +276,7 @@ def case(
     *,
     expected_from: ExpectedSource = ExpectedSource.REFERENCE,
     round: int | None = 0,
-    model: str,
-    effort: str,
-    prompt_hash: str,
-    call_id: str,
-    pin: str,
-    temperature: float | None = None,
-    provider: str | None = None,
-    cost: float | None = None,
+    written: MachineProvenance,
 ) -> TestCase:
     """One case of the set a generated problem carries, and the call that
     proposed its arguments.
@@ -356,14 +295,7 @@ def case(
         expected=expected,
         expected_from=expected_from,
         round=round,
-        model=model,
-        effort=effort,
-        prompt_hash=prompt_hash,
-        call_id=call_id,
-        pin=pin,
-        temperature=temperature,
-        provider=provider,
-        cost=cost,
+        **written.model_dump(),
     )
 
 
@@ -372,14 +304,7 @@ def solution(
     code: str,
     role: SolutionRole,
     *,
-    model: str,
-    effort: str,
-    prompt_hash: str,
-    call_id: str,
-    pin: str,
-    temperature: float | None = None,
-    provider: str | None = None,
-    cost: float | None = None,
+    written: MachineProvenance,
 ) -> Solution:
     """One solution the engine wrote, in the role it was written for. The role
     is passed rather than inferred: both roles pass the same cases, so nothing
@@ -390,14 +315,7 @@ def solution(
         problem_id=problem_id,
         role=role,
         code=code,
-        model=model,
-        effort=effort,
-        prompt_hash=prompt_hash,
-        call_id=call_id,
-        pin=pin,
-        temperature=temperature,
-        provider=provider,
-        cost=cost,
+        **written.model_dump(),
     )
 
 
@@ -425,14 +343,7 @@ def site_outcome(
     writing_id: str,
     template_id: str,
     *,
-    model: str,
-    effort: str,
-    prompt_hash: str,
-    call_id: str,
-    pin: str,
-    temperature: float | None = None,
-    provider: str | None = None,
-    cost: float | None = None,
+    written: MachineProvenance,
     problem_id: str | None = None,
     gate: Discard | None = None,
     detail: str = "",
@@ -469,14 +380,7 @@ def site_outcome(
         separating=separating,
         unseparated=unseparated,
         largest=largest,
-        model=model,
-        effort=effort,
-        prompt_hash=prompt_hash,
-        call_id=call_id,
-        pin=pin,
-        temperature=temperature,
-        provider=provider,
-        cost=cost,
+        **written.model_dump(),
     )
 
 
@@ -489,14 +393,7 @@ def draft(
     declared: Sequence[DraftCase],
     difficulty: ProblemDifficulty,
     template_id: str | None = None,
-    model: str,
-    effort: str,
-    prompt_hash: str,
-    call_id: str,
-    pin: str,
-    temperature: float | None = None,
-    provider: str | None = None,
-    cost: float | None = None,
+    written: MachineProvenance,
 ) -> Draft:
     """One attempt at writing a problem, as the generator's call left it.
 
@@ -513,14 +410,5 @@ def draft(
         canonical=canonical,
         declared=list(declared),
         difficulty=difficulty,
-        generator=MachineProvenance(
-            model=model,
-            effort=effort,
-            prompt_hash=prompt_hash,
-            call_id=call_id,
-            pin=pin,
-            temperature=temperature,
-            provider=provider,
-            cost=cost,
-        ),
+        generator=written,
     )

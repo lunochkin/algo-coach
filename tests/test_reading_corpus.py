@@ -6,7 +6,7 @@ from algo_coach.classifier import DEFAULT, request_hash
 from algo_coach.mint import machine_reading, user_reading
 from algo_coach.readings import Progress, ReadingLog, candidates, outstanding, read_corpus
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Solution, SolutionRole
+from algo_coach.schema import MachineProvenance, Solution, SolutionRole
 
 answering = FakeTransport.answering
 
@@ -34,12 +34,14 @@ def already_read(
     return machine_reading(
         one.id,
         ["sorting"],
-        model=configuration.model,
-        effort=configuration.effort,
-        prompt_hash=prompt_hash or request_hash(candidates(), one.code),
-        call_id="call-0",
-        pin=configuration.pin,
-        temperature=configuration.temperature,
+        written=MachineProvenance(
+            model=configuration.model,
+            effort=configuration.effort,
+            prompt_hash=prompt_hash or request_hash(candidates(), one.code),
+            call_id="call-0",
+            pin=configuration.pin,
+            temperature=configuration.temperature,
+        ),
     )
 
 

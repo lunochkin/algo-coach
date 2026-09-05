@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar, overload
 
 from pydantic import BaseModel
 
 from algo_coach.schema.call import Call
+
+if TYPE_CHECKING:
+    from algo_coach.calls.configuration import Configuration
 
 
 class MachineProvenance(BaseModel):
@@ -24,12 +27,23 @@ class MachineProvenance(BaseModel):
     PROVENANCE: ClassVar[tuple[str, ...]] = ("model", "effort", "pin", "prompt_hash", "call_id")
     RECORDED: ClassVar[tuple[str, ...]] = (*PROVENANCE, "provider", "temperature", "cost")
 
+    @overload
     @classmethod
-    def of(cls, call: Call) -> MachineProvenance:
+    def of(cls, call: Call) -> MachineProvenance: ...
+
+    @overload
+    @classmethod
+    def of(cls, call: None) -> None: ...
+
+    @classmethod
+    def of(cls, call: Call | None) -> MachineProvenance | None:
         """What one call's record copies onto its own: all of the
         configuration, since a record carrying part of it compares with
         nothing. `pin` reads as empty rather than absent, or an unpinned call
-        would write a provenance no machine record may have."""
+        would write a provenance no machine record may have. A site that made
+        no call copies nothing."""
+        if call is None:
+            return None
         return cls(
             model=call.model,
             effort=call.effort,
@@ -39,6 +53,17 @@ class MachineProvenance(BaseModel):
             temperature=call.temperature,
             provider=call.provider,
             cost=call.cost,
+        )
+
+    def at_configuration(self, configuration: Configuration, prompt_hash: str) -> bool:
+        """Whether this configuration, asked this question, produced the
+        record. The provider that served it is recorded and never compared."""
+        return (self.model, self.effort, self.pin, self.temperature, self.prompt_hash) == (
+            configuration.model,
+            configuration.effort,
+            configuration.pin,
+            configuration.temperature,
+            prompt_hash,
         )
 
     def check_provenance(self, machine: bool) -> None:
