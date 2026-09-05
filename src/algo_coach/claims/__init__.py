@@ -1,4 +1,5 @@
 from algo_coach.claims.attribution import resolve_techniques, standing_claims
+from algo_coach.claims.eval import score_backlog
 from algo_coach.claims.hand import claim_by_hand
 from algo_coach.claims.reading import Plan, ReadResult, absorb, select
 from algo_coach.claims.revision import against, contested, revisable
@@ -27,7 +28,6 @@ from algo_coach.claims.score import (
     Split,
     TechniqueScore,
     score,
-    score_backlog,
 )
 from algo_coach.claims.stale import at_configuration, is_stale, readings_at
 from algo_coach.runs import as_answered_grouped
