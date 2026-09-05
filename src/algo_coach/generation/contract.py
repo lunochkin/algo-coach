@@ -16,5 +16,12 @@ ENTRY = "one module-level function named `solve`"
 
 ALONE = "The code stands alone: no input is read and nothing is printed."
 
+# corpus.md, "The statement carries the signature, and the order is why"
+SIGNATURE = "a `def solve(...)` line naming the parameters in the order the cases pass them"
 
-__all__ = ["ALONE", "ENTRY", "RUNTIME"]
+POSITIONAL = (
+    "taking its arguments positionally, in the order the statement's `def solve(...)` line gives"
+)
+
+
+__all__ = ["ALONE", "ENTRY", "POSITIONAL", "RUNTIME", "SIGNATURE"]

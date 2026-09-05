@@ -91,6 +91,15 @@ What decides whether a solution to a generated problem is correct.
   function called `longest_palindromic_substring` tells the solver what the
   statement was written to withhold. What the announcement floor measures on a
   statement applies to a signature too.
+- **The statement carries the signature, and the order is why.** A fixed name
+  leaves the parameter order to be inferred from prose, and three briefs infer
+  it separately. A reference took `solve(capacity, times, sizes)` where the
+  canonical took `solve(times, sizes, capacity)`, answered no case, and the
+  problem was discarded as untested.
+- **A statement whose signature contradicts its canonical does not land.** Both
+  later solutions are written to the statement, so a wrong line there is worse
+  than a missing one. The generation call is what the two are read off, so it
+  is checked as its reply is read.
 - **A problem needing more than one entry point is not expressible**, and that
   is accepted. A structure asked for by its operations has no single function.
   If one is ever wanted, `entrypoint` is an additive field whose absence means

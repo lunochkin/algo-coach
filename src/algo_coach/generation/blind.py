@@ -9,7 +9,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Configuration, Transport, ask, prompt_hash
-from algo_coach.generation.contract import ALONE, ENTRY, RUNTIME
+from algo_coach.generation.contract import ALONE, ENTRY, POSITIONAL, RUNTIME
 from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call
 
@@ -30,8 +30,8 @@ what it says rather than what you take it to have meant. Another solution is
 being written from the same prose, and where the two disagree the problem is
 discarded rather than either solution corrected.
 
-{RUNTIME}, {ENTRY}, taking its arguments
-positionally in the order the statement describes them.
+{RUNTIME}, {ENTRY},
+{POSITIONAL}.
 {ALONE}"""
 
 

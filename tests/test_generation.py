@@ -11,6 +11,7 @@ from algo_coach.generation import (
     SYSTEM,
     GenerationError,
     generate,
+    parameters,
     prompt,
     read,
     schema,
@@ -82,7 +83,7 @@ def draft(**overrides) -> str:
     return json.dumps(
         {
             "title": "Widest fair stretch",
-            "statement": "Given a list of readings, return ...",
+            "statement": "Given a list of readings, return ...\n\ndef solve(xs)",
             "canonical": "def solve(xs):\n    return len(xs)\n",
             "difficulty": "medium",
             "cases": [{"args": "[[1, 2, 3]]", "expected": "3"}],
@@ -99,6 +100,57 @@ def test_the_three_parts_come_back_together():
     assert written.title == "Widest fair stretch"
     assert written.cases[0].args == [[1, 2, 3]]
     assert written.cases[0].expected == 3
+
+
+def test_a_statement_carrying_no_signature_fails():
+    """Three briefs are written from the statement alone, and a parameter
+    order they infer is one they can infer differently."""
+    with pytest.raises(ValidationError):
+        read(draft(statement="Given a list of readings, return ..."))
+
+
+def test_a_signature_the_canonical_contradicts_fails():
+    """Both later solutions are written to the statement, so a line that
+    disagrees with the canonical misleads them together."""
+    with pytest.raises(ValidationError):
+        read(draft(statement="Return ...\n\ndef solve(k, xs)"))
+
+
+def test_the_declaration_is_read_and_not_a_mention_before_it():
+    """A statement names the call while describing it, and the line it ends on
+    is what a reader takes the order from."""
+    written = read(
+        draft(statement="`def solve(k, xs)` is described first.\n\ndef solve(xs) -> int:")
+    )
+
+    assert written.statement.endswith("def solve(xs) -> int:")
+
+
+def test_an_annotated_signature_is_read_by_its_names():
+    """A statement writing types and a canonical writing none are one
+    order."""
+    written = read(draft(statement="Return ...\n\ndef solve(xs: list[int]) -> int:"))
+
+    assert parameters(written.canonical) == parameters(written.statement)
+
+
+@pytest.mark.parametrize(
+    "wrapped", ["`def solve(xs)`", "`def solve(xs) -> int`.", "def solve(xs)."]
+)
+def test_a_signature_wrapped_in_markdown_is_read(wrapped):
+    """The brief writes the line in backticks, so a model that mirrors them
+    has still ended the statement on it."""
+    written = read(draft(statement=f"Return ...\n\n{wrapped}"))
+
+    assert parameters(written.statement) == ("xs",)
+
+
+def test_a_positional_only_canonical_is_the_same_order():
+    """A `/` marks how the arguments are passed, and the cases pass them
+    positionally either way."""
+    written = read(draft(canonical="def solve(xs, /):\n    return len(xs)\n"))
+
+    assert parameters(written.canonical) == ("xs",)
 
 
 @pytest.mark.parametrize("missing", ["title", "statement", "canonical", "cases", "difficulty"])

@@ -27,7 +27,7 @@ SYSTEM = f"""You write a program that builds an input for a problem statement.
 The statement is all you are given. Write {RUNTIME} defining
 {ENTRY}, taking two positional arguments,
 `size` and `seed`. It returns an array: the positional arguments of a case, in
-the order the statement describes them. `solve` is the name every module this
+the order the statement's `def solve(...)` line gives. `solve` is the name every module this
 engine runs defines, and says nothing about what yours computes.
 
 `size` scales the input. What it counts is yours to choose where the statement

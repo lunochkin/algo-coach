@@ -89,7 +89,10 @@ def test_a_problem_its_runs_kept_is_stored_whole(root, monkeypatch, capsys):
     run(monkeypatch, FakeWriter(), "longest-valid-window")
 
     (problem,) = ProblemStore(root).all()
-    assert problem.statement == "A statement."
+    # the signature the fixture appends: every statement carries the one its
+    # cases pass, since three briefs read the order off it
+    assert problem.statement.startswith("A statement.")
+    assert problem.statement.endswith("def solve(xs)")
     assert [one.problem_id for one in CaseLog(root).cases()] == [problem.id]
     assert [one.role for one in SolutionLog(root).for_problem(problem.id)] == [
         SolutionRole.CANONICAL,

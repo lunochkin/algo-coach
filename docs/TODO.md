@@ -485,7 +485,7 @@ exit criteria reads a draft.
       approach the card replaces. Two edits to that brief have each fixed one
       end and caused the other, and the doc names neither
 
-- [ ] Require the statement to carry its `solve` signature, and point the three
+- [x] Require the statement to carry its `solve` signature, and point the three
       briefs written from a statement at it. A reference took
       `solve(capacity, times, sizes)` where the canonical took
       `solve(times, sizes, capacity)`, crashed on every case, and the draft was

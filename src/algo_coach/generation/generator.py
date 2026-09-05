@@ -1,13 +1,14 @@
 """Writing a problem for one template: the statement, the canonical solution,
 the first test cases and how hard it is. One call for all of them."""
 
+import ast
 from collections.abc import Iterable, Sequence
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from algo_coach.calls import CallLog, Configuration, Transport, ask
-from algo_coach.generation.contract import ALONE, ENTRY, RUNTIME
+from algo_coach.generation.contract import ALONE, ENTRY, POSITIONAL, RUNTIME, SIGNATURE
 from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call, Card, DraftCase, Problem, ProblemDifficulty, Template
 
@@ -28,10 +29,11 @@ Produce four things.
 1. A statement. Self-contained prose: what the input is, what to return, the
    constraints that bound them, and one worked example. It must not name the
    technique, the template, or the data structure the solution uses. The solver
-   has to derive the form from what is asked.
+   has to derive the form from what is asked. It ends with {SIGNATURE}. Two
+   more solutions are written from this prose alone, and a parameter order
+   they have to infer is one they can infer differently.
 2. A canonical solution. {RUNTIME}, {ENTRY},
-   taking its arguments positionally. Written to display the form rather than
-   to be clever.
+   {POSITIONAL}. Written to display the form rather than to be clever.
    {ALONE}
 3. Test cases. Each is the positional arguments and the expected return.
    Include the edge cases the statement admits. They must separate a correct
@@ -122,6 +124,49 @@ class Generated(BaseModel):
     # asked for rather than derived: nothing else has read the problem yet
     difficulty: ProblemDifficulty
 
+    @model_validator(mode="after")
+    def _the_statement_carries_the_signature(self) -> Generated:
+        # corpus.md, "The statement carries the signature": three briefs read
+        # the order off it
+        named = parameters(self.statement)
+        if named is None:
+            raise ValueError("the statement ends with the `def solve(...)` line its cases pass")
+        # skipped rather than raised: a canonical that does not parse fails
+        # every case, which is the gate that discards the problem
+        mine = parameters(self.canonical)
+        if mine is not None and mine != named:
+            raise ValueError(f"the statement declares solve{named} and the canonical takes {mine}")
+        return self
+
+
+def parameters(text: str) -> tuple[str, ...] | None:
+    """The parameter names of the last `def solve(` in a text, prose or code.
+
+    The last one: a statement can mention the call before it declares it, and
+    the declaration is what a reader takes the order from.
+    """
+    for start in reversed([one for one in range(len(text)) if text.startswith("def solve(", one)]):
+        parsed = _parsed(text[start:])
+        if parsed is not None:
+            return parsed
+    return None
+
+
+def _parsed(text: str) -> tuple[str, ...] | None:
+    # the header alone, since prose after it is not code and a canonical's
+    # body would parse to the same names anyway. Stripped of the backticks and
+    # the full stop a statement wraps it in, since the brief writes it in them
+    header = text.split("\n", 1)[0].strip().rstrip("`.:")
+    try:
+        tree = ast.parse(f"{header}:\n    pass")
+    except SyntaxError:
+        return None
+    [function] = tree.body
+    if not isinstance(function, ast.FunctionDef):
+        return None
+    # positional-only counted too: `solve(xs, /)` and `solve(xs)` are one order
+    return tuple(one.arg for one in [*function.args.posonlyargs, *function.args.args])
+
 
 def read(text: str) -> Generated:
     # checked again on arrival: the schema's guarantee ends with the request
@@ -135,7 +180,10 @@ def schema() -> dict[str, Any]:
         "type": "object",
         "properties": {
             "title": {"type": "string"},
-            "statement": {"type": "string"},
+            "statement": {
+                "type": "string",
+                "description": f"prose ending with {SIGNATURE}",
+            },
             "canonical": {"type": "string"},
             "difficulty": {"type": "string", "enum": [one.value for one in ProblemDifficulty]},
             "cases": {

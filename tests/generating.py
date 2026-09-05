@@ -15,16 +15,21 @@ NAIVE = "def solve(xs):\n    return len([one for one in xs])\n"
 
 
 def draft(statement: str = "Given a list of readings, return ...", **overrides) -> str:
-    return json.dumps(
-        {
-            "title": "Widest fair stretch",
-            "statement": statement,
-            "canonical": CANONICAL,
-            "difficulty": "medium",
-            "cases": [{"args": "[[1, 2, 3]]", "expected": "3"}],
-        }
-        | overrides
-    )
+    written = {
+        "title": "Widest fair stretch",
+        "statement": statement,
+        "canonical": CANONICAL,
+        "difficulty": "medium",
+        "cases": [{"args": "[[1, 2, 3]]", "expected": "3"}],
+    } | overrides
+    return json.dumps(written | {"statement": signed(written["statement"], written["canonical"])})
+
+
+def signed(statement: str, canonical: str) -> str:
+    """The statement with the signature its canonical takes, which every
+    generation call is required to end on."""
+    header = canonical.split("\n", 1)[0].rstrip(":")
+    return statement if "def solve(" in statement else f"{statement}\n\n{header}"
 
 
 def solved(solution: str = BLIND) -> str:

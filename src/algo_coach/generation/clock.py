@@ -11,7 +11,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Configuration, Transport, ask, prompt_hash
-from algo_coach.generation.contract import ALONE, ENTRY, RUNTIME
+from algo_coach.generation.contract import ALONE, ENTRY, POSITIONAL, RUNTIME
 from algo_coach.generation.errors import GenerationError
 from algo_coach.schema import Call
 
@@ -50,8 +50,8 @@ and do not stop a loop early. A loop that runs to the end is what is wanted.
 Do not use the approach you are told to avoid, and do not use another approach
 that reaches the same running time by a different route.
 
-{RUNTIME}, {ENTRY}, taking its arguments
-positionally in the order the statement describes them.
+{RUNTIME}, {ENTRY},
+{POSITIONAL}.
 {ALONE}"""
 
 
