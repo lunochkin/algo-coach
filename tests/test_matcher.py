@@ -1,16 +1,8 @@
 import json
 
 import pytest
-from matching import (
-    PROCEDURE,
-    FakeTransport,
-    Verdict,
-    canonical,
-    card,
-    problem,
-    seeded,
-    template,
-)
+from helpers import FakeTransport, Verdict
+from matching import PROCEDURE, canonical, card, problem, seeded, template
 
 from algo_coach.calls import CallLog
 from algo_coach.matches import DEFAULT, MatcherError, candidates, match, request_hash

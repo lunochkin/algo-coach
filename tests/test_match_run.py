@@ -1,17 +1,7 @@
 from datetime import UTC, datetime
 
-from matching import (
-    PROCEDURE,
-    FakeTransport,
-    Verdict,
-    canonical,
-    canonicals,
-    card,
-    problem,
-    seeded,
-    stored,
-    template,
-)
+from helpers import FakeTransport, Verdict
+from matching import PROCEDURE, canonical, canonicals, card, problem, seeded, stored, template
 
 from algo_coach.calls import CallLog
 from algo_coach.matches import (

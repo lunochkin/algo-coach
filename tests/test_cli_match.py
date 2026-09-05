@@ -1,7 +1,8 @@
 from importlib import import_module
 
 import pytest
-from matching import FakeTransport, Verdict, canonicals, card, problem, seeded, stored
+from helpers import FakeTransport, Verdict
+from matching import canonicals, card, problem, seeded, stored
 
 from algo_coach import cli
 from algo_coach.matches import EFFORT, MODEL, MatchLog

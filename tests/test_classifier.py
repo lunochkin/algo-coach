@@ -1,12 +1,11 @@
-import json
 import re
 import tempfile
-from dataclasses import dataclass, field
 from pathlib import Path
 
 import pytest
+from helpers import FakeTransport, Verdict
 
-from algo_coach.calls import UNSENT, CallLog, Reply
+from algo_coach.calls import UNSENT, CallLog
 from algo_coach.classifier import (
     DEFAULT,
     EFFORT,
@@ -33,32 +32,12 @@ def verdict(client, candidates, code, **kwargs):
     return techniques
 
 
-@dataclass
-class FakeTransport:
-    """Records the request rather than making one — the prompt is the thing
-    under test, and a real call would score a live model, not this code."""
-
-    techniques: list[str]
-    silent: bool = False
-    # The token cap, where whatever came back is truncated. `text` carries the
-    # runaway that emits whitespace until it runs out; without it, the reply
-    # that never reached the schema at all.
-    stop_reason: str = "stop"
-    text: str | None = None
-    calls: list[dict] = field(default_factory=list)
-
-    def __call__(self, **kwargs) -> Reply:
-        self.calls.append(kwargs)
-        if self.silent:
-            # A refusal answers nothing and says nothing about the code.
-            return Reply(text=None, stop_reason="content_filter")
-        if self.stop_reason != "stop":
-            return Reply(text=self.text, stop_reason=self.stop_reason)
-        return Reply(text=json.dumps({"techniques": self.techniques}), stop_reason="stop")
-
-
 def answering(*techniques: str) -> FakeTransport:
-    return FakeTransport(list(techniques))
+    return FakeTransport.answering(Verdict(list(techniques)))
+
+
+# A refusal answers nothing and says nothing about the code.
+SILENT = Verdict(stop_reason="content_filter")
 
 
 def test_the_verdict_is_the_techniques_it_named():
@@ -211,7 +190,7 @@ def test_no_candidates_is_no_question():
 def test_a_response_carrying_no_verdict_raises():
     """A refusal and a truncated answer both land here: the caller is running
     over a backlog, and one attempt must not cost the rest."""
-    client = FakeTransport([], silent=True)
+    client = FakeTransport.answering(SILENT)
 
     with pytest.raises(ClassifierError, match="content_filter"):
         verdict(client, ["greedy", "sorting"], CODE)
@@ -324,7 +303,7 @@ def test_a_reply_cut_short_by_the_cap_names_nothing():
     no verdict can be read from it. Recorded as naming nothing rather than
     raised. Greedy decoding is deterministic, so every later run would re-ask
     the same prompt and be cut short in the same place."""
-    client = FakeTransport([], stop_reason="length", text="{  \t  \n\n  \t  ")
+    client = FakeTransport.answering(Verdict(stop_reason="length", text="{  \t  \n\n  \t  "))
 
     techniques, call = _classify(client, CALLS, ["greedy", "sorting"], CODE)
 
@@ -335,7 +314,7 @@ def test_a_reply_cut_short_by_the_cap_names_nothing():
 def test_a_cap_hit_that_returned_no_text_names_nothing_too():
     """Both shapes of the same event. Which one arrives depends on whether the
     runaway was inside the schema or before it, and neither can be read."""
-    client = FakeTransport([], stop_reason="length")
+    client = FakeTransport.answering(Verdict(stop_reason="length"))
 
     techniques, call = _classify(client, CALLS, ["greedy", "sorting"], CODE)
 
@@ -346,4 +325,4 @@ def test_a_refusal_still_raises():
     """It answered nothing and says nothing about the code. Only the cap is
     stored as a verdict, because only the cap repeats."""
     with pytest.raises(ClassifierError):
-        _classify(FakeTransport([], silent=True), CALLS, ["greedy", "sorting"], CODE)
+        _classify(FakeTransport.answering(SILENT), CALLS, ["greedy", "sorting"], CODE)

@@ -115,7 +115,9 @@ def machine_claim(
 
 @dataclass
 class Verdict:
-    """One reply the fake model gives, or one failure it raises."""
+    """One reply the fake model gives, or one failure it raises. The names go
+    under whatever key the request's schema asks for, so one fake answers the
+    classifier and the matcher alike."""
 
     techniques: list[str] | None = None
     error: Exception | None = None
@@ -196,11 +198,12 @@ class FakeTransport:
             taken = self.request_ms
         if verdict.error is not None:
             raise verdict.error
+        key = next(iter((kwargs.get("schema") or {}).get("required", [])), "techniques")
         return Reply(
             text=(
                 verdict.text
                 if verdict.text is not None or verdict.techniques is None
-                else json.dumps({"techniques": verdict.techniques})
+                else json.dumps({key: verdict.techniques})
             ),
             stop_reason=verdict.stop_reason,
             provider="fake",
