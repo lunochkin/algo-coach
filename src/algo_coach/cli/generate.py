@@ -323,20 +323,27 @@ def written_for(cards: list[Card], draft: Draft) -> Target | None:
     return None
 
 
+def counted(results: list[GenerationResult], field: str) -> int:
+    """How many of one kind the run left, over every template it was aimed at."""
+    return sum(len(getattr(result, field)) for result in results)
+
+
+def tallied(*counts: tuple[int, str]) -> str:
+    """The non-zero counts as `, 3 held, 1 failed`, so a summary names only what
+    the run reached."""
+    return "".join(f", {count} {label}" for count, label in counts if count)
+
+
 def resume_summary(results: list[Resumed], bench: Bench = BENCH, *, unaimed: int = 0) -> str:
     """What the resumed drafts became, and where each run started."""
-    stored = sum(len(result.drafted) for result in results)
-    line = f"{len(results)} draft(s) resumed, {stored} stored"
-    on_hold = sum(len(result.held) for result in results)
-    if on_hold:
-        line += f", {on_hold} held again"
-    failed = sum(len(result.failed) for result in results)
-    if failed:
-        line += f", {failed} failed"
-    if unaimed:
-        # apart from a failure: nothing was asked, since the form it names is
-        # not among the seeded cards
-        line += f", {unaimed} naming no template"
+    line = f"{len(results)} draft(s) resumed, {counted(results, 'drafted')} stored"
+    # naming no template is apart from a failure: nothing was asked, since the
+    # form it names is not among the seeded cards
+    line += tallied(
+        (counted(results, "held"), "held again"),
+        (counted(results, "failed"), "failed"),
+        (unaimed, "naming no template"),
+    )
     started = Counter(result.started_at for result in results)
     if started:
         line += ", from " + ", ".join(
@@ -376,32 +383,23 @@ def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
 def replay_summary(result: ReplayResult, bench: Bench = BENCH) -> str:
     """What the replay paid for, beside what it did not have to."""
     line = f"{result.asked} pair(s) asked, {result.skipped} skipped, {wrote(bench)}"
-    if result.unasked:
-        # apart from a skip: nothing was there to ask about, at no cost
-        line += f", {result.unasked} with nothing to ask"
-    if result.failed:
-        line += f", {len(result.failed)} failed"
-    return line
+    # unasked is apart from skipped: nothing was there to ask about, at no cost
+    return line + tallied((result.unasked, "with nothing to ask"), (len(result.failed), "failed"))
 
 
 def summary(results: list[GenerationResult], aimed: list[Target], bench: Bench = BENCH) -> str:
     """What the run stored, over every template it was aimed at."""
-    stored = sum(len(result.drafted) for result in results)
-    kept = f"{stored} problem(s) stored"
+    kept = f"{counted(results, 'drafted')} problem(s) stored"
     if len(aimed) > 1:
         kept += f", over {len(aimed)} template(s)"
-    discarded = sum(len(result.discarded) for result in results)
-    if discarded:
-        # Repeated from the per-problem lines: a run of ten scrolls past them.
-        kept += f", {discarded} discarded"
-    on_hold = sum(len(result.held) for result in results)
-    if on_hold:
-        # apart from a discard: the calls are kept and the form still has no
-        # problem, which is what the next run is aimed at
-        kept += f", {on_hold} held"
-    failed = sum(len(result.failed) for result in results)
-    if failed:
-        kept += f", {failed} failed"
+    # the discards repeat the per-problem lines, since a run of ten scrolls past
+    # them. A hold is apart from a discard: the calls are kept and the form
+    # still has no problem, which is what the next run is aimed at
+    kept += tallied(
+        (counted(results, "discarded"), "discarded"),
+        (counted(results, "held"), "held"),
+        (counted(results, "failed"), "failed"),
+    )
     # last, since it is one line per site where the sites differ
     return f"{kept}, {wrote(bench)}"
 
