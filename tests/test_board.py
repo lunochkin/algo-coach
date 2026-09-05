@@ -4,6 +4,7 @@ import pytest
 from helpers import GENERATED
 
 from algo_coach.board import TechniqueRow, per_technique, ungrouped
+from algo_coach.claims import standing_claims
 from algo_coach.log import latest_by_attempt
 from algo_coach.schema import (
     Attempt,
@@ -13,7 +14,6 @@ from algo_coach.schema import (
     SelfLabel,
     TechniqueClaim,
 )
-from algo_coach.techniques import standing_claims
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 

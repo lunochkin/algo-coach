@@ -4,8 +4,7 @@ from importlib import import_module
 
 import pytest
 
-from algo_coach.calls import CallLog, Reply, Trace, ask, payload, prompt_hash, stamp
-from algo_coach.mint import call as mint_call
+from algo_coach.calls import CallLog, Reply, Trace, ask, payload, prompt_hash, recorded, stamp
 from algo_coach.schema import Call
 
 ASK = import_module("algo_coach.calls.ask")
@@ -137,9 +136,9 @@ def test_the_hash_ignores_what_the_hash_cannot_see(tmp_path):
 
 def test_a_call_carries_an_outcome_or_it_is_not_a_call():
     with pytest.raises(ValueError, match="response or an error"):
-        mint_call(model="m", effort="low", prompt="p", prompt_hash="h")
+        recorded(model="m", effort="low", prompt="p", prompt_hash="h")
     with pytest.raises(ValueError, match="response or an error"):
-        mint_call(model="m", effort="low", prompt="p", prompt_hash="h", response="r", error="e")
+        recorded(model="m", effort="low", prompt="p", prompt_hash="h", response="r", error="e")
 
 
 def test_an_empty_log_reads_as_nothing(tmp_path):
@@ -148,7 +147,7 @@ def test_an_empty_log_reads_as_nothing(tmp_path):
 
 def test_the_log_round_trips(tmp_path):
     log = CallLog(tmp_path)
-    call = mint_call(model="m", effort="low", prompt="p", prompt_hash="h", response="r")
+    call = recorded(model="m", effort="low", prompt="p", prompt_hash="h", response="r")
 
     log.append(call)
 
@@ -256,7 +255,7 @@ def test_a_call_from_before_the_waits_were_measured_still_reads():
     """Additive, like every other field: the log stays readable by its own
     schema, and an unmeasured call says so rather than claiming zero."""
     stored = Call.model_validate_json(
-        mint_call(
+        recorded(
             model="m", effort="low", prompt="p", prompt_hash="h", response="r"
         ).model_dump_json(exclude={"elapsed_ms"})
     )

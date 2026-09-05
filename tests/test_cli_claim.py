@@ -4,6 +4,7 @@ import pytest
 from helpers import seed_problem
 
 from algo_coach import cli
+from algo_coach.claims import standing_claims
 from algo_coach.classifier import PIN, TEMPERATURE, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_claim
@@ -14,7 +15,7 @@ from algo_coach.schema import (
     MachineProvenance,
     TechniqueClaim,
 )
-from algo_coach.techniques import criteria, criterion, standing_claims
+from algo_coach.techniques import criteria, criterion
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 

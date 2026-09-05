@@ -3,7 +3,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from textwrap import fill
 
-from algo_coach.claims import against, claimable, contested, readings_at, revisable
+from algo_coach.claims import against, claimable, contested, readings_at, revisable, standing_claims
 from algo_coach.classifier import request_hash
 from algo_coach.cli.display import verdict
 from algo_coach.cli.prompts import NONE, ask_choice, numbered
@@ -12,7 +12,7 @@ from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import load_problems
 from algo_coach.schema import Attempt, Confidence, Problem, TechniqueClaim
-from algo_coach.techniques import criterion, standing_claims
+from algo_coach.techniques import criterion
 
 WIDTH = 100
 LEVELS = list(Confidence)

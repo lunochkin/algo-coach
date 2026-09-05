@@ -1,4 +1,4 @@
-from algo_coach.calls.ask import HASH_LENGTH, ask, elapsed, payload, prompt_hash
+from algo_coach.calls.ask import HASH_LENGTH, ask, elapsed, payload, prompt_hash, recorded
 from algo_coach.calls.choice import choice_schema, chosen, offer
 from algo_coach.calls.openrouter import BASE_URL, ROUTING, UNSENT, OpenRouter
 from algo_coach.calls.store import CallLog
@@ -33,6 +33,7 @@ __all__ = [
     "offer",
     "payload",
     "prompt_hash",
+    "recorded",
     "stamp",
     "traced",
 ]

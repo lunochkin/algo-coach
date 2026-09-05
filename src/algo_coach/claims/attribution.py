@@ -1,16 +1,17 @@
 from collections.abc import Iterable, Mapping
+from operator import attrgetter
 
-from algo_coach.log import latest_by_attempt
 from algo_coach.schema import Attempt, ClaimSource, Problem, TechniqueClaim
+from algo_coach.standing import standing
+
+# Weakest first: the user's claim stands over the machine's.
+BY_WHAT_EACH_KNEW = (ClaimSource.CLASSIFIER, ClaimSource.USER)
 
 
 def standing_claims(claims: Iterable[TechniqueClaim]) -> dict[str, TechniqueClaim]:
     """The claim that stands: the user's own if any, however late the
     machine's."""
-    claims = list(claims)
-    return latest_by_attempt(claims) | latest_by_attempt(
-        [claim for claim in claims if claim.source is ClaimSource.USER]
-    )
+    return standing(claims, attrgetter("attempt_id"), by_what_each_knew=BY_WHAT_EACH_KNEW)
 
 
 def resolve_techniques(

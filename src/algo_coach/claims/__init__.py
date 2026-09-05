@@ -1,3 +1,4 @@
+from algo_coach.claims.attribution import resolve_techniques, standing_claims
 from algo_coach.claims.reading import Plan, ReadResult, absorb, select
 from algo_coach.claims.revision import against, contested, revisable
 from algo_coach.claims.run import (
@@ -57,6 +58,8 @@ __all__ = [
     "one_per_problem",
     "read_one",
     "readings_at",
+    "resolve_techniques",
+    "standing_claims",
     "revisable",
     "score",
     "score_backlog",

@@ -5,6 +5,7 @@ from collections.abc import Callable, Iterator, Mapping, Sequence
 from pydantic import BaseModel, Field
 
 from algo_coach.calls import CallLog, Transport
+from algo_coach.claims.attribution import standing_claims
 from algo_coach.claims.reading import Plan, absorb, select
 from algo_coach.claims.run import CONCURRENCY, Failed, Progress, read_one
 from algo_coach.claims.sample import answered_by_hand, eligible, one_per_problem
@@ -12,7 +13,6 @@ from algo_coach.classifier import DEFAULT
 from algo_coach.log import AttemptLog
 from algo_coach.runs import as_answered_grouped
 from algo_coach.schema import Attempt, Call, Configuration, Problem
-from algo_coach.techniques import standing_claims
 
 
 class TechniqueScore(BaseModel):

@@ -1,13 +1,13 @@
-"""Where every stored record's id and timestamp come from, kept in one module
-so the policy is one line to change."""
+"""Where every stored record is minted, so what one carries is settled in one
+place. The id itself is `ids`, which the transport reaches without this module
+and the domain it reads."""
 
-import uuid
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Any
 
+from algo_coach.ids import new_id
 from algo_coach.schema import (
-    Call,
     CallSite,
     CaseResult,
     ClaimSource,
@@ -34,57 +34,6 @@ from algo_coach.schema import (
     WritingState,
 )
 from algo_coach.techniques import is_known
-
-
-# Opaque and unguessable: nothing derives an id from a record's content, or two
-# engines would mint the same id for different records.
-def new_id() -> str:
-    return uuid.uuid4().hex
-
-
-def call(
-    *,
-    model: str,
-    effort: str,
-    prompt: str,
-    prompt_hash: str,
-    response: str | None = None,
-    error: str | None = None,
-    thinking: str | None = None,
-    stop_reason: str | None = None,
-    pin: str | None = None,
-    temperature: float | None = None,
-    provider: str | None = None,
-    input_tokens: int | None = None,
-    output_tokens: int | None = None,
-    reasoning_tokens: int | None = None,
-    cost: float | None = None,
-    elapsed_ms: int | None = None,
-    request_ms: int | None = None,
-    attempts: int | None = None,
-) -> Call:
-    return Call(
-        id=new_id(),
-        created_at=datetime.now(UTC),
-        model=model,
-        effort=effort,
-        prompt=prompt,
-        prompt_hash=prompt_hash,
-        response=response,
-        error=error,
-        thinking=thinking,
-        stop_reason=stop_reason,
-        pin=pin,
-        temperature=temperature,
-        provider=provider,
-        input_tokens=input_tokens,
-        output_tokens=output_tokens,
-        reasoning_tokens=reasoning_tokens,
-        cost=cost,
-        elapsed_ms=elapsed_ms,
-        request_ms=request_ms,
-        attempts=attempts,
-    )
 
 
 def user_claim(

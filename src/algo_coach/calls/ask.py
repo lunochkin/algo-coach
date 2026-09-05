@@ -1,12 +1,13 @@
 """Making a call and recording it, with nothing said about what it was for."""
 
+from datetime import UTC, datetime
 from hashlib import sha256
 from time import monotonic
 from typing import Any
 
 from algo_coach.calls.store import CallLog
 from algo_coach.calls.transport import MAX_TOKENS, Reply, Transport, traced
-from algo_coach.mint import call as mint_call
+from algo_coach.ids import new_id
 from algo_coach.schema import Call
 
 # Hex characters of sha256, compared only for equality; sixty-four of them
@@ -22,6 +23,12 @@ def payload(system: str, content: str) -> str:
 
 def prompt_hash(system: str, content: str) -> str:
     return sha256(payload(system, content).encode()).hexdigest()[:HASH_LENGTH]
+
+
+def recorded(**fields: Any) -> Call:
+    """One request's record. Minted here rather than through `mint`: the
+    transport sits under the domain and reads nothing from it."""
+    return Call(id=new_id(), created_at=datetime.now(UTC), **fields)
 
 
 def ask(
@@ -62,7 +69,7 @@ def ask(
         )
     except Exception as exc:
         log.append(
-            mint_call(
+            recorded(
                 model=model,
                 effort=effort,
                 prompt=text,
@@ -76,7 +83,7 @@ def ask(
         )
         raise
 
-    call = mint_call(
+    call = recorded(
         model=model,
         effort=effort,
         prompt=text,

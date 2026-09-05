@@ -7,14 +7,13 @@ import pytest
 from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach.calls import CallLog, Reply
-from algo_coach.claims import score_backlog
+from algo_coach.claims import score_backlog, standing_claims
 from algo_coach.classifier import DEFAULT, EFFORT, MODEL, PIN, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
 from algo_coach.problems import load_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import ClaimSource
-from algo_coach.techniques import standing_claims
 
 # What the one-attempt fixture would be sent now.
 ASKED = request_hash(["greedy", "sorting"], "def f(): pass")

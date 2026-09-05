@@ -4,8 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from algo_coach.claims import resolve_techniques
 from algo_coach.schema import Attempt, FailureMode, Problem, SelfLabel, TechniqueClaim
-from algo_coach.techniques import resolve_techniques
 
 
 class TechniqueRow(BaseModel):

@@ -4,10 +4,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from algo_coach.board import TechniqueRow, per_technique, ungrouped
+from algo_coach.claims import standing_claims
 from algo_coach.cli.display import age
 from algo_coach.log import AttemptLog, latest_by_attempt
 from algo_coach.problems import load_problems
-from algo_coach.techniques import standing_claims
 
 
 def board(args: argparse.Namespace, root: Path) -> None:

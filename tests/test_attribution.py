@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 
 from helpers import GENERATED
 
+from algo_coach.claims import resolve_techniques, standing_claims
 from algo_coach.log import AttemptLog
 from algo_coach.schema import (
     Attempt,
@@ -9,7 +10,6 @@ from algo_coach.schema import (
     Problem,
     TechniqueClaim,
 )
-from algo_coach.techniques import resolve_techniques, standing_claims
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
