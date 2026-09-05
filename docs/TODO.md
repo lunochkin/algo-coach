@@ -542,9 +542,11 @@ numbers go in the commit unless the item names a file.
       reason each gave. Counting `naive_finished` alone reads zero, since the
       case ceiling reports `input_too_large` before the clock is judged
 - [x] Count how many of those ten reuse a domain their template's cue names.
-      The exclusion is prompted and nothing enforces it
-- [ ] Count how many of those ten ask the same question in a new setting. The
-      list of what a form already carries is what prevents that
+      The exclusion is prompted and nothing enforces it. One of ten: shipping
+      containers under a capacity allowance
+- [x] Count how many of those ten ask the same question in a new setting. The
+      list of what a form already carries is what prevents that. Two of ten,
+      both written with the twin in the list, and held drafts are not listed
 - [x] Run `generate` on a template claiming a speedup and record the
       separating size, or which `unseparated` reason came back
 - [ ] Run `read` over the stored canonicals and record the techniques each
