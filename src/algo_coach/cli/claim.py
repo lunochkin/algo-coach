@@ -15,7 +15,8 @@ from algo_coach.claims import (
 from algo_coach.classifier import request_hash
 from algo_coach.cli.display import verdict
 from algo_coach.cli.prompts import NONE, ask_choice, numbered
-from algo_coach.cli.score import configurations, labels
+from algo_coach.cli.score import configurations
+from algo_coach.cli.scoring import labels
 from algo_coach.log import AttemptLog
 from algo_coach.readings import load_problems
 from algo_coach.schema import Attempt, Confidence, Problem, TechniqueClaim
