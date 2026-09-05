@@ -1,3 +1,4 @@
+from algo_coach.matches.annotate import annotate
 from algo_coach.matches.gaps import Coverage, core, coverage, uncovered
 from algo_coach.matches.matcher import (
     DEFAULT,
@@ -33,6 +34,7 @@ __all__ = [
     "Question",
     "Progress",
     "annotatable",
+    "annotate",
     "at_configuration",
     "candidates",
     "core",

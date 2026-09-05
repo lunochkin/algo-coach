@@ -1,4 +1,5 @@
 from algo_coach.claims.attribution import resolve_techniques, standing_claims
+from algo_coach.claims.hand import claim_by_hand
 from algo_coach.claims.reading import Plan, ReadResult, absorb, select
 from algo_coach.claims.revision import against, contested, revisable
 from algo_coach.claims.run import (
@@ -49,6 +50,7 @@ __all__ = [
     "as_answered_grouped",
     "ask",
     "at_configuration",
+    "claim_by_hand",
     "claimable",
     "classify_backlog",
     "contested",

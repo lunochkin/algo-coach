@@ -8,10 +8,11 @@ from pathlib import Path
 from algo_coach.cards import CardStore
 from algo_coach.cli.annotating import Annotating
 from algo_coach.matches import MatchLog, Question, annotatable, candidates
-from algo_coach.mint import user_match
+from algo_coach.matches import annotate as annotated
 from algo_coach.readings import load_problems
 from algo_coach.schema import MatchSource, Template, TemplateMatch
 from algo_coach.solutions import SolutionLog
+from algo_coach.standing import latest_by
 
 
 class Landing:
@@ -24,18 +25,8 @@ class Landing:
         self.written = 0
 
     def __call__(self, question: Question, picked: set[str]) -> None:
-        forms = candidates(question.card)
-        saw = shown(question, forms, self.read)
-        for form in forms:
-            self.log.append(
-                user_match(
-                    form.id,
-                    question.solution.id,
-                    matched=form.id in picked,
-                    informed_by=saw,
-                )
-            )
-            self.written += 1
+        saw = shown(question, candidates(question.card), self.read)
+        self.written += annotated(self.log, question, picked, informed_by=saw)
 
 
 def annotating(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> Annotating:
@@ -71,14 +62,10 @@ def annotate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
 def machine_verdicts(matches: Iterable[TemplateMatch]) -> dict[tuple[str, str], TemplateMatch]:
     """The latest reading per pair, from any configuration: this is shown to a
     reader rather than scored."""
-    latest: dict[tuple[str, str], TemplateMatch] = {}
-    for match in matches:
-        if match.source is not MatchSource.CLASSIFIER:
-            continue
-        pair = (match.template_id, match.solution_id)
-        if pair not in latest or match.created_at >= latest[pair].created_at:
-            latest[pair] = match
-    return latest
+    return latest_by(
+        (match for match in matches if match.source is MatchSource.CLASSIFIER),
+        lambda match: (match.template_id, match.solution_id),
+    )
 
 
 def shown(

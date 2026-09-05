@@ -3,13 +3,20 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from textwrap import fill
 
-from algo_coach.claims import against, claimable, contested, readings_at, revisable, standing_claims
+from algo_coach.claims import (
+    against,
+    claim_by_hand,
+    claimable,
+    contested,
+    readings_at,
+    revisable,
+    standing_claims,
+)
 from algo_coach.classifier import request_hash
 from algo_coach.cli.display import verdict
 from algo_coach.cli.prompts import NONE, ask_choice, numbered
 from algo_coach.cli.score import configurations, labels
 from algo_coach.log import AttemptLog
-from algo_coach.mint import user_claim
 from algo_coach.readings import load_problems
 from algo_coach.schema import Attempt, Confidence, Problem, TechniqueClaim
 from algo_coach.techniques import criterion
@@ -97,16 +104,12 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         level = ask_choice("confidence", LEVELS, [], empty="unsaid")
         if level is None:
             break
-        log.append_claim(
-            user_claim(
-                attempt.id,
-                chosen,
-                # `0` came back as an empty list; the schema refuses an empty
-                # claim that does not say it is one.
-                declined=not chosen,
-                confidence=LEVELS[int(level.picked[0]) - 1] if level.picked else None,
-                informed_by=shown(attempt, readings),
-            )
+        claim_by_hand(
+            log,
+            attempt.id,
+            chosen,
+            confidence=LEVELS[int(level.picked[0]) - 1] if level.picked else None,
+            informed_by=shown(attempt, readings),
         )
         written += 1
         # After the append, since the techniques answer already landed.
