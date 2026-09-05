@@ -485,6 +485,12 @@ exit criteria reads a draft.
       approach the card replaces. Two edits to that brief have each fixed one
       end and caused the other, and the doc names neither
 
+- [ ] Require the statement to carry its `solve` signature, and point the three
+      briefs written from a statement at it. A reference took
+      `solve(capacity, times, sizes)` where the canonical took
+      `solve(times, sizes, capacity)`, crashed on every case, and the draft was
+      rejected as `untested`
+
 ### The gate the generator's own values raise
 
 `misdeclared` rejected 4 of 10 attempts on one template, and every rejected
@@ -502,7 +508,7 @@ answer.
 - [x] Write that demotion into `flows.md` and `corpus.md`: step 3 is a recorded
       reading rather than a gate, and the two solutions agreeing is what a
       landing turns on
-- [ ] Re-run `generate --count 10` on `answer-space` and record how many
+- [x] Re-run `generate --count 10` on `answer-space` and record how many
       attempts the reference discards that `misdeclared` would have. That
       number is what restores the gate or closes it
 
