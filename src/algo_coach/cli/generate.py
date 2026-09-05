@@ -599,7 +599,17 @@ def verdict(progress: Progress) -> str:
     if progress.outcome is None:
         return f"{cases}  not run"
     landed = "landed" if progress.landed else "not stored"
-    return f"{cases}  {progress.outcome}  {landed}{bar(progress)}{timing(progress)}"
+    return (
+        f"{cases}  {progress.outcome}  {landed}{declared(progress)}"
+        f"{bar(progress)}{timing(progress)}{paid(progress)}"
+    )
+
+
+def declared(progress: Progress) -> str:
+    """Cases the canonical answered differently from what its own call
+    declared. It rejects nothing, so it prints beside the verdict rather than
+    as one."""
+    return f"  {progress.misdeclared} misdeclared" if progress.misdeclared else ""
 
 
 def bar(progress: Progress) -> str:
@@ -625,6 +635,13 @@ def sources(progress: Progress) -> str:
     return ", ".join(
         part for part in (f"{progress.declared} set", f"{progress.fuzzed} fuzz", rounds) if part
     )
+
+
+def paid(progress: Progress) -> str:
+    """What the problem cost, over every call its sites and rounds made. The
+    stage lines price one call each, and a row nobody watched live is where the
+    total is read."""
+    return f"  ${progress.cost:.4f}" if progress.cost is not None else ""
 
 
 def timing(progress: Progress) -> str:

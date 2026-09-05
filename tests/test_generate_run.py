@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 from generating import NAIVE, FakeWriter
 from helpers import PROVENANCE
 from matching import card, seeded, template
@@ -28,6 +30,54 @@ def run(tmp_path, model: FakeWriter, *, count: int = 1):
     return one, write_problems(
         model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path), count=count
     )
+
+
+class Priced(FakeWriter):
+    """A provider that prices every call, which is what a row's total is summed
+    over."""
+
+    def __call__(self, **kwargs):
+        answered = super().__call__(**kwargs)
+        return replace(answered, cost=0.001)
+
+
+def test_each_row_is_priced_over_its_own_calls(tmp_path):
+    """The stage lines price one call each, and the row is what says what a
+    problem cost. A running total would report the second problem as the
+    dearer one."""
+    seen: list[Progress] = []
+    (one,) = seeded(tmp_path, card())
+    log = CallLog(tmp_path)
+
+    write_problems(
+        Priced(statements=["The first.", "The second."]),
+        log,
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        count=2,
+        on_progress=seen.append,
+    )
+
+    assert [line.cost for line in seen] == [0.003, 0.003]
+    assert sum(line.cost for line in seen) == sum(call.cost for call in log.appended)
+
+
+def test_a_provider_that_prices_nothing_leaves_the_row_unpriced(tmp_path):
+    """Absent rather than zero: a run of those reports the count alone."""
+    seen: list[Progress] = []
+    (one,) = seeded(tmp_path, card())
+
+    write_problems(
+        FakeWriter(),
+        CallLog(tmp_path),
+        one,
+        one.templates[0],
+        Corpus.at(tmp_path),
+        on_progress=seen.append,
+    )
+
+    assert [line.cost for line in seen] == [None]
 
 
 def test_a_problem_takes_three_calls_in_one_order(tmp_path):

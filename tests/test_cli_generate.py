@@ -292,6 +292,22 @@ def test_a_separation_proved_and_not_stored_is_not_read_as_a_stored_one():
     assert landed.endswith("no case at 4096: case_too_large")
 
 
+def test_the_line_counts_what_the_generator_misdeclared():
+    """It rejects nothing, so it prints beside the verdict: one call wrote the
+    canonical and the declaration, and the reference is what decides a case."""
+    landed = line(cases=9, outcome=CaseOutcome.PASSED, landed=True, misdeclared=2)
+
+    assert landed == "9 case(s)  passed  landed  2 misdeclared"
+
+
+def test_the_line_reports_what_the_problem_cost():
+    """The stage lines price one call each, and the row is where the total for
+    a problem nobody watched live is read."""
+    landed = line(cases=4, outcome=CaseOutcome.PASSED, landed=True, cost=0.0123)
+
+    assert landed.endswith("$0.0123")
+
+
 def test_a_form_that_is_its_own_optimum_says_nothing():
     assert line(cases=4, outcome=CaseOutcome.PASSED, landed=True) == "4 case(s)  passed  landed"
 

@@ -70,7 +70,9 @@ def test_a_canonical_contradicting_its_own_cases_is_counted_not_discarded():
     result = checked(([2], 4), ([5], 11))
 
     assert result.survived
-    assert result.outcome is CaseOutcome.WRONG
+    # the fold says how the run went: a declaration it contradicts is counted,
+    # and only the reference can call an answer wrong
+    assert result.outcome is CaseOutcome.PASSED
     assert [one.returned for one in result.misdeclarations] == [10]
     assert [one.expected for one in result.cases] == [4, 10]
 

@@ -48,8 +48,8 @@ class Checked:
     """What the two runs decided about one drafted problem. `cases` is empty
     where it was discarded."""
 
-    # the canonical's run against what its call declared, folded to the
-    # severest case. `None` only where there were no cases to run
+    # how the canonical's run went, folded to the severest case. `None` only
+    # where there were no cases to run
     outcome: CaseOutcome | None
     # what the canonical's slowest case took in that run. The mutation loop
     # paces its cap by it rather than running the canonical again
@@ -85,7 +85,10 @@ def check(cases: Sequence[DraftCase], *, canonical: str, cap_ms: int = CAP_MS) -
     args = [case.args for case in cases]
     ran = run(canonical, args, cap_ms=cap_ms)
     ours = [answered(one) for one in ran]
-    outcome = severest(decide(one, case.expected) for case, one in zip(cases, ran, strict=True))
+    # folded over how the run went rather than over the declared values: a case
+    # answered differently from the declaration is counted, and the reference
+    # is what decides whether the answer is wrong
+    outcome = severest(decide(one, one.value) for one in ran)
     slowest = max((one.elapsed_ms or 0 for one in ran if one.returned), default=0)
 
     if any(isinstance(one, NoValue) for one in ours):

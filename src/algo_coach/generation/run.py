@@ -1,7 +1,7 @@
 """Writing several problems for one template, one after another. Sequential
 where the matcher is parallel — `flows.md` gives why."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from time import monotonic
 from typing import Any
 
@@ -86,6 +86,8 @@ class Progress(BaseModel):
     outcome: CaseOutcome | None = None
     # apart from `outcome`: a problem can be written, run and still not land
     landed: bool = False
+    # cases the canonical answered differently from what its own call declared
+    misdeclared: int = 0
     reason: str | None = None
     # the size at which the naive solution stops fitting a sitting. Absent
     # where the form is its own optimum, and `unseparated` says so where it is
@@ -108,6 +110,9 @@ class Progress(BaseModel):
     fuzzed: int = 0
     caught: list[int] = Field(default_factory=list)
     unmeasured: str | None = None  # the round's call failed, and the set is unmeasured
+    # what this problem's calls cost, over every site and every round. Absent
+    # where the provider priced none of them
+    cost: float | None = None
 
 
 class Inputs(BaseModel):
@@ -832,6 +837,8 @@ def write_problems(
         # known, which is the first point there is a problem id to name
         left: list[SiteOutcome] = []
         writing = Writing(template_id=template.id, into=left)
+        # the tail this problem appends, which is what its row is priced over
+        paid = len(calls.appended)
         try:
             draft, checked, inputs, clock, bar = write_one(
                 transport,
@@ -855,7 +862,14 @@ def write_problems(
             stopped = drafts.get(writing.id) if drafts is not None else None
             if stopped is not None:
                 result.held.append(Held(index=index, draft=stopped, failed=repr(failure)))
-            report(on_progress, index, count, template, reason=repr(failure))
+            report(
+                on_progress,
+                index,
+                count,
+                template,
+                reason=repr(failure),
+                cost=priced(calls.appended[paid:]),
+            )
             consecutive += 1
             if consecutive == ABORT_AFTER:
                 result.aborted = True
@@ -886,6 +900,7 @@ def write_problems(
             title=draft.title,
             cases=len(draft.declared),
             outcome=checked.outcome,
+            misdeclared=len(checked.misdeclarations),
             landed=draft.state is WritingState.LANDED,
             reason=None if checked.survived else why(checked),
             separating=inputs.separating,
@@ -901,6 +916,7 @@ def write_problems(
             fuzzed=bar.fuzzed,
             caught=bar.caught,
             unmeasured=bar.unmeasured,
+            cost=priced(calls.appended[paid:]),
         )
     return result
 
@@ -1043,6 +1059,13 @@ def why(checked: Checked) -> str:
             return "discarded: the reference computed no case"
         case _:
             return f"discarded: the two solutions disagree on {len(checked.disagreements)} case(s)"
+
+
+def priced(paid: Sequence[Call]) -> float | None:
+    """What a problem's calls cost. Absent rather than zero where a provider
+    priced none of them, as the run's own summary reports the count alone."""
+    costs = [one.cost for one in paid if one.cost is not None]
+    return sum(costs) if costs else None
 
 
 def report(
