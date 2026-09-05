@@ -5,7 +5,9 @@ from importlib import import_module
 import pytest
 
 from algo_coach.calls import CallLog, Reply, Trace, ask, payload, prompt_hash, recorded, stamp
-from algo_coach.schema import Call
+from algo_coach.schema import Call, Configuration
+
+CONFIGURATION = Configuration(model="m", effort="low", pin="a-host")
 
 ASK = import_module("algo_coach.calls.ask")
 
@@ -44,7 +46,13 @@ def test_the_stored_prompt_digests_to_the_hash_beside_it(tmp_path):
     its own key is a claim about what was sent rather than the thing itself."""
     log = CallLog(tmp_path)
 
-    ask(answering(), log, system="sys", content="body", model="m", effort="low", pin="a-host")
+    ask(
+        answering(),
+        log,
+        system="sys",
+        content="body",
+        configuration=CONFIGURATION,
+    )
 
     (stored,) = log.all()
     assert sha256(stored.prompt.encode()).hexdigest()[: len(stored.prompt_hash)] == (
@@ -55,7 +63,13 @@ def test_the_stored_prompt_digests_to_the_hash_beside_it(tmp_path):
 def test_the_prompt_is_both_halves_in_the_order_sent(tmp_path):
     log = CallLog(tmp_path)
 
-    ask(answering(), log, system="sys", content="body", model="m", effort="low", pin="a-host")
+    ask(
+        answering(),
+        log,
+        system="sys",
+        content="body",
+        configuration=CONFIGURATION,
+    )
 
     (stored,) = log.all()
     assert "sys" in stored.prompt and "body" in stored.prompt
@@ -70,9 +84,7 @@ def test_what_came_back_is_recorded_beside_what_it_cost(tmp_path):
         log,
         system="sys",
         content="body",
-        model="m",
-        effort="low",
-        pin="a-host",
+        configuration=CONFIGURATION,
     )
 
     assert text == '{"techniques": []}'
@@ -92,7 +104,13 @@ def test_a_failure_is_recorded_and_then_raised(tmp_path):
     transport = FakeTransport(error=RuntimeError("rate limited"))
 
     with pytest.raises(RuntimeError):
-        ask(transport, log, system="sys", content="body", model="m", effort="low", pin="a-host")
+        ask(
+            transport,
+            log,
+            system="sys",
+            content="body",
+            configuration=CONFIGURATION,
+        )
 
     (stored,) = log.all()
     assert stored.error == "RuntimeError: rate limited"
@@ -106,7 +124,11 @@ def test_a_reply_with_no_text_is_a_failure_not_an_empty_reading(tmp_path):
     transport = FakeTransport(Reply(text=None, stop_reason="content_filter"))
 
     call, text = ask(
-        transport, log, system="sys", content="body", model="m", effort="low", pin="a-host"
+        transport,
+        log,
+        system="sys",
+        content="body",
+        configuration=CONFIGURATION,
     )
 
     assert text is None
@@ -118,8 +140,20 @@ def test_the_same_prompt_may_be_called_more_than_once(tmp_path):
     repeat a hash — so nothing may assume one call per hash."""
     log = CallLog(tmp_path)
 
-    ask(answering(), log, system="sys", content="body", model="m", effort="low", pin="a-host")
-    ask(answering(), log, system="sys", content="body", model="m", effort="low", pin="a-host")
+    ask(
+        answering(),
+        log,
+        system="sys",
+        content="body",
+        configuration=CONFIGURATION,
+    )
+    ask(
+        answering(),
+        log,
+        system="sys",
+        content="body",
+        configuration=CONFIGURATION,
+    )
 
     first, second = log.all()
     assert first.prompt_hash == second.prompt_hash
@@ -167,10 +201,7 @@ def test_the_call_records_what_it_was_sampled_at(tmp_path):
         log,
         system="sys",
         content="body",
-        model="m",
-        effort="low",
-        pin="a-host",
-        temperature=0.0,
+        configuration=CONFIGURATION.model_copy(update={"temperature": 0.0}),
     )
 
     assert transport.calls[0]["temperature"] == 0.0
@@ -185,7 +216,11 @@ def test_a_call_at_the_provider_s_own_default_records_no_temperature(tmp_path):
     log = CallLog(tmp_path)
 
     call, _ = ask(
-        answering(), log, system="sys", content="body", model="m", effort="low", pin="a-host"
+        answering(),
+        log,
+        system="sys",
+        content="body",
+        configuration=CONFIGURATION,
     )
 
     assert call.temperature is None
@@ -200,7 +235,13 @@ def test_the_execution_and_its_last_request_are_both_recorded(tmp_path, monkeypa
     transport = answering()
     transport.reply = replace(transport.reply, request_ms=90, attempts=2)
 
-    ask(transport, log, system="sys", content="body", model="m", effort="low", pin="a-host")
+    ask(
+        transport,
+        log,
+        system="sys",
+        content="body",
+        configuration=CONFIGURATION,
+    )
 
     (stored,) = log.all()
     assert (stored.elapsed_ms, stored.attempts, stored.request_ms) == (250, 2, 90)
@@ -222,9 +263,7 @@ def test_a_failure_records_both_levels_too(tmp_path, monkeypatch):
             log,
             system="sys",
             content="body",
-            model="m",
-            effort="low",
-            pin="a-host",
+            configuration=CONFIGURATION,
         )
 
     (stored,) = log.all()
@@ -242,9 +281,7 @@ def test_a_transport_that_never_retried_stamps_nothing(tmp_path):
             log,
             system="sys",
             content="body",
-            model="m",
-            effort="low",
-            pin="a-host",
+            configuration=CONFIGURATION,
         )
 
     (stored,) = log.all()

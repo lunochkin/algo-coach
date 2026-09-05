@@ -41,10 +41,7 @@ def offer(
         log,
         system=system,
         content=content,
-        model=configuration.model,
-        effort=configuration.effort,
-        pin=configuration.pin,
-        temperature=configuration.temperature,
+        configuration=configuration,
         schema=choice_schema(key, options),
     )
 

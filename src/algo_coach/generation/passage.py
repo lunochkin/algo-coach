@@ -21,10 +21,7 @@ from algo_coach.generation.checks import (
 from algo_coach.generation.clock import naive
 from algo_coach.generation.drafting import advanced, held, rejected
 from algo_coach.generation.fuzzing import Fuzzing, pass_over
-from algo_coach.generation.generator import (
-    Configuration,
-    generate,
-)
+from algo_coach.generation.generator import generate
 from algo_coach.generation.hardening import harden
 from algo_coach.generation.inputs import Built, builder
 from algo_coach.generation.resuming import draws_again, re_asks, reaches
@@ -47,6 +44,7 @@ from algo_coach.schema import (
     Call,
     CallSite,
     Card,
+    Configuration,
     Draft,
     MachineProvenance,
     SettledCase,

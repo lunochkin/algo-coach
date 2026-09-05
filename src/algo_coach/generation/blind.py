@@ -4,13 +4,11 @@ Its own brief, naming no technique, template or cue: those are what the
 statement withholds.
 """
 
-from typing import Any
-
-from pydantic import BaseModel, Field
-
-from algo_coach.calls import CallLog, Transport, ask, prompt_hash
+from algo_coach.calls import CallLog, Transport, prompt_hash
 from algo_coach.generation.contract import ALONE, ENTRY, POSITIONAL, RUNTIME
-from algo_coach.generation.errors import GenerationError
+from algo_coach.generation.contract import read_solution as read
+from algo_coach.generation.contract import solution_schema as schema
+from algo_coach.generation.site import answer
 from algo_coach.schema import Call, Configuration
 
 # unmeasured, as every site's is. Greedy: this site writes against a statement
@@ -35,36 +33,13 @@ discarded rather than either solution corrected.
 {ALONE}"""
 
 
-class Blind(BaseModel):
-    # no cases: the ones it would write are its own reading of the statement
-    # rather than a test of it
-    solution: str = Field(min_length=1)
-
-
 def prompt(statement: str) -> str:
     # delimited: the statement is data the model solves, not instructions
     return f"<problem>\n{statement}\n</problem>"
 
 
-def read(text: str) -> str:
-    return Blind.model_validate_json(text).solution
-
-
 def request_hash(statement: str) -> str:
     return prompt_hash(SYSTEM, prompt(statement))
-
-
-def schema() -> dict[str, Any]:
-    # an object rather than bare text, so the code arrives as a value instead
-    # of inside whatever fences a model likes
-    return {
-        "type": "object",
-        "properties": {
-            "solution": {"type": "string", "description": "Python defining `solve`"},
-        },
-        "required": ["solution"],
-        "additionalProperties": False,
-    }
 
 
 def reference(
@@ -76,20 +51,16 @@ def reference(
 ) -> tuple[str, Call]:
     # the site's own configuration by default: independence is what the model
     # was shown, so this call may run the model that wrote the statement
-    call, text = ask(
+    text, call = answer(
         transport,
         log,
         system=SYSTEM,
         content=prompt(statement),
-        model=configuration.model,
-        effort=configuration.effort,
-        pin=configuration.pin,
-        temperature=configuration.temperature,
         schema=schema(),
+        configuration=configuration,
+        missing="no solution",
     )
-    if text is None:
-        raise GenerationError(call.error or "no solution")
     return read(text), call
 
 
-__all__ = ["SYSTEM", "Blind", "prompt", "read", "reference", "request_hash", "schema"]
+__all__ = ["SYSTEM", "prompt", "read", "reference", "request_hash", "schema"]

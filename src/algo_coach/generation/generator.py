@@ -7,9 +7,9 @@ from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
-from algo_coach.calls import CallLog, Transport, ask
+from algo_coach.calls import CallLog, Transport
 from algo_coach.generation.contract import ALONE, ENTRY, POSITIONAL, RUNTIME, SIGNATURE
-from algo_coach.generation.errors import GenerationError
+from algo_coach.generation.site import answer
 from algo_coach.schema import (
     Call,
     Card,
@@ -229,19 +229,15 @@ def generate(
 ) -> tuple[Generated, Call]:
     # the call is returned beside the draft because the problem, the cases and
     # the solution all copy their provenance from it
-    call, text = ask(
+    text, call = answer(
         transport,
         log,
         system=SYSTEM,
         content=prompt(card, template, written),
-        model=configuration.model,
-        effort=configuration.effort,
-        pin=configuration.pin,
-        temperature=configuration.temperature,
         schema=schema(),
+        configuration=configuration,
+        missing="no draft",
     )
-    if text is None:
-        raise GenerationError(call.error or "no draft")
     return read(text), call
 
 

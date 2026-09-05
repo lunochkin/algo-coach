@@ -8,9 +8,7 @@ from algo_coach.generation.checks import (
     Checked,
     Discard,
 )
-from algo_coach.generation.generator import (
-    GenerationError,
-)
+from algo_coach.generation.errors import GenerationError
 from algo_coach.generation.inputs import Built
 from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, Searched, search
 from algo_coach.generation.steps import SILENT, Notes

@@ -6,13 +6,11 @@ that may be told which form to avoid, and the one that is sampled. `corpus.md`
 gives what it may never do.
 """
 
-from typing import Any
-
-from pydantic import BaseModel, Field
-
-from algo_coach.calls import CallLog, Transport, ask, prompt_hash
+from algo_coach.calls import CallLog, Transport, prompt_hash
 from algo_coach.generation.contract import ALONE, ENTRY, POSITIONAL, RUNTIME
-from algo_coach.generation.errors import GenerationError
+from algo_coach.generation.contract import read_solution as read
+from algo_coach.generation.contract import solution_schema as schema
+from algo_coach.generation.site import answer
 from algo_coach.schema import Call, Configuration
 
 # Sampled rather than greedy, as the generator is: it produces an artifact
@@ -55,34 +53,13 @@ that reaches the same running time by a different route.
 {ALONE}"""
 
 
-class Naive(BaseModel):
-    # no cases and no bound: it answers the problem's own cases, and how far it
-    # can be pushed is what the search measures rather than what it declares
-    solution: str = Field(min_length=1)
-
-
 def prompt(statement: str, avoid: str) -> str:
     # delimited: both are data the model writes against, not instructions
     return f"<problem>\n{statement}\n</problem>\n\n<avoid>\n{avoid}\n</avoid>"
 
 
-def read(text: str) -> str:
-    return Naive.model_validate_json(text).solution
-
-
 def request_hash(statement: str, avoid: str) -> str:
     return prompt_hash(SYSTEM, prompt(statement, avoid))
-
-
-def schema() -> dict[str, Any]:
-    return {
-        "type": "object",
-        "properties": {
-            "solution": {"type": "string", "description": "Python defining `solve`"},
-        },
-        "required": ["solution"],
-        "additionalProperties": False,
-    }
 
 
 def naive(
@@ -95,26 +72,21 @@ def naive(
 ) -> tuple[str, Call]:
     # the form to avoid is the template's trigger, which no other site may be
     # shown: this one settles no case, so nothing it reads reaches a verdict
-    call, text = ask(
+    text, call = answer(
         transport,
         log,
         system=SYSTEM,
         content=prompt(statement, avoid),
-        model=configuration.model,
-        effort=configuration.effort,
-        pin=configuration.pin,
-        temperature=configuration.temperature,
         schema=schema(),
+        configuration=configuration,
+        missing="no solution",
     )
-    if text is None:
-        raise GenerationError(call.error or "no solution")
     return read(text), call
 
 
 __all__ = [
     "CLOCK_DEFAULT",
     "SYSTEM",
-    "Naive",
     "naive",
     "prompt",
     "read",

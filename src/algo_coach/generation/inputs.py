@@ -11,9 +11,9 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog, Transport, ask, prompt_hash
+from algo_coach.calls import CallLog, Transport, prompt_hash
 from algo_coach.generation.contract import ALONE, ENTRY, RUNTIME
-from algo_coach.generation.errors import GenerationError
+from algo_coach.generation.site import answer
 from algo_coach.schema import Call, Configuration
 
 # unmeasured, as every site's is. Greedy: this site writes against a statement
@@ -94,19 +94,15 @@ def builder(
     *,
     configuration: Configuration = INPUTS_DEFAULT,
 ) -> tuple[Built, Call]:
-    call, text = ask(
+    text, call = answer(
         transport,
         log,
         system=SYSTEM,
         content=prompt(statement),
-        model=configuration.model,
-        effort=configuration.effort,
-        pin=configuration.pin,
-        temperature=configuration.temperature,
         schema=schema(),
+        configuration=configuration,
+        missing="no generator",
     )
-    if text is None:
-        raise GenerationError(call.error or "no generator")
     return read(text), call
 
 

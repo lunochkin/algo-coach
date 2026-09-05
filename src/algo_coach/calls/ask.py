@@ -8,7 +8,7 @@ from typing import Any
 from algo_coach.calls.store import CallLog
 from algo_coach.calls.transport import MAX_TOKENS, Reply, Transport, traced
 from algo_coach.ids import new_id
-from algo_coach.schema import Call
+from algo_coach.schema import Call, Configuration
 
 # Hex characters of sha256, compared only for equality; sixty-four of them
 # would be carried on every line of an append-only log.
@@ -37,10 +37,7 @@ def ask(
     *,
     system: str,
     content: str,
-    model: str,
-    effort: str,
-    pin: str,
-    temperature: float | None = None,
+    configuration: Configuration,
     schema: dict[str, Any] | None = None,
     max_tokens: int = MAX_TOKENS,
 ) -> tuple[Call, str | None]:
@@ -53,6 +50,12 @@ def ask(
     """
     text = payload(system, content)
     digest = prompt_hash(system, content)
+    model, effort, pin, temperature = (
+        configuration.model,
+        configuration.effort,
+        configuration.pin,
+        configuration.temperature,
+    )
     # Monotonic: a wall clock stepping backwards would record a negative wait.
     started = monotonic()
 

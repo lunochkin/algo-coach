@@ -7,8 +7,8 @@ from typing import Any
 
 from pydantic import BaseModel, field_validator
 
-from algo_coach.calls import CallLog, Transport, ask, prompt_hash
-from algo_coach.generation.errors import GenerationError
+from algo_coach.calls import CallLog, Transport, prompt_hash
+from algo_coach.generation.site import answer
 from algo_coach.mutation import Mutant
 from algo_coach.schema import Call, Configuration
 
@@ -164,19 +164,15 @@ def separators(
     if not survivors:
         raise ValueError("no survivor to answer")
 
-    call, text = ask(
+    text, call = answer(
         transport,
         log,
         system=SYSTEM,
         content=prompt(statement, canonical, survivors, known),
-        model=configuration.model,
-        effort=configuration.effort,
-        pin=configuration.pin,
-        temperature=configuration.temperature,
         schema=schema(),
+        configuration=configuration,
+        missing="no cases",
     )
-    if text is None:
-        raise GenerationError(call.error or "no cases")
     return read(text), call
 
 
