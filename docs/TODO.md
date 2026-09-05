@@ -493,13 +493,13 @@ margin, and two checked by hand had the canonical right and the declared value
 wrong. The field is stored nowhere: a landing case carries the reference's
 answer.
 
-- [ ] Add a count of the generator's misdeclared cases to `SiteOutcome`, filed
+- [x] Add a count of the generator's misdeclared cases to `SiteOutcome`, filed
       on the generator as its gate is. The number is what says whether the gate
       catches a wrong canonical or a slip in ten hand computations
-- [ ] Stop discarding a problem on `misdeclared`, and let the reference settle
+- [x] Stop discarding a problem on `misdeclared`, and let the reference settle
       it. One call wrote the canonical and the declarations, so they share a
       reading, where the blind reference is the independent one
-- [ ] Write that demotion into `flows.md` and `corpus.md`: step 3 is a recorded
+- [x] Write that demotion into `flows.md` and `corpus.md`: step 3 is a recorded
       reading rather than a gate, and the two solutions agreeing is what a
       landing turns on
 - [ ] Re-run `generate --count 10` on `answer-space` and record how many

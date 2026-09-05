@@ -64,28 +64,28 @@ def test_a_canonical_yielding_no_value_discards_the_problem():
     assert result.cases == []
 
 
-def test_a_canonical_contradicting_its_own_cases_discards_the_problem():
-    """One call wrote the code and the cases, so a disagreement between them
-    means it wrote one of the two wrong."""
+def test_a_canonical_contradicting_its_own_cases_is_counted_not_discarded():
+    """One call wrote the code and the declaration, so they share a reading.
+    What the case stores is the reference's answer either way."""
     result = checked(([2], 4), ([5], 11))
 
-    assert result.discard is Discard.MISDECLARED
+    assert result.survived
     assert result.outcome is CaseOutcome.WRONG
     assert [one.returned for one in result.misdeclarations] == [10]
-    assert result.cases == []
+    assert [one.expected for one in result.cases] == [4, 10]
 
 
-def test_the_reference_is_never_run_where_the_canonical_failed(monkeypatch):
-    """The two solutions are compared to test the statement, and a call that
-    contradicted itself leaves nothing to test."""
+def test_the_reference_is_never_run_where_the_canonical_yielded_no_value(monkeypatch):
+    """Nothing establishes what the case returns, so there is nothing for a
+    second solution to be settled against."""
 
     def unreachable(*args, **kwargs):
         raise AssertionError("the reference was run")
 
     monkeypatch.setattr(checks, "outputs", unreachable)
+    canonical = "def other():\n    return 1\n"
 
-    assert checked(([2], 5)).discard is Discard.MISDECLARED
-    assert checked(([2], 4), canonical="def other():\n    return 1\n").discard is Discard.NO_VALUE
+    assert checked(([2], 4), canonical=canonical).discard is Discard.NO_VALUE
 
 
 def test_two_solutions_that_disagree_discard_the_problem():

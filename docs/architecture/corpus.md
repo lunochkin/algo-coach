@@ -103,6 +103,11 @@ What decides whether a solution to a generated problem is correct.
   case the canonical produced passes by construction, and `verified` then means
   only that the solution agrees with itself. The reference is different code
   from a call that saw the statement alone, so a case it computed is a test.
+- **The value the generator declared is neither a source nor a gate.** One call
+  wrote the canonical and the declaration, so a contradiction between them is
+  that call's arithmetic rather than a second reading of the statement. The
+  count sits on the generator's site outcome, and the reference is what
+  discards.
 - **A case records where its expected output came from.** Beyond the largest
   input the reference finishes at generation time, only the canonical can
   compute one, and that case is evidence about the cap rather than about the

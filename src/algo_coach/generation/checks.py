@@ -2,9 +2,8 @@
 land.
 
 Two steps rather than one, in the order `flows.md` gives: the canonical is run
-and checked against what its own call declared, and only then is it settled
-against a reference. A canonical that contradicts itself pays for no blind
-call.
+and read against what its own call declared, and only then is it settled
+against a reference. The reading discards nothing, since one call wrote both.
 
 Stores nothing: the ids a case and a solution need do not exist until it lands.
 """
@@ -80,8 +79,9 @@ def mistakes(cases: Sequence[SettledCase], *, code: str, cap_ms: int = CAP_MS) -
 
 
 def check(cases: Sequence[DraftCase], *, canonical: str, cap_ms: int = CAP_MS) -> Ran:
-    """The canonical alone: comparing the two tests the statement, and a call
-    that contradicted itself leaves nothing to test."""
+    """The canonical alone, before a blind call is paid for. A case it answered
+    differently from its own call's `expected` is counted rather than gated:
+    one call wrote the code and the declaration, so they share a reading."""
     args = [case.args for case in cases]
     ran = run(canonical, args, cap_ms=cap_ms)
     ours = [answered(one) for one in ran]
@@ -91,19 +91,16 @@ def check(cases: Sequence[DraftCase], *, canonical: str, cap_ms: int = CAP_MS) -
     if any(isinstance(one, NoValue) for one in ours):
         return Ran(outcome=outcome, slowest_ms=slowest, discard=Discard.NO_VALUE)
 
-    wrong = misdeclared(cases, ours)
-    if wrong:
-        return Ran(
-            outcome=outcome,
-            slowest_ms=slowest,
-            discard=Discard.MISDECLARED,
-            misdeclarations=wrong,
-        )
-    return Ran(outcome=outcome, slowest_ms=slowest, returned=ours)
+    return Ran(
+        outcome=outcome,
+        slowest_ms=slowest,
+        returned=ours,
+        misdeclarations=misdeclared(cases, ours),
+    )
 
 
 def stopped(ran: Ran) -> Checked:
-    """The canonical's own verdict, where it is the run's. Only its gates can
+    """The canonical's own verdict, where it is the run's. Only `no_value` can
     reach here, so nothing was settled and no reference disagreed."""
     return Checked(
         outcome=ran.outcome,
@@ -130,7 +127,13 @@ def agree(
     args = [case.args for case in cases]
     theirs = outputs(reference, args, cap_ms=cap_ms)
     settled = settle(args, canonical=ran.returned, reference=theirs, written=written)
-    kept = {"outcome": ran.outcome, "slowest_ms": ran.slowest_ms}
+    # carried rather than dropped at the gate it no longer is: the count is
+    # what the generator's own record is scored on
+    kept = {
+        "outcome": ran.outcome,
+        "slowest_ms": ran.slowest_ms,
+        "misdeclarations": ran.misdeclarations,
+    }
     if not settled.agreed:
         return Checked(**kept, discard=Discard.DISAGREED, disagreements=settled.disagreements)
     if not settled.tested:

@@ -99,7 +99,7 @@ def left(one: SiteOutcome) -> str:
     parts = [f"{one.site:<15} {one.model}"]
     if one.gate is not None:
         parts.append(f"gate {one.gate}{f': {one.detail}' if one.detail else ''}")
-    for name in ("mutants", "survived", "killed", "won", "offered"):
+    for name in ("mutants", "survived", "killed", "won", "offered", "misdeclared"):
         if getattr(one, name):
             parts.append(f"{name} {getattr(one, name)}")
     if one.rounds:

@@ -515,9 +515,10 @@ def sites(
     writing(
         CallSite.GENERATOR,
         call,
-        **gated(ran, Discard.NO_VALUE, Discard.MISDECLARED),
+        **gated(ran, Discard.NO_VALUE),
         mutants=bar.mutants,
         killed=bar.declared,
+        misdeclared=len(ran.misdeclarations),
     )
     writing(CallSite.BLIND, blind, **gated(ran, Discard.UNTESTED, Discard.DISAGREED))
     # the counters as the last round left them, which is why the record cites
@@ -565,7 +566,10 @@ def settled(checked: Checked) -> str:
     """What the two runs left, as the stage line reports it."""
     if not checked.survived:
         return why(checked)
-    return f"{checked.outcome}, {len(checked.cases)} case(s) settled"
+    counted = f"{checked.outcome}, {len(checked.cases)} case(s) settled"
+    if not checked.misdeclarations:
+        return counted
+    return f"{counted}, {len(checked.misdeclarations)} misdeclared"
 
 
 def measured(
@@ -1035,8 +1039,6 @@ def why(checked: Checked) -> str:
     match checked.discard:
         case Discard.NO_VALUE:
             return f"discarded: the canonical {checked.outcome} on some case"
-        case Discard.MISDECLARED:
-            return f"discarded: the canonical contradicts {len(checked.misdeclarations)} case(s)"
         case Discard.UNTESTED:
             return "discarded: the reference computed no case"
         case _:

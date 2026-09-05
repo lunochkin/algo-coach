@@ -26,6 +26,8 @@ class CallSite(StrEnum):
 class Discard(StrEnum):
     # named rather than a boolean: a run reports how its problems were lost
     NO_VALUE = "no_value"
+    # no run raises it: the count sits on the generator's own record, and the
+    # arm stays for the drafts and the outcomes already written under it
     MISDECLARED = "misdeclared"
     UNTESTED = "untested"
     DISAGREED = "disagreed"
@@ -68,6 +70,9 @@ class SiteOutcome(MachineProvenance):
     # proposals the rounds put to the set, landed or not. `offered` less `won`
     # is what killed nothing, which is what a round wasted its call on
     offered: int = 0
+    # cases the canonical answered differently from what its own call
+    # declared. A reading rather than a gate, since one call wrote both
+    misdeclared: int = 0
     # the speedup search, where this site ran one
     separating: int | None = None
     unseparated: str | None = None

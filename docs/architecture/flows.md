@@ -12,8 +12,8 @@ The order matters because each step can reject what came before.
    a technique, naming only the skill.
 2. The statement, the canonical solution and the first test cases, from one
    call.
-3. The canonical runs, and its outputs are checked against the expected
-   values the same call declared.
+3. The canonical runs, and its outputs are read against the expected values
+   the same call declared.
 4. The reference solution, from the statement alone.
 5. The reference runs, and the two solutions' outputs are settled: they agree
    on every case, or the problem is discarded.
@@ -44,10 +44,16 @@ The order matters because each step can reject what came before.
 - **The naive solution is written the opposite way**, and told the form it may
   not use. It settles no case and discards no problem, so nothing it is shown
   can reach a verdict. `corpus.md` gives what it may never do.
-- **The generator's own expected values are a gate, not a source.** The call
-  that wrote the canonical also declared what each case returns, so a
-  disagreement between them means it wrote one of the two wrong. What a landing
-  case stores is still the reference's answer.
+- **The generator's own expected values are a reading, not a gate.** The call
+  that wrote the canonical also declared what each case returns, so the two
+  share one reading of the statement and a contradiction between them is that
+  call's arithmetic. What a landing case stores is the reference's answer.
+- **The count is filed on the generator's own record.** It says how often a
+  configuration's hand-computed value contradicts its own code, which is a fact
+  about that site rather than about the problem.
+- **The blind reference is what discards.** It read the statement and nothing
+  else, so a disagreement is evidence the prose admits two readings, where the
+  declaration is evidence about one call.
 - **A disagreement is the statement's fault, not either solution's.** Two
   correct-looking solutions returning different answers means the prose admits
   two readings. That is what an in-place edit cannot repair, since the cases
@@ -182,7 +188,7 @@ before it away.
 
 ```mermaid
 flowchart TB
-  D["drafted"] -->|"the canonical answers every case its own call declared"| C["checked"]
+  D["drafted"] -->|"the canonical returns a value on every case"| C["checked"]
   C -->|"<b>blind</b>: the reference, from the statement alone"| R["referenced"]
   R -->|"the two solutions agree on every case"| A["agreed"]
   A -->|"<b>inputs</b>: code that builds an input of a given size"| B["built"]
@@ -191,7 +197,7 @@ flowchart TB
   S -->|"<b>discrimination</b>: the fuzz pass, then the rounds"| H["hardened"]
   H -->|"the problem, its cases, its solutions and the match"| L(["landed"])
 
-  D -.->|"no_value · misdeclared"| X(["rejected<br/><i>terminal, and names the gate</i>"])
+  D -.->|"no_value"| X(["rejected<br/><i>terminal, and names the gate</i>"])
   R -.->|"untested · disagreed"| X
   P -.->|"disagreed"| X
   S -.->|"disagreed"| X

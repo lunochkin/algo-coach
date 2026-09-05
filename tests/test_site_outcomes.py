@@ -96,16 +96,17 @@ def test_a_reference_that_computed_nothing_is_the_blind_sites_gate(tmp_path):
     assert sites(outcomes)[CallSite.BLIND].gate is Discard.UNTESTED
 
 
-def test_a_canonical_contradicting_its_own_cases_is_the_generators_gate(tmp_path):
-    """One call wrote both, so a disagreement between them is that call's
-    mistake and no reading of the statement is involved."""
+def test_a_canonical_contradicting_its_own_cases_is_counted_on_the_generator(tmp_path):
+    """One call wrote the code and the declaration, so the contradiction is
+    that call's arithmetic rather than a reading of the statement. It rejects
+    nothing, and the count is what says how often the site slips."""
     model = FakeWriter(cases=[{"args": "[[1, 2, 3]]", "expected": "99"}])
 
-    _, _, outcomes = run(tmp_path, model)
+    _, result, outcomes = run(tmp_path, model)
 
-    at = sites(outcomes)
-    assert at[CallSite.GENERATOR].gate is Discard.MISDECLARED
-    assert "contradicts 1 case(s)" in at[CallSite.GENERATOR].detail
+    one = sites(outcomes)[CallSite.GENERATOR]
+    assert (one.gate, one.misdeclared) == (None, 1)
+    assert len(result.drafted) == 1
 
 
 def test_each_record_carries_the_configuration_of_its_own_call(tmp_path):

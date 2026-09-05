@@ -74,14 +74,14 @@ def test_a_canonical_yielding_no_value_stops_at_the_first_gate(tmp_path):
     assert stored.reference is None
 
 
-def test_a_canonical_contradicting_its_own_cases_pays_for_no_blind_call(tmp_path):
-    """The call wrote one of the two wrong, and the statement it wrote is not
-    worth a second reading."""
+def test_a_canonical_contradicting_its_own_cases_is_settled_by_the_reference(tmp_path):
+    """The declaration and the code came from one call, so what rejects the
+    draft is the blind reading rather than the contradiction."""
     stored = written(tmp_path, FakeWriter(canonical=WRONG))
 
     assert stored.state is WritingState.REJECTED
-    assert stored.gate is Discard.MISDECLARED
-    assert (stored.reference, stored.blind) == (None, None)
+    assert stored.gate is Discard.DISAGREED
+    assert stored.blind is not None
 
 
 def test_the_reference_a_rejected_draft_paid_for_is_kept(tmp_path):

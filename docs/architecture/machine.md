@@ -106,10 +106,14 @@ a call returned, which is why it sits beside the call log.
 - **The mutants a canonical yielded sit on the site that wrote it.** The count
   is a fact about that solution, so it is readable on an attempt no round
   reached, and two generator configurations compare on it.
-- **A gate is filed under the site whose answer made it decidable.** A canonical
-  contradicting the cases its own call declared is the generator's. A
-  disagreement is the blind site's, since nothing disagrees before a second
-  reading of the statement exists.
+- **A gate is filed under the site whose answer made it decidable.** A
+  canonical yielding no value on a case is the generator's. A disagreement is
+  the blind site's, since nothing disagrees before a second reading of the
+  statement exists.
+- **A canonical contradicting its own call's declarations is counted, not
+  gated.** The code and the declaration came from one call, so the count is
+  what that site's arithmetic is read by, and `corpus.md` gives what settles
+  the case instead.
 - **The search's verdict is filed under every site it judged.** It times the
   clock against the canonical on an input the builder made, so neither answer
   alone makes it decidable. A resume that re-asked one of the two writes that
