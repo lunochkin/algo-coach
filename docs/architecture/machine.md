@@ -18,8 +18,8 @@ comparable is the same, and is stated here once.
 - **A configuration is per call site, not per run.** Writing a problem takes
   five calls, and they ask for different things: a statement and a solution, an
   independent reading of that statement, the inputs that catch a wrong
-  solution, code that builds an input of a given size, and the slowest correct
-  solution a timing bar measures against. One configuration over all five makes
+  solution, code that builds an input of a given size, and the approach the
+  form replaces, which a timing bar measures against. One configuration over all five makes
   the cheapest of them pay the price of the hardest.
 - **A run mixing models stays readable, because each record copies its own
   call's configuration.** The problem names the call that wrote it, its

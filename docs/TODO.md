@@ -481,7 +481,7 @@ exit criteria reads a draft.
       correct one. Told to be slowest, a model enumerated every pairing, and
       the separating size then falls below what a wrong-complexity submission
       passes
-- [ ] Write into `corpus.md` what the clock may not be: slower than the
+- [x] Write into `corpus.md` what the clock may not be: slower than the
       approach the card replaces. Two edits to that brief have each fixed one
       end and caused the other, and the doc names neither
 

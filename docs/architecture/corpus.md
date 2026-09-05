@@ -171,8 +171,8 @@ What decides whether a solution to a generated problem is correct.
 - **Neither is a defect.** A run reading the three as one answer cannot tell a
   defect from an unknown.
 - **The naive solution finishing at the largest legal input is a defect in the
-  run, not in the problem.** It is briefed to be slow and told which form to
-  avoid, so finishing means the brief did not take.
+  run, not in the problem.** It is briefed as the approach the form replaces and
+  told which form to avoid, so finishing means the brief did not take.
 - **Three things produce that answer**, and nothing in the run separates them:
   the naive solution reached the form, the input generator built a shape the
   form does not beat, or the template claims a speedup its form does not have.
@@ -277,10 +277,19 @@ A solution the engine wrote for a problem, in one of three roles.
 - **The reference is written from the statement alone**, and it computes the
   expected outputs. Independence is its whole purpose, so a solution displaying
   the form could not serve as one.
-- **The naive solution is the clock.** It is written to be the slowest correct
-  approach, and the speedup search measures the canonical against it. The
+- **The naive solution is the clock.** It is the approach the card's form
+  replaces, and the speedup search measures the canonical against it. The
   reference held both jobs and they pull apart: one wants a blind reading, the
   other wants a solution that does not reach the form.
+- **It may not narrow its candidates the way the canonical does.** A clock
+  trying only the values the input carries has used the insight the form is
+  built on. The two then run the same way, and the search separates nothing.
+- **It may not be slower than the approach it stands for either.** One trying
+  every subset where the statement describes a scan is separated at a few dozen
+  elements, and a submission of the wrong complexity passes every input that
+  small.
+- **The brief states both ends.** Two edits to it have each fixed one end and
+  caused the other, so a brief naming one alone has been written twice.
 - **It may be told which form to avoid**, where the reference may not. It
   settles no case, discards no problem and is scored against nothing, so what
   it is shown cannot reach a verdict.
