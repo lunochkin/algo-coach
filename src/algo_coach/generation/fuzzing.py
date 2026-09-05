@@ -14,7 +14,7 @@ from algo_coach.generation.inputs import Built
 from algo_coach.generation.shrinking import Candidate, shrink
 from algo_coach.generation.speedup import CEILING
 from algo_coach.mutation import Mutant, kill, survivors
-from algo_coach.runner import NoValue, as_json, outputs
+from algo_coach.runner import NoValue, outputs, weighs
 from algo_coach.schema import MachineProvenance
 
 # what the pass builds at, size-major and smallest first: the input a mutant is
@@ -133,7 +133,7 @@ def fuzz(
         )
         # after the shrink rather than before it: an input the ceiling rejects
         # is storable once it is only as large as the kill needs
-        if _weighs(one.args) + _weighs(one.expected) > ceiling:
+        if weighs(one.args) + weighs(one.expected) > ceiling:
             continue
         standing = left
         kept.append(one)
@@ -163,10 +163,6 @@ def fuzz(
         dropped=dropped,
         disagreement=settled.disagreements[0] if settled.disagreements else None,
     )
-
-
-def _weighs(value: Any) -> int:
-    return len(as_json(value).encode())
 
 
 __all__ = [

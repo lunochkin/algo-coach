@@ -10,10 +10,10 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
-from algo_coach.generation.agreement import Disagreement, SettledCase
+from algo_coach.generation.agreement import Disagreement, SettledCase, settle
 from algo_coach.generation.checks import CAP_MS
-from algo_coach.runner import RunOutcome, agrees, as_json, run
-from algo_coach.schema import ExpectedSource, MachineProvenance
+from algo_coach.runner import RunOutcome, answered, run, weighs
+from algo_coach.schema import MachineProvenance
 
 # the cap a sitting judges a submission under, which is what the separating
 # case is chosen against. Phase 8 reads it; generation's own cap sits above it
@@ -100,7 +100,7 @@ def search(
         args = list(make(size))
         # stopped before the run rather than after it: an input over the
         # ceiling is one no case can carry, whatever the clock does on it
-        if _weighs(args) > ceiling:
+        if weighs(args) > ceiling:
             capped = True
             break
         exceeded, elapsed = _paces(naive, args, cap_ms=cap_ms, measure_ms=measure_ms)
@@ -167,41 +167,25 @@ def _settled(
 
     measured = {"size": size, "canonical_ms": ran.elapsed_ms, "naive_ms": naive_ms}
     # the reference rather than the clock: what a case stores is the answer of
-    # the solution written from the statement alone, whichever one was timed
+    # the solution written from the statement alone, whichever one was timed.
+    # Settled as the first case set is, and by no round: the search runs after
+    # the loop
     [theirs] = run(reference, [args], cap_ms=measure_ms)
-    # the settle rule the first case set uses: the reference's answer wherever
-    # it computed one, and the canonical's only beyond its reach
-    if not theirs.returned:
-        expected, source = ran.value, ExpectedSource.CANONICAL
-    elif agrees(ran.value, theirs.value):
-        expected, source = theirs.value, ExpectedSource.REFERENCE
-    else:
+    settled = settle(
+        [args], canonical=[ran.value], reference=[answered(theirs)], written=written, round=None
+    )
+    if not settled.agreed:
         return Searched(
-            missing=Missing.DISAGREED,
-            disagreement=Disagreement(args=args, canonical=ran.value, reference=theirs.value),
-            **measured,
+            missing=Missing.DISAGREED, disagreement=settled.disagreements[0], **measured
         )
 
     # the returned value weighs on the case as the arguments do. `measured` is
     # carried: the speedup is established at this size, and only the case is
     # not
-    if _weighs(args) + _weighs(expected) > ceiling:
+    (case,) = settled.cases
+    if weighs(case.args) + weighs(case.expected) > ceiling:
         return Searched(missing=Missing.CASE_TOO_LARGE, **measured)
-    return Searched(
-        # no round won it: the search runs after the loop
-        case=SettledCase(
-            args=args,
-            expected=expected,
-            expected_from=source,
-            written=written,
-            round=None,
-        ),
-        **measured,
-    )
-
-
-def _weighs(value: Any) -> int:
-    return len(as_json(value).encode())
+    return Searched(case=case, **measured)
 
 
 def _paces(

@@ -1,4 +1,4 @@
-from algo_coach.runner.encoding import agrees, as_json
+from algo_coach.runner.encoding import agrees, as_json, weighs
 from algo_coach.runner.execution import (
     CHILD,
     STARTUP_MS,
@@ -26,4 +26,5 @@ __all__ = [
     "outputs",
     "run",
     "verify",
+    "weighs",
 ]
