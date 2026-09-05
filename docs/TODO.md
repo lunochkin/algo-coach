@@ -300,9 +300,9 @@ canonical. What the first corpus settles is the bound.
 - [x] Separate the search's two empty answers: the reference finished at the
       largest legal input, against the built input crossing the ceiling.
       `input_too_large` hid which happened on the first run
-- [x] Decide what enforces a speedup where the blind reference writes the same
-      form — a third solution written deliberately naive, or `speedup` claiming
-      less — and write the choice into `corpus.md`
+- [x] Decide what enforces a speedup where the blind reference writes the
+      same form — a third solution written deliberately naive, or `speedup`
+      claiming less — and write the choice into `corpus.md`
 - [x] Move the search ahead of the mutation loop, appending its case after it.
       A disagreement at the separating size then costs no round
 - [x] Hold a draft at `searched` where its template claims a speedup and the
@@ -526,21 +526,32 @@ numbers go in the commit unless the item names a file.
 
 - [x] Run `generate --card binary-search --template predicate-first-true
       --count 1` and read what it stored: the problem, its cases, both
-      solutions and the generator match
+      solutions and the generator match. Landed, on Opus 5 and on Gemini 3.7
+      Flash
 - [x] Record what one problem costs, from the call log: tokens and wall clock
-      per call. How large a corpus is affordable follows from that number
+      per call. How large a corpus is affordable follows from that number.
+      Opus 5 high: $0.41, 6 calls, 190 s of model time, 70 s of it the round.
+      Flash medium: $0.031, 4 calls, 28 s. Reasoning is the output: 5,263 of
+      the round's 5,573 tokens. Over ten attempts, $0.095 per landed problem
 - [x] Record how many mutants a real canonical yields and how many each round
       kills. Revise `ROUNDS` in `corpus.md` where the second round kills
-      nothing
+      nothing. 53 and 22 mutants; the statement's cases killed 46 and 17; round
+      one killed none on either, and the five survivors were equivalent by
+      inspection. `ROUNDS` stays at two
 - [x] Record what the mutation loop spends in the runner. A per-case
       subprocess is what the deferred fork server replaces, and nothing has
-      measured it
+      measured it. 76.3 s on 22 mutants, 70 s of it seven timeout kills at the
+      generation cap. Process start is not the cost
 - [x] Run `generate --count 10` on one template and record the discard rate
       per gate: no_value, misdeclared, untested, disagreed. A gate rejecting
-      most problems is a defect in the prompt rather than a bar
+      most problems is a defect in the prompt rather than a bar. `answer-space`:
+      5 landed, 4 misdeclared, 1 held, the other three gates on none. Two
+      misdeclarations checked by hand had the canonical right, which demoted
+      the gate. Re-run: 8 landed, 1 untested, 1 held; 49 calls, $0.55
 - [x] Count how many of those ten held at `searched`, and which `unseparated`
       reason each gave. Counting `naive_finished` alone reads zero, since the
-      case ceiling reports `input_too_large` before the clock is judged
+      case ceiling reports `input_too_large` before the clock is judged. One of
+      ten, `input_too_large`, in both runs
 - [x] Count how many of those ten reuse a domain their template's cue names.
       The exclusion is prompted and nothing enforces it. One of ten: shipping
       containers under a capacity allowance
@@ -548,7 +559,12 @@ numbers go in the commit unless the item names a file.
       list of what a form already carries is what prevents that. Two of ten,
       both written with the twin in the list, and held drafts are not listed
 - [x] Run `generate` on a template claiming a speedup and record the
-      separating size, or which `unseparated` reason came back
+      separating size, or which `unseparated` reason came back. First two:
+      `input_too_large`, the reference having written the form. Five on
+      `answer-space`: 1, 2, 6, 13, 21 against 100000, the clock too slow. After
+      the clock brief, 1 on five of six and 22 on one. Fifteen over the corpus:
+      eight at one or two, six at 13 to 27 where the clock is exponential, four
+      over the ceiling
 - [x] Run `read` over the stored canonicals and record the techniques each
       problem derives. Nothing has read a generated solution. Twenty-four read,
       none undecided, two cents. Every problem derives `binary-search`; twelve
@@ -557,14 +573,18 @@ numbers go in the commit unless the item names a file.
 - [x] Load problems carrying the derived techniques in every command that reads
       them. Board, claim, classify, score, match and gaps read the record's
       `techniques`, which is empty on every generated problem
-- [ ] Run `gaps`, then `generate --gaps --count 1`, and record which templates
-      the run was aimed at
+- [x] Run `gaps`, then `generate --gaps --count 1`, and record which templates
+      the run was aimed at. Thirty-five of thirty-seven core templates, every
+      one but the two binary-search forms already written for, in card order.
+      Stopped by hand after seven: four landed on `dp-1d-linear`, two held on
+      `input_too_large`, one cut at the blind call. `--count` is per template,
+      so a run over the gaps writes one problem per gap
 
 ### Exit
-- [ ] A run has stored problems, each carrying techniques derived from its
+- [x] A run has stored problems, each carrying techniques derived from its
       canonicals and a case set measured against the mutation bound, and the
       gap report names the templates the next run is aimed at
-- [ ] What one problem costs and what each mutation round kills are recorded.
+- [x] What one problem costs and what each mutation round kills are recorded.
       Nothing re-derives them once the corpus has grown past that run
 
 ## Phase 7 — the corpus, measured
