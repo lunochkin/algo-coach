@@ -376,6 +376,7 @@ def inputs_replay(
             "gate": Discard.DISAGREED if found.missing is Missing.DISAGREED else None,
             "separating": found.size,
             "unseparated": found.missing,
+            "largest": built.largest,
         },
     )
 

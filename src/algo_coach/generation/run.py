@@ -539,6 +539,9 @@ def sites(
         killed=bar.fuzzed,
         separating=inputs.separating,
         unseparated=inputs.unseparated,
+        # the bound the search ran under, which a landed problem keeps
+        # nowhere else once its draft is cleared
+        largest=inputs.built.largest if inputs.built is not None else None,
     )
     # the search judged this answer as much as the builder's, so both records
     # carry its verdict. A resume that re-asked one writes only that one

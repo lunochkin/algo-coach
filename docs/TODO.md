@@ -471,7 +471,7 @@ exit criteria reads a draft.
       never ran as resumable, where `carried` holds it before reaching that
       step
 
-- [ ] Add `largest` to `SiteOutcome` beside `separating`, as the inputs site's
+- [x] Add `largest` to `SiteOutcome` beside `separating`, as the inputs site's
       own answer. A landed problem loses the builder's bound with its draft, so
       a separating size has no denominator to be read against
 - [ ] Record the separating size against `largest` over the stored corpus. The

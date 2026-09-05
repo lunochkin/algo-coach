@@ -108,6 +108,8 @@ def left(one: SiteOutcome) -> str:
         parts.append(f"separating at {one.separating}")
     if one.unseparated is not None:
         parts.append(f"unseparated: {one.unseparated}")
+    if one.largest is not None:
+        parts.append(f"up to {one.largest}")
     return "  ".join(parts)
 
 

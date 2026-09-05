@@ -87,6 +87,16 @@ def test_the_search_measures_against_the_stored_clock(tmp_path, monkeypatch):
     assert stored.code == SLOW
 
 
+def test_a_replayed_builder_records_the_bound_it_reported(tmp_path, monkeypatch):
+    """The bound is this call's own answer, and what the search it fed is read
+    against."""
+    cards = landed(tmp_path, monkeypatch)
+
+    _, outcomes = replayed(tmp_path, FakeWriter(generator=BUILDS), cards)
+
+    assert sites(outcomes)[CallSite.INPUTS].largest == 8
+
+
 def test_a_replayed_clock_that_answers_wrongly_names_no_gate(tmp_path, monkeypatch):
     """Being wrong rejects no problem, and every `Discard` arm says one was
     rejected. What the record carries is what the run saw."""

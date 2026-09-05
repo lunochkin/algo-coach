@@ -71,6 +71,11 @@ class SiteOutcome(MachineProvenance):
     # the speedup search, where this site ran one
     separating: int | None = None
     unseparated: str | None = None
+    # the largest input the statement's constraints allow, as the inputs call
+    # reported it. Stored here because a landed problem keeps no draft, and a
+    # separating size read without the bound it was searched under says
+    # nothing about how far the search had left to look
+    largest: int | None = Field(default=None, gt=0)
 
     @model_validator(mode="after")
     def _provenance_required(self) -> SiteOutcome:

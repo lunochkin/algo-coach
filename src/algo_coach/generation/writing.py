@@ -55,6 +55,7 @@ class Writing:
         offered: int = 0,
         separating: int | None = None,
         unseparated: str | None = None,
+        largest: int | None = None,
     ) -> None:
         # a site that made no call left no configuration to compare, so it
         # writes nothing rather than a record with provenance missing
@@ -75,6 +76,7 @@ class Writing:
                 offered=offered,
                 separating=separating,
                 unseparated=unseparated,
+                largest=largest,
                 **written_by(call),
             )
         )

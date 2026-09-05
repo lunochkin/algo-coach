@@ -82,6 +82,9 @@ def test_the_page_names_what_the_run_left_and_what_it_matched(root, monkeypatch,
     out = capsys.readouterr().out
     assert "displays  generator" in out
     assert "separating at" in out
+    # the bound the size was searched under, which the cleared draft no longer
+    # carries
+    assert "up to" in out
     # nothing has read a canonical, so the view is empty rather than absent
     assert "techniques: none read" in out
 

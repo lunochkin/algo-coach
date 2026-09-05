@@ -444,6 +444,7 @@ def site_outcome(
     offered: int = 0,
     separating: int | None = None,
     unseparated: str | None = None,
+    largest: int | None = None,
 ) -> SiteOutcome:
     """`problem_id` is filled by the caller that lands the problem: a discarded
     draft mints none, and `writing_id` is what groups the four sites either
@@ -465,6 +466,7 @@ def site_outcome(
         offered=offered,
         separating=separating,
         unseparated=unseparated,
+        largest=largest,
         model=model,
         effort=effort,
         prompt_hash=prompt_hash,

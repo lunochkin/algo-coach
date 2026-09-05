@@ -115,6 +115,10 @@ a call returned, which is why it sits beside the call log.
   alone makes it decidable. A resume that re-asked one of the two writes that
   record and no other, and the size would otherwise be lost with the site it
   reused.
+- **The builder's bound is on the record, not only on the draft.** A landed
+  problem clears its draft, so the largest input the statement admits is
+  readable nowhere else. A separating size read without it says nothing about
+  how far the search had left to look.
 - **Two of a problem's records can carry different verdicts.** The builder's
   answers for the search that judged it when it was written, and a later
   clock's for the search that judged the redraw. Each says what one answer was
