@@ -117,8 +117,11 @@ a call returned, which is why it sits beside the call log.
   reused.
 - **The builder's bound is on the record, not only on the draft.** A landed
   problem clears its draft, so the largest input the statement admits is
-  readable nowhere else. A separating size read without it says nothing about
-  how far the search had left to look.
+  readable nowhere else. It is what says whether a walk that stored no case
+  reached the bound or stopped under it.
+- **It is not a denominator.** The bound counts whatever the builder's `size`
+  counts, which is a list length on one problem and a grid's side on another,
+  and `corpus.md` gives what a separating size is comparable with.
 - **Two of a problem's records can carry different verdicts.** The builder's
   answers for the search that judged it when it was written, and a later
   clock's for the search that judged the redraw. Each says what one answer was

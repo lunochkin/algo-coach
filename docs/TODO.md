@@ -474,7 +474,7 @@ exit criteria reads a draft.
 - [x] Add `largest` to `SiteOutcome` beside `separating`, as the inputs site's
       own answer. A landed problem loses the builder's bound with its draft, so
       a separating size has no denominator to be read against
-- [ ] Record the separating size against `largest` over the stored corpus. The
+- [x] Record the separating size against `largest` over the stored corpus. The
       five problems one run landed separated at 1, 2, 6, 13 and 21 against a
       legal 100000, and nothing says where the bar belongs
 - [ ] Ask the clock's brief for the approach the form replaces, not the slowest

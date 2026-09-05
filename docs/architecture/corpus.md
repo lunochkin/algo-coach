@@ -144,9 +144,22 @@ What decides whether a solution to a generated problem is correct.
   from a linear one takes a few thousand elements. A seed and a size would
   store less, at the cost of a case naming how it is built rather than what it
   holds, and of a run that builds an input before it can judge one.
+- **The ceiling is reached at a few thousand elements**, since an integer drawn
+  at full magnitude costs eleven bytes. Four of the first twenty searches
+  crossed it before the clock exceeded the cap, so a quadratic separation is
+  the one that may not fit.
 - **The separating case is chosen against the sitting's cap**, never
   generation's. It is the size at which a submission that did not use the form
   fails, so the number a sitting judges under is what decides it.
+- **A separation at the smallest legal input is a whole verdict.** Eight of the
+  first fifteen searches separated at one or two: the clock scans a range taken
+  from the values the input carries, and a legal input carries values large
+  enough at any size. The bar sits below what the statement admits, so every
+  input teaches the form.
+- **A size is comparable only within one clock's cost.** A form the clock is
+  exponential in separates in the tens, and one whose cost the values drive
+  separates at the floor, against the same bound of a hundred thousand. Two
+  sizes drawn from the two say nothing about each other.
 - **A separating input over the ceiling stores no case.** The draft stops at
   the search, and the run reports what the walk found.
 - **The two ways that happens assert opposite things, and are named apart.** A
