@@ -6,42 +6,12 @@ one site changes one call.
 """
 
 import argparse
-from collections.abc import Sequence
 
 from algo_coach.cli.display import chosen
 from algo_coach.generation import BENCH, Bench
 from algo_coach.schema import Configuration
 
-# Which slot each flag fills in the row a `--site` opens.
-SLOTS = {"--model": 1, "--effort": 2, "--provider": 3, "--temperature": 4}
-
 SITES = tuple(Bench.model_fields)
-
-
-class Sited(argparse.Action):
-    """`--site` and its settings alternately, into one ordered list. Separate
-    `append` destinations would lose which model followed which site."""
-
-    def __call__(
-        self,
-        parser: argparse.ArgumentParser,
-        namespace: argparse.Namespace,
-        value: str | Sequence[str] | None,
-        option_string: str | None = None,
-    ) -> None:
-        rows: list[list[str]] = getattr(namespace, self.dest, None) or []
-        if option_string == "--site":
-            rows.append([str(value), "", "", "", ""])
-        else:
-            # never defaulted to a site: a model meant for one call would
-            # otherwise land on whichever the list happens to open with
-            if not rows:
-                parser.exit(2, f"generate: name a --site before {option_string}\n")
-            slot = SLOTS[str(option_string)]
-            if rows[-1][slot]:
-                parser.exit(2, f"generate: two {option_string} for one --site\n")
-            rows[-1][slot] = str(value)
-        setattr(namespace, self.dest, rows)
 
 
 def bench(args: argparse.Namespace, parser: argparse.ArgumentParser) -> Bench:
@@ -80,4 +50,4 @@ def configured(
     )
 
 
-__all__ = ["SITES", "SLOTS", "Sited", "bench", "configured"]
+__all__ = ["SITES", "bench", "configured"]

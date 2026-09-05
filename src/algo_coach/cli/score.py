@@ -16,37 +16,11 @@ from algo_coach.problems import load_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Configuration
 
-# Which slot each flag fills in the row a `--model` opens.
-SLOTS = {"--effort": 1, "--provider": 2, "--temperature": 3}
-
-
-class Named(argparse.Action):
-    """`--model` and its settings alternately, into one ordered list. Separate
-    `append` destinations would lose which effort followed which model."""
-
-    def __call__(
-        self,
-        parser: argparse.ArgumentParser,
-        namespace: argparse.Namespace,
-        value: str | Sequence[str] | None,
-        option_string: str | None = None,
-    ) -> None:
-        named: list[list[str]] = getattr(namespace, self.dest, None) or []
-        if option_string == "--model":
-            named.append([str(value), "", "", ""])
-        else:
-            slot = SLOTS[str(option_string)]
-            if not named:
-                named.append([DEFAULT.model, "", "", ""])
-            if named[-1][slot]:
-                parser.exit(2, f"score: two {option_string} for one --model\n")
-            named[-1][slot] = str(value)
-        setattr(namespace, self.dest, named)
-
 
 def configurations(
     args: argparse.Namespace, parser: argparse.ArgumentParser
 ) -> tuple[Configuration, ...]:
+    """The rows `--model` opened, over the built-in classifier."""
     named = getattr(args, "named", None)
     if not named:
         return (DEFAULT,)

@@ -7,8 +7,9 @@ from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 
 from algo_coach.claims import CONCURRENCY
+from algo_coach.classifier import DEFAULT
 from algo_coach.cli.annotate import annotate
-from algo_coach.cli.bench import SITES, Sited
+from algo_coach.cli.bench import SITES
 from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
@@ -18,7 +19,8 @@ from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
 from algo_coach.cli.problem import problem
 from algo_coach.cli.read import read
-from algo_coach.cli.score import Named, score
+from algo_coach.cli.rows import Rows
+from algo_coach.cli.score import score
 from algo_coach.cli.seed import BadLine, seed
 
 DATA_ROOT = Path("data")
@@ -51,6 +53,57 @@ def _user_argument(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _run_arguments(
+    parser: argparse.ArgumentParser, *, record: str, question: str = "prompt", per: str = ""
+) -> None:
+    """The flags every run over a backlog takes."""
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=CONCURRENCY,
+        help=f"calls in flight at once{per}; one at a time otherwise",
+    )
+    parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help=f"ask again even where a stored {record} answers the same {question}",
+    )
+
+
+SETTINGS = ("--model", "--effort", "--provider", "--temperature")
+
+
+def _rows(dest: str, opener: str, *, opens_by_default: str | None = None) -> dict[str, object]:
+    """The `add_argument` keywords that put a flag into the rows `opener`
+    begins. One destination for all of them, so which setting followed which
+    opener survives."""
+    fills = [flag for flag in SETTINGS if flag != opener]
+    return {
+        "dest": dest,
+        "action": Rows,
+        "opener": opener,
+        "fills": fills,
+        "opens_by_default": opens_by_default,
+    }
+
+
+def _configuration_arguments(
+    parser: argparse.ArgumentParser, rows: dict[str, object], opener: str, **help: str
+) -> None:
+    """`--model`, `--effort`, `--provider` and `--temperature`, each filling the
+    row the `opener` before it began. `help` overrides the wording of one flag,
+    keyed by its name."""
+    wording = {
+        "model": f"the model writing the {opener} before it",
+        "effort": f"the effort of the {opener} before it",
+        "provider": f"the backend to pin the {opener} before it to",
+        "temperature": f"what the {opener} before it samples at; 'default' for the provider's own",
+    } | help
+    for flag in SETTINGS:
+        name = flag[2:]
+        parser.add_argument(flag, metavar=name.upper(), help=wording[name], **rows)
+
+
 def main() -> None:
     # Before the parser, since a default reads the environment too. An exported
     # variable wins over the file, and the file is found from the working
@@ -81,33 +134,13 @@ def main() -> None:
     claim_parser.add_argument(
         "--revise", action="store_true", help="ask again about attempts already claimed"
     )
-    claim_parser.add_argument(
+    _configuration_arguments(
+        claim_parser,
+        _rows("named", "--model", opens_by_default=DEFAULT.model),
         "--model",
-        dest="named",
-        action=Named,
-        metavar="MODEL",
-        help="a classifier whose reading to show beside the claim; repeatable",
-    )
-    claim_parser.add_argument(
-        "--effort",
-        dest="named",
-        action=Named,
-        metavar="EFFORT",
-        help="the effort of the --model before it",
-    )
-    claim_parser.add_argument(
-        "--provider",
-        dest="named",
-        action=Named,
-        metavar="PROVIDER",
-        help="the endpoint the --model before it read from",
-    )
-    claim_parser.add_argument(
-        "--temperature",
-        dest="named",
-        action=Named,
-        metavar="TEMPERATURE",
-        help="what the --model before it sampled at; 'default' for the provider's own",
+        model="a classifier whose reading to show beside the claim; repeatable",
+        provider="the endpoint the --model before it read from",
+        temperature="what the --model before it sampled at; 'default' for the provider's own",
     )
     # Unset rather than 0: "not passed" has to be a state the flag cannot
     # also be given as a value.
@@ -131,17 +164,7 @@ def main() -> None:
         action="store_true",
         help="also re-derive claims an older model or prompt version made",
     )
-    classify_parser.add_argument(
-        "--concurrency",
-        type=int,
-        default=CONCURRENCY,
-        help="calls in flight at once; one at a time otherwise",
-    )
-    classify_parser.add_argument(
-        "--fresh",
-        action="store_true",
-        help="ask again even where a stored claim answers the same prompt",
-    )
+    _run_arguments(classify_parser, record="claim")
     _user_argument(classify_parser)
 
     match_parser = _command(sub, "match", "which problems exercise a card's templates")
@@ -149,33 +172,13 @@ def main() -> None:
         "--limit", type=int, help="how many pairs to read; every outstanding one otherwise"
     )
     match_parser.add_argument("--card", help="one card by slug; every seeded card otherwise")
-    match_parser.add_argument(
-        "--concurrency",
-        type=int,
-        default=CONCURRENCY,
-        help="calls in flight at once; one at a time otherwise",
-    )
-    match_parser.add_argument(
-        "--fresh",
-        action="store_true",
-        help="ask again even where a stored record answers the same question",
-    )
+    _run_arguments(match_parser, record="record", question="question")
 
     read_parser = _command(sub, "read", "name the techniques each stored canonical used")
     read_parser.add_argument(
         "--limit", type=int, help="how many canonicals to read; every unread one otherwise"
     )
-    read_parser.add_argument(
-        "--concurrency",
-        type=int,
-        default=CONCURRENCY,
-        help="calls in flight at once; one at a time otherwise",
-    )
-    read_parser.add_argument(
-        "--fresh",
-        action="store_true",
-        help="ask again even where a stored reading answers the same prompt",
-    )
+    _run_arguments(read_parser, record="reading")
 
     generate_parser = _command(sub, "generate", "write problems for one of a card's templates")
     generate_parser.add_argument("--card", help="the card, by slug; narrows --gaps to it")
@@ -219,44 +222,15 @@ def main() -> None:
         action="store_true",
         help="replay a pair even where a record answers the same prompt",
     )
-    # One destination for all of them, so which setting followed which site
-    # survives. See `Sited` in bench.py.
+    sited = _rows("sites", "--site")
     generate_parser.add_argument(
         "--site",
-        dest="sites",
-        action=Sited,
         metavar="SITE",
         choices=SITES,
         help=f"the call site the settings after it configure: {', '.join(SITES)}; repeatable",
+        **sited,
     )
-    generate_parser.add_argument(
-        "--model",
-        dest="sites",
-        action=Sited,
-        metavar="MODEL",
-        help="the model writing the --site before it",
-    )
-    generate_parser.add_argument(
-        "--effort",
-        dest="sites",
-        action=Sited,
-        metavar="EFFORT",
-        help="the effort of the --site before it",
-    )
-    generate_parser.add_argument(
-        "--provider",
-        dest="sites",
-        action=Sited,
-        metavar="PROVIDER",
-        help="the backend to pin the --site before it to",
-    )
-    generate_parser.add_argument(
-        "--temperature",
-        dest="sites",
-        action=Sited,
-        metavar="TEMPERATURE",
-        help="what the --site before it samples at; 'default' for the provider's own",
-    )
+    _configuration_arguments(generate_parser, sited, "--site")
 
     problem_parser = _command(sub, "problem", "read one stored problem, or list the corpus")
     problem_parser.add_argument(
@@ -284,35 +258,11 @@ def main() -> None:
         type=int,
         help="how many attempts to read per classifier; every unread one otherwise",
     )
-    # One destination for all of them, so which setting followed which model
-    # survives. See `Named` in score.py.
-    score_parser.add_argument(
+    _configuration_arguments(
+        score_parser,
+        _rows("named", "--model", opens_by_default=DEFAULT.model),
         "--model",
-        dest="named",
-        action=Named,
-        metavar="MODEL",
-        help="a classifier to score; repeatable",
-    )
-    score_parser.add_argument(
-        "--effort",
-        dest="named",
-        action=Named,
-        metavar="EFFORT",
-        help="the effort of the --model before it",
-    )
-    score_parser.add_argument(
-        "--provider",
-        dest="named",
-        action=Named,
-        metavar="PROVIDER",
-        help="the backend to pin the --model before it to",
-    )
-    score_parser.add_argument(
-        "--temperature",
-        dest="named",
-        action=Named,
-        metavar="TEMPERATURE",
-        help="what the --model before it samples at; 'default' for the provider's own",
+        model="a classifier to score; repeatable",
     )
     score_parser.add_argument(
         "--stored",
@@ -324,17 +274,7 @@ def main() -> None:
         action="store_true",
         help="print the per-technique table and every attempt read differently; counted otherwise",
     )
-    score_parser.add_argument(
-        "--concurrency",
-        type=int,
-        default=CONCURRENCY,
-        help="calls in flight at once per model and endpoint; one at a time otherwise",
-    )
-    score_parser.add_argument(
-        "--fresh",
-        action="store_true",
-        help="ask again even where a stored claim answers the same prompt",
-    )
+    _run_arguments(score_parser, record="claim", per=" per model and endpoint")
     _user_argument(score_parser)
 
     movement_parser = _command(
