@@ -12,7 +12,7 @@ from algo_coach.cli.display import UNSET, chosen, sampled
 from algo_coach.cli.status import Status
 from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
-from algo_coach.problems import load_problems
+from algo_coach.readings import load_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Configuration
 

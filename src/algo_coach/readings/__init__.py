@@ -1,3 +1,4 @@
+from algo_coach.readings.derive import derive, load_problems, with_techniques
 from algo_coach.readings.reader import candidates, read, read_one, store
 from algo_coach.readings.run import Failed, Progress, ReadingResult, read_corpus
 from algo_coach.readings.stale import at_configuration, outstanding
@@ -5,6 +6,9 @@ from algo_coach.readings.standing import standing_readings
 from algo_coach.readings.store import ReadingLog
 
 __all__ = [
+    "derive",
+    "load_problems",
+    "with_techniques",
     "Failed",
     "Progress",
     "ReadingLog",

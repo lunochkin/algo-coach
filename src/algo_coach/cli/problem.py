@@ -11,8 +11,7 @@ from algo_coach.cards import CardStore
 from algo_coach.cli.display import configured, left, listing_code, one_of, shortened
 from algo_coach.generation import Corpus
 from algo_coach.outcomes import OutcomeLog
-from algo_coach.problems.techniques import derive
-from algo_coach.readings import ReadingLog
+from algo_coach.readings import ReadingLog, derive
 from algo_coach.schema import Problem, Solution, TemplateMatch, TestCase
 
 

@@ -1,7 +1,7 @@
 from helpers import attempt, machine_claim, seed_problem
 
 from algo_coach.board import movement
-from algo_coach.problems import load_problems
+from algo_coach.readings import load_problems
 
 
 def problems(root):

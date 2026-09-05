@@ -11,7 +11,7 @@ from algo_coach.claims.run import Progress
 from algo_coach.classifier import DEFAULT, EFFORT, MODEL, ClassifierError, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
-from algo_coach.problems import load_problems
+from algo_coach.readings import load_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import ClaimSource, TechniqueClaim
 

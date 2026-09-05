@@ -4,7 +4,7 @@ from helpers import attempt, seed_problem
 
 from algo_coach.claims import claimable, spread
 from algo_coach.mint import user_claim
-from algo_coach.problems import load_problems
+from algo_coach.readings import load_problems
 
 
 def techniques_of(problems, drawn):

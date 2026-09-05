@@ -3,7 +3,7 @@ from pathlib import Path
 
 from algo_coach.cards import CardStore
 from algo_coach.matches import Coverage, MatchLog, coverage, uncovered
-from algo_coach.problems import load_problems
+from algo_coach.readings import load_problems
 from algo_coach.solutions import SolutionLog
 
 

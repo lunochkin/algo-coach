@@ -4,7 +4,7 @@ from pathlib import Path
 from algo_coach.board import TechniqueMovement, movement
 from algo_coach.claims import standing_claims
 from algo_coach.log import AttemptLog
-from algo_coach.problems import load_problems
+from algo_coach.readings import load_problems
 from algo_coach.schema import ClaimSource
 
 

@@ -4,8 +4,14 @@ import pytest
 from helpers import PROVENANCE, T0, make_problem
 
 from algo_coach.mint import user_reading
-from algo_coach.problems import ProblemStore, derive, load_problems, with_techniques
-from algo_coach.readings import ReadingLog, standing_readings
+from algo_coach.problems import ProblemStore
+from algo_coach.readings import (
+    ReadingLog,
+    derive,
+    load_problems,
+    standing_readings,
+    with_techniques,
+)
 from algo_coach.schema import Solution, SolutionRole, TechniqueReading
 from algo_coach.solutions import SolutionLog
 
