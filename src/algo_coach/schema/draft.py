@@ -106,8 +106,8 @@ class Draft(BaseModel):
     # size the statement admits
     builder: str | None = Field(default=None, min_length=1)
     largest: int | None = Field(default=None, gt=0)
-    # paced: the clock the search measures the canonical against, written to be
-    # the slowest correct approach. Absent where no speedup is claimed
+    # paced: the clock the search measures the canonical against, written as the
+    # approach the form replaces. Absent where no speedup is claimed
     naive: str | None = Field(default=None, min_length=1)
     # searched: the case at the size the naive solution stops fitting, absent
     # where the form is its own optimum or nothing separated

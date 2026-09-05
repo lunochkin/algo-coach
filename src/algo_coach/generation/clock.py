@@ -1,5 +1,5 @@
-"""The naive solution: the slowest correct approach to a statement, which is
-what the speedup search measures the canonical against.
+"""The naive solution: the approach the card's form replaces, which is what the
+speedup search measures the canonical against.
 
 It settles no case and discards no problem, so it is the one answering site
 that may be told which form to avoid, and the one that is sampled. `corpus.md`
@@ -22,17 +22,15 @@ CLOCK_DEFAULT = Configuration(
     model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio"
 )
 
-SYSTEM = f"""You write the slowest correct solution to a problem statement.
+SYSTEM = f"""You write the solution a solver reaches for without one technique.
 
-Another solution to the same statement is fast, and yours is what its speed is
-measured against. Correctness is the only thing asked of you. Being slow is
-what is wanted, not what is tolerated.
+You are told which approach to avoid. Write what someone who does not know it
+writes: the statement's own definition, computed directly. Another solution
+uses that approach, and what is measured is how much faster it is than yours.
+Correctness is the only thing asked of you.
 
-Assume every input is tiny. Nothing you write is judged on how it scales.
-
-Compute the answer the way the statement defines it. Enumerate every candidate
-and check each one against that definition; where the statement asks for the
-best of something, try them all and keep the best.
+Compute the answer the way the statement defines it. Where it asks for the best
+of something, check every candidate its definition admits and keep the best.
 
 The candidates are what the statement's own bounds admit. Where the answer is a
 number, try every value between the bounds the statement gives it. Do not
@@ -41,11 +39,16 @@ value because an argument shows the answer cannot be there. Such an argument is
 what the fast solution is built on, and using it here leaves nothing to
 measure.
 
+Do not search a space wider than the definition names. Trying every subset,
+every ordering or every pairing where the statement describes a scan is slower
+than the approach the technique replaces. A solution that slow is separated by
+an input of a few dozen elements, and no submission is judged at that size.
+
 Do not precompute, do not cache a result, do not reach for a data structure,
 and do not stop a loop early. A loop that runs to the end is what is wanted.
 
-You are told which approach to avoid. Do not use it, and do not use another
-approach that reaches the same running time by a different route.
+Do not use the approach you are told to avoid, and do not use another approach
+that reaches the same running time by a different route.
 
 {RUNTIME}, {ENTRY}, taking its arguments
 positionally in the order the statement describes them.

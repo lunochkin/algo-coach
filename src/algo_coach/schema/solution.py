@@ -11,8 +11,8 @@ class SolutionRole(StrEnum):
 
     CANONICAL = "canonical"
     REFERENCE = "reference"
-    # the clock a speedup is measured against, written to be the slowest
-    # correct approach. `corpus.md` gives what it may never do
+    # the clock a speedup is measured against, written as the approach the
+    # form replaces. `corpus.md` gives what it may never do
     NAIVE = "naive"
 
 

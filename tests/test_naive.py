@@ -53,14 +53,18 @@ def test_the_form_to_avoid_is_sent_beside_the_statement(tmp_path):
     assert call.response == answer()
 
 
-def test_the_brief_asks_for_slow_where_the_blind_one_asks_for_plain(tmp_path):
+def test_the_brief_asks_for_the_replaced_approach_where_the_blind_one_asks_for_plain(
+    tmp_path,
+):
     """A plain solution is whatever the model finds obvious, which on some
-    statements is the form itself. This one is told what is wanted."""
+    statements is the form itself. This one is told what is wanted: what a
+    solver writes without the technique, rather than the slowest solution
+    there is."""
     (one,) = seeded(tmp_path, card())
     sent = SYSTEM + prompt(STATEMENT, one.templates[0].trigger)
 
-    assert "slowest correct" in SYSTEM
-    assert "Assume every input is tiny" in SYSTEM
+    assert "solver reaches for without one technique" in SYSTEM
+    assert "slowest" not in SYSTEM
     assert one.templates[0].trigger in sent
     # the blind site is briefed for the plainest solution and shown no form,
     # which is what keeps its reading of the statement independent
@@ -72,6 +76,13 @@ def test_the_brief_bounds_the_candidates_by_the_statement(tmp_path):
     insight the fast solution is built on, and separates nothing."""
     assert "The candidates are what the statement's own bounds admit" in SYSTEM
     assert "the values the input happens to contain" in SYSTEM
+
+
+def test_the_brief_stops_a_clock_slower_than_the_replaced_approach():
+    """Told to be slowest, a model enumerated every pairing. The search then
+    separates at a few dozen elements, which is below the size a submission of
+    the wrong complexity is judged at."""
+    assert "Do not search a space wider than the definition names" in SYSTEM
 
 
 def test_a_reply_carrying_no_solution_fails():

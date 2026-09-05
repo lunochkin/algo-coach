@@ -477,7 +477,7 @@ exit criteria reads a draft.
 - [x] Record the separating size against `largest` over the stored corpus. The
       five problems one run landed separated at 1, 2, 6, 13 and 21 against a
       legal 100000, and nothing says where the bar belongs
-- [ ] Ask the clock's brief for the approach the form replaces, not the slowest
+- [x] Ask the clock's brief for the approach the form replaces, not the slowest
       correct one. Told to be slowest, a model enumerated every pairing, and
       the separating size then falls below what a wrong-complexity submission
       passes
