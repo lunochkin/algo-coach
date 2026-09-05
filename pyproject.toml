@@ -38,7 +38,7 @@ asyncio_mode = "auto"
 [tool.pyright]
 include = ["src"]
 pythonVersion = "3.14"
-typeCheckingMode = "basic"
+typeCheckingMode = "standard"
 
 [tool.importlinter]
 root_package = "algo_coach"

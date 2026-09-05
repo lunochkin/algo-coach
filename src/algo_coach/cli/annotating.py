@@ -1,7 +1,8 @@
 """The annotation prompt as two panes: the statement with its solution, and one
 form's code. It only collects; what lands is the caller's."""
 
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Protocol
 
 from rich.syntax import Syntax
 from textual.app import App, ComposeResult
@@ -25,8 +26,14 @@ def evidence(question: Question) -> str:
     )
 
 
-# Answering one question: the pairs it settles, positive and negative.
-Answered = Callable[[Question, set[str]], None]
+class Answered(Protocol):
+    """Answering one question: the pairs it settles, positive and negative, and
+    how many records that has written so far."""
+
+    written: int
+
+    def __call__(self, question: Question, picked: set[str]) -> None: ...
+
 
 CUE = 60  # how much of a trigger the list shows; the code pane carries it whole
 
@@ -46,7 +53,7 @@ class Annotating(App[None]):
     """
 
     BINDINGS = [
-        Binding("space", "toggle", "pick/unpick"),
+        Binding("space", "pick", "pick/unpick"),
         Binding("enter", "record", "record"),
         Binding("s", "skip", "skip"),
         Binding("c", "clear", "clear"),
@@ -167,7 +174,8 @@ class Annotating(App[None]):
             self.query_one("#forms", Static).update(self.listing())
             self.show_code()
 
-    def action_toggle(self) -> None:
+    # `pick` rather than `toggle`: `DOMNode.action_toggle` flips a named attribute
+    def action_pick(self) -> None:
         form = self.forms[self.focused_form]
         self.picked ^= {form.id}
         self.query_one("#forms", Static).update(self.listing())
