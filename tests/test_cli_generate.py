@@ -9,7 +9,7 @@ from algo_coach import cli
 from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
-from algo_coach.cli.generate import staged, summary, verdict
+from algo_coach.cli.generating import staged, summary, verdict
 from algo_coach.drafts import DraftStore
 from algo_coach.generation import (
     BENCH,
