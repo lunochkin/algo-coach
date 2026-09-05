@@ -3,6 +3,7 @@ from pathlib import Path
 
 from algo_coach.board import TechniqueMovement, movement
 from algo_coach.claims import standing_claims
+from algo_coach.cli.display import table
 from algo_coach.log import AttemptLog
 from algo_coach.readings import load_problems
 from algo_coach.schema import ClaimSource
@@ -30,8 +31,4 @@ def moved(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
 def render(rows: list[TechniqueMovement]) -> str:
     header = ("technique", "fallback", "claimed", "moved")
     body = [(row.technique, str(row.fallback), str(row.claimed), f"{row.moved:+d}") for row in rows]
-    widths = [max(len(cell) for cell in column) for column in zip(header, *body, strict=True)]
-    return "\n".join(
-        "  ".join(cell.ljust(width) for cell, width in zip(line, widths, strict=True)).rstrip()
-        for line in (header, *body)
-    )
+    return table(header, body)

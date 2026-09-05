@@ -15,7 +15,7 @@ from algo_coach.matches.matcher import (
 from algo_coach.matches.questions import Question, at_configuration, outstanding, questions
 from algo_coach.matches.run import Failed, MatchResult, Progress, match_corpus, read_one, store
 from algo_coach.matches.sample import annotatable
-from algo_coach.matches.standing import BY_WHAT_EACH_KNEW, standing_matches
+from algo_coach.matches.standing import BY_WHAT_EACH_KNEW, latest_readings, standing_matches
 from algo_coach.matches.store import MatchLog
 
 __all__ = [
@@ -45,6 +45,7 @@ __all__ = [
     "questions",
     "read_one",
     "request_hash",
+    "latest_readings",
     "standing_matches",
     "uncovered",
     "store",

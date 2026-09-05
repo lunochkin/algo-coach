@@ -8,7 +8,13 @@ import argparse
 from pathlib import Path
 
 from algo_coach.cards import CardStore
-from algo_coach.cli.display import configured, left, listing_code, one_of, shortened
+from algo_coach.cli.display import (
+    case_line,
+    configured,
+    listing_code,
+    one_of,
+    sites,
+)
 from algo_coach.generation import Corpus
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.readings import ReadingLog, derive
@@ -71,7 +77,7 @@ def page(one: Problem, corpus: Corpus, root: Path) -> str:
             *cases(corpus.cases.for_problem(one.id)),
             *code(solutions),
             *pairs(matches, solutions, forms),
-            *sites(OutcomeLog(root).outcomes(), one.id),
+            *sites(OutcomeLog(root).for_problem(one.id), none="none recorded"),
         ]
     )
 
@@ -85,10 +91,7 @@ def slugs(root: Path) -> dict[str, str]:
 def cases(stored: list[TestCase]) -> list[str]:
     """The set the problem carries, each naming whose answer it holds and the
     round that won it."""
-    named = [
-        f"  {shortened(one.args, one.expected)}  [{one.expected_from}, round {one.round}]"
-        for one in stored
-    ]
+    named = [f"  {case_line(one)}" for one in stored]
     return [f"## cases ({len(stored)})", *named, ""]
 
 
@@ -119,14 +122,6 @@ def pairs(
         for one in matches
     ]
     return ["## matches", *named, ""]
-
-
-def sites(outcomes: list, problem_id: str) -> list[str]:
-    """What the run that wrote it left, keyed to the problem it landed as."""
-    mine = [one for one in outcomes if one.problem_id == problem_id]
-    if not mine:
-        return ["## sites", "", "none recorded"]
-    return ["## sites", *(f"  {left(one)}" for one in mine)]
 
 
 __all__ = ["problem"]

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from algo_coach.board import TechniqueRow, per_technique, ungrouped
 from algo_coach.claims import standing_claims
-from algo_coach.cli.display import age
+from algo_coach.cli.display import age, table
 from algo_coach.log import AttemptLog, latest_by_attempt
 from algo_coach.readings import load_problems
 
@@ -50,8 +50,4 @@ def render(rows: list[TechniqueRow], now: datetime) -> str:
         )
         for row in rows
     ]
-    widths = [max(len(cell) for cell in column) for column in zip(header, *body, strict=True)]
-    return "\n".join(
-        "  ".join(cell.ljust(width) for cell, width in zip(line, widths, strict=True)).rstrip()
-        for line in (header, *body)
-    )
+    return table(header, body)

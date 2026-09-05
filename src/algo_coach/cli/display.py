@@ -6,7 +6,7 @@ from typing import Protocol
 
 from algo_coach.calls import Retry
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Attempt, MachineProvenance, SiteOutcome
+from algo_coach.schema import Attempt, MachineProvenance, SettledCase, SiteOutcome, TestCase
 
 
 def age(when: datetime | None, now: datetime) -> str:
@@ -47,6 +47,15 @@ def chosen(
     except ValueError:
         parser.exit(2, f"{command}: --temperature {temperature} is not a number or {UNSET!r}\n")
         raise
+
+
+def table(header: Sequence[str], body: Sequence[Sequence[str]]) -> str:
+    """Columns as wide as their widest cell, two spaces apart."""
+    widths = [max(len(cell) for cell in column) for column in zip(header, *body, strict=True)]
+    return "\n".join(
+        "  ".join(cell.ljust(width) for cell, width in zip(line, widths, strict=True)).rstrip()
+        for line in (header, *body)
+    )
 
 
 def counter(index: int, total: int) -> str:
@@ -151,6 +160,20 @@ def left(one: SiteOutcome) -> str:
     if one.largest is not None:
         parts.append(f"up to {one.largest}")
     return "  ".join(parts)
+
+
+def case_line(case: TestCase | SettledCase) -> str:
+    """One case, and whose answer it carries. The round is what a replay
+    rebuilds the set from, so it prints beside the source."""
+    return f"{shortened(case.args, case.expected)}  [{case.expected_from}, round {case.round}]"
+
+
+def sites(outcomes: Sequence[SiteOutcome], *, none: str) -> list[str]:
+    """What each call site left, in the order written. A resumed step wrote a
+    second record, so a site can appear twice."""
+    if not outcomes:
+        return ["## sites", "", none]
+    return ["## sites", *(f"  {left(one)}" for one in outcomes)]
 
 
 def one_of[T: Identified](

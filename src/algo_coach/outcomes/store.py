@@ -16,3 +16,6 @@ class OutcomeLog(JsonlLog[SiteOutcome]):
 
     def for_writing(self, writing_id: str) -> list[SiteOutcome]:
         return [one for one in self.all() if one.writing_id == writing_id]
+
+    def for_problem(self, problem_id: str) -> list[SiteOutcome]:
+        return [one for one in self.all() if one.problem_id == problem_id]

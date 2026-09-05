@@ -1,7 +1,7 @@
 """The stored drafts: a line per draft for `--drafts`, and one read whole for
 `--draft`."""
 
-from algo_coach.cli.display import configured, left, listing_code, shortened
+from algo_coach.cli.display import case_line, configured, listing_code, shortened, sites
 from algo_coach.generation import (
     Bench,
     Target,
@@ -10,7 +10,6 @@ from algo_coach.generation import (
 )
 from algo_coach.schema import (
     Draft,
-    SettledCase,
     SiteOutcome,
     WritingState,
 )
@@ -92,7 +91,7 @@ def report(draft: Draft, target: Target | None, outcomes: list[SiteOutcome], ben
             *listing_code("reference", draft.reference),
             *listing_code(f"input generator (up to {draft.largest})", draft.builder),
             *listing_code("naive solution", draft.naive),
-            *sites(outcomes),
+            *sites(outcomes, none="none recorded: they are written once the loop has run"),
         ]
     )
 
@@ -115,24 +114,9 @@ def cases(draft: Draft) -> list[str]:
     counted = f"{len(draft.cases)} settled, {len(draft.won)} won, {len(separating)} separating"
     return [
         f"## cases ({counted})",
-        *(f"  {settled(one)}" for one in [*draft.cases, *draft.won, *separating]),
+        *(f"  {case_line(one)}" for one in [*draft.cases, *draft.won, *separating]),
         "",
     ]
-
-
-def settled(case: SettledCase) -> str:
-    """One case, and whose answer it carries. The round is what a replay
-    rebuilds the set from, so it prints beside the source."""
-    return f"{shortened(case.args, case.expected)}  [{case.expected_from}, round {case.round}]"
-
-
-def sites(outcomes: list[SiteOutcome]) -> list[str]:
-    """What each call site left on this writing, in the order they were
-    written. A resumed step wrote a second record, so a site can appear
-    twice."""
-    if not outcomes:
-        return ["## sites", "", "none recorded: they are written once the loop has run"]
-    return ["## sites", *(f"  {left(one)}" for one in outcomes)]
 
 
 __all__ = [
@@ -141,7 +125,5 @@ __all__ = [
     "heading",
     "listing",
     "report",
-    "settled",
-    "sites",
     "waiting_on",
 ]

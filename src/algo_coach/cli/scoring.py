@@ -4,7 +4,7 @@ by side, per technique and per attempt read differently."""
 from collections.abc import Callable, Sequence
 
 from algo_coach.claims import Comparison, ConfigurationScore, Score, TechniqueScore
-from algo_coach.cli.display import UNSET, sampled
+from algo_coach.cli.display import UNSET, sampled, table
 from algo_coach.schema import Configuration
 
 
@@ -235,11 +235,3 @@ def counts(row: TechniqueScore) -> tuple[str, str, str]:
 # rather than a gap.
 def packed(row: TechniqueScore | None) -> str:
     return "/".join(counts(row)) if row is not None else "0/0/0"
-
-
-def table(header: Sequence[str], body: Sequence[Sequence[str]]) -> str:
-    widths = [max(len(cell) for cell in column) for column in zip(header, *body, strict=True)]
-    return "\n".join(
-        "  ".join(cell.ljust(width) for cell, width in zip(line, widths, strict=True)).rstrip()
-        for line in (header, *body)
-    )
