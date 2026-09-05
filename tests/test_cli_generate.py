@@ -573,7 +573,7 @@ def test_replay_pays_for_a_second_configuration_once(root, monkeypatch, capsys):
     run that wrote it already answers for the bench it was written with."""
     # a template claiming a speedup, so the inputs site has a pair to answer.
     # The problem then lands only where the search separated the two solutions
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     seeded(root, card(templates=[template("longest-valid-window", speedup=True)]))
     run(monkeypatch, FakeWriter(slow=SLOW, generator=BUILDS), "longest-valid-window")
     capsys.readouterr()

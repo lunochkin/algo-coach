@@ -27,7 +27,7 @@ def root(tmp_path, monkeypatch):
 def landed(root, monkeypatch, **overrides):
     """One stored problem, written through the whole pipeline so every record a
     reader joins is there."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(root, card(templates=[template("longest-valid-window", speedup=True)]))
     write_problems(
         FakeWriter(slow=SLOW, generator=BUILDS, **overrides),

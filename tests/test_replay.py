@@ -33,7 +33,7 @@ def landed(tmp_path, monkeypatch, model: FakeWriter | None = None, **overrides):
     asked about. A run under the real sitting cap holds the draft instead: the
     reference finishes at every size the builder writes.
     """
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     overrides.setdefault(
         "templates", [template("longest-valid-window", speedup=True), template("fixed-window")]
     )

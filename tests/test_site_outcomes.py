@@ -282,7 +282,7 @@ def test_a_form_that_is_its_own_optimum_leaves_no_clock_record(tmp_path):
 def test_the_inputs_record_carries_the_size_the_search_found(tmp_path, monkeypatch):
     """What the site is scored on: the code it wrote is what the search ran to
     reach a size."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     _, _, outcomes = run(tmp_path, model, templates=[CLAIMS])
@@ -296,7 +296,7 @@ def test_the_inputs_record_carries_the_bound_the_search_ran_under(tmp_path, monk
     """A landed problem clears its draft, so the size the builder reported is
     readable nowhere else and a separating size has nothing to be read
     against."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     _, _, outcomes = run(tmp_path, model, templates=[CLAIMS])
@@ -322,7 +322,7 @@ def test_a_bound_is_recorded_where_no_search_ran(tmp_path):
 def test_the_clock_record_carries_the_search_it_was_judged_by(tmp_path, monkeypatch):
     """The search timed this answer against the canonical, so what it found is
     a verdict about the clock as much as about the builder."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     _, _, outcomes = run(tmp_path, model, templates=[CLAIMS])

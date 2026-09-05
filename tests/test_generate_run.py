@@ -20,7 +20,7 @@ from algo_coach.generation import (
     inputs,
     write_problems,
 )
-from algo_coach.generation import run as run_module
+from algo_coach.generation import passage as passage_module
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Configuration, ExpectedSource, Problem, WritingState
 
@@ -218,7 +218,7 @@ def claiming(overrides: dict) -> dict:
 def timed(tmp_path, monkeypatch, model: FakeWriter, **overrides):
     """A run whose sitting cap is small enough to separate in a test, over a
     template claiming the speedup that makes the search run."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(tmp_path, card(**claiming(overrides)))
     return one, write_problems(model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path))
 
@@ -239,13 +239,13 @@ def test_the_mutation_loop_never_sees_the_separating_case(tmp_path, monkeypatch)
     """The survivors are decided against the set as the statement left it, so
     the case the search won cannot be in it whichever ran first."""
     seen: list[list] = []
-    loop = run_module.harden
+    loop = passage_module.harden
 
     def capture(*args, cases, **kwargs):
         seen.append([one.args for one in cases])
         return loop(*args, cases=cases, **kwargs)
 
-    monkeypatch.setattr("algo_coach.generation.run.harden", capture)
+    monkeypatch.setattr("algo_coach.generation.passage.harden", capture)
 
     timed(tmp_path, monkeypatch, FakeWriter(slow=SLOW, generator=BUILDS))
 
@@ -276,7 +276,7 @@ CRASHES = "def solve(size, seed):\n    raise ValueError\n"
 def reported(tmp_path, monkeypatch, model: FakeWriter, **overrides) -> Progress:
     """The line one problem left, which is where a site's failure is read."""
     seen: list[Progress] = []
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(tmp_path, card(**claiming(overrides)))
     write_problems(
         model,
@@ -352,7 +352,7 @@ def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
 def test_the_clock_is_written_between_the_builder_and_the_search(tmp_path, monkeypatch):
     """The builder is written for every problem, since the fuzz pass builds its
     inputs with it, and the search measures against what this step writes."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(tmp_path, card(**claiming({})))
     stages: list[str] = []
 
@@ -473,7 +473,7 @@ def test_a_written_clock_is_held_on_the_draft(tmp_path):
 def test_the_search_runs_before_the_mutation_loop(tmp_path, monkeypatch):
     """A canonical wrong at scale discards the problem, and the loop is what
     that saves: a round is paid for after the search rather than before it."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(tmp_path, card(**claiming({})))
     stages: list[str] = []
 

@@ -263,7 +263,7 @@ def written(tmp_path, model: FakeWriter, drafts: DraftStore, **overrides):
 def test_a_resumed_draw_separates_where_the_stored_clock_did_not(tmp_path, monkeypatch):
     """The exit a held draft takes where nothing was wrong with the run: the
     site is asked again and this answer is slow."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     drafts = DraftStore(tmp_path)
     one, first = written(tmp_path, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
     (stopped,) = first.held
@@ -289,7 +289,7 @@ def test_a_redrawn_clock_carries_the_size_its_search_found(tmp_path, monkeypatch
     """The builder was reused, so the inputs site made no call and wrote no
     record. Filed nowhere, the size a resumed problem landed on would be
     readable only from the arguments of its own case."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     drafts = DraftStore(tmp_path)
     one, first = written(tmp_path, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
     (stopped,) = first.held
@@ -312,7 +312,7 @@ def test_a_redrawn_clock_carries_the_size_its_search_found(tmp_path, monkeypatch
 def test_a_moved_clock_re_pays_that_call_and_no_other(tmp_path, monkeypatch):
     """The reference and the input generator are written from the statement,
     which this bench did not move."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     drafts = DraftStore(tmp_path)
     one, first = written(tmp_path, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
     (stopped,) = first.held
@@ -339,7 +339,7 @@ def test_a_moved_clock_re_pays_that_call_and_no_other(tmp_path, monkeypatch):
 def test_a_resume_pays_for_the_step_that_had_no_answer_and_no_other(tmp_path, monkeypatch):
     """The draft holds the reference the first run bought, so the resume is
     charged for the input generator alone."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     drafts = DraftStore(tmp_path)
     one, first = written(tmp_path, FakeWriter(slow=SLOW), drafts, templates=CLAIMED)
     (stopped,) = first.held

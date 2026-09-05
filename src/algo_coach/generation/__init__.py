@@ -20,6 +20,7 @@ from algo_coach.generation.checks import (
 )
 from algo_coach.generation.clock import CLOCK_DEFAULT, naive
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
+from algo_coach.generation.drafting import reject, swept
 from algo_coach.generation.errors import GenerationError
 from algo_coach.generation.fuzzing import (
     SEEDS,
@@ -46,6 +47,7 @@ from algo_coach.generation.generator import (
 from algo_coach.generation.hardening import Hardened, harden, standing
 from algo_coach.generation.inputs import INPUTS_DEFAULT, Built, builder
 from algo_coach.generation.landing import Corpus, copied, land, landing
+from algo_coach.generation.passage import Passage, write_one
 from algo_coach.generation.replay import (
     REPLAYED,
     ReplayResult,
@@ -63,23 +65,18 @@ from algo_coach.generation.resuming import (
     starts_at,
 )
 from algo_coach.generation.run import (
-    Bar,
     Discarded,
     Failed,
     GenerationResult,
     Held,
-    Inputs,
-    Passage,
     Progress,
     Resumed,
-    reject,
     resume,
-    swept,
-    write_one,
     write_problems,
 )
 from algo_coach.generation.speedup import Missing, Searched, search
 from algo_coach.generation.steps import SILENT, Notes, Step
+from algo_coach.generation.verdicts import Bar, Inputs
 from algo_coach.generation.writing import UNRECORDED, Writing
 
 __all__ = [

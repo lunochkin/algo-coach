@@ -98,7 +98,7 @@ def test_the_reference_a_rejected_draft_paid_for_is_kept(tmp_path):
 def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
     """The statement's own cases, the reference, the builder and its bound,
     each written as the step that produced it answered."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     result, _ = run(tmp_path, FakeWriter(slow=SLOW, generator=BUILDS), templates=[CLAIMS])
     (stored,) = result.drafted
 
@@ -141,7 +141,7 @@ def test_the_draft_and_its_site_outcomes_carry_one_id(tmp_path):
 def test_a_separated_problem_lands(tmp_path, monkeypatch):
     """The case that demonstrates the claim is stored, so the draft runs on
     through the loop."""
-    monkeypatch.setattr("algo_coach.generation.run.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     result, drafts = run(tmp_path, model, templates=[CLAIMS])
