@@ -4,6 +4,7 @@ thread and a wait on whichever worker hit the cap, so both are serialised."""
 
 import shutil
 import threading
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TextIO
 
@@ -44,7 +45,7 @@ class Widths:
 
 
 class Status:
-    def __init__(self, stream: TextIO, configurations: list[Configuration]) -> None:
+    def __init__(self, stream: TextIO, configurations: Sequence[Configuration]) -> None:
         self.stream = stream
         self.rows = [Row(configuration) for configuration in configurations]
         self.lock = threading.Lock()

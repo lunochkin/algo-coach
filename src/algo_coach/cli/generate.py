@@ -21,6 +21,7 @@ from algo_coach.generation import (
     Corpus,
     GenerationResult,
     Notes,
+    Resumed,
     Target,
     replay,
     resume,
@@ -118,7 +119,7 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
     outcomes = OutcomeLog(root)
 
     before = len(calls.all())
-    reached: list[tuple[Target, GenerationResult]] = []
+    reached: list[tuple[Target, Resumed]] = []
     unaimed = 0
     for index, draft in enumerate(waiting, start=1):
         target = written_for(cards, draft)

@@ -143,7 +143,9 @@ def disputed(
         attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
         for attempt in pool
     }
-    readings = [readings_at(claims, configuration, asked) for configuration in named]
+    readings: list[Mapping[str, TechniqueClaim]] = [
+        readings_at(claims, configuration, asked) for configuration in named
+    ]
     pool = contested(
         pool,
         standing,

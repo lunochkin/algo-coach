@@ -42,7 +42,9 @@ class FileStore[T: BaseModel]:
 
     def put(self, record: T) -> None:
         self.path.mkdir(parents=True, exist_ok=True)
-        (self.path / f"{record.id}.json").write_text(record.model_dump_json(indent=2) + "\n")
+        # the bound is the model, and the id is this store's own contract
+        key = getattr(record, "id")  # noqa: B009
+        (self.path / f"{key}.json").write_text(record.model_dump_json(indent=2) + "\n")
 
     def get(self, id: str) -> T | None:
         path = self.path / f"{id}.json"

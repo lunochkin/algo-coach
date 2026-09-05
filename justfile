@@ -21,12 +21,16 @@ test *args:
 lint *args:
     uv run ruff check {{ args }}
 
+# Type-check the engine.
+typecheck:
+    uv run pyright
+
 # Format.
 fmt:
     uv run ruff format .
 
-# Lint and test, as a commit does.
-check: lint test
+# Lint, type-check and test, as a commit does.
+check: lint typecheck test
 
 # Enable the pre-commit and commit-msg hooks. Once per clone.
 hooks:

@@ -207,7 +207,8 @@ def _paces(
         return True, None
     if not ran.returned:
         return None, None
-    return ran.elapsed_ms > cap_ms, ran.elapsed_ms
+    # measured whenever a value returned, so the fallback never decides
+    return (ran.elapsed_ms or 0) > cap_ms, ran.elapsed_ms
 
 
 __all__ = ["CEILING", "DRILL_CAP_MS", "Missing", "Searched", "search"]

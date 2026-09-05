@@ -5,7 +5,7 @@ has answered at the digest it would send now.
 Read-only over the corpus, for the reason `flows.md` gives.
 """
 
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -97,7 +97,8 @@ class Asked:
     """What one site's replay left. `call` is absent where it was not asked."""
 
     call: Call | None = None
-    verdicts: dict[str, Any] = field(default_factory=dict)
+    # whichever site's, so typed as a mapping rather than as one site's record
+    verdicts: Mapping[str, Any] = field(default_factory=dict)
     skipped: bool = False
 
 
@@ -184,7 +185,7 @@ def replay(
             result.unasked += 1
             continue
         left: list[SiteOutcome] = []
-        writing = Writing(template_id=problem_template(subject), into=left)
+        writing = Writing(template_id=problem_template(subject) or "", into=left)
         writing(site, asked.call, **asked.verdicts)
         for one in left:
             outcomes.append(one.model_copy(update={"problem_id": subject.problem.id}))
@@ -228,7 +229,7 @@ def blind_replay(
         ran, subject.cases, reference=solution, written=MachineProvenance.of(call), cap_ms=cap_ms
     )
     verdicts = blind_verdicts(checked)
-    notes("blind", str(verdicts.get("detail") or "agrees on every case"), call)
+    notes("blind", verdicts.get("detail") or "agrees on every case", call)
     return Asked(call=call, verdicts=verdicts)
 
 

@@ -1,6 +1,8 @@
 """What each answering site leaves on one attempt, and how a site outcome
 reads it. `machine.md` gives what the records carry."""
 
+from typing import TypedDict
+
 from pydantic import BaseModel, Field
 
 from algo_coach.generation.checks import (
@@ -75,12 +77,39 @@ class Bar(BaseModel):
     unmeasured: str | None = None
 
 
-def gated(checked: Checked, *gates: Discard) -> dict[str, object]:
+class GateVerdict(TypedDict, total=False):
+    """What a site's record carries where its answer met a gate."""
+
+    gate: Discard | None
+    detail: str
+
+
+class LoopVerdict(TypedDict):
+    """What the discrimination site's record carries."""
+
+    gate: Discard | None
+    survived: int
+    won: int
+    offered: int
+    killed: int
+    rounds: list[int]
+
+
+class SearchVerdict(TypedDict):
+    """What the inputs site's record carries of the search that judged it."""
+
+    gate: Discard | None
+    separating: int | None
+    unseparated: str | None
+    largest: int | None
+
+
+def gated(checked: Checked, *gates: Discard) -> GateVerdict:
     """The gate this site's answer was rejected by, and what it said. A discard
     belongs to the site whose output made it decidable."""
     if checked.discard not in gates:
-        return {}
-    return {"gate": checked.discard, "detail": reason(checked)}
+        return GateVerdict()
+    return GateVerdict(gate=checked.discard, detail=reason(checked))
 
 
 def settled(checked: Checked) -> str:
@@ -109,34 +138,34 @@ def why(checked: Checked) -> str:
     return f"discarded: {reason(checked)}"
 
 
-def blind_verdicts(checked: Checked) -> dict[str, object]:
+def blind_verdicts(checked: Checked) -> GateVerdict:
     """What the blind site's record carries: the gate its reading was rejected
     by, where one was."""
     return gated(checked, Discard.UNTESTED, Discard.DISAGREED)
 
 
-def loop_verdicts(bar: Bar) -> dict[str, object]:
+def loop_verdicts(bar: Bar) -> LoopVerdict:
     """What the discrimination site's record carries. The mutants are not among
     them: they sit on the site that wrote the canonical."""
-    return {
-        "gate": bar.gate,
-        "survived": bar.survived,
-        "won": bar.won,
-        "offered": bar.offered,
-        "killed": sum(bar.caught),
-        "rounds": bar.caught,
-    }
+    return LoopVerdict(
+        gate=bar.gate,
+        survived=bar.survived,
+        won=bar.won,
+        offered=bar.offered,
+        killed=sum(bar.caught),
+        rounds=bar.caught,
+    )
 
 
-def search_verdicts(inputs: Inputs) -> dict[str, object]:
+def search_verdicts(inputs: Inputs) -> SearchVerdict:
     """What the inputs site's record carries of the search that judged it. The
     bound is kept here, since a landed problem clears the draft that held it."""
-    return {
-        "gate": inputs.gate,
-        "separating": inputs.separating,
-        "unseparated": inputs.unseparated,
-        "largest": inputs.built.largest if inputs.built is not None else None,
-    }
+    return SearchVerdict(
+        gate=inputs.gate,
+        separating=inputs.separating,
+        unseparated=inputs.unseparated,
+        largest=inputs.built.largest if inputs.built is not None else None,
+    )
 
 
 def barred(hardened: Hardened) -> Bar:
@@ -159,6 +188,9 @@ def barred(hardened: Hardened) -> Bar:
 
 
 __all__ = [
+    "GateVerdict",
+    "LoopVerdict",
+    "SearchVerdict",
     "Bar",
     "Clock",
     "Inputs",

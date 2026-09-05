@@ -7,6 +7,7 @@ import json
 import signal
 import sys
 import time
+from typing import Any
 
 RETURNED = "returned"
 TIMEOUT = "timeout"
@@ -27,7 +28,7 @@ def encode(value):
 def execute(code, args, cap_ms):
     # the cap times the `solve` call alone; interpreter start and the module's
     # top level are the parent timer's to catch
-    namespace = {"__name__": "__solution__"}
+    namespace: dict[str, Any] = {"__name__": "__solution__"}
     try:
         exec(compile(code, "<solution>", "exec"), namespace)  # noqa: S102 - the subject
         solve = namespace["solve"]

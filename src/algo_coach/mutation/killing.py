@@ -21,10 +21,12 @@ FLOOR_MS = 50
 
 class Case(Protocol):
     """A case on either side of landing: a `SettledCase` before, a `TestCase`
-    after."""
+    after, or a built input the fuzz pass is judging."""
 
-    args: list[Any]
-    expected: Any
+    @property
+    def args(self) -> Sequence[Any]: ...
+    @property
+    def expected(self) -> Any: ...
 
 
 @dataclass(frozen=True)

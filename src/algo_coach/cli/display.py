@@ -81,7 +81,9 @@ def named(reason: str | None, names: Sequence[str], *, none: str) -> str:
 
 class RunOutcome(Protocol):
     aborted: bool
-    failed: Sequence[object]
+
+    @property
+    def failed(self) -> Sequence[object]: ...
 
     @property
     def written(self) -> int: ...

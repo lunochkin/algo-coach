@@ -81,6 +81,14 @@ class Passage:
     bar: Bar = field(default_factory=Bar)
 
     @property
+    def generator(self) -> MachineProvenance:
+        """The configuration of the call that wrote the draft. `carried` has
+        checked it is there before any step reads it."""
+        if self.draft.generator is None:
+            raise ValueError("a draft carries the configuration of the call that wrote it")
+        return self.draft.generator
+
+    @property
     def measurable(self) -> bool:
         """Whether a search has anything to run: a speedup is claimed and there
         is a builder to make inputs with."""
@@ -174,7 +182,7 @@ def to_agreed(p: Passage) -> bool:
     # the generator's configuration rather than the blind call's: the arguments
     # are the statement's own cases, whoever computed what they return
     p.checked = p.first = agree(
-        ran, p.draft.declared, reference=solution, written=p.draft.generator, cap_ms=p.cap_ms
+        ran, p.draft.declared, reference=solution, written=p.generator, cap_ms=p.cap_ms
     )
     p.notes("cases", f"{settled(p.first)}, {monotonic() - started:.1f}s in the runner")
     if not p.first.survived:

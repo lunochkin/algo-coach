@@ -37,10 +37,6 @@ SYNTAX = "xcode"
 
 # One question at a time, over the pool the caller sampled.
 class Annotating(App[None]):
-    # Stated rather than inherited, so the panes agree whatever the terminal
-    # is set to.
-    theme = "textual-light"
-
     CSS = """
     #head { padding: 0 1; background: $panel; color: $text; }
     #statement { width: 50%; padding: 0 1; border-right: solid $panel; }
@@ -72,6 +68,9 @@ class Annotating(App[None]):
         answered: Answered,
     ):
         super().__init__()
+        # stated rather than inherited, so the panes agree whatever the
+        # terminal is set to
+        self.theme = "textual-light"
         self.pool = list(pool)
         self.read = read
         self.answered = answered

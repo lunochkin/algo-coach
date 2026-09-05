@@ -10,6 +10,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 from functools import partial
+from typing import Any, cast
 
 
 class Operator(StrEnum):
@@ -114,7 +115,7 @@ class _Walk(ast.NodeTransformer):
         rewrite: Callable[[], ast.AST],
     ) -> ast.AST | None:
         hit = len(self.sites) == self.target
-        self.sites.append(_Site(operator, change, node.lineno))
+        self.sites.append(_Site(operator, change, getattr(node, "lineno", 0)))
         return rewrite() if hit else None
 
     def visit_Compare(self, node: ast.Compare) -> ast.AST:
@@ -199,7 +200,8 @@ def _swap_at(node: ast.Compare, index: int, new: type[ast.cmpop]) -> ast.AST:
 
 
 def _swap(node: ast.BinOp | ast.AugAssign | ast.BoolOp, new: type[ast.AST]) -> ast.AST:
-    node.op = new()
+    # an operator on two of the three and a boolop on the third
+    node.op = cast(Any, new())
     return node
 
 
@@ -208,6 +210,7 @@ def _drop(node: ast.UnaryOp) -> ast.AST:
 
 
 def _shift(node: ast.Constant, delta: int) -> ast.AST:
+    assert isinstance(node.value, int)  # matched on an integer literal
     return ast.copy_location(ast.Constant(value=node.value + delta), node)
 
 

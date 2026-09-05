@@ -3,6 +3,7 @@ problem, and the block it ends on."""
 
 import sys
 from collections import Counter
+from collections.abc import Sequence
 
 from algo_coach.cli.display import clipped, counter, progress, sampled
 from algo_coach.generation import (
@@ -126,7 +127,7 @@ def timing(progress: Progress) -> str:
     return f"  separates at {progress.separating}" if progress.separating is not None else ""
 
 
-def counted(results: list[GenerationResult], field: str) -> int:
+def counted(results: Sequence[GenerationResult], field: str) -> int:
     """How many of one kind the run left, over every template it was aimed at."""
     return sum(len(getattr(result, field)) for result in results)
 
@@ -137,7 +138,7 @@ def tallied(*counts: tuple[int, str]) -> str:
     return "".join(f", {count} {label}" for count, label in counts if count)
 
 
-def summary(results: list[GenerationResult], aimed: list[Target], bench: Bench = BENCH) -> str:
+def summary(results: Sequence[GenerationResult], aimed: list[Target], bench: Bench = BENCH) -> str:
     """What the run stored, over every template it was aimed at."""
     kept = f"{counted(results, 'drafted')} problem(s) stored"
     if len(aimed) > 1:
@@ -154,7 +155,7 @@ def summary(results: list[GenerationResult], aimed: list[Target], bench: Bench =
     return f"{kept}, {wrote(bench)}"
 
 
-def resume_summary(results: list[Resumed], bench: Bench = BENCH, *, unaimed: int = 0) -> str:
+def resume_summary(results: Sequence[Resumed], bench: Bench = BENCH, *, unaimed: int = 0) -> str:
     """What the resumed drafts became, and where each run started."""
     line = f"{len(results)} draft(s) resumed, {counted(results, 'drafted')} stored"
     # naming no template is apart from a failure: nothing was asked, since the
@@ -194,7 +195,9 @@ def discarding(target: Target, one: Discarded) -> str:
     return f"  {target.template.slug[:24]:<24}  {one.reason}"
 
 
-def finale(reached: list[tuple[Target, GenerationResult]], closing: str, paid: list[Call]) -> str:
+def finale(
+    reached: Sequence[tuple[Target, GenerationResult]], closing: str, paid: list[Call]
+) -> str:
     """What the run ended with, printed once and after every stage line.
 
     The statements are not in it. Ten of them scroll the result out of the

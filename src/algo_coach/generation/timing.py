@@ -126,7 +126,7 @@ def timed(
     discarded = Checked(
         outcome=checked.outcome,
         discard=Discard.DISAGREED,
-        disagreements=[found.disagreement],
+        disagreements=[found.disagreement] if found.disagreement is not None else [],
     )
     return discarded, searched, None
 

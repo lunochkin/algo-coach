@@ -20,6 +20,7 @@ algo-coach = "algo_coach.cli:main"
 [dependency-groups]
 dev = [
     "duckdb>=1.5",
+    "pyright>=1.1.411",
     "pytest>=8.0",
     "pytest-asyncio>=1.4.0",
     "pytest-xdist>=3.6",
@@ -30,6 +31,11 @@ dev = [
 python_classes = []
 # The annotation prompt is a textual app, and its pilot is an async generator.
 asyncio_mode = "auto"
+
+[tool.pyright]
+include = ["src"]
+pythonVersion = "3.14"
+typeCheckingMode = "basic"
 
 [tool.ruff]
 line-length = 100

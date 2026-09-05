@@ -98,6 +98,9 @@ def score_backlog(
 
     def asked(work: tuple[Plan, Attempt]) -> tuple[list[str], Call | None]:
         plan, attempt = work
+        if transport is None:
+            # `--stored` plans nothing to ask, so this is never reached there
+            raise ValueError("a reading needs a transport")
         return read_one(
             transport,
             calls,

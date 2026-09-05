@@ -27,6 +27,7 @@ from algo_coach.schema import (
     Call,
     Card,
     CaseOutcome,
+    Discard,
     Draft,
     SiteOutcome,
     Template,
@@ -46,7 +47,7 @@ class Discarded(BaseModel):
     `Failed`, which is a call that returned nothing."""
 
     index: int
-    discard: str  # which gate rejected it
+    discard: Discard  # which gate rejected it
     reason: str
 
 
@@ -181,7 +182,7 @@ def write_problems(
     paid = len(calls.appended)
     for index, (_, writing), passage, failure in answers:
         records = writing.into or []
-        if failure is not None or passage is None:
+        if failure is not None:
             # broad on purpose: a refusal, a rate limit or a reply that does
             # not parse costs this problem and not the run
             raised(
@@ -193,46 +194,51 @@ def write_problems(
                 outcomes=outcomes,
                 drafts=drafts,
             )
-            report(
-                on_progress,
-                index,
-                count,
-                template,
-                reason=repr(failure),
-                cost=priced(calls.appended[paid:]),
-            )
+            if on_progress is not None:
+                on_progress(
+                    Progress(
+                        index=index,
+                        total=count,
+                        template_slug=template.slug,
+                        reason=repr(failure),
+                        cost=priced(calls.appended[paid:]),
+                    )
+                )
             paid = len(calls.appended)
             continue
 
+        assert passage is not None  # `as_answered` yields an answer or a failure
         written.append(passage.draft.statement)
         finished(result, corpus, passage, index=index, records=records, outcomes=outcomes)
         p = passage
-        report(
-            on_progress,
-            index,
-            count,
-            template,
-            title=p.draft.title,
-            cases=len(p.draft.declared),
-            outcome=p.checked.outcome,
-            misdeclared=len(p.checked.misdeclarations),
-            landed=p.draft.state is WritingState.LANDED,
-            reason=None if p.checked.survived else why(p.checked),
-            separating=p.inputs.separating,
-            unseparated=p.inputs.unseparated,
-            unbuilt=p.inputs.unbuilt,
-            mutants=p.bar.mutants,
-            survived=p.bar.survived,
-            won=p.bar.won,
-            offered=p.bar.offered,
-            built=p.bar.built,
-            kept=p.bar.kept,
-            declared=p.bar.declared,
-            fuzzed=p.bar.fuzzed,
-            caught=p.bar.caught,
-            unmeasured=p.bar.unmeasured,
-            cost=priced(calls.appended[paid:]),
-        )
+        if on_progress is not None:
+            on_progress(
+                Progress(
+                    index=index,
+                    total=count,
+                    template_slug=template.slug,
+                    title=p.draft.title,
+                    cases=len(p.draft.declared),
+                    outcome=p.checked.outcome,
+                    misdeclared=len(p.checked.misdeclarations),
+                    landed=p.draft.state is WritingState.LANDED,
+                    reason=None if p.checked.survived else why(p.checked),
+                    separating=p.inputs.separating,
+                    unseparated=p.inputs.unseparated,
+                    unbuilt=p.inputs.unbuilt,
+                    mutants=p.bar.mutants,
+                    survived=p.bar.survived,
+                    won=p.bar.won,
+                    offered=p.bar.offered,
+                    built=p.bar.built,
+                    kept=p.bar.kept,
+                    declared=p.bar.declared,
+                    fuzzed=p.bar.fuzzed,
+                    caught=p.bar.caught,
+                    unmeasured=p.bar.unmeasured,
+                    cost=priced(calls.appended[paid:]),
+                )
+            )
         paid = len(calls.appended)
     result.aborted = answers.aborted
     return result
@@ -269,7 +275,11 @@ def finished(
 ) -> None:
     """What one draft ends as: landed, held short of it, or discarded. Shared
     with a resume, which reaches the same three ends by the same rules."""
-    if p.checked.survived and p.draft.state is not WritingState.HARDENED:
+    gate = p.checked.discard
+    if gate is not None:
+        record(outcomes, records)
+        result.discarded.append(Discarded(index=index, discard=gate, reason=why(p.checked)))
+    elif p.draft.state is not WritingState.HARDENED:
         # every gate that judges the problem passed, and a step of the writing
         # did not: held where it stopped rather than landed
         record(outcomes, records)
@@ -284,7 +294,7 @@ def finished(
                 unmeasured=p.bar.unmeasured,
             )
         )
-    elif p.checked.survived:
+    else:
         problem = land(corpus, p.template, p.draft)
         # named before it is cleared: a crash between the two then leaves a
         # draft the next run clears rather than a problem written twice
@@ -292,11 +302,6 @@ def finished(
         cleared(p.drafts, p.draft)
         record(outcomes, records, problem_id=problem.id)
         result.drafted.append(p.draft)
-    else:
-        record(outcomes, records)
-        result.discarded.append(
-            Discarded(index=index, discard=p.checked.discard, reason=why(p.checked))
-        )
 
 
 def resume(
@@ -375,17 +380,6 @@ def priced(paid: Sequence[Call]) -> float | None:
     return sum(costs) if costs else None
 
 
-def report(
-    on_progress: Callable[[Progress], None] | None,
-    index: int,
-    total: int,
-    template: Template,
-    **outcome: object,
-) -> None:
-    if on_progress is not None:
-        on_progress(Progress(index=index, total=total, template_slug=template.slug, **outcome))
-
-
 __all__ = [
     "Discarded",
     "Failed",
@@ -397,7 +391,6 @@ __all__ = [
     "priced",
     "raised",
     "record",
-    "report",
     "resume",
     "write_problems",
 ]

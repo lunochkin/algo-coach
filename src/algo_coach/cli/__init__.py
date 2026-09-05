@@ -3,6 +3,7 @@
 import argparse
 import os
 from pathlib import Path
+from typing import TypedDict
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -73,22 +74,26 @@ def _run_arguments(
 SETTINGS = ("--model", "--effort", "--provider", "--temperature")
 
 
-def _rows(dest: str, opener: str, *, opens_by_default: str | None = None) -> dict[str, object]:
+class RowKeywords(TypedDict):
+    dest: str
+    action: type[argparse.Action]
+    opener: str
+    fills: list[str]
+    opens_by_default: str | None
+
+
+def _rows(dest: str, opener: str, *, opens_by_default: str | None = None) -> RowKeywords:
     """The `add_argument` keywords that put a flag into the rows `opener`
     begins. One destination for all of them, so which setting followed which
     opener survives."""
     fills = [flag for flag in SETTINGS if flag != opener]
-    return {
-        "dest": dest,
-        "action": Rows,
-        "opener": opener,
-        "fills": fills,
-        "opens_by_default": opens_by_default,
-    }
+    return RowKeywords(
+        dest=dest, action=Rows, opener=opener, fills=fills, opens_by_default=opens_by_default
+    )
 
 
 def _configuration_arguments(
-    parser: argparse.ArgumentParser, rows: dict[str, object], opener: str, **help: str
+    parser: argparse.ArgumentParser, rows: RowKeywords, opener: str, **help: str
 ) -> None:
     """`--model`, `--effort`, `--provider` and `--temperature`, each filling the
     row the `opener` before it began. `help` overrides the wording of one flag,
