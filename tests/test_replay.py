@@ -1,13 +1,14 @@
 from generating import FakeWriter
 from matching import card, seeded, template
 
-from algo_coach.calls import CallLog, Configuration
+from algo_coach.calls import CallLog
 from algo_coach.cases import CaseLog
 from algo_coach.generation import Bench, Corpus, clock, replay, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
     CallSite,
+    Configuration,
     Discard,
     ProblemStatus,
     RetirementReason,

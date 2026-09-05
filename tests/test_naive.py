@@ -5,7 +5,7 @@ import pytest
 from matching import card, seeded
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog, Configuration, Reply
+from algo_coach.calls import CallLog, Reply
 from algo_coach.generation import GenerationError, naive
 from algo_coach.generation.blind import SYSTEM as BLIND
 from algo_coach.generation.blind import prompt as blindly
@@ -17,6 +17,7 @@ from algo_coach.generation.clock import (
     request_hash,
     schema,
 )
+from algo_coach.schema import Configuration
 
 STATEMENT = "Given a list of readings, return the widest stretch that stays fair."
 AVOID = "two indices walking one way over a window that never shrinks"

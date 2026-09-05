@@ -5,14 +5,14 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog, Configuration, Transport
+from algo_coach.calls import CallLog, Transport
 from algo_coach.claims.sample import eligible, recency
 from algo_coach.claims.stale import is_stale
 from algo_coach.classifier import DEFAULT, classify, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim
 from algo_coach.runs import ABORT_AFTER, CONCURRENCY, as_answered
-from algo_coach.schema import Attempt, Call, MachineProvenance, Problem
+from algo_coach.schema import Attempt, Call, Configuration, MachineProvenance, Problem
 from algo_coach.techniques import standing_claims
 
 

@@ -3,7 +3,7 @@ import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
-from algo_coach.calls import CallLog, Configuration
+from algo_coach.calls import CallLog
 from algo_coach.claims import Comparison, ConfigurationScore, Score, TechniqueScore, score_backlog
 from algo_coach.claims.reading import Plan
 from algo_coach.claims.run import ABORT_AFTER, Progress
@@ -13,6 +13,7 @@ from algo_coach.cli.status import Status
 from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
 from algo_coach.problems import load_problems
+from algo_coach.schema import Configuration
 
 # Which slot each flag fills in the row a `--model` opens.
 SLOTS = {"--effort": 1, "--provider": 2, "--temperature": 3}

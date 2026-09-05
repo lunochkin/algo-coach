@@ -8,9 +8,9 @@ one site changes one call.
 import argparse
 from collections.abc import Sequence
 
-from algo_coach.calls import Configuration
 from algo_coach.cli.display import chosen
 from algo_coach.generation import BENCH, Bench
+from algo_coach.schema import Configuration
 
 # Which slot each flag fills in the row a `--site` opens.
 SLOTS = {"--model": 1, "--effort": 2, "--provider": 3, "--temperature": 4}

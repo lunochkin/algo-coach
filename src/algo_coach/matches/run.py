@@ -5,13 +5,13 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog, Configuration, Transport
+from algo_coach.calls import CallLog, Transport
 from algo_coach.matches.matcher import DEFAULT, candidates, match, request_hash
 from algo_coach.matches.questions import Question, outstanding, questions
 from algo_coach.matches.store import MatchLog
 from algo_coach.mint import machine_match
 from algo_coach.runs import ABORT_AFTER, CONCURRENCY, as_answered
-from algo_coach.schema import Call, Card, MachineProvenance, Problem, Solution
+from algo_coach.schema import Call, Card, Configuration, MachineProvenance, Problem, Solution
 
 
 class Failed(BaseModel):

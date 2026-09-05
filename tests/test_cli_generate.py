@@ -6,7 +6,7 @@ from generating import FakeWriter, Raises
 from matching import card, seeded, template
 
 from algo_coach import cli
-from algo_coach.calls import CallLog, Configuration
+from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
 from algo_coach.cli.generate import staged, summary, verdict
@@ -26,7 +26,7 @@ from algo_coach.generation import (
 )
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Call, CaseOutcome, MatchSource, SolutionRole
+from algo_coach.schema import Call, CaseOutcome, Configuration, MatchSource, SolutionRole
 from algo_coach.solutions import SolutionLog
 
 TRANSPORT = import_module("algo_coach.cli.transport")

@@ -4,7 +4,7 @@ from generating import NAIVE, FakeWriter
 from helpers import PROVENANCE
 from matching import card, seeded, template
 
-from algo_coach.calls import CallLog, Configuration
+from algo_coach.calls import CallLog
 from algo_coach.cases import CaseLog
 from algo_coach.drafts import DraftStore
 from algo_coach.generation import (
@@ -22,7 +22,7 @@ from algo_coach.generation import (
 )
 from algo_coach.generation import run as run_module
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import ExpectedSource, Problem, WritingState
+from algo_coach.schema import Configuration, ExpectedSource, Problem, WritingState
 
 
 def run(tmp_path, model: FakeWriter, *, count: int = 1):

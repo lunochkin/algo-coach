@@ -2,7 +2,7 @@ import pytest
 from generating import CANONICAL, FakeWriter, Raises
 from matching import card, seeded, template
 
-from algo_coach.calls import CallLog, Configuration
+from algo_coach.calls import CallLog
 from algo_coach.drafts import DraftStore
 from algo_coach.generation import (
     BENCH,
@@ -20,7 +20,7 @@ from algo_coach.generation import (
     write_problems,
 )
 from algo_coach.outcomes import OutcomeLog
-from algo_coach.schema import CallSite, Draft, Template, WritingState
+from algo_coach.schema import CallSite, Configuration, Draft, Template, WritingState
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 # four mutation sites, so a survivor reaches a round and the loop pays a call

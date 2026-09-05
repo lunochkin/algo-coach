@@ -7,7 +7,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
-from algo_coach.calls import Configuration, Reply
+from algo_coach.calls import Reply
 from algo_coach.classifier import PIN, TEMPERATURE
 from algo_coach.mint import classifier_claim, user_reading
 from algo_coach.problems import ProblemStore
@@ -15,6 +15,7 @@ from algo_coach.readings import ReadingLog
 from algo_coach.schema import (
     Attempt,
     Call,
+    Configuration,
     MachineProvenance,
     Problem,
     Solution,

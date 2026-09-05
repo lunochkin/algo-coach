@@ -11,7 +11,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog, Configuration, Transport
+from algo_coach.calls import CallLog, Transport
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import reference
 from algo_coach.generation.blind import request_hash as blind_hash
@@ -36,6 +36,7 @@ from algo_coach.schema import (
     Card,
     CaseOutcome,
     CaseResult,
+    Configuration,
     Discard,
     MachineProvenance,
     Problem,

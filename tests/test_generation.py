@@ -6,7 +6,7 @@ from helpers import PROVENANCE
 from matching import card, seeded, template
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog, Configuration, Reply, prompt_hash
+from algo_coach.calls import CallLog, Reply, prompt_hash
 from algo_coach.generation import (
     SYSTEM,
     GenerationError,
@@ -17,7 +17,13 @@ from algo_coach.generation import (
     schema,
     written_for,
 )
-from algo_coach.schema import Problem, ProblemDifficulty, ProblemStatus, RetirementReason
+from algo_coach.schema import (
+    Configuration,
+    Problem,
+    ProblemDifficulty,
+    ProblemStatus,
+    RetirementReason,
+)
 
 
 def brief(tmp_path, **overrides) -> str:

@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from time import monotonic
 from typing import Any
 
-from algo_coach.calls import CallLog, Configuration, Transport
+from algo_coach.calls import CallLog, Transport
 from algo_coach.generation.agreement import Disagreement, Settled, SettledCase, settle
 from algo_coach.generation.checks import CAP_MS
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
@@ -17,7 +17,7 @@ from algo_coach.generation.fuzzing import Fuzzed, Fuzzing
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.mutation import ROUNDS, Case, Mutant, kill, mutants, pace, survivors
 from algo_coach.runner import NoValue, outputs
-from algo_coach.schema import Call, MachineProvenance
+from algo_coach.schema import Call, Configuration, MachineProvenance
 
 
 @dataclass(frozen=True)

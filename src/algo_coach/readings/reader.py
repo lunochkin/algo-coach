@@ -2,11 +2,11 @@
 
 from collections.abc import Sequence
 
-from algo_coach.calls import CallLog, Configuration, Transport
+from algo_coach.calls import CallLog, Transport
 from algo_coach.classifier import DEFAULT, classify
 from algo_coach.mint import machine_reading
 from algo_coach.readings.store import ReadingLog
-from algo_coach.schema import Call, MachineProvenance, Solution, TechniqueReading
+from algo_coach.schema import Call, Configuration, MachineProvenance, Solution, TechniqueReading
 from algo_coach.techniques import codes
 
 

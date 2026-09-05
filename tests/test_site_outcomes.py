@@ -1,11 +1,11 @@
 from generating import FakeWriter
 from matching import card, seeded, template
 
-from algo_coach.calls import CallLog, Configuration
+from algo_coach.calls import CallLog
 from algo_coach.generation import BENCH, Bench, Corpus, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import CallSite, Discard
+from algo_coach.schema import CallSite, Configuration, Discard
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 # four mutation sites, where `len(xs)` has none: what makes the loop ask

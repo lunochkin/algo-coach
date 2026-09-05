@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, overload
+from typing import ClassVar, overload
 
 from pydantic import BaseModel
 
 from algo_coach.schema.call import Call
-
-if TYPE_CHECKING:
-    from algo_coach.calls.configuration import Configuration
+from algo_coach.schema.configuration import Configuration
 
 
 class MachineProvenance(BaseModel):

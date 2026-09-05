@@ -1,12 +1,12 @@
 import pytest
 from helpers import CONFIGURATION, PROVENANCE, T0, FakeTransport, Verdict
 
-from algo_coach.calls import CallLog, Configuration
+from algo_coach.calls import CallLog
 from algo_coach.classifier import DEFAULT, request_hash
 from algo_coach.mint import machine_reading, user_reading
 from algo_coach.readings import Progress, ReadingLog, candidates, outstanding, read_corpus
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import MachineProvenance, Solution, SolutionRole
+from algo_coach.schema import Configuration, MachineProvenance, Solution, SolutionRole
 
 answering = FakeTransport.answering
 

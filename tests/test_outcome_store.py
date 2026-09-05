@@ -2,10 +2,9 @@ import pytest
 from helpers import WRITTEN
 from pydantic import ValidationError
 
-from algo_coach.calls import Configuration
 from algo_coach.mint import site_outcome
 from algo_coach.outcomes import OutcomeLog, answered
-from algo_coach.schema import CallSite, Discard, SiteOutcome
+from algo_coach.schema import CallSite, Configuration, Discard, SiteOutcome
 
 
 def left(site: CallSite = CallSite.GENERATOR, writing_id: str = "w1", **overrides):

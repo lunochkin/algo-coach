@@ -5,9 +5,9 @@ import json
 from collections.abc import Sequence
 from typing import Any
 
-from algo_coach.calls import CallLog, Configuration, Transport, ask
+from algo_coach.calls import CallLog, Transport, ask
 from algo_coach.calls import prompt_hash as digest
-from algo_coach.schema import Call
+from algo_coach.schema import Call, Configuration
 from algo_coach.techniques import criterion
 
 # Twenty configurations over the same 80 hand-claimed attempts spread 70% to

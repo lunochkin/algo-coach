@@ -5,9 +5,9 @@ import json
 from collections.abc import Sequence
 from typing import Any
 
-from algo_coach.calls import CallLog, Configuration, Transport, ask
+from algo_coach.calls import CallLog, Transport, ask
 from algo_coach.calls import prompt_hash as digest
-from algo_coach.schema import Call, Card, Problem, Solution, Template, TemplateKind
+from algo_coach.schema import Call, Card, Configuration, Problem, Solution, Template, TemplateKind
 
 MODEL = "openai/gpt-oss-120b"
 EFFORT = "medium"

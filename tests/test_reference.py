@@ -5,10 +5,11 @@ import pytest
 from matching import card, seeded
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog, Configuration, Reply
+from algo_coach.calls import CallLog, Reply
 from algo_coach.generation import GenerationError, reference
 from algo_coach.generation.blind import BLIND_DEFAULT, SYSTEM, prompt, read, schema
 from algo_coach.generation.generator import prompt as brief
+from algo_coach.schema import Configuration
 
 STATEMENT = "Given a list of readings, return the widest stretch that stays fair."
 

@@ -3,12 +3,12 @@ call site, not per run."""
 
 from pydantic import BaseModel
 
-from algo_coach.calls import Configuration
 from algo_coach.generation.blind import BLIND_DEFAULT
 from algo_coach.generation.clock import CLOCK_DEFAULT
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT
 from algo_coach.generation.generator import GENERATOR_DEFAULT
 from algo_coach.generation.inputs import INPUTS_DEFAULT
+from algo_coach.schema import Configuration
 
 
 class Bench(BaseModel, frozen=True):

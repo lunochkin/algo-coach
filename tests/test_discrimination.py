@@ -3,10 +3,11 @@ from dataclasses import dataclass, field
 
 import pytest
 
-from algo_coach.calls import CallLog, Configuration, Reply
+from algo_coach.calls import CallLog, Reply
 from algo_coach.generation import GenerationError, separators
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, prompt, read, schema
 from algo_coach.mutation import Mutant, Operator
+from algo_coach.schema import Configuration
 
 STATEMENT = "Given a list of readings, return the widest stretch that stays fair."
 CANONICAL = "def solve(xs):\n    return len(xs)\n"

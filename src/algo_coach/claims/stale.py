@@ -2,9 +2,8 @@
 
 from collections.abc import Iterable, Mapping
 
-from algo_coach.calls import Configuration
 from algo_coach.log import latest_by_attempt
-from algo_coach.schema import ClaimSource, TechniqueClaim
+from algo_coach.schema import ClaimSource, Configuration, TechniqueClaim
 
 
 def is_stale(claim: TechniqueClaim, configuration: Configuration, prompt_hash: str) -> bool:

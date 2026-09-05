@@ -15,6 +15,7 @@ from algo_coach.schema.case import (
     TestCase,
     severest,
 )
+from algo_coach.schema.configuration import Configuration
 from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.draft import Draft, DraftCase, SettledCase, WritingState
 from algo_coach.schema.match import MatchSource, TemplateMatch
@@ -45,6 +46,7 @@ __all__ = [
     "CardSeed",
     "ClaimSource",
     "Confidence",
+    "Configuration",
     "Diagnosis",
     "Discard",
     "Draft",

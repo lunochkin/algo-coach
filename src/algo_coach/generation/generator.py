@@ -7,10 +7,18 @@ from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
-from algo_coach.calls import CallLog, Configuration, Transport, ask
+from algo_coach.calls import CallLog, Transport, ask
 from algo_coach.generation.contract import ALONE, ENTRY, POSITIONAL, RUNTIME, SIGNATURE
 from algo_coach.generation.errors import GenerationError
-from algo_coach.schema import Call, Card, DraftCase, Problem, ProblemDifficulty, Template
+from algo_coach.schema import (
+    Call,
+    Card,
+    Configuration,
+    DraftCase,
+    Problem,
+    ProblemDifficulty,
+    Template,
+)
 
 # unmeasured: none of the gates a generator is scored by has run yet. Sampled
 # where the other three are greedy, and `machine.md` gives the reason. Pinned

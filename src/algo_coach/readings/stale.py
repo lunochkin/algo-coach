@@ -2,8 +2,7 @@
 
 from collections.abc import Iterable, Mapping, Sequence
 
-from algo_coach.calls import Configuration
-from algo_coach.schema import ReadingSource, Solution, TechniqueReading
+from algo_coach.schema import Configuration, ReadingSource, Solution, TechniqueReading
 
 
 def at_configuration(

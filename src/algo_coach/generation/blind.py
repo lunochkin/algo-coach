@@ -8,10 +8,10 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.calls import CallLog, Configuration, Transport, ask, prompt_hash
+from algo_coach.calls import CallLog, Transport, ask, prompt_hash
 from algo_coach.generation.contract import ALONE, ENTRY, POSITIONAL, RUNTIME
 from algo_coach.generation.errors import GenerationError
-from algo_coach.schema import Call
+from algo_coach.schema import Call, Configuration
 
 # unmeasured, as every site's is. Greedy: this site writes against a statement
 # that already exists, so its variance buys no diversity

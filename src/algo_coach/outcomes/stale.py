@@ -3,8 +3,7 @@ question."""
 
 from collections.abc import Iterable
 
-from algo_coach.calls import Configuration
-from algo_coach.schema import CallSite, SiteOutcome
+from algo_coach.schema import CallSite, Configuration, SiteOutcome
 
 
 def answered(
