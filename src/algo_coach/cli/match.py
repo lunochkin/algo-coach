@@ -1,13 +1,12 @@
 import argparse
-import sys
 from pathlib import Path
 
 from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
+from algo_coach.cli.display import clipped, exit_on, named, progress
 from algo_coach.cli.transport import transport
 from algo_coach.matches import EFFORT, MODEL, MatchLog, Progress, match_corpus
 from algo_coach.readings import load_problems
-from algo_coach.runs import ABORT_AFTER
 from algo_coach.solutions import SolutionLog
 
 
@@ -33,21 +32,14 @@ def match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
 
     print(f"{result.asked} card/solution question(s) read by {MODEL}, effort {EFFORT}")
     print(f"{result.matched} match(es), {result.unmatched} non-match(es) recorded")
-    if result.aborted:
-        parser.exit(1, f"match: aborted after {ABORT_AFTER} consecutive failures\n")
-    if result.failed and not result.written:
-        parser.exit(1, "match: nothing landed\n")
+    exit_on(parser, "match", result)
 
 
-def show(progress: Progress) -> None:
-    """One line per question, on stderr and flushed: a call takes seconds."""
-    counter = f"[{progress.index:>{len(str(progress.total))}}/{progress.total}]"
-    if progress.reason is not None:
-        verdict = f"! {progress.reason}"
-    else:
-        verdict = " ".join(progress.templates) or "— no template"
-    print(
-        f"{counter} {progress.card_slug[:20]:<20} {progress.title[:40]:<40}  {verdict}",
-        file=sys.stderr,
-        flush=True,
+def show(one: Progress) -> None:
+    progress(
+        one.index,
+        one.total,
+        clipped(one.card_slug, 20),
+        clipped(one.title, 40),
+        verdict=named(one.reason, one.templates, none="no template"),
     )

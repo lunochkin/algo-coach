@@ -1,15 +1,14 @@
 import argparse
-import sys
 from pathlib import Path
 
 from algo_coach.calls import CallLog
 from algo_coach.claims import classify_backlog
 from algo_coach.claims.run import Progress
 from algo_coach.classifier import EFFORT, MODEL
+from algo_coach.cli.display import clipped, exit_on, named, progress
 from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
 from algo_coach.readings import load_problems
-from algo_coach.runs import ABORT_AFTER
 
 
 def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -36,19 +35,13 @@ def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         print(f"{result.redone} stale machine claim(s) re-derived")
     if result.undecided:
         print(f"{result.undecided} named no candidate — the fallback stands")
-    # Failures were named by `show` as they happened; only the counts here.
-    if result.aborted:
-        # Nonzero even when claims landed: the backlog was left unfinished.
-        parser.exit(1, f"classify: aborted after {ABORT_AFTER} consecutive failures\n")
-    if result.failed and not result.written:
-        parser.exit(1, "classify: nothing landed\n")
+    exit_on(parser, "classify", result)
 
 
-def show(progress: Progress) -> None:
-    """One line per attempt, on stderr and flushed: a call takes seconds."""
-    counter = f"[{progress.index:>{len(str(progress.total))}}/{progress.total}]"
-    if progress.reason is not None:
-        verdict = f"! {progress.reason}"
-    else:
-        verdict = " ".join(progress.techniques) or "— no candidate"
-    print(f"{counter} {progress.title[:40]:<40}  {verdict}", file=sys.stderr, flush=True)
+def show(one: Progress) -> None:
+    progress(
+        one.index,
+        one.total,
+        clipped(one.title, 40),
+        verdict=named(one.reason, one.techniques, none="no candidate"),
+    )

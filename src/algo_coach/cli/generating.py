@@ -4,7 +4,7 @@ problem, and the block it ends on."""
 import sys
 from collections import Counter
 
-from algo_coach.cli.display import sampled
+from algo_coach.cli.display import clipped, counter, progress, sampled
 from algo_coach.generation import (
     BENCH,
     Bench,
@@ -32,8 +32,7 @@ def stage(step: Step) -> None:
 def staged(step: Step) -> str:
     """What a stage is doing and what it left: three calls and a mutation loop
     take minutes, and a line per problem shows none of it."""
-    counter = f"[{step.index:>{len(str(step.total))}}/{step.total}]"
-    return f"{counter} {step.name:<10} {step.detail}{spent(step.call)}"
+    return f"{counter(step.index, step.total)} {step.name:<10} {step.detail}{spent(step.call)}"
 
 
 def spent(call: Call | None) -> str:
@@ -50,14 +49,13 @@ def count(tokens: int | None) -> str:
     return "?" if tokens is None else f"{tokens:,}"
 
 
-def show(progress: Progress) -> None:
-    """One line per problem, on stderr and flushed: two calls take a minute."""
-    counter = f"[{progress.index:>{len(str(progress.total))}}/{progress.total}]"
-    print(
-        f"{counter} {progress.template_slug[:24]:<24} {progress.title[:40]:<40}  "
-        f"{verdict(progress)}",
-        file=sys.stderr,
-        flush=True,
+def show(one: Progress) -> None:
+    progress(
+        one.index,
+        one.total,
+        clipped(one.template_slug, 24),
+        clipped(one.title, 40),
+        verdict=verdict(one),
     )
 
 

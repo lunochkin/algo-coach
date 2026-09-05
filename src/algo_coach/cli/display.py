@@ -1,9 +1,11 @@
 import argparse
+import sys
 from collections.abc import Sequence
 from datetime import datetime
 from typing import Protocol
 
 from algo_coach.calls import Retry
+from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Attempt, MachineProvenance, SiteOutcome
 
 
@@ -45,6 +47,44 @@ def chosen(
     except ValueError:
         parser.exit(2, f"{command}: --temperature {temperature} is not a number or {UNSET!r}\n")
         raise
+
+
+def counter(index: int, total: int) -> str:
+    return f"[{index:>{len(str(total))}}/{total}]"
+
+
+def clipped(text: str, width: int) -> str:
+    return f"{text[:width]:<{width}}"
+
+
+def progress(index: int, total: int, *cells: str, verdict: str) -> None:
+    """One line per item, on stderr and flushed: a call takes seconds."""
+    print(f"{counter(index, total)} {' '.join(cells)}  {verdict}", file=sys.stderr, flush=True)
+
+
+def named(reason: str | None, names: Sequence[str], *, none: str) -> str:
+    """A run's verdict on one item: the failure, what it named, or that it
+    named nothing."""
+    if reason is not None:
+        return f"! {reason}"
+    return " ".join(names) or f"— {none}"
+
+
+class RunOutcome(Protocol):
+    aborted: bool
+    failed: Sequence[object]
+
+    @property
+    def written(self) -> int: ...
+
+
+def exit_on(parser: argparse.ArgumentParser, command: str, result: RunOutcome) -> None:
+    """Failures were named as they happened; only the ends are here. Nonzero
+    even where records landed: an aborted backlog was left unfinished."""
+    if result.aborted:
+        parser.exit(1, f"{command}: aborted after {ABORT_AFTER} consecutive failures\n")
+    if result.failed and not result.written:
+        parser.exit(1, f"{command}: nothing landed\n")
 
 
 class Identified(Protocol):
