@@ -1,11 +1,9 @@
 """Which techniques a piece of code used, chosen from candidates the caller
 gives."""
 
-import json
 from collections.abc import Sequence
-from typing import Any
 
-from algo_coach.calls import CallLog, Transport, ask
+from algo_coach.calls import CallLog, Transport, chosen, offer
 from algo_coach.calls import prompt_hash as digest
 from algo_coach.schema import Call, Configuration
 from algo_coach.techniques import criterion
@@ -64,22 +62,19 @@ def classify(
     configuration: Configuration = DEFAULT,
 ) -> tuple[list[str], Call | None]:
     """The techniques the code used, and the call that read them — `None` where
-    the answer cost nothing. The candidates appear twice: the schema enforces
-    them, and the prompt informs them, thinking being unconstrained."""
+    the answer cost nothing."""
     # A schema offering one choice would ask the model to agree with itself.
     if len(candidates) < 2:
         return list(candidates), None
 
-    call, text = ask(
+    call, text = offer(
         transport,
         log,
         system=SYSTEM,
         content=prompt(candidates, code),
-        model=configuration.model,
-        effort=configuration.effort,
-        pin=configuration.pin,
-        temperature=configuration.temperature,
-        schema=schema(candidates),
+        key="techniques",
+        options=candidates,
+        configuration=configuration,
     )
     if call.stop_reason == "length":
         # Truncated, so no verdict. Named as nothing rather than raised:
@@ -87,11 +82,7 @@ def classify(
         return [], call
     if text is None:
         raise ClassifierError(call.error or "no verdict")
-
-    # Checked again: the schema's guarantee ends with the request, and an
-    # append-only log has no later pass that fixes a bad code.
-    named = set(json.loads(text)["techniques"])
-    return [technique for technique in candidates if technique in named], call
+    return chosen(text, "techniques", candidates), call
 
 
 def prompt(candidates: Sequence[str], code: str) -> str:
@@ -115,14 +106,3 @@ def prompt(candidates: Sequence[str], code: str) -> str:
 def block(candidate: str) -> list[str]:
     lines = criterion(candidate)
     return [*lines, ""] if lines else []
-
-
-def schema(candidates: Sequence[str]) -> dict[str, Any]:
-    return {
-        "type": "object",
-        "properties": {
-            "techniques": {"type": "array", "items": {"type": "string", "enum": list(candidates)}},
-        },
-        "required": ["techniques"],
-        "additionalProperties": False,
-    }

@@ -1,11 +1,9 @@
 """Which of a card's templates a solution displays. Candidates in, the subset
 out, as the technique classifier works."""
 
-import json
 from collections.abc import Sequence
-from typing import Any
 
-from algo_coach.calls import CallLog, Transport, ask
+from algo_coach.calls import CallLog, Transport, chosen, offer
 from algo_coach.calls import prompt_hash as digest
 from algo_coach.schema import Call, Card, Configuration, Problem, Solution, Template, TemplateKind
 
@@ -73,23 +71,22 @@ def match(
     if not forms:
         return [], None
 
-    call, text = ask(
+    slugs = [template.slug for template in forms]
+    call, text = offer(
         transport,
         log,
         system=SYSTEM,
         content=prompt(forms, problem, solution),
-        model=configuration.model,
-        effort=configuration.effort,
-        pin=configuration.pin,
-        temperature=configuration.temperature,
-        schema=schema(forms),
+        key="templates",
+        options=slugs,
+        configuration=configuration,
     )
+    # a cut-short reply raises here where the classifier stores it as naming
+    # nothing: a negative is stored per template, and one read off a truncated
+    # answer would settle pairs no verdict reached
     if text is None:
         raise MatcherError(call.error or "no verdict")
-
-    # Checked again: the schema binds the request, not the record.
-    named = set(json.loads(text)["templates"])
-    return [template.slug for template in forms if template.slug in named], call
+    return chosen(text, "templates", slugs), call
 
 
 def prompt(forms: Sequence[Template], problem: Problem, solution: Solution) -> str:
@@ -121,19 +118,3 @@ def block(template: Template) -> list[str]:
         *(f"    {line}" for line in template.code.splitlines()),
         "",
     ]
-
-
-def schema(forms: Sequence[Template]) -> dict[str, Any]:
-    """The same candidates as an enum: the prompt informs the reading, this
-    enforces it."""
-    return {
-        "type": "object",
-        "properties": {
-            "templates": {
-                "type": "array",
-                "items": {"type": "string", "enum": [template.slug for template in forms]},
-            },
-        },
-        "required": ["templates"],
-        "additionalProperties": False,
-    }
