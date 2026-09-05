@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from algo_coach.claims import as_answered, as_answered_grouped
+from algo_coach.runs import as_answered, as_answered_grouped
 
 
 def test_serial_when_one_worker_runs_on_the_calling_thread():

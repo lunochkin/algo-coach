@@ -6,7 +6,7 @@ from collections.abc import Callable, Iterator, Mapping, Sequence
 from algo_coach.calls import CallLog, Transport
 from algo_coach.claims.attribution import standing_claims
 from algo_coach.claims.reading import Plan, absorb, select
-from algo_coach.claims.run import CONCURRENCY, Progress, read_one
+from algo_coach.claims.run import Progress, read_one
 from algo_coach.claims.sample import answered_by_hand, eligible, one_per_problem
 from algo_coach.claims.score import (
     Comparison,
@@ -18,7 +18,7 @@ from algo_coach.claims.score import (
 )
 from algo_coach.classifier import DEFAULT
 from algo_coach.log import AttemptLog
-from algo_coach.runs import as_answered_grouped
+from algo_coach.runs import CONCURRENCY, as_answered_grouped
 from algo_coach.schema import Attempt, Call, Configuration, Problem
 
 

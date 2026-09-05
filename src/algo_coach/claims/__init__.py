@@ -4,10 +4,8 @@ from algo_coach.claims.hand import claim_by_hand
 from algo_coach.claims.reading import Plan, ReadResult, absorb, select
 from algo_coach.claims.revision import against, contested, revisable
 from algo_coach.claims.run import (
-    CONCURRENCY,
     ClassifyResult,
     Failed,
-    as_answered,
     ask,
     classify_backlog,
     read_one,
@@ -30,10 +28,8 @@ from algo_coach.claims.score import (
     score,
 )
 from algo_coach.claims.stale import at_configuration, is_stale, readings_at
-from algo_coach.runs import as_answered_grouped
 
 __all__ = [
-    "CONCURRENCY",
     "ClassifyResult",
     "Comparison",
     "ConfigurationScore",
@@ -46,8 +42,6 @@ __all__ = [
     "absorb",
     "against",
     "answered_by_hand",
-    "as_answered",
-    "as_answered_grouped",
     "ask",
     "at_configuration",
     "claim_by_hand",

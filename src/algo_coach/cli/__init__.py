@@ -6,7 +6,6 @@ from pathlib import Path
 
 from dotenv import find_dotenv, load_dotenv
 
-from algo_coach.claims import CONCURRENCY
 from algo_coach.classifier import DEFAULT
 from algo_coach.cli.annotate import annotate
 from algo_coach.cli.bench import SITES
@@ -22,6 +21,7 @@ from algo_coach.cli.read import read
 from algo_coach.cli.rows import Rows
 from algo_coach.cli.score import score
 from algo_coach.cli.seed import BadLine, seed
+from algo_coach.runs import CONCURRENCY
 
 DATA_ROOT = Path("data")
 
