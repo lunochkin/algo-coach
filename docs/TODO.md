@@ -541,7 +541,7 @@ numbers go in the commit unless the item names a file.
 - [x] Count how many of those ten held at `searched`, and which `unseparated`
       reason each gave. Counting `naive_finished` alone reads zero, since the
       case ceiling reports `input_too_large` before the clock is judged
-- [ ] Count how many of those ten reuse a domain their template's cue names.
+- [x] Count how many of those ten reuse a domain their template's cue names.
       The exclusion is prompted and nothing enforces it
 - [ ] Count how many of those ten ask the same question in a new setting. The
       list of what a form already carries is what prevents that
