@@ -5,7 +5,7 @@ import json
 from collections.abc import Sequence
 from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 
 from algo_coach.calls import CallLog, Configuration, Transport, ask, prompt_hash
 from algo_coach.generation.errors import GenerationError
@@ -37,6 +37,10 @@ excludes catches nothing, because no solution owes an answer on it.
 Answer each mutant, and give several inputs where one does not separate a
 change on its own. Prefer the smallest input that separates: a boundary, an
 empty collection, a tie, a repeated element.
+
+Return no case where a mutant computes what the correct solution computes on
+every legal input. Such a change is unobservable, and an input that does not
+separate it catches nothing while every later run pays for it.
 
 `args` is an array of the positional arguments, in the order `solve` takes them,
 written as JSON inside a string."""
@@ -98,7 +102,11 @@ class ProposedCase(BaseModel):
 
 
 class Proposed(BaseModel):
-    cases: list[ProposedCase] = Field(min_length=1)
+    # no floor: a survivor equivalent to the canonical is separated by no
+    # input, and an empty reply is that answer. Rejected here, the round would
+    # fail the call, hold the draft, and be asked the same question on every
+    # resume
+    cases: list[ProposedCase]
 
 
 def read(text: str) -> list[list[Any]]:

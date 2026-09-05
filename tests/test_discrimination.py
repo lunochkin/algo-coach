@@ -2,7 +2,6 @@ import json
 from dataclasses import dataclass, field
 
 import pytest
-from pydantic import ValidationError
 
 from algo_coach.calls import CallLog, Configuration, Reply
 from algo_coach.generation import GenerationError, separators
@@ -129,11 +128,11 @@ def test_an_answer_cut_short_proposes_nothing(tmp_path):
     assert len(CallLog(tmp_path).all()) == 1
 
 
-def test_a_reply_proposing_no_case_fails():
-    """A call that answered a survivor with nothing is a failure rather than a
-    verdict that no input separates it."""
-    with pytest.raises(ValidationError):
-        read(json.dumps({"cases": []}))
+def test_a_reply_proposing_no_case_is_read_as_a_verdict():
+    """A survivor equivalent to the canonical is separated by no input, so an
+    empty reply is that answer. Rejected, it would fail the round's call and
+    hold a draft every resume asks the same question of."""
+    assert read(json.dumps({"cases": []})) == []
 
 
 def test_the_reply_has_no_field_for_an_expected_value():

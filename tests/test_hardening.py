@@ -208,6 +208,22 @@ def test_a_round_that_kills_nothing_stops_the_loop(tmp_path):
     assert hardened.survived == 3
 
 
+def test_a_round_that_proposes_nothing_stops_the_loop(tmp_path):
+    """No input separates a mutant equivalent to the canonical, so an empty
+    reply is the round's answer. Read as a failure it would hold the draft, and
+    every resume would ask the same question of the same survivors."""
+    model = Answers(rounds=[[]])
+
+    hardened = run(tmp_path, model, WEAK)
+
+    assert len(model.calls) == 1
+    assert hardened.rounds == 1
+    assert hardened.offered == 0
+    # the zero keeps a counter's position reading as the round that left it
+    assert hardened.caught == [0]
+    assert hardened.survived == 3
+
+
 def test_the_loop_stops_at_the_bound(tmp_path):
     """A survivor two rounds did not kill is usually equivalent to the
     canonical, and no case kills an equivalent mutant."""

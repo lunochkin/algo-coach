@@ -104,6 +104,10 @@ The order matters because each step can reject what came before.
   problem**, as a disagreement on any other case does. The round asks for
   boundary inputs, and a canonical wrong at a boundary the first set never
   reached is what the loop exists to find.
+- **A round that proposes nothing is a verdict, never a failure.** No input
+  separates a mutant equivalent to the canonical, which is what the loop's
+  bound already expects. Read as a failed call it holds the draft, and every
+  resume asks the same question of the same survivors.
 - **A round whose call fails holds the draft.** The problem passed every gate
   that judges it, and its set was never measured against the bound. Landing it
   would store a set no round was paid for, where a resume asks the loop again.

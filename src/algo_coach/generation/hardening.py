@@ -177,6 +177,11 @@ def harden(
                 disagreement=settled.disagreements[0],
             )
         if not settled.cases:
+            # a round that proposed nothing, or whose proposals the canonical
+            # could not answer. It killed nothing, so the loop stops as it does
+            # on a round whose cases killed nothing, and the zero keeps the
+            # counter's position reading as the round number
+            caught.append(0)
             break
 
         offered += len(settled.cases)
