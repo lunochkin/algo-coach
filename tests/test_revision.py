@@ -5,12 +5,12 @@ from helpers import T0, attempt, machine_claim, seed_problem
 from algo_coach.claims import against, contested, revisable
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 from algo_coach.techniques import standing_claims
 
 
 def pool(log):
-    problems = {problem.id: problem for problem in ProblemStore(log.root).all()}
+    problems = {problem.id: problem for problem in load_problems(log.root)}
     return revisable(log.attempts(), problems, standing_claims(log.claims()), user_id="u1")
 
 

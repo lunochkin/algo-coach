@@ -33,7 +33,7 @@ from algo_coach.generation import (
 )
 from algo_coach.matches import MatchLog
 from algo_coach.outcomes import OutcomeLog
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import (
     Call,
@@ -534,7 +534,7 @@ def aimed_at_gaps(
         parser.exit(2, f"generate: no card {args.card!r} — seed it first\n")
     aimed = targets(
         cards,
-        ProblemStore(root).all(),
+        load_problems(root),
         SolutionLog(root).solutions(),
         MatchLog(root).matches(),
     )

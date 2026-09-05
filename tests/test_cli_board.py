@@ -2,35 +2,21 @@ import json
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from helpers import GENERATED
+from helpers import seed_problem
 
 from algo_coach import cli
 from algo_coach.board import TechniqueRow
 from algo_coach.cli.board import render
 from algo_coach.log import AttemptLog
-from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
     Attempt,
     ClaimSource,
     FailureMode,
-    Problem,
     SelfLabel,
     TechniqueClaim,
 )
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
-
-
-def seed_problem(root, *, id: str, techniques: list[str]) -> None:
-    ProblemStore(root).put(
-        Problem(
-            id=id,
-            title=id,
-            statement="Given an array, return ...",
-            techniques=techniques,
-            **GENERATED,
-        )
-    )
 
 
 @pytest.fixture

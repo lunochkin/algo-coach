@@ -10,7 +10,7 @@ from algo_coach.cli.prompts import NONE, ask_choice, numbered
 from algo_coach.cli.score import configurations, labels
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 from algo_coach.schema import Attempt, Confidence, Problem, TechniqueClaim
 from algo_coach.techniques import criterion, standing_claims
 
@@ -25,7 +25,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     answered.
     """
     log = AttemptLog(root)
-    problems = {problem.id: problem for problem in ProblemStore(root).all()}
+    problems = {problem.id: problem for problem in load_problems(root)}
     claims = log.claims()
     standing = standing_claims(claims)
 

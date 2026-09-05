@@ -549,8 +549,14 @@ numbers go in the commit unless the item names a file.
       both written with the twin in the list, and held drafts are not listed
 - [x] Run `generate` on a template claiming a speedup and record the
       separating size, or which `unseparated` reason came back
-- [ ] Run `read` over the stored canonicals and record the techniques each
-      problem derives. Nothing has read a generated solution
+- [x] Run `read` over the stored canonicals and record the techniques each
+      problem derives. Nothing has read a generated solution. Twenty-four read,
+      none undecided, two cents. Every problem derives `binary-search`; twelve
+      that alone, seven one more, five two more. `greedy` on eight, `sorting`
+      on four
+- [x] Load problems carrying the derived techniques in every command that reads
+      them. Board, claim, classify, score, match and gaps read the record's
+      `techniques`, which is empty on every generated problem
 - [ ] Run `gaps`, then `generate --gaps --count 1`, and record which templates
       the run was aimed at
 

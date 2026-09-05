@@ -3,7 +3,7 @@ from pathlib import Path
 
 from algo_coach.board import TechniqueMovement, movement
 from algo_coach.log import AttemptLog
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 from algo_coach.schema import ClaimSource
 from algo_coach.techniques import standing_claims
 
@@ -11,7 +11,7 @@ from algo_coach.techniques import standing_claims
 def moved(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
     log = AttemptLog(root)
     attempts = [attempt for attempt in log.attempts() if attempt.user_id == args.user]
-    problems = {problem.id: problem for problem in ProblemStore(root).all()}
+    problems = {problem.id: problem for problem in load_problems(root)}
     # Standing classifier claims only: a hand claim narrows for its own
     # reason, and a machine reading that never stands moved nothing.
     claims = {

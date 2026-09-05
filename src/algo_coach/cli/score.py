@@ -12,7 +12,7 @@ from algo_coach.cli.display import UNSET, chosen, sampled
 from algo_coach.cli.status import Status
 from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 
 # Which slot each flag fills in the row a `--model` opens.
 SLOTS = {"--effort": 1, "--provider": 2, "--temperature": 3}
@@ -81,7 +81,7 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     api = None if args.stored else transport(args, parser, on_retry=board.waiting)
     log = AttemptLog(root)
     calls = CallLog(root)
-    problems = {problem.id: problem for problem in ProblemStore(root).all()}
+    problems = {problem.id: problem for problem in load_problems(root)}
 
     def planned(plans: Sequence[Plan]) -> None:
         board.planned([len(plan.asking) for plan in plans])

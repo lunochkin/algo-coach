@@ -1,37 +1,21 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from helpers import GENERATED
+from helpers import seed_problem
 
 from algo_coach import cli
 from algo_coach.classifier import PIN, TEMPERATURE, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_claim
-from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
     Attempt,
     ClaimSource,
     Kind,
-    Problem,
     TechniqueClaim,
 )
 from algo_coach.techniques import criteria, criterion, standing_claims
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
-
-
-def seed_problem(root, *, id: str, techniques: list[str]) -> None:
-    """Codes in the order given: a problem's own order is what the candidates
-    are offered in."""
-    ProblemStore(root).put(
-        Problem(
-            id=id,
-            title=id,
-            statement="Given an array, return ...",
-            techniques=techniques,
-            **GENERATED,
-        )
-    )
 
 
 def attempt(
@@ -430,24 +414,6 @@ def test_the_reader_and_the_classifier_meet_the_same_words(claim_root, monkeypat
             assert " ".join(line.split()) in out
 
 
-def test_the_criteria_are_shown_in_the_candidates_order(tmp_path, monkeypatch, capsys):
-    """The numbers select from the problem's own order. Criteria in vocabulary
-    order agree with it only while a problem's codes are stored sorted and the
-    vocabulary is alphabetical — neither is a promise to a reader matching rule
-    to number."""
-    root = tmp_path / "data"
-    monkeypatch.setattr(cli, "DATA_ROOT", root)
-    seed_problem(root, id="unsorted", techniques=["sorting", "greedy"])
-    log = AttemptLog(root)
-    log.append_attempt(attempt("a1", "unsorted"))
-
-    run(monkeypatch, ["1", ""])
-
-    out = capsys.readouterr().out
-    assert "1 sorting   2 greedy" in out
-    assert out.index("sorting —") < out.index("greedy —")
-
-
 def test_a_retired_candidate_costs_its_own_criterion_and_nothing_else(
     tmp_path, monkeypatch, capsys
 ):
@@ -459,7 +425,7 @@ def test_a_retired_candidate_costs_its_own_criterion_and_nothing_else(
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "retired"))
 
-    run(monkeypatch, ["2", ""])
+    run(monkeypatch, ["1", ""])
 
     (claim,) = log.claims()
     assert claim.techniques == ["dynamic-programming-2d"]

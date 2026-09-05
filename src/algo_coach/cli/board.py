@@ -6,7 +6,7 @@ from pathlib import Path
 from algo_coach.board import TechniqueRow, per_technique, ungrouped
 from algo_coach.cli.display import age
 from algo_coach.log import AttemptLog, latest_by_attempt
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 from algo_coach.techniques import standing_claims
 
 
@@ -15,7 +15,7 @@ def board(args: argparse.Namespace, root: Path) -> None:
     attempts = [attempt for attempt in log.attempts() if attempt.user_id == args.user]
     # Every problem, not the user's: an attempt names a minted id, and a
     # narrower index would miss a legitimate one.
-    problems = {problem.id: problem for problem in ProblemStore(root).all()}
+    problems = {problem.id: problem for problem in load_problems(root)}
     claims = standing_claims(log.claims())
     labels = latest_by_attempt(log.self_labels())
     rows = per_technique(attempts, problems, claims, labels)

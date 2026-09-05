@@ -1,11 +1,11 @@
 from helpers import attempt, machine_claim, seed_problem
 
 from algo_coach.board import movement
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 
 
 def problems(root):
-    return {problem.id: problem for problem in ProblemStore(root).all()}
+    return {problem.id: problem for problem in load_problems(root)}
 
 
 def claim(attempt_id: str, *techniques: str):

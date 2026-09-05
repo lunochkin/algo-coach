@@ -9,9 +9,11 @@ from datetime import UTC, datetime
 
 from algo_coach.calls import Configuration, Reply
 from algo_coach.classifier import PIN, TEMPERATURE
-from algo_coach.mint import classifier_claim
+from algo_coach.mint import classifier_claim, user_reading
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, Call, Problem, TechniqueClaim
+from algo_coach.readings import ReadingLog
+from algo_coach.schema import Attempt, Call, Problem, Solution, SolutionRole, TechniqueClaim
+from algo_coach.solutions import SolutionLog
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -197,7 +199,19 @@ class FakeTransport:
 
 
 def seed_problem(root, *, id: str, techniques: list[str]) -> None:
-    ProblemStore(root).put(make_problem(id, techniques=techniques))
+    """A stored problem deriving `techniques`: one canonical, read by hand as
+    using them. The record itself carries none, as a generated one does."""
+    ProblemStore(root).put(make_problem(id))
+    canonical = Solution(
+        id=f"{id}-canonical",
+        created_at=T0,
+        problem_id=id,
+        role=SolutionRole.CANONICAL,
+        code="def solve(xs):\n    return sorted(xs)\n",
+        **PROVENANCE,
+    )
+    SolutionLog(root).append(canonical)
+    ReadingLog(root).append(user_reading(canonical.id, techniques))
 
 
 def attempt(

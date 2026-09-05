@@ -11,7 +11,7 @@ from algo_coach.claims.run import ABORT_AFTER, Progress
 from algo_coach.classifier import DEFAULT, EFFORT, MODEL, ClassifierError, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 from algo_coach.schema import ClaimSource, TechniqueClaim
 from algo_coach.techniques import standing_claims
 
@@ -33,7 +33,7 @@ def backlog(tmp_path, monkeypatch) -> AttemptLog:
 
 
 def stored(log: AttemptLog):
-    return {problem.id: problem for problem in ProblemStore(log.root).all()}
+    return {problem.id: problem for problem in load_problems(log.root)}
 
 
 def run(client, log, **kwargs):

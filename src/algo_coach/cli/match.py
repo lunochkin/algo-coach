@@ -6,7 +6,7 @@ from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cli.transport import transport
 from algo_coach.matches import EFFORT, MODEL, MatchLog, Progress, match_corpus
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.solutions import SolutionLog
 
@@ -22,7 +22,7 @@ def match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         MatchLog(root),
         CallLog(root),
         cards,
-        ProblemStore(root).all(),
+        load_problems(root),
         SolutionLog(root).solutions(),
         limit=args.limit,
         card_slug=args.card,

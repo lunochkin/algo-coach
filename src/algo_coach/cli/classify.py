@@ -8,14 +8,14 @@ from algo_coach.claims.run import ABORT_AFTER, Progress
 from algo_coach.classifier import EFFORT, MODEL
 from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 
 
 def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
     api = transport(args, parser)
     log = AttemptLog(root)
     calls = CallLog(root)
-    problems = {problem.id: problem for problem in ProblemStore(root).all()}
+    problems = {problem.id: problem for problem in load_problems(root)}
     result = classify_backlog(
         api,
         log,

@@ -9,7 +9,7 @@ from algo_coach.cards import CardStore
 from algo_coach.cli.annotating import Annotating
 from algo_coach.matches import MatchLog, Question, annotatable, candidates
 from algo_coach.mint import user_match
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 from algo_coach.schema import MatchSource, Template, TemplateMatch
 from algo_coach.solutions import SolutionLog
 
@@ -48,7 +48,7 @@ def annotating(args: argparse.Namespace, parser: argparse.ArgumentParser, root: 
     stored = log.matches()
     pool = annotatable(
         cards,
-        ProblemStore(root).all(),
+        load_problems(root),
         SolutionLog(root).solutions(),
         stored,
         card=args.card,

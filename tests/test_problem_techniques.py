@@ -4,9 +4,10 @@ import pytest
 from helpers import PROVENANCE, T0, make_problem
 
 from algo_coach.mint import user_reading
-from algo_coach.problems import derive, with_techniques
-from algo_coach.readings import standing_readings
+from algo_coach.problems import ProblemStore, derive, load_problems, with_techniques
+from algo_coach.readings import ReadingLog, standing_readings
 from algo_coach.schema import Solution, SolutionRole, TechniqueReading
+from algo_coach.solutions import SolutionLog
 
 
 def solution(id: str, problem_id: str = "p1", *, role: SolutionRole = SolutionRole.CANONICAL):
@@ -129,3 +130,15 @@ def test_standing_is_keyed_by_solution(problem):
     standing = standing_readings(readings)
 
     assert {id: one.techniques for id, one in standing.items()} == {"s1": ["greedy"], "s2": []}
+
+
+def test_a_command_loads_the_view(tmp_path, problem):
+    """Every command reading techniques loads through this. The store alone
+    returns the record, which carries none on any generated problem."""
+    ProblemStore(tmp_path).put(problem)
+    SolutionLog(tmp_path).append(solution("s1"))
+    ReadingLog(tmp_path).append(reading("s1", ["sorting"]))
+
+    (loaded,) = load_problems(tmp_path)
+
+    assert (loaded.id, loaded.techniques) == ("p1", ["sorting"])

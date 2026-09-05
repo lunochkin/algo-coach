@@ -4,7 +4,7 @@ from helpers import attempt, seed_problem
 
 from algo_coach.claims import claimable, spread
 from algo_coach.mint import user_claim
-from algo_coach.problems import ProblemStore
+from algo_coach.problems import load_problems
 
 
 def techniques_of(problems, drawn):
@@ -17,7 +17,7 @@ def pool(root, coded: dict[str, list[str]]):
     for id, techniques in coded.items():
         seed_problem(root, id=id, techniques=techniques)
     attempts = [attempt(f"a-{id}", id) for id in coded]
-    return attempts, {problem.id: problem for problem in ProblemStore(root).all()}
+    return attempts, {problem.id: problem for problem in load_problems(root)}
 
 
 def skewed(root, *, common: int):
