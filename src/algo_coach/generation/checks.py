@@ -15,13 +15,19 @@ from typing import Any
 from algo_coach.generation.agreement import (
     Disagreement,
     Misdeclaration,
-    SettledCase,
     misdeclared,
     settle,
 )
 from algo_coach.mutation import Case
 from algo_coach.runner import NoValue, agrees, answered, decide, outputs, run
-from algo_coach.schema import CaseOutcome, Discard, DraftCase, MachineProvenance, severest
+from algo_coach.schema import (
+    CaseOutcome,
+    Discard,
+    DraftCase,
+    MachineProvenance,
+    SettledCase,
+    severest,
+)
 
 # the per-case cap at generation, well above the drill loop's: what the
 # reference has to finish under

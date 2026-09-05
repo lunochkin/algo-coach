@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 
 from algo_coach import mint
 from algo_coach.generation.generator import Generated
+from algo_coach.ids import new_id
 from algo_coach.schema import Call, CallSite, Discard, Draft, MachineProvenance, SiteOutcome
 
 
@@ -21,7 +22,7 @@ class Writing:
 
     template_id: str = ""
     into: list[SiteOutcome] | None = None
-    id: str = field(default_factory=mint.new_id)
+    id: str = field(default_factory=new_id)
 
     def draft(self, generated: Generated, call: Call) -> Draft:
         """The draft this attempt writes, carrying the id its site outcomes

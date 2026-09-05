@@ -20,6 +20,7 @@ algo-coach = "algo_coach.cli:main"
 [dependency-groups]
 dev = [
     "duckdb>=1.5",
+    "import-linter>=2.15",
     "pyright>=1.1.411",
     "pytest>=8.0",
     "pytest-asyncio>=1.4.0",
@@ -36,6 +37,66 @@ asyncio_mode = "auto"
 include = ["src"]
 pythonVersion = "3.14"
 typeCheckingMode = "basic"
+
+[tool.importlinter]
+root_package = "algo_coach"
+
+[[tool.importlinter.contracts]]
+name = "schema, ids, storage and standing import nothing of the domain"
+type = "forbidden"
+source_modules = ["algo_coach.schema", "algo_coach.ids", "algo_coach.storage", "algo_coach.standing"]
+forbidden_modules = [
+    "algo_coach.calls",
+    "algo_coach.mint",
+    "algo_coach.techniques",
+    "algo_coach.log",
+    "algo_coach.claims",
+    "algo_coach.readings",
+    "algo_coach.matches",
+    "algo_coach.generation",
+    "algo_coach.cli",
+]
+
+[[tool.importlinter.contracts]]
+name = "the transport and the vocabulary sit under the domain"
+type = "forbidden"
+source_modules = ["algo_coach.calls", "algo_coach.techniques"]
+forbidden_modules = [
+    "algo_coach.mint",
+    "algo_coach.log",
+    "algo_coach.claims",
+    "algo_coach.readings",
+    "algo_coach.matches",
+    "algo_coach.generation",
+    "algo_coach.cli",
+]
+
+[[tool.importlinter.contracts]]
+name = "no store reads another store"
+type = "independence"
+modules = [
+    "algo_coach.cases",
+    "algo_coach.solutions",
+    "algo_coach.outcomes",
+    "algo_coach.drafts",
+    "algo_coach.problems",
+    "algo_coach.verifications",
+    "algo_coach.cards",
+]
+
+[[tool.importlinter.contracts]]
+name = "nothing imports the adapter"
+type = "forbidden"
+source_modules = [
+    "algo_coach.claims",
+    "algo_coach.readings",
+    "algo_coach.matches",
+    "algo_coach.generation",
+    "algo_coach.board",
+    "algo_coach.runner",
+    "algo_coach.mutation",
+]
+forbidden_modules = ["algo_coach.cli"]
 
 [tool.ruff]
 line-length = 100

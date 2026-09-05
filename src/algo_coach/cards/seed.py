@@ -3,7 +3,7 @@ from collections.abc import Iterable, Mapping
 from pydantic import BaseModel, Field, ValidationError
 
 from algo_coach.cards.store import CardStore
-from algo_coach.mint import new_id
+from algo_coach.ids import new_id
 from algo_coach.schema import Card, CardSeed, Template
 from algo_coach.techniques import is_known
 

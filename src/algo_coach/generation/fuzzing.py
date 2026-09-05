@@ -9,13 +9,13 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from algo_coach.generation.agreement import Disagreement, SettledCase, settle
+from algo_coach.generation.agreement import Disagreement, settle
 from algo_coach.generation.inputs import Built
 from algo_coach.generation.shrinking import Candidate, shrink
 from algo_coach.generation.speedup import CEILING
 from algo_coach.mutation import Mutant, kill, survivors
 from algo_coach.runner import NoValue, outputs, weighs
-from algo_coach.schema import MachineProvenance
+from algo_coach.schema import MachineProvenance, SettledCase
 
 # what the pass builds at, size-major and smallest first: the input a mutant is
 # killed by is the first that kills it, and a small one is a small case

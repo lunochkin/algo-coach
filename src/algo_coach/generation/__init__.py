@@ -2,7 +2,6 @@ from algo_coach.generation.agreement import (
     Disagreement,
     Misdeclaration,
     Settled,
-    agrees,
     misdeclared,
     settle,
 )
@@ -127,7 +126,6 @@ __all__ = [
     "Inputs",
     "Passage",
     "Writing",
-    "agrees",
     "builder",
     "agree",
     "check",

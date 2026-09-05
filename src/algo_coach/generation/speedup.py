@@ -10,10 +10,10 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
-from algo_coach.generation.agreement import Disagreement, SettledCase, settle
+from algo_coach.generation.agreement import Disagreement, settle
 from algo_coach.generation.checks import CAP_MS
 from algo_coach.runner import RunOutcome, answered, run, weighs
-from algo_coach.schema import MachineProvenance
+from algo_coach.schema import MachineProvenance, SettledCase
 
 # the cap a sitting judges a submission under, which is what the separating
 # case is chosen against. Phase 8 reads it; generation's own cap sits above it
