@@ -56,10 +56,31 @@ def test_the_command_writes_problems(root, monkeypatch, capsys):
     run(monkeypatch, model, "longest-valid-window", "--count", "2")
 
     out = capsys.readouterr().out
-    assert "The first." in out and "The second." in out
     assert "2 problem(s) stored, written by" in out
     assert f"generator {GENERATOR_DEFAULT.model} at {GENERATOR_DEFAULT.effort}" in out
     assert len(CallLog(root).all()) == 6
+
+
+def test_the_run_names_each_stored_problem_and_not_its_statement(root, monkeypatch, capsys):
+    """Ten statements scroll the result out of the terminal, and the id is what
+    reads one whole."""
+    model = FakeWriter(statements=["The first.", "The second."])
+
+    run(monkeypatch, model, "longest-valid-window", "--count", "2")
+
+    out = capsys.readouterr().out
+    assert "The first." not in out and "The second." not in out
+    assert "# stored" in out
+    for problem in ProblemStore(root).all():
+        assert f"{problem.id}  {problem.title}" in out
+
+
+def test_the_run_reports_what_its_calls_cost(root, monkeypatch, capsys):
+    """A run's own tail rather than the whole log: the store is what a later
+    query reads, and this is what one sitting spent."""
+    run(monkeypatch, FakeWriter(), "longest-valid-window")
+
+    assert "3 call(s), 0 output token(s)" in capsys.readouterr().out
 
 
 def test_a_problem_its_runs_kept_is_stored_whole(root, monkeypatch, capsys):
@@ -93,12 +114,6 @@ def test_a_discarded_problem_stores_nothing(root, monkeypatch, capsys):
     assert CaseLog(root).cases() == []
     assert "1 discarded" in capsys.readouterr().out
     assert len(CallLog(root).all()) == 2
-
-
-def test_the_canonical_is_printed_only_when_asked_for(root, monkeypatch, capsys):
-    run(monkeypatch, FakeWriter(), "longest-valid-window", "--code")
-
-    assert "def solve(xs):" in capsys.readouterr().out
 
 
 def test_an_unseeded_card_is_named_before_any_call(root, monkeypatch, capsys):
@@ -298,7 +313,8 @@ def test_the_line_reports_what_the_mutation_loop_caught():
     )
 
     assert landed == (
-        "4 case(s)  passed  landed  kills 10/12 (6 set, 2 fuzz, 2 round 1), +3/18 case(s)"
+        "4 case(s)  passed  landed  kills 10/12 (6 set, 2 fuzz, 2 round 1), "
+        "18 case(s) proposed, 3 landed"
     )
 
 
@@ -316,7 +332,7 @@ def test_the_line_reports_what_a_round_proposed_and_what_landed():
         caught=[10],
     )
 
-    assert landed.endswith("+3/18 case(s)")
+    assert landed.endswith("18 case(s) proposed, 3 landed")
 
 
 def test_a_round_that_killed_nothing_still_prints_its_zero():
@@ -572,7 +588,8 @@ def test_a_held_draft_is_named_by_the_template_and_what_stopped_it(root, monkeyp
     run(monkeypatch, FakeWriter(generator=BUILDS), "longest-valid-window")
 
     out = capsys.readouterr().out
-    assert "# held: Widest fair stretch (longest-valid-window, searched)" in out
+    assert "# held" in out
+    assert "longest-valid-window" in out and "searched" in out
     assert "no separating case: naive_finished" in out
 
 
@@ -609,7 +626,7 @@ def test_a_draft_a_raised_call_left_is_named_too(root, monkeypatch, capsys):
         run(monkeypatch, Raises(), "longest-valid-window")
 
     out, err = capsys.readouterr()
-    assert "# held: Widest fair stretch (longest-valid-window, checked)" in out
+    assert "# held" in out and "checked" in out
     assert "the call raised: RuntimeError('the gateway is down')" in out
     assert "no problem stored" in err
 

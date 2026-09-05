@@ -13,6 +13,7 @@ from algo_coach.generation import (
     BENCH,
     Bench,
     Corpus,
+    Discarded,
     GenerationResult,
     Held,
     Notes,
@@ -22,6 +23,7 @@ from algo_coach.generation import (
     Step,
     Target,
     advances,
+    landing,
     replay,
     resume,
     starts_at,
@@ -66,7 +68,9 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
     outcomes = OutcomeLog(root)
     bench = chosen_bench(args, parser)
 
-    results = []
+    # the log as the run found it, so what this run paid is the tail past it
+    before = len(calls.all())
+    reached: list[tuple[Target, GenerationResult]] = []
     for target in aimed:
         result = write_problems(
             api,
@@ -81,17 +85,14 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
             outcomes=outcomes,
             drafts=DraftStore(root),
         )
-        results.append(result)
-        for drafted in result.drafted:
-            print(written(drafted, code=args.code))
-        for one in result.held:
-            print(holding(target, one))
+        reached.append((target, result))
         # A broken configuration fails the next template the same way, so the
         # run stops rather than spending its abort count once per gap.
         if result.aborted:
             break
 
-    print(summary(results, aimed, bench))
+    results = [result for _, result in reached]
+    print(finale(reached, summary(results, aimed, bench), calls.all()[before:]))
     if any(result.aborted for result in results):
         parser.exit(1, f"generate: aborted after {ABORT_AFTER} consecutive failures\n")
     failed = any(result.failed for result in results)
@@ -122,7 +123,9 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
     calls, corpus = CallLog(root), Corpus.at(root)
     outcomes = OutcomeLog(root)
 
-    results, unaimed = [], 0
+    before = len(calls.all())
+    reached: list[tuple[Target, GenerationResult]] = []
+    unaimed = 0
     for index, draft in enumerate(waiting, start=1):
         target = written_for(cards, draft)
         if target is None:
@@ -142,13 +145,11 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
             outcomes=outcomes,
             drafts=drafts,
         )
-        results.append(result)
-        for landed in result.drafted:
-            print(written(landed, code=args.code))
-        for one in result.held:
-            print(holding(target, one))
+        reached.append((target, result))
 
-    print(resume_summary(results, bench, unaimed=unaimed))
+    results = [result for _, result in reached]
+    closing = resume_summary(results, bench, unaimed=unaimed)
+    print(finale(reached, closing, calls.all()[before:]))
     if not any(result.drafted for result in results):
         parser.exit(1, "generate: no problem stored\n")
 
@@ -325,7 +326,7 @@ def written_for(cards: list[Card], draft: Draft) -> Target | None:
 def resume_summary(results: list[Resumed], bench: Bench = BENCH, *, unaimed: int = 0) -> str:
     """What the resumed drafts became, and where each run started."""
     stored = sum(len(result.drafted) for result in results)
-    line = f"{len(results)} draft(s) resumed, {stored} stored, {wrote(bench)}"
+    line = f"{len(results)} draft(s) resumed, {stored} stored"
     on_hold = sum(len(result.held) for result in results)
     if on_hold:
         line += f", {on_hold} held again"
@@ -341,7 +342,8 @@ def resume_summary(results: list[Resumed], bench: Bench = BENCH, *, unaimed: int
         line += ", from " + ", ".join(
             f"{count} at {state}" for state, count in started.most_common()
         )
-    return line
+    # last, as in `summary`: one line per site where the sites differ
+    return f"{line}, {wrote(bench)}"
 
 
 def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -385,7 +387,7 @@ def replay_summary(result: ReplayResult, bench: Bench = BENCH) -> str:
 def summary(results: list[GenerationResult], aimed: list[Target], bench: Bench = BENCH) -> str:
     """What the run stored, over every template it was aimed at."""
     stored = sum(len(result.drafted) for result in results)
-    kept = f"{stored} problem(s) stored, {wrote(bench)}"
+    kept = f"{stored} problem(s) stored"
     if len(aimed) > 1:
         kept += f", over {len(aimed)} template(s)"
     discarded = sum(len(result.discarded) for result in results)
@@ -397,20 +399,71 @@ def summary(results: list[GenerationResult], aimed: list[Target], bench: Bench =
         # apart from a discard: the calls are kept and the form still has no
         # problem, which is what the next run is aimed at
         kept += f", {on_hold} held"
-    return kept
+    failed = sum(len(result.failed) for result in results)
+    if failed:
+        kept += f", {failed} failed"
+    # last, since it is one line per site where the sites differ
+    return f"{kept}, {wrote(bench)}"
 
 
 def holding(target: Target, one: Held) -> str:
     """One draft the run left short of landing, named by the form it was
     written for. It is the gap the next run aims at: the template carries no
     problem until this draft is resumed or rejected."""
-    return "\n".join(
-        [
-            f"\n# held: {one.draft.title} ({target.template.slug}, {one.draft.state})",
-            "",
-            f"{stopped_by(one)}. Held as draft {one.draft.id}.",
-        ]
+    form = target.template.slug[:24]
+    return f"  {one.draft.id}  {form:<24}  {one.draft.state:<10}  {stopped_by(one)}"
+
+
+def discarding(target: Target, one: Discarded) -> str:
+    """One problem written and not kept. Its gate is on the site outcomes of a
+    writing no problem names, so the run is where a reader meets it."""
+    return f"  {target.template.slug[:24]:<24}  {one.reason}"
+
+
+def finale(reached: list[tuple[Target, GenerationResult]], closing: str, paid: list[Call]) -> str:
+    """What the run ended with, printed once and after every stage line.
+
+    The statements are not in it. Ten of them scroll the result out of the
+    terminal, and `algo-coach problem <id>` is what reads one whole.
+    """
+    block: list[str] = []
+    block += section("stored", [written(one) for _, result in reached for one in result.drafted])
+    block += section(
+        "held", [holding(target, one) for target, result in reached for one in result.held]
     )
+    block += section(
+        "discarded",
+        [discarding(target, one) for target, result in reached for one in result.discarded],
+    )
+    # a call that returned nothing, where a discard is a problem that arrived
+    # and did not survive its runs. It leaves no draft and no site outcome, so
+    # the run is the only place it is named
+    block += section(
+        "failed",
+        [
+            f"  {target.template.slug[:24]:<24}  {one.reason}"
+            for target, result in reached
+            for one in result.failed
+        ],
+    )
+    return "\n".join([*block, closing, spending(paid)])
+
+
+def section(name: str, lines: list[str]) -> list[str]:
+    """One block of the report, absent where the run reached none of it."""
+    return [f"# {name}", "", *lines, ""] if lines else []
+
+
+def spending(paid: list[Call]) -> str:
+    """What this run's calls cost, over the ones it appended to the log. A
+    provider that priced nothing leaves the field absent, so a run of those
+    reports the count alone."""
+    priced = [one.cost for one in paid if one.cost is not None]
+    tokens = sum(one.output_tokens or 0 for one in paid)
+    line = f"{len(paid)} call(s), {tokens:,} output token(s)"
+    if priced:
+        line += f", ${sum(priced):.4f}"
+    return line
 
 
 def stopped_by(one: Held) -> str:
@@ -492,16 +545,12 @@ def aimed_at_gaps(
     return aimed
 
 
-def written(draft: Draft, *, code: bool) -> str:
-    """One problem as it was written."""
-    block = [
-        f"\n# {draft.title} ({draft.difficulty}, {len(draft.declared)} case(s))",
-        "",
-        draft.statement,
-    ]
-    if code:
-        block += ["", "```python", draft.canonical.rstrip(), "```"]
-    return "\n".join(block)
+def written(draft: Draft) -> str:
+    """One stored problem as a line: what it is, and the id that reads it. The
+    case count is the set that landed rather than the one the generator
+    declared, since the loop and the search append to it."""
+    cases = f"{draft.difficulty}, {len(landing(draft))} case(s)"
+    return f"  {draft.problem_id}  {draft.title[:40]:<40}  {cases}"
 
 
 def stage(step: Step) -> None:
@@ -563,7 +612,9 @@ def bar(progress: Progress) -> str:
     if not progress.mutants:
         return ""
     killed = progress.mutants - progress.survived
-    won = f", +{progress.won}/{progress.offered} case(s)" if progress.offered else ""
+    won = (
+        f", {progress.offered} case(s) proposed, {progress.won} landed" if progress.offered else ""
+    )
     return f"  kills {killed}/{progress.mutants} ({sources(progress)}){won}"
 
 

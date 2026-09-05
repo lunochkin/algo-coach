@@ -187,9 +187,6 @@ def main() -> None:
     )
     generate_parser.add_argument("--count", type=int, default=1, help="how many problems to write")
     generate_parser.add_argument(
-        "--code", action="store_true", help="print each canonical beside its statement"
-    )
-    generate_parser.add_argument(
         "--replay",
         action="store_true",
         help="re-ask the answering sites about the stored problems, writing nothing to the corpus",

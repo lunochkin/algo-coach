@@ -153,6 +153,9 @@ The order matters because each step can reject what came before.
 - **Every step's verdict is recorded, not only reported.** A run prints each
   stage and the process then ends, so a discarded draft would leave only the
   calls it paid for. `machine.md` gives what a site's record carries.
+- **A run ends on what it reached, and prints no statement.** Each problem it
+  stored is a line naming the id, and `algo-coach problem <id>` is what reads
+  one whole. Ten statements scroll the result out of the terminal.
 - **A statement may not name the domain its template's cue names.** The
   monotonic stack's cue says "temperatures" and "a next warmer day". A solver
   who recognises a problem has not derived its form.
