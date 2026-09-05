@@ -41,6 +41,6 @@ if echo "$FILES" | grep -qE '\.py$|^pyproject\.toml$'; then
     uv run ruff check src tests || exit 1
     uv run ruff format --check src tests || exit 1
     uv run pyright || exit 1
-    uv run pytest -q tests/test_architecture.py || exit 1
+    uv run pytest -q -n 0 tests/test_architecture.py || exit 1
 fi
 exit 0

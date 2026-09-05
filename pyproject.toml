@@ -30,6 +30,8 @@ dev = [
 
 [tool.pytest.ini_options]
 python_classes = []
+# The workers cost two seconds to start; `-n 0` for one file.
+addopts = "-n auto"
 # The annotation prompt is a textual app, and its pilot is an async generator.
 asyncio_mode = "auto"
 
