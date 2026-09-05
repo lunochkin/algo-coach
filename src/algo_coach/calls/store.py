@@ -1,32 +1,19 @@
 from pathlib import Path
 
 from algo_coach.schema import Call
+from algo_coach.storage import JsonlLog
 
 
-class CallLog:
-    """Append-only JSONL store for what was asked of a model and what
-    returned."""
+class CallLog(JsonlLog[Call]):
+    """What was asked of a model and what returned. No index by hash: several
+    calls can share one prompt."""
 
-    def __init__(self, root: Path):
-        self.root = root
-        self.path = root / "calls.jsonl"
+    def __init__(self, root: Path) -> None:
+        super().__init__(root, "calls.jsonl", Call)
         # what this instance appended, so a caller reads its own tail without
         # a megabyte-scale load per problem
         self.appended: list[Call] = []
 
-    def append(self, call: Call) -> None:
-        self.root.mkdir(parents=True, exist_ok=True)
-        with self.path.open("a") as f:
-            f.write(call.model_dump_json() + "\n")
-        self.appended.append(call)
-
-    def all(self) -> list[Call]:
-        """In append order. No index by hash: several calls can share one
-        prompt."""
-        if not self.path.exists():
-            return []
-        return [
-            Call.model_validate_json(line)
-            for line in self.path.read_text().splitlines()
-            if line.strip()
-        ]
+    def append(self, record: Call) -> None:
+        super().append(record)
+        self.appended.append(record)

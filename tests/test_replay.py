@@ -118,7 +118,7 @@ def test_a_problem_with_no_stored_clock_is_not_searched_over(tmp_path, monkeypat
     cards = landed(tmp_path, monkeypatch)
     log = SolutionLog(tmp_path)
     kept = [one for one in log.solutions() if one.role is not SolutionRole.NAIVE]
-    log.solutions_path.write_text("".join(one.model_dump_json() + "\n" for one in kept))
+    log.path.write_text("".join(one.model_dump_json() + "\n" for one in kept))
 
     _, outcomes = replayed(tmp_path, FakeWriter(generator=BUILDS), cards)
 
