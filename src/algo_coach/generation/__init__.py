@@ -25,7 +25,6 @@ from algo_coach.generation.errors import GenerationError
 from algo_coach.generation.fuzzing import (
     SEEDS,
     SIZES,
-    Candidate,
     Fuzzed,
     Fuzzing,
     fuzz,
@@ -74,6 +73,7 @@ from algo_coach.generation.run import (
     resume,
     write_problems,
 )
+from algo_coach.generation.shrinking import Candidate
 from algo_coach.generation.speedup import Missing, Searched, search
 from algo_coach.generation.steps import SILENT, Notes, Step
 from algo_coach.generation.verdicts import Bar, Inputs

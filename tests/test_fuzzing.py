@@ -1,14 +1,7 @@
 from helpers import a_call
 
-from algo_coach.generation.fuzzing import (
-    SEEDS,
-    SIZES,
-    Candidate,
-    build,
-    fuzz,
-    grid,
-    shrink,
-)
+from algo_coach.generation.fuzzing import SEEDS, SIZES, build, fuzz, grid
+from algo_coach.generation.shrinking import Candidate, shrink
 from algo_coach.mutation import kill, mutants, survivors
 from algo_coach.runner import outputs
 from algo_coach.schema import ExpectedSource, MachineProvenance
