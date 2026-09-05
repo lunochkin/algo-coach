@@ -92,10 +92,19 @@ DERIVED = {
         -- One row per attempt at writing a problem: which sites answered, what
         -- their gates said, and the draft where one is still stored. A draft is
         -- cleared at landing, so a row with none is an attempt that finished.
+        --
+        -- `calls` counts the records rather than the sites: a resumed step
+        -- writes a second outcome, so a resumed problem cost both. A site that
+        -- made no call wrote nothing, and `cost` is absent where the provider
+        -- priced nothing.
+        --
+        -- `max` over the problem, never `any_value`: the outcomes a held run
+        -- wrote carry none, and only the resume that landed it stamps one.
         select o.writing_id, any_value(o.template_id) template_id,
-               any_value(o.problem_id) problem_id,
+               max(o.problem_id) problem_id,
                list(o.site order by o.site) answered,
                list(o.gate order by o.site) filter (o.gate is not null) gates,
+               count(*) calls, sum(o.cost) as cost,
                any_value(d.state) state, any_value(d.gate) rejected_by
         from site_outcomes o
         left join drafts d on d.id = o.writing_id
