@@ -1,23 +1,14 @@
 from collections.abc import Iterable
+from operator import attrgetter
 
 from algo_coach.schema import ReadingSource, TechniqueReading
+from algo_coach.standing import standing
 
-
-def latest_by_solution(readings: Iterable[TechniqueReading]) -> dict[str, TechniqueReading]:
-    """The last reading of each solution, append order breaking a tie on time.
-    Within one writer only; which writer wins is `standing_readings`."""
-    standing: dict[str, TechniqueReading] = {}
-    for reading in readings:
-        current = standing.get(reading.solution_id)
-        if current is None or reading.created_at >= current.created_at:
-            standing[reading.solution_id] = reading
-    return standing
+# Weakest first: the user's reading adjudicates the machine's.
+BY_WHAT_EACH_KNEW = (ReadingSource.CLASSIFIER, ReadingSource.USER)
 
 
 def standing_readings(readings: Iterable[TechniqueReading]) -> dict[str, TechniqueReading]:
     """The reading that stands on each solution: the user's own if any, however
     late the machine's."""
-    readings = list(readings)
-    return latest_by_solution(readings) | latest_by_solution(
-        [reading for reading in readings if reading.source is ReadingSource.USER]
-    )
+    return standing(readings, attrgetter("solution_id"), by_what_each_knew=BY_WHAT_EACH_KNEW)
