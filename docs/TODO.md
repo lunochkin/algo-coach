@@ -471,6 +471,41 @@ exit criteria reads a draft.
       never ran as resumable, where `carried` holds it before reaching that
       step
 
+- [ ] Add `largest` to `SiteOutcome` beside `separating`, as the inputs site's
+      own answer. A landed problem loses the builder's bound with its draft, so
+      a separating size has no denominator to be read against
+- [ ] Record the separating size against `largest` over the stored corpus. The
+      five problems one run landed separated at 1, 2, 6, 13 and 21 against a
+      legal 100000, and nothing says where the bar belongs
+- [ ] Ask the clock's brief for the approach the form replaces, not the slowest
+      correct one. Told to be slowest, a model enumerated every pairing, and
+      the separating size then falls below what a wrong-complexity submission
+      passes
+- [ ] Write into `corpus.md` what the clock may not be: slower than the
+      approach the card replaces. Two edits to that brief have each fixed one
+      end and caused the other, and the doc names neither
+
+### The gate the generator's own values raise
+
+`misdeclared` rejected 4 of 10 attempts on one template, and every rejected
+draft in the store carries it. Each misdeclares one case in ten by a small
+margin, and two checked by hand had the canonical right and the declared value
+wrong. The field is stored nowhere: a landing case carries the reference's
+answer.
+
+- [ ] Add a count of the generator's misdeclared cases to `SiteOutcome`, filed
+      on the generator as its gate is. The number is what says whether the gate
+      catches a wrong canonical or a slip in ten hand computations
+- [ ] Stop discarding a problem on `misdeclared`, and let the reference settle
+      it. One call wrote the canonical and the declarations, so they share a
+      reading, where the blind reference is the independent one
+- [ ] Write that demotion into `flows.md` and `corpus.md`: step 3 is a recorded
+      reading rather than a gate, and the two solutions agreeing is what a
+      landing turns on
+- [ ] Re-run `generate --count 10` on `answer-space` and record how many
+      attempts the reference discards that `misdeclared` would have. That
+      number is what restores the gate or closes it
+
 ### Transport
 
 - [x] Retry once on a 404 whose message names no endpoints for the model. It is
@@ -494,10 +529,10 @@ numbers go in the commit unless the item names a file.
 - [x] Record what the mutation loop spends in the runner. A per-case
       subprocess is what the deferred fork server replaces, and nothing has
       measured it
-- [ ] Run `generate --count 10` on one template and record the discard rate
+- [x] Run `generate --count 10` on one template and record the discard rate
       per gate: no_value, misdeclared, untested, disagreed. A gate rejecting
       most problems is a defect in the prompt rather than a bar
-- [ ] Count how many of those ten held at `searched`, and which `unseparated`
+- [x] Count how many of those ten held at `searched`, and which `unseparated`
       reason each gave. Counting `naive_finished` alone reads zero, since the
       case ceiling reports `input_too_large` before the clock is judged
 - [ ] Count how many of those ten reuse a domain their template's cue names.
