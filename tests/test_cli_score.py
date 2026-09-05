@@ -1,8 +1,8 @@
 import re
 from datetime import timedelta
-from importlib import import_module
 
 import pytest
+from commands import TRANSPORT, data_root, run_cli
 from helpers import T0, FakeTransport, Verdict, attempt, seed_problem
 
 from algo_coach import cli
@@ -12,14 +12,9 @@ from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_claim
 from algo_coach.schema import ClaimSource, MachineProvenance
 
-TRANSPORT = import_module("algo_coach.cli.transport")
-
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
-    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
-    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: client)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "score", "--user", "u1", *argv])
-    cli.main()
+    run_cli(monkeypatch, "score", "--user", "u1", *argv, client=client)
 
 
 def reading(attempt_id: str, techniques: list[str], *, model: str = MODEL):
@@ -39,9 +34,8 @@ def reading(attempt_id: str, techniques: list[str], *, model: str = MODEL):
 
 @pytest.fixture
 def hand_claimed(tmp_path, monkeypatch):
-    data = tmp_path / "data"
+    data = data_root(tmp_path, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
-    monkeypatch.setattr(cli, "DATA_ROOT", data)
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-codes"))
     log.append_claim(user_claim("a1", ["greedy"]))
@@ -270,9 +264,8 @@ def test_a_stored_run_over_nothing_read_exits_nonzero(hand_claimed, monkeypatch,
 
 def test_nothing_hand_claimed_exits_nonzero(tmp_path, monkeypatch, capsys):
     """No ground truth is not a score of zero — there is nothing to score."""
-    data = tmp_path / "data"
+    data = data_root(tmp_path, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
-    monkeypatch.setattr(cli, "DATA_ROOT", data)
     AttemptLog(data).append_attempt(attempt("a1", "two-codes"))
 
     with pytest.raises(SystemExit) as exit_info:

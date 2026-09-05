@@ -1,6 +1,5 @@
-from importlib import import_module
-
 import pytest
+from commands import TRANSPORT, data_root, run_cli
 from helpers import FakeTransport, Verdict
 from matching import canonicals, card, problem, seeded, stored
 
@@ -8,25 +7,19 @@ from algo_coach import cli
 from algo_coach.matches import EFFORT, MODEL, MatchLog
 from algo_coach.solutions import SolutionLog
 
-TRANSPORT = import_module("algo_coach.cli.transport")
-
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
-    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
-    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: client)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "match", *argv])
-    cli.main()
+    run_cli(monkeypatch, "match", *argv, client=client)
 
 
 @pytest.fixture
 def root(tmp_path, monkeypatch):
-    data = tmp_path / "data"
+    data = data_root(tmp_path, monkeypatch)
     seeded(data, card())
     corpus = stored(data, problem("p1", techniques=["sliding-window"]))
     # a match is keyed to a solution, so a corpus with none asks nothing
     for one in canonicals(*corpus):
         SolutionLog(data).append(one)
-    monkeypatch.setattr(cli, "DATA_ROOT", data)
     return data
 
 

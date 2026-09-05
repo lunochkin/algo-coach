@@ -1,6 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from commands import data_root, run_cli
 from helpers import seed_problem
 
 from algo_coach import cli
@@ -40,10 +41,9 @@ def attempt(
 @pytest.fixture
 def claim_root(tmp_path, monkeypatch) -> AttemptLog:
     """One two-tag problem and one single-tag problem, an attempt on each."""
-    root = tmp_path / "data"
+    root = data_root(tmp_path, monkeypatch)
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     seed_problem(root, id="one-tag", techniques=["trie"])
-    monkeypatch.setattr(cli, "DATA_ROOT", root)
 
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -54,8 +54,7 @@ def claim_root(tmp_path, monkeypatch) -> AttemptLog:
 def run(monkeypatch, answers: list[str], *argv: str) -> None:
     scripted = iter(answers)
     monkeypatch.setattr("builtins.input", lambda _: next(scripted))
-    monkeypatch.setattr("sys.argv", ["algo-coach", "claim", "--user", "u1", *argv])
-    cli.main()
+    run_cli(monkeypatch, "claim", "--user", "u1", *argv)
 
 
 def test_a_claim_records_what_was_chosen(claim_root, monkeypatch, capsys):
@@ -166,9 +165,8 @@ def test_the_machine_verdict_is_never_shown(claim_root, monkeypatch, capsys):
 
 def test_an_attempt_without_code_is_not_offered(tmp_path, monkeypatch, capsys):
     """The evidence is the code; without it there is nothing to read."""
-    root = tmp_path / "data"
+    root = data_root(tmp_path, monkeypatch)
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
-    monkeypatch.setattr(cli, "DATA_ROOT", root)
     AttemptLog(root).append_attempt(attempt("a1", "two-codes", code=None))
 
     with pytest.raises(SystemExit) as exit_info:
@@ -184,9 +182,8 @@ def test_the_code_is_shown(claim_root, monkeypatch, capsys):
 
 
 def test_a_long_solution_is_cut_and_says_so(tmp_path, monkeypatch, capsys):
-    root = tmp_path / "data"
+    root = data_root(tmp_path, monkeypatch)
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
-    monkeypatch.setattr(cli, "DATA_ROOT", root)
     AttemptLog(root).append_attempt(attempt("a1", "two-codes", code="\n".join("x" * 50)))
 
     run(monkeypatch, ["1", ""], "--lines", "10")
@@ -301,8 +298,7 @@ def seed_many(root, count: int) -> AttemptLog:
 
 
 def test_count_caps_how_many_are_asked_about(tmp_path, monkeypatch, capsys):
-    root = tmp_path / "data"
-    monkeypatch.setattr(cli, "DATA_ROOT", root)
+    root = data_root(tmp_path, monkeypatch)
     log = seed_many(root, 5)
 
     run(monkeypatch, ["1", "", "1", ""], "--count", "2")
@@ -313,8 +309,7 @@ def test_count_caps_how_many_are_asked_about(tmp_path, monkeypatch, capsys):
 def test_the_sample_is_spread_across_techniques(tmp_path, monkeypatch, capsys):
     """A pile of one pair of tags does not take the whole sample: the rare
     problem is asked about before a sixth greedy one."""
-    root = tmp_path / "data"
-    monkeypatch.setattr(cli, "DATA_ROOT", root)
+    root = data_root(tmp_path, monkeypatch)
     log = seed_many(root, 5)
     seed_problem(root, id="rare", techniques=["backtracking", "trie"])
     log.append_attempt(attempt("a-rare", "rare"))
@@ -364,8 +359,7 @@ def test_a_claimed_attempt_drops_out_of_the_pool(tmp_path, monkeypatch, capsys):
 
 
 def test_ending_early_keeps_what_landed(tmp_path, monkeypatch, capsys):
-    root = tmp_path / "data"
-    monkeypatch.setattr(cli, "DATA_ROOT", root)
+    root = data_root(tmp_path, monkeypatch)
     log = seed_many(root, 4)
 
     run(monkeypatch, ["1", "a"])
@@ -425,8 +419,7 @@ def test_a_retired_candidate_costs_its_own_criterion_and_nothing_else(
 ):
     """Records outlive the vocabulary, so a stored problem can name a code the
     criteria no longer hold. It is still a legal claim."""
-    root = tmp_path / "data"
-    monkeypatch.setattr(cli, "DATA_ROOT", root)
+    root = data_root(tmp_path, monkeypatch)
     seed_problem(root, id="retired", techniques=["greedy", "dynamic-programming-2d"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "retired"))

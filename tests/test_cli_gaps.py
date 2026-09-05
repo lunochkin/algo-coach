@@ -1,4 +1,5 @@
 import pytest
+from commands import data_root, run_cli
 from matching import canonical, card, problem, seeded, stored, template
 
 from algo_coach import cli
@@ -8,21 +9,19 @@ from algo_coach.solutions import SolutionLog
 
 
 def run(monkeypatch, *argv: str) -> None:
-    monkeypatch.setattr("sys.argv", ["algo-coach", "gaps", *argv])
-    cli.main()
+    run_cli(monkeypatch, "gaps", *argv)
 
 
 @pytest.fixture
 def root(tmp_path, monkeypatch):
     """One card of two core forms, and a canonical displaying one of them."""
-    data = tmp_path / "data"
+    data = data_root(tmp_path, monkeypatch)
     cards = seeded(data, card(templates=[template("fixed-window"), template("shrink-to-fit")]))
     stored(data, problem("p1", techniques=["sliding-window"]))
     solution = canonical("p1")
     SolutionLog(data).append(solution)
     fixed = next(one.id for one in cards[0].templates if one.slug == "fixed-window")
     MatchLog(data).append(generator_match(fixed, solution.id))
-    monkeypatch.setattr(cli, "DATA_ROOT", data)
     return data
 
 

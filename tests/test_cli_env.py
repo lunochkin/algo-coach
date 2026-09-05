@@ -1,12 +1,10 @@
 import os
-from importlib import import_module
 
 import pytest
+from commands import TRANSPORT
 from helpers import FakeTransport, Verdict
 
 from algo_coach import cli
-
-TRANSPORT = import_module("algo_coach.cli.transport")
 
 
 @pytest.fixture

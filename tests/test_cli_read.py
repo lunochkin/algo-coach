@@ -1,31 +1,23 @@
-from importlib import import_module
-
 import pytest
+from commands import data_root, run_cli
 from helpers import FakeTransport, Verdict
 from matching import canonicals, problem, stored
 
-from algo_coach import cli
 from algo_coach.classifier import EFFORT, MODEL
 from algo_coach.readings import ReadingLog
 from algo_coach.solutions import SolutionLog
 
-TRANSPORT = import_module("algo_coach.cli.transport")
-
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
-    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
-    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: client)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "read", *argv])
-    cli.main()
+    run_cli(monkeypatch, "read", *argv, client=client)
 
 
 @pytest.fixture
 def root(tmp_path, monkeypatch):
-    data = tmp_path / "data"
+    data = data_root(tmp_path, monkeypatch)
     corpus = stored(data, problem("p1", techniques=[]))
     for one in canonicals(*corpus):
         SolutionLog(data).append(one)
-    monkeypatch.setattr(cli, "DATA_ROOT", data)
     return data
 
 

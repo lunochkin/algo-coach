@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
-from importlib import import_module
 
 import pytest
+from commands import TRANSPORT, data_root, run_cli
 from generating import FakeWriter, Raises
 from matching import card, seeded, template
 
@@ -29,24 +29,15 @@ from algo_coach.problems import ProblemStore
 from algo_coach.schema import Call, CaseOutcome, Configuration, MatchSource, SolutionRole
 from algo_coach.solutions import SolutionLog
 
-TRANSPORT = import_module("algo_coach.cli.transport")
-
 
 def run(monkeypatch, model: FakeWriter, *argv: str) -> None:
-    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
-    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: model)
-    monkeypatch.setattr(
-        "sys.argv",
-        ["algo-coach", "generate", "--card", "sliding-window", "--template", *argv],
-    )
-    cli.main()
+    run_cli(monkeypatch, "generate", "--card", "sliding-window", "--template", *argv, client=model)
 
 
 @pytest.fixture
 def root(tmp_path, monkeypatch):
-    data = tmp_path / "data"
+    data = data_root(tmp_path, monkeypatch)
     seeded(data, card())
-    monkeypatch.setattr(cli, "DATA_ROOT", data)
     return data
 
 
@@ -184,10 +175,7 @@ def test_a_failure_is_the_whole_line():
 def aimed(monkeypatch, model: FakeWriter, *argv: str) -> None:
     """A run aimed by the gap report rather than at a template named by
     hand."""
-    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
-    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: model)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--gaps", *argv])
-    cli.main()
+    run_cli(monkeypatch, "generate", "--gaps", *argv, client=model)
 
 
 def test_a_gap_run_writes_for_every_core_template(root, monkeypatch, capsys):
@@ -555,10 +543,7 @@ def test_one_site_named_twice_is_refused(root, monkeypatch):
 
 
 def replaying(monkeypatch, model: FakeWriter, *argv: str) -> None:
-    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
-    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: model)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--replay", *argv])
-    cli.main()
+    run_cli(monkeypatch, "generate", "--replay", *argv, client=model)
 
 
 # what the input generator returns, so the site answers rather than failing
@@ -651,10 +636,7 @@ def test_a_draft_a_raised_call_left_is_named_too(root, monkeypatch, capsys):
 
 
 def resuming(monkeypatch, model: FakeWriter, *argv: str) -> None:
-    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
-    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: model)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--resume", *argv])
-    cli.main()
+    run_cli(monkeypatch, "generate", "--resume", *argv, client=model)
 
 
 def held_draft(root, monkeypatch, capsys):
@@ -738,8 +720,7 @@ def test_a_replay_is_not_a_resume(root, monkeypatch, capsys):
 def listing(monkeypatch, *argv: str) -> None:
     """No key and no transport: a listing names what a sweep would spend and
     spends none of it."""
-    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--drafts", *argv])
-    cli.main()
+    run_cli(monkeypatch, "generate", "--drafts", *argv)
 
 
 def test_the_drafts_are_listed_with_the_step_each_would_resume_at(root, monkeypatch, capsys):
@@ -820,8 +801,7 @@ def test_a_listing_is_aimed_at_nothing(root, monkeypatch, capsys):
 def reading(monkeypatch, wanted: str, *argv: str) -> None:
     """One stored draft, read whole. It makes no call, as a listing makes
     none."""
-    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--draft", wanted, *argv])
-    cli.main()
+    run_cli(monkeypatch, "generate", "--draft", wanted, *argv)
 
 
 def searched_draft(root, monkeypatch, capsys):

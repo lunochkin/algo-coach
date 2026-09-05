@@ -2,9 +2,9 @@ import json
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from commands import data_root, run_cli
 from helpers import seed_problem
 
-from algo_coach import cli
 from algo_coach.board import TechniqueRow
 from algo_coach.cli.board import render
 from algo_coach.log import AttemptLog
@@ -22,9 +22,8 @@ T0 = datetime(2026, 1, 1, tzinfo=UTC)
 @pytest.fixture
 def board_root(tmp_path, monkeypatch) -> AttemptLog:
     """A store holding one greedy problem, and a log of attempts on it."""
-    root = tmp_path / "data"
+    root = data_root(tmp_path, monkeypatch)
     seed_problem(root, id="minted-u1", techniques=["greedy", "sorting"])
-    monkeypatch.setattr(cli, "DATA_ROOT", root)
     return AttemptLog(root)
 
 
@@ -46,8 +45,7 @@ def attempt(
 
 
 def run(monkeypatch, *argv: str) -> None:
-    monkeypatch.setattr("sys.argv", ["algo-coach", "board", *argv])
-    cli.main()
+    run_cli(monkeypatch, "board", *argv)
 
 
 def test_board_renders_a_row_per_technique(board_root, monkeypatch, capsys):

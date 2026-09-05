@@ -1,17 +1,13 @@
-from importlib import import_module
-
 import pytest
+from commands import data_root, run_cli
 from generating import FakeWriter
 from matching import card, seeded, template
 
-from algo_coach import cli
 from algo_coach.calls import CallLog
 from algo_coach.generation import Corpus, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import ProblemStatus, RetirementReason
-
-TRANSPORT = import_module("algo_coach.cli.transport")
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
@@ -19,8 +15,7 @@ SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    ret
 
 @pytest.fixture
 def root(tmp_path, monkeypatch):
-    data = tmp_path / "data"
-    monkeypatch.setattr(cli, "DATA_ROOT", data)
+    data = data_root(tmp_path, monkeypatch)
     return data
 
 
@@ -42,8 +37,7 @@ def landed(root, monkeypatch, **overrides):
 
 
 def reading(monkeypatch, *argv: str) -> None:
-    monkeypatch.setattr("sys.argv", ["algo-coach", "problem", *argv])
-    cli.main()
+    run_cli(monkeypatch, "problem", *argv)
 
 
 def test_the_corpus_is_listed_where_no_id_is_named(root, monkeypatch, capsys):

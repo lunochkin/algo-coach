@@ -1,6 +1,5 @@
-from importlib import import_module
-
 import pytest
+from commands import TRANSPORT, data_root, run_cli
 from helpers import FakeTransport, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach import cli
@@ -9,21 +8,15 @@ from algo_coach.classifier import EFFORT, MODEL
 from algo_coach.log import AttemptLog
 from algo_coach.runs import ABORT_AFTER
 
-TRANSPORT = import_module("algo_coach.cli.transport")
-
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
-    monkeypatch.setenv("OPENROUTER_API_KEY", "test")
-    monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: client)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "classify", "--user", "u1", *argv])
-    cli.main()
+    run_cli(monkeypatch, "classify", "--user", "u1", *argv, client=client)
 
 
 @pytest.fixture
 def root(tmp_path, monkeypatch):
-    data = tmp_path / "data"
+    data = data_root(tmp_path, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
-    monkeypatch.setattr(cli, "DATA_ROOT", data)
     AttemptLog(data).append_attempt(attempt("a1", "two-codes"))
     return data
 
