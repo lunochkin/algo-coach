@@ -28,6 +28,7 @@ dev = [
     "pytest-cov>=7.1.0",
     "pytest-xdist>=3.6",
     "ruff>=0.16.0",
+    "vulture>=2.16",
 ]
 
 [tool.pytest.ini_options]
@@ -131,6 +132,24 @@ show_missing = true
 [tool.mutmut]
 paths_to_mutate = ["src/algo_coach/"]
 tests_dir = ["tests/"]
+
+# ---- dead code: a name nothing in src or tests references
+[tool.vulture]
+paths = ["src", "tests"]
+# a schema field or an enum member no code reads is still one a stored record
+# carries, and a code is never deleted
+exclude = ["src/algo_coach/schema/"]
+# pydantic calls validators by registration, pytest calls fixtures by name
+ignore_decorators = ["@field_validator", "@model_validator", "@pytest.fixture"]
+ignore_names = [
+    "model_config",
+    # textual reads the class attributes and dispatches hooks and actions by name
+    "compose", "on_*", "action_*", "CSS", "BINDINGS", "theme", "can_focus",
+    # ast.NodeTransformer dispatches by name
+    "visit_*",
+    # a result record names the pair that failed; the report reads only the reason
+    "card_id",
+]
 
 [tool.ruff]
 line-length = 100

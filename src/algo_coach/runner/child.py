@@ -58,7 +58,7 @@ def execute(code: str, args: list[Any], cap_ms: int) -> dict[str, Any]:
     return {"outcome": RETURNED, "value": encoded, "elapsed_ms": elapsed}
 
 
-def _expire(signum: int, frame: FrameType | None) -> None:
+def _expire(_signum: int, _frame: FrameType | None) -> None:
     raise Expired
 
 

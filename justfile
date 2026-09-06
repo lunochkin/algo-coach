@@ -25,6 +25,10 @@ lint *args:
 typecheck:
     uv run pyright
 
+# A name nothing in src or tests references.
+dead:
+    uv run vulture
+
 # Rewrite the schema snapshots after an intended tightening; the test holds them otherwise.
 schemas:
     SCHEMA_SNAPSHOT=write uv run pytest -q -n 0 tests/test_schema_additive.py
@@ -41,11 +45,11 @@ mutate *args:
 fmt:
     uv run ruff format .
 
-# Lint, type-check and test, as a commit does.
-check: lint typecheck test
+# Lint, type-check, dead-code check and test, as a commit does.
+check: lint typecheck dead test
 
 # What CI runs: `check` with coverage in place of the bare tests.
-ci: lint typecheck coverage
+ci: lint typecheck dead coverage
 
 # Enable the pre-commit and commit-msg hooks. Once per clone.
 hooks:
