@@ -24,9 +24,11 @@ class JsonlLog[T: BaseModel]:
     def all(self) -> list[T]:
         if not self.path.exists():
             return []
+        # split on the newline alone: `splitlines` also splits on U+2028 and
+        # its kin, which JSON leaves unescaped inside a string
         return [
             self.model.model_validate_json(line)
-            for line in self.path.read_text().splitlines()
+            for line in self.path.read_text().split("\n")
             if line.strip()
         ]
 
