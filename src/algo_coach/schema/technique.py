@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Kind(StrEnum):
@@ -28,6 +28,8 @@ class Technique(BaseModel):
     """A vocabulary entry: a code and the criterion for claiming it.
     Not the type of a code in a record, which is a bare string: a retired one
     has no criterion."""
+
+    model_config = ConfigDict(frozen=True)
 
     code: str = Field(pattern=r"^[a-z0-9][a-z0-9-]*$")
     kind: Kind

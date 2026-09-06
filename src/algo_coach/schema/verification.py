@@ -2,12 +2,14 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from algo_coach.schema.case import CaseOutcome, CaseResult, severest
 
 
 class Verification(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     id: str
     created_at: datetime
     solution_id: str = Field(min_length=1)  # in either role

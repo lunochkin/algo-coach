@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Annotated
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from algo_coach.schema.problem import ProblemDifficulty
 
@@ -16,6 +16,8 @@ class TemplateKind(StrEnum):
 class Selector(BaseModel):
     """What a ladder resolves from. Named fields rather than a filter map, so
     a new filter is an additive optional field."""
+
+    model_config = ConfigDict(frozen=True)
 
     technique: str
     difficulty: list[ProblemDifficulty] = Field(
@@ -42,6 +44,8 @@ def unique_slugs(slugs: list[str]) -> None:
 class Template(BaseModel):
     """One form reproduced from memory. The unit of recall."""
 
+    model_config = ConfigDict(frozen=True)
+
     id: str  # a recall attempt keys to it and outlives any edit
     slug: Slug  # authored; how a re-import finds the same template
     title: str
@@ -56,6 +60,8 @@ class Template(BaseModel):
 class Card(BaseModel):
     """Teaching content for one technique: forms to reproduce, and a
     selector."""
+
+    model_config = ConfigDict(frozen=True)
 
     id: str  # what a card run references
     slug: Slug  # authored; the idempotency key a re-seed matches on

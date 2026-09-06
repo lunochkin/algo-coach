@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from algo_coach.schema.provenance import MachineProvenance
 from algo_coach.schema.record import AttemptRecord
@@ -16,6 +16,8 @@ class FailureMode(StrEnum):
 
 
 class Attempt(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     id: str
     user_id: str
     problem_id: str

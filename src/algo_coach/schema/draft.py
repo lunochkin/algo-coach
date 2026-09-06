@@ -38,6 +38,8 @@ class DraftCase(BaseModel):
     """One case as the generator wrote it: the arguments and what `solve` must
     return."""
 
+    model_config = ConfigDict(frozen=True)
+
     # no id, no problem and no `expected_from`: none of the three exists until
     # the problem lands, and the reference recomputes `expected` before it does
     args: list[Any]
@@ -76,6 +78,8 @@ class Draft(BaseModel):
     walk enumerates the first two and the site outcomes of this id carry the
     third.
     """
+
+    model_config = ConfigDict(frozen=True)
 
     id: str = Field(min_length=1)  # the writing id the site outcomes group under
     state: WritingState = WritingState.DRAFTED

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import ClassVar, overload
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from algo_coach.schema.call import Call
 from algo_coach.schema.configuration import Configuration
@@ -12,6 +12,8 @@ class MachineProvenance(BaseModel):
     """The configuration a reading was taken at, and the call that took it.
     Optional here and required by the record's own validator, since the
     hand-written counterpart carries none of it."""
+
+    model_config = ConfigDict(frozen=True)
 
     model: str | None = None
     effort: str | None = None  # how hard it was asked to think

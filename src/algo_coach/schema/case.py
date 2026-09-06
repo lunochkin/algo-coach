@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from algo_coach.schema.provenance import MachineProvenance
 
@@ -48,6 +48,8 @@ class CaseOutcome(StrEnum):
 
 
 class CaseResult(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     case_id: str = Field(min_length=1)
     outcome: CaseOutcome
     elapsed_ms: int | None = Field(default=None, ge=0)  # absent where the child measured nothing
