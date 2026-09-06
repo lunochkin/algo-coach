@@ -16,6 +16,9 @@ class ProblemStore(FileStore[Problem]):
         super().__init__(root, "problems", Problem)
 
     def put(self, record: Problem) -> None:
+        if record.techniques:
+            # `README.md`: aggregates are derived views, never stored truth
+            raise ValueError(f"problem {record.id} carries a view; the store keeps the record")
         stored = self.get(record.id)
         if stored is not None and stored.model_dump(exclude=STATUS) != record.model_dump(
             exclude=STATUS

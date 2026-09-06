@@ -53,6 +53,13 @@ def test_only_the_status_of_a_stored_problem_moves(tmp_path):
     assert len(store.all()) == 1
 
 
+def test_a_problem_carrying_its_view_is_refused(tmp_path):
+    """`README.md`: `techniques` is derived from the readings, and a record
+    stored with it would be truth nothing re-derives."""
+    with pytest.raises(ValueError, match="carries a view"):
+        ProblemStore(tmp_path).put(make_problem(techniques=["greedy"]))
+
+
 def test_writing_the_same_problem_again_is_allowed(tmp_path):
     """A run that died between two writes of one landing may write it again."""
     store = ProblemStore(tmp_path)
