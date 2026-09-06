@@ -190,27 +190,40 @@ The order matters because each step can reject what came before.
   a form unprompted, so the enabling property has to be derivable from the
   statement rather than stated in it. A form a matcher names instantly from the
   statement alone was telegraphed, and such a problem teaches recognition of
-  nothing.  ## Writing a problem, as states  The sequence above, held as durable
-  state. A draft is stored as it is written, so a step that fails leaves the
-  draft where it stopped instead of throwing the calls before it away.
-  ```mermaid flowchart TB D["drafted"] -->|"the canonical returns a value on
-  every case"| C["checked"] C -->|"<b>blind</b>: the reference, from the
-  statement alone"| R["referenced"] R -->|"the two solutions agree on every
-  case"| A["agreed"] A -->|"<b>inputs</b>: code that builds an input of a given
-  size"| B["built"] B -->|"<b>naive</b>: the naive solution, where a speedup is
-  claimed"| P["paced"] P -->|"the input separating it from the canonical"|
-  S["searched"] S -->|"<b>discrimination</b>: the fuzz pass, then the rounds"|
-  H["hardened"] H -->|"the problem, its cases, its solutions and the match"|
-  L(["landed"])  D -.->|"no_value"| X(["rejected<br/><i>terminal, and names the
-  gate</i>"]) R -.->|"untested · disagreed"| X P -.->|"disagreed"| X S
-  -.->|"disagreed"| X  C ==>|"the blind call failed"| Z(["held<br/><i>at the
-  state it reached; a resume re-enters at the<br/>first step whose configuration
-  or digest moved</i>"]) A ==>|"no input generator, and a speedup is claimed"| Z
-  B ==>|"no naive solution, or one the cases failed"| Z P ==>|"the round's call
-  failed"| Z S ==>|"nothing separated · the round's call failed"| Z Z
-  -.->|"unexercised, by hand"| X ```  The generator is not an edge: a draft
-  exists only once that call answered, and a second generator call writes a
-  different problem.
+  nothing.
+
+## Writing a problem, as states
+
+The sequence above, held as durable state. A draft is stored as it is written,
+so a step that fails leaves the draft where it stopped instead of throwing the
+calls before it away.
+
+```mermaid
+flowchart TB
+  D["drafted"] -->|"the canonical returns a value on every case"| C["checked"]
+  C -->|"<b>blind</b>: the reference, from the statement alone"| R["referenced"]
+  R -->|"the two solutions agree on every case"| A["agreed"]
+  A -->|"<b>inputs</b>: code that builds an input of a given size"| B["built"]
+  B -->|"<b>naive</b>: the naive solution, where a speedup is claimed"| P["paced"]
+  P -->|"the input separating it from the canonical"| S["searched"]
+  S -->|"<b>discrimination</b>: the fuzz pass, then the rounds"| H["hardened"]
+  H -->|"the problem, its cases, its solutions and the match"| L(["landed"])
+
+  D -.->|"no_value"| X(["rejected<br/><i>terminal, and names the gate</i>"])
+  R -.->|"untested · disagreed"| X
+  P -.->|"disagreed"| X
+  S -.->|"disagreed"| X
+
+  C ==>|"the blind call failed"| Z(["held<br/><i>at the state it reached; a resume re-enters at the<br/>first step whose configuration or digest moved</i>"])
+  A ==>|"no input generator, and a speedup is claimed"| Z
+  B ==>|"no naive solution, or one the cases failed"| Z
+  P ==>|"the round's call failed"| Z
+  S ==>|"nothing separated · the round's call failed"| Z
+  Z -.->|"unexercised, by hand"| X
+```
+
+The generator is not an edge: a draft exists only once that call answered, and
+a second generator call writes a different problem.
 
 - **Two machines, meeting at landing.** `ProblemStatus` governs a problem that
   exists: created, active, retired. This machine governs the writing, and its
