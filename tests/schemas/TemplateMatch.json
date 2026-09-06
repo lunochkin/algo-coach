@@ -1,0 +1,153 @@
+{
+  "$defs": {
+    "MatchSource": {
+      "enum": [
+        "user",
+        "generator",
+        "classifier"
+      ],
+      "title": "MatchSource",
+      "type": "string"
+    }
+  },
+  "description": "Whether one solution displays one of a card's templates. One record per\npair \u2014 `content.md` gives why not a set.",
+  "properties": {
+    "call_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Call Id"
+    },
+    "cost": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cost"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "effort": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Effort"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "informed_by": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Informed By",
+      "type": "array"
+    },
+    "matched": {
+      "title": "Matched",
+      "type": "boolean"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model"
+    },
+    "pin": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pin"
+    },
+    "prompt_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Prompt Hash"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Provider"
+    },
+    "solution_id": {
+      "title": "Solution Id",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/MatchSource"
+    },
+    "temperature": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Temperature"
+    },
+    "template_id": {
+      "title": "Template Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "created_at",
+    "template_id",
+    "solution_id",
+    "matched",
+    "source"
+  ],
+  "title": "TemplateMatch",
+  "type": "object"
+}

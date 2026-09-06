@@ -1,0 +1,441 @@
+{
+  "$defs": {
+    "Discard": {
+      "enum": [
+        "no_value",
+        "misdeclared",
+        "untested",
+        "disagreed",
+        "unexercised"
+      ],
+      "title": "Discard",
+      "type": "string"
+    },
+    "DraftCase": {
+      "description": "One case as the generator wrote it: the arguments and what `solve` must\nreturn.",
+      "properties": {
+        "args": {
+          "items": {},
+          "title": "Args",
+          "type": "array"
+        },
+        "expected": {
+          "title": "Expected"
+        }
+      },
+      "required": [
+        "args",
+        "expected"
+      ],
+      "title": "DraftCase",
+      "type": "object"
+    },
+    "ExpectedSource": {
+      "description": "Which solution computed a case's expected output. Not `SolutionRole`\nunder another name: it answers how strong the case is.",
+      "enum": [
+        "reference",
+        "canonical"
+      ],
+      "title": "ExpectedSource",
+      "type": "string"
+    },
+    "MachineProvenance": {
+      "description": "The configuration a reading was taken at, and the call that took it.\nOptional here and required by the record's own validator, since the\nhand-written counterpart carries none of it.",
+      "properties": {
+        "call_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Call Id"
+        },
+        "cost": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost"
+        },
+        "effort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effort"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "pin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pin"
+        },
+        "prompt_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prompt Hash"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider"
+        },
+        "temperature": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Temperature"
+        }
+      },
+      "title": "MachineProvenance",
+      "type": "object"
+    },
+    "ProblemDifficulty": {
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "title": "ProblemDifficulty",
+      "type": "string"
+    },
+    "SettledCase": {
+      "description": "One case a run established: whose answer it carries, and the call that\nproposed the arguments.",
+      "properties": {
+        "args": {
+          "items": {},
+          "title": "Args",
+          "type": "array"
+        },
+        "expected": {
+          "title": "Expected"
+        },
+        "expected_from": {
+          "$ref": "#/$defs/ExpectedSource"
+        },
+        "round": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0,
+          "title": "Round"
+        },
+        "written": {
+          "$ref": "#/$defs/MachineProvenance"
+        }
+      },
+      "required": [
+        "args",
+        "expected",
+        "expected_from",
+        "written"
+      ],
+      "title": "SettledCase",
+      "type": "object"
+    },
+    "WritingState": {
+      "description": "How far a problem has been written. One state per step that can fail, in\nthe order `flows.md` gives; `landed` is where `ProblemStatus` starts.",
+      "enum": [
+        "drafted",
+        "checked",
+        "referenced",
+        "agreed",
+        "built",
+        "paced",
+        "searched",
+        "hardened",
+        "landed",
+        "rejected"
+      ],
+      "title": "WritingState",
+      "type": "string"
+    }
+  },
+  "description": "What the steps of one attempt produced and no local run re-derives.\n\nThe mutants, the survivors and the loop's counters are not here: a tree\nwalk enumerates the first two and the site outcomes of this id carry the\nthird.",
+  "properties": {
+    "blind": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MachineProvenance"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "builder": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Builder"
+    },
+    "canonical": {
+      "minLength": 1,
+      "title": "Canonical",
+      "type": "string"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/SettledCase"
+      },
+      "title": "Cases",
+      "type": "array"
+    },
+    "clock": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MachineProvenance"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "declared": {
+      "items": {
+        "$ref": "#/$defs/DraftCase"
+      },
+      "minItems": 1,
+      "title": "Declared",
+      "type": "array"
+    },
+    "difficulty": {
+      "$ref": "#/$defs/ProblemDifficulty"
+    },
+    "discrimination": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MachineProvenance"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "gate": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Discard"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "generator": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MachineProvenance"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "id": {
+      "minLength": 1,
+      "title": "Id",
+      "type": "string"
+    },
+    "inputs": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MachineProvenance"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "largest": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Largest"
+    },
+    "naive": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Naive"
+    },
+    "problem_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Problem Id"
+    },
+    "reference": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reference"
+    },
+    "separating": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SettledCase"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "state": {
+      "$ref": "#/$defs/WritingState",
+      "default": "drafted"
+    },
+    "statement": {
+      "minLength": 1,
+      "title": "Statement",
+      "type": "string"
+    },
+    "template_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Template Id"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "unseparated": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Unseparated"
+    },
+    "won": {
+      "items": {
+        "$ref": "#/$defs/SettledCase"
+      },
+      "title": "Won",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "statement",
+    "canonical",
+    "declared",
+    "difficulty"
+  ],
+  "title": "Draft",
+  "type": "object"
+}

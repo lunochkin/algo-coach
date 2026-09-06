@@ -1,0 +1,64 @@
+{
+  "$defs": {
+    "FailureMode": {
+      "enum": [
+        "speed",
+        "rust",
+        "gap",
+        "syntax",
+        "none"
+      ],
+      "title": "FailureMode",
+      "type": "string"
+    }
+  },
+  "description": "Why an attempt failed, inferred. The machine counterpart of\n`SelfLabel`.",
+  "properties": {
+    "attempt_id": {
+      "title": "Attempt Id",
+      "type": "string"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "evidence": {
+      "title": "Evidence",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "mode": {
+      "$ref": "#/$defs/FailureMode"
+    },
+    "model": {
+      "title": "Model",
+      "type": "string"
+    },
+    "prompt_version": {
+      "title": "Prompt Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "created_at",
+    "attempt_id",
+    "mode",
+    "confidence",
+    "evidence",
+    "model",
+    "prompt_version"
+  ],
+  "title": "Diagnosis",
+  "type": "object"
+}

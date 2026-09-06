@@ -1,0 +1,42 @@
+{
+  "$defs": {
+    "FailureMode": {
+      "enum": [
+        "speed",
+        "rust",
+        "gap",
+        "syntax",
+        "none"
+      ],
+      "title": "FailureMode",
+      "type": "string"
+    }
+  },
+  "description": "The user's own verdict on why an attempt went the way it did.",
+  "properties": {
+    "attempt_id": {
+      "title": "Attempt Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "mode": {
+      "$ref": "#/$defs/FailureMode"
+    }
+  },
+  "required": [
+    "id",
+    "created_at",
+    "attempt_id",
+    "mode"
+  ],
+  "title": "SelfLabel",
+  "type": "object"
+}

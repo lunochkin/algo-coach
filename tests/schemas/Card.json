@@ -1,0 +1,163 @@
+{
+  "$defs": {
+    "ProblemDifficulty": {
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "title": "ProblemDifficulty",
+      "type": "string"
+    },
+    "Selector": {
+      "description": "What a ladder resolves from. Named fields rather than a filter map, so\na new filter is an additive optional field.",
+      "properties": {
+        "difficulty": {
+          "items": {
+            "$ref": "#/$defs/ProblemDifficulty"
+          },
+          "title": "Difficulty",
+          "type": "array"
+        },
+        "size": {
+          "minimum": 1,
+          "title": "Size",
+          "type": "integer"
+        },
+        "technique": {
+          "title": "Technique",
+          "type": "string"
+        }
+      },
+      "required": [
+        "technique",
+        "size"
+      ],
+      "title": "Selector",
+      "type": "object"
+    },
+    "Template": {
+      "description": "One form reproduced from memory. The unit of recall.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/TemplateKind",
+          "default": "code"
+        },
+        "notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Notes"
+        },
+        "optional": {
+          "default": false,
+          "title": "Optional",
+          "type": "boolean"
+        },
+        "slug": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Slug",
+          "type": "string"
+        },
+        "speedup": {
+          "default": true,
+          "title": "Speedup",
+          "type": "boolean"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "trigger": {
+          "minLength": 1,
+          "title": "Trigger",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "title",
+        "trigger",
+        "code"
+      ],
+      "title": "Template",
+      "type": "object"
+    },
+    "TemplateKind": {
+      "enum": [
+        "code",
+        "procedure"
+      ],
+      "title": "TemplateKind",
+      "type": "string"
+    }
+  },
+  "description": "Teaching content for one technique: forms to reproduce, and a\nselector.",
+  "properties": {
+    "brief": {
+      "minLength": 1,
+      "title": "Brief",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "selector": {
+      "$ref": "#/$defs/Selector"
+    },
+    "slug": {
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "title": "Slug",
+      "type": "string"
+    },
+    "technique": {
+      "title": "Technique",
+      "type": "string"
+    },
+    "templates": {
+      "items": {
+        "$ref": "#/$defs/Template"
+      },
+      "minItems": 1,
+      "title": "Templates",
+      "type": "array"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "trigger": {
+      "minLength": 1,
+      "title": "Trigger",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "slug",
+    "technique",
+    "title",
+    "trigger",
+    "brief",
+    "templates",
+    "selector"
+  ],
+  "title": "Card",
+  "type": "object"
+}

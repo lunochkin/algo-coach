@@ -1,0 +1,87 @@
+{
+  "$defs": {
+    "CaseOutcome": {
+      "enum": [
+        "passed",
+        "wrong",
+        "timeout",
+        "crashed"
+      ],
+      "title": "CaseOutcome",
+      "type": "string"
+    },
+    "CaseResult": {
+      "properties": {
+        "case_id": {
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "elapsed_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elapsed Ms"
+        },
+        "outcome": {
+          "$ref": "#/$defs/CaseOutcome"
+        }
+      },
+      "required": [
+        "case_id",
+        "outcome"
+      ],
+      "title": "CaseResult",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "results": {
+      "items": {
+        "$ref": "#/$defs/CaseResult"
+      },
+      "title": "Results",
+      "type": "array"
+    },
+    "runner": {
+      "minLength": 1,
+      "title": "Runner",
+      "type": "string"
+    },
+    "solution_id": {
+      "minLength": 1,
+      "title": "Solution Id",
+      "type": "string"
+    },
+    "timeout_ms": {
+      "exclusiveMinimum": 0,
+      "title": "Timeout Ms",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "created_at",
+    "solution_id",
+    "timeout_ms",
+    "runner"
+  ],
+  "title": "Verification",
+  "type": "object"
+}

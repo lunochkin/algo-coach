@@ -138,3 +138,7 @@ carrying nothing."
   code is staged: the import contracts in `pyproject.toml`, the module size
   limit, and that a name is imported from where it is defined. The full suite
   is `just test`, by hand.
+- `tests/schemas/` holds each stored record's JSON schema as last agreed, and
+  `tests/test_schema_additive.py` refuses a change that is not additive. An
+  intended tightening rewrites the snapshots in the same commit: `just
+  schemas`.

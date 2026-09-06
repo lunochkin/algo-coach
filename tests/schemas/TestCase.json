@@ -1,0 +1,153 @@
+{
+  "$defs": {
+    "ExpectedSource": {
+      "description": "Which solution computed a case's expected output. Not `SolutionRole`\nunder another name: it answers how strong the case is.",
+      "enum": [
+        "reference",
+        "canonical"
+      ],
+      "title": "ExpectedSource",
+      "type": "string"
+    }
+  },
+  "description": "One case of a generated problem's set. The provenance is the proposing\ncall's rather than the problem's \u2014 `corpus.md` gives why.",
+  "properties": {
+    "args": {
+      "items": {},
+      "title": "Args",
+      "type": "array"
+    },
+    "call_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Call Id"
+    },
+    "cost": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cost"
+    },
+    "effort": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Effort"
+    },
+    "expected": {
+      "title": "Expected"
+    },
+    "expected_from": {
+      "$ref": "#/$defs/ExpectedSource"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model"
+    },
+    "pin": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pin"
+    },
+    "problem_id": {
+      "minLength": 1,
+      "title": "Problem Id",
+      "type": "string"
+    },
+    "prompt_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Prompt Hash"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Provider"
+    },
+    "round": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Round"
+    },
+    "temperature": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Temperature"
+    }
+  },
+  "required": [
+    "id",
+    "problem_id",
+    "expected",
+    "expected_from",
+    "round"
+  ],
+  "title": "TestCase",
+  "type": "object"
+}

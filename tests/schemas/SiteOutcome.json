@@ -1,0 +1,264 @@
+{
+  "$defs": {
+    "CallSite": {
+      "description": "The calls writing a problem takes. `Bench` names one configuration per\nentry, and a test pins the two lists together.",
+      "enum": [
+        "generator",
+        "blind",
+        "discrimination",
+        "inputs",
+        "clock"
+      ],
+      "title": "CallSite",
+      "type": "string"
+    },
+    "Discard": {
+      "enum": [
+        "no_value",
+        "misdeclared",
+        "untested",
+        "disagreed",
+        "unexercised"
+      ],
+      "title": "Discard",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "call_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Call Id"
+    },
+    "cost": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cost"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "detail": {
+      "default": "",
+      "title": "Detail",
+      "type": "string"
+    },
+    "effort": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Effort"
+    },
+    "gate": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Discard"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "killed": {
+      "default": 0,
+      "title": "Killed",
+      "type": "integer"
+    },
+    "largest": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Largest"
+    },
+    "misdeclared": {
+      "default": 0,
+      "title": "Misdeclared",
+      "type": "integer"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model"
+    },
+    "mutants": {
+      "default": 0,
+      "title": "Mutants",
+      "type": "integer"
+    },
+    "offered": {
+      "default": 0,
+      "title": "Offered",
+      "type": "integer"
+    },
+    "pin": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pin"
+    },
+    "problem_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Problem Id"
+    },
+    "prompt_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Prompt Hash"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Provider"
+    },
+    "rounds": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Rounds",
+      "type": "array"
+    },
+    "separating": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Separating"
+    },
+    "site": {
+      "$ref": "#/$defs/CallSite"
+    },
+    "survived": {
+      "default": 0,
+      "title": "Survived",
+      "type": "integer"
+    },
+    "temperature": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Temperature"
+    },
+    "template_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Template Id"
+    },
+    "unseparated": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Unseparated"
+    },
+    "won": {
+      "default": 0,
+      "title": "Won",
+      "type": "integer"
+    },
+    "writing_id": {
+      "minLength": 1,
+      "title": "Writing Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "created_at",
+    "site",
+    "writing_id"
+  ],
+  "title": "SiteOutcome",
+  "type": "object"
+}
