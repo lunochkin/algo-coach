@@ -57,50 +57,84 @@ last.
 
 ## Writing
 
-Docs, `README.md`, commits, comments.
+Docs, `README.md`, commits.
 
-- Shortest form that keeps the reason. Cut restating, hedging, and any
-  sentence that only rephrases the one before.
+- Write for a reader who opens this file first and has not read the others.
+  Prefer the explicit sentence over the short one. Two faults, tested
+  separately:
+  - A sentence is wordy if deleting it loses no fact. Delete it. This covers
+    restating, hedging, and a reason given twice.
+  - A sentence is dense if the reader needs another section to know what a
+    noun refers to. Name the noun. This costs a few words, not a paragraph.
 - **No aphorisms.** State the rule, then the reason, both literally. Don't
   compress an argument into a metaphor the reader has to unpack.
 - **Name what every noun refers to.** A noun the doc has not defined — `the
   work`, `the point`, `the product`, `the unit` — means the sentence restates
   the previous one in more abstract words rather than adding a fact. Cut it,
   or name what it stands for.
-- **A bullet ends on its reason, never on a summary.** A closing clause that
-  can be deleted without losing a fact is a summary. Check the last sentence
-  of every bullet against the test above.
+- **Every word this project gives its own meaning is an entry in
+  `docs/architecture/README.md` `## Terminology`.** A file uses the word
+  without redefining it. A word not there is defined in the sentence that
+  introduces it, or added to the glossary. `the clock`, `the bench`, `the
+  walk` are each defined in one file and used in four, so a reader of the
+  fourth file cannot resolve them.
+- **Repeat the noun instead of `one`, `it`, `that`, `the two`, `either`.** A
+  pronoun two sentences after its noun is resolved by the writer and guessed
+  by the reader.
+- **No cleft sentences.** Not "What a site left is stored", not "The reference
+  is what discards". Write the subject, the verb, the object: "Each site's
+  outcome is stored", "The reference discards the problem".
+- **Contrast is not the default form.** "X, never Y", "X rather than Y" and
+  "as a claim does" each assume the reader knows Y. State X on its own first.
+  Add the contrast only where Y is a mistake a reader would otherwise make,
+  and name Y in full when you do.
+- **A sentence does not open with `What`, `Where`, `Neither`, `Both` or
+  `Nothing`.** Each of these fronts an abstraction and delays the subject to
+  the end. Start with the concrete noun the sentence is about.
+- **A bullet ends on its reason.** A closing clause that can be deleted
+  without losing a fact is a summary. Check the last sentence of every bullet
+  against that test.
 - **No personification.** Records don't wear, ride, go quiet, or flatter. Say
   what the code does.
 - **One idea per sentence.** Split at the em-dash and the semicolon instead
   of chaining. Target 25 words; nothing over 40.
-- **A TODO item is a task someone can finish**, not a statement about the
-  system. An item that only asserts what is true has nothing to do and never
-  gets ticked. State it in `docs/architecture/` instead.
+- Precise technical terms are unaffected — `append-only`, `digest`,
+  `denominator`, `supersede`. Use the exact term.
+
+Aphorism, before: "A blank string is the same absence wearing a value, so it
+is rejected too."
+After: "A blank string is rejected too. It passes a presence check while
+carrying nothing."
+
+Dense, before: "What a site left is stored rather than only printed. A run's
+stage lines end with the process. The gate that rejected an answer, the
+configuration behind it and the digest it was sent are readable nowhere else."
+After: "Each site's outcome is stored, not only printed. The run prints one
+line per stage, and that output is gone when the process ends. Without a
+stored record, nobody can later see which gate rejected an answer, which
+configuration produced it, or which prompt digest it was sent."
+
+### TODO items
+
+- **A TODO item is a task someone can finish.** An item that only asserts
+  what is true about the system has nothing to do and never gets ticked.
+  State it in `docs/architecture/` instead.
 - **An item opens with an imperative verb**: write, add, run, measure, delete,
   rename. A noun phrase names a topic, and a reader cannot tell whether the
   work is to build it, decide it or check it.
 - **An item names what exists when it is done** — a file, a field, a passing
   test, a number written down. Without that, two readers tick it at different
   points, and the phase closes on whichever read it loosest.
-- **An investigation is written as the run and its output**, never as the
-  question. "Whether X holds is what decides Y" is a statement; the task is to
-  run X once and record what it showed. Keep the question in
-  `docs/architecture/` if it needs stating at all.
+- **An investigation is written as the run and its output.** "Whether X holds
+  is what decides Y" is a statement; the task is to run X once and record what
+  it showed. Keep the question in `docs/architecture/` if it needs stating at
+  all.
 - **A TODO item is one or two lines, rarely three.** It names what to do and
   the one reason that is not obvious from the name. The argument behind it
   belongs in `docs/architecture/`, and the record of how it went
   belongs in the commit.
-- **Split before you compress.** An item carrying two decisions becomes two
-  items, not one dense paragraph. Each is then checkable on its own, and one
-  can land while the other is still open.
-- Precise technical terms are unaffected — `append-only`, `digest`,
-  `denominator`, `supersede`. Density comes from those, not from clause count.
-
-Before: "A blank string is the same absence wearing a value, so it is
-rejected too."
-After: "A blank string is rejected too. It passes a presence check while
-carrying nothing."
+- **An item carrying two decisions becomes two items.** Each is then
+  checkable on its own, and one can land while the other is still open.
 
 ## Code style
 

@@ -21,15 +21,176 @@ Python-shaped, and a second language is a runner rather than a record change.
 
 ## Terminology
 
-- **Attempt** — a user's solution to a problem, successful or failed.
+Words this project gives its own meaning. The files beside this one use them
+without redefining them. Grouped by the file that specifies the record.
+
+### Content
+
+- **Technique** — one entry in the vocabulary of skills the log references. A
+  procedure, a structure, a paradigm or a problem class. Shipped as code.
+- **Vocabulary** — every technique, each with the criterion for claiming it.
+- **Card** — the study material for one technique: what to read, the
+  templates to reproduce from memory, and a selector for problems to solve.
+- **Template** — one form of a technique, authored on a card, that a user
+  reproduces from memory. Core by default.
+- **Capstone** — a card's one optional template, shown only on request.
+- **Recognition cue** — the field on a card or a template saying when to reach
+  for the technique or the form. Withheld during a probe.
+- **Speedup** — a flag on a template saying its form is faster than the naive
+  approach the technique replaces.
+- **Selector** — a technique plus filters, on a card. The ladder is derived
+  from it.
+- **Ladder** — the problems a card has the user solve, derived from template
+  matches and the selector. Never stored.
+- **Rung** — one problem on a ladder. Required when it covers a core template.
+- **Probe** — a problem assigned when a card is started, testing whether the
+  form is recognised unprompted. Never drawn from the ladder.
+- **Template match** — a record saying one solution displays one template.
+  Written by the generator, the matcher or by hand.
+- **Matcher** — the model call reading a canonical beside its statement and
+  naming the templates it displays.
+- **Annotation** — a template match or technique reading written by hand. It
+  stands over both machine sources.
+
+### Corpus
+
+- **Problem** — a statement, its test cases and its solutions, written by the
+  engine. Never edited; only its status moves.
+- **Statement** — the prose a solver is served. It carries the signature of
+  `solve`, the fixed name of the function every solution defines.
+- **Test case** (case) — positional arguments and an expected return. The
+  case set is every case a problem carries, appended to and never revised.
+- **Brief** — what a problem must be solvable by: a template, naming the form,
+  or a technique, naming only the skill.
 - **Canonical solution** — an exemplary solution, written to display the
   approach rather than to pass.
 - **Reference solution** — a solution written from the statement alone.
-  Correct, and deliberately not exemplary.
-- **Verification** — executing a solution against a problem's test cases,
-  yielding pass or fail. An attempt or a generated solution in either role.
-- **Diagnosis** — classifying why an attempt failed. A `Diagnosis` record
-  stores the result.
+  Correct, and deliberately not exemplary. It computes the expected returns.
+- **Naive solution** (the clock) — the approach the template's form replaces,
+  written told which form to avoid. The speedup search times the canonical
+  against it. The code names its site `clock`.
+- **Role** — which of the three a solution is: canonical, reference or naive.
+  Stored, since all three pass the same cases.
+- **Verification** — executing a solution against a problem's cases. A
+  `Verification` record stores one run, with a case outcome per case: passed,
+  wrong, timed out or crashed.
+- **Cap** — the wall-clock limit on one `solve` call, measured in the child
+  process. Generation's cap sits well above the sitting's.
+- **Technique reading** (reading) — a machine record naming the techniques a
+  canonical used. A problem's techniques are folded from these.
+- **Announcement floor** — the measurement of how often a statement names its
+  own form. It clears a created problem or retires it as telegraphed.
+- **Telegraphed** — a retirement reason: the statement names the approach.
+- **Defective** — a retirement reason: the statement asks for something its
+  cases do not decide.
+- **Enumeration** — a pass over a landed problem proposing other approaches,
+  each generated as a further canonical.
+- **Calibration corpus** — the platform problems and attempts under
+  `data/old/`, kept for measuring the announcement floor.
+
+### Generating a problem
+
+- **Site** (call site) — one of the five model calls writing a problem, each
+  at its own configuration: generator, blind, inputs, naive and
+  discrimination.
+- **Generator** — the site writing the statement, the canonical and the first
+  cases in one call.
+- **Blind site** — the site writing the reference from the statement alone.
+- **Inputs site** — the site writing the input generator.
+- **Input generator** (the builder) — model-written code building an input of
+  a given size and seed.
+- **Bound** — the largest input the statement admits, as the builder's `size`
+  counts it.
+- **Naive site** — the site writing the naive solution.
+- **Discrimination site** — the site asked for cases that kill the surviving
+  mutants.
+- **Bench** — the configuration of each site a run is aimed with, from the
+  `--site` flags or the built-in default.
+- **Draft** — a problem being written, stored at every state so a failed step
+  can resume. Cleared at landing.
+- **Writing state** — how far a draft got: drafted, checked, referenced,
+  agreed, built, paced, searched, hardened, landed, or rejected.
+- **Gate** — a check a draft must pass to advance. A failed gate rejects the
+  draft or holds it, and is named on the site outcome.
+- **Rejected** — a draft's terminal state. The gate names why: `no_value`,
+  `untested`, `disagreed` or `unexercised`.
+- **Held** — a draft stopped at a state a resume can re-enter.
+- **Landing** — the last step: the problem, its cases, its solutions and the
+  generator's template match are stored together.
+- **Resume** — `generate --resume`: re-entering every held draft at the first
+  step whose configuration or digest moved.
+- **Mutant** — the canonical with one semantic change made on the parsed tree.
+  A tree walk enumerates them; nothing stores them.
+- **Kill** — a mutant failing at least one case, or answering a built input
+  differently from the canonical.
+- **Survivor** — a mutant no case and no built input killed.
+- **Fuzz pass** — running the survivors against inputs the input generator
+  builds. Costs no call.
+- **Shrink** — reducing a kept fuzz input to the smallest list still killing
+  the same mutants.
+- **Round** — one discrimination call, proposing cases for the survivors. At
+  most two per draft.
+- **Mutation loop** — the fuzz pass and the rounds together.
+- **Speedup search** (the search) — finding the smallest input on which the
+  naive solution exceeds the sitting's cap and the canonical does not. The
+  walk is the sequence of sizes it tries.
+- **Separating case** — the case stored at the size the search found.
+  Appended after the loop, naming no round.
+- **Ceiling** — 64 KiB, the most a stored case may weigh.
+- **Site outcome** — the record of what one site left on one attempt at
+  writing a problem: the gate, the counters and the configuration.
+- **Writing id** — the id a run mints per attempt at writing a problem. The
+  draft and its site outcomes share it.
+- **Replay** — running the four answering sites over stored problems at a new
+  bench. It writes nothing to the corpus.
+
+### Machine records
+
+- **Machine record** — any record a model wrote: a claim, a match, a reading,
+  a solution, a case's arguments. It carries provenance whole.
+- **Configuration** — model, effort, endpoint pin and temperature.
+- **Provenance** — the configuration, the digest of what was sent and the call
+  that sent it.
+- **Pin** — the endpoint a model id is fixed to, so one build answers.
+- **Digest** — the hash of the prompt a record was sent. Staleness keys on it.
+- **Stale** — a record whose digest differs from the one its site would send
+  now. A re-run reads stale items and skips the rest.
+- **Greedy** / **sampled** — temperature zero, or the provider's default. The
+  answering sites are greedy; the generator and the naive site are sampled.
+- **Call** — one request to a model and its response, domain-free. The call
+  log holds every one.
+
+### The log
+
+- **Attempt** — a user's solution to a problem, successful or failed.
+- **Sitting** — one timed session on one problem in the drill loop. It may
+  mint several attempts.
+- **Drill loop** — the practice flow: pick a technique and a problem, read the
+  card, solve, then answer the claim and the label.
+- **Technique claim** (claim) — a record naming the techniques an attempt
+  used. The user's stands over the classifier's.
+- **Classifier** — the model call reading an attempt's code for the
+  techniques it used.
+- **Decline** — a claim stating that none of the candidates apply. Distinct
+  from an empty claim, which answers nothing.
+- **Fallback** — the problem's own techniques, answering an attempt no claim
+  covers.
+- **Self-label** — the user's own verdict on why an attempt went the way it
+  did.
+- **Diagnosis** — the machine's verdict on why an attempt failed. A
+  `Diagnosis` record stores it.
+- **Card run** — the record that a card was started, and the probes it was
+  given.
+- **Recall attempt** — one template reproduced from memory, with the hints
+  taken.
+- **Board** — the per-technique view of progress, derived from attempts and
+  claims. Never stored.
+- **Mastery** — what a user can solve, per technique. Derived from the board's
+  inputs, never stored.
+- **Eval set** — the hand-claimed attempts a classifier configuration is
+  scored against.
+- **Adjudication** — resolving each divergence between the user's blind claims
+  and a frontier model's readings, by editing the criterion or the claim.
 
 ## Where the rest lives
 
