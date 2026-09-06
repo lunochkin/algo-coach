@@ -1,9 +1,8 @@
 """The matcher over the corpus."""
 
 from collections.abc import Callable, Iterable, Sequence
-from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.matches.matcher import DEFAULT, candidates, match, request_hash
@@ -27,7 +26,7 @@ class Progress(BaseModel):
     total: int
     card_slug: str
     title: str  # the problem the solution answers
-    templates: list[str] = Field(default_factory=list)  # the slugs it matched
+    templates: list[str] = []  # the slugs it matched
     reason: str | None = None  # the failure, when there was one
 
 
@@ -35,7 +34,7 @@ class MatchResult(BaseModel):
     asked: int = 0  # calls made, one per card and solution
     matched: int = 0  # pairs recorded as exercised
     unmatched: int = 0  # pairs recorded as not; stored, or every re-run re-tests them
-    failed: list[Failed] = Field(default_factory=list)
+    failed: list[Failed] = []
     aborted: bool = False
 
     @property
@@ -119,7 +118,13 @@ def match_corpus(
         asking = outstanding(asking, log.matches(), hashes, configuration=configuration)
     asking = asking[:limit]
 
-    def report(index: int, question: Question, **verdict: Any) -> None:
+    def report(
+        index: int,
+        question: Question,
+        *,
+        templates: Sequence[str] = (),
+        reason: str | None = None,
+    ) -> None:
         if on_progress is not None:
             on_progress(
                 Progress(
@@ -127,7 +132,8 @@ def match_corpus(
                     total=len(asking),
                     card_slug=question.card.slug,
                     title=question.problem.title,
-                    **verdict,
+                    templates=list(templates),
+                    reason=reason,
                 )
             )
 

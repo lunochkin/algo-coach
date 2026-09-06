@@ -1,9 +1,8 @@
 """The classifier over the stored log."""
 
 from collections.abc import Callable, Mapping, Sequence
-from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.claims.attribution import standing_claims
@@ -29,7 +28,7 @@ class Progress(BaseModel):
     total: int
     attempt_id: str
     title: str
-    techniques: list[str] = Field(default_factory=list)  # empty when undecided
+    techniques: list[str] = []  # empty when undecided
     reason: str | None = None  # the failure, when there was one
 
 
@@ -37,7 +36,7 @@ class ClassifyResult(BaseModel):
     classified: int = 0
     redone: int = 0  # stale machine claims superseded by this classifier
     undecided: int = 0  # named none of the candidates; the fallback stands
-    failed: list[Failed] = Field(default_factory=list)
+    failed: list[Failed] = []
     aborted: bool = False
 
     @property
@@ -148,11 +147,23 @@ def classify_backlog(
 
     asking = (unclaimed + stale)[:limit]
 
-    def report(index: int, attempt: Attempt, title: str, **verdict: Any) -> None:
+    def report(
+        index: int,
+        attempt: Attempt,
+        title: str,
+        *,
+        techniques: Sequence[str] = (),
+        reason: str | None = None,
+    ) -> None:
         if on_progress is not None:
             on_progress(
                 Progress(
-                    index=index, total=len(asking), attempt_id=attempt.id, title=title, **verdict
+                    index=index,
+                    total=len(asking),
+                    attempt_id=attempt.id,
+                    title=title,
+                    techniques=list(techniques),
+                    reason=reason,
                 )
             )
 

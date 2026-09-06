@@ -2,7 +2,7 @@ from collections import Counter, defaultdict
 from collections.abc import Iterable, Mapping
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from algo_coach.claims import resolve_techniques
 from algo_coach.schema import Attempt, FailureMode, Problem, SelfLabel, TechniqueClaim
@@ -17,7 +17,7 @@ class TechniqueRow(BaseModel):
     last_attempt_at: datetime
     # Only the modes an attempt was labelled with; an unlabelled attempt
     # counts toward the row and toward no mode.
-    self_labels: dict[FailureMode, int] = Field(default_factory=dict)
+    self_labels: dict[FailureMode, int] = {}
 
     @property
     def unsolved_count(self) -> int:

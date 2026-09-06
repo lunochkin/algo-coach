@@ -2,7 +2,7 @@
 inputs site. `corpus.md` gives what a separating size means."""
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, cast
 
 from algo_coach.generation.checks import (
     Checked,
@@ -37,7 +37,7 @@ def make(code: str, cap_ms: int, *, seed: int = SEARCH_SEED) -> Callable[[int], 
         [args] = outputs(code, [[size, seed]], cap_ms=cap_ms)
         if isinstance(args, NoValue) or not isinstance(args, list):
             raise GenerationError(f"the input generator built nothing at size {size}")
-        return args
+        return cast(list[Any], args)
 
     return built
 

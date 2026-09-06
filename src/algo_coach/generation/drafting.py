@@ -1,8 +1,6 @@
 """Moving a draft between the states of the writing. The store is working
 state, so a draft is revised in place, and it moves forward only."""
 
-from typing import Any
-
 from algo_coach.drafts import DraftStore
 from algo_coach.generation.checks import (
     Discard,
@@ -14,7 +12,9 @@ from algo_coach.schema import (
 )
 
 
-def advanced(drafts: DraftStore | None, draft: Draft, state: WritingState, **fields: Any) -> Draft:
+def advanced(
+    drafts: DraftStore | None, draft: Draft, state: WritingState, **fields: object
+) -> Draft:
     """Forward only: a resume takes the local steps before the one it starts
     at, and a draft moved back would re-pay the calls it already holds if the
     run then died."""
@@ -53,7 +53,7 @@ def swept(drafts: DraftStore | None) -> None:
             drafts.remove(draft.id)
 
 
-def moved(draft: Draft, state: WritingState, **fields: Any) -> Draft:
+def moved(draft: Draft, state: WritingState, **fields: object) -> Draft:
     """Revised in place rather than appended: the draft store is working state,
     and a step's answer moves the draft it was written on."""
     return Draft.model_validate(draft.model_dump() | {"state": state} | fields)

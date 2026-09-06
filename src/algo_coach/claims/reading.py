@@ -16,11 +16,11 @@ from algo_coach.schema import Attempt, Call, Configuration, Problem, TechniqueCl
 
 
 class ReadResult(BaseModel):
-    verdicts: dict[str, list[str]] = Field(default_factory=dict)  # attempt id -> techniques
+    verdicts: dict[str, list[str]] = {}  # attempt id -> techniques
     read: int = 0  # attempts this run paid a call for
     reused: int = 0  # answered from a stored reading
     undecided: int = 0  # named no candidate: stored, and never scored
-    failed: list[Failed] = Field(default_factory=list)
+    failed: list[Failed] = []
     aborted: bool = False
     # A reading stored before the price was recorded carries none and is left
     # out of both, so the mean is over what is known.
@@ -28,7 +28,7 @@ class ReadResult(BaseModel):
     costed: int = 0
     # Ids, not the token counts: a claim carries none, and a report joins them
     # from the call log.
-    call_ids: list[str] = Field(default_factory=list)
+    call_ids: list[str] = []
 
 
 class Plan(BaseModel):
@@ -36,7 +36,7 @@ class Plan(BaseModel):
     so one consumer drives several of them, appending on its own thread."""
 
     configuration: Configuration
-    asking: list[Attempt] = Field(default_factory=list)  # newest first, after `limit`
+    asking: list[Attempt] = []  # newest first, after `limit`
     result: ReadResult = Field(default_factory=ReadResult)
     answered: int = 0  # of `asking`, however the answer went
     consecutive: int = 0  # failures since the last answer

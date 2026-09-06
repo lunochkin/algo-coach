@@ -49,8 +49,8 @@ class Disagreement:
 
 @dataclass(frozen=True)
 class Settled:
-    cases: list[SettledCase] = field(default_factory=list)
-    disagreements: list[Disagreement] = field(default_factory=list)
+    cases: list[SettledCase] = field(default_factory=list[SettledCase])
+    disagreements: list[Disagreement] = field(default_factory=list[Disagreement])
 
     @property
     def agreed(self) -> bool:

@@ -8,6 +8,9 @@ from pydantic import BaseModel, Field, model_validator
 
 from algo_coach.schema.provenance import MachineProvenance
 
+# what a case's arguments and return are made of: what JSON can carry
+type Json = None | bool | int | float | str | list[Json] | dict[str, Json]
+
 
 class ExpectedSource(StrEnum):
     """Which solution computed a case's expected output. Not `SolutionRole`
@@ -23,7 +26,7 @@ class TestCase(MachineProvenance):
 
     id: str
     problem_id: str = Field(min_length=1)
-    args: list[Any] = Field(default_factory=list)  # positional; empty is legal
+    args: list[Any] = []  # positional; empty is legal
     expected: Any  # required: `None` is a value a solution may return, so absence cannot stand in
     expected_from: ExpectedSource  # required; `mint.case` carries the rule
     # `0` is the set written with the statement; absent is a case no round won

@@ -45,7 +45,7 @@ class DraftCase(BaseModel):
 
     @field_validator("args", "expected", mode="before")
     @classmethod
-    def _decoded(cls, value: Any) -> Any:
+    def _decoded(cls, value: object) -> object:
         # strict structured output cannot express an unconstrained JSON value,
         # so the two arrive as text and are checked here, not by the provider
         return json.loads(value) if isinstance(value, str) else value
@@ -101,7 +101,7 @@ class Draft(BaseModel):
     reference: str | None = Field(default=None, min_length=1)
     # agreed: what the two solutions settled, where `declared` holds what the
     # generator's own call said each case returns
-    cases: list[SettledCase] = Field(default_factory=list)
+    cases: list[SettledCase] = []
     # built: the code that builds an input of a given size, and the largest
     # size the statement admits
     builder: str | None = Field(default=None, min_length=1)
@@ -118,7 +118,7 @@ class Draft(BaseModel):
     # hardened: what the loop appended to the set — the inputs the fuzz pass
     # kept, then the cases the rounds won. Neither lands where it killed
     # nothing, so this is what the step was paid for
-    won: list[SettledCase] = Field(default_factory=list)
+    won: list[SettledCase] = []
 
     # the configuration each step ran at, copied as its call returned. A resume
     # starts at the first step whose configuration or digest moved, which is

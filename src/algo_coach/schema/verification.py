@@ -13,7 +13,7 @@ class Verification(BaseModel):
     solution_id: str = Field(min_length=1)  # in either role
     timeout_ms: int = Field(gt=0)  # the per-case cap that decided any `TIMEOUT`
     runner: str = Field(min_length=1)  # backend and interpreter, opaque; never parsed
-    results: list[CaseResult] = Field(default_factory=list)  # one entry per case run
+    results: list[CaseResult] = []  # one entry per case run
 
     @property
     def outcome(self) -> CaseOutcome | None:

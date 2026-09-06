@@ -32,7 +32,7 @@ def queued(plans: Sequence[Plan]) -> Iterator[tuple[Plan, Attempt]]:
     """
     queues = [(plan, iter(plan.asking)) for plan in plans]
     while queues:
-        alive = []
+        alive: list[tuple[Plan, Iterator[Attempt]]] = []
         for plan, queue in queues:
             if plan.result.aborted:
                 continue
@@ -133,7 +133,9 @@ def score_backlog(
     readings = [plan.result for plan in plans]
 
     common = (
-        set.intersection(*(set(reading.verdicts) for reading in readings)) if readings else set()
+        set[str].intersection(*(set(reading.verdicts) for reading in readings))
+        if readings
+        else set[str]()
     )
     # The whole eval set, not the intersection: `score` and `per_decision` both
     # skip an attempt a configuration has no verdict for, so each is measured

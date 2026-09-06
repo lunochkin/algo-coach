@@ -129,7 +129,7 @@ class Annotating(App[None]):
 
     def listing(self) -> str:
         """The card's forms, which is picked, and which is in the code pane."""
-        lines = []
+        lines: list[str] = []
         # Widest slug of this card's, since a fixed width wraps the cue on one
         # card and wastes the pane on another.
         width = max(len(form.slug) for form in self.forms)

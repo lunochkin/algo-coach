@@ -8,6 +8,7 @@ what the case at that size returns.
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
+from functools import partial
 from typing import Any
 
 from algo_coach.generation.agreement import Disagreement, settle
@@ -165,7 +166,9 @@ def _settled(
     if not ran.returned:
         return Searched(missing=Missing.CANONICAL_FAILED)
 
-    measured = {"size": size, "canonical_ms": ran.elapsed_ms, "naive_ms": naive_ms}
+    # carried onto every answer from here: the speedup is established at this
+    # size whether or not a case is stored
+    measured = partial(Searched, size=size, canonical_ms=ran.elapsed_ms, naive_ms=naive_ms)
     # the reference rather than the clock: what a case stores is the answer of
     # the solution written from the statement alone, whichever one was timed.
     # Settled as the first case set is, and by no round: the search runs after
@@ -175,17 +178,13 @@ def _settled(
         [args], canonical=[ran.value], reference=[answered(theirs)], written=written, round=None
     )
     if not settled.agreed:
-        return Searched(
-            missing=Missing.DISAGREED, disagreement=settled.disagreements[0], **measured
-        )
+        return measured(missing=Missing.DISAGREED, disagreement=settled.disagreements[0])
 
-    # the returned value weighs on the case as the arguments do. `measured` is
-    # carried: the speedup is established at this size, and only the case is
-    # not
+    # the returned value weighs on the case as the arguments do
     (case,) = settled.cases
     if weighs(case.args) + weighs(case.expected) > ceiling:
-        return Searched(missing=Missing.CASE_TOO_LARGE, **measured)
-    return Searched(case=case, **measured)
+        return measured(missing=Missing.CASE_TOO_LARGE)
+    return measured(case=case)
 
 
 def _paces(

@@ -41,9 +41,9 @@ class Ran:
 
     outcome: CaseOutcome | None
     slowest_ms: int | None = None
-    returned: list[Any] = field(default_factory=list)
+    returned: list[Any] = field(default_factory=list[Any])
     discard: Discard | None = None
-    misdeclarations: list[Misdeclaration] = field(default_factory=list)
+    misdeclarations: list[Misdeclaration] = field(default_factory=list[Misdeclaration])
 
     @property
     def survived(self) -> bool:
@@ -62,9 +62,9 @@ class Checked:
     # paces its cap by it rather than running the canonical again
     slowest_ms: int | None = None
     discard: Discard | None = None
-    cases: list[SettledCase] = field(default_factory=list)
-    misdeclarations: list[Misdeclaration] = field(default_factory=list)
-    disagreements: list[Disagreement] = field(default_factory=list)
+    cases: list[SettledCase] = field(default_factory=list[SettledCase])
+    misdeclarations: list[Misdeclaration] = field(default_factory=list[Misdeclaration])
+    disagreements: list[Disagreement] = field(default_factory=list[Disagreement])
 
     @property
     def survived(self) -> bool:
@@ -144,18 +144,29 @@ def agree(
     args = [case.args for case in cases]
     theirs = outputs(reference, args, cap_ms=cap_ms)
     settled = settle(args, canonical=ran.returned, reference=theirs, written=written)
+
     # carried rather than dropped at the gate it no longer is: the count is
     # what the generator's own record is scored on
-    kept = {
-        "outcome": ran.outcome,
-        "slowest_ms": ran.slowest_ms,
-        "misdeclarations": ran.misdeclarations,
-    }
+    def checked(
+        *,
+        discard: Discard | None = None,
+        cases: list[SettledCase] | None = None,
+        disagreements: list[Disagreement] | None = None,
+    ) -> Checked:
+        return Checked(
+            outcome=ran.outcome,
+            slowest_ms=ran.slowest_ms,
+            misdeclarations=ran.misdeclarations,
+            discard=discard,
+            cases=cases or [],
+            disagreements=disagreements or [],
+        )
+
     if not settled.agreed:
-        return Checked(**kept, discard=Discard.DISAGREED, disagreements=settled.disagreements)
+        return checked(discard=Discard.DISAGREED, disagreements=settled.disagreements)
     if not settled.tested:
-        return Checked(**kept, discard=Discard.UNTESTED)
-    return Checked(**kept, cases=settled.cases)
+        return checked(discard=Discard.UNTESTED)
+    return checked(cases=settled.cases)
 
 
 __all__ = [

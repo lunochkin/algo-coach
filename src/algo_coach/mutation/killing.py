@@ -7,7 +7,7 @@ from typing import Any, Protocol
 
 from algo_coach.mutation.mutants import Mutant
 from algo_coach.runner import decide, run
-from algo_coach.schema import CaseOutcome
+from algo_coach.schema import CaseOutcome, Json
 
 # how many times the loop asks for cases before it stops. `corpus.md` gives why
 ROUNDS = 2
@@ -26,7 +26,7 @@ class Case(Protocol):
     @property
     def args(self) -> Sequence[Any]: ...
     @property
-    def expected(self) -> Any: ...
+    def expected(self) -> Json: ...
 
 
 @dataclass(frozen=True)

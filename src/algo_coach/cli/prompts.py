@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import NamedTuple
 
 
@@ -12,7 +13,12 @@ NONE = "none of these"
 
 
 def ask_choice(
-    what: str, options: list, default: list[str], *, empty: str = "skip", none: str | None = None
+    what: str,
+    options: Sequence[object],
+    default: list[str],
+    *,
+    empty: str = "skip",
+    none: str | None = None,
 ) -> Answer | None:
     """One prompt over a numbered list. `None` on EOF or a skip.
 
@@ -39,5 +45,5 @@ def ask_choice(
         print(f"  pick numbers between 1 and {len(options)}{zero}, or a, or s")
 
 
-def numbered(items: list) -> str:
+def numbered(items: Sequence[object]) -> str:
     return "   ".join(f"{index} {item}" for index, item in enumerate(items, start=1))

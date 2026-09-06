@@ -24,7 +24,7 @@ from algo_coach.schema import Call, Configuration, MachineProvenance, SettledCas
 class Hardened:
     """What the rounds won, and what the set still does not catch."""
 
-    cases: list[SettledCase] = field(default_factory=list)
+    cases: list[SettledCase] = field(default_factory=list[SettledCase])
     mutants: int = 0
     survived: int = 0  # mutants no case killed when the loop stopped
     rounds: int = 0  # rounds paid for, at one call each
@@ -32,7 +32,7 @@ class Hardened:
     # which source killed what, so a report can say whether a round earned its
     # call: the set the loop was given, then one entry per round it played
     declared: int = 0
-    caught: list[int] = field(default_factory=list)
+    caught: list[int] = field(default_factory=list[int])
     # the last round's call, which is what the counters above were left
     # by. `None` where the first case set killed every mutant
     call: Call | None = None

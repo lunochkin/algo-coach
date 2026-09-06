@@ -3,7 +3,7 @@ where the matcher is parallel — `flows.md` gives why."""
 
 from collections.abc import Callable, Sequence
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.drafts import DraftStore
@@ -87,7 +87,7 @@ class Progress(BaseModel):
     # pass's built inputs, and one entry per round
     declared: int = 0
     fuzzed: int = 0
-    caught: list[int] = Field(default_factory=list)
+    caught: list[int] = []
     unmeasured: str | None = None  # the round's call failed, and the set is unmeasured
     # what this problem's calls cost, over every site and every round. Absent
     # where the provider priced none of them
@@ -116,12 +116,12 @@ class Held(BaseModel):
 
 
 class GenerationResult(BaseModel):
-    drafted: list[Draft] = Field(default_factory=list)
+    drafted: list[Draft] = []
     # written whole and demonstrating nothing, so held until a resume separates
     # it, the template's `speedup` is corrected, or it is rejected
-    held: list[Held] = Field(default_factory=list)
-    discarded: list[Discarded] = Field(default_factory=list)
-    failed: list[Failed] = Field(default_factory=list)
+    held: list[Held] = []
+    discarded: list[Discarded] = []
+    failed: list[Failed] = []
     aborted: bool = False
 
 

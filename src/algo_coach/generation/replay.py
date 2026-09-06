@@ -9,7 +9,7 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.generation.bench import BENCH, Bench
@@ -66,7 +66,7 @@ class ReplayResult(BaseModel):
     asked: int = 0  # pairs a call was paid for
     skipped: int = 0  # pairs this configuration had already answered
     unasked: int = 0  # pairs with nothing to ask about, at no cost
-    failed: list[Failed] = Field(default_factory=list)
+    failed: list[Failed] = []
     aborted: bool = False
 
 
@@ -98,7 +98,7 @@ class Asked:
 
     call: Call | None = None
     # whichever site's, so typed as a mapping rather than as one site's record
-    verdicts: Mapping[str, Any] = field(default_factory=dict)
+    verdicts: Mapping[str, Any] = field(default_factory=dict[str, Any])
     skipped: bool = False
 
 
@@ -111,7 +111,7 @@ def subjects(corpus: Corpus, cards: Iterable[Card]) -> list[Subject]:
     forms = {one.id: one for card in cards for one in card.templates}
     solutions = corpus.solutions.solutions()
     cases = corpus.cases.cases()
-    found = []
+    found: list[Subject] = []
     for problem in corpus.problems.all():
         if problem.status is ProblemStatus.RETIRED:
             continue

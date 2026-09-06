@@ -1,6 +1,7 @@
 from collections.abc import Iterable, Mapping
+from typing import Any
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, ValidationError
 
 from algo_coach.cards.store import CardStore
 from algo_coach.ids import new_id
@@ -16,7 +17,7 @@ class Rejected(BaseModel):
 class CardSeedResult(BaseModel):
     ingested: int = 0
     updated: int = 0  # a slug already seeded; the card refreshes, its id stays
-    rejected: list[Rejected] = Field(default_factory=list)
+    rejected: list[Rejected] = []
 
 
 def reason(exc: ValidationError) -> str:
@@ -27,7 +28,7 @@ def reason(exc: ValidationError) -> str:
     )
 
 
-def seed_cards(records: Iterable[Mapping], *, store: CardStore) -> CardSeedResult:
+def seed_cards(records: Iterable[Mapping[str, Any]], *, store: CardStore) -> CardSeedResult:
     """Validate authored cards, mint what identifies them, upsert each one.
 
     Records rather than paths: the caller owns where the content lives. The

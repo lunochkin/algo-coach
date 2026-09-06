@@ -38,7 +38,7 @@ asyncio_mode = "auto"
 [tool.pyright]
 include = ["src"]
 pythonVersion = "3.14"
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"
 
 [tool.importlinter]
 root_package = "algo_coach"
@@ -104,7 +104,8 @@ forbidden_modules = ["algo_coach.cli"]
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "W", "F", "I", "UP", "B", "SIM"]
+# ANN401: `Any` in a signature is a decision, made where the value really is any
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "ANN401"]
 
 [build-system]
 requires = ["hatchling"]

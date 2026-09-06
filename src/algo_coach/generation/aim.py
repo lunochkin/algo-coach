@@ -29,7 +29,7 @@ def targets(
     """A target per gap, in the order the gap report lists them."""
     cards = list(cards)
     by_slug = {card.slug: card for card in cards}
-    aimed = []
+    aimed: list[Target] = []
     for gap in uncovered(coverage(cards, problems, solutions, matches)):
         card = by_slug[gap.card_slug]
         template = next(one for one in card.templates if one.id == gap.template_id)

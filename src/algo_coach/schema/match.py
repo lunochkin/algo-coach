@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import Field, model_validator
+from pydantic import model_validator
 
 from algo_coach.schema.provenance import MachineProvenance
 
@@ -22,7 +22,7 @@ class TemplateMatch(MachineProvenance):
     solution_id: str
     matched: bool  # a negative is stored, or every re-run re-tests every non-match
     source: MatchSource
-    informed_by: list[str] = Field(default_factory=list)  # calls its author saw, not provenance
+    informed_by: list[str] = []  # calls its author saw, not provenance
 
     @model_validator(mode="after")
     def _provenance_matches_source(self) -> TemplateMatch:

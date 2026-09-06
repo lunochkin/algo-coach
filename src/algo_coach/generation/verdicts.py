@@ -3,7 +3,7 @@ reads it. `machine.md` gives what the records carry."""
 
 from typing import TypedDict
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from algo_coach.generation.checks import (
     Checked,
@@ -67,7 +67,7 @@ class Bar(BaseModel):
     # which source killed what, each written on the site whose output did it
     declared: int = 0
     fuzzed: int = 0
-    caught: list[int] = Field(default_factory=list)
+    caught: list[int] = []
     # the last round's call, which is what the counters were left by. Absent
     # where nothing reached a round
     call: Call | None = None

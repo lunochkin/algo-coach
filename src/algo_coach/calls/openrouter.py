@@ -6,7 +6,7 @@ dropped."""
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, replace
-from typing import Any
+from typing import Any, cast
 
 from algo_coach.calls.transport import MAX_TOKENS, ProviderError, Reply, Retry, Trace, stamp
 
@@ -48,19 +48,21 @@ def unrouted(exc: Exception) -> bool:
     return status(exc) == 404 and UNROUTED in str(exc).lower()
 
 
-def failure(error: Any) -> tuple[str, int | None]:
+def failure(error: object) -> tuple[str, int | None]:
     """A provider's error body as a message and, where it gave one, a code."""
     if isinstance(error, dict):
-        return str(error.get("message") or error), error.get("code")
+        body = cast(dict[str, Any], error)
+        return str(body.get("message") or body), body.get("code")
     return str(error or "no choices returned"), None
 
 
-def extra(obj: Any, name: str) -> Any:
+def extra(obj: object, name: str) -> Any:  # noqa: ANN401 - the SDK does not model it
     """A field the SDK does not model: OpenRouter's own additions arrive beside
     the typed ones."""
-    value = getattr(obj, name, None)
+    value: Any = getattr(obj, name, None)
     if value is None:
-        value = (getattr(obj, "model_extra", None) or {}).get(name)
+        extras = cast(dict[str, Any], getattr(obj, "model_extra", None) or {})
+        value = extras.get(name)
     return value or None
 
 
@@ -114,13 +116,13 @@ class OpenRouter:
             **request,
         )
 
-    def send(self, *, pin: str, **request: Any) -> Reply:
+    def send(self, *, pin: str, model: str, **request: object) -> Reply:
         """One reading, repeated while the endpoint answers with a reason to
         ask again, and raised on the first try otherwise."""
         rerouted = False  # the one retry an unrouted 404 is given
         for tries, pause in enumerate(BACKOFF, start=1):
             try:
-                return self.once(tries, **request)
+                return self.once(tries, model=model, **request)
             except Exception as exc:
                 if unrouted(exc) and not rerouted:
                     # the shortest wait: what this asks is whether the router's
@@ -130,9 +132,9 @@ class OpenRouter:
                     of = len(BACKOFF) + 1
                 else:
                     raise
-                self.held(exc, pin=pin, model=request["model"], tries=tries, of=of, pause=pause)
+                self.held(exc, pin=pin, model=model, tries=tries, of=of, pause=pause)
                 time.sleep(pause)
-        return self.once(len(BACKOFF) + 1, **request)
+        return self.once(len(BACKOFF) + 1, model=model, **request)
 
     def held(
         self, exc: Exception, *, pin: str, model: str, tries: int, of: int, pause: float
@@ -151,7 +153,7 @@ class OpenRouter:
                 )
             )
 
-    def once(self, tries: int, **request: Any) -> Reply:
+    def once(self, tries: int, **request: object) -> Reply:
         """One request, timed and counted whether it answers or fails."""
         started = time.monotonic()
         try:
@@ -160,7 +162,7 @@ class OpenRouter:
             stamp(exc, Trace(attempts=tries, request_ms=since(started)))
             raise
 
-    def attempt(self, **request: Any) -> Reply:
+    def attempt(self, **request: object) -> Reply:
         """One request, read into the terms the call log keeps."""
         response = self.client.chat.completions.create(**request)
 
@@ -191,16 +193,16 @@ class OpenRouter:
         )
 
 
-def reasoning(usage: Any) -> int | None:
+def reasoning(usage: object) -> int | None:
     """How much of the completion was spent thinking, where the router said it.
     Absent rather than zero: thinking nothing and not reporting a split
     differ."""
     details = getattr(usage, "completion_tokens_details", None) if usage is not None else None
     if details is None:
         return None
-    value = getattr(details, "reasoning_tokens", None)
+    value: Any = getattr(details, "reasoning_tokens", None)
     if value is None and isinstance(details, dict):
-        value = details.get("reasoning_tokens")
+        value = cast(dict[str, Any], details).get("reasoning_tokens")
     return value
 
 

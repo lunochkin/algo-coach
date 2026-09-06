@@ -88,7 +88,7 @@ class Status:
         return name + standing
 
     def tail(self, row: Row) -> str:
-        parts = []
+        parts: list[str] = []
         if row.holding:
             parts.append(f"held {row.holding:g}s")
         elif row.held:

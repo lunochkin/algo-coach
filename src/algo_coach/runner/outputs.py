@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from algo_coach.runner.execution import CaseRun, RunOutcome, run
+from algo_coach.schema import Json
 
 
 @dataclass(frozen=True)
@@ -25,5 +26,5 @@ def outputs(
     return [answered(each) for each in run(code, args, cap_ms=cap_ms, stop_early=stop_early)]
 
 
-def answered(ran: CaseRun) -> Any:
+def answered(ran: CaseRun) -> Json | NoValue:
     return ran.value if ran.returned else NoValue(ran.outcome)

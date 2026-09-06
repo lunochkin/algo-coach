@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Any
 
 import pytest
 
@@ -72,7 +71,7 @@ class FakeClient:
 
 
 def client(
-    message: Message | None = None, raises: list[Exception] = (), **completion: Any
+    message: Message | None = None, raises: list[Exception] = (), **completion: object
 ) -> FakeClient:
     reply = Completion([Choice(message or Message())], **completion)
     return FakeClient(FakeChat(FakeCompletions(reply, raises=list(raises))))

@@ -17,6 +17,7 @@ from algo_coach.schema import (
     DraftCase,
     ExpectedSource,
     FailureMode,
+    Json,
     MachineProvenance,
     MatchSource,
     Problem,
@@ -221,7 +222,7 @@ def generated_problem(
 def case(
     problem_id: str,
     args: Sequence[Any],
-    expected: Any,
+    expected: Json,
     *,
     expected_from: ExpectedSource = ExpectedSource.REFERENCE,
     round: int | None = 0,

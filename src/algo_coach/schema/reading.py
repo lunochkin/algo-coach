@@ -18,9 +18,9 @@ class TechniqueReading(MachineProvenance):
     created_at: datetime
     solution_id: str = Field(min_length=1)
     # Empty is a stored verdict; no `declined`, since a reading is deliberate.
-    techniques: list[str] = Field(default_factory=list)
+    techniques: list[str] = []
     source: ReadingSource  # required: a mislabelled reading cannot be corrected later
-    informed_by: list[str] = Field(default_factory=list)  # calls its author saw, not provenance
+    informed_by: list[str] = []  # calls its author saw, not provenance
 
     @model_validator(mode="after")
     def _provenance_matches_source(self) -> TechniqueReading:

@@ -3,7 +3,7 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from algo_coach.mutation import Mutant, kill, survivors
 from algo_coach.runner import NoValue, outputs
@@ -46,7 +46,7 @@ def shrink(
             break
         # lists alone: a smaller integer is a different question the statement
         # answers, where a shorter list is the same one asked of less
-        if isinstance(value, list) and len(value) > 1:
+        if isinstance(value, list) and len(cast(list[Any], value)) > 1:
             kept, left = _ddmin(
                 kept,
                 index,

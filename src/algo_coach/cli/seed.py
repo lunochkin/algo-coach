@@ -2,6 +2,7 @@ import argparse
 import json
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 from algo_coach.cards import CardStore, seed_cards
 
@@ -10,7 +11,7 @@ class BadLine(Exception):
     """Not JSON at all: a corrupt file, not an invalid record."""
 
 
-def read_json(source: str) -> Iterator[dict]:
+def read_json(source: str) -> Iterator[dict[str, Any]]:
     """One authored file per record: a directory of them, or a single file."""
     path = Path(source)
     paths = sorted(path.glob("*.json")) if path.is_dir() else [path]

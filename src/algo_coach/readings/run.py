@@ -1,9 +1,8 @@
 """The classifier over the corpus of canonical solutions."""
 
-from collections.abc import Callable, Iterable
-from typing import Any
+from collections.abc import Callable, Iterable, Sequence
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.classifier import DEFAULT, request_hash
@@ -27,14 +26,14 @@ class Progress(BaseModel):
     total: int
     solution_id: str
     problem_id: str  # what the solution answers; the title is the caller's lookup
-    techniques: list[str] = Field(default_factory=list)  # empty when the reader named none
+    techniques: list[str] = []  # empty when the reader named none
     reason: str | None = None  # the failure, when there was one
 
 
 class ReadingResult(BaseModel):
     read: int = 0
     undecided: int = 0  # named no technique; stored, or every re-run re-reads them
-    failed: list[Failed] = Field(default_factory=list)
+    failed: list[Failed] = []
     aborted: bool = False
 
     @property
@@ -69,7 +68,13 @@ def read_corpus(
         asking = outstanding(asking, log.readings(), hashes, configuration=configuration)
     asking = asking[:limit]
 
-    def report(index: int, solution: Solution, **verdict: Any) -> None:
+    def report(
+        index: int,
+        solution: Solution,
+        *,
+        techniques: Sequence[str] = (),
+        reason: str | None = None,
+    ) -> None:
         if on_progress is not None:
             on_progress(
                 Progress(
@@ -77,7 +82,8 @@ def read_corpus(
                     total=len(asking),
                     solution_id=solution.id,
                     problem_id=solution.problem_id,
-                    **verdict,
+                    techniques=list(techniques),
+                    reason=reason,
                 )
             )
 

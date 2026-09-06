@@ -12,6 +12,7 @@ from algo_coach.schema.case import (
     CaseOutcome,
     CaseResult,
     ExpectedSource,
+    Json,
     TestCase,
     severest,
 )
@@ -52,6 +53,7 @@ __all__ = [
     "Draft",
     "DraftCase",
     "FailureMode",
+    "Json",
     "Kind",
     "MachineProvenance",
     "MatchSource",

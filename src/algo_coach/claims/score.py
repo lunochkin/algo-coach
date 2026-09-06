@@ -2,7 +2,7 @@
 
 from collections.abc import Mapping, Sequence
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from algo_coach.claims.run import Failed
 from algo_coach.schema import Call, Configuration
@@ -42,9 +42,9 @@ class Score(BaseModel):
     decisions_agreed: int = 0
     # Of `undecided`, those cut short by the token cap rather than declined.
     exhausted: int = 0
-    per_technique: list[TechniqueScore] = Field(default_factory=list)
-    disagreements: list[Disagreement] = Field(default_factory=list)
-    failed: list[Failed] = Field(default_factory=list)
+    per_technique: list[TechniqueScore] = []
+    disagreements: list[Disagreement] = []
+    failed: list[Failed] = []
     read: int = 0
     reused: int = 0
     undecided: int = 0
@@ -87,8 +87,8 @@ class Comparison(BaseModel):
 
     eval_set: int = 0
     common: int = 0
-    scores: list[ConfigurationScore] = Field(default_factory=list)
-    splits: list[Split] = Field(default_factory=list)
+    scores: list[ConfigurationScore] = []
+    splits: list[Split] = []
 
 
 def score(truth: Mapping[str, Sequence[str]], machine: Mapping[str, Sequence[str]]) -> Score:

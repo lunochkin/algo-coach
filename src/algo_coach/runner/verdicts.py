@@ -2,11 +2,10 @@
 backend."""
 
 from collections.abc import Sequence
-from typing import Any
 
 from algo_coach.runner.encoding import agrees
 from algo_coach.runner.execution import CaseRun, RunOutcome, run
-from algo_coach.schema import CaseOutcome, CaseResult, TestCase
+from algo_coach.schema import CaseOutcome, CaseResult, Json, TestCase
 
 DECIDED = {RunOutcome.TIMEOUT: CaseOutcome.TIMEOUT, RunOutcome.CRASHED: CaseOutcome.CRASHED}
 
@@ -30,7 +29,7 @@ def result(case: TestCase, ran: CaseRun) -> CaseResult:
     )
 
 
-def decide(ran: CaseRun, expected: Any) -> CaseOutcome:
+def decide(ran: CaseRun, expected: Json) -> CaseOutcome:
     # apart from `result` because generation decides the canonical before any
     # case has an id
     if not ran.returned:

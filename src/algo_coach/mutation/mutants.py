@@ -27,8 +27,13 @@ class Operator(StrEnum):
     CONTROL = "control"
 
 
-BOUNDARY = {ast.Lt: ast.LtE, ast.LtE: ast.Lt, ast.Gt: ast.GtE, ast.GtE: ast.Gt}
-NEGATED = {
+BOUNDARY: dict[type[ast.cmpop], type[ast.cmpop]] = {
+    ast.Lt: ast.LtE,
+    ast.LtE: ast.Lt,
+    ast.Gt: ast.GtE,
+    ast.GtE: ast.Gt,
+}
+NEGATED: dict[type[ast.cmpop], type[ast.cmpop]] = {
     ast.Lt: ast.GtE,
     ast.LtE: ast.Gt,
     ast.Gt: ast.LtE,
@@ -40,11 +45,16 @@ NEGATED = {
     ast.In: ast.NotIn,
     ast.NotIn: ast.In,
 }
-ARITHMETIC = {ast.Add: ast.Sub, ast.Sub: ast.Add, ast.Mult: ast.FloorDiv, ast.FloorDiv: ast.Mult}
-CONNECTOR = {ast.And: ast.Or, ast.Or: ast.And}
+ARITHMETIC: dict[type[ast.operator], type[ast.operator]] = {
+    ast.Add: ast.Sub,
+    ast.Sub: ast.Add,
+    ast.Mult: ast.FloorDiv,
+    ast.FloorDiv: ast.Mult,
+}
+CONNECTOR: dict[type[ast.boolop], type[ast.boolop]] = {ast.And: ast.Or, ast.Or: ast.And}
 EXTREMUM = {"min": "max", "max": "min"}
 
-SYMBOL = {
+SYMBOL: dict[type[ast.AST], str] = {
     ast.Lt: "<",
     ast.LtE: "<=",
     ast.Gt: ">",

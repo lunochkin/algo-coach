@@ -25,10 +25,10 @@ def prompt_hash(system: str, content: str) -> str:
     return sha256(payload(system, content).encode()).hexdigest()[:HASH_LENGTH]
 
 
-def recorded(**fields: Any) -> Call:
+def recorded(**fields: object) -> Call:
     """One request's record. Minted here rather than through `mint`: the
     transport sits under the domain and reads nothing from it."""
-    return Call(id=new_id(), created_at=datetime.now(UTC), **fields)
+    return Call.model_validate({"id": new_id(), "created_at": datetime.now(UTC), **fields})
 
 
 def ask(

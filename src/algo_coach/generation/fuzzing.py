@@ -34,8 +34,8 @@ Fuzzing = Callable[[Sequence["Mutant"], int], "Fuzzed"]
 class Fuzzed:
     """What the pass kept, and what it leaves for a round to ask about."""
 
-    cases: list[SettledCase] = field(default_factory=list)
-    standing: list[Mutant] = field(default_factory=list)
+    cases: list[SettledCase] = field(default_factory=list[SettledCase])
+    standing: list[Mutant] = field(default_factory=list[Mutant])
     killed: int = 0  # mutants the kept inputs caught
     built: int = 0  # inputs the generator's code produced
     dropped: int = 0  # of those, the ones the canonical could not answer

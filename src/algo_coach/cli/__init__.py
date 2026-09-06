@@ -42,7 +42,11 @@ class _Defaults(argparse.ArgumentDefaultsHelpFormatter):
         return super()._get_help_string(action)
 
 
-def _command(sub: argparse._SubParsersAction, name: str, help: str) -> argparse.ArgumentParser:
+def _command(
+    sub: argparse._SubParsersAction[argparse.ArgumentParser],  # pyright: ignore[reportPrivateUsage]
+    name: str,
+    help: str,
+) -> argparse.ArgumentParser:
     return sub.add_parser(name, help=help, formatter_class=_Defaults)
 
 

@@ -216,7 +216,7 @@ def rows(scored_entries: Sequence[ConfigurationScore]) -> list[tuple[str, ...]]:
     counted = [
         {row.technique: row for row in scored.score.per_technique} for scored in scored_entries
     ]
-    body = []
+    body: list[tuple[str, ...]] = []
     for technique in sorted({name for rows in counted for name in rows}):
         found = [rows.get(technique) for rows in counted]
         attempts = max(row.attempts for row in found if row is not None)
