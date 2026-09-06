@@ -56,7 +56,7 @@ def test_what_a_step_left_reads_back_whole(tmp_path):
         ],
         builder="def solve(size, seed): ...",
         largest=1000,
-        generator=PROVENANCE,
+        generator_provenance=PROVENANCE,
     )
     store.put(draft)
 
@@ -64,7 +64,7 @@ def test_what_a_step_left_reads_back_whole(tmp_path):
 
     assert read == draft
     assert read.cases[0].expected_from is ExpectedSource.REFERENCE
-    assert read.generator.call_id == "call-1"
+    assert read.generator_provenance.call_id == "call-1"
 
 
 def test_a_rejected_draft_reads_back_with_its_gate(tmp_path):

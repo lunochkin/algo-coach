@@ -7,7 +7,7 @@
         "blind",
         "discrimination",
         "inputs",
-        "clock"
+        "naive"
       ],
       "title": "CallSite",
       "type": "string"

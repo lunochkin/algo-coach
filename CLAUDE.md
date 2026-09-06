@@ -75,8 +75,8 @@ Docs, `README.md`, commits.
 - **Every word this project gives its own meaning is an entry in
   `docs/architecture/README.md` `## Terminology`.** A file uses the word
   without redefining it. A word not there is defined in the sentence that
-  introduces it, or added to the glossary. `the clock`, `the bench`, `the
-  walk` are each defined in one file and used in four, so a reader of the
+  introduces it, or added to the glossary. `the bench`, `the walk`, `the
+  builder` are each defined in one file and used in four, so a reader of the
   fourth file cannot resolve them.
 - **Repeat the noun instead of `one`, `it`, `that`, `the two`, `either`.** A
   pronoun two sentences after its noun is resolved by the writer and guessed

@@ -20,7 +20,7 @@ class CallSite(StrEnum):
     BLIND = "blind"
     DISCRIMINATION = "discrimination"
     INPUTS = "inputs"
-    CLOCK = "clock"
+    NAIVE = "naive"
 
 
 class Discard(StrEnum):

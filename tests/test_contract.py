@@ -1,7 +1,7 @@
-from algo_coach.generation import blind, clock, generator, inputs
+from algo_coach.generation import blind, generator, inputs, naive
 from algo_coach.generation.contract import ALONE, ENTRY, RUNTIME, SIGNATURE
 
-BRIEFS = (generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM, clock.SYSTEM)
+BRIEFS = (generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM, naive.SYSTEM)
 
 
 def test_every_brief_names_the_interpreter_it_runs_under():

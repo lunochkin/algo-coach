@@ -12,7 +12,7 @@ from algo_coach.generation.errors import GenerationError
 from algo_coach.generation.inputs import Built
 from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, Searched, search
 from algo_coach.generation.steps import SILENT, Notes
-from algo_coach.generation.verdicts import Clock, Inputs
+from algo_coach.generation.verdicts import Inputs, Naive
 from algo_coach.runner import NoValue, outputs
 from algo_coach.schema import (
     Draft,
@@ -87,7 +87,7 @@ def timed(
     draft: Draft,
     checked: Checked,
     inputs: Inputs,
-    clock: Clock,
+    naive: Naive,
     *,
     cap_ms: int,
     notes: Notes = SILENT,
@@ -100,14 +100,14 @@ def timed(
     """
     if not template.speedup or inputs.built is None or inputs.written is None:
         return checked, inputs, None
-    if clock.code is None:
+    if naive.code is None:
         raise ValueError("the search measures the canonical against a naive solution")
     notes("timing", "searching for the input that separates the two solutions")
     try:
         found = separated(
             inputs.built,
             canonical=draft.canonical,
-            naive=clock.code,
+            naive=naive.code,
             reference=draft.reference or "",
             written=inputs.written,
             cap_ms=cap_ms,

@@ -16,13 +16,13 @@ from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import reference
 from algo_coach.generation.blind import request_hash as blind_hash
 from algo_coach.generation.checks import CAP_MS, Ran, agree, wrong_on
-from algo_coach.generation.clock import naive
-from algo_coach.generation.clock import request_hash as clock_hash
 from algo_coach.generation.discrimination import request_hash as discrimination_hash
 from algo_coach.generation.hardening import harden, standing
 from algo_coach.generation.inputs import builder
 from algo_coach.generation.inputs import request_hash as inputs_hash
 from algo_coach.generation.landing import Corpus
+from algo_coach.generation.naive import naive_solution
+from algo_coach.generation.naive import request_hash as naive_hash
 from algo_coach.generation.steps import Notes, Step
 from algo_coach.generation.timing import found_in, searched_note, separated
 from algo_coach.generation.verdicts import (
@@ -53,7 +53,7 @@ from algo_coach.schema import (
 
 # the sites a stored problem can be re-asked about. The generator writes a
 # problem rather than answering one, so asking it again is `generate`
-REPLAYED = (CallSite.BLIND, CallSite.DISCRIMINATION, CallSite.INPUTS, CallSite.CLOCK)
+REPLAYED = (CallSite.BLIND, CallSite.DISCRIMINATION, CallSite.INPUTS, CallSite.NAIVE)
 
 
 class Failed(BaseModel):
@@ -77,7 +77,7 @@ class Subject:
     problem: Problem
     canonical: str
     reference: str
-    # the clock the search times against, absent on a problem whose template
+    # the naive solution the search times against, absent on a problem whose template
     # claims no speedup and on one landed before the role existed
     naive: str | None
     cases: list[TestCase]
@@ -233,7 +233,7 @@ def blind_replay(
     return Asked(call=call, verdicts=verdicts)
 
 
-def clock_replay(
+def naive_replay(
     transport: Transport,
     calls: CallLog,
     subject: Subject,
@@ -248,14 +248,14 @@ def clock_replay(
     where the generation path writes one."""
     if subject.template is None or not subject.template.speedup:
         return Asked()
-    configuration = bench.clock
-    digest = clock_hash(subject.problem.statement, subject.template.trigger)
-    if not fresh and asked_already(stored, CallSite.CLOCK, subject, configuration, digest):
-        notes("clock", "answered at this digest")
+    configuration = bench.naive
+    digest = naive_hash(subject.problem.statement, subject.template.trigger)
+    if not fresh and asked_already(stored, CallSite.NAIVE, subject, configuration, digest):
+        notes("naive", "answered at this digest")
         return Asked(skipped=True)
 
-    notes("clock", "writing the solution the search measures against")
-    solution, call = naive(
+    notes("naive", "writing the solution the search measures against")
+    solution, call = naive_solution(
         transport,
         calls,
         subject.problem.statement,
@@ -265,7 +265,7 @@ def clock_replay(
     # no gate: being wrong rejects no problem, and every `Discard` arm says one
     # was rejected
     detail = wrong_on(subject.cases, code=solution, cap_ms=cap_ms)
-    notes("clock", detail or "correct on every case it answered", call)
+    notes("naive", detail or "correct on every case it answered", call)
     return Asked(call=call, verdicts={"detail": detail} if detail else {})
 
 
@@ -333,7 +333,7 @@ def inputs_replay(
     if subject.template is None or not subject.template.speedup:
         return Asked()
     if subject.naive is None:
-        # a problem landed before the clock was stored with it. The site's own
+        # a problem landed before the naive solution was stored with it. The site's own
         # answer would be judged by a search that cannot run
         notes("timing", "no naive solution stored")
         return Asked()
@@ -377,7 +377,7 @@ ASK = {
     CallSite.BLIND: blind_replay,
     CallSite.DISCRIMINATION: discrimination_replay,
     CallSite.INPUTS: inputs_replay,
-    CallSite.CLOCK: clock_replay,
+    CallSite.NAIVE: naive_replay,
 }
 
 

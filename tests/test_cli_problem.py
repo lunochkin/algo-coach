@@ -61,7 +61,7 @@ def test_a_problem_is_read_whole_by_a_prefix_of_its_id(root, monkeypatch, capsys
     out = capsys.readouterr().out
     assert f"# {stored.title} ({stored.id})" in out
     assert stored.statement in out
-    # the canonical, the reference and the clock, each headed by its role
+    # the canonical, the reference and the naive solution, each headed by its role
     assert out.count("```python") == 3
     assert "### naive" in out
 

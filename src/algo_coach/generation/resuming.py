@@ -12,8 +12,8 @@ invalidates no stored draft.
 
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import request_hash as blind_hash
-from algo_coach.generation.clock import request_hash as clock_hash
 from algo_coach.generation.inputs import request_hash as inputs_hash
+from algo_coach.generation.naive import request_hash as naive_hash
 from algo_coach.generation.speedup import Missing
 from algo_coach.schema import Draft, Template, WritingState
 
@@ -22,7 +22,7 @@ from algo_coach.schema import Draft, Template, WritingState
 ANSWERED = (
     (WritingState.REFERENCED, "blind"),
     (WritingState.BUILT, "inputs"),
-    (WritingState.PACED, "clock"),
+    (WritingState.PACED, "naive"),
     (WritingState.HARDENED, "discrimination"),
 )
 
@@ -70,10 +70,10 @@ def sending(draft: Draft, site: str, template: Template) -> str | None:
         return blind_hash(draft.statement)
     if site == "inputs":
         return inputs_hash(draft.statement)
-    if site == "clock":
+    if site == "naive":
         # the one prompt carrying more than the statement, so an edited trigger
         # re-asks the drafts written for that form and no others
-        return clock_hash(draft.statement, template.trigger)
+        return naive_hash(draft.statement, template.trigger)
     # the discrimination prompt carries the survivors, and which mutants stand
     # is known only after the kill pass a resume runs
     return None
@@ -86,7 +86,7 @@ def re_asks(draft: Draft, site: str, template: Template, bench: Bench = BENCH) -
     Per site rather than per position: three of the four prompts are a function
     of the statement, so none of them invalidates another.
     """
-    taken = getattr(draft, site)
+    taken = getattr(draft, f"{site}_provenance")
     if taken is None:
         return True
     # its own digest where a local pass decides one, so the configuration is
@@ -96,10 +96,10 @@ def re_asks(draft: Draft, site: str, template: Template, bench: Bench = BENCH) -
 
 
 def draws_again(draft: Draft, template: Template) -> bool:
-    """Whether a resume asks the clock again though nothing about the bench
+    """Whether a resume asks the naive solution again though nothing about the bench
     moved.
 
-    The clock finished at every size the builder reached, and it is the one
+    The naive solution finished at every size the builder reached, and it is the one
     sampled site: a second call is a second draw rather than the answer already
     stored.
 
@@ -134,7 +134,9 @@ def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingS
     draft's state rather than the bench's.
     """
     for state, site in ANSWERED:
-        if getattr(draft, site) is not None and re_asks(draft, site, template, bench):
+        if getattr(draft, f"{site}_provenance") is not None and re_asks(
+            draft, site, template, bench
+        ):
             return state
     # a flag edit moves neither a configuration nor a digest, and it is what
     # releases a draft the search held: with no speedup claimed the loop is the

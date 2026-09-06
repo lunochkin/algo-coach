@@ -75,7 +75,7 @@ DERIVED = {
                (select count(*) from solutions s where s.problem_id = p.id
                   and s.role = 'reference') as blind,
                (select count(*) from solutions s where s.problem_id = p.id
-                  and s.role = 'naive') clocks,
+                  and s.role = 'naive') naive_solutions,
                p.model, p.effort, p.temperature, p.pin, p.call_id
         from problems p
         left join card_templates t on t.id = p.generated_for

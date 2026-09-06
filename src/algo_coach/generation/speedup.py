@@ -1,7 +1,7 @@
 """The smallest input under which the naive solution exceeds the cap and the
 canonical does not. Run only where the template claims a speedup.
 
-Two solutions, two jobs: the naive one is the clock, and the reference settles
+Two solutions, two jobs: the naive one is the naive solution, and the reference settles
 what the case at that size returns.
 """
 
@@ -39,7 +39,7 @@ class Missing(StrEnum):
     NAIVE_FINISHED = "naive_finished"
     NAIVE_CRASHED = "naive_crashed"
     CANONICAL_FAILED = "canonical_failed"
-    # the built input crossed the ceiling before the clock exceeded the cap
+    # the built input crossed the ceiling before the naive solution exceeded the cap
     INPUT_TOO_LARGE = "input_too_large"
     # a separating size was found, and the case at it weighs too much
     CASE_TOO_LARGE = "case_too_large"
@@ -52,7 +52,7 @@ class Searched:
 
     size: int | None = None
     case: SettledCase | None = None
-    # what the child measured at that size. The clock's is absent where it
+    # what the child measured at that size. The naive solution's is absent where it
     # exceeded the measuring cap rather than merely the drill loop's
     canonical_ms: int | None = None
     naive_ms: int | None = None
@@ -100,7 +100,7 @@ def search(
     while True:
         args = list(make(size))
         # stopped before the run rather than after it: an input over the
-        # ceiling is one no case can carry, whatever the clock does on it
+        # ceiling is one no case can carry, whatever the naive solution does on it
         if weighs(args) > ceiling:
             capped = True
             break
@@ -169,7 +169,7 @@ def _settled(
     # carried onto every answer from here: the speedup is established at this
     # size whether or not a case is stored
     measured = partial(Searched, size=size, canonical_ms=ran.elapsed_ms, naive_ms=naive_ms)
-    # the reference rather than the clock: what a case stores is the answer of
+    # the reference rather than the naive solution: what a case stores is the answer of
     # the solution written from the statement alone, whichever one was timed.
     # Settled as the first case set is, and by no round: the search runs after
     # the loop
@@ -194,7 +194,7 @@ def _paces(
     cap_ms: int,
     measure_ms: int,
 ) -> tuple[bool | None, int | None]:
-    """Whether the clock exceeds `cap_ms` at this size and what it took. The
+    """Whether the naive solution exceeds `cap_ms` at this size and what it took. The
     first is `None` where it crashed, which is neither.
 
     Measured well above the cap, so a run a sitting would have cut short still

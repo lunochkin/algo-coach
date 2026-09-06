@@ -33,8 +33,11 @@ def test_the_draft_copies_the_generator_call_whole():
     and a copy taken partly could be compared with nothing."""
     made = Writing().draft(GENERATED, a_call())
 
-    assert (made.generator.call_id, made.generator.model) == ("call-1", "a-model")
-    assert made.blind is None
+    assert (made.generator_provenance.call_id, made.generator_provenance.model) == (
+        "call-1",
+        "a-model",
+    )
+    assert made.blind_provenance is None
 
 
 def test_the_draft_names_the_form_it_was_briefed_on():

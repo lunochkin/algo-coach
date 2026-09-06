@@ -151,11 +151,11 @@ The order matters because each step can reject what came before.
   and a resume starts at the builder rather than at the search. It costs the
   fuzz pass besides.
 - **The naive solution has to be correct on every case it answers**, and one
-  that is not holds the draft. A clock that is wrong measures nothing, so a
-  search against it would separate on a mistake rather than on the form.
-- **It discards nothing all the same.** It is the clock rather than a reading
-  of the statement, so what its being wrong establishes is that this solution
-  cannot serve, and nothing about the problem.
+  that is not holds the draft. A naive solution that is wrong measures nothing,
+  so a search against it would separate on a mistake rather than on the form.
+- **It discards nothing all the same.** It is what the search times rather than
+  a reading of the statement, so what its being wrong establishes is that this
+  solution cannot serve, and nothing about the problem.
 - **Nothing is repaired after landing.** A stored problem carries attempts and
   its cases are append-only, so every fix is a resumed draft. A step that has
   no answer therefore stops the writing rather than lowering what a landing
@@ -192,7 +192,7 @@ flowchart TB
   C -->|"<b>blind</b>: the reference, from the statement alone"| R["referenced"]
   R -->|"the two solutions agree on every case"| A["agreed"]
   A -->|"<b>inputs</b>: code that builds an input of a given size"| B["built"]
-  B -->|"<b>naive</b>: the clock, where a speedup is claimed"| P["paced"]
+  B -->|"<b>naive</b>: the naive solution, where a speedup is claimed"| P["paced"]
   P -->|"the input separating it from the canonical"| S["searched"]
   S -->|"<b>discrimination</b>: the fuzz pass, then the rounds"| H["hardened"]
   H -->|"the problem, its cases, its solutions and the match"| L(["landed"])
@@ -230,9 +230,9 @@ a second one writes a different problem.
 - **A draft that never reached the search stops earlier.** A speedup is
   claimed and no input generator was written, so it is held at `agreed` and a
   resume runs the builder.
-- **A draft with no clock stops at `built`.** The naive call failed, or what it
-  wrote did not pass the problem's cases, and the search has nothing to measure
-  the canonical against.
+- **A draft with no naive solution stops at `built`.** The naive call failed, or
+  what it wrote did not pass the problem's cases, and the search has nothing to
+  measure the canonical against.
 - **A loop whose round failed stops the draft before `hardened`**, at whatever
   the steps before it reached. A resume runs the loop over the set as the
   statement left it, which is the set the survivors were decided against.
@@ -260,15 +260,15 @@ a second one writes a different problem.
   nothing moved it starts at the step the draft never took.
 - **A site is asked again on its own configuration and digest**, as a replay
   skips a pair. The blind and the inputs prompts are the statement alone, and
-  the clock's is the statement and the form to avoid, so a moved configuration
-  re-pays its own call and no other.
+  the naive site's is the statement and the form to avoid, so a moved
+  configuration re-pays its own call and no other.
 - **The steps after them read what they left.** The search runs the builder
   against the naive solution, and the loop's survivors are decided against a set
   the reference settled. A site moving takes the steps that read it again.
-- **The naive site is asked again where the clock finished at every size**,
-  though its configuration and its digest stand. It is the one sampled
-  answering site, so a second call is a second draw — `corpus.md` gives it as
-  an exit.
+- **The naive site is asked again where the naive solution finished at every
+  size**, though its configuration and its digest stand. It is the one sampled
+  answering site, so a second call is a second draw — `corpus.md` gives it as an
+  exit.
 - **Only that reason draws again.** A search that never ran, or one whose walk
   crossed the case ceiling, is the inputs site's to repair, and the draft holds
   the reason so a resume can tell them apart.
@@ -378,8 +378,8 @@ there is ever asked twice and no two configurations meet the same item.
    cases the problem carries rather than against the canonical.
 4. The discrimination site runs the mutation loop over the stored canonical,
    against the cases written with the statement alone.
-5. The naive site writes the clock, and the inputs site builds and searches
-   against it, where the template claims a speedup.
+5. The naive site writes the naive solution, and the inputs site builds and
+   searches against it, where the template claims a speedup.
 6. Each site's answer is recorded as its outcome, keyed to the problem.
 
 - **It writes nothing to the corpus.** A case a round wins here is discarded,
@@ -399,11 +399,11 @@ there is ever asked twice and no two configurations meet the same item.
   unless a search does.
 - **The naive site is asked there too**, where a speedup is claimed. What its
   record carries is the configuration and whether the solution it wrote answers
-  the problem's cases, since a wrong clock rejects no problem and so names no
-  gate.
-- **The search stays measured against the stored clock**, not the one this run
-  just wrote. Moving the builder and the clock together would leave neither
-  configuration readable from the verdict.
+  the problem's cases, since a wrong naive solution rejects no problem and so
+  names no gate.
+- **The search stays measured against the stored naive solution**, not the one
+  this run just wrote. Moving the builder and the naive solution together would
+  leave neither configuration readable from the verdict.
 
 ## Drill loop
 

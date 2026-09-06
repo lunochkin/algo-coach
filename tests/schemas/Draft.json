@@ -210,7 +210,7 @@
   },
   "description": "What the steps of one attempt produced and no local run re-derives.\n\nThe mutants, the survivors and the loop's counters are not here: a tree\nwalk enumerates the first two and the site outcomes of this id carry the\nthird.",
   "properties": {
-    "blind": {
+    "blind_provenance": {
       "anyOf": [
         {
           "$ref": "#/$defs/MachineProvenance"
@@ -246,17 +246,6 @@
       "title": "Cases",
       "type": "array"
     },
-    "clock": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/MachineProvenance"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null
-    },
     "declared": {
       "items": {
         "$ref": "#/$defs/DraftCase"
@@ -268,7 +257,7 @@
     "difficulty": {
       "$ref": "#/$defs/ProblemDifficulty"
     },
-    "discrimination": {
+    "discrimination_provenance": {
       "anyOf": [
         {
           "$ref": "#/$defs/MachineProvenance"
@@ -290,7 +279,7 @@
       ],
       "default": null
     },
-    "generator": {
+    "generator_provenance": {
       "anyOf": [
         {
           "$ref": "#/$defs/MachineProvenance"
@@ -306,7 +295,7 @@
       "title": "Id",
       "type": "string"
     },
-    "inputs": {
+    "inputs_provenance": {
       "anyOf": [
         {
           "$ref": "#/$defs/MachineProvenance"
@@ -342,6 +331,17 @@
       ],
       "default": null,
       "title": "Naive"
+    },
+    "naive_provenance": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MachineProvenance"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "problem_id": {
       "anyOf": [

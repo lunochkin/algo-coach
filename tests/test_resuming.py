@@ -12,9 +12,9 @@ from algo_coach.generation import (
     Notes,
     advances,
     blind,
-    clock,
     inputs,
     moved_at,
+    naive,
     resume,
     sending,
     write_problems,
@@ -112,9 +112,9 @@ def test_a_stale_digest_starts_at_its_own_step(tmp_path):
     """An edited prompt moves the digest without moving the configuration, and
     a resume that read only the model would re-run nothing."""
     stored = drafted(tmp_path)
-    stale = stored.blind.model_copy(update={"prompt_hash": "ffffffffffff"})
+    stale = stored.blind_provenance.model_copy(update={"prompt_hash": "ffffffffffff"})
 
-    assert moved_at(stored.model_copy(update={"blind": stale}), OPTIMUM, BENCH) is (
+    assert moved_at(stored.model_copy(update={"blind_provenance": stale}), OPTIMUM, BENCH) is (
         WritingState.REFERENCED
     )
 
@@ -153,7 +153,7 @@ def held(tmp_path) -> Draft:
     return one.draft
 
 
-def test_an_unseparated_draft_draws_the_clock_again(tmp_path):
+def test_an_unseparated_draft_draws_the_naive_solution_again(tmp_path):
     """Nothing about the bench moved, and the site is the one that is sampled:
     a second call is a second draw rather than the answer already stored."""
     stopped = held(tmp_path)
@@ -181,7 +181,7 @@ def unbuilt(tmp_path) -> Draft:
     return stopped.draft
 
 
-def test_a_search_that_never_ran_draws_no_clock(tmp_path):
+def test_a_search_that_never_ran_draws_no_naive_solution(tmp_path):
     """A draw would pay for a call the search still cannot use."""
     stopped = unbuilt(tmp_path)
 
@@ -195,7 +195,7 @@ def test_a_draft_a_resume_starts_past_the_search_on_advances_nowhere(tmp_path):
     assert not advances(unbuilt(tmp_path), CLAIMS, BENCH)
 
 
-def test_a_draft_whose_clock_is_drawn_again_advances(tmp_path):
+def test_a_draft_whose_naive_solution_is_drawn_again_advances(tmp_path):
     """The resume starts at the naive site, so the search runs again against
     the second draw."""
     assert advances(held(tmp_path), CLAIMS, BENCH)
@@ -213,23 +213,23 @@ def test_a_corrected_speedup_resumes_the_draft_the_search_held(tmp_path):
     assert moved_at(held(tmp_path), OPTIMUM, BENCH) is WritingState.HARDENED
 
 
-def test_a_moved_clock_configuration_starts_at_the_naive_solution(tmp_path):
+def test_a_moved_naive_solution_configuration_starts_at_the_naive_solution(tmp_path):
     """A draft holds one only where a speedup is claimed, which is where the
     search that reads it runs."""
-    bench = BENCH.model_copy(update={"clock": OTHER})
+    bench = BENCH.model_copy(update={"naive": OTHER})
 
     assert moved_at(held(tmp_path), CLAIMS, bench) is WritingState.PACED
 
 
-def test_an_edited_trigger_re_asks_the_clock_alone(tmp_path):
+def test_an_edited_trigger_re_asks_the_naive_solution_alone(tmp_path):
     """The one prompt carrying more than the statement, so editing a form
     moves the digest of the drafts written for it and no others."""
     edited = Template(id="t1", **template("longest-valid-window", speedup=True, trigger="Else."))
 
-    written_at = held(tmp_path).clock.prompt_hash
+    written_at = held(tmp_path).naive_provenance.prompt_hash
 
     assert moved_at(held(tmp_path), edited, BENCH) is WritingState.PACED
-    assert sending(held(tmp_path), "clock", edited) != written_at
+    assert sending(held(tmp_path), "naive", edited) != written_at
 
 
 def test_a_moved_configuration_is_returned_over_a_corrected_flag(tmp_path):
@@ -260,7 +260,7 @@ def written(tmp_path, model: FakeWriter, drafts: DraftStore, **overrides):
     return one, result
 
 
-def test_a_resumed_draw_separates_where_the_stored_clock_did_not(tmp_path, monkeypatch):
+def test_a_resumed_draw_separates_where_the_stored_naive_solution_did_not(tmp_path, monkeypatch):
     """The exit a held draft takes where nothing was wrong with the run: the
     site is asked again and this answer is slow."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
@@ -280,12 +280,12 @@ def test_a_resumed_draw_separates_where_the_stored_clock_did_not(tmp_path, monke
     )
 
     asked = [call["system"] for call in model.calls]
-    assert asked == [clock.SYSTEM]
+    assert asked == [naive.SYSTEM]
     assert result.started_at is WritingState.PACED
     assert len(result.drafted) == 1
 
 
-def test_a_redrawn_clock_carries_the_size_its_search_found(tmp_path, monkeypatch):
+def test_a_redrawn_naive_solution_carries_the_size_its_search_found(tmp_path, monkeypatch):
     """The builder was reused, so the inputs site made no call and wrote no
     record. Filed nowhere, the size a resumed problem landed on would be
     readable only from the arguments of its own case."""
@@ -305,11 +305,11 @@ def test_a_redrawn_clock_carries_the_size_its_search_found(tmp_path, monkeypatch
     )
 
     left = {one.site: one for one in OutcomeLog(tmp_path).outcomes() if one.problem_id}
-    assert set(left) == {CallSite.CLOCK}
-    assert left[CallSite.CLOCK].separating is not None
+    assert set(left) == {CallSite.NAIVE}
+    assert left[CallSite.NAIVE].separating is not None
 
 
-def test_a_moved_clock_re_pays_that_call_and_no_other(tmp_path, monkeypatch):
+def test_a_moved_naive_solution_re_pays_that_call_and_no_other(tmp_path, monkeypatch):
     """The reference and the input generator are written from the statement,
     which this bench did not move."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
@@ -324,15 +324,15 @@ def test_a_moved_clock_re_pays_that_call_and_no_other(tmp_path, monkeypatch):
         one.templates[0],
         stopped.draft,
         Corpus.at(tmp_path),
-        bench=BENCH.model_copy(update={"clock": OTHER}),
+        bench=BENCH.model_copy(update={"naive": OTHER}),
         drafts=drafts,
     )
 
     asked = [call["system"] for call in model.calls]
-    assert clock.SYSTEM in asked
+    assert naive.SYSTEM in asked
     assert blind.SYSTEM not in asked and inputs.SYSTEM not in asked
     assert result.started_at is WritingState.PACED
-    # the new clock separated where the stored one did not, so the draft lands
+    # the new naive separated where the stored one did not, so the draft lands
     assert len(result.drafted) == 1
 
 
@@ -451,7 +451,7 @@ def test_a_moved_blind_configuration_re_pays_no_input_generator(tmp_path):
     assert blind.SYSTEM in asked
     assert inputs.SYSTEM not in asked
     (again,) = result.held
-    assert again.draft.inputs == stopped.draft.inputs
+    assert again.draft.inputs_provenance == stopped.draft.inputs_provenance
 
 
 def test_a_rejected_draft_is_not_resumed(tmp_path):

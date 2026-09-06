@@ -80,7 +80,10 @@ def report(draft: Draft, target: Target | None, outcomes: list[SiteOutcome], ben
             waiting_on(draft, target, bench),
             "",
             "## configurations",
-            *(f"  {name:<15} {configured(getattr(draft, name))}" for name in Bench.model_fields),
+            *(
+                f"  {site:<15} {configured(getattr(draft, f'{site}_provenance'))}"
+                for site in Bench.model_fields
+            ),
             "",
             "## statement",
             "",

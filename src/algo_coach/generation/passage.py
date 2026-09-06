@@ -18,19 +18,19 @@ from algo_coach.generation.checks import (
     stopped,
     wrong_on,
 )
-from algo_coach.generation.clock import naive
 from algo_coach.generation.drafting import advanced, held, rejected
 from algo_coach.generation.fuzzing import Fuzzing, pass_over
 from algo_coach.generation.generator import generate
 from algo_coach.generation.hardening import harden
 from algo_coach.generation.inputs import Built, builder
+from algo_coach.generation.naive import naive_solution
 from algo_coach.generation.resuming import draws_again, re_asks, reaches
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.generation.timing import timed
 from algo_coach.generation.verdicts import (
     Bar,
-    Clock,
     Inputs,
+    Naive,
     barred,
     blind_verdicts,
     gated,
@@ -61,7 +61,7 @@ class Passage:
     `first` is the first case set's verdict, which the first two sites are
     judged by. A later gate replaces `checked` and leaves it. `start` is where
     a resume began, and the search reads it: it runs the builder against the
-    clock, so either site moving takes it again.
+    naive, so either site moving takes it again.
     """
 
     transport: Transport
@@ -77,16 +77,16 @@ class Passage:
     first: Checked = field(default_factory=lambda: Checked(outcome=None))
     blind: Call | None = None
     inputs: Inputs = field(default_factory=Inputs)
-    clock: Clock = field(default_factory=Clock)
+    naive: Naive = field(default_factory=Naive)
     bar: Bar = field(default_factory=Bar)
 
     @property
     def generator(self) -> MachineProvenance:
         """The configuration of the call that wrote the draft. `carried` has
         checked it is there before any step reads it."""
-        if self.draft.generator is None:
+        if self.draft.generator_provenance is None:
             raise ValueError("a draft carries the configuration of the call that wrote it")
-        return self.draft.generator
+        return self.draft.generator_provenance
 
     @property
     def measurable(self) -> bool:
@@ -140,7 +140,7 @@ def carried(passage: Passage, writing: Writing, *, generator: Call | None) -> Pa
     the first that rejects or holds the draft, and the site records are written
     once, over whatever they left.
     """
-    if passage.draft.generator is None:
+    if passage.draft.generator_provenance is None:
         raise ValueError("a draft carries the configuration of the call that wrote it")
     for step in STEPS:
         if not step(passage):
@@ -173,7 +173,7 @@ def to_agreed(p: Passage) -> bool:
             p.draft,
             WritingState.REFERENCED,
             reference=solution,
-            blind=MachineProvenance.of(p.blind),
+            blind_provenance=MachineProvenance.of(p.blind),
         )
     else:
         p.notes("reference", "reused, at the configuration that wrote it")
@@ -208,7 +208,7 @@ def to_built(p: Passage) -> bool:
                 WritingState.BUILT,
                 builder=p.inputs.built.code,
                 largest=p.inputs.built.largest,
-                inputs=MachineProvenance.of(p.inputs.call),
+                inputs_provenance=MachineProvenance.of(p.inputs.call),
             )
     else:
         p.notes("inputs", "reused, at the configuration that wrote it")
@@ -217,36 +217,36 @@ def to_built(p: Passage) -> bool:
 
 
 def to_paced(p: Passage) -> bool:
-    """The clock, after the builder and only where a speedup is claimed: the
+    """The naive solution, after the builder and only where a speedup is claimed: the
     builder is written for every problem, and nothing measures a form that is
     its own optimum. A draft with no builder stops at the step before this one,
-    so paying for a clock here would buy a step the draft cannot record."""
+    so paying for a naive solution here would buy a step the draft cannot record."""
     if not p.measurable:
         return True
-    p.clock = paced(
+    p.naive = paced(
         p.transport,
         p.calls,
         p.draft,
         p.template,
-        configuration=p.bench.clock,
+        configuration=p.bench.naive,
         cap_ms=p.cap_ms,
         notes=p.notes,
         # drawn again where the search separated nothing, though nothing about
         # the bench moved: the site is the one that is sampled
-        reuse=not re_asks(p.draft, "clock", p.template, p.bench)
+        reuse=not re_asks(p.draft, "naive", p.template, p.bench)
         and not draws_again(p.draft, p.template),
     )
-    if p.clock.code is not None and p.clock.call is not None:
+    if p.naive.code is not None and p.naive.call is not None:
         p.draft = advanced(
             p.drafts,
             p.draft,
             WritingState.PACED,
-            naive=p.clock.code,
-            clock=MachineProvenance.of(p.clock.call),
+            naive=p.naive.code,
+            naive_provenance=MachineProvenance.of(p.naive.call),
         )
-    # without a clock the search has nothing to measure the canonical against,
+    # without a naive solution the search has nothing to measure the canonical against,
     # so the draft stops here rather than at the step after it
-    return p.clock.code is not None
+    return p.naive.code is not None
 
 
 def to_searched(p: Passage) -> bool:
@@ -256,7 +256,7 @@ def to_searched(p: Passage) -> bool:
     separating = p.draft.separating
     if reaches(p.start, WritingState.SEARCHED):
         p.checked, p.inputs, separating = timed(
-            p.template, p.draft, p.checked, p.inputs, p.clock, cap_ms=p.cap_ms, notes=p.notes
+            p.template, p.draft, p.checked, p.inputs, p.naive, cap_ms=p.cap_ms, notes=p.notes
         )
         if not p.checked.survived:
             p.draft = rejected(p.drafts, p.draft, p.checked.discard)
@@ -300,7 +300,7 @@ def to_hardened(p: Passage) -> bool:
         p.draft,
         WritingState.HARDENED,
         won=won,
-        discrimination=MachineProvenance.of(p.bar.call),
+        discrimination_provenance=MachineProvenance.of(p.bar.call),
     )
     return True
 
@@ -314,7 +314,7 @@ def stored(draft: Draft) -> Inputs:
     wrote it. It made no call here, so it leaves no site outcome."""
     return Inputs(
         built=Built(code=draft.builder or "", largest=draft.largest or 1),
-        written=draft.inputs,
+        written=draft.inputs_provenance,
     )
 
 
@@ -344,8 +344,8 @@ def sites(writing: Writing, call: Call | None, p: Passage) -> None:
     # the search judged this answer as much as the builder's, so both records
     # carry its verdict. A resume that re-asked one writes only that one
     writing(
-        CallSite.CLOCK,
-        p.clock.call,
+        CallSite.NAIVE,
+        p.naive.call,
         separating=p.inputs.separating,
         unseparated=p.inputs.unseparated,
     )
@@ -439,38 +439,38 @@ def paced(
     cap_ms: int,
     notes: Notes = SILENT,
     reuse: bool = True,
-) -> Clock:
+) -> Naive:
     """The naive solution, or the one the draft already holds, run against the
     set the two solutions settled.
 
-    A call that fails costs the clock rather than the problem, as a failed
+    A call that fails costs the naive solution rather than the problem, as a failed
     builder does. So does one whose answer is wrong: what it says is that this
     solution measures nothing, not that the statement is unsound.
     """
     if reuse and draft.naive is not None:
-        notes("clock", "reused, at the configuration that wrote it")
-        clock = Clock(code=draft.naive, written=draft.clock)
+        notes("naive", "reused, at the configuration that wrote it")
+        naive = Naive(code=draft.naive, written=draft.naive_provenance)
     else:
-        notes("clock", "writing the solution the search measures against")
+        notes("naive", "writing the solution the search measures against")
         try:
-            code, call = naive(
+            code, call = naive_solution(
                 transport, calls, draft.statement, template.trigger, configuration=configuration
             )
         except Exception as failure:
-            notes("clock", f"unpaced: {failure!r}")
-            return Clock(unpaced=repr(failure))
-        notes("clock", "written", call)
-        clock = Clock(call=call, code=code, written=MachineProvenance.of(call))
+            notes("naive", f"unpaced: {failure!r}")
+            return Naive(unpaced=repr(failure))
+        notes("naive", "written", call)
+        naive = Naive(call=call, code=code, written=MachineProvenance.of(call))
 
     # run again on a reuse: the draft stores the code rather than the verdict,
     # and a subprocess answers this for nothing
-    detail = wrong_on(draft.cases, code=clock.code or "", cap_ms=cap_ms)
+    detail = wrong_on(draft.cases, code=naive.code or "", cap_ms=cap_ms)
     if detail is None:
-        return clock
-    notes("clock", detail)
+        return naive
+    notes("naive", detail)
     # the call is kept, since the site answered and the record is what says
     # what it cost. Nothing is stored, so the draft stops at the step before
-    return clock.model_copy(update={"code": None, "unpaced": detail})
+    return naive.model_copy(update={"code": None, "unpaced": detail})
 
 
 def fuzzing(draft: Draft, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:

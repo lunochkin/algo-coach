@@ -6,11 +6,11 @@ from matching import card, seeded
 from pydantic import ValidationError
 
 from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import GenerationError, naive
+from algo_coach.generation import GenerationError, naive_solution
 from algo_coach.generation.blind import SYSTEM as BLIND
 from algo_coach.generation.blind import prompt as blindly
-from algo_coach.generation.clock import (
-    CLOCK_DEFAULT,
+from algo_coach.generation.naive import (
+    NAIVE_DEFAULT,
     SYSTEM,
     prompt,
     read,
@@ -46,7 +46,7 @@ def test_the_form_to_avoid_is_sent_beside_the_statement(tmp_path):
     reach a verdict. No other site may be told it."""
     model = FakeModel(answer())
 
-    code, call = naive(model, CallLog(tmp_path), STATEMENT, AVOID)
+    code, call = naive_solution(model, CallLog(tmp_path), STATEMENT, AVOID)
 
     assert model.calls[0]["content"] == prompt(STATEMENT, AVOID)
     assert STATEMENT in model.calls[0]["content"] and AVOID in model.calls[0]["content"]
@@ -73,13 +73,13 @@ def test_the_brief_asks_for_the_replaced_approach_where_the_blind_one_asks_for_p
 
 
 def test_the_brief_bounds_the_candidates_by_the_statement(tmp_path):
-    """A clock that only tries the values the input contains has used the
+    """A naive solution that only tries the values the input contains has used the
     insight the fast solution is built on, and separates nothing."""
     assert "The candidates are what the statement's own bounds admit" in SYSTEM
     assert "the values the input happens to contain" in SYSTEM
 
 
-def test_the_brief_stops_a_clock_slower_than_the_replaced_approach():
+def test_the_brief_stops_a_naive_solution_slower_than_the_replaced_approach():
     """Told to be slowest, a model enumerated every pairing. The search then
     separates at a few dozen elements, which is below the size a submission of
     the wrong complexity is judged at."""
@@ -95,7 +95,7 @@ def test_an_answer_cut_short_writes_no_solution(tmp_path):
     model = FakeModel(None)
 
     with pytest.raises(GenerationError):
-        naive(model, CallLog(tmp_path), STATEMENT, AVOID)
+        naive_solution(model, CallLog(tmp_path), STATEMENT, AVOID)
 
     assert len(CallLog(tmp_path).all()) == 1
 
@@ -103,10 +103,10 @@ def test_an_answer_cut_short_writes_no_solution(tmp_path):
 def test_the_site_s_own_configuration_is_the_default(tmp_path):
     model = FakeModel(answer())
 
-    naive(model, CallLog(tmp_path), STATEMENT, AVOID)
-    naive(model, CallLog(tmp_path), STATEMENT, AVOID, configuration=ELSEWHERE)
+    naive_solution(model, CallLog(tmp_path), STATEMENT, AVOID)
+    naive_solution(model, CallLog(tmp_path), STATEMENT, AVOID, configuration=ELSEWHERE)
 
-    assert model.calls[0]["model"] == CLOCK_DEFAULT.model
+    assert model.calls[0]["model"] == NAIVE_DEFAULT.model
     assert model.calls[1]["model"] == ELSEWHERE.model
 
 
@@ -120,7 +120,7 @@ def test_the_site_is_sampled_where_the_other_answering_ones_are_greedy(tmp_path)
     """
     model = FakeModel(answer())
 
-    _, call = naive(model, CallLog(tmp_path), STATEMENT, AVOID)
+    _, call = naive_solution(model, CallLog(tmp_path), STATEMENT, AVOID)
 
     assert model.calls[0]["temperature"] is None
     assert call.temperature is None

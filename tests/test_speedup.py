@@ -4,10 +4,10 @@ from helpers import a_call
 from algo_coach.generation.speedup import CEILING, Missing, search
 from algo_coach.schema import ExpectedSource, MachineProvenance
 
-# a clock whose cost grows with the square of the size, as a naive solution
+# a naive solution whose cost grows with the square of the size, as a naive solution
 # usually does. Two sleeps take 20ms and three take 45ms, and the cap sits
 # between them, so a bound of two finishes. Which size the search settles on is
-# the clock's answer rather than the search's, and no test asserts a number: a
+# the naive solution's answer rather than the search's, and no test asserts a number: a
 # loaded machine moves it by one where the behaviour under test is the same
 SLEEPS = "import time\n\n\ndef solve(n):\n    time.sleep(n * n / 200)\n    return n\n"
 FAST = "def solve(n):\n    return n\n"
@@ -16,7 +16,7 @@ MEASURE_MS = 2000
 
 
 def searched(canonical: str = FAST, naive: str = SLEEPS, reference: str = FAST, **overrides):
-    """The clock is what the walk times; the reference is what settles the case
+    """The naive solution is what the walk times; the reference is what settles the case
     at the size it stops on."""
     return search(
         overrides.pop("make", lambda size: [size]),
@@ -77,7 +77,7 @@ def test_both_measurements_are_carried():
     assert found.canonical_ms < CAP_MS
 
 
-def test_a_clock_that_finishes_everywhere_separates_nothing():
+def test_a_naive_solution_that_finishes_everywhere_separates_nothing():
     """A defect where the template claimed a speedup, and nothing at all where
     it did not."""
     found = searched(largest=2)
@@ -88,7 +88,7 @@ def test_a_clock_that_finishes_everywhere_separates_nothing():
 
 def test_the_largest_legal_size_is_tried_before_the_search_gives_up():
     """Doubling from one reaches two and then four, so a bound of three is
-    reached by clamping alone. A clock that fits everywhere is what makes the
+    reached by clamping alone. A naive solution that fits everywhere is what makes the
     sizes it was asked for readable."""
     asked: list[int] = []
 
@@ -108,7 +108,7 @@ def test_a_canonical_that_cannot_answer_at_that_size_separates_nothing():
     assert found.missing is Missing.CANONICAL_FAILED
 
 
-def test_a_clock_that_crashes_is_neither():
+def test_a_naive_solution_that_crashes_is_neither():
     """A recursion limit at size says nothing about how long the naive
     solution takes."""
     found = searched(naive="def solve(n):\n    raise ValueError(n)\n")
@@ -116,7 +116,7 @@ def test_a_clock_that_crashes_is_neither():
     assert found.missing is Missing.NAIVE_CRASHED
 
 
-def test_a_clock_beyond_the_measuring_cap_carries_no_time():
+def test_a_naive_solution_beyond_the_measuring_cap_carries_no_time():
     """It exceeded the cap being separated, and by how much was never
     measured."""
     found = searched(naive="def solve(n):\n    while True:\n        pass\n", measure_ms=200)
@@ -188,13 +188,13 @@ def test_a_separation_it_proved_carries_the_size_and_both_times():
     assert found.canonical_ms < CAP_MS
 
 
-def test_a_clock_that_finishes_is_told_from_an_input_that_does_not_fit():
+def test_a_naive_solution_that_finishes_is_told_from_an_input_that_does_not_fit():
     """One is a defect where a speedup was claimed, the other a problem whose
     separating input is out of reach."""
     assert searched(largest=2).missing is Missing.NAIVE_FINISHED
 
 
-def test_the_case_carries_the_reference_s_answer_and_not_the_clock_s():
+def test_the_case_carries_the_reference_s_answer_and_not_the_naive_solution_s():
     """Two solutions, two jobs: the naive one is timed and the reference is
     what says what the case returns."""
     found = searched(naive="import time\n\n\ndef solve(n):\n    time.sleep(n)\n    return -n\n")

@@ -202,13 +202,13 @@ def test_a_draft_holds_the_builder_and_its_bound():
     assert draft.largest == 1000
 
 
-def test_a_draft_holds_the_clock_the_search_measures_against():
+def test_a_draft_holds_the_naive_solution_the_search_measures_against():
     """A resume holding neither the code nor its configuration would re-pay
     the call that wrote it."""
-    draft = make_draft(naive="def solve(xs): ...", clock=PROVENANCE)
+    draft = make_draft(naive="def solve(xs): ...", naive_provenance=PROVENANCE)
 
     assert draft.naive.startswith("def solve")
-    assert draft.clock.call_id == "call-1"
+    assert draft.naive_provenance.call_id == "call-1"
 
 
 @pytest.mark.parametrize("half", [{"builder": "def solve(size, seed): ..."}, {"largest": 1000}])
@@ -239,15 +239,15 @@ def test_a_draft_holds_the_cases_the_rounds_won():
 def test_a_draft_carries_the_configuration_of_each_step():
     """A resume starts at the first step whose configuration or digest moved,
     which is why both are held here rather than only the outputs."""
-    for site in ("generator", "blind", "inputs", "clock", "discrimination"):
-        draft = make_draft(**{site: PROVENANCE})
+    for site in ("generator", "blind", "inputs", "naive", "discrimination"):
+        draft = make_draft(**{f"{site}_provenance": PROVENANCE})
 
-        assert getattr(draft, site).call_id == "call-1"
+        assert getattr(draft, f"{site}_provenance").call_id == "call-1"
 
 
 def test_a_step_runs_at_no_configuration_until_it_has_run():
     """Absence says the step was never asked, as it does on a site outcome."""
-    assert make_draft().generator is None
+    assert make_draft().generator_provenance is None
 
 
 @pytest.mark.parametrize("missing", PROVENANCE)
@@ -256,7 +256,7 @@ def test_a_step_copies_a_whole_configuration(missing):
     be compared with the one a resume would run."""
     kept = {field: value for field, value in PROVENANCE.items() if field != missing}
     with pytest.raises(ValidationError, match=missing):
-        make_draft(generator=kept)
+        make_draft(generator_provenance=kept)
 
 
 def test_the_mutants_and_the_counters_are_not_held():

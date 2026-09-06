@@ -81,7 +81,7 @@ def test_a_canonical_contradicting_its_own_cases_is_settled_by_the_reference(tmp
 
     assert stored.state is WritingState.REJECTED
     assert stored.gate is Discard.DISAGREED
-    assert stored.blind is not None
+    assert stored.blind_provenance is not None
 
 
 def test_the_reference_a_rejected_draft_paid_for_is_kept(tmp_path):
@@ -92,7 +92,7 @@ def test_the_reference_a_rejected_draft_paid_for_is_kept(tmp_path):
     assert stored.state is WritingState.REJECTED
     assert stored.gate is Discard.DISAGREED
     assert stored.reference == WRONG
-    assert stored.blind is not None
+    assert stored.blind_provenance is not None
 
 
 def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
@@ -115,8 +115,11 @@ def test_each_step_copies_the_configuration_of_its_own_call(tmp_path):
     result, _ = run(tmp_path, FakeWriter(generator=BUILDS))
 
     (stored,) = result.drafted
-    assert stored.generator.call_id != stored.blind.call_id
-    assert stored.inputs.call_id not in (stored.generator.call_id, stored.blind.call_id)
+    assert stored.generator_provenance.call_id != stored.blind_provenance.call_id
+    assert stored.inputs_provenance.call_id not in (
+        stored.generator_provenance.call_id,
+        stored.blind_provenance.call_id,
+    )
 
 
 def test_the_draft_and_its_site_outcomes_carry_one_id(tmp_path):
@@ -196,7 +199,7 @@ def test_a_draft_a_raised_call_left_is_held_with_its_reason(tmp_path):
 
 def test_a_held_draft_is_rejected_where_the_reference_wrote_the_form(tmp_path):
     """The exit no resume reaches: that solution is immutable and it is still
-    the clock, so the claim holds and this problem does not exercise it."""
+    the naive solution, so the claim holds and this problem does not exercise it."""
     result, drafts = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
     (one,) = result.held
     stored = one.draft

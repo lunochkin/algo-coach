@@ -17,10 +17,10 @@ comparable is the same, and is stated here once.
   field.
 - **A configuration is per call site, not per run.** Writing a problem takes
   five calls, and they ask for different things: a statement and a solution, an
-  independent reading of that statement, the inputs that catch a wrong
-  solution, code that builds an input of a given size, and the approach the
-  form replaces, which a timing bar measures against. One configuration over all five makes
-  the cheapest of them pay the price of the hardest.
+  independent reading of that statement, the inputs that catch a wrong solution,
+  code that builds an input of a given size, and the approach the form replaces,
+  which a timing bar measures against. One configuration over all five makes the
+  cheapest of them pay the price of the hardest.
 - **A run mixing models stays readable, because each record copies its own
   call's configuration.** The problem names the call that wrote it, its
   reference names the call written blind, and a case won by a round names the
@@ -115,10 +115,10 @@ a call returned, which is why it sits beside the call log.
   what that site's arithmetic is read by, and `corpus.md` gives what settles
   the case instead.
 - **The search's verdict is filed under every site it judged.** It times the
-  clock against the canonical on an input the builder made, so neither answer
-  alone makes it decidable. A resume that re-asked one of the two writes that
-  record and no other, and the size would otherwise be lost with the site it
-  reused.
+  naive solution against the canonical on an input the builder made, so neither
+  answer alone makes it decidable. A resume that re-asked one of the two writes
+  that record and no other, and the size would otherwise be lost with the site
+  it reused.
 - **The builder's bound is on the record, not only on the draft.** A landed
   problem clears its draft, so the largest input the statement admits is
   readable nowhere else. It is what says whether a walk that stored no case
@@ -127,9 +127,9 @@ a call returned, which is why it sits beside the call log.
   counts, which is a list length on one problem and a grid's side on another,
   and `corpus.md` gives what a separating size is comparable with.
 - **Two of a problem's records can carry different verdicts.** The builder's
-  answers for the search that judged it when it was written, and a later
-  clock's for the search that judged the redraw. Each says what one answer was
-  worth at one configuration, which is what a record is for.
+  answers for the search that judged it when it was written, and a later naive
+  solution's for the search that judged the redraw. Each says what one answer
+  was worth at one configuration, which is what a record is for.
 - **The exception is the gate no answer was rejected by.** A held draft is
   rejected where the problem does not exercise the form its template claims,
   and every site answered. It is read from the draft, which is the record that

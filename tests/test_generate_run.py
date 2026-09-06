@@ -14,10 +14,10 @@ from algo_coach.generation import (
     Corpus,
     Progress,
     blind,
-    clock,
     discrimination,
     generator,
     inputs,
+    naive,
     write_problems,
 )
 from algo_coach.generation import passage as passage_module
@@ -349,7 +349,7 @@ def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
     assert CaseLog(tmp_path).cases() == []
 
 
-def test_the_clock_is_written_between_the_builder_and_the_search(tmp_path, monkeypatch):
+def test_the_naive_solution_is_written_between_the_builder_and_the_search(tmp_path, monkeypatch):
     """The builder is written for every problem, since the fuzz pass builds its
     inputs with it, and the search measures against what this step writes."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
@@ -365,10 +365,10 @@ def test_the_clock_is_written_between_the_builder_and_the_search(tmp_path, monke
         on_step=lambda step: stages.append(step.name),
     )
 
-    assert stages.index("inputs") < stages.index("clock") < stages.index("timing")
+    assert stages.index("inputs") < stages.index("naive") < stages.index("timing")
 
 
-def test_a_form_that_is_its_own_optimum_pays_for_no_clock(tmp_path):
+def test_a_form_that_is_its_own_optimum_pays_for_no_naive_solution(tmp_path):
     """Nothing measures a solution the naive approach does not beat, so the
     site is asked exactly where the search is run."""
     (one,) = seeded(tmp_path, card())
@@ -376,10 +376,10 @@ def test_a_form_that_is_its_own_optimum_pays_for_no_clock(tmp_path):
 
     write_problems(model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path))
 
-    assert clock.SYSTEM not in [asked["system"] for asked in model.calls]
+    assert naive.SYSTEM not in [asked["system"] for asked in model.calls]
 
 
-def test_a_clock_that_was_not_written_holds_the_draft(tmp_path):
+def test_a_naive_solution_that_was_not_written_holds_the_draft(tmp_path):
     """The search has nothing to measure the canonical against, so the draft
     stops here rather than landing undemonstrated."""
     (one,) = seeded(tmp_path, card(**claiming({})))
@@ -400,20 +400,20 @@ def test_a_clock_that_was_not_written_holds_the_draft(tmp_path):
     assert held.draft.naive is None
 
 
-WRONG_CLOCK = "def solve(xs):\n    return len(xs) + 1\n"
+WRONG_NAIVE = "def solve(xs):\n    return len(xs) + 1\n"
 # slow where it matters and correct: the statement's own case is small enough
 # for it to answer
 UNFINISHED = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs))\n    return len(xs)\n"
 
 
-def test_a_clock_that_answers_a_case_wrongly_holds_the_draft(tmp_path):
+def test_a_naive_solution_that_answers_a_case_wrongly_holds_the_draft(tmp_path):
     """It measures nothing, and what it discards is nothing: being wrong says
     nothing about the statement."""
     (one,) = seeded(tmp_path, card(**claiming({})))
     drafts = DraftStore(tmp_path)
 
     result = write_problems(
-        FakeWriter(generator=BUILDS, slow=WRONG_CLOCK),
+        FakeWriter(generator=BUILDS, slow=WRONG_NAIVE),
         CallLog(tmp_path),
         one,
         one.templates[0],
@@ -429,9 +429,9 @@ def test_a_clock_that_answers_a_case_wrongly_holds_the_draft(tmp_path):
     assert stored.naive is None
 
 
-def test_a_clock_answering_no_case_is_not_wrong(tmp_path):
+def test_a_naive_solution_answering_no_case_is_not_wrong(tmp_path):
     """A case it does not finish is what the search is looking for at size, so
-    a solution too slow to answer one is the clock working."""
+    a solution too slow to answer one is the naive solution working."""
     (one,) = seeded(tmp_path, card(**claiming({})))
     drafts = DraftStore(tmp_path)
 
@@ -449,7 +449,7 @@ def test_a_clock_answering_no_case_is_not_wrong(tmp_path):
     assert stored.naive == UNFINISHED
 
 
-def test_a_written_clock_is_held_on_the_draft(tmp_path):
+def test_a_written_naive_solution_is_held_on_the_draft(tmp_path):
     """A resume re-deriving it would re-pay the call, so the code and the
     configuration it was written at are both stored."""
     (one,) = seeded(tmp_path, card(**claiming({})))
@@ -467,7 +467,7 @@ def test_a_written_clock_is_held_on_the_draft(tmp_path):
     (stored,) = drafts.all()
     assert stored.state is WritingState.SEARCHED
     assert stored.naive == NAIVE
-    assert stored.clock.model == BENCH.clock.model
+    assert stored.naive_provenance.model == BENCH.naive.model
 
 
 def test_the_search_runs_before_the_mutation_loop(tmp_path, monkeypatch):

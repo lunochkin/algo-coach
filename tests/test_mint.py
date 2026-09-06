@@ -364,5 +364,9 @@ def test_a_minted_draft_copies_the_generator_configuration_whole():
     a call site spelling the fields out could fill them partly."""
     made = draft("w1", **DRAFTED, written=WRITTEN)
 
-    assert made.generator.call_id == "call-1"
-    assert (made.blind, made.inputs, made.discrimination) == (None, None, None)
+    assert made.generator_provenance.call_id == "call-1"
+    assert (made.blind_provenance, made.inputs_provenance, made.discrimination_provenance) == (
+        None,
+        None,
+        None,
+    )

@@ -108,7 +108,7 @@ class Held(BaseModel):
     separating: int | None = None
     unseparated: str | None = None
     unbuilt: str | None = None  # no input generator, so no search ran at all
-    unpaced: str | None = None  # no naive solution, so the search had no clock
+    unpaced: str | None = None  # no naive solution, so the search had no naive solution
     unmeasured: str | None = None  # the round's call failed
     # a call that raised, which ends the writing where the others answer
     # nothing and let it go on. The draft the run wrote before it stands
@@ -289,7 +289,7 @@ def finished(
                 separating=p.inputs.separating,
                 unseparated=p.inputs.unseparated,
                 unbuilt=p.inputs.unbuilt,
-                unpaced=p.clock.unpaced,
+                unpaced=p.naive.unpaced,
                 unmeasured=p.bar.unmeasured,
             )
         )

@@ -4,10 +4,10 @@ call site, not per run."""
 from pydantic import BaseModel
 
 from algo_coach.generation.blind import BLIND_DEFAULT
-from algo_coach.generation.clock import CLOCK_DEFAULT
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT
 from algo_coach.generation.generator import GENERATOR_DEFAULT
 from algo_coach.generation.inputs import INPUTS_DEFAULT
+from algo_coach.generation.naive import NAIVE_DEFAULT
 from algo_coach.schema import Configuration
 
 
@@ -20,7 +20,7 @@ class Bench(BaseModel, frozen=True):
     blind: Configuration = BLIND_DEFAULT
     discrimination: Configuration = DISCRIMINATION_DEFAULT
     inputs: Configuration = INPUTS_DEFAULT
-    clock: Configuration = CLOCK_DEFAULT
+    naive: Configuration = NAIVE_DEFAULT
 
     @property
     def shared(self) -> Configuration | None:

@@ -53,7 +53,7 @@ def landing(draft: Draft) -> list[SettledCase]:
 def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
     # minted first, since every other record names its id, and put last, since
     # it is what a reader finds
-    written = copied(draft.generator)
+    written = copied(draft.generator_provenance)
     problem = mint.generated_problem(
         draft.title,
         draft.statement,
@@ -76,7 +76,7 @@ def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
         )
     canonical = mint.solution(problem.id, draft.canonical, SolutionRole.CANONICAL, written=written)
     corpus.solutions.append(canonical)
-    blind = copied(draft.blind)
+    blind = copied(draft.blind_provenance)
     if draft.reference is None:
         raise ValueError("a landing draft carries the reference its blind call wrote")
     corpus.solutions.append(
@@ -87,7 +87,9 @@ def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
         # for. Absent where the template claims no speedup, since nothing
         # measures a form that is its own optimum
         corpus.solutions.append(
-            mint.solution(problem.id, draft.naive, SolutionRole.NAIVE, written=copied(draft.clock))
+            mint.solution(
+                problem.id, draft.naive, SolutionRole.NAIVE, written=copied(draft.naive_provenance)
+            )
         )
     corpus.matches.append(mint.generator_match(template.id, canonical.id))
     corpus.problems.put(problem)

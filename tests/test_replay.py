@@ -3,7 +3,7 @@ from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
 from algo_coach.cases import CaseLog
-from algo_coach.generation import REPLAYED, Bench, Corpus, clock, replay, write_problems
+from algo_coach.generation import REPLAYED, Bench, Corpus, naive, replay, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
@@ -65,22 +65,22 @@ def test_a_replay_asks_the_answering_sites_about_a_stored_problem(tmp_path, monk
 
     result, outcomes = replayed(tmp_path, FakeWriter(generator=BUILDS), cards)
 
-    assert set(sites(outcomes)) == {CallSite.BLIND, CallSite.INPUTS, CallSite.CLOCK}
+    assert set(sites(outcomes)) == {CallSite.BLIND, CallSite.INPUTS, CallSite.NAIVE}
     assert result.asked == 3
 
 
-def test_the_search_measures_against_the_stored_clock(tmp_path, monkeypatch):
-    """The clock site answers for itself. A search measured against what it
+def test_the_search_measures_against_the_stored_naive_solution(tmp_path, monkeypatch):
+    """The naive solution site answers for itself. A search measured against what it
     just wrote would move two configurations at once, and neither could be
     read."""
     cards = landed(tmp_path, monkeypatch)
-    # a clock that crashes where the stored one runs: a search timing the new
+    # a naive solution that crashes where the stored one runs: a search timing the new
     # one would report `naive_crashed`, where the stored one separates
     model = FakeWriter(generator=BUILDS, slow="def solve(xs):\n    raise ValueError(1)\n")
 
     _, outcomes = replayed(tmp_path, model, cards)
 
-    assert clock.SYSTEM in [asked["system"] for asked in model.calls]
+    assert naive.SYSTEM in [asked["system"] for asked in model.calls]
     one = sites(outcomes)[CallSite.INPUTS]
     assert (one.separating, one.unseparated) == (2, None)
     (stored,) = SolutionLog(tmp_path).for_problem(
@@ -99,7 +99,7 @@ def test_a_replayed_builder_records_the_bound_it_reported(tmp_path, monkeypatch)
     assert sites(outcomes)[CallSite.INPUTS].largest == 8
 
 
-def test_a_replayed_clock_that_answers_wrongly_names_no_gate(tmp_path, monkeypatch):
+def test_a_replayed_naive_solution_that_answers_wrongly_names_no_gate(tmp_path, monkeypatch):
     """Being wrong rejects no problem, and every `Discard` arm says one was
     rejected. What the record carries is what the run saw."""
     cards = landed(tmp_path, monkeypatch)
@@ -107,12 +107,12 @@ def test_a_replayed_clock_that_answers_wrongly_names_no_gate(tmp_path, monkeypat
 
     _, outcomes = replayed(tmp_path, FakeWriter(generator=BUILDS, slow=wrong), cards)
 
-    one = sites(outcomes)[CallSite.CLOCK]
+    one = sites(outcomes)[CallSite.NAIVE]
     assert one.gate is None
     assert one.detail == "wrong on 2 case(s)"
 
 
-def test_a_problem_with_no_stored_clock_is_not_searched_over(tmp_path, monkeypatch):
+def test_a_problem_with_no_stored_naive_solution_is_not_searched_over(tmp_path, monkeypatch):
     """One landed before the role existed. The site's own answer would be
     judged by a search that cannot run."""
     cards = landed(tmp_path, monkeypatch)
@@ -237,7 +237,7 @@ def test_a_form_that_is_its_own_optimum_is_not_asked(tmp_path, monkeypatch):
     result, outcomes = replayed(tmp_path, FakeWriter(), cards)
 
     assert CallSite.INPUTS not in sites(outcomes)
-    assert CallSite.CLOCK not in sites(outcomes)
+    assert CallSite.NAIVE not in sites(outcomes)
     assert result.asked == 1  # the reference alone
 
 
@@ -293,7 +293,7 @@ def test_the_loop_is_replayed_against_the_set_as_it_stood(tmp_path):
 
     # skipped rather than unasked: shown the won case the loop kills every
     # mutant, and the site would go unasked for the wrong reason. The inputs
-    # and clock sites are the unasked ones, since the form claims no speedup
+    # and naive sites are the unasked ones, since the form claims no speedup
     assert (result.skipped, result.unasked) == (2, 2)
     assert second.answered == 0
 
@@ -306,5 +306,5 @@ def test_the_sites_a_replay_asks_exclude_the_generator(tmp_path):
         CallSite.BLIND,
         CallSite.DISCRIMINATION,
         CallSite.INPUTS,
-        CallSite.CLOCK,
+        CallSite.NAIVE,
     }

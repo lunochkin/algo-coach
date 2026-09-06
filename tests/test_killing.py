@@ -126,7 +126,7 @@ def test_the_cap_never_exceeds_the_one_it_was_given():
     assert pace(200, cap_ms=500) == 500
 
 
-def test_a_mutant_far_slower_than_the_canonical_is_killed_by_the_clock():
+def test_a_mutant_far_slower_than_the_canonical_is_killed_by_the_naive_solution():
     """A mutant whose change breaks the loop's progress never returns, and
     dozens of them at the reference's cap cost more than the calls."""
     [verdict] = kill([mutant(SLOW)], cases(([2], 4)), cap_ms=pace(0, cap_ms=CAP_MS))

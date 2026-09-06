@@ -13,7 +13,6 @@ from algo_coach.generation.checks import (
     check,
     stopped,
 )
-from algo_coach.generation.clock import naive
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
 from algo_coach.generation.drafting import reject, swept
 from algo_coach.generation.errors import GenerationError
@@ -29,6 +28,7 @@ from algo_coach.generation.generator import (
 )
 from algo_coach.generation.hardening import harden
 from algo_coach.generation.landing import Corpus, land, landing
+from algo_coach.generation.naive import naive_solution
 from algo_coach.generation.replay import (
     REPLAYED,
     ReplayResult,
@@ -85,7 +85,7 @@ __all__ = [
     "landing",
     "misdeclared",
     "moved_at",
-    "naive",
+    "naive_solution",
     "parameters",
     "prompt",
     "read",

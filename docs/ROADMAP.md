@@ -93,13 +93,13 @@ canonical solution and a reference solution. Everything that makes a generated
 problem sound.
 
 - Five call sites, each at its own configuration: the generator, the blind
-  reference, the input builder, the naive clock, the discrimination round.
+  reference, the input builder, the naive solution, the discrimination round.
 - A blind reference settles every expected value; a disagreement discards.
 - Mutants of the canonical, killed by the statement's cases, then by built
   inputs, then by at most two rounds of proposed cases. A proposal lands only
   where it killed.
 - A separating case where the template claims a speedup: the smallest input
-  the naive clock exceeds the drill cap on, under a 64 KiB case ceiling.
+  the naive solution exceeds the drill cap on, under a 64 KiB case ceiling.
 - The statement ends on its `solve` signature, checked against the canonical.
 - Site outcomes: what each site's gates said, per attempt, beside the call log.
 - Drafts as states, held where a step failed, resumed by `generate --resume`,
@@ -131,11 +131,11 @@ Measured:
   wrong, so the gate became a count. Re-run: 8 landed, 1 `untested` on an
   argument order the prose left open, 1 held on `input_too_large`.
 - Separating sizes: the first two searches gave `input_too_large`, the blind
-  reference having written the form, which is why the clock is its own site.
-  Five then separated at 1, 2, 6, 13 and 21 against a legal 100000, the clock
-  briefed too slow. Fifteen over the corpus: eight at one or two where the
-  clock scans the values, six at 13 to 27 where it is exponential, four over
-  the ceiling. The builder's bound is not a denominator.
+  reference having written the form, which is why the naive solution is its own
+  site. Five then separated at 1, 2, 6, 13 and 21 against a legal 100000, the
+  naive solution briefed too slow. Fifteen over the corpus: eight at one or two
+  where the naive solution scans the values, six at 13 to 27 where it is
+  exponential, four over the ceiling. The builder's bound is not a denominator.
 - Of ten statements on one template, 1 reused a domain the cue names and 2
   asked a question a listed statement already asked, both with the twin in the
   list. Held drafts are not listed.

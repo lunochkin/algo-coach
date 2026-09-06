@@ -37,8 +37,8 @@ class Inputs(BaseModel):
     gate: Discard | None = None  # the two solutions disagreed at that size
 
 
-class Clock(BaseModel):
-    """What the clock site left: the naive solution the search measures the
+class Naive(BaseModel):
+    """What the naive site left: the naive solution the search measures the
     canonical against, or why there is none.
 
     Empty where the template claims no speedup, as the search's own fields are.
@@ -49,7 +49,7 @@ class Clock(BaseModel):
     # the configuration the solution was written at. A resume past this step
     # reuses it where there is no call
     written: MachineProvenance | None = None
-    unpaced: str | None = None  # the call failed, and no clock was written
+    unpaced: str | None = None  # the call failed, and no naive solution was written
 
 
 class Bar(BaseModel):
@@ -189,10 +189,10 @@ def barred(hardened: Hardened) -> Bar:
 
 __all__ = [
     "Bar",
-    "Clock",
     "GateVerdict",
     "Inputs",
     "LoopVerdict",
+    "Naive",
     "SearchVerdict",
     "barred",
     "blind_verdicts",

@@ -360,5 +360,5 @@ def draft(
         canonical=canonical,
         declared=list(declared),
         difficulty=difficulty,
-        generator=written,
+        generator_provenance=written,
     )

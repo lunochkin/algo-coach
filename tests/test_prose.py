@@ -9,8 +9,8 @@ SRC = ROOT / "src" / "algo_coach"
 # `CLAUDE.md`, Writing: one idea per sentence, nothing over forty words, split
 # at the em-dash and the semicolon. The docs predate the rule, so each count
 # is held where it stands and lowered as they are edited, never raised.
-LONG_SENTENCES = 22
-EM_DASHES = 31
+LONG_SENTENCES = 21
+EM_DASHES = 26
 SEMICOLONS = 25
 # `CLAUDE.md`, Code style: a docstring stays shorter than the code it sits on.
 LONGER_DOCSTRINGS = 36

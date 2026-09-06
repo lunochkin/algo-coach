@@ -16,7 +16,7 @@ from algo_coach.schema import Call, Configuration
 # Sampled rather than greedy, as the generator is: it produces an artifact
 # rather than a verdict, and a second call is a second draw where the first
 # wrote the form.
-CLOCK_DEFAULT = Configuration(
+NAIVE_DEFAULT = Configuration(
     model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio"
 )
 
@@ -62,13 +62,13 @@ def request_hash(statement: str, avoid: str) -> str:
     return prompt_hash(SYSTEM, prompt(statement, avoid))
 
 
-def naive(
+def naive_solution(
     transport: Transport,
     log: CallLog,
     statement: str,
     avoid: str,
     *,
-    configuration: Configuration = CLOCK_DEFAULT,
+    configuration: Configuration = NAIVE_DEFAULT,
 ) -> tuple[str, Call]:
     # the form to avoid is the template's trigger, which no other site may be
     # shown: this one settles no case, so nothing it reads reaches a verdict
@@ -85,9 +85,9 @@ def naive(
 
 
 __all__ = [
-    "CLOCK_DEFAULT",
+    "NAIVE_DEFAULT",
     "SYSTEM",
-    "naive",
+    "naive_solution",
     "prompt",
     "read",
     "request_hash",

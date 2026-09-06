@@ -110,7 +110,7 @@ class Draft(BaseModel):
     # size the statement admits
     builder: str | None = Field(default=None, min_length=1)
     largest: int | None = Field(default=None, gt=0)
-    # paced: the clock the search measures the canonical against, written as the
+    # paced: the naive solution the search measures the canonical against, written as the
     # approach the form replaces. Absent where no speedup is claimed
     naive: str | None = Field(default=None, min_length=1)
     # searched: the case at the size the naive solution stops fitting, absent
@@ -127,11 +127,13 @@ class Draft(BaseModel):
     # the configuration each step ran at, copied as its call returned. A resume
     # starts at the first step whose configuration or digest moved, which is
     # why both are held here rather than only the outputs
-    generator: MachineProvenance | None = None
-    blind: MachineProvenance | None = None
-    inputs: MachineProvenance | None = None  # the builder and the search it fed
-    clock: MachineProvenance | None = None  # the naive solution a search measures against
-    discrimination: MachineProvenance | None = None
+    generator_provenance: MachineProvenance | None = None
+    blind_provenance: MachineProvenance | None = None
+    inputs_provenance: MachineProvenance | None = None  # the builder and the search it fed
+    naive_provenance: MachineProvenance | None = (
+        None  # the naive solution a search measures against
+    )
+    discrimination_provenance: MachineProvenance | None = None
 
     @model_validator(mode="after")
     def _rejection_names_its_gate(self) -> Draft:
@@ -167,8 +169,8 @@ class Draft(BaseModel):
     def _each_step_copies_a_whole_configuration(self) -> Draft:
         """A step whose configuration is partly unknown could not be compared
         with the one a resume would run."""
-        for site in ("generator", "blind", "inputs", "clock", "discrimination"):
-            copied = getattr(self, site)
+        for site in ("generator", "blind", "inputs", "naive", "discrimination"):
+            copied = getattr(self, f"{site}_provenance")
             if copied is not None:
                 copied.check_provenance(True)
         return self

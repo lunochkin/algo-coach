@@ -246,7 +246,7 @@ def test_the_sites_are_the_ones_the_bench_names(tmp_path):
 
 
 # the sites making an artifact rather than a verdict about one
-SAMPLED = {"generator", "clock"}
+SAMPLED = {"generator", "naive"}
 
 
 def test_only_the_sites_making_an_artifact_are_sampled():
@@ -263,20 +263,20 @@ SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    ret
 CLAIMS = template("longest-valid-window", speedup=True)
 
 
-def test_the_clock_leaves_a_record_where_it_answered(tmp_path):
+def test_the_naive_solution_leaves_a_record_where_it_answered(tmp_path):
     """A site that made a call writes one, or what the run paid for is
     readable nowhere."""
     _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
 
-    assert sites(outcomes)[CallSite.CLOCK].model == BENCH.clock.model
+    assert sites(outcomes)[CallSite.NAIVE].model == BENCH.naive.model
 
 
-def test_a_form_that_is_its_own_optimum_leaves_no_clock_record(tmp_path):
+def test_a_form_that_is_its_own_optimum_leaves_no_naive_solution_record(tmp_path):
     """Absence on a site means it was never asked, and nothing measures a form
     the naive approach does not beat."""
     _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS))
 
-    assert CallSite.CLOCK not in sites(outcomes)
+    assert CallSite.NAIVE not in sites(outcomes)
 
 
 def test_the_inputs_record_carries_the_size_the_search_found(tmp_path, monkeypatch):
@@ -303,8 +303,8 @@ def test_the_inputs_record_carries_the_bound_the_search_ran_under(tmp_path, monk
 
     at = sites(outcomes)
     assert at[CallSite.INPUTS].largest == 8
-    # the builder's answer, not the clock's: the search read it from this call
-    assert at[CallSite.CLOCK].largest is None
+    # the builder's answer, not the naive solution's: the search read it from this call
+    assert at[CallSite.NAIVE].largest is None
 
 
 def test_a_bound_is_recorded_where_no_search_ran(tmp_path):
@@ -319,15 +319,15 @@ def test_a_bound_is_recorded_where_no_search_ran(tmp_path):
     assert sites(outcomes)[CallSite.INPUTS].largest == 8
 
 
-def test_the_clock_record_carries_the_search_it_was_judged_by(tmp_path, monkeypatch):
+def test_the_naive_solution_record_carries_the_search_it_was_judged_by(tmp_path, monkeypatch):
     """The search timed this answer against the canonical, so what it found is
-    a verdict about the clock as much as about the builder."""
+    a verdict about the naive solution as much as about the builder."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     _, _, outcomes = run(tmp_path, model, templates=[CLAIMS])
 
-    assert sites(outcomes)[CallSite.CLOCK].separating is not None
+    assert sites(outcomes)[CallSite.NAIVE].separating is not None
     assert sites(outcomes)[CallSite.INPUTS].separating is not None
 
 

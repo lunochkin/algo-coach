@@ -160,20 +160,20 @@ What decides whether a solution to a generated problem is correct.
   holds, and of a run that builds an input before it can judge one.
 - **The ceiling is reached at a few thousand elements**, since an integer drawn
   at full magnitude costs eleven bytes. Four of the first twenty searches
-  crossed it before the clock exceeded the cap, so a quadratic separation is
-  the one that may not fit.
+  crossed it before the naive solution exceeded the cap, so a quadratic
+  separation is the one that may not fit.
 - **The separating case is chosen against the sitting's cap**, never
   generation's. It is the size at which a submission that did not use the form
   fails, so the number a sitting judges under is what decides it.
 - **A separation at the smallest legal input is a whole verdict.** Eight of the
-  first fifteen searches separated at one or two: the clock scans a range taken
-  from the values the input carries, and a legal input carries values large
-  enough at any size. The bar sits below what the statement admits, so every
-  input teaches the form.
-- **A size is comparable only within one clock's cost.** A form the clock is
-  exponential in separates in the tens, and one whose cost the values drive
-  separates at the floor, against the same bound of a hundred thousand. Two
-  sizes drawn from the two say nothing about each other.
+  first fifteen searches separated at one or two. The naive solution scans a
+  range taken from the values the input carries, and a legal input carries
+  values large enough at any size. The bar sits below what the statement admits,
+  so every input teaches the form.
+- **A size is comparable only within one naive solution's cost.** A form the
+  naive solution is exponential in separates in the tens. One whose cost the
+  values drive separates at the floor, against the same bound of a hundred
+  thousand. Two sizes drawn from the two say nothing about each other.
 - **A separating input over the ceiling stores no case.** The draft stops at
   the search, and the run reports what the walk found.
 - **The two ways that happens assert opposite things, and are named apart.** A
@@ -209,16 +209,16 @@ What decides whether a solution to a generated problem is correct.
 - **A corrected `speedup` is what a resume watches besides the digest.** A flag
   edit moves neither a configuration nor a prompt, so a resume reading only
   those would leave the draft where the search stopped it.
-- **A resume asks the naive site again where the clock finished at every size
-  the builder reached**, though its configuration and its digest both stand.
-  The site is sampled, so the skip that spares every other site would spend the
-  exit that costs one call.
+- **A resume asks the naive site again where the naive solution finished at
+  every size the builder reached**, though its configuration and its digest both
+  stand. The site is sampled, so the skip that spares every other site would
+  spend the exit that costs one call.
 - **The draft carries why the search stored no case**, since the exits differ
   by it. A crashed builder is the inputs site's to repair, and a draw there
   buys a call the search still cannot use.
-- **The reference is not asked again for this.** It is immutable, it is no
-  longer the clock, and a second blind reading answers a question nothing here
-  asked.
+- **The reference is not asked again for this.** It is immutable, the search no
+  longer measures against it, and a second blind reading answers a question
+  nothing here asked.
 - **Rejection is what is left when the draws run out.** A model briefed to be
   slow and told the form to avoid, writing the form anyway, is the strongest
   evidence the run can produce that the problem does not exercise it.
@@ -291,13 +291,14 @@ A solution the engine wrote for a problem, in one of three roles.
 - **The reference is written from the statement alone**, and it computes the
   expected outputs. Independence is its whole purpose, so a solution displaying
   the form could not serve as one.
-- **The naive solution is the clock.** It is the approach the card's form
-  replaces, and the speedup search measures the canonical against it. The
-  reference held both jobs and they pull apart: one wants a blind reading, the
-  other wants a solution that does not reach the form.
-- **It may not narrow its candidates the way the canonical does.** A clock
-  trying only the values the input carries has used the insight the form is
-  built on. The two then run the same way, and the search separates nothing.
+- **The naive solution is what the speedup search times.** It is the approach
+  the card's form replaces, and the search measures the canonical against it.
+  The reference held both jobs and they pull apart: one wants a blind reading,
+  the other wants a solution that does not reach the form.
+- **It may not narrow its candidates the way the canonical does.** A naive
+  solution trying only the values the input carries has used the insight the
+  form is built on. The two then run the same way, and the search separates
+  nothing.
 - **It may not be slower than the approach it stands for either.** One trying
   every subset where the statement describes a scan is separated at a few dozen
   elements, and a submission of the wrong complexity passes every input that
@@ -310,9 +311,10 @@ A solution the engine wrote for a problem, in one of three roles.
 - **It is sampled, for the reason the generator is.** It produces an artifact
   rather than a verdict, so asking again is a second draw rather than the
   answer already stored.
-- **It is verified, and a failure is its own.** A wrong clock measures nothing,
-  so one that answers a case wrongly is not stored and the draft is held. It
-  never discards the problem: being wrong says nothing about the statement.
+- **It is verified, and a failure is its own.** A wrong naive solution measures
+  nothing, so one that answers a case wrongly is not stored and the draft is
+  held. It never discards the problem: being wrong says nothing about the
+  statement.
 - **A case it does not finish is not a failure.** Being slow is what it is for,
   and only a computed answer can be wrong. The cases written with the statement
   are small, so one it cannot answer there is the same evidence the search
@@ -324,8 +326,8 @@ A solution the engine wrote for a problem, in one of three roles.
   technique reading, no template match, no rung. It is the approach the card
   exists to replace.
 - **Stored at landing, as the reference is.** A replay re-runs the search over
-  the stored problem, and re-deriving the clock would re-pay the call that
-  wrote it.
+  the stored problem, and re-deriving the naive solution would re-pay the call
+  that wrote it.
 - **The role is stored, because all three are verified against the same
   cases.** Passing says nothing about which of them a solution is, and a reader
   taking a reference for a canonical would teach the approach the card exists
