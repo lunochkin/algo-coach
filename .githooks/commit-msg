@@ -16,4 +16,19 @@ if grep -qiE "$WORDS" "$1"; then
     grep -niE "$WORDS" "$1" >&2
     exit 1
 fi
+
+# The shape CLAUDE.md asks for: Conventional Commits, and an imperative subject
+# of at most fifty characters.
+SUBJECT=$(grep -v '^#' "$1" | head -n1)
+case "$SUBJECT" in
+    Merge\ *|Revert\ *) exit 0 ;;
+esac
+if ! echo "$SUBJECT" | grep -qE '^(feat|fix|refactor|test|build|ci|docs|chore|perf|style)(\([^)]+\))?: [a-z]'; then
+    echo "commit-msg: subject is '<type>(<scope>)?: <imperative, lowercase>'" >&2
+    exit 1
+fi
+if [ "${#SUBJECT}" -gt 50 ]; then
+    echo "commit-msg: subject is ${#SUBJECT} characters; the limit is 50" >&2
+    exit 1
+fi
 exit 0
