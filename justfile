@@ -25,6 +25,10 @@ lint *args:
 typecheck:
     uv run pyright
 
+# Rewrite the schema snapshots after an intended tightening; the test holds them otherwise.
+schemas:
+    SCHEMA_SNAPSHOT=write uv run pytest -q -n 0 tests/test_schema_additive.py
+
 # The tests with coverage, gated at `fail_under`. What CI runs in place of `test`.
 coverage *args:
     uv run pytest --cov {{ args }}
@@ -39,6 +43,9 @@ fmt:
 
 # Lint, type-check and test, as a commit does.
 check: lint typecheck test
+
+# What CI runs: `check` with coverage in place of the bare tests.
+ci: lint typecheck coverage
 
 # Enable the pre-commit and commit-msg hooks. Once per clone.
 hooks:

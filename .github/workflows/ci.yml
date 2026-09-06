@@ -27,5 +27,4 @@ jobs:
       - uses: extractions/setup-just@v4
       - run: uv lock --check
       - run: uv sync
-      # `check` with coverage in place of the bare tests
-      - run: just lint typecheck coverage
+      - run: just ci
