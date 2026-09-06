@@ -49,12 +49,12 @@ solutions written for it. Part of the architecture; `README.md` is the map.
   generation, so a problem whose cases separate nothing never lands. The floor
   is checked over the corpus, so a problem that telegraphs its form lands and
   is then retired.
-- **A problem is edited in place only where no verdict moves.** Wording that
-  changes nothing a solution returns is repaired. A statement that asks for
-  something else mints a new problem, and the old one keeps its attempts.
-- **A corrected statement usually drags cases with it**, which is why the edit
-  cannot stand. The new wording needs cases that pin it, and those would fail
-  attempts already made.
+- **A problem is never edited; only its status moves.** A statement that says
+  the wrong thing is retired `defective` and a new problem is written. Its
+  attempts stay with the record they were made against, and no case moves
+  under them. A generated statement passes every gate or is retired, so a
+  write path for wording would buy nothing and could change what a verdict
+  means.
 - **Retirement names its reason, because readers treat the two apart.**
   `defective` is a statement that asked for something its cases do not decide.
   `telegraphed` is one that names the approach, which the announcement floor

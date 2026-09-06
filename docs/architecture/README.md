@@ -51,7 +51,7 @@ times. Each record class is specified in one of the files beside it.
 | Techniques | product | global | read-only at runtime | this repo, in git |
 | Cards | product | global | read-only at runtime | the store, seeded from `content/` |
 | Drafts | product | global | revised in place | the store |
-| Problems | product | global | append-only | the store |
+| Problems | product | global | created once; only its status moves | the store |
 | Test cases | product | global | written with the problem | the store |
 | Solutions | product | global | append-only | the store |
 | Technique readings | product | global | append-only | the store |

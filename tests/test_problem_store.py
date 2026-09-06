@@ -1,7 +1,8 @@
+import pytest
 from helpers import GENERATED
 
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Problem
+from algo_coach.schema import Problem, ProblemStatus, RetirementReason
 
 
 def make_problem(id: str = "i1", **overrides) -> Problem:
@@ -29,13 +30,35 @@ def test_get_missing_is_none(tmp_path):
     assert ProblemStore(tmp_path).get("nope") is None
 
 
-def test_put_overwrites(tmp_path):
-    """One file per id: the second write of a problem replaces the first."""
+def test_a_stored_problem_is_not_rewritten(tmp_path):
+    """`corpus.md`: a statement that says the wrong thing is retired and a new
+    problem written, so the attempts stay with what they were made against."""
     store = ProblemStore(tmp_path)
     store.put(make_problem(title="Two Sum"))
-    store.put(make_problem(title="Two Sum II"))
 
-    assert store.get("i1").title == "Two Sum II"
+    with pytest.raises(ValueError, match="only its status moves"):
+        store.put(make_problem(title="Two Sum II"))
+    assert store.get("i1").title == "Two Sum"
+
+
+def test_only_the_status_of_a_stored_problem_moves(tmp_path):
+    """Created, then active or retired: the one write an existing problem
+    takes."""
+    store = ProblemStore(tmp_path)
+    store.put(make_problem())
+
+    store.put(make_problem(status=ProblemStatus.RETIRED, retired_reason=RetirementReason.DEFECTIVE))
+
+    assert store.get("i1").status is ProblemStatus.RETIRED
+    assert len(store.all()) == 1
+
+
+def test_writing_the_same_problem_again_is_allowed(tmp_path):
+    """A run that died between two writes of one landing may write it again."""
+    store = ProblemStore(tmp_path)
+    store.put(make_problem())
+    store.put(make_problem())
+
     assert len(store.all()) == 1
 
 
