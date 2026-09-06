@@ -189,7 +189,7 @@ def test_a_hand_match_is_blind_by_default():
 
 
 def test_a_hand_match_records_what_its_author_had_seen():
-    """An annotation made with a verdict in view is no longer independent of
+    """A hand match made with a verdict in view is no longer independent of
     it, and the agreement it is later scored on measures rather less."""
     match = user_match("t1", "s1", matched=True, informed_by=["call-1"])
 
@@ -215,7 +215,7 @@ def test_a_machine_match_has_seen_nothing():
     assert match.informed_by == []
 
 
-def test_a_hand_match_annotates_the_negative_too():
+def test_a_hand_match_records_the_negative_too():
     """The machine answers every candidate of a card, so a reference naming
     only the matches would score its yes and say nothing about its no."""
     assert user_match("t1", "s1", matched=False).matched is False

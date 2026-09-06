@@ -379,7 +379,7 @@ Which techniques a solution used. Product-owned and global, as the solution is.
   digest of what was sent, and re-derivable at any time. Where a claim carries
   one problem's criteria, a reading carries the whole vocabulary's, so any
   criteria edit re-reads every canonical.
-- **Two writers, user first**, as a claim resolves. A hand record here
+- **Two writers, user first**, as a claim resolves. A hand reading here
   adjudicates rather than testifies: nobody sat for a canonical, so what the
   user writes is a reading of code they did not produce. It stands all the
   same, and it is the reference a configuration is scored against.

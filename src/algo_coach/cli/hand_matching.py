@@ -1,4 +1,4 @@
-"""The annotation prompt as two panes: the statement with its solution, and one
+"""The hand-match prompt as two panes: the statement with its solution, and one
 form's code. It only collects; what lands is the caller's."""
 
 from collections.abc import Mapping, Sequence
@@ -43,7 +43,7 @@ SYNTAX = "xcode"
 
 
 # One question at a time, over the pool the caller sampled.
-class Annotating(App[None]):
+class HandMatching(App[None]):
     CSS = """
     #head { padding: 0 1; background: $panel; color: $text; }
     #statement { width: 50%; padding: 0 1; border-right: solid $panel; }

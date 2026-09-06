@@ -7,7 +7,7 @@ from textual.containers import VerticalScroll
 from textual.widgets import Markdown, Static
 
 from algo_coach.cards import CardStore
-from algo_coach.cli.annotate import annotating
+from algo_coach.cli.hand_match import hand_matching
 from algo_coach.matches import MatchLog
 from algo_coach.mint import machine_match
 from algo_coach.schema import MachineProvenance, MatchSource
@@ -19,7 +19,7 @@ SCREEN = (200, 50)
 
 
 @pytest.fixture
-def annotate_root(tmp_path, monkeypatch):
+def hand_match_root(tmp_path, monkeypatch):
     """One card of three forms and two problems its technique reaches, plus a
     second card nothing asks about unless `--card` says so."""
     root = tmp_path / "data"
@@ -51,7 +51,7 @@ def annotate_root(tmp_path, monkeypatch):
 def built(root, **flags):
     """The prompt the command builds, before anything runs it."""
     args = argparse.Namespace(**{"count": 10, "card": None, "seed": 0, "verdict": False, **flags})
-    return annotating(args, argparse.ArgumentParser(prog="annotate"), root)
+    return hand_matching(args, argparse.ArgumentParser(prog="match"), root)
 
 
 @asynccontextmanager
@@ -83,7 +83,7 @@ def written(root):
     return MatchLog(root).matches()
 
 
-def annotated(root):
+def by_hand(root):
     """The hand records alone: a test that seeds a matcher's verdict finds it
     in the log beside what the sitting wrote."""
     return [one for one in written(root) if one.source is MatchSource.USER]
@@ -121,116 +121,116 @@ def screen(app, selector: str) -> str:
     return str(app.query_one(selector, Static).content)
 
 
-async def test_one_answer_writes_a_record_per_template(annotate_root):
+async def test_one_answer_writes_a_record_per_template(hand_match_root):
     """The picked forms positive and the rest negative, in one write: reading
     a statement once to judge three forms is what the question is for."""
-    await run(annotate_root, ["space", "enter"], count=1, card="backtracking")
+    await run(hand_match_root, ["space", "enter"], count=1, card="backtracking")
 
-    slug = by_slug(annotate_root)
-    recorded = {slug[one.template_id]: one.matched for one in annotated(annotate_root)}
+    slug = by_slug(hand_match_root)
+    recorded = {slug[one.template_id]: one.matched for one in by_hand(hand_match_root)}
     assert recorded == {"subsets": True, "permutations": False, "grid-walk": False}
 
 
-async def test_several_forms_can_be_named(annotate_root):
+async def test_several_forms_can_be_named(hand_match_root):
     """Two approaches to one problem is the ordinary case, and it is what lets
     a rung cover a studied template and an optional one at once."""
-    await run(annotate_root, ["space", "3", "space", "enter"], count=1, card="backtracking")
+    await run(hand_match_root, ["space", "3", "space", "enter"], count=1, card="backtracking")
 
-    slug = by_slug(annotate_root)
-    recorded = {slug[one.template_id]: one.matched for one in annotated(annotate_root)}
+    slug = by_slug(hand_match_root)
+    recorded = {slug[one.template_id]: one.matched for one in by_hand(hand_match_root)}
     assert recorded == {"subsets": True, "permutations": False, "grid-walk": True}
 
 
-async def test_a_pick_can_be_taken_back(annotate_root):
+async def test_a_pick_can_be_taken_back(hand_match_root):
     """The same key both ways, since deciding against a form after reading its
     code is the ordinary case rather than a correction."""
-    await run(annotate_root, ["space", "space", "enter"], count=1, card="backtracking")
+    await run(hand_match_root, ["space", "space", "enter"], count=1, card="backtracking")
 
-    assert not any(one.matched for one in annotated(annotate_root))
+    assert not any(one.matched for one in by_hand(hand_match_root))
 
 
-async def test_naming_none_is_negatives_not_a_decline(annotate_root):
+async def test_naming_none_is_negatives_not_a_decline(hand_match_root):
     """A call naming no template asserts that each of them does not match,
     which is a verdict on every pair. The record shape decides that, so the
     prompt has to be able to say it."""
-    await run(annotate_root, ["enter"], count=1, card="backtracking")
+    await run(hand_match_root, ["enter"], count=1, card="backtracking")
 
-    recorded = annotated(annotate_root)
+    recorded = by_hand(hand_match_root)
     assert len(recorded) == 3
     assert not any(one.matched for one in recorded)
 
 
-async def test_a_hand_record_carries_no_configuration(annotate_root):
+async def test_a_hand_record_carries_no_configuration(hand_match_root):
     """Nothing re-derives it, which is what makes it the reference a reading is
     scored against."""
-    await run(annotate_root, ["space", "enter"], count=1, card="backtracking")
+    await run(hand_match_root, ["space", "enter"], count=1, card="backtracking")
 
-    one = annotated(annotate_root)[0]
+    one = by_hand(hand_match_root)[0]
     assert one.source is MatchSource.USER
     assert (one.model, one.pin, one.prompt_hash, one.call_id) == (None, None, None, None)
 
 
-async def test_a_skip_writes_nothing_and_moves_on(annotate_root):
+async def test_a_skip_writes_nothing_and_moves_on(hand_match_root):
     """Not the same as recording no template: the pair stays in the pool, so
     a sitting that could not decide costs the reference nothing."""
-    await run(annotate_root, ["s", "space", "enter"], count=2, card="backtracking")
+    await run(hand_match_root, ["s", "space", "enter"], count=2, card="backtracking")
 
-    assert len({one.solution_id for one in annotated(annotate_root)}) == 1
+    assert len({one.solution_id for one in by_hand(hand_match_root)}) == 1
 
 
-async def test_ending_the_sitting_keeps_what_landed(annotate_root):
+async def test_ending_the_sitting_keeps_what_landed(hand_match_root):
     """The log is append-only either way, so stopping early costs nothing that
     was answered."""
-    await run(annotate_root, ["space", "enter", "q"], count=2, card="backtracking")
+    await run(hand_match_root, ["space", "enter", "q"], count=2, card="backtracking")
 
-    assert len(annotated(annotate_root)) == 3
+    assert len(by_hand(hand_match_root)) == 3
 
 
-async def test_the_solution_is_read_under_its_statement(annotate_root):
+async def test_the_solution_is_read_under_its_statement(hand_match_root):
     """A form is displayed by code, so the solution is what the verdict is
     about. The statement is above it, for what the code leaves implicit."""
-    async with sitting(annotate_root, [], count=1, card="backtracking") as app:
+    async with sitting(hand_match_root, [], count=1, card="backtracking") as app:
         source = app.query_one("#statement-body", Markdown).source
 
     assert source.startswith("Given an array, return ...")
     assert "def solve(xs):" in source
 
 
-async def test_each_form_is_offered_by_its_own_cue(annotate_root):
+async def test_each_form_is_offered_by_its_own_cue(hand_match_root):
     """A template's trigger says which of the technique's forms this is, which
-    is exactly what the annotator is deciding."""
-    async with sitting(annotate_root, [], count=1, card="backtracking") as app:
+    is exactly what the user is deciding."""
+    async with sitting(hand_match_root, [], count=1, card="backtracking") as app:
         listing = screen(app, "#forms")
         assert "the cue for subsets" in listing
         assert "grid-walk" in listing
 
 
-async def test_the_form_in_view_shows_its_code(annotate_root):
+async def test_the_form_in_view_shows_its_code(hand_match_root):
     """What has to be reproduced is what says whether a problem exercises the
-    form. A cue names it; the code is what the annotator reads it against."""
-    async with sitting(annotate_root, ["2"], count=1, card="backtracking") as app:
+    form. A cue names it; the code is what the user reads it against."""
+    async with sitting(hand_match_root, ["2"], count=1, card="backtracking") as app:
         assert app.query_one("#code-body", Static).content.code == "def permutations(): pass"
         assert "the cue for permutations" in screen(app, "#cue")
 
 
-async def test_one_form_is_in_view_at_a_time(annotate_root):
+async def test_one_form_is_in_view_at_a_time(hand_match_root):
     """Six forms run to a hundred and thirty lines of code, which no pane
     holds. Which one is in view is the question already being answered."""
-    async with sitting(annotate_root, ["3"], count=1, card="backtracking") as app:
+    async with sitting(hand_match_root, ["3"], count=1, card="backtracking") as app:
         assert app.query_one("#code-body", Static).content.code == "def grid_walk(): pass"
 
 
-async def test_neither_pane_takes_focus(annotate_root):
+async def test_neither_pane_takes_focus(hand_match_root):
     """A focused scrollable claims space for a page down, and space is how a
     form is picked. Both panes scroll by key and by wheel without it."""
-    async with sitting(annotate_root, [], count=1, card="backtracking") as app:
+    async with sitting(hand_match_root, [], count=1, card="backtracking") as app:
         assert not any(pane.can_focus for pane in app.query(VerticalScroll))
 
 
-async def test_a_procedure_template_is_never_offered(annotate_root):
+async def test_a_procedure_template_is_never_offered(hand_match_root):
     """A framing procedure is displayed by every solution its technique
     reaches, so a per-solution verdict on it carries no information."""
-    root = annotate_root
+    root = hand_match_root
     seeded(
         root,
         card(
@@ -244,72 +244,72 @@ async def test_a_procedure_template_is_never_offered(annotate_root):
     await run(root, ["space", "enter"], count=1, card="monotonic-stack")
 
     slug = by_slug(root)
-    assert {slug[one.template_id] for one in annotated(root)} == {"next-greater"}
+    assert {slug[one.template_id] for one in by_hand(root)} == {"next-greater"}
 
 
-async def test_the_matcher_is_not_shown_by_default(annotate_root):
-    """Blind, or the annotation records what it reviewed rather than what it
+async def test_the_matcher_is_not_shown_by_default(hand_match_root):
+    """Blind, or the hand match records what it reviewed rather than what it
     read: the first hand pass is what the line gets drawn by."""
-    read_by_matcher(annotate_root)
-    async with sitting(annotate_root, [], count=1, card="backtracking") as app:
+    read_by_matcher(hand_match_root)
+    async with sitting(hand_match_root, [], count=1, card="backtracking") as app:
         assert "a-matcher" not in screen(app, "#cue")
 
 
-async def test_the_matcher_is_shown_on_request(annotate_root):
+async def test_the_matcher_is_shown_on_request(hand_match_root):
     """Asked for by name, as `claim --revise` shows a reading — and what it
     costs is that the answer is no longer independent of it."""
-    read_by_matcher(annotate_root)
-    async with sitting(annotate_root, [], count=1, card="backtracking", verdict=True) as app:
+    read_by_matcher(hand_match_root)
+    async with sitting(hand_match_root, [], count=1, card="backtracking", verdict=True) as app:
         cue = screen(app, "#cue")
         assert "a-matcher" in cue
         assert "yes" in cue
 
 
-async def test_a_blind_annotation_names_no_reading(annotate_root):
+async def test_a_blind_hand_match_names_no_reading(hand_match_root):
     """Nothing was in view, so there is nothing to record — which is what makes
     the record independent of every configuration scored against it."""
-    read_by_matcher(annotate_root)
-    await run(annotate_root, ["enter"], count=1, card="backtracking")
+    read_by_matcher(hand_match_root)
+    await run(hand_match_root, ["enter"], count=1, card="backtracking")
 
-    assert all(one.informed_by == [] for one in annotated(annotate_root))
+    assert all(one.informed_by == [] for one in by_hand(hand_match_root))
 
 
-async def test_an_annotation_records_the_calls_it_saw(annotate_root):
+async def test_a_hand_match_records_the_calls_it_saw(hand_match_root):
     """On every pair the answer writes, negatives included: what the reader saw
     is a fact about the sitting rather than about the verdict."""
-    read_by_matcher(annotate_root)
-    await run(annotate_root, ["enter"], count=1, card="backtracking", verdict=True)
+    read_by_matcher(hand_match_root)
+    await run(hand_match_root, ["enter"], count=1, card="backtracking", verdict=True)
 
-    assert all(one.informed_by == ["c"] for one in annotated(annotate_root))
+    assert all(one.informed_by == ["c"] for one in by_hand(hand_match_root))
 
 
-async def test_a_form_no_matcher_read_informs_nothing(annotate_root):
+async def test_a_form_no_matcher_read_informs_nothing(hand_match_root):
     """Only `subsets` was read, so only its call is named — the other two forms
     were shown with no verdict beside them."""
-    read_by_matcher(annotate_root)
-    await run(annotate_root, ["space", "enter"], count=1, card="backtracking", verdict=True)
+    read_by_matcher(hand_match_root)
+    await run(hand_match_root, ["space", "enter"], count=1, card="backtracking", verdict=True)
 
-    assert {tuple(one.informed_by) for one in annotated(annotate_root)} == {("c",)}
+    assert {tuple(one.informed_by) for one in by_hand(hand_match_root)} == {("c",)}
 
 
-async def test_one_card_is_asked_about_alone(annotate_root):
-    await run(annotate_root, ["enter"], count=1, card="union-find")
+async def test_one_card_is_asked_about_alone(hand_match_root):
+    await run(hand_match_root, ["enter"], count=1, card="union-find")
 
-    slug = by_slug(annotate_root)
-    assert {slug[one.template_id] for one in annotated(annotate_root)} == {
+    slug = by_slug(hand_match_root)
+    assert {slug[one.template_id] for one in by_hand(hand_match_root)} == {
         "plain-union",
         "weighted-union",
     }
 
 
-def test_an_unseeded_card_is_refused(annotate_root):
+def test_an_unseeded_card_is_refused(hand_match_root):
     with pytest.raises(SystemExit) as exit:
-        built(annotate_root, card="no-such-card")
+        built(hand_match_root, card="no-such-card")
     assert exit.value.code == 2
 
 
-async def test_nothing_left_to_annotate_says_so(annotate_root):
-    await run(annotate_root, ["enter", "enter"], card="union-find")
+async def test_nothing_left_to_match_by_hand_says_so(hand_match_root):
+    await run(hand_match_root, ["enter", "enter"], card="union-find")
     with pytest.raises(SystemExit) as exit:
-        built(annotate_root, card="union-find")
+        built(hand_match_root, card="union-find")
     assert exit.value.code == 1

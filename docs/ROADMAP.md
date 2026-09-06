@@ -64,7 +64,7 @@ Measured:
 - Card content as product data, authored by a skill into `content/` and seeded
   into the store.
 - Template matches: one record per template and problem, negatives included.
-- The matcher and its annotation pass.
+- The matcher and its hand pass.
 
 Measured:
 
@@ -151,7 +151,7 @@ What a generated corpus is worth, measured rather than asserted.
 
 - The hand pass, which writes the matcher's reference and is the only reading
   of a generated problem no model produced.
-- Annotation over pairs of a template and a solution, from the templates alone.
+- Hand matches over pairs of a template and a solution, from the templates alone.
 - The matcher scored per pair and grouped per template, positive verdicts in
   both directions.
 - The announcement floor: one matcher over both corpora, the archive in

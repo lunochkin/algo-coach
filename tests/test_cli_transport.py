@@ -63,7 +63,7 @@ def test_the_transport_the_cli_builds_reports_its_waits(monkeypatch):
     """Wired once, where the transport is made. A command that forgot would be
     silent exactly where the run is slowest."""
     monkeypatch.setenv("OPENROUTER_API_KEY", "a-key")
-    args = argparse.Namespace(command="classify")
+    args = argparse.Namespace(command="claim")
 
     built = transport(args, argparse.ArgumentParser())
 
@@ -75,7 +75,7 @@ def test_no_key_is_the_configuration_being_wrong(monkeypatch):
     """Checked before the run: an unset key fails every attempt identically,
     and reporting that per attempt buries it."""
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
-    args = argparse.Namespace(command="classify")
+    args = argparse.Namespace(command="claim")
 
     with pytest.raises(SystemExit) as exit_info:
         transport(args, argparse.ArgumentParser())

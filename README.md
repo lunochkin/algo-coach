@@ -338,11 +338,11 @@ Why it is shaped this way:
   fluency that blocked practice trains.
 
 **Where it stands:** the card record, the authoring skill and its nine cards,
-seeding, the template matcher and the hand-annotation prompt are built. Against
+seeding, the template matcher and the hand-match prompt are built. Against
 the archived corpus, nine cards pre-filtered to ~2.8k questions and ~14k pair
 verdicts. Next: a corpus written for the forms the cards teach, since the reset
 left no pair carrying a hand reference and none can until problems exist to
-annotate. Then the matcher's score against that hand pass, then ladder
+match by hand. Then the matcher's score against that hand pass, then ladder
 resolution, card runs and the recall trainer. Item by item in
 [`docs/TODO.md`](docs/TODO.md), phases 6 and 7.
 
@@ -399,14 +399,12 @@ uv run algo-coach <command>
 |---|---|
 | `seed` | seed authored cards into the store |
 | `board` | per-technique standing: attempts, solved, recency, labels |
-| `claim` | hand-label which techniques a stored attempt used |
-| `classify` | claim stored attempts with the classifier |
-| `match` | which problems exercise a card's templates |
+| `claim` | name the techniques a stored attempt used: the classifier, or the user with `--by-hand` |
+| `match` | which problems exercise a card's templates: the matcher, or the user with `--by-hand` |
 | `read` | name the techniques each stored canonical used |
 | `problem` | read one stored problem, or list the corpus |
 | `generate` | write problems for one of a card's templates |
 | `gaps` | core templates no stored solution displays |
-| `annotate` | which of a card's templates a problem exercises, by hand |
 | `score` | the classifier against the hand claims, per technique |
 | `movement` | how far the classifier's claims move the board off the fallback |
 

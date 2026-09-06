@@ -49,8 +49,9 @@ without redefining them. Grouped by the file that specifies the record.
   Written by the generator, the matcher or by hand.
 - **Matcher**: the model call reading a canonical beside its statement and
   naming the templates it displays.
-- **Annotation**: a template match or technique reading written by hand. It
-  stands over both machine sources.
+- **Hand record**: a claim, match or reading written by the user rather than a
+  model. Its `source` says so. It stands over every machine record on the same
+  question.
 
 ### Corpus
 

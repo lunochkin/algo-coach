@@ -62,7 +62,7 @@ def test_a_negative_verdict_leaves_the_gap(cards):
 
 
 def test_the_standing_verdict_decides(cards):
-    """A hand annotation overturning a matcher's positive reopens the gap."""
+    """A hand match overturning a matcher's positive reopens the gap."""
     one = problem("p1", techniques=["sliding-window"])
     solution = canonical("p1")
     [fixed] = templates(cards, "fixed-window")

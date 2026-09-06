@@ -9,13 +9,13 @@ from typing import TypedDict
 from dotenv import find_dotenv, load_dotenv
 
 from algo_coach.classifier import DEFAULT
-from algo_coach.cli.annotate import annotate
 from algo_coach.cli.bench import SITES
 from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
 from algo_coach.cli.classify import classify
 from algo_coach.cli.gaps import gaps
 from algo_coach.cli.generate import generate
+from algo_coach.cli.hand_match import hand_match
 from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
 from algo_coach.cli.problem import problem
@@ -29,6 +29,9 @@ DATA_ROOT = Path("data")
 
 # What a shell reports for a command its user stopped: 128 plus the signal.
 INTERRUPTED = 130
+
+# a parser or one of its groups: both take `add_argument`
+Flags = argparse._ActionsContainer  # pyright: ignore[reportPrivateUsage]
 
 __all__ = ["DATA_ROOT", "INTERRUPTED", "BadLine", "main"]
 
@@ -51,7 +54,7 @@ def _command(
     return sub.add_parser(name, help=help, formatter_class=_Defaults)
 
 
-def _user_argument(parser: argparse.ArgumentParser) -> None:
+def _user_argument(parser: Flags) -> None:
     parser.add_argument(
         "--user",
         default=os.environ.get("ALGO_COACH_USER", "local"),
@@ -59,9 +62,7 @@ def _user_argument(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def _run_arguments(
-    parser: argparse.ArgumentParser, *, record: str, question: str = "prompt", per: str = ""
-) -> None:
+def _run_arguments(parser: Flags, *, record: str, question: str = "prompt", per: str = "") -> None:
     """The flags every run over a backlog takes."""
     parser.add_argument(
         "--concurrency",
@@ -97,9 +98,7 @@ def _rows(dest: str, opener: str, *, opens_by_default: str | None = None) -> Row
     )
 
 
-def _configuration_arguments(
-    parser: argparse.ArgumentParser, rows: RowKeywords, opener: str, **help: str
-) -> None:
+def _configuration_arguments(parser: Flags, rows: RowKeywords, opener: str, **help: str) -> None:
     """`--model`, `--effort`, `--provider` and `--temperature`, each filling the
     row the `opener` before it began. `help` overrides the wording of one flag,
     keyed by its name."""
@@ -135,17 +134,24 @@ def main() -> None:
     _user_argument(board_parser)
 
     claim_parser = _command(sub, "claim", "name the techniques a stored attempt used")
-    claim_parser.add_argument("--count", type=int, default=10, help="how many to ask about")
+    claim_parser.add_argument(
+        "--by-hand",
+        action="store_true",
+        help="ask the user, one attempt at a time; run the classifier otherwise",
+    )
     claim_parser.add_argument(
         "--technique", help="only attempts whose problem carries it; every technique otherwise"
     )
-    claim_parser.add_argument("--lines", type=int, default=120, help="lines of code to show")
-    claim_parser.add_argument("--seed", type=int, default=0, help="sampling order")
-    claim_parser.add_argument(
+    _user_argument(claim_parser)
+    by_hand = claim_parser.add_argument_group("with --by-hand")
+    by_hand.add_argument("--count", type=int, default=10, help="how many to ask about")
+    by_hand.add_argument("--lines", type=int, default=120, help="lines of code to show")
+    by_hand.add_argument("--seed", type=int, default=0, help="sampling order")
+    by_hand.add_argument(
         "--revise", action="store_true", help="ask again about attempts already claimed"
     )
     _configuration_arguments(
-        claim_parser,
+        by_hand,
         _rows("named", "--model", opens_by_default=DEFAULT.model),
         "--model",
         model="a classifier whose reading to show beside the claim; repeatable",
@@ -154,35 +160,41 @@ def main() -> None:
     )
     # Unset rather than 0: "not passed" has to be a state the flag cannot
     # also be given as a value.
-    claim_parser.add_argument(
+    by_hand.add_argument(
         "--disputed",
         type=int,
         default=None,
         help="how many of them must read it differently; every claim otherwise",
     )
-    _user_argument(claim_parser)
-
-    classify_parser = _command(sub, "classify", "claim stored attempts with the classifier")
-    classify_parser.add_argument(
+    classifier = claim_parser.add_argument_group("without --by-hand")
+    classifier.add_argument(
         "--limit", type=int, help="how many attempts to claim; the whole backlog otherwise"
     )
-    classify_parser.add_argument(
-        "--technique", help="only attempts whose problem carries it; every technique otherwise"
-    )
-    classify_parser.add_argument(
+    classifier.add_argument(
         "--redo",
         action="store_true",
         help="also re-derive claims an older model or prompt version made",
     )
-    _run_arguments(classify_parser, record="claim")
-    _user_argument(classify_parser)
+    _run_arguments(classifier, record="claim")
 
     match_parser = _command(sub, "match", "which problems exercise a card's templates")
     match_parser.add_argument(
-        "--limit", type=int, help="how many pairs to read; every outstanding one otherwise"
+        "--by-hand",
+        action="store_true",
+        help="ask the user, one solution at a time; run the matcher otherwise",
     )
     match_parser.add_argument("--card", help="one card by slug; every seeded card otherwise")
-    _run_arguments(match_parser, record="record", question="question")
+    by_hand = match_parser.add_argument_group("with --by-hand")
+    by_hand.add_argument("--count", type=int, default=10, help="how many to ask about")
+    by_hand.add_argument("--seed", type=int, default=0, help="sampling order")
+    by_hand.add_argument(
+        "--verdict", action="store_true", help="show what the matcher read the same pairs as"
+    )
+    matcher = match_parser.add_argument_group("without --by-hand")
+    matcher.add_argument(
+        "--limit", type=int, help="how many pairs to read; every outstanding one otherwise"
+    )
+    _run_arguments(matcher, record="record", question="question")
 
     read_parser = _command(sub, "read", "name the techniques each stored canonical used")
     read_parser.add_argument(
@@ -252,16 +264,6 @@ def main() -> None:
         "--all", action="store_true", help="every core template; only the gaps otherwise"
     )
 
-    annotate_parser = _command(
-        sub, "annotate", "which of a card's templates a problem exercises, by hand"
-    )
-    annotate_parser.add_argument("--count", type=int, default=10, help="how many to ask about")
-    annotate_parser.add_argument("--card", help="one card by slug; every seeded card otherwise")
-    annotate_parser.add_argument("--seed", type=int, default=0, help="sampling order")
-    annotate_parser.add_argument(
-        "--verdict", action="store_true", help="show what the matcher read the same pairs as"
-    )
-
     score_parser = _command(sub, "score", "the classifier against the user's own claims")
     score_parser.add_argument(
         "--limit",
@@ -307,14 +309,13 @@ def main() -> None:
 COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Path], None]] = {
     "seed": seed,
     "board": lambda args, _parser, root: board(args, root),
-    "claim": claim,
-    "classify": classify,
+    # one command per record; `--by-hand` picks the writer
+    "claim": lambda args, parser, root: (claim if args.by_hand else classify)(args, parser, root),
     "problem": problem,
     "gaps": lambda args, _parser, root: gaps(args, root),
     "generate": generate,
     "read": read,
-    "match": match,
-    "annotate": annotate,
+    "match": lambda args, parser, root: (hand_match if args.by_hand else match)(args, parser, root),
     "score": score,
     "movement": moved,
 }

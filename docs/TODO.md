@@ -29,20 +29,20 @@ carry no solution, and three drafts would resume.
       of ten statements asked a question a listed one asked, and a draft held
       at `searched` is not listed at all
 
-### Annotating the generated corpus
+### Matching the generated corpus by hand
 
 The hand pass does two jobs at once. It writes the matcher's reference, and it
 is the only reading of a generated problem that no model produced. A generator
 that wandered from its brief shows up there whatever the matcher says.
 
-- [ ] Annotate a sample of what the sweep lands, across the core templates it
-      reached. The aiming is done: `--gaps` names them
-- [ ] Sample and annotate through `algo-coach annotate`, over pairs of a
-      template and a solution. It already samples across templates, and only
-      the subject of a pair moves
-- [ ] Annotate the eval set from the templates alone, with no matcher reading
-      in view. A score over the pairs that drew the line is agreement with
-      itself
+- [ ] Match by hand a sample of what the sweep lands, across the core templates
+      it reached. The aiming is done: `--gaps` names them
+- [ ] Sample and match by hand through `algo-coach match --by-hand`, over pairs
+      of a template and a solution. It already samples across templates, and
+      only the subject of a pair moves
+- [ ] Match the eval set by hand from the templates alone, with no matcher
+      reading in view. A score over the pairs that drew the line is agreement
+      with itself
 
 ### Scoring the matcher
 
@@ -229,8 +229,8 @@ sequences it. Known gaps with a trigger rather than a date: each names what has
 to happen before the item is worth doing, and it is picked up when that fires,
 whatever phase is current.
 
-- [ ] Re-annotate thirty attempts with the earlier readings hidden, for the
-      annotator's own ceiling. Triggered when mastery estimation reads claims,
+- [ ] Re-claim thirty attempts with the earlier readings hidden, for the
+      user's own ceiling. Triggered when mastery estimation reads claims,
       and a wrong one starts spending practice time
 - [ ] Read the architecture doc against the code, landing every divergence
       here. The goal is not that none exists, since the doc is target state.

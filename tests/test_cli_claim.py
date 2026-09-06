@@ -54,7 +54,7 @@ def claim_root(tmp_path, monkeypatch) -> AttemptLog:
 def run(monkeypatch, answers: list[str], *argv: str) -> None:
     scripted = iter(answers)
     monkeypatch.setattr("builtins.input", lambda _: next(scripted))
-    run_cli(monkeypatch, "claim", "--user", "u1", *argv)
+    run_cli(monkeypatch, "claim", "--by-hand", "--user", "u1", *argv)
 
 
 def test_a_claim_records_what_was_chosen(claim_root, monkeypatch, capsys):
@@ -378,7 +378,7 @@ def test_the_candidates_are_shown(claim_root, monkeypatch, capsys):
 
 
 def test_each_candidate_is_shown_with_its_criterion(claim_root, monkeypatch, capsys):
-    """One rulebook and two annotators is what makes their disagreement mean
+    """One rulebook and two readers is what makes their disagreement mean
     something: a reader judging from the code name alone disagrees with the
     classifier over an unclear rule and a different one indistinguishably."""
     run(monkeypatch, ["1", ""])

@@ -34,7 +34,7 @@ def test_a_negative_is_a_verdict_and_is_stored():
     assert make_match(MatchSource.USER, matched=False).matched is False
 
 
-def test_an_annotation_is_blind_unless_it_says_otherwise():
+def test_a_hand_match_is_blind_unless_it_says_otherwise():
     """The first pass is asked from the statement and the cues alone, so an
     empty list is what a record means when nothing recorded what its author
     saw."""
@@ -52,7 +52,7 @@ def test_a_hand_match_records_the_verdicts_its_author_saw():
 
 
 def test_verdicts_are_named_one_by_one_rather_than_flagged():
-    """An annotation made after seeing one matcher's verdict is still
+    """A hand match made after seeing one matcher's verdict is still
     independent of another's, and configurations are scored against the same
     records."""
     match = make_match(MatchSource.USER, informed_by=["call-1"])
@@ -173,7 +173,7 @@ def test_a_generator_match_has_seen_nothing():
 
 
 def test_the_three_writers_are_named_apart():
-    """A hand annotation stands over both machine sources, and a generator's
+    """A hand match stands over both machine sources, and a generator's
     assertion stands over a matcher's reading of the same pair."""
     assert set(MatchSource) == {
         MatchSource.USER,

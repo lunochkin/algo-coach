@@ -63,3 +63,15 @@ def test_a_missing_key_fails_before_the_run(root, monkeypatch, capsys):
 
     assert exit_info.value.code == 2
     assert "OPENROUTER_API_KEY unset" in capsys.readouterr().err
+
+
+def test_by_hand_reaches_the_prompt_and_not_the_matcher(tmp_path, monkeypatch, capsys):
+    """One command per record, and the flag picks the writer. With nothing
+    seeded the prompt has nothing to ask, and no model is called."""
+    data_root(tmp_path, monkeypatch)
+
+    with pytest.raises(SystemExit) as exit_info:
+        run_cli(monkeypatch, "match", "--by-hand")
+
+    assert exit_info.value.code == 1
+    assert "match by hand" in capsys.readouterr().err

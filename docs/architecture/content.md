@@ -128,7 +128,7 @@ own work: an author names no solution, so nothing is authored here either.
   problem itself, and nobody named a form for them. So every template they
   display is the matcher's answer, and one assertion per problem is the most
   there can be.
-- **A generator's assertion carries no configuration**, as a hand annotation
+- **A generator's assertion carries no configuration**, as a hand match
   carries none. The all-or-none rule is about readings, which are re-derivable
   and so must say by what. Nothing re-derives this pair short of writing the
   solution again, and the solution already names the call that wrote it.
@@ -152,11 +152,11 @@ own work: an author names no solution, so nothing is authored here either.
   generator's own claim holds. The first is why a rung can cover a core
   template and an optional one at once, the second the only check on a
   generator drifting from its brief.
-- **Three writers, ordered by what each of them knew.** A hand annotation
+- **Three writers, ordered by what each of them knew.** A hand match
   stands over both machine sources. A generator's assertion stands over a
   matcher's reading of the same pair, because the generator knew and the
   matcher inferred.
-- **An assertion and an annotation are one record per template and solution.**
+- **An assertion and a hand match are one record per template and solution.**
   Each answers one pair, and pairs are independent: solutions arrive one at a
   time, and a set record would rewrite pairs already settled every time the
   corpus grew.
@@ -186,7 +186,7 @@ own work: an author names no solution, so nothing is authored here either.
 - **A hand record settles what stands, not what has been read.** The run path
   skips a solution only where the hand pass settled every pair the call would
   have asked about, which is why what a skip needs follows the deferred shape.
-  The eval reads annotated pairs on purpose, because that reading is the
+  The eval reads pairs matched by hand on purpose, because that reading is the
   measurement.
 - **Agreement is per pair, grouped per template.** A call carrying six pairs
   saves requests; it is not a unit of truth. Grouping follows the ladder: a
@@ -196,20 +196,18 @@ own work: an author names no solution, so nothing is authored here either.
   asserts a pair, and a matcher that says yes to everything is already visible
   as a false positive on every template. Most pairs are negative, so a matcher
   naming nothing would score in the nineties and resolve an empty ladder. What
-  is scored is the positive verdicts, both directions: what the annotator named
-  and the machine missed, and what the machine named and the annotator did
-  not.
+  is scored is the positive verdicts, both directions: what the user named
+  and the machine missed, and what the machine named and the user did not.
 - **An empty answer is negatives, not a decline.** Where a claim naming nothing
   answers nothing, a call naming no template asserts that each candidate it was
   given does not match. What that becomes on disk follows the deferred shape,
   and either way it is a reading rather than a refusal to read. The record shape
   decides this, not the model's behaviour.
-- **An annotation records the verdicts its author saw**, as a claim does. It is
+- **A hand match records the verdicts its author saw**, as a claim does. It is
   written on every pair the answer settles, negatives included, because what the
   reader saw is a fact about the sitting rather than about the verdict.
-- **The first hand pass calibrates, a blind one measures.** Annotating is where
-  the line gets drawn between displaying a form and merely admitting it. A
-  score taken over the pairs that drew that line measures agreement with
-  itself. The eval set is annotated from the templates alone, and
-  configurations are compared over the pairs both read — the claims rule,
-  unchanged.
+- **The first hand pass calibrates, a blind one measures.** Matching by hand is
+  where the line gets drawn between displaying a form and merely admitting it. A
+  score taken over the pairs that drew that line measures agreement with itself.
+  The eval set is matched by hand from the templates alone, and configurations
+  are compared over the pairs both read — the claims rule, unchanged.

@@ -20,7 +20,7 @@ def criteria() -> Mapping[str, Technique]:
 
 
 def criterion(code: str) -> list[str]:
-    """One code's rule in the words both annotators meet, and nothing for a
+    """One code's rule in the words both readers meet, and nothing for a
     code the vocabulary no longer carries: records outlive it, so a retired
     code can still be a candidate and then reaches its reader as a bare
     name."""

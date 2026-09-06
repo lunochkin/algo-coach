@@ -69,16 +69,16 @@ board *args:
 
 # --- attribution ---
 
-# Claim stored attempts by hand: the eval set.
+# Claim stored attempts with the classifier.
 claim *args:
     uv run algo-coach claim {{ args }}
 
-revise:
-    uv run algo-coach claim --revise --disputed 1 --model anthropic/claude-opus-5 --effort medium --provider anthropic --temperature default
+# Claim stored attempts by hand: the eval set.
+claim-by-hand *args:
+    uv run algo-coach claim --by-hand {{ args }}
 
-# Claim stored attempts with the classifier.
-classify *args:
-    uv run algo-coach classify {{ args }}
+revise:
+    uv run algo-coach claim --by-hand --revise --disputed 1 --model anthropic/claude-opus-5 --effort medium --provider anthropic --temperature default
 
 adjudicate:
     uv run algo-coach score --concurrency 4 --model anthropic/claude-opus-5 --provider anthropic --temperature default
@@ -157,8 +157,8 @@ movement *args:
 # --- matching ---
 
 # Which of a card's templates a problem exercises, by hand.
-annotate *args:
-    uv run algo-coach annotate {{ args }}
+match-by-hand *args:
+    uv run algo-coach match --by-hand {{ args }}
 
 # Match the corpus against a card's templates.
 match *args:

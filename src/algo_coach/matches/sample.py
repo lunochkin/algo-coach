@@ -1,5 +1,5 @@
-"""The order a hand annotation is asked in, levelled per template rather than
-per card: a form nothing has annotated is a gap no card-level count reports."""
+"""The order hand matches are asked for, levelled per template rather than
+per card: a form no hand match covers is a gap no card-level count reports."""
 
 import random
 from collections import Counter
@@ -10,7 +10,7 @@ from algo_coach.matches.questions import Question, questions
 from algo_coach.schema import Card, MatchSource, Problem, Solution, TemplateMatch
 
 
-def annotatable(
+def unsettled(
     cards: Iterable[Card],
     problems: Iterable[Problem],
     solutions: Iterable[Solution],
@@ -19,10 +19,10 @@ def annotatable(
     card: str | None = None,
     seed: int = 0,
 ) -> list[Question]:
-    """The questions a hand annotation would settle something about, in the
-    order to ask them. `card` narrows the pool to one. A machine verdict does
-    not take a question out of it: a machine reading is what the annotation is
-    scored against."""
+    """The questions a hand match would settle something about, in the order to
+    ask them. `card` narrows the pool to one. A machine verdict does not take a
+    question out of it: a machine reading is what the hand match is scored
+    against."""
     asking = [
         question
         for question in questions(cards, problems, solutions)
@@ -52,7 +52,7 @@ def settled(question: Question, hand: set[tuple[str, str]]) -> bool:
 
 def spread(asking: Sequence[Question], *, covered: Counter[str], seed: int = 0) -> list[Question]:
     """The pool ordered so no single card's forms carry the reference: each
-    step takes from the card holding the least annotated template, so any
+    step takes from the card whose template has the fewest hand matches, so any
     prefix is spread. Shuffled within a card by `seed`."""
     pool = list(asking)
     random.Random(seed).shuffle(pool)

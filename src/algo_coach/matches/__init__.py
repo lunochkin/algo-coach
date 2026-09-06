@@ -1,5 +1,5 @@
-from algo_coach.matches.annotate import annotate
 from algo_coach.matches.gaps import Coverage, core, coverage, uncovered
+from algo_coach.matches.hand import hand_match
 from algo_coach.matches.matcher import (
     DEFAULT,
     EFFORT,
@@ -11,7 +11,7 @@ from algo_coach.matches.matcher import (
 )
 from algo_coach.matches.questions import Question, outstanding, questions
 from algo_coach.matches.run import Progress, match_corpus
-from algo_coach.matches.sample import annotatable
+from algo_coach.matches.sample import unsettled
 from algo_coach.matches.standing import latest_readings, standing_matches
 from algo_coach.matches.store import MatchLog
 
@@ -24,11 +24,10 @@ __all__ = [
     "MatcherError",
     "Progress",
     "Question",
-    "annotatable",
-    "annotate",
     "candidates",
     "core",
     "coverage",
+    "hand_match",
     "latest_readings",
     "match",
     "match_corpus",
@@ -37,4 +36,5 @@ __all__ = [
     "request_hash",
     "standing_matches",
     "uncovered",
+    "unsettled",
 ]

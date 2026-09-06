@@ -35,7 +35,7 @@ def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         print(f"{result.redone} stale machine claim(s) re-derived")
     if result.undecided:
         print(f"{result.undecided} named no candidate — the fallback stands")
-    exit_on(parser, "classify", result)
+    exit_on(parser, "claim", result)
 
 
 def show(one: Progress) -> None:

@@ -47,14 +47,14 @@ def test_a_lone_verdict_stands():
     assert standing_matches([reading]) == {("t1", "s1"): reading}
 
 
-def test_a_hand_annotation_stands_over_both_machine_sources():
+def test_a_hand_match_stands_over_both_machine_sources():
     """It is the reference a machine reading is scored against, so nothing a
     machine writes may replace it."""
-    annotation = match(MatchSource.USER, matched=True, at=T0)
+    by_hand = match(MatchSource.USER, matched=True, at=T0)
     asserted = match(MatchSource.GENERATOR, at=T0 + timedelta(days=1))
     read = match(MatchSource.CLASSIFIER, matched=False, at=T0 + timedelta(days=2))
 
-    assert standing_matches([annotation, asserted, read])[("t1", "s1")] is annotation
+    assert standing_matches([by_hand, asserted, read])[("t1", "s1")] is by_hand
 
 
 def test_a_generator_stands_over_a_matcher_reading_the_same_pair():
@@ -85,21 +85,21 @@ def test_append_order_breaks_a_tie_on_time():
 def test_order_of_reading_does_not_decide():
     """The rule is what each writer knew, so shuffling the log changes
     nothing."""
-    annotation = match(MatchSource.USER)
+    by_hand = match(MatchSource.USER)
     asserted = match(MatchSource.GENERATOR, at=T0 + timedelta(days=1))
     read = match(MatchSource.CLASSIFIER, at=T0 + timedelta(days=2))
 
-    for order in ([annotation, asserted, read], [read, asserted, annotation]):
-        assert standing_matches(order)[("t1", "s1")] is annotation
+    for order in ([by_hand, asserted, read], [read, asserted, by_hand]):
+        assert standing_matches(order)[("t1", "s1")] is by_hand
 
 
 def test_a_negative_stands_as_readily_as_a_positive():
     """A stored negative is a verdict. Resolution says who answered, never
     what they should have said."""
-    annotation = match(MatchSource.USER, matched=False)
+    by_hand = match(MatchSource.USER, matched=False)
     read = match(MatchSource.CLASSIFIER, matched=True, at=T0 + timedelta(days=1))
 
-    assert standing_matches([annotation, read])[("t1", "s1")].matched is False
+    assert standing_matches([by_hand, read])[("t1", "s1")].matched is False
 
 
 def test_pairs_resolve_apart():

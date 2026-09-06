@@ -182,7 +182,7 @@ def test_fresh_asks_again(tmp_path):
     assert len(MatchLog(tmp_path).matches()) == 4
 
 
-def test_a_hand_annotation_is_never_what_a_run_leans_on(tmp_path):
+def test_a_hand_match_is_never_what_a_run_leans_on(tmp_path):
     """It is the reference a machine run is scored against, so it settles
     nothing about what still has to be read."""
     cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))

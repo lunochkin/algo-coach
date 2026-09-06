@@ -137,10 +137,10 @@ def user_match(
     matched: bool,
     informed_by: Sequence[str] = (),
 ) -> TemplateMatch:
-    """One pair the user annotated, positive or negative: whether this solution
+    """One pair the user matched by hand, positive or negative: whether this solution
     displays this form.
 
-    The negative is annotated as deliberately as the positive, since the
+    The negative is recorded as deliberately as the positive, since the
     machine answers every candidate it was given. `informed_by` is empty unless
     the caller says otherwise.
     """

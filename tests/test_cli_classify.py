@@ -10,7 +10,7 @@ from algo_coach.runs import ABORT_AFTER
 
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
-    run_cli(monkeypatch, "classify", "--user", "u1", *argv, client=client)
+    run_cli(monkeypatch, "claim", "--user", "u1", *argv, client=client)
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def test_a_missing_key_fails_before_the_run(root, monkeypatch, capsys):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
     monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: client)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "classify", "--user", "u1"])
+    monkeypatch.setattr("sys.argv", ["algo-coach", "claim", "--user", "u1"])
 
     with pytest.raises(SystemExit) as exit_info:
         cli.main()
