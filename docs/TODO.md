@@ -21,9 +21,10 @@ carry no solution, and three drafts would resume.
       Two causes are known, a list grown where runtime follows a value and a
       separation the ceiling cannot hold, and the draft's reason does not
       separate them
-- [ ] Print a gaps run's position over every target, `[k/35]`, where the
-      counter reads `[1/1]` on each template today. What a sweep will spend is
-      otherwise readable only once it has spent it
+- [x] Print a gaps run's position over every target, `[k/35]`, and its size
+      before the first call, where the counter reads `[1/1]` on each template
+      today. What a sweep will spend is otherwise readable only once it has
+      spent it
 - [ ] List held drafts' statements to the generator beside the landed ones. Two
       of ten statements asked a question a listed one asked, and a draft held
       at `searched` is not listed at all

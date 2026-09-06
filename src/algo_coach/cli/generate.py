@@ -1,5 +1,6 @@
 import argparse
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 from algo_coach.calls import CallLog
@@ -21,7 +22,9 @@ from algo_coach.generation import (
     Corpus,
     GenerationResult,
     Notes,
+    Progress,
     Resumed,
+    Step,
     Target,
     replay,
     resume,
@@ -66,7 +69,10 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
     # the log as the run found it, so what this run paid is the tail past it
     before = len(calls.all())
     reached: list[tuple[Target, GenerationResult]] = []
-    for target in aimed:
+    total = len(aimed) * args.count
+    print(f"{total} problem(s) over {len(aimed)} template(s)", file=sys.stderr, flush=True)
+    for at, target in enumerate(aimed):
+        on_progress, on_step = rebased(at * args.count, total)
         result = write_problems(
             api,
             calls,
@@ -75,8 +81,8 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
             corpus,
             count=args.count,
             bench=bench,
-            on_progress=show,
-            on_step=stage,
+            on_progress=on_progress,
+            on_step=on_step,
             outcomes=outcomes,
             drafts=DraftStore(root),
         )
@@ -95,6 +101,20 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         # not "nothing written": a call that raised leaves the draft the steps
         # before it wrote, and the block above names it
         parser.exit(1, "generate: no problem stored\n")
+
+
+def rebased(offset: int, total: int) -> tuple[Callable[[Progress], None], Callable[[Step], None]]:
+    """The counters over the whole run rather than one template's share of
+    it: a gap run writes one problem per template, and `[1/1]` on every line
+    says nothing about how far it is."""
+
+    def on_progress(one: Progress) -> None:
+        show(one.model_copy(update={"index": one.index + offset, "total": total}))
+
+    def on_step(step: Step) -> None:
+        stage(step.model_copy(update={"index": step.index + offset, "total": total}))
+
+    return on_progress, on_step
 
 
 def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:

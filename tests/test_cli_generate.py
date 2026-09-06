@@ -191,6 +191,16 @@ def test_a_gap_run_writes_for_every_core_template(root, monkeypatch, capsys):
     assert written == {one.id for one in card.templates}
 
 
+def test_a_gap_run_counts_over_every_template(root, monkeypatch, capsys):
+    """Each template's run counts its own problems, so the lines are rebased
+    over the whole run and its size is named before the first call."""
+    aimed(monkeypatch, FakeWriter(statements=["The first.", "The second."]))
+
+    err = capsys.readouterr().err
+    assert "2 problem(s) over 2 template(s)" in err
+    assert "[2/2]" in err and "[1/1]" not in err
+
+
 def test_a_covered_form_is_not_written_again(root, monkeypatch, capsys):
     """One form is displayed already, so the run is aimed at what is left."""
     run(monkeypatch, FakeWriter(statements=["The first."]), "fixed-window")
