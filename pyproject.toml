@@ -34,6 +34,9 @@ dev = [
 python_classes = []
 # The workers cost two seconds to start; `-n 0` for one file.
 addopts = "-n auto"
+# a warning is a defect the interpreter noticed first: a leaked child, a
+# deprecated call. The runner's stop-early path leaked one before this was on
+filterwarnings = ["error"]
 # The annotation prompt is a textual app, and its pilot is an async generator.
 asyncio_mode = "auto"
 
@@ -142,6 +145,7 @@ select = ["E", "W", "F", "I", "UP", "B", "SIM", "ANN401", "RUF100", "RUF022", "R
 [tool.ruff.lint.per-file-ignores]
 "src/algo_coach/cli/**" = ["T20"]
 "scripts/**" = ["T20"]
+".claude/skills/**" = ["T20"]
 "tests/**" = ["T20"]
 
 # Twelve is where `search`, `score_backlog` and `claim` sit. Each is one flow,
