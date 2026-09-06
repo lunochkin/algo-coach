@@ -84,7 +84,10 @@ def run(
             stopped = False
             for one, (child, path) in zip(batch, waiting, strict=True):
                 if stopped:
+                    # killed and reaped: a child left unwaited is a zombie, and
+                    # its open pipe a warning the suite treats as an error
                     _kill(child.pid)
+                    child.communicate()
                     continue
                 result = _answered(child, path, code, one, cap_ms)
                 results.append(result)
