@@ -5,7 +5,7 @@ phase closes it is harvested into `docs/ROADMAP.md` and removed whole.
 
 ## Phase 7 — the corpus, measured (current)
 
-What a generated corpus is worth, measured rather than asserted. Split from
+The worth of a generated corpus, measured rather than asserted. Split from
 Phase 6 on 2026-09-02: every item here needs a corpus to exist first.
 
 ### Finishing the sweep
@@ -18,13 +18,13 @@ carry no solution, and three drafts would resume.
       `input_too_large`, so the count of held drafts after the sweep is the
       first number
 - [ ] Name the builder shape behind each `input_too_large` the sweep leaves.
-      Two causes are known, a list grown where runtime follows a value and a
-      separation the ceiling cannot hold, and the draft's reason does not
-      separate them
+      Two causes are known: a list grown where runtime follows a value, and a
+      separation the ceiling cannot hold. The draft's reason does not separate
+      them
 - [x] Print a gaps run's position over every target, `[k/35]`, and its size
       before the first call, where the counter reads `[1/1]` on each template
-      today. What a sweep will spend is otherwise readable only once it has
-      spent it
+      today. A sweep's cost is otherwise readable only once the sweep has paid
+      it
 - [ ] List held drafts' statements to the generator beside the landed ones. Two
       of ten statements asked a question a listed one asked, and a draft held
       at `searched` is not listed at all
@@ -47,16 +47,16 @@ that wandered from its brief shows up there whatever the matcher says.
 ### Scoring the matcher
 
 Generation asserts a match and the matcher audits it, so an unmeasured matcher
-audits at an unknown error rate. What that blocks is trusting the audit, not
-generating.
+audits at an unknown error rate. An unmeasured matcher blocks trusting the
+audit, not generating.
 
 - [ ] Score the matcher per pair, grouped per template, over the pairs both
       read. Not as a set: a match asserts a pair
 - [ ] Report the positive verdicts in both directions. Accuracy would score a
       matcher that names nothing in the nineties
 - [ ] Skip a pair the hand settled on the run path, and read it in the eval.
-      What a skip needs settled follows from the reading's record shape, which
-      is deferred
+      The skip's condition follows from the reading's record shape, which is
+      deferred
 - [ ] Lift the scorer out of `claims` rather than copying it. It already prints
       denominators and reports both directions, which is the shape a per-pair
       score needs
@@ -69,9 +69,9 @@ The archive half can start as soon as the matcher runs, and needs no scored
 matcher. The floor is one matcher over two corpora, so a systematic error
 largely cancels in the comparison.
 
-- [ ] Write the reader for `data/old/`, used by the floor measurement alone. It
-      is a corpus rather than a store, so nothing on the run path may point at
-      it
+- [ ] Write the reader for `data/old/`, used by the floor measurement alone.
+      `data/old/` is a corpus rather than a store, so nothing on the run path
+      may point at it
 - [ ] Measure the announcement floor over the archived statements: how often
       the matcher names a form from the statement alone
 - [ ] Promote a created problem to active, or retire it as telegraphed.
@@ -103,21 +103,22 @@ happens.
 - [ ] Store the verification result on `Attempt`. Additive, and meaningless
       before Phase 6
 - [ ] Feed the claim classifier its candidates from the problem's derived
-      techniques. Nothing else supplies them now the tag mapping is gone
+      techniques. No other source supplies candidates now that the tag
+      mapping is gone
 - [ ] Offer marking a problem defective in place of the self-label. A statement
       that asked the wrong thing would otherwise be recorded as the user's own
       gap
 - [ ] Exclude a defective problem's attempts from the board, both directions.
       Dropping only the failures would raise a technique's solve rate because
       a problem was broken
-- [ ] Ask for a claim and a self-label as Phase 2 asked them. What changes is
-      who witnessed the sitting, not who writes
+- [ ] Ask for a claim and a self-label as Phase 2 asked them. The only change
+      is who witnessed the sitting, not who writes
 
 - [ ] Serve the statement, take a submission and show the per-case verdict in
       one view. A sitting is one screen or it is a workflow, and a workflow is
       not practised daily
-- [ ] Time the sitting in the interface rather than asking for a number. What
-      the loop witnessed is the only timing it may record
+- [ ] Time the sitting in the interface rather than asking for a number. The
+      loop may record only the timing it witnessed
 - [ ] Show the board and the day's due work as the entry point, so the loop
       starts from what to practise rather than from a problem id
 
@@ -127,21 +128,21 @@ happens.
 
 ## Phase 9 — the engine hosted
 
-The same loop, for people who are not the author. What changes is entirely
-what may be trusted: the local backend is a subprocess per case because our
-own generated code on our own machine is not a threat model, and another
-person's is.
+The same loop, for people who are not the author. The only change is the trust
+the submitted code gets. The local backend is a subprocess per case, because
+our own generated code on our own machine is not a threat model, and another
+person's code is.
 
 - [ ] Add a sandboxed backend behind `runner.run`. Same signature, same child
-      protocol, JSON in and JSON out — a second backend rather than a second
-      runner, which is what that boundary was written for
+      protocol, JSON in and JSON out: a second backend rather than a second
+      runner. That boundary was written for a second backend
 - [ ] Keep the comparison against `expected` above the boundary, as it already
       is. A sandbox is never told what a case expects
 - [ ] Cap wall clock, memory and output per run, and give the sandbox no
       network. A submission that spawns a process or opens a connection
       fails
-- [ ] Key `AttemptLog` by user. It is the only store that changes: problems,
-      cases, solutions, matches and cards are shared product data
+- [ ] Key `AttemptLog` by user. The log is the only store that changes:
+      problems, cases, solutions, matches and cards are shared product data
 - [ ] Make one user's log readable and deletable without touching another's.
       The author's own log is the dogfooding evidence and the measurement
       substrate, and must not mix with a user's
@@ -165,11 +166,11 @@ person's is.
 - [ ] Re-derive the ladder whenever the corpus moves under it, a started card
       included. Progress is a fold over attempts, so nothing is lost
 - [ ] Add `CardRun`, minted where a card is started, since the ladder is
-      measured from it. Holds when it began and the probes assigned; later
-      probes append
+      measured from it. The run holds when it began and the probes assigned,
+      and later probes append
 - [ ] Add `RecallAttempt`, keyed to a card and a template rather than to an
-      attempt, since there is no problem and no submission. What was hinted
-      before a pass is part of it
+      attempt, since there is no problem and no submission. The hints taken
+      before a pass are part of the record
 - [ ] Generate probes from the corpus, as a skill rather than code, since
       choosing one is judgment. An agent later, possibly
 - [ ] Build the recall trainer: names hidden, the template typed into a blank
@@ -201,9 +202,9 @@ person's is.
 
 Every other way to solve a stored problem, by the flow in `flows.md`,
 "Enumerating a problem's other solutions". The schema and the match's subject
-are in place already; nothing before this phase writes a second canonical.
+are in place already, and nothing before this phase writes a second canonical.
 
-What it buys is a rung covering two forms at once, a scale case cross-checked
+Enumeration buys a rung covering two forms at once, a scale case cross-checked
 between two efficient solutions, and a problem's techniques widening past the
 one form its brief named.
 
@@ -245,11 +246,11 @@ whatever phase is current.
       criteria in, a problem out, carrying no `generated_for`. A paradigm and a
       problem class have no template, so nothing else reaches them. Triggered
       when a technique with no card needs problems
-- [ ] Choose what a classifier reading of a solution stores — a verdict per
-      candidate template, or one record naming the templates it found — and
+- [ ] Choose what a classifier reading of a solution stores, a verdict per
+      candidate template or one record naming the templates it found, and
       write the choice into `content.md`. Scoping through the problem's
       techniques bounds the pairs today. Triggered when a canonical displays a
-      form outside them, which enumeration is what produces
+      form outside them, which enumeration produces
 - [ ] Decide whether a canonical that yields no value on a proposed case is a
       defect rather than an input the statement excludes, and write the choice
       into `flows.md`. Triggered when a run drops such cases often enough to
@@ -262,10 +263,10 @@ whatever phase is current.
 - [ ] Decide how long a rejected draft is kept, and write the choice into
       `flows.md`. Triggered when the draft store outgrows the corpus it
       produced
-- [ ] Choose how a case with several correct returns is decided — a normaliser
-      over the returned value, or a checker per problem — and write the choice
-      into `corpus.md`. Triggered when a core template can only be exercised
-      by a problem whose answer is not unique
+- [ ] Choose how a case with several correct returns is decided, by a
+      normaliser over the returned value or by a checker per problem, and write
+      the choice into `corpus.md`. Triggered when a core template can only be
+      exercised by a problem whose answer is not unique
 - [ ] Name on the verification the rule that decided a case, once that rule is
       no longer JSON equality. A verdict stored without it cannot be re-read
       after the rule moves. Triggered by the item above landing

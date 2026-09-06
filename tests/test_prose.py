@@ -7,15 +7,15 @@ ARCHITECTURE = sorted((ROOT / "docs" / "architecture").glob("*.md"))
 SRC = ROOT / "src" / "algo_coach"
 
 # `CLAUDE.md`, Writing: one idea per sentence, nothing over forty words, split
-# at the em-dash and the semicolon. The docs predate the rule, so each count
-# is held where it stands and lowered as they are edited, never raised.
-LONG_SENTENCES = 3
-EM_DASHES = 26
-SEMICOLONS = 25
+# at the em-dash and the semicolon. Each count is a ratchet: held at zero, and
+# never raised.
+LONG_SENTENCES = 0
+EM_DASHES = 0
+SEMICOLONS = 0
 # `CLAUDE.md`, Writing: no cleft sentences, and no sentence opening on an
-# abstraction that delays its subject. Held and lowered the same way.
-CLEFTS = 77
-FRONTED = 67
+# abstraction that delays its subject. Held at zero the same way.
+CLEFTS = 0
+FRONTED = 0
 # `CLAUDE.md`, Code style: a docstring stays shorter than the code it sits on.
 LONGER_DOCSTRINGS = 36
 

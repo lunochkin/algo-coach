@@ -1,18 +1,19 @@
 # Architecture
 
-Target state, across this file and the ones beside it. Code lags them; where
-they differ, the doc wins.
+Target state, across this file and the ones beside it. The code lags these
+files. On any difference, the doc wins.
 
 ## Shape
 
-Engine public, content private. Everything the practice loop reads is local to
-the engine, which never contacts external platforms.
+The engine is public and the content is private. Everything the practice loop
+reads is local to the engine, which never contacts external platforms.
 
 Consequence: no third-party dependency in the drill loop.
 
 **Problems are the product's own, and the engine writes them.** A statement
-scraped from a platform cannot ship, which is what forces the question, but the
-answer is a capability rather than a licence fix.
+scraped from a platform cannot ship, which forces the question of where
+problems come from. The answer is a capability of the engine rather than a
+licence fix.
 
 **The engine is the platform.** It serves a generated problem, times the
 sitting, runs the submission against the problem's own test cases, and records
@@ -232,33 +233,35 @@ times. Each record class is specified in one of the files beside it.
 
 ## Boundaries
 
-- **Verification** — runs locally, so every submission is judged by whatever
+- **Verification runs locally**, so every submission is judged by whatever
   ran it.
-- **Storage** — concrete for now (JSON files under a gitignored directory), a
-  database later. The schema is the contract, and storage swaps underneath it.
-- **Calibration corpus** — what the pivot to generated problems left behind,
-  under `data/old/`: a platform's problems, the attempts against them, the
-  claims and the calls. A corpus rather than a store: no store points there,
-  and nothing on the run path reads it.
-  - It is kept for one measurement. The announcement floor is how often a form
-    is named from the statement alone, and a corpus no generator wrote is what
-    sets that floor. How it is read is deferred to taking that measurement.
-- **Content generation** — problems, their test cases and their solutions are
-  written by the engine, as a command beside the classifier and the matcher. It
-  reuses one transport, one call log and one provenance base, rather than
-  standing a second copy of each somewhere else.
-  - Extraction to a pipeline of its own stays possible and is not planned. What
-    it would have to preserve is the minted ids, since the attempt log
+- **Storage is concrete for now**: JSON files under a gitignored directory,
+  with a database later. The schema is the contract, and storage swaps
+  underneath it.
+- **The calibration corpus is the platform data the pivot to generated
+  problems left behind**, under `data/old/`: a platform's problems, the
+  attempts against them, the claims and the calls. It is a corpus rather than
+  a store: no store points there, and nothing on the run path reads it.
+  - The corpus is kept for one measurement, the announcement floor. The floor
+    measures how often a form is named from the statement alone, and a corpus
+    no generator wrote sets that floor. How the corpus is read is deferred to
+    taking that measurement.
+- **Content generation is a command of the engine**, beside the classifier and
+  the matcher, and it writes the problems, their test cases and their
+  solutions. The command reuses one transport, one call log and one provenance
+  base, rather than standing a second copy of each somewhere else.
+  - Extraction to a pipeline of its own stays possible and is not planned. Such
+    a pipeline would have to preserve the minted ids, since the attempt log
     references them.
-- **Card ingest** — cards are authored in `content/` and seeded into the
-  datastore. File-based for now, and gitignored like `data/`. The technique
+- **Cards are ingested from files.** They are authored in `content/` and seeded
+  into the datastore. `content/` is gitignored like `data/`. The technique
   vocabulary is the exception: it ships with the package, in git.
-  - What an author writes has its own shape. `CardSeed`
+  - An authored card has its own shape. `CardSeed`
     (`src/algo_coach/schema/seed.py`) is the payload the stored card is built
     from, not the card, and it has no field for the identity the engine mints.
   - A card and each template are matched by their authored slug, which makes
     re-seeding refresh rather than duplicate. A new slug is a new card: the
-    runs and the recall history stay with the old one, so renaming is a title
+    runs and the recall history stay with the old card, so renaming is a title
     change.
 
 ## Invariants
@@ -267,26 +270,26 @@ Properties the system holds at all times.
 
 - Attempts, technique claims, self-labels and diagnoses are append-only: no
   record is ever revised or removed in place. Discarding a private log
-  wholesale while it holds nothing irreplaceable is a different act, and that
-  window closes the first time a record is worth keeping.
+  wholesale while it holds nothing irreplaceable is a different act. That
+  allowance ends the first time a record in the log is worth keeping.
 - Every record keyed to an attempt carries an engine-minted `id`, its
   `attempt_id` and `created_at`.
 - The user's own record stands over the machine's answer to the same question,
   whichever was written later: a technique claim resolves user-first, and a
-  diagnosis never supersedes a self-label. What the machine wrote is kept and
+  diagnosis never supersedes a self-label. The machine's record is kept and
   scored, never discarded and never promoted.
 - Every reference in an append-only record is engine-minted, so the log stays
   readable without anything outside the engine.
 - Aggregates are derived views, never stored truth.
 - Every problem is the product's own, written by the engine.
 - A problem never lands without the test cases that decide it, a canonical
-  solution that passed them, and a reference solution that agreed with it on
-  every one.
-- The technique vocabulary and the cards are product-owned and global, with no
-  user-authored ones of either.
+  solution that passed them, and a reference solution that agreed with the
+  canonical on every case.
+- The technique vocabulary and the cards are product-owned and global, and no
+  user authors a technique or a card.
 - Domain logic stays adapter-free and directly callable. The CLI is one
   adapter, and a web API will be another.
-- No third-party problem statements or test cases in git — in any repo.
+- No third-party problem statements or test cases in git, in any repo.
 
 ## Repo constraints
 
@@ -294,12 +297,13 @@ Rules on how this repo is built, rather than properties of the running system.
 
 - No concrete third-party problem-platform client ever enters this repo.
 - Schema changes must be additive (new optional fields), never breaking. A
-  change may tighten instead — a field made required, one removed, a validator
-  widened — only while no stored record carries the loose shape, which in
-  practice means deleting the ones that do. Weigh what is deleted, not how
-  many: the log has to stay readable by its own schema, and a field kept for a
-  handful of disposable records is one every reader branches on forever.
-- `data/` and `content/` are gitignored; only the schema is public. The
+  change may tighten instead, by making a field required, removing a field or
+  widening a validator. Tightening is allowed only while no stored record
+  carries the loose shape, which in practice means deleting the records that
+  do. Weigh what is deleted, not how many: the log has to stay readable by its
+  own schema, and a field kept for a handful of disposable records is one every
+  reader branches on forever.
+- `data/` and `content/` are gitignored, and only the schema is public. The
   generated corpus could be committed, since the product owns it, and is not:
   those directories also hold the private log, and storage moves to a database
   before the corpus ships anywhere.

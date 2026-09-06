@@ -4,11 +4,11 @@ Each phase ships one capability and a write-up. Ship thin.
 
 A phase exits when its deliverable is in use by whatever consumes it: daily
 practice for a phase the user runs, the next phase for one that builds a
-capability. A phase can also close as superseded — built, and answered by
-something later, so its exit no longer applies.
+capability. A phase can also close as superseded: it was built, and something
+later answered it, so its exit no longer applies.
 
 `docs/architecture/` owns the concepts, boundaries, and invariants.
-This file owns only sequencing. Where the two differ, the architecture wins.
+This file owns only sequencing. On any difference, the architecture wins.
 
 A phase section is short: what ships, what it exits on, and for a closed one
 what it measured. Reasons are in `docs/architecture/` and in the commits, and
@@ -24,7 +24,7 @@ are not repeated here. `docs/TODO.md` drops a phase when it closes.
 Measured:
 
 - 485 problems in the backlog: 61 reached no technique, 183 one, 241 two or
-  more. That share is what made a classifier worth building.
+  more. That share made a classifier worth building.
 - 1785 attempts over 117 practice days, 159 of them in the last 30.
 - The board renders 25 technique rows, and 101 attempts reach none.
 
@@ -41,12 +41,12 @@ sitting. The claim and self-label prompt survives unchanged.
 - A classifier constrained to the problem's own candidates, scored per
   technique by set equality.
 - The call log beneath it: one transport, one record per request.
-- Provenance settled — model, effort, pin, temperature, prompt digest.
+- Provenance settled: model, effort, pin, temperature, prompt digest.
 
 Measured:
 
 - Twelve configurations over a 10x price range scored within two attempts of
-  each other and failed in the same cells. The model was never what to change.
+  each other and failed in the same cells. Changing the model was never the fix.
 - A configuration against itself, three `--fresh` passes: 1 of 31 attempts
   flips for opus, 3 for haiku and sonnet. 0.5-2.2% of decisions, and the
   ceiling any score is read against.
@@ -69,7 +69,7 @@ Measured:
 Measured:
 
 - Nine cards ported, each authored blind and then compared against the
-  hand-written one. The diffs are what the skill's rules are.
+  hand-written one. The diffs became the skill's rules.
 - `statement` tightened to required and non-blank at 485 of 485, and held at
   ~4k problems across an eight-fold push.
 
@@ -94,7 +94,8 @@ problem sound.
 
 - Five call sites, each at its own configuration: the generator, the blind
   reference, the input builder, the naive solution, the discrimination round.
-- A blind reference settles every expected value; a disagreement discards.
+- A blind reference settles every expected value, and a disagreement discards
+  the problem.
 - Mutants of the canonical, killed by the statement's cases, then by built
   inputs, then by at most two rounds of proposed cases. A proposal lands only
   where it killed.
@@ -104,7 +105,7 @@ problem sound.
 - Site outcomes: what each site's gates said, per attempt, beside the call log.
 - Drafts as states, held where a step failed, resumed by `generate --resume`,
   listed by `--drafts`.
-- A template match keyed to a solution; the generating canonical asserts its
+- A template match keyed to a solution. The generating canonical asserts its
   own pair.
 - Technique readings over canonicals, and problem techniques derived from them
   wherever a command loads problems.
@@ -116,42 +117,44 @@ problem sound.
 Measured:
 
 - One problem: Opus 5 at high $0.41 over 6 calls and 190 s of model time, 70 s
-  of it the round; Gemini 3.7 Flash at medium $0.031 over 4 calls and 28 s.
+  of it the round. Gemini 3.7 Flash at medium $0.031 over 4 calls and 28 s.
   Reasoning is the output: 5,263 of the round's 5,573 tokens. Ten attempts on
   one template cost $0.47 to $0.55 over 36 to 49 calls, $0.095 per landed
   problem.
 - Mutants: 53 and 22 on the first two canonicals, 46 and 17 killed by the
-  statement's own cases. Round one killed nothing on either; the survivors were
-  equivalent by inspection. `ROUNDS` stays at two. Later landings killed 4 of 4,
-  7 of 7 and 11 of 13, the round proposing nothing.
+  statement's own cases. Round one killed nothing on either, and the survivors
+  were equivalent by inspection. `ROUNDS` stays at two. Later landings killed
+  4 of 4, 7 of 7 and 11 of 13, the round proposing nothing.
 - The runner spent 76.3 s on 22 mutants, 70 s of it seven timeout kills at the
   generation cap. Process start is not the cost, so no fork server.
 - Ten attempts on `answer-space`: 5 landed, 4 rejected as `misdeclared`, 1 held.
   Two rejections checked by hand had the canonical right and the declared value
   wrong, so the gate became a count. Re-run: 8 landed, 1 `untested` on an
   argument order the prose left open, 1 held on `input_too_large`.
-- Separating sizes: the first two searches gave `input_too_large`, the blind
-  reference having written the form, which is why the naive solution is its own
-  site. Five then separated at 1, 2, 6, 13 and 21 against a legal 100000, the
-  naive solution briefed too slow. Fifteen over the corpus: eight at one or two
-  where the naive solution scans the values, six at 13 to 27 where it is
-  exponential, four over the ceiling. The builder's bound is not a denominator.
+- Separating sizes: the first two searches gave `input_too_large`, because
+  the blind reference had written the form. The naive solution is its own site
+  for that reason. Five then separated at 1, 2, 6, 13 and 21 against a legal
+  100000, the naive solution briefed too slow. Fifteen over the corpus: eight
+  at one or two where the naive solution scans the values, six at 13 to 27
+  where it is exponential, four over the ceiling. The builder's bound is not a
+  denominator.
 - Of ten statements on one template, 1 reused a domain the cue names and 2
   asked a question a listed statement already asked, both with the twin in the
   list. Held drafts are not listed.
 - 28 canonicals read at two cents, none undecided. Every problem derives
-  `binary-search`; 12 that alone, 7 one code more, 5 two more.
+  `binary-search`: 12 that alone, 7 one code more, 5 two more.
 - `generate --gaps --count 1` aimed at 35 of 37 core templates. Seven reached
   before a stop by hand: 4 landed, 2 held on `input_too_large`, 1 cut.
   `--count` is per template.
 
 ## Phase 7 — The corpus, measured (current)
 
-What a generated corpus is worth, measured rather than asserted.
+The worth of a generated corpus, measured rather than asserted.
 
 - The hand pass, which writes the matcher's reference and is the only reading
   of a generated problem no model produced.
-- Hand matches over pairs of a template and a solution, from the templates alone.
+- Hand matches over pairs of a template and a solution, from the templates
+  alone.
 - The matcher scored per pair and grouped per template, positive verdicts in
   both directions.
 - The announcement floor: one matcher over both corpora, the archive in
@@ -180,8 +183,8 @@ one.
 
 ## Phase 9 — The engine hosted
 
-The same loop, for people who are not the author. The difference is what may
-be trusted.
+The same loop, for people who are not the author. The difference from Phase 8
+is the trust the submitted code gets.
 
 - Submitted code runs in a sandbox, as a second backend behind the boundary
   `run` already defines.
@@ -194,7 +197,7 @@ be trusted.
 
 ## Phase 10 — Ladder, recall and card runs
 
-What a card needs once there are problems to fill it.
+The pieces a card needs once there are problems to fill it.
 
 - The ladder resolved at import from the selector and the template matches, at
   least one rung per core template. An unfilled core template is a
@@ -205,14 +208,14 @@ What a card needs once there are problems to fill it.
   pass is not a pass.
 - The trainer never prints a template: reproduced cold, run against the card's
   own tests.
-- Status rather than verdicts — the inputs a graduation rule would read.
+- Status rather than verdicts: the inputs a graduation rule would read.
 - Graduation names no threshold. The numbers do not exist yet.
 - Exit: recall and the ladder run daily.
 
 ## Phase 11 — Technique mastery, scheduling, failure mode
 
-Per-technique skill state updated from attempts and the diagnosis signal;
-scheduling targets the diagnosed cause rather than per-problem intervals.
+Per-technique skill state updated from attempts and the diagnosis signal.
+Scheduling targets the diagnosed cause rather than per-problem intervals.
 
 - Failure mode lands here, not beside attribution: only the mastery state
   separates rust from gap. `SPEED` needs settling first.
@@ -237,7 +240,7 @@ measured accuracy delta against LLM-only diagnosis.
 ## Phase 14 — Retrieval
 
 Similar problems, patterns, and technique briefs retrieved from the corpus and
-the user's own attempts; weak-spot patterns surfaced.
+the user's own attempts, and weak-spot patterns surfaced.
 
 ## Phase 15 — MCP + autonomy
 

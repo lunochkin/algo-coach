@@ -5,46 +5,49 @@ spaced repetition over a technique-mastery model, on a problem corpus the
 engine writes and owns.
 
 **The corpus is the target state.** A problem is generated for one form of one
-technique, carrying the test cases that decide it, a canonical solution that
-passed them, and a reference solution that agreed with it on every one. The
-engine then serves it, times the sitting and judges the submission against
-those cases. One origin, and nothing is fetched from a platform — which is
-what makes a verdict the engine's own rather than a status string it copied.
+technique. It carries the test cases that decide it, a canonical solution that
+passed them, and a reference solution that agreed with the canonical on every
+case. The engine then serves the problem, times the sitting and judges the
+submission against those cases. The engine fetches nothing from a platform, so
+every verdict is the engine's own rather than a status string copied from a
+platform.
 
 Most practice tools schedule *problems*. algo-coach models mastery of
-*techniques*. What a solution used is read from the code by a model, not
-inferred from a problem's tags. Scheduling will target the weakest technique
-rather than the oldest problem. Procedural-skill SRS, not fact SRS: built for
-experienced engineers restoring fluency, not beginners learning concepts.
+*techniques*. A model reads the techniques a solution used from its code,
+rather than inferring them from a problem's tags. Scheduling will target the
+weakest technique rather than the oldest problem. The spaced repetition is over
+procedural skill rather than facts: built for experienced engineers restoring
+fluency, not beginners learning concepts.
 
-What matters is not that an LLM is in the loop, but how the log treats what it
-said. Every reading is stored with the configuration that produced it, scored
-against hand claims, and outranked by the user's own record forever.
+The design is in how the log treats what the model said, not in the fact that
+a model is in the loop: every reading is stored with the configuration that produced it,
+scored against hand claims, and outranked by the user's own record forever.
 
 Built and measured: the technique vocabulary, the attribution classifier, cards
 and template matching. Problem generation is built and has written no corpus
-yet, so the numbers below were taken on the archived corpus it replaces —
-[what that corpus was, and why it went](#the-archived-corpus).
+yet. The numbers below were therefore taken on the archived corpus that
+generation replaces, described in
+[The archived corpus](#the-archived-corpus).
 
 ## Where the model sits
 
 Four places, and nothing is trained anywhere in the engine:
 
-- **Generation** — a statement, its test cases and a canonical solution,
+- **Generation**: a statement, its test cases and a canonical solution,
   written together for one form, then three more calls that test what the
-  first one wrote. [How a problem gets written](#how-a-problem-gets-written)
-  is the shape of it.
-- **Attribution** — a prompted classifier reads the *solution* and names the
+  first call wrote. [How a problem gets written](#how-a-problem-gets-written)
+  gives the shape.
+- **Attribution**: a prompted classifier reads the *solution* and names the
   techniques it used, choosing among the problem's own candidates. No training
   data exists for that label. Public corpora tag problems, not solutions, so a
   trained model would predict the fallback it is meant to improve on. The same
   reader, given the whole vocabulary instead, reads each canonical the engine
-  wrote — which is what a problem's own techniques are folded from.
-- **Template matching** — which of a card's forms a *solution* displays, read
+  wrote, and a problem's own techniques are folded from those readings.
+- **Template matching**: which of a card's forms a *solution* displays, read
   from the code with the statement beside it for what the code leaves implicit.
   A technique says what a problem is *about*, not which form solves it, so the
   verdict is keyed to the solution rather than to the problem.
-- **Card authoring** — a skill turns notes into structured cards; every code
+- **Card authoring**: a skill turns notes into structured cards. Every code
   template is checked against a brute force before it lands.
 
 And three rules on top of them:
@@ -61,15 +64,15 @@ And three rules on top of them:
   models is therefore unreadable, and is not read.
 
 Models are reached through [OpenRouter](https://openrouter.ai) as the single
-transport: one chat-completions shape for every provider, a schema-enforcing
-endpoint required rather than optional, fallbacks off so a model id resolves to
-one backend, and the serving provider recorded on the call. Adding a model is a
-string. Adding a provider is a base URL.
+transport. Every provider is reached in one chat-completions shape. A
+schema-enforcing endpoint is required rather than optional. Fallbacks are off,
+so a model id resolves to one backend, and the serving provider is recorded on
+the call. Adding a model is a string. Adding a provider is a base URL.
 
 ## What it looks like
 
-Per-technique standing over the archived corpus of 1,785 attempts. Nothing here
-is stored: every column is computed from the append-only log on read.
+Per-technique standing over the archived corpus of 1,785 attempts. The board
+stores nothing: every column is computed from the append-only log on read.
 
 ```
 $ algo-coach board
@@ -87,7 +90,7 @@ string-matching       8         6/8      2025-01-16 (580d)
 101 attempts grouped nowhere — no technique resolved
 ```
 
-Classifiers against the hand-claimed eval set — several at once, over the
+Several classifiers at once against the hand-claimed eval set, scored over the
 attempts all of them read, with every divergence printed rather than averaged
 away.
 
@@ -112,21 +115,21 @@ named no candidate  0                1                0                1
 
 ## Early evaluation
 
-Measured on the archived corpus, which is where the attempts carrying code
-were. What the reset costs is the *set* — every claim keys to a problem the
-engine no longer holds. What survives it is everything the set was used to
-build: the criteria the classifier reads, the classifier itself, the transport
-and the call log beneath it, the scoring method, and the adjudication
-procedure. A set rebuilt by hand on generated problems is scored the same way.
+Measured on the archived corpus, where the attempts carrying code were. The
+reset cost the *set*: every claim keys to a problem the engine no longer holds.
+Everything the set was used to build survives the reset: the criteria the
+classifier reads, the classifier itself, the transport and the call log beneath
+it, the scoring method, and the adjudication procedure. A set rebuilt by hand
+on generated problems is scored the same way.
 
 The eval set is 62 attempts. They were claimed by hand blind, then read by a
 frontier model as a scored configuration. Every divergence was resolved one at
 a time, by editing the criterion or by editing the claim, until the frontier
-disagreed with nothing. That stopping signal is what makes the set a reference
-two readers reached rather than one reader's consistency.
+disagreed with nothing. That stopping signal makes the set a reference two
+readers reached rather than one reader's consistency.
 
 Classifiers against it, greedy, each pinned to one endpoint. The adjudicator is
-listed first and is not a candidate — its 100% is construction, since the gold
+listed first and is not a candidate. Its 100% is construction, since the gold
 is its own labels wherever the hand pass did not overturn them.
 
 | Classifier | Pinned endpoint | Tokens in→out | $/1M in→out | Exact set match | Per decision | $ per 1k decisions |
@@ -138,15 +141,15 @@ is its own labels wherever the hand pass did not overturn them.
 | `openai/gpt-oss-120b` | `deepinfra/bf16` | 864 → 406 | 0.04 → 0.17 | 54/60 (90%) | 165/171 (96.5%) | 0.04 |
 | `anthropic/claude-sonnet-5` | `anthropic` | 1,409 → 56 | 2.00 → 10.00 | 51/60 (85%) | 162/171 (94.7%) | 1.19 |
 
-Tokens are the measured mean per attempt on this set, from the call log; prices
+Tokens are the measured mean per attempt on this set, from the call log. Prices
 are the pinned endpoint's on OpenRouter, read 2026-08-20. A full pass over the
 62-attempt set costs $0.56 on the adjudicator, $0.02 on `gemma-4-31b-it` and
 $0.006 on `gpt-oss-120b`.
 
-Two results, and the second is why the table is worth keeping:
+Two results. The second result justifies keeping the table:
 
 - **`gemma-4-31b-it` lands within 0.6 points of the adjudicator's per-decision
-  agreement at a twenty-sixth of the price.** That is what decides which
+  agreement at a twenty-sixth of the price.** That result decides which
   classifier the engine runs.
 - **Size does not order this task.** A mid-tier frontier model places last,
   nine attempts behind a 31B open one and well outside the noise floor.
@@ -173,14 +176,14 @@ Read honestly, and with the caveats the tool prints:
   per attempt catches the classifier that names every candidate. Per-decision
   agreement credits correctly declining a code, and keeps a per-candidate error
   from compounding over the candidate count.
-- **What the set cannot show** is a classifier right where the frontier was
-  wrong. That is the cost of a fixed reference, and it is accepted.
+- **The set cannot show a classifier right where the frontier was wrong.** That
+  is the cost of a fixed reference, and it is accepted.
 
 For scale, on the calibration set: that pass helped write the criteria, so it
 measures applicability rather than quality. Four sizes of frontier model
 laddered 90/95/98/99% per decision, with the top three within one label of each
-other. The cheap models above land in that upper band on the frozen set, which
-is why the engine runs them rather than the frontier.
+other. The cheap models above land in that upper band on the frozen set, so the
+engine runs them rather than the frontier.
 
 ## Where it stands
 
@@ -193,10 +196,10 @@ is why the engine runs them rather than the frontier.
 
 Built: the technique vocabulary, the attribution classifier and its eval, the
 call log and transport, cards, template matching, and the four calls that write
-a problem. Next: what a generated corpus is worth — the matcher scored against
-a hand pass, and the announcement floor — then the drill loop the engine
-serves and judges. Not started: the ladder and recall, failure-mode diagnosis,
-mastery estimation, scheduling.
+a problem. Next: the worth of a generated corpus, measured as the matcher's
+score against a hand pass and as the announcement floor. Then the drill loop
+the engine serves and judges. Not started: the ladder and recall, failure-mode
+diagnosis, mastery estimation, scheduling.
 Sequencing lives in [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## The archived corpus
@@ -213,17 +216,18 @@ third-party platform, ingested and read. That corpus is archived under
 | Machine readings | 6,523 technique claims |
 | Model calls | 7,644, each with its prompt, provenance and timings |
 
-**Why it went.** A scraped statement cannot ship, so a corpus built from one
-caps the product at what a single user already solved. It also carries no test
-cases, which is the harder problem: with nothing to run a submission against,
-the engine can only copy a platform's verdict, and an attempt on such a problem
-can never be verified. Generation answers both, so the second origin was no
-longer worth the branch it cost in every record.
+**Why it went.** A scraped statement cannot ship, so a corpus built from
+scraped statements caps the product at what a single user already solved. The
+corpus also carries no test cases, which is the harder problem. With nothing to
+run a submission against, the engine can only copy a platform's verdict, and an
+attempt on such a problem can never be verified. Generation answers both, so
+the second origin was no longer worth the branch it cost in every record.
 
 **Why it is kept.** It sets the announcement floor. A generated problem must
-not telegraph its own form — if a matcher names the form from the statement
+not telegraph its own form. If a matcher names the form from the statement
 alone, the problem teaches recognition of nothing. Measuring that floor needs a
-corpus no generator wrote, and this is the only one there will be.
+corpus no generator wrote, and this archived corpus is the only one there will
+be.
 
 ## Core loop
 
@@ -237,9 +241,10 @@ flowchart LR
   C --> L
 ```
 
-The engine serves, times and judges. Everything the loop reads is local to it:
-the problem, the test cases that decide it, and the log. Nothing is fetched
-from an external platform, and no third-party client sits in the loop.
+The engine serves, times and judges. Everything the loop reads is local to the
+engine: the problem, the test cases that decide it, and the log. The engine
+fetches nothing from an external platform, and no third-party client sits in
+the loop.
 
 The board, the hand claim and the classifier ran daily over the archived
 corpus. Writing the problems is built. Serving one, judging it and asking for
@@ -249,8 +254,8 @@ the label are next, and the loop above is whole then.
 
 The corpus feeding that loop is the engine's own. A problem is written for a
 brief: a template naming the exact form, or a technique naming only the skill.
-Four calls write one. Nothing lands half-verified, since every step after the
-first can reject what came before it.
+Four calls write one. No problem lands half-verified, since every step after
+the first can reject what came before it.
 
 ```mermaid
 flowchart LR
@@ -268,16 +273,17 @@ flowchart LR
   W ==> H(["<b>held</b><br/><i>a step had no answer; a resume re-pays<br/>only the calls whose prompt or model moved</i>"])
 ```
 
-- **The reference is written blind.** Shown the canonical, it would inherit
-  that solution's reading of the statement, and agreement would then show only
-  that one model is consistent. Written from the prose alone, agreement is
-  evidence that the prose has one reading. It is also the reference, never the
-  canonical, that computes what each case returns — a case the canonical
-  produced passes by construction.
-- **No model is asked whether the cases are good enough.** One asked that about
-  its own cases says yes. So a tree walk enumerates mutants of the canonical
-  instead, built inputs kill what the cases already catch, and a call is paid
-  only for the survivors. A proposed case that killed nothing does not land.
+- **The reference is written blind.** Shown the canonical, the reference would
+  inherit that solution's reading of the statement, and agreement would then
+  show only that one model is consistent. Written from the prose alone,
+  agreement is evidence that the prose has one reading. The reference, never
+  the canonical, also computes what each case returns, since a case the
+  canonical produced passes by construction.
+- **No model is asked whether the cases are good enough.** A model asked that
+  about its own cases says yes. So a tree walk enumerates mutants of the
+  canonical instead. Built inputs kill what the cases already catch, and a
+  call is paid only for the survivors. A proposed case that killed nothing
+  does not land.
 - **A step with no answer holds the draft where it stopped.** The calls before
   it are stored, so a fixed prompt resumes from the step that moved rather than
   paying for the whole problem again. A rejected draft is kept too: which gate
@@ -286,17 +292,17 @@ flowchart LR
 Each state and every exit is in
 [`docs/architecture/flows.md`](docs/architecture/flows.md#writing-a-problem-as-states).
 
-**Where it stands:** the four calls, the gates between them and the draft store
-are built, and have written problems end to end. Not yet measured: the discard
-rate per gate over a run of ten, and the announcement floor that says whether a
+**Built so far:** the four calls, the gates between them and the draft store,
+and they have written problems end to end. Not yet measured: the discard rate
+per gate over a run of ten, and the announcement floor that says whether a
 statement telegraphs its own form.
 
-## Cards — how a technique gets studied
+## Cards: how a technique gets studied
 
-The board says which technique is weak. A card says what to do about it. Not an
-ability estimate and not a problem list: a card is one technique's study unit —
-the cue that should fire, what to read, the forms to reproduce from memory, and
-a selector the problems to solve are drawn by.
+The board says which technique is weak. A card says what to do about it. A card
+is one technique's study unit: the cue that should fire, what to read, the
+forms to reproduce from memory, and a selector the problems to solve are drawn
+by. A card is not an ability estimate and not a problem list.
 
 ```
 monotonic-stack                                  9 cards authored
@@ -333,26 +339,26 @@ Why it is shaped this way:
   solution answers. A core form no solution displays is a reported gap, never a
   quietly shorter ladder.
 - **Recall fluency is not solving fluency.** Reproducing a form cold is not
-  recognising it unprompted. A probe — an unseen problem, no card in view —
-  asks the second question. The gap between the two is exactly the false
-  fluency that blocked practice trains.
+  recognising it unprompted. A probe, an unseen problem with no card in view,
+  asks the second question. The gap between recall and recognition is exactly
+  the false fluency that blocked practice trains.
 
-**Where it stands:** the card record, the authoring skill and its nine cards,
-seeding, the template matcher and the hand-match prompt are built. Against
-the archived corpus, nine cards pre-filtered to ~2.8k questions and ~14k pair
-verdicts. Next: a corpus written for the forms the cards teach, since the reset
-left no pair carrying a hand reference and none can until problems exist to
+**Built so far:** the card record, the authoring skill and its nine cards,
+seeding, the template matcher and the hand-match prompt. Against the archived
+corpus, nine cards pre-filtered to ~2.8k questions and ~14k pair verdicts.
+Next: a corpus written for the forms the cards teach. The reset left no pair
+carrying a hand reference, and none can carry one until problems exist to
 match by hand. Then the matcher's score against that hand pass, then ladder
 resolution, card runs and the recall trainer. Item by item in
 [`docs/TODO.md`](docs/TODO.md), phases 6 and 7.
 
 ## Design
 
-[`docs/architecture/`](docs/architecture/) is the primary design document —
-the concepts, boundaries and invariants, and the reasons behind them.
+[`docs/architecture/`](docs/architecture/) is the primary design document: the
+concepts, boundaries and invariants, and the reasons behind them.
 [`README.md`](docs/architecture/README.md) is its map.
 
-What is keyed to an attempt, and who may write it:
+The records keyed to an attempt, and who may write each:
 
 ```mermaid
 flowchart LR
@@ -365,7 +371,7 @@ flowchart LR
   DG --- A
 ```
 
-The load-bearing ones:
+The load-bearing invariants:
 
 - **[The log is append-only.](docs/architecture/README.md#invariants)** No
   record is revised or removed in place. Component boundaries can therefore be
@@ -375,10 +381,10 @@ The load-bearing ones:
   reference in an append-only record is one the engine minted, so the log stays
   readable on its own.
 - **[The user's record stands over the machine's](docs/architecture/log.md#technique-claims)**
-  answer to the same question, whichever was written later. What the machine
-  wrote is kept and scored, never discarded and never promoted.
+  answer to the same question, whichever was written later. The machine's
+  record is kept and scored, never discarded and never promoted.
 - **[Aggregates are derived views](docs/architecture/README.md#invariants)**,
-  never stored truth — the board, a card's ladder, mastery.
+  never stored truth: the board, a card's ladder, mastery.
 - **[No third-party problem statements or test cases in git](docs/architecture/README.md#repo-constraints)**,
   in any repo. The engine contacts no external platform, and no platform client
   lives here.
@@ -434,7 +440,7 @@ data/old/                    the archived corpus: calibration, not a store
 ## Your data stays yours
 
 Attempt logs, solutions and card content live under `data/` and `content/`,
-both gitignored. The schema is public; the data is not.
+both gitignored. The schema is public. The data is not.
 
 ## Development
 

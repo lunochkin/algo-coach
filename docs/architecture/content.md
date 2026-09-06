@@ -2,7 +2,7 @@
 
 The product-owned material a practice session reads: the technique vocabulary,
 the cards that teach one technique, and which problems exercise which of a
-card's templates. Part of the architecture; `README.md` is the map.
+card's templates. Part of the architecture, and `README.md` is the map.
 
 ## Techniques
 
@@ -18,26 +18,28 @@ The vocabulary the append-only log references.
   - A procedure counts when the solution performs it.
   - A structure counts when its properties carry the correctness or the
     complexity.
-  - A paradigm counts when it is why the solution is correct.
-  - A problem class counts when it is what the problem asks for.
+  - A paradigm counts when the paradigm is the reason the solution is correct.
+  - A problem class counts when the problem asks for that class.
 - **A kind reaches both readers as its test, never as its name.** The label
-  helps only a reader who already knows what it selects; one who does not will
-  judge a structure on whether it was performed. The four tests live with the
-  kind, so twenty-seven entries state them once.
-- **A code is claimed beside the narrower ones, never instead of them.** What a
-  solution does is true at several levels: a backtracking search descends, and
-  a search tree is a binary tree. An exclusive rule would need a containment
-  order over the codes, and nothing generates one — it could only be written by
-  hand pair by pair, then disagreed with case by case. Exceptions are per code
-  and stated in the entry: `recursion` names a language mechanism rather than
-  an approach, so a row counting every self-call would name no skill.
-- **What disqualifies a code is incidental use**, never that another candidate
-  covers it. The near miss states that line in full: a sorted lookup beside a
-  linear pass that dominates, a map standing in for an array. A reader taking
-  the near miss for precedence drops codes the user claimed.
-- **Inclusive claiming is what keeps a row coherent.** The fallback is the
-  problem's own techniques, and those nest already. Under an exclusive rule a
-  claimed attempt and an unclaimed one on the same problem would be counted
+  helps only a reader who already knows what the kind selects. A reader who
+  does not will judge a structure on whether the structure was performed. The
+  four tests live with the kind, so twenty-seven entries state them once.
+- **A code is claimed beside the narrower ones, never instead of them.** A
+  solution's approach is true at several levels: a backtracking search
+  descends, and a search tree is a binary tree. An exclusive rule would need a
+  containment order over the codes, and nothing generates one. Such an order
+  could only be written by hand pair by pair, then disagreed with case by case.
+  Exceptions are per code and stated in the entry: `recursion` names a
+  language mechanism rather than an approach, so a row counting every
+  self-call would name no skill.
+- **Only incidental use disqualifies a code.** Another
+  candidate covering the code does not. The near miss states that line in
+  full: a sorted lookup beside a linear pass that dominates, a map standing in
+  for an array. A reader taking the near miss for precedence drops codes the
+  user claimed.
+- **Inclusive claiming keeps a row coherent.** The fallback is the problem's
+  own techniques, and those nest already. Under an exclusive rule a claimed
+  attempt and an unclaimed one on the same problem would be counted
   differently, so board numbers would move as classification progressed while
   the practice behind them did not.
 - **The criteria are the prompt.** They reach the classifier beside the
@@ -47,8 +49,8 @@ The vocabulary the append-only log references.
 - **A code is never deleted**, because records carrying it outlive it.
   Retirement means an entry in an alias map, applied when grouping.
 - **The vocabulary is read-only once loaded.** Its entries reach a prompt and
-  a reader unchanged. One edited in memory would be a criterion the file does
-  not carry, and nothing could re-derive the readings it produced.
+  a reader unchanged. An entry edited in memory would be a criterion the file
+  does not carry, and nothing could re-derive the readings that entry produced.
 - **Membership is checked on the write path only.** A model that validated
   codes on read would make the log unreadable by its own schema the moment a
   code was retired.
@@ -56,30 +58,30 @@ The vocabulary the append-only log references.
 ## Cards
 
 A card organises studying one technique: what to read, what to reproduce from
-memory, and what to solve. Not the vocabulary itself, and not an ability
-estimate — mastery is what a user can solve, per technique, and the two share
-no data.
+memory, and what to solve. A card is not the vocabulary itself, and not an
+ability estimate. Mastery is the set of problems a user can solve, per
+technique, and a card and a mastery estimate share no data.
 
 - **Product data, not code.** Cards live in the engine datastore, seeded from
   `content/`, which is gitignored like `data/`. One location, whatever the
   content turns out to be worth keeping private.
 - **Granularity follows teaching, not estimation.** One technique can carry
   several cards. Mastery is estimated per technique, so cards are never the
-  unit of estimation, and the attempt log never references one.
+  unit of estimation, and the attempt log never references a card.
 - **A card names no problem.** It carries a selector: a technique, and the
   filters that narrow it. The ladder is derived from the corpus. Ids are minted
-  per engine, so a card holding them would mean nothing in another store, where
-  a selector ships anywhere.
+  per engine, so a card holding problem ids would mean nothing in another
+  store, where a selector ships anywhere.
 - **The ladder covers every core template.** Its rungs come from the
   template matches, at least one per template, and the selector fills the rest
   out to `size`. A match is a fact about a solution, so a rung is filled by the
   problem that solution answers. Drawn from the selector alone the ladder would
   exercise the technique and leave some forms untouched, since a technique says
   what a problem is about rather than which form solves it.
-- **Requiredness is derived from what a rung covers**, never stored. A rung
-  covering a core template is required. A rung covering only the optional
-  template is optional. A rung covering both is required, and the optional
-  template is offered on it as the alternative approach.
+- **Requiredness is derived from the templates a rung covers**, never stored.
+  A rung covering a core template is required. A rung covering only the
+  optional template is optional. A rung covering both is required, and the
+  optional template is offered on that rung as the alternative approach.
 - **A core template no solution displays is a reported gap**, not a quietly
   shorter ladder. The gap is the input to the next generation run: it names the
   template the next problem must be written for. The ladder never substitutes
@@ -87,42 +89,47 @@ no data.
   is then never written.
 - **The recognition cue is its own field**, apart from the prose it could sit
   in, because a probe asks exactly that question: is the form recognised
-  unprompted. So it is shown and withheld on its own, where the rest of what to
-  read is one authored block the engine never parses. It is carried at both
-  levels — the card's says to reach for the technique, a template's says which
-  of its forms — because recall is per template.
+  unprompted. So the cue is shown and withheld on its own, where the rest of
+  what to read is one authored block the engine never parses. The cue is
+  carried at both levels, because recall is per template. The card's cue says
+  to reach for the technique, and a template's cue says which of the
+  technique's forms.
 - **A template states whether its form is a speedup** over the naive solution
   the technique replaces. Backtracking and exhaustive search are their own
   optimum, so no input separates them from a reference. Generation cannot tell
-  that from a reference written cleverly by mistake, so the template says which
-  it is. A missing separation where a speedup was claimed is a defect in the
-  run, and `corpus.md` names the three things that produce one.
+  such a form from a reference written cleverly by mistake, so the template
+  says which of the two holds. A missing separation where a speedup was
+  claimed is a defect in the run, and `corpus.md` names the three things that
+  produce one.
 - **One template may sit outside the core set.** Templates are core by
-  default, and at most one is marked optional — the capstone, authored whole
-  and surfaced on request alone. The hard form is worth deriving before it is
-  read, and a card showing it unasked would remove that chance permanently.
+  default, and at most one is marked optional. That one is the capstone,
+  authored whole and surfaced on request alone. The hard form is worth
+  deriving before it is read, and a card showing it unasked would remove that
+  chance permanently.
 - **The ladder is resolved at import and re-derived whenever the corpus moves
   under it.** The selector is the truth and the ladder a derived view, so
-  resolving it again costs nothing. A started card is re-derived too. Ladder
-  progress is a fold over attempts rather than a mark on a rung, so what was
-  solved stays solved.
-- **A retired problem fills no rung.** A defective one was never a fair test,
-  and a telegraphed one teaches recognition of nothing. Re-deriving is what
-  removes it, which is the other reason a started card is re-derived.
-- **Probes are assigned when a card is started**, not at import, since what was
-  unseen at import need not still be unseen. Unseen first, then least recently
-  attempted, and never drawn from the ladder, which teaches the form rather
-  than testing whether it is recognised unprompted.
+  resolving the ladder again costs nothing. A started card is re-derived too.
+  Ladder progress is a fold over attempts rather than a mark on a rung, so a
+  solved problem stays solved.
+- **A retired problem fills no rung.** A defective problem was never a fair
+  test, and a telegraphed problem teaches recognition of nothing. Re-deriving
+  the ladder removes the retired problem, which is the other reason a started
+  card is re-derived.
+- **Probes are assigned when a card is started**, not at import, since a
+  problem unseen at import need not still be unseen. Unseen first, then least
+  recently attempted, and never drawn from the ladder. The ladder teaches the
+  form, where a probe tests whether the form is recognised unprompted.
 
 ## Template matches
 
 Which solutions display which of a card's templates. A form is displayed by
-code, so the subject is a solution rather than a problem. They are the engine's
-own work: an author names no solution, so nothing is authored here either.
+code, so the subject is a solution rather than a problem. Matches are the
+engine's own work: an author names no solution, so nothing is authored here
+either.
 
 - **The canonical a problem was generated with asserts its own match.** Its
   brief said which template, so the pair is provenance rather than a reading,
-  and the record names `generator` as its source. Nothing pays a call to learn
+  and the record names `generator` as its source. No call is paid to learn
   what the generator was told to write.
 - **No other canonical asserts anything.** The rest are enumerated from the
   problem itself, and nobody named a form for them. So every template they
@@ -130,11 +137,11 @@ own work: an author names no solution, so nothing is authored here either.
   there can be.
 - **A generator's assertion carries no configuration**, as a hand match
   carries none. The all-or-none rule is about readings, which are re-derivable
-  and so must say by what. Nothing re-derives this pair short of writing the
+  and so must say by what. Re-deriving this pair would mean writing the
   solution again, and the solution already names the call that wrote it.
 - **It is only ever positive.** The generator asserts the form it was briefed
-  on. What else the solution displays is the matcher's question, and a
-  generator saying nothing about a template is not a negative on it.
+  on. Every other template the solution displays is the matcher's question,
+  and a generator saying nothing about a template is not a negative on it.
 - **The assertion is stored only for a canonical that passed.** A solution that
   failed the cases demonstrates nothing about the form, so a failure is not a
   negative either.
@@ -149,9 +156,9 @@ own work: an author names no solution, so nothing is authored here either.
   their own matches.
 - **The matcher answers what generation cannot assert**: which templates a
   solution displays besides the one it was written for, and whether the
-  generator's own claim holds. The first is why a rung can cover a core
-  template and an optional one at once, the second the only check on a
-  generator drifting from its brief.
+  generator's own claim holds. The first answer lets a rung cover a core
+  template and an optional one at once. The second answer is the only check on
+  a generator drifting from its brief.
 - **Three writers, ordered by what each of them knew.** A hand match
   stands over both machine sources. A generator's assertion stands over a
   matcher's reading of the same pair, because the generator knew and the
@@ -164,50 +171,55 @@ own work: an author names no solution, so nothing is authored here either.
   the cards whose technique its problem carries, which bounds the pairs a call
   asks about and keeps a per-pair negative finite. The scoping survived the
   subject moving, because a solution answers exactly one problem.
-- **What a classifier reading stores is deferred** where that scoping does not
-  reach: a solution displaying a form outside its problem's carded techniques
-  is a pair nothing offers. Whether the record then becomes one naming the
-  templates it found is the open question. What it must give either way is
-  staleness by configuration: a re-run reads what has not been read at the
+- **The record a classifier reading stores is deferred** where that scoping
+  does not reach: a solution displaying a form outside its problem's carded
+  techniques is a pair nothing offers. Whether the record then becomes one
+  naming the templates it found is the open question. Either shape must give
+  staleness by configuration: a re-run reads the solutions not yet read at the
   current digest, and nothing else.
-- **Written after the solution lands, never before.** Both references are
-  minted: the template at card import, the solution when the problem lands. So
-  a match cannot be authored against a seed file.
+- **Written after the solution lands, never before.** The template is minted
+  at card import, and the solution when the problem lands. So a match cannot
+  be authored against a seed file.
 - **Procedure templates are excluded.** A framing procedure is displayed by
   every solution its technique reaches, so a per-solution verdict carries no
   information.
 - **A card's relation to a problem is a fold over its canonicals**, never a
   record of its own. A rung is earned when some canonical of the problem
-  displays some template of the card. Nothing asserts in one place that a
-  problem belongs to a card, so nothing is rewritten when one verdict changes.
+  displays some template of the card. No record asserts in one place that a
+  problem belongs to a card, so no record is rewritten when one verdict
+  changes.
 - **Re-derivation is the normal path, not an exception.** A technique claim
   asks about one attempt, and the question never changes. A match asks about a
   template against a corpus of solutions that grows with every enumeration run.
 - **A hand record settles what stands, not what has been read.** The run path
   skips a solution only where the hand pass settled every pair the call would
-  have asked about, which is why what a skip needs follows the deferred shape.
-  The eval reads pairs matched by hand on purpose, because that reading is the
+  have asked about. So the record a skip needs follows the deferred shape. The
+  eval reads pairs matched by hand on purpose, because that reading is the
   measurement.
 - **Agreement is per pair, grouped per template.** A call carrying six pairs
-  saves requests; it is not a unit of truth. Grouping follows the ladder: a
+  saves requests, and is not a unit of truth. Grouping follows the ladder: a
   form the matcher over-matches fills its rung with problems that do not teach
   it, and one number over the card would average that away.
-- **Nothing is scored as a set, and accuracy is not the metric.** A match
+- **No score is taken over a set, and accuracy is not the metric.** A match
   asserts a pair, and a matcher that says yes to everything is already visible
   as a false positive on every template. Most pairs are negative, so a matcher
-  naming nothing would score in the nineties and resolve an empty ladder. What
-  is scored is the positive verdicts, both directions: what the user named
-  and the machine missed, and what the machine named and the user did not.
-- **An empty answer is negatives, not a decline.** Where a claim naming nothing
-  answers nothing, a call naming no template asserts that each candidate it was
-  given does not match. What that becomes on disk follows the deferred shape,
-  and either way it is a reading rather than a refusal to read. The record shape
-  decides this, not the model's behaviour.
+  naming nothing would score in the nineties and resolve an empty ladder. The
+  score covers the positive verdicts, both directions: the templates the user
+  named and the machine missed, and the templates the machine named and the
+  user did not.
+- **An empty answer is negatives, not a decline.** A call naming no template
+  asserts that each candidate it was given does not match. A claim naming
+  nothing answers nothing, and the difference is in the record shape rather
+  than in the model's behaviour. The stored form of an empty answer follows
+  the deferred shape, and either way it is a reading rather than a refusal to
+  read.
 - **A hand match records the verdicts its author saw**, as a claim does. It is
-  written on every pair the answer settles, negatives included, because what the
-  reader saw is a fact about the sitting rather than about the verdict.
-- **The first hand pass calibrates, a blind one measures.** Matching by hand is
-  where the line gets drawn between displaying a form and merely admitting it. A
-  score taken over the pairs that drew that line measures agreement with itself.
-  The eval set is matched by hand from the templates alone, and configurations
-  are compared over the pairs both read — the claims rule, unchanged.
+  written on every pair the answer settles, negatives included, because the
+  pairs the reader saw are a fact about the sitting rather than about the
+  verdict.
+- **The first hand pass calibrates, a blind one measures.** Matching by hand
+  draws the line between displaying a form and merely admitting it. A score
+  taken over the pairs that drew that line measures agreement with itself. The
+  eval set is matched by hand from the templates alone, and configurations are
+  compared over the pairs both read. The rules `log.md` gives for scoring a
+  technique claim apply here unchanged.
