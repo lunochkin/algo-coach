@@ -1,11 +1,36 @@
 import ast
+import inspect
+import re
 from pathlib import Path
 
 from importlinter.cli import lint_imports
+from pydantic import BaseModel
+
+import algo_coach.schema as schema
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "src" / "algo_coach"
 TESTS = ROOT / "tests"
+DOCS = [*(ROOT / "docs").rglob("*.md"), ROOT / "README.md", ROOT / "CLAUDE.md"]
+
+# the enums the docs enumerate: states, gates, sources, roles and kinds. Left
+# out are the three scales the docs describe as scales rather than by member:
+# `Confidence`, `FailureMode`, `ProblemDifficulty`
+ENUMERATED = (
+    schema.CallSite,
+    schema.CaseOutcome,
+    schema.ClaimSource,
+    schema.Discard,
+    schema.ExpectedSource,
+    schema.Kind,
+    schema.MatchSource,
+    schema.ProblemStatus,
+    schema.ReadingSource,
+    schema.RetirementReason,
+    schema.SolutionRole,
+    schema.TemplateKind,
+    schema.WritingState,
+)
 
 # what a module may grow to before it is split. `passage.py` is the largest,
 # at just over five hundred
@@ -146,3 +171,56 @@ def test_a_test_module_carries_no_docstring():
         if ast.get_docstring(ast.parse(path.read_text())) is not None
     ]
     assert with_one == []
+
+
+def prose() -> str:
+    return "\n".join(path.read_text() for path in DOCS)
+
+
+def test_the_docs_name_every_state_gate_and_source():
+    """`CLAUDE.md`: an unchecked doc describes a system that does not exist. A
+    member the docs never name is a state a reader cannot find."""
+    text = prose()
+    unnamed = [
+        f"{kind.__name__}.{member.value}"
+        for kind in ENUMERATED
+        for member in kind
+        # `problem-class` is written `problem class`
+        if not re.search(rf"\b{re.escape(member.value).replace(r'\-', '[- ]')}\b", text)
+    ]
+    assert unnamed == []
+
+
+def test_every_path_the_docs_name_exists():
+    """A backticked path or module in the docs points at something in the
+    tree, or the doc is describing a repo that moved under it."""
+    pattern = r"`((?:src/|docs/|tests/|scripts/)[\w./-]+|algo_coach(?:\.\w+)+)`"
+    named = set(re.findall(pattern, prose()))
+    missing = []
+    for ref in sorted(named):
+        if ref.startswith("algo_coach"):
+            path = ROOT / "src" / Path(*ref.split("."))
+            found = path.with_suffix(".py").exists() or path.is_dir()
+        else:
+            found = (ROOT / ref).exists()
+        if not found:
+            missing.append(ref)
+    assert missing == []
+
+
+def test_a_record_keyed_to_an_attempt_carries_what_the_log_needs():
+    """`README.md`: an engine-minted `id`, its `attempt_id` and `created_at`,
+    each required, so one reader orders all of them."""
+    keyed = [
+        cls
+        for _, cls in inspect.getmembers(schema, inspect.isclass)
+        if issubclass(cls, BaseModel) and "attempt_id" in cls.model_fields
+    ]
+    assert {cls.__name__ for cls in keyed} >= {"TechniqueClaim", "SelfLabel", "Diagnosis"}
+    lacking = [
+        f"{cls.__name__}.{field}"
+        for cls in keyed
+        for field in ("id", "attempt_id", "created_at")
+        if field not in cls.model_fields or not cls.model_fields[field].is_required()
+    ]
+    assert lacking == []
