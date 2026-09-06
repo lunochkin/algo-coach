@@ -43,6 +43,8 @@ asyncio_mode = "auto"
 
 [tool.pyright]
 include = ["src"]
+# tests are unannotated by design: pydantic coerces what strict rejects
+ignore = ["tests"]
 pythonVersion = "3.14"
 typeCheckingMode = "strict"
 
