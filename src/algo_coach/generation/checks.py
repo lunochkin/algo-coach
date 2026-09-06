@@ -132,7 +132,7 @@ def agree(
     cases: Sequence[Case],
     *,
     reference: str,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
     cap_ms: int = CAP_MS,
 ) -> Checked:
     """The reference against the canonical's answers, which is what settles a
@@ -143,7 +143,7 @@ def agree(
     return."""
     args = [case.args for case in cases]
     theirs = outputs(reference, args, cap_ms=cap_ms)
-    settled = settle(args, canonical=ran.returned, reference=theirs, written=written)
+    settled = settle(args, canonical=ran.returned, reference=theirs, provenance=provenance)
 
     # carried rather than dropped at the gate it no longer is: the count is
     # what the generator's own record is scored on

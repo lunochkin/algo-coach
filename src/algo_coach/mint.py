@@ -68,7 +68,7 @@ def classifier_claim(
     attempt_id: str,
     techniques: list[str],
     *,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
 ) -> TechniqueClaim:
     """A claim a model made, naming its configuration whole.
 
@@ -86,7 +86,7 @@ def classifier_claim(
         attempt_id=attempt_id,
         techniques=techniques,
         source=ClaimSource.CLASSIFIER,
-        **written.model_dump(),
+        **provenance.model_dump(),
     )
 
 
@@ -113,7 +113,7 @@ def machine_reading(
     solution_id: str,
     techniques: list[str],
     *,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
 ) -> TechniqueReading:
     """One solution read by a model, naming its configuration whole. Membership
     is checked here as it is on a classifier claim, and rejected whole."""
@@ -126,7 +126,7 @@ def machine_reading(
         solution_id=solution_id,
         techniques=techniques,
         source=ReadingSource.CLASSIFIER,
-        **written.model_dump(),
+        **provenance.model_dump(),
     )
 
 
@@ -172,7 +172,7 @@ def machine_match(
     solution_id: str,
     *,
     matched: bool,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
 ) -> TemplateMatch:
     """One pair a matcher read, positive or negative. The negative is stored,
     or every re-run re-tests every non-match forever, which on a growing corpus
@@ -184,7 +184,7 @@ def machine_match(
         solution_id=solution_id,
         matched=matched,
         source=MatchSource.CLASSIFIER,
-        **written.model_dump(),
+        **provenance.model_dump(),
     )
 
 
@@ -196,7 +196,7 @@ def generated_problem(
     title: str,
     statement: str,
     *,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
     generated_for: str | None = None,
     techniques: Sequence[str] = (),
     difficulty: ProblemDifficulty | None = None,
@@ -215,7 +215,7 @@ def generated_problem(
         generated_for=generated_for,
         techniques=list(techniques),
         difficulty=difficulty,
-        **written.model_dump(),
+        **provenance.model_dump(),
     )
 
 
@@ -226,7 +226,7 @@ def case(
     *,
     expected_from: ExpectedSource = ExpectedSource.REFERENCE,
     round: int | None = 0,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
 ) -> TestCase:
     """One case of the set a generated problem carries, and the call that
     proposed its arguments.
@@ -245,7 +245,7 @@ def case(
         expected=expected,
         expected_from=expected_from,
         round=round,
-        **written.model_dump(),
+        **provenance.model_dump(),
     )
 
 
@@ -254,7 +254,7 @@ def solution(
     code: str,
     role: SolutionRole,
     *,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
 ) -> Solution:
     """One solution the engine wrote, in the role it was written for. The role
     is passed rather than inferred: both roles pass the same cases, so nothing
@@ -265,7 +265,7 @@ def solution(
         problem_id=problem_id,
         role=role,
         code=code,
-        **written.model_dump(),
+        **provenance.model_dump(),
     )
 
 
@@ -293,7 +293,7 @@ def site_outcome(
     writing_id: str,
     template_id: str,
     *,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
     problem_id: str | None = None,
     gate: Discard | None = None,
     detail: str = "",
@@ -330,7 +330,7 @@ def site_outcome(
         separating=separating,
         unseparated=unseparated,
         largest=largest,
-        **written.model_dump(),
+        **provenance.model_dump(),
     )
 
 
@@ -343,7 +343,7 @@ def draft(
     declared: Sequence[DraftCase],
     difficulty: ProblemDifficulty,
     template_id: str | None = None,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
 ) -> Draft:
     """One attempt at writing a problem, as the generator's call left it.
 
@@ -360,5 +360,5 @@ def draft(
         canonical=canonical,
         declared=list(declared),
         difficulty=difficulty,
-        generator_provenance=written,
+        generator_provenance=provenance,
     )

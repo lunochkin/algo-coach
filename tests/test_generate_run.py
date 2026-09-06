@@ -1,7 +1,7 @@
 from dataclasses import replace
 
 from generating import NAIVE, FakeWriter
-from helpers import PROVENANCE
+from helpers import PROVENANCE_FIELDS
 from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
@@ -114,7 +114,7 @@ def test_the_corpus_seeds_the_list(tmp_path):
             title="p1",
             statement="An earlier statement.",
             generated_for=one.templates[0].id,
-            **PROVENANCE,
+            **PROVENANCE_FIELDS,
         )
     )
     model = FakeWriter()

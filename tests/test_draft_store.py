@@ -1,4 +1,4 @@
-from helpers import PROVENANCE
+from helpers import PROVENANCE_FIELDS
 
 from algo_coach.drafts import DraftStore
 from algo_coach.schema import Discard, Draft, ExpectedSource, WritingState
@@ -51,12 +51,12 @@ def test_what_a_step_left_reads_back_whole(tmp_path):
                 "args": [[1, 2]],
                 "expected": 2,
                 "expected_from": "reference",
-                "written": PROVENANCE,
+                "provenance": PROVENANCE_FIELDS,
             }
         ],
         builder="def solve(size, seed): ...",
         largest=1000,
-        generator_provenance=PROVENANCE,
+        generator_provenance=PROVENANCE_FIELDS,
     )
     store.put(draft)
 

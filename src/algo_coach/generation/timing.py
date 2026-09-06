@@ -48,7 +48,7 @@ def separated(
     canonical: str,
     naive: str,
     reference: str,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
     cap_ms: int,
 ) -> Searched:
     """The search over the builder's inputs. The generation cap measures, and
@@ -58,7 +58,7 @@ def separated(
         canonical=canonical,
         naive=naive,
         reference=reference,
-        written=written,
+        provenance=provenance,
         cap_ms=DRILL_CAP_MS,
         largest=built.largest,
         measure_ms=cap_ms,
@@ -98,7 +98,7 @@ def timed(
     A search that fails costs the case rather than the problem, so its failure
     is caught here instead of reaching the run's abort count.
     """
-    if not template.speedup or inputs.built is None or inputs.written is None:
+    if not template.speedup or inputs.built is None or inputs.provenance is None:
         return checked, inputs, None
     if naive.code is None:
         raise ValueError("the search measures the canonical against a naive solution")
@@ -109,7 +109,7 @@ def timed(
             canonical=draft.canonical,
             naive=naive.code,
             reference=draft.reference or "",
-            written=inputs.written,
+            provenance=inputs.provenance,
             cap_ms=cap_ms,
         )
     except Exception as failure:

@@ -30,7 +30,7 @@ class Inputs(BaseModel):
     built: Built | None = None
     # the configuration the code was written at, which is what the cases it
     # feeds carry. A resume past this step reuses it where there is no call
-    written: MachineProvenance | None = None
+    provenance: MachineProvenance | None = None
     unbuilt: str | None = None  # the call failed, and no code was written
     separating: int | None = None  # the size the naive solution stops fitting at
     unseparated: str | None = None  # why there was none, where one was looked for
@@ -48,7 +48,7 @@ class Naive(BaseModel):
     code: str | None = None
     # the configuration the solution was written at. A resume past this step
     # reuses it where there is no call
-    written: MachineProvenance | None = None
+    provenance: MachineProvenance | None = None
     unpaced: str | None = None  # the call failed, and no naive solution was written
 
 

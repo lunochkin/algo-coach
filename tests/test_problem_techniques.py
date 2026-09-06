@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import pytest
-from helpers import PROVENANCE, T0, make_problem
+from helpers import PROVENANCE_FIELDS, T0, make_problem
 
 from algo_coach.mint import user_reading
 from algo_coach.problems import ProblemStore
@@ -23,7 +23,7 @@ def solution(id: str, problem_id: str = "p1", *, role: SolutionRole = SolutionRo
         problem_id=problem_id,
         role=role,
         code="def solve(xs):\n    return sorted(xs)\n",
-        **PROVENANCE,
+        **PROVENANCE_FIELDS,
     )
 
 
@@ -35,7 +35,7 @@ def reading(solution_id: str, techniques: list[str], *, at: int = 0) -> Techniqu
         solution_id=solution_id,
         techniques=techniques,
         source="classifier",
-        **PROVENANCE,
+        **PROVENANCE_FIELDS,
     )
 
 

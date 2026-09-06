@@ -1,5 +1,5 @@
 import pytest
-from helpers import CONFIGURATION, PROVENANCE, T0, FakeTransport, Verdict
+from helpers import CONFIGURATION, PROVENANCE_FIELDS, T0, FakeTransport, Verdict
 
 from algo_coach.calls import CallLog
 from algo_coach.classifier import DEFAULT, request_hash
@@ -20,7 +20,7 @@ def solution(id: str, *, role: SolutionRole = SolutionRole.CANONICAL, code: str 
         problem_id=f"p-{id}",
         role=role,
         code=code,
-        **PROVENANCE,
+        **PROVENANCE_FIELDS,
     )
 
 
@@ -34,7 +34,7 @@ def already_read(
     return machine_reading(
         one.id,
         ["sorting"],
-        written=MachineProvenance(
+        provenance=MachineProvenance(
             model=configuration.model,
             effort=configuration.effort,
             prompt_hash=prompt_hash or request_hash(candidates(), one.code),

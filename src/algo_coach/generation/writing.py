@@ -37,7 +37,7 @@ class Writing:
             # empty where nothing recorded the attempt, as it is on the site
             # outcomes this id groups
             template_id=self.template_id or None,
-            written=MachineProvenance.of(call),
+            provenance=MachineProvenance.of(call),
         )
 
     def __call__(
@@ -79,7 +79,7 @@ class Writing:
                 separating=separating,
                 unseparated=unseparated,
                 largest=largest,
-                written=MachineProvenance.of(call),
+                provenance=MachineProvenance.of(call),
             )
         )
 

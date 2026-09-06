@@ -23,7 +23,7 @@ def canonical(code: str = CODE):
         problem_id="p1",
         code=code,
         role=SolutionRole.CANONICAL,
-        written=MachineProvenance(
+        provenance=MachineProvenance(
             model="a-model", effort="medium", pin="a/pin", prompt_hash="deadbeef", call_id="call-0"
         ),
     )

@@ -1,5 +1,5 @@
 import pytest
-from helpers import WRITTEN, machine_claim
+from helpers import PROVENANCE, machine_claim
 
 from algo_coach.mint import (
     draft,
@@ -203,7 +203,7 @@ def test_a_machine_match_has_seen_nothing():
         "t1",
         "s1",
         matched=True,
-        written=MachineProvenance(
+        provenance=MachineProvenance(
             model="a-model",
             effort="medium",
             prompt_hash="0123456789ab",
@@ -226,7 +226,7 @@ def test_a_machine_match_names_what_produced_it():
         "t1",
         "s1",
         matched=True,
-        written=MachineProvenance(
+        provenance=MachineProvenance(
             model="a-model",
             effort="medium",
             prompt_hash="0123456789ab",
@@ -252,7 +252,7 @@ def generated(**overrides):
         "title": "Two Sum",
         "statement": "Given an array, return ...",
         "generated_for": "t1",
-        "written": MachineProvenance(
+        "provenance": MachineProvenance(
             model="a-model",
             effort="medium",
             prompt_hash="0123456789ab",
@@ -292,18 +292,22 @@ def test_a_generated_problem_is_minted_an_id():
 def test_generation_records_what_it_sampled_at():
     """Sampled rather than greedy, which a reading never is: variance is what
     stops one model's habits becoming the whole corpus."""
-    assert generated(written=WRITTEN.model_copy(update={"temperature": 1.0})).temperature == 1.0
+    assert (
+        generated(provenance=PROVENANCE.model_copy(update={"temperature": 1.0})).temperature == 1.0
+    )
     assert generated().temperature is None
 
 
 def test_who_served_a_generated_problem_is_recorded():
-    assert generated(written=WRITTEN.model_copy(update={"provider": "fake"})).provider == "fake"
+    assert (
+        generated(provenance=PROVENANCE.model_copy(update={"provider": "fake"})).provider == "fake"
+    )
 
 
 def test_what_a_generated_problem_cost_is_recorded():
     """A match cannot record this and a claim can. Generation is the expensive
     call of the three, so the corpus says what it was paid for."""
-    assert generated(written=WRITTEN.model_copy(update={"cost": 0.02})).cost == 0.02
+    assert generated(provenance=PROVENANCE.model_copy(update={"cost": 0.02})).cost == 0.02
 
 
 def test_a_generated_problem_starts_with_no_techniques():
@@ -344,7 +348,7 @@ def test_a_draft_is_minted_with_the_writing_id_it_was_given():
     """The only minter passed its id. The four site outcomes of one attempt
     already group under it, and a second identity would need a reference
     nothing carries."""
-    made = draft("w1", **DRAFTED, written=WRITTEN)
+    made = draft("w1", **DRAFTED, provenance=PROVENANCE)
 
     assert made.id == "w1"
 
@@ -352,7 +356,7 @@ def test_a_draft_is_minted_with_the_writing_id_it_was_given():
 def test_a_minted_draft_starts_at_the_first_step():
     """The generator answered and nothing has checked it, which is the state a
     draft exists in before any step after it."""
-    made = draft("w1", **DRAFTED, written=WRITTEN)
+    made = draft("w1", **DRAFTED, provenance=PROVENANCE)
 
     assert made.state is WritingState.DRAFTED
     assert made.gate is None
@@ -362,7 +366,7 @@ def test_a_minted_draft_starts_at_the_first_step():
 def test_a_minted_draft_copies_the_generator_configuration_whole():
     """The one place that supplies it, as `generated_problem` is for a problem:
     a call site spelling the fields out could fill them partly."""
-    made = draft("w1", **DRAFTED, written=WRITTEN)
+    made = draft("w1", **DRAFTED, provenance=PROVENANCE)
 
     assert made.generator_provenance.call_id == "call-1"
     assert (made.blind_provenance, made.inputs_provenance, made.discrimination_provenance) == (

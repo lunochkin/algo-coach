@@ -63,7 +63,7 @@ def pass_over(
     *,
     canonical: str,
     reference: str,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
     cap_ms: int,
 ) -> Fuzzing:
     """`fuzz` bound to one problem, which is the shape `harden` runs.
@@ -79,7 +79,7 @@ def pass_over(
             build(built.code, pairs, cap_ms=cap_ms),
             canonical=canonical,
             reference=reference,
-            written=written,
+            provenance=provenance,
             cap_ms=cap_ms,
             against_ms=against_ms,
         )
@@ -93,7 +93,7 @@ def fuzz(
     *,
     canonical: str,
     reference: str,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
     cap_ms: int,
     against_ms: int,
     ceiling: int = CEILING,
@@ -150,7 +150,7 @@ def fuzz(
         args,
         canonical=[one.expected for one in kept],
         reference=outputs(reference, args, cap_ms=cap_ms),
-        written=written,
+        provenance=provenance,
         # in the set the first round's survivors are decided against, which is
         # what `round` zero names
         round=0,

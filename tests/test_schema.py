@@ -107,7 +107,7 @@ def make_claim(source: ClaimSource, **overrides) -> TechniqueClaim:
     return TechniqueClaim.model_validate(fields)
 
 
-PROVENANCE = {
+PROVENANCE_FIELDS = {
     "model": "test-model",
     "effort": "medium",
     "pin": "a-host",
@@ -117,9 +117,9 @@ PROVENANCE = {
 
 
 def test_classifier_claim_records_what_produced_it():
-    claim = make_claim(ClaimSource.CLASSIFIER, **PROVENANCE)
+    claim = make_claim(ClaimSource.CLASSIFIER, **PROVENANCE_FIELDS)
 
-    assert {field: getattr(claim, field) for field in PROVENANCE} == PROVENANCE
+    assert {field: getattr(claim, field) for field in PROVENANCE_FIELDS} == PROVENANCE_FIELDS
 
 
 def test_classifier_claim_without_any_provenance_is_rejected():
@@ -128,7 +128,7 @@ def test_classifier_claim_without_any_provenance_is_rejected():
         make_claim(ClaimSource.CLASSIFIER)
 
 
-@pytest.mark.parametrize("missing", PROVENANCE)
+@pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_classifier_claim_needs_every_field_that_produced_it(missing):
     """All of them or none. A reading whose configuration is partly unknown
     cannot be compared with one whose configuration is known, and a reader
@@ -136,16 +136,16 @@ def test_classifier_claim_needs_every_field_that_produced_it(missing):
     with pytest.raises(ValidationError, match=missing):
         make_claim(
             ClaimSource.CLASSIFIER,
-            **{field: value for field, value in PROVENANCE.items() if field != missing},
+            **{field: value for field, value in PROVENANCE_FIELDS.items() if field != missing},
         )
 
 
-@pytest.mark.parametrize("field", PROVENANCE)
+@pytest.mark.parametrize("field", PROVENANCE_FIELDS)
 def test_user_claim_carries_no_provenance(field):
     """Nothing re-derives a user's claim, so naming a model would name one
     that never touched it."""
     with pytest.raises(ValidationError, match=field):
-        make_claim(ClaimSource.USER, **{field: PROVENANCE[field]})
+        make_claim(ClaimSource.USER, **{field: PROVENANCE_FIELDS[field]})
 
 
 def test_a_claim_is_blind_unless_it_says_otherwise():

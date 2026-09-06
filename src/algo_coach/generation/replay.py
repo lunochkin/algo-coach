@@ -226,7 +226,7 @@ def blind_replay(
     # landed. The settled cases are discarded with the run
     ran = Ran(outcome=CaseOutcome.PASSED, returned=[one.expected for one in subject.cases])
     checked = agree(
-        ran, subject.cases, reference=solution, written=MachineProvenance.of(call), cap_ms=cap_ms
+        ran, subject.cases, reference=solution, provenance=MachineProvenance.of(call), cap_ms=cap_ms
     )
     verdicts = blind_verdicts(checked)
     notes("blind", verdicts.get("detail") or "agrees on every case", call)
@@ -350,7 +350,7 @@ def inputs_replay(
         canonical=subject.canonical,
         naive=subject.naive,
         reference=subject.reference,
-        written=MachineProvenance.of(call),
+        provenance=MachineProvenance.of(call),
         cap_ms=cap_ms,
     )
     notes("timing", searched_note(found), call)

@@ -37,7 +37,7 @@ PROMPT_HASH = "0123456789ab"
 # What a generated problem carries. Spelled out once: a problem carries
 # provenance unconditionally, so a site restating the five fields would say
 # nothing about what its test is for.
-PROVENANCE = {
+PROVENANCE_FIELDS = {
     "model": "a-model",
     "effort": "medium",
     "pin": PIN,
@@ -47,10 +47,10 @@ PROVENANCE = {
 
 # Provenance and the template the brief named. A site caring about neither
 # spreads this. One testing a match against a template names its own.
-GENERATED = PROVENANCE | {"generated_for": "t1"}
+GENERATED = PROVENANCE_FIELDS | {"generated_for": "t1"}
 
 # The same, as the record a minter takes.
-WRITTEN = MachineProvenance(**PROVENANCE)
+PROVENANCE = MachineProvenance(**PROVENANCE_FIELDS)
 
 
 def a_call(id: str = "call-1", **overrides) -> Call:
@@ -101,7 +101,7 @@ def machine_claim(
     return classifier_claim(
         attempt_id,
         techniques,
-        written=MachineProvenance(
+        provenance=MachineProvenance(
             model=model,
             effort=effort,
             prompt_hash=prompt_hash,
@@ -225,7 +225,7 @@ def seed_problem(root, *, id: str, techniques: list[str]) -> None:
         problem_id=id,
         role=SolutionRole.CANONICAL,
         code="def solve(xs):\n    return sorted(xs)\n",
-        **PROVENANCE,
+        **PROVENANCE_FIELDS,
     )
     SolutionLog(root).append(canonical)
     ReadingLog(root).append(user_reading(canonical.id, techniques))

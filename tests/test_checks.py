@@ -25,7 +25,7 @@ def checked(*pairs, canonical: str = DOUBLE, reference: str = TWICE, cap_ms: int
     if not ran.survived:
         return stopped(ran)
     return agree(
-        ran, written, reference=reference, written=MachineProvenance.of(a_call()), cap_ms=cap_ms
+        ran, written, reference=reference, provenance=MachineProvenance.of(a_call()), cap_ms=cap_ms
     )
 
 

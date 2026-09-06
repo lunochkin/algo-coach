@@ -67,7 +67,7 @@ class SettledCase(BaseModel):
     # the configuration rather than the call: the `TestCase` this becomes
     # copies it, and a call carries its prompt whole, which every case of one
     # draft would then hold a copy of
-    written: MachineProvenance
+    provenance: MachineProvenance
     round: int | None = 0  # as `TestCase.round`
 
 

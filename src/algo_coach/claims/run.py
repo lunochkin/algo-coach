@@ -72,7 +72,7 @@ def store(
     question was asked twice.
     """
     log.append_claim(
-        classifier_claim(attempt_id, list(techniques), written=MachineProvenance.of(call))
+        classifier_claim(attempt_id, list(techniques), provenance=MachineProvenance.of(call))
     )
 
 

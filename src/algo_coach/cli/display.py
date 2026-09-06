@@ -119,13 +119,16 @@ def held(retry: Retry) -> str:
 CASE_WIDTH = 96
 
 
-def configured(written: MachineProvenance | None) -> str:
+def configured(provenance: MachineProvenance | None) -> str:
     """What one step ran at, or that it never ran. The digest too: it is half
     of what a resume compares, and a prompt edit moves it alone."""
-    if written is None:
+    if provenance is None:
         return "not taken"
-    at = sampled(written.temperature)
-    return f"{written.model}, effort {written.effort} @{at}, {written.prompt_hash} @ {written.pin}"
+    at = sampled(provenance.temperature)
+    return (
+        f"{provenance.model}, effort {provenance.effort} @{at}, "
+        f"{provenance.prompt_hash} @ {provenance.pin}"
+    )
 
 
 def shortened(args: object, expected: object) -> str:

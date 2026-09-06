@@ -257,7 +257,7 @@ def _settled(
         args,
         canonical=[value for _, value in answered],
         reference=theirs,
-        written=MachineProvenance.of(call),
+        provenance=MachineProvenance.of(call),
         round=round,
     )
 

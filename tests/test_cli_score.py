@@ -21,7 +21,7 @@ def reading(attempt_id: str, techniques: list[str], *, model: str = MODEL):
     return classifier_claim(
         attempt_id,
         techniques,
-        written=MachineProvenance(
+        provenance=MachineProvenance(
             model=model,
             effort=EFFORT,
             prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),

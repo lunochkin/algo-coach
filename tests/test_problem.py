@@ -1,5 +1,5 @@
 import pytest
-from helpers import GENERATED, PROVENANCE
+from helpers import GENERATED, PROVENANCE_FIELDS
 from pydantic import ValidationError
 
 from algo_coach.schema import Problem, ProblemStatus, RetirementReason
@@ -20,7 +20,7 @@ def test_a_problem_records_what_produced_it():
     whose configuration is unknown cannot be compared with the rest."""
     problem = make_problem()
 
-    assert {field: getattr(problem, field) for field in PROVENANCE} == PROVENANCE
+    assert {field: getattr(problem, field) for field in PROVENANCE_FIELDS} == PROVENANCE_FIELDS
 
 
 def test_a_problem_without_any_provenance_is_rejected():
@@ -30,7 +30,7 @@ def test_a_problem_without_any_provenance_is_rejected():
         Problem.model_validate(CONTENT | {"generated_for": "t1"})
 
 
-@pytest.mark.parametrize("missing", PROVENANCE)
+@pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_a_problem_needs_every_field_that_produced_it(missing):
     """All of them or none, as on a reading: a record whose configuration is
     partly unknown compares with nothing."""
@@ -80,7 +80,7 @@ def test_a_problem_names_the_template_it_was_written_for():
 def test_a_problem_written_from_a_technique_brief_names_no_template():
     """A template is the tightest brief and a technique a looser one. Nothing
     told this generator a form, so nothing may assert a pair."""
-    assert Problem.model_validate(CONTENT | PROVENANCE).generated_for is None
+    assert Problem.model_validate(CONTENT | PROVENANCE_FIELDS).generated_for is None
 
 
 def test_a_blank_template_is_rejected():

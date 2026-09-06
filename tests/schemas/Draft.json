@@ -165,6 +165,9 @@
         "expected_from": {
           "$ref": "#/$defs/ExpectedSource"
         },
+        "provenance": {
+          "$ref": "#/$defs/MachineProvenance"
+        },
         "round": {
           "anyOf": [
             {
@@ -176,16 +179,13 @@
           ],
           "default": 0,
           "title": "Round"
-        },
-        "written": {
-          "$ref": "#/$defs/MachineProvenance"
         }
       },
       "required": [
         "args",
         "expected",
         "expected_from",
-        "written"
+        "provenance"
       ],
       "title": "SettledCase",
       "type": "object"

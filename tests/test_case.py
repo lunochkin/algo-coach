@@ -1,15 +1,15 @@
 import pytest
-from helpers import PROVENANCE, WRITTEN
+from helpers import PROVENANCE, PROVENANCE_FIELDS
 from pydantic import ValidationError
 
 from algo_coach import mint
 from algo_coach.schema import ExpectedSource, MachineProvenance, TestCase
 
 
-def case(*args, written: MachineProvenance = WRITTEN, **overrides) -> TestCase:
+def case(*args, provenance: MachineProvenance = PROVENANCE, **overrides) -> TestCase:
     """The minter with a configuration supplied, so a test naming none is about
     the case rather than about what proposed it."""
-    return mint.case(*args, written=written, **overrides)
+    return mint.case(*args, provenance=provenance, **overrides)
 
 
 def test_a_case_is_keyed_to_a_problem():
@@ -58,7 +58,7 @@ def test_a_case_is_minted_an_id():
 def test_a_case_names_the_call_that_proposed_its_arguments():
     """Not the problem's own call: a mutation round and the speedup search each
     propose arguments at their own configuration."""
-    one = case("p1", [1], 2, written=WRITTEN.model_copy(update={"call_id": "round-2"}))
+    one = case("p1", [1], 2, provenance=PROVENANCE.model_copy(update={"call_id": "round-2"}))
 
     assert (one.call_id, one.model) == ("round-2", "a-model")
 
@@ -103,7 +103,7 @@ def test_a_case_that_names_no_round_is_rejected():
             args=[1],
             expected=2,
             expected_from=ExpectedSource.REFERENCE,
-            **PROVENANCE,
+            **PROVENANCE_FIELDS,
         )
 
 

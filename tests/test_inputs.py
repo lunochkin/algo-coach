@@ -78,7 +78,7 @@ def test_the_search_runs_a_generated_builder():
         canonical="def solve(xs):\n    return len(xs)\n",
         naive=SLEEPS,
         reference="def solve(xs):\n    return len(xs)\n",
-        written=MachineProvenance.of(a_call()),
+        provenance=MachineProvenance.of(a_call()),
         cap_ms=55,
         largest=16,
         measure_ms=2000,

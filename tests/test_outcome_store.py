@@ -1,5 +1,5 @@
 import pytest
-from helpers import WRITTEN
+from helpers import PROVENANCE
 from pydantic import ValidationError
 
 from algo_coach.mint import site_outcome
@@ -8,7 +8,7 @@ from algo_coach.schema import CallSite, Configuration, Discard, SiteOutcome
 
 
 def left(site: CallSite = CallSite.GENERATOR, writing_id: str = "w1", **overrides):
-    return site_outcome(site, writing_id, "t1", written=WRITTEN, **overrides)
+    return site_outcome(site, writing_id, "t1", provenance=PROVENANCE, **overrides)
 
 
 def test_an_empty_store_reads_as_nothing(tmp_path):

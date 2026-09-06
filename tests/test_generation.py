@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass, field
 
 import pytest
-from helpers import PROVENANCE
+from helpers import PROVENANCE_FIELDS
 from matching import card, seeded, template
 from pydantic import ValidationError
 
@@ -333,17 +333,19 @@ def test_the_statements_are_the_template_s_own(tmp_path):
     (one,) = seeded(tmp_path, card())
     mine, theirs = one.templates[0], one.templates[1]
     corpus = [
-        Problem(id="p1", title="p1", statement="Mine.", **PROVENANCE, generated_for=mine.id),
+        Problem(id="p1", title="p1", statement="Mine.", **PROVENANCE_FIELDS, generated_for=mine.id),
         Problem(
             id="p2",
             title="p2",
             statement="Retired but mine.",
             status=ProblemStatus.RETIRED,
             retired_reason=RetirementReason.TELEGRAPHED,
-            **PROVENANCE,
+            **PROVENANCE_FIELDS,
             generated_for=mine.id,
         ),
-        Problem(id="p3", title="p3", statement="Theirs.", **PROVENANCE, generated_for=theirs.id),
+        Problem(
+            id="p3", title="p3", statement="Theirs.", **PROVENANCE_FIELDS, generated_for=theirs.id
+        ),
     ]
 
     assert written_for(corpus, mine) == ["Mine.", "Retired but mine."]

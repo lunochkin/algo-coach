@@ -53,13 +53,13 @@ def landing(draft: Draft) -> list[SettledCase]:
 def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
     # minted first, since every other record names its id, and put last, since
     # it is what a reader finds
-    written = copied(draft.generator_provenance)
+    provenance = copied(draft.generator_provenance)
     problem = mint.generated_problem(
         draft.title,
         draft.statement,
         generated_for=template.id,
         difficulty=draft.difficulty,
-        written=written,
+        provenance=provenance,
     )
     for case in landing(draft):
         # the case's own call rather than the problem's: a mutation round and
@@ -71,16 +71,18 @@ def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
                 case.expected,
                 expected_from=case.expected_from,
                 round=case.round,
-                written=case.written,
+                provenance=case.provenance,
             )
         )
-    canonical = mint.solution(problem.id, draft.canonical, SolutionRole.CANONICAL, written=written)
+    canonical = mint.solution(
+        problem.id, draft.canonical, SolutionRole.CANONICAL, provenance=provenance
+    )
     corpus.solutions.append(canonical)
     blind = copied(draft.blind_provenance)
     if draft.reference is None:
         raise ValueError("a landing draft carries the reference its blind call wrote")
     corpus.solutions.append(
-        mint.solution(problem.id, draft.reference, SolutionRole.REFERENCE, written=blind)
+        mint.solution(problem.id, draft.reference, SolutionRole.REFERENCE, provenance=blind)
     )
     if draft.naive is not None:
         # stored so a later search measures against the solution this run paid
@@ -88,7 +90,10 @@ def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
         # measures a form that is its own optimum
         corpus.solutions.append(
             mint.solution(
-                problem.id, draft.naive, SolutionRole.NAIVE, written=copied(draft.naive_provenance)
+                problem.id,
+                draft.naive,
+                SolutionRole.NAIVE,
+                provenance=copied(draft.naive_provenance),
             )
         )
     corpus.matches.append(mint.generator_match(template.id, canonical.id))

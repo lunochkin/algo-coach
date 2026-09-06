@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 import pytest
-from helpers import PROVENANCE
+from helpers import PROVENANCE_FIELDS
 from pydantic import ValidationError
 
 from algo_coach.mint import machine_reading, user_reading
@@ -43,7 +43,9 @@ def test_one_record_names_every_technique_of_one_solution():
 def test_an_empty_reading_is_a_verdict_rather_than_an_absence():
     """A reading is only ever written deliberately, so naming nothing says the
     vocabulary does not cover this code."""
-    assert make_reading(ReadingSource.CLASSIFIER, techniques=[], **PROVENANCE).techniques == []
+    assert (
+        make_reading(ReadingSource.CLASSIFIER, techniques=[], **PROVENANCE_FIELDS).techniques == []
+    )
 
 
 def test_a_reading_needs_no_decline():
@@ -58,14 +60,14 @@ def test_a_machine_reading_carries_its_whole_configuration():
     with pytest.raises(ValidationError, match="machine reading needs"):
         make_reading(ReadingSource.CLASSIFIER)
 
-    assert make_reading(ReadingSource.CLASSIFIER, **PROVENANCE).model == "a-model"
+    assert make_reading(ReadingSource.CLASSIFIER, **PROVENANCE_FIELDS).model == "a-model"
 
 
 def test_a_hand_reading_carries_none_of_it():
     """Nothing re-derives it, so any of it would name a configuration that
     never touched the record."""
     with pytest.raises(ValidationError, match="hand reading carries no"):
-        make_reading(ReadingSource.USER, **PROVENANCE)
+        make_reading(ReadingSource.USER, **PROVENANCE_FIELDS)
 
 
 def test_a_reading_records_what_its_author_saw():
@@ -95,7 +97,7 @@ def test_a_machine_reading_names_what_produced_it():
     reading = machine_reading(
         "s1",
         ["sliding-window"],
-        written=MachineProvenance(
+        provenance=MachineProvenance(
             model="a-model",
             effort="medium",
             prompt_hash="0123456789ab",
@@ -120,7 +122,7 @@ def test_a_code_outside_the_vocabulary_is_rejected_whole():
         machine_reading(
             "s1",
             ["sliding-window", "invented"],
-            written=MachineProvenance(
+            provenance=MachineProvenance(
                 model="a-model",
                 effort="medium",
                 prompt_hash="0123456789ab",

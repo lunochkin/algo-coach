@@ -106,7 +106,7 @@ def read_by_matcher(root):
                 subsets,
                 solution_id,
                 matched=True,
-                written=MachineProvenance(
+                provenance=MachineProvenance(
                     model="a-matcher",
                     effort="medium",
                     prompt_hash="h",

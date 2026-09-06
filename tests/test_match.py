@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 import pytest
-from helpers import PROVENANCE
+from helpers import PROVENANCE_FIELDS
 from pydantic import ValidationError
 
 from algo_coach.mint import generator_match
@@ -63,7 +63,7 @@ def test_verdicts_are_named_one_by_one_rather_than_flagged():
 
 def test_a_match_states_its_verdict():
     with pytest.raises(ValidationError):
-        make_match(MatchSource.CLASSIFIER, matched=None, **PROVENANCE)
+        make_match(MatchSource.CLASSIFIER, matched=None, **PROVENANCE_FIELDS)
 
 
 def test_a_match_records_its_source():
@@ -84,9 +84,9 @@ def test_a_match_records_its_source():
 def test_a_machine_match_records_what_produced_it():
     """Provenance as a claim carries it: re-deriving has to find the stale
     readings and leave the hand ones alone."""
-    match = make_match(MatchSource.CLASSIFIER, **PROVENANCE)
+    match = make_match(MatchSource.CLASSIFIER, **PROVENANCE_FIELDS)
 
-    assert {field: getattr(match, field) for field in PROVENANCE} == PROVENANCE
+    assert {field: getattr(match, field) for field in PROVENANCE_FIELDS} == PROVENANCE_FIELDS
 
 
 def test_a_machine_match_without_any_provenance_is_rejected():
@@ -94,22 +94,22 @@ def test_a_machine_match_without_any_provenance_is_rejected():
         make_match(MatchSource.CLASSIFIER)
 
 
-@pytest.mark.parametrize("missing", PROVENANCE)
+@pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_a_machine_match_needs_every_field_that_produced_it(missing):
     """All of them or none: a reading whose configuration is partly unknown
     compares with nothing."""
     with pytest.raises(ValidationError, match=missing):
         make_match(
             MatchSource.CLASSIFIER,
-            **{field: value for field, value in PROVENANCE.items() if field != missing},
+            **{field: value for field, value in PROVENANCE_FIELDS.items() if field != missing},
         )
 
 
-@pytest.mark.parametrize("field", [*PROVENANCE, "temperature", "provider"])
+@pytest.mark.parametrize("field", [*PROVENANCE_FIELDS, "temperature", "provider"])
 def test_a_hand_match_carries_no_provenance(field):
     """Nothing re-derives a hand match, so naming a model would name one that
     never touched it."""
-    value = 0.0 if field == "temperature" else PROVENANCE.get(field, "a-company")
+    value = 0.0 if field == "temperature" else PROVENANCE_FIELDS.get(field, "a-company")
     with pytest.raises(ValidationError, match=field):
         make_match(MatchSource.USER, **{field: value})
 
@@ -117,18 +117,18 @@ def test_a_hand_match_carries_no_provenance(field):
 def test_a_machine_match_is_greedy_and_says_so():
     """`None` is the provider's own default rather than a gap — a named arm,
     as it is on a claim."""
-    greedy = make_match(MatchSource.CLASSIFIER, temperature=0.0, **PROVENANCE)
+    greedy = make_match(MatchSource.CLASSIFIER, temperature=0.0, **PROVENANCE_FIELDS)
 
     assert greedy.temperature == 0.0
-    assert make_match(MatchSource.CLASSIFIER, **PROVENANCE).temperature is None
+    assert make_match(MatchSource.CLASSIFIER, **PROVENANCE_FIELDS).temperature is None
 
 
 def test_who_served_a_machine_match_is_recorded():
     """Recorded and never compared: the router names a company, and a company
     serves several builds of a model."""
-    assert make_match(MatchSource.CLASSIFIER, provider="a-company", **PROVENANCE).provider == (
-        "a-company"
-    )
+    assert make_match(
+        MatchSource.CLASSIFIER, provider="a-company", **PROVENANCE_FIELDS
+    ).provider == ("a-company")
 
 
 def test_a_match_is_keyed_to_no_attempt():

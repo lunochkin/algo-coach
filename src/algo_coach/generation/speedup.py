@@ -75,7 +75,7 @@ def search(
     canonical: str,
     naive: str,
     reference: str,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
     cap_ms: int,
     largest: int,
     smallest: int = 1,
@@ -140,7 +140,7 @@ def search(
         over,
         canonical=canonical,
         reference=reference,
-        written=written,
+        provenance=provenance,
         cap_ms=cap_ms,
         measure_ms=measure_ms,
         naive_ms=over_ms,
@@ -154,7 +154,7 @@ def _settled(
     *,
     canonical: str,
     reference: str,
-    written: MachineProvenance,
+    provenance: MachineProvenance,
     cap_ms: int,
     measure_ms: int,
     naive_ms: int | None,
@@ -175,7 +175,11 @@ def _settled(
     # the loop
     [theirs] = run(reference, [args], cap_ms=measure_ms)
     settled = settle(
-        [args], canonical=[ran.value], reference=[answered(theirs)], written=written, round=None
+        [args],
+        canonical=[ran.value],
+        reference=[answered(theirs)],
+        provenance=provenance,
+        round=None,
     )
     if not settled.agreed:
         return measured(missing=Missing.DISAGREED, disagreement=settled.disagreements[0])

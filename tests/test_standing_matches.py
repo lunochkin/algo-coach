@@ -7,7 +7,7 @@ from algo_coach.schema import MatchSource, TemplateMatch
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
-PROVENANCE = {
+PROVENANCE_FIELDS = {
     "model": "a-model",
     "effort": "medium",
     "pin": "a-host",
@@ -33,7 +33,7 @@ def match(
         "source": source,
     }
     if source is MatchSource.CLASSIFIER:
-        fields |= PROVENANCE
+        fields |= PROVENANCE_FIELDS
     return TemplateMatch.model_validate(fields)
 
 

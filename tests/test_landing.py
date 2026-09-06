@@ -34,7 +34,7 @@ def call(id: str, **overrides) -> Call:
     )
 
 
-def written(one: Call) -> MachineProvenance:
+def provenance(one: Call) -> MachineProvenance:
     """The configuration a step copied off its call, as a draft holds it."""
     return MachineProvenance.of(one)
 
@@ -46,7 +46,7 @@ def drafted(**overrides) -> Draft:
                 args=[[1, 2, 3]],
                 expected=3,
                 expected_from=ExpectedSource.REFERENCE,
-                written=MachineProvenance.of(call("call-3")),
+                provenance=MachineProvenance.of(call("call-3")),
             )
         ]
     } | overrides
@@ -59,8 +59,8 @@ def drafted(**overrides) -> Draft:
         declared=[{"args": [[1, 2, 3]], "expected": 3}],
         difficulty="medium",
         reference=BLIND,
-        generator_provenance=written(call("call-1")),
-        blind_provenance=written(call("call-2", temperature=0.0)),
+        generator_provenance=provenance(call("call-1")),
+        blind_provenance=provenance(call("call-2", temperature=0.0)),
         **fields,
     )
 
@@ -102,7 +102,7 @@ def test_the_naive_solution_lands_beside_the_two_other_solutions(tmp_path, templ
     problem = land(
         corpus,
         template,
-        drafted(naive=NAIVE, naive_provenance=written(call("call-4", temperature=None))),
+        drafted(naive=NAIVE, naive_provenance=provenance(call("call-4", temperature=None))),
     )
 
     stored = corpus.solutions.for_problem(problem.id, SolutionRole.NAIVE)
@@ -172,7 +172,7 @@ def test_a_case_keeps_the_solution_that_computed_it(tmp_path, template):
                 args=[[1]],
                 expected=1,
                 expected_from=ExpectedSource.CANONICAL,
-                written=MachineProvenance.of(call("call-3")),
+                provenance=MachineProvenance.of(call("call-3")),
             )
         ]
     )
@@ -192,7 +192,7 @@ def test_a_case_keeps_the_round_that_won_it(tmp_path, template):
                 args=[[1]],
                 expected=1,
                 expected_from=ExpectedSource.REFERENCE,
-                written=MachineProvenance.of(call("call-3")),
+                provenance=MachineProvenance.of(call("call-3")),
                 round=2,
             )
         ]

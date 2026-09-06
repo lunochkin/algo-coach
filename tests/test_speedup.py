@@ -23,7 +23,7 @@ def searched(canonical: str = FAST, naive: str = SLEEPS, reference: str = FAST, 
         canonical=canonical,
         naive=naive,
         reference=reference,
-        written=MachineProvenance.of(a_call()),
+        provenance=MachineProvenance.of(a_call()),
         cap_ms=overrides.pop("cap_ms", CAP_MS),
         largest=overrides.pop("largest", 16),
         measure_ms=overrides.pop("measure_ms", MEASURE_MS),
@@ -60,7 +60,7 @@ def test_the_case_names_the_call_that_wrote_the_input_generator():
     is what the stored case compares under."""
     found = searched()
 
-    assert found.case.written.call_id == "call-1"
+    assert found.case.provenance.call_id == "call-1"
 
 
 def test_the_separating_case_was_won_by_no_round():
@@ -146,7 +146,7 @@ def test_an_input_over_the_ceiling_is_not_a_case():
         canonical="def solve(xs):\n    return len(xs)\n",
         naive="def solve(xs):\n    return len(xs)\n",
         reference="def solve(xs):\n    return len(xs)\n",
-        written=MachineProvenance.of(a_call()),
+        provenance=MachineProvenance.of(a_call()),
         cap_ms=CAP_MS,
         largest=10_000,
         measure_ms=MEASURE_MS,

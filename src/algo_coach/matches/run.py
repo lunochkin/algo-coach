@@ -71,14 +71,14 @@ def store(log: MatchLog, question: Question, matched: Sequence[str], call: Call)
     reading a later run must not pay for again.
     """
     named = set(matched)
-    written = MachineProvenance.of(call)
+    provenance = MachineProvenance.of(call)
     for template in candidates(question.card):
         log.append(
             machine_match(
                 template.id,
                 question.solution.id,
                 matched=template.slug in named,
-                written=written,
+                provenance=provenance,
             )
         )
     return len(named)

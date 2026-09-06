@@ -67,7 +67,7 @@ def settle(
     *,
     canonical: Sequence[Any],
     reference: Sequence[Any],
-    written: MachineProvenance,
+    provenance: MachineProvenance,
     round: int | None = 0,
 ) -> Settled:
     # every case is decided, never stopping at the first disagreement: a
@@ -84,7 +84,7 @@ def settle(
                     args=case,
                     expected=ours,
                     expected_from=ExpectedSource.CANONICAL,
-                    written=written,
+                    provenance=provenance,
                     round=round,
                 )
             )
@@ -94,7 +94,7 @@ def settle(
                     args=case,
                     expected=theirs,
                     expected_from=ExpectedSource.REFERENCE,
-                    written=written,
+                    provenance=provenance,
                     round=round,
                 )
             )

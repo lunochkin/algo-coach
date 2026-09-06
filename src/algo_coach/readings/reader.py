@@ -37,7 +37,7 @@ def store(
     call: Call,
 ) -> TechniqueReading:
     """Append what a classifier read, on the calling thread."""
-    reading = machine_reading(solution_id, list(techniques), written=MachineProvenance.of(call))
+    reading = machine_reading(solution_id, list(techniques), provenance=MachineProvenance.of(call))
     log.append(reading)
     return reading
 

@@ -21,7 +21,7 @@ def fuzzed(inputs, *, canonical: str = BOUNDED, reference: str = AGREES):
         inputs,
         canonical=canonical,
         reference=reference,
-        written=MachineProvenance.of(a_call()),
+        provenance=MachineProvenance.of(a_call()),
         cap_ms=CAP_MS,
         against_ms=CAP_MS,
     )
@@ -75,7 +75,7 @@ def test_the_case_names_the_call_that_built_it():
     call that wrote the statement."""
     found = fuzzed([[3]])
 
-    assert found.cases[0].written.call_id == "call-1"
+    assert found.cases[0].provenance.call_id == "call-1"
 
 
 def test_an_input_the_canonical_cannot_answer_is_dropped():
@@ -196,7 +196,7 @@ def test_an_input_over_the_ceiling_is_kept_once_it_fits():
         [[list(range(12))]],
         canonical=LONGEST,
         reference=LONGEST_BLIND,
-        written=MachineProvenance.of(a_call()),
+        provenance=MachineProvenance.of(a_call()),
         cap_ms=CAP_MS,
         against_ms=CAP_MS,
         ceiling=40,
@@ -213,7 +213,7 @@ def test_an_input_the_shrink_cannot_bring_under_the_ceiling_is_not_kept():
         [[list(range(12))]],
         canonical=LONGEST,
         reference=LONGEST_BLIND,
-        written=MachineProvenance.of(a_call()),
+        provenance=MachineProvenance.of(a_call()),
         cap_ms=CAP_MS,
         against_ms=CAP_MS,
         ceiling=1,

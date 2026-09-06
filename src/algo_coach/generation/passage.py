@@ -182,7 +182,7 @@ def to_agreed(p: Passage) -> bool:
     # the generator's configuration rather than the blind call's: the arguments
     # are the statement's own cases, whoever computed what they return
     p.checked = p.first = agree(
-        ran, p.draft.declared, reference=solution, written=p.generator, cap_ms=p.cap_ms
+        ran, p.draft.declared, reference=solution, provenance=p.generator, cap_ms=p.cap_ms
     )
     p.notes("cases", f"{settled(p.first)}, {monotonic() - started:.1f}s in the runner")
     if not p.first.survived:
@@ -314,7 +314,7 @@ def stored(draft: Draft) -> Inputs:
     wrote it. It made no call here, so it leaves no site outcome."""
     return Inputs(
         built=Built(code=draft.builder or "", largest=draft.largest or 1),
-        written=draft.inputs_provenance,
+        provenance=draft.inputs_provenance,
     )
 
 
@@ -426,7 +426,7 @@ def building(
         notes("inputs", f"unbuilt: {failure!r}")
         return Inputs(unbuilt=repr(failure))
     notes("inputs", f"written, up to {built.largest}", call)
-    return Inputs(call=call, built=built, written=MachineProvenance.of(call))
+    return Inputs(call=call, built=built, provenance=MachineProvenance.of(call))
 
 
 def paced(
@@ -449,7 +449,7 @@ def paced(
     """
     if reuse and draft.naive is not None:
         notes("naive", "reused, at the configuration that wrote it")
-        naive = Naive(code=draft.naive, written=draft.naive_provenance)
+        naive = Naive(code=draft.naive, provenance=draft.naive_provenance)
     else:
         notes("naive", "writing the solution the search measures against")
         try:
@@ -460,7 +460,7 @@ def paced(
             notes("naive", f"unpaced: {failure!r}")
             return Naive(unpaced=repr(failure))
         notes("naive", "written", call)
-        naive = Naive(call=call, code=code, written=MachineProvenance.of(call))
+        naive = Naive(call=call, code=code, provenance=MachineProvenance.of(call))
 
     # run again on a reuse: the draft stores the code rather than the verdict,
     # and a subprocess answers this for nothing
@@ -476,13 +476,13 @@ def paced(
 def fuzzing(draft: Draft, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:
     """The pass `harden` runs before its first round, or nothing where no
     generator was written for it to build with."""
-    if inputs.built is None or inputs.written is None:
+    if inputs.built is None or inputs.provenance is None:
         return None
     return pass_over(
         inputs.built,
         canonical=draft.canonical,
         reference=draft.reference or "",
-        written=inputs.written,
+        provenance=inputs.provenance,
         cap_ms=cap_ms,
     )
 

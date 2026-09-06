@@ -147,7 +147,7 @@ def test_a_machine_match_does_not_settle_a_question(tmp_path):
             id[form],
             "s-b0",
             matched=False,
-            written=MachineProvenance(
+            provenance=MachineProvenance(
                 model="m",
                 effort="medium",
                 prompt_hash="h",

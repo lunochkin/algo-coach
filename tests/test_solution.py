@@ -1,5 +1,5 @@
 import pytest
-from helpers import PROVENANCE, T0, WRITTEN
+from helpers import PROVENANCE, PROVENANCE_FIELDS, T0
 from pydantic import ValidationError
 
 from algo_coach.mint import solution
@@ -13,7 +13,7 @@ def make_canonical(**overrides) -> Solution:
         "problem_id": "p1",
         "code": CODE,
         "role": SolutionRole.CANONICAL,
-        "written": WRITTEN,
+        "provenance": PROVENANCE,
     } | overrides
     return solution(**fields)
 
@@ -36,14 +36,14 @@ def test_a_canonical_names_what_produced_it():
     written by two configurations has to say which wrote what."""
     canonical = make_canonical()
 
-    assert {field: getattr(canonical, field) for field in PROVENANCE} == PROVENANCE
+    assert {field: getattr(canonical, field) for field in PROVENANCE_FIELDS} == PROVENANCE_FIELDS
 
 
-@pytest.mark.parametrize("missing", PROVENANCE)
+@pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_a_canonical_needs_every_field_that_produced_it(missing):
     """All of them or none, as on any reading. Asserted against the model,
     since the minter cannot be called without them at all."""
-    kept = {field: value for field, value in PROVENANCE.items() if field != missing}
+    kept = {field: value for field, value in PROVENANCE_FIELDS.items() if field != missing}
     with pytest.raises(ValidationError, match=missing):
         Solution.model_validate(
             {
@@ -103,5 +103,5 @@ def test_a_solution_without_a_role_is_rejected():
     generation run forgot to state."""
     with pytest.raises(ValidationError, match="role"):
         Solution.model_validate(
-            {"id": "s1", "created_at": T0, "problem_id": "p1", "code": CODE} | PROVENANCE
+            {"id": "s1", "created_at": T0, "problem_id": "p1", "code": CODE} | PROVENANCE_FIELDS
         )

@@ -1,7 +1,7 @@
 """Fixtures the matcher tests share: a model answering from a script, and the
 records a verdict needs to exist."""
 
-from helpers import GENERATED, PROVENANCE, T0
+from helpers import GENERATED, PROVENANCE_FIELDS, T0
 
 from algo_coach.cards import CardStore, seed_cards
 from algo_coach.mint import user_reading
@@ -73,7 +73,7 @@ def canonical(problem_id: str, *, id: str | None = None, **overrides) -> Solutio
         created_at=T0,
         problem_id=problem_id,
         role=SolutionRole.CANONICAL,
-        **PROVENANCE,
+        **PROVENANCE_FIELDS,
         **fields,
     )
 

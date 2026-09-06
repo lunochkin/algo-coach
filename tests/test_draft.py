@@ -1,5 +1,5 @@
 import pytest
-from helpers import PROVENANCE, a_call
+from helpers import PROVENANCE_FIELDS, a_call
 from pydantic import ValidationError
 
 from algo_coach.schema import (
@@ -30,7 +30,7 @@ def a_settled_case(**overrides) -> dict:
         "args": [[1, 2]],
         "expected": 2,
         "expected_from": "reference",
-        "written": MachineProvenance.of(a_call()),
+        "provenance": MachineProvenance.of(a_call()),
     } | overrides
 
 
@@ -190,7 +190,7 @@ def test_a_draft_holds_the_cases_the_runs_settled():
     draft = make_draft(cases=[a_settled_case()])
 
     assert draft.cases[0].expected_from is ExpectedSource.REFERENCE
-    assert draft.cases[0].written.call_id == "call-1"
+    assert draft.cases[0].provenance.call_id == "call-1"
 
 
 def test_a_draft_holds_the_builder_and_its_bound():
@@ -205,7 +205,7 @@ def test_a_draft_holds_the_builder_and_its_bound():
 def test_a_draft_holds_the_naive_solution_the_search_measures_against():
     """A resume holding neither the code nor its configuration would re-pay
     the call that wrote it."""
-    draft = make_draft(naive="def solve(xs): ...", naive_provenance=PROVENANCE)
+    draft = make_draft(naive="def solve(xs): ...", naive_provenance=PROVENANCE_FIELDS)
 
     assert draft.naive.startswith("def solve")
     assert draft.naive_provenance.call_id == "call-1"
@@ -240,7 +240,7 @@ def test_a_draft_carries_the_configuration_of_each_step():
     """A resume starts at the first step whose configuration or digest moved,
     which is why both are held here rather than only the outputs."""
     for site in ("generator", "blind", "inputs", "naive", "discrimination"):
-        draft = make_draft(**{f"{site}_provenance": PROVENANCE})
+        draft = make_draft(**{f"{site}_provenance": PROVENANCE_FIELDS})
 
         assert getattr(draft, f"{site}_provenance").call_id == "call-1"
 
@@ -250,11 +250,11 @@ def test_a_step_runs_at_no_configuration_until_it_has_run():
     assert make_draft().generator_provenance is None
 
 
-@pytest.mark.parametrize("missing", PROVENANCE)
+@pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_a_step_copies_a_whole_configuration(missing):
     """All of it or none: a step whose configuration is partly unknown cannot
     be compared with the one a resume would run."""
-    kept = {field: value for field, value in PROVENANCE.items() if field != missing}
+    kept = {field: value for field, value in PROVENANCE_FIELDS.items() if field != missing}
     with pytest.raises(ValidationError, match=missing):
         make_draft(generator_provenance=kept)
 
