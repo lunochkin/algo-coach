@@ -9,9 +9,13 @@ SRC = ROOT / "src" / "algo_coach"
 # `CLAUDE.md`, Writing: one idea per sentence, nothing over forty words, split
 # at the em-dash and the semicolon. The docs predate the rule, so each count
 # is held where it stands and lowered as they are edited, never raised.
-LONG_SENTENCES = 21
+LONG_SENTENCES = 3
 EM_DASHES = 26
 SEMICOLONS = 25
+# `CLAUDE.md`, Writing: no cleft sentences, and no sentence opening on an
+# abstraction that delays its subject. Held and lowered the same way.
+CLEFTS = 77
+FRONTED = 67
 # `CLAUDE.md`, Code style: a docstring stays shorter than the code it sits on.
 LONGER_DOCSTRINGS = 36
 
@@ -22,7 +26,18 @@ def prose(path: Path) -> str:
 
 
 def sentences(text: str) -> list[str]:
-    return re.split(r"(?<=[.!?])\s+", re.sub(r"\s+", " ", text))
+    # a bold headline ends in `.**`, and the sentence after it is its own
+    return re.split(r"(?<=[.!?])(?:\*\*)?\s+", re.sub(r"\s+", " ", text))
+
+
+CLEFT = re.compile(r"\b(?:is|are|was|were) (?:what|where|why|how)\b")
+OPENERS = ("What", "Where", "Neither", "Both", "Nothing")
+
+
+def opener(sentence: str) -> str:
+    """The first word, past a list marker and any emphasis."""
+    words = re.sub(r"^(?:[-*]|\d+\.)?\s*[*`_]*", "", sentence).split()
+    return words[0].rstrip(",:") if words else ""
 
 
 def test_no_sentence_in_the_architecture_runs_past_forty_words():
@@ -33,6 +48,30 @@ def test_no_sentence_in_the_architecture_runs_past_forty_words():
         if len(one.split()) > 40
     ]
     assert len(over) <= LONG_SENTENCES, over
+
+
+def test_the_architecture_states_the_subject_rather_than_clefting_it():
+    """ "The reference is what discards" names the subject after the verb, and
+    a reader holds the verb until it arrives."""
+    clefts = [
+        f"{path.name}: {one[:60]}..."
+        for path in ARCHITECTURE
+        for one in sentences(prose(path))
+        if CLEFT.search(one)
+    ]
+    assert len(clefts) <= CLEFTS, clefts
+
+
+def test_no_sentence_in_the_architecture_opens_on_an_abstraction():
+    """`What`, `Where`, `Neither`, `Both` and `Nothing` front an abstraction and
+    hold the concrete noun back to the end of the sentence."""
+    fronted = [
+        f"{path.name}: {one[:60]}..."
+        for path in ARCHITECTURE
+        for one in sentences(prose(path))
+        if opener(one) in OPENERS
+    ]
+    assert len(fronted) <= FRONTED, fronted
 
 
 def test_the_architecture_splits_where_it_would_chain():

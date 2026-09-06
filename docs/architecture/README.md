@@ -110,6 +110,9 @@ without redefining them. Grouped by the file that specifies the record.
   can resume. Cleared at landing.
 - **Writing state**: how far a draft got: drafted, checked, referenced,
   agreed, built, paced, searched, hardened, landed, or rejected.
+- **Paced**: the writing state after a naive solution passed the cases. Named
+  for the pacer, the runner who sets the time others are measured against.
+  `unpaced` is the reason a draft has none.
 - **Gate**: a check a draft must pass to advance. A failed gate rejects the
   draft or holds it, and is named on the site outcome.
 - **Rejected**: a draft's terminal state. The gate names why: `no_value`,
@@ -120,7 +123,7 @@ without redefining them. Grouped by the file that specifies the record.
 - **Resume**: `generate --resume`: re-entering every held draft at the first
   step whose configuration or digest moved.
 - **Mutant**: the canonical with one semantic change made on the parsed tree.
-  A tree walk enumerates them. Nothing stores them.
+  A tree walk enumerates them, and no store holds them.
 - **Kill**: a mutant failing at least one case, or answering a built input
   differently from the canonical.
 - **Survivor**: a mutant no case and no built input killed.
