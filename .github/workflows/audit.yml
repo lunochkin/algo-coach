@@ -1,0 +1,18 @@
+# Known vulnerabilities in what is installed. Weekly, since a new advisory
+# arrives without a commit.
+name: audit
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      - run: uv sync
+      - run: uv run --with pip-audit pip-audit

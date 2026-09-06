@@ -89,6 +89,18 @@ modules = [
 ]
 
 [[tool.importlinter.contracts]]
+name = "the packages are layered, and nothing imports upward"
+type = "layers"
+layers = [
+    "algo_coach.cli",
+    "algo_coach.generation",
+    "algo_coach.claims : algo_coach.readings : algo_coach.matches : algo_coach.board : algo_coach.cards",
+    "algo_coach.classifier : algo_coach.mint : algo_coach.log : algo_coach.outcomes : algo_coach.problems : algo_coach.solutions : algo_coach.cases : algo_coach.drafts : algo_coach.verifications : algo_coach.techniques : algo_coach.mutation : algo_coach.calls : algo_coach.runs",
+    "algo_coach.runner",
+    "algo_coach.schema : algo_coach.ids : algo_coach.storage : algo_coach.standing",
+]
+
+[[tool.importlinter.contracts]]
 name = "nothing imports the adapter"
 type = "forbidden"
 source_modules = [
@@ -124,7 +136,13 @@ line-length = 100
 # ANN401: `Any` in a signature is a decision, made where the value really is any.
 # N818 is left out: an exception here is named by what happened (`Expired`),
 # not by its base class.
-select = ["E", "W", "F", "I", "UP", "B", "SIM", "ANN401", "RUF100", "RUF022", "RUF012", "C901", "PLC0415", "PT011"]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "ANN401", "RUF100", "RUF022", "RUF012", "C901", "PLC0415", "PT011", "T20"]
+
+# the adapter and the scripts print; the domain does not
+[tool.ruff.lint.per-file-ignores]
+"src/algo_coach/cli/**" = ["T20"]
+"scripts/**" = ["T20"]
+"tests/**" = ["T20"]
 
 # Twelve is where `search`, `score_backlog` and `claim` sit. Each is one flow,
 # and splitting it for the counter would spread that flow across helpers.
