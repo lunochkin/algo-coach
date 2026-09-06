@@ -25,6 +25,14 @@ lint *args:
 typecheck:
     uv run pyright
 
+# The tests with coverage, gated at `fail_under`. What CI runs in place of `test`.
+coverage *args:
+    uv run pytest --cov {{ args }}
+
+# Mutate the engine and see which tests notice. Slow: hours, not seconds.
+mutate *args:
+    uv run --with mutmut mutmut run {{ args }}
+
 # Format.
 fmt:
     uv run ruff format .

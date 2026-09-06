@@ -25,5 +25,7 @@ jobs:
         with:
           node-version: 22
       - uses: extractions/setup-just@v4
+      - run: uv lock --check
       - run: uv sync
-      - run: just check
+      # `check` with coverage in place of the bare tests
+      - run: just lint typecheck coverage

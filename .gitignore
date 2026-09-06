@@ -1,7 +1,16 @@
 .venv/
 __pycache__/
 *.pyc
+
+# what the checks leave behind: pytest, ruff, import-linter, coverage, hypothesis, mutmut
 .pytest_cache/
+.ruff_cache/
+.import_linter_cache/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+mutants/
 
 .env
 data/

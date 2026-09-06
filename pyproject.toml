@@ -20,10 +20,12 @@ algo-coach = "algo_coach.cli:main"
 [dependency-groups]
 dev = [
     "duckdb>=1.5",
+    "hypothesis>=6.167.1",
     "import-linter>=2.15",
     "pyright>=1.1.411",
     "pytest>=8.0",
     "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
     "pytest-xdist>=3.6",
     "ruff>=0.16.0",
 ]
@@ -100,12 +102,34 @@ source_modules = [
 ]
 forbidden_modules = ["algo_coach.cli"]
 
+[tool.coverage.run]
+source = ["algo_coach"]
+
+[tool.coverage.report]
+# what a module landing untested drops the total by. The uncovered lines are the
+# child's signal path and the CLI's exits
+fail_under = 95
+skip_covered = true
+show_missing = true
+
+# ---- mutation testing of the suite itself: `just mutate`, never the hook
+[tool.mutmut]
+paths_to_mutate = ["src/algo_coach/"]
+tests_dir = ["tests/"]
+
 [tool.ruff]
 line-length = 100
 
 [tool.ruff.lint]
-# ANN401: `Any` in a signature is a decision, made where the value really is any
-select = ["E", "W", "F", "I", "UP", "B", "SIM", "ANN401"]
+# ANN401: `Any` in a signature is a decision, made where the value really is any.
+# N818 is left out: an exception here is named by what happened (`Expired`),
+# not by its base class.
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "ANN401", "RUF100", "RUF022", "RUF012", "C901", "PLC0415", "PT011"]
+
+# Twelve is where `search`, `score_backlog` and `claim` sit. Each is one flow,
+# and splitting it for the counter would spread that flow across helpers.
+[tool.ruff.lint.mccabe]
+max-complexity = 12
 
 [build-system]
 requires = ["hatchling"]
