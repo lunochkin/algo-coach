@@ -115,6 +115,28 @@ def test_a_package_exports_only_its_own_names():
     assert borrowed == []
 
 
+def test_a_package_exports_only_what_something_imports():
+    """A name in `__all__` no module outside the package imports, in `src` or in
+    `tests`, is surface nothing pays for. `cli` is exempt: it is the entry
+    point, and its names are reached by the console script and by attribute."""
+    imported: dict[str, set[str]] = {}
+    for path in [*SRC.rglob("*.py"), *TESTS.glob("*.py")]:
+        for node in ast.walk(ast.parse(path.read_text())):
+            if not isinstance(node, ast.ImportFrom) or node.module is None:
+                continue
+            if path.is_relative_to(SRC.parent / Path(*node.module.split("."))):
+                continue
+            imported.setdefault(node.module, set()).update(alias.name for alias in node.names)
+    unpaid = [
+        f"{name}: {export}"
+        for name, path, tree in modules()
+        if path.name == "__init__.py" and name not in ("algo_coach", "algo_coach.cli")
+        for export in sorted(exported(tree))
+        if export not in imported.get(name, set())
+    ]
+    assert unpaid == []
+
+
 def test_a_test_module_carries_no_docstring():
     """`CLAUDE.md`: a module-level one restates the filename, and a fact it
     holds alone belongs on the test that pins it."""

@@ -2,6 +2,7 @@
 
 import argparse
 import os
+from collections.abc import Callable
 from pathlib import Path
 from typing import TypedDict
 
@@ -29,7 +30,7 @@ DATA_ROOT = Path("data")
 # What a shell reports for a command its user stopped: 128 plus the signal.
 INTERRUPTED = 130
 
-__all__ = ["BadLine", "DATA_ROOT", "INTERRUPTED", "main"]
+__all__ = ["DATA_ROOT", "INTERRUPTED", "BadLine", "main"]
 
 
 class _Defaults(argparse.ArgumentDefaultsHelpFormatter):
@@ -302,28 +303,22 @@ def main() -> None:
         parser.exit(INTERRUPTED, "\ninterrupted\n")
 
 
+# every command takes the parser, whether or not it exits through it
+COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Path], None]] = {
+    "seed": seed,
+    "board": lambda args, _parser, root: board(args, root),
+    "claim": claim,
+    "classify": classify,
+    "problem": problem,
+    "gaps": lambda args, _parser, root: gaps(args, root),
+    "generate": generate,
+    "read": read,
+    "match": match,
+    "annotate": annotate,
+    "score": score,
+    "movement": moved,
+}
+
+
 def dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
-    if args.command == "seed":
-        seed(args, parser, root)
-    elif args.command == "board":
-        board(args, root)
-    elif args.command == "claim":
-        claim(args, parser, root)
-    elif args.command == "classify":
-        classify(args, parser, root)
-    elif args.command == "problem":
-        problem(args, parser, root)
-    elif args.command == "gaps":
-        gaps(args, root)
-    elif args.command == "generate":
-        generate(args, parser, root)
-    elif args.command == "read":
-        read(args, parser, root)
-    elif args.command == "match":
-        match(args, parser, root)
-    elif args.command == "annotate":
-        annotate(args, parser, root)
-    elif args.command == "score":
-        score(args, parser, root)
-    else:
-        moved(args, parser, root)
+    COMMANDS[args.command](args, parser, root)
