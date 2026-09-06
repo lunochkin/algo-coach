@@ -64,7 +64,7 @@ def test_a_case_that_yielded_no_value_is_not_a_misdeclaration():
 
 def test_a_run_that_answered_a_different_number_of_cases_reports_nothing():
     """A fault in the runner rather than a call that declared wrong."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="one output per case"):
         misdeclared(declared(([1], 1), ([2], 2)), [1])
 
 
@@ -115,7 +115,7 @@ def test_agreement_is_agreement_as_json():
 def test_a_run_that_answered_a_different_number_of_cases_decides_nothing():
     """A fault in the runner rather than a disagreement between the
     solutions."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="one output per case"):
         settle(cases([1], [2]), canonical=[1], reference=[1, 2])
 
 

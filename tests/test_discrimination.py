@@ -114,7 +114,7 @@ def test_no_call_is_paid_for_where_nothing_survived(tmp_path):
     """The set caught every change, so there is no question to ask."""
     model = FakeModel(answer([[1]]))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="no survivor"):
         asked(model, survivors=[], tmp_path=tmp_path)
 
     assert model.calls == []

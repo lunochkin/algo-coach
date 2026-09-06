@@ -25,7 +25,9 @@ class RetirementReason(StrEnum):
 class Problem(MachineProvenance):
     id: str
     title: str
-    techniques: list[str] = []  # read off the canonicals; re-derivable
+    techniques: list[str] = Field(
+        default_factory=list[str]
+    )  # read off the canonicals; re-derivable
     difficulty: ProblemDifficulty | None = None
     statement: str = Field(min_length=1)  # what the problem asks; matching reads it
     # The template the brief named, where it named one: an assertion rather

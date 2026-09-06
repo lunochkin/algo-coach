@@ -3,7 +3,7 @@ from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
 from algo_coach.cases import CaseLog
-from algo_coach.generation import Bench, Corpus, clock, replay, write_problems
+from algo_coach.generation import REPLAYED, Bench, Corpus, clock, replay, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
@@ -301,8 +301,6 @@ def test_the_loop_is_replayed_against_the_set_as_it_stood(tmp_path):
 def test_the_sites_a_replay_asks_exclude_the_generator(tmp_path):
     """It writes a problem rather than answering one, so asking it again is
     `generate`."""
-    from algo_coach.generation import REPLAYED
-
     assert CallSite.GENERATOR not in REPLAYED
     assert set(REPLAYED) == {
         CallSite.BLIND,

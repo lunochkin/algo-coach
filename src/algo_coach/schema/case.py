@@ -26,7 +26,7 @@ class TestCase(MachineProvenance):
 
     id: str
     problem_id: str = Field(min_length=1)
-    args: list[Any] = []  # positional; empty is legal
+    args: list[Any] = Field(default_factory=list[Any])  # positional; empty is legal
     expected: Any  # required: `None` is a value a solution may return, so absence cannot stand in
     expected_from: ExpectedSource  # required; `mint.case` carries the rule
     # `0` is the set written with the statement; absent is a case no round won

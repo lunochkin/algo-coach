@@ -3,6 +3,7 @@ import argparse
 import pytest
 
 from algo_coach.calls import OpenRouter, Retry
+from algo_coach.cli import transport as module
 from algo_coach.cli.transport import transport, warn
 
 
@@ -40,8 +41,6 @@ def test_a_wait_is_written_as_one_line(capsys):
         def write(self, text: str) -> int:
             written.append(text)
             return len(text)
-
-    import algo_coach.cli.transport as module
 
     original, module.sys.stderr = module.sys.stderr, Stream()
     try:

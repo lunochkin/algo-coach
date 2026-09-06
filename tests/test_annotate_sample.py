@@ -1,7 +1,7 @@
 from matching import canonicals, card, problem, seeded, stored, template
 
 from algo_coach.matches import annotatable
-from algo_coach.mint import user_match
+from algo_coach.mint import machine_match, user_match
 from algo_coach.schema import MachineProvenance
 
 
@@ -140,8 +140,6 @@ def test_another_seed_gives_another_order(tmp_path):
 def test_a_machine_match_does_not_settle_a_question(tmp_path):
     """The hand annotation is what a reading is scored against, so a reading
     never takes its own question out of the pool."""
-    from algo_coach.mint import machine_match
-
     cards, problems, solutions = corpus(tmp_path)
     id = slugs(cards)
     read = [

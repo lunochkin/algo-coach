@@ -2,11 +2,11 @@
 form's code. It only collects; what lands is the caller's."""
 
 from collections.abc import Mapping, Sequence
-from typing import Protocol
+from typing import ClassVar, Protocol
 
 from rich.syntax import Syntax
 from textual.app import App, ComposeResult
-from textual.binding import Binding
+from textual.binding import Binding, BindingType
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.widgets import Footer, Markdown, Static
 
@@ -52,7 +52,7 @@ class Annotating(App[None]):
     #code { padding: 0 1; }
     """
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[BindingType]] = [
         Binding("space", "pick", "pick/unpick"),
         Binding("enter", "record", "record"),
         Binding("s", "skip", "skip"),

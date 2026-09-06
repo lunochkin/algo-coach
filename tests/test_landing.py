@@ -128,7 +128,7 @@ def test_the_problem_is_written_last(tmp_path, template, monkeypatch):
         corpus.problems, "put", lambda _problem: (_ for _ in ()).throw(OSError("disk"))
     )
 
-    with pytest.raises(OSError):
+    with pytest.raises(OSError, match="disk"):
         land(corpus, template, drafted())
 
     assert corpus.problems.all() == []

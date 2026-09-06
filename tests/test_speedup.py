@@ -129,12 +129,12 @@ def test_a_clock_beyond_the_measuring_cap_carries_no_time():
 def test_the_measuring_cap_sits_above_the_cap_being_separated():
     """Measured at the cap itself, every separating run is a timeout and no
     time is read from it."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="measuring cap"):
         searched(measure_ms=CAP_MS)
 
 
 def test_the_search_starts_within_the_constraints():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="smallest size"):
         searched(smallest=20, largest=16)
 
 

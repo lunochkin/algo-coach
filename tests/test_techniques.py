@@ -59,12 +59,12 @@ def test_a_criterion_needs_all_three():
             "near_miss": "n",
         }
         del entry[missing]
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=missing):
             Technique.model_validate(entry)
 
 
 def test_a_criterion_is_one_of_four_kinds():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="kind"):
         Technique.model_validate(
             {"code": "example", "kind": "heuristic", "earns": "e", "near_miss": "n"}
         )

@@ -188,12 +188,12 @@ def barred(hardened: Hardened) -> Bar:
 
 
 __all__ = [
-    "GateVerdict",
-    "LoopVerdict",
-    "SearchVerdict",
     "Bar",
     "Clock",
+    "GateVerdict",
     "Inputs",
+    "LoopVerdict",
+    "SearchVerdict",
     "barred",
     "blind_verdicts",
     "gated",

@@ -18,7 +18,9 @@ class Selector(BaseModel):
     a new filter is an additive optional field."""
 
     technique: str
-    difficulty: list[ProblemDifficulty] = []  # empty is the whole range
+    difficulty: list[ProblemDifficulty] = Field(
+        default_factory=list[ProblemDifficulty]
+    )  # empty is the whole range
     size: int = Field(ge=1)
 
 

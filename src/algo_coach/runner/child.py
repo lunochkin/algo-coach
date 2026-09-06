@@ -31,7 +31,7 @@ def execute(code: str, args: list[Any], cap_ms: int) -> dict[str, Any]:
     # top level are the parent timer's to catch
     namespace: dict[str, Any] = {"__name__": "__solution__"}
     try:
-        exec(compile(code, "<solution>", "exec"), namespace)  # noqa: S102 - the subject
+        exec(compile(code, "<solution>", "exec"), namespace)
         solve = namespace["solve"]
     except BaseException:
         return {"outcome": CRASHED, "value": None, "elapsed_ms": None}

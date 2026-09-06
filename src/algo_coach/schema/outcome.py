@@ -66,7 +66,7 @@ class SiteOutcome(MachineProvenance):
     killed: int = 0
     # what each round killed, in order, summing to `killed`. A list rather than
     # a field per round, since `ROUNDS` is what a corpus revises
-    rounds: list[int] = []
+    rounds: list[int] = Field(default_factory=list[int])
     # proposals the rounds put to the set, landed or not. `offered` less `won`
     # is what killed nothing, which is what a round wasted its call on
     offered: int = 0

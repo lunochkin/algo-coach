@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from algo_coach.schema.provenance import MachineProvenance
 from algo_coach.schema.record import AttemptRecord
@@ -47,10 +47,12 @@ class Confidence(StrEnum):
 class TechniqueClaim(AttemptRecord, MachineProvenance):
     """Which techniques an attempt used, as one writer claimed them."""
 
-    techniques: list[str] = []  # empty is a verdict, and is stored
+    techniques: list[str] = Field(default_factory=list[str])  # empty is a verdict, and is stored
     declined: bool = False  # the user's, stated rather than inferred from an empty set
     source: ClaimSource  # required: a mislabelled claim cannot be corrected later
-    informed_by: list[str] = []  # calls its author saw, not provenance
+    informed_by: list[str] = Field(
+        default_factory=list[str]
+    )  # calls its author saw, not provenance
     confidence: Confidence | None = None  # absent on claims written before it was asked for
 
     @model_validator(mode="after")
