@@ -179,25 +179,23 @@ def classify_backlog(
     )
     for index, attempt, answer, failure in answers:
         problem = problems[attempt.problem_id]
-        techniques, call = answer if answer is not None else ([], None)
         if failure is not None:
             # Broad on purpose: a refusal or a dropped connection is one
             # attempt's problem, and the run must not lose the ones behind it.
             result.failed.append(Failed(attempt_id=attempt.id, reason=repr(failure)))
             report(index, attempt, problem.title, reason=repr(failure))
             continue
+        techniques, call = answer if answer is not None else ([], None)
+        # Stored whether or not it named anything: an undecided verdict is a
+        # reading, and that answer holds while the question does not change.
+        if call is not None:
+            store(log, attempt.id, techniques, call)
         # Answered, so the classifier is reachable: an undecided verdict is a
         # reading, not a failure.
         if not techniques:
-            # Stored rather than dropped: the candidates did not cover the
-            # code, and that answer holds while the question does not change.
-            if call is not None:
-                store(log, attempt.id, techniques, call)
             result.undecided += 1
             report(index, attempt, problem.title)
             continue
-        if call is not None:
-            store(log, attempt.id, techniques, call)
         if attempt.id in superseding:
             result.redone += 1
         else:

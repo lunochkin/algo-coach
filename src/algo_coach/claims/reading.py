@@ -74,7 +74,6 @@ def select(
             continue
         if not reading.techniques:
             # A stored decline is a verdict, not a missing answer.
-            plan.result.verdicts[attempt.id] = []
             plan.result.undecided += 1
         plan.result.verdicts[attempt.id] = reading.techniques
         plan.result.reused += 1
@@ -122,7 +121,6 @@ def absorb(
         if call.cost is not None:
             plan.result.cost += call.cost
             plan.result.costed += 1
-    if call is not None:
         # Stored whether or not it named anything, so no later run at this
         # configuration pays for the question again.
         store(log, attempt.id, techniques, call)

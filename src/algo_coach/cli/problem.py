@@ -76,7 +76,7 @@ def page(one: Problem, corpus: Corpus, root: Path) -> str:
             "",
             *cases(corpus.cases.for_problem(one.id)),
             *code(solutions),
-            *pairs(matches, solutions, forms),
+            *pairs(matches, forms),
             *sites(OutcomeLog(root).for_problem(one.id), none="none recorded"),
         ]
     )
@@ -109,9 +109,7 @@ def keyed(match: TemplateMatch, solutions: list[Solution]) -> bool:
     return any(match.solution_id == one.id for one in solutions)
 
 
-def pairs(
-    matches: list[TemplateMatch], solutions: list[Solution], forms: dict[str, str]
-) -> list[str]:
+def pairs(matches: list[TemplateMatch], forms: dict[str, str]) -> list[str]:
     """Which of a card's templates each solution displays. A form is displayed
     by code, so the pair names the solution rather than the problem."""
     if not matches:

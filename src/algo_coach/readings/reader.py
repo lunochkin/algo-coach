@@ -52,8 +52,8 @@ def read(
 ) -> list[str]:
     """Read one solution and store the verdict, returning what was named."""
     techniques, call = read_one(transport, calls, solution, configuration=configuration)
-    # No call means fewer than two candidates were offered, which the whole
-    # vocabulary never is; a reading with no configuration cannot be stored.
-    if call is not None:
-        store(log, solution.id, techniques, call)
+    # the whole vocabulary is never fewer than two candidates, so the call was
+    # made; a reading with no configuration could not be stored
+    assert call is not None
+    store(log, solution.id, techniques, call)
     return techniques

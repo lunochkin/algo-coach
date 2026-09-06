@@ -180,7 +180,7 @@ def write_problems(
     answers = Bounded(as_answered(ask, writings, concurrency=1))
     # the tail this problem appends, which is what its row is priced over
     paid = len(calls.appended)
-    for index, (_, writing), passage, failure in answers:
+    for index, (_, writing), p, failure in answers:
         records = writing.into or []
         if failure is not None:
             # broad on purpose: a refusal, a rate limit or a reply that does
@@ -207,10 +207,9 @@ def write_problems(
             paid = len(calls.appended)
             continue
 
-        assert passage is not None  # `as_answered` yields an answer or a failure
-        written.append(passage.draft.statement)
-        finished(result, corpus, passage, index=index, records=records, outcomes=outcomes)
-        p = passage
+        assert p is not None  # `as_answered` yields an answer or a failure
+        written.append(p.draft.statement)
+        finished(result, corpus, p, index=index, records=records, outcomes=outcomes)
         if on_progress is not None:
             on_progress(
                 Progress(

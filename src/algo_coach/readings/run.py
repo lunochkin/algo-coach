@@ -103,11 +103,9 @@ def read_corpus(
             report(index, solution, reason=repr(failure))
             continue
         techniques, call = answer if answer is not None else ([], None)
-        if call is None:
-            # Fewer than two candidates were offered, which the whole
-            # vocabulary never is; a reading with no configuration is
-            # unstorable.
-            continue
+        # the whole vocabulary is never fewer than two candidates, so the call
+        # was made; a reading with no configuration would be unstorable
+        assert call is not None
         store(log, solution.id, techniques, call)
         if techniques:
             result.read += 1

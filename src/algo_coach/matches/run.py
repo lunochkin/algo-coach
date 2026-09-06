@@ -159,9 +159,8 @@ def match_corpus(
             report(index, question, reason=repr(failure))
             continue
         matched, call = answer if answer is not None else ([], None)
-        if call is None:
-            # Nothing was asked, so nothing is recorded.
-            continue
+        # `questions` dropped every card with no candidate, so the call was made
+        assert call is not None
         result.asked += 1
         positive = store(log, question, matched, call)
         result.matched += positive
