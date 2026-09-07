@@ -19,7 +19,7 @@ architecture, and `README.md` is the map.
   corpus written from templates alone can never exercise them.
 - **The template it was written for is stored, where there was one.**
   `generated_for` records what the generator was told rather than what a
-  reader inferred, and it makes the
+  model inferred, and it makes the
   first template match provenance. It never claims the problem exercises
   nothing else. A problem written for a technique target carries no
   `generated_for`: the generator was told no form, so no pair can be asserted.
@@ -28,12 +28,14 @@ architecture, and `README.md` is the map.
   rather than a solution.
 - **Provenance is required.** A problem names what produced it, as any machine
   record does.
-- **A problem's techniques are derived from readings of its canonical
+- **A problem's techniques are derived from technique readings of its
+  canonical
   solutions**, and are a view rather than stored truth: adding a canonical can
   widen the set, and re-deriving is legal and expected. The reference is
   excluded from those readings. Otherwise the naive approach a form replaces
   would be credited as an approach the problem takes. A canonical that sorts
-  before it searches used two techniques, and only a reading names the second.
+  before it searches used two techniques, and only a technique reading names
+  the second.
 - **Never derived from templates.** A template is defined by whether its form
   can be reproduced from memory. That definition says nothing about what the
   template classifies. A paradigm and a
@@ -381,27 +383,28 @@ A solution the engine wrote for a problem, in one of three roles.
 A technique reading names which techniques a solution used. It is
 product-owned and global, as the solution is.
 
-- **A reading is its own record, not a technique claim.** A claim is testimony
-  about the user's own attempt, and is private. A reading is a verdict about
-  code the engine wrote, and ships with the corpus. One record type for both
-  would also make the fallback a fold over records of the type it falls back
-  for.
+- **A technique reading is its own record, not a technique claim.** A claim is
+  testimony about the user's own attempt, and is private. A technique reading is
+  a verdict about code the engine wrote, and ships with the corpus. One record
+  type for both would also make the fallback a fold over records of the type it
+  falls back for.
 - **The candidates are the whole vocabulary**, where an attempt is classified
   against the problem's own techniques. A problem's techniques are derived
-  from these readings, so constraining a reading by them is circular.
-- **One reader writes two records.** The prompt, the transport and the
+  from these readings, so constraining a technique reading by them is circular.
+- **One classifier writes two records.** The prompt, the transport and the
   staleness rule are shared with the attempt classifier. Two prompts asking
   one question would drift, and neither score would compare with the other.
-- **A reading is a machine record like any other**: provenance whole,
+- **A technique reading is a machine record like any other**: provenance whole,
   staleness keyed on the prompt hash of what was sent, and re-derivable at any
-  time. A claim carries one problem's criteria, and a reading carries the
+  time. A claim carries one problem's criteria, and a technique reading carries
+  the
   whole vocabulary's, so any criteria edit re-reads every canonical.
 - **Two writers, and the user's stands first**, as a claim resolves. A hand
   reading adjudicates rather than testifies: nobody sat for a canonical, so
   the user's reading is of code they did not produce. The hand reading stands
   all the same, and it is the reference a configuration is scored against.
-- **A problem's techniques are folded from its readings.** The union over the
-  standing readings of its canonicals, with the reference excluded.
+- **A problem's techniques are folded from its technique readings.** The union
+  over the standing readings of its canonicals, with the reference excluded.
 
 ## Verification runs
 
@@ -411,7 +414,8 @@ A verification run is one execution of a solution against a problem's cases.
   run.** The cap and the machine decide a timeout, and a crash can come from
   the runner rather than the solution. A result stored on the solution would
   claim a permanence it does not have.
-- **Re-running is legal and expected**, as re-deriving a reading is. Two runs
+- **Re-running is legal and expected**, as re-deriving a technique reading is.
+  Two runs
   of one solution are two records, and neither run supersedes the other.
 - **The cap is stored beside the results.** The cap decided any timeout, and
   two runs under different caps are not comparable. No other field would show

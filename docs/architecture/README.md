@@ -49,7 +49,8 @@ without redefining them. Grouped by the file that specifies the record.
   Written by the generator, the matcher or by hand.
 - **Matcher**: the model call reading a canonical beside its statement and
   naming the templates it displays.
-- **Hand record**: a claim, match or reading written by the user rather than a
+- **Hand record**: a claim, match or technique reading written by the user
+  rather than a
   model. Its `source` says so. It stands over every machine record on the same
   question.
 
@@ -150,7 +151,8 @@ without redefining them. Grouped by the file that specifies the record.
 
 ### Machine records
 
-- **Machine record**: any record a model wrote: a claim, a match, a reading,
+- **Machine record**: any record a model wrote: a claim, a match, a technique
+  reading,
   a solution, a case's arguments. It carries provenance whole.
 - **Configuration**: model, effort, endpoint pin and temperature.
 - **Provenance**: the configuration, the prompt hash of what was sent and the
@@ -199,7 +201,7 @@ without redefining them. Grouped by the file that specifies the record.
 - **Eval set**: the hand-claimed attempts a classifier configuration is
   scored against.
 - **Adjudication**: resolving each divergence between the user's blind claims
-  and a frontier model's readings, by editing the criterion or the claim.
+  and a frontier model's claims, by editing the criterion or the claim.
 
 ## Where the rest lives
 

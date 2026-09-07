@@ -44,13 +44,15 @@ The vocabulary the append-only log references.
   the practice behind them did not.
 - **The criteria are the prompt.** They reach the classifier beside the
   candidates and the reader beside the code, so one rulebook answers both.
-  Editing an entry changes readings, but only for the attempts carrying that
+  Editing an entry changes machine claims, but only for the attempts carrying
+  that
   candidate.
 - **A code is never deleted**, because records carrying it outlive it.
   Retirement means an entry in an alias map, applied when grouping.
 - **The vocabulary is read-only once loaded.** Its entries reach a prompt and
   a reader unchanged. An entry edited in memory would be a criterion the file
-  does not carry, and nothing could re-derive the readings that entry produced.
+  does not carry, and nothing could re-derive the machine claims that entry
+  produced.
 - **Membership is checked on the write path only.** A model that validated
   codes on read would make the log unreadable by its own schema the moment a
   code was retired.
@@ -127,7 +129,8 @@ engine's own work: an author names no solution, so nothing is authored here
 either.
 
 - **The canonical a problem was generated with asserts its own match.** Its
-  target was that template, so the pair is provenance rather than a reading,
+  target was that template, so the pair is provenance rather than an
+  inference,
   and the record names `generator` as its source. No call is paid to learn
   what the generator was told to write.
 - **No other canonical asserts anything.** The rest are enumerated from the
@@ -135,7 +138,8 @@ either.
   display is the matcher's answer, and one generator's match per problem is
   the most there can be.
 - **A generator's match carries no configuration**, as a hand match
-  carries none. The all-or-none rule is about readings, which are re-derivable
+  carries none. The all-or-none rule is about machine matches, which are
+  re-derivable
   and so must say by what. Re-deriving this pair would mean writing the
   solution again, and the solution already names the call that wrote it.
 - **It is only ever positive.** The generator asserts the form its target
@@ -171,7 +175,7 @@ either.
   the cards whose technique its problem carries, which bounds the pairs a call
   asks about and keeps a per-pair negative finite. The scoping survived the
   subject moving, because a solution answers exactly one problem.
-- **The record a classifier reading stores is deferred** where that scoping
+- **The matcher's record is deferred** where that scoping
   does not reach: a solution displaying a form outside its problem's carded
   techniques is a pair nothing offers. Whether the record then becomes one
   naming the templates it found is the open question. Either shape must give
@@ -194,7 +198,7 @@ either.
 - **A hand record settles what stands, not what has been read.** The run path
   skips a solution only where the hand pass settled every pair the call would
   have asked about. So the record a skip needs follows the deferred shape. The
-  eval reads pairs matched by hand on purpose, because that reading is the
+  eval reads pairs matched by hand on purpose, because reading them is the
   measurement.
 - **Agreement is per pair, grouped per template.** A call carrying six pairs
   saves requests, and is not a unit of truth. Grouping follows the ladder: a
@@ -211,11 +215,11 @@ either.
   asserts that each candidate it was given does not match. A claim naming
   nothing answers nothing, and the difference is in the record shape rather
   than in the model's behaviour. The stored form of an empty answer follows
-  the deferred shape, and either way it is a reading rather than a refusal to
+  the deferred shape, and either way it is a verdict rather than a refusal to
   read.
 - **A hand match records the verdicts its author saw**, as a claim does. It is
   written on every pair the answer settles, negatives included, because the
-  pairs the reader saw are a fact about the sitting rather than about the
+  pairs the user saw are a fact about the sitting rather than about the
   verdict.
 - **The first hand pass calibrates, a blind one measures.** Matching by hand
   draws the line between displaying a form and merely admitting it. A score

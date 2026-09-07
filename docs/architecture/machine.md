@@ -28,23 +28,24 @@ fields to stay comparable, and those fields are stated here once.
   reference names the call written blind, and a case won by a round names the
   call that proposed it. No record reads a run-wide configuration, so there is
   none to be wrong.
-- **A pin is part of the reading, not a note about routing.** A model id
+- **A pin is part of the record, not a note about routing.** A model id
   resolves to as many builds as there are endpoints serving it, and
   quantization changes the weights. Unpinned, the router chooses per request,
   so the records under one key are a mixture no later run can separate.
 - **Who served a call is recorded and never compared.** The router reports a
   company rather than an endpoint, and one company serves several builds. The
   company name confirms that a pin held, without identifying the build. The
-  name is also not known until the response arrives, so a reader deciding what
+  name is also not known until the response arrives, so a run deciding what
   it has already read cannot key on it.
-- **A reading is greedy, and says so.** Sampling turns a verdict the model holds
-  at 0.9 into one it gives four times in five. An eval absorbs that variance by
-  being repeated. A sweep cannot be repeated: it writes into an append-only log
-  the board reads forever. Temperature identifies a record for the same reason
-  the pin does: the pin says which weights answered, and the temperature says
-  how they were sampled. A temperature nobody set is the provider's own default.
-  It is recorded absent, and equal only to itself, which keeps records taken
-  before the parameter existed scorable rather than discarded.
+- **A machine record is greedy, and says so.** Sampling turns a verdict the
+  model holds at 0.9 into one it gives four times in five. An eval absorbs that
+  variance by being repeated. A sweep cannot be repeated: it writes into an
+  append-only log the board reads forever. Temperature identifies a record for
+  the same reason the pin does: the pin says which weights answered, and the
+  temperature says how they were sampled. A temperature nobody set is the
+  provider's own default. It is recorded absent, and equal only to itself, which
+  keeps records taken before the parameter existed scorable rather than
+  discarded.
 
 - **The generator and the naive site are sampled**, for the reason `corpus.md`
   gives: each produces an artifact rather than a verdict about one. The
@@ -59,11 +60,12 @@ fields to stay comparable, and those fields are stated here once.
   greedy. Some endpoints serving a model at an effort advertise no temperature
   and others carry both, so pinning a site to `0` costs the effort in one place
   and nothing in another.
-- **A reading's price is recorded and never compared.** A price says when a
-  reading was taken rather than which reader took it, so two readings compare
+- **A machine record's price is recorded and never compared.** A price says
+  when a record was written rather than which model wrote it, so two records
+  compare
   whether or not each carries a price. The price sits outside the all-or-none
-  rule, as the temperature does: a reading stored before the field existed
-  carries none, and so does a reading a provider priced at nothing.
+  rule, as the temperature does: a record stored before the field existed
+  carries none, and so does a record a provider priced at nothing.
 - **Staleness keys on the prompt hash of what was sent**, never on a version
   over the rulebook. A criterion travels with its candidate, so editing one
   entry re-derives what that entry reached and leaves the rest. An author can
@@ -82,8 +84,8 @@ fields to stay comparable, and those fields are stated here once.
   printed rather than assumed. Scoring over the intersection alone charges
   every column for the records one column failed on. A share prints as
   `92/98`, so two columns over different samples cannot be read as one rate.
-  The reader still supplies the judgement that the harder sample reads as the
-  worse reader.
+  Whoever reads the table still supplies the judgement that the harder sample
+  reads as the worse model.
 
 ## Site outcomes
 
@@ -203,9 +205,9 @@ holds nothing about what the answer was for.
 - **Every request names one endpoint.** A provider that cannot honour the
   response schema is never chosen, and a request fails rather than falling back
   to a backend the record would not name.
-- **The reasoning field holds what the reading produced, not what was asked
+- **The reasoning field holds what the call produced, not what was asked
   for.** A model that decides a question needs no thought returns none, and the
-  empty field is a fact about the reading rather than a gap in the record.
+  empty field is a fact about the call rather than a gap in the record.
 - **A call is timed at two levels**: what the caller waited and how many
   requests that took, beside what the last request took alone. The difference
   between the two is the endpoint's backoff, and without it a run held behind a

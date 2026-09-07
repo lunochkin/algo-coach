@@ -376,7 +376,8 @@ other way to solve it is found afterwards, over the stored problem.
   independent reading. The enumerated canonical cannot discard a problem, and
   its failure says nothing about the statement.
 - **Execution cannot catch duplicates.** Top-down and bottom-up dynamic
-  programming pass the same cases, and only a reading separates them. The
+  programming pass the same cases, and only a template match separates them.
+  The
   handling of two canonicals of one form is deferred until a corpus shows how
   often it happens.
 
@@ -460,15 +461,15 @@ are answered by using the loop.
 
 ## Adjudicating the eval set
 
-The reference the classifier is scored against. One reader's blind claims cap
-at that reader's own consistency. The reference is therefore a set two readers
+The reference the classifier is scored against. One writer's blind claims cap
+at that writer's own consistency. The reference is therefore a set two writers
 reached: the user's blind pass, a frontier model reading the same attempts, and
 every divergence resolved by hand.
 
 1. The blind hand claims stand as pass one. No claim is added to them while a
-   reading is in view.
+   machine claim is in view.
 2. The frontier model reads those same attempts as a scored configuration. Its
-   claims are readings, stored and never standing.
+   claims are machine claims, stored and never standing.
 3. Each divergence is reviewed alone and resolved one of two ways: the
    criterion is edited, or the user's claim is.
 4. A criteria edit changes the prompt hash of the attempts it reaches, and the
@@ -486,12 +487,13 @@ every divergence resolved by hand.
   hand rather than taken.
 - **The blind pass keeps the reference independent.** Reviewing a proposed
   label is easier and more permissive than producing one. A claim made with a
-  reading in view therefore records what it saw, and never stands in for pass
+  machine claim in view therefore records what it saw, and never stands in for
+  pass
   one.
 - **Which way the divergences went is the check on the process.** Mostly claim
-  edits means the eval set is becoming a copy of one model's readings. A real
+  edits means the eval set is becoming a copy of one model's claims. A real
   share of criteria edits means the criteria are being corrected instead.
 - **The set cannot show a classifier that is right where the frontier was
-  wrong.** Such a case is recorded as an error, and the attempts both readers
+  wrong.** Such a case is recorded as an error, and the attempts both writers
   got wrong the same way are never detected. That is the cost of a fixed
   reference, and it is accepted.

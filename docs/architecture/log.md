@@ -44,7 +44,7 @@ attempt.
   and keywords is weakest exactly where the claim is worth making.
 - **Showing the classifier anything besides the code is deferred.** The code
   is the subject and stays. A measured comparison decides whether the problem's
-  canonicals or the candidates' templates improve a reading.
+  canonicals or the candidates' templates improve a machine claim.
 - **A richer prompt can change the question rather than the answer.** Shown a
   problem's canonicals, a classifier can report which canonical the attempt
   resembles instead of which techniques its code used. Those are two different
@@ -70,13 +70,14 @@ attempt.
   true.
 - **The hand claims are an eval set and a correction path**, never training
   data. The engine trains nothing.
-- **A label is invalidated by which reader informed it, not by the fact that a
-  reader did.** A claim made with the scored configuration's reading in view
+- **A label is invalidated by which classifier informed it, not by the fact
+  that one did.** A claim made with the scored configuration's claim in view
   measures that configuration against itself. A claim adjudicated against a
-  reader that is never scored measures no configuration against itself. That
-  adjudication draws the boundary. So `informed_by` names the readings its
+  classifier that is never scored measures no configuration against itself. That
+  adjudication draws the boundary. So `informed_by` names the machine claims its
   author saw, one by one, and a set of claims can be read back for either
-  question: which claims a scored reader informed, and which claims any reader
+  question: which claims a scored classifier informed, and which claims any
+  classifier
   informed.
 - **The eval set holds one attempt per problem**, the latest attempt carrying
   code, since a retry asks the identical question and a repeat would measure
@@ -85,16 +86,17 @@ attempt.
 - **One claim per attempt names every technique the attempt used**, since a
   solution can use several. A later claim replaces the whole set rather than
   rewriting the earlier one.
-- **A verdict naming no candidate is a reading, and is stored.** The verdict is
-  evidence about the code rather than an absence of it, and an unstored verdict
-  would be re-read by every later run. A reply cut short by the token cap also
-  names nothing and is stored for the same reason, but that reply is a fact
-  about the configuration instead. The call's `stop_reason` separates a decline
-  from a cut-short reply, and the report counts them apart.
+- **A verdict naming no candidate is a machine claim, and is stored.** The
+  verdict is evidence about the code rather than an absence of it, and an
+  unstored verdict would be re-read by every later run. A reply cut short by the
+  token cap also names nothing and is stored for the same reason, but that reply
+  is a fact about the configuration instead. The call's `stop_reason` separates
+  a decline from a cut-short reply, and the report counts them apart.
 - **An empty claim answers nothing, so the fallback stands.** The resolver
   reads a claim's *techniques* rather than its existence, so the problem's own
-  techniques keep answering an attempt whose reading declined. A later decline
-  supersedes an earlier claim as any reading does.
+  techniques keep answering an attempt whose machine claim declined. A later
+  decline
+  supersedes an earlier claim as any machine claim does.
 - **A decline is scored all the same.** A decline asserts that none of these
   candidates apply, so a hand claim naming one is a miss against every
   technique the user named. Unscored, declining would pay: each decline would
@@ -107,16 +109,18 @@ attempt.
   needs no flag: the classifier answers or fails, and a failure writes no
   claim. The eval set holds a correct decline, or the attempt could only leave
   the set by deletion.
-- **A machine claim on a hand-claimed attempt is a reading, not a candidate.**
+- **A machine claim on a hand-claimed attempt is scored, never a candidate.**
   Such a claim never stands and never reaches the board. It exists to be
-  scored. Storing the reading makes an eval a dataset rather than a run, and a
+  scored. Storing the machine claim makes an eval a dataset rather than a run,
+  and a
   second configuration is then paid for only where it has not read. The
   classifier still skips such attempts, but only to save a call whose verdict
   could never stand.
 - **One record for both writers, not two.** Splitting would mirror `SelfLabel`
   and `Diagnosis`, but claims already written stay in the log forever, so a
   reader carries the old shape regardless. A third record written only by the
-  eval is worse: the same verdict would be a claim or a reading depending on
+  eval is worse: the same verdict would land in one record or the other
+  depending on
   what else was claimed.
 - **Every claim records its source.** A user's claim carries no provenance,
   because nothing re-derives a user's claim. A machine claim carries all of its
@@ -152,7 +156,7 @@ re-diagnosed and compared.
 
 - **A diagnosis is the machine counterpart of a self-label, never its
   replacement.** A diagnosis and a self-label never supersede each other, and
-  agreement between them is the eval. A later diagnosis is a second reading
+  agreement between them is the eval. A later diagnosis is a second verdict
   rather than a correction.
 
 ## What every record keyed to an attempt carries
