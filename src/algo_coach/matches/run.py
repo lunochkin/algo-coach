@@ -68,7 +68,7 @@ def store(log: MatchLog, question: Question, matched: Sequence[str], call: Call)
     """Append a verdict per template, returning how many were positive.
 
     Every candidate gets a record, not only the ones named: a negative is a
-    reading a later run must not pay for again.
+    match a later run must not pay for again.
     """
     named = set(matched)
     provenance = MachineProvenance.of(call)

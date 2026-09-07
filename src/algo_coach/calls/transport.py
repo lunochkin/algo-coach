@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 # Thinking and answer together: no model reached through this transport accepts
-# a separate reasoning budget. Sized against a runaway, not against a reading —
+# a separate reasoning budget. Sized against a runaway, not against a call —
 # one generation call spent 11,520 tokens reasoning and had 466 left for a
 # statement, which arrived cut in half and parsed as nothing.
 MAX_TOKENS = 32000

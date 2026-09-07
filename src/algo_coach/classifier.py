@@ -40,7 +40,7 @@ the syntax, and let each candidate's near miss say where that line falls.
 If the code used none of the candidates, name none of them."""
 
 
-# which classifier a reading came from. The prompt is not among them: staleness
+# which classifier a claim came from. The prompt is not among them: staleness
 # keys on the digest of what was sent
 DEFAULT = Configuration(model=MODEL, effort=EFFORT, pin=PIN, temperature=TEMPERATURE)
 

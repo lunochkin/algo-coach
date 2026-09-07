@@ -14,7 +14,7 @@ def moved(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     attempts = [attempt for attempt in log.attempts() if attempt.user_id == args.user]
     problems = {problem.id: problem for problem in load_problems(root)}
     # Standing classifier claims only: a hand claim narrows for its own
-    # reason, and a machine reading that never stands moved nothing.
+    # reason, and a machine claim that never stands moved nothing.
     claims = {
         attempt_id: claim
         for attempt_id, claim in standing_claims(log.claims()).items()

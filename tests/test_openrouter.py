@@ -98,7 +98,7 @@ def test_the_schema_is_sent_strict_or_it_guarantees_nothing():
 def test_the_route_is_pinned_rather_than_left_to_the_router():
     """A provider that cannot honour the schema must never be chosen, and a
     silent second backend would make one configuration key mean two
-    readings."""
+    machine records."""
     api = client()
 
     OpenRouter(api)(system="s", content="c", model="m", effort="low", pin="a-host", schema=SCHEMA)
@@ -124,7 +124,7 @@ def test_the_pin_names_the_only_backend_that_may_serve():
 
 def test_no_request_leaves_the_choice_to_the_router():
     """There is no unpinned path. A router picking per request answers one
-    configuration key from several builds, and the readings under it could
+    configuration key from several builds, and the records under it could
     never be taken apart afterwards."""
     api = client()
 
@@ -398,7 +398,7 @@ def test_the_temperature_is_sent_as_the_api_s_own_parameter():
 
 
 def test_no_temperature_sends_none_at_all():
-    """The provider's own default, which is what every stored reading was taken
+    """The provider's own default, which is what every stored record was written
     at — a configuration in its own right, and not one to be forged by sending
     a number that happens to match."""
     api = client()

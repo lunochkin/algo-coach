@@ -57,7 +57,7 @@ def test_a_reading_needs_no_decline():
 
 def test_a_machine_reading_carries_its_whole_configuration():
     """One whose configuration is partly known compares with nothing."""
-    with pytest.raises(ValidationError, match="machine reading needs"):
+    with pytest.raises(ValidationError, match="machine record needs"):
         make_reading(ReadingSource.CLASSIFIER)
 
     assert make_reading(ReadingSource.CLASSIFIER, **PROVENANCE_FIELDS).model == "a-model"
@@ -66,7 +66,7 @@ def test_a_machine_reading_carries_its_whole_configuration():
 def test_a_hand_reading_carries_none_of_it():
     """Nothing re-derives it, so any of it would name a configuration that
     never touched the record."""
-    with pytest.raises(ValidationError, match="hand reading carries no"):
+    with pytest.raises(ValidationError, match="hand record carries no"):
         make_reading(ReadingSource.USER, **PROVENANCE_FIELDS)
 
 

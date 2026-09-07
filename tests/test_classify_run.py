@@ -281,7 +281,7 @@ def store_claim(log, attempt_id, **configuration):
 
 
 def test_a_claim_answering_another_prompt_is_re_derived(backlog):
-    """The rulebook moved for this attempt, so the reading is worth paying for
+    """The rulebook moved for this attempt, so the machine claim is worth paying for
     again — and only for the attempts the edit reached."""
     store_claim(backlog, "a1", prompt_hash="ffffffffffff")
 
@@ -302,7 +302,7 @@ def test_a_claim_from_another_model_is_re_derived(backlog):
 
 
 def test_a_claim_from_another_effort_is_re_derived(backlog):
-    """How hard the model was asked to think decides the reading, so it is a
+    """How hard the model was asked to think decides the machine claim, so it is a
     configuration of its own rather than something folded into the version."""
     store_claim(backlog, "a1", effort="low")
 
@@ -365,7 +365,7 @@ def test_a_user_claim_is_never_stale(backlog):
 def test_a_reading_stored_under_a_hand_claim_is_never_re_derived(backlog):
     """The eval stores what it read on hand-claimed attempts. It holds at this
     configuration and at any other: the user's claim is what stands there, and
-    nothing re-derives it — so the reading under it is never asked again."""
+    nothing re-derives it — so the machine claim under it is never asked again."""
     backlog.append_claim(user_claim("a1", ["greedy"]))
     store_claim(backlog, "a1", prompt_hash="ffffffffffff")
     client = answering()
@@ -414,10 +414,10 @@ def test_unclaimed_attempts_are_claimed_before_stale_ones(tmp_path):
 
 
 def test_naming_no_candidate_supersedes_the_older_claim(backlog):
-    """Latest wins, as everywhere else in the log: a later reading saying the
+    """Latest wins, as everywhere else in the log: a later claim saying the
     candidates do not cover the code is evidence about the code, not an
     absence of it. The board falls back to the tags rather than to a claim
-    made against a rulebook this reading disagrees with."""
+    made against a rulebook this machine claim disagrees with."""
     store_claim(backlog, "a1", prompt_hash="ffffffffffff")
 
     result = run(answering(Verdict([])), backlog, redo=True)

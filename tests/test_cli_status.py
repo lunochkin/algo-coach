@@ -206,7 +206,7 @@ def test_a_run_that_will_call_nothing_draws_nothing():
 
 
 def test_a_row_that_asks_nothing_still_appears():
-    """A configuration whose readings are all reused makes no call. Without a
+    """A configuration whose machine claims are all reused makes no call. Without a
     row it would be missing from a comparison it is part of."""
     stream = Stream(terminal=True)
     board = Status(stream, [LOW, OTHER])

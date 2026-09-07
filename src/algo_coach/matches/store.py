@@ -5,7 +5,7 @@ from algo_coach.storage import JsonlLog
 
 
 class MatchLog(JsonlLog[TemplateMatch]):
-    """Template matches, one line per pair and reading."""
+    """Template matches, one line per pair and writer."""
 
     def __init__(self, root: Path) -> None:
         super().__init__(root, "template_matches.jsonl", TemplateMatch)

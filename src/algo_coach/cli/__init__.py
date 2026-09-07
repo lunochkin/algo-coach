@@ -154,7 +154,7 @@ def main() -> None:
         by_hand,
         _rows("named", "--model", opens_by_default=DEFAULT.model),
         "--model",
-        model="a classifier whose reading to show beside the claim; repeatable",
+        model="a classifier whose claim to show beside the user's; repeatable",
         provider="the endpoint the --model before it read from",
         temperature="what the --model before it sampled at; 'default' for the provider's own",
     )
@@ -279,7 +279,7 @@ def main() -> None:
     score_parser.add_argument(
         "--stored",
         action="store_true",
-        help="score only readings already stored, making no call",
+        help="score only claims already stored, making no call",
     )
     score_parser.add_argument(
         "--splits",

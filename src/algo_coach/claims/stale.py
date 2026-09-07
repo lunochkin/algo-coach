@@ -22,7 +22,7 @@ def at_configuration(claim: TechniqueClaim, configuration: Configuration, prompt
     )
 
 
-def readings_at(
+def machine_claims_at(
     claims: Iterable[TechniqueClaim],
     configuration: Configuration,
     hashes: Mapping[str, str],

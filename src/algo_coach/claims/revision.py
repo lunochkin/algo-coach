@@ -1,4 +1,4 @@
-"""The hand pass run again over what a reading disagrees with."""
+"""The hand pass run again over what a machine claim disagrees with."""
 
 from collections.abc import Iterable, Mapping, Sequence
 
@@ -20,22 +20,21 @@ def revisable(
     return [attempt for attempt in collapsed if answered_by_hand(claimed.get(attempt.id))]
 
 
-def against(claim: TechniqueClaim, readings: Sequence[Mapping[str, TechniqueClaim]]) -> int:
+def against(claim: TechniqueClaim, machine_claims: Sequence[Mapping[str, TechniqueClaim]]) -> int:
     """How many of these configurations read the attempt differently, by set
     equality. One that never read it is silent rather than dissenting."""
     wanted = set(claim.techniques)
     return sum(
         1
-        for stored in readings
-        if (reading := stored.get(claim.attempt_id)) is not None
-        and set(reading.techniques) != wanted
+        for stored in machine_claims
+        if (one := stored.get(claim.attempt_id)) is not None and set(one.techniques) != wanted
     )
 
 
 def contested(
     attempts: Sequence[Attempt],
     standing: Mapping[str, TechniqueClaim],
-    readings: Sequence[Mapping[str, TechniqueClaim]],
+    machine_claims: Sequence[Mapping[str, TechniqueClaim]],
     *,
     at_least: int = 1,
 ) -> list[Attempt]:
@@ -43,7 +42,7 @@ def contested(
     between a wrong claim and one wrong configuration. Stable, so ties keep the
     pool's order, which makes two runs of the same review comparable."""
     counted = [
-        (attempt, against(standing[attempt.id], readings))
+        (attempt, against(standing[attempt.id], machine_claims))
         for attempt in attempts
         if attempt.id in standing
     ]

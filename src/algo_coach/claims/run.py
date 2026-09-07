@@ -67,7 +67,7 @@ def store(
 ) -> None:
     """Append what a classifier read, on the calling thread.
 
-    Only ever after a call: a reading served from an earlier claim was already
+    Only ever after a call: an answer served from an earlier claim was already
     written by the run that paid for it, and appending it again would say the
     question was asked twice.
     """
@@ -187,11 +187,11 @@ def classify_backlog(
             continue
         techniques, call = answer if answer is not None else ([], None)
         # Stored whether or not it named anything: an undecided verdict is a
-        # reading, and that answer holds while the question does not change.
+        # verdict, and that answer holds while the question does not change.
         if call is not None:
             store(log, attempt.id, techniques, call)
         # Answered, so the classifier is reachable: an undecided verdict is a
-        # reading, not a failure.
+        # verdict, not a failure.
         if not techniques:
             result.undecided += 1
             report(index, attempt, problem.title)

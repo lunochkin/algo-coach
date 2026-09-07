@@ -21,7 +21,7 @@ def unsettled(
 ) -> list[Question]:
     """The questions a hand match would settle something about, in the order to
     ask them. `card` narrows the pool to one. A machine verdict does not take a
-    question out of it: a machine reading is what the hand match is scored
+    question out of it: a machine match is what the hand match is scored
     against."""
     asking = [
         question

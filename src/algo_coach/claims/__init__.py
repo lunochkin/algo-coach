@@ -17,7 +17,7 @@ from algo_coach.claims.score import (
     TechniqueScore,
     score,
 )
-from algo_coach.claims.stale import at_configuration, is_stale, readings_at
+from algo_coach.claims.stale import at_configuration, is_stale, machine_claims_at
 
 __all__ = [
     "Comparison",
@@ -32,7 +32,7 @@ __all__ = [
     "classify_backlog",
     "contested",
     "is_stale",
-    "readings_at",
+    "machine_claims_at",
     "resolve_techniques",
     "revisable",
     "score",

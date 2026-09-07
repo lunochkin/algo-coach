@@ -65,8 +65,8 @@ def test_a_user_claim_is_blind_by_default():
 
 
 def test_a_user_claim_records_what_its_author_had_seen():
-    """A revision is asked with the readings in view, and a claim that cannot
-    say so is scored against the reading that produced it."""
+    """A revision is asked with the machine claims in view, and a claim that cannot
+    say so is scored against the machine claim that produced it."""
     claim = user_claim("a1", ["greedy"], informed_by=["call-1"])
 
     assert claim.informed_by == ["call-1"]
@@ -172,7 +172,7 @@ def test_records_are_stamped_when_minted():
 
 
 def test_a_hand_match_carries_no_configuration():
-    """Nothing re-derives it, which is what makes it the reference a reading is
+    """Nothing re-derives it, which is what makes it the reference a machine match is
     scored against."""
     match = user_match("t1", "s1", matched=True)
 
@@ -290,7 +290,7 @@ def test_a_generated_problem_is_minted_an_id():
 
 
 def test_generation_records_what_it_sampled_at():
-    """Sampled rather than greedy, which a reading never is: variance is what
+    """Sampled rather than greedy, which an answering site never is: variance is what
     stops one model's habits becoming the whole corpus."""
     assert (
         generated(provenance=PROVENANCE.model_copy(update={"temperature": 1.0})).temperature == 1.0
@@ -324,7 +324,7 @@ def test_the_techniques_are_passed_rather_than_read_here():
 def test_a_generated_problem_asserts_the_template_it_was_written_for():
     """What the generator was told, not what a matcher inferred. That is what
     makes the first `TemplateMatch` on the pair provenance rather than a
-    reading, and it asserts nothing about the forms the problem also
+    inference, and it asserts nothing about the forms the problem also
     exercises."""
     assert generated(generated_for="t7").generated_for == "t7"
 

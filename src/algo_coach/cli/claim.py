@@ -8,7 +8,7 @@ from algo_coach.claims import (
     claim_by_hand,
     claimable,
     contested,
-    readings_at,
+    machine_claims_at,
     revisable,
     standing_claims,
 )
@@ -38,11 +38,11 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     standing = standing_claims(claims)
 
     if args.revise:
-        pool, readings, names = disputed(args, parser, claims, log, problems, standing)
+        pool, machine_claims, names = disputed(args, parser, claims, log, problems, standing)
     else:
         if args.named or args.disputed is not None:
             parser.exit(2, "claim: --model, --effort and --disputed need --revise\n")
-        pool, readings, names = (
+        pool, machine_claims, names = (
             claimable(
                 log.attempts(),
                 problems,
@@ -78,7 +78,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
         print(f"{verdict(attempt)}, {attempt.finished_at:%Y-%m-%d}")
         print(code_excerpt(attempt.code or "", args.lines))
         if args.revise:
-            print(read_as(attempt, standing[attempt.id], readings, names))
+            print(read_as(attempt, standing[attempt.id], machine_claims, names))
         # Printed per attempt: the candidates are this problem's techniques.
         print(f"  {numbered(problem.techniques)}")
 
@@ -110,7 +110,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             attempt.id,
             chosen,
             confidence=LEVELS[int(level.picked[0]) - 1] if level.picked else None,
-            informed_by=shown(attempt, readings),
+            informed_by=shown(attempt, machine_claims),
         )
         written += 1
         # After the append, since the techniques answer already landed.
@@ -143,42 +143,42 @@ def disputed(
         attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
         for attempt in pool
     }
-    readings: list[Mapping[str, TechniqueClaim]] = [
-        readings_at(claims, configuration, asked) for configuration in named
+    machine_claims: list[Mapping[str, TechniqueClaim]] = [
+        machine_claims_at(claims, configuration, asked) for configuration in named
     ]
     pool = contested(
         pool,
         standing,
-        readings,
+        machine_claims,
         at_least=args.disputed if args.disputed is not None else 0,
     )
-    return pool, readings, labels(named)
+    return pool, machine_claims, labels(named)
 
 
 # The calls whose verdicts `read_as` showed. The pool only promises that one
 # configuration disagreed, not that all answered.
-def shown(attempt: Attempt, readings: Sequence[Mapping[str, TechniqueClaim]]) -> list[str]:
+def shown(attempt: Attempt, machine_claims: Sequence[Mapping[str, TechniqueClaim]]) -> list[str]:
     return [
-        reading.call_id
-        for stored in readings
-        if (reading := stored.get(attempt.id)) is not None and reading.call_id is not None
+        one.call_id
+        for stored in machine_claims
+        if (one := stored.get(attempt.id)) is not None and one.call_id is not None
     ]
 
 
 def read_as(
     attempt: Attempt,
     claim: TechniqueClaim,
-    readings: Sequence[Mapping[str, TechniqueClaim]],
+    machine_claims: Sequence[Mapping[str, TechniqueClaim]],
     names: Sequence[str],
 ) -> str:
     """The standing claim and what each classifier read the same code as."""
     width = max(len(name) for name in ("you", *names)) + 1
     lines = [f"  {'you:'.ljust(width)} {' '.join(claim.techniques)}"]
-    for name, stored in zip(names, readings, strict=True):
-        reading = stored.get(attempt.id)
-        if reading is not None:
-            lines.append(f"  {(name + ':').ljust(width)} {' '.join(reading.techniques)}")
-    lines.append(f"  {against(claim, readings)} of {len(names)} disagree")
+    for name, stored in zip(names, machine_claims, strict=True):
+        one = stored.get(attempt.id)
+        if one is not None:
+            lines.append(f"  {(name + ':').ljust(width)} {' '.join(one.techniques)}")
+    lines.append(f"  {against(claim, machine_claims)} of {len(names)} disagree")
     return "\n".join(lines)
 
 

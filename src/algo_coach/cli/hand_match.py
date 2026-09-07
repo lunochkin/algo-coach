@@ -7,7 +7,7 @@ from pathlib import Path
 
 from algo_coach.cards import CardStore
 from algo_coach.cli.hand_matching import HandMatching
-from algo_coach.matches import MatchLog, Question, candidates, latest_readings, unsettled
+from algo_coach.matches import MatchLog, Question, candidates, latest_machine_matches, unsettled
 from algo_coach.matches import hand_match as recorded
 from algo_coach.readings import load_problems
 from algo_coach.schema import Template, TemplateMatch
@@ -50,7 +50,7 @@ def hand_matching(
         left = f"left to match by hand for {args.card}" if args.card else "left to match by hand"
         parser.exit(1, f"match: nothing {left}\n")
 
-    read = latest_readings(stored) if args.verdict else {}
+    read = latest_machine_matches(stored) if args.verdict else {}
     return HandMatching(pool[: args.count], read, Landing(log, read))
 
 

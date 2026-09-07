@@ -17,7 +17,7 @@ def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
     run_cli(monkeypatch, "score", "--user", "u1", *argv, client=client)
 
 
-def reading(attempt_id: str, techniques: list[str], *, model: str = MODEL):
+def stored_claim(attempt_id: str, techniques: list[str], *, model: str = MODEL):
     return classifier_claim(
         attempt_id,
         techniques,
@@ -71,7 +71,7 @@ def test_the_disagreements_are_printed_in_full(hand_claimed, monkeypatch, capsys
 
 
 def test_the_command_says_what_it_paid_for(hand_claimed, monkeypatch, capsys):
-    """A run is minutes of calls, and reuse is what the stored readings buy —
+    """A run is minutes of calls, and reuse is what the stored claims buy —
     so the cost is reported beside the share rather than inferred from it."""
     run(monkeypatch, FakeTransport.answering(Verdict(["greedy"])))
     capsys.readouterr()
@@ -226,14 +226,14 @@ def test_an_unsupported_effort_can_be_left_unset(hand_claimed, monkeypatch, caps
 
     (call,) = client.calls
     assert call["effort"] == UNSENT
-    (reading,) = [c for c in hand_claimed.claims() if c.source is ClaimSource.CLASSIFIER]
-    assert reading.effort == "default"
+    (claim,) = [c for c in hand_claimed.claims() if c.source is ClaimSource.CLASSIFIER]
+    assert claim.effort == "default"
 
 
 def test_a_stored_run_makes_no_call_and_needs_no_key(hand_claimed, monkeypatch, capsys):
     """What makes it the reproducible mode: it can be run anywhere, and
     twice."""
-    hand_claimed.append_claim(reading("a1", ["greedy"]))
+    hand_claimed.append_claim(stored_claim("a1", ["greedy"]))
     for name in TRANSPORT.CREDENTIALS:
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setattr("sys.argv", ["algo-coach", "score", "--user", "u1", "--stored"])
@@ -299,7 +299,7 @@ def test_a_provider_pins_the_model_before_it(hand_claimed, monkeypatch):
 def test_a_model_named_without_a_provider_is_refused(hand_claimed, monkeypatch, capsys):
     """Neither inherited nor left to the router. An endpoint carries some
     models and not others, so the built-in pin would route a model to a host
-    that never serves it; and unpinned, the readings under one key would be a
+    that never serves it; and unpinned, the claims under one key would be a
     mixture of builds that no later run could take apart."""
     with pytest.raises(SystemExit) as exit_info:
         run(monkeypatch, FakeTransport.answering(), "--model", "another/model")
@@ -494,7 +494,7 @@ def test_one_configuration_reports_the_columns_the_comparison_does(
 
 def test_a_cut_short_reply_is_its_own_column(hand_claimed, monkeypatch, capsys):
     """A considered decline and a runaway decoder both name nothing, and only
-    one of them is a reading. One column carrying both would have said they
+    one of them is a machine claim. One column carrying both would have said they
     were a single number in two flavours."""
     seed_problem(hand_claimed.root, id="second", techniques=["greedy", "sorting"])
     hand_claimed.append_attempt(attempt("a2", "second", finished_at=T0 + timedelta(days=1)))

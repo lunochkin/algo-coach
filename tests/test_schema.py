@@ -130,7 +130,7 @@ def test_classifier_claim_without_any_provenance_is_rejected():
 
 @pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_classifier_claim_needs_every_field_that_produced_it(missing):
-    """All of them or none. A reading whose configuration is partly unknown
+    """All of them or none. A machine record whose configuration is partly unknown
     cannot be compared with one whose configuration is known, and a reader
     would branch on the absence forever."""
     with pytest.raises(ValidationError, match=missing):
@@ -149,7 +149,7 @@ def test_user_claim_carries_no_provenance(field):
 
 
 def test_a_claim_is_blind_unless_it_says_otherwise():
-    """The absence of a reading is the ordinary case — the drill loop asks
+    """The absence of a machine claim is the ordinary case — the drill loop asks
     before any classifier has run — so an empty list is what a claim means
     when nothing recorded what its author saw."""
     assert make_claim(ClaimSource.USER).informed_by == []
@@ -164,7 +164,7 @@ def test_a_user_claim_records_the_readings_its_author_saw():
 
 
 def test_readings_are_named_one_by_one_rather_than_flagged():
-    """A claim made after seeing one configuration's reading is still
+    """A claim made after seeing one configuration's claim is still
     independent of another's, and configurations are scored against the same
     claims — so validity is per configuration, which a boolean cannot say."""
     claim = make_claim(ClaimSource.USER, informed_by=["call-1"])

@@ -32,7 +32,7 @@ def test_a_problem_without_any_provenance_is_rejected():
 
 @pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_a_problem_needs_every_field_that_produced_it(missing):
-    """All of them or none, as on a reading: a record whose configuration is
+    """All of them or none, as on a machine record: a record whose configuration is
     partly unknown compares with nothing."""
     kept = {field: value for field, value in GENERATED.items() if field != missing}
     with pytest.raises(ValidationError, match=missing):
@@ -47,7 +47,7 @@ def test_a_problem_has_no_hand_arm():
 
 
 def test_generation_is_sampled_and_says_so():
-    """The exception the provenance rule names. A reading is greedy so a
+    """The exception the provenance rule names. A machine record is greedy so a
     verdict is not resampled; generation wants the variance, or one model's
     habits become the whole corpus."""
     sampled = make_problem(temperature=1.0)
@@ -57,7 +57,7 @@ def test_generation_is_sampled_and_says_so():
 
 
 def test_who_served_a_problem_is_recorded():
-    """Recorded and never compared, as on a reading: the router names a
+    """Recorded and never compared, as on a machine record: the router names a
     company, and a company serves several builds of a model."""
     assert make_problem(provider="a-company").provider == "a-company"
 
@@ -71,7 +71,7 @@ def test_what_a_problem_cost_is_recorded_rather_than_required():
 
 
 def test_a_problem_names_the_template_it_was_written_for():
-    """An assertion rather than a reading: the generator was told the form,
+    """An assertion rather than an inference: the generator was told the form,
     where a matcher infers it. That is what makes the first `TemplateMatch` on
     the pair provenance."""
     assert make_problem(generated_for="t7").generated_for == "t7"

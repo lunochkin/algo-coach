@@ -256,7 +256,7 @@ def test_generation_is_sampled_at_the_provider_default(tmp_path):
 
 
 def test_the_configuration_is_what_goes_out(tmp_path):
-    """Its own, since generation asks for an artifact where a reading asks for
+    """Its own, since generation asks for an artifact where an answering site asks for
     a verdict."""
     model = FakeModel(draft())
 

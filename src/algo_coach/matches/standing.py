@@ -9,8 +9,8 @@ type Pair = tuple[str, str]
 BY_WHAT_EACH_KNEW = (MatchSource.CLASSIFIER, MatchSource.GENERATOR, MatchSource.USER)
 
 
-def latest_readings(matches: Iterable[TemplateMatch]) -> dict[Pair, TemplateMatch]:
-    """The latest machine reading per pair, from any configuration: what a
+def latest_machine_matches(matches: Iterable[TemplateMatch]) -> dict[Pair, TemplateMatch]:
+    """The latest machine match per pair, from any configuration: what a
     reader is shown, never what is scored or stands."""
     return latest_by(
         (match for match in matches if match.source is MatchSource.CLASSIFIER),

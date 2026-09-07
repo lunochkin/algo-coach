@@ -9,7 +9,7 @@ from algo_coach.schema.configuration import Configuration
 
 
 class MachineProvenance(BaseModel):
-    """The configuration a reading was taken at, and the call that took it.
+    """The configuration a machine record was written at, and the call that wrote it.
     Optional here and required by the record's own validator, since the
     hand-written counterpart carries none of it."""
 
@@ -67,11 +67,11 @@ class MachineProvenance(BaseModel):
         )
 
     def check_provenance(self, machine: bool) -> None:
-        """All of it on a machine reading, none of it on a hand one."""
+        """All of it on a machine record, none of it on a hand one."""
         named = [field for field in self.RECORDED if getattr(self, field) is not None]
         if machine:
             missing = [field for field in self.PROVENANCE if field not in named]
             if missing:
-                raise ValueError(f"a machine reading needs {', '.join(missing)}")
+                raise ValueError(f"a machine record needs {', '.join(missing)}")
         elif named:
-            raise ValueError(f"a hand reading carries no {', '.join(named)}")
+            raise ValueError(f"a hand record carries no {', '.join(named)}")

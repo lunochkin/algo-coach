@@ -1,11 +1,11 @@
 """Every configuration named over the eval set, in one run: what each read,
-what it reused, and how the readings compare."""
+what it reused, and how the configurations compare."""
 
 from collections.abc import Callable, Iterator, Mapping, Sequence
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.claims.attribution import standing_claims
-from algo_coach.claims.reading import Plan, absorb, select
+from algo_coach.claims.plan import Plan, absorb, select
 from algo_coach.claims.run import Progress, read_one
 from algo_coach.claims.sample import answered_by_hand, eligible, one_per_problem
 from algo_coach.claims.score import (
@@ -60,7 +60,7 @@ def score_backlog(
 ) -> Comparison:
     """What each classifier reads the hand-claimed attempts as, scored.
 
-    The eval set is decided here and the reading is not: one attempt per
+    The eval set is decided here and the run is not: one attempt per
     problem, and only those the user answered. `standing` and `claims` are read
     once though the run writes as it goes — what it writes is the classifier's,
     and a user's claim wins by source rather than by being the earlier record.
@@ -100,7 +100,7 @@ def score_backlog(
         plan, attempt = work
         if transport is None:
             # `--stored` plans nothing to ask, so this is never reached there
-            raise ValueError("a reading needs a transport")
+            raise ValueError("a classifier run needs a transport")
         return read_one(
             transport,
             calls,
@@ -130,11 +130,11 @@ def score_backlog(
                 ),
             )
 
-    readings = [plan.result for plan in plans]
+    results = [plan.result for plan in plans]
 
     common = (
-        set[str].intersection(*(set(reading.verdicts) for reading in readings))
-        if readings
+        set[str].intersection(*(set(result.verdicts) for result in results))
+        if results
         else set[str]()
     )
     # The whole eval set, not the intersection: `score` and `per_decision` both
@@ -157,17 +157,15 @@ def score_backlog(
     seen = {call.id: call for call in calls.all()}
 
     result = Comparison(eval_set=len(hand_claimed), common=len(common))
-    for configuration, reading in zip(configurations, readings, strict=True):
-        scored = score(truth, reading.verdicts)
-        scored.decisions, scored.decisions_agreed = per_decision(
-            truth, reading.verdicts, candidates
-        )
-        scored.failed = reading.failed
-        scored.read, scored.reused = reading.read, reading.reused
-        scored.cost, scored.costed = reading.cost, reading.costed
-        spent(scored, [seen[one] for one in reading.call_ids if one in seen])
-        scored.undecided = reading.undecided
-        scored.aborted = reading.aborted
+    for configuration, run in zip(configurations, results, strict=True):
+        scored = score(truth, run.verdicts)
+        scored.decisions, scored.decisions_agreed = per_decision(truth, run.verdicts, candidates)
+        scored.failed = run.failed
+        scored.read, scored.reused = run.read, run.reused
+        scored.cost, scored.costed = run.cost, run.costed
+        spent(scored, [seen[one] for one in run.call_ids if one in seen])
+        scored.undecided = run.undecided
+        scored.aborted = run.aborted
         result.scores.append(ConfigurationScore(configuration=configuration, score=scored))
 
     # In eval-set order, which is the order the disagreements print in, so the
@@ -175,7 +173,7 @@ def score_backlog(
     for attempt in hand_claimed:
         if attempt.id not in common:
             continue
-        verdicts = [sorted(set(reading.verdicts[attempt.id])) for reading in readings]
+        verdicts = [sorted(set(run.verdicts[attempt.id])) for run in results]
         if any(verdict != verdicts[0] for verdict in verdicts[1:]):
             result.splits.append(
                 Split(

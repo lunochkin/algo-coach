@@ -41,7 +41,7 @@ def test_a_canonical_names_what_produced_it():
 
 @pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_a_canonical_needs_every_field_that_produced_it(missing):
-    """All of them or none, as on any reading. Asserted against the model,
+    """All of them or none, as on any machine record. Asserted against the model,
     since the minter cannot be called without them at all."""
     kept = {field: value for field, value in PROVENANCE_FIELDS.items() if field != missing}
     with pytest.raises(ValidationError, match=missing):

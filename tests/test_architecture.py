@@ -242,7 +242,7 @@ APPEND_ONLY = (CaseLog, SolutionLog, ReadingLog, OutcomeLog, MatchLog, CallLog, 
 
 
 def test_the_stores_write_as_the_data_class_table_says():
-    """`README.md`: attempts, claims, cases, solutions, readings, matches, site
+    """`README.md`: attempts, claims, cases, solutions, technique readings, matches, site
     outcomes and calls are append-only; drafts are revised in place; a problem
     is created once and only its status moves; cards are re-seeded by slug."""
     for log in APPEND_ONLY:

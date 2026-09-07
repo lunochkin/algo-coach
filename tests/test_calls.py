@@ -190,7 +190,7 @@ def test_the_log_round_trips(tmp_path):
 
 
 def test_the_call_records_what_it_was_sampled_at(tmp_path):
-    """A reading's configuration must be recoverable from its own record. The
+    """A machine record's configuration must be recoverable from its own record. The
     claim carries a copy so the claims file reads alone; this is where the copy
     is taken from, and it cannot drift because both are one append."""
     log = CallLog(tmp_path)

@@ -42,7 +42,7 @@ def test_a_hand_match_is_blind_unless_it_says_otherwise():
 
 
 def test_a_hand_match_records_the_verdicts_its_author_saw():
-    """Not provenance: provenance is what produced a reading, this is what its
+    """Not provenance: provenance is what produced a machine match, this is what its
     author had in view. A hand record carries the second and never the
     first."""
     match = make_match(MatchSource.USER, informed_by=["call-1", "call-2"])
@@ -83,7 +83,7 @@ def test_a_match_records_its_source():
 
 def test_a_machine_match_records_what_produced_it():
     """Provenance as a claim carries it: re-deriving has to find the stale
-    readings and leave the hand ones alone."""
+    matches and leave the hand ones alone."""
     match = make_match(MatchSource.CLASSIFIER, **PROVENANCE_FIELDS)
 
     assert {field: getattr(match, field) for field in PROVENANCE_FIELDS} == PROVENANCE_FIELDS
@@ -96,7 +96,7 @@ def test_a_machine_match_without_any_provenance_is_rejected():
 
 @pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_a_machine_match_needs_every_field_that_produced_it(missing):
-    """All of them or none: a reading whose configuration is partly unknown
+    """All of them or none: a machine match whose configuration is partly unknown
     compares with nothing."""
     with pytest.raises(ValidationError, match=missing):
         make_match(
@@ -145,7 +145,7 @@ def test_a_match_names_no_card():
 
 def test_the_canonical_a_problem_was_generated_with_asserts_its_own_match():
     """Its target was that template, so the pair is provenance rather than a
-    reading and nothing pays a call to learn it."""
+    match and nothing pays a call to learn it."""
     match = generator_match("t1", "s1")
 
     assert (match.template_id, match.solution_id) == ("t1", "s1")

@@ -158,7 +158,7 @@ def test_a_machine_claim_stands_where_no_hand_reached():
 
 
 def test_the_latest_machine_claim_stands_among_machine_claims():
-    """A re-derivation supersedes the reading it replaces, as before — the
+    """A re-derivation supersedes the claim it replaces, as before — the
     user-first rule orders one writer against the other, not within one."""
     claims = standing_claims(
         [
@@ -193,20 +193,20 @@ def test_a_superseded_machine_claim_never_resurfaces_on_another_attempt():
 
 
 def test_a_machine_claim_on_a_hand_claimed_attempt_is_kept_in_the_log(tmp_path):
-    """A reading, not a candidate: it never reaches the board and never leaves
+    """Scored, never a candidate: it never reaches the board and never leaves
     the log, which is what makes it safe to store and scoreable later."""
     log = AttemptLog(tmp_path)
     hand = make_claim(["greedy"], id="c1", source=ClaimSource.USER)
-    reading = make_claim(
+    machine = make_claim(
         ["dynamic-programming"],
         id="c2",
         created_at=T0 + timedelta(hours=1),
         source=ClaimSource.CLASSIFIER,
     )
     log.append_claim(hand)
-    log.append_claim(reading)
+    log.append_claim(machine)
 
-    assert log.claims() == [hand, reading]
+    assert log.claims() == [hand, machine]
     assert standing_claims(log.claims())["a1"] == hand
 
 
@@ -215,14 +215,14 @@ def test_the_rule_holds_over_a_stream_read_once():
     the machine the attempt — silently, since there is nothing to raise on.
     Every caller passes a list today, so nothing else would catch it."""
     hand = make_claim(["greedy"], id="c1", created_at=T0, source=ClaimSource.USER)
-    reading = make_claim(
+    machine = make_claim(
         ["dynamic-programming"],
         id="c2",
         created_at=T0 + timedelta(hours=1),
         source=ClaimSource.CLASSIFIER,
     )
 
-    claims = standing_claims(claim for claim in [hand, reading])
+    claims = standing_claims(claim for claim in [hand, machine])
 
     assert claims["a1"] == hand
 
@@ -300,7 +300,7 @@ def test_a_user_decline_leaves_the_fallback_standing():
 
 def test_a_user_decline_stands_over_a_later_machine_claim():
     """A decline is the user's answer, so it wins on read like any other. The
-    machine's stays in the log as a reading and is scored against it."""
+    machine's stays in the log as a machine claim and is scored against it."""
     later = make_claim(
         ["greedy"], id="c2", created_at=T0 + timedelta(days=1), source=ClaimSource.CLASSIFIER
     )

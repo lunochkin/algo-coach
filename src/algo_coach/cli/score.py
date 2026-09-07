@@ -5,7 +5,7 @@ from pathlib import Path
 
 from algo_coach.calls import CallLog
 from algo_coach.claims import score_backlog
-from algo_coach.claims.reading import Plan
+from algo_coach.claims.plan import Plan
 from algo_coach.claims.run import Progress
 from algo_coach.classifier import DEFAULT
 from algo_coach.cli.display import chosen
@@ -35,7 +35,7 @@ def configurations(
             model=model,
             effort=effort or DEFAULT.effort,
             pin=provider or DEFAULT.pin,
-            # Unlike the provider, part of what identifies a reading: a model
+            # Unlike the provider, part of what identifies a claim: a model
             # named without one runs at the built-in temperature.
             temperature=chosen(temperature, parser, command="score", fallback=DEFAULT.temperature),
         )
@@ -102,7 +102,7 @@ def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             f"\nscore: {', '.join(aborted)} aborted after {ABORT_AFTER} consecutive failures\n",
         )
     if not result.common:
-        # Apart from the abort above: ground truth exists, no reading of it
+        # Apart from the abort above: ground truth exists, no claim over it
         # does.
         parser.exit(1, "score: nothing every configuration named has read\n")
 

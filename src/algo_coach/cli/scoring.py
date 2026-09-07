@@ -30,7 +30,7 @@ def columns(scores: Sequence[Score]) -> list[tuple[str, Callable[[Score], str]]]
     if any(scored.timed for scored in scores):
         shown.append(("mean/max", latency))
     if any(scored.costed for scored in scores):
-        # A mean over the readings that carry a price, not over the eval set.
+        # A mean over the claims that carry a price, not over the eval set.
         shown.append(("per attempt", spent))
         shown.append(("set", outlay))
     if any(scored.undecided for scored in scores):
@@ -170,7 +170,7 @@ def decided(scored: Score) -> str:
     )
 
 
-# What one attempt cost, over the readings that say. Six decimals: at four,
+# What one attempt cost, over the claims that say. Six decimals: at four,
 # everything below a tenth of a cent printed the same.
 def spent(scored: Score) -> str:
     if not scored.costed:

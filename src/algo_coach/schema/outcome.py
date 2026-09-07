@@ -71,7 +71,7 @@ class SiteOutcome(MachineProvenance):
     # is what killed nothing, which is what a round wasted its call on
     proposed: int = 0
     # cases the canonical answered differently from what its own call
-    # declared. A reading rather than a gate, since one call wrote both
+    # declared. An interpretation rather than a gate, since one call wrote both
     misdeclared: int = 0
     # the speedup search, where this site ran one
     separating: int | None = None

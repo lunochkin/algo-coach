@@ -1,4 +1,4 @@
-"""A reading that names a subset of the candidates it was offered, which is how
+"""A reply that names a subset of the candidates it was offered, which is how
 the classifier and the matcher both read. The candidates appear twice: the
 schema enforces them, and the prompt informs them, reasoning being unconstrained."""
 

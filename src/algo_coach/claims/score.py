@@ -49,7 +49,7 @@ class Score(BaseModel):
     reused: int = 0
     undecided: int = 0
     aborted: bool = False
-    # A reading stored before the price was recorded carries none, so a column
+    # A claim stored before the price was recorded carries none, so a column
     # reports the mean over `costed`.
     cost: float = 0.0
     costed: int = 0
@@ -57,7 +57,7 @@ class Score(BaseModel):
     input_tokens: int = 0
     output_tokens: int = 0
     reasoning_tokens: int = 0
-    tokened: int = 0  # readings whose call reported a count
+    tokened: int = 0  # claims whose call reported a count
     reasoned: int = 0  # of those, the ones reporting the reasoning split
     # The answering request alone, never what the caller waited: the difference
     # is the endpoint's backoff. The slowest sits beside the mean, which hides
@@ -138,7 +138,7 @@ def per_decision(
 
     The denominator is the candidates: declining a code correctly is the
     decision set equality never credits. A disagreement counts only where it
-    names a candidate, since a stored reading can carry a retired one.
+    names a candidate, since a stored claim can carry a retired one.
     """
     total = agreed = 0
     for attempt_id, expected in truth.items():
@@ -151,7 +151,7 @@ def per_decision(
 
 
 def spent(scored: Score, calls: Sequence[Call]) -> None:
-    """Counted over the calls that reported, never over the readings. The
+    """Counted over the calls that reported, never over the claims. The
     reasoning split and the timing each have their own denominator."""
     for call in calls:
         # An empty verdict has two causes and the claim cannot tell them apart,

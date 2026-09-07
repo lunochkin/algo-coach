@@ -12,7 +12,7 @@ from algo_coach.matches.matcher import (
 from algo_coach.matches.questions import Question, outstanding, questions
 from algo_coach.matches.run import Progress, match_corpus
 from algo_coach.matches.sample import unsettled
-from algo_coach.matches.standing import latest_readings, standing_matches
+from algo_coach.matches.standing import latest_machine_matches, standing_matches
 from algo_coach.matches.store import MatchLog
 
 __all__ = [
@@ -28,7 +28,7 @@ __all__ = [
     "core",
     "coverage",
     "hand_match",
-    "latest_readings",
+    "latest_machine_matches",
     "match",
     "match_corpus",
     "outstanding",

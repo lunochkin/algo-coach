@@ -45,18 +45,18 @@ def test_a_reading_naming_a_subset_disagrees(tmp_path):
     """Set equality, as the score uses: stopping at the first technique is a
     disagreement, not a partial answer."""
     claim = user_claim("a1", ["greedy", "sorting"])
-    readings = [{"a1": machine_claim("a1", ["greedy"])}]
+    machine_claims = [{"a1": machine_claim("a1", ["greedy"])}]
 
-    assert against(claim, readings) == 1
+    assert against(claim, machine_claims) == 1
 
 
 def test_a_configuration_that_never_read_it_is_not_a_dissenter(tmp_path):
     """Silence is a third thing — counting it would report a disagreement
     nothing made."""
     claim = user_claim("a1", ["greedy"])
-    readings = [{"a1": machine_claim("a1", ["greedy"])}, {}]
+    machine_claims = [{"a1": machine_claim("a1", ["greedy"])}, {}]
 
-    assert against(claim, readings) == 0
+    assert against(claim, machine_claims) == 0
 
 
 def test_the_most_disputed_are_asked_about_first(tmp_path):
@@ -70,13 +70,13 @@ def test_the_most_disputed_are_asked_about_first(tmp_path):
         log.append_attempt(attempt(name, name))
         log.append_claim(user_claim(name, ["greedy"]))
     standing = standing_claims(log.claims())
-    readings = [
+    machine_claims = [
         {"all": machine_claim("all", ["sorting"]), "one": machine_claim("one", ["sorting"])},
         {"all": machine_claim("all", ["sorting"]), "one": machine_claim("one", ["greedy"])},
     ]
 
-    ordered = contested(pool(log), standing, readings)
+    ordered = contested(pool(log), standing, machine_claims)
 
     assert [a.id for a in ordered] == ["all", "one"]
-    assert [a.id for a in contested(pool(log), standing, readings, at_least=2)] == ["all"]
-    assert len(contested(pool(log), standing, readings, at_least=0)) == 3
+    assert [a.id for a in contested(pool(log), standing, machine_claims, at_least=2)] == ["all"]
+    assert len(contested(pool(log), standing, machine_claims, at_least=0)) == 3

@@ -19,8 +19,8 @@ from algo_coach.schema import ClaimSource
 ASKED = request_hash(["greedy", "sorting"], "def f(): pass")
 
 
-def reading(attempt_id: str, techniques: list[str], **configuration):
-    """A stored reading at this classifier's configuration unless a test names
+def stored_claim(attempt_id: str, techniques: list[str], **configuration):
+    """A stored claim at this classifier's configuration unless a test names
     the field it differs in."""
     return machine_claim(
         attempt_id,
@@ -107,7 +107,7 @@ def test_what_the_classifier_read_is_stored(hand_claimed):
 
 
 def test_a_stored_reading_never_becomes_the_standing_claim(hand_claimed):
-    """It is a reading, not a candidate: the user's claim wins by source, not
+    """It is scored, not a candidate: the user's claim wins by source, not
     by being the later record."""
     run(FakeTransport.answering(Verdict(["sorting"])), hand_claimed)
 
@@ -134,7 +134,7 @@ def test_a_reading_stored_before_the_hand_claim_is_reused(tmp_path):
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-codes"))
-    log.append_claim(reading("a1", ["sorting"]))
+    log.append_claim(stored_claim("a1", ["sorting"]))
     log.append_claim(user_claim("a1", ["greedy"]))
     client = FakeTransport.answering()
 
@@ -145,10 +145,10 @@ def test_a_reading_stored_before_the_hand_claim_is_reused(tmp_path):
 
 
 def test_a_rolled_back_rulebook_reuses_the_reading_under_it(hand_claimed):
-    """Running an earlier rulebook on purpose is a rollback, so the reading
+    """Running an earlier rulebook on purpose is a rollback, so the claim
     answering today's question can sit under a later one and still answer."""
-    hand_claimed.append_claim(reading("a1", ["greedy"]))
-    hand_claimed.append_claim(reading("a1", ["sorting"], prompt_hash="ffffffffffff"))
+    hand_claimed.append_claim(stored_claim("a1", ["greedy"]))
+    hand_claimed.append_claim(stored_claim("a1", ["sorting"], prompt_hash="ffffffffffff"))
     client = FakeTransport.answering()
 
     result = run(client, hand_claimed)
@@ -157,7 +157,7 @@ def test_a_rolled_back_rulebook_reuses_the_reading_under_it(hand_claimed):
 
 
 def test_a_reading_answering_another_prompt_is_read_again(hand_claimed):
-    hand_claimed.append_claim(reading("a1", ["sorting"], prompt_hash="ffffffffffff"))
+    hand_claimed.append_claim(stored_claim("a1", ["sorting"], prompt_hash="ffffffffffff"))
 
     result = run(FakeTransport.answering(Verdict(["greedy"])), hand_claimed)
 
@@ -165,7 +165,7 @@ def test_a_reading_answering_another_prompt_is_read_again(hand_claimed):
 
 
 def test_a_reading_from_another_model_is_read_again(hand_claimed):
-    hand_claimed.append_claim(reading("a1", ["sorting"], model="an-older-model"))
+    hand_claimed.append_claim(stored_claim("a1", ["sorting"], model="an-older-model"))
 
     result = run(FakeTransport.answering(Verdict(["greedy"])), hand_claimed)
 
@@ -174,8 +174,8 @@ def test_a_reading_from_another_model_is_read_again(hand_claimed):
 
 def test_a_reading_answering_the_same_prompt_is_reused(hand_claimed):
     """The saving: an edit this attempt's candidates never carried leaves its
-    stored reading answering the same question, and nothing is paid twice."""
-    hand_claimed.append_claim(reading("a1", ["greedy"]))
+    stored claim answering the same question, and nothing is paid twice."""
+    hand_claimed.append_claim(stored_claim("a1", ["greedy"]))
     client = FakeTransport.answering()
 
     result = run(client, hand_claimed)
@@ -186,7 +186,7 @@ def test_a_reading_answering_the_same_prompt_is_reused(hand_claimed):
 def test_fresh_asks_again_where_a_reading_already_answers(hand_claimed):
     """A run measuring a model against itself needs the same question asked
     twice, which is the one thing a cache exists to prevent."""
-    hand_claimed.append_claim(reading("a1", ["greedy"]))
+    hand_claimed.append_claim(stored_claim("a1", ["greedy"]))
 
     result = run(FakeTransport.answering(Verdict(["sorting"])), hand_claimed, fresh=True)
 
@@ -199,9 +199,9 @@ def test_naming_no_candidate_is_scored_against_a_claim_that_named_some(hand_clai
     seeing — but not excused from the score for being one."""
     result = run(FakeTransport.answering(Verdict([])), hand_claimed)
 
-    (reading,) = machine_claims(hand_claimed)
+    (claim,) = machine_claims(hand_claimed)
     assert (result.scored, result.exact, result.undecided) == (1, 0, 1)
-    assert reading.techniques == []
+    assert claim.techniques == []
     # Missed against every technique the claim named, and over-claimed on none.
     (row,) = [one for one in result.per_technique if one.technique == "greedy"]
     assert (row.attempts, row.missed, row.over) == (1, 1, 0)
@@ -281,9 +281,9 @@ def test_one_failure_does_not_cost_the_rest(two_problems):
 
 
 def test_the_limit_caps_the_calls_not_the_score(two_problems):
-    """A stored reading is free, so a capped run adds to what earlier runs read
+    """A stored claim is free, so a capped run adds to what earlier runs read
     rather than reporting on a slice of it."""
-    two_problems.append_claim(reading("a2", ["greedy"]))
+    two_problems.append_claim(stored_claim("a2", ["greedy"]))
     client = FakeTransport.answering(Verdict(["greedy"]))
 
     result = run(client, two_problems, limit=1)
@@ -322,7 +322,7 @@ def test_a_scattered_failure_does_not_abort(two_problems):
 
 
 def test_a_named_configuration_stores_its_own_provenance(hand_claimed):
-    """A reading names the classifier that reached it, or a later run could not
+    """A claim names the classifier that reached it, or a later run could not
     tell whose answer it was reusing."""
     run(FakeTransport.answering(Verdict(["greedy"])), hand_claimed, configurations=(CHEAP,))
 
@@ -336,11 +336,11 @@ def test_each_share_is_over_what_its_own_configuration_read(two_problems):
     """A configuration is never charged for an attempt another one failed on.
     The cost is that two columns can carry different denominators, so each
     share prints its own and `common` says how far they overlap."""
-    two_problems.append_claim(reading("a1", ["greedy"]))
-    two_problems.append_claim(reading("a2", ["greedy"]))
+    two_problems.append_claim(stored_claim("a1", ["greedy"]))
+    two_problems.append_claim(stored_claim("a2", ["greedy"]))
     # The cheap one reads the newest and stops there, so a1 is the built-in
     # classifier's alone and belongs to neither share. Scripted by model: the
-    # built-in one reuses both readings and asks nothing, so a script naming it
+    # built-in one reuses both claims and asks nothing, so a script naming it
     # would say a call was expected that never comes.
     client = FakeTransport.per_deployment({(CHEAP.model, CHEAP.pin): Verdict(["sorting"])})
 
@@ -372,8 +372,8 @@ def test_an_attempt_one_configuration_declined_stays_in_both_denominators(two_pr
     """A decline is an answer, so it keeps the attempt in `common`. Dropping it
     would shrink the denominator for every configuration whenever any one of
     them declined — and reward the one that did."""
-    two_problems.append_claim(reading("a1", ["greedy"]))
-    two_problems.append_claim(reading("a2", ["greedy"]))
+    two_problems.append_claim(stored_claim("a1", ["greedy"]))
+    two_problems.append_claim(stored_claim("a2", ["greedy"]))
     # Only the cheap one asks; the newest attempt is what it declines.
     client = FakeTransport.per_deployment(
         {(CHEAP.model, CHEAP.pin): [Verdict([]), Verdict(["greedy"])]}
@@ -391,8 +391,8 @@ def test_an_attempt_one_configuration_declined_stays_in_both_denominators(two_pr
 def test_only_the_attempts_they_answered_differently_are_split(two_problems):
     """Where they agreed there is nothing to choose between them, however wrong
     both are — a1 is where reading the code decides which to keep."""
-    two_problems.append_claim(reading("a1", ["sorting"]))
-    two_problems.append_claim(reading("a2", ["sorting"]))
+    two_problems.append_claim(stored_claim("a1", ["sorting"]))
+    two_problems.append_claim(stored_claim("a2", ["sorting"]))
     client = FakeTransport.per_deployment(
         {(CHEAP.model, CHEAP.pin): [Verdict(["sorting"]), Verdict(["greedy"])]}
     )
@@ -416,7 +416,7 @@ def test_one_configuration_is_compared_with_nothing(hand_claimed):
 def test_a_cap_of_no_calls_scores_what_is_already_stored(hand_claimed):
     """The reproducible run: nothing is paid for, so the client is never
     reached and need not exist."""
-    hand_claimed.append_claim(reading("a1", ["greedy"]))
+    hand_claimed.append_claim(stored_claim("a1", ["greedy"]))
 
     result = compare(None, hand_claimed, limit=0)
 
@@ -536,8 +536,8 @@ def test_every_configuration_is_planned_before_the_first_call(tmp_path):
     """A reader needs every total up front, and one answered entirely from the
     log asks for nothing — reported as it started, it would never appear."""
     log = spread(tmp_path / "data", 2)
-    log.append_claim(reading("a0", ["greedy"]))
-    log.append_claim(reading("a1", ["greedy"]))
+    log.append_claim(stored_claim("a0", ["greedy"]))
+    log.append_claim(stored_claim("a1", ["greedy"]))
     planned = []
 
     compare(
@@ -570,7 +570,7 @@ def test_a_progress_report_names_the_configuration_that_read_it(tmp_path):
 
 def test_a_reading_carries_what_it_was_charged(hand_claimed):
     """Recorded rather than derived: a price moves, so a rate applied later
-    says what a reading would cost now instead of what it cost."""
+    says what a claim would cost now instead of what it cost."""
     client = FakeTransport.answering(Verdict(["greedy"]))
     client.cost = 0.0042
 
@@ -583,8 +583,8 @@ def test_a_reading_carries_what_it_was_charged(hand_claimed):
 
 def test_a_reused_reading_brings_its_own_price(hand_claimed):
     """The run that paid it recorded it. Re-reading the log must not make an
-    old reading look free, nor reprice it at today's rate."""
-    hand_claimed.append_claim(reading("a1", ["greedy"], cost=0.0031))
+    old claim look free, nor reprice it at today's rate."""
+    hand_claimed.append_claim(stored_claim("a1", ["greedy"], cost=0.0031))
 
     result = run(None, hand_claimed, limit=0)
 
@@ -595,7 +595,7 @@ def test_a_reused_reading_brings_its_own_price(hand_claimed):
 def test_a_reading_stored_before_the_price_is_left_out_of_the_mean(hand_claimed):
     """Counting it as free would flatter whichever configuration was read
     earliest, which is the opposite of what the column is for."""
-    hand_claimed.append_claim(reading("a1", ["greedy"]))
+    hand_claimed.append_claim(stored_claim("a1", ["greedy"]))
 
     result = run(None, hand_claimed, limit=0)
 
@@ -627,7 +627,7 @@ def test_a_call_reporting_no_thinking_split_is_counted_apart(hand_claimed):
 
 
 def test_a_reused_reading_brings_its_calls_counts_too(hand_claimed):
-    """The join is by call id, so a reading paid for by an earlier run counts
+    """The join is by call id, so a claim paid for by an earlier run counts
     the same as one this run made."""
     client = FakeTransport.answering(Verdict(["greedy"]))
     client.tokens = (900, 200, 150)
@@ -666,7 +666,7 @@ def test_the_slowest_request_is_kept_beside_the_mean(two_problems):
 
 def test_a_machine_decline_agrees_with_a_user_decline(hand_claimed):
     """Both assert the candidates do not apply, so the sets are equal and the
-    reading is exact. Without a stated user decline the gold could only be a
+    claim is exact. Without a stated user decline the gold could only be a
     set the machine was bound to disagree with, which is what forced an
     adjudicated decline out of the eval set."""
     hand_claimed.append_claim(user_claim("a1", [], declined=True))

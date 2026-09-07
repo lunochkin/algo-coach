@@ -42,13 +42,13 @@ def test_nothing_read_stands_for_nothing():
 
 
 def test_a_lone_verdict_stands():
-    reading = match(MatchSource.CLASSIFIER)
+    machine = match(MatchSource.CLASSIFIER)
 
-    assert standing_matches([reading]) == {("t1", "s1"): reading}
+    assert standing_matches([machine]) == {("t1", "s1"): machine}
 
 
 def test_a_hand_match_stands_over_both_machine_sources():
-    """It is the reference a machine reading is scored against, so nothing a
+    """It is the reference a machine match is scored against, so nothing a
     machine writes may replace it."""
     by_hand = match(MatchSource.USER, matched=True, at=T0)
     asserted = match(MatchSource.GENERATOR, at=T0 + timedelta(days=1))
@@ -59,7 +59,7 @@ def test_a_hand_match_stands_over_both_machine_sources():
 
 def test_a_generator_stands_over_a_matcher_reading_the_same_pair():
     """The generator was told the form. The matcher inferred it, and a later
-    reading must not supersede the assertion it audits."""
+    match must not supersede the generator's match it audits."""
     asserted = match(MatchSource.GENERATOR, at=T0)
     read = match(MatchSource.CLASSIFIER, matched=False, at=T0 + timedelta(days=1))
 

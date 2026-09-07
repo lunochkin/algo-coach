@@ -107,7 +107,7 @@ def test_a_record_carries_what_read_it(tmp_path):
 
 def test_a_second_run_pays_for_nothing(tmp_path):
     """The pairs carrying no record at the current configuration are what
-    still needs testing — the rule readings already use."""
+    still needs testing — the rule machine matches already use."""
     cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
     run(tmp_path, FakeTransport.answering(Verdict([])), cards, corpus)
 

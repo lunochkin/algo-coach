@@ -77,7 +77,7 @@ def test_the_candidates_are_named_in_the_prompt_too():
 
 
 def test_each_candidate_reaches_the_model_with_its_criterion():
-    """One rulebook, applied where it decides something: the reading is made
+    """One rulebook, applied where it decides something: the machine claim is made
     against what earns a code and the near miss it is confused with."""
     client = answering("greedy")
 
@@ -261,7 +261,7 @@ def test_a_named_configuration_is_what_the_call_carries():
 
 def test_the_default_configuration_is_known_in_every_part():
     """A machine claim can be recomputed by a better classifier, so re-deriving
-    has to find the stale ones and leave the rest — and a reading whose
+    has to find the stale ones and leave the rest — and a machine claim whose
     configuration is partly unknown compares with nothing.
 
     Which model is named is a decision the eval set makes and remakes; that it
@@ -276,7 +276,7 @@ def test_the_default_configuration_is_known_in_every_part():
 
 
 def test_the_request_hash_is_the_question_this_attempt_would_be_asked():
-    """What decides whether a reading is worth paying for again — recomputed
+    """What decides whether a machine claim is worth paying for again — recomputed
     rather than compared with a literal, which would assert only that someone
     edited it."""
     assert request_hash(["greedy", "sorting"], CODE) == request_hash(["greedy", "sorting"], CODE)

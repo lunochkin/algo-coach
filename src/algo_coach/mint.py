@@ -49,7 +49,7 @@ def user_claim(
 
     `declined` is passed rather than inferred from an empty list, so a writer
     that lost an answer cannot record a verdict nobody gave. `informed_by` is
-    empty unless the caller says otherwise: only a revision has readings in
+    empty unless the caller says otherwise: only a revision has machine claims in
     view.
     """
     return TechniqueClaim(
@@ -96,7 +96,7 @@ def user_reading(
     *,
     informed_by: Sequence[str] = (),
 ) -> TechniqueReading:
-    """One solution read by hand, which is what a machine reading is scored
+    """One solution read by hand, which is what a machine technique reading is scored
     against. An adjudication rather than testimony: nobody sat for a canonical,
     so this is a verdict on code the user did not produce."""
     return TechniqueReading(
@@ -156,7 +156,7 @@ def user_match(
 
 
 def generator_match(template_id: str, solution_id: str) -> TemplateMatch:
-    """Provenance rather than a reading, so it carries no configuration."""
+    """Provenance rather than an inference, so it carries no configuration."""
     return TemplateMatch(
         id=new_id(),
         created_at=datetime.now(UTC),

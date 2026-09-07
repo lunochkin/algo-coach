@@ -10,7 +10,7 @@ from algo_coach.schema import Call, Card, Configuration, Problem, Solution, Temp
 MODEL = "openai/gpt-oss-120b"
 EFFORT = "medium"
 PIN = "deepinfra/bf16"
-# Greedy, as every reading written into the log is.
+# Greedy, as every machine record written into the log is.
 TEMPERATURE: float | None = 0.0
 
 SYSTEM = """You decide which of a card's templates a solution displays.
@@ -33,7 +33,7 @@ If the solution displays none of the candidates, name none of them."""
 
 
 # Which matcher read a pair. The prompt is not among them: it varies per pair,
-# so what a reading came from is the digest of what that pair was sent.
+# so what a match came from is the digest of what that pair was sent.
 DEFAULT = Configuration(model=MODEL, effort=EFFORT, pin=PIN, temperature=TEMPERATURE)
 
 
@@ -90,7 +90,7 @@ def match(
 
 
 def prompt(forms: Sequence[Template], problem: Problem, solution: Solution) -> str:
-    """The candidates first, so the reading is made knowing what can be named,
+    """The candidates first, so the verdict is made knowing what can be named,
     then the statement and the code that answers it. Both are delimited: they
     are data the model reads rather than instructions it follows."""
     return "\n".join(

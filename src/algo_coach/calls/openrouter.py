@@ -117,7 +117,7 @@ class OpenRouter:
         )
 
     def send(self, *, pin: str, model: str, **request: object) -> Reply:
-        """One reading, repeated while the endpoint answers with a reason to
+        """One call, repeated while the endpoint answers with a reason to
         ask again, and raised on the first try otherwise."""
         rerouted = False  # the one retry an unrouted 404 is given
         for tries, pause in enumerate(BACKOFF, start=1):

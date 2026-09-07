@@ -88,7 +88,7 @@ def test_a_cross_reference_names_a_code_that_exists():
 
 def test_criteria_cannot_be_edited_in_place():
     """They reach a prompt and a reader unchanged: a mutable rulebook makes a
-    reading whose criteria nothing recorded."""
+    machine claim whose criteria nothing recorded."""
     with pytest.raises(TypeError):
         criteria()["backtracking"] = criteria()["greedy"]
 

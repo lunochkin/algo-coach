@@ -98,7 +98,7 @@ class Status:
         return "   " + ", ".join(parts) if parts else ""
 
     def planned(self, totals: list[int]) -> None:
-        """What each row will pay for. A configuration whose readings are all
+        """What each row will pay for. A configuration whose claims are all
         reused asks nothing, so without this it would never appear."""
         with self.lock:
             for row, total in zip(self.rows, totals, strict=True):
