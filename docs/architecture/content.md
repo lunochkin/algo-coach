@@ -112,9 +112,8 @@ technique, and a card and a mastery estimate share no data.
   Ladder progress is a fold over attempts rather than a mark on a rung, so a
   solved problem stays solved.
 - **A retired problem fills no rung.** A defective problem was never a fair
-  test, and a telegraphed problem teaches recognition of nothing. Re-deriving
-  the ladder removes the retired problem, which is the other reason a started
-  card is re-derived.
+  test. Re-deriving the ladder removes the retired problem, which is the other
+  reason a started card is re-derived.
 - **Probes are assigned when a card is started**, not at import, since a
   problem unseen at import need not still be unseen. Unseen first, then least
   recently attempted, and never drawn from the ladder. The ladder teaches the

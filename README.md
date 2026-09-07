@@ -197,7 +197,7 @@ engine runs them rather than the frontier.
 Built: the technique vocabulary, the attribution classifier and its eval, the
 call log and transport, cards, template matching, and the four calls that write
 a problem. Next: the worth of a generated corpus, measured as the matcher's
-score against a hand pass and as the announcement floor. Then the drill loop
+score against a hand pass. Then the drill loop
 the engine serves and judges. Not started: the ladder and recall, failure-mode
 diagnosis, mastery estimation, scheduling.
 Sequencing lives in [`docs/ROADMAP.md`](docs/ROADMAP.md).
@@ -223,11 +223,11 @@ run a submission against, the engine can only copy a platform's verdict, and an
 attempt on such a problem can never be verified. Generation answers both, so
 the second origin was no longer worth the branch it cost in every record.
 
-**Why it is kept.** It sets the announcement floor. A generated problem must
-not telegraph its own form. If a matcher names the form from the statement
-alone, the problem teaches recognition of nothing. Measuring that floor needs a
-corpus no generator wrote, and this archived corpus is the only one there will
-be.
+**Why it is kept.** For one deferred measurement. A generated problem must not
+give its own form away: if a matcher names the form from the statement alone,
+the problem teaches recognition of nothing. Deciding that needs a baseline rate
+from a corpus no generator wrote, and this archive is the only one there will
+be. Phase 13 in the roadmap.
 
 ## Core loop
 
@@ -294,8 +294,7 @@ Each state and every exit is in
 
 **Built so far:** the four calls, the gates between them and the draft store,
 and they have written problems end to end. Not yet measured: the discard rate
-per gate over a run of ten, and the announcement floor that says whether a
-statement telegraphs its own form.
+per gate over a run of ten.
 
 ## Cards: how a technique gets studied
 

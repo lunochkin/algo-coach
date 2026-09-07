@@ -57,7 +57,7 @@ def test_the_states_are_the_steps_that_can_fail():
 
 def test_the_two_machines_stay_apart():
     """`ProblemStatus` governs a problem that exists, this one the writing. One
-    enum would put `drafted` beside `active` and every reader would branch."""
+    enum would put `drafted` beside `retired` and every reader would branch."""
     assert not {state.value for state in WritingState} & {s.value for s in ProblemStatus}
 
 

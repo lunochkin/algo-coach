@@ -39,38 +39,31 @@ architecture, and `README.md` is the map.
   problem class have no form to type out, so templates reach about half the
   vocabulary, and a technique set folded from them would be capped by which
   cards happen to exist.
-- **The statement is stored, because a solver is served it.** The
-  announcement floor reads the statement, and a matcher reads the statement
-  beside the canonical it classifies. Required and non-blank.
-- **A problem is created, cleared, then served.** `created` means written and
-  verified. That is not the same as fit to serve. The announcement floor
-  clears a created problem. Whether a statement telegraphs its form is a
-  question about the corpus, and the generation call cannot answer it.
-- **`created` is not a resting state.** Every created problem is promoted or
-  retired. Until the floor is measured, selection reads created problems too,
-  so the corpus is usable before the gate exists.
-- **Discrimination and the announcement floor are checked at different
-  points.** Discrimination is checked at generation, so a problem whose cases
-  separate nothing never lands. The floor is checked over the corpus, so a
-  problem that telegraphs its form lands and is then retired.
+- **The statement is stored, because a solver is served it.** A matcher also
+  reads the statement beside the canonical it classifies. Required and
+  non-blank.
+- **A created problem is served.** `created` means written and verified, and
+  no later gate stands between that and serving. Retirement is the only status
+  move.
+- **Whether a statement gives its form away is not checked.** A statement can
+  name its approach, or reuse the example its template's cue names, and a
+  solver who recognises the problem has not derived the form. A gate over the
+  corpus for this is deferred to Phase 13 in `ROADMAP.md`. It needs a corpus
+  to measure and a baseline no generator wrote, and a status the gate promotes
+  to is an additive change when it comes.
 - **A problem is never edited, and only its status moves.** A statement that
   says the wrong thing is retired `defective` and a new problem is written.
   The retired problem's attempts stay with the record they were made against,
   and no case moves under them. A generated statement passes every gate or is
   retired, so a write path for wording would buy nothing and could change what
   a verdict means.
-- **Retirement names its reason, because readers treat the two reasons
-  apart.** `defective` is a statement that asked for something its cases do
-  not decide. `telegraphed` is a statement that names the approach, which the
-  announcement floor rejects.
+- **Retirement names its reason.** `defective` is a statement that asked for
+  something its cases do not decide, and it is the only reason today. A reason
+  whose attempts are kept is additive when a gate needs one.
 - **A defective problem's attempts are excluded from mastery, both
   directions.** The failure was the problem's fault, and the self-label the
   loop asked for blamed the user instead. Excluding only the failures would
   raise a technique's solve rate because a problem was broken.
-- **A telegraphed problem's attempts are kept.** Its statement asked what its
-  cases decide, so the verdict is a fact about the solution. Whether such a
-  solve counts for less than an unprompted one is deferred, since no weighting
-  for it exists.
 - **Exclusion is a read-time rule, never a deletion.** The attempts stay
   readable, and the board stops counting them.
 
@@ -93,8 +86,8 @@ The test cases decide whether a solution to a generated problem is correct.
   unreachable.
 - **A fixed name also stops the signature announcing the approach.** A
   function called `longest_palindromic_substring` tells the solver what the
-  statement was written to withhold. The announcement floor measures whether a
-  statement names its form, and a signature can name the form the same way.
+  statement was written to withhold. A signature can name the form as a
+  statement can, so the same rule covers both.
 - **The statement carries the signature, because the parameter order has to
   be stated somewhere.** A fixed name leaves the parameter order to be
   inferred from prose, and three briefs infer it separately. A reference took

@@ -207,8 +207,8 @@ def test_a_replay_writes_nothing_to_the_corpus(tmp_path, monkeypatch):
 
 
 def test_a_retired_problem_is_not_replayed(tmp_path, monkeypatch):
-    """A defective problem was never a fair test, and a telegraphed one is not
-    what a later corpus will hold."""
+    """A defective problem was never a fair test, and a later corpus will not
+    hold it."""
     cards = landed(tmp_path, monkeypatch)
     store = ProblemStore(tmp_path)
     (one,) = store.all()
@@ -216,7 +216,7 @@ def test_a_retired_problem_is_not_replayed(tmp_path, monkeypatch):
         one.model_copy(
             update={
                 "status": ProblemStatus.RETIRED,
-                "retired_reason": RetirementReason.TELEGRAPHED,
+                "retired_reason": RetirementReason.DEFECTIVE,
             }
         )
     )

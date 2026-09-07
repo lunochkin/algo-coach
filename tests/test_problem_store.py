@@ -42,8 +42,7 @@ def test_a_stored_problem_is_not_rewritten(tmp_path):
 
 
 def test_only_the_status_of_a_stored_problem_moves(tmp_path):
-    """Created, then active or retired: the one write an existing problem
-    takes."""
+    """Created, then retired: the one write an existing problem takes."""
     store = ProblemStore(tmp_path)
     store.put(make_problem())
 

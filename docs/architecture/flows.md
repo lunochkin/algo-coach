@@ -186,11 +186,6 @@ The order matters because each step can reject what came before.
   only by yielding no value on some case, and the problem is discarded. A
   later canonical is judged by the cases the problem carries, so it fails as
   any solution does, and nothing is discarded.
-- **Announcement is measured, not assumed.** The drill loop trains reaching for
-  a form unprompted, so the enabling property has to be derivable from the
-  statement rather than stated in it. A form a matcher names instantly from the
-  statement alone was telegraphed, and such a problem teaches recognition of
-  nothing.
 
 ## Writing a problem, as states
 
@@ -226,10 +221,10 @@ The generator is not an edge: a draft exists only once that call answered, and
 a second generator call writes a different problem.
 
 - **Two machines, meeting at landing.** `ProblemStatus` governs a problem that
-  exists: created, active, retired. This machine governs the writing, and its
+  exists: created, retired. This machine governs the writing, and its
   last state is `ProblemStatus`'s first.
 - **The two machines stay apart.** One enum carrying both would put `drafted`
-  beside `active`, and every reader would have to know which half it was
+  beside `retired`, and every reader would have to know which half it was
   looking at.
 - **The draft is identified by the writing id.** `SiteOutcome` already mints
   one per attempt, so the site records of one draft group with no new
@@ -414,7 +409,7 @@ there is ever asked twice and no two configurations meet the same item.
   survivors are in the prompt, and killing costs subprocesses rather than a
   call, so the skip is decided after that pass and before the call.
 - **A retired problem is not replayed.** A defective one was never a fair test,
-  and a telegraphed one is not what a later corpus will hold.
+  and a later corpus will not hold it.
 - **The inputs site is asked only where a speedup is claimed**, where the
   landing path builds for every problem. A replay records the verdict a gate
   reached on an answer, and nothing here runs the code the call wrote unless

@@ -328,7 +328,7 @@ def test_written_statements_reach_the_call(tmp_path):
 
 
 def test_the_statements_are_the_template_s_own(tmp_path):
-    """Every status, retired included: a repeat of a telegraphed problem is
+    """Every status, retired included: a repeat of a retired problem is
     still the same problem."""
     (one,) = seeded(tmp_path, card())
     mine, theirs = one.templates[0], one.templates[1]
@@ -339,7 +339,7 @@ def test_the_statements_are_the_template_s_own(tmp_path):
             title="p2",
             statement="Retired but mine.",
             status=ProblemStatus.RETIRED,
-            retired_reason=RetirementReason.TELEGRAPHED,
+            retired_reason=RetirementReason.DEFECTIVE,
             **PROVENANCE_FIELDS,
             generated_for=mine.id,
         ),

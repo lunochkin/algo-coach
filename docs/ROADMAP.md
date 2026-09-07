@@ -157,15 +157,8 @@ The worth of a generated corpus, measured rather than asserted.
   alone.
 - The matcher scored per pair and grouped per template, positive verdicts in
   both directions.
-- The announcement floor: one matcher over both corpora, the archive in
-  `data/old/` and the generated one.
-- A reader for `data/old/`, serving the floor measurement alone.
-- How many generated statements are retrieved public problems rather than
-  written ones.
 - A configuration pinned before any number is quoted.
-- Exit: the matcher carries a per-template score in both directions, the floor
-  is measured across both corpora, and every created problem has been promoted
-  or retired.
+- Exit: the matcher carries a per-template score in both directions.
 
 ## Phase 8 — The engine serves
 
@@ -231,27 +224,42 @@ own canonical, and the problem's own cases judge them.
 Exit: one rung covers a core template and an optional one, through two
 canonicals of one problem.
 
-## Phase 13 — Program-analysis-grounded diagnosis
+## Phase 13 — The corpus gated
+
+Whether a generated statement gives its form away, measured rather than
+assumed. A solver who recognises a problem has not derived its form, so such a
+problem teaches recognition of nothing.
+
+- A reader for `data/old/`, the corpus no generator wrote.
+- The rate at which one matcher names a form from the statement alone, over
+  both corpora. The archive's rate is the baseline.
+- A status the gate promotes a created problem to, and a retirement reason
+  whose attempts are kept. Both are additive to the schema.
+- How many generated statements are retrieved public problems rather than
+  written ones.
+- Exit: every stored problem has passed the gate or been retired by it.
+
+## Phase 14 — Program-analysis-grounded diagnosis
 
 Ground the classifier in evidence: AST-diff against canonical solutions,
 execution-trace comparison, empirical complexity measurement. Deliverable:
 measured accuracy delta against LLM-only diagnosis.
 
-## Phase 14 — Retrieval
+## Phase 15 — Retrieval
 
 Similar problems, patterns, and technique briefs retrieved from the corpus and
 the user's own attempts, and weak-spot patterns surfaced.
 
-## Phase 15 — MCP + autonomy
+## Phase 16 — MCP + autonomy
 
 Corpus and tools exposed as an MCP server. A scheduled agent runs the practice
 loop: it picks drills and adapts to history.
 
-## Phase 16 — Multi-agent (conditional)
+## Phase 17 — Multi-agent (conditional)
 
 Only once a real pipeline needs it: diagnose → retrieve → brief → schedule.
 
-## Phase 17 — Soundness-checked synthesis
+## Phase 18 — Soundness-checked synthesis
 
 An upgrade to Phase 6's generation rather than its first appearance. Formal
 constraint specs, property-based test-case generation, adversarial validation.

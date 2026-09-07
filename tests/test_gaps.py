@@ -77,7 +77,7 @@ def test_a_retired_problem_fills_no_rung(cards):
     retired = problem("p1", techniques=["sliding-window"]).model_copy(
         update={
             "status": ProblemStatus.RETIRED,
-            "retired_reason": RetirementReason.TELEGRAPHED,
+            "retired_reason": RetirementReason.DEFECTIVE,
         }
     )
     solution = canonical("p1")

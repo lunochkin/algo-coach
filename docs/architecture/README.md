@@ -79,15 +79,12 @@ without redefining them. Grouped by the file that specifies the record.
   process. Generation's cap sits well above the sitting's.
 - **Technique reading** (reading): a machine record naming the techniques a
   canonical used. A problem's techniques are folded from these.
-- **Announcement floor**: the measurement of how often a statement names its
-  own form. It clears a created problem or retires it as telegraphed.
-- **Telegraphed**: a retirement reason: the statement names the approach.
 - **Defective**: a retirement reason: the statement asks for something its
   cases do not decide.
 - **Enumeration**: a pass over a landed problem proposing other approaches,
   each generated as a further canonical.
 - **Calibration corpus**: the platform problems and attempts under
-  `data/old/`, kept for measuring the announcement floor.
+  `data/old/`, kept for one deferred measurement, Phase 13 in `ROADMAP.md`.
 
 ### Generating a problem
 
@@ -242,10 +239,10 @@ times. Each record class is specified in one of the files beside it.
   problems left behind**, under `data/old/`: a platform's problems, the
   attempts against them, the claims and the calls. It is a corpus rather than
   a store: no store points there, and nothing on the run path reads it.
-  - The corpus is kept for one measurement, the announcement floor. The floor
-    measures how often a form is named from the statement alone, and a corpus
-    no generator wrote sets that floor. How the corpus is read is deferred to
-    taking that measurement.
+  - The corpus is kept for one measurement, deferred to Phase 13 in
+    `ROADMAP.md`: how often a matcher names a form from a statement alone. A
+    corpus no generator wrote is the baseline for that rate. How the corpus is
+    read is deferred to taking the measurement.
 - **Content generation is a command of the engine**, beside the classifier and
   the matcher, and it writes the problems, their test cases and their
   solutions. The command reuses one transport, one call log and one provenance

@@ -336,12 +336,12 @@ def test_a_problem_from_a_technique_brief_names_no_template():
 
 
 def test_a_generated_problem_is_created_rather_than_served():
-    """Landing is not clearing. Retirement is a judgement made later still, so
-    generation has no say in either and takes no argument for them."""
+    """Retirement is a judgement made later, so generation has no say in it and
+    takes no argument for it."""
     assert generated().status is ProblemStatus.CREATED
     assert generated().retired_reason is None
     with pytest.raises(TypeError):
-        generated(status="active")
+        generated(status="retired")
 
 
 def test_a_draft_is_minted_with_the_writing_id_it_was_given():

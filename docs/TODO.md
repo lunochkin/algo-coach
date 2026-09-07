@@ -63,31 +63,8 @@ audit, not generating.
 - [ ] Let the matcher read the pair generation asserted, and report the
       disagreements. Actionable once the matcher carries a score
 
-### The announcement floor
-
-The archive half can start as soon as the matcher runs, and needs no scored
-matcher. The floor is one matcher over two corpora, so a systematic error
-largely cancels in the comparison.
-
-- [ ] Write the reader for `data/old/`, used by the floor measurement alone.
-      `data/old/` is a corpus rather than a store, so nothing on the run path
-      may point at it
-- [ ] Measure the announcement floor over the archived statements: how often
-      the matcher names a form from the statement alone
-- [ ] Promote a created problem to active, or retire it as telegraphed.
-      `created` is not a resting state, so nothing may leave a problem sitting
-      in it
-- [ ] Read the generated corpus against that floor before growing it. A problem
-      the matcher names instantly was telegraphed, and teaches recognition of
-      nothing
-- [ ] Measure how many generated statements are public problems the model
-      retrieved rather than wrote, and record the share. Excluding the cue's
-      domains renames a retrieval instead of preventing it
-
 ### Exit
-- [ ] The matcher carries a per-template score in both directions, the floor
-      is measured across both corpora, and every created problem has been
-      promoted or retired
+- [ ] The matcher carries a per-template score in both directions
 
 ## Phase 8 — the engine serves
 
@@ -96,8 +73,8 @@ produced in. The interface is part of the phase rather than a later skin: a
 practice loop is used or it is not, and a command line is not where a sitting
 happens.
 
-- [ ] Serve active problems, and created ones while the floor has not run.
-      Reading only active would serve nothing until the gate exists
+- [ ] Serve every created problem and skip the retired ones. No gate stands
+      between landing and serving until Phase 13
 - [ ] Serve a generated problem, time the sitting, run the submission against
       the problem's own cases, and mint the attempt
 - [ ] Store the verification result on `Attempt`. Additive, and meaningless

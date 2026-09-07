@@ -116,13 +116,10 @@ def test_a_problem_is_retired_for_a_named_reason():
         assert problem.retired_reason is reason
 
 
-def test_the_reasons_are_the_two_the_board_reads_apart():
-    """A defective problem was never a fair test. A telegraphed one asked what
-    its cases decide, so its attempts stay evidence."""
-    assert set(RetirementReason) == {
-        RetirementReason.DEFECTIVE,
-        RetirementReason.TELEGRAPHED,
-    }
+def test_the_one_reason_is_the_one_the_board_excludes_on():
+    """A defective problem was never a fair test, so its attempts leave mastery.
+    A reason whose attempts are kept is additive when a gate needs one."""
+    assert set(RetirementReason) == {RetirementReason.DEFECTIVE}
 
 
 def test_a_retired_problem_must_say_why():
@@ -132,11 +129,10 @@ def test_a_retired_problem_must_say_why():
         make_problem(status="retired")
 
 
-@pytest.mark.parametrize("status", [ProblemStatus.CREATED, ProblemStatus.ACTIVE])
-def test_a_problem_still_in_service_carries_no_reason(status):
+def test_a_problem_still_in_service_carries_no_reason():
     """It would name a retirement that did not happen."""
     with pytest.raises(ValidationError, match="retired_reason"):
-        make_problem(status=status, retired_reason="defective")
+        make_problem(status=ProblemStatus.CREATED, retired_reason="defective")
 
 
 def test_an_unnamed_status_is_rejected():

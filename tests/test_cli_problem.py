@@ -84,21 +84,21 @@ def test_the_page_names_what_the_run_left_and_what_it_matched(root, monkeypatch,
 
 
 def test_a_retired_problem_names_the_reason(root, monkeypatch, capsys):
-    """Readers treat the two retirements apart, so the status alone would not
-    say whether its attempts count."""
+    """The reason decides whether its attempts count, so the status alone would
+    not do."""
     stored = landed(root, monkeypatch)
     ProblemStore(root).put(
         stored.model_copy(
             update={
                 "status": ProblemStatus.RETIRED,
-                "retired_reason": RetirementReason.TELEGRAPHED,
+                "retired_reason": RetirementReason.DEFECTIVE,
             }
         )
     )
 
     reading(monkeypatch)
 
-    assert "retired: telegraphed" in capsys.readouterr().out
+    assert "retired: defective" in capsys.readouterr().out
 
 
 def test_a_problem_that_is_not_stored_says_so(root, monkeypatch, capsys):

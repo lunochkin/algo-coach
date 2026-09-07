@@ -12,7 +12,6 @@
     "ProblemStatus": {
       "enum": [
         "created",
-        "active",
         "retired"
       ],
       "title": "ProblemStatus",
@@ -20,8 +19,7 @@
     },
     "RetirementReason": {
       "enum": [
-        "defective",
-        "telegraphed"
+        "defective"
       ],
       "title": "RetirementReason",
       "type": "string"

@@ -12,14 +12,12 @@ class ProblemDifficulty(StrEnum):
 
 
 class ProblemStatus(StrEnum):
-    CREATED = "created"  # written and verified, not yet cleared to serve
-    ACTIVE = "active"  # served by the drill loop
+    CREATED = "created"  # written and verified; served, since no gate over the corpus exists yet
     RETIRED = "retired"  # no longer served; `retired_reason` says why
 
 
 class RetirementReason(StrEnum):
     DEFECTIVE = "defective"  # its cases decide something else; its attempts leave mastery
-    TELEGRAPHED = "telegraphed"  # it names its own approach; its attempts are kept
 
 
 class Problem(MachineProvenance):
