@@ -16,7 +16,7 @@ class Call(BaseModel):
     prompt_hash: str = Field(min_length=1)  # not unique; a retry and re-sampling both repeat it
     response: str | None = None
     error: str | None = None
-    thinking: str | None = None  # absent where the model judged it needed none
+    reasoning: str | None = None  # absent where the model judged it needed none
     stop_reason: str | None = None
     temperature: float | None = None  # absent is the provider's default, which moves
     pin: str | None = None  # the endpoint, named to the quantization
@@ -28,8 +28,8 @@ class Call(BaseModel):
     # other rather than subtracted. Zero and absent are different facts.
     reasoning_tokens: int | None = None
     cost: float | None = None  # as the router charged then, not a rate applied later
-    elapsed_ms: int | None = None  # what the caller waited, over `attempts` requests
-    attempts: int | None = None
+    elapsed_ms: int | None = None  # what the caller waited, over `requests` requests
+    requests: int | None = None
     request_ms: int | None = None  # the last request alone: the one that answered or failed
 
     @model_validator(mode="after")

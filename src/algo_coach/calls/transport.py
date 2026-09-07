@@ -6,7 +6,7 @@ from typing import Any, Protocol
 
 # Thinking and answer together: no model reached through this transport accepts
 # a separate reasoning budget. Sized against a runaway, not against a reading —
-# one generation call spent 11,520 tokens thinking and had 466 left for a
+# one generation call spent 11,520 tokens reasoning and had 466 left for a
 # statement, which arrived cut in half and parsed as nothing.
 MAX_TOKENS = 32000
 
@@ -25,7 +25,7 @@ class ProviderError(Exception):
 @dataclass(frozen=True)
 class Reply:
     text: str | None  # None where the model answered nothing: a refusal, or cut short
-    thinking: str | None = None
+    reasoning: str | None = None
     stop_reason: str | None = None
     input_tokens: int | None = None
     output_tokens: int | None = None
@@ -33,7 +33,7 @@ class Reply:
     cost: float | None = None  # always returned; absent only if the provider reported none
     provider: str | None = None  # the company the router reports, not the endpoint
     request_ms: int | None = None  # this request alone; a caller's own timing includes backoff
-    attempts: int | None = None
+    requests: int | None = None
 
 
 @dataclass(frozen=True)
@@ -42,7 +42,7 @@ class Trace:
     wrapped around it, so every caller still catches the type it caught
     before."""
 
-    attempts: int
+    requests: int
     request_ms: int
 
 

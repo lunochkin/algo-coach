@@ -59,7 +59,7 @@ class Bar(BaseModel):
     mutants: int = 0
     survived: int = 0
     won: int = 0  # cases the rounds appended to the set
-    offered: int = 0  # what they proposed to it, so the difference killed nothing
+    proposed: int = 0  # what they proposed to it, so the difference killed nothing
     # the fuzz pass before them: the inputs it built and the ones it kept,
     # which cost subprocesses rather than a call
     built: int = 0
@@ -90,7 +90,7 @@ class LoopVerdict(TypedDict):
     gate: Discard | None
     survived: int
     won: int
-    offered: int
+    proposed: int
     killed: int
     rounds: list[int]
 
@@ -151,7 +151,7 @@ def loop_verdicts(bar: Bar) -> LoopVerdict:
         gate=bar.gate,
         survived=bar.survived,
         won=bar.won,
-        offered=bar.offered,
+        proposed=bar.proposed,
         killed=sum(bar.caught),
         rounds=bar.caught,
     )
@@ -177,7 +177,7 @@ def barred(hardened: Hardened) -> Bar:
         # the rounds' own, which is what the site is scored on. The pass before
         # them paid for no call
         won=len(hardened.cases) - kept,
-        offered=hardened.offered,
+        proposed=hardened.proposed,
         built=hardened.fuzzed.built if hardened.fuzzed else 0,
         kept=kept,
         declared=hardened.declared,

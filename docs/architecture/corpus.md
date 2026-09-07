@@ -414,7 +414,7 @@ A verification run is one execution of a solution against a problem's cases.
 - **The cap is stored beside the results.** The cap decided any timeout, and
   two runs under different caps are not comparable. No other field would show
   that the caps differ.
-- **The backend and the interpreter are named, as one opaque string.** A local
+- **The runner and the interpreter are named, as one opaque string.** A local
   subprocess and a container under a CPU limit decide a timeout differently,
   and nothing else separates two runs that disagree. Full environment
   provenance is deferred, and subsumes this field rather than replacing it.
@@ -456,7 +456,7 @@ fixed here rather than by whatever executed it.
 - **A return that JSON cannot encode is `CRASHED`.** The fault is the
   solution's rather than the case's. `WRONG` would file it beside an answer
   that was computed and is merely incorrect. The child does the encoding, so
-  every backend uses the encoder `as_json` uses, or the same return would be
+  every runner uses the encoder `as_json` uses, or the same return would be
   decided differently by where it ran.
 - **A solution defining no module-level `solve` fails every case as
   `CRASHED`.** Code that does not parse is rejected the same way. It is a
@@ -469,11 +469,11 @@ fixed here rather than by whatever executed it.
 - **A runner fault is raised, never recorded.** A subprocess that fails to
   start says nothing about the solution, and a stored `CRASHED` would discard a
   sound problem over the runner's own defect.
-- **A run is comparable only within one backend.** A CPU limit changes what a
+- **A run is comparable only within one runner.** A CPU limit changes what a
   timing bar measures, so the smallest input separating a naive solution from a
-  canonical is a fact about the backend that found it.
-- **Comparison stays outside the executor.** A backend is handed code, the
-  arguments and a cap, and returns what each call produced. The backend is
+  canonical is a fact about the runner that found it.
+- **Comparison stays outside the runner.** A runner is handed code, the
+  arguments and a cap, and returns what each call produced. The runner is
   never told what a case expects, so the rule deciding a case cannot vary by
   where the code ran.
 - **A case yielding no value is read by the solution's role.** A canonical that

@@ -180,7 +180,7 @@ def test_the_record_says_what_a_round_proposed_and_what_landed(tmp_path):
     _, _, outcomes = run(tmp_path, model)
 
     one = sites(outcomes)[CallSite.DISCRIMINATION]
-    assert one.offered == 3
+    assert one.proposed == 3
     assert one.won == 2
 
 

@@ -40,7 +40,7 @@ class Hardened:
     # proposals a round put to the set, landed or not. What the rounds landed
     # is `cases` minus the fuzz pass's, so the difference is what killed
     # nothing
-    offered: int = 0
+    proposed: int = 0
     # a proposed input the two solutions answered differently. The caller
     # discards the problem on it, as it does on any disagreement
     disagreement: Disagreement | None = None
@@ -105,7 +105,7 @@ def harden(
     paid: Call | None = None
     fuzzed: Fuzzed | None = None
     caught: list[int] = []
-    dropped = played = offered = 0
+    dropped = played = proposed = 0
 
     started = monotonic()
     standing = [one.mutant for one in survivors(kill(standing, cases, cap_ms=against_ms))]
@@ -131,7 +131,7 @@ def harden(
                 standing=standing,
                 played=played,
                 dropped=dropped,
-                offered=offered,
+                proposed=proposed,
                 declared=declared,
                 caught=caught,
                 call=paid,
@@ -142,7 +142,7 @@ def harden(
     while standing and played < rounds:
         played += 1
         notes("round", f"{played} of {rounds}: asking for the cases that kill {len(standing)}")
-        proposed, call = propose_cases(
+        proposals, call = propose_cases(
             transport,
             calls,
             statement,
@@ -152,16 +152,16 @@ def harden(
             configuration=configuration,
         )
         paid = call
-        notes("round", f"{played}: {len(proposed)} case(s) proposed", call)
+        notes("round", f"{played}: {len(proposals)} case(s) proposed", call)
         settled = _settled(
-            proposed,
+            proposals,
             canonical=canonical,
             reference=reference,
             call=call,
             round=played,
             cap_ms=cap_ms,
         )
-        dropped += len(proposed) - len(settled.cases) - len(settled.disagreements)
+        dropped += len(proposals) - len(settled.cases) - len(settled.disagreements)
         if settled.disagreements:
             return _left(
                 won=won,
@@ -169,7 +169,7 @@ def harden(
                 standing=standing,
                 played=played,
                 dropped=dropped,
-                offered=offered,
+                proposed=proposed,
                 declared=declared,
                 caught=caught,
                 call=paid,
@@ -184,7 +184,7 @@ def harden(
             caught.append(0)
             break
 
-        offered += len(settled.cases)
+        proposed += len(settled.cases)
         asked.extend(one.args for one in settled.cases)
         before, started = len(standing), monotonic()
         killers, standing = _killers(standing, settled.cases, cap_ms=against_ms)
@@ -206,7 +206,7 @@ def harden(
         standing=standing,
         played=played,
         dropped=dropped,
-        offered=offered,
+        proposed=proposed,
         declared=declared,
         caught=caught,
         call=paid,
@@ -232,7 +232,7 @@ def _killers(
 
 
 def _settled(
-    proposed: Sequence[Sequence[Any]],
+    proposals: Sequence[Sequence[Any]],
     *,
     canonical: str,
     reference: str,
@@ -245,10 +245,10 @@ def _settled(
 
     One it cannot answer costs the case rather than the problem.
     """
-    ours = outputs(canonical, proposed, cap_ms=cap_ms)
+    ours = outputs(canonical, proposals, cap_ms=cap_ms)
     answered = [
         (list(args), value)
-        for args, value in zip(proposed, ours, strict=True)
+        for args, value in zip(proposals, ours, strict=True)
         if not isinstance(value, NoValue)
     ]
     args = [one for one, _ in answered]
@@ -269,7 +269,7 @@ def _left(
     standing: Sequence[Any],
     played: int,
     dropped: int,
-    offered: int,
+    proposed: int,
     declared: int,
     caught: list[int],
     call: Call | None,
@@ -282,7 +282,7 @@ def _left(
         survived=len(standing),
         rounds=played,
         dropped=dropped,
-        offered=offered,
+        proposed=proposed,
         call=call,
         disagreement=disagreement,
         fuzzed=fuzzed,

@@ -28,11 +28,11 @@ class FakeTransport:
         return self.reply
 
 
-def answering(text: str = '{"ok": true}', thinking: str | None = None) -> FakeTransport:
+def answering(text: str = '{"ok": true}', reasoning: str | None = None) -> FakeTransport:
     return FakeTransport(
         Reply(
             text=text,
-            thinking=thinking,
+            reasoning=reasoning,
             stop_reason="stop",
             input_tokens=11,
             output_tokens=22,
@@ -80,7 +80,7 @@ def test_what_came_back_is_recorded_beside_what_it_cost(tmp_path):
     log = CallLog(tmp_path)
 
     call, text = ask(
-        answering('{"techniques": []}', thinking="weighing the invariant"),
+        answering('{"techniques": []}', reasoning="weighing the invariant"),
         log,
         system="sys",
         content="body",
@@ -90,7 +90,7 @@ def test_what_came_back_is_recorded_beside_what_it_cost(tmp_path):
     assert text == '{"techniques": []}'
     (stored,) = log.all()
     assert stored.response == '{"techniques": []}'
-    assert stored.thinking == "weighing the invariant"
+    assert stored.reasoning == "weighing the invariant"
     assert (stored.input_tokens, stored.output_tokens) == (11, 22)
     assert stored.stop_reason == "stop"
     assert stored.provider == "a-provider"
@@ -233,7 +233,7 @@ def test_the_execution_and_its_last_request_are_both_recorded(tmp_path, monkeypa
     monkeypatch.setattr(ASK, "monotonic", lambda: next(ticks))
     log = CallLog(tmp_path)
     transport = answering()
-    transport.reply = replace(transport.reply, request_ms=90, attempts=2)
+    transport.reply = replace(transport.reply, request_ms=90, requests=2)
 
     ask(
         transport,
@@ -244,7 +244,7 @@ def test_the_execution_and_its_last_request_are_both_recorded(tmp_path, monkeypa
     )
 
     (stored,) = log.all()
-    assert (stored.elapsed_ms, stored.attempts, stored.request_ms) == (250, 2, 90)
+    assert (stored.elapsed_ms, stored.requests, stored.request_ms) == (250, 2, 90)
 
 
 def test_a_failure_records_both_levels_too(tmp_path, monkeypatch):
@@ -255,7 +255,7 @@ def test_a_failure_records_both_levels_too(tmp_path, monkeypatch):
     monkeypatch.setattr(ASK, "monotonic", lambda: next(ticks))
     log = CallLog(tmp_path)
     failure = RuntimeError("timed out")
-    stamp(failure, Trace(attempts=5, request_ms=9_000))
+    stamp(failure, Trace(requests=5, request_ms=9_000))
 
     with pytest.raises(RuntimeError):
         ask(
@@ -267,7 +267,7 @@ def test_a_failure_records_both_levels_too(tmp_path, monkeypatch):
         )
 
     (stored,) = log.all()
-    assert (stored.elapsed_ms, stored.attempts, stored.request_ms) == (30_000, 5, 9_000)
+    assert (stored.elapsed_ms, stored.requests, stored.request_ms) == (30_000, 5, 9_000)
 
 
 def test_a_transport_that_never_retried_stamps_nothing(tmp_path):
@@ -285,7 +285,7 @@ def test_a_transport_that_never_retried_stamps_nothing(tmp_path):
         )
 
     (stored,) = log.all()
-    assert (stored.attempts, stored.request_ms) == (None, None)
+    assert (stored.requests, stored.request_ms) == (None, None)
 
 
 def test_a_call_from_before_the_waits_were_measured_still_reads():

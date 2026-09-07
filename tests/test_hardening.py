@@ -87,7 +87,7 @@ def test_a_proposal_that_killed_nothing_does_not_land(tmp_path):
     hardened = run(tmp_path, model, WEAK)
 
     assert [one.args for one in hardened.cases] == BOUNDARY
-    assert hardened.offered == 3
+    assert hardened.proposed == 3
 
 
 def test_two_proposals_killing_one_mutant_land_the_first(tmp_path):
@@ -218,7 +218,7 @@ def test_a_round_that_proposes_nothing_stops_the_loop(tmp_path):
 
     assert len(model.calls) == 1
     assert hardened.rounds == 1
-    assert hardened.offered == 0
+    assert hardened.proposed == 0
     # the zero keeps a counter's position reading as the round that left it
     assert hardened.caught == [0]
     assert hardened.survived == 3

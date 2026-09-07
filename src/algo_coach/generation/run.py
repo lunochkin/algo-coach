@@ -79,7 +79,7 @@ class Progress(BaseModel):
     mutants: int = 0
     survived: int = 0
     won: int = 0
-    offered: int = 0  # what the rounds proposed, so the difference killed nothing
+    proposed: int = 0  # what the rounds proposed, so the difference killed nothing
     # the fuzz pass before the rounds: what it built and what it kept
     built: int = 0
     kept: int = 0
@@ -228,7 +228,7 @@ def write_problems(
                     mutants=p.bar.mutants,
                     survived=p.bar.survived,
                     won=p.bar.won,
-                    offered=p.bar.offered,
+                    proposed=p.bar.proposed,
                     built=p.bar.built,
                     kept=p.bar.kept,
                     declared=p.bar.declared,

@@ -43,6 +43,11 @@
     }
   },
   "properties": {
+    "cap_ms": {
+      "exclusiveMinimum": 0,
+      "title": "Cap Ms",
+      "type": "integer"
+    },
     "created_at": {
       "format": "date-time",
       "title": "Created At",
@@ -68,18 +73,13 @@
       "minLength": 1,
       "title": "Solution Id",
       "type": "string"
-    },
-    "timeout_ms": {
-      "exclusiveMinimum": 0,
-      "title": "Timeout Ms",
-      "type": "integer"
     }
   },
   "required": [
     "id",
     "created_at",
     "solution_id",
-    "timeout_ms",
+    "cap_ms",
     "runner"
   ],
   "title": "Verification",

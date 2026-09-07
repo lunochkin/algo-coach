@@ -6,7 +6,7 @@ from algo_coach.verifications import VerificationLog
 def run(solution_id: str = "s1", **overrides):
     fields = {
         "solution_id": solution_id,
-        "timeout_ms": 2000,
+        "cap_ms": 2000,
         "runner": "subprocess/cpython-3.14",
     } | overrides
     return verification(**fields)
@@ -34,15 +34,13 @@ def test_a_second_run_does_not_supersede_the_first(tmp_path):
     """Neither answers for the other. A run under a different cap is a
     different question, and both stay readable."""
     store = VerificationLog(tmp_path)
-    slow = run(timeout_ms=100, results=[CaseResult(case_id="c1", outcome="timeout")])
-    generous = run(
-        timeout_ms=5000, results=[CaseResult(case_id="c1", outcome="passed", elapsed_ms=1)]
-    )
+    slow = run(cap_ms=100, results=[CaseResult(case_id="c1", outcome="timeout")])
+    generous = run(cap_ms=5000, results=[CaseResult(case_id="c1", outcome="passed", elapsed_ms=1)])
     store.append(slow)
     store.append(generous)
 
     assert store.verifications() == [slow, generous]
-    assert [one.timeout_ms for one in store.verifications()] == [100, 5000]
+    assert [one.cap_ms for one in store.verifications()] == [100, 5000]
 
 
 def test_runs_are_read_per_solution(tmp_path):

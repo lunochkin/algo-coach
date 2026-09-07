@@ -152,7 +152,7 @@ class FakeTransport:
     # test asks about is whether the price reaches the record, never how it
     # varies.
     cost: float | None = None
-    # Input, output and the thinking split, as a router would report them.
+    # Input, output and the reasoning split, as a router would report them.
     tokens: tuple[int | None, int | None, int | None] = (None, None, None)
     # What the answering request took. A list is drawn in call order, for the
     # tests about the slowest of several.

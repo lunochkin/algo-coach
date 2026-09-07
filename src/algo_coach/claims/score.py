@@ -58,7 +58,7 @@ class Score(BaseModel):
     output_tokens: int = 0
     reasoning_tokens: int = 0
     tokened: int = 0  # readings whose call reported a count
-    reasoned: int = 0  # of those, the ones reporting the thinking split
+    reasoned: int = 0  # of those, the ones reporting the reasoning split
     # The answering request alone, never what the caller waited: the difference
     # is the endpoint's backoff. The slowest sits beside the mean, which hides
     # an occasional stall.
@@ -152,7 +152,7 @@ def per_decision(
 
 def spent(scored: Score, calls: Sequence[Call]) -> None:
     """Counted over the calls that reported, never over the readings. The
-    thinking split and the timing each have their own denominator."""
+    reasoning split and the timing each have their own denominator."""
     for call in calls:
         # An empty verdict has two causes and the claim cannot tell them apart,
         # since both name no technique. The call can, so it is counted here.

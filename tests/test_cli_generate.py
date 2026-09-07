@@ -323,7 +323,7 @@ def test_the_line_reports_what_the_mutation_loop_caught():
         mutants=12,
         survived=2,
         won=3,
-        offered=18,
+        proposed=18,
         declared=6,
         fuzzed=2,
         caught=[2],
@@ -345,7 +345,7 @@ def test_the_line_reports_what_a_round_proposed_and_what_landed():
         mutants=12,
         survived=2,
         won=3,
-        offered=18,
+        proposed=18,
         caught=[10],
     )
 

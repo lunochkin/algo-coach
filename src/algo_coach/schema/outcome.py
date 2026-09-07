@@ -67,9 +67,9 @@ class SiteOutcome(MachineProvenance):
     # what each round killed, in order, summing to `killed`. A list rather than
     # a field per round, since `ROUNDS` is what a corpus revises
     rounds: list[int] = Field(default_factory=list[int])
-    # proposals the rounds put to the set, landed or not. `offered` less `won`
+    # proposals the rounds put to the set, landed or not. `proposed` less `won`
     # is what killed nothing, which is what a round wasted its call on
-    offered: int = 0
+    proposed: int = 0
     # cases the canonical answered differently from what its own call
     # declared. A reading rather than a gate, since one call wrote both
     misdeclared: int = 0

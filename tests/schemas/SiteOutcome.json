@@ -126,11 +126,6 @@
       "title": "Mutants",
       "type": "integer"
     },
-    "offered": {
-      "default": 0,
-      "title": "Offered",
-      "type": "integer"
-    },
     "pin": {
       "anyOf": [
         {
@@ -166,6 +161,11 @@
       ],
       "default": null,
       "title": "Prompt Hash"
+    },
+    "proposed": {
+      "default": 0,
+      "title": "Proposed",
+      "type": "integer"
     },
     "provider": {
       "anyOf": [

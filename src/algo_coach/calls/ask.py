@@ -97,7 +97,7 @@ def ask(
         # it is rather than as an empty verdict.
         response=reply.text,
         error=None if reply.text is not None else f"no verdict: {reply.stop_reason}",
-        thinking=reply.thinking,
+        reasoning=reply.reasoning,
         stop_reason=reply.stop_reason,
         input_tokens=reply.input_tokens,
         output_tokens=reply.output_tokens,
@@ -106,7 +106,7 @@ def ask(
         provider=reply.provider,
         elapsed_ms=elapsed(started),
         request_ms=reply.request_ms,
-        attempts=reply.attempts,
+        requests=reply.requests,
     )
     log.append(call)
     return call, reply.text
@@ -115,7 +115,7 @@ def ask(
 def failed(exc: Exception) -> dict[str, int]:
     """What the transport stamped, or nothing where it never retried."""
     trace = traced(exc)
-    return {} if trace is None else {"attempts": trace.attempts, "request_ms": trace.request_ms}
+    return {} if trace is None else {"requests": trace.requests, "request_ms": trace.request_ms}
 
 
 def elapsed(started: float) -> int:

@@ -157,12 +157,12 @@ class OpenRouter:
         """One request, timed and counted whether it answers or fails."""
         started = time.monotonic()
         try:
-            return replace(self.attempt(**request), attempts=tries, request_ms=since(started))
+            return replace(self.request_once(**request), requests=tries, request_ms=since(started))
         except Exception as exc:
-            stamp(exc, Trace(attempts=tries, request_ms=since(started)))
+            stamp(exc, Trace(requests=tries, request_ms=since(started)))
             raise
 
-    def attempt(self, **request: object) -> Reply:
+    def request_once(self, **request: object) -> Reply:
         """One request, read into the terms the call log keeps."""
         response = self.client.chat.completions.create(**request)
 
@@ -183,7 +183,7 @@ class OpenRouter:
         usage = getattr(response, "usage", None)
         return Reply(
             text=choice.message.content or None,
-            thinking=extra(choice.message, "reasoning"),
+            reasoning=extra(choice.message, "reasoning"),
             stop_reason=choice.finish_reason,
             input_tokens=getattr(usage, "prompt_tokens", None),
             output_tokens=getattr(usage, "completion_tokens", None),
@@ -194,8 +194,8 @@ class OpenRouter:
 
 
 def reasoning(usage: object) -> int | None:
-    """How much of the completion was spent thinking, where the router said it.
-    Absent rather than zero: thinking nothing and not reporting a split
+    """How much of the completion was spent reasoning, where the router said it.
+    Absent rather than zero: reasoning nothing and not reporting a split
     differ."""
     details = getattr(usage, "completion_tokens_details", None) if usage is not None else None
     if details is None:

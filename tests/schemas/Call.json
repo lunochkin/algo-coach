@@ -1,17 +1,5 @@
 {
   "properties": {
-    "attempts": {
-      "anyOf": [
-        {
-          "type": "integer"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Attempts"
-    },
     "cost": {
       "anyOf": [
         {
@@ -123,6 +111,18 @@
       "default": null,
       "title": "Provider"
     },
+    "reasoning": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reasoning"
+    },
     "reasoning_tokens": {
       "anyOf": [
         {
@@ -146,6 +146,18 @@
       ],
       "default": null,
       "title": "Request Ms"
+    },
+    "requests": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Requests"
     },
     "response": {
       "anyOf": [
@@ -182,18 +194,6 @@
       ],
       "default": null,
       "title": "Temperature"
-    },
-    "thinking": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Thinking"
     }
   },
   "required": [

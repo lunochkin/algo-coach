@@ -12,7 +12,7 @@ def result(case_id: str, outcome: str, **overrides) -> CaseResult:
 
 
 def run(**overrides) -> Verification:
-    fields = {"solution_id": "s1", "timeout_ms": 2000, "runner": "subprocess/cpython-3.14"}
+    fields = {"solution_id": "s1", "cap_ms": 2000, "runner": "subprocess/cpython-3.14"}
     return verification(**(fields | overrides))
 
 
@@ -28,7 +28,7 @@ def test_a_run_naming_no_solution_is_rejected():
 def test_a_run_stores_the_cap_that_decided_a_timeout():
     """Two runs under different caps are not comparable, and the outcome is
     the only thing that would show it."""
-    assert run(timeout_ms=500).timeout_ms == 500
+    assert run(cap_ms=500).cap_ms == 500
 
 
 def test_a_run_names_the_backend_and_the_interpreter():
@@ -47,8 +47,8 @@ def test_a_run_naming_no_runner_is_rejected():
 def test_a_cap_of_nothing_is_rejected():
     """Every case would time out, so the run would decide nothing about the
     solution."""
-    with pytest.raises(ValidationError, match="timeout_ms"):
-        run(timeout_ms=0)
+    with pytest.raises(ValidationError, match="cap_ms"):
+        run(cap_ms=0)
 
 
 def test_a_result_is_per_case_and_says_how_it_went():

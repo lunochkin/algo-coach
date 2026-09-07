@@ -71,7 +71,7 @@ def test_a_canonical_says_nothing_about_how_it_ran():
     assert not [
         name
         for name in Solution.model_fields
-        if name in {"results", "outcome", "verified", "timeout_ms"}
+        if name in {"results", "outcome", "verified", "cap_ms"}
     ]
 
 

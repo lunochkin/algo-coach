@@ -177,7 +177,7 @@ def test_what_came_back_is_read_into_the_terms_the_log_keeps():
     )
 
     assert reply.text == "answer"
-    assert reply.thinking == "weighing the invariant"
+    assert reply.reasoning == "weighing the invariant"
     assert reply.stop_reason == "stop"
     assert (reply.input_tokens, reply.output_tokens) == (11, 22)
     assert reply.provider == "Anthropic"
@@ -191,7 +191,7 @@ def test_a_model_that_shows_no_reasoning_leaves_it_empty():
         system="s", content="c", model="m", effort="low", pin="a-host", schema=None
     )
 
-    assert reply.thinking is None
+    assert reply.reasoning is None
 
 
 def test_an_answer_with_no_content_is_no_verdict():
@@ -275,7 +275,7 @@ def test_a_rate_limit_is_waited_out_rather_than_reported(monkeypatch):
     assert slept == [5.0, 15.0]
     # What the two waits on the record differ by: held behind a cap twice, the
     # call reads as a slow model without this.
-    assert reply.attempts == 3
+    assert reply.requests == 3
 
 
 def test_every_other_failure_is_raised_on_the_first_try(monkeypatch):
@@ -305,7 +305,7 @@ def test_a_404_naming_no_endpoints_is_asked_once_more(monkeypatch):
         system="s", content="c", model="m", effort="low", pin="a-host", schema=None
     )
 
-    assert reply.attempts == 2
+    assert reply.requests == 2
     assert len(api.chat.completions.calls) == 2
     # the shortest wait: what this asks is whether the list moved
     assert slept == [5.0]
@@ -414,7 +414,7 @@ def test_no_temperature_sends_none_at_all():
 def test_an_endpoint_that_answers_first_time_took_one_attempt():
     reply = OpenRouter(client())(system="s", content="c", model="m", effort="low", pin="a-host")
 
-    assert reply.attempts == 1
+    assert reply.requests == 1
 
 
 def test_the_request_times_itself(monkeypatch):
@@ -440,7 +440,7 @@ def test_a_failure_carries_what_the_loop_knows(monkeypatch):
 
     trace = traced(failure.value)
     assert trace is not None
-    assert trace.attempts == 5
+    assert trace.requests == 5
 
 
 def test_a_wait_is_reported_while_it_is_being_waited_out(monkeypatch):
@@ -533,7 +533,7 @@ def test_a_transport_nobody_asked_to_report_still_waits(monkeypatch):
         system="s", content="c", model="m", effort="low", pin="a-host", schema=None
     )
 
-    assert reply.attempts == 2
+    assert reply.requests == 2
     assert slept == [5.0]
 
 

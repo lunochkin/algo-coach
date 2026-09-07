@@ -272,7 +272,7 @@ def solution(
 def verification(
     solution_id: str,
     *,
-    timeout_ms: int,
+    cap_ms: int,
     runner: str,
     results: Sequence[CaseResult] = (),
 ) -> Verification:
@@ -282,7 +282,7 @@ def verification(
         id=new_id(),
         created_at=datetime.now(UTC),
         solution_id=solution_id,
-        timeout_ms=timeout_ms,
+        cap_ms=cap_ms,
         runner=runner,
         results=list(results),
     )
@@ -302,7 +302,7 @@ def site_outcome(
     won: int = 0,
     killed: int = 0,
     rounds: list[int] | None = None,
-    offered: int = 0,
+    proposed: int = 0,
     misdeclared: int = 0,
     separating: int | None = None,
     unseparated: str | None = None,
@@ -325,7 +325,7 @@ def site_outcome(
         won=won,
         killed=killed,
         rounds=list(rounds or []),
-        offered=offered,
+        proposed=proposed,
         misdeclared=misdeclared,
         separating=separating,
         unseparated=unseparated,

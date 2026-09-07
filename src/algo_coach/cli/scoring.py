@@ -184,15 +184,15 @@ def considered(scored: Score) -> str:
 
 
 def tokens(scored: Score) -> str:
-    """In, out and of that how much was thinking, per attempt. One column,
+    """In, out and of that how much was reasoning, per attempt. One column,
     since a verdict is a dozen tokens and everything above that is the model
     deciding."""
     if not scored.tokened:
         return "—"
-    thinking = f"{round(scored.reasoning_tokens / scored.reasoned)}" if scored.reasoned else "—"
+    reasoning = f"{round(scored.reasoning_tokens / scored.reasoned)}" if scored.reasoned else "—"
     return (
         f"{round(scored.input_tokens / scored.tokened)}/"
-        f"{round(scored.output_tokens / scored.tokened)}/{thinking}"
+        f"{round(scored.output_tokens / scored.tokened)}/{reasoning}"
     )
 
 
