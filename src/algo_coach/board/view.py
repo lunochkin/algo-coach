@@ -9,7 +9,7 @@ from algo_coach.schema import Attempt, FailureMode, Problem, SelfLabel, Techniqu
 
 
 class TechniqueRow(BaseModel):
-    """One technique's standing, derived from the log on every read."""
+    """One technique's progress, derived from the log on every read."""
 
     technique: str
     attempt_count: int

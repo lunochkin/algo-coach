@@ -63,7 +63,7 @@ seed source="content/cards":
 
 # --- practice ---
 
-# Per-technique standing.
+# Per-technique progress.
 board *args:
     uv run algo-coach board {{ args }}
 

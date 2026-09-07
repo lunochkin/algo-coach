@@ -126,7 +126,7 @@ def main() -> None:
     seed_parser.add_argument("kind", choices=["cards"])
     seed_parser.add_argument("source", help="path to an authored JSON file, or a directory of them")
 
-    board_parser = _command(sub, "board", "per-technique standing, derived from the log")
+    board_parser = _command(sub, "board", "per-technique progress, derived from the log")
     board_parser.add_argument("--json", action="store_true", help="emit rows instead of a table")
     board_parser.add_argument(
         "--stale", action="store_true", help="order by recency, least recently practised first"

@@ -71,7 +71,7 @@ the call. Adding a model is a string. Adding a provider is a base URL.
 
 ## What it looks like
 
-Per-technique standing over the archived corpus of 1,785 attempts. The board
+Per-technique progress over the archived corpus of 1,785 attempts. The board
 stores nothing: every column is computed from the append-only log on read.
 
 ```
@@ -403,7 +403,7 @@ uv run algo-coach <command>
 | Command | What it does |
 |---|---|
 | `seed` | seed authored cards into the store |
-| `board` | per-technique standing: attempts, solved, recency, labels |
+| `board` | per-technique progress: attempts, solved, recency, labels |
 | `claim` | name the techniques a stored attempt used: the classifier, or the user with `--by-hand` |
 | `match` | which problems exercise a card's templates: the matcher, or the user with `--by-hand` |
 | `read` | name the techniques each stored canonical used |

@@ -37,7 +37,7 @@ class Coverage(BaseModel):
 
 def core(card: Card) -> list[Template]:
     """The templates a ladder must cover: what `candidates` asks about, less
-    the capstone, which is surfaced on request alone."""
+    the optional template, which is surfaced on request alone."""
     return [template for template in candidates(card) if not template.optional]
 
 

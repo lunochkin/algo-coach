@@ -140,9 +140,9 @@ file in place.
    card's before writing the code; a card whose trigger does not select its own
    contents teaches a boundary it then violates.
 
-   **One optional template, and usually one.** Mark it `"optional": true`: the
-   capstone, a stretch rather than the day's work, authored in full and outside
-   the default study set. Never two — a second means the card was scoped wrong.
+   **One optional template, and usually one.** Mark it `"optional": true`: a
+   stretch rather than the day's work, authored in full and outside the default
+   study set. Never two — a second means the card was scoped wrong.
 
    Optional means *reserved for deriving*, never *rare* or *advanced-looking*.
    A faster idiom the reader would reach for in an ordinary solve — a bitset

@@ -34,7 +34,6 @@ without redefining them. Grouped by the file that specifies the record.
   templates to reproduce from memory, and a selector for problems to solve.
 - **Template**: one form of a technique, authored on a card, that a user
   reproduces from memory. Core by default.
-- **Capstone**: a card's one optional template, shown only on request.
 - **Trigger**: the field on a card or a template saying when to reach for the
   technique or the form. Withheld during a probe.
 - **Speedup**: a flag on a template saying its form is faster than the naive
@@ -147,6 +146,7 @@ without redefining them. Grouped by the file that specifies the record.
   draft and its site outcomes share it.
 - **Replay**: running the four answering sites over stored problems at a new
   bench. It writes nothing to the corpus.
+- **Sweep**: one `generate` run over every target, or over every held draft.
 
 ### Machine records
 
@@ -178,7 +178,8 @@ without redefining them. Grouped by the file that specifies the record.
 - **Technique claim** (claim): a record naming the techniques an attempt
   used. The user's stands over the classifier's.
 - **Classifier**: the model call reading an attempt's code for the
-  techniques it used.
+  techniques it used. As a `source` value on any record, `classifier` means a
+  model wrote it, whichever call.
 - **Decline**: a claim stating that none of the candidates apply. Distinct
   from an empty claim, which answers nothing.
 - **Fallback**: the problem's own techniques, answering an attempt no claim

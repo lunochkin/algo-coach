@@ -79,13 +79,13 @@ class Status:
         filled = row.answered * BAR // row.total if row.total else 0
         bar = f"[{'#' * filled}{'-' * (BAR - filled)}]"
         counts = f"{row.answered:>{widths.total}}/{row.total}"
-        standing = f"  {bar}  {counts}{self.tail(row)}"
-        # The name gives way, never the standing: a cut line would otherwise
+        figures = f"  {bar}  {counts}{self.tail(row)}"
+        # The name gives way, never the figures: a cut line would otherwise
         # lose the counts and the failure tally first.
-        room = self.widths.line - len(standing)
+        room = self.widths.line - len(figures)
         if self.widths.line and len(name) > room:
             name = name[: max(room - 1, 0)] + "…"
-        return name + standing
+        return name + figures
 
     def tail(self, row: Row) -> str:
         parts: list[str] = []

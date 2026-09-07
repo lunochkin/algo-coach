@@ -18,13 +18,14 @@ architecture, and `README.md` is the map.
   problem class have no form to reproduce, so no template names them, and a
   corpus written from templates alone can never exercise them.
 - **The template it was written for is stored, where there was one.**
-  `generated_for` is an assertion rather than a reading, and it makes the
+  `generated_for` records what the generator was told rather than what a
+  reader inferred, and it makes the
   first template match provenance. It never claims the problem exercises
   nothing else. A problem written for a technique target carries no
   `generated_for`: the generator was told no form, so no pair can be asserted.
-- **A technique target asserts no technique either.** An assertion records what
-  the generator was told, and a technique target told it a skill rather than a
-  solution.
+- **A technique target asserts no technique either.** The generator's match
+  records what the generator was told, and a technique target told it a skill
+  rather than a solution.
 - **Provenance is required.** A problem names what produced it, as any machine
   record does.
 - **A problem's techniques are derived from readings of its canonical
@@ -348,7 +349,8 @@ A solution the engine wrote for a problem, in one of three roles.
   which form is a question about the solution, and a statement only implies
   one. The matcher reads the canonical beside the statement, and the verdict
   is about the canonical.
-- **A problem may carry several canonicals, and the set is the assertion.** Two
+- **A problem may carry several canonicals, and together they say what it
+  teaches.** Two
   approaches to one problem is the ordinary case, and two canonicals let one
   rung cover a core template and an optional one. A problem carrying one
   canonical can teach one form.

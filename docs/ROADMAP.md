@@ -19,7 +19,7 @@ are not repeated here. `docs/TODO.md` drops a phase when it closes.
 - Push API: `Problem` and `Attempt` ingested per record from the practice
   client.
 - Techniques: the product-owned vocabulary, shipped as code.
-- Drill board: per-technique standing derived from the log.
+- Drill board: per-technique progress derived from the log.
 
 Measured:
 

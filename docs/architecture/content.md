@@ -102,7 +102,7 @@ technique, and a card and a mastery estimate share no data.
   claimed is a defect in the run, and `corpus.md` names the three things that
   produce one.
 - **One template may sit outside the core set.** Templates are core by
-  default, and at most one is marked optional. That one is the capstone,
+  default, and at most one is marked optional. The optional template is
   authored whole and surfaced on request alone. The hard form is worth
   deriving before it is read, and a card showing it unasked would remove that
   chance permanently.
@@ -132,18 +132,18 @@ either.
   what the generator was told to write.
 - **No other canonical asserts anything.** The rest are enumerated from the
   problem itself, and nobody named a form for them. So every template they
-  display is the matcher's answer, and one assertion per problem is the most
-  there can be.
-- **A generator's assertion carries no configuration**, as a hand match
+  display is the matcher's answer, and one generator's match per problem is
+  the most there can be.
+- **A generator's match carries no configuration**, as a hand match
   carries none. The all-or-none rule is about readings, which are re-derivable
   and so must say by what. Re-deriving this pair would mean writing the
   solution again, and the solution already names the call that wrote it.
 - **It is only ever positive.** The generator asserts the form its target
   named. Every other template the solution displays is the matcher's question,
   and a generator saying nothing about a template is not a negative on it.
-- **The assertion is stored only for a canonical that passed.** A solution that
-  failed the cases demonstrates nothing about the form, so a failure is not a
-  negative either.
+- **The generator's match is stored only for a canonical that passed.** A
+  solution that failed the cases demonstrates nothing about the form, so a
+  failure is not a negative either.
 - **A demonstration is free ground truth on a pair a matcher read.** It
   confirms a positive, and on a pair the matcher scored negative it is a caught
   false negative. It replaces no hand pass: the pairs it reaches are the ones a
@@ -159,10 +159,11 @@ either.
   template and an optional one at once. The second answer is the only check on
   a generator drifting from its target.
 - **Three writers, ordered by what each of them knew.** A hand match
-  stands over both machine sources. A generator's assertion stands over a
-  matcher's reading of the same pair, because the generator knew and the
+  stands over both machine sources. A generator's match stands over a
+  matcher's match on the same pair, because the generator knew and the
   matcher inferred.
-- **An assertion and a hand match are one record per template and solution.**
+- **A generator's match and a hand match are one record per template and
+  solution.**
   Each answers one pair, and pairs are independent: solutions arrive one at a
   time, and a set record would rewrite pairs already settled every time the
   corpus grew.
