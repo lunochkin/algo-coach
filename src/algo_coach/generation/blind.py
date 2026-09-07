@@ -1,6 +1,6 @@
 """The reference solution: the statement in, a solution out, and nothing else.
 
-Its own brief, naming no technique, template or cue: those are what the
+Its own prompt, naming no technique, template or cue: those are what the
 statement withholds.
 """
 
@@ -42,7 +42,7 @@ def request_hash(statement: str) -> str:
     return prompt_hash(SYSTEM, prompt(statement))
 
 
-def reference(
+def write_reference(
     transport: Transport,
     log: CallLog,
     statement: str,
@@ -63,4 +63,4 @@ def reference(
     return read(text), call
 
 
-__all__ = ["SYSTEM", "prompt", "read", "reference", "request_hash", "schema"]
+__all__ = ["SYSTEM", "prompt", "read", "request_hash", "schema", "write_reference"]

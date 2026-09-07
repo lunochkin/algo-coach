@@ -26,7 +26,7 @@ class Writing:
 
     def draft(self, generated: Generated, call: Call) -> Draft:
         """The draft this attempt writes, carrying the id its site outcomes
-        group under and the form it was briefed on."""
+        group under and the form its target named."""
         return mint.draft(
             self.id,
             title=generated.title,

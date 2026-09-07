@@ -133,7 +133,7 @@ def test_a_site_that_made_no_call_writes_nothing(tmp_path):
     assert CallSite.DISCRIMINATION not in sites(outcomes)
 
 
-def test_a_form_that_is_its_own_optimum_records_the_builder_it_paid_for(tmp_path):
+def test_a_form_that_is_its_own_optimum_records_the_input_generator_it_paid_for(tmp_path):
     """The input generator is written for every problem, so the site answered.
     Nothing was searched for, and the record carries neither a size nor a
     reason there was none."""
@@ -148,7 +148,7 @@ def test_a_form_that_is_its_own_optimum_records_the_builder_it_paid_for(tmp_path
     assert one.unseparated is None
 
 
-def test_a_builder_call_that_failed_leaves_no_record(tmp_path):
+def test_an_input_generator_call_that_failed_leaves_no_record(tmp_path):
     """Provenance is all or none, and a call that answered nothing carries
     none. The problem lands: the site says nothing about the statement."""
     _, result, outcomes = run(tmp_path, FakeWriter())
@@ -293,7 +293,7 @@ def test_the_inputs_record_carries_the_size_the_search_found(tmp_path, monkeypat
 
 
 def test_the_inputs_record_carries_the_bound_the_search_ran_under(tmp_path, monkeypatch):
-    """A landed problem clears its draft, so the size the builder reported is
+    """A landed problem clears its draft, so the size the input generator reported is
     readable nowhere else and a separating size has nothing to be read
     against."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
@@ -303,7 +303,7 @@ def test_the_inputs_record_carries_the_bound_the_search_ran_under(tmp_path, monk
 
     at = sites(outcomes)
     assert at[CallSite.INPUTS].largest == 8
-    # the builder's answer, not the naive solution's: the search read it from this call
+    # the input generator's answer, not the naive solution's: the search read it from this call
     assert at[CallSite.NAIVE].largest is None
 
 
@@ -321,7 +321,7 @@ def test_a_bound_is_recorded_where_no_search_ran(tmp_path):
 
 def test_the_naive_solution_record_carries_the_search_it_was_judged_by(tmp_path, monkeypatch):
     """The search timed this answer against the canonical, so what it found is
-    a verdict about the naive solution as much as about the builder."""
+    a verdict about the naive solution as much as about the input generator."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 

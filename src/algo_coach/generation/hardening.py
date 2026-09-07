@@ -12,7 +12,7 @@ from typing import Any
 from algo_coach.calls import CallLog, Transport
 from algo_coach.generation.agreement import Disagreement, Settled, settle
 from algo_coach.generation.checks import CAP_MS
-from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, separators
+from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, propose_cases
 from algo_coach.generation.fuzzing import Fuzzed, Fuzzing
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.mutation import ROUNDS, Case, Mutant, kill, mutants, pace, survivors
@@ -142,7 +142,7 @@ def harden(
     while standing and played < rounds:
         played += 1
         notes("round", f"{played} of {rounds}: asking for the cases that kill {len(standing)}")
-        proposed, call = separators(
+        proposed, call = propose_cases(
             transport,
             calls,
             statement,

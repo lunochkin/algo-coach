@@ -8,7 +8,7 @@ from time import monotonic
 from algo_coach.calls import CallLog, Transport
 from algo_coach.drafts import DraftStore
 from algo_coach.generation.bench import BENCH, Bench
-from algo_coach.generation.blind import reference
+from algo_coach.generation.blind import write_reference
 from algo_coach.generation.checks import (
     CAP_MS,
     Checked,
@@ -22,8 +22,8 @@ from algo_coach.generation.drafting import advanced, held, rejected
 from algo_coach.generation.fuzzing import Fuzzing, pass_over
 from algo_coach.generation.generator import generate
 from algo_coach.generation.hardening import harden
-from algo_coach.generation.inputs import Built, builder
-from algo_coach.generation.naive import naive_solution
+from algo_coach.generation.inputs import InputGenerator, write_input_generator
+from algo_coach.generation.naive import write_naive
 from algo_coach.generation.resuming import draws_again, re_asks, reaches
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.generation.timing import timed
@@ -60,7 +60,7 @@ class Passage:
 
     `first` is the first case set's verdict, which the first two sites are
     judged by. A later gate replaces `checked` and leaves it. `start` is where
-    a resume began, and the search reads it: it runs the builder against the
+    a resume began, and the search reads it: it runs the input generator against the
     naive, so either site moving takes it again.
     """
 
@@ -91,8 +91,8 @@ class Passage:
     @property
     def measurable(self) -> bool:
         """Whether a search has anything to run: a speedup is claimed and there
-        is a builder to make inputs with."""
-        return self.template.speedup and self.inputs.built is not None
+        is an input generator to make inputs with."""
+        return self.template.speedup and self.inputs.input_generator is not None
 
 
 def write_one(
@@ -164,7 +164,7 @@ def to_agreed(p: Passage) -> bool:
 
     if re_asks(p.draft, "blind", p.template, p.bench) or p.draft.reference is None:
         p.notes("reference", "writing the reference from the statement alone")
-        solution, p.blind = reference(
+        solution, p.blind = write_reference(
             p.transport, p.calls, p.draft.statement, configuration=p.bench.blind
         )
         p.notes("reference", "written", p.blind)
@@ -197,17 +197,17 @@ def to_built(p: Passage) -> bool:
     inputs it builds are what a fuzz pass kills mutants with, and a round is
     then paid for the survivors alone. A call that fails stops nothing here:
     the draft is held at the step that has no answer."""
-    if re_asks(p.draft, "inputs", p.template, p.bench) or p.draft.builder is None:
+    if re_asks(p.draft, "inputs", p.template, p.bench) or p.draft.input_generator is None:
         p.inputs = building(
             p.transport, p.calls, p.draft.statement, configuration=p.bench.inputs, notes=p.notes
         )
-        if p.inputs.built is not None:
+        if p.inputs.input_generator is not None:
             p.draft = advanced(
                 p.drafts,
                 p.draft,
                 WritingState.BUILT,
-                builder=p.inputs.built.code,
-                largest=p.inputs.built.largest,
+                input_generator=p.inputs.input_generator.code,
+                largest=p.inputs.input_generator.largest,
                 inputs_provenance=MachineProvenance.of(p.inputs.call),
             )
     else:
@@ -217,9 +217,9 @@ def to_built(p: Passage) -> bool:
 
 
 def to_paced(p: Passage) -> bool:
-    """The naive solution, after the builder and only where a speedup is claimed: the
-    builder is written for every problem, and nothing measures a form that is
-    its own optimum. A draft with no builder stops at the step before this one,
+    """The naive solution, after the input generator and only where a speedup is claimed: the
+    input generator is written for every problem, and nothing measures a form that is
+    its own optimum. A draft with no input generator stops at the step before this one,
     so paying for a naive solution here would buy a step the draft cannot record."""
     if not p.measurable:
         return True
@@ -313,7 +313,9 @@ def stored(draft: Draft) -> Inputs:
     """The input generator a draft already holds, at the configuration that
     wrote it. It made no call here, so it leaves no site outcome."""
     return Inputs(
-        built=Built(code=draft.builder or "", largest=draft.largest or 1),
+        input_generator=InputGenerator(
+            code=draft.input_generator or "", largest=draft.largest or 1
+        ),
         provenance=draft.inputs_provenance,
     )
 
@@ -341,7 +343,7 @@ def sites(writing: Writing, call: Call | None, p: Passage) -> None:
     # that round's call. A loop needing none paid for no configuration
     writing(CallSite.DISCRIMINATION, p.bar.call, **loop_verdicts(p.bar))
     writing(CallSite.INPUTS, p.inputs.call, **search_verdicts(p.inputs), killed=p.bar.fuzzed)
-    # the search judged this answer as much as the builder's, so both records
+    # the search judged this answer as much as the input generator's, so both records
     # carry its verdict. A resume that re-asked one writes only that one
     writing(
         CallSite.NAIVE,
@@ -421,12 +423,14 @@ def building(
     """
     notes("inputs", "writing the input generator")
     try:
-        built, call = builder(transport, calls, statement, configuration=configuration)
+        generator, call = write_input_generator(
+            transport, calls, statement, configuration=configuration
+        )
     except Exception as failure:
         notes("inputs", f"unbuilt: {failure!r}")
         return Inputs(unbuilt=repr(failure))
-    notes("inputs", f"written, up to {built.largest}", call)
-    return Inputs(call=call, built=built, provenance=MachineProvenance.of(call))
+    notes("inputs", f"written, up to {generator.largest}", call)
+    return Inputs(call=call, input_generator=generator, provenance=MachineProvenance.of(call))
 
 
 def paced(
@@ -444,7 +448,7 @@ def paced(
     set the two solutions settled.
 
     A call that fails costs the naive solution rather than the problem, as a failed
-    builder does. So does one whose answer is wrong: what it says is that this
+    input generator does. So does one whose answer is wrong: what it says is that this
     solution measures nothing, not that the statement is unsound.
     """
     if reuse and draft.naive is not None:
@@ -453,7 +457,7 @@ def paced(
     else:
         notes("naive", "writing the solution the search measures against")
         try:
-            code, call = naive_solution(
+            code, call = write_naive(
                 transport, calls, draft.statement, template.trigger, configuration=configuration
             )
         except Exception as failure:
@@ -476,10 +480,10 @@ def paced(
 def fuzzing(draft: Draft, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:
     """The pass `harden` runs before its first round, or nothing where no
     generator was written for it to build with."""
-    if inputs.built is None or inputs.provenance is None:
+    if inputs.input_generator is None or inputs.provenance is None:
         return None
     return pass_over(
-        inputs.built,
+        inputs.input_generator,
         canonical=draft.canonical,
         reference=draft.reference or "",
         provenance=inputs.provenance,

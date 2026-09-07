@@ -99,8 +99,8 @@ def test_each_call_is_shown_what_the_run_wrote_before_it(tmp_path):
 
     run(tmp_path, model, count=2)
 
-    assert "The first." not in model.briefs[0]
-    assert "The first." in model.briefs[1]
+    assert "The first." not in model.prompts[0]
+    assert "The first." in model.prompts[1]
 
 
 def test_the_corpus_seeds_the_list(tmp_path):
@@ -121,7 +121,7 @@ def test_the_corpus_seeds_the_list(tmp_path):
 
     write_problems(model, CallLog(tmp_path), one, one.templates[0], corpus)
 
-    assert "An earlier statement." in model.briefs[0]
+    assert "An earlier statement." in model.prompts[0]
 
 
 def test_a_failure_costs_one_problem(tmp_path):
@@ -192,7 +192,7 @@ def test_a_discarded_statement_is_still_shown_to_the_next_call(tmp_path):
 
     run(tmp_path, model, count=2)
 
-    assert "The first." in model.briefs[1]
+    assert "The first." in model.prompts[1]
 
 
 def test_a_surviving_problem_carries_what_the_reference_computed(tmp_path):
@@ -290,7 +290,7 @@ def reported(tmp_path, monkeypatch, model: FakeWriter, **overrides) -> Progress:
     return line
 
 
-def test_a_builder_that_fails_holds_a_draft_claiming_a_speedup(tmp_path, monkeypatch):
+def test_an_input_generator_that_fails_holds_a_draft_claiming_a_speedup(tmp_path, monkeypatch):
     """No code to build with, so no search, so nothing demonstrates the claim.
     A landed problem is repaired nowhere, which is why the draft stops at the
     step the call failed before."""
@@ -304,7 +304,7 @@ def test_a_builder_that_fails_holds_a_draft_claiming_a_speedup(tmp_path, monkeyp
     assert (result.drafted, CaseLog(tmp_path).cases()) == ([], [])
 
 
-def test_a_builder_that_fails_lands_a_form_that_is_its_own_optimum(tmp_path, monkeypatch):
+def test_an_input_generator_that_fails_lands_a_form_that_is_its_own_optimum(tmp_path, monkeypatch):
     """Nothing was searched for, so the case the call cost was never one the
     problem needed."""
     model = FakeWriter(slow=SLOW)
@@ -320,7 +320,9 @@ def test_a_builder_that_fails_lands_a_form_that_is_its_own_optimum(tmp_path, mon
     assert len(CaseLog(tmp_path).cases()) == 1
 
 
-def test_a_call_that_wrote_no_builder_is_reported_apart_from_a_search(tmp_path, monkeypatch):
+def test_a_call_that_wrote_no_input_generator_is_reported_apart_from_a_search(
+    tmp_path, monkeypatch
+):
     """A site that answered nothing and a search that separated nothing are
     different facts, and the fuzz pass is lost only by the first."""
     unwritten = reported(tmp_path, monkeypatch, FakeWriter(slow=SLOW))
@@ -337,7 +339,7 @@ def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
 ):
     """A canonical correct on the small cases and wrong at scale, which only
     the separating input reaches."""
-    # correct on the statement's own case and wrong on what the builder makes,
+    # correct on the statement's own case and wrong on what the input generator makes,
     # which is the size only the search reaches
     blind_solution = "def solve(xs):\n    return len(xs) + (1 if 0 in xs else 0)\n"
     model = FakeWriter(solution=blind_solution, slow=SLOW, generator=BUILDS)
@@ -349,8 +351,10 @@ def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
     assert CaseLog(tmp_path).cases() == []
 
 
-def test_the_naive_solution_is_written_between_the_builder_and_the_search(tmp_path, monkeypatch):
-    """The builder is written for every problem, since the fuzz pass builds its
+def test_the_naive_solution_is_written_between_the_input_generator_and_the_search(
+    tmp_path, monkeypatch
+):
+    """The input generator is written for every problem, since the fuzz pass builds its
     inputs with it, and the search measures against what this step writes."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(tmp_path, card(**claiming({})))
@@ -546,7 +550,7 @@ def test_the_input_generator_is_written_before_the_rounds(tmp_path):
     ]
 
 
-def test_a_builder_that_failed_costs_the_inputs_and_not_the_round(tmp_path):
+def test_an_input_generator_that_failed_costs_the_inputs_and_not_the_round(tmp_path):
     """The call says nothing about the statement, so the loop still runs and
     the problem still lands."""
     model = bounded(separators=[[[3], [4]]])
@@ -662,7 +666,7 @@ def test_a_run_reports_every_stage_as_it_goes(tmp_path):
 
 
 def models(model: FakeWriter) -> dict[str, str]:
-    """Which model each call site was asked of, by the brief it was sent."""
+    """Which model each call site was asked of, by the prompt it was sent."""
     named = {
         generator.SYSTEM: "generator",
         blind.SYSTEM: "blind",

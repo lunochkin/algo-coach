@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import pytest
 
 from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import GenerationError, separators
+from algo_coach.generation import GenerationError, propose_cases
 from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, prompt, read, schema
 from algo_coach.mutation import Mutant, Operator
 from algo_coach.schema import Configuration
@@ -34,7 +34,7 @@ def answer(*args) -> str:
 
 
 def asked(model: FakeModel, **overrides):
-    return separators(
+    return propose_cases(
         model, CallLog(overrides.pop("tmp_path")), STATEMENT, canonical=CANONICAL, **overrides
     )
 

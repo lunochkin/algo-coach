@@ -62,7 +62,7 @@ def request_hash(statement: str, avoid: str) -> str:
     return prompt_hash(SYSTEM, prompt(statement, avoid))
 
 
-def naive_solution(
+def write_naive(
     transport: Transport,
     log: CallLog,
     statement: str,
@@ -87,9 +87,9 @@ def naive_solution(
 __all__ = [
     "NAIVE_DEFAULT",
     "SYSTEM",
-    "naive_solution",
     "prompt",
     "read",
     "request_hash",
     "schema",
+    "write_naive",
 ]

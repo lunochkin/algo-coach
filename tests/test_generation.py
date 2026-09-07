@@ -26,15 +26,15 @@ from algo_coach.schema import (
 )
 
 
-def brief(tmp_path, **overrides) -> str:
+def generator_prompt(tmp_path, **overrides) -> str:
     (one,) = seeded(tmp_path, card(**overrides))
     return prompt(one, one.templates[0])
 
 
 def test_the_form_is_sent_rather_than_named(tmp_path):
     """A cue and a title name a shape the model would have to guess at, so the
-    code it comes back as is what the brief carries."""
-    content = brief(tmp_path)
+    code it comes back as is what the prompt carries."""
+    content = generator_prompt(tmp_path)
 
     assert "def longest_valid_window(): pass" in content
     assert "Cue: the cue for longest-valid-window" in content
@@ -43,14 +43,14 @@ def test_the_form_is_sent_rather_than_named(tmp_path):
 def test_both_cues_reach_the_brief(tmp_path):
     """The technique's cue says when to reach for it at all, the template's
     which of its forms is being asked for."""
-    content = brief(tmp_path)
+    content = generator_prompt(tmp_path)
 
     assert "Technique: sliding-window" in content
     assert "Reach for it when: a window over a contiguous run" in content
 
 
 def test_notes_are_carried_where_the_template_has_them(tmp_path):
-    content = brief(
+    content = generator_prompt(
         tmp_path,
         templates=[template("longest-valid-window", notes="Grow right.\nShrink left.")],
     )
@@ -60,19 +60,19 @@ def test_notes_are_carried_where_the_template_has_them(tmp_path):
 
 def test_a_template_without_notes_carries_no_heading(tmp_path):
     """An empty heading reads as a field the author left blank."""
-    assert "Notes:" not in brief(tmp_path)
+    assert "Notes:" not in generator_prompt(tmp_path)
 
 
 def test_the_statement_is_asked_for_before_the_solution():
     """Cases read off a finished solution describe what that code does. The
-    order in the brief is what makes them describe the problem instead."""
+    order in the prompt is what makes them describe the problem instead."""
     parts = SYSTEM.index("1. A statement"), SYSTEM.index("2. A canonical"), SYSTEM.index("3. Test")
 
     assert list(parts) == sorted(parts)
 
 
 def test_the_entry_point_convention_is_stated():
-    """Nothing stores the name, so the brief is where a solution learns it."""
+    """Nothing stores the name, so the prompt is where a solution learns it."""
     assert "`solve`" in SYSTEM
 
 
@@ -109,7 +109,7 @@ def test_the_three_parts_come_back_together():
 
 
 def test_a_statement_carrying_no_signature_fails():
-    """Three briefs are written from the statement alone, and a parameter
+    """Three prompts are written from the statement alone, and a parameter
     order they infer is one they can infer differently."""
     with pytest.raises(ValidationError):
         read(draft(statement="Given a list of readings, return ..."))
@@ -144,7 +144,7 @@ def test_an_annotated_signature_is_read_by_its_names():
     "wrapped", ["`def solve(xs)`", "`def solve(xs) -> int`.", "def solve(xs)."]
 )
 def test_a_signature_wrapped_in_markdown_is_read(wrapped):
-    """The brief writes the line in backticks, so a model that mirrors them
+    """The prompt writes the line in backticks, so a model that mirrors them
     has still ended the statement on it."""
     written = read(draft(statement=f"Return ...\n\n{wrapped}"))
 
@@ -226,7 +226,7 @@ def written(tmp_path, model: FakeModel, **overrides):
 
 def test_one_call_carries_all_three_parts(tmp_path):
     """Cases asked for in a second call describe the solution that already
-    exists, so the brief and the schema go out together."""
+    exists, so the prompt and the schema go out together."""
     model = FakeModel(draft())
 
     result, call = written(tmp_path, model)

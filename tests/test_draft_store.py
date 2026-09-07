@@ -54,7 +54,7 @@ def test_what_a_step_left_reads_back_whole(tmp_path):
                 "provenance": PROVENANCE_FIELDS,
             }
         ],
-        builder="def solve(size, seed): ...",
+        input_generator="def solve(size, seed): ...",
         largest=1000,
         generator_provenance=PROVENANCE_FIELDS,
     )

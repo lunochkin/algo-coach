@@ -330,7 +330,7 @@ def test_a_generated_problem_asserts_the_template_it_was_written_for():
 
 
 def test_a_problem_from_a_technique_brief_names_no_template():
-    """A brief naming a skill rather than a form told the generator no pair to
+    """A target naming a skill rather than a form told the generator no pair to
     assert. What such a problem is about comes from its canonicals."""
     assert generated(generated_for=None).generated_for is None
 
@@ -360,7 +360,7 @@ def test_a_minted_draft_starts_at_the_first_step():
 
     assert made.state is WritingState.DRAFTED
     assert made.gate is None
-    assert (made.reference, made.builder, made.separating) == (None, None, None)
+    assert (made.reference, made.input_generator, made.separating) == (None, None, None)
 
 
 def test_a_minted_draft_copies_the_generator_configuration_whole():

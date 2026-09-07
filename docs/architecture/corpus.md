@@ -9,21 +9,21 @@ architecture, and `README.md` is the map.
 - **Generated, and that is the only origin.** The engine writes a statement,
   the test cases that decide it, a canonical solution and a reference
   solution.
-- **A problem is written from a brief: what it must be solvable by.** A
+- **A problem is written for a target: what it must be solvable by.** A
   template is the tightest kind, naming the exact form. A technique is a looser
-  one, naming only the skill. Each kind produces a problem. A template brief
-  and a technique brief differ in what the generator knew, and not in how the
+  one, naming only the skill. Each kind produces a problem. A template target
+  and a technique target differ in what the generator knew, and not in how the
   problem is judged.
-- **The looser brief reaches the rest of the vocabulary.** A paradigm and a
+- **The looser target reaches the rest of the vocabulary.** A paradigm and a
   problem class have no form to reproduce, so no template names them, and a
   corpus written from templates alone can never exercise them.
 - **The template it was written for is stored, where there was one.**
   `generated_for` is an assertion rather than a reading, and it makes the
   first template match provenance. It never claims the problem exercises
-  nothing else. A problem written from a technique brief carries no
+  nothing else. A problem written for a technique target carries no
   `generated_for`: the generator was told no form, so no pair can be asserted.
-- **A technique brief asserts no technique either.** An assertion records what
-  the generator was told, and a technique brief told it a skill rather than a
+- **A technique target asserts no technique either.** An assertion records what
+  the generator was told, and a technique target told it a skill rather than a
   solution.
 - **Provenance is required.** A problem names what produced it, as any machine
   record does.
@@ -46,7 +46,7 @@ architecture, and `README.md` is the map.
   no later gate stands between that and serving. Retirement is the only status
   move.
 - **Whether a statement gives its form away is not checked.** A statement can
-  name its approach, or reuse the example its template's cue names, and a
+  name its approach, or reuse the example its template's trigger names, and a
   solver who recognises the problem has not derived the form. A gate over the
   corpus for this is deferred to Phase 13 in `ROADMAP.md`. It needs a corpus
   to measure and a baseline no generator wrote, and a status the gate promotes
@@ -90,7 +90,7 @@ The test cases decide whether a solution to a generated problem is correct.
   statement can, so the same rule covers both.
 - **The statement carries the signature, because the parameter order has to
   be stated somewhere.** A fixed name leaves the parameter order to be
-  inferred from prose, and three briefs infer it separately. A reference took
+  inferred from prose, and three prompts infer it separately. A reference took
   `solve(capacity, times, sizes)` where the canonical took `solve(times,
   sizes, capacity)`, answered no case, and the problem was discarded as
   untested.
@@ -127,12 +127,12 @@ The test cases decide whether a solution to a generated problem is correct.
   problem's own wherever a mutation round or the speedup search won the case.
   Three sites write cases at three configurations, and a reader taking the
   problem's provenance would attribute a round's case to the generator.
-- **A case names the round that won it, zero for the set the first round was
-  run against.** Replaying the discrimination site needs that set as it stood,
+- **A case names the round that won it, zero for the set the first round was run
+  against.** Replaying the discrimination site needs that set as it stood,
   because the set decides which mutants survive and the set goes into the
   prompt. A loop shown a case a round already won reaches other survivors and
-  sends another digest, so the verdict the generation run recorded is paid for
-  a second time.
+  sends another prompt hash, so the verdict the generation run recorded is paid
+  for a second time.
 - **Zero covers two writers, and provenance separates them.** The statement's
   own cases name the generator's call. A fuzz case names the call that wrote
   the input generator. Each kind was in the set before any round ran, and that
@@ -191,8 +191,8 @@ The test cases decide whether a solution to a generated problem is correct.
   those two answers together with a naive solution that finished at the
   largest legal input could not tell a defect from an unknown.
 - **The naive solution finishing at the largest legal input is a defect in the
-  run, not in the problem.** The naive solution is briefed as the approach the
-  form replaces and told which form to avoid, so finishing means the brief did
+  run, not in the problem.** The naive solution is prompted as the approach the
+  form replaces and told which form to avoid, so finishing means the prompt did
   not take.
 - **Three faults produce that answer, and the run cannot separate them.** The
   naive solution reached the form. The input generator built a shape the form
@@ -213,21 +213,21 @@ The test cases decide whether a solution to a generated problem is correct.
   naive solution is drawn, and the second one is slow. The template's
   `speedup` is corrected, and the next resume skips the search. Or the draft
   is rejected: the claim holds, and this problem does not exercise the form.
-- **A resume watches the template's `speedup` beside the digest.** A flag
+- **A resume watches the template's `speedup` beside the prompt hash.** A flag
   edit moves neither a configuration nor a prompt, so a resume reading only
   those two would leave the draft where the search stopped it.
 - **A resume asks the naive site again where the naive solution finished at
-  every size the builder reached**, though its configuration and its digest
-  both stand. The naive site is sampled, so a second call is a second draw.
-  The skip that spares every other site would spend the exit that costs one
-  call.
-- **The draft carries why the search stored no case**, since the exits differ
-  by that reason. A crashed builder is the inputs site's to repair, and a
+  every size the input generator reached**, though its configuration and its
+  prompt hash both stand. The naive site is sampled, so a second call is a
+  second draw. The skip that spares every other site would spend the exit that
+  costs one call.
+- **The draft carries why the search stored no case**, since the exits differ by
+  that reason. A crashed input generator is the inputs site's to repair, and a
   second naive draw there buys a call the search still cannot use.
 - **The reference is not asked again for this.** The reference is immutable,
   the search no longer measures against the reference, and a second blind
   reading answers a question no exit asks.
-- **Rejection is the exit left when the draws run out.** A model briefed to be
+- **Rejection is the exit left when the draws run out.** A model prompted to be
   slow and told the form to avoid, writing the form anyway, is the strongest
   evidence the run can produce that the problem does not exercise the form.
 - **A speedup whose separating size is a million elements goes unenforced.**
@@ -314,8 +314,8 @@ A solution the engine wrote for a problem, in one of three roles.
   either.** A naive solution trying every subset where the statement describes
   a scan is separated at a few dozen elements, and a submission of the wrong
   complexity passes every input that small.
-- **The brief states both ends.** Two edits to the brief have each fixed one
-  end and caused the other, so a brief naming one end alone has been written
+- **The prompt states both ends.** Two edits to the prompt have each fixed one
+  end and caused the other, so a prompt naming one end alone has been written
   twice.
 - **The naive solution may be told which form to avoid**, where the reference
   may not. The naive solution settles no case, discards no problem and is
@@ -391,7 +391,7 @@ product-owned and global, as the solution is.
   staleness rule are shared with the attempt classifier. Two prompts asking
   one question would drift, and neither score would compare with the other.
 - **A reading is a machine record like any other**: provenance whole,
-  staleness keyed on the digest of what was sent, and re-derivable at any
+  staleness keyed on the prompt hash of what was sent, and re-derivable at any
   time. A claim carries one problem's criteria, and a reading carries the
   whole vocabulary's, so any criteria edit re-reads every canonical.
 - **Two writers, and the user's stands first**, as a claim resolves. A hand

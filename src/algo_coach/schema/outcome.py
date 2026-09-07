@@ -45,7 +45,7 @@ class SiteOutcome(MachineProvenance):
     # minted per attempt at one problem, so the four sites of one attempt group
     # and a discarded draft still has an identity
     writing_id: str = Field(min_length=1)
-    # absent where the problem was written from a technique brief, which
+    # absent where the problem was written for a technique target, which
     # names no form
     template_id: str | None = None
     problem_id: str | None = None  # only where the attempt landed

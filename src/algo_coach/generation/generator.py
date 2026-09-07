@@ -77,7 +77,7 @@ absent value is `null`."""
 
 
 def prompt(card: Card, template: Template, written: Sequence[str] = ()) -> str:
-    """The brief: one form, and the technique it belongs to.
+    """The prompt: one form, and the technique it belongs to.
 
     Both cues, since they answer different questions: when to reach for the
     technique, and which of its forms is asked for. `written` is what this
@@ -134,7 +134,7 @@ class Generated(BaseModel):
 
     @model_validator(mode="after")
     def _the_statement_carries_the_signature(self) -> Generated:
-        # corpus.md, "The statement carries the signature": three briefs read
+        # corpus.md, "The statement carries the signature": three prompts read
         # the order off it
         named = parameters(self.statement)
         if named is None:
@@ -163,7 +163,7 @@ def parameters(text: str) -> tuple[str, ...] | None:
 def _parsed(text: str) -> tuple[str, ...] | None:
     # the header alone, since prose after it is not code and a canonical's
     # body would parse to the same names anyway. Stripped of the backticks and
-    # the full stop a statement wraps it in, since the brief writes it in them
+    # the full stop a statement wraps it in, since the prompt writes it in them
     header = text.split("\n", 1)[0].strip().rstrip("`.:")
     try:
         tree = ast.parse(f"{header}:\n    pass")

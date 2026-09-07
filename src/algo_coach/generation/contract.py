@@ -1,10 +1,10 @@
 """What every solution this engine runs must be, stated once.
 
-Four briefs ask for code, and each stated the same three facts in its own
-words. `corpus.md` gives the entry point as an invariant, so a per-brief copy
+Four prompts ask for code, and each stated the same three facts in its own
+words. `corpus.md` gives the entry point as an invariant, so a per-prompt copy
 of it is a copy that can drift.
 
-Each brief still writes its own signature: the two that answer a statement take
+Each prompt still writes its own signature: the two that answer a statement take
 what the prose describes, and the input generator takes a size and a seed.
 """
 
@@ -29,7 +29,7 @@ POSITIONAL = (
 
 
 class Solved(BaseModel):
-    """A brief's reply carrying one solution and nothing else. No cases: the
+    """A prompt's reply carrying one solution and nothing else. No cases: the
     ones it would write are its own reading of the statement rather than a
     test of it."""
 

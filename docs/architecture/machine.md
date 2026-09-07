@@ -9,8 +9,8 @@ Claims, template matches, technique readings, canonical solutions and the
 arguments of a test case are written by a model. Each of them carries the same
 fields to stay comparable, and those fields are stated here once.
 
-- **Provenance is the configuration**: model, effort, the endpoint the model
-  was pinned to, temperature, the digest of what that record was sent, and the
+- **Provenance is the configuration**: model, effort, the endpoint the model was
+  pinned to, temperature, the prompt hash of what that record was sent, and the
   call that sent it. All of them or none, since a record whose configuration is
   partly unknown compares with nothing. A model asked for no effort, or a model
   that rejects the parameter, records the level it ran at rather than an empty
@@ -64,12 +64,12 @@ fields to stay comparable, and those fields are stated here once.
   whether or not each carries a price. The price sits outside the all-or-none
   rule, as the temperature does: a reading stored before the field existed
   carries none, and so does a reading a provider priced at nothing.
-- **Staleness keys on the digest of what was sent**, never on a version over
-  the rulebook. A criterion travels with its candidate, so editing one entry
-  re-derives what that entry reached and leaves the rest. An author can forget
-  to bump a version while the text moves. A digest moves with the text. The
-  cost is that a reflowed sentence re-derives what it reaches, and that a
-  rulebook is cited as a digest rather than as "prompt 3".
+- **Staleness keys on the prompt hash of what was sent**, never on a version
+  over the rulebook. A criterion travels with its candidate, so editing one
+  entry re-derives what that entry reached and leaves the rest. An author can
+  forget to bump a version while the text moves. A prompt hash moves with the
+  text. The cost is that a reflowed sentence re-derives what it reaches, and
+  that a rulebook is cited as a prompt hash rather than as "prompt 3".
 - **The record's own copy of the configuration cannot drift**, because a call
   is append-only and the copy is made in the same write. The copy exists so the
   log reads alone: loading the calls to learn which model produced a record
@@ -94,7 +94,7 @@ said about the answer a call returned, so it sits beside the call log.
 - **Each site's outcome is stored rather than only printed.** The run prints
   one line per stage, and that output is gone when the process ends. Without a
   stored record, nobody can later see which gate rejected an answer, which
-  configuration produced it, or which prompt digest it was sent.
+  configuration produced it, or which prompt hash it was sent.
 - **One record per site and per attempt.** The five sites can run at five
   configurations, and one record over the attempt could not say which of them a
   gate rejected.
@@ -119,23 +119,23 @@ said about the answer a call returned, so it sits beside the call log.
   gated.** The code and the declaration came from one call, so the count reads
   that site's arithmetic. `corpus.md` names the record that settles the case
   instead.
-- **The search's verdict is filed under every site it judged.** The search
-  times the naive solution against the canonical on an input the builder made,
+- **The search's verdict is filed under every site it judged.** The search times
+  the naive solution against the canonical on an input the input generator made,
   so neither answer alone makes the verdict decidable. A resume that re-asked
-  one of the two sites writes that site's record and no other, so the
-  separating size would otherwise be lost with the site the resume reused.
-- **The builder's bound is on the record, not only on the draft.** A landed
-  problem clears its draft, so the largest input the statement admits is
+  one of the two sites writes that site's record and no other, so the separating
+  size would otherwise be lost with the site the resume reused.
+- **The input generator's bound is on the record, not only on the draft.** A
+  landed problem clears its draft, so the largest input the statement admits is
   readable nowhere else. The bound says whether a walk that stored no case
   reached the bound or stopped under it.
-- **The bound is not a denominator.** The bound counts whatever the builder's
-  `size` counts, which is a list length on one problem and a grid's side on
-  another. `corpus.md` gives what a separating size is comparable with.
-- **Two of a problem's records can carry different verdicts.** The builder's
-  record answers for the search that judged it when it was written, and a later
-  naive solution's record answers for the search that judged the redraw. Each
-  record says what one answer was worth at one configuration, and that is the
-  purpose of a record.
+- **The bound is not a denominator.** The bound counts whatever the input
+  generator's `size` counts, which is a list length on one problem and a grid's
+  side on another. `corpus.md` gives what a separating size is comparable with.
+- **Two of a problem's records can carry different verdicts.** The input
+  generator's record answers for the search that judged it when it was written,
+  and a later naive solution's record answers for the search that judged the
+  redraw. Each record says what one answer was worth at one configuration, and
+  that is the purpose of a record.
 - **The exception is the gate no answer was rejected by.** A held draft is
   rejected where the problem does not exercise the form its template claims,
   and every site answered. That gate is read from the draft, since the draft is
@@ -166,7 +166,7 @@ said about the answer a call returned, so it sits beside the call log.
 - **The verdicts are named fields rather than a mapping.** A report groups by
   gate and averages the counters, and a mapping makes every key a field nothing
   enforces.
-- **A site skips an item it has answered at the current digest**, as the
+- **A site skips an item it has answered at the current prompt hash**, as the
   classifier skips a claim. So a second configuration is paid for only where it
   has not read, and the run that wrote the problem answers for the bench it was
   written with.
@@ -185,8 +185,8 @@ holds nothing about what the answer was for.
   vocabulary. It holds only what was asked, of whom, and what returned. That
   absence lets a second domain reuse the log without being taught anything, and
   keeps the run loop's decisions in the domain where they belong.
-- **The prompt is stored whole, beside its digest.** The record therefore
-  digests to its own key, and a renderer that changes later cannot make an old
+- **The prompt is stored whole, beside its prompt hash.** The record therefore
+  hashes to its own key, and a renderer that changes later cannot make an old
   record unreadable. The prompt is inline rather than deduplicated into a store
   of its own: one append cannot half-succeed, where a file plus a log line can
   leave a call naming a prompt that is not there.

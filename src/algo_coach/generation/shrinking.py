@@ -17,7 +17,7 @@ TRIES = 24
 @dataclass(frozen=True)
 class Candidate:
     """One built input and the canonical's answer to it, which is what a mutant
-    is killed by disagreeing with. Named apart from `inputs.Built`, which is
+    is killed by disagreeing with. Named apart from `inputs.InputGenerator`, which is
     the code that produced it."""
 
     args: list[Any]

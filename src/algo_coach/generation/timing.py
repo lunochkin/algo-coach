@@ -1,4 +1,4 @@
-"""The speedup search over the builder's inputs, and what it leaves on the
+"""The speedup search over the input generator's inputs, and what it leaves on the
 inputs site. `corpus.md` gives what a separating size means."""
 
 from collections.abc import Callable
@@ -9,7 +9,7 @@ from algo_coach.generation.checks import (
     Discard,
 )
 from algo_coach.generation.errors import GenerationError
-from algo_coach.generation.inputs import Built
+from algo_coach.generation.inputs import InputGenerator
 from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, Searched, search
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.generation.verdicts import Inputs, Naive
@@ -43,7 +43,7 @@ def make(code: str, cap_ms: int, *, seed: int = SEARCH_SEED) -> Callable[[int], 
 
 
 def separated(
-    built: Built,
+    generator: InputGenerator,
     *,
     canonical: str,
     naive: str,
@@ -51,16 +51,16 @@ def separated(
     provenance: MachineProvenance,
     cap_ms: int,
 ) -> Searched:
-    """The search over the builder's inputs. The generation cap measures, and
+    """The search over the input generator's inputs. The generation cap measures, and
     the sitting's cap is what a size is separated against."""
     return search(
-        make(built.code, cap_ms),
+        make(generator.code, cap_ms),
         canonical=canonical,
         naive=naive,
         reference=reference,
         provenance=provenance,
         cap_ms=DRILL_CAP_MS,
-        largest=built.largest,
+        largest=generator.largest,
         measure_ms=cap_ms,
     )
 
@@ -98,14 +98,14 @@ def timed(
     A search that fails costs the case rather than the problem, so its failure
     is caught here instead of reaching the run's abort count.
     """
-    if not template.speedup or inputs.built is None or inputs.provenance is None:
+    if not template.speedup or inputs.input_generator is None or inputs.provenance is None:
         return checked, inputs, None
     if naive.code is None:
         raise ValueError("the search measures the canonical against a naive solution")
     notes("timing", "searching for the input that separates the two solutions")
     try:
         found = separated(
-            inputs.built,
+            inputs.input_generator,
             canonical=draft.canonical,
             naive=naive.code,
             reference=draft.reference or "",

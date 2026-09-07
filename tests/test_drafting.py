@@ -96,7 +96,7 @@ def test_the_reference_a_rejected_draft_paid_for_is_kept(tmp_path):
 
 
 def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
-    """The statement's own cases, the reference, the builder and its bound,
+    """The statement's own cases, the reference, the input generator and its bound,
     each written as the step that produced it answered."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     result, _ = run(tmp_path, FakeWriter(slow=SLOW, generator=BUILDS), templates=[CLAIMS])
@@ -105,7 +105,7 @@ def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
     assert stored.canonical == CANONICAL
     assert [case.expected for case in stored.declared] == [3]
     assert [case.expected for case in stored.cases] == [3]
-    assert (stored.builder, stored.largest) == (BUILDS, 8)
+    assert (stored.input_generator, stored.largest) == (BUILDS, 8)
     assert stored.separating is not None
 
 
@@ -156,7 +156,7 @@ def test_a_separated_problem_lands(tmp_path, monkeypatch):
 
 
 def test_an_unseparated_draft_is_held_at_the_search(tmp_path):
-    """The reference finished at every size the builder wrote, so nothing
+    """The reference finished at every size the input generator wrote, so nothing
     demonstrates the speedup its template claims and the problem does not
     land."""
     result, drafts = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])

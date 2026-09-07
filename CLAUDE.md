@@ -78,6 +78,11 @@ Docs, `README.md`, commits.
   introduces it, or added to the glossary. `the bench`, `the walk`, `the
   builder` are each defined in one file and used in four, so a reader of the
   fourth file cannot resolve them.
+- **One name for one thing, and one thing per name.** A record, a state or a
+  field has the same name in the docs, the code and the store. A name carries
+  one meaning. `clock` beside `naive` was one thing under two names, and
+  `brief` for both a card's reading and a run's target was two things under
+  one. Either way a reader has to know which is meant, and a model guesses.
 - **Repeat the noun instead of `one`, `it`, `that`, `the two`, `either`.** A
   pronoun two sentences after its noun is resolved by the writer and guessed
   by the reader.
@@ -98,7 +103,7 @@ Docs, `README.md`, commits.
   what the code does.
 - **One idea per sentence.** Split at the em-dash and the semicolon instead
   of chaining. Target 25 words; nothing over 40.
-- Precise technical terms are unaffected — `append-only`, `digest`,
+- Precise technical terms are unaffected — `append-only`, `provenance`,
   `denominator`, `supersede`. Use the exact term.
 
 Aphorism, before: "A blank string is the same absence wearing a value, so it
@@ -112,7 +117,7 @@ configuration behind it and the digest it was sent are readable nowhere else."
 After: "Each site's outcome is stored, not only printed. The run prints one
 line per stage, and that output is gone when the process ends. Without a
 stored record, nobody can later see which gate rejected an answer, which
-configuration produced it, or which prompt digest it was sent."
+configuration produced it, or which prompt hash it was sent."
 
 ### TODO items
 
@@ -146,7 +151,7 @@ configuration produced it, or which prompt digest it was sent."
   `candidates() -> list[str]` returning `sorted(codes())` needs none.
 - **Never restate a reason `docs/architecture/` already gives.** Docs are the
   durable context; a copy in the code drifts from it. Point instead:
-  `# sorted: the digest is taken over this order`.
+  `# sorted: the prompt hash is taken over this order`.
 - **One comment carries one non-obvious fact** — the alternative rejected, the
   invariant that would break. Not the argument for it.
 - The `## Writing` rules are for docs and commits. They do not license prose in

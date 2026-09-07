@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from algo_coach.generation.agreement import Disagreement, settle
-from algo_coach.generation.inputs import Built
+from algo_coach.generation.inputs import InputGenerator
 from algo_coach.generation.shrinking import Candidate, shrink
 from algo_coach.generation.speedup import CEILING
 from algo_coach.mutation import Mutant, kill, survivors
@@ -59,7 +59,7 @@ def build(code: str, pairs: Sequence[Sequence[int]], *, cap_ms: int) -> list[lis
 
 
 def pass_over(
-    built: Built,
+    generator: InputGenerator,
     *,
     canonical: str,
     reference: str,
@@ -71,12 +71,12 @@ def pass_over(
     The inputs are built inside it rather than here, so a case set that already
     kills every mutant pays for no subprocess.
     """
-    pairs = grid(built.largest)
+    pairs = grid(generator.largest)
 
     def over(standing: Sequence[Mutant], against_ms: int) -> Fuzzed:
         return fuzz(
             standing,
-            build(built.code, pairs, cap_ms=cap_ms),
+            build(generator.code, pairs, cap_ms=cap_ms),
             canonical=canonical,
             reference=reference,
             provenance=provenance,

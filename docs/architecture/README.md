@@ -35,8 +35,8 @@ without redefining them. Grouped by the file that specifies the record.
 - **Template**: one form of a technique, authored on a card, that a user
   reproduces from memory. Core by default.
 - **Capstone**: a card's one optional template, shown only on request.
-- **Recognition cue**: the field on a card or a template saying when to reach
-  for the technique or the form. Withheld during a probe.
+- **Trigger**: the field on a card or a template saying when to reach for the
+  technique or the form. Withheld during a probe.
 - **Speedup**: a flag on a template saying its form is faster than the naive
   approach the technique replaces.
 - **Selector**: a technique plus filters, on a card. The ladder is derived
@@ -62,8 +62,9 @@ without redefining them. Grouped by the file that specifies the record.
   `solve`, the fixed name of the function every solution defines.
 - **Test case** (case): positional arguments and an expected return. The
   case set is every case a problem carries, appended to and never revised.
-- **Brief**: what a problem must be solvable by: a template, naming the form,
-  or a technique, naming only the skill.
+- **Target**: what a problem is written for: a template, naming the form, or a
+  technique, naming only the skill. The prompt a site is given is built from
+  it.
 - **Canonical solution**: an exemplary solution, written to display the
   approach rather than to pass.
 - **Reference solution**: a solution written from the statement alone.
@@ -95,10 +96,10 @@ without redefining them. Grouped by the file that specifies the record.
   cases in one call.
 - **Blind site**: the site writing the reference from the statement alone.
 - **Inputs site**: the site writing the input generator.
-- **Input generator** (the builder): model-written code building an input of
-  a given size and seed.
-- **Bound**: the largest input the statement admits, as the builder's `size`
-  counts it.
+- **Input generator**: model-written code building an input of a given size and
+  seed.
+- **Bound**: the largest input the statement admits, as the input generator's
+  `size` counts it. Stored as `largest` on the draft and the site outcome.
 - **Naive site**: the site writing the naive solution.
 - **Discrimination site**: the site asked for cases that kill the surviving
   mutants.
@@ -111,6 +112,8 @@ without redefining them. Grouped by the file that specifies the record.
 - **Paced**: the writing state after a naive solution passed the cases. Named
   for the pacer, the runner who sets the time others are measured against.
   `unpaced` is the reason a draft has none.
+- **Hardened**: the writing state after the mutation loop appended the cases it
+  won. Named for hardening, making a thing resist attack.
 - **Gate**: a check a draft must pass to advance. A failed gate rejects the
   draft or holds it, and is named on the site outcome.
 - **Rejected**: a draft's terminal state. The gate names why: `no_value`,
@@ -119,7 +122,7 @@ without redefining them. Grouped by the file that specifies the record.
 - **Landing**: the last step: the problem, its cases, its solutions and the
   generator's template match are stored together.
 - **Resume**: `generate --resume`: re-entering every held draft at the first
-  step whose configuration or digest moved.
+  step whose configuration or prompt hash moved.
 - **Mutant**: the canonical with one semantic change made on the parsed tree.
   A tree walk enumerates them, and no store holds them.
 - **Kill**: a mutant failing at least one case, or answering a built input
@@ -150,16 +153,20 @@ without redefining them. Grouped by the file that specifies the record.
 - **Machine record**: any record a model wrote: a claim, a match, a reading,
   a solution, a case's arguments. It carries provenance whole.
 - **Configuration**: model, effort, endpoint pin and temperature.
-- **Provenance**: the configuration, the digest of what was sent and the call
-  that sent it.
+- **Provenance**: the configuration, the prompt hash of what was sent and the
+  call that sent it.
 - **Pin**: the endpoint a model id is fixed to, so one build answers.
-- **Digest**: the hash of the prompt a record was sent. Staleness keys on it.
-- **Stale**: a record whose digest differs from the one its site would send
+- **Prompt hash**: the hash of the prompt a record was sent, `prompt_hash` on
+  every machine record. Staleness keys on it.
+- **Stale**: a record whose prompt hash differs from the one its site would send
   now. A re-run reads stale items and skips the rest.
 - **Greedy** / **sampled**: temperature zero, or the provider's default. The
   answering sites are greedy. The generator and the naive site are sampled.
 - **Call**: one request to a model and its response, domain-free. The call
   log holds every one.
+- **Standing**: the record that answers a question when several were written
+  about it. The user's stands over the machine's, and among the machine's the
+  latest stands.
 
 ### The log
 

@@ -41,7 +41,7 @@ sitting. The claim and self-label prompt survives unchanged.
 - A classifier constrained to the problem's own candidates, scored per
   technique by set equality.
 - The call log beneath it: one transport, one record per request.
-- Provenance settled: model, effort, pin, temperature, prompt digest.
+- Provenance settled: model, effort, pin, temperature, prompt hash.
 
 Measured:
 
@@ -52,7 +52,7 @@ Measured:
   ceiling any score is read against.
 - Set equality compounds a per-candidate error: 95% of calls reads as 87% over
   three candidates.
-- Keying reuse on the payload digest rather than on a version: editing one
+- Keying reuse on the prompt hash rather than on a version: editing one
   criteria entry re-derived 7 of 31 attempts.
 - 100 attempts claimed blind, carrying 138 claims, so 38 revisions. 62 of them
   were read by a frontier configuration to adjudicate the set.
@@ -93,7 +93,7 @@ canonical solution and a reference solution. Everything that makes a generated
 problem sound.
 
 - Five call sites, each at its own configuration: the generator, the blind
-  reference, the input builder, the naive solution, the discrimination round.
+  reference, the input generator, the naive solution, the discrimination round.
 - A blind reference settles every expected value, and a disagreement discards
   the problem.
 - Mutants of the canonical, killed by the statement's cases, then by built
@@ -131,14 +131,14 @@ Measured:
   Two rejections checked by hand had the canonical right and the declared value
   wrong, so the gate became a count. Re-run: 8 landed, 1 `untested` on an
   argument order the prose left open, 1 held on `input_too_large`.
-- Separating sizes: the first two searches gave `input_too_large`, because
-  the blind reference had written the form. The naive solution is its own site
-  for that reason. Five then separated at 1, 2, 6, 13 and 21 against a legal
-  100000, the naive solution briefed too slow. Fifteen over the corpus: eight
-  at one or two where the naive solution scans the values, six at 13 to 27
-  where it is exponential, four over the ceiling. The builder's bound is not a
+- Separating sizes: the first two searches gave `input_too_large`, because the
+  blind reference had written the form. The naive solution is its own site for
+  that reason. Five then separated at 1, 2, 6, 13 and 21 against a legal 100000,
+  the naive solution prompted too slow. Fifteen over the corpus: eight at one or
+  two where the naive solution scans the values, six at 13 to 27 where it is
+  exponential, four over the ceiling. The input generator's bound is not a
   denominator.
-- Of ten statements on one template, 1 reused a domain the cue names and 2
+- Of ten statements on one template, 1 reused a domain the trigger names and 2
   asked a question a listed statement already asked, both with the twin in the
   list. Held drafts are not listed.
 - 28 canonicals read at two cents, none undecided. Every problem derives

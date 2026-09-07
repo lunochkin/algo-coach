@@ -144,7 +144,7 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
     for index, draft in enumerate(waiting, start=1):
         target = written_for(cards, draft)
         if target is None:
-            # the form it was briefed on is gone, so nothing says what its
+            # the form its target named is gone, so nothing says what its
             # search or its ladder would be
             unaimed += 1
             print(f"draft {draft.id}: no template {draft.template_id}", file=sys.stderr)
@@ -279,7 +279,7 @@ def aimed_at_gaps(
 
 
 def written_for(cards: list[Card], draft: Draft) -> Target | None:
-    """The card and template a draft was briefed on, by the id it carries."""
+    """The card and template a draft was written for, by the id it carries."""
     for card in cards:
         for template in card.templates:
             if template.id == draft.template_id:

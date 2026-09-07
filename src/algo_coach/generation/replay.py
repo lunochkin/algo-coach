@@ -13,16 +13,16 @@ from pydantic import BaseModel
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.generation.bench import BENCH, Bench
-from algo_coach.generation.blind import reference
 from algo_coach.generation.blind import request_hash as blind_hash
+from algo_coach.generation.blind import write_reference
 from algo_coach.generation.checks import CAP_MS, Ran, agree, wrong_on
 from algo_coach.generation.discrimination import request_hash as discrimination_hash
 from algo_coach.generation.hardening import harden, standing
-from algo_coach.generation.inputs import builder
 from algo_coach.generation.inputs import request_hash as inputs_hash
+from algo_coach.generation.inputs import write_input_generator
 from algo_coach.generation.landing import Corpus
-from algo_coach.generation.naive import naive_solution
 from algo_coach.generation.naive import request_hash as naive_hash
+from algo_coach.generation.naive import write_naive
 from algo_coach.generation.steps import Notes, Step
 from algo_coach.generation.timing import found_in, searched_note, separated
 from algo_coach.generation.verdicts import (
@@ -81,7 +81,7 @@ class Subject:
     # claims no speedup and on one landed before the role existed
     naive: str | None
     cases: list[TestCase]
-    template: Template | None  # absent where the brief named a technique
+    template: Template | None  # absent where the target named a technique
 
     @property
     def declared(self) -> list[TestCase]:
@@ -218,7 +218,7 @@ def blind_replay(
         return Asked(skipped=True)
 
     notes("blind", "writing the reference from the statement alone")
-    solution, call = reference(
+    solution, call = write_reference(
         transport, calls, subject.problem.statement, configuration=configuration
     )
     # settled as the first reading was, against what the canonical answered:
@@ -255,7 +255,7 @@ def naive_replay(
         return Asked(skipped=True)
 
     notes("naive", "writing the solution the search measures against")
-    solution, call = naive_solution(
+    solution, call = write_naive(
         transport,
         calls,
         subject.problem.statement,
@@ -326,7 +326,7 @@ def inputs_replay(
     fresh: bool,
     notes: Notes,
 ) -> Asked:
-    """The input builder and the search it feeds. Asked only where the template
+    """The input input generator and the search it feeds. Asked only where the template
     claims a speedup, where the landing path builds for every problem: a replay
     records what a site's answer was judged by, and without a search there is
     no verdict on the code this call wrote."""
@@ -344,9 +344,11 @@ def inputs_replay(
         return Asked(skipped=True)
 
     notes("timing", "writing the input generator")
-    built, call = builder(transport, calls, subject.problem.statement, configuration=configuration)
+    generator, call = write_input_generator(
+        transport, calls, subject.problem.statement, configuration=configuration
+    )
     found = separated(
-        built,
+        generator,
         canonical=subject.canonical,
         naive=subject.naive,
         reference=subject.reference,
@@ -354,7 +356,9 @@ def inputs_replay(
         cap_ms=cap_ms,
     )
     notes("timing", searched_note(found), call)
-    return Asked(call=call, verdicts=search_verdicts(found_in(Inputs(built=built), found)))
+    return Asked(
+        call=call, verdicts=search_verdicts(found_in(Inputs(input_generator=generator), found))
+    )
 
 
 def asked_already(

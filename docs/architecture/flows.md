@@ -8,7 +8,7 @@ flow says in what order, and what each step may not do.
 A problem, its test cases and its solutions are written across five calls.
 The order matters because each step can reject what came before.
 
-1. The brief: a template, naming the form the problem must be solvable by, or
+1. The target: a template, naming the form the problem must be solvable by, or
    a technique, naming only the skill.
 2. The statement, the canonical solution and the first test cases, from one
    call.
@@ -33,7 +33,7 @@ The order matters because each step can reject what came before.
 - **Problems for one template are written one at a time.** Each call is shown
   the statements the form already has, so two in flight would be shown the same
   list and could write the same problem twice. Concurrency saves minutes and
-  costs the diversity the brief exists to enforce.
+  costs the diversity the target exists to enforce.
 - **A draft lands only once every gate has passed.** A draft failing any step
   stops there, and only one that passed every gate becomes a problem. The
   draft is kept where it stopped rather than discarded, so a fixed step can
@@ -142,7 +142,7 @@ The order matters because each step can reject what came before.
 - **The input the search measured is the input the case stores.** The input
   generator is asked to build one input per size, and building the input
   again would be a second run of model-written code.
-- **The input generator is written for every problem**, whatever the brief
+- **The input generator is written for every problem**, whatever the target
   named, and before the mutation loop. The fuzz pass kills mutants with the
   inputs the input generator builds, so a round is paid for the survivors
   alone.
@@ -156,10 +156,10 @@ The order matters because each step can reject what came before.
   The input generator's code can crash, which says nothing about the
   statement. The case a landing needs is missing, and the run reports what
   the search stopped at.
-- **A call that wrote no input generator holds the draft too**, where a
-  speedup is claimed. No search ran, so the claim is undemonstrated for the
-  same reason, and a resume starts at the builder rather than at the search.
-  The missing builder costs the fuzz pass besides.
+- **A call that wrote no input generator holds the draft too**, where a speedup
+  is claimed. No search ran, so the claim is undemonstrated for the same reason,
+  and a resume starts at the input generator rather than at the search. The
+  missing input generator costs the fuzz pass besides.
 - **The naive solution has to be correct on every case it answers**, and a
   naive solution that is not holds the draft. A naive solution that is wrong
   measures nothing, so a search against it would separate on a mistake rather
@@ -178,9 +178,9 @@ The order matters because each step can reject what came before.
 - **A run ends on what it reached, and prints no statement.** Each problem
   the run stored is a line naming the id, and `algo-coach problem <id>` reads
   one problem whole. Ten statements scroll the result out of the terminal.
-- **A statement may not name the domain its template's cue names.** The
-  monotonic stack's cue says "temperatures" and "a next warmer day". A solver
-  who recognises a problem has not derived its form.
+- **A statement may not name the domain its template's trigger names.** The
+  monotonic stack's trigger says "temperatures" and "a next warmer day". A
+  solver who recognises a problem has not derived its form.
 - **Failing means two things on the cases written with the statement.** The
   first canonical is run before any expected value is settled, so it fails
   only by yielding no value on some case, and the problem is discarded. A
@@ -209,7 +209,7 @@ flowchart TB
   P -.->|"disagreed"| X
   S -.->|"disagreed"| X
 
-  C ==>|"the blind call failed"| Z(["held<br/><i>at the state it reached; a resume re-enters at the<br/>first step whose configuration or digest moved</i>"])
+  C ==>|"the blind call failed"| Z(["held<br/><i>at the state it reached; a resume re-enters at the<br/>first step whose configuration or prompt hash moved</i>"])
   A ==>|"no input generator, and a speedup is claimed"| Z
   B ==>|"no naive solution, or one the cases failed"| Z
   P ==>|"the round's call failed"| Z
@@ -237,7 +237,7 @@ a second generator call writes a different problem.
   a held draft leaves by.
 - **A draft that never reached the search stops earlier.** A speedup is
   claimed and no input generator was written, so the draft is held at
-  `agreed` and a resume runs the builder.
+  `agreed` and a resume runs the input generator.
 - **A draft with no naive solution stops at `built`.** The naive call failed,
   or the solution it wrote did not pass the problem's cases, and the search
   has nothing to measure the canonical against.
@@ -252,11 +252,11 @@ a second generator call writes a different problem.
   no site outcome to file the gate under. The run never writes `unexercised`,
   since it cannot tell a naive solution that reached the form from an input
   generator that built the wrong shape.
-- **A draft holds every output a call produced that no local run
-  re-derives.** Those outputs are the statement, the canonical, the declared
-  cases and the difficulty, the reference, the settled cases, the builder's
-  code and its bound, the naive solution, the cases the mutation loop
-  appended, and the separating case.
+- **A draft holds every output a call produced that no local run re-derives.**
+  Those outputs are the statement, the canonical, the declared cases and the
+  difficulty, the reference, the settled cases, the input generator's code and
+  its bound, the naive solution, the cases the mutation loop appended, and the
+  separating case.
 - **The mutants and the survivors are not in the draft.** A tree walk
   enumerates them and subprocesses kill them, so a resume re-derives both
   without a call.
@@ -265,21 +265,21 @@ a second generator call writes a different problem.
 - **Each step's configuration is copied onto the draft.** The four site
   outcomes are written once the loop has run, so a draft that stopped before
   that has none to read a configuration from.
-- **A resume starts at the first step whose configuration or digest moved.**
-  The configuration and the digest are both on the draft for that reason,
-  rather than only the outputs. A draft where nothing moved starts at the
-  step the draft never took.
-- **A site is asked again on its own configuration and digest**, as a replay
-  skips a pair. The blind and the inputs prompts are the statement alone, and
-  the naive site's is the statement and the form to avoid, so a moved
+- **A resume starts at the first step whose configuration or prompt hash
+  moved.** The configuration and the prompt hash are both on the draft for that
+  reason, rather than only the outputs. A draft where nothing moved starts at
+  the step the draft never took.
+- **A site is asked again on its own configuration and prompt hash**, as a
+  replay skips a pair. The blind and the inputs prompts are the statement alone,
+  and the naive site's is the statement and the form to avoid, so a moved
   configuration re-pays its own call and no other.
 - **The steps after the sites read what the sites left.** The search runs the
-  builder against the naive solution, and the loop's survivors are decided
-  against a set the reference settled. A site moving takes the steps that
-  read it again.
+  input generator against the naive solution, and the loop's survivors are
+  decided against a set the reference settled. A site moving takes the steps
+  that read it again.
 - **The naive site is asked again where the naive solution finished at every
-  size**, though its configuration and its digest stand. The naive site is the
-  one sampled answering site, so a second call is a second draw. `corpus.md`
+  size**, though its configuration and its prompt hash stand. The naive site is
+  the one sampled answering site, so a second call is a second draw. `corpus.md`
   gives the second draw as an exit.
 - **Only that reason draws again.** A search that never ran, or one whose walk
   crossed the case ceiling, is the inputs site's to repair. The draft holds
@@ -292,9 +292,9 @@ a second generator call writes a different problem.
   re-pay the calls this draft already holds.
 - **A draft held at `searched` starts at the loop once its template drops the
   claim.** The flag is read beside the bench, since a corrected flag moves
-  neither a configuration nor a digest.
-- **The draft names the form its brief asked for**, absent where a technique
-  brief named none, as on a site outcome. A sweep over the store resolves the
+  neither a configuration nor a prompt hash.
+- **The draft names the form its target named**, absent where a technique
+  target named none, as on a site outcome. A sweep over the store resolves the
   template from the draft rather than from the outcomes of the same writing
   id.
 - **Editing the generator's prompt invalidates no stored draft.** The draft is
@@ -321,11 +321,11 @@ a second generator call writes a different problem.
   would write a second time.
 - **A resume is invoked as `generate --resume`**, over every held draft rather
   than one named. A prompt edit reaches the drafts it repairs in one run, and
-  the digests already answer which drafts moved.
+  the prompt hashes already answer which drafts moved.
 - **A resume is aimed at nothing**, as a replay is: the store is the input,
   so the flags that aim a write name no draft.
 - **A draft whose template is not seeded is skipped**, not resumed. A search
-  reads `speedup` from the form the brief named, and the run reports the
+  reads `speedup` from the form the target named, and the run reports the
   drafts it could not aim.
 - **The store is listed by `generate --drafts`**, each draft named by its
   state, its gate and the step a resume would start at. A sweep is aimed at
@@ -347,7 +347,7 @@ a second generator call writes a different problem.
 
 ## Enumerating a problem's other solutions
 
-A landed problem carries one canonical, written for what its brief named. Every
+A landed problem carries one canonical, written for what its target named. Every
 other way to solve it is found afterwards, over the stored problem.
 
 1. The statement, the cases it carries and the canonical it already has.
@@ -388,8 +388,8 @@ there is ever asked twice and no two configurations meet the same item.
 
 1. The stored problems, minus the retired ones and any missing a solution in
    either role.
-2. Per site, the digest it would send now. A pair this configuration has
-   answered at that digest is skipped.
+2. Per site, the prompt hash it would send now. A pair this configuration has
+   answered at that prompt hash is skipped.
 3. The blind site writes a reference from the statement, settled against the
    cases the problem carries rather than against the canonical.
 4. The discrimination site runs the mutation loop over the stored canonical,
@@ -401,12 +401,12 @@ there is ever asked twice and no two configurations meet the same item.
 - **A replay writes nothing to the corpus.** A case a round wins here is
   discarded, or the next configuration would be measured against a different
   problem.
-- **The loop is replayed against the set as it stood.** A case a later round
-  won and the separating case are excluded, since neither was there when the
-  survivors were decided. Counting them changes the survivors and the digest,
-  and the generation run's own record would then answer for nothing.
-- **The discrimination digest is known only after the local kill pass.** The
-  survivors are in the prompt, and killing costs subprocesses rather than a
+- **The loop is replayed against the set as it stood.** A case a later round won
+  and the separating case are excluded, since neither was there when the
+  survivors were decided. Counting them changes the survivors and the prompt
+  hash, and the generation run's own record would then answer for nothing.
+- **The discrimination prompt hash is known only after the local kill pass.**
+  The survivors are in the prompt, and killing costs subprocesses rather than a
   call, so the skip is decided after that pass and before the call.
 - **A retired problem is not replayed.** A defective one was never a fair test,
   and a later corpus will not hold it.
@@ -419,8 +419,8 @@ there is ever asked twice and no two configurations meet the same item.
   wrote answers the problem's cases, since a wrong naive solution rejects no
   problem and so names no gate.
 - **The search stays measured against the stored naive solution**, not the one
-  this run just wrote. Moving the builder and the naive solution together
-  would leave neither configuration readable from the verdict.
+  this run just wrote. Moving the input generator and the naive solution
+  together would leave neither configuration readable from the verdict.
 
 ## Drill loop
 
@@ -471,7 +471,7 @@ every divergence resolved by hand.
    claims are readings, stored and never standing.
 3. Each divergence is reviewed alone and resolved one of two ways: the
    criterion is edited, or the user's claim is.
-4. A criteria edit changes the digest of the attempts it reaches, and the
+4. A criteria edit changes the prompt hash of the attempts it reaches, and the
    frontier reads those again.
 5. Repeat until it disagrees with nothing. That is the stopping signal.
 6. The set is frozen, and the cheap classifiers are scored against it.

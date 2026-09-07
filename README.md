@@ -56,7 +56,7 @@ And three rules on top of them:
   A machine reading of an attempt the user already claimed is kept and scored,
   never promoted.
 - **Every reading is identified by its configuration**: model, effort, the
-  endpoint it was pinned to, the temperature, the digest of the exact prompt
+  endpoint it was pinned to, the temperature, the hash of the exact prompt
   that attempt was sent, and the call that sent it. Two configurations are
   compared over the attempts *both* read, never each over its own.
 - **Readings are greedy, and the noise floor is measured.** Repeating a
@@ -162,8 +162,8 @@ Read honestly, and with the caveats the tool prints:
 - **n = 60**, the attempts every configuration in the table read at the current
   criteria text. The score command computes that denominator rather than
   letting each model be graded on its own sample. A criteria edit changes the
-  digest of the attempts it reaches, so a reading taken before it is stale, and
-  is re-asked rather than quietly counted.
+  prompt hash of the attempts it reaches, so a reading taken before it is
+  stale, and is re-asked rather than quietly counted.
 - **The endpoint is part of the reading.** A model id resolves to as many
   builds as there are endpoints serving it, and quantization changes the
   weights. So a configuration is pinned, and the same model on two endpoints is
@@ -253,13 +253,13 @@ the label are next, and the loop above is whole then.
 ## How a problem gets written
 
 The corpus feeding that loop is the engine's own. A problem is written for a
-brief: a template naming the exact form, or a technique naming only the skill.
+target: a template naming the exact form, or a technique naming only the skill.
 Four calls write one. No problem lands half-verified, since every step after
 the first can reject what came before it.
 
 ```mermaid
 flowchart LR
-  T["a brief<br/><i>a template naming the form,<br/>or a technique naming the skill</i>"] --> W
+  T["a target<br/><i>a template naming the form,<br/>or a technique naming the skill</i>"] --> W
 
   subgraph W["four calls, each able to reject what came before"]
     direction LR
@@ -299,7 +299,7 @@ per gate over a run of ten.
 ## Cards: how a technique gets studied
 
 The board says which technique is weak. A card says what to do about it. A card
-is one technique's study unit: the cue that should fire, what to read, the
+is one technique's study unit: the trigger that should fire, what to read, the
 forms to reproduce from memory, and a selector the problems to solve are drawn
 by. A card is not an ability estimate and not a problem list.
 

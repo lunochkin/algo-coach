@@ -90,7 +90,7 @@ class Draft(BaseModel):
     # landing and clearing leaves a draft naming one, which is what tells the
     # next run to clear it rather than write the problem a second time
     problem_id: str | None = Field(default=None, min_length=1)
-    # the form the brief named, absent where a technique brief named none, as
+    # the form the target named, absent where a technique target named none, as
     # on `SiteOutcome`. A resume reads the template's `speedup`, and a sweep
     # over the store has nothing else to find it from
     template_id: str | None = Field(default=None, min_length=1)
@@ -108,7 +108,7 @@ class Draft(BaseModel):
     cases: list[SettledCase] = Field(default_factory=list[SettledCase])
     # built: the code that builds an input of a given size, and the largest
     # size the statement admits
-    builder: str | None = Field(default=None, min_length=1)
+    input_generator: str | None = Field(default=None, min_length=1)
     largest: int | None = Field(default=None, gt=0)
     # paced: the naive solution the search measures the canonical against, written as the
     # approach the form replaces. Absent where no speedup is claimed
@@ -129,7 +129,7 @@ class Draft(BaseModel):
     # why both are held here rather than only the outputs
     generator_provenance: MachineProvenance | None = None
     blind_provenance: MachineProvenance | None = None
-    inputs_provenance: MachineProvenance | None = None  # the builder and the search it fed
+    inputs_provenance: MachineProvenance | None = None  # the input generator and the search it fed
     naive_provenance: MachineProvenance | None = (
         None  # the naive solution a search measures against
     )
@@ -158,11 +158,11 @@ class Draft(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def _the_builder_carries_its_bound(self) -> Draft:
+    def _the_input_generator_carries_its_bound(self) -> Draft:
         """One call returned both, and a search asking for a size the statement
         excludes is what a bound without code cannot stop."""
-        if (self.builder is None) != (self.largest is None):
-            raise ValueError("a builder is stored with the bound its call reported")
+        if (self.input_generator is None) != (self.largest is None):
+            raise ValueError("an input generator is stored with the bound its call reported")
         return self
 
     @model_validator(mode="after")

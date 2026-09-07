@@ -221,19 +221,6 @@
       ],
       "default": null
     },
-    "builder": {
-      "anyOf": [
-        {
-          "minLength": 1,
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Builder"
-    },
     "canonical": {
       "minLength": 1,
       "title": "Canonical",
@@ -294,6 +281,19 @@
       "minLength": 1,
       "title": "Id",
       "type": "string"
+    },
+    "input_generator": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Input Generator"
     },
     "inputs_provenance": {
       "anyOf": [

@@ -52,7 +52,7 @@ def built(
 class FakeWriter:
     """Answers the two calls apart, telling them by what was sent: the
     reference is given the statement alone, so its content is delimited prose
-    where the generation brief is a template.
+    where the target is a template.
 
     `statements` is what each generation call returns, in order; a `None` in it
     is a call that answered nothing. `solution` is what every reference call
@@ -79,7 +79,7 @@ class FakeWriter:
 
     def __call__(self, **kwargs) -> Reply:
         self.calls.append(kwargs)
-        # told apart by the brief rather than by the content: the reference and
+        # told apart by the prompt rather than by the content: the reference and
         # the input generator are both handed the statement alone
         if kwargs["system"] == blind.SYSTEM:
             return Reply(text=solved(self.solution), stop_reason="stop")
@@ -107,7 +107,7 @@ class FakeWriter:
         return Reply(text=draft(statement, **written), stop_reason="stop")
 
     @property
-    def briefs(self) -> list[str]:
+    def prompts(self) -> list[str]:
         """What the generation calls were sent, in order."""
         return [
             one["content"]

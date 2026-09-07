@@ -25,7 +25,7 @@ def call(id: str, **overrides) -> Call:
         created_at=datetime(2026, 1, 1, tzinfo=UTC),
         model="a-model",
         effort="high",
-        prompt="a brief",
+        prompt="a prompt",
         prompt_hash="0123456789ab",
         response="{}",
         pin="a-provider/bf16",

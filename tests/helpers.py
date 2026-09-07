@@ -45,7 +45,7 @@ PROVENANCE_FIELDS = {
     "call_id": "call-1",
 }
 
-# Provenance and the template the brief named. A site caring about neither
+# Provenance and the template the target named. A site caring about neither
 # spreads this. One testing a match against a template names its own.
 GENERATED = PROVENANCE_FIELDS | {"generated_for": "t1"}
 
@@ -61,7 +61,7 @@ def a_call(id: str = "call-1", **overrides) -> Call:
         "created_at": T0,
         "model": "a-model",
         "effort": "medium",
-        "prompt": "a brief",
+        "prompt": "a prompt",
         "prompt_hash": PROMPT_HASH,
         "response": "{}",
         "pin": PIN,

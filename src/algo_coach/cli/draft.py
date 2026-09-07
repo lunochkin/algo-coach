@@ -16,7 +16,7 @@ from algo_coach.schema import (
 
 
 def listing(draft: Draft, target: Target | None, bench: Bench) -> str:
-    """One stored draft: the form it was briefed on, how far it was written,
+    """One stored draft: the form its target named, how far it was written,
     and what it is waiting on."""
     form = target.template.slug if target is not None else str(draft.template_id)
     return f"{draft.id}  {form[:24]:<24}  {draft.state:<10}  {waiting_on(draft, target, bench)}"
@@ -30,7 +30,7 @@ def waiting_on(draft: Draft, target: Target | None, bench: Bench) -> str:
     if draft.state is WritingState.LANDED:
         return f"landed as {draft.problem_id}, cleared by the next run"
     if target is None:
-        # the form its brief named is not seeded, and a search reads `speedup`
+        # the form its target named is not seeded, and a search reads `speedup`
         # from it
         return f"no template {draft.template_id}"
     if not advances(draft, target.template, bench):
@@ -92,7 +92,7 @@ def report(draft: Draft, target: Target | None, outcomes: list[SiteOutcome], ben
             *cases(draft),
             *listing_code("canonical", draft.canonical),
             *listing_code("reference", draft.reference),
-            *listing_code(f"input generator (up to {draft.largest})", draft.builder),
+            *listing_code(f"input generator (up to {draft.largest})", draft.input_generator),
             *listing_code("naive solution", draft.naive),
             *sites(outcomes, none="none recorded: they are written once the loop has run"),
         ]
@@ -100,7 +100,7 @@ def report(draft: Draft, target: Target | None, outcomes: list[SiteOutcome], ben
 
 
 def heading(draft: Draft, target: Target | None) -> str:
-    """The form it was briefed on and how far it was written. A technique brief
+    """The form its target named and how far it was written. A technique target
     names no form, and neither does a draft whose card is gone."""
     form = target.template.slug if target is not None else str(draft.template_id)
     return f"{form}, {draft.difficulty}, {draft.state}"

@@ -17,10 +17,10 @@ carry no solution, and three drafts would resume.
       then record what `gaps` reports. Two of the first seven targets held on
       `input_too_large`, so the count of held drafts after the sweep is the
       first number
-- [ ] Name the builder shape behind each `input_too_large` the sweep leaves.
-      Two causes are known: a list grown where runtime follows a value, and a
-      separation the ceiling cannot hold. The draft's reason does not separate
-      them
+- [ ] Name the input generator shape behind each `input_too_large` the sweep
+      leaves. Two causes are known: a list grown where runtime follows a value,
+      and a separation the ceiling cannot hold. The draft's reason does not
+      separate them
 - [x] Print a gaps run's position over every target, `[k/35]`, and its size
       before the first call, where the counter reads `[1/1]` on each template
       today. A sweep's cost is otherwise readable only once the sweep has paid
@@ -33,7 +33,7 @@ carry no solution, and three drafts would resume.
 
 The hand pass does two jobs at once. It writes the matcher's reference, and it
 is the only reading of a generated problem that no model produced. A generator
-that wandered from its brief shows up there whatever the matcher says.
+that wandered from its target shows up there whatever the matcher says.
 
 - [ ] Match by hand a sample of what the sweep lands, across the core templates
       it reached. The aiming is done: `--gaps` names them
@@ -183,7 +183,7 @@ are in place already, and nothing before this phase writes a second canonical.
 
 Enumeration buys a rung covering two forms at once, a scale case cross-checked
 between two efficient solutions, and a problem's techniques widening past the
-one form its brief named.
+one form its target named.
 
 - [ ] Write the enumeration call: a landed problem in, the approaches that
       solve it out, each a name and a one-line idea. No code in that reply, so
@@ -219,7 +219,7 @@ whatever phase is current.
 - [ ] Point the matcher at an attempt as well as a canonical, and keep the
       records apart as the technique readers do. Triggered when a rung or a
       recall probe needs to know which form the user's own solution used
-- [ ] Write the generation call for a technique brief: a technique and its
+- [ ] Write the generation call for a technique target: a technique and its
       criteria in, a problem out, carrying no `generated_for`. A paradigm and a
       problem class have no template, so nothing else reaches them. Triggered
       when a technique with no card needs problems

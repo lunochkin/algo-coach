@@ -78,7 +78,7 @@ def test_a_moved_blind_configuration_starts_at_the_reference(tmp_path):
     )
 
 
-def test_a_moved_inputs_configuration_starts_at_the_builder(tmp_path):
+def test_a_moved_inputs_configuration_starts_at_the_input_generator(tmp_path):
     assert moved_at(drafted(tmp_path), OPTIMUM, BENCH.model_copy(update={"inputs": OTHER})) is (
         WritingState.BUILT
     )
@@ -139,7 +139,7 @@ def test_a_step_the_draft_never_took_is_not_moved():
 
 def held(tmp_path) -> Draft:
     """A draft the search held: its template claims a speedup and the reference
-    finished at every size the builder wrote."""
+    finished at every size the input generator wrote."""
     (one,) = seeded(tmp_path, card(templates=[template("longest-valid-window", speedup=True)]))
     result = write_problems(
         FakeWriter(generator=BUILDS),
@@ -166,7 +166,7 @@ CRASHES = "def solve(size, seed):\n    raise ValueError\n"
 
 
 def unbuilt(tmp_path) -> Draft:
-    """A draft the search never ran for: the builder's code crashed, so nothing
+    """A draft the search never ran for: the input generator's code crashed, so nothing
     timed the solution it holds."""
     (one,) = seeded(tmp_path, card(templates=[template("longest-valid-window", speedup=True)]))
     result = write_problems(
@@ -286,7 +286,7 @@ def test_a_resumed_draw_separates_where_the_stored_naive_solution_did_not(tmp_pa
 
 
 def test_a_redrawn_naive_solution_carries_the_size_its_search_found(tmp_path, monkeypatch):
-    """The builder was reused, so the inputs site made no call and wrote no
+    """The input generator was reused, so the inputs site made no call and wrote no
     record. Filed nowhere, the size a resumed problem landed on would be
     readable only from the arguments of its own case."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)

@@ -28,9 +28,9 @@ class Problem(MachineProvenance):
     )  # read off the canonicals; re-derivable
     difficulty: ProblemDifficulty | None = None
     statement: str = Field(min_length=1)  # what the problem asks; matching reads it
-    # The template the brief named, where it named one: an assertion rather
+    # The template the target named, where it named one: an assertion rather
     # than a reading, and never a claim that the problem exercises nothing
-    # else. Absent on a problem written from a technique brief.
+    # else. Absent on a problem written for a technique target.
     generated_for: str | None = Field(default=None, min_length=1)
     status: ProblemStatus = ProblemStatus.CREATED
     # A field rather than a record of its own, unlike a self-label or a claim:

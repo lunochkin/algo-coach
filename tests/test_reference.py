@@ -6,9 +6,9 @@ from matching import card, seeded
 from pydantic import ValidationError
 
 from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import GenerationError, reference
+from algo_coach.generation import GenerationError, write_reference
 from algo_coach.generation.blind import BLIND_DEFAULT, SYSTEM, prompt, read, schema
-from algo_coach.generation.generator import prompt as brief
+from algo_coach.generation.generator import prompt as generator_prompt
 from algo_coach.schema import Configuration
 
 STATEMENT = "Given a list of readings, return the widest stretch that stays fair."
@@ -37,14 +37,14 @@ def test_the_statement_is_the_whole_of_the_request(tmp_path):
     solution's reading, and agreement then shows only self-consistency."""
     model = FakeModel(answer())
 
-    code, call = reference(model, CallLog(tmp_path), STATEMENT)
+    code, call = write_reference(model, CallLog(tmp_path), STATEMENT)
 
     assert model.calls[0]["content"] == f"<problem>\n{STATEMENT}\n</problem>"
     assert code.startswith("def solve")
     assert call.response == answer()
 
 
-def test_the_brief_names_no_technique_and_no_form(tmp_path):
+def test_the_generator_prompt_names_no_technique_and_no_form(tmp_path):
     """The template, its cue and the form are what the statement is written to
     withhold, so none of them may reach the reference."""
     (one,) = seeded(tmp_path, card())
@@ -52,9 +52,9 @@ def test_the_brief_names_no_technique_and_no_form(tmp_path):
 
     for named in ("Technique:", "Cue:", "Form:", one.templates[0].code):
         assert named not in sent
-    # The generation brief carries every one of them, which is what makes the
+    # The generator prompt carries every one of them, which is what makes the
     # two readings independent rather than one reading twice.
-    assert one.templates[0].code in brief(one, one.templates[0])
+    assert one.templates[0].code in generator_prompt(one, one.templates[0])
 
 
 def test_a_reply_carrying_no_solution_fails():
@@ -66,7 +66,7 @@ def test_an_answer_cut_short_writes_no_solution(tmp_path):
     model = FakeModel(None)
 
     with pytest.raises(GenerationError):
-        reference(model, CallLog(tmp_path), STATEMENT)
+        write_reference(model, CallLog(tmp_path), STATEMENT)
 
     assert len(CallLog(tmp_path).all()) == 1
 
@@ -76,8 +76,8 @@ def test_the_site_s_own_configuration_is_the_default(tmp_path):
     so it may run the model that wrote the statement."""
     model = FakeModel(answer())
 
-    reference(model, CallLog(tmp_path), STATEMENT)
-    reference(model, CallLog(tmp_path), STATEMENT, configuration=ELSEWHERE)
+    write_reference(model, CallLog(tmp_path), STATEMENT)
+    write_reference(model, CallLog(tmp_path), STATEMENT, configuration=ELSEWHERE)
 
     assert model.calls[0]["model"] == BLIND_DEFAULT.model
     assert model.calls[1]["model"] == ELSEWHERE.model

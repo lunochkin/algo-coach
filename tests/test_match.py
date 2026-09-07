@@ -144,7 +144,7 @@ def test_a_match_names_no_card():
 
 
 def test_the_canonical_a_problem_was_generated_with_asserts_its_own_match():
-    """Its brief said which template, so the pair is provenance rather than a
+    """Its target was that template, so the pair is provenance rather than a
     reading and nothing pays a call to learn it."""
     match = generator_match("t1", "s1")
 
@@ -161,13 +161,13 @@ def test_a_generator_match_carries_no_configuration():
 
 
 def test_a_generator_only_ever_asserts_a_positive():
-    """It asserts the form it was briefed on and says nothing about the
+    """It asserts the form its target named and says nothing about the
     templates it was not, which is the matcher's question."""
     assert generator_match("t1", "s1").matched is True
 
 
 def test_a_generator_match_has_seen_nothing():
-    """The brief named a template. No reading of the pair was in view, and
+    """The target named a template. No reading of the pair was in view, and
     none could have been before the solution existed."""
     assert generator_match("t1", "s1").informed_by == []
 

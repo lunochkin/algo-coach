@@ -87,12 +87,12 @@ technique, and a card and a mastery estimate share no data.
   template the next problem must be written for. The ladder never substitutes
   another problem, because a substitution hides the gap and the missing problem
   is then never written.
-- **The recognition cue is its own field**, apart from the prose it could sit
-  in, because a probe asks exactly that question: is the form recognised
-  unprompted. So the cue is shown and withheld on its own, where the rest of
-  what to read is one authored block the engine never parses. The cue is
-  carried at both levels, because recall is per template. The card's cue says
-  to reach for the technique, and a template's cue says which of the
+- **The trigger is its own field**, apart from the prose it could
+  sit in, because a probe asks exactly that question: is the form recognised
+  unprompted. So the trigger is shown and withheld on its own, where the rest of
+  what to read is one authored block the engine never parses. The trigger is
+  carried at both levels, because recall is per template. The card's trigger
+  says to reach for the technique, and a template's trigger says which of the
   technique's forms.
 - **A template states whether its form is a speedup** over the naive solution
   the technique replaces. Backtracking and exhaustive search are their own
@@ -127,7 +127,7 @@ engine's own work: an author names no solution, so nothing is authored here
 either.
 
 - **The canonical a problem was generated with asserts its own match.** Its
-  brief said which template, so the pair is provenance rather than a reading,
+  target was that template, so the pair is provenance rather than a reading,
   and the record names `generator` as its source. No call is paid to learn
   what the generator was told to write.
 - **No other canonical asserts anything.** The rest are enumerated from the
@@ -138,8 +138,8 @@ either.
   carries none. The all-or-none rule is about readings, which are re-derivable
   and so must say by what. Re-deriving this pair would mean writing the
   solution again, and the solution already names the call that wrote it.
-- **It is only ever positive.** The generator asserts the form it was briefed
-  on. Every other template the solution displays is the matcher's question,
+- **It is only ever positive.** The generator asserts the form its target
+  named. Every other template the solution displays is the matcher's question,
   and a generator saying nothing about a template is not a negative on it.
 - **The assertion is stored only for a canonical that passed.** A solution that
   failed the cases demonstrates nothing about the form, so a failure is not a
@@ -149,15 +149,15 @@ either.
   false negative. It replaces no hand pass: the pairs it reaches are the ones a
   ladder wanted, which is a sample nobody drew at random.
 - **The same fact sits on the problem and in a match.** `generated_for` names
-  the template the problem's brief asked for, and the first canonical's match
+  the template the problem's target named, and the first canonical's match
   names the same one. They cannot drift, because generation writes both in one
-  act. The canonicals of a problem written from a technique brief still carry
+  act. The canonicals of a problem written for a technique target still carry
   their own matches.
 - **The matcher answers what generation cannot assert**: which templates a
   solution displays besides the one it was written for, and whether the
   generator's own claim holds. The first answer lets a rung cover a core
   template and an optional one at once. The second answer is the only check on
-  a generator drifting from its brief.
+  a generator drifting from its target.
 - **Three writers, ordered by what each of them knew.** A hand match
   stands over both machine sources. A generator's assertion stands over a
   matcher's reading of the same pair, because the generator knew and the
@@ -175,7 +175,7 @@ either.
   techniques is a pair nothing offers. Whether the record then becomes one
   naming the templates it found is the open question. Either shape must give
   staleness by configuration: a re-run reads the solutions not yet read at the
-  current digest, and nothing else.
+  current prompt hash, and nothing else.
 - **Written after the solution lands, never before.** The template is minted
   at card import, and the solution when the problem lands. So a match cannot
   be authored against a seed file.

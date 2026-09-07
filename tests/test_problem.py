@@ -78,14 +78,14 @@ def test_a_problem_names_the_template_it_was_written_for():
 
 
 def test_a_problem_written_from_a_technique_brief_names_no_template():
-    """A template is the tightest brief and a technique a looser one. Nothing
+    """A template is the tightest target and a technique a looser one. Nothing
     told this generator a form, so nothing may assert a pair."""
     assert Problem.model_validate(CONTENT | PROVENANCE_FIELDS).generated_for is None
 
 
 def test_a_blank_template_is_rejected():
     """It passes a presence check while naming nothing. Absent is the arm for
-    a brief that named no form."""
+    a target that named no form."""
     with pytest.raises(ValidationError, match="generated_for"):
         make_problem(generated_for="")
 

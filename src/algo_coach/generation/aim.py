@@ -14,7 +14,7 @@ from algo_coach.schema import Card, Problem, Solution, Template, TemplateMatch
 
 class Target(BaseModel):
     """One template a generation run writes for, beside the card it is on: a
-    brief is built from both."""
+    prompt is built from both."""
 
     card: Card
     template: Template

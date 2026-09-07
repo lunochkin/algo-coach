@@ -31,7 +31,7 @@ def landed(tmp_path, monkeypatch, model: FakeWriter | None = None, **overrides):
 
     Over a template claiming a speedup, since that is what the inputs site is
     asked about. A run under the real sitting cap holds the draft instead: the
-    reference finishes at every size the builder writes.
+    reference finishes at every size the input generator writes.
     """
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     overrides.setdefault(
@@ -89,7 +89,7 @@ def test_the_search_measures_against_the_stored_naive_solution(tmp_path, monkeyp
     assert stored.code == SLOW
 
 
-def test_a_replayed_builder_records_the_bound_it_reported(tmp_path, monkeypatch):
+def test_a_replayed_input_generator_records_the_bound_it_reported(tmp_path, monkeypatch):
     """The bound is this call's own answer, and what the search it fed is read
     against."""
     cards = landed(tmp_path, monkeypatch)

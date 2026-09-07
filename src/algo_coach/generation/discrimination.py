@@ -146,7 +146,7 @@ def schema() -> dict[str, Any]:
     }
 
 
-def separators(
+def propose_cases(
     transport: Transport,
     log: CallLog,
     statement: str,
@@ -182,9 +182,9 @@ __all__ = [
     "ProposedCase",
     "already",
     "prompt",
+    "propose_cases",
     "read",
     "request_hash",
     "schema",
-    "separators",
     "shown",
 ]

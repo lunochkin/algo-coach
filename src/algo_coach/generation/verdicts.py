@@ -10,7 +10,7 @@ from algo_coach.generation.checks import (
     Discard,
 )
 from algo_coach.generation.hardening import Hardened
-from algo_coach.generation.inputs import Built
+from algo_coach.generation.inputs import InputGenerator
 from algo_coach.schema import (
     Call,
     MachineProvenance,
@@ -27,7 +27,7 @@ class Inputs(BaseModel):
     """
 
     call: Call | None = None
-    built: Built | None = None
+    input_generator: InputGenerator | None = None
     # the configuration the code was written at, which is what the cases it
     # feeds carry. A resume past this step reuses it where there is no call
     provenance: MachineProvenance | None = None
@@ -164,7 +164,7 @@ def search_verdicts(inputs: Inputs) -> SearchVerdict:
         gate=inputs.gate,
         separating=inputs.separating,
         unseparated=inputs.unseparated,
-        largest=inputs.built.largest if inputs.built is not None else None,
+        largest=inputs.input_generator.largest if inputs.input_generator is not None else None,
     )
 
 

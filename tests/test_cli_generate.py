@@ -81,7 +81,7 @@ def test_a_problem_its_runs_kept_is_stored_whole(root, monkeypatch, capsys):
 
     (problem,) = ProblemStore(root).all()
     # the signature the fixture appends: every statement carries the one its
-    # cases pass, since three briefs read the order off it
+    # cases pass, since three prompts read the order off it
     assert problem.statement.startswith("A statement.")
     assert problem.statement.endswith("def solve(xs)")
     assert [one.problem_id for one in CaseLog(root).cases()] == [problem.id]
@@ -460,7 +460,7 @@ def bounded(**overrides) -> FakeWriter:
 
 
 def asked(model: FakeWriter) -> dict[str, dict]:
-    """What each site was asked of, by the brief it was sent."""
+    """What each site was asked of, by the prompt it was sent."""
     named = {
         generator.SYSTEM: "generator",
         blind.SYSTEM: "blind",
@@ -687,7 +687,7 @@ def test_resume_reports_a_draft_that_is_held_again(root, monkeypatch, capsys):
 
 
 def test_resume_skips_a_draft_naming_no_seeded_template(root, monkeypatch, capsys):
-    """The form it was briefed on is gone, so nothing says what its search
+    """The form its target named is gone, so nothing says what its search
     would be."""
     stored = held_draft(root, monkeypatch, capsys)
     DraftStore(root).put(stored.model_copy(update={"template_id": "gone"}))
@@ -751,7 +751,7 @@ CRASHES = "def solve(size, seed):\n    raise ValueError\n"
 
 
 def test_a_draft_no_resume_would_advance_is_listed_as_held(root, monkeypatch, capsys):
-    """The builder crashed, so the search never ran and nothing about the bench
+    """The input generator crashed, so the search never ran and nothing about the bench
     moved. The step a resume would nominally start at is past the search, and
     the run holds the draft before reaching it."""
     seeded(root, card(templates=CLAIMS))
@@ -836,7 +836,7 @@ def test_a_draft_is_read_whole_by_its_id(root, monkeypatch, capsys):
     assert f"# {stored.title} ({stored.id})" in out
     assert "longest-valid-window, medium, searched" in out
     assert stored.statement in out
-    # the canonical, the reference, the builder and the naive solution
+    # the canonical, the reference, the input generator and the naive solution
     assert out.count("```python") == 4
     assert f"## cases ({len(stored.cases)} settled, 0 won, 0 separating)" in out
     # the loop never ran, so the step that would have paid for it took nothing

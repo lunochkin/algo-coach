@@ -206,7 +206,7 @@ def generated_problem(
     The one place that supplies provenance: a call site spelling the fields out
     could fill them partly. The techniques are passed in rather than read here,
     since the canonical is written in the same act. `generated_for` is the
-    template the brief asked for, and is absent where the brief named a skill.
+    template the target named, and is absent where the target named a skill.
     """
     return Problem(
         id=new_id(),

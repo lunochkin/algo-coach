@@ -78,7 +78,7 @@ def test_a_draft_is_identified_by_the_writing_id():
 
 
 def test_the_form_a_draft_was_briefed_on_is_optional():
-    """A technique brief names no form, as on `SiteOutcome`. A blank one is
+    """A technique target names no form, as on `SiteOutcome`. A blank one is
     rejected: it passes a presence check while naming nothing."""
     assert make_draft().template_id is None
     assert make_draft(template_id="t1").template_id == "t1"
@@ -172,7 +172,7 @@ def test_the_steps_after_the_generator_start_empty():
 
     assert draft.reference is None
     assert draft.cases == []
-    assert draft.builder is None and draft.largest is None
+    assert draft.input_generator is None and draft.largest is None
     assert draft.naive is None
     assert draft.separating is None
     assert draft.won == []
@@ -193,12 +193,12 @@ def test_a_draft_holds_the_cases_the_runs_settled():
     assert draft.cases[0].provenance.call_id == "call-1"
 
 
-def test_a_draft_holds_the_builder_and_its_bound():
+def test_a_draft_holds_the_input_generator_and_its_bound():
     """One call returned both: the code that builds an input of a given size,
     and the largest size the statement admits."""
-    draft = make_draft(builder="def solve(size, seed): ...", largest=1000)
+    draft = make_draft(input_generator="def solve(size, seed): ...", largest=1000)
 
-    assert draft.builder.startswith("def solve")
+    assert draft.input_generator.startswith("def solve")
     assert draft.largest == 1000
 
 
@@ -211,8 +211,10 @@ def test_a_draft_holds_the_naive_solution_the_search_measures_against():
     assert draft.naive_provenance.call_id == "call-1"
 
 
-@pytest.mark.parametrize("half", [{"builder": "def solve(size, seed): ..."}, {"largest": 1000}])
-def test_half_a_builder_is_rejected(half):
+@pytest.mark.parametrize(
+    "half", [{"input_generator": "def solve(size, seed): ..."}, {"largest": 1000}]
+)
+def test_half_an_input_generator_is_rejected(half):
     """A bound without code stops no search, and code without one lets a search
     ask for an input the problem excludes."""
     with pytest.raises(ValidationError, match="bound"):

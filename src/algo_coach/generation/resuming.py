@@ -99,7 +99,7 @@ def draws_again(draft: Draft, template: Template) -> bool:
     """Whether a resume asks the naive solution again though nothing about the bench
     moved.
 
-    The naive solution finished at every size the builder reached, and it is the one
+    The naive solution finished at every size the input generator reached, and it is the one
     sampled site: a second call is a second draw rather than the answer already
     stored.
 

@@ -6,7 +6,7 @@ from matching import card, seeded
 from pydantic import ValidationError
 
 from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import GenerationError, naive_solution
+from algo_coach.generation import GenerationError, write_naive
 from algo_coach.generation.blind import SYSTEM as BLIND
 from algo_coach.generation.blind import prompt as blindly
 from algo_coach.generation.naive import (
@@ -46,7 +46,7 @@ def test_the_form_to_avoid_is_sent_beside_the_statement(tmp_path):
     reach a verdict. No other site may be told it."""
     model = FakeModel(answer())
 
-    code, call = naive_solution(model, CallLog(tmp_path), STATEMENT, AVOID)
+    code, call = write_naive(model, CallLog(tmp_path), STATEMENT, AVOID)
 
     assert model.calls[0]["content"] == prompt(STATEMENT, AVOID)
     assert STATEMENT in model.calls[0]["content"] and AVOID in model.calls[0]["content"]
@@ -67,7 +67,7 @@ def test_the_brief_asks_for_the_replaced_approach_where_the_blind_one_asks_for_p
     assert "solver reaches for without one technique" in SYSTEM
     assert "slowest" not in SYSTEM
     assert one.templates[0].trigger in sent
-    # the blind site is briefed for the plainest solution and shown no form,
+    # the blind site is prompted for the plainest solution and shown no form,
     # which is what keeps its reading of the statement independent
     assert one.templates[0].trigger not in BLIND + blindly(STATEMENT)
 
@@ -95,7 +95,7 @@ def test_an_answer_cut_short_writes_no_solution(tmp_path):
     model = FakeModel(None)
 
     with pytest.raises(GenerationError):
-        naive_solution(model, CallLog(tmp_path), STATEMENT, AVOID)
+        write_naive(model, CallLog(tmp_path), STATEMENT, AVOID)
 
     assert len(CallLog(tmp_path).all()) == 1
 
@@ -103,8 +103,8 @@ def test_an_answer_cut_short_writes_no_solution(tmp_path):
 def test_the_site_s_own_configuration_is_the_default(tmp_path):
     model = FakeModel(answer())
 
-    naive_solution(model, CallLog(tmp_path), STATEMENT, AVOID)
-    naive_solution(model, CallLog(tmp_path), STATEMENT, AVOID, configuration=ELSEWHERE)
+    write_naive(model, CallLog(tmp_path), STATEMENT, AVOID)
+    write_naive(model, CallLog(tmp_path), STATEMENT, AVOID, configuration=ELSEWHERE)
 
     assert model.calls[0]["model"] == NAIVE_DEFAULT.model
     assert model.calls[1]["model"] == ELSEWHERE.model
@@ -120,7 +120,7 @@ def test_the_site_is_sampled_where_the_other_answering_ones_are_greedy(tmp_path)
     """
     model = FakeModel(answer())
 
-    _, call = naive_solution(model, CallLog(tmp_path), STATEMENT, AVOID)
+    _, call = write_naive(model, CallLog(tmp_path), STATEMENT, AVOID)
 
     assert model.calls[0]["temperature"] is None
     assert call.temperature is None

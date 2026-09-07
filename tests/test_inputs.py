@@ -7,7 +7,14 @@ from pydantic import ValidationError
 
 from algo_coach.calls import CallLog, Reply
 from algo_coach.generation import GenerationError
-from algo_coach.generation.inputs import INPUTS_DEFAULT, SYSTEM, builder, prompt, read, schema
+from algo_coach.generation.inputs import (
+    INPUTS_DEFAULT,
+    SYSTEM,
+    prompt,
+    read,
+    schema,
+    write_input_generator,
+)
 from algo_coach.generation.speedup import search
 from algo_coach.runner import defines_solve, outputs
 from algo_coach.schema import Configuration, MachineProvenance
@@ -40,7 +47,7 @@ def test_the_statement_is_the_whole_of_the_request(tmp_path):
     where they are stated."""
     model = FakeModel(answer())
 
-    built, call = builder(model, CallLog(tmp_path), STATEMENT)
+    built, call = write_input_generator(model, CallLog(tmp_path), STATEMENT)
 
     assert model.calls[0]["content"] == f"<problem>\n{STATEMENT}\n</problem>"
     assert built.code == BUILDS
@@ -52,7 +59,7 @@ def test_the_largest_size_the_statement_allows_is_reported(tmp_path):
     nothing because the problem excludes it."""
     model = FakeModel(answer(largest=1000))
 
-    built, _ = builder(model, CallLog(tmp_path), STATEMENT)
+    built, _ = write_input_generator(model, CallLog(tmp_path), STATEMENT)
 
     assert built.largest == 1000
 
@@ -71,7 +78,7 @@ def test_what_it_builds_is_the_arguments_of_a_case():
     assert built == [[0, 1, 2, 3]]
 
 
-def test_the_search_runs_a_generated_builder():
+def test_the_search_runs_a_generated_input_generator():
     """What the call exists for: the search had no input to run without one."""
     found = search(
         lambda size: outputs(BUILDS, [[size, 0]], cap_ms=1000)[0],
@@ -105,7 +112,7 @@ def test_an_answer_cut_short_writes_no_generator(tmp_path):
     model = FakeModel(None)
 
     with pytest.raises(GenerationError):
-        builder(model, CallLog(tmp_path), STATEMENT)
+        write_input_generator(model, CallLog(tmp_path), STATEMENT)
 
     assert len(CallLog(tmp_path).all()) == 1
 
@@ -136,8 +143,8 @@ def test_the_site_s_own_configuration_is_the_default(tmp_path):
     """A site names its own model, and a run may aim this call elsewhere."""
     model = FakeModel(answer())
 
-    builder(model, CallLog(tmp_path), STATEMENT)
-    builder(model, CallLog(tmp_path), STATEMENT, configuration=ELSEWHERE)
+    write_input_generator(model, CallLog(tmp_path), STATEMENT)
+    write_input_generator(model, CallLog(tmp_path), STATEMENT, configuration=ELSEWHERE)
 
     assert model.calls[0]["model"] == INPUTS_DEFAULT.model
     assert model.calls[1]["model"] == ELSEWHERE.model
