@@ -13,14 +13,32 @@ Phase 6 on 2026-09-02: every item here needs a corpus to exist first.
 Phase 6 closed with the gaps run stopped by hand: 31 of 37 core templates
 carry no solution, and three drafts would resume.
 
-- [ ] Resume the held drafts and run `generate --gaps --count 1` to the end,
+- [x] Resume the held drafts and run `generate --gaps --count 1` to the end,
       then record what `gaps` reports. Two of the first seven targets held on
       `input_too_large`, so the count of held drafts after the sweep is the
       first number
-- [ ] Name the input generator shape behind each `input_too_large` the sweep
+- [x] Name the input generator shape behind each `input_too_large` the sweep
       leaves. Two causes are known: a list grown where runtime follows a value,
       and a separation the ceiling cannot hold. The draft's reason does not
       separate them
+- [ ] Raise `CEILING` to 256 KiB, in `speedup.py` and the two docs that quote
+      64 KiB. Two quadratic naive solutions cross the 2 s cap between the two
+      sizes: dsu-core at 4467 with a 94 KB case, next-greater at some 13k
+      elements
+- [ ] Re-enter the search on resume where the ceiling moved, as a resume does
+      where `speedup` moved. A constant moves neither a configuration nor a
+      prompt hash, so the two drafts above would stay held after the raise
+- [ ] Give `speedup` one meaning in `content.md`, and seed rotated-array and
+      count-based-kth by it. The card reads the flag as faster than the naive
+      solution, the search as separable under the ceiling, and a log factor is
+      the first and never the second
+- [ ] Ask the inputs site for the shape the naive solution is slowest on. Three
+      holds are shape faults: kahn-indegree's graphs are all cyclic at size,
+      kruskal-mst's are disconnected, worked-framing's random digits branch
+      nowhere. The moved prompt hash makes `--resume` re-run the three
+- [ ] Name the technique's other templates to the naive site beside the form
+      to avoid. top-down-memo's naive solution wrote tabulation, the same
+      complexity under another form
 - [x] Print a gaps run's position over every target, `[k/35]`, and its size
       before the first call, where the counter reads `[1/1]` on each template
       today. A sweep's cost is otherwise readable only once the sweep has paid
