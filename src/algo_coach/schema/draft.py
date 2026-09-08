@@ -4,8 +4,6 @@ Working state rather than a log: a draft is revised in place and cleared at
 landing. `flows.md` gives the states and what a resume may not do.
 """
 
-from __future__ import annotations
-
 import json
 from enum import StrEnum
 from typing import Any
