@@ -103,9 +103,9 @@ def bar(progress: Progress) -> str:
 def sources(progress: Progress) -> str:
     """Where each kill came from, in the order the loop reached them. A source
     that killed nothing still prints, since zero is what says it was tried."""
-    rounds = ", ".join(f"{one} round {at}" for at, one in enumerate(progress.caught, start=1))
+    per_round = ", ".join(f"{one} round {at}" for at, one in enumerate(progress.rounds, start=1))
     return ", ".join(
-        part for part in (f"{progress.declared} set", f"{progress.fuzzed} fuzz", rounds) if part
+        part for part in (f"{progress.declared} set", f"{progress.fuzzed} fuzz", per_round) if part
     )
 
 

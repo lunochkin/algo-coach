@@ -137,7 +137,7 @@ def disputed(
         user_id=args.user,
         technique=args.technique,
     )
-    # What each attempt would be asked now: a claim made against an older rulebook
+    # What each attempt would be asked now: a claim made against older criteria
     # answered a different question.
     asked = {
         attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")

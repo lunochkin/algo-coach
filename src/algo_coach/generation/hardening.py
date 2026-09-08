@@ -22,17 +22,18 @@ from algo_coach.schema import Call, Configuration, MachineProvenance, SettledCas
 
 @dataclass(frozen=True)
 class Hardened:
-    """What the rounds won, and what the set still does not catch."""
+    """What the loop appended, and what the set still does not catch."""
 
-    cases: list[SettledCase] = field(default_factory=list[SettledCase])
+    kept: list[SettledCase] = field(default_factory=list[SettledCase])  # the fuzz pass's inputs
+    won: list[SettledCase] = field(default_factory=list[SettledCase])  # the rounds' proposals
     mutants: int = 0
     survived: int = 0  # mutants no case killed when the loop stopped
-    rounds: int = 0  # rounds paid for, at one call each
+    played: int = 0  # rounds paid for, at one call each
     fuzzed: Fuzzed | None = None  # the pass before the rounds, where one ran
     # which source killed what, so a report can say whether a round earned its
     # call: the set the loop was given, then one entry per round it played
     declared: int = 0
-    caught: list[int] = field(default_factory=list[int])
+    rounds: list[int] = field(default_factory=list[int])
     # the last round's call, which is what the counters above were left
     # by. `None` where the first case set killed every mutant
     call: Call | None = None
@@ -75,7 +76,7 @@ def harden(
     slowest_ms: int | None = None,
     cap_ms: int = CAP_MS,
     configuration: Configuration = DISCRIMINATION_DEFAULT,
-    rounds: int = ROUNDS,
+    bound: int = ROUNDS,
     fuzzing: Fuzzing | None = None,
     notes: Notes = SILENT,
 ) -> Hardened:
@@ -104,7 +105,8 @@ def harden(
     asked: list[Sequence[Any]] = []
     paid: Call | None = None
     fuzzed: Fuzzed | None = None
-    caught: list[int] = []
+    kept: list[SettledCase] = []
+    rounds: list[int] = []
     dropped = played = proposed = 0
 
     started = monotonic()
@@ -122,10 +124,11 @@ def harden(
             "fuzz",
             f"{fuzzed.built} built, {len(fuzzed.cases)} kept, {len(fuzzed.standing)} standing",
         )
-        won.extend(fuzzed.cases)
+        kept = fuzzed.cases
         standing = fuzzed.standing
         if fuzzed.disagreement is not None:
             return _left(
+                kept=kept,
                 won=won,
                 enumerated=enumerated,
                 standing=standing,
@@ -133,22 +136,22 @@ def harden(
                 dropped=dropped,
                 proposed=proposed,
                 declared=declared,
-                caught=caught,
+                rounds=rounds,
                 call=paid,
                 fuzzed=fuzzed,
                 disagreement=fuzzed.disagreement,
             )
 
-    while standing and played < rounds:
+    while standing and played < bound:
         played += 1
-        notes("round", f"{played} of {rounds}: asking for the cases that kill {len(standing)}")
+        notes("round", f"{played} of {bound}: asking for the cases that kill {len(standing)}")
         proposals, call = propose_cases(
             transport,
             calls,
             statement,
             canonical=canonical,
             survivors=standing,
-            known=[*[one.args for one in [*cases, *won]], *asked],
+            known=[*[one.args for one in [*cases, *kept, *won]], *asked],
             configuration=configuration,
         )
         paid = call
@@ -164,6 +167,7 @@ def harden(
         dropped += len(proposals) - len(settled.cases) - len(settled.disagreements)
         if settled.disagreements:
             return _left(
+                kept=kept,
                 won=won,
                 enumerated=enumerated,
                 standing=standing,
@@ -171,7 +175,7 @@ def harden(
                 dropped=dropped,
                 proposed=proposed,
                 declared=declared,
-                caught=caught,
+                rounds=rounds,
                 call=paid,
                 fuzzed=fuzzed,
                 disagreement=settled.disagreements[0],
@@ -181,14 +185,14 @@ def harden(
             # could not answer. It killed nothing, so the loop stops as it does
             # on a round whose cases killed nothing, and the zero keeps the
             # counter's position reading as the round number
-            caught.append(0)
+            rounds.append(0)
             break
 
         proposed += len(settled.cases)
         asked.extend(one.args for one in settled.cases)
         before, started = len(standing), monotonic()
         killers, standing = _killers(standing, settled.cases, cap_ms=against_ms)
-        caught.append(before - len(standing))
+        rounds.append(before - len(standing))
         notes(
             "round",
             f"{played}: {len(killers)} of {len(settled.cases)} landed"
@@ -201,6 +205,7 @@ def harden(
             break
 
     return _left(
+        kept=kept,
         won=won,
         enumerated=enumerated,
         standing=standing,
@@ -208,7 +213,7 @@ def harden(
         dropped=dropped,
         proposed=proposed,
         declared=declared,
-        caught=caught,
+        rounds=rounds,
         call=paid,
         fuzzed=fuzzed,
     )
@@ -264,6 +269,7 @@ def _settled(
 
 def _left(
     *,
+    kept: list[SettledCase],
     won: list[SettledCase],
     enumerated: int,
     standing: Sequence[Any],
@@ -271,23 +277,24 @@ def _left(
     dropped: int,
     proposed: int,
     declared: int,
-    caught: list[int],
+    rounds: list[int],
     call: Call | None,
     fuzzed: Fuzzed | None = None,
     disagreement: Disagreement | None = None,
 ) -> Hardened:
     return Hardened(
-        cases=won,
+        kept=kept,
+        won=won,
         mutants=enumerated,
         survived=len(standing),
-        rounds=played,
+        played=played,
         dropped=dropped,
         proposed=proposed,
         call=call,
         disagreement=disagreement,
         fuzzed=fuzzed,
         declared=declared,
-        caught=list(caught),
+        rounds=list(rounds),
     )
 
 

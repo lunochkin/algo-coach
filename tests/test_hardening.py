@@ -64,7 +64,7 @@ def test_a_canonical_with_no_mutant_asks_nothing(tmp_path):
 
     assert model.calls == []
     assert hardened.mutants == 0
-    assert hardened.rounds == 0
+    assert hardened.played == 0
 
 
 def test_a_set_that_kills_every_mutant_asks_no_call(tmp_path):
@@ -76,7 +76,7 @@ def test_a_set_that_kills_every_mutant_asks_no_call(tmp_path):
 
     assert model.calls == []
     assert hardened.survived == 0
-    assert hardened.cases == []
+    assert hardened.won == []
 
 
 def test_a_proposal_that_killed_nothing_does_not_land(tmp_path):
@@ -86,7 +86,7 @@ def test_a_proposal_that_killed_nothing_does_not_land(tmp_path):
 
     hardened = run(tmp_path, model, WEAK)
 
-    assert [one.args for one in hardened.cases] == BOUNDARY
+    assert [one.args for one in hardened.won] == BOUNDARY
     assert hardened.proposed == 3
 
 
@@ -97,7 +97,7 @@ def test_two_proposals_killing_one_mutant_land_the_first(tmp_path):
 
     hardened = run(tmp_path, model, WEAK)
 
-    assert [one.args for one in hardened.cases] == [[3], [4]]
+    assert [one.args for one in hardened.won] == [[3], [4]]
     assert hardened.survived == 0
 
 
@@ -108,7 +108,7 @@ def test_a_round_whose_proposals_all_killed_nothing_stops_the_loop(tmp_path):
     hardened = run(tmp_path, model, WEAK)
 
     assert len(model.calls) == 1
-    assert hardened.cases == []
+    assert hardened.won == []
     assert hardened.survived == 3
 
 
@@ -131,8 +131,8 @@ def test_a_survivor_draws_one_call_and_the_cases_it_wins_land(tmp_path):
     hardened = run(tmp_path, model, WEAK)
 
     assert len(model.calls) == 1
-    assert hardened.rounds == 1
-    assert [one.args for one in hardened.cases] == BOUNDARY
+    assert hardened.played == 1
+    assert [one.args for one in hardened.won] == BOUNDARY
     assert hardened.survived == 0
 
 
@@ -141,8 +141,8 @@ def test_a_won_case_carries_the_reference_s_answer(tmp_path):
     construction."""
     hardened = run(tmp_path, Answers(rounds=[BOUNDARY]), WEAK)
 
-    assert [one.expected for one in hardened.cases] == [True, False]
-    assert {one.expected_from for one in hardened.cases} == {ExpectedSource.REFERENCE}
+    assert [one.expected for one in hardened.won] == [True, False]
+    assert {one.expected_from for one in hardened.won} == {ExpectedSource.REFERENCE}
 
 
 def test_a_won_case_names_the_round_that_proposed_it(tmp_path):
@@ -150,7 +150,7 @@ def test_a_won_case_names_the_round_that_proposed_it(tmp_path):
     configuration, and the stored case copies that one."""
     hardened = run(tmp_path, Answers(rounds=[BOUNDARY]), WEAK)
 
-    assert {one.provenance.call_id for one in hardened.cases} == {hardened.call.id}
+    assert {one.provenance.call_id for one in hardened.won} == {hardened.call.id}
 
 
 def test_a_won_case_names_the_round_that_won_it(tmp_path):
@@ -158,7 +158,7 @@ def test_a_won_case_names_the_round_that_won_it(tmp_path):
     what separates it from the set written with the statement."""
     hardened = run(tmp_path, Answers(rounds=[BOUNDARY]), WEAK)
 
-    assert {one.round for one in hardened.cases} == {1}
+    assert {one.round for one in hardened.won} == {1}
 
 
 def test_the_cases_the_set_already_has_reach_the_call(tmp_path):
@@ -179,7 +179,7 @@ def test_a_proposal_the_canonical_cannot_answer_drops_the_case(tmp_path):
     hardened = run(tmp_path, model, WEAK)
 
     assert hardened.dropped == 1
-    assert hardened.cases == []
+    assert hardened.won == []
     assert hardened.disagreement is None
 
 
@@ -194,7 +194,7 @@ def test_a_proposal_the_two_solutions_answer_differently_is_reported(tmp_path):
     assert hardened.disagreement is not None
     assert hardened.disagreement.canonical is True
     assert hardened.disagreement.reference == 99
-    assert hardened.cases == []
+    assert hardened.won == []
 
 
 def test_a_round_that_kills_nothing_stops_the_loop(tmp_path):
@@ -204,7 +204,7 @@ def test_a_round_that_kills_nothing_stops_the_loop(tmp_path):
     hardened = run(tmp_path, model, WEAK)
 
     assert len(model.calls) == 1
-    assert hardened.rounds == 1
+    assert hardened.played == 1
     assert hardened.survived == 3
 
 
@@ -217,10 +217,10 @@ def test_a_round_that_proposes_nothing_stops_the_loop(tmp_path):
     hardened = run(tmp_path, model, WEAK)
 
     assert len(model.calls) == 1
-    assert hardened.rounds == 1
+    assert hardened.played == 1
     assert hardened.proposed == 0
     # the zero keeps a counter's position reading as the round that left it
-    assert hardened.caught == [0]
+    assert hardened.rounds == [0]
     assert hardened.survived == 3
 
 
@@ -232,7 +232,7 @@ def test_the_loop_stops_at_the_bound(tmp_path):
     hardened = run(tmp_path, model, WEAK)
 
     assert len(model.calls) == ROUNDS
-    assert hardened.rounds == ROUNDS
+    assert hardened.played == ROUNDS
     # `n > 4`, which only an input of 4 separates
     assert hardened.survived == 1
 

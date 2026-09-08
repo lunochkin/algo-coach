@@ -133,8 +133,12 @@ without redefining them. Grouped by the file that specifies the record.
   builds. Costs no call.
 - **Shrink**: reducing a kept fuzz input to the smallest list still killing
   the same mutants.
+- **Kept input**: an input the fuzz pass built that killed a mutant, shrunk and
+  stored as a case. `kept` on the draft.
 - **Round**: one discrimination call, proposing cases for the survivors. At
   most two per draft.
+- **Won case**: a round's proposal that killed a mutant, stored as a case.
+  `won` on the draft and the site outcome.
 - **Mutation loop**: the fuzz pass and the rounds together.
 - **Speedup search** (the search): finding the smallest input on which the
   naive solution exceeds the sitting's cap and the canonical does not. The

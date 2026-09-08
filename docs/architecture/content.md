@@ -43,7 +43,7 @@ The vocabulary the append-only log references.
   differently, so board numbers would move as classification progressed while
   the practice behind them did not.
 - **The criteria are the prompt.** They reach the classifier beside the
-  candidates and the reader beside the code, so one rulebook answers both.
+  candidates and the reader beside the code, so one set of criteria answers both.
   Editing an entry changes machine claims, but only for the attempts carrying
   that
   candidate.

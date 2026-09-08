@@ -277,7 +277,7 @@ def to_searched(p: Passage) -> bool:
 
 def to_hardened(p: Passage) -> bool:
     """The mutation loop over the set the two solutions settled."""
-    p.checked, p.inputs, p.bar, won = measured(
+    p.checked, p.inputs, p.bar, kept, won = measured(
         p.transport,
         p.calls,
         p.draft,
@@ -299,6 +299,7 @@ def to_hardened(p: Passage) -> bool:
         p.drafts,
         p.draft,
         WritingState.HARDENED,
+        kept=kept,
         won=won,
         discrimination_provenance=MachineProvenance.of(p.bar.call),
     )
@@ -363,7 +364,7 @@ def measured(
     configuration: Configuration,
     cap_ms: int,
     notes: Notes = SILENT,
-) -> tuple[Checked, Inputs, Bar, list[SettledCase]]:
+) -> tuple[Checked, Inputs, Bar, list[SettledCase], list[SettledCase]]:
     """The mutation loop's cases, appended to the set the problem carries.
 
     `inputs` is returned because the fuzz pass runs inside the loop: a built
@@ -389,11 +390,11 @@ def measured(
         )
     except Exception as failure:
         notes("mutants", f"unmeasured: {failure!r}")
-        return checked, inputs, Bar(unmeasured=repr(failure)), []
+        return checked, inputs, Bar(unmeasured=repr(failure)), [], []
 
     bar = barred(hardened)
     if hardened.disagreement is None:
-        return checked, inputs, bar, hardened.cases
+        return checked, inputs, bar, hardened.kept, hardened.won
 
     # a boundary input the first case set never reached, answered two ways
     disagreed = Checked(
@@ -404,8 +405,8 @@ def measured(
     # the fuzz pass's input was built by the inputs site's code, so its gate is
     # filed there and the round answered for nothing
     if hardened.fuzzed is not None and hardened.fuzzed.disagreement is not None:
-        return disagreed, inputs.model_copy(update={"gate": Gate.DISAGREED}), bar, []
-    return disagreed, inputs, bar.model_copy(update={"gate": Gate.DISAGREED}), []
+        return disagreed, inputs.model_copy(update={"gate": Gate.DISAGREED}), bar, [], []
+    return disagreed, inputs, bar.model_copy(update={"gate": Gate.DISAGREED}), [], []
 
 
 def building(

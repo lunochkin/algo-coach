@@ -67,7 +67,7 @@ class Bar(BaseModel):
     # which source killed what, each written on the site whose output did it
     declared: int = 0
     fuzzed: int = 0
-    caught: list[int] = []
+    rounds: list[int] = []
     # the last round's call, which is what the counters were left by. Absent
     # where nothing reached a round
     call: Call | None = None
@@ -152,8 +152,8 @@ def loop_verdicts(bar: Bar) -> LoopVerdict:
         survived=bar.survived,
         won=bar.won,
         proposed=bar.proposed,
-        killed=sum(bar.caught),
-        rounds=bar.caught,
+        killed=sum(bar.rounds),
+        rounds=bar.rounds,
     )
 
 
@@ -170,19 +170,16 @@ def search_verdicts(inputs: Inputs) -> SearchVerdict:
 
 def barred(hardened: Hardened) -> Bar:
     """What the loop left, as the discrimination site's record counts it."""
-    kept = len(hardened.fuzzed.cases) if hardened.fuzzed else 0
     return Bar(
         mutants=hardened.mutants,
         survived=hardened.survived,
-        # the rounds' own, which is what the site is scored on. The pass before
-        # them paid for no call
-        won=len(hardened.cases) - kept,
+        won=len(hardened.won),
         proposed=hardened.proposed,
         built=hardened.fuzzed.built if hardened.fuzzed else 0,
-        kept=kept,
+        kept=len(hardened.kept),
         declared=hardened.declared,
         fuzzed=hardened.fuzzed.killed if hardened.fuzzed else 0,
-        caught=hardened.caught,
+        rounds=hardened.rounds,
         call=hardened.call,
     )
 

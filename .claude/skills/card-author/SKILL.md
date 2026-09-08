@@ -57,7 +57,7 @@ file in place.
    forms rather than the card's contents.
 
 3. **Write the card's `trigger`** — what in a problem says "reach for this
-   technique", plus the brute force it replaces. One or two sentences, and the
+   technique", plus the naive approach it replaces. One or two sentences, and the
    load-bearing field: a probe asks whether the technique is recognised
    unprompted, which is this and nothing else. Which *form* to reach for is each
    template's own trigger.

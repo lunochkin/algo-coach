@@ -326,7 +326,7 @@ def test_the_line_reports_what_the_mutation_loop_caught():
         proposed=18,
         declared=6,
         fuzzed=2,
-        caught=[2],
+        rounds=[2],
     )
 
     assert landed == (
@@ -346,7 +346,7 @@ def test_the_line_reports_what_a_round_proposed_and_what_landed():
         survived=2,
         won=3,
         proposed=18,
-        caught=[10],
+        rounds=[10],
     )
 
     assert landed.endswith("18 case(s) proposed, 3 landed")
@@ -362,7 +362,7 @@ def test_a_round_that_killed_nothing_still_prints_its_zero():
         mutants=12,
         survived=2,
         declared=10,
-        caught=[0, 0],
+        rounds=[0, 0],
     )
 
     assert "(10 set, 0 fuzz, 0 round 1, 0 round 2)" in landed
@@ -838,7 +838,7 @@ def test_a_draft_is_read_whole_by_its_id(root, monkeypatch, capsys):
     assert stored.statement in out
     # the canonical, the reference, the input generator and the naive solution
     assert out.count("```python") == 4
-    assert f"## cases ({len(stored.cases)} settled, 0 won, 0 separating)" in out
+    assert f"## cases ({len(stored.cases)} settled, 0 kept, 0 won, 0 separating)" in out
     # the loop never ran, so the step that would have paid for it took nothing
     assert "discrimination  not taken" in out
     assert len(CallLog(root).all()) == spent

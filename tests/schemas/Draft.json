@@ -306,6 +306,13 @@
       ],
       "default": null
     },
+    "kept": {
+      "items": {
+        "$ref": "#/$defs/SettledCase"
+      },
+      "title": "Kept",
+      "type": "array"
+    },
     "largest": {
       "anyOf": [
         {

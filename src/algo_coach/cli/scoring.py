@@ -131,7 +131,7 @@ def compared(result: Comparison, *, splits: bool = False) -> None:
 
 def describe(configuration: Configuration) -> str:
     """The whole configuration in a sentence, which `labels` says in a token.
-    No rulebook: the criteria vary per attempt within one run."""
+    No criteria named: they vary per attempt within one run."""
     temperature = UNSET if configuration.temperature is None else configuration.temperature
     return (
         f"{configuration.model}, effort {configuration.effort}, "

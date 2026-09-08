@@ -87,7 +87,7 @@ class Progress(BaseModel):
     # pass's built inputs, and one entry per round
     declared: int = 0
     fuzzed: int = 0
-    caught: list[int] = []
+    rounds: list[int] = []
     unmeasured: str | None = None  # the round's call failed, and the set is unmeasured
     # what this problem's calls cost, over every site and every round. Absent
     # where the provider priced none of them
@@ -235,7 +235,7 @@ def write_problems(
                     kept=p.bar.kept,
                     declared=p.bar.declared,
                     fuzzed=p.bar.fuzzed,
-                    caught=p.bar.caught,
+                    rounds=p.bar.rounds,
                     unmeasured=p.bar.unmeasured,
                     cost=priced(calls.appended[paid:]),
                 )

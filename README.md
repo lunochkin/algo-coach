@@ -153,9 +153,8 @@ Two results. The second result justifies keeping the table:
   classifier the engine runs.
 - **Size does not order this task.** A mid-tier frontier model places last,
   nine attempts behind a 31B open one and well outside the noise floor.
-  Reading which technique a solution used is a rulebook-application problem. A
-  model that applies the criteria as written beats one that reasons around
-  them.
+  Reading which technique a solution used is applying written criteria. A
+  model that applies them as written beats one that reasons around them.
 
 Read honestly, and with the caveats the tool prints:
 

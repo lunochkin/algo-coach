@@ -46,8 +46,14 @@ def copied(provenance: MachineProvenance | None) -> MachineProvenance:
 
 def landing(draft: Draft) -> list[SettledCase]:
     """The set the problem carries, in the order it was built: what the two
-    solutions settled, then what the rounds won, then the separating case."""
-    return [*draft.cases, *draft.won, *([draft.separating] if draft.separating else [])]
+    solutions settled, what the fuzz pass kept, what the rounds won, then the
+    separating case."""
+    return [
+        *draft.cases,
+        *draft.kept,
+        *draft.won,
+        *([draft.separating] if draft.separating else []),
+    ]
 
 
 def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:

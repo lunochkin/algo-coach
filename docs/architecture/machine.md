@@ -67,11 +67,11 @@ fields to stay comparable, and those fields are stated here once.
   rule, as the temperature does: a record stored before the field existed
   carries none, and so does a record a provider priced at nothing.
 - **Staleness keys on the prompt hash of what was sent**, never on a version
-  over the rulebook. A criterion travels with its candidate, so editing one
+  over the vocabulary. A criterion travels with its candidate, so editing one
   entry re-derives what that entry reached and leaves the rest. An author can
   forget to bump a version while the text moves. A prompt hash moves with the
   text. The cost is that a reflowed sentence re-derives what it reaches, and
-  that a rulebook is cited as a prompt hash rather than as "prompt 3".
+  that the criteria are cited as a prompt hash rather than as "prompt 3".
 - **The record's own copy of the configuration cannot drift**, because a call
   is append-only and the copy is made in the same write. The copy exists so the
   log reads alone: loading the calls to learn which model produced a record

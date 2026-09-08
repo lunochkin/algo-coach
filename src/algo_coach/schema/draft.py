@@ -121,9 +121,10 @@ class Draft(BaseModel):
     # why the search stored no case, as the inputs site records it. A resume
     # reads it: the exits a held draft leaves by differ by what stopped it
     unseparated: str | None = Field(default=None, min_length=1)
-    # hardened: what the loop appended to the set — the inputs the fuzz pass
+    # hardened: what the loop appended to the set. The inputs the fuzz pass
     # kept, then the cases the rounds won. Neither lands where it killed
     # nothing, so this is what the step was paid for
+    kept: list[SettledCase] = Field(default_factory=list[SettledCase])
     won: list[SettledCase] = Field(default_factory=list[SettledCase])
 
     # the configuration each step ran at, copied as its call returned. A resume
