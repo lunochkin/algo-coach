@@ -89,16 +89,16 @@ fields to stay comparable, and those fields are stated here once.
 
 ## Site outcomes
 
-The record of what one generation call site left on one attempt at writing a
-problem. A model wrote no part of it. The record holds what the run's gates
-said about the answer a call returned, so it sits beside the call log.
+The record of what one generation call site left on one writing. A model wrote
+no part of it. The record holds what the run's gates said about the answer a
+call returned, so it sits beside the call log.
 
 - **Each site's outcome is stored rather than only printed.** The run prints
   one line per stage, and that output is gone when the process ends. Without a
   stored record, nobody can later see which gate rejected an answer, which
   configuration produced it, or which prompt hash it was sent.
-- **One record per site and per attempt.** The five sites can run at five
-  configurations, and one record over the attempt could not say which of them a
+- **One record per site and per writing.** The five sites can run at five
+  configurations, and one record over the writing could not say which of them a
   gate rejected.
 - **A kill is filed under the site whose output did it**, as a gate is filed
   under the site whose answer made it decidable. The mutants the statement's own
@@ -108,10 +108,10 @@ said about the answer a call returned, so it sits beside the call log.
   exactly where its own count can be other than zero: the generator always
   answered, the fuzz pass ran only where a generator was written, and a round
   killed only where one was asked. Held on the discrimination record alone, the
-  three sources would go unrecorded on every attempt the fuzz pass finished,
-  and that attempt is the one that says a round was not needed.
+  three sources would go unrecorded on every writing the fuzz pass finished,
+  and that writing is the one that says a round was not needed.
 - **The mutants a canonical yielded sit on the site that wrote it.** The count
-  is a fact about that solution, so it is readable on an attempt no round
+  is a fact about that solution, so it is readable on a writing no round
   reached, and two generator configurations compare on it.
 - **A gate is filed under the site whose answer made it decidable.** A
   canonical yielding no value on a case is the generator's. A disagreement is
@@ -142,8 +142,8 @@ said about the answer a call returned, so it sits beside the call log.
   rejected where the problem does not exercise the form its template claims,
   and every site answered. That gate is read from the draft, since the draft is
   the record that outlives the run.
-- **The attempt carries an id the run mints.** A rejected draft has no problem
-  to key to, and the rejected attempt is the one whose cost nothing else
+- **The writing carries an id the run mints.** A rejected draft has no problem
+  to key to, and the rejected writing is the one whose cost nothing else
   records.
 - **The problem is named where one landed.** Its id exists only once the problem
   is stored, so the records are written at that point rather than as each site

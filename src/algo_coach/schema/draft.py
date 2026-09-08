@@ -1,4 +1,4 @@
-"""One attempt at writing a problem, held as it is written.
+"""One writing, held as it is written.
 
 Working state rather than a log: a draft is revised in place and cleared at
 landing. `flows.md` gives the states and what a resume may not do.
@@ -73,7 +73,7 @@ class SettledCase(BaseModel):
 
 
 class Draft(BaseModel):
-    """What the steps of one attempt produced and no local run re-derives.
+    """What the steps of one writing produced and no local run re-derives.
 
     The mutants, the survivors and the loop's counters are not here: a tree
     walk enumerates the first two and the site outcomes of this id carry the
@@ -93,7 +93,7 @@ class Draft(BaseModel):
     problem_id: str | None = Field(default=None, min_length=1)
     # the target, as on `SiteOutcome` and the problem this lands as. A resume
     # reads the template's `speedup`, and a sweep over the store has nothing
-    # else to find it from. Both absent where nothing recorded the attempt
+    # else to find it from. Both absent where nothing recorded the writing
     target_template_id: str | None = Field(default=None, min_length=1)
     target_technique: str | None = Field(default=None, min_length=1)
 

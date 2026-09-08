@@ -45,8 +45,8 @@ def test_every_site_that_answered_leaves_a_record(tmp_path):
     assert set(sites(outcomes)) == {CallSite.GENERATOR, CallSite.BLIND, CallSite.INPUTS}
 
 
-def test_the_four_sites_of_one_attempt_share_a_writing_id(tmp_path):
-    """Minted per attempt rather than taken from the problem: it is what groups
+def test_the_four_sites_of_one_writing_share_a_writing_id(tmp_path):
+    """Minted per writing rather than taken from the problem: it is what groups
     the sites of a draft that never landed."""
     _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS))
 
@@ -63,7 +63,7 @@ def test_a_landed_problem_is_named_by_its_records(tmp_path):
 
 
 def test_a_rejected_draft_still_leaves_what_its_sites_left(tmp_path):
-    """The draft is the attempt with nothing else to point at: unrecorded, what
+    """The draft is the writing with nothing else to point at: unrecorded, what
     the run paid for is lost when it ends."""
     model = FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n")
 
@@ -186,7 +186,7 @@ def test_the_record_says_what_a_round_proposed_and_what_landed(tmp_path):
 
 def test_the_canonical_s_mutants_are_the_generator_s_own_count(tmp_path):
     """It wrote the solution the set is enumerated from, and its record is the
-    one every attempt leaves."""
+    one every writing leaves."""
     model = FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES, separators=[[[4], [3]]])
 
     _, _, outcomes = run(tmp_path, model)
@@ -207,7 +207,7 @@ def test_each_source_is_filed_under_the_site_whose_output_killed(tmp_path):
 
 
 def test_a_pass_that_needed_no_round_still_records_what_killed(tmp_path):
-    """The attempt a round was never paid for is the one the measurement wants,
+    """The writing a round was never paid for is the one the measurement wants,
     and no discrimination record exists to carry it."""
     model = FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES, generator=COUNTS)
 

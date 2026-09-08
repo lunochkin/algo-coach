@@ -31,7 +31,7 @@ def test_a_record_reads_back_whole(tmp_path):
     assert read[0].gate is Gate.DISAGREED
 
 
-def test_records_are_read_per_attempt(tmp_path):
+def test_records_are_read_per_writing(tmp_path):
     """The writing id is what groups a draft's sites, landed or not."""
     store = OutcomeLog(tmp_path)
     mine = [left(CallSite.GENERATOR, "w1"), left(CallSite.BLIND, "w1")]

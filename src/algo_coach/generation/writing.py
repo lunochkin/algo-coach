@@ -1,4 +1,4 @@
-"""One attempt at writing a problem, and what its call sites leave behind.
+"""One writing, and what its call sites leave behind.
 
 `machine.md` gives what a site outcome carries and why a run's stage lines do
 not suffice.
@@ -14,7 +14,7 @@ from algo_coach.schema import Call, CallSite, Draft, Gate, MachineProvenance, Si
 
 @dataclass(frozen=True)
 class Writing:
-    """The four sites of one attempt, grouped by a minted id.
+    """The four sites of one writing, grouped by a minted id.
 
     Silent by default, so `write_one` and `harden` are callable without a
     store and a test needs none.
@@ -26,7 +26,7 @@ class Writing:
     id: str = field(default_factory=new_id)
 
     def draft(self, generated: Generated, call: Call) -> Draft:
-        """The draft this attempt writes, carrying the id its site outcomes
+        """The draft of this writing, carrying the id its site outcomes
         group under and the form its target named."""
         return mint.draft(
             self.id,
@@ -35,7 +35,7 @@ class Writing:
             canonical=generated.canonical,
             declared=generated.cases,
             difficulty=generated.difficulty,
-            # absent where nothing recorded the attempt, as on the site
+            # absent where nothing recorded the writing, as on the site
             # outcomes this id groups
             target_template_id=self.target_template_id,
             target_technique=self.target_technique,
@@ -87,7 +87,7 @@ class Writing:
         )
 
 
-# the default: an attempt that was given no list records nothing
+# the default: a writing that was given no list records nothing
 UNRECORDED = Writing()
 
 

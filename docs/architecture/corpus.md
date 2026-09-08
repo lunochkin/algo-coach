@@ -404,10 +404,11 @@ product-owned and global, as the solution is.
   whole vocabulary's, so any criteria edit re-reads every canonical.
 - **Two writers, and the user's stands first**, as a claim resolves. A user
   reading adjudicates rather than testifies: nobody sat for a canonical, so the
-  user's reading is of code they did not produce. The user's solution claim stands
-  all the same, and it is the reference a configuration is scored against.
-- **A problem's techniques are folded from its solution claims.** The union
-  over the standing solution claims of its canonicals, with the reference excluded.
+  user's reading is of code they did not produce. The user's solution claim
+  stands all the same, and it is the reference a configuration is scored
+  against.
+- **A problem's techniques are folded from its solution claims.** The union over
+  the standing solution claims of its canonicals, with the reference excluded.
 
 ## Verification runs
 

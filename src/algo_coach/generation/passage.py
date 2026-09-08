@@ -322,7 +322,7 @@ def stored(draft: Draft) -> Inputs:
 
 
 def sites(writing: Writing, call: Call | None, p: Passage) -> None:
-    """The five records of one attempt, written once the loop's numbers are
+    """The five records of one writing, written once the loop's numbers are
     known.
 
     A gate belongs to the site whose answer made it decidable, and a kill to

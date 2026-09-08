@@ -146,10 +146,13 @@ without redefining them. Grouped by the file that specifies the record.
 - **Separating case**: the case stored at the size the search found.
   Appended after the loop, naming no round.
 - **Ceiling**: 64 KiB, the most a stored case may weigh.
-- **Site outcome**: the record of what one site left on one attempt at
-  writing a problem: the gate, the counters and the configuration.
-- **Writing id**: the id a run mints per attempt at writing a problem. The
-  draft and its site outcomes share it.
+- **Writing**: one run of the generation flow over one target, from the
+  generator's call to landing or rejection. An attempt is a different
+  thing: the log's record of a user's solution.
+- **Site outcome**: the record of what one site left on one writing: the gate,
+  the counters and the configuration.
+- **Writing id**: the id a run mints per writing. The draft and its site
+  outcomes share it.
 - **Replay**: running the four answering sites over stored problems at a new
   bench. It writes nothing to the corpus.
 - **Sweep**: one `generate` run over every target, or over every held draft.

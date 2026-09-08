@@ -349,10 +349,10 @@ def draft(
     target_technique: str | None = None,
     provenance: MachineProvenance,
 ) -> Draft:
-    """One attempt at writing a problem, as the generator's call left it.
+    """One writing, as the generator's call left it.
 
     The writing id rather than an id of its own: the four site outcomes of this
-    attempt already group under it, and a second identity would need a
+    writing already group under it, and a second identity would need a
     reference nothing else carries. The only minter here that is passed its id.
     """
     return Draft(

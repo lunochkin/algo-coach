@@ -43,10 +43,9 @@ The vocabulary the append-only log references.
   differently, so board numbers would move as classification progressed while
   the practice behind them did not.
 - **The criteria are the prompt.** They reach the classifier beside the
-  candidates and the reader beside the code, so one set of criteria answers both.
-  Editing an entry changes machine claims, but only for the attempts carrying
-  that
-  candidate.
+  candidates and the reader beside the code, so one set of criteria answers
+  both. Editing an entry changes machine claims, but only for the attempts
+  carrying that candidate.
 - **A code is never deleted**, because records carrying it outlive it.
   Retirement means an entry in an alias map, applied when grouping.
 - **The vocabulary is read-only once loaded.** Its entries reach a prompt and
@@ -153,8 +152,8 @@ either.
   false negative. It replaces no hand pass: the pairs it reaches are the ones a
   ladder wanted, which is a sample nobody drew at random.
 - **The same fact sits on the problem and in a match.** `target_template_id`
-  names the template the problem's target named, and the first canonical's
-  match names the same one. They cannot drift, because generation writes both in one
+  names the template the problem's target named, and the first canonical's match
+  names the same one. They cannot drift, because generation writes both in one
   act. The canonicals of a problem written for a technique target still carry
   their own matches.
 - **The matcher answers what generation cannot assert**: which templates a

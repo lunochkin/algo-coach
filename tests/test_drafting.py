@@ -123,7 +123,7 @@ def test_each_step_copies_the_configuration_of_its_own_call(tmp_path):
 
 
 def test_the_draft_and_its_site_outcomes_carry_one_id(tmp_path):
-    """The writing id, which is what groups the four records of one attempt
+    """The writing id, which is what groups the four records of one writing
     with the draft they were written through."""
     (one,) = seeded(tmp_path, card())
     outcomes = OutcomeLog(tmp_path)

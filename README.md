@@ -423,8 +423,8 @@ src/algo_coach/matches/         which solutions display which card template
 src/algo_coach/calls/           the model transport (OpenRouter) and the call log
 src/algo_coach/board/           the per-technique view, derived on read
 src/algo_coach/generation/      the four calls that write a problem, and its gates
-src/algo_coach/drafts/          one attempt at writing a problem, held as it goes
-src/algo_coach/outcomes/        what each call site left on one such attempt
+src/algo_coach/drafts/          one writing, held as it goes
+src/algo_coach/outcomes/        what each call site left on one such writing
 src/algo_coach/mutation/        the mutants a case set has to kill
 src/algo_coach/runner/          running a solution against a problem's cases
 src/algo_coach/{log,cards,problems,cases,solutions,solution_claims,verifications}/

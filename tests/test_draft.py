@@ -71,14 +71,14 @@ def test_a_draft_starts_at_the_first_step():
 
 
 def test_a_draft_is_identified_by_the_writing_id():
-    """`SiteOutcome` already mints one per attempt, so the four site records of
+    """`SiteOutcome` already mints one per writing, so the four site records of
     one draft group with no new reference."""
     assert make_draft().id == "w1"
     assert "writing_id" in SiteOutcome.model_fields
 
 
 def test_the_target_a_draft_was_written_for_is_optional():
-    """Absent where nothing recorded the attempt, as on `SiteOutcome`. A blank
+    """Absent where nothing recorded the writing, as on `SiteOutcome`. A blank
     one is rejected: it passes a presence check while naming nothing."""
     assert make_draft().target_template_id is None
     assert make_draft(target_template_id="t1").target_template_id == "t1"
@@ -104,7 +104,7 @@ def test_a_blank_id_is_rejected():
 @pytest.mark.parametrize("gate", list(Gate))
 def test_a_rejected_draft_names_the_gate_that_reached_it(gate):
     """Terminal means no resume rather than no record: what the gate said is
-    the whole of what the attempt left."""
+    the whole of what the writing left."""
     draft = make_draft(state="rejected", gate=gate)
 
     assert draft.gate is gate

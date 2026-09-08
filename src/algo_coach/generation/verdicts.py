@@ -1,4 +1,4 @@
-"""What each answering site leaves on one attempt, and how a site outcome
+"""What each answering site leaves on one writing, and how a site outcome
 reads it. `machine.md` gives what the records carry."""
 
 from typing import TypedDict

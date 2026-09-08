@@ -1,4 +1,4 @@
-"""What one generation call site left on one attempt at writing a problem.
+"""What one generation call site left on one writing.
 
 A run prints its stages and the process then ends. What a configuration cost
 and what the gates said about its answer is only readable from a record.
@@ -43,14 +43,14 @@ class SiteOutcome(MachineProvenance):
     id: str
     created_at: datetime
     site: CallSite
-    # minted per attempt at one problem, so the four sites of one attempt group
+    # minted per writing, so the four sites of one writing group
     # and a rejected draft still has an identity
     writing_id: str = Field(min_length=1)
     # the target, as on the draft and the problem. Both absent where nothing
-    # recorded the attempt
+    # recorded the writing
     target_template_id: str | None = Field(default=None, min_length=1)
     target_technique: str | None = Field(default=None, min_length=1)
-    problem_id: str | None = None  # only where the attempt landed
+    problem_id: str | None = None  # only where the writing landed
     # what rejected this site's answer, absent where nothing did. The gate is
     # filed under the site whose output made it decidable
     gate: Gate | None = None
@@ -61,7 +61,7 @@ class SiteOutcome(MachineProvenance):
     survived: int = 0
     won: int = 0
     # mutants this site's own output killed, so the three sources sum over the
-    # records of one attempt. Each is written where its counter can be other
+    # records of one writing. Each is written where its counter can be other
     # than zero: the generator's cases always leave a record, the fuzz pass
     # runs only where a generator was written, and a round kills only where one
     # was asked

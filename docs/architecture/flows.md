@@ -227,7 +227,7 @@ a second generator call writes a different problem.
   beside `retired`, and every reader would have to know which half it was
   looking at.
 - **The draft is identified by the writing id.** `SiteOutcome` already mints
-  one per attempt, so the site records of one draft group with no new
+  one per writing, so the site records of one draft group with no new
   reference.
 - **A state per step that can fail**: drafted, checked, referenced, agreed,
   built, paced, searched, hardened, landed. The names are the steps above and
