@@ -8,7 +8,9 @@ from algo_coach.schema import CallSite, Configuration, Gate, SiteOutcome
 
 
 def left(site: CallSite = CallSite.GENERATOR, writing_id: str = "w1", **overrides):
-    return site_outcome(site, writing_id, "t1", provenance=PROVENANCE, **overrides)
+    return site_outcome(
+        site, writing_id, target_template_id="t1", provenance=PROVENANCE, **overrides
+    )
 
 
 def test_an_empty_store_reads_as_nothing(tmp_path):
@@ -49,7 +51,7 @@ def test_a_record_carries_its_whole_configuration(tmp_path):
             created_at="2026-01-01T00:00:00Z",
             site=CallSite.BLIND,
             writing_id="w1",
-            template_id="t1",
+            target_template_id="t1",
             model="a-model",
             effort="medium",
             prompt_hash="0123456789ab",

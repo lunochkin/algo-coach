@@ -206,6 +206,32 @@
       "title": "Survived",
       "type": "integer"
     },
+    "target_technique": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Technique"
+    },
+    "target_template_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Template Id"
+    },
     "temperature": {
       "anyOf": [
         {
@@ -217,18 +243,6 @@
       ],
       "default": null,
       "title": "Temperature"
-    },
-    "template_id": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Template Id"
     },
     "unseparated": {
       "anyOf": [

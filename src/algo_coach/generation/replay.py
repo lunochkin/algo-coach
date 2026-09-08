@@ -129,7 +129,7 @@ def subjects(corpus: Corpus, cards: Iterable[Card]) -> list[Subject]:
                 reference=blind.code,
                 naive=slow.code if slow is not None else None,
                 cases=theirs,
-                template=forms.get(problem.generated_for or ""),
+                template=forms.get(problem.target_template_id or ""),
             )
         )
     return found
@@ -185,7 +185,7 @@ def replay(
             result.unasked += 1
             continue
         left: list[SiteOutcome] = []
-        writing = Writing(template_id=problem_template(subject) or "", into=left)
+        writing = Writing(target_template_id=problem_template(subject), into=left)
         writing(site, asked.call, **asked.verdicts)
         for one in left:
             outcomes.append(one.model_copy(update={"problem_id": subject.problem.id}))

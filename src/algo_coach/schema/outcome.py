@@ -10,6 +10,7 @@ from enum import StrEnum
 from pydantic import Field, model_validator
 
 from algo_coach.schema.provenance import MachineProvenance
+from algo_coach.schema.target import one_target
 
 
 class CallSite(StrEnum):
@@ -45,9 +46,10 @@ class SiteOutcome(MachineProvenance):
     # minted per attempt at one problem, so the four sites of one attempt group
     # and a rejected draft still has an identity
     writing_id: str = Field(min_length=1)
-    # absent where the problem was written for a technique target, which
-    # names no form
-    template_id: str | None = None
+    # the target, as on the draft and the problem. Both absent where nothing
+    # recorded the attempt
+    target_template_id: str | None = Field(default=None, min_length=1)
+    target_technique: str | None = Field(default=None, min_length=1)
     problem_id: str | None = None  # only where the attempt landed
     # what rejected this site's answer, absent where nothing did. The gate is
     # filed under the site whose output made it decidable
@@ -81,6 +83,11 @@ class SiteOutcome(MachineProvenance):
     # separating size read without the bound it was searched under says
     # nothing about how far the search had left to look
     largest: int | None = Field(default=None, gt=0)
+
+    @model_validator(mode="after")
+    def _one_target(self) -> SiteOutcome:
+        one_target(self.target_template_id, self.target_technique)
+        return self
 
     @model_validator(mode="after")
     def _provenance_required(self) -> SiteOutcome:

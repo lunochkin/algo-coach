@@ -186,7 +186,7 @@ def test_a_gap_run_writes_for_every_core_template(root, monkeypatch, capsys):
 
     out = capsys.readouterr().out
     assert "2 problem(s) stored" in out and "over 2 template(s)" in out
-    written = {one.generated_for for one in ProblemStore(root).all()}
+    written = {one.target_template_id for one in ProblemStore(root).all()}
     card = CardStore(root).by_slug("sliding-window")
     assert written == {one.id for one in card.templates}
 
@@ -210,7 +210,7 @@ def test_a_covered_form_is_not_written_again(root, monkeypatch, capsys):
 
     out = capsys.readouterr().out
     assert "1 problem(s) stored" in out and "template(s)" not in out
-    written = [one.generated_for for one in ProblemStore(root).all()]
+    written = [one.target_template_id for one in ProblemStore(root).all()]
     assert len(set(written)) == 2
 
 
@@ -259,7 +259,7 @@ def test_a_card_narrows_what_the_gaps_aim_at(root, monkeypatch, capsys):
     )
 
     assert "over 2 template(s)" in capsys.readouterr().out
-    cards = {one.generated_for for one in ProblemStore(root).all()}
+    cards = {one.target_template_id for one in ProblemStore(root).all()}
     assert len(cards) == 2
 
 
@@ -690,7 +690,7 @@ def test_resume_skips_a_draft_naming_no_seeded_template(root, monkeypatch, capsy
     """The form its target named is gone, so nothing says what its search
     would be."""
     stored = held_draft(root, monkeypatch, capsys)
-    DraftStore(root).put(stored.model_copy(update={"template_id": "gone"}))
+    DraftStore(root).put(stored.model_copy(update={"target_template_id": "gone"}))
 
     with pytest.raises(SystemExit):
         resuming(monkeypatch, FakeWriter())

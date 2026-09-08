@@ -251,7 +251,7 @@ def generated(**overrides):
     fields = {
         "title": "Two Sum",
         "statement": "Given an array, return ...",
-        "generated_for": "t1",
+        "target_template_id": "t1",
         "provenance": MachineProvenance(
             model="a-model",
             effort="medium",
@@ -326,13 +326,14 @@ def test_a_generated_problem_asserts_the_template_it_was_written_for():
     makes the first `TemplateMatch` on the pair provenance rather than a
     inference, and it asserts nothing about the forms the problem also
     exercises."""
-    assert generated(generated_for="t7").generated_for == "t7"
+    assert generated(target_template_id="t7").target_template_id == "t7"
 
 
-def test_a_problem_from_a_technique_brief_names_no_template():
+def test_a_problem_from_a_technique_target_names_the_technique():
     """A target naming a skill rather than a form told the generator no pair to
-    assert. What such a problem is about comes from its canonicals."""
-    assert generated(generated_for=None).generated_for is None
+    assert. What such a problem is about still comes from its canonicals."""
+    made = generated(target_template_id=None, target_technique="greedy")
+    assert (made.target_template_id, made.target_technique) == (None, "greedy")
 
 
 def test_a_generated_problem_is_created_rather_than_served():

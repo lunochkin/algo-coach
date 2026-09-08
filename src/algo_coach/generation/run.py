@@ -159,7 +159,9 @@ def write_problems(
     written = written_for(corpus.problems.all(), template)
     # one recorder per problem, filled as the sites answer and stored once the
     # problem's fate is known, which is the first point there is an id to name
-    writings = [(index, Writing(template_id=template.id, into=[])) for index in range(1, count + 1)]
+    writings = [
+        (index, Writing(target_template_id=template.id, into=[])) for index in range(1, count + 1)
+    ]
 
     def ask(item: tuple[int, Writing]) -> Passage:
         index, writing = item
@@ -329,7 +331,7 @@ def resume(
     # the draft's own id, so a resumed step's site outcome groups with the
     # records of the writing it continues
     records: list[SiteOutcome] = []
-    writing = Writing(template_id=template.id, into=records, id=draft.id)
+    writing = Writing(target_template_id=template.id, into=records, id=draft.id)
     result = Resumed(started_at=start)
     passage = Passage(
         transport,

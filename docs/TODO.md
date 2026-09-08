@@ -220,7 +220,7 @@ whatever phase is current.
       records apart as the technique readers do. Triggered when a rung or a
       recall probe needs to know which form the user's own solution used
 - [ ] Write the generation call for a technique target: a technique and its
-      criteria in, a problem out, carrying no `generated_for`. A paradigm and a
+      criteria in, a problem out, carrying `target_technique`. A paradigm and a
       problem class have no template, so nothing else reaches them. Triggered
       when a technique with no card needs problems
 - [ ] Choose what a classifier reading of a solution stores, a verdict per

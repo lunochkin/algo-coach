@@ -142,7 +142,7 @@ def test_the_problem_carries_what_the_generation_call_asserted(tmp_path, templat
     that wrote it."""
     problem = land(Corpus.at(tmp_path), template, drafted())
 
-    assert problem.generated_for == template.id
+    assert problem.target_template_id == template.id
     assert (problem.model, problem.effort, problem.call_id) == ("a-model", "high", "call-1")
     assert problem.difficulty == "medium"
     # a view over the problem's canonicals, derived rather than written here

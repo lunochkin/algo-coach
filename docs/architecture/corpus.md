@@ -17,15 +17,18 @@ architecture, and `README.md` is the map.
 - **The looser target reaches the rest of the vocabulary.** A paradigm and a
   problem class have no form to reproduce, so no template names them, and a
   corpus written from templates alone can never exercise them.
-- **The template it was written for is stored, where there was one.**
-  `generated_for` records what the generator was told rather than what a
-  model inferred, and it makes the
-  first template match provenance. It never claims the problem exercises
-  nothing else. A problem written for a technique target carries no
-  `generated_for`: the generator was told no form, so no pair can be asserted.
-- **A technique target asserts no technique either.** The generator's match
-  records what the generator was told, and a technique target told it a skill
-  rather than a solution.
+- **The target is stored on the problem.** `target_template_id` or
+  `target_technique` records what the generator was told rather than what a
+  model inferred. The template arm makes the first template match provenance.
+  No arm claims the problem exercises nothing else.
+- **A technique target asserts no pair.** The generator was told no form, so
+  no template match is written for its canonical, and the matcher alone says
+  which forms the canonical displays.
+- **A technique target asserts no technique either.** A problem's techniques
+  are folded from the solution claims of its canonicals, and the fold never
+  reads the target. The target says what the generator was asked for. The
+  claims say what the canonical used, and only the second is evidence about
+  the code.
 - **Provenance is required.** A problem names what produced it, as any machine
   record does.
 - **A problem's techniques are derived from solution claims of its

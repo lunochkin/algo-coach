@@ -20,7 +20,8 @@ class Writing:
     store and a test needs none.
     """
 
-    template_id: str = ""
+    target_template_id: str | None = None
+    target_technique: str | None = None
     into: list[SiteOutcome] | None = None
     id: str = field(default_factory=new_id)
 
@@ -34,9 +35,10 @@ class Writing:
             canonical=generated.canonical,
             declared=generated.cases,
             difficulty=generated.difficulty,
-            # empty where nothing recorded the attempt, as it is on the site
+            # absent where nothing recorded the attempt, as on the site
             # outcomes this id groups
-            template_id=self.template_id or None,
+            target_template_id=self.target_template_id,
+            target_technique=self.target_technique,
             provenance=MachineProvenance.of(call),
         )
 
@@ -66,7 +68,8 @@ class Writing:
             mint.site_outcome(
                 site,
                 self.id,
-                self.template_id,
+                target_template_id=self.target_template_id,
+                target_technique=self.target_technique,
                 gate=gate,
                 detail=detail,
                 mutants=mutants,

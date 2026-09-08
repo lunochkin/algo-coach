@@ -293,10 +293,9 @@ a second generator call writes a different problem.
 - **A draft held at `searched` starts at the loop once its template drops the
   claim.** The flag is read beside the bench, since a corrected flag moves
   neither a configuration nor a prompt hash.
-- **The draft names the form its target named**, absent where a technique
-  target named none, as on a site outcome. A sweep over the store resolves the
-  template from the draft rather than from the outcomes of the same writing
-  id.
+- **The draft names its target**, as a site outcome and the problem it lands
+  as do. A sweep over the store resolves the template from the draft rather
+  than from the outcomes of the same writing id.
 - **Editing the generator's prompt invalidates no stored draft.** The draft is
   that step's output, and the new prompt writes a different problem rather
   than the same one again.

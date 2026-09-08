@@ -113,7 +113,7 @@ def test_the_corpus_seeds_the_list(tmp_path):
             id="p1",
             title="p1",
             statement="An earlier statement.",
-            generated_for=one.templates[0].id,
+            target_template_id=one.templates[0].id,
             **PROVENANCE_FIELDS,
         )
     )

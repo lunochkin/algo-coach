@@ -27,7 +27,7 @@ def test_a_problem_without_any_provenance_is_rejected():
     """The whole point of the field. Problems are append-only and identity
     never moves, so one that lands without provenance keeps none."""
     with pytest.raises(ValidationError):
-        Problem.model_validate(CONTENT | {"generated_for": "t1"})
+        Problem.model_validate(CONTENT | {"target_template_id": "t1"})
 
 
 @pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
@@ -74,27 +74,35 @@ def test_a_problem_names_the_template_it_was_written_for():
     """An assertion rather than an inference: the generator was told the form,
     where a matcher infers it. That is what makes the first `TemplateMatch` on
     the pair provenance."""
-    assert make_problem(generated_for="t7").generated_for == "t7"
+    assert make_problem(target_template_id="t7").target_template_id == "t7"
 
 
-def test_a_problem_written_from_a_technique_brief_names_no_template():
+def test_a_problem_written_for_a_technique_target_names_no_template():
     """A template is the tightest target and a technique a looser one. Nothing
     told this generator a form, so nothing may assert a pair."""
-    assert Problem.model_validate(CONTENT | PROVENANCE_FIELDS).generated_for is None
+    made = Problem.model_validate(CONTENT | PROVENANCE_FIELDS | {"target_technique": "greedy"})
+    assert (made.target_template_id, made.target_technique) == (None, "greedy")
+
+
+def test_a_problem_names_one_kind_of_target():
+    """The generator was told one thing, so a record naming both kinds
+    describes a prompt no site sends."""
+    with pytest.raises(ValidationError, match="not both"):
+        make_problem(target_template_id="t1", target_technique="greedy")
 
 
 def test_a_blank_template_is_rejected():
     """It passes a presence check while naming nothing. Absent is the arm for
     a target that named no form."""
-    with pytest.raises(ValidationError, match="generated_for"):
-        make_problem(generated_for="")
+    with pytest.raises(ValidationError, match="target_template_id"):
+        make_problem(target_template_id="")
 
 
 def test_one_template_is_named_rather_than_a_set():
     """It says what the problem was written for, never what it exercises. The
     templates it also matches are the matcher's question, and they are
     `TemplateMatch` records rather than a field here."""
-    assert isinstance(make_problem().generated_for, str)
+    assert isinstance(make_problem().target_template_id, str)
 
 
 def test_a_problem_starts_created_rather_than_served():

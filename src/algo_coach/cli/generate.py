@@ -147,7 +147,7 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
             # the form its target named is gone, so nothing says what its
             # search or its ladder would be
             unaimed += 1
-            print(f"draft {draft.id}: no template {draft.template_id}", file=sys.stderr)
+            print(f"draft {draft.id}: no template {draft.target_template_id}", file=sys.stderr)
             continue
         result = resume(
             api,
@@ -282,6 +282,6 @@ def written_for(cards: list[Card], draft: Draft) -> Target | None:
     """The card and template a draft was written for, by the id it carries."""
     for card in cards:
         for template in card.templates:
-            if template.id == draft.template_id:
+            if template.id == draft.target_template_id:
                 return Target(card=card, template=template)
     return None

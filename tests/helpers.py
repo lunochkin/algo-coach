@@ -47,7 +47,7 @@ PROVENANCE_FIELDS = {
 
 # Provenance and the template the target named. A site caring about neither
 # spreads this. One testing a match against a template names its own.
-GENERATED = PROVENANCE_FIELDS | {"generated_for": "t1"}
+GENERATED = PROVENANCE_FIELDS | {"target_template_id": "t1"}
 
 # The same, as the record a minter takes.
 PROVENANCE = MachineProvenance(**PROVENANCE_FIELDS)

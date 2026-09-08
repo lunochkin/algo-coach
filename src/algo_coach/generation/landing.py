@@ -57,7 +57,7 @@ def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
     problem = mint.generated_problem(
         draft.title,
         draft.statement,
-        generated_for=template.id,
+        target_template_id=template.id,
         difficulty=draft.difficulty,
         provenance=provenance,
     )

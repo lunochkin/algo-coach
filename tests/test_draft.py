@@ -77,13 +77,21 @@ def test_a_draft_is_identified_by_the_writing_id():
     assert "writing_id" in SiteOutcome.model_fields
 
 
-def test_the_form_a_draft_was_briefed_on_is_optional():
-    """A technique target names no form, as on `SiteOutcome`. A blank one is
-    rejected: it passes a presence check while naming nothing."""
-    assert make_draft().template_id is None
-    assert make_draft(template_id="t1").template_id == "t1"
-    with pytest.raises(ValidationError, match="template_id"):
-        make_draft(template_id="")
+def test_the_target_a_draft_was_written_for_is_optional():
+    """Absent where nothing recorded the attempt, as on `SiteOutcome`. A blank
+    one is rejected: it passes a presence check while naming nothing."""
+    assert make_draft().target_template_id is None
+    assert make_draft(target_template_id="t1").target_template_id == "t1"
+    with pytest.raises(ValidationError, match="target_template_id"):
+        make_draft(target_template_id="")
+
+
+def test_a_draft_names_one_kind_of_target():
+    """A target is one thing the generator was told, and two kinds would be
+    two prompts."""
+    assert make_draft(target_technique="greedy").target_technique == "greedy"
+    with pytest.raises(ValidationError, match="not both"):
+        make_draft(target_template_id="t1", target_technique="greedy")
 
 
 def test_a_blank_id_is_rejected():

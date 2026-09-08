@@ -333,7 +333,9 @@ def test_the_statements_are_the_template_s_own(tmp_path):
     (one,) = seeded(tmp_path, card())
     mine, theirs = one.templates[0], one.templates[1]
     corpus = [
-        Problem(id="p1", title="p1", statement="Mine.", **PROVENANCE_FIELDS, generated_for=mine.id),
+        Problem(
+            id="p1", title="p1", statement="Mine.", **PROVENANCE_FIELDS, target_template_id=mine.id
+        ),
         Problem(
             id="p2",
             title="p2",
@@ -341,10 +343,14 @@ def test_the_statements_are_the_template_s_own(tmp_path):
             status=ProblemStatus.RETIRED,
             retired_reason=RetirementReason.DEFECTIVE,
             **PROVENANCE_FIELDS,
-            generated_for=mine.id,
+            target_template_id=mine.id,
         ),
         Problem(
-            id="p3", title="p3", statement="Theirs.", **PROVENANCE_FIELDS, generated_for=theirs.id
+            id="p3",
+            title="p3",
+            statement="Theirs.",
+            **PROVENANCE_FIELDS,
+            target_template_id=theirs.id,
         ),
     ]
 

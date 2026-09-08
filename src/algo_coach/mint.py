@@ -196,7 +196,8 @@ def generated_problem(
     statement: str,
     *,
     provenance: MachineProvenance,
-    generated_for: str | None = None,
+    target_template_id: str | None = None,
+    target_technique: str | None = None,
     techniques: Sequence[str] = (),
     difficulty: ProblemDifficulty | None = None,
 ) -> Problem:
@@ -204,14 +205,15 @@ def generated_problem(
 
     The one place that supplies provenance: a call site spelling the fields out
     could fill them partly. The techniques are passed in rather than read here,
-    since the canonical is written in the same act. `generated_for` is the
-    template the target named, and is absent where the target named a skill.
+    since the canonical is written in the same act. The target is one of the
+    two, by the kind it named.
     """
     return Problem(
         id=new_id(),
         title=title,
         statement=statement,
-        generated_for=generated_for,
+        target_template_id=target_template_id,
+        target_technique=target_technique,
         techniques=list(techniques),
         difficulty=difficulty,
         **provenance.model_dump(),
@@ -290,9 +292,10 @@ def verification(
 def site_outcome(
     site: CallSite,
     writing_id: str,
-    template_id: str,
     *,
     provenance: MachineProvenance,
+    target_template_id: str | None = None,
+    target_technique: str | None = None,
     problem_id: str | None = None,
     gate: Gate | None = None,
     detail: str = "",
@@ -315,7 +318,8 @@ def site_outcome(
         created_at=datetime.now(UTC),
         site=site,
         writing_id=writing_id,
-        template_id=template_id,
+        target_template_id=target_template_id,
+        target_technique=target_technique,
         problem_id=problem_id,
         gate=gate,
         detail=detail,
@@ -341,7 +345,8 @@ def draft(
     canonical: str,
     declared: Sequence[DraftCase],
     difficulty: ProblemDifficulty,
-    template_id: str | None = None,
+    target_template_id: str | None = None,
+    target_technique: str | None = None,
     provenance: MachineProvenance,
 ) -> Draft:
     """One attempt at writing a problem, as the generator's call left it.
@@ -353,7 +358,8 @@ def draft(
     return Draft(
         id=writing_id,
         state=WritingState.DRAFTED,
-        template_id=template_id,
+        target_template_id=target_template_id,
+        target_technique=target_technique,
         title=title,
         statement=statement,
         canonical=canonical,

@@ -73,19 +73,6 @@
       "default": null,
       "title": "Effort"
     },
-    "generated_for": {
-      "anyOf": [
-        {
-          "minLength": 1,
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Generated For"
-    },
     "id": {
       "title": "Id",
       "type": "string"
@@ -157,6 +144,32 @@
     "status": {
       "$ref": "#/$defs/ProblemStatus",
       "default": "created"
+    },
+    "target_technique": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Technique"
+    },
+    "target_template_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Template Id"
     },
     "techniques": {
       "items": {

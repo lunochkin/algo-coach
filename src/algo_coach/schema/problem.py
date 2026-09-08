@@ -3,6 +3,7 @@ from enum import StrEnum
 from pydantic import Field, model_validator
 
 from algo_coach.schema.provenance import MachineProvenance
+from algo_coach.schema.target import one_target
 
 
 class ProblemDifficulty(StrEnum):
@@ -28,10 +29,11 @@ class Problem(MachineProvenance):
     )  # read off the canonicals; re-derivable
     difficulty: ProblemDifficulty | None = None
     statement: str = Field(min_length=1)  # what the problem asks; matching reads it
-    # The template the target named, where it named one: an assertion rather
-    # than an inference, and never a claim that the problem exercises nothing
-    # else. Absent on a problem written for a technique target.
-    generated_for: str | None = Field(default=None, min_length=1)
+    # The target: what the generator was told, never a claim that the problem
+    # exercises nothing else. One of the two, by the kind the target named.
+    # The template arm makes the first template match provenance
+    target_template_id: str | None = Field(default=None, min_length=1)
+    target_technique: str | None = Field(default=None, min_length=1)
     status: ProblemStatus = ProblemStatus.CREATED
     # A field rather than a record of its own, unlike a self-label or a claim:
     # nothing but the user ever retires a problem.
@@ -40,6 +42,11 @@ class Problem(MachineProvenance):
     @model_validator(mode="after")
     def _provenance_required(self) -> Problem:
         self.check_provenance(True)
+        return self
+
+    @model_validator(mode="after")
+    def _one_target(self) -> Problem:
+        one_target(self.target_template_id, self.target_technique)
         return self
 
     @model_validator(mode="after")

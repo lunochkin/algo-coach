@@ -16,6 +16,7 @@ from algo_coach.schema.case import ExpectedSource
 from algo_coach.schema.outcome import Gate
 from algo_coach.schema.problem import ProblemDifficulty
 from algo_coach.schema.provenance import MachineProvenance
+from algo_coach.schema.target import one_target
 
 
 class WritingState(StrEnum):
@@ -90,10 +91,11 @@ class Draft(BaseModel):
     # landing and clearing leaves a draft naming one, which is what tells the
     # next run to clear it rather than write the problem a second time
     problem_id: str | None = Field(default=None, min_length=1)
-    # the form the target named, absent where a technique target named none, as
-    # on `SiteOutcome`. A resume reads the template's `speedup`, and a sweep
-    # over the store has nothing else to find it from
-    template_id: str | None = Field(default=None, min_length=1)
+    # the target, as on `SiteOutcome` and the problem this lands as. A resume
+    # reads the template's `speedup`, and a sweep over the store has nothing
+    # else to find it from. Both absent where nothing recorded the attempt
+    target_template_id: str | None = Field(default=None, min_length=1)
+    target_technique: str | None = Field(default=None, min_length=1)
 
     # drafted: one call wrote all five, so a draft exists only once they do
     title: str = Field(min_length=1)
@@ -155,6 +157,11 @@ class Draft(BaseModel):
             raise ValueError("a landed draft names the problem_id it became")
         if not landed and self.problem_id is not None:
             raise ValueError(f"a {self.state} draft carries no problem_id")
+        return self
+
+    @model_validator(mode="after")
+    def _one_target(self) -> Draft:
+        one_target(self.target_template_id, self.target_technique)
         return self
 
     @model_validator(mode="after")

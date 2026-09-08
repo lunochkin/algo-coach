@@ -64,7 +64,8 @@ without redefining them. Grouped by the file that specifies the record.
   case set is every case a problem carries, appended to and never revised.
 - **Target**: what a problem is written for: a template, naming the form, or a
   technique, naming only the skill. The prompt a site is given is built from
-  it.
+  it. Stored as `target_template_id` or `target_technique` on the problem, the
+  draft and the site outcome, one of the two.
 - **Canonical solution**: an exemplary solution, written to display the
   approach rather than to pass.
 - **Reference solution**: a solution written from the statement alone.

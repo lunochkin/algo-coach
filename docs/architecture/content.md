@@ -152,9 +152,9 @@ either.
   confirms a positive, and on a pair the matcher scored negative it is a caught
   false negative. It replaces no hand pass: the pairs it reaches are the ones a
   ladder wanted, which is a sample nobody drew at random.
-- **The same fact sits on the problem and in a match.** `generated_for` names
-  the template the problem's target named, and the first canonical's match
-  names the same one. They cannot drift, because generation writes both in one
+- **The same fact sits on the problem and in a match.** `target_template_id`
+  names the template the problem's target named, and the first canonical's
+  match names the same one. They cannot drift, because generation writes both in one
   act. The canonicals of a problem written for a technique target still carry
   their own matches.
 - **The matcher answers what generation cannot assert**: which templates a

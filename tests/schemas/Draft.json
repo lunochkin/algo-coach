@@ -389,7 +389,7 @@
       "title": "Statement",
       "type": "string"
     },
-    "template_id": {
+    "target_technique": {
       "anyOf": [
         {
           "minLength": 1,
@@ -400,7 +400,20 @@
         }
       ],
       "default": null,
-      "title": "Template Id"
+      "title": "Target Technique"
+    },
+    "target_template_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Template Id"
     },
     "title": {
       "minLength": 1,

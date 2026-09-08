@@ -38,12 +38,19 @@ def listed(stored: list[Problem], corpus: Corpus, root: Path) -> None:
     cases = corpus.cases.cases()
     solutions = corpus.solutions.solutions()
     for one in sorted(stored, key=lambda problem: problem.title):
-        form = forms.get(one.generated_for or "", str(one.generated_for))
+        form = aimed_at(one, forms)
         held = sum(case.problem_id == one.id for case in cases)
         wrote = sum(solution.problem_id == one.id for solution in solutions)
         carries = f"{held} case(s), {wrote} solution(s)"
         print(f"{one.id}  {form[:24]:<24}  {standing(one):<12}  {carries}")
     print(f"{len(stored)} problem(s) stored")
+
+
+def aimed_at(one: Problem, forms: dict[str, str]) -> str:
+    """The target, as a reader names it: the template's slug, or the technique."""
+    if one.target_template_id is not None:
+        return forms.get(one.target_template_id, one.target_template_id)
+    return one.target_technique or "no target"
 
 
 def standing(one: Problem) -> str:
@@ -65,8 +72,7 @@ def page(one: Problem, corpus: Corpus, root: Path) -> str:
         [
             f"# {one.title} ({one.id})",
             "",
-            f"{forms.get(one.generated_for or '', str(one.generated_for))}, "
-            f"{one.difficulty}, {standing(one)}",
+            f"{aimed_at(one, forms)}, {one.difficulty}, {standing(one)}",
             f"techniques: {' '.join(read) or 'none read'}",
             f"written by {configured(one)}",
             "",

@@ -18,7 +18,7 @@ from algo_coach.schema import (
 def listing(draft: Draft, target: Target | None, bench: Bench) -> str:
     """One stored draft: the form its target named, how far it was written,
     and what it is waiting on."""
-    form = target.template.slug if target is not None else str(draft.template_id)
+    form = target.template.slug if target is not None else str(draft.target_template_id)
     return f"{draft.id}  {form[:24]:<24}  {draft.state:<10}  {waiting_on(draft, target, bench)}"
 
 
@@ -32,7 +32,7 @@ def waiting_on(draft: Draft, target: Target | None, bench: Bench) -> str:
     if target is None:
         # the form its target named is not seeded, and a search reads `speedup`
         # from it
-        return f"no template {draft.template_id}"
+        return f"no template {draft.target_template_id}"
     if not advances(draft, target.template, bench):
         # the step `starts_at` names is past the search, and a draft with no
         # separating case is held before the loop: reporting that step would
@@ -100,9 +100,9 @@ def report(draft: Draft, target: Target | None, outcomes: list[SiteOutcome], ben
 
 
 def heading(draft: Draft, target: Target | None) -> str:
-    """The form its target named and how far it was written. A technique target
-    names no form, and neither does a draft whose card is gone."""
-    form = target.template.slug if target is not None else str(draft.template_id)
+    """The form its target named and how far it was written. The id stands in
+    where the card is gone."""
+    form = target.template.slug if target is not None else str(draft.target_template_id)
     return f"{form}, {draft.difficulty}, {draft.state}"
 
 

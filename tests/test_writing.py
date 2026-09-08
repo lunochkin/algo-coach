@@ -11,7 +11,7 @@ GENERATED = read(draft())
 def test_the_draft_carries_the_id_its_site_outcomes_group_under():
     """One attempt, one id: a draft of its own would need a second reference
     to reach the four records of the same writing."""
-    writing = Writing(template_id="t1")
+    writing = Writing(target_template_id="t1")
 
     assert writing.draft(GENERATED, a_call()).id == writing.id
 
@@ -43,13 +43,13 @@ def test_the_draft_copies_the_generator_call_whole():
 def test_the_draft_names_the_form_it_was_briefed_on():
     """A resume reads the template's `speedup`, and a sweep over the store has
     nothing else to find it from."""
-    assert Writing(template_id="t1").draft(GENERATED, a_call()).template_id == "t1"
+    assert Writing(target_template_id="t1").draft(GENERATED, a_call()).target_template_id == "t1"
 
 
 def test_an_unrecorded_attempt_names_no_form():
     """As its site outcomes name none: nothing recorded the attempt, so there
     is no template to read back."""
-    assert Writing().draft(GENERATED, a_call()).template_id is None
+    assert Writing().draft(GENERATED, a_call()).target_template_id is None
 
 
 def test_two_attempts_are_two_drafts():
