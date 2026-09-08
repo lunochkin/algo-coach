@@ -42,7 +42,7 @@ class Hardened:
     # nothing
     proposed: int = 0
     # a proposed input the two solutions answered differently. The caller
-    # discards the problem on it, as it does on any disagreement
+    # rejects the draft on it, as it does on any disagreement
     disagreement: Disagreement | None = None
 
 

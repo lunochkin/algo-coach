@@ -29,7 +29,7 @@ def test_every_brief_says_the_code_stands_alone():
 def test_every_brief_names_the_line_the_argument_order_is_read_from():
     """A reference took `solve(capacity, times, sizes)` where the canonical
     took `solve(times, sizes, capacity)`, so it answered no case and the
-    problem was discarded."""
+    problem was rejected."""
     for prompt in PROMPTS:
         assert "`def solve(...)` line" in prompt
 

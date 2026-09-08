@@ -41,7 +41,7 @@ from algo_coach.schema import (
     Card,
     CaseOutcome,
     Configuration,
-    Discard,
+    Gate,
     MachineProvenance,
     Problem,
     ProblemStatus,
@@ -223,7 +223,7 @@ def blind_replay(
     )
     # settled as the first reading was, against what the canonical answered:
     # the stored values are its answers, since it passed them when the problem
-    # landed. The settled cases are discarded with the run
+    # landed. The settled cases are dropped with the run
     ran = Ran(outcome=CaseOutcome.PASSED, returned=[one.expected for one in subject.cases])
     checked = agree(
         ran, subject.cases, reference=solution, provenance=MachineProvenance.of(call), cap_ms=cap_ms
@@ -262,7 +262,7 @@ def naive_replay(
         subject.template.trigger,
         configuration=configuration,
     )
-    # no gate: being wrong rejects no problem, and every `Discard` arm says one
+    # no gate: being wrong rejects no draft, and every `Gate` arm says one
     # was rejected
     detail = wrong_on(subject.cases, code=solution, cap_ms=cap_ms)
     notes("naive", detail or "correct on every case it answered", call)
@@ -311,7 +311,7 @@ def discrimination_replay(
         notes=notes,
     )
     bar = barred(hardened).model_copy(
-        update={"gate": None if hardened.disagreement is None else Discard.DISAGREED}
+        update={"gate": None if hardened.disagreement is None else Gate.DISAGREED}
     )
     # the mutants on this record, since a replay writes no generator record to
     # file them under

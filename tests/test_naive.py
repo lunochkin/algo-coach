@@ -42,7 +42,7 @@ ELSEWHERE = Configuration(model="another", effort="low", pin="somewhere")
 
 
 def test_the_form_to_avoid_is_sent_beside_the_statement(tmp_path):
-    """It settles no case and discards no problem, so naming the form cannot
+    """It settles no case and rejects no draft, so naming the form cannot
     reach a verdict. No other site may be told it."""
     model = FakeModel(answer())
 

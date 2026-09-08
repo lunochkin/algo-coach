@@ -9,7 +9,7 @@ from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
     CallSite,
     Configuration,
-    Discard,
+    Gate,
     ProblemStatus,
     RetirementReason,
     SolutionRole,
@@ -100,7 +100,7 @@ def test_a_replayed_input_generator_records_the_bound_it_reported(tmp_path, monk
 
 
 def test_a_replayed_naive_solution_that_answers_wrongly_names_no_gate(tmp_path, monkeypatch):
-    """Being wrong rejects no problem, and every `Discard` arm says one was
+    """Being wrong rejects no draft, and every `Gate` arm says one was
     rejected. What the record carries is what the run saw."""
     cards = landed(tmp_path, monkeypatch)
     wrong = "def solve(xs):\n    return len(xs) + 1\n"
@@ -191,7 +191,7 @@ def test_a_replayed_reference_that_disagrees_is_recorded(tmp_path, monkeypatch):
     _, outcomes = replayed(tmp_path, apart, cards)
 
     one = sites(outcomes)[CallSite.BLIND]
-    assert one.gate is Discard.DISAGREED
+    assert one.gate is Gate.DISAGREED
     assert "disagree on 1 case(s)" in one.detail
 
 

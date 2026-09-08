@@ -27,8 +27,8 @@ from algo_coach.schema import (
     Call,
     Card,
     CaseOutcome,
-    Discard,
     Draft,
+    Gate,
     SiteOutcome,
     Template,
     WritingState,
@@ -42,12 +42,12 @@ class Failed(BaseModel):
     reason: str
 
 
-class Discarded(BaseModel):
+class Rejected(BaseModel):
     """One problem that was written and did not survive its runs. Apart from
     `Failed`, which is a call that returned nothing."""
 
     index: int
-    discard: Discard  # which gate rejected it
+    gate: Gate  # which gate rejected it
     reason: str
 
 
@@ -120,7 +120,7 @@ class GenerationResult(BaseModel):
     # written whole and demonstrating nothing, so held until a resume separates
     # it, the template's `speedup` is corrected, or it is rejected
     held: list[Held] = []
-    discarded: list[Discarded] = []
+    rejected: list[Rejected] = []
     failed: list[Failed] = []
     aborted: bool = False
 
@@ -151,8 +151,8 @@ def write_problems(
     each stored as soon as its runs keep it.
 
     A statement joins the list the next call sees without waiting for the
-    problem to land, discarded ones included. `ABORT_AFTER` counts failures
-    only: a discard means the calls answered and the runs rejected the writing.
+    problem to land, rejected ones included. `ABORT_AFTER` counts failures
+    only: a rejection means the calls answered and the runs rejected the writing.
     """
     result = GenerationResult()
     swept(drafts)
@@ -272,12 +272,12 @@ def finished(
     records: list[SiteOutcome],
     outcomes: OutcomeLog | None,
 ) -> None:
-    """What one draft ends as: landed, held short of it, or discarded. Shared
+    """What one draft ends as: landed, held short of it, or rejected. Shared
     with a resume, which reaches the same three ends by the same rules."""
-    gate = p.checked.discard
+    gate = p.checked.gate
     if gate is not None:
         record(outcomes, records)
-        result.discarded.append(Discarded(index=index, discard=gate, reason=why(p.checked)))
+        result.rejected.append(Rejected(index=index, gate=gate, reason=why(p.checked)))
     elif p.draft.state is not WritingState.HARDENED:
         # every gate that judges the problem passed, and a step of the writing
         # did not: held where it stopped rather than landed
@@ -364,7 +364,7 @@ def record(
     outcomes: OutcomeLog | None, left: list[SiteOutcome], *, problem_id: str | None = None
 ) -> None:
     """Appended after landing, since only then is there a problem to name. The
-    `writing_id` groups them either way, which is what a discarded draft
+    `writing_id` groups them either way, which is what a rejected draft
     has."""
     if outcomes is None:
         return
@@ -380,11 +380,11 @@ def priced(paid: Sequence[Call]) -> float | None:
 
 
 __all__ = [
-    "Discarded",
     "Failed",
     "GenerationResult",
     "Held",
     "Progress",
+    "Rejected",
     "Resumed",
     "finished",
     "priced",

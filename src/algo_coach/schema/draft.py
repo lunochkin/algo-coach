@@ -13,7 +13,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from algo_coach.schema.case import ExpectedSource
-from algo_coach.schema.outcome import Discard
+from algo_coach.schema.outcome import Gate
 from algo_coach.schema.problem import ProblemDifficulty
 from algo_coach.schema.provenance import MachineProvenance
 
@@ -85,7 +85,7 @@ class Draft(BaseModel):
     state: WritingState = WritingState.DRAFTED
     # what rejected the answer, as the same gate on the site whose output made
     # it decidable. A field rather than a record: nothing but the run writes it
-    gate: Discard | None = None
+    gate: Gate | None = None
     # the problem this draft landed as, absent until it did. A crash between
     # landing and clearing leaves a draft naming one, which is what tells the
     # next run to clear it rather than write the problem a second time

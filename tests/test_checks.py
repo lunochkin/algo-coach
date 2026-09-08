@@ -2,7 +2,7 @@ import json
 
 from helpers import a_call
 
-from algo_coach.generation import Discard, agree, check, checks, stopped
+from algo_coach.generation import Gate, agree, check, checks, stopped
 from algo_coach.schema import CaseOutcome, DraftCase, ExpectedSource, MachineProvenance
 
 DOUBLE = "def solve(x):\n    return x * 2\n"
@@ -53,18 +53,18 @@ def test_a_landing_case_carries_the_reference_s_answer():
     assert [one.expected for one in result.cases] == [4]
 
 
-def test_a_canonical_yielding_no_value_discards_the_problem():
+def test_a_canonical_yielding_no_value_rejects_the_draft():
     """Nothing establishes what the case returns, so there is no problem to
     keep."""
     result = checked(([2], 4), canonical="def solve(x):\n    raise ValueError(x)\n")
 
     assert not result.survived
-    assert result.discard is Discard.NO_VALUE
+    assert result.gate is Gate.NO_VALUE
     assert result.outcome is CaseOutcome.CRASHED
     assert result.cases == []
 
 
-def test_a_canonical_contradicting_its_own_cases_is_counted_not_discarded():
+def test_a_canonical_contradicting_its_own_cases_is_counted_not_rejected():
     """One call wrote the code and the declaration, so they share a reading.
     What the case stores is the reference's answer either way."""
     result = checked(([2], 4), ([5], 11))
@@ -87,20 +87,20 @@ def test_the_reference_is_never_run_where_the_canonical_yielded_no_value(monkeyp
     monkeypatch.setattr(checks, "outputs", unreachable)
     canonical = "def other():\n    return 1\n"
 
-    assert checked(([2], 4), canonical=canonical).discard is Discard.NO_VALUE
+    assert checked(([2], 4), canonical=canonical).gate is Gate.NO_VALUE
 
 
-def test_two_solutions_that_disagree_discard_the_problem():
+def test_two_solutions_that_disagree_reject_the_draft():
     """The prose admits two readings, which is the statement's fault rather
     than either solution's."""
     result = checked(([2], 4), ([5], 10), reference="def solve(x):\n    return x * 3\n")
 
-    assert result.discard is Discard.DISAGREED
+    assert result.gate is Gate.DISAGREED
     assert [one.args for one in result.disagreements] == [[2], [5]]
     assert result.cases == []
 
 
-def test_a_canonical_that_passed_its_own_cases_can_still_be_discarded():
+def test_a_canonical_that_passed_its_own_cases_can_still_be_rejected():
     """The gates are ordered, and the run's outcome is a fact about the
     canonical rather than about whether the problem was kept."""
     result = checked(([2], 4), reference="def solve(x):\n    return x * 3\n")
@@ -133,12 +133,12 @@ def test_a_case_the_reference_computed_names_it():
     assert [one.expected_from for one in result.cases] == [ExpectedSource.REFERENCE]
 
 
-def test_a_reference_that_computed_no_case_discards_the_problem():
+def test_a_reference_that_computed_no_case_rejects_the_draft():
     """Every expected output would be the canonical's own, and `verified`
     would then mean only that the solution agrees with itself."""
     result = checked(([2], 4), reference="def solve(x):\n    raise ValueError(x)\n")
 
-    assert result.discard is Discard.UNTESTED
+    assert result.gate is Gate.UNTESTED
     assert result.outcome is CaseOutcome.PASSED
     assert result.cases == []
 

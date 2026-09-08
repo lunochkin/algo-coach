@@ -9,10 +9,10 @@ from algo_coach.cli.display import clipped, counter, progress, sampled
 from algo_coach.generation import (
     BENCH,
     Bench,
-    Discarded,
     GenerationResult,
     Held,
     Progress,
+    Rejected,
     ReplayResult,
     Resumed,
     Step,
@@ -62,7 +62,7 @@ def show(one: Progress) -> None:
 
 def verdict(progress: Progress) -> str:
     """The case run and whether it was kept, apart: a written problem can still
-    be discarded."""
+    be rejected."""
     if progress.reason is not None:
         return f"! {progress.reason}"
     cases = f"{progress.cases} case(s)"
@@ -145,11 +145,11 @@ def summary(results: Sequence[GenerationResult], aimed: list[Target], bench: Ben
     kept = f"{counted(results, 'drafted')} problem(s) stored"
     if len(aimed) > 1:
         kept += f", over {len(aimed)} template(s)"
-    # the discards repeat the per-problem lines, since a run of ten scrolls past
-    # them. A hold is apart from a discard: the calls are kept and the form
+    # the rejections repeat the per-problem lines, since a run of ten scrolls past
+    # them. A hold is apart from a rejection: the calls are kept and the form
     # still has no problem, which is what the next run is aimed at
     kept += tallied(
-        (counted(results, "discarded"), "discarded"),
+        (counted(results, "rejected"), "rejected"),
         (counted(results, "held"), "held"),
         (counted(results, "failed"), "failed"),
     )
@@ -191,7 +191,7 @@ def holding(target: Target, one: Held) -> str:
     return f"  {one.draft.id}  {form:<24}  {one.draft.state:<10}  {stopped_by(one)}"
 
 
-def discarding(target: Target, one: Discarded) -> str:
+def rejecting(target: Target, one: Rejected) -> str:
     """One problem written and not kept. Its gate is on the site outcomes of a
     writing no problem names, so the run is where a reader meets it."""
     return f"  {target.template.slug[:24]:<24}  {one.reason}"
@@ -211,10 +211,10 @@ def finale(
         "held", [holding(target, one) for target, result in reached for one in result.held]
     )
     block += section(
-        "discarded",
-        [discarding(target, one) for target, result in reached for one in result.discarded],
+        "rejected",
+        [rejecting(target, one) for target, result in reached for one in result.rejected],
     )
-    # a call that returned nothing, where a discard is a problem that arrived
+    # a call that returned nothing, where a rejection is a problem that arrived
     # and did not survive its runs. It leaves no draft and no site outcome, so
     # the run is the only place it is named
     block += section(
@@ -296,11 +296,11 @@ __all__ = [
     "count",
     "counted",
     "declared",
-    "discarding",
     "finale",
     "holding",
     "named",
     "paid",
+    "rejecting",
     "replay_summary",
     "resume_summary",
     "section",

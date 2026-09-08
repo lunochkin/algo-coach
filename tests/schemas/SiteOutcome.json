@@ -12,7 +12,7 @@
       "title": "CallSite",
       "type": "string"
     },
-    "Discard": {
+    "Gate": {
       "enum": [
         "no_value",
         "misdeclared",
@@ -20,7 +20,7 @@
         "disagreed",
         "unexercised"
       ],
-      "title": "Discard",
+      "title": "Gate",
       "type": "string"
     }
   },
@@ -74,7 +74,7 @@
     "gate": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Discard"
+          "$ref": "#/$defs/Gate"
         },
         {
           "type": "null"

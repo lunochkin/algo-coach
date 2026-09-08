@@ -1,7 +1,7 @@
 from helpers import PROVENANCE_FIELDS
 
 from algo_coach.drafts import DraftStore
-from algo_coach.schema import Discard, Draft, ExpectedSource, WritingState
+from algo_coach.schema import Draft, ExpectedSource, Gate, WritingState
 
 CONTENT = {
     "title": "Two Sum",
@@ -71,9 +71,9 @@ def test_a_rejected_draft_reads_back_with_its_gate(tmp_path):
     """Terminal means no resume rather than no record: what the gate said is
     the whole of what the attempt left."""
     store = DraftStore(tmp_path)
-    store.put(make_draft(state=WritingState.REJECTED, gate=Discard.DISAGREED))
+    store.put(make_draft(state=WritingState.REJECTED, gate=Gate.DISAGREED))
 
-    assert store.get("w1").gate is Discard.DISAGREED
+    assert store.get("w1").gate is Gate.DISAGREED
 
 
 def test_drafts_are_read_in_id_order(tmp_path):

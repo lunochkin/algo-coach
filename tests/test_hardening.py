@@ -185,7 +185,7 @@ def test_a_proposal_the_canonical_cannot_answer_drops_the_case(tmp_path):
 
 def test_a_proposal_the_two_solutions_answer_differently_is_reported(tmp_path):
     """A boundary the first set never reached, read two ways. The caller
-    discards the problem on it."""
+    rejects the draft on it."""
     reference = "def solve(n):\n    return 99 if n == 4 else n > 3\n"
     model = Answers(rounds=[[[4]]])
 

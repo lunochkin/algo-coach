@@ -8,7 +8,7 @@ from algo_coach.generation.aim import Target, targets
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import write_reference
 from algo_coach.generation.checks import (
-    Discard,
+    Gate,
     agree,
     check,
     stopped,
@@ -42,10 +42,10 @@ from algo_coach.generation.resuming import (
     starts_at,
 )
 from algo_coach.generation.run import (
-    Discarded,
     GenerationResult,
     Held,
     Progress,
+    Rejected,
     Resumed,
     resume,
     write_problems,
@@ -63,14 +63,14 @@ __all__ = [
     "Bench",
     "Corpus",
     "Disagreement",
-    "Discard",
-    "Discarded",
+    "Gate",
     "GenerationError",
     "GenerationResult",
     "Held",
     "Misdeclaration",
     "Notes",
     "Progress",
+    "Rejected",
     "ReplayResult",
     "Resumed",
     "Step",

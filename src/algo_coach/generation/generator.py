@@ -67,7 +67,7 @@ Cases read off a finished solution test what that code does rather than what
 the problem asks.
 
 The statement admits one reading. Another solver will write a solution from it
-alone, and a disagreement between the two discards the problem. State how ties
+alone, and a disagreement between the two rejects the draft. State how ties
 are broken and what an empty input returns.
 
 A case carries two JSON texts. `args` is an array of the positional arguments,
@@ -140,7 +140,7 @@ class Generated(BaseModel):
         if named is None:
             raise ValueError("the statement ends with the `def solve(...)` line its cases pass")
         # skipped rather than raised: a canonical that does not parse fails
-        # every case, which is the gate that discards the problem
+        # every case, which is the gate that rejects the draft
         mine = parameters(self.canonical)
         if mine is not None and mine != named:
             raise ValueError(f"the statement declares solve{named} and the canonical takes {mine}")

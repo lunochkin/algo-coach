@@ -13,11 +13,11 @@ from algo_coach.schema import (
     CaseResult,
     ClaimSource,
     Confidence,
-    Discard,
     Draft,
     DraftCase,
     ExpectedSource,
     FailureMode,
+    Gate,
     Json,
     MachineProvenance,
     MatchSource,
@@ -294,7 +294,7 @@ def site_outcome(
     *,
     provenance: MachineProvenance,
     problem_id: str | None = None,
-    gate: Discard | None = None,
+    gate: Gate | None = None,
     detail: str = "",
     mutants: int = 0,
     survived: int = 0,
@@ -307,7 +307,7 @@ def site_outcome(
     unseparated: str | None = None,
     largest: int | None = None,
 ) -> SiteOutcome:
-    """`problem_id` is filled by the caller that lands the problem: a discarded
+    """`problem_id` is filled by the caller that lands the problem: a rejected
     draft mints none, and `writing_id` is what groups the four sites either
     way."""
     return SiteOutcome(

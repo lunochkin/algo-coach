@@ -1,16 +1,5 @@
 {
   "$defs": {
-    "Discard": {
-      "enum": [
-        "no_value",
-        "misdeclared",
-        "untested",
-        "disagreed",
-        "unexercised"
-      ],
-      "title": "Discard",
-      "type": "string"
-    },
     "DraftCase": {
       "description": "One case as the generator wrote it: the arguments and what `solve` must\nreturn.",
       "properties": {
@@ -37,6 +26,17 @@
         "canonical"
       ],
       "title": "ExpectedSource",
+      "type": "string"
+    },
+    "Gate": {
+      "enum": [
+        "no_value",
+        "misdeclared",
+        "untested",
+        "disagreed",
+        "unexercised"
+      ],
+      "title": "Gate",
       "type": "string"
     },
     "MachineProvenance": {
@@ -258,7 +258,7 @@
     "gate": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Discard"
+          "$ref": "#/$defs/Gate"
         },
         {
           "type": "null"

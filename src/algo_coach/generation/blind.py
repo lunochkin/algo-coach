@@ -26,7 +26,7 @@ not reach for a technique the statement did not ask for.
 Follow the statement literally. Where it leaves something undecided, implement
 what it says rather than what you take it to have meant. Another solution is
 being written from the same prose, and where the two disagree the problem is
-discarded rather than either solution corrected.
+rejected rather than either solution corrected.
 
 {RUNTIME}, {ENTRY},
 {POSITIONAL}.

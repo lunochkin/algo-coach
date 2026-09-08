@@ -189,7 +189,7 @@ one form its target named.
       solve it out, each a name and a one-line idea. No code in that reply, so
       one bad proposal costs one call rather than the batch
 - [ ] Generate a canonical per approach, one call each, and store the ones the
-      problem's cases keep. A failure discards nothing, since the cases judge a
+      problem's cases keep. A failure rejects nothing, since the cases judge a
       solution rather than the statement
 - [ ] Add `algo-coach enumerate`, a problem in and canonicals out, through the
       transport the other commands share

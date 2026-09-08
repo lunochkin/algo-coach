@@ -1,7 +1,7 @@
 """The naive solution: the approach the card's form replaces, which is what the
 speedup search measures the canonical against.
 
-It settles no case and discards no problem, so it is the one answering site
+It settles no case and rejects no draft, so it is the one answering site
 that may be told which form to avoid, and the one that is sampled. `corpus.md`
 gives what it may never do.
 """

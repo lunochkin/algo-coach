@@ -159,7 +159,7 @@ def test_every_call_is_recorded(tmp_path):
 
 
 def test_a_problem_the_runs_reject_is_reported_apart(tmp_path):
-    """A written problem can still be discarded, and a report folding the two
+    """A written problem can still be rejected, and a report folding the two
     would say a call refused where the model wrote and the runs rejected."""
     model = FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n")
 
@@ -167,11 +167,11 @@ def test_a_problem_the_runs_reject_is_reported_apart(tmp_path):
 
     assert result.drafted == []
     assert result.failed == []
-    assert [one.discard for one in result.discarded] == ["disagreed"]
-    assert "disagree on 1 case(s)" in result.discarded[0].reason
+    assert [one.gate for one in result.rejected] == ["disagreed"]
+    assert "disagree on 1 case(s)" in result.rejected[0].reason
 
 
-def test_a_discard_does_not_end_the_run(tmp_path):
+def test_a_rejection_does_not_end_the_run(tmp_path):
     """`ABORT_AFTER` catches a broken configuration. Every call answered here,
     and what the runs rejected is the model's writing."""
     model = FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n")
@@ -179,10 +179,10 @@ def test_a_discard_does_not_end_the_run(tmp_path):
     _, result = run(tmp_path, model, count=ABORT_AFTER + 1)
 
     assert not result.aborted
-    assert len(result.discarded) == ABORT_AFTER + 1
+    assert len(result.rejected) == ABORT_AFTER + 1
 
 
-def test_a_discarded_statement_is_still_shown_to_the_next_call(tmp_path):
+def test_a_rejected_statement_is_still_shown_to_the_next_call(tmp_path):
     """It was written for this form, and asking for it again is what the list
     exists to prevent."""
     model = FakeWriter(
@@ -334,9 +334,7 @@ def test_a_call_that_wrote_no_input_generator_is_reported_apart_from_a_search(
     assert "built nothing at size 1" in crashing.unseparated
 
 
-def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
-    tmp_path, monkeypatch
-):
+def test_two_solutions_disagreeing_at_the_separating_size_reject_the_draft(tmp_path, monkeypatch):
     """A canonical correct on the small cases and wrong at scale, which only
     the separating input reaches."""
     # correct on the statement's own case and wrong on what the input generator makes,
@@ -347,7 +345,7 @@ def test_two_solutions_disagreeing_at_the_separating_size_discard_the_problem(
     _, result = timed(tmp_path, monkeypatch, model)
 
     assert result.drafted == []
-    assert [one.discard for one in result.discarded] == ["disagreed"]
+    assert [one.gate for one in result.rejected] == ["disagreed"]
     assert CaseLog(tmp_path).cases() == []
 
 
@@ -411,7 +409,7 @@ UNFINISHED = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs))\n    retu
 
 
 def test_a_naive_solution_that_answers_a_case_wrongly_holds_the_draft(tmp_path):
-    """It measures nothing, and what it discards is nothing: being wrong says
+    """It measures nothing, and what it rejects is nothing: being wrong says
     nothing about the statement."""
     (one,) = seeded(tmp_path, card(**claiming({})))
     drafts = DraftStore(tmp_path)
@@ -427,7 +425,7 @@ def test_a_naive_solution_that_answers_a_case_wrongly_holds_the_draft(tmp_path):
 
     (held,) = result.held
     assert held.unpaced == "wrong on 1 case(s)"
-    assert result.discarded == []
+    assert result.rejected == []
     (stored,) = drafts.all()
     assert stored.state is WritingState.BUILT
     assert stored.naive is None
@@ -475,7 +473,7 @@ def test_a_written_naive_solution_is_held_on_the_draft(tmp_path):
 
 
 def test_the_search_runs_before_the_mutation_loop(tmp_path, monkeypatch):
-    """A canonical wrong at scale discards the problem, and the loop is what
+    """A canonical wrong at scale rejects the draft, and the loop is what
     that saves: a round is paid for after the search rather than before it."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(tmp_path, card(**claiming({})))
@@ -624,7 +622,7 @@ def test_a_round_that_fails_holds_the_draft_for_a_resume(tmp_path):
     assert reported[0].unmeasured is not None
 
 
-def test_a_proposed_case_the_two_solutions_answer_differently_discards_it(tmp_path):
+def test_a_proposed_case_the_two_solutions_answer_differently_rejects_it(tmp_path):
     """A canonical wrong at a boundary the first set never reached, which is
     what the loop exists to find."""
     model = bounded(
@@ -635,7 +633,7 @@ def test_a_proposed_case_the_two_solutions_answer_differently_discards_it(tmp_pa
     _, result = run(tmp_path, model)
 
     assert result.drafted == []
-    assert [one.discard for one in result.discarded] == ["disagreed"]
+    assert [one.gate for one in result.rejected] == ["disagreed"]
     assert CaseLog(tmp_path).cases() == []
 
 

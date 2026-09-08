@@ -12,7 +12,7 @@ from algo_coach.generation.blind import write_reference
 from algo_coach.generation.checks import (
     CAP_MS,
     Checked,
-    Discard,
+    Gate,
     agree,
     check,
     stopped,
@@ -108,7 +108,7 @@ def write_one(
     writing: Writing = UNRECORDED,
     drafts: DraftStore | None = None,
 ) -> Passage:
-    # the `Checked` is returned rather than raised: a discard is a fact about
+    # the `Checked` is returned rather than raised: a rejection is a fact about
     # the problem, and the run reports what it cost
     notes("statement", "writing the statement, the canonical and the cases")
     generated, call = generate(
@@ -158,7 +158,7 @@ def to_agreed(p: Passage) -> bool:
     if not ran.survived:
         p.checked = p.first = stopped(ran)
         p.notes("cases", why(p.first))
-        p.draft = rejected(p.drafts, p.draft, ran.discard)
+        p.draft = rejected(p.drafts, p.draft, ran.gate)
         return False
     p.draft = advanced(p.drafts, p.draft, WritingState.CHECKED)
 
@@ -186,7 +186,7 @@ def to_agreed(p: Passage) -> bool:
     )
     p.notes("cases", f"{settled(p.first)}, {monotonic() - started:.1f}s in the runner")
     if not p.first.survived:
-        p.draft = rejected(p.drafts, p.draft, p.first.discard)
+        p.draft = rejected(p.drafts, p.draft, p.first.gate)
         return False
     p.draft = advanced(p.drafts, p.draft, WritingState.AGREED, cases=p.first.cases)
     return True
@@ -259,7 +259,7 @@ def to_searched(p: Passage) -> bool:
             p.template, p.draft, p.checked, p.inputs, p.naive, cap_ms=p.cap_ms, notes=p.notes
         )
         if not p.checked.survived:
-            p.draft = rejected(p.drafts, p.draft, p.checked.discard)
+            p.draft = rejected(p.drafts, p.draft, p.checked.gate)
             return False
         if p.measurable:
             p.draft = advanced(
@@ -288,7 +288,7 @@ def to_hardened(p: Passage) -> bool:
         notes=p.notes,
     )
     if not p.checked.survived:
-        p.draft = rejected(p.drafts, p.draft, p.checked.discard)
+        p.draft = rejected(p.drafts, p.draft, p.checked.gate)
         return False
     if p.bar.unmeasured is not None:
         # the round's call failed, so the set is what the statement left. Held
@@ -333,7 +333,7 @@ def sites(writing: Writing, call: Call | None, p: Passage) -> None:
     writing(
         CallSite.GENERATOR,
         call,
-        **gated(p.first, Discard.NO_VALUE),
+        **gated(p.first, Gate.NO_VALUE),
         mutants=p.bar.mutants,
         killed=p.bar.declared,
         misdeclared=len(p.first.misdeclarations),
@@ -396,16 +396,16 @@ def measured(
         return checked, inputs, bar, hardened.cases
 
     # a boundary input the first case set never reached, answered two ways
-    discarded = Checked(
+    disagreed = Checked(
         outcome=checked.outcome,
-        discard=Discard.DISAGREED,
+        gate=Gate.DISAGREED,
         disagreements=[hardened.disagreement],
     )
     # the fuzz pass's input was built by the inputs site's code, so its gate is
     # filed there and the round answered for nothing
     if hardened.fuzzed is not None and hardened.fuzzed.disagreement is not None:
-        return discarded, inputs.model_copy(update={"gate": Discard.DISAGREED}), bar, []
-    return discarded, inputs, bar.model_copy(update={"gate": Discard.DISAGREED}), []
+        return disagreed, inputs.model_copy(update={"gate": Gate.DISAGREED}), bar, []
+    return disagreed, inputs, bar.model_copy(update={"gate": Gate.DISAGREED}), []
 
 
 def building(

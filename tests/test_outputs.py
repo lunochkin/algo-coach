@@ -8,7 +8,7 @@ def test_a_case_reports_the_value_it_returned():
 
 
 def test_a_case_that_yielded_nothing_says_how():
-    """A canonical that crashed discards the problem, where a reference that
+    """A canonical that crashed rejects the draft, where a reference that
     did so is the ordinary path beyond its reach. Only the outcome separates
     them from a case that answered."""
     code = "def solve(n):\n    if n == 2:\n        raise ValueError('no')\n    return n\n"

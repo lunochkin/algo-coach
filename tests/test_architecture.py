@@ -32,7 +32,7 @@ ENUMERATED = (
     schema.CallSite,
     schema.CaseOutcome,
     schema.ClaimSource,
-    schema.Discard,
+    schema.Gate,
     schema.ExpectedSource,
     schema.Kind,
     schema.MatchSource,

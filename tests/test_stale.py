@@ -77,7 +77,7 @@ def test_a_claim_read_at_another_temperature_is_stale():
 def test_a_reading_taken_before_a_temperature_was_sent_is_its_own_arm():
     """`None` is the provider's default, named rather than absent — as an
     unsent effort is. It is the arm every machine claim already in the log sits in,
-    and the one a greedy run is compared against, so it is never discarded."""
+    and the one a greedy run is compared against, so it is never deleted."""
     claim = machine_claim("a1", ["greedy"], temperature=None)
     unset = CONFIGURATION.model_copy(update={"temperature": None})
 

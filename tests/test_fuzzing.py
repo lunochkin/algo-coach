@@ -88,7 +88,7 @@ def test_an_input_the_canonical_cannot_answer_is_dropped():
 
 
 def test_two_solutions_disagreeing_on_a_kept_input_is_reported():
-    """As a round's proposal is: the caller discards the problem, since the
+    """As a round's proposal is: the caller rejects the draft, since the
     statement admits two readings."""
     found = fuzzed([[3]], reference="def solve(n):\n    return n > 2\n")
 
@@ -175,7 +175,7 @@ def test_the_budget_bounds_what_one_shrink_costs():
 
 
 # agrees with `LONGEST` by another route, so a kept input settles rather than
-# discarding the problem
+# rejecting the draft
 LONGEST_BLIND = "def solve(xs):\n    return not len(xs) <= 2\n"
 
 

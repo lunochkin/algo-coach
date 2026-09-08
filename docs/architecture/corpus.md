@@ -95,7 +95,7 @@ The test cases decide whether a solution to a generated problem is correct.
   be stated somewhere.** A fixed name leaves the parameter order to be
   inferred from prose, and three prompts infer it separately. A reference took
   `solve(capacity, times, sizes)` where the canonical took `solve(times,
-  sizes, capacity)`, answered no case, and the problem was discarded as
+  sizes, capacity)`, answered no case, and the draft was rejected as
   untested.
 - **A statement whose signature contradicts its canonical does not land.** The
   reference and the naive solution are written to the statement, so a wrong
@@ -120,7 +120,7 @@ The test cases decide whether a solution to a generated problem is correct.
   wrote the canonical and the declaration, so a contradiction between them is
   that call's arithmetic rather than a second reading of the statement. The
   count of contradictions sits on the generator's site outcome, and the
-  reference decides whether the problem is discarded.
+  reference decides whether the draft is rejected.
 - **A case records where its expected output came from.** Beyond the largest
   input the reference finishes at generation time, only the canonical can
   compute an expected output, and such a case is evidence about the cap rather
@@ -207,8 +207,8 @@ The test cases decide whether a solution to a generated problem is correct.
 - **The same holds where no search ran.** A call that wrote no input generator,
   or one that wrote no naive solution, leaves the claim undemonstrated as an
   empty search does. The draft stops at the step before the search.
-- **The problem is held as a draft rather than discarded.** The statement, the
-  cases and every solution passed every gate that judges them. Discarding here
+- **The problem is held as a draft rather than rejected.** The statement, the
+  cases and every solution passed every gate that judges them. Rejecting here
   would keep only the problems one model happened to be slow at. The draft is
   resumed where it stopped, so nothing the calls bought is thrown away.
 - **A held draft leaves by one of four exits**, and each names a different
@@ -241,7 +241,7 @@ The test cases decide whether a solution to a generated problem is correct.
   except return 7 on this input" is a function nobody can write a statement
   for. Such a problem does not land, and the discrimination bar catches it.
 - **How discrimination is established is in `flows.md`.** A blind reference
-  disagreeing on any case discards the problem, and a surviving mutant of the
+  disagreeing on any case rejects the draft, and a surviving mutant of the
   canonical names a case that has to exist.
 - **The mutation loop stops after two rounds**, at one call each. A survivor
   two rounds did not kill is usually equivalent to the canonical, and no case
@@ -282,7 +282,7 @@ The test cases decide whether a solution to a generated problem is correct.
   would fail the solution it was written from.
 - **The ceiling is checked after the shrink.** An input over the ceiling is
   storable once it is only as large as the kill needs. Checking before the
-  shrink would discard the kill with the size.
+  shrink would lose the kill with the size.
 - **The shrink runs on a budget of candidate inputs.** Each candidate costs a
   run of the canonical and one run per mutant it must keep killing, so an
   input nothing shrinks would otherwise spend the pass's whole runtime.
@@ -290,7 +290,7 @@ The test cases decide whether a solution to a generated problem is correct.
   input does. No check runs a built input against the constraints the
   statement gives, so a crash there is as likely to be an input the problem
   excludes as a defect in the canonical.
-- **A kept input the canonical and the reference answer differently discards
+- **A kept input the canonical and the reference answer differently rejects
   the problem**, as a round's proposal does. The pass reaches boundaries the
   first set never did, and the pass exists to find a canonical wrong at one of
   those boundaries.
@@ -321,14 +321,14 @@ A solution the engine wrote for a problem, in one of three roles.
   end and caused the other, so a prompt naming one end alone has been written
   twice.
 - **The naive solution may be told which form to avoid**, where the reference
-  may not. The naive solution settles no case, discards no problem and is
+  may not. The naive solution settles no case, rejects no draft and is
   scored against nothing, so nothing it is shown can reach a verdict.
 - **The naive site is sampled, for the reason the generator is.** It produces
   an artifact rather than a verdict, so asking again is a second draw rather
   than the answer already stored.
 - **The naive solution is verified, and a failure is its own.** A wrong naive
   solution measures nothing, so one that answers a case wrongly is not stored
-  and the draft is held. The failure never discards the problem: being wrong
+  and the draft is held. The failure never rejects the draft: being wrong
   says nothing about the statement.
 - **A case the naive solution does not finish is not a failure.** Being slow
   is the naive solution's purpose, and only a computed answer can be wrong.
@@ -473,8 +473,8 @@ fixed here rather than by whatever executed it.
   key would pass. Which mechanism gives that isolation is the runner's to
   choose.
 - **A runner fault is raised, never recorded.** A subprocess that fails to
-  start says nothing about the solution, and a stored `CRASHED` would discard a
-  sound problem over the runner's own defect.
+  start says nothing about the solution, and a stored `CRASHED` would reject a
+  sound draft over the runner's own defect.
 - **A run is comparable only within one runner.** A CPU limit changes what a
   timing bar measures, so the smallest input separating a naive solution from a
   canonical is a fact about the runner that found it.
@@ -483,11 +483,11 @@ fixed here rather than by whatever executed it.
   never told what a case expects, so the rule deciding a case cannot vary by
   where the code ran.
 - **A case yielding no value is read by the solution's role.** A canonical that
-  crashed or timed out discards the problem, since nothing establishes what the
+  crashed or timed out rejects the draft, since nothing establishes what the
   case returns. A reference that crashed or timed out is the ordinary path
   beyond its reach, and the case takes the canonical's answer, with
   `expected_from` naming the canonical.
-- **A reference that computed no case discards the problem.** Every expected
+- **A reference that computed no case rejects the draft.** Every expected
   output would then be the canonical's own, and `verified` would mean only that
   the solution agrees with itself. Some cases beyond the reference's reach is
   the ordinary path. All of them beyond it is no independent reading at all.

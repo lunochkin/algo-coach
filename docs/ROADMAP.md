@@ -94,8 +94,8 @@ problem sound.
 
 - Five call sites, each at its own configuration: the generator, the blind
   reference, the input generator, the naive solution, the discrimination round.
-- A blind reference settles every expected value, and a disagreement discards
-  the problem.
+- A blind reference settles every expected value, and a disagreement rejects
+  the draft.
 - Mutants of the canonical, killed by the statement's cases, then by built
   inputs, then by at most two rounds of proposed cases. A proposal lands only
   where it killed.

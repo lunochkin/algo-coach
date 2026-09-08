@@ -58,7 +58,7 @@ def test_the_declared_value_is_compared_as_json():
 
 def test_a_case_that_yielded_no_value_is_not_a_misdeclaration():
     """Nothing was computed to compare. A canonical yielding nothing is what
-    discards the problem a step later."""
+    rejects the draft a step later."""
     assert misdeclared(declared(([1], 1)), [NoValue(RunOutcome.TIMEOUT)]) == []
 
 
@@ -88,7 +88,7 @@ def test_a_disagreement_carries_both_answers():
 
 
 def test_every_case_is_decided():
-    """Which inputs the two readings differ on is what a discarded problem is
+    """Which inputs the two readings differ on is what a rejected draft is
     reported by, and the first of them says less than all of them."""
     settled = settle(cases([1], [2], [3]), canonical=[1, 9, 3], reference=[1, 8, 4])
 

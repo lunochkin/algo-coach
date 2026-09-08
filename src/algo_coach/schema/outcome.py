@@ -23,7 +23,7 @@ class CallSite(StrEnum):
     NAIVE = "naive"
 
 
-class Discard(StrEnum):
+class Gate(StrEnum):
     # named rather than a boolean: a run reports how its problems were lost
     NO_VALUE = "no_value"
     # no run raises it: the count sits on the generator's own record, and the
@@ -43,7 +43,7 @@ class SiteOutcome(MachineProvenance):
     created_at: datetime
     site: CallSite
     # minted per attempt at one problem, so the four sites of one attempt group
-    # and a discarded draft still has an identity
+    # and a rejected draft still has an identity
     writing_id: str = Field(min_length=1)
     # absent where the problem was written for a technique target, which
     # names no form
@@ -51,7 +51,7 @@ class SiteOutcome(MachineProvenance):
     problem_id: str | None = None  # only where the attempt landed
     # what rejected this site's answer, absent where nothing did. The gate is
     # filed under the site whose output made it decidable
-    gate: Discard | None = None
+    gate: Gate | None = None
     detail: str = ""
     # the mutation loop. `mutants` is what the canonical yielded, on the site
     # that wrote it

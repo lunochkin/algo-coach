@@ -16,7 +16,7 @@ The order matters because each step can reject what came before.
    the same call declared.
 4. The reference solution, from the statement alone.
 5. The reference runs, and the two solutions' outputs are settled: they agree
-   on every case, or the problem is discarded.
+   on every case, or the draft is rejected.
 6. Code that builds an input of a given size and seed, from the statement
    alone.
 7. A deliberately naive solution, from the statement and the form it may not
@@ -36,15 +36,15 @@ The order matters because each step can reject what came before.
   costs the diversity the target exists to enforce.
 - **A draft lands only once every gate has passed.** A draft failing any step
   stops there, and only one that passed every gate becomes a problem. The
-  draft is kept where it stopped rather than discarded, so a fixed step can
+  draft is kept where it stopped rather than deleted, so a fixed step can
   resume from there.
 - **The reference is written blind.** Shown the canonical, the reference would
   inherit that solution's reading of the statement. Agreement would then show
   only that one model is consistent. Blind, agreement is evidence that the
-  statement has one reading, and disagreement on any case discards the
-  problem.
+  statement has one reading, and disagreement on any case rejects the
+  draft.
 - **The naive solution is written the opposite way**, and told the form it may
-  not use. The naive solution settles no case and discards no problem, so what
+  not use. The naive solution settles no case and rejects no draft, so what
   the naive site is shown cannot reach a verdict. `corpus.md` gives what the
   naive solution may never do.
 - **The generator's own expected values are a reading, not a gate.** The call
@@ -54,7 +54,7 @@ The order matters because each step can reject what came before.
 - **The count is filed on the generator's own record.** The count says how
   often a configuration's hand-computed value contradicts its own code, which
   is a fact about that site rather than about the problem.
-- **The blind reference discards the problem.** The reference read the statement
+- **The blind reference rejects the draft.** The reference read the statement
   and nothing else, so a disagreement is evidence the prose admits two readings.
   The generator's declaration is evidence about one call.
 
@@ -113,8 +113,8 @@ The order matters because each step can reject what came before.
   input the problem excludes as a defect in the solution. The canonical was
   already run against the cases written with the statement, and those cases
   decide it.
-- **A proposed case the two solutions answer differently discards the
-  problem**, as a disagreement on any other case does. The round asks for
+- **A proposed case the two solutions answer differently rejects the
+  draft**, as a disagreement on any other case does. The round asks for
   boundary inputs, and the loop exists to find a canonical wrong at a boundary
   the first set never reached.
 - **A round that proposes nothing is a verdict, never a failure.** No input
@@ -136,8 +136,8 @@ The order matters because each step can reject what came before.
   and the naive solution only where a speedup is claimed.
 - **The separating case is settled as any other case.** The reference is
   measured well above the sitting's cap, so it usually computes the value the
-  separating case stores. A disagreement on the separating case discards the
-  problem, and that disagreement catches a canonical correct on the small
+  separating case stores. A disagreement on the separating case rejects the
+  draft, and that disagreement catches a canonical correct on the small
   cases and wrong at scale.
 - **The input the search measured is the input the case stores.** The input
   generator is asked to build one input per size, and building the input
@@ -164,7 +164,7 @@ The order matters because each step can reject what came before.
   naive solution that is not holds the draft. A naive solution that is wrong
   measures nothing, so a search against it would separate on a mistake rather
   than on the form.
-- **A wrong naive solution discards nothing all the same.** The naive solution
+- **A wrong naive solution rejects nothing all the same.** The naive solution
   is the solution the search times rather than a reading of the statement. A
   wrong naive solution establishes that this solution cannot serve, and
   nothing about the problem.
@@ -173,7 +173,7 @@ The order matters because each step can reject what came before.
   has no answer therefore stops the writing rather than lowering what a
   landing requires.
 - **Every step's verdict is recorded, not only reported.** A run prints each
-  stage and the process then ends, so a discarded draft would leave only the
+  stage and the process then ends, so a rejected draft would leave only the
   calls it paid for. `machine.md` gives what a site's record carries.
 - **A run ends on what it reached, and prints no statement.** Each problem
   the run stored is a line naming the id, and `algo-coach problem <id>` reads
@@ -183,9 +183,9 @@ The order matters because each step can reject what came before.
   solver who recognises a problem has not derived its form.
 - **Failing means two things on the cases written with the statement.** The
   first canonical is run before any expected value is settled, so it fails
-  only by yielding no value on some case, and the problem is discarded. A
+  only by yielding no value on some case, and the draft is rejected. A
   later canonical is judged by the cases the problem carries, so it fails as
-  any solution does, and nothing is discarded.
+  any solution does, and nothing is rejected.
 
 ## Writing a problem, as states
 
@@ -245,7 +245,7 @@ a second generator call writes a different problem.
   the steps before it reached. A resume runs the loop over the set as the
   statement left it, which is the set the survivors were decided against.
 - **`rejected` is terminal and names the gate that reached it**, which is the
-  same `Discard` a site outcome carries. Terminal means no resume rather than
+  same `Gate` a site outcome carries. Terminal means no resume rather than
   no record.
 - **One gate is a draft's alone.** A held draft rejected by hand names
   `unexercised`: every site answered and none of them was wrong, so there is
@@ -373,7 +373,7 @@ other way to solve it is found afterwards, over the stored problem.
   canonical in view.
 - **A canonical enumeration produced is not a reference.** The enumerated
   canonical saw the statement, the cases and another solution, so it is no
-  independent reading. The enumerated canonical cannot discard a problem, and
+  independent reading. The enumerated canonical cannot reject a draft, and
   its failure says nothing about the statement.
 - **Execution cannot catch duplicates.** Top-down and bottom-up dynamic
   programming pass the same cases, and only a template match separates them.
@@ -400,7 +400,7 @@ there is ever asked twice and no two configurations meet the same item.
 6. Each site's answer is recorded as its outcome, keyed to the problem.
 
 - **A replay writes nothing to the corpus.** A case a round wins here is
-  discarded, or the next configuration would be measured against a different
+  dropped, or the next configuration would be measured against a different
   problem.
 - **The loop is replayed against the set as it stood.** A case a later round won
   and the separating case are excluded, since neither was there when the
@@ -418,7 +418,7 @@ there is ever asked twice and no two configurations meet the same item.
 - **The naive site is asked there too**, where a speedup is claimed. The
   naive site's record carries the configuration and whether the solution it
   wrote answers the problem's cases, since a wrong naive solution rejects no
-  problem and so names no gate.
+  draft and so names no gate.
 - **The search stays measured against the stored naive solution**, not the one
   this run just wrote. Moving the input generator and the naive solution
   together would leave neither configuration readable from the verdict.

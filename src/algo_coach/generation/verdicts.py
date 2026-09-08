@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from algo_coach.generation.checks import (
     Checked,
-    Discard,
+    Gate,
 )
 from algo_coach.generation.hardening import Hardened
 from algo_coach.generation.inputs import InputGenerator
@@ -34,7 +34,7 @@ class Inputs(BaseModel):
     unbuilt: str | None = None  # the call failed, and no code was written
     separating: int | None = None  # the size the naive solution stops fitting at
     unseparated: str | None = None  # why there was none, where one was looked for
-    gate: Discard | None = None  # the two solutions disagreed at that size
+    gate: Gate | None = None  # the two solutions disagreed at that size
 
 
 class Naive(BaseModel):
@@ -73,21 +73,21 @@ class Bar(BaseModel):
     call: Call | None = None
     # a round's proposal the two solutions answered differently. The fuzz
     # pass's own is the inputs site's, since its code built the input
-    gate: Discard | None = None
+    gate: Gate | None = None
     unmeasured: str | None = None
 
 
 class GateVerdict(TypedDict, total=False):
     """What a site's record carries where its answer met a gate."""
 
-    gate: Discard | None
+    gate: Gate | None
     detail: str
 
 
 class LoopVerdict(TypedDict):
     """What the discrimination site's record carries."""
 
-    gate: Discard | None
+    gate: Gate | None
     survived: int
     won: int
     proposed: int
@@ -98,18 +98,18 @@ class LoopVerdict(TypedDict):
 class SearchVerdict(TypedDict):
     """What the inputs site's record carries of the search that judged it."""
 
-    gate: Discard | None
+    gate: Gate | None
     separating: int | None
     unseparated: str | None
     largest: int | None
 
 
-def gated(checked: Checked, *gates: Discard) -> GateVerdict:
-    """The gate this site's answer was rejected by, and what it said. A discard
+def gated(checked: Checked, *gates: Gate) -> GateVerdict:
+    """The gate this site's answer was rejected by, and what it said. A reject
     belongs to the site whose output made it decidable."""
-    if checked.discard not in gates:
+    if checked.gate not in gates:
         return GateVerdict()
-    return GateVerdict(gate=checked.discard, detail=reason(checked))
+    return GateVerdict(gate=checked.gate, detail=reason(checked))
 
 
 def settled(checked: Checked) -> str:
@@ -125,23 +125,23 @@ def settled(checked: Checked) -> str:
 def reason(checked: Checked) -> str:
     """What the gate said, as a site outcome's detail carries it. A count
     rather than the cases: the failing arguments are on the `Checked`."""
-    match checked.discard:
-        case Discard.NO_VALUE:
+    match checked.gate:
+        case Gate.NO_VALUE:
             return f"the canonical {checked.outcome} on some case"
-        case Discard.UNTESTED:
+        case Gate.UNTESTED:
             return "the reference computed no case"
         case _:
             return f"the two solutions disagree on {len(checked.disagreements)} case(s)"
 
 
 def why(checked: Checked) -> str:
-    return f"discarded: {reason(checked)}"
+    return f"rejected: {reason(checked)}"
 
 
 def blind_verdicts(checked: Checked) -> GateVerdict:
     """What the blind site's record carries: the gate its reading was rejected
     by, where one was."""
-    return gated(checked, Discard.UNTESTED, Discard.DISAGREED)
+    return gated(checked, Gate.UNTESTED, Gate.DISAGREED)
 
 
 def loop_verdicts(bar: Bar) -> LoopVerdict:

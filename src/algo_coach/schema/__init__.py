@@ -20,7 +20,7 @@ from algo_coach.schema.configuration import Configuration
 from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.draft import Draft, DraftCase, SettledCase, WritingState
 from algo_coach.schema.match import MatchSource, TemplateMatch
-from algo_coach.schema.outcome import CallSite, Discard, SiteOutcome
+from algo_coach.schema.outcome import CallSite, Gate, SiteOutcome
 from algo_coach.schema.problem import (
     Problem,
     ProblemDifficulty,
@@ -49,11 +49,11 @@ __all__ = [
     "Confidence",
     "Configuration",
     "Diagnosis",
-    "Discard",
     "Draft",
     "DraftCase",
     "ExpectedSource",
     "FailureMode",
+    "Gate",
     "Json",
     "Kind",
     "MachineProvenance",

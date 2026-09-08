@@ -4,7 +4,7 @@ from pydantic import ValidationError
 
 from algo_coach.mint import site_outcome
 from algo_coach.outcomes import OutcomeLog, answered
-from algo_coach.schema import CallSite, Configuration, Discard, SiteOutcome
+from algo_coach.schema import CallSite, Configuration, Gate, SiteOutcome
 
 
 def left(site: CallSite = CallSite.GENERATOR, writing_id: str = "w1", **overrides):
@@ -20,13 +20,13 @@ def test_a_record_reads_back_whole(tmp_path):
     """The gate and the counters are what an eval reads, so they survive the
     round trip rather than collapsing to whether the problem landed."""
     store = OutcomeLog(tmp_path)
-    one = left(CallSite.DISCRIMINATION, gate=Discard.DISAGREED, mutants=53, survived=5, won=15)
+    one = left(CallSite.DISCRIMINATION, gate=Gate.DISAGREED, mutants=53, survived=5, won=15)
     store.append(one)
 
     read = store.outcomes()
 
     assert read == [one]
-    assert read[0].gate is Discard.DISAGREED
+    assert read[0].gate is Gate.DISAGREED
 
 
 def test_records_are_read_per_attempt(tmp_path):

@@ -3,7 +3,7 @@ land.
 
 Two steps rather than one, in the order `flows.md` gives: the canonical is run
 and read against what its own call declared, and only then is it settled
-against a reference. The reading discards nothing, since one call wrote both.
+against a reference. The reading rejects nothing, since one call wrote both.
 
 Stores nothing: the ids a case and a solution need do not exist until it lands.
 """
@@ -22,8 +22,8 @@ from algo_coach.mutation import Case
 from algo_coach.runner import NoValue, agrees, answered, decide, outputs, run
 from algo_coach.schema import (
     CaseOutcome,
-    Discard,
     DraftCase,
+    Gate,
     MachineProvenance,
     SettledCase,
     severest,
@@ -42,18 +42,18 @@ class Ran:
     outcome: CaseOutcome | None
     slowest_ms: int | None = None
     returned: list[Any] = field(default_factory=list[Any])
-    discard: Discard | None = None
+    gate: Gate | None = None
     misdeclarations: list[Misdeclaration] = field(default_factory=list[Misdeclaration])
 
     @property
     def survived(self) -> bool:
-        return self.discard is None
+        return self.gate is None
 
 
 @dataclass(frozen=True)
 class Checked:
     """What the two runs decided about one drafted problem. `cases` is empty
-    where it was discarded."""
+    where it was rejected."""
 
     # how the canonical's run went, folded to the severest case. `None` only
     # where there were no cases to run
@@ -61,14 +61,14 @@ class Checked:
     # what the canonical's slowest case took in that run. The mutation loop
     # paces its cap by it rather than running the canonical again
     slowest_ms: int | None = None
-    discard: Discard | None = None
+    gate: Gate | None = None
     cases: list[SettledCase] = field(default_factory=list[SettledCase])
     misdeclarations: list[Misdeclaration] = field(default_factory=list[Misdeclaration])
     disagreements: list[Disagreement] = field(default_factory=list[Disagreement])
 
     @property
     def survived(self) -> bool:
-        return self.discard is None
+        return self.gate is None
 
 
 def mistakes[C: Case](cases: Sequence[C], *, code: str, cap_ms: int = CAP_MS) -> list[C]:
@@ -106,7 +106,7 @@ def check(cases: Sequence[DraftCase], *, canonical: str, cap_ms: int = CAP_MS) -
     slowest = max((one.elapsed_ms or 0 for one in ran if one.returned), default=0)
 
     if any(isinstance(one, NoValue) for one in ours):
-        return Ran(outcome=outcome, slowest_ms=slowest, discard=Discard.NO_VALUE)
+        return Ran(outcome=outcome, slowest_ms=slowest, gate=Gate.NO_VALUE)
 
     return Ran(
         outcome=outcome,
@@ -122,7 +122,7 @@ def stopped(ran: Ran) -> Checked:
     return Checked(
         outcome=ran.outcome,
         slowest_ms=ran.slowest_ms,
-        discard=ran.discard,
+        gate=ran.gate,
         misdeclarations=ran.misdeclarations,
     )
 
@@ -149,7 +149,7 @@ def agree(
     # what the generator's own record is scored on
     def checked(
         *,
-        discard: Discard | None = None,
+        gate: Gate | None = None,
         cases: list[SettledCase] | None = None,
         disagreements: list[Disagreement] | None = None,
     ) -> Checked:
@@ -157,22 +157,22 @@ def agree(
             outcome=ran.outcome,
             slowest_ms=ran.slowest_ms,
             misdeclarations=ran.misdeclarations,
-            discard=discard,
+            gate=gate,
             cases=cases or [],
             disagreements=disagreements or [],
         )
 
     if not settled.agreed:
-        return checked(discard=Discard.DISAGREED, disagreements=settled.disagreements)
+        return checked(gate=Gate.DISAGREED, disagreements=settled.disagreements)
     if not settled.tested:
-        return checked(discard=Discard.UNTESTED)
+        return checked(gate=Gate.UNTESTED)
     return checked(cases=settled.cases)
 
 
 __all__ = [
     "CAP_MS",
     "Checked",
-    "Discard",
+    "Gate",
     "Ran",
     "agree",
     "check",

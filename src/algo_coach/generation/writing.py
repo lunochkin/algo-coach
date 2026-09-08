@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from algo_coach import mint
 from algo_coach.generation.generator import Generated
 from algo_coach.ids import new_id
-from algo_coach.schema import Call, CallSite, Discard, Draft, MachineProvenance, SiteOutcome
+from algo_coach.schema import Call, CallSite, Draft, Gate, MachineProvenance, SiteOutcome
 
 
 @dataclass(frozen=True)
@@ -45,7 +45,7 @@ class Writing:
         site: CallSite,
         call: Call | None,
         *,
-        gate: Discard | None = None,
+        gate: Gate | None = None,
         detail: str = "",
         mutants: int = 0,
         survived: int = 0,

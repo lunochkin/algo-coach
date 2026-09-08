@@ -275,7 +275,7 @@ times. Each record class is specified in one of the files beside it.
 Properties the system holds at all times.
 
 - Attempts, attempt claims, self-labels and diagnoses are append-only: no
-  record is ever revised or removed in place. Discarding a private log
+  record is ever revised or removed in place. Deleting a private log
   wholesale while it holds nothing irreplaceable is a different act. That
   allowance ends the first time a record in the log is worth keeping.
 - Every record keyed to an attempt carries an engine-minted `id`, its
@@ -283,7 +283,7 @@ Properties the system holds at all times.
 - The user's own record stands over the machine's answer to the same question,
   whichever was written later: a attempt claim resolves user-first, and a
   diagnosis never supersedes a self-label. The machine's record is kept and
-  scored, never discarded and never promoted.
+  scored, never deleted and never promoted.
 - Every reference in an append-only record is engine-minted, so the log stays
   readable without anything outside the engine.
 - Aggregates are derived views, never stored truth.

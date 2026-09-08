@@ -7,7 +7,7 @@ from algo_coach.drafts import DraftStore
 from algo_coach.generation import Corpus, reject, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Discard, Draft, WritingState
+from algo_coach.schema import Draft, Gate, WritingState
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
@@ -70,7 +70,7 @@ def test_a_canonical_yielding_no_value_stops_at_the_first_gate(tmp_path):
     stored = written(tmp_path, FakeWriter(canonical=crashes))
 
     assert stored.state is WritingState.REJECTED
-    assert stored.gate is Discard.NO_VALUE
+    assert stored.gate is Gate.NO_VALUE
     assert stored.reference is None
 
 
@@ -80,7 +80,7 @@ def test_a_canonical_contradicting_its_own_cases_is_settled_by_the_reference(tmp
     stored = written(tmp_path, FakeWriter(canonical=WRONG))
 
     assert stored.state is WritingState.REJECTED
-    assert stored.gate is Discard.DISAGREED
+    assert stored.gate is Gate.DISAGREED
     assert stored.blind_provenance is not None
 
 
@@ -90,7 +90,7 @@ def test_the_reference_a_rejected_draft_paid_for_is_kept(tmp_path):
     stored = written(tmp_path, FakeWriter(solution=WRONG))
 
     assert stored.state is WritingState.REJECTED
-    assert stored.gate is Discard.DISAGREED
+    assert stored.gate is Gate.DISAGREED
     assert stored.reference == WRONG
     assert stored.blind_provenance is not None
 
@@ -207,8 +207,8 @@ def test_a_held_draft_is_rejected_where_the_reference_wrote_the_form(tmp_path):
     rejected = reject(drafts, stored)
 
     assert rejected.state is WritingState.REJECTED
-    assert rejected.gate is Discard.UNEXERCISED
-    assert drafts.get(stored.id).gate is Discard.UNEXERCISED
+    assert rejected.gate is Gate.UNEXERCISED
+    assert drafts.get(stored.id).gate is Gate.UNEXERCISED
 
 
 def test_a_landed_draft_is_not_rejected():

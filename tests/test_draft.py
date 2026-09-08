@@ -3,9 +3,9 @@ from helpers import PROVENANCE_FIELDS, a_call
 from pydantic import ValidationError
 
 from algo_coach.schema import (
-    Discard,
     Draft,
     ExpectedSource,
+    Gate,
     MachineProvenance,
     ProblemDifficulty,
     ProblemStatus,
@@ -93,7 +93,7 @@ def test_a_blank_id_is_rejected():
         make_draft(id="")
 
 
-@pytest.mark.parametrize("gate", list(Discard))
+@pytest.mark.parametrize("gate", list(Gate))
 def test_a_rejected_draft_names_the_gate_that_reached_it(gate):
     """Terminal means no resume rather than no record: what the gate said is
     the whole of what the attempt left."""

@@ -293,7 +293,7 @@ Each state and every exit is in
 [`docs/architecture/flows.md`](docs/architecture/flows.md#writing-a-problem-as-states).
 
 **Built so far:** the four calls, the gates between them and the draft store,
-and they have written problems end to end. Not yet measured: the discard rate
+and they have written problems end to end. Not yet measured: the rejection rate
 per gate over a run of ten.
 
 ## Cards: how a technique gets studied
@@ -382,7 +382,7 @@ The load-bearing invariants:
 - **[The user's record stands over the
   machine's](docs/architecture/log.md#technique-claims)** answer to the same
   question, whichever was written later. The machine's record is kept and
-  scored, never discarded and never promoted.
+  scored, never deleted and never promoted.
 - **[Aggregates are derived views](docs/architecture/README.md#invariants)**,
   never stored truth: the board, a card's ladder, mastery.
 - **[No third-party problem statements or test cases in

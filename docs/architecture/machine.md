@@ -45,7 +45,7 @@ fields to stay comparable, and those fields are stated here once.
   temperature says how they were sampled. A temperature nobody set is the
   provider's own default. It is recorded absent, and equal only to itself, which
   keeps records taken before the parameter existed scorable rather than
-  discarded.
+  excluded.
 
 - **The generator and the naive site are sampled**, for the reason `corpus.md`
   gives: each produces an artifact rather than a verdict about one. The
@@ -142,8 +142,8 @@ said about the answer a call returned, so it sits beside the call log.
   rejected where the problem does not exercise the form its template claims,
   and every site answered. That gate is read from the draft, since the draft is
   the record that outlives the run.
-- **The attempt carries an id the run mints.** A discarded draft has no problem
-  to key to, and the discarded attempt is the one whose cost nothing else
+- **The attempt carries an id the run mints.** A rejected draft has no problem
+  to key to, and the rejected attempt is the one whose cost nothing else
   records.
 - **The problem is named where one landed.** Its id exists only once the problem
   is stored, so the records are written at that point rather than as each site

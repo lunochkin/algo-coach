@@ -6,7 +6,7 @@ from typing import Any, cast
 
 from algo_coach.generation.checks import (
     Checked,
-    Discard,
+    Gate,
 )
 from algo_coach.generation.errors import GenerationError
 from algo_coach.generation.inputs import InputGenerator
@@ -73,7 +73,7 @@ def found_in(inputs: Inputs, found: Searched) -> Inputs:
         update={
             "separating": found.size,
             "unseparated": found.missing,
-            "gate": Discard.DISAGREED if found.missing is Missing.DISAGREED else None,
+            "gate": Gate.DISAGREED if found.missing is Missing.DISAGREED else None,
         }
     )
 
@@ -123,12 +123,12 @@ def timed(
     if found.missing is not Missing.DISAGREED:
         return checked, searched, None
     # one input the small cases could not reach, answered two ways
-    discarded = Checked(
+    disagreed = Checked(
         outcome=checked.outcome,
-        discard=Discard.DISAGREED,
+        gate=Gate.DISAGREED,
         disagreements=[found.disagreement] if found.disagreement is not None else [],
     )
-    return discarded, searched, None
+    return disagreed, searched, None
 
 
 __all__ = [

@@ -39,7 +39,7 @@ class Fuzzed:
     killed: int = 0  # mutants the kept inputs caught
     built: int = 0  # inputs the generator's code produced
     dropped: int = 0  # of those, the ones the canonical could not answer
-    # a kept input the two solutions answered differently. The caller discards
+    # a kept input the two solutions answered differently. The caller rejects
     # the problem on it, as it does on a round's
     disagreement: Disagreement | None = None
 

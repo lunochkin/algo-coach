@@ -3,7 +3,7 @@ state, so a draft is revised in place, and it moves forward only."""
 
 from algo_coach.drafts import DraftStore
 from algo_coach.generation.checks import (
-    Discard,
+    Gate,
 )
 from algo_coach.generation.resuming import later
 from algo_coach.schema import (
@@ -21,7 +21,7 @@ def advanced(
     return held(drafts, moved(draft, later(draft.state, state), **fields))
 
 
-def rejected(drafts: DraftStore | None, draft: Draft, gate: Discard | None) -> Draft:
+def rejected(drafts: DraftStore | None, draft: Draft, gate: Gate | None) -> Draft:
     """A gate the run reached, as against the hand exit `reject` writes."""
     return held(drafts, moved(draft, WritingState.REJECTED, gate=gate))
 
@@ -59,7 +59,7 @@ def moved(draft: Draft, state: WritingState, **fields: object) -> Draft:
     return Draft.model_validate(draft.model_dump() | {"state": state} | fields)
 
 
-def reject(drafts: DraftStore | None, draft: Draft, gate: Discard = Discard.UNEXERCISED) -> Draft:
+def reject(drafts: DraftStore | None, draft: Draft, gate: Gate = Gate.UNEXERCISED) -> Draft:
     """The exit a held draft takes where no resume would separate it: the
     reference wrote the form, so the claim holds and this problem does not
     exercise it. Read by hand, since the run cannot tell that answer from an

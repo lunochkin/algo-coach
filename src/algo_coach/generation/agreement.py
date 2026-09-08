@@ -33,7 +33,7 @@ def misdeclared(cases: Sequence[DraftCase], canonical: Sequence[Any]) -> list[Mi
         Misdeclaration(args=case.args, declared=case.expected, returned=value)
         for case, value in zip(cases, canonical, strict=True)
         # a case answered with nothing is not a misdeclaration: nothing was
-        # computed to compare, and it discards the problem a step later
+        # computed to compare, and it rejects the draft a step later
         if not isinstance(value, NoValue) and not agrees(value, case.expected)
     ]
 
@@ -71,7 +71,7 @@ def settle(
     round: int | None = 0,
 ) -> Settled:
     # every case is decided, never stopping at the first disagreement: a
-    # discarded problem is reported by every input the two readings differ on
+    # rejected draft is reported by every input the two readings differ on
     if not (len(args) == len(canonical) == len(reference)):
         raise ValueError("one output per case, from each solution")
 

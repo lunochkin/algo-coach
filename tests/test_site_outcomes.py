@@ -5,7 +5,7 @@ from algo_coach.calls import CallLog
 from algo_coach.generation import BENCH, Bench, Corpus, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import CallSite, Configuration, Discard
+from algo_coach.schema import CallSite, Configuration, Gate
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 # four mutation sites, where `len(xs)` has none: what makes the loop ask
@@ -62,7 +62,7 @@ def test_a_landed_problem_is_named_by_its_records(tmp_path):
     assert {one.problem_id for one in outcomes} == {stored.id}
 
 
-def test_a_discarded_draft_still_leaves_what_its_sites_left(tmp_path):
+def test_a_rejected_draft_still_leaves_what_its_sites_left(tmp_path):
     """The draft is the attempt with nothing else to point at: unrecorded, what
     the run paid for is lost when it ends."""
     model = FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n")
@@ -82,7 +82,7 @@ def test_a_disagreement_is_the_blind_sites_gate(tmp_path):
     _, _, outcomes = run(tmp_path, model)
 
     at = sites(outcomes)
-    assert at[CallSite.BLIND].gate is Discard.DISAGREED
+    assert at[CallSite.BLIND].gate is Gate.DISAGREED
     assert at[CallSite.GENERATOR].gate is None
 
 
@@ -93,7 +93,7 @@ def test_a_reference_that_computed_nothing_is_the_blind_sites_gate(tmp_path):
 
     _, _, outcomes = run(tmp_path, model)
 
-    assert sites(outcomes)[CallSite.BLIND].gate is Discard.UNTESTED
+    assert sites(outcomes)[CallSite.BLIND].gate is Gate.UNTESTED
 
 
 def test_a_canonical_contradicting_its_own_cases_is_counted_on_the_generator(tmp_path):
@@ -234,8 +234,8 @@ def test_a_fuzz_disagreement_is_the_inputs_site_s_gate(tmp_path):
 
     _, result, outcomes = run(tmp_path, model)
 
-    assert [one.discard for one in result.discarded] == ["disagreed"]
-    assert sites(outcomes)[CallSite.INPUTS].gate is Discard.DISAGREED
+    assert [one.gate for one in result.rejected] == ["disagreed"]
+    assert sites(outcomes)[CallSite.INPUTS].gate is Gate.DISAGREED
     assert CallSite.DISCRIMINATION not in sites(outcomes)
 
 
