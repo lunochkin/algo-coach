@@ -38,17 +38,24 @@ def make_attempt(id: str) -> Attempt:
     )
 
 
-def make_diagnosis(attempt_id: str, mode: FailureMode) -> Diagnosis:
-    return Diagnosis(
-        id=f"d-{attempt_id}",
-        attempt_id=attempt_id,
-        mode=mode,
-        confidence=0.8,
-        evidence="loop bound off by one",
-        model="test-model",
-        prompt_version="v0",
-        created_at=datetime.now(UTC),
-    )
+def make_diagnosis(attempt_id: str, mode: FailureMode, **overrides) -> Diagnosis:
+    fields = {
+        "id": f"d-{attempt_id}",
+        "attempt_id": attempt_id,
+        "mode": mode,
+        "evidence": "loop bound off by one",
+        "created_at": datetime.now(UTC),
+        **PROVENANCE_FIELDS,
+    }
+    return Diagnosis(**(fields | overrides))
+
+
+def test_a_diagnosis_carries_its_provenance_whole():
+    """A model wrote it, so it is stale by prompt hash and comparable by
+    configuration as any machine record is. A version string could say
+    neither."""
+    with pytest.raises(ValidationError, match="machine record needs"):
+        make_diagnosis("a1", FailureMode.RUST, prompt_hash=None)
 
 
 def test_attempt_roundtrip(tmp_path):

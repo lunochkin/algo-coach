@@ -168,7 +168,7 @@ person's code is.
 - [ ] Narrow the failure classifier to what the record supports: a mechanical
       slip against a conceptual miss. A four-way router would ask it for what
       it cannot see
-- [ ] Write the verdict as a `Diagnosis` with model and prompt version. It
+- [ ] Write the verdict as a `Diagnosis` carrying its provenance whole. It
       never supersedes a self-label, because the eval scores one against the
       other
 - [ ] Score the diagnoser per mode rather than overall, against self-labels the
