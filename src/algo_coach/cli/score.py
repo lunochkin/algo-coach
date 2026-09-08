@@ -3,19 +3,19 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from algo_coach.attempt_claims import score_backlog
+from algo_coach.attempt_claims.plan import Plan
+from algo_coach.attempt_claims.run import Progress
 from algo_coach.calls import CallLog
-from algo_coach.claims import score_backlog
-from algo_coach.claims.plan import Plan
-from algo_coach.claims.run import Progress
 from algo_coach.classifier import DEFAULT
 from algo_coach.cli.display import chosen
 from algo_coach.cli.scoring import alone, compared, failures, labels
 from algo_coach.cli.status import Status
 from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
-from algo_coach.readings import load_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Configuration
+from algo_coach.solution_claims import load_problems
 
 
 def configurations(

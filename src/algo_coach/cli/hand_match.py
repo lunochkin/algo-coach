@@ -9,8 +9,8 @@ from algo_coach.cards import CardStore
 from algo_coach.cli.hand_matching import HandMatching
 from algo_coach.matches import MatchLog, Question, candidates, latest_machine_matches, unsettled
 from algo_coach.matches import hand_match as recorded
-from algo_coach.readings import load_problems
 from algo_coach.schema import Template, TemplateMatch
+from algo_coach.solution_claims import load_problems
 from algo_coach.solutions import SolutionLog
 
 

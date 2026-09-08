@@ -5,16 +5,16 @@ from commands import data_root, run_cli
 from helpers import seed_problem
 
 from algo_coach import cli
-from algo_coach.claims import standing_claims
+from algo_coach.attempt_claims import standing_attempt_claims
 from algo_coach.classifier import PIN, TEMPERATURE, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_claim
 from algo_coach.schema import (
     Attempt,
+    AttemptClaim,
     ClaimSource,
     Kind,
     MachineProvenance,
-    TechniqueClaim,
 )
 from algo_coach.techniques import criteria, criterion
 
@@ -54,7 +54,7 @@ def claim_root(tmp_path, monkeypatch) -> AttemptLog:
 def run(monkeypatch, answers: list[str], *argv: str) -> None:
     scripted = iter(answers)
     monkeypatch.setattr("builtins.input", lambda _: next(scripted))
-    run_cli(monkeypatch, "claim", "--by-hand", "--user", "u1", *argv)
+    run_cli(monkeypatch, "claim", "attempts", "--by-hand", "--user", "u1", *argv)
 
 
 def test_a_claim_records_what_was_chosen(claim_root, monkeypatch, capsys):
@@ -92,7 +92,7 @@ def test_skipping_writes_nothing(claim_root, monkeypatch, capsys):
 
 def test_an_already_claimed_attempt_is_not_asked_again(claim_root, monkeypatch, capsys):
     claim_root.append_claim(
-        TechniqueClaim(
+        AttemptClaim(
             id="c1",
             created_at=T0,
             attempt_id="a1",
@@ -130,7 +130,7 @@ def test_a_machine_claimed_attempt_is_still_offered(claim_root, monkeypatch, cap
 
     run(monkeypatch, ["1", ""])
 
-    standing = standing_claims(claim_root.claims())["a1"]
+    standing = standing_attempt_claims(claim_root.claims())["a1"]
     assert (standing.techniques, standing.source) == (["greedy"], ClaimSource.USER)
 
 
@@ -655,7 +655,7 @@ def test_a_decline_can_supersede_an_earlier_claim(claim_root, monkeypatch, capsy
 
     run(monkeypatch, ["0", ""], "--revise")
 
-    latest = standing_claims(claim_root.claims())["a1"]
+    latest = standing_attempt_claims(claim_root.claims())["a1"]
     assert (latest.techniques, latest.declined) == ([], True)
 
 

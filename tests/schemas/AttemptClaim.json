@@ -169,6 +169,6 @@
     "attempt_id",
     "source"
   ],
-  "title": "TechniqueClaim",
+  "title": "AttemptClaim",
   "type": "object"
 }

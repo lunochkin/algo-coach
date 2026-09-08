@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from algo_coach.log import AttemptLog
 from algo_coach.schema import (
     Attempt,
+    AttemptClaim,
     AttemptRecord,
     ClaimSource,
     Confidence,
@@ -14,7 +15,6 @@ from algo_coach.schema import (
     Kind,
     SelfLabel,
     Technique,
-    TechniqueClaim,
 )
 
 
@@ -62,7 +62,7 @@ def test_attempt_roundtrip(tmp_path):
 
 
 def test_technique_claim_records_its_source():
-    claim = TechniqueClaim(
+    claim = AttemptClaim(
         id="c1",
         created_at=datetime.now(UTC),
         attempt_id="a1",
@@ -88,7 +88,7 @@ def test_a_claim_names_at_least_one_technique():
 def test_technique_claim_requires_a_source():
     """Nothing distinguishes a user claim from a machine one after the fact."""
     with pytest.raises(ValidationError):
-        TechniqueClaim(
+        AttemptClaim(
             id="c1",
             created_at=datetime.now(UTC),
             attempt_id="a1",
@@ -96,7 +96,7 @@ def test_technique_claim_requires_a_source():
         )
 
 
-def make_claim(source: ClaimSource, **overrides) -> TechniqueClaim:
+def make_claim(source: ClaimSource, **overrides) -> AttemptClaim:
     fields = {
         "id": "c1",
         "created_at": datetime.now(UTC),
@@ -104,7 +104,7 @@ def make_claim(source: ClaimSource, **overrides) -> TechniqueClaim:
         "techniques": ["backtracking"],
         "source": source,
     } | overrides
-    return TechniqueClaim.model_validate(fields)
+    return AttemptClaim.model_validate(fields)
 
 
 PROVENANCE_FIELDS = {
@@ -214,7 +214,7 @@ def test_self_label_roundtrip(tmp_path):
     assert log.self_labels() == [first, second]
 
 
-ATTEMPT_RECORDS = [SelfLabel, TechniqueClaim, Diagnosis]
+ATTEMPT_RECORDS = [SelfLabel, AttemptClaim, Diagnosis]
 
 
 @pytest.mark.parametrize("record", ATTEMPT_RECORDS)

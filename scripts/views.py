@@ -31,7 +31,7 @@ LOGS = {
     "cases": "test_cases.jsonl",
     "solutions": "solutions.jsonl",
     "verifications": "verifications.jsonl",
-    "readings": "technique_readings.jsonl",
+    "solution_claims": "solution_claims.jsonl",
     "site_outcomes": "site_outcomes.jsonl",
 }
 
@@ -82,7 +82,7 @@ DERIVED = {
     """,
     "problem_solutions": """
         -- One row per solution, named by the problem it answers. A form is
-        -- displayed by code, so this is what a match and a reading key to.
+        -- displayed by code, so this is what a match and a solution claim key to.
         select s.id solution_id, s.role, s.problem_id, p.title, p.status,
                s.model, s.effort, s.temperature, s.pin, s.call_id, s.created_at
         from solutions s
@@ -110,8 +110,8 @@ DERIVED = {
         left join drafts d on d.id = o.writing_id
         group by o.writing_id
     """,
-    "standing_claims": """
-        -- MIRRORS `algo_coach.techniques.standing_claims`. The user's claim
+    "standing_attempt_claims": """
+        -- MIRRORS `algo_coach.techniques.standing_attempt_claims`. The user's claim
         -- wins however late the machine's is; otherwise the latest classifier
         -- one. Latest alone would let a re-derivation bury ground truth.
         --
@@ -133,13 +133,13 @@ DERIVED = {
     "attributed": """
         -- What an attempt counts toward: its standing claim where that names
         -- anything, the problem's own techniques otherwise. A claim naming
-        -- nothing is a reading that declined, so the fallback stands.
+        -- nothing is a verdict, not a decline, so the fallback stands.
         select a.id attempt_id, a.problem_id, a.solved, a.finished_at,
                coalesce(nullif(s.techniques, []), p.techniques) techniques,
                s.source is not null and len(s.techniques) > 0 claimed
         from attempts a
         join problems p on p.id = a.problem_id
-        left join standing_claims s on s.attempt_id = a.id
+        left join standing_attempt_claims s on s.attempt_id = a.id
     """,
 }
 

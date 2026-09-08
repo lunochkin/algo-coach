@@ -3,16 +3,16 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from helpers import GENERATED
 
+from algo_coach.attempt_claims import standing_attempt_claims
 from algo_coach.board import TechniqueRow, per_technique, ungrouped
-from algo_coach.claims import standing_claims
 from algo_coach.log import latest_by_attempt
 from algo_coach.schema import (
     Attempt,
+    AttemptClaim,
     ClaimSource,
     FailureMode,
     Problem,
     SelfLabel,
-    TechniqueClaim,
 )
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
@@ -44,8 +44,8 @@ def make_problem(id: str, techniques: list[str]) -> Problem:
     )
 
 
-def make_claim(techniques: list[str], *, attempt_id: str = "a1") -> TechniqueClaim:
-    return TechniqueClaim(
+def make_claim(techniques: list[str], *, attempt_id: str = "a1") -> AttemptClaim:
+    return AttemptClaim(
         id=f"c-{attempt_id}",
         created_at=T0,
         attempt_id=attempt_id,
@@ -157,7 +157,7 @@ def test_an_attempt_counts_once_in_every_technique_it_names():
 
 
 def test_a_claim_moves_an_attempt_to_the_technique_it_claims():
-    claims = standing_claims([make_claim(["two-pointers"])])
+    claims = standing_attempt_claims([make_claim(["two-pointers"])])
 
     rows = per_technique([make_attempt("a1")], index(GREEDY), claims, {})
 
@@ -184,7 +184,7 @@ def test_rows_are_ordered_by_technique_code():
 def test_a_technique_only_a_claim_names_still_gets_a_row():
     """The vocabulary is wider than what the tags of the log happen to
     reach."""
-    claims = standing_claims([make_claim(["binary-search"], attempt_id="a2")])
+    claims = standing_attempt_claims([make_claim(["binary-search"], attempt_id="a2")])
     attempts = [make_attempt("a1"), make_attempt("a2")]
 
     rows = per_technique(attempts, index(GREEDY), claims, {})
@@ -214,7 +214,7 @@ def test_ungrouped_names_the_attempts_no_row_reached():
 def test_an_attempt_a_claim_rescues_is_not_ungrouped():
     """Its problem maps to nothing, but the claim says what it exercised."""
     problem = make_problem("unmapped", [])
-    claims = standing_claims([make_claim(["greedy"])])
+    claims = standing_attempt_claims([make_claim(["greedy"])])
 
     assert ungrouped([make_attempt("a1", problem_id="unmapped")], index(problem), claims) == []
 

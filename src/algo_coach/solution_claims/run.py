@@ -6,11 +6,11 @@ from pydantic import BaseModel
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.classifier import DEFAULT, request_hash
-from algo_coach.readings.reader import candidates, read_one, store
-from algo_coach.readings.stale import outstanding
-from algo_coach.readings.store import ReadingLog
 from algo_coach.runs import CONCURRENCY, Bounded, as_answered
 from algo_coach.schema import Configuration, Solution, SolutionRole
+from algo_coach.solution_claims.reader import candidates, read_one, store
+from algo_coach.solution_claims.stale import outstanding
+from algo_coach.solution_claims.store import SolutionClaimLog
 
 
 class Failed(BaseModel):
@@ -30,7 +30,7 @@ class Progress(BaseModel):
     reason: str | None = None  # the failure, when there was one
 
 
-class ReadingResult(BaseModel):
+class SolutionClaimResult(BaseModel):
     read: int = 0
     undecided: int = 0  # named no technique; stored, or every re-run re-reads them
     failed: list[Failed] = []
@@ -43,7 +43,7 @@ class ReadingResult(BaseModel):
 
 def read_corpus(
     transport: Transport,
-    log: ReadingLog,
+    log: SolutionClaimLog,
     calls: CallLog,
     solutions: Iterable[Solution],
     *,
@@ -52,12 +52,12 @@ def read_corpus(
     concurrency: int = CONCURRENCY,
     fresh: bool = False,
     on_progress: Callable[[Progress], None] | None = None,
-) -> ReadingResult:
+) -> SolutionClaimResult:
     """Read every stored canonical for its techniques, skipping the ones this
     configuration has already read at the current digest.
 
-    References are never read. Readings are appended as they are made, so a run
-    resumes where the last stopped. `fresh` asks again where a stored reading
+    References are never read. Claims are appended as they are made, so a run
+    resumes where the last stopped. `fresh` asks again where a stored claim
     answers the same prompt, which is what measuring a reader against itself
     needs.
     """
@@ -65,7 +65,7 @@ def read_corpus(
     offered = candidates()
     hashes = {one.id: request_hash(offered, one.code) for one in asking}
     if not fresh:
-        asking = outstanding(asking, log.readings(), hashes, configuration=configuration)
+        asking = outstanding(asking, log.claims(), hashes, configuration=configuration)
     asking = asking[:limit]
 
     def report(
@@ -87,7 +87,7 @@ def read_corpus(
                 )
             )
 
-    result = ReadingResult()
+    result = SolutionClaimResult()
     answers = Bounded(
         as_answered(
             lambda solution: read_one(transport, calls, solution, configuration=configuration),
@@ -104,7 +104,7 @@ def read_corpus(
             continue
         techniques, call = answer if answer is not None else ([], None)
         # the whole vocabulary is never fewer than two candidates, so the call
-        # was made; a reading with no configuration would be unstorable
+        # was made; a claim with no configuration would be unstorable
         assert call is not None
         store(log, solution.id, techniques, call)
         if techniques:

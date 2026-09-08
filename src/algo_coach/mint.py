@@ -8,6 +8,7 @@ from typing import Any
 
 from algo_coach.ids import new_id
 from algo_coach.schema import (
+    AttemptClaim,
     CallSite,
     CaseResult,
     ClaimSource,
@@ -22,13 +23,11 @@ from algo_coach.schema import (
     MatchSource,
     Problem,
     ProblemDifficulty,
-    ReadingSource,
     SelfLabel,
     SiteOutcome,
     Solution,
+    SolutionClaim,
     SolutionRole,
-    TechniqueClaim,
-    TechniqueReading,
     TemplateMatch,
     TestCase,
     Verification,
@@ -44,7 +43,7 @@ def user_claim(
     confidence: Confidence | None = None,
     informed_by: Sequence[str] = (),
     declined: bool = False,
-) -> TechniqueClaim:
+) -> AttemptClaim:
     """A claim the user made, carrying no provenance.
 
     `declined` is passed rather than inferred from an empty list, so a writer
@@ -52,7 +51,7 @@ def user_claim(
     empty unless the caller says otherwise: only a revision has machine claims in
     view.
     """
-    return TechniqueClaim(
+    return AttemptClaim(
         id=new_id(),
         created_at=datetime.now(UTC),
         attempt_id=attempt_id,
@@ -69,7 +68,7 @@ def classifier_claim(
     techniques: list[str],
     *,
     provenance: MachineProvenance,
-) -> TechniqueClaim:
+) -> AttemptClaim:
     """A claim a model made, naming its configuration whole.
 
     Membership is checked here because this is the only write path that could
@@ -80,7 +79,7 @@ def classifier_claim(
     unknown = [code for code in techniques if not is_known(code)]
     if unknown:
         raise ValueError(f"unknown technique code(s): {', '.join(unknown)}")
-    return TechniqueClaim(
+    return AttemptClaim(
         id=new_id(),
         created_at=datetime.now(UTC),
         attempt_id=attempt_id,
@@ -90,42 +89,42 @@ def classifier_claim(
     )
 
 
-def user_reading(
+def user_solution_claim(
     solution_id: str,
     techniques: list[str],
     *,
     informed_by: Sequence[str] = (),
-) -> TechniqueReading:
-    """One solution read by hand, which is what a machine technique reading is scored
+) -> SolutionClaim:
+    """One solution read by hand, which is what a machine solution claim is scored
     against. An adjudication rather than testimony: nobody sat for a canonical,
     so this is a verdict on code the user did not produce."""
-    return TechniqueReading(
+    return SolutionClaim(
         id=new_id(),
         created_at=datetime.now(UTC),
         solution_id=solution_id,
         techniques=techniques,
-        source=ReadingSource.USER,
+        source=ClaimSource.USER,
         informed_by=list(informed_by),
     )
 
 
-def machine_reading(
+def machine_solution_claim(
     solution_id: str,
     techniques: list[str],
     *,
     provenance: MachineProvenance,
-) -> TechniqueReading:
+) -> SolutionClaim:
     """One solution read by a model, naming its configuration whole. Membership
     is checked here as it is on a classifier claim, and rejected whole."""
     unknown = [code for code in techniques if not is_known(code)]
     if unknown:
         raise ValueError(f"unknown technique code(s): {', '.join(unknown)}")
-    return TechniqueReading(
+    return SolutionClaim(
         id=new_id(),
         created_at=datetime.now(UTC),
         solution_id=solution_id,
         techniques=techniques,
-        source=ReadingSource.CLASSIFIER,
+        source=ClaimSource.CLASSIFIER,
         **provenance.model_dump(),
     )
 

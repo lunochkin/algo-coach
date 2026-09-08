@@ -167,14 +167,14 @@ def test_a_generator_only_ever_asserts_a_positive():
 
 
 def test_a_generator_match_has_seen_nothing():
-    """The target named a template. No reading of the pair was in view, and
+    """The target named a template. No machine match on the pair was in view, and
     none could have been before the solution existed."""
     assert generator_match("t1", "s1").informed_by == []
 
 
 def test_the_three_writers_are_named_apart():
     """A hand match stands over both machine sources, and a generator's
-    assertion stands over a matcher's reading of the same pair."""
+    assertion stands over a matcher's match on the same pair."""
     assert set(MatchSource) == {
         MatchSource.USER,
         MatchSource.GENERATOR,

@@ -4,10 +4,10 @@ from collections.abc import Callable, Mapping, Sequence
 
 from pydantic import BaseModel
 
+from algo_coach.attempt_claims.attribution import standing_attempt_claims
+from algo_coach.attempt_claims.sample import eligible, recency
+from algo_coach.attempt_claims.stale import is_stale
 from algo_coach.calls import CallLog, Transport
-from algo_coach.claims.attribution import standing_claims
-from algo_coach.claims.sample import eligible, recency
-from algo_coach.claims.stale import is_stale
 from algo_coach.classifier import DEFAULT, classify, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim
@@ -120,7 +120,7 @@ def classify_backlog(
     where the last stopped. `on_progress` fires once per attempt asked about;
     reporting is the caller's.
     """
-    standing = standing_claims(log.claims())
+    standing = standing_attempt_claims(log.claims())
     candidates = sorted(
         eligible(log.attempts(), problems, user_id=user_id, technique=technique),
         key=recency,

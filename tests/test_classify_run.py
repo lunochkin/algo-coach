@@ -5,15 +5,15 @@ import pytest
 from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach import cli
+from algo_coach.attempt_claims import classify_backlog, standing_attempt_claims
+from algo_coach.attempt_claims.run import Progress
 from algo_coach.calls import CallLog
-from algo_coach.claims import classify_backlog, standing_claims
-from algo_coach.claims.run import Progress
 from algo_coach.classifier import DEFAULT, EFFORT, MODEL, ClassifierError, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
-from algo_coach.readings import load_problems
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import ClaimSource, TechniqueClaim
+from algo_coach.schema import AttemptClaim, ClaimSource
+from algo_coach.solution_claims import load_problems
 
 answering = FakeTransport.answering
 
@@ -79,7 +79,7 @@ def test_a_claimed_attempt_is_not_asked_again(backlog):
     """The user claims first and the classifier fills the rest, so a hand
     claim is never overwritten by a machine one."""
     backlog.append_claim(
-        TechniqueClaim(
+        AttemptClaim(
             id="c1",
             created_at=T0,
             attempt_id="a1",
@@ -287,7 +287,7 @@ def test_a_claim_answering_another_prompt_is_re_derived(backlog):
 
     result = run(answering(Verdict(["greedy"])), backlog, redo=True)
 
-    standing = standing_claims(backlog.claims())["a1"]
+    standing = standing_attempt_claims(backlog.claims())["a1"]
     assert standing.techniques == ["greedy"]
     assert (standing.model, standing.effort, standing.prompt_hash) == (MODEL, EFFORT, ASKED)
     assert (result.redone, result.classified) == (1, 0)
@@ -314,7 +314,7 @@ def test_a_claim_from_another_effort_is_re_derived(backlog):
 def test_an_edit_the_prompt_never_reached_costs_nothing(backlog):
     """The saving the whole scheme is for: a criterion travels with its
     candidate, so editing an entry this attempt never sees leaves its stored
-    reading answering the same question, and the run makes no call."""
+    claim answering the same question, and the run makes no call."""
     store_claim(backlog, "a1")
     client = answering()
 
@@ -347,7 +347,7 @@ def test_a_stale_claim_is_left_alone_without_the_flag(backlog):
 def test_a_user_claim_is_never_stale(backlog):
     """Nothing re-derives it: it is what the classifier is corrected by."""
     backlog.append_claim(
-        TechniqueClaim(
+        AttemptClaim(
             id="c1",
             created_at=T0,
             attempt_id="a1",
@@ -422,7 +422,7 @@ def test_naming_no_candidate_supersedes_the_older_claim(backlog):
 
     result = run(answering(Verdict([])), backlog, redo=True)
 
-    standing = standing_claims(backlog.claims())["a1"]
+    standing = standing_attempt_claims(backlog.claims())["a1"]
     assert (standing.techniques, result.undecided, result.redone) == ([], 1, 0)
 
 

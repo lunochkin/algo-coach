@@ -46,7 +46,7 @@ class Confidence(StrEnum):
     SURE = "sure"
 
 
-class TechniqueClaim(AttemptRecord, MachineProvenance):
+class AttemptClaim(AttemptRecord, MachineProvenance):
     """Which techniques an attempt used, as one writer claimed them."""
 
     techniques: list[str] = Field(default_factory=list[str])  # empty is a verdict, and is stored
@@ -58,7 +58,7 @@ class TechniqueClaim(AttemptRecord, MachineProvenance):
     confidence: Confidence | None = None  # absent on claims written before it was asked for
 
     @model_validator(mode="after")
-    def _provenance_matches_source(self) -> TechniqueClaim:
+    def _provenance_matches_source(self) -> AttemptClaim:
         """Rejects a user claim that says nothing, a decline that names
         techniques, and provenance that disagrees with the source."""
         if self.source is ClaimSource.USER and not (self.techniques or self.declined):

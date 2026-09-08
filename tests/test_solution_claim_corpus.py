@@ -3,10 +3,16 @@ from helpers import CONFIGURATION, PROVENANCE_FIELDS, T0, FakeTransport, Verdict
 
 from algo_coach.calls import CallLog
 from algo_coach.classifier import DEFAULT, request_hash
-from algo_coach.mint import machine_reading, user_reading
-from algo_coach.readings import Progress, ReadingLog, candidates, outstanding, read_corpus
+from algo_coach.mint import machine_solution_claim, user_solution_claim
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Configuration, MachineProvenance, Solution, SolutionRole
+from algo_coach.solution_claims import (
+    Progress,
+    SolutionClaimLog,
+    candidates,
+    outstanding,
+    read_corpus,
+)
 
 answering = FakeTransport.answering
 
@@ -31,7 +37,7 @@ def already_read(
     prompt_hash: str | None = None,
 ):
     """What this configuration would have written, had it read the solution."""
-    return machine_reading(
+    return machine_solution_claim(
         one.id,
         ["sorting"],
         provenance=MachineProvenance(
@@ -46,8 +52,8 @@ def already_read(
 
 
 @pytest.fixture
-def log(tmp_path) -> ReadingLog:
-    return ReadingLog(tmp_path)
+def log(tmp_path) -> SolutionClaimLog:
+    return SolutionClaimLog(tmp_path)
 
 
 def run(client, log, solutions, **kwargs):
@@ -62,33 +68,33 @@ def test_every_canonical_is_read(log):
     result = run(client, log, [solution("s1"), solution("s2")])
 
     assert result.read == 2
-    assert {one.solution_id for one in log.readings()} == {"s1", "s2"}
+    assert {one.solution_id for one in log.claims()} == {"s1", "s2"}
 
 
 def test_a_reference_is_never_read(log):
     """A problem's techniques are folded from its canonicals alone, so a
-    reading of the reference would credit the approach the form replaces."""
+    claim of the reference would credit the approach the form replaces."""
     client = answering(Verdict(["sorting"]))
 
     result = run(client, log, [solution("s1", role=SolutionRole.REFERENCE), solution("s2")])
 
     assert result.read == 1
-    assert [one.solution_id for one in log.readings()] == ["s2"]
+    assert [one.solution_id for one in log.claims()] == ["s2"]
 
 
 def test_a_naive_solution_is_never_read(log):
-    """It is the approach the form replaces, so a reading of it would credit
+    """It is the approach the form replaces, so a claim of it would credit
     the problem with the technique the card exists to teach past."""
     client = answering(Verdict(["sorting"]))
 
     result = run(client, log, [solution("s1", role=SolutionRole.NAIVE), solution("s2")])
 
     assert result.read == 1
-    assert [one.solution_id for one in log.readings()] == ["s2"]
+    assert [one.solution_id for one in log.claims()] == ["s2"]
 
 
 def test_a_canonical_read_at_this_digest_is_skipped(log):
-    """The reading answers the prompt this run would send, so paying for it
+    """The claim answers the prompt this run would send, so paying for it
     again would buy the same verdict."""
     one = solution("s1")
     log.append(already_read(one))
@@ -101,7 +107,7 @@ def test_a_canonical_read_at_this_digest_is_skipped(log):
 
 
 def test_a_criteria_edit_re_reads_what_it_reached(log):
-    """Staleness keys on the digest of what was sent, so a reading taken at
+    """Staleness keys on the digest of what was sent, so a claim taken at
     another rulebook is answered again."""
     one = solution("s1")
     log.append(already_read(one, prompt_hash="an-older-rulebook"))
@@ -110,11 +116,11 @@ def test_a_criteria_edit_re_reads_what_it_reached(log):
     result = run(client, log, [one])
 
     assert result.read == 1
-    assert [reading.techniques for reading in log.readings()] == [["sorting"], ["greedy"]]
+    assert [claim.techniques for claim in log.claims()] == [["sorting"], ["greedy"]]
 
 
 def test_only_the_unread_canonicals_are_asked_about(log):
-    """A run resumes where the last stopped: readings are appended as they are
+    """A run resumes where the last stopped: claims are appended as they are
     made, and the ones already at this digest drop out."""
     read, unread = solution("s1"), solution("s2", code="def solve(n):\n    return n\n")
     log.append(already_read(read))
@@ -124,11 +130,11 @@ def test_only_the_unread_canonicals_are_asked_about(log):
 
     assert result.read == 1
     assert unread.code in client.calls[0]["content"]
-    assert [one.solution_id for one in log.readings()] == ["s1", "s2"]
+    assert [one.solution_id for one in log.claims()] == ["s1", "s2"]
 
 
 def test_another_configuration_reads_again(log):
-    """A reading is scored per configuration, so what one model answered is no
+    """A claim is scored per configuration, so what one model answered is no
     answer from another."""
     one = solution("s1")
     another = DEFAULT.model_copy(update={"model": "another-model"})
@@ -141,10 +147,10 @@ def test_another_configuration_reads_again(log):
 
 
 def test_a_hand_reading_does_not_take_a_canonical_out_of_the_run(log):
-    """The user's reading is what a configuration is scored against, so a
-    machine reading of the same solution is what the score needs to exist."""
+    """The user's claim is what a configuration is scored against, so a
+    machine claim of the same solution is what the score needs to exist."""
     one = solution("s1")
-    log.append(user_reading(one.id, ["sorting"]))
+    log.append(user_solution_claim(one.id, ["sorting"]))
     client = answering(Verdict(["greedy"]))
 
     result = run(client, log, [one])
@@ -161,7 +167,7 @@ def test_fresh_asks_again(log):
     result = run(client, log, [one], fresh=True)
 
     assert result.read == 1
-    assert len(log.readings()) == 2
+    assert len(log.claims()) == 2
 
 
 def test_a_limit_bounds_what_a_run_pays_for(log):
@@ -181,7 +187,7 @@ def test_an_empty_verdict_is_stored_and_counted_apart(log):
     result = run(client, log, [solution("s1")])
 
     assert (result.read, result.undecided, result.written) == (0, 1, 1)
-    assert [one.techniques for one in log.readings()] == [[]]
+    assert [one.techniques for one in log.claims()] == [[]]
 
 
 def test_a_failure_leaves_the_canonicals_behind_it_readable(log):
@@ -228,8 +234,8 @@ def test_outstanding_reads_the_digest_it_is_given(log):
     solution out, and one at another hash does not."""
     one, two = solution("s1"), solution("s2")
     hashes = {"s1": "current", "s2": "current"}
-    readings = [already_read(one, prompt_hash="current"), already_read(two, prompt_hash="older")]
+    claims = [already_read(one, prompt_hash="current"), already_read(two, prompt_hash="older")]
 
     assert [
-        left.id for left in outstanding([one, two], readings, hashes, configuration=CONFIGURATION)
+        left.id for left in outstanding([one, two], claims, hashes, configuration=CONFIGURATION)
     ] == ["s2"]

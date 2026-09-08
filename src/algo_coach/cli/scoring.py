@@ -3,7 +3,7 @@ by side, per technique and per attempt read differently."""
 
 from collections.abc import Callable, Sequence
 
-from algo_coach.claims import Comparison, ConfigurationScore, Score, TechniqueScore
+from algo_coach.attempt_claims import Comparison, ConfigurationScore, Score, TechniqueScore
 from algo_coach.cli.display import UNSET, sampled, table
 from algo_coach.schema import Configuration
 

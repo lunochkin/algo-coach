@@ -9,19 +9,19 @@ from datetime import UTC, datetime
 
 from algo_coach.calls import Reply
 from algo_coach.classifier import PIN, TEMPERATURE
-from algo_coach.mint import classifier_claim, user_reading
+from algo_coach.mint import classifier_claim, user_solution_claim
 from algo_coach.problems import ProblemStore
-from algo_coach.readings import ReadingLog
 from algo_coach.schema import (
     Attempt,
+    AttemptClaim,
     Call,
     Configuration,
     MachineProvenance,
     Problem,
     Solution,
     SolutionRole,
-    TechniqueClaim,
 )
+from algo_coach.solution_claims import SolutionClaimLog
 from algo_coach.solutions import SolutionLog
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
@@ -95,7 +95,7 @@ def machine_claim(
     pin: str = PIN,
     temperature: float | None = TEMPERATURE,
     cost: float | None = None,
-) -> TechniqueClaim:
+) -> AttemptClaim:
     """A classifier claim under a named configuration, defaulted so a test
     naming one field says that field is what it is about."""
     return classifier_claim(
@@ -228,7 +228,7 @@ def seed_problem(root, *, id: str, techniques: list[str]) -> None:
         **PROVENANCE_FIELDS,
     )
     SolutionLog(root).append(canonical)
-    ReadingLog(root).append(user_reading(canonical.id, techniques))
+    SolutionClaimLog(root).append(user_solution_claim(canonical.id, techniques))
 
 
 def attempt(

@@ -12,6 +12,7 @@ from algo_coach.classifier import DEFAULT
 from algo_coach.cli.bench import SITES
 from algo_coach.cli.board import board
 from algo_coach.cli.claim import claim
+from algo_coach.cli.claim_solutions import claim_solutions
 from algo_coach.cli.classify import classify
 from algo_coach.cli.gaps import gaps
 from algo_coach.cli.generate import generate
@@ -19,7 +20,6 @@ from algo_coach.cli.hand_match import hand_match
 from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
 from algo_coach.cli.problem import problem
-from algo_coach.cli.read import read
 from algo_coach.cli.rows import Rows
 from algo_coach.cli.score import score
 from algo_coach.cli.seed import BadLine, seed
@@ -133,17 +133,23 @@ def main() -> None:
     )
     _user_argument(board_parser)
 
-    claim_parser = _command(sub, "claim", "name the techniques a stored attempt used")
-    claim_parser.add_argument(
+    claim_parser = _command(sub, "claim", "name the techniques a piece of code used")
+    subject = claim_parser.add_subparsers(dest="subject", required=True)
+    attempts_parser = subject.add_parser(
+        "attempts",
+        help="the user's attempts: the classifier, or the user with --by-hand",
+        formatter_class=_Defaults,
+    )
+    attempts_parser.add_argument(
         "--by-hand",
         action="store_true",
         help="ask the user, one attempt at a time; run the classifier otherwise",
     )
-    claim_parser.add_argument(
+    attempts_parser.add_argument(
         "--technique", help="only attempts whose problem carries it; every technique otherwise"
     )
-    _user_argument(claim_parser)
-    by_hand = claim_parser.add_argument_group("with --by-hand")
+    _user_argument(attempts_parser)
+    by_hand = attempts_parser.add_argument_group("with --by-hand")
     by_hand.add_argument("--count", type=int, default=10, help="how many to ask about")
     by_hand.add_argument("--lines", type=int, default=120, help="lines of code to show")
     by_hand.add_argument("--seed", type=int, default=0, help="sampling order")
@@ -166,7 +172,7 @@ def main() -> None:
         default=None,
         help="how many of them must read it differently; every claim otherwise",
     )
-    classifier = claim_parser.add_argument_group("without --by-hand")
+    classifier = attempts_parser.add_argument_group("without --by-hand")
     classifier.add_argument(
         "--limit", type=int, help="how many attempts to claim; the whole backlog otherwise"
     )
@@ -176,6 +182,14 @@ def main() -> None:
         help="also re-derive claims an older model or prompt version made",
     )
     _run_arguments(classifier, record="claim")
+
+    solutions_parser = subject.add_parser(
+        "solutions", help="the stored canonicals, by the classifier", formatter_class=_Defaults
+    )
+    solutions_parser.add_argument(
+        "--limit", type=int, help="how many canonicals to claim; every unclaimed one otherwise"
+    )
+    _run_arguments(solutions_parser, record="claim")
 
     match_parser = _command(sub, "match", "which problems exercise a card's templates")
     match_parser.add_argument(
@@ -195,12 +209,6 @@ def main() -> None:
         "--limit", type=int, help="how many pairs to read; every outstanding one otherwise"
     )
     _run_arguments(matcher, record="record", question="question")
-
-    read_parser = _command(sub, "read", "name the techniques each stored canonical used")
-    read_parser.add_argument(
-        "--limit", type=int, help="how many canonicals to read; every unread one otherwise"
-    )
-    _run_arguments(read_parser, record="reading")
 
     generate_parser = _command(sub, "generate", "write problems for one of a card's templates")
     generate_parser.add_argument("--card", help="the card, by slug; narrows --gaps to it")
@@ -309,12 +317,13 @@ def main() -> None:
 COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Path], None]] = {
     "seed": seed,
     "board": lambda args, _parser, root: board(args, root),
-    # one command per record; `--by-hand` picks the writer
-    "claim": lambda args, parser, root: (claim if args.by_hand else classify)(args, parser, root),
+    # one command per record; the subject names the code, `--by-hand` the writer
+    "claim": lambda args, parser, root: (
+        claim_solutions if args.subject == "solutions" else claim if args.by_hand else classify
+    )(args, parser, root),
     "problem": problem,
     "gaps": lambda args, _parser, root: gaps(args, root),
     "generate": generate,
-    "read": read,
     "match": lambda args, parser, root: (hand_match if args.by_hand else match)(args, parser, root),
     "score": score,
     "movement": moved,

@@ -13,7 +13,7 @@ the estimates are exactly the records dated before this ran.
 Priced per call, never per claim: a claim carries no token counts, so its cost
 comes from the call it cites. A call missing either count, or naming a model
 the catalogue no longer lists, is left unpriced rather than guessed at — which
-covers the readings taken through the native Anthropic transport, whose model
+covers the calls made through the native Anthropic transport, whose model
 ids were never OpenRouter's.
 """
 
@@ -105,8 +105,8 @@ def main() -> None:
     print(f"claims {filled}/{sum(1 for c in claims if c.get('source') != 'user')} filled")
     # Two reasons a call goes unpriced, and only one of them is worth acting
     # on. A failure has no tokens and cost nothing recordable. A model the
-    # catalogue does not list cannot be priced at all, which is every reading
-    # taken before the router — those ids were never OpenRouter's.
+    # catalogue does not list cannot be priced at all, which is every call
+    # made before the router — those ids were never OpenRouter's.
     untokened: Counter[tuple[str, str | None]] = Counter()
     unrated: Counter[tuple[str, str | None]] = Counter()
     for call in calls:

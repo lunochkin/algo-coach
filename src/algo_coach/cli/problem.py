@@ -1,7 +1,7 @@
 """One stored problem read whole, or the corpus listed.
 
 Its own command rather than a flag on `generate`: a problem outlives the run
-that wrote it, and matching, reading and the drill loop all reach it.
+that wrote it, and matching, solution claims and the drill loop all reach it.
 """
 
 import argparse
@@ -17,8 +17,8 @@ from algo_coach.cli.display import (
 )
 from algo_coach.generation import Corpus
 from algo_coach.outcomes import OutcomeLog
-from algo_coach.readings import ReadingLog, derive
 from algo_coach.schema import Problem, Solution, TemplateMatch, TestCase
+from algo_coach.solution_claims import SolutionClaimLog, derive
 
 
 def problem(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -59,7 +59,7 @@ def page(one: Problem, corpus: Corpus, root: Path) -> str:
     solution written for it, and what the run that wrote it left."""
     forms = slugs(root)
     solutions = corpus.solutions.for_problem(one.id)
-    read = derive([one], solutions, ReadingLog(root).readings())[one.id]
+    read = derive([one], solutions, SolutionClaimLog(root).claims())[one.id]
     matches = [match for match in corpus.matches.matches() if keyed(match, solutions)]
     return "\n".join(
         [

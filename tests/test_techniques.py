@@ -7,10 +7,10 @@ from helpers import GENERATED
 
 from algo_coach.mint import user_claim
 from algo_coach.schema import (
+    AttemptClaim,
     Kind,
     Problem,
     Technique,
-    TechniqueClaim,
 )
 from algo_coach.techniques import codes, criteria, is_known
 
@@ -120,7 +120,7 @@ def test_is_known_does_not_reject_retired_codes_at_read_time():
     assert Problem.model_validate_json(problem.model_dump_json()).techniques == [retired]
 
     claim = user_claim("a1", [retired])
-    assert TechniqueClaim.model_validate_json(claim.model_dump_json()).techniques == [retired]
+    assert AttemptClaim.model_validate_json(claim.model_dump_json()).techniques == [retired]
 
 
 def test_every_kind_names_its_test():

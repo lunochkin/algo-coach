@@ -17,7 +17,7 @@ went the way it did, and the study a card run tracks. Part of the architecture.
   techniques are re-derivable and the log is not, so a copy taken when the
   attempt was written would drift with no way to tell which is right.
 
-## Technique claims
+## Attempt claims
 
 Which techniques an attempt used. Per-technique progress is measured from this.
 A claim is open to revision, so it is its own record rather than a field on the

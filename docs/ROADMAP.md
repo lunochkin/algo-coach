@@ -107,7 +107,7 @@ problem sound.
   listed by `--drafts`.
 - A template match keyed to a solution. The generating canonical asserts its
   own pair.
-- Technique readings over canonicals, and problem techniques derived from them
+- Solution claims over canonicals, and problem techniques derived from them
   wherever a command loads problems.
 - The gap report, and `generate --gaps` aimed at what it lists.
 - Exit: every landed problem carries techniques derived from its canonicals

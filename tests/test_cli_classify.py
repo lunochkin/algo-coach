@@ -3,14 +3,14 @@ from commands import TRANSPORT, data_root, run_cli
 from helpers import FakeTransport, Verdict, attempt, machine_claim, seed_problem
 
 from algo_coach import cli
-from algo_coach.claims import standing_claims
+from algo_coach.attempt_claims import standing_attempt_claims
 from algo_coach.classifier import EFFORT, MODEL
 from algo_coach.log import AttemptLog
 from algo_coach.runs import ABORT_AFTER
 
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
-    run_cli(monkeypatch, "claim", "--user", "u1", *argv, client=client)
+    run_cli(monkeypatch, "claim", "attempts", "--user", "u1", *argv, client=client)
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def test_a_missing_key_fails_before_the_run(root, monkeypatch, capsys):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
     monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: client)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "claim", "--user", "u1"])
+    monkeypatch.setattr("sys.argv", ["algo-coach", "claim", "attempts", "--user", "u1"])
 
     with pytest.raises(SystemExit) as exit_info:
         cli.main()
@@ -90,7 +90,7 @@ def test_redo_re_derives_a_stale_machine_claim(root, monkeypatch, capsys):
 
     run(monkeypatch, FakeTransport.answering(Verdict(["greedy"])), "--redo")
 
-    standing = standing_claims(AttemptLog(root).claims())["a1"]
+    standing = standing_attempt_claims(AttemptLog(root).claims())["a1"]
     assert standing.techniques == ["greedy"]
     assert (standing.model, standing.effort) == (MODEL, EFFORT)
     assert "1 stale machine claim(s) re-derived" in capsys.readouterr().out

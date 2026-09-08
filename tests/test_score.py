@@ -1,5 +1,5 @@
-from algo_coach.claims import score
-from algo_coach.claims.score import per_decision
+from algo_coach.attempt_claims import score
+from algo_coach.attempt_claims.score import per_decision
 
 
 def rows(result):

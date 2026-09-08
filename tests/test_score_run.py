@@ -6,14 +6,14 @@ from datetime import timedelta
 import pytest
 from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_problem
 
+from algo_coach.attempt_claims import score_backlog, standing_attempt_claims
 from algo_coach.calls import CallLog, Reply
-from algo_coach.claims import score_backlog, standing_claims
 from algo_coach.classifier import DEFAULT, EFFORT, MODEL, PIN, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
-from algo_coach.readings import load_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import ClaimSource
+from algo_coach.solution_claims import load_problems
 
 # What the one-attempt fixture would be sent now.
 ASKED = request_hash(["greedy", "sorting"], "def f(): pass")
@@ -111,7 +111,7 @@ def test_a_stored_reading_never_becomes_the_standing_claim(hand_claimed):
     by being the later record."""
     run(FakeTransport.answering(Verdict(["sorting"])), hand_claimed)
 
-    standing = standing_claims(hand_claimed.claims())["a1"]
+    standing = standing_attempt_claims(hand_claimed.claims())["a1"]
     assert [claim.techniques for claim in machine_claims(hand_claimed)] == [["sorting"]]
     assert (standing.source, standing.techniques) == (ClaimSource.USER, ["greedy"])
 

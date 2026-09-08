@@ -4,10 +4,10 @@ records a verdict needs to exist."""
 from helpers import GENERATED, PROVENANCE_FIELDS, T0
 
 from algo_coach.cards import CardStore, seed_cards
-from algo_coach.mint import user_reading
+from algo_coach.mint import user_solution_claim
 from algo_coach.problems import ProblemStore
-from algo_coach.readings import ReadingLog
 from algo_coach.schema import Card, Problem, Solution, SolutionRole, TemplateKind
+from algo_coach.solution_claims import SolutionClaimLog
 
 
 def template(slug: str, **overrides) -> dict:
@@ -86,13 +86,13 @@ def canonicals(*problems: Problem) -> list[Solution]:
 
 def stored(root, *problems: Problem) -> list[Problem]:
     """Stored as the engine holds them: the record carries no techniques, and a
-    hand reading on the canonical `canonicals()` mints for it carries the ones
+    hand claim on the canonical `canonicals()` mints for it carries the ones
     the test named. Returned carrying them, as `load_problems` returns them."""
     store = ProblemStore(root)
     for one in problems:
         store.put(one.model_copy(update={"techniques": []}))
         if one.techniques:
-            ReadingLog(root).append(user_reading(f"s-{one.id}", one.techniques))
+            SolutionClaimLog(root).append(user_solution_claim(f"s-{one.id}", one.techniques))
     return sorted(problems, key=lambda one: one.id)
 
 

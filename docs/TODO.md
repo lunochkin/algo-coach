@@ -207,7 +207,7 @@ sequences it. Known gaps with a trigger rather than a date: each names what has
 to happen before the item is worth doing, and it is picked up when that fires,
 whatever phase is current.
 
-- [ ] Re-claim thirty attempts with the earlier readings hidden, for the
+- [ ] Re-claim thirty attempts with the earlier machine claims hidden, for the
       user's own ceiling. Triggered when mastery estimation reads claims,
       and a wrong one starts spending practice time
 - [ ] Read the architecture doc against the code, landing every divergence

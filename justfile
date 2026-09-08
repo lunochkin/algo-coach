@@ -70,15 +70,19 @@ board *args:
 # --- attribution ---
 
 # Claim stored attempts with the classifier.
-claim *args:
-    uv run algo-coach claim {{ args }}
+claim-attempts *args:
+    uv run algo-coach claim attempts {{ args }}
 
 # Claim stored attempts by hand: the eval set.
-claim-by-hand *args:
-    uv run algo-coach claim --by-hand {{ args }}
+claim-attempts-by-hand *args:
+    uv run algo-coach claim attempts --by-hand {{ args }}
+
+# Claim the stored canonicals with the classifier.
+claim-solutions *args:
+    uv run algo-coach claim solutions {{ args }}
 
 revise:
-    uv run algo-coach claim --by-hand --revise --disputed 1 --model anthropic/claude-opus-5 --effort medium --provider anthropic --temperature default
+    uv run algo-coach claim attempts --by-hand --revise --disputed 1 --model anthropic/claude-opus-5 --effort medium --provider anthropic --temperature default
 
 adjudicate:
     uv run algo-coach score --concurrency 4 --model anthropic/claude-opus-5 --provider anthropic --temperature default

@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from algo_coach.schema import (
     Attempt,
+    AttemptClaim,
     Call,
     Card,
     Diagnosis,
@@ -16,8 +17,7 @@ from algo_coach.schema import (
     SelfLabel,
     SiteOutcome,
     Solution,
-    TechniqueClaim,
-    TechniqueReading,
+    SolutionClaim,
     TemplateMatch,
     TestCase,
     Verification,
@@ -26,7 +26,7 @@ from algo_coach.schema import (
 # every record a store holds. Seeds and configurations are inputs, not records
 RECORDS: list[type[BaseModel]] = [
     Attempt,
-    TechniqueClaim,
+    AttemptClaim,
     SelfLabel,
     Diagnosis,
     Call,
@@ -34,7 +34,7 @@ RECORDS: list[type[BaseModel]] = [
     TestCase,
     Problem,
     Solution,
-    TechniqueReading,
+    SolutionClaim,
     TemplateMatch,
     SiteOutcome,
     Verification,

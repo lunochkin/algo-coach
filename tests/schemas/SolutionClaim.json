@@ -1,11 +1,11 @@
 {
   "$defs": {
-    "ReadingSource": {
+    "ClaimSource": {
       "enum": [
         "user",
         "classifier"
       ],
-      "title": "ReadingSource",
+      "title": "ClaimSource",
       "type": "string"
     }
   },
@@ -116,7 +116,7 @@
       "type": "string"
     },
     "source": {
-      "$ref": "#/$defs/ReadingSource"
+      "$ref": "#/$defs/ClaimSource"
     },
     "techniques": {
       "items": {
@@ -144,6 +144,6 @@
     "solution_id",
     "source"
   ],
-  "title": "TechniqueReading",
+  "title": "SolutionClaim",
   "type": "object"
 }

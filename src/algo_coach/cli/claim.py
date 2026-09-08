@@ -3,14 +3,14 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from textwrap import fill
 
-from algo_coach.claims import (
+from algo_coach.attempt_claims import (
     against,
     claim_by_hand,
     claimable,
     contested,
     machine_claims_at,
     revisable,
-    standing_claims,
+    standing_attempt_claims,
 )
 from algo_coach.classifier import request_hash
 from algo_coach.cli.display import verdict
@@ -18,8 +18,8 @@ from algo_coach.cli.prompts import NONE, ask_choice, numbered
 from algo_coach.cli.score import configurations
 from algo_coach.cli.scoring import labels
 from algo_coach.log import AttemptLog
-from algo_coach.readings import load_problems
-from algo_coach.schema import Attempt, Confidence, Problem, TechniqueClaim
+from algo_coach.schema import Attempt, AttemptClaim, Confidence, Problem
+from algo_coach.solution_claims import load_problems
 from algo_coach.techniques import criterion
 
 WIDTH = 100
@@ -35,7 +35,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     log = AttemptLog(root)
     problems = {problem.id: problem for problem in load_problems(root)}
     claims = log.claims()
-    standing = standing_claims(claims)
+    standing = standing_attempt_claims(claims)
 
     if args.revise:
         pool, machine_claims, names = disputed(args, parser, claims, log, problems, standing)
@@ -123,11 +123,11 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
 def disputed(
     args: argparse.Namespace,
     parser: argparse.ArgumentParser,
-    claims: Sequence[TechniqueClaim],
+    claims: Sequence[AttemptClaim],
     log: AttemptLog,
     problems: Mapping[str, Problem],
-    standing: Mapping[str, TechniqueClaim],
-) -> tuple[list[Attempt], list[Mapping[str, TechniqueClaim]], list[str]]:
+    standing: Mapping[str, AttemptClaim],
+) -> tuple[list[Attempt], list[Mapping[str, AttemptClaim]], list[str]]:
     """The revision pool and what each named classifier read it as."""
     named = configurations(args, parser)
     pool = revisable(
@@ -137,13 +137,13 @@ def disputed(
         user_id=args.user,
         technique=args.technique,
     )
-    # What each attempt would be asked now: a reading of an older rulebook
+    # What each attempt would be asked now: a claim made against an older rulebook
     # answered a different question.
     asked = {
         attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
         for attempt in pool
     }
-    machine_claims: list[Mapping[str, TechniqueClaim]] = [
+    machine_claims: list[Mapping[str, AttemptClaim]] = [
         machine_claims_at(claims, configuration, asked) for configuration in named
     ]
     pool = contested(
@@ -157,7 +157,7 @@ def disputed(
 
 # The calls whose verdicts `read_as` showed. The pool only promises that one
 # configuration disagreed, not that all answered.
-def shown(attempt: Attempt, machine_claims: Sequence[Mapping[str, TechniqueClaim]]) -> list[str]:
+def shown(attempt: Attempt, machine_claims: Sequence[Mapping[str, AttemptClaim]]) -> list[str]:
     return [
         one.call_id
         for stored in machine_claims
@@ -167,8 +167,8 @@ def shown(attempt: Attempt, machine_claims: Sequence[Mapping[str, TechniqueClaim
 
 def read_as(
     attempt: Attempt,
-    claim: TechniqueClaim,
-    machine_claims: Sequence[Mapping[str, TechniqueClaim]],
+    claim: AttemptClaim,
+    machine_claims: Sequence[Mapping[str, AttemptClaim]],
     names: Sequence[str],
 ) -> str:
     """The standing claim and what each classifier read the same code as."""

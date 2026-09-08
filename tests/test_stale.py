@@ -1,6 +1,6 @@
 from helpers import CONFIGURATION, PROMPT_HASH, machine_claim
 
-from algo_coach.claims import at_configuration, is_stale, machine_claims_at
+from algo_coach.attempt_claims import at_configuration, is_stale, machine_claims_at
 from algo_coach.mint import user_claim
 
 

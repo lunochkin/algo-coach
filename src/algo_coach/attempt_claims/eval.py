@@ -3,12 +3,11 @@ what it reused, and how the configurations compare."""
 
 from collections.abc import Callable, Iterator, Mapping, Sequence
 
-from algo_coach.calls import CallLog, Transport
-from algo_coach.claims.attribution import standing_claims
-from algo_coach.claims.plan import Plan, absorb, select
-from algo_coach.claims.run import Progress, read_one
-from algo_coach.claims.sample import answered_by_hand, eligible, one_per_problem
-from algo_coach.claims.score import (
+from algo_coach.attempt_claims.attribution import standing_attempt_claims
+from algo_coach.attempt_claims.plan import Plan, absorb, select
+from algo_coach.attempt_claims.run import Progress, read_one
+from algo_coach.attempt_claims.sample import answered_by_hand, eligible, one_per_problem
+from algo_coach.attempt_claims.score import (
     Comparison,
     ConfigurationScore,
     Split,
@@ -16,6 +15,7 @@ from algo_coach.claims.score import (
     score,
     spent,
 )
+from algo_coach.calls import CallLog, Transport
 from algo_coach.classifier import DEFAULT
 from algo_coach.log import AttemptLog
 from algo_coach.runs import CONCURRENCY, as_answered_grouped
@@ -66,7 +66,7 @@ def score_backlog(
     and a user's claim wins by source rather than by being the earlier record.
     """
     claims = log.claims()
-    standing = standing_claims(claims)
+    standing = standing_attempt_claims(claims)
     hand_claimed = [
         attempt
         for attempt in one_per_problem(eligible(log.attempts(), problems, user_id=user_id))

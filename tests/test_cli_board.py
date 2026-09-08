@@ -10,10 +10,10 @@ from algo_coach.cli.board import render
 from algo_coach.log import AttemptLog
 from algo_coach.schema import (
     Attempt,
+    AttemptClaim,
     ClaimSource,
     FailureMode,
     SelfLabel,
-    TechniqueClaim,
 )
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
@@ -102,7 +102,7 @@ def test_board_counts_only_the_users_own_attempts(board_root, monkeypatch, capsy
 def test_board_follows_a_claim_over_the_problems_tags(board_root, monkeypatch, capsys):
     board_root.append_attempt(attempt("a1"))
     board_root.append_claim(
-        TechniqueClaim(
+        AttemptClaim(
             id="c1",
             created_at=T0,
             attempt_id="a1",

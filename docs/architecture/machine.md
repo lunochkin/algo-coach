@@ -5,7 +5,7 @@ it. Part of the architecture. `README.md` is the map.
 
 ## Machine records
 
-Claims, template matches, technique readings, canonical solutions and the
+Claims, template matches, solution claims, canonical solutions and the
 arguments of a test case are written by a model. Each of them carries the same
 fields to stay comparable, and those fields are stated here once.
 

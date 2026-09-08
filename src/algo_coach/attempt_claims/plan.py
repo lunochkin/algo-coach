@@ -6,13 +6,13 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from algo_coach.claims.run import Failed, store
-from algo_coach.claims.sample import recency
-from algo_coach.claims.stale import machine_claims_at
+from algo_coach.attempt_claims.run import Failed, store
+from algo_coach.attempt_claims.sample import recency
+from algo_coach.attempt_claims.stale import machine_claims_at
 from algo_coach.classifier import DEFAULT, request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Attempt, Call, Configuration, Problem, TechniqueClaim
+from algo_coach.schema import Attempt, AttemptClaim, Call, Configuration, Problem
 
 
 class ReadResult(BaseModel):
@@ -46,7 +46,7 @@ def select(
     attempts: Sequence[Attempt],
     problems: Mapping[str, Problem],
     *,
-    claims: Sequence[TechniqueClaim],
+    claims: Sequence[AttemptClaim],
     configuration: Configuration = DEFAULT,
     limit: int | None = None,
     fresh: bool = False,

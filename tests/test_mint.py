@@ -80,7 +80,7 @@ def test_a_user_claim_records_how_sure_its_author_was():
 
 def test_a_machine_claim_has_seen_nothing():
     """The classifier reads one attempt's code and candidates, never another
-    reading of it — so there is no configuration it is not independent of."""
+    writer's claim on it — so there is no configuration it is not independent of."""
     assert machine_claim("a1", ["greedy"]).informed_by == []
 
 
@@ -198,7 +198,7 @@ def test_a_hand_match_records_what_its_author_had_seen():
 
 def test_a_machine_match_has_seen_nothing():
     """The matcher reads one statement against one card's cues, never another
-    reading of them."""
+    writer's match on them."""
     match = machine_match(
         "t1",
         "s1",

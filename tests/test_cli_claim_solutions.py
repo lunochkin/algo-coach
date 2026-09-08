@@ -4,12 +4,12 @@ from helpers import FakeTransport, Verdict
 from matching import canonicals, problem, stored
 
 from algo_coach.classifier import EFFORT, MODEL
-from algo_coach.readings import ReadingLog
+from algo_coach.solution_claims import SolutionClaimLog
 from algo_coach.solutions import SolutionLog
 
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
-    run_cli(monkeypatch, "read", *argv, client=client)
+    run_cli(monkeypatch, "claim", "solutions", *argv, client=client)
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def root(tmp_path, monkeypatch):
 def test_the_command_reads_the_corpus(root, monkeypatch, capsys):
     run(monkeypatch, FakeTransport.answering(Verdict(["sorting"])))
 
-    assert [one.techniques for one in ReadingLog(root).readings()] == [["sorting"]]
+    assert [one.techniques for one in SolutionClaimLog(root).claims()] == [["sorting"]]
     assert f"1 canonical(s) read by {MODEL}, effort {EFFORT}" in capsys.readouterr().out
 
 
@@ -36,7 +36,7 @@ def test_a_second_run_reads_nothing(root, monkeypatch, capsys):
 
     run(monkeypatch, FakeTransport.answering())
 
-    assert len(ReadingLog(root).readings()) == 1
+    assert len(SolutionClaimLog(root).claims()) == 1
     assert "0 canonical(s) read" in capsys.readouterr().out
 
 

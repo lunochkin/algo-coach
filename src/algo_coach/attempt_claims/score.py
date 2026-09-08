@@ -4,7 +4,7 @@ from collections.abc import Mapping, Sequence
 
 from pydantic import BaseModel
 
-from algo_coach.claims.run import Failed
+from algo_coach.attempt_claims.run import Failed
 from algo_coach.schema import Call, Configuration
 
 

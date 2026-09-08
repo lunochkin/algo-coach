@@ -3,13 +3,13 @@ from collections import Counter, defaultdict
 from collections.abc import Iterable, Mapping
 from datetime import datetime
 
-from algo_coach.schema import Attempt, ClaimSource, Problem, TechniqueClaim
+from algo_coach.schema import Attempt, AttemptClaim, ClaimSource, Problem
 
 
 def claimable(
     attempts: Iterable[Attempt],
     problems: Mapping[str, Problem],
-    claimed: Mapping[str, TechniqueClaim],
+    claimed: Mapping[str, AttemptClaim],
     *,
     user_id: str,
     technique: str | None = None,
@@ -34,7 +34,7 @@ def claimable(
     )
 
 
-def answered_by_hand(claim: TechniqueClaim | None) -> bool:
+def answered_by_hand(claim: AttemptClaim | None) -> bool:
     return claim is not None and claim.source is ClaimSource.USER
 
 

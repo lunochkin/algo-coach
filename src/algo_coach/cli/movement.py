@@ -1,12 +1,12 @@
 import argparse
 from pathlib import Path
 
+from algo_coach.attempt_claims import standing_attempt_claims
 from algo_coach.board import TechniqueMovement, movement
-from algo_coach.claims import standing_claims
 from algo_coach.cli.display import table
 from algo_coach.log import AttemptLog
-from algo_coach.readings import load_problems
 from algo_coach.schema import ClaimSource
+from algo_coach.solution_claims import load_problems
 
 
 def moved(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -17,7 +17,7 @@ def moved(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     # reason, and a machine claim that never stands moved nothing.
     claims = {
         attempt_id: claim
-        for attempt_id, claim in standing_claims(log.claims()).items()
+        for attempt_id, claim in standing_attempt_claims(log.claims()).items()
         if claim.source is ClaimSource.CLASSIFIER
     }
     if not claims:

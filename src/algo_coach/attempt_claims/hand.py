@@ -5,7 +5,7 @@ from collections.abc import Sequence
 
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
-from algo_coach.schema import Confidence, TechniqueClaim
+from algo_coach.schema import AttemptClaim, Confidence
 
 
 def claim_by_hand(
@@ -15,7 +15,7 @@ def claim_by_hand(
     *,
     confidence: Confidence | None = None,
     informed_by: Sequence[str] = (),
-) -> TechniqueClaim:
+) -> AttemptClaim:
     """Written whole. Naming nothing declines: the user said the candidates do
     not cover the code, which the schema refuses to take for a lost answer."""
     claim = user_claim(

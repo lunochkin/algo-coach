@@ -2,14 +2,14 @@
 
 from collections.abc import Iterable, Mapping, Sequence
 
-from algo_coach.claims.sample import answered_by_hand, eligible, one_per_problem
-from algo_coach.schema import Attempt, Problem, TechniqueClaim
+from algo_coach.attempt_claims.sample import answered_by_hand, eligible, one_per_problem
+from algo_coach.schema import Attempt, AttemptClaim, Problem
 
 
 def revisable(
     attempts: Iterable[Attempt],
     problems: Mapping[str, Problem],
-    claimed: Mapping[str, TechniqueClaim],
+    claimed: Mapping[str, AttemptClaim],
     *,
     user_id: str,
     technique: str | None = None,
@@ -20,7 +20,7 @@ def revisable(
     return [attempt for attempt in collapsed if answered_by_hand(claimed.get(attempt.id))]
 
 
-def against(claim: TechniqueClaim, machine_claims: Sequence[Mapping[str, TechniqueClaim]]) -> int:
+def against(claim: AttemptClaim, machine_claims: Sequence[Mapping[str, AttemptClaim]]) -> int:
     """How many of these configurations read the attempt differently, by set
     equality. One that never read it is silent rather than dissenting."""
     wanted = set(claim.techniques)
@@ -33,8 +33,8 @@ def against(claim: TechniqueClaim, machine_claims: Sequence[Mapping[str, Techniq
 
 def contested(
     attempts: Sequence[Attempt],
-    standing: Mapping[str, TechniqueClaim],
-    machine_claims: Sequence[Mapping[str, TechniqueClaim]],
+    standing: Mapping[str, AttemptClaim],
+    machine_claims: Sequence[Mapping[str, AttemptClaim]],
     *,
     at_least: int = 1,
 ) -> list[Attempt]:

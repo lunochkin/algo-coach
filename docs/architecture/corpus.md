@@ -28,13 +28,13 @@ architecture, and `README.md` is the map.
   rather than a solution.
 - **Provenance is required.** A problem names what produced it, as any machine
   record does.
-- **A problem's techniques are derived from technique readings of its
+- **A problem's techniques are derived from solution claims of its
   canonical
   solutions**, and are a view rather than stored truth: adding a canonical can
   widen the set, and re-deriving is legal and expected. The reference is
-  excluded from those readings. Otherwise the naive approach a form replaces
+  excluded from those claims. Otherwise the naive approach a form replaces
   would be credited as an approach the problem takes. A canonical that sorts
-  before it searches used two techniques, and only a technique reading names
+  before it searches used two techniques, and only a solution claim names
   the second.
 - **Never derived from templates.** A template is defined by whether its form
   can be reproduced from memory. That definition says nothing about what the
@@ -338,7 +338,7 @@ A solution the engine wrote for a problem, in one of three roles.
   as the search runs only there. A form that is its own optimum has nothing to
   be measured against.
 - **The naive solution is excluded from what a canonical answers for**, as the
-  reference is: no technique reading, no template match, no rung. It is the
+  reference is: no solution claim, no template match, no rung. It is the
   approach the card exists to replace.
 - **The naive solution is stored at landing, as the reference is.** A replay
   re-runs the search over the stored problem, and re-deriving the naive
@@ -378,33 +378,33 @@ A solution the engine wrote for a problem, in one of three roles.
 - **A solution is immutable once written.** Whether a solution passes is a
   fact about a run, so nothing about how it ran is stored on the solution.
 
-## Technique readings
+## Solution claims
 
-A technique reading names which techniques a solution used. It is
+A solution claim names which techniques a solution used. It is
 product-owned and global, as the solution is.
 
-- **A technique reading is its own record, not a technique claim.** A claim is
-  testimony about the user's own attempt, and is private. A technique reading is
+- **A solution claim is its own record, not a attempt claim.** A claim is
+  testimony about the user's own attempt, and is private. A solution claim is
   a verdict about code the engine wrote, and ships with the corpus. One record
   type for both would also make the fallback a fold over records of the type it
   falls back for.
 - **The candidates are the whole vocabulary**, where an attempt is classified
   against the problem's own techniques. A problem's techniques are derived
-  from these readings, so constraining a technique reading by them is circular.
+  from these claims, so constraining a solution claim by them is circular.
 - **One classifier writes two records.** The prompt, the transport and the
   staleness rule are shared with the attempt classifier. Two prompts asking
   one question would drift, and neither score would compare with the other.
-- **A technique reading is a machine record like any other**: provenance whole,
+- **A solution claim is a machine record like any other**: provenance whole,
   staleness keyed on the prompt hash of what was sent, and re-derivable at any
-  time. A claim carries one problem's criteria, and a technique reading carries
+  time. A claim carries one problem's criteria, and a solution claim carries
   the
   whole vocabulary's, so any criteria edit re-reads every canonical.
 - **Two writers, and the user's stands first**, as a claim resolves. A hand
-  reading adjudicates rather than testifies: nobody sat for a canonical, so
-  the user's reading is of code they did not produce. The hand reading stands
+  reading adjudicates rather than testifies: nobody sat for a canonical, so the
+  user's reading is of code they did not produce. The hand solution claim stands
   all the same, and it is the reference a configuration is scored against.
-- **A problem's techniques are folded from its technique readings.** The union
-  over the standing readings of its canonicals, with the reference excluded.
+- **A problem's techniques are folded from its solution claims.** The union
+  over the standing solution claims of its canonicals, with the reference excluded.
 
 ## Verification runs
 
@@ -414,7 +414,7 @@ A verification run is one execution of a solution against a problem's cases.
   run.** The cap and the machine decide a timeout, and a crash can come from
   the runner rather than the solution. A result stored on the solution would
   claim a permanence it does not have.
-- **Re-running is legal and expected**, as re-deriving a technique reading is.
+- **Re-running is legal and expected**, as re-deriving a solution claim is.
   Two runs
   of one solution are two records, and neither run supersedes the other.
 - **The cap is stored beside the results.** The cap decided any timeout, and

@@ -36,7 +36,7 @@ def landed(root, monkeypatch, **overrides):
     return stored
 
 
-def reading(monkeypatch, *argv: str) -> None:
+def shown(monkeypatch, *argv: str) -> None:
     run_cli(monkeypatch, "problem", *argv)
 
 
@@ -44,7 +44,7 @@ def test_the_corpus_is_listed_where_no_id_is_named(root, monkeypatch, capsys):
     """What a reader has to have before naming one."""
     stored = landed(root, monkeypatch)
 
-    reading(monkeypatch)
+    shown(monkeypatch)
 
     out = capsys.readouterr().out
     assert f"{stored.id}  longest-valid-window" in out
@@ -56,7 +56,7 @@ def test_a_problem_is_read_whole_by_a_prefix_of_its_id(root, monkeypatch, capsys
     it."""
     stored = landed(root, monkeypatch)
 
-    reading(monkeypatch, stored.id[:8])
+    shown(monkeypatch, stored.id[:8])
 
     out = capsys.readouterr().out
     assert f"# {stored.title} ({stored.id})" in out
@@ -71,7 +71,7 @@ def test_the_page_names_what_the_run_left_and_what_it_matched(root, monkeypatch,
     problem, and are readable nowhere else."""
     stored = landed(root, monkeypatch)
 
-    reading(monkeypatch, stored.id)
+    shown(monkeypatch, stored.id)
 
     out = capsys.readouterr().out
     assert "displays  generator" in out
@@ -96,7 +96,7 @@ def test_a_retired_problem_names_the_reason(root, monkeypatch, capsys):
         )
     )
 
-    reading(monkeypatch)
+    shown(monkeypatch)
 
     assert "retired: defective" in capsys.readouterr().out
 
@@ -105,7 +105,7 @@ def test_a_problem_that_is_not_stored_says_so(root, monkeypatch, capsys):
     landed(root, monkeypatch)
 
     with pytest.raises(SystemExit) as exit_info:
-        reading(monkeypatch, "beef")
+        shown(monkeypatch, "beef")
 
     assert exit_info.value.code == 1
     assert "no problem beef" in capsys.readouterr().err
@@ -113,7 +113,7 @@ def test_a_problem_that_is_not_stored_says_so(root, monkeypatch, capsys):
 
 def test_an_empty_corpus_says_so(root, monkeypatch, capsys):
     with pytest.raises(SystemExit) as exit_info:
-        reading(monkeypatch)
+        shown(monkeypatch)
 
     assert exit_info.value.code == 0
     assert "no problem is stored" in capsys.readouterr().err

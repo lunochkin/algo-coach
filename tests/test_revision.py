@@ -2,15 +2,15 @@ from datetime import timedelta
 
 from helpers import T0, attempt, machine_claim, seed_problem
 
-from algo_coach.claims import against, contested, revisable, standing_claims
+from algo_coach.attempt_claims import against, contested, revisable, standing_attempt_claims
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
-from algo_coach.readings import load_problems
+from algo_coach.solution_claims import load_problems
 
 
 def pool(log):
     problems = {problem.id: problem for problem in load_problems(log.root)}
-    return revisable(log.attempts(), problems, standing_claims(log.claims()), user_id="u1")
+    return revisable(log.attempts(), problems, standing_attempt_claims(log.claims()), user_id="u1")
 
 
 def test_only_what_the_hand_pass_answered_is_revisable(tmp_path):
@@ -69,7 +69,7 @@ def test_the_most_disputed_are_asked_about_first(tmp_path):
     for name in ("all", "one", "none"):
         log.append_attempt(attempt(name, name))
         log.append_claim(user_claim(name, ["greedy"]))
-    standing = standing_claims(log.claims())
+    standing = standing_attempt_claims(log.claims())
     machine_claims = [
         {"all": machine_claim("all", ["sorting"]), "one": machine_claim("one", ["sorting"])},
         {"all": machine_claim("all", ["sorting"]), "one": machine_claim("one", ["greedy"])},

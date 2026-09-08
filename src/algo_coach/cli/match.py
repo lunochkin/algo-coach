@@ -6,7 +6,7 @@ from algo_coach.cards import CardStore
 from algo_coach.cli.display import clipped, exit_on, named, progress
 from algo_coach.cli.transport import transport
 from algo_coach.matches import EFFORT, MODEL, MatchLog, Progress, match_corpus
-from algo_coach.readings import load_problems
+from algo_coach.solution_claims import load_problems
 from algo_coach.solutions import SolutionLog
 
 

@@ -4,9 +4,9 @@ from collections.abc import Sequence
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.classifier import DEFAULT, classify
-from algo_coach.mint import machine_reading
-from algo_coach.readings.store import ReadingLog
-from algo_coach.schema import Call, Configuration, MachineProvenance, Solution, TechniqueReading
+from algo_coach.mint import machine_solution_claim
+from algo_coach.schema import Call, Configuration, MachineProvenance, Solution, SolutionClaim
+from algo_coach.solution_claims.store import SolutionClaimLog
 from algo_coach.techniques import codes
 
 
@@ -25,26 +25,28 @@ def read_one(
 ) -> tuple[list[str], Call | None]:
     """What one classifier reads one solution as, and the call that read it.
 
-    Writes no reading, so several may run at once.
+    Writes no claim, so several may run at once.
     """
     return classify(transport, calls, candidates(), solution.code, configuration=configuration)
 
 
 def store(
-    log: ReadingLog,
+    log: SolutionClaimLog,
     solution_id: str,
     techniques: Sequence[str],
     call: Call,
-) -> TechniqueReading:
+) -> SolutionClaim:
     """Append what a classifier read, on the calling thread."""
-    reading = machine_reading(solution_id, list(techniques), provenance=MachineProvenance.of(call))
-    log.append(reading)
-    return reading
+    claim = machine_solution_claim(
+        solution_id, list(techniques), provenance=MachineProvenance.of(call)
+    )
+    log.append(claim)
+    return claim
 
 
 def read(
     transport: Transport,
-    log: ReadingLog,
+    log: SolutionClaimLog,
     calls: CallLog,
     solution: Solution,
     *,
@@ -53,7 +55,7 @@ def read(
     """Read one solution and store the verdict, returning what was named."""
     techniques, call = read_one(transport, calls, solution, configuration=configuration)
     # the whole vocabulary is never fewer than two candidates, so the call was
-    # made; a reading with no configuration could not be stored
+    # made; a claim with no configuration could not be stored
     assert call is not None
     store(log, solution.id, techniques, call)
     return techniques

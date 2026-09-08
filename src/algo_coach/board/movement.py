@@ -8,7 +8,7 @@ from collections.abc import Iterable, Mapping
 from pydantic import BaseModel
 
 from algo_coach.board.view import per_technique
-from algo_coach.schema import Attempt, Problem, TechniqueClaim
+from algo_coach.schema import Attempt, AttemptClaim, Problem
 
 
 class TechniqueMovement(BaseModel):
@@ -21,7 +21,7 @@ class TechniqueMovement(BaseModel):
 def movement(
     attempts: Iterable[Attempt],
     problems: Mapping[str, Problem],
-    claims: Mapping[str, TechniqueClaim],
+    claims: Mapping[str, AttemptClaim],
 ) -> list[TechniqueMovement]:
     """The board with the claims against the board without them."""
     attempts = list(attempts)
@@ -41,7 +41,7 @@ def movement(
 def counts(
     attempts: Iterable[Attempt],
     problems: Mapping[str, Problem],
-    claims: Mapping[str, TechniqueClaim],
+    claims: Mapping[str, AttemptClaim],
 ) -> dict[str, int]:
     return {
         row.technique: row.attempt_count for row in per_technique(attempts, problems, claims, {})

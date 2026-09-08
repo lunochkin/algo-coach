@@ -34,13 +34,13 @@ from algo_coach.generation import (
 )
 from algo_coach.matches import MatchLog
 from algo_coach.outcomes import OutcomeLog
-from algo_coach.readings import load_problems
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import (
     Card,
     Draft,
     WritingState,
 )
+from algo_coach.solution_claims import load_problems
 from algo_coach.solutions import SolutionLog
 
 # the modes a run can be put in. Each reads its own input and reports its own

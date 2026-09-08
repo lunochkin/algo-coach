@@ -3,17 +3,17 @@
 from collections.abc import Iterable, Mapping
 
 from algo_coach.log import latest_by_attempt
-from algo_coach.schema import ClaimSource, Configuration, TechniqueClaim
+from algo_coach.schema import AttemptClaim, ClaimSource, Configuration
 
 
-def is_stale(claim: TechniqueClaim, configuration: Configuration, prompt_hash: str) -> bool:
+def is_stale(claim: AttemptClaim, configuration: Configuration, prompt_hash: str) -> bool:
     if claim.source is not ClaimSource.CLASSIFIER:
         return False
 
     return not at_configuration(claim, configuration, prompt_hash)
 
 
-def at_configuration(claim: TechniqueClaim, configuration: Configuration, prompt_hash: str) -> bool:
+def at_configuration(claim: AttemptClaim, configuration: Configuration, prompt_hash: str) -> bool:
     """Not `not is_stale`: that means "not known-stale", and a user's claim is
     at no configuration at all. The provider is not compared, being unknown
     here."""
@@ -23,10 +23,10 @@ def at_configuration(claim: TechniqueClaim, configuration: Configuration, prompt
 
 
 def machine_claims_at(
-    claims: Iterable[TechniqueClaim],
+    claims: Iterable[AttemptClaim],
     configuration: Configuration,
     hashes: Mapping[str, str],
-) -> dict[str, TechniqueClaim]:
+) -> dict[str, AttemptClaim]:
     """Filtered before `latest_by_attempt`, never after: an attempt's latest
     machine claim can be another configuration's, with this one's under it."""
     return latest_by_attempt(

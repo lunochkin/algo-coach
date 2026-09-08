@@ -15,7 +15,7 @@ from algo_coach.log import AttemptLog
 from algo_coach.matches import MatchLog
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
-from algo_coach.readings import ReadingLog
+from algo_coach.solution_claims import SolutionClaimLog
 from algo_coach.solutions import SolutionLog
 from algo_coach.storage import FileStore, JsonlLog
 from algo_coach.verifications import VerificationLog
@@ -37,7 +37,7 @@ ENUMERATED = (
     schema.Kind,
     schema.MatchSource,
     schema.ProblemStatus,
-    schema.ReadingSource,
+    schema.ClaimSource,
     schema.RetirementReason,
     schema.SolutionRole,
     schema.TemplateKind,
@@ -228,7 +228,7 @@ def test_a_record_keyed_to_an_attempt_carries_what_the_log_needs():
         for _, cls in inspect.getmembers(schema, inspect.isclass)
         if issubclass(cls, BaseModel) and "attempt_id" in cls.model_fields
     ]
-    assert {cls.__name__ for cls in keyed} >= {"TechniqueClaim", "SelfLabel", "Diagnosis"}
+    assert {cls.__name__ for cls in keyed} >= {"AttemptClaim", "SelfLabel", "Diagnosis"}
     lacking = [
         f"{cls.__name__}.{field}"
         for cls in keyed
@@ -238,11 +238,19 @@ def test_a_record_keyed_to_an_attempt_carries_what_the_log_needs():
     assert lacking == []
 
 
-APPEND_ONLY = (CaseLog, SolutionLog, ReadingLog, OutcomeLog, MatchLog, CallLog, VerificationLog)
+APPEND_ONLY = (
+    CaseLog,
+    SolutionLog,
+    SolutionClaimLog,
+    OutcomeLog,
+    MatchLog,
+    CallLog,
+    VerificationLog,
+)
 
 
 def test_the_stores_write_as_the_data_class_table_says():
-    """`README.md`: attempts, claims, cases, solutions, technique readings, matches, site
+    """`README.md`: attempts, claims, cases, solutions, solution claims, matches, site
     outcomes and calls are append-only; drafts are revised in place; a problem
     is created once and only its status moves; cards are re-seeded by slug."""
     for log in APPEND_ONLY:

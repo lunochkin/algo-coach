@@ -3,11 +3,11 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+from algo_coach.attempt_claims import standing_attempt_claims
 from algo_coach.board import TechniqueRow, per_technique, ungrouped
-from algo_coach.claims import standing_claims
 from algo_coach.cli.display import age, table
 from algo_coach.log import AttemptLog, latest_by_attempt
-from algo_coach.readings import load_problems
+from algo_coach.solution_claims import load_problems
 
 
 def board(args: argparse.Namespace, root: Path) -> None:
@@ -16,7 +16,7 @@ def board(args: argparse.Namespace, root: Path) -> None:
     # Every problem, not the user's: an attempt names a minted id, and a
     # narrower index would miss a legitimate one.
     problems = {problem.id: problem for problem in load_problems(root)}
-    claims = standing_claims(log.claims())
+    claims = standing_attempt_claims(log.claims())
     labels = latest_by_attempt(log.self_labels())
     rows = per_technique(attempts, problems, claims, labels)
     if args.stale:

@@ -439,7 +439,7 @@ are answered by using the loop.
 4. The statement, and the clock starts.
 5. The submission runs against the problem's own test cases, and the attempt is
    minted carrying the result.
-6. Keyed to each attempt, the loop asks for a technique claim and a
+6. Keyed to each attempt, the loop asks for a attempt claim and a
    self-label, or the user marks the problem defective instead.
 
 - **An attempt nobody timed stays untimed**, rather than carrying a duration

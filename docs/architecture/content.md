@@ -192,7 +192,7 @@ either.
   displays some template of the card. No record asserts in one place that a
   problem belongs to a card, so no record is rewritten when one verdict
   changes.
-- **Re-derivation is the normal path, not an exception.** A technique claim
+- **Re-derivation is the normal path, not an exception.** A attempt claim
   asks about one attempt, and the question never changes. A match asks about a
   template against a corpus of solutions that grows with every enumeration run.
 - **A hand record settles what stands, not what has been read.** The run path
@@ -226,4 +226,4 @@ either.
   taken over the pairs that drew that line measures agreement with itself. The
   eval set is matched by hand from the templates alone, and configurations are
   compared over the pairs both read. The rules `log.md` gives for scoring a
-  technique claim apply here unchanged.
+  attempt claim apply here unchanged.

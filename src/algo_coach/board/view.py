@@ -4,8 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from algo_coach.claims import resolve_techniques
-from algo_coach.schema import Attempt, FailureMode, Problem, SelfLabel, TechniqueClaim
+from algo_coach.attempt_claims import resolve_techniques
+from algo_coach.schema import Attempt, AttemptClaim, FailureMode, Problem, SelfLabel
 
 
 class TechniqueRow(BaseModel):
@@ -27,7 +27,7 @@ class TechniqueRow(BaseModel):
 def per_technique(
     attempts: Iterable[Attempt],
     problems: Mapping[str, Problem],
-    claims: Mapping[str, TechniqueClaim],
+    claims: Mapping[str, AttemptClaim],
     labels: Mapping[str, SelfLabel],
 ) -> list[TechniqueRow]:
     """The drill board: one row per technique the log reaches, ordered by code.
@@ -59,7 +59,7 @@ def per_technique(
 def ungrouped(
     attempts: Iterable[Attempt],
     problems: Mapping[str, Problem],
-    claims: Mapping[str, TechniqueClaim],
+    claims: Mapping[str, AttemptClaim],
 ) -> list[Attempt]:
     """The attempts `per_technique` reaches no row for, shown beside the
     rows."""

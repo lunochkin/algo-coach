@@ -42,7 +42,7 @@ Four places, and nothing is trained anywhere in the engine:
   data exists for that label. Public corpora tag problems, not solutions, so a
   trained model would predict the fallback it is meant to improve on. The same
   reader, given the whole vocabulary instead, reads each canonical the engine
-  wrote, and a problem's own techniques are folded from those readings.
+  wrote, and a problem's own techniques are folded from those claims.
 - **Template matching**: which of a card's forms a *solution* displays, read
   from the code with the statement beside it for what the code leaves implicit.
   A technique says what a problem is *about*, not which form solves it, so the
@@ -59,7 +59,7 @@ And three rules on top of them:
   endpoint it was pinned to, the temperature, the hash of the exact prompt
   that attempt was sent, and the call that sent it. Two configurations are
   compared over the attempts *both* read, never each over its own.
-- **Readings are greedy, and the noise floor is measured.** Repeating a
+- **Machine records are greedy, and the noise floor is measured.** Repeating a
   configuration flips 0.5–2.2% of decisions. A one- or two-attempt gap between
   models is therefore unreadable, and is not read.
 
@@ -213,7 +213,7 @@ third-party platform, ingested and read. That corpus is archived under
 | Attempts | 1,785, over 117 practice days |
 | Problems | ~4k, each carrying the statement matching reads |
 | Hand claims | 138 over 100 attempts, the adjudicated eval set |
-| Machine readings | 6,523 technique claims |
+| Machine claims | 6,523 attempt claims |
 | Model calls | 7,644, each with its prompt, provenance and timings |
 
 **Why it went.** A scraped statement cannot ship, so a corpus built from
@@ -362,7 +362,7 @@ The records keyed to an attempt, and who may write each:
 ```mermaid
 flowchart LR
   U(["user"]) --> SL["SelfLabel<br/><i>why the sitting went that way</i>"]
-  U -->|"stands on read"| TC["TechniqueClaim<br/><i>which techniques the solution used</i>"]
+  U -->|"stands on read"| TC["AttemptClaim<br/><i>which techniques the solution used</i>"]
   M(["machine"]) -.->|"kept and scored, never promoted"| TC
   M --> DG["Diagnosis<br/><i>why it failed, inferred</i>"]
   SL --- A["Attempt<br/><i>engine-minted id, append-only</i>"]
@@ -379,14 +379,15 @@ The load-bearing invariants:
 - **[Identity is the engine's.](docs/architecture/README.md#invariants)** Every
   reference in an append-only record is one the engine minted, so the log stays
   readable on its own.
-- **[The user's record stands over the machine's](docs/architecture/log.md#technique-claims)**
-  answer to the same question, whichever was written later. The machine's
-  record is kept and scored, never discarded and never promoted.
+- **[The user's record stands over the
+  machine's](docs/architecture/log.md#technique-claims)** answer to the same
+  question, whichever was written later. The machine's record is kept and
+  scored, never discarded and never promoted.
 - **[Aggregates are derived views](docs/architecture/README.md#invariants)**,
   never stored truth: the board, a card's ladder, mastery.
-- **[No third-party problem statements or test cases in git](docs/architecture/README.md#repo-constraints)**,
-  in any repo. The engine contacts no external platform, and no platform client
-  lives here.
+- **[No third-party problem statements or test cases in
+  git](docs/architecture/README.md#repo-constraints)**, in any repo. The engine
+  contacts no external platform, and no platform client lives here.
 
 If you read one section, read **[technique
 claims](docs/architecture/log.md#technique-claims)**: what a reading is, why
@@ -404,9 +405,9 @@ uv run algo-coach <command>
 |---|---|
 | `seed` | seed authored cards into the store |
 | `board` | per-technique progress: attempts, solved, recency, labels |
-| `claim` | name the techniques a stored attempt used: the classifier, or the user with `--by-hand` |
+| `claim attempts` | name the techniques a stored attempt used: the classifier, or the user with `--by-hand` |
+| `claim solutions` | name the techniques each stored canonical used |
 | `match` | which problems exercise a card's templates: the matcher, or the user with `--by-hand` |
-| `read` | name the techniques each stored canonical used |
 | `problem` | read one stored problem, or list the corpus |
 | `generate` | write problems for one of a card's templates |
 | `gaps` | core templates no stored solution displays |
@@ -416,20 +417,20 @@ uv run algo-coach <command>
 ## Where things are
 
 ```
-src/algo_coach/schema/       the record contracts — the public part
-src/algo_coach/techniques/   the vocabulary: 27 codes, each with its criterion
-src/algo_coach/claims/       the attribution classifier and its scoring
-src/algo_coach/matches/      which solutions display which card template
-src/algo_coach/calls/        the model transport (OpenRouter) and the call log
-src/algo_coach/board/        the per-technique view, derived on read
-src/algo_coach/generation/   the four calls that write a problem, and its gates
-src/algo_coach/drafts/       one attempt at writing a problem, held as it goes
-src/algo_coach/outcomes/     what each call site left on one such attempt
-src/algo_coach/mutation/     the mutants a case set has to kill
-src/algo_coach/runner/       running a solution against a problem's cases
-src/algo_coach/{log,cards,problems,cases,solutions,readings,verifications}/
-docs/architecture/           concepts, boundaries, invariants, flows
-docs/{ROADMAP,TODO}.md       sequencing, and what is open
+src/algo_coach/schema/          the record contracts — the public part
+src/algo_coach/techniques/      the vocabulary: 27 codes, each with its criterion
+src/algo_coach/attempt_claims/  the attribution classifier and its scoring
+src/algo_coach/matches/         which solutions display which card template
+src/algo_coach/calls/           the model transport (OpenRouter) and the call log
+src/algo_coach/board/           the per-technique view, derived on read
+src/algo_coach/generation/      the four calls that write a problem, and its gates
+src/algo_coach/drafts/          one attempt at writing a problem, held as it goes
+src/algo_coach/outcomes/        what each call site left on one such attempt
+src/algo_coach/mutation/        the mutants a case set has to kill
+src/algo_coach/runner/          running a solution against a problem's cases
+src/algo_coach/{log,cards,problems,cases,solutions,solution_claims,verifications}/
+docs/architecture/              concepts, boundaries, invariants, flows
+docs/{ROADMAP,TODO}.md          sequencing, and what is open
 .claude/skills/card-author/  the skill that authors cards
 content/cards/               the authored cards — never committed
 data/                        your attempts and solutions — never committed

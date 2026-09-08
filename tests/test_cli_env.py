@@ -14,7 +14,7 @@ def cwd(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, "DATA_ROOT", tmp_path / "data")
     answering = FakeTransport.answering(Verdict(["greedy"]))
     monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: answering)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "claim", "--user", "u1"])
+    monkeypatch.setattr("sys.argv", ["algo-coach", "claim", "attempts", "--user", "u1"])
     return tmp_path
 
 

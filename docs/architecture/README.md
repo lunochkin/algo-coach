@@ -49,10 +49,8 @@ without redefining them. Grouped by the file that specifies the record.
   Written by the generator, the matcher or by hand.
 - **Matcher**: the model call reading a canonical beside its statement and
   naming the templates it displays.
-- **Hand record**: a claim, match or technique reading written by the user
-  rather than a
-  model. Its `source` says so. It stands over every machine record on the same
-  question.
+- **Hand record**: a claim or match written by the user rather than a model. Its
+  `source` says so. It stands over every machine record on the same question.
 
 ### Corpus
 
@@ -78,8 +76,8 @@ without redefining them. Grouped by the file that specifies the record.
   wrong, timed out or crashed.
 - **Cap**: the wall-clock limit on one `solve` call, measured in the child
   process. Generation's cap sits well above the sitting's.
-- **Technique reading** (reading): a machine record naming the techniques a
-  canonical used. A problem's techniques are folded from these.
+- **Solution claim**: a claim about a solution the engine wrote. Product data,
+  and what a problem's techniques are folded from.
 - **Defective**: a retirement reason: the statement asks for something its
   cases do not decide.
 - **Enumeration**: a pass over a landed problem proposing other approaches,
@@ -151,9 +149,8 @@ without redefining them. Grouped by the file that specifies the record.
 
 ### Machine records
 
-- **Machine record**: any record a model wrote: a claim, a match, a technique
-  reading,
-  a solution, a case's arguments. It carries provenance whole.
+- **Machine record**: any record a model wrote: a claim, a match, a solution, a
+  case's arguments. It carries provenance whole.
 - **Configuration**: model, effort, endpoint pin and temperature.
 - **Provenance**: the configuration, the prompt hash of what was sent and the
   call that sent it.
@@ -177,11 +174,13 @@ without redefining them. Grouped by the file that specifies the record.
   mint several attempts.
 - **Drill loop**: the practice flow: pick a technique and a problem, read the
   card, solve, then answer the claim and the label.
-- **Technique claim** (claim): a record naming the techniques an attempt
-  used. The user's stands over the classifier's.
-- **Classifier**: the model call reading an attempt's code for the
-  techniques it used. As a `source` value on any record, `classifier` means a
-  model wrote it, whichever call.
+- **Claim**: a record naming the techniques a piece of code used, by a named
+  writer. Latest wins, and the user's stands over the classifier's.
+- **Attempt claim**: a claim about the user's own attempt. Private, and what
+  the board counts.
+- **Classifier**: the model call reading an attempt's or a solution's code for
+  the techniques it used. As a `source` value on any record, `classifier` means
+  a model wrote it, whichever call.
 - **Decline**: a claim stating that none of the candidates apply. Distinct
   from an empty claim, which answers nothing.
 - **Fallback**: the problem's own techniques, answering an attempt no claim
@@ -211,7 +210,7 @@ times. Each record class is specified in one of the files beside it.
 | File | Holds |
 |---|---|
 | [`content.md`](content.md) | Techniques, cards, template matches |
-| [`corpus.md`](corpus.md) | Problems, test cases, solutions, technique readings |
+| [`corpus.md`](corpus.md) | Problems, test cases, solutions, solution claims |
 | [`log.md`](log.md) | Attempts, claims, self-labels, diagnoses, card runs, recall attempts |
 | [`machine.md`](machine.md) | What a model-written record carries, what a generation run's call sites leave, and the call log |
 | [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, adjudicating the eval set |
@@ -226,14 +225,14 @@ times. Each record class is specified in one of the files beside it.
 | Problems | product | global | created once; only its status moves | the store |
 | Test cases | product | global | written with the problem | the store |
 | Solutions | product | global | append-only | the store |
-| Technique readings | product | global | append-only | the store |
+| Solution claims | product | global | append-only | the store |
 | Verification runs | product | global | append-only | the store |
 | Template matches | product | global | append-only | the store |
 | Site outcomes | product | global | append-only | the store |
 | Card runs | user | private | append-only | the store |
 | Recall attempts | user | private | append-only | the store |
 | Attempts | user | private | append-only | the store |
-| Technique claims | user | private | append-only | the store |
+| Attempt claims | user | private | append-only | the store |
 | Calls | user | private | append-only | the store |
 | Self-labels | user | private | append-only | the store |
 | Diagnoses | user | private | append-only | the store |
@@ -275,14 +274,14 @@ times. Each record class is specified in one of the files beside it.
 
 Properties the system holds at all times.
 
-- Attempts, technique claims, self-labels and diagnoses are append-only: no
+- Attempts, attempt claims, self-labels and diagnoses are append-only: no
   record is ever revised or removed in place. Discarding a private log
   wholesale while it holds nothing irreplaceable is a different act. That
   allowance ends the first time a record in the log is worth keeping.
 - Every record keyed to an attempt carries an engine-minted `id`, its
   `attempt_id` and `created_at`.
 - The user's own record stands over the machine's answer to the same question,
-  whichever was written later: a technique claim resolves user-first, and a
+  whichever was written later: a attempt claim resolves user-first, and a
   diagnosis never supersedes a self-label. The machine's record is kept and
   scored, never discarded and never promoted.
 - Every reference in an append-only record is engine-minted, so the log stays

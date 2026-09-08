@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from algo_coach.schema import Attempt, Diagnosis, SelfLabel, TechniqueClaim
+from algo_coach.schema import Attempt, AttemptClaim, Diagnosis, SelfLabel
 from algo_coach.storage import JsonlLog
 
 
@@ -11,14 +11,14 @@ class AttemptLog:
     def __init__(self, root: Path) -> None:
         self.root = root
         self._attempts = JsonlLog(root, "attempts.jsonl", Attempt)
-        self._claims = JsonlLog(root, "technique_claims.jsonl", TechniqueClaim)
+        self._claims = JsonlLog(root, "technique_claims.jsonl", AttemptClaim)
         self._self_labels = JsonlLog(root, "self_labels.jsonl", SelfLabel)
         self._diagnoses = JsonlLog(root, "diagnoses.jsonl", Diagnosis)
 
     def append_attempt(self, attempt: Attempt) -> None:
         self._attempts.append(attempt)
 
-    def append_claim(self, claim: TechniqueClaim) -> None:
+    def append_claim(self, claim: AttemptClaim) -> None:
         self._claims.append(claim)
 
     def append_self_label(self, label: SelfLabel) -> None:
@@ -30,7 +30,7 @@ class AttemptLog:
     def attempts(self) -> list[Attempt]:
         return self._attempts.all()
 
-    def claims(self) -> list[TechniqueClaim]:
+    def claims(self) -> list[AttemptClaim]:
         return self._claims.all()
 
     def self_labels(self) -> list[SelfLabel]:

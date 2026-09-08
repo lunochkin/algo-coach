@@ -6,11 +6,11 @@ from algo_coach.classifier import EFFORT, MODEL
 from algo_coach.cli.display import clipped, exit_on, named, progress
 from algo_coach.cli.transport import transport
 from algo_coach.problems import ProblemStore
-from algo_coach.readings import Progress, ReadingLog, read_corpus
+from algo_coach.solution_claims import Progress, SolutionClaimLog, read_corpus
 from algo_coach.solutions import SolutionLog
 
 
-def read(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def claim_solutions(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
     api = transport(args, parser)
     titles = {problem.id: problem.title for problem in ProblemStore(root).all()}
 
@@ -24,7 +24,7 @@ def read(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) 
 
     result = read_corpus(
         api,
-        ReadingLog(root),
+        SolutionClaimLog(root),
         CallLog(root),
         SolutionLog(root).solutions(),
         limit=args.limit,
@@ -36,4 +36,4 @@ def read(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) 
     print(f"{result.read} canonical(s) read by {MODEL}, effort {EFFORT}")
     if result.undecided:
         print(f"{result.undecided} named no technique")
-    exit_on(parser, "read", result)
+    exit_on(parser, "claim", result)
