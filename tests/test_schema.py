@@ -61,7 +61,7 @@ def test_attempt_roundtrip(tmp_path):
     assert log.diagnoses()[0].attempt_id == "a1"
 
 
-def test_technique_claim_records_its_source():
+def test_an_attempt_claim_records_its_source():
     claim = AttemptClaim(
         id="c1",
         created_at=datetime.now(UTC),
@@ -85,7 +85,7 @@ def test_a_claim_names_at_least_one_technique():
         make_claim(ClaimSource.USER, techniques=[])
 
 
-def test_technique_claim_requires_a_source():
+def test_an_attempt_claim_requires_a_source():
     """Nothing distinguishes a user claim from a machine one after the fact."""
     with pytest.raises(ValidationError):
         AttemptClaim(

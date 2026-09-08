@@ -11,7 +11,7 @@ class AttemptLog:
     def __init__(self, root: Path) -> None:
         self.root = root
         self._attempts = JsonlLog(root, "attempts.jsonl", Attempt)
-        self._claims = JsonlLog(root, "technique_claims.jsonl", AttemptClaim)
+        self._claims = JsonlLog(root, "attempt_claims.jsonl", AttemptClaim)
         self._self_labels = JsonlLog(root, "self_labels.jsonl", SelfLabel)
         self._diagnoses = JsonlLog(root, "diagnoses.jsonl", Diagnosis)
 
