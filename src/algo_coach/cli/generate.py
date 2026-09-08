@@ -26,6 +26,7 @@ from algo_coach.generation import (
     Resumed,
     Step,
     Target,
+    advances,
     replay,
     resume,
     swept,
@@ -138,17 +139,27 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
     calls, corpus = CallLog(root), Corpus.at(root)
     outcomes = OutcomeLog(root)
 
-    before = len(calls.all())
-    reached: list[tuple[Target, Resumed]] = []
-    unaimed = 0
-    for index, draft in enumerate(waiting, start=1):
+    # settled before the first call, so the counter runs over what the sweep
+    # resumes rather than over the store
+    resumable: list[tuple[Target, Draft]] = []
+    unaimed = held_back = 0
+    for draft in waiting:
         target = written_for(cards, draft)
         if target is None:
             # the form its target named is gone, so nothing says what its
             # search or its ladder would be
             unaimed += 1
             print(f"draft {draft.id}: no template {draft.target_template_id}", file=sys.stderr)
-            continue
+        elif not advances(draft, target.template, bench):
+            # the run would take the local steps and stop where the draft
+            # stopped: nothing it reads moved, and `--drafts` names the reason
+            held_back += 1
+        else:
+            resumable.append((target, draft))
+
+    before = len(calls.all())
+    reached: list[tuple[Target, Resumed]] = []
+    for index, (target, draft) in enumerate(resumable, start=1):
         result = resume(
             api,
             calls,
@@ -156,14 +167,14 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
             draft,
             corpus,
             bench=bench,
-            notes=Notes(stage, index=index, total=len(waiting)),
+            notes=Notes(stage, index=index, total=len(resumable)),
             outcomes=outcomes,
             drafts=drafts,
         )
         reached.append((target, result))
 
     results = [result for _, result in reached]
-    closing = resume_summary(results, bench, unaimed=unaimed)
+    closing = resume_summary(results, bench, unaimed=unaimed, held_back=held_back)
     print(finale(reached, closing, calls.all()[before:]))
     if not any(result.drafted for result in results):
         parser.exit(1, "generate: no problem stored\n")

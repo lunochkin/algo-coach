@@ -321,6 +321,10 @@ a second generator call writes a different problem.
 - **A resume is invoked as `generate --resume`**, over every held draft rather
   than one named. A prompt edit reaches the drafts it repairs in one run, and
   the prompt hashes already answer which drafts moved.
+- **A draft no resume would advance is counted, not run.** Its local steps
+  would end where the draft already stands, and the run would then report the
+  draft as held again, which says a step was taken. The listing names why the
+  draft waits.
 - **A resume is aimed at nothing**, as a replay is: the store is the input,
   so the flags that aim a write name no draft.
 - **A draft whose template is not seeded is skipped**, not resumed. A search

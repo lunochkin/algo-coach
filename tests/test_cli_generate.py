@@ -766,6 +766,23 @@ def test_a_draft_no_resume_would_advance_is_listed_as_held(root, monkeypatch, ca
     assert "1 draft(s) stored, 0 would resume" in out
 
 
+def test_a_draft_no_resume_would_advance_is_counted_and_not_run(root, monkeypatch, capsys):
+    """Its local steps would end where it stands, and a run over it would
+    report a step taken. Counted apart from held again, and the listing names
+    why it waits."""
+    seeded(root, card(templates=CLAIMS))
+    run(monkeypatch, FakeWriter(generator=CRASHES), "longest-valid-window")
+    capsys.readouterr()
+
+    with pytest.raises(SystemExit):
+        resuming(monkeypatch, FakeWriter(generator=CRASHES))
+
+    captured = capsys.readouterr()
+    assert "0 draft(s) resumed" in captured.out and "1 held before the loop" in captured.out
+    assert "# held" not in captured.out
+    assert "resume" not in captured.err
+
+
 def test_a_rejected_draft_is_counted_and_not_listed(root, monkeypatch, capsys):
     """Nothing resumes it, so a sweep's listing is what it will reach. The
     count still covers the store, or the summary would report fewer drafts than
