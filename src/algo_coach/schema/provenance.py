@@ -17,7 +17,7 @@ class MachineProvenance(BaseModel):
 
     model: str | None = None
     effort: str | None = None  # how hard it was asked to think
-    prompt_hash: str | None = None  # the digest of the text this record was sent
+    prompt_hash: str | None = None  # of the text this record was sent
     call_id: str | None = None  # the call carrying the prompt, the tokens, the reasoning
     pin: str | None = None  # the endpoint, named to the quantization
     provider: str | None = None  # who served it, as the router reported; never compared

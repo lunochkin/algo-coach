@@ -66,7 +66,7 @@ def test_every_state_but_the_terminal_one_is_in_the_order():
 
 def test_an_unchanged_bench_moves_nothing(tmp_path):
     """The run wrote this draft at the bench's own configurations, and every
-    digest is a function of the statement it already holds."""
+    prompt hash is a function of the statement it already holds."""
     assert moved_at(drafted(tmp_path), OPTIMUM, BENCH) is None
 
 
@@ -85,7 +85,7 @@ def test_a_moved_inputs_configuration_starts_at_the_input_generator(tmp_path):
 
 
 def test_a_moved_discrimination_configuration_starts_at_the_loop(tmp_path):
-    """Its digest carries the survivors, which only the local kill pass names,
+    """Its prompt hash carries the survivors, which only the local kill pass names,
     so the configuration is what answers here."""
     assert moved_at(
         drafted(tmp_path), OPTIMUM, BENCH.model_copy(update={"discrimination": OTHER})
@@ -108,8 +108,8 @@ def test_a_moved_generator_invalidates_no_draft(tmp_path):
     )
 
 
-def test_a_stale_digest_starts_at_its_own_step(tmp_path):
-    """An edited prompt moves the digest without moving the configuration, and
+def test_a_stale_prompt_hash_starts_at_its_own_step(tmp_path):
+    """An edited prompt moves the prompt hash without moving the configuration, and
     a resume that read only the model would re-run nothing."""
     stored = drafted(tmp_path)
     stale = stored.blind_provenance.model_copy(update={"prompt_hash": "ffffffffffff"})
@@ -208,7 +208,7 @@ def test_a_form_that_is_its_own_optimum_advances(tmp_path):
 
 
 def test_a_corrected_speedup_resumes_the_draft_the_search_held(tmp_path):
-    """A flag edit moves neither a configuration nor a digest, so a resume
+    """A flag edit moves neither a configuration nor a prompt hash, so a resume
     reading only those would leave the draft where the search stopped it."""
     assert moved_at(held(tmp_path), OPTIMUM, BENCH) is WritingState.HARDENED
 
@@ -223,7 +223,7 @@ def test_a_moved_naive_solution_configuration_starts_at_the_naive_solution(tmp_p
 
 def test_an_edited_trigger_re_asks_the_naive_solution_alone(tmp_path):
     """The one prompt carrying more than the statement, so editing a form
-    moves the digest of the drafts written for it and no others."""
+    moves the prompt hash of the drafts written for it and no others."""
     edited = Template(id="t1", **template("longest-valid-window", speedup=True, trigger="Else."))
 
     written_at = held(tmp_path).naive_provenance.prompt_hash

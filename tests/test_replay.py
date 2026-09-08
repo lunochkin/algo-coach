@@ -137,7 +137,7 @@ def test_a_replayed_record_names_the_problem_it_answered(tmp_path, monkeypatch):
 
 
 def test_a_pair_this_configuration_answered_is_skipped(tmp_path, monkeypatch):
-    """The second run buys the same verdict at the same digest, so it is not
+    """The second run buys the same verdict at the same prompt hash, so it is not
     paid for."""
     cards = landed(tmp_path, monkeypatch)
     log = OutcomeLog(tmp_path)
@@ -242,7 +242,7 @@ def test_a_form_that_is_its_own_optimum_is_not_asked(tmp_path, monkeypatch):
 
 
 def test_the_discrimination_site_is_asked_where_a_mutant_survives(tmp_path, monkeypatch):
-    """The survivors are in the prompt, so the digest that decides the skip is
+    """The survivors are in the prompt, so the prompt hash that decides the skip is
     known only after the local kill pass."""
     # the landing run's own round proposed a case that killed nothing, so the
     # stored set is the one written with the statement and a mutant is still
@@ -268,7 +268,7 @@ def test_the_discrimination_site_is_asked_where_a_mutant_survives(tmp_path, monk
 
 def test_the_loop_is_replayed_against_the_set_as_it_stood(tmp_path):
     """A case a round won was not in the set the survivors were decided
-    against. Counted, it would send another digest, and the verdict the landing
+    against. Counted, it would send another prompt hash, and the verdict the landing
     run recorded at the same configuration would be paid for twice."""
     log = OutcomeLog(tmp_path)
     (one,) = seeded(tmp_path, card())

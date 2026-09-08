@@ -54,7 +54,7 @@ def read_corpus(
     on_progress: Callable[[Progress], None] | None = None,
 ) -> SolutionClaimResult:
     """Read every stored canonical for its techniques, skipping the ones this
-    configuration has already read at the current digest.
+    configuration has already read at the current prompt hash.
 
     References are never read. Claims are appended as they are made, so a run
     resumes where the last stopped. `fresh` asks again where a stored claim

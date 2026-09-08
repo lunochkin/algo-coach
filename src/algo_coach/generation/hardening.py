@@ -57,7 +57,7 @@ def standing(
     about.
 
     `harden` runs the same pass itself. A replay needs the survivors before the
-    call, since they are in the prompt whose digest decides whether to ask, and
+    call, since they are in the prompt whose prompt hash decides whether to ask, and
     killing costs subprocesses rather than a call.
     """
     against_ms = pace(slowest_ms, cap_ms=cap_ms)

@@ -1,9 +1,9 @@
 """Where a resume starts: the first step a draft took whose configuration or
-digest is no longer what the bench would send, or the loop where a corrected
+prompt hash is no longer what the bench would send, or the loop where a corrected
 `speedup` released the draft the search held.
 
 Where it starts and what it pays for are two questions: a site past the start
-is asked again only where its own configuration or digest moved.
+is asked again only where its own configuration or prompt hash moved.
 
 The generator is not among them. The draft is that step's output, and a new
 prompt writes a different problem rather than the same one again, so editing it
@@ -59,12 +59,12 @@ def next_step(draft: Draft) -> WritingState:
 
 def starts_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingState:
     """Where a resume of this draft begins: the first step whose configuration
-    or digest moved, and otherwise the one it never took."""
+    or prompt hash moved, and otherwise the one it never took."""
     return moved_at(draft, template, bench) or next_step(draft)
 
 
 def sending(draft: Draft, site: str, template: Template) -> str | None:
-    """The digest that site would send about this draft now, or `None` where
+    """The prompt hash that site would send about this draft now, or `None` where
     only a local pass can say."""
     if site == "blind":
         return blind_hash(draft.statement)
@@ -81,7 +81,7 @@ def sending(draft: Draft, site: str, template: Template) -> str | None:
 
 def re_asks(draft: Draft, site: str, template: Template, bench: Bench = BENCH) -> bool:
     """Whether a resume pays this site again: it never answered, or its own
-    configuration or digest moved.
+    configuration or prompt hash moved.
 
     Per site rather than per position: three of the four prompts are a function
     of the statement, so none of them invalidates another.
@@ -89,10 +89,10 @@ def re_asks(draft: Draft, site: str, template: Template, bench: Bench = BENCH) -
     taken = getattr(draft, f"{site}_provenance")
     if taken is None:
         return True
-    # its own digest where a local pass decides one, so the configuration is
+    # its own prompt hash where a local pass decides one, so the configuration is
     # what answers there
-    digest = sending(draft, site, template) or taken.prompt_hash or ""
-    return not taken.at_configuration(getattr(bench, site), digest)
+    prompt_hash = sending(draft, site, template) or taken.prompt_hash or ""
+    return not taken.at_configuration(getattr(bench, site), prompt_hash)
 
 
 def draws_again(draft: Draft, template: Template) -> bool:
@@ -138,7 +138,7 @@ def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingS
             draft, site, template, bench
         ):
             return state
-    # a flag edit moves neither a configuration nor a digest, and it is what
+    # a flag edit moves neither a configuration nor a prompt hash, and it is what
     # releases a draft the search held: with no speedup claimed the loop is the
     # step that has not run
     if draft.state is WritingState.SEARCHED and not template.speedup:

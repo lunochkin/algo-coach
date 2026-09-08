@@ -69,7 +69,7 @@ def test_a_record_answers_for_the_configuration_that_wrote_it():
     assert not answered(stored, configuration=theirs, **asked)
 
 
-def test_a_record_at_another_digest_does_not_answer():
+def test_a_record_at_another_prompt_hash_does_not_answer():
     """The criteria travel with the prompt, so an edit re-asks what it reaches
     and leaves the rest."""
     stored = [left(CallSite.BLIND, problem_id="p1")]

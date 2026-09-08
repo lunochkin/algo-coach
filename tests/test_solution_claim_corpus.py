@@ -93,7 +93,7 @@ def test_a_naive_solution_is_never_read(log):
     assert [one.solution_id for one in log.claims()] == ["s2"]
 
 
-def test_a_canonical_read_at_this_digest_is_skipped(log):
+def test_a_canonical_read_at_this_prompt_hash_is_skipped(log):
     """The claim answers the prompt this run would send, so paying for it
     again would buy the same verdict."""
     one = solution("s1")
@@ -107,7 +107,7 @@ def test_a_canonical_read_at_this_digest_is_skipped(log):
 
 
 def test_a_criteria_edit_re_reads_what_it_reached(log):
-    """Staleness keys on the digest of what was sent, so a claim taken at
+    """Staleness keys on the prompt hash of what was sent, so a claim taken at
     another rulebook is answered again."""
     one = solution("s1")
     log.append(already_read(one, prompt_hash="an-older-rulebook"))
@@ -121,7 +121,7 @@ def test_a_criteria_edit_re_reads_what_it_reached(log):
 
 def test_only_the_unread_canonicals_are_asked_about(log):
     """A run resumes where the last stopped: claims are appended as they are
-    made, and the ones already at this digest drop out."""
+    made, and the ones already at this prompt hash drop out."""
     read, unread = solution("s1"), solution("s2", code="def solve(n):\n    return n\n")
     log.append(already_read(read))
     client = answering(Verdict(["greedy"]))
@@ -229,7 +229,7 @@ def test_progress_is_reported_as_the_run_goes(log):
     assert seen[1].reason is not None
 
 
-def test_outstanding_reads_the_digest_it_is_given(log):
+def test_outstanding_reads_the_prompt_hash_it_is_given(log):
     """The staleness rule alone: a record at the hash asked about takes its
     solution out, and one at another hash does not."""
     one, two = solution("s1"), solution("s2")

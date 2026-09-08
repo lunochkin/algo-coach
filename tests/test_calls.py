@@ -41,7 +41,7 @@ def answering(text: str = '{"ok": true}', reasoning: str | None = None) -> FakeT
     )
 
 
-def test_the_stored_prompt_digests_to_the_hash_beside_it(tmp_path):
+def test_the_stored_prompt_hashes_to_the_prompt_hash_beside_it(tmp_path):
     """The point of keeping the text: a record that cannot be checked against
     its own key is a claim about what was sent rather than the thing itself."""
     log = CallLog(tmp_path)

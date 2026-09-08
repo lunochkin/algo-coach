@@ -93,7 +93,7 @@ def test_a_hand_reading_is_minted_blind_and_unconfigured():
 
 
 def test_a_machine_reading_names_what_produced_it():
-    """The digest is what makes it stale, so editing one criterion re-reads
+    """The prompt hash is what makes it stale, so editing one criterion re-reads
     the solutions that criterion reached."""
     claim = machine_solution_claim(
         "s1",

@@ -15,8 +15,8 @@ from algo_coach.schema import Call, Configuration
 HASH_LENGTH = 12
 
 
-# Hashed and stored in this form, so a stored prompt digests to the hash beside
-# it.
+# Hashed and stored in this form, so a stored prompt re-hashes to the prompt
+# hash beside it.
 def payload(system: str, content: str) -> str:
     return f"{system}\n\n---\n\n{content}"
 
@@ -49,7 +49,7 @@ def ask(
     appear verbatim in the content already.
     """
     text = payload(system, content)
-    digest = prompt_hash(system, content)
+    hash = prompt_hash(system, content)
     model, effort, pin, temperature = (
         configuration.model,
         configuration.effort,
@@ -76,7 +76,7 @@ def ask(
                 model=model,
                 effort=effort,
                 prompt=text,
-                prompt_hash=digest,
+                prompt_hash=hash,
                 pin=pin,
                 temperature=temperature,
                 error=f"{type(exc).__name__}: {exc}",
@@ -90,7 +90,7 @@ def ask(
         model=model,
         effort=effort,
         prompt=text,
-        prompt_hash=digest,
+        prompt_hash=hash,
         pin=pin,
         temperature=temperature,
         # No text is a refusal or a cut-short answer, recorded as the failure

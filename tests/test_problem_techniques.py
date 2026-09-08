@@ -120,7 +120,7 @@ def test_a_problem_carries_the_view_rather_than_what_its_record_stores():
 
 
 def test_the_order_is_fixed(problem):
-    """A claim's prompt is rendered from these, and the digest is taken over
+    """A claim's prompt is rendered from these, and the prompt hash is taken over
     that text. Drawn from a set the order would move with the hash seed."""
     solutions = [solution("s1"), solution("s2")]
     claims = [solution_claim("s1", ["sorting", "greedy"]), solution_claim("s2", ["hashing"])]

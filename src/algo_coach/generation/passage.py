@@ -1,6 +1,6 @@
 """One draft carried through the steps after the statement, in the order
 `flows.md` gives. Each step is asked again only where its own configuration or
-digest moved."""
+prompt hash moved."""
 
 from dataclasses import dataclass, field
 from time import monotonic
@@ -132,7 +132,7 @@ def write_one(
 
 def carried(passage: Passage, writing: Writing, *, generator: Call | None) -> Passage:
     """Every step after the statement. Each site is asked again only where its
-    own configuration or digest moved, so a resume pays for the calls that
+    own configuration or prompt hash moved, so a resume pays for the calls that
     moved and for no others.
 
     The local runs are taken again either way: the draft stores what a call

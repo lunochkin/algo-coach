@@ -108,16 +108,16 @@ def test_the_candidates_are_the_whole_vocabulary(log):
 
 
 def test_the_candidate_order_is_fixed(log):
-    """The order reaches the prompt and the prompt is what the digest is taken
-    over. Drawn from a frozenset it would move with the hash seed, and every
-    stored claim would read as stale on the next process."""
+    """The order reaches the prompt, so the prompt hash is taken over it. Drawn
+    from a frozenset it would move with the hash seed, and every stored claim
+    would read as stale on the next process."""
     assert candidates() == sorted(codes())
 
 
 def test_one_reader_asks_both_and_the_candidates_are_what_differ(log, tmp_path):
     """One rulebook: the system text and the rendering of a criterion are the
     same, so a disagreement between the two records is about the code. What
-    separates them is the candidate set, which is why the digests differ."""
+    separates them is the candidate set, which is why the prompt hashes differ."""
     client = answering(Verdict(["sorting"]), Verdict(["sorting"]))
     attempts = AttemptLog(tmp_path)
     attempts.append_attempt(attempt("a1", "p1", code=CODE))

@@ -461,7 +461,7 @@ def test_revise_shows_a_named_classifier_s_reading_of_the_same_prompt(
 
 
 def disputing(log, techniques: list[str], *, call_id: str = "call-1") -> None:
-    """A machine claim of a1 at the digest the command asks for, so the revision pool
+    """A machine claim of a1 at the prompt hash the command asks for, so the revision pool
     holds it."""
     log.append_claim(
         classifier_claim(

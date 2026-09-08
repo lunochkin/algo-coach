@@ -3,8 +3,7 @@ gives."""
 
 from collections.abc import Sequence
 
-from algo_coach.calls import CallLog, Transport, chosen, offer
-from algo_coach.calls import prompt_hash as digest
+from algo_coach.calls import CallLog, Transport, chosen, offer, prompt_hash
 from algo_coach.schema import Call, Configuration
 from algo_coach.techniques import criterion
 
@@ -41,7 +40,7 @@ If the code used none of the candidates, name none of them."""
 
 
 # which classifier a claim came from. The prompt is not among them: staleness
-# keys on the digest of what was sent
+# keys on the prompt hash of what was sent
 DEFAULT = Configuration(model=MODEL, effort=EFFORT, pin=PIN, temperature=TEMPERATURE)
 
 
@@ -50,7 +49,7 @@ class ClassifierError(Exception):
 
 
 def request_hash(candidates: Sequence[str], code: str) -> str:
-    return digest(SYSTEM, prompt(candidates, code))
+    return prompt_hash(SYSTEM, prompt(candidates, code))
 
 
 def classify(

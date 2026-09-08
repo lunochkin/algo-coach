@@ -96,7 +96,7 @@ def test_no_verdict_is_an_error(tmp_path):
         read(tmp_path, FakeTransport.answering(Verdict()))
 
 
-def test_the_digest_is_per_pair(tmp_path):
+def test_the_prompt_hash_is_per_pair(tmp_path):
     """A template edited on one card re-tests that card's pairs and leaves
     every other one settled."""
     one, edited = seeded(

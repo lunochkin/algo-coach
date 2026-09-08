@@ -29,7 +29,7 @@ def derive(
         claim = standing.get(solution.id)
         if claim is not None:
             derived[solution.problem_id] |= set(claim.techniques)
-    # sorted: a claim's prompt is rendered from these, and the digest is taken
+    # sorted: a claim's prompt is rendered from these, and the prompt hash is taken
     # over that text.
     return {problem_id: sorted(codes) for problem_id, codes in derived.items()}
 

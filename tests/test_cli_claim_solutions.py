@@ -29,7 +29,7 @@ def test_the_command_reads_the_corpus(root, monkeypatch, capsys):
 
 
 def test_a_second_run_reads_nothing(root, monkeypatch, capsys):
-    """The digest is what a skip keys on, so a corpus that has not moved costs
+    """The prompt hash is what a skip keys on, so a corpus that has not moved costs
     no call the second time."""
     run(monkeypatch, FakeTransport.answering(Verdict(["sorting"])))
     capsys.readouterr()

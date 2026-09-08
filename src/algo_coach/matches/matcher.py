@@ -3,8 +3,7 @@ out, as the technique classifier works."""
 
 from collections.abc import Sequence
 
-from algo_coach.calls import CallLog, Transport, chosen, offer
-from algo_coach.calls import prompt_hash as digest
+from algo_coach.calls import CallLog, Transport, chosen, offer, prompt_hash
 from algo_coach.schema import Call, Card, Configuration, Problem, Solution, Template, TemplateKind
 
 MODEL = "openai/gpt-oss-120b"
@@ -33,7 +32,7 @@ If the solution displays none of the candidates, name none of them."""
 
 
 # Which matcher read a pair. The prompt is not among them: it varies per pair,
-# so what a match came from is the digest of what that pair was sent.
+# so what a match came from is the prompt hash of what that pair was sent.
 DEFAULT = Configuration(model=MODEL, effort=EFFORT, pin=PIN, temperature=TEMPERATURE)
 
 
@@ -48,7 +47,7 @@ def candidates(card: Card) -> list[Template]:
 # Per pair, so a template edited on one card re-tests that card and leaves
 # every other pair settled.
 def request_hash(card: Card, problem: Problem, solution: Solution) -> str:
-    return digest(SYSTEM, prompt(candidates(card), problem, solution))
+    return prompt_hash(SYSTEM, prompt(candidates(card), problem, solution))
 
 
 def match(

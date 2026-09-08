@@ -127,7 +127,7 @@ def test_the_site_is_sampled_where_the_other_answering_ones_are_greedy(tmp_path)
 
 
 def test_two_forms_to_avoid_are_two_questions(tmp_path):
-    """The digest keys the skip, so a template whose trigger was edited is
+    """The prompt hash keys the skip, so a template whose trigger was edited is
     re-asked and the rest are not."""
     assert request_hash(STATEMENT, AVOID) != request_hash(STATEMENT, "something else")
 

@@ -110,7 +110,7 @@ def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
 
 
 def test_each_step_copies_the_configuration_of_its_own_call(tmp_path):
-    """A resume starts at the first step whose configuration or digest moved,
+    """A resume starts at the first step whose configuration or prompt hash moved,
     so a draft holding one for the run would answer for every step."""
     result, _ = run(tmp_path, FakeWriter(generator=BUILDS))
 

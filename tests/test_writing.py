@@ -29,7 +29,7 @@ def test_the_draft_holds_what_the_generator_returned():
 
 
 def test_the_draft_copies_the_generator_call_whole():
-    """A resume starts at the first step whose configuration or digest moved,
+    """A resume starts at the first step whose configuration or prompt hash moved,
     and a copy taken partly could be compared with nothing."""
     made = Writing().draft(GENERATED, a_call())
 

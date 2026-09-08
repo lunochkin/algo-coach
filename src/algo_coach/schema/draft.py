@@ -125,7 +125,7 @@ class Draft(BaseModel):
     won: list[SettledCase] = Field(default_factory=list[SettledCase])
 
     # the configuration each step ran at, copied as its call returned. A resume
-    # starts at the first step whose configuration or digest moved, which is
+    # starts at the first step whose configuration or prompt hash moved, which is
     # why both are held here rather than only the outputs
     generator_provenance: MachineProvenance | None = None
     blind_provenance: MachineProvenance | None = None

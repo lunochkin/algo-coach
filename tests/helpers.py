@@ -30,7 +30,7 @@ T0 = datetime(2026, 1, 1, tzinfo=UTC)
 # without restating what produced it.
 CONFIGURATION = Configuration(model="a-model", effort="medium", pin=PIN, temperature=TEMPERATURE)
 
-# The digest `machine_claim` defaults to. A test naming a different one is
+# The prompt hash `machine_claim` defaults to. A test naming a different one is
 # saying the prompt changed, which is the only thing that makes a claim stale.
 PROMPT_HASH = "0123456789ab"
 

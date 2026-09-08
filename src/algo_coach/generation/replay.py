@@ -1,6 +1,6 @@
 """Re-asking a call site about a problem the store already holds: the four
 answering sites over a stored statement, skipping the pairs this configuration
-has answered at the digest it would send now.
+has answered at the prompt hash it would send now.
 
 Read-only over the corpus, for the reason `flows.md` gives.
 """
@@ -88,7 +88,7 @@ class Subject:
         """The set the first round's survivors were decided against: what the
         statement was written with, and what the fuzz pass kept. A later
         round's own cases and the separating one were not there, and a loop
-        shown them decides other survivors and sends another digest."""
+        shown them decides other survivors and sends another prompt hash."""
         return [one for one in self.cases if one.round == 0]
 
 
@@ -212,9 +212,9 @@ def blind_replay(
     """A second reading of the statement, settled against the cases the problem
     already carries rather than against the canonical it was written with."""
     configuration = bench.blind
-    digest = blind_hash(subject.problem.statement)
-    if not fresh and asked_already(stored, CallSite.BLIND, subject, configuration, digest):
-        notes("blind", "answered at this digest")
+    prompt_hash = blind_hash(subject.problem.statement)
+    if not fresh and asked_already(stored, CallSite.BLIND, subject, configuration, prompt_hash):
+        notes("blind", "answered at this prompt hash")
         return Asked(skipped=True)
 
     notes("blind", "writing the reference from the statement alone")
@@ -249,9 +249,9 @@ def naive_replay(
     if subject.template is None or not subject.template.speedup:
         return Asked()
     configuration = bench.naive
-    digest = naive_hash(subject.problem.statement, subject.template.trigger)
-    if not fresh and asked_already(stored, CallSite.NAIVE, subject, configuration, digest):
-        notes("naive", "answered at this digest")
+    prompt_hash = naive_hash(subject.problem.statement, subject.template.trigger)
+    if not fresh and asked_already(stored, CallSite.NAIVE, subject, configuration, prompt_hash):
+        notes("naive", "answered at this prompt hash")
         return Asked(skipped=True)
 
     notes("naive", "writing the solution the search measures against")
@@ -280,21 +280,23 @@ def discrimination_replay(
     notes: Notes,
 ) -> Asked:
     """The mutation loop over the stored canonical. The survivors are in the
-    prompt, so they are computed before the digest can be known."""
+    prompt, so they are computed before the prompt hash can be known."""
     configuration = bench.discrimination
     alive = standing(subject.canonical, subject.declared, cap_ms=cap_ms)
     if not alive:
         notes("mutants", "the stored cases kill every mutant")
         return Asked()
 
-    digest = discrimination_hash(
+    prompt_hash = discrimination_hash(
         subject.problem.statement,
         subject.canonical,
         alive,
         [one.args for one in subject.declared],
     )
-    if not fresh and asked_already(stored, CallSite.DISCRIMINATION, subject, configuration, digest):
-        notes("mutants", "answered at this digest")
+    if not fresh and asked_already(
+        stored, CallSite.DISCRIMINATION, subject, configuration, prompt_hash
+    ):
+        notes("mutants", "answered at this prompt hash")
         return Asked(skipped=True)
 
     hardened = harden(
@@ -338,9 +340,9 @@ def inputs_replay(
         notes("timing", "no naive solution stored")
         return Asked()
     configuration = bench.inputs
-    digest = inputs_hash(subject.problem.statement)
-    if not fresh and asked_already(stored, CallSite.INPUTS, subject, configuration, digest):
-        notes("timing", "answered at this digest")
+    prompt_hash = inputs_hash(subject.problem.statement)
+    if not fresh and asked_already(stored, CallSite.INPUTS, subject, configuration, prompt_hash):
+        notes("timing", "answered at this prompt hash")
         return Asked(skipped=True)
 
     notes("timing", "writing the input generator")
@@ -366,14 +368,14 @@ def asked_already(
     site: CallSite,
     subject: Subject,
     configuration: Configuration,
-    digest: str,
+    prompt_hash: str,
 ) -> bool:
     return answered(
         stored,
         site=site,
         problem_id=subject.problem.id,
         configuration=configuration,
-        prompt_hash=digest,
+        prompt_hash=prompt_hash,
     )
 
 

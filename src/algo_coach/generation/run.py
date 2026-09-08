@@ -317,7 +317,7 @@ def resume(
     drafts: DraftStore | None = None,
 ) -> Resumed:
     """One stored draft carried forward, from the first step whose
-    configuration or digest moved and otherwise from the one it never took.
+    configuration or prompt hash moved and otherwise from the one it never took.
 
     A resume never serves: landing is the only way into `created`, and it still
     requires every gate the writing requires.

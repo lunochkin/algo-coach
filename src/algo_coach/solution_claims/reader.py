@@ -11,8 +11,8 @@ from algo_coach.techniques import codes
 
 
 def candidates() -> list[str]:
-    # sorted: the order reaches the prompt the digest is taken over, and a
-    # frozenset's own order moves with the interpreter's hash seed.
+    # sorted: the order reaches the prompt, so the prompt hash is taken over it,
+    # and a frozenset's own order moves with the interpreter's hash seed.
     return sorted(codes())
 
 
