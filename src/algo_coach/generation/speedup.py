@@ -6,7 +6,7 @@ what the case at that size returns.
 """
 
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import partial
 from typing import Any
@@ -30,7 +30,8 @@ class Missing(StrEnum):
     because the three ceiling and bound answers assert different things about
     the speedup a template claimed.
 
-    `INPUT_TOO_LARGE` asserts nothing: the walk stopped before it could look.
+    `INPUT_TOO_LARGE` asserts nothing: the naive solution finished at the largest
+    storable input, and a separation may sit above it.
     `CASE_TOO_LARGE` proves it and carries the size, and only the case is lost.
     `NAIVE_FINISHED` is a defect in the run rather than in the problem, and
     `corpus.md` gives the three things that produce it.
@@ -39,7 +40,7 @@ class Missing(StrEnum):
     NAIVE_FINISHED = "naive_finished"
     NAIVE_CRASHED = "naive_crashed"
     CANONICAL_FAILED = "canonical_failed"
-    # the built input crossed the ceiling before the naive solution exceeded the cap
+    # every storable input the walk reached, the naive solution finished under the cap
     INPUT_TOO_LARGE = "input_too_large"
     # a separating size was found, and the case at it weighs too much
     CASE_TOO_LARGE = "case_too_large"
@@ -95,30 +96,25 @@ def search(
     if smallest > largest:
         raise ValueError("the smallest size the search starts at is within the constraints")
 
-    under, over, over_ms, over_args, capped = smallest, None, None, [], False
-    size = smallest
-    while True:
-        args = list(make(size))
-        # stopped before the run rather than after it: an input over the
-        # ceiling is one no case can carry, whatever the naive solution does on it
-        if weighs(args) > ceiling:
-            capped = True
-            break
-        exceeded, elapsed = _paces(naive, args, cap_ms=cap_ms, measure_ms=measure_ms)
-        if exceeded is None:
-            return Searched(missing=Missing.NAIVE_CRASHED)
-        if exceeded:
-            over, over_ms, over_args = size, elapsed, args
-            break
-        under = size
-        if size >= largest:
-            break
-        # clamped rather than doubled past it: the largest legal input is the
-        # one size a search that found nothing has to have tried
-        size = min(size * 2, largest)
+    walk = _doubled(
+        make, naive, smallest, largest, cap_ms=cap_ms, measure_ms=measure_ms, ceiling=ceiling
+    )
+    if isinstance(walk, Missing):
+        return Searched(missing=walk)
+    if walk.over is None and walk.capped and walk.fitted is not None:
+        # the doubling leaves a factor of two under the ceiling untried, and a
+        # quadratic naive solution separates in exactly that gap
+        edge, args = _storable(make, walk.fitted, walk.size, ceiling)
+        if edge > walk.fitted:
+            exceeded, elapsed = _paces(naive, args, cap_ms=cap_ms, measure_ms=measure_ms)
+            if exceeded is None:
+                return Searched(missing=Missing.NAIVE_CRASHED)
+            if exceeded:
+                walk.over, walk.over_ms, walk.over_args = edge, elapsed, args
 
-    if over is None:
-        return Searched(missing=Missing.INPUT_TOO_LARGE if capped else Missing.NAIVE_FINISHED)
+    if walk.over is None:
+        return Searched(missing=Missing.INPUT_TOO_LARGE if walk.capped else Missing.NAIVE_FINISHED)
+    under, over, over_ms, over_args = walk.under, walk.over, walk.over_ms, walk.over_args
 
     # runtime is taken to grow with the size: the halving needs it, and nothing
     # short of running every size in between would establish it
@@ -146,6 +142,69 @@ def search(
         naive_ms=over_ms,
         ceiling=ceiling,
     )
+
+
+@dataclass
+class _Walk:
+    """Where the doubling stopped: the last size the naive solution finished at, the
+    first it exceeded the cap at, and whether the ceiling ended it first."""
+
+    size: int
+    under: int
+    fitted: int | None = None
+    over: int | None = None
+    over_ms: int | None = None
+    over_args: list[Any] = field(default_factory=list[Any])
+    capped: bool = False
+
+
+def _doubled(
+    make: Callable[[int], Sequence[Any]],
+    naive: str,
+    smallest: int,
+    largest: int,
+    *,
+    cap_ms: int,
+    measure_ms: int,
+    ceiling: int,
+) -> _Walk | Missing:
+    walk = _Walk(size=smallest, under=smallest)
+    while True:
+        args = list(make(walk.size))
+        # stopped before the run rather than after it: an input over the
+        # ceiling is one no case can carry, whatever the naive solution does on it
+        if weighs(args) > ceiling:
+            walk.capped = True
+            return walk
+        walk.fitted = walk.size
+        exceeded, elapsed = _paces(naive, args, cap_ms=cap_ms, measure_ms=measure_ms)
+        if exceeded is None:
+            return Missing.NAIVE_CRASHED
+        if exceeded:
+            walk.over, walk.over_ms, walk.over_args = walk.size, elapsed, args
+            return walk
+        walk.under = walk.size
+        if walk.size >= largest:
+            return walk
+        # clamped rather than doubled past it: the largest legal input is the
+        # one size a search that found nothing has to have tried
+        walk.size = min(walk.size * 2, largest)
+
+
+def _storable(
+    make: Callable[[int], Sequence[Any]], fits: int, over: int, ceiling: int
+) -> tuple[int, list[Any]]:
+    """The largest size under the ceiling, between one that fitted and one that
+    did not. Costs builds alone: nothing is timed until the size is known."""
+    args: list[Any] = []
+    while over - fits > 1:
+        middle = (fits + over) // 2
+        built = list(make(middle))
+        if weighs(built) > ceiling:
+            over = middle
+        else:
+            fits, args = middle, built
+    return fits, args
 
 
 def _settled(

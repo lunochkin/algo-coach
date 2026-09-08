@@ -189,9 +189,12 @@ The test cases decide whether a solution to a generated problem is correct.
 - **A search stores no case for one of two reasons, and the draft names the two
   apart.** The two reasons assert opposite things. A search that reached a
   separating size and could not store the case has established the speedup. It
-  reports the size and both timings. A search whose walk crossed the ceiling
-  before the naive solution ever exceeded the cap has established nothing: a
-  separation may sit at a size the walk could not look at.
+  reports the size and both timings. A search whose naive solution finished at
+  the largest storable input has established nothing: a separation may sit
+  above the ceiling, where no case can hold it.
+- **The walk bisects to the ceiling before it gives up.** Doubling leaves a
+  factor of two under the ceiling untried, and a quadratic naive solution
+  separates in exactly that gap: five of the first eighteen held drafts did.
 
 - **A search that stored no case is not a defect either way.** A run folding
   those two answers together with a naive solution that finished at the

@@ -2,6 +2,7 @@ import pytest
 from helpers import a_call
 
 from algo_coach.generation.speedup import CEILING, Missing, search
+from algo_coach.runner import weighs
 from algo_coach.schema import ExpectedSource, MachineProvenance
 
 # a naive solution whose cost grows with the square of the size, as a naive solution
@@ -154,6 +155,27 @@ def test_an_input_over_the_ceiling_is_not_a_case():
     )
 
     assert found.missing is Missing.INPUT_TOO_LARGE
+
+
+def test_the_walk_tries_the_largest_storable_input_before_giving_up():
+    """Doubling leaves a factor of two under the ceiling untried, and a
+    quadratic naive solution separates in that gap. Three fits and four does not, and
+    the naive solution exceeds the cap at three."""
+    # the case weighs its answer beside its arguments
+    ceiling = weighs([list(range(3))]) + weighs(3)
+    listed = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) ** 2 / 200)\n"
+    listed += "    return len(xs)\n"
+
+    found = searched(
+        make=lambda size: [list(range(size))],
+        canonical="def solve(xs):\n    return len(xs)\n",
+        naive=listed,
+        reference="def solve(xs):\n    return len(xs)\n",
+        ceiling=ceiling,
+    )
+
+    assert found.found
+    assert found.size <= 3
 
 
 def unstorable():
