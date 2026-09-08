@@ -67,7 +67,7 @@ Cases read off a finished solution test what that code does rather than what
 the problem asks.
 
 The statement admits one reading. Another solver will write a solution from it
-alone, and a disagreement between the two rejects the draft. State how ties
+alone, and a disagreement between the two discards the problem. State how ties
 are broken and what an empty input returns.
 
 A case carries two JSON texts. `args` is an array of the positional arguments,
@@ -244,4 +244,4 @@ def generate(
 def written_for(problems: Iterable[Problem], template: Template) -> list[str]:
     # every status, retired included: what the next run differs from is the
     # corpus rather than the part of it that is served
-    return [problem.statement for problem in problems if problem.generated_for == template.id]
+    return [problem.statement for problem in problems if problem.target_template_id == template.id]
