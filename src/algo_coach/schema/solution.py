@@ -25,6 +25,6 @@ class Solution(MachineProvenance):
 
     @model_validator(mode="after")
     def _provenance_required(self) -> Solution:
-        """A model wrote every solution, so there is no hand arm to exempt."""
+        """A model wrote every solution, so there is no user arm to exempt."""
         self.check_provenance(True)
         return self

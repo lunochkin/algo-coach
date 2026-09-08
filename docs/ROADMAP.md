@@ -36,7 +36,7 @@ sitting. The claim and self-label prompt survives unchanged.
 
 ## Phase 3 — Technique attribution — done
 
-- Hand claims over the backlog: the eval set, adjudicated against a frontier
+- User claims over the backlog: the eval set, adjudicated against a frontier
   model.
 - A classifier constrained to the problem's own candidates, scored per
   technique by set equality.
@@ -84,7 +84,7 @@ One origin end to end. The ingest path removed before generation was written.
   attempts and 3962 problems, with the claims and the call log.
 - The live store emptied, then `origin`, `source_status`, `external_id` and
   the platform fields removed.
-- The eval set did not survive: 138 hand claims key to pushed attempts.
+- The eval set did not survive: 138 user claims key to pushed attempts.
 
 ## Phase 6 — Problem generation — done
 
@@ -153,7 +153,7 @@ The worth of a generated corpus, measured rather than asserted.
 
 - The hand pass, which writes the matcher's reference and is the only reading
   of a generated problem no model produced.
-- Hand matches over pairs of a template and a solution, from the templates
+- User matches over pairs of a template and a solution, from the templates
   alone.
 - The matcher scored per pair and grouped per template, positive verdicts in
   both directions.

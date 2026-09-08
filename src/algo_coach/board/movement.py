@@ -1,6 +1,6 @@
 """How far the classifier's claims move the board off the fallback.
 
-A sanity check, never a criterion: only the hand claims say a claim is right.
+A sanity check, never a criterion: only the user's claims say a claim is right.
 """
 
 from collections.abc import Iterable, Mapping

@@ -187,7 +187,7 @@ def test_a_hand_match_is_never_what_a_run_leans_on(tmp_path):
     nothing about what still has to be read."""
     cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
     hashes = {(cards[0].id, "s-p1"): request_hash(cards[0], corpus[0], canonicals(*corpus)[0])}
-    hand = [
+    user = [
         TemplateMatch(
             id=f"m{index}",
             created_at=datetime.now(UTC),
@@ -201,7 +201,7 @@ def test_a_hand_match_is_never_what_a_run_leans_on(tmp_path):
 
     assert (
         outstanding(
-            questions(cards, corpus, canonicals(*corpus)), hand, hashes, configuration=DEFAULT
+            questions(cards, corpus, canonicals(*corpus)), user, hashes, configuration=DEFAULT
         )
         != []
     )

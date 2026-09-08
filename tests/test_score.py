@@ -65,7 +65,7 @@ def test_a_wrong_set_naming_the_technique_is_not_a_miss():
 
 
 def test_every_disagreement_is_returned():
-    """Reviewing them is how a mislabelled hand claim is caught: the eval
+    """Reviewing them is how a mislabelled user claim is caught: the eval
     measures agreement, and only a reader can say which side was wrong."""
     result = score(
         {"a1": ["greedy"], "a2": ["sorting"]},

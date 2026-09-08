@@ -1,5 +1,5 @@
-"""The order hand matches are asked for, levelled per template rather than
-per card: a form no hand match covers is a gap no card-level count reports."""
+"""The order user matches are asked for, levelled per template rather than
+per card: a form no user match covers is a gap no card-level count reports."""
 
 import random
 from collections import Counter
@@ -19,40 +19,40 @@ def unsettled(
     card: str | None = None,
     seed: int = 0,
 ) -> list[Question]:
-    """The questions a hand match would settle something about, in the order to
+    """The questions a user match would settle something about, in the order to
     ask them. `card` narrows the pool to one. A machine verdict does not take a
-    question out of it: a machine match is what the hand match is scored
+    question out of it: a machine match is what the user's match is scored
     against."""
     asking = [
         question
         for question in questions(cards, problems, solutions)
         if card is None or question.card.slug == card
     ]
-    hand = {
+    user = {
         (match.template_id, match.solution_id)
         for match in matches
         if match.source is MatchSource.USER
     }
     return spread(
-        [question for question in asking if not settled(question, hand)],
-        # Every hand record, not only those on what is being asked: the counts
+        [question for question in asking if not settled(question, user)],
+        # Every user record, not only those on what is being asked: the counts
         # say what the reference already covers.
         covered=Counter(match.template_id for match in matches if match.source is MatchSource.USER),
         seed=seed,
     )
 
 
-def settled(question: Question, hand: set[tuple[str, str]]) -> bool:
-    """Whether the hand has answered every candidate of this card for this
+def settled(question: Question, user: set[tuple[str, str]]) -> bool:
+    """Whether the user has answered every candidate of this card for this
     solution."""
     return all(
-        (template.id, question.solution.id) in hand for template in candidates(question.card)
+        (template.id, question.solution.id) in user for template in candidates(question.card)
     )
 
 
 def spread(asking: Sequence[Question], *, covered: Counter[str], seed: int = 0) -> list[Question]:
     """The pool ordered so no single card's forms carry the reference: each
-    step takes from the card whose template has the fewest hand matches, so any
+    step takes from the card whose template has the fewest user matches, so any
     prefix is spread. Shuffled within a card by `seed`."""
     pool = list(asking)
     random.Random(seed).shuffle(pool)

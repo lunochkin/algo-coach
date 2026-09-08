@@ -30,7 +30,7 @@ def corpus(root, *, backtracking: int = 3, union: int = 3):
 
 
 def slugs(cards):
-    """Template slug to minted id — what a hand match is written against, and
+    """Template slug to minted id — what a user match is written against, and
     what a seed file cannot carry."""
     return {one.slug: one.id for card in cards for one in card.templates}
 
@@ -76,7 +76,7 @@ def test_the_template_with_the_fewest_hand_matches_is_drawn_first(tmp_path):
 def test_a_template_nothing_reached_pulls_its_card_forward(tmp_path):
     """What levelling on template catches and levelling on card cannot.
 
-    A re-seeded card gains a form, and its siblings carry forty hand matches
+    A re-seeded card gains a form, and its siblings carry forty user matches
     while the new one carries none. Counted per card the card is the best
     covered there is; counted per template it holds the only gap.
     """
@@ -138,7 +138,7 @@ def test_another_seed_gives_another_order(tmp_path):
 
 
 def test_a_machine_match_does_not_settle_a_question(tmp_path):
-    """The hand match is what a machine match is scored against, so a match
+    """The user's match is what a machine match is scored against, so a match
     never takes its own question out of the pool."""
     cards, problems, solutions = corpus(tmp_path)
     id = slugs(cards)

@@ -189,7 +189,7 @@ def test_a_hand_match_is_blind_by_default():
 
 
 def test_a_hand_match_records_what_its_author_had_seen():
-    """A hand match made with a verdict in view is no longer independent of
+    """A user match made with a verdict in view is no longer independent of
     it, and the agreement it is later scored on measures rather less."""
     match = user_match("t1", "s1", matched=True, informed_by=["call-1"])
 
@@ -265,7 +265,7 @@ def generated(**overrides):
 
 def test_a_generated_problem_names_what_wrote_it():
     """Required unconditionally: generated is a problem's only origin, so
-    there is no hand arm to exempt as there is for a claim or a match."""
+    there is no user arm to exempt as there is for a claim or a match."""
     problem = generated()
 
     assert (

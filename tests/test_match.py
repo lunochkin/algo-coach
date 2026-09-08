@@ -43,7 +43,7 @@ def test_a_hand_match_is_blind_unless_it_says_otherwise():
 
 def test_a_hand_match_records_the_verdicts_its_author_saw():
     """Not provenance: provenance is what produced a machine match, this is what its
-    author had in view. A hand record carries the second and never the
+    author had in view. A user record carries the second and never the
     first."""
     match = make_match(MatchSource.USER, informed_by=["call-1", "call-2"])
 
@@ -52,7 +52,7 @@ def test_a_hand_match_records_the_verdicts_its_author_saw():
 
 
 def test_verdicts_are_named_one_by_one_rather_than_flagged():
-    """A hand match made after seeing one matcher's verdict is still
+    """A user match made after seeing one matcher's verdict is still
     independent of another's, and configurations are scored against the same
     records."""
     match = make_match(MatchSource.USER, informed_by=["call-1"])
@@ -83,7 +83,7 @@ def test_a_match_records_its_source():
 
 def test_a_machine_match_records_what_produced_it():
     """Provenance as a claim carries it: re-deriving has to find the stale
-    matches and leave the hand ones alone."""
+    matches and leave the user's alone."""
     match = make_match(MatchSource.CLASSIFIER, **PROVENANCE_FIELDS)
 
     assert {field: getattr(match, field) for field in PROVENANCE_FIELDS} == PROVENANCE_FIELDS
@@ -107,7 +107,7 @@ def test_a_machine_match_needs_every_field_that_produced_it(missing):
 
 @pytest.mark.parametrize("field", [*PROVENANCE_FIELDS, "temperature", "provider"])
 def test_a_hand_match_carries_no_provenance(field):
-    """Nothing re-derives a hand match, so naming a model would name one that
+    """Nothing re-derives a user match, so naming a model would name one that
     never touched it."""
     value = 0.0 if field == "temperature" else PROVENANCE_FIELDS.get(field, "a-company")
     with pytest.raises(ValidationError, match=field):
@@ -173,7 +173,7 @@ def test_a_generator_match_has_seen_nothing():
 
 
 def test_the_three_writers_are_named_apart():
-    """A hand match stands over both machine sources, and a generator's
+    """A user match stands over both machine sources, and a generator's
     assertion stands over a matcher's match on the same pair."""
     assert set(MatchSource) == {
         MatchSource.USER,

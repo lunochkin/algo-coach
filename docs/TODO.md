@@ -54,7 +54,7 @@ audit, not generating.
       read. Not as a set: a match asserts a pair
 - [ ] Report the positive verdicts in both directions. Accuracy would score a
       matcher that names nothing in the nineties
-- [ ] Skip a pair the hand settled on the run path, and read it in the eval.
+- [ ] Skip a pair the user settled on the run path, and read it in the eval.
       The skip's condition follows from the reading's record shape, which is
       deferred
 - [ ] Lift the scorer out of `claims` rather than copying it. It already prints
@@ -214,7 +214,7 @@ whatever phase is current.
       here. The goal is not that none exists, since the doc is target state.
       The goal is that none is unknown
 - [ ] Classify freely over the whole vocabulary and intersect in code, once the
-      hand claims can score it against the constrained one. A verdict outside
+      user claims can score it against the constrained one. A verdict outside
       the problem's own techniques is the only signal that they are the gap
 - [ ] Point the matcher at an attempt as well as a canonical, and keep the
       records apart as the technique readers do. Triggered when a rung or a

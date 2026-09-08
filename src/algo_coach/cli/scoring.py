@@ -60,7 +60,7 @@ def alone(result: Comparison) -> None:
     print()
     print(table(("technique", "attempts", "exact", "missed", "over"), rows(result.scores)))
 
-    # In full: reading them is how a mislabelled hand claim is caught.
+    # In full: reading them is how a mislabelled user claim is caught.
     for disagreement in only.disagreements:
         user = " ".join(disagreement.user)
         machine = " ".join(disagreement.machine)
@@ -211,7 +211,7 @@ def outlay(scored: Score) -> str:
 
 def rows(scored_entries: Sequence[ConfigurationScore]) -> list[tuple[str, ...]]:
     """Per technique, as the board is. One `attempts` column however many
-    configurations, since the denominator is the hand claims. A technique no
+    configurations, since the denominator is the user's claims. A technique no
     claim named is still a row, carrying the over-claims that put it there."""
     counted = [
         {row.technique: row for row in scored.score.per_technique} for scored in scored_entries

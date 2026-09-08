@@ -49,7 +49,7 @@ def questions(
 
 def at_configuration(match: TemplateMatch, configuration: Configuration, prompt_hash: str) -> bool:
     """Whether this matcher, asked this question, produced the record. The
-    provider that served it is recorded and never compared, and a hand
+    provider that served it is recorded and never compared, and a user
     match is at no configuration at all."""
     return match.source is MatchSource.CLASSIFIER and match.at_configuration(
         configuration, prompt_hash

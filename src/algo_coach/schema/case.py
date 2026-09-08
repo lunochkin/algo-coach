@@ -35,7 +35,7 @@ class TestCase(MachineProvenance):
 
     @model_validator(mode="after")
     def _provenance_required(self) -> TestCase:
-        """A model proposed every case's arguments, so there is no hand arm."""
+        """A model proposed every case's arguments, so there is no user arm."""
         self.check_provenance(True)
         return self
 

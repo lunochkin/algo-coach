@@ -76,7 +76,7 @@ def test_an_attempt_without_code_is_never_asked_about(tmp_path, monkeypatch):
 
 
 def test_a_claimed_attempt_is_not_asked_again(backlog):
-    """The user claims first and the classifier fills the rest, so a hand
+    """The user claims first and the classifier fills the rest, so a user
     claim is never overwritten by a machine one."""
     backlog.append_claim(
         AttemptClaim(

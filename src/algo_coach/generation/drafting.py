@@ -22,7 +22,7 @@ def advanced(
 
 
 def rejected(drafts: DraftStore | None, draft: Draft, gate: Gate | None) -> Draft:
-    """A gate the run reached, as against the hand exit `reject` writes."""
+    """A gate the run reached, as against the exit `reject` writes by hand."""
     return held(drafts, moved(draft, WritingState.REJECTED, gate=gate))
 
 

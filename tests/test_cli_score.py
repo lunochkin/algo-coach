@@ -60,7 +60,7 @@ def test_the_rows_carry_what_was_over_claimed(hand_claimed, monkeypatch, capsys)
 
 
 def test_the_disagreements_are_printed_in_full(hand_claimed, monkeypatch, capsys):
-    """Reading them is how a mislabelled hand claim is caught, and a corrected
+    """Reading them is how a mislabelled user claim is caught, and a corrected
     claim supersedes the earlier one."""
     run(monkeypatch, FakeTransport.answering(Verdict(["sorting"])))
 

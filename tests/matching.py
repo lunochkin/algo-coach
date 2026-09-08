@@ -86,7 +86,7 @@ def canonicals(*problems: Problem) -> list[Solution]:
 
 def stored(root, *problems: Problem) -> list[Problem]:
     """Stored as the engine holds them: the record carries no techniques, and a
-    hand claim on the canonical `canonicals()` mints for it carries the ones
+    user claim on the canonical `canonicals()` mints for it carries the ones
     the test named. Returned carrying them, as `load_problems` returns them."""
     store = ProblemStore(root)
     for one in problems:

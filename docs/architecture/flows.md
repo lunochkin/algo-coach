@@ -466,7 +466,7 @@ at that writer's own consistency. The reference is therefore a set two writers
 reached: the user's blind pass, a frontier model reading the same attempts, and
 every divergence resolved by hand.
 
-1. The blind hand claims stand as pass one. No claim is added to them while a
+1. The blind user claims stand as pass one. No claim is added to them while a
    machine claim is in view.
 2. The frontier model reads those same attempts as a scored configuration. Its
    claims are machine claims, stored and never standing.

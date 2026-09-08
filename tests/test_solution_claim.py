@@ -67,7 +67,7 @@ def test_a_machine_reading_carries_its_whole_configuration():
 def test_a_hand_reading_carries_none_of_it():
     """Nothing re-derives it, so any of it would name a configuration that
     never touched the record."""
-    with pytest.raises(ValidationError, match="hand record carries no"):
+    with pytest.raises(ValidationError, match="user record carries no"):
         make_solution_claim(ClaimSource.USER, **PROVENANCE_FIELDS)
 
 

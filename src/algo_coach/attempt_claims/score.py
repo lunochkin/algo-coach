@@ -23,7 +23,7 @@ class TechniqueScore(BaseModel):
 
 
 class Disagreement(BaseModel):
-    """One attempt the two claims read differently. The hand claims are ground
+    """One attempt the two claims read differently. The user's claims are ground
     truth by construction, not by being right, so which is wrong is a reader's
     question."""
 

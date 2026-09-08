@@ -248,7 +248,7 @@ async def test_a_procedure_template_is_never_offered(hand_match_root):
 
 
 async def test_the_matcher_is_not_shown_by_default(hand_match_root):
-    """Blind, or the hand match records what it reviewed rather than what it
+    """Blind, or the user's match records what it reviewed rather than what it
     read: the first hand pass is what the line gets drawn by."""
     read_by_matcher(hand_match_root)
     async with sitting(hand_match_root, [], count=1, card="backtracking") as app:

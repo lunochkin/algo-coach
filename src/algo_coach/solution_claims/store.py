@@ -5,7 +5,7 @@ from algo_coach.storage import JsonlLog
 
 
 class SolutionClaimLog(JsonlLog[SolutionClaim]):
-    """Solution claims, hand and machine alike."""
+    """Solution claims, the user's and the machine's alike."""
 
     def __init__(self, root: Path) -> None:
         super().__init__(root, "solution_claims.jsonl", SolutionClaim)

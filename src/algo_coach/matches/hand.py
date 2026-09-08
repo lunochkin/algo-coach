@@ -1,4 +1,4 @@
-"""A hand match: which of a card's forms one solution displays."""
+"""A user match: which of a card's forms one solution displays."""
 
 from collections.abc import Iterable, Sequence
 

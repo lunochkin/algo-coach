@@ -50,11 +50,11 @@ def test_a_hand_reading_lands_beside_a_machine_one(tmp_path):
     question, not the log's."""
     log = SolutionClaimLog(tmp_path)
     machine = make_solution_claim()
-    hand = user_solution_claim("s1", ["sorting"])
+    user = user_solution_claim("s1", ["sorting"])
     log.append(machine)
-    log.append(hand)
+    log.append(user)
 
-    assert log.claims() == [machine, hand]
+    assert log.claims() == [machine, user]
 
 
 def test_the_set_is_read_per_solution(tmp_path):

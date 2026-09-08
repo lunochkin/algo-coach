@@ -47,7 +47,7 @@ def hand_claimed(tmp_path) -> AttemptLog:
 
 @pytest.fixture
 def two_problems(tmp_path) -> AttemptLog:
-    """A hand claim on each of two problems, so neither collapses into the
+    """A user claim on each of two problems, so neither collapses into the
     other and a run has two attempts to spend a call on."""
     root = tmp_path / "data"
     seed_problem(root, id="p1", techniques=["greedy", "sorting"])
@@ -452,7 +452,7 @@ class Counting:
 
 
 def spread(root, count: int) -> AttemptLog:
-    """A hand claim on each of `count` problems, so a run has that many calls
+    """A user claim on each of `count` problems, so a run has that many calls
     to spend per configuration."""
     log = AttemptLog(root)
     for index in range(count):

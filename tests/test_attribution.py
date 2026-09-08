@@ -198,25 +198,25 @@ def test_a_machine_claim_on_a_hand_claimed_attempt_is_kept_in_the_log(tmp_path):
     """Scored, never a candidate: it never reaches the board and never leaves
     the log, which is what makes it safe to store and scoreable later."""
     log = AttemptLog(tmp_path)
-    hand = make_claim(["greedy"], id="c1", source=ClaimSource.USER)
+    user = make_claim(["greedy"], id="c1", source=ClaimSource.USER)
     machine = make_claim(
         ["dynamic-programming"],
         id="c2",
         created_at=T0 + timedelta(hours=1),
         source=ClaimSource.CLASSIFIER,
     )
-    log.append_claim(hand)
+    log.append_claim(user)
     log.append_claim(machine)
 
-    assert log.claims() == [hand, machine]
-    assert standing_attempt_claims(log.claims())["a1"] == hand
+    assert log.claims() == [user, machine]
+    assert standing_attempt_claims(log.claims())["a1"] == user
 
 
 def test_the_rule_holds_over_a_stream_read_once():
     """A reader that iterated twice would see the second pass empty and hand
     the machine the attempt — silently, since there is nothing to raise on.
     Every caller passes a list today, so nothing else would catch it."""
-    hand = make_claim(["greedy"], id="c1", created_at=T0, source=ClaimSource.USER)
+    user = make_claim(["greedy"], id="c1", created_at=T0, source=ClaimSource.USER)
     machine = make_claim(
         ["dynamic-programming"],
         id="c2",
@@ -224,9 +224,9 @@ def test_the_rule_holds_over_a_stream_read_once():
         source=ClaimSource.CLASSIFIER,
     )
 
-    claims = standing_attempt_claims(claim for claim in [hand, machine])
+    claims = standing_attempt_claims(claim for claim in [user, machine])
 
-    assert claims["a1"] == hand
+    assert claims["a1"] == user
 
 
 def test_a_claim_on_another_attempt_does_not_leak():

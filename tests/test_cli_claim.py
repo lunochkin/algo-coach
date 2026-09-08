@@ -109,7 +109,7 @@ def test_an_already_claimed_attempt_is_not_asked_again(claim_root, monkeypatch, 
 
 
 def test_a_machine_claimed_attempt_is_still_offered(claim_root, monkeypatch, capsys):
-    """The classifier fills what no hand reached, and a user claim is what
+    """The classifier fills what no user claim reached, and a user claim is what
     corrects it — so a machine claim leaves the attempt in the pool. A pool
     that emptied as the classifier ran would freeze the eval set at whatever
     was labelled before the first run."""
@@ -530,7 +530,7 @@ def test_a_reading_of_another_attempt_is_not_recorded(claim_root, monkeypatch, c
 
 
 def test_an_undisputed_attempt_is_offered_for_revision(claim_root, monkeypatch, capsys):
-    """Reviewing only what a classifier contests corrects the hand claims in
+    """Reviewing only what a classifier contests corrects the user's claims in
     one direction: a claim both readers got wrong the same way is never
     revisited, and agreement climbs for reasons unrelated to either being
     right."""
@@ -649,7 +649,7 @@ def test_a_skip_still_records_nothing(claim_root, monkeypatch, capsys):
 
 
 def test_a_decline_can_supersede_an_earlier_claim(claim_root, monkeypatch, capsys):
-    """What the countRangeSum case needs: a hand claim revised to name none of
+    """What the countRangeSum case needs: a user claim revised to name none of
     the candidates, rather than deleted to get it out of the eval set."""
     claim_root.append_claim(user_claim("a1", ["greedy"]))
 

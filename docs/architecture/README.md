@@ -49,8 +49,10 @@ without redefining them. Grouped by the file that specifies the record.
   Written by the generator, the matcher or by hand.
 - **Matcher**: the model call reading a canonical beside its statement and
   naming the templates it displays.
-- **Hand record**: a claim or match written by the user rather than a model. Its
-  `source` says so. It stands over every machine record on the same question.
+- **User record**: a claim or match written by the user rather than a model. Its
+  `source` is `user`. It is written by hand: in the drill loop, or in a
+  `--by-hand` pass over what the loop never asked. It stands over every
+  machine record on the same question.
 
 ### Corpus
 

@@ -7,7 +7,7 @@ from algo_coach.schema import ClaimSource, Configuration, Solution, SolutionClai
 
 def at_configuration(claim: SolutionClaim, configuration: Configuration, prompt_hash: str) -> bool:
     """Whether this classifier, asked this question, produced the record. The
-    provider that served it is recorded and never compared, and a hand claim
+    provider that served it is recorded and never compared, and a user claim
     is at no configuration at all."""
     return claim.source is ClaimSource.CLASSIFIER and claim.at_configuration(
         configuration, prompt_hash

@@ -85,6 +85,6 @@ class SiteOutcome(MachineProvenance):
     @model_validator(mode="after")
     def _provenance_required(self) -> SiteOutcome:
         """A site writes an outcome only where it made a call, so there is no
-        hand arm to exempt."""
+        user arm to exempt."""
         self.check_provenance(True)
         return self

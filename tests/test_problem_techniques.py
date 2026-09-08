@@ -75,7 +75,7 @@ def test_a_canonical_nothing_read_contributes_nothing(problem):
 
 
 def test_the_user_reading_stands_over_a_later_machine_one(problem):
-    """A hand record adjudicates, and the machine's is kept and scored rather
+    """A user record adjudicates, and the machine's is kept and scored rather
     than promoted."""
     claims = [
         user_solution_claim("s1", ["greedy"]),

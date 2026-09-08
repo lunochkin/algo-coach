@@ -7,7 +7,7 @@ from algo_coach.schema.provenance import MachineProvenance
 
 
 class MatchSource(StrEnum):
-    USER = "user"  # a hand match: the set a machine run is scored against
+    USER = "user"  # the set a machine run is scored against
     GENERATOR = "generator"  # what it was told to write; an assertion, so no provenance
     CLASSIFIER = "classifier"
 

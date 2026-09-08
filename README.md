@@ -21,7 +21,7 @@ fluency, not beginners learning concepts.
 
 The design is in how the log treats what the model said, not in the fact that
 a model is in the loop: every reading is stored with the configuration that produced it,
-scored against hand claims, and outranked by the user's own record forever.
+scored against user claims, and outranked by the user's own record forever.
 
 Built and measured: the technique vocabulary, the attribution classifier, cards
 and template matching. Problem generation is built and has written no corpus
@@ -212,7 +212,7 @@ third-party platform, ingested and read. That corpus is archived under
 |---|---|
 | Attempts | 1,785, over 117 practice days |
 | Problems | ~4k, each carrying the statement matching reads |
-| Hand claims | 138 over 100 attempts, the adjudicated eval set |
+| User claims | 138 over 100 attempts, the adjudicated eval set |
 | Machine claims | 6,523 attempt claims |
 | Model calls | 7,644, each with its prompt, provenance and timings |
 
@@ -246,7 +246,7 @@ engine: the problem, the test cases that decide it, and the log. The engine
 fetches nothing from an external platform, and no third-party client sits in
 the loop.
 
-The board, the hand claim and the classifier ran daily over the archived
+The board, the user's claim and the classifier ran daily over the archived
 corpus. Writing the problems is built. Serving one, judging it and asking for
 the label are next, and the loop above is whole then.
 
@@ -346,7 +346,7 @@ Why it is shaped this way:
 seeding, the template matcher and the hand-match prompt. Against the archived
 corpus, nine cards pre-filtered to ~2.8k questions and ~14k pair verdicts.
 Next: a corpus written for the forms the cards teach. The reset left no pair
-carrying a hand reference, and none can carry one until problems exist to
+carrying a user reference, and none can carry one until problems exist to
 match by hand. Then the matcher's score against that hand pass, then ladder
 resolution, card runs and the recall trainer. Item by item in
 [`docs/TODO.md`](docs/TODO.md), phases 6 and 7.
@@ -411,7 +411,7 @@ uv run algo-coach <command>
 | `problem` | read one stored problem, or list the corpus |
 | `generate` | write problems for one of a card's templates |
 | `gaps` | core templates no stored solution displays |
-| `score` | the classifier against the hand claims, per technique |
+| `score` | the classifier against the user's claims, per technique |
 | `movement` | how far the classifier's claims move the board off the fallback |
 
 ## Where things are

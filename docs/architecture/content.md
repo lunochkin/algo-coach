@@ -137,7 +137,7 @@ either.
   problem itself, and nobody named a form for them. So every template they
   display is the matcher's answer, and one generator's match per problem is
   the most there can be.
-- **A generator's match carries no configuration**, as a hand match
+- **A generator's match carries no configuration**, as a user match
   carries none. The all-or-none rule is about machine matches, which are
   re-derivable
   and so must say by what. Re-deriving this pair would mean writing the
@@ -162,11 +162,11 @@ either.
   generator's own claim holds. The first answer lets a rung cover a core
   template and an optional one at once. The second answer is the only check on
   a generator drifting from its target.
-- **Three writers, ordered by what each of them knew.** A hand match
+- **Three writers, ordered by what each of them knew.** A user match
   stands over both machine sources. A generator's match stands over a
   matcher's match on the same pair, because the generator knew and the
   matcher inferred.
-- **A generator's match and a hand match are one record per template and
+- **A generator's match and a user match are one record per template and
   solution.**
   Each answers one pair, and pairs are independent: solutions arrive one at a
   time, and a set record would rewrite pairs already settled every time the
@@ -195,7 +195,7 @@ either.
 - **Re-derivation is the normal path, not an exception.** A attempt claim
   asks about one attempt, and the question never changes. A match asks about a
   template against a corpus of solutions that grows with every enumeration run.
-- **A hand record settles what stands, not what has been read.** The run path
+- **A user record settles what stands, not what has been read.** The run path
   skips a solution only where the hand pass settled every pair the call would
   have asked about. So the record a skip needs follows the deferred shape. The
   eval reads pairs matched by hand on purpose, because reading them is the
@@ -217,7 +217,7 @@ either.
   than in the model's behaviour. The stored form of an empty answer follows
   the deferred shape, and either way it is a verdict rather than a refusal to
   read.
-- **A hand match records the verdicts its author saw**, as a claim does. It is
+- **A user match records the verdicts its author saw**, as a claim does. It is
   written on every pair the answer settles, negatives included, because the
   pairs the user saw are a fact about the sitting rather than about the
   verdict.

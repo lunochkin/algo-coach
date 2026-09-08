@@ -91,7 +91,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             problem.techniques,
             [],
             empty="keep" if args.revise else "skip",
-            # Without `0`, a hand claim could only be overturned by deleting
+            # Without `0`, a user claim could only be overturned by deleting
             # it, which drops the attempt out of the eval set.
             none=NONE,
         )

@@ -48,7 +48,7 @@ attempt.
 - **A richer prompt can change the question rather than the answer.** Shown a
   problem's canonicals, a classifier can report which canonical the attempt
   resembles instead of which techniques its code used. Those are two different
-  labels, and the hand claims were made against the second label. A
+  labels, and the user's claims were made against the second label. A
   configuration that moves the question is not comparable to one that answers
   it better.
 - **A claim is scored against the user's own**, per technique rather than
@@ -68,7 +68,7 @@ attempt.
 - **One list of columns serves whichever renderer prints a score.** A metric
   added to one renderer and not the other prints a number that stopped being
   true.
-- **The hand claims are an eval set and a correction path**, never training
+- **The user's claims are an eval set and a correction path**, never training
   data. The engine trains nothing.
 - **A label is invalidated by which classifier informed it, not by the fact
   that one did.** A claim made with the scored configuration's claim in view
@@ -98,7 +98,7 @@ attempt.
   decline
   supersedes an earlier claim as any machine claim does.
 - **A decline is scored all the same.** A decline asserts that none of these
-  candidates apply, so a hand claim naming one is a miss against every
+  candidates apply, so a user claim naming one is a miss against every
   technique the user named. Unscored, declining would pay: each decline would
   leave a smaller denominator and a better share over it. Only an attempt
   nothing read stays unscored, and the count of declines prints beside the

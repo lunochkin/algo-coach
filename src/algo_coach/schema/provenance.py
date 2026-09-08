@@ -67,11 +67,11 @@ class MachineProvenance(BaseModel):
         )
 
     def check_provenance(self, machine: bool) -> None:
-        """All of it on a machine record, none of it on a hand one."""
+        """All of it on a machine record, none of it on the user's."""
         named = [field for field in self.RECORDED if getattr(self, field) is not None]
         if machine:
             missing = [field for field in self.PROVENANCE if field not in named]
             if missing:
                 raise ValueError(f"a machine record needs {', '.join(missing)}")
         elif named:
-            raise ValueError(f"a hand record carries no {', '.join(named)}")
+            raise ValueError(f"a user record carries no {', '.join(named)}")

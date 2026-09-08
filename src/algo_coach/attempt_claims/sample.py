@@ -15,7 +15,7 @@ def claimable(
     technique: str | None = None,
     seed: int = 0,
 ) -> list[Attempt]:
-    """The attempts a hand claim would decide something about, in the order to
+    """The attempts a user claim would decide something about, in the order to
     ask about them. A machine claim does not take one out of the pool; only the
     user's own answer does. Spread against the claims already made rather than
     within the batch, since the eval set is grown and never redrawn."""

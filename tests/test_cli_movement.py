@@ -30,7 +30,7 @@ def test_the_command_reports_what_the_claims_took_away(classified, monkeypatch, 
 
 
 def test_a_hand_claim_is_not_the_classifier_s_movement(tmp_path, monkeypatch, capsys):
-    """A hand claim narrows for a different reason; crediting the machine with
+    """A user claim narrows for a different reason; crediting the machine with
     it would read as a classifier that decided something."""
     data = data_root(tmp_path, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
