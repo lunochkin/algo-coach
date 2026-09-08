@@ -113,7 +113,7 @@ def cases(draft: Draft) -> list[str]:
     if not draft.cases:
         declared = [f"  {shortened(one.args, one.expected)}" for one in draft.declared]
         return ["## cases (declared, unsettled)", *declared, ""]
-    separating = [draft.separating] if draft.separating is not None else []
+    separating = [draft.separating_case] if draft.separating_case is not None else []
     counted = (
         f"{len(draft.cases)} settled, {len(draft.kept)} kept, {len(draft.won)} won, "
         f"{len(separating)} separating"

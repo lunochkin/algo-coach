@@ -121,7 +121,7 @@ def advances(draft: Draft, template: Template, bench: Bench = BENCH) -> bool:
     the step that would separate it nor the one that would land it. `starts_at`
     still names a step, and it is one the run never takes.
     """
-    if not (template.speedup and draft.separating is None):
+    if not (template.speedup and draft.separating_case is None):
         return True
     return reaches(starts_at(draft, template, bench), WritingState.SEARCHED)
 

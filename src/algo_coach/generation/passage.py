@@ -253,9 +253,9 @@ def to_searched(p: Passage) -> bool:
     """The separating case, before the loop so a canonical wrong at scale costs
     no round. It is held back until after the loop: the survivors are decided
     against the set as the statement left it."""
-    separating = p.draft.separating
+    case = p.draft.separating_case
     if reaches(p.start, WritingState.SEARCHED):
-        p.checked, p.inputs, separating = timed(
+        p.checked, p.inputs, case = timed(
             p.template, p.draft, p.checked, p.inputs, p.naive, cap_ms=p.cap_ms, notes=p.notes
         )
         if not p.checked.survived:
@@ -266,13 +266,13 @@ def to_searched(p: Passage) -> bool:
                 p.drafts,
                 p.draft,
                 WritingState.SEARCHED,
-                separating=separating,
+                separating_case=case,
                 unseparated=p.inputs.unseparated,
             )
     # the claim is what a rung teaches, and a landed problem is repaired
     # nowhere: the draft stops at the step that has no answer, and a resume is
     # what carries it forward
-    return not (p.template.speedup and separating is None)
+    return not (p.template.speedup and case is None)
 
 
 def to_hardened(p: Passage) -> bool:

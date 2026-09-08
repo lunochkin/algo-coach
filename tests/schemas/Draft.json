@@ -208,7 +208,7 @@
       "type": "string"
     }
   },
-  "description": "What the steps of one attempt produced and no local run re-derives.\n\nThe mutants, the survivors and the loop's counters are not here: a tree\nwalk enumerates the first two and the site outcomes of this id carry the\nthird.",
+  "description": "What the steps of one writing produced and no local run re-derives.\n\nThe mutants, the survivors and the loop's counters are not here: a tree\nwalk enumerates the first two and the site outcomes of this id carry the\nthird.",
   "properties": {
     "blind_provenance": {
       "anyOf": [
@@ -376,7 +376,7 @@
       "default": null,
       "title": "Reference"
     },
-    "separating": {
+    "separating_case": {
       "anyOf": [
         {
           "$ref": "#/$defs/SettledCase"

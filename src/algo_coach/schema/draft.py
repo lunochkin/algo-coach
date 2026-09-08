@@ -116,8 +116,9 @@ class Draft(BaseModel):
     # approach the form replaces. Absent where no speedup is claimed
     naive: str | None = Field(default=None, min_length=1)
     # searched: the case at the size the naive solution stops fitting, absent
-    # where the form is its own optimum or nothing separated
-    separating: SettledCase | None = None
+    # where the form is its own optimum or nothing separated. The site outcome
+    # stores the size alone, as `separating`
+    separating_case: SettledCase | None = None
     # why the search stored no case, as the inputs site records it. A resume
     # reads it: the exits a held draft leaves by differ by what stopped it
     unseparated: str | None = Field(default=None, min_length=1)

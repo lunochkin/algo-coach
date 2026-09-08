@@ -182,7 +182,7 @@ def test_the_steps_after_the_generator_start_empty():
     assert draft.cases == []
     assert draft.input_generator is None and draft.largest is None
     assert draft.naive is None
-    assert draft.separating is None
+    assert draft.separating_case is None
     assert draft.won == []
 
 
@@ -232,9 +232,9 @@ def test_half_an_input_generator_is_rejected(half):
 def test_a_draft_holds_the_separating_case_apart_from_the_set():
     """It is appended after the loop, so a draft holding it in `cases` would
     put it in the set the survivors were decided against."""
-    draft = make_draft(separating=a_settled_case(round=None))
+    draft = make_draft(separating_case=a_settled_case(round=None))
 
-    assert draft.separating.round is None
+    assert draft.separating_case.round is None
     assert draft.cases == []
 
 

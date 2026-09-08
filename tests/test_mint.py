@@ -361,7 +361,7 @@ def test_a_minted_draft_starts_at_the_first_step():
 
     assert made.state is WritingState.DRAFTED
     assert made.gate is None
-    assert (made.reference, made.input_generator, made.separating) == (None, None, None)
+    assert (made.reference, made.input_generator, made.separating_case) == (None, None, None)
 
 
 def test_a_minted_draft_copies_the_generator_configuration_whole():

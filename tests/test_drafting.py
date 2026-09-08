@@ -106,7 +106,7 @@ def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
     assert [case.expected for case in stored.declared] == [3]
     assert [case.expected for case in stored.cases] == [3]
     assert (stored.input_generator, stored.largest) == (BUILDS, 8)
-    assert stored.separating is not None
+    assert stored.separating_case is not None
 
 
 def test_each_step_copies_the_configuration_of_its_own_call(tmp_path):
@@ -151,7 +151,7 @@ def test_a_separated_problem_lands(tmp_path, monkeypatch):
 
     (landed,) = result.drafted
     assert landed.state is WritingState.LANDED
-    assert landed.separating is not None
+    assert landed.separating_case is not None
     assert (result.held, drafts.all()) == ([], [])
 
 
@@ -165,7 +165,7 @@ def test_an_unseparated_draft_is_held_at_the_search(tmp_path):
     stored = one.draft
     assert stored.state is WritingState.SEARCHED
     assert one.unseparated == "naive_finished"
-    assert (stored.separating, stored.problem_id) == (None, None)
+    assert (stored.separating_case, stored.problem_id) == (None, None)
     # kept where it stopped, since a resume is what separates it
     assert drafts.all() == [stored]
     assert (result.drafted, ProblemStore(tmp_path).all()) == ([], [])

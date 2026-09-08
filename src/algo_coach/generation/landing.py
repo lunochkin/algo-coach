@@ -52,7 +52,7 @@ def landing(draft: Draft) -> list[SettledCase]:
         *draft.cases,
         *draft.kept,
         *draft.won,
-        *([draft.separating] if draft.separating else []),
+        *([draft.separating_case] if draft.separating_case else []),
     ]
 
 
