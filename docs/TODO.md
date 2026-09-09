@@ -6,15 +6,22 @@ phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 ## Phase 8 — the engine serves (current)
 
 The first attempts the engine produces itself, through the interface a sitting
-happens in. The interface ships in this phase. A practice loop that is not used
+happens in. The interface is a web app: a JSON API over the domain calls, and a
+React frontend the API serves as static files. A practice loop that is not used
 daily measures nothing, and a sitting does not happen at a command line.
 
+### The loop, as domain calls
+
+- [ ] Add `algo_coach.sitting`: serve a created problem, run a submission
+      against the problem's own cases, and mint the attempt. The module takes
+      no adapter, so the API and the tests call the same functions
 - [ ] Serve every created problem and skip the retired ones. No gate stands
       between landing and serving until Phase 14
-- [ ] Serve a generated problem, time the sitting, run the submission against
-      the problem's own cases, and mint the attempt
 - [ ] Store the verification result on `Attempt`. The field is additive, and
       every attempt written before the engine judged one leaves the field empty
+- [ ] Time the sitting in the engine, between serving the statement and
+      receiving the submission. A duration the browser reports is a number the
+      engine did not witness, and it is never stored
 - [ ] Feed the claim classifier its candidates from the problem's derived
       techniques. No other source supplies candidates now that the tag
       mapping is gone
@@ -27,17 +34,43 @@ daily measures nothing, and a sitting does not happen at a command line.
 - [ ] Ask for a claim and a self-label as the Phase 2 loop asked for them. The
       engine now witnesses the sitting, and the user still writes both records
 
-- [ ] Add a web layer as the second adapter beside the CLI, over the same
-      domain calls. Phase 9 hosts the same pages for invited users, so a
-      terminal interface here would be written twice
-- [ ] Serve the statement, take a submission from an editor on the page, and
-      show the per-case verdict in one view. A sitting split over several
+### The API
+
+- [ ] Add `algo_coach.api`: a FastAPI app over the sitting calls, JSON in and
+      JSON out. The API is the second adapter beside the CLI, and neither
+      adapter holds domain logic
+- [ ] Add a route per step of the drill loop `flows.md` gives: the board, the
+      candidates for a technique, the card, the statement, the submission and
+      its per-case verdict, the claim and the self-label
+- [ ] Serve the built frontend from the same process as the API, so the app
+      deploys as one unit when Phase 9 hosts it
+- [ ] Add an import contract forbidding the domain from importing
+      `algo_coach.api`, as the contract in `pyproject.toml` already forbids
+      the CLI. That contract names the CLI alone, so nothing stops the domain
+      from importing the API
+
+### The frontend
+
+- [ ] Add `web/`: a Vite and React app in TypeScript, built to static files.
+      Phase 9 hosts these same pages, so a terminal interface here would be
+      written twice
+- [ ] Build the board as the entry point, showing per-technique progress and
+      the technique the user picks from. A problem id as the entry point leaves
+      the selection to the user
+- [ ] Show the technique's card before the statement. The card is read before
+      the attempt rather than after it
+- [ ] Build the sitting page: the statement, a CodeMirror editor, the submit
+      action and the per-case verdict in one view. A sitting split over several
       pages is a workflow, and a workflow is not practised daily
-- [ ] Time the sitting in the interface. The loop records only the timing the
-      loop witnessed, so the loop never asks the user for a duration
-- [ ] Show the board and the day's due work as the entry point, so the loop
-      starts from what to practise. A problem id as the entry point leaves the
-      selection to the user
+- [ ] Build the prompt the sitting ends on: the claim over the problem's
+      techniques, the self-label, and marking the problem defective in place of
+      the self-label
+- [ ] Drive one whole sitting in a test through the API rather than a browser:
+      serve, submit, verdict, claim, self-label. The frontend then carries no
+      logic a test can only reach by rendering a page
+- [ ] Run the frontend's type check and lint from `just`, beside the Python
+      checks. The pre-commit hook runs the Python checks, and a frontend check
+      outside that hook never runs before a commit
 
 ### Exit
 - [ ] Daily practice runs here, in the app, on problems the engine wrote and

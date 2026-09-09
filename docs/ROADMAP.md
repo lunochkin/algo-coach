@@ -180,8 +180,9 @@ records the verdict. The interface ships in this phase, and it is a web app
 served locally: Phase 9 hosts the same pages for invited users, so a terminal
 interface here would be written twice.
 
-- A web layer as the second adapter beside the CLI, over the same domain
-  calls. Server-rendered pages, and a code editor on the sitting's page.
+- A JSON API as the second adapter beside the CLI, over the same domain calls,
+  and a React frontend the API serves as static files. The sitting's page
+  carries a code editor.
 - `Attempt` gains the verification result.
 - The loop can mark a problem defective in place of a self-label, and the board
   stops counting that problem's attempts in either direction.

@@ -456,6 +456,11 @@ are answered by using the loop.
 
 - **An attempt nobody timed stays untimed**, rather than carrying a duration
   reconstructed after the fact.
+- **The editor completes nothing.** The editor a sitting is typed into
+  highlights syntax and indents, and it proposes no name from the standard
+  library or from the code already typed. A solver offered `bisect_left` after
+  three characters has recalled no form, and the sitting exists to measure
+  recalling the form. The recall trainer Phase 11 adds holds the same rule.
 - **A drill can mint several attempts**, and each is asked about in turn. A
   submission that failed on syntax and the one that passed are different
   evidence, and labelling only the last would leave the counts on two
