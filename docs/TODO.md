@@ -25,7 +25,7 @@ solution, and three drafts would resume.
       where `speedup` moved. A changed ceiling moves neither a configuration nor
       a prompt hash, so dsu-core and next-greater would stay held after the
       raise
-- [ ] Give `speedup` one meaning in `content.md`, then seed rotated-array and
+- [x] Give `speedup` one meaning in `content.md`, then seed rotated-array and
       count-based-kth by that meaning. The card reads the flag as faster than
       the naive solution, and the search reads the flag as separable under the
       ceiling. A log-factor form is faster and is never separable
@@ -302,3 +302,10 @@ trigger fires, whatever phase is current.
       never to Anthropic direct, whose compatibility layer ignores
       `response_format`, `strict` and `reasoning_effort`. Triggered when an
       outage blocks a run
+- [ ] Demonstrate a speedup over a linear or linearithmic naive solution, by a
+      cap set per problem from the canonical's measured time or by an
+      operation count in the child instead of a clock. A factor of log n is at
+      most fourteen at the ceiling, and no storable input brings either side to
+      the 2 s cap, so the search today demonstrates a claim only against a
+      quadratic one. Triggered when a core template's naive approach is
+      linearithmic and the card is worth its rung

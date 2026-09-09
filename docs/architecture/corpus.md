@@ -244,10 +244,13 @@ The test cases decide whether a solution to a generated problem is correct.
 - **Rejection is the exit left when the draws run out.** A model prompted to be
   slow and told the form to avoid, writing the form anyway, is the strongest
   evidence the run can produce that the problem does not exercise the form.
-- **A speedup whose separating size is a million elements goes unenforced.**
-  That separation is a log factor rather than the quadratic a card teaches.
-  The bar is that some input separates the two solutions, not that the
-  separation is worth the card.
+- **A linearithmic naive solution is out of the clock's reach.** A factor of
+  log n is at most fourteen at the ceiling, and a batch of instances grows both
+  solutions' cost alike, so neither side reaches the cap inside a storable
+  case. The speedup claim still holds for such a form. Demonstrating it needs
+  a cap set per problem or an operation count instead of a clock, and both
+  are deferred, so the search today demonstrates a claim only against a naive
+  solution at least quadratic in the input.
 - **Consistent is not the same as statable.** A set fitting only "compute f,
   except return 7 on this input" is a function nobody can write a statement
   for. Such a problem does not land, and the discrimination bar catches it.

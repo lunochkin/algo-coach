@@ -36,8 +36,9 @@ without redefining them. Grouped by the file that specifies the record.
   reproduces from memory. Core by default.
 - **Trigger**: the field on a card or a template saying when to reach for the
   technique or the form. Withheld during a probe.
-- **Speedup**: a flag on a template saying its form is faster than the naive
-  approach the technique replaces.
+- **Speedup**: a flag on a template saying its form is asymptotically faster
+  than the naive approach the technique replaces, by at least a factor of
+  log n.
 - **Selector**: a technique plus filters, on a card. The ladder is derived
   from it.
 - **Ladder**: the problems a card has the user solve, derived from template

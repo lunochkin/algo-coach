@@ -76,6 +76,18 @@ Both are written as JSON inside a string, so a string keeps its quotes and an
 absent value is `null`."""
 
 
+# shown where the template claims a speedup. `content.md` gives what the claim
+# requires of the statement, and why a single sublinear query separates nothing
+SPEEDUP = """
+This form is faster than the naive approach it replaces, and the problem is
+stored with an input that shows it: the naive approach runs over a time limit
+and the form does not. That takes a naive approach at least quadratic in the
+input the statement admits. Where one application of the form is sublinear,
+such as one lookup, ask for a batch: many queries over one input, one answer
+per query, both bounded by the constraints. A single query finishes within the
+limit by any approach, and the problem is then discarded."""
+
+
 def prompt(card: Card, template: Template, written: Sequence[str] = ()) -> str:
     """The prompt: one form, and the technique it belongs to.
 
@@ -94,6 +106,7 @@ def prompt(card: Card, template: Template, written: Sequence[str] = ()) -> str:
             *notes(template),
             "Form:",
             *(f"  {line}" for line in template.code.splitlines()),
+            *([SPEEDUP] if template.speedup else []),
             *already(written),
         ]
     )

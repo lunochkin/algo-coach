@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass, field
 
 import pytest
-from matching import card, seeded
+from matching import card, seeded, template
 from pydantic import ValidationError
 
 from algo_coach.calls import CallLog, Reply
@@ -55,6 +55,16 @@ def test_the_generator_prompt_names_no_technique_and_no_form(tmp_path):
     # The generator prompt carries every one of them, which is what makes the
     # two readings independent rather than one reading twice.
     assert one.templates[0].code in generator_prompt(one, one.templates[0])
+
+
+def test_a_speedup_claim_asks_the_generator_for_a_batch(tmp_path):
+    """One sublinear query finishes within the cap by any approach, so the
+    statement has to make the approach the form replaces at least quadratic."""
+    (claims,) = seeded(tmp_path, card(templates=[template("rotated-array", speedup=True)]))
+    (optimum,) = seeded(tmp_path, card(templates=[template("n-queens")]))
+
+    assert "batch" in generator_prompt(claims, claims.templates[0])
+    assert "batch" not in generator_prompt(optimum, optimum.templates[0])
 
 
 def test_a_reply_carrying_no_solution_fails():
