@@ -160,6 +160,8 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
     before = len(calls.all())
     reached: list[tuple[Target, Resumed]] = []
     for index, (target, draft) in enumerate(resumable, start=1):
+        # the row a written problem ends on, at the sweep's own counter
+        on_progress, _ = rebased(index - 1, len(resumable))
         result = resume(
             api,
             calls,
@@ -168,6 +170,7 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
             corpus,
             bench=bench,
             notes=Notes(stage, index=index, total=len(resumable)),
+            on_progress=on_progress,
             outcomes=outcomes,
             drafts=drafts,
         )

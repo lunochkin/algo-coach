@@ -213,36 +213,41 @@ def write_problems(
         written.append(p.draft.statement)
         finished(result, corpus, p, index=index, records=records, outcomes=outcomes)
         if on_progress is not None:
-            on_progress(
-                Progress(
-                    index=index,
-                    total=count,
-                    template_slug=template.slug,
-                    title=p.draft.title,
-                    cases=len(p.draft.declared),
-                    outcome=p.checked.outcome,
-                    misdeclared=len(p.checked.misdeclarations),
-                    landed=p.draft.state is WritingState.LANDED,
-                    reason=None if p.checked.survived else why(p.checked),
-                    separating=p.inputs.separating,
-                    unseparated=p.inputs.unseparated,
-                    unbuilt=p.inputs.unbuilt,
-                    mutants=p.bar.mutants,
-                    survived=p.bar.survived,
-                    won=p.bar.won,
-                    proposed=p.bar.proposed,
-                    built=p.bar.built,
-                    kept=p.bar.kept,
-                    declared=p.bar.declared,
-                    fuzzed=p.bar.fuzzed,
-                    rounds=p.bar.rounds,
-                    unmeasured=p.bar.unmeasured,
-                    cost=priced(calls.appended[paid:]),
-                )
-            )
+            on_progress(progressed(p, index=index, total=count, cost=priced(calls.appended[paid:])))
         paid = len(calls.appended)
     result.aborted = answers.aborted
     return result
+
+
+def progressed(p: Passage, *, index: int, total: int, cost: float | None) -> Progress:
+    """The row one writing ends on, read off what its steps left. Shared with a
+    resume, which ends on the same row: a resumed draft otherwise ends on its
+    last stage line, and whether it landed is readable only in the summary."""
+    return Progress(
+        index=index,
+        total=total,
+        template_slug=p.template.slug,
+        title=p.draft.title,
+        cases=len(p.draft.declared),
+        outcome=p.checked.outcome,
+        misdeclared=len(p.checked.misdeclarations),
+        landed=p.draft.state is WritingState.LANDED,
+        reason=None if p.checked.survived else why(p.checked),
+        separating=p.inputs.separating,
+        unseparated=p.inputs.unseparated,
+        unbuilt=p.inputs.unbuilt,
+        mutants=p.bar.mutants,
+        survived=p.bar.survived,
+        won=p.bar.won,
+        proposed=p.bar.proposed,
+        built=p.bar.built,
+        kept=p.bar.kept,
+        declared=p.bar.declared,
+        fuzzed=p.bar.fuzzed,
+        rounds=p.bar.rounds,
+        unmeasured=p.bar.unmeasured,
+        cost=cost,
+    )
 
 
 def raised(
@@ -315,6 +320,7 @@ def resume(
     bench: Bench = BENCH,
     cap_ms: int = CAP_MS,
     notes: Notes = SILENT,
+    on_progress: Callable[[Progress], None] | None = None,
     outcomes: OutcomeLog | None = None,
     drafts: DraftStore | None = None,
 ) -> Resumed:
@@ -326,6 +332,7 @@ def resume(
     """
     if draft.state is WritingState.REJECTED:
         raise ValueError("a rejected draft is not resumed: its gate said the answer was wrong")
+    paid = len(calls.appended)
     start = starts_at(draft, template, bench)
     notes("resume", f"starting at {start}")
     # the draft's own id, so a resumed step's site outcome groups with the
@@ -359,6 +366,8 @@ def resume(
         )
         return result
     finished(result, corpus, passage, index=1, records=records, outcomes=outcomes)
+    if on_progress is not None:
+        on_progress(progressed(passage, index=1, total=1, cost=priced(calls.appended[paid:])))
     return result
 
 

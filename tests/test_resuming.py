@@ -10,6 +10,7 @@ from algo_coach.generation import (
     Bench,
     Corpus,
     Notes,
+    Progress,
     advances,
     blind,
     inputs,
@@ -311,6 +312,31 @@ def written(tmp_path, model: FakeWriter, drafts: DraftStore, **overrides):
         outcomes=OutcomeLog(tmp_path),
     )
     return one, result
+
+
+def test_a_resume_ends_on_the_row_a_writing_ends_on(tmp_path, monkeypatch):
+    """A resumed draft's stage lines otherwise stop at its last step, and
+    whether it landed is readable only once the whole sweep is over."""
+    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    drafts = DraftStore(tmp_path)
+    one, first = written(tmp_path, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
+    (stopped,) = first.held
+    seen: list[Progress] = []
+
+    resume(
+        FakeWriter(generator=BUILDS, slow=SLOW),
+        CallLog(tmp_path),
+        one.templates[0],
+        stopped.draft,
+        Corpus.at(tmp_path),
+        drafts=drafts,
+        on_progress=seen.append,
+    )
+
+    (row,) = seen
+    assert row.landed
+    assert row.title == stopped.draft.title
+    assert row.separating is not None
 
 
 def test_a_resumed_draw_separates_where_the_stored_naive_solution_did_not(tmp_path, monkeypatch):
