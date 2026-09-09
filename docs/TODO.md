@@ -37,6 +37,10 @@ solution, and three drafts would resume.
 - [ ] Name the technique's other templates to the naive site beside the form
       to avoid. top-down-memo's naive solution wrote tabulation, the same
       complexity under another form
+- [x] Add `generate --reject <id>`, the by-hand exit `flows.md` names for a
+      held draft no resume would separate. `drafting.reject` existed and no
+      command called it, so the two single-query drafts could leave only by
+      editing their files
 - [x] Print a gaps run's position over every target, `[k/35]`, and the run's
       size before the first call. Today the counter reads `[1/1]` on each
       template, so a sweep's cost is readable only once the sweep has paid it

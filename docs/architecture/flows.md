@@ -344,6 +344,10 @@ a second generator call writes a different problem.
   solutions, the set the steps settled, and the site outcomes of its writing
   id. A listing is a line per draft, where reading why one stopped needs the
   text its calls produced.
+- **A held draft is rejected by hand with `generate --reject <id>`**, and the
+  gate it names is `unexercised`. The draft is read whole first, since the
+  verdict is that this statement does not exercise the form, and the run
+  cannot reach that verdict on its own.
 - **A rejected draft is counted and not listed.** A rejected draft is never
   resumed, so the listing shows exactly the drafts a sweep will reach. The
   count still covers the store, or the summary would report fewer drafts than

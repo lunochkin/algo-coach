@@ -27,6 +27,7 @@ from algo_coach.generation import (
     Step,
     Target,
     advances,
+    reject,
     replay,
     resume,
     swept,
@@ -46,7 +47,7 @@ from algo_coach.solutions import SolutionLog
 
 # the modes a run can be put in. Each reads its own input and reports its own
 # summary, so a run doing two would print both under one
-MODES = ("replay", "resume", "drafts", "draft")
+MODES = ("replay", "resume", "drafts", "draft", "reject")
 
 
 def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
@@ -61,6 +62,8 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         return listed(args, parser, root)
     if args.draft:
         return shown(args, parser, root)
+    if args.reject:
+        return rejected_by_hand(args, parser, root)
     aimed = resolve(args, parser, root)
     api = transport(args, parser)
     calls, corpus = CallLog(root), Corpus.at(root)
@@ -222,6 +225,27 @@ def shown(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
             chosen_bench(args, parser),
         )
     )
+
+
+def rejected_by_hand(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+    """The exit a held draft takes where no resume would separate it. The run
+    never writes `unexercised`, since it cannot tell a naive solution that
+    reached the form from an input generator that built the wrong shape, so
+    the gate is a reader's verdict over `--draft`.
+
+    It makes no call, as `--draft` makes none.
+    """
+    if args.card or args.template or args.gaps:
+        parser.exit(2, "generate: --reject names the draft it rejects, so it is aimed at nothing\n")
+    drafts = DraftStore(root)
+    draft = one_of(drafts.all(), args.reject, parser, "draft")
+    try:
+        left = reject(drafts, draft)
+    except ValueError as refused:
+        parser.exit(2, f"generate: {refused}\n")
+    target = written_for(CardStore(root).all(), left)
+    form = target.template.slug if target is not None else left.target_template_id
+    print(f"draft {left.id}: rejected {left.gate}, {form}")
 
 
 def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:

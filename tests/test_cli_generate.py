@@ -841,6 +841,50 @@ def searched_draft(root, monkeypatch, capsys):
     return stored
 
 
+def rejected(monkeypatch, wanted: str, *argv: str) -> None:
+    run_cli(monkeypatch, "generate", "--reject", wanted, *argv)
+
+
+def test_a_held_draft_is_rejected_by_hand(root, monkeypatch, capsys):
+    """The exit the run never takes: every site answered and none was wrong,
+    so the gate is a reader's verdict. The draft is kept for the record."""
+    stored = searched_draft(root, monkeypatch, capsys)
+    spent = len(CallLog(root).all())
+
+    rejected(monkeypatch, stored.id[:8])
+
+    (left,) = DraftStore(root).all()
+    assert left.state == "rejected"
+    assert left.gate == "unexercised"
+    assert (
+        f"draft {stored.id}: rejected unexercised, longest-valid-window" in capsys.readouterr().out
+    )
+    assert len(CallLog(root).all()) == spent
+
+
+def test_a_rejected_draft_is_not_rejected_again(root, monkeypatch, capsys):
+    """Terminal means no second verdict, as it means no resume."""
+    stored = searched_draft(root, monkeypatch, capsys)
+    rejected(monkeypatch, stored.id)
+
+    with pytest.raises(SystemExit) as exit_info:
+        rejected(monkeypatch, stored.id)
+
+    assert exit_info.value.code == 2
+    assert "a rejected draft is not rejected" in capsys.readouterr().err
+
+
+def test_a_rejection_is_aimed_at_nothing(root, monkeypatch, capsys):
+    """It names the draft it rejects, as `--draft` names the one it reads."""
+    stored = searched_draft(root, monkeypatch, capsys)
+
+    with pytest.raises(SystemExit) as exit_info:
+        rejected(monkeypatch, stored.id, "--gaps")
+
+    assert exit_info.value.code == 2
+    assert "aimed at nothing" in capsys.readouterr().err
+
+
 def test_a_draft_is_read_whole_by_its_id(root, monkeypatch, capsys):
     """What a listing cannot hold: the statement, both solutions and the set
     the steps settled."""

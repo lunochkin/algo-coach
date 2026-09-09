@@ -245,6 +245,11 @@ def main() -> None:
         help="read one stored draft whole, by id or a prefix of one, without calling",
     )
     generate_parser.add_argument(
+        "--reject",
+        metavar="ID",
+        help="reject one held draft by hand, as unexercised: no resume would separate it",
+    )
+    generate_parser.add_argument(
         "--limit", type=int, help="how many stored problems to replay; every one otherwise"
     )
     generate_parser.add_argument(
