@@ -72,6 +72,7 @@ def found_in(inputs: Inputs, found: Searched) -> Inputs:
     return inputs.model_copy(
         update={
             "separating": found.size,
+            "repeats": found.repeats,
             "unseparated": found.missing,
             "gate": Gate.DISAGREED if found.missing is Missing.DISAGREED else None,
         }
@@ -79,7 +80,10 @@ def found_in(inputs: Inputs, found: Searched) -> Inputs:
 
 
 def searched_note(found: Searched) -> str:
-    return f"separates at {found.size}" if found.found else f"no case: {found.missing}"
+    calls = f", {found.repeats} calls" if found.repeats > 1 else ""
+    if not found.found:
+        return f"no case{calls}: {found.missing}"
+    return f"separates at {found.size}{calls}"
 
 
 def timed(

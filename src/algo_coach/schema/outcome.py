@@ -77,6 +77,10 @@ class SiteOutcome(MachineProvenance):
     misdeclared: int = 0
     # the speedup search, where this site ran one
     separating: int | None = None
+    # how many calls the separating case carries. Above one where the ceiling
+    # ended the size walk with the naive solution still under the cap, and a
+    # separating size read without it says nothing about what was measured
+    repeats: int = Field(default=1, ge=1)
     unseparated: str | None = None
     # the largest input the statement's constraints allow, as the inputs call
     # reported it. Stored here because a landed problem keeps no draft, and a

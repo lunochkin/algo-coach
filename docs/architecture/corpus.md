@@ -176,6 +176,23 @@ The test cases decide whether a solution to a generated problem is correct.
   expected list weighed half of that case. A naive Prim over 5355 vertices ran
   2.0 s and 2.2 s at the largest input 256 KiB held, the cap's own edge. The
   ceiling moved to 1 MiB the same day.
+- **A separating case may carry a repeat count**, and the cap covers the calls
+  together. A form whose one application is sublinear separates on no input the
+  ceiling holds, since a linear scan of the largest storable array takes two
+  milliseconds. Repeating the call reaches the cap on an input a case can carry.
+  Every other case carries one call.
+- **The calls of one case are identical, and each runs on a fresh module.** A
+  memo left in a global would otherwise answer the second call from the first.
+  The calls ask the same question all the same, so a submission that caches its
+  own answer passes such a case. Varying the arguments closes that, and varying
+  is deferred. The count separates the two solutions the engine wrote, and
+  neither of them caches.
+- **The canonical finishes within a tenth of the cap** at the size and count
+  the case stores. A case the canonical only just answers fails a correct
+  submission a few percent slower. The margin makes the case a test of the form
+  rather than of the machine that ran it. The two solutions are within a
+  constant factor when the naive solution is over the cap and the canonical
+  over a tenth of it, and no count separates them.
 - **The separating case is chosen against the sitting's cap**, and never
   against generation's. The separating size is the size at which a submission
   that did not use the form fails, so the cap a sitting judges under decides
@@ -232,10 +249,22 @@ The test cases decide whether a solution to a generated problem is correct.
 - **A resume watches the template's `speedup` beside the prompt hash.** A flag
   edit moves neither a configuration nor a prompt, so a resume reading only
   those two would leave the draft where the search stopped it.
-- **A resume watches the ceiling too**, where the ceiling stopped the walk. The
-  draft records the ceiling its search ran under, since a raised constant
-  moves neither a configuration nor a prompt hash either, and the search is a
-  local step that costs no call.
+- **A resume watches the search's own bounds too**: the ceiling, the share of
+  the cap the canonical may take, and the most calls a case may carry. The
+  draft records all three, since a raised constant moves neither a
+  configuration nor a prompt hash. One rule covers them, because the search is
+  a local step and a walk taken again where an unrelated bound moved costs
+  subprocesses and no call.
+- **The search carries a revision beside its bounds**, bumped where the walk's
+  behaviour changes. A change to the walk moves no bound, so a held draft would
+  otherwise wait for a constant nobody is going to edit. A hash of the code
+  would need no bumping and is not used: the search is spread over four
+  modules, so a hash of one fires on a comment there and misses a change
+  elsewhere. No check catches a forgotten bump, and the cost of forgetting is a
+  draft that waits for the next change.
+- **A moved bound is read before a second naive draw.** A draft held because
+  the two solutions ran within a constant factor can leave by either, and the
+  search costs subprocesses where a draw costs a call.
 - **A resume asks the naive site again where the naive solution finished at
   every size the input generator reached**, though its configuration and its
   prompt hash both stand. The naive site is sampled, so a second call is a

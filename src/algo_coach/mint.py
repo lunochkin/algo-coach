@@ -227,6 +227,7 @@ def case(
     *,
     expected_from: ExpectedSource = ExpectedSource.REFERENCE,
     round: int | None = 0,
+    repeats: int = 1,
     provenance: MachineProvenance,
 ) -> TestCase:
     """One case of the set a generated problem carries, and the call that
@@ -246,6 +247,7 @@ def case(
         expected=expected,
         expected_from=expected_from,
         round=round,
+        repeats=repeats,
         **provenance.model_dump(),
     )
 
@@ -307,6 +309,7 @@ def site_outcome(
     proposed: int = 0,
     misdeclared: int = 0,
     separating: int | None = None,
+    repeats: int = 1,
     unseparated: str | None = None,
     largest: int | None = None,
 ) -> SiteOutcome:
@@ -331,6 +334,7 @@ def site_outcome(
         proposed=proposed,
         misdeclared=misdeclared,
         separating=separating,
+        repeats=repeats,
         unseparated=unseparated,
         largest=largest,
         **provenance.model_dump(),

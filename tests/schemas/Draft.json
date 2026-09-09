@@ -168,6 +168,12 @@
         "provenance": {
           "$ref": "#/$defs/MachineProvenance"
         },
+        "repeats": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Repeats",
+          "type": "integer"
+        },
         "round": {
           "anyOf": [
             {
@@ -339,6 +345,19 @@
       "default": null,
       "title": "Largest"
     },
+    "margin": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Margin"
+    },
     "naive": {
       "anyOf": [
         {
@@ -388,6 +407,32 @@
       ],
       "default": null,
       "title": "Reference"
+    },
+    "repeats_max": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Repeats Max"
+    },
+    "search_revision": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Search Revision"
     },
     "separating_case": {
       "anyOf": [

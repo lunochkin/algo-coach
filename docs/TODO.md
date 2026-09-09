@@ -25,6 +25,8 @@ solution, and three drafts would resume.
       separation at 23k and 30k elements with a 393 KB case, and two
       kruskal-mst naive solutions ran 2.0 s and 2.2 s at the largest input
       256 KiB held
+- [x] Re-enter the search on resume where any of its bounds moved: the
+      ceiling, the canonical's share of the cap, or the count bound
 - [x] Re-enter the search on resume where the ceiling moved, as a resume does
       where `speedup` moved. A changed ceiling moves neither a configuration nor
       a prompt hash, so dsu-core and next-greater would stay held after the
@@ -49,6 +51,12 @@ solution, and three drafts would resume.
 - [x] Print a gaps run's position over every target, `[k/35]`, and the run's
       size before the first call. Today the counter reads `[1/1]` on each
       template, so a sweep's cost is readable only once the sweep has paid it
+- [x] Separate a sublinear form by repeating a case's call, since no input the
+      ceiling holds separates one: a linear scan of the largest storable array
+      takes two milliseconds. The count is the cap divided by one call
+- [x] Require the canonical to finish within a tenth of the cap at the
+      separating point. A case the canonical only just answers fails a correct
+      submission a few percent slower
 - [ ] List held drafts' statements to the generator beside the landed ones. Two
       of ten statements asked a question a listed statement asked, and a draft
       held at `searched` is not listed at all
@@ -311,13 +319,11 @@ trigger fires, whatever phase is current.
       never to Anthropic direct, whose compatibility layer ignores
       `response_format`, `strict` and `reasoning_effort`. Triggered when an
       outage blocks a run
-- [ ] Add `repeats` to a case, and grow it in the search where the size walk
-      ends at the ceiling with the naive solution still under the cap. The
-      runner calls `solve` that many times, each call isolated from the last,
-      and the cap covers the sum. A form whose one application is sublinear
-      then separates on the statement it naturally has. Triggered when a ladder
-      needs a rung for a form no input separates, which rotated-array and
-      count-based-kth are the first two of
+- [ ] Vary one argument across a separating case's calls, so a submission
+      that caches its own answer fails it. The calls are identical today, and
+      the count separates the two solutions the engine wrote because neither
+      caches. Triggered when the drill loop judges a submission against a case
+      carrying a count
 - [ ] Read the naive solution with the classifier, and hold the draft where the
       verdict names the card's technique. One call per naive solution, and it
       catches what the prompt misses rather than hoping. Triggered when a sweep

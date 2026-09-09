@@ -78,8 +78,11 @@ without redefining them. Grouped by the file that specifies the record.
 - **Verification**: executing a solution against a problem's cases. A
   `Verification` record stores one run, with a case outcome per case: passed,
   wrong, timed out or crashed.
-- **Cap**: the wall-clock limit on one `solve` call, measured in the child
-  process. Generation's cap sits well above the sitting's.
+- **Cap**: the wall-clock limit on a case's `solve` calls, measured in the
+  child process. Generation's cap sits well above the sitting's.
+- **Repeat count**: how many times a case calls `solve` on its arguments, the
+  cap covering the calls together. One on every case but a separating one the
+  ceiling put out of reach.
 - **Solution claim**: a claim about a solution the engine wrote. Product data,
   and what a problem's techniques are folded from.
 - **Defective**: a retirement reason: the statement asks for something its

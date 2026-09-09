@@ -57,6 +57,7 @@ class Writing:
         proposed: int = 0,
         misdeclared: int = 0,
         separating: int | None = None,
+        repeats: int = 1,
         unseparated: str | None = None,
         largest: int | None = None,
     ) -> None:
@@ -80,6 +81,7 @@ class Writing:
                 proposed=proposed,
                 misdeclared=misdeclared,
                 separating=separating,
+                repeats=repeats,
                 unseparated=unseparated,
                 largest=largest,
                 provenance=MachineProvenance.of(call),

@@ -21,7 +21,7 @@ from algo_coach.generation import (
     sending,
     write_problems,
 )
-from algo_coach.generation.speedup import CEILING
+from algo_coach.generation.speedup import CEILING, MARGIN, REPEATS_MAX, SEARCH_REVISION
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.schema import CallSite, Card, Configuration, Draft, WritingState
 
@@ -229,9 +229,17 @@ def test_the_search_records_the_ceiling_it_ran_under(tmp_path):
     assert held(tmp_path).ceiling == CEILING
 
 
-def at_ceiling(tmp_path, reason: str, ceiling: int | None) -> Draft:
-    """A draft the search held at the ceiling, as the search left it."""
-    return held(tmp_path).model_copy(update={"unseparated": reason, "ceiling": ceiling})
+def at_ceiling(tmp_path, reason: str, ceiling: int | None, **bounds) -> Draft:
+    """A draft the search held at one of its bounds, as the search left it."""
+    return held(tmp_path).model_copy(
+        update={
+            "unseparated": reason,
+            "ceiling": ceiling,
+            "margin": bounds.pop("margin", MARGIN),
+            "repeats_max": bounds.pop("repeats_max", REPEATS_MAX),
+            "search_revision": bounds.pop("search_revision", SEARCH_REVISION),
+        }
+    )
 
 
 def test_a_moved_ceiling_re_enters_the_search(tmp_path):
@@ -550,3 +558,44 @@ def test_a_rejected_draft_is_not_resumed(tmp_path):
 
     with pytest.raises(ValueError, match="rejected"):
         resume(FakeWriter(), CallLog(tmp_path), one.templates[0], gated, Corpus.at(tmp_path))
+
+
+def test_a_moved_margin_re_enters_the_search(tmp_path):
+    """The share of the cap the canonical may take is a constant like the
+    ceiling, and a draft held on it waits for exactly that number to move."""
+    stopped = at_ceiling(tmp_path, "canonical_too_slow", CEILING, margin=MARGIN * 2)
+
+    assert moved_at(stopped, CLAIMS, BENCH) is WritingState.SEARCHED
+
+
+def test_a_moved_count_bound_re_enters_the_search(tmp_path):
+    """A count the bound cut short is a walk that stopped early, and raising
+    the bound is what lets it reach the cap."""
+    stopped = at_ceiling(tmp_path, "input_too_large", CEILING, repeats_max=REPEATS_MAX // 2)
+
+    assert moved_at(stopped, CLAIMS, BENCH) is WritingState.SEARCHED
+
+
+def test_the_free_step_is_taken_before_the_paid_one(tmp_path):
+    """A draft held on the canonical's margin can both re-walk and draw the
+    naive site again, and the search costs subprocesses where a draw costs a
+    call."""
+    stopped = at_ceiling(tmp_path, "canonical_too_slow", CEILING // 4)
+
+    assert moved_at(stopped, CLAIMS, BENCH) is WritingState.SEARCHED
+
+
+def test_a_draft_held_on_the_margin_draws_again_where_no_bound_moved(tmp_path):
+    """Nothing else releases it: the two solutions ran within a constant factor
+    and the sampled site is the one that can answer differently."""
+    stopped = at_ceiling(tmp_path, "canonical_too_slow", CEILING)
+
+    assert moved_at(stopped, CLAIMS, BENCH) is WritingState.PACED
+
+
+def test_a_changed_search_re_enters_it(tmp_path):
+    """A bound the draft records moves with the ceiling and the margin, and not
+    with the walk itself. The revision is what a change to the walk moves."""
+    stopped = at_ceiling(tmp_path, "case_too_large", CEILING, search_revision=SEARCH_REVISION - 1)
+
+    assert moved_at(stopped, CLAIMS, BENCH) is WritingState.SEARCHED

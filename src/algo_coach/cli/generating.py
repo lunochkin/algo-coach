@@ -125,8 +125,12 @@ def timing(progress: Progress) -> str:
     # case carries both, and printing the size alone would read as a stored one
     if progress.unseparated:
         at = f" at {progress.separating}" if progress.separating is not None else ""
-        return f"  no case{at}: {progress.unseparated}"
-    return f"  separates at {progress.separating}" if progress.separating is not None else ""
+        calls = f", {progress.repeats} calls" if progress.repeats > 1 else ""
+        return f"  no case{at}{calls}: {progress.unseparated}"
+    if progress.separating is None:
+        return ""
+    calls = f", {progress.repeats} calls" if progress.repeats > 1 else ""
+    return f"  separates at {progress.separating}{calls}"
 
 
 def counted(results: Sequence[GenerationResult], field: str) -> int:

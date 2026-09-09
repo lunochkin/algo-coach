@@ -33,6 +33,7 @@ class Inputs(BaseModel):
     provenance: MachineProvenance | None = None
     unbuilt: str | None = None  # the call failed, and no code was written
     separating: int | None = None  # the size the naive solution stops fitting at
+    repeats: int = 1  # calls per case there, above one where the ceiling ended the walk
     unseparated: str | None = None  # why there was none, where one was looked for
     gate: Gate | None = None  # the two solutions disagreed at that size
 
@@ -100,6 +101,7 @@ class SearchVerdict(TypedDict):
 
     gate: Gate | None
     separating: int | None
+    repeats: int
     unseparated: str | None
     largest: int | None
 
@@ -163,6 +165,7 @@ def search_verdicts(inputs: Inputs) -> SearchVerdict:
     return SearchVerdict(
         gate=inputs.gate,
         separating=inputs.separating,
+        repeats=inputs.repeats,
         unseparated=inputs.unseparated,
         largest=inputs.input_generator.largest if inputs.input_generator is not None else None,
     )

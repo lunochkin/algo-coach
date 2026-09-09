@@ -32,6 +32,9 @@ class TestCase(MachineProvenance):
     # `0` is the set written with the statement; absent is a case no round won
     # and the statement did not write, today the separating one
     round: int | None = Field(ge=0)
+    # how many times `solve` is called on these arguments, the cap covering the
+    # sum. Above one on a separating case the search could not reach by size
+    repeats: int = Field(default=1, ge=1)
 
     @model_validator(mode="after")
     def _provenance_required(self) -> TestCase:

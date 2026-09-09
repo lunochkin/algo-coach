@@ -77,6 +77,7 @@ def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
                 case.expected,
                 expected_from=case.expected_from,
                 round=case.round,
+                repeats=case.repeats,
                 provenance=case.provenance,
             )
         )

@@ -19,7 +19,13 @@ def verify(
 ) -> list[CaseResult]:
     # `run` rather than `outputs`: a `CaseResult` carries the elapsed time,
     # and `stop_early` is why the zip is not strict
-    ran = run(code, [case.args for case in cases], cap_ms=cap_ms, stop_early=stop_early)
+    ran = run(
+        code,
+        [case.args for case in cases],
+        cap_ms=cap_ms,
+        repeats=[case.repeats for case in cases],
+        stop_early=stop_early,
+    )
     return [result(case, one) for case, one in zip(cases, ran, strict=False)]
 
 

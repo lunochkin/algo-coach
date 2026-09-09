@@ -26,49 +26,54 @@ def encode(value: object) -> str:
     return json.dumps(value, sort_keys=True)
 
 
-def execute(code: str, args: list[Any], cap_ms: int) -> dict[str, Any]:
-    # the cap times the `solve` call alone; interpreter start and the module's
+def execute(code: str, args: list[Any], cap_ms: int, repeats: int = 1) -> dict[str, Any]:
+    # the cap times the `solve` calls alone; interpreter start and the module's
     # top level are the parent timer's to catch
-    namespace: dict[str, Any] = {"__name__": "__solution__"}
     try:
-        exec(compile(code, "<solution>", "exec"), namespace)
-        solve = namespace["solve"]
+        compiled = compile(code, "<solution>", "exec")
+        exec(compiled, {"__name__": "__solution__"})
     except BaseException:
         return {"outcome": CRASHED, "value": None, "elapsed_ms": None}
 
     signal.signal(signal.SIGALRM, _expire)
     signal.setitimer(signal.ITIMER_REAL, cap_ms / 1000)
-    started = time.perf_counter()
+    elapsed = 0.0
+    value = None
     try:
-        value = solve(*args)
+        for _ in range(repeats):
+            # a fresh module per call, so a memo left in a global cannot answer
+            # the next one. It costs microseconds and is outside the timing,
+            # as the module's top level is on a single call
+            namespace: dict[str, Any] = {"__name__": "__solution__"}
+            exec(compiled, namespace)
+            solve = namespace["solve"]
+            started = time.perf_counter()
+            value = solve(*args)
+            elapsed += time.perf_counter() - started
     except Expired:
-        return {"outcome": TIMEOUT, "value": None, "elapsed_ms": _since(started)}
+        return {"outcome": TIMEOUT, "value": None, "elapsed_ms": round(elapsed * 1000)}
     except BaseException:
-        return {"outcome": CRASHED, "value": None, "elapsed_ms": _since(started)}
+        return {"outcome": CRASHED, "value": None, "elapsed_ms": round(elapsed * 1000)}
     finally:
         signal.setitimer(signal.ITIMER_REAL, 0)
 
-    elapsed = _since(started)
+    measured = round(elapsed * 1000)
     try:
         encoded = encode(value)
     except TypeError, ValueError:
         # a return JSON cannot encode is the solution's fault, not a wrong
         # answer
-        return {"outcome": CRASHED, "value": None, "elapsed_ms": elapsed}
-    return {"outcome": RETURNED, "value": encoded, "elapsed_ms": elapsed}
+        return {"outcome": CRASHED, "value": None, "elapsed_ms": measured}
+    return {"outcome": RETURNED, "value": encoded, "elapsed_ms": measured}
 
 
 def _expire(_signum: int, _frame: FrameType | None) -> None:
     raise Expired
 
 
-def _since(started: float) -> int:
-    return round((time.perf_counter() - started) * 1000)
-
-
 def main() -> None:
     request = json.loads(sys.stdin.read())
-    result = execute(request["code"], request["args"], request["cap_ms"])
+    result = execute(request["code"], request["args"], request["cap_ms"], request.get("repeats", 1))
     # to a file rather than stdout, which belongs to the solution
     with open(sys.argv[1], "w") as handle:
         json.dump(result, handle)

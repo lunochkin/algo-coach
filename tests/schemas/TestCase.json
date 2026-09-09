@@ -116,6 +116,12 @@
       "default": null,
       "title": "Provider"
     },
+    "repeats": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Repeats",
+      "type": "integer"
+    },
     "round": {
       "anyOf": [
         {

@@ -285,9 +285,10 @@ a second generator call writes a different problem.
 - **Only that reason draws again.** A search that never ran is the inputs
   site's to repair. The draft holds the reason, so a resume can tell the two
   apart.
-- **A draft whose walk stopped at the ceiling starts at the search once the
-  ceiling is raised.** The draft records the ceiling its search ran under, and
-  a resume reads that number beside the flag and the bench.
+- **A draft whose walk stopped at a bound starts at the search once that bound
+  moves.** The draft records the ceiling, the canonical's share of the cap, the
+  count bound and the search's own revision, and a resume reads the four beside
+  the flag and the bench.
 - **The local steps are taken again either way.** Running the canonical and
   settling the cases cost subprocesses rather than a call, so the draft stores
   neither, and the steps after them need both.

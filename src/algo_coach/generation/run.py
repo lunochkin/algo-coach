@@ -73,6 +73,7 @@ class Progress(BaseModel):
     # where the form is its own optimum, and `unseparated` says so where it is
     # not
     separating: int | None = None
+    repeats: int = 1  # calls per case, above one where the ceiling ended the size walk
     unseparated: str | None = None
     unbuilt: str | None = None  # the input generator's call failed, so nothing was built
     # what the mutation loop did to the set: the mutants it enumerated, the
@@ -107,6 +108,7 @@ class Held(BaseModel):
     draft: Draft
     # the size the search proved a separation at, and why it stored no case
     separating: int | None = None
+    repeats: int = 1  # calls per case, above one where the ceiling ended the size walk
     unseparated: str | None = None
     unbuilt: str | None = None  # no input generator, so no search ran at all
     unpaced: str | None = None  # no naive solution, so the search had no naive solution
@@ -235,6 +237,7 @@ def progressed(p: Passage, *, index: int, total: int, cost: float | None) -> Pro
         landed=p.draft.state is WritingState.LANDED,
         reason=None if p.checked.survived else why(p.checked),
         separating=p.inputs.separating,
+        repeats=p.inputs.repeats,
         unseparated=p.inputs.unseparated,
         unbuilt=p.inputs.unbuilt,
         mutants=p.bar.mutants,

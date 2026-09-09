@@ -16,7 +16,13 @@ from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import request_hash as blind_hash
 from algo_coach.generation.inputs import request_hash as inputs_hash
 from algo_coach.generation.naive import request_hash as naive_hash
-from algo_coach.generation.speedup import CEILING, Missing
+from algo_coach.generation.speedup import (
+    CEILING,
+    MARGIN,
+    REPEATS_MAX,
+    SEARCH_REVISION,
+    Missing,
+)
 from algo_coach.schema import Draft, WritingState
 
 # the steps a call answers, in the order they run. `checked`, `agreed` and
@@ -101,9 +107,9 @@ def draws_again(draft: Draft, target: Target) -> bool:
     """Whether a resume asks the naive solution again though nothing about the bench
     moved.
 
-    The naive solution finished at every size the input generator reached, and it is the one
-    sampled site: a second call is a second draw rather than the answer already
-    stored.
+    The naive solution finished at every size the input generator reached, or it
+    ran within a constant factor of the canonical, and it is the one sampled
+    site: a second call is a second draw rather than the answer already stored.
 
     Only that reason. A search that never ran is the inputs site's to repair,
     and a draw there pays for a call the search cannot use.
@@ -111,23 +117,46 @@ def draws_again(draft: Draft, target: Target) -> bool:
     return (
         draft.state is WritingState.SEARCHED
         and target.template.speedup
-        and draft.unseparated == Missing.NAIVE_FINISHED
+        and draft.unseparated in (Missing.NAIVE_FINISHED, Missing.CANONICAL_TOO_SLOW)
     )
 
 
-def re_walks(draft: Draft, target: Target, ceiling: int = CEILING) -> bool:
-    """Whether a resume runs the search again though nothing about the bench
-    moved: the walk stopped at a ceiling that is no longer the one in force.
+# the reasons a raised bound can answer. A walk that reached the statement's
+# own bound is not among them: `corpus.md` names that a defect in the run
+BOUNDED = (
+    Missing.INPUT_TOO_LARGE,
+    Missing.COUNT_TOO_LARGE,
+    Missing.CASE_TOO_LARGE,
+    Missing.CANONICAL_TOO_SLOW,
+)
 
-    Absent counts as moved. The drafts written before the ceiling was recorded
-    were walked under the first one.
+
+def re_walks(
+    draft: Draft,
+    target: Target,
+    ceiling: int = CEILING,
+    margin: int = MARGIN,
+    repeats_max: int = REPEATS_MAX,
+    revision: int = SEARCH_REVISION,
+) -> bool:
+    """Whether a resume runs the search again though nothing about the bench
+    moved: a bound the walk stopped at is no longer the one in force, or the
+    search itself is no longer the one that walked.
+
+    One rule over the four numbers rather than a reason per number. The search
+    is a local step, so a walk taken again where an unrelated one moved costs
+    subprocesses and no call.
+
+    Absent counts as moved. The drafts written before a number was recorded
+    were walked under the first of it.
     """
     return (
         draft.state is WritingState.SEARCHED
         and target.template.speedup
         and draft.separating_case is None
-        and draft.unseparated in (Missing.INPUT_TOO_LARGE, Missing.CASE_TOO_LARGE)
-        and draft.ceiling != ceiling
+        and draft.unseparated in BOUNDED
+        and (draft.ceiling, draft.margin, draft.repeats_max, draft.search_revision)
+        != (ceiling, margin, repeats_max, revision)
     )
 
 
@@ -159,17 +188,20 @@ def moved_at(draft: Draft, target: Target, bench: Bench = BENCH) -> WritingState
     # step that has not run
     if draft.state is WritingState.SEARCHED and not target.template.speedup:
         return WritingState.HARDENED
+    # before the draw: the search costs subprocesses where a second draw costs
+    # a call, so a moved bound is the cheaper answer where both apply
+    if re_walks(draft, target):
+        return WritingState.SEARCHED
     # read after the flag: a corrected claim releases the draft without paying
     # for a draw the search no longer needs
     if draws_again(draft, target):
         return WritingState.PACED
-    if re_walks(draft, target):
-        return WritingState.SEARCHED
     return None
 
 
 __all__ = [
     "ANSWERED",
+    "BOUNDED",
     "ORDER",
     "advances",
     "draws_again",

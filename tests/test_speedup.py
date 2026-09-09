@@ -1,7 +1,7 @@
 import pytest
 from helpers import a_call
 
-from algo_coach.generation.speedup import CEILING, Missing, search
+from algo_coach.generation.speedup import CEILING, MARGIN, Missing, search
 from algo_coach.runner import weighs
 from algo_coach.schema import ExpectedSource, MachineProvenance
 
@@ -141,7 +141,9 @@ def test_the_search_starts_within_the_constraints():
 
 def test_an_input_over_the_ceiling_is_not_a_case():
     """A stored case is read whole on every verification, so what it may weigh
-    is bounded rather than left to the separating size."""
+    is bounded rather than left to the separating size. The count step then
+    finds nothing either, since a solution that returns a length has no time
+    the cap can be divided by."""
     found = search(
         lambda size: [list(range(size))],
         canonical="def solve(xs):\n    return len(xs)\n",
@@ -154,7 +156,7 @@ def test_an_input_over_the_ceiling_is_not_a_case():
         ceiling=64,
     )
 
-    assert found.missing is Missing.INPUT_TOO_LARGE
+    assert found.missing is Missing.COUNT_TOO_LARGE
 
 
 def test_the_walk_tries_the_largest_storable_input_before_giving_up():
@@ -249,3 +251,71 @@ def test_two_solutions_disagreeing_at_that_size_is_not_a_case():
 
     assert found.missing is Missing.DISAGREED
     assert found.disagreement.canonical == found.disagreement.reference + 1
+
+
+# one call is 3ms against a cap of 37, so the ceiling stops the size walk long
+# before the naive solution is slow enough and only a count separates the two
+SLOW_ONCE = "import time\n\n\ndef solve(xs):\n    time.sleep(0.003)\n    return len(xs)\n"
+COUNTS = "def solve(xs):\n    return len(xs)\n"
+# a fifth of the naive solution's cost per call, so the canonical lands near a
+# fifth of the cap whatever count the search settles on: inside the cap, and
+# outside a tenth of it
+FIFTH_SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(0.0006)\n    return len(xs)\n"
+
+
+def counted(**overrides):
+    """A walk the ceiling ends with the naive solution under the cap, which is
+    what a sublinear form leaves. A list of `size` zeros weighs three bytes an
+    element, so forty stops the walk on an input a case can still carry."""
+    return searched(
+        canonical=overrides.pop("canonical", COUNTS),
+        naive=overrides.pop("naive", SLOW_ONCE),
+        reference=overrides.pop("reference", COUNTS),
+        make=overrides.pop("make", lambda size: [[0] * size]),
+        largest=overrides.pop("largest", 64),
+        ceiling=overrides.pop("ceiling", 40),
+        **overrides,
+    )
+
+
+def test_a_walk_the_ceiling_ended_separates_by_the_count():
+    """A form whose one application is sublinear separates on no input the
+    ceiling holds, and repeating the call reaches the cap on the one it does."""
+    found = counted()
+
+    assert found.found
+    assert found.repeats > 1
+    assert found.naive_ms > CAP_MS
+
+
+def test_the_case_carries_the_count_the_search_settled_on():
+    """The case separates under its own terms, so a verification that ran it
+    once would pass the solution the search timed out."""
+    found = counted()
+
+    assert found.case.repeats == found.repeats
+
+
+def test_a_canonical_over_a_tenth_of_the_cap_separates_nothing():
+    """A case the canonical only just answers fails a correct submission a few
+    percent slower, so the margin is what makes it a test of the form."""
+    found = counted(canonical=FIFTH_SLOW)
+
+    assert found.missing is Missing.CANONICAL_TOO_SLOW
+    assert found.canonical_ms * MARGIN > CAP_MS
+
+
+def test_a_count_no_ceiling_bounds_still_stops():
+    """The cap divided by a time of nothing is unbounded, and a search that
+    walked it would spend the run."""
+    found = counted(naive=COUNTS)
+
+    assert found.missing is Missing.COUNT_TOO_LARGE
+
+
+def test_a_size_the_statement_bounds_is_not_repeated():
+    """A walk that reached the statement's own bound is a defect in the run,
+    which `corpus.md` names, rather than a size the ceiling hid."""
+    found = counted(largest=2, ceiling=CEILING)
+
+    assert found.missing is Missing.NAIVE_FINISHED

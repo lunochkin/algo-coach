@@ -58,14 +58,21 @@ def run(
     args: Sequence[Sequence[Any]],
     *,
     cap_ms: int,
+    repeats: Sequence[int] | None = None,
     stop_early: bool = False,
 ) -> list[CaseRun]:
+    """One run per argument tuple. `repeats` says how many times `solve` is
+    called on each, one entry per tuple, and the cap covers the sum. Absent is
+    one call each, which is every case but a separating one."""
     # the whole set in one call: a per-case boundary is a round trip per case
     # once the executor is remote
     if cap_ms <= 0:
         raise ValueError("a cap of nothing decides nothing about the solution")
 
     cases = [list(one) for one in args]
+    counts = list(repeats) if repeats is not None else [1] * len(cases)
+    if len(counts) != len(cases):
+        raise ValueError("a repeat count per argument tuple, or none at all")
     if not defines_solve(code):
         # every case, whatever `stop_early` says: nothing ran, so there is
         # nothing to stop at
@@ -74,7 +81,9 @@ def run(
     results: list[CaseRun] = []
     with TemporaryDirectory() as work:
         for start in range(0, len(cases), BATCH):
-            batch = cases[start : start + BATCH]
+            batch = list(
+                zip(cases[start : start + BATCH], counts[start : start + BATCH], strict=True)
+            )
             # started together and fed one at a time: the cases stay
             # sequential, so nothing a run measures is timed against another
             # case
@@ -82,14 +91,14 @@ def run(
                 _started(Path(work) / f"{start + index}.json") for index in range(len(batch))
             ]
             stopped = False
-            for one, (child, path) in zip(batch, waiting, strict=True):
+            for (one, count), (child, path) in zip(batch, waiting, strict=True):
                 if stopped:
                     # killed and reaped: a child left unwaited is a zombie, and
                     # its open pipe a warning the suite treats as an error
                     _kill(child.pid)
                     child.communicate()
                     continue
-                result = _answered(child, path, code, one, cap_ms)
+                result = _answered(child, path, code, one, cap_ms, count)
                 results.append(result)
                 # never at a returned value, however wrong: the backend is not
                 # told what a case expects
@@ -145,9 +154,10 @@ def _answered(
     code: str,
     args: list[Any],
     cap_ms: int,
+    repeats: int = 1,
 ) -> CaseRun:
     # one case per child: `corpus.md` requires that no case observes another
-    request = json.dumps({"code": code, "args": args, "cap_ms": cap_ms})
+    request = json.dumps({"code": code, "args": args, "cap_ms": cap_ms, "repeats": repeats})
     try:
         child.communicate(request, timeout=(cap_ms + STARTUP_MS) / 1000)
     except subprocess.TimeoutExpired:
