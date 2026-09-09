@@ -29,7 +29,7 @@ solution, and three drafts would resume.
       count-based-kth by that meaning. The card reads the flag as faster than
       the naive solution, and the search reads the flag as separable under the
       ceiling. A log-factor form is faster and is never separable
-- [ ] Ask the inputs site for the shape the naive solution is slowest on. Three
+- [x] Ask the inputs site for the shape the naive solution is slowest on. Three
       holds are shape faults: kahn-indegree's graphs are all cyclic at size,
       kruskal-mst's are disconnected, and worked-framing's random digits give
       the recursion almost no branches. The moved prompt hash makes `--resume`

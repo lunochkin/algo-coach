@@ -123,6 +123,19 @@ def test_the_brief_asks_for_one_input_per_pair(tmp_path):
     assert "same pair builds the same input" in SYSTEM
 
 
+def test_the_brief_asks_for_the_shape_the_work_is_slowest_on():
+    """A random input leaves most of the work undone: a random graph is
+    disconnected or cyclic, and the naive solution finishes at every size."""
+    assert "slowest on" in SYSTEM
+    assert "grows with `size` all the way to the bound" in SYSTEM
+
+
+def test_the_brief_says_size_one_runs_first():
+    """A generator drawing over an empty range on one vertex crashed the
+    search before it started, and a greedy site is never asked again."""
+    assert "runs at size 1 first" in SYSTEM
+
+
 def test_the_brief_names_no_technique_and_no_form():
     """The generator reads the constraints, which are what a statement states
     rather than what it withholds."""

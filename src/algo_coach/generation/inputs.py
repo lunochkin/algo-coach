@@ -33,7 +33,10 @@ engine runs defines, and says nothing about what yours computes.
 `size` scales the input. What it counts is yours to choose where the statement
 describes several inputs: the length of the collection, the number of rows,
 whatever the work grows with. Size 1 is the smallest input the statement
-admits.
+admits, and your code runs at size 1 first. A collection of one element, a
+graph of one vertex, a string of one character: build each without a random
+call over an empty range, since a crash there ends the search before it
+starts.
 
 `seed` varies the input at one size. Two seeds are two different inputs of the
 same size, and both satisfy the statement.
@@ -45,6 +48,15 @@ list fails outright.
 
 The input satisfies every constraint the statement gives, at every size. Values
 stay inside the ranges it states, and the shape stays what it describes.
+
+Build the input a straightforward solution is slowest on: the shape that makes
+every step of the work happen. Random values usually leave most of the work
+undone. A random graph is disconnected, so a solution stops early; where the
+statement asks for an order over a graph, a random graph has a cycle, so the
+order is never built. A random string opens few of the choices the statement
+allows. A random target is found early. Build the connected graph, the acyclic
+one, the string every position of which admits a choice, the target that is
+absent or last, so that the work grows with `size` all the way to the bound.
 
 Report the largest size the statement allows, in the unit your `size` counts.
 That bound is what stops a search asking for an input the problem excludes.
