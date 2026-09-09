@@ -57,9 +57,6 @@ solution, and three drafts would resume.
 - [x] Require the canonical to finish within a tenth of the cap at the
       separating point. A case the canonical only just answers fails a correct
       submission a few percent slower
-- [ ] List held drafts' statements to the generator beside the landed ones. Two
-      of ten statements asked a question a listed statement asked, and a draft
-      held at `searched` is not listed at all
 
 ### Exit
 - [ ] Every held draft has landed or been rejected, and the sweep's numbers
