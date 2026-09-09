@@ -147,26 +147,30 @@ Measured:
   before a stop by hand: 4 landed, 2 held on `input_too_large`, 1 cut.
   `--count` is per template.
 
-## Phase 7 — The corpus, measured (current)
+## Phase 7 — Finishing the sweep (current)
 
-The worth of a generated corpus, measured rather than asserted.
+The corpus the drill loop needs, before the loop. Split from Phase 6 on
+2026-09-02. The matcher measurement moved behind the beta on 2026-09-09,
+since the loop needs problems and not a score.
 
-- The hand pass, which writes the matcher's reference and is the only reading
-  of a generated problem no model produced.
-- User matches over pairs of a template and a solution, from the templates
-  alone.
-- The matcher scored per pair and grouped per template, positive verdicts in
-  both directions.
-- A configuration pinned before any number is quoted.
-- Exit: the matcher carries a per-template score in both directions.
+- `generate --gaps` run to the end over every core template, and its counts
+  recorded.
+- The held drafts resolved: the case ceiling raised, the inputs site asked for
+  the naive solution's worst shape, the naive site told the technique's other
+  forms, and `speedup` given one meaning.
+- Exit: every held draft has landed or been rejected, and the sweep's numbers
+  are written here.
 
 ## Phase 8 — The engine serves
 
 The first attempts the engine produces itself. It serves a generated problem,
 times the sitting, runs the submission against the problem's own cases, and
-records the verdict. The interface ships in this phase rather than a later
-one.
+records the verdict. The interface ships in this phase, and it is a web app
+served locally: Phase 9 hosts the same pages for invited users, so a terminal
+interface here would be written twice.
 
+- A web layer as the second adapter beside the CLI, over the same domain
+  calls. Server-rendered pages, and a code editor on the sitting's page.
 - `Attempt` gains the verification result.
 - The loop can mark a problem defective in place of a self-label, and the board
   stops counting that problem's attempts in either direction.
@@ -188,7 +192,21 @@ is the trust the submitted code gets.
 - Access is by invitation.
 - Exit: someone other than the author completes a sitting.
 
-## Phase 10 — Ladder, recall and card runs
+## Phase 10 — The matcher, measured
+
+The worth of a generated corpus, measured. Held Phase 7's number until
+2026-09-09.
+
+- The hand pass, which writes the matcher's reference and is the only reading
+  of a generated problem no model produced.
+- User matches over pairs of a template and a solution, from the templates
+  alone.
+- The matcher scored per pair and grouped per template, positive verdicts in
+  both directions.
+- A configuration pinned before any number is quoted.
+- Exit: the matcher carries a per-template score in both directions.
+
+## Phase 11 — Ladder, recall and card runs
 
 The pieces a card needs once there are problems to fill it.
 
@@ -205,7 +223,7 @@ The pieces a card needs once there are problems to fill it.
 - Graduation names no threshold. The numbers do not exist yet.
 - Exit: recall and the ladder run daily.
 
-## Phase 11 — Technique mastery, scheduling, failure mode
+## Phase 12 — Technique mastery, scheduling, failure mode
 
 Per-technique skill state updated from attempts and the diagnosis signal.
 Scheduling targets the diagnosed cause rather than per-problem intervals.
@@ -215,7 +233,7 @@ Scheduling targets the diagnosed cause rather than per-problem intervals.
 - Sessions land here too, as a derived view over the log grouped on read.
 - Exit: the scheduler drives daily practice.
 
-## Phase 12 — Alternative solutions
+## Phase 13 — Alternative solutions
 
 Every other way to solve a stored problem, enumerated over the corpus rather
 than asked for by template. A call proposes the approaches, each becomes its
@@ -224,7 +242,7 @@ own canonical, and the problem's own cases judge them.
 Exit: one rung covers a core template and an optional one, through two
 canonicals of one problem.
 
-## Phase 13 — The corpus gated
+## Phase 14 — The corpus gated
 
 Whether a generated statement gives its form away, measured rather than
 assumed. A solver who recognises a problem has not derived its form, so such a
@@ -239,27 +257,33 @@ problem teaches recognition of nothing.
   written ones.
 - Exit: every stored problem has passed the gate or been retired by it.
 
-## Phase 14 — Program-analysis-grounded diagnosis
+## Phase 15 — Program-analysis-grounded diagnosis
 
 Ground the classifier in evidence: AST-diff against canonical solutions,
 execution-trace comparison, empirical complexity measurement. Deliverable:
 measured accuracy delta against LLM-only diagnosis.
 
-## Phase 15 — Retrieval
+## Phase 16 — Retrieval
 
 Similar problems, patterns, and technique briefs retrieved from the corpus and
 the user's own attempts, and weak-spot patterns surfaced.
 
-## Phase 16 — MCP + autonomy
+## Phase 17 — MCP + autonomy
 
 Corpus and tools exposed as an MCP server. A scheduled agent runs the practice
 loop: it picks drills and adapts to history.
 
-## Phase 17 — Multi-agent (conditional)
+## Phase 18 — Multi-agent (conditional)
 
 Only once a real pipeline needs it: diagnose → retrieve → brief → schedule.
 
-## Phase 18 — Soundness-checked synthesis
+## Phase 19 — Soundness-checked synthesis
 
 An upgrade to Phase 6's generation rather than its first appearance. Formal
 constraint specs, property-based test-case generation, adversarial validation.
+
+## Renumbering
+
+On 2026-09-09 the matcher measurement left Phase 7 for a phase of its own,
+Phase 10, and Phases 10 to 18 became 11 to 19. Text written before that date
+reads through this map.

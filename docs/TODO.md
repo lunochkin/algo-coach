@@ -3,15 +3,11 @@
 The phases still open. A ticked item stays while its phase is open. When a
 phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 
-## Phase 7 — the corpus, measured (current)
+## Phase 7 — finishing the sweep (current)
 
-How much a generated corpus is worth, measured. Split from Phase 6 on
-2026-09-02, because every item here needs a corpus to exist first.
-
-### Finishing the sweep
-
-Phase 6 closed with the gaps run stopped by hand. At that point 31 of 37 core
-templates carried no solution, and three drafts would resume.
+The corpus the drill loop needs, before the loop. Phase 6 closed with the gaps
+run stopped by hand. At that point 31 of 37 core templates carried no
+solution, and three drafts would resume.
 
 - [x] Resume the held drafts and run `generate --gaps --count 1` to the end,
       then record what `gaps` reports. Two of the first seven targets held on
@@ -47,6 +43,85 @@ templates carried no solution, and three drafts would resume.
 - [ ] List held drafts' statements to the generator beside the landed ones. Two
       of ten statements asked a question a listed statement asked, and a draft
       held at `searched` is not listed at all
+
+### Exit
+- [ ] Every held draft has landed or been rejected, and the sweep's numbers
+      are in `docs/ROADMAP.md`
+
+## Phase 8 — the engine serves
+
+The first attempts the engine produces itself, through the interface a sitting
+happens in. The interface ships in this phase. A practice loop that is not used
+daily measures nothing, and a sitting does not happen at a command line.
+
+- [ ] Serve every created problem and skip the retired ones. No gate stands
+      between landing and serving until Phase 14
+- [ ] Serve a generated problem, time the sitting, run the submission against
+      the problem's own cases, and mint the attempt
+- [ ] Store the verification result on `Attempt`. The field is additive, and
+      every attempt written before the engine judged one leaves the field empty
+- [ ] Feed the claim classifier its candidates from the problem's derived
+      techniques. No other source supplies candidates now that the tag
+      mapping is gone
+- [ ] Offer marking a problem defective in place of the self-label. A statement
+      that asked the wrong thing would otherwise be recorded as the user's own
+      gap
+- [ ] Exclude a defective problem's attempts from the board, solved and failed
+      alike. Dropping only the failures would raise a technique's solve rate
+      because a problem was broken
+- [ ] Ask for a claim and a self-label as the Phase 2 loop asked for them. The
+      engine now witnesses the sitting, and the user still writes both records
+
+- [ ] Add a web layer as the second adapter beside the CLI, over the same
+      domain calls. Phase 9 hosts the same pages for invited users, so a
+      terminal interface here would be written twice
+- [ ] Serve the statement, take a submission from an editor on the page, and
+      show the per-case verdict in one view. A sitting split over several
+      pages is a workflow, and a workflow is not practised daily
+- [ ] Time the sitting in the interface. The loop records only the timing the
+      loop witnessed, so the loop never asks the user for a duration
+- [ ] Show the board and the day's due work as the entry point, so the loop
+      starts from what to practise. A problem id as the entry point leaves the
+      selection to the user
+
+### Exit
+- [ ] Daily practice runs here, in the app, on problems the engine wrote and
+      judged
+
+## Phase 9 — the engine hosted
+
+The same loop, for people who are not the author. The only change is the trust
+the submitted code gets. The local backend is a subprocess per case, because
+our own generated code on our own machine is not a threat model, and another
+person's code is.
+
+- [ ] Add a sandboxed backend behind `runner.run`. The backend keeps the
+      signature and the child protocol, JSON in and JSON out. The `run` boundary
+      was written for a second backend, so no second runner is needed
+- [ ] Keep the comparison against `expected` above the boundary, where the
+      comparison already sits. A sandbox is never told what a case expects
+- [ ] Cap wall clock, memory and output per run, and give the sandbox no
+      network. A submission that spawns a process or opens a connection
+      fails
+- [ ] Key `AttemptLog` by user. The log is the only store that changes.
+      Problems, cases, solutions, matches and cards are shared product data
+- [ ] Make one user's log readable and deletable without touching another's.
+      The author's own log is the evidence of daily use and the set every eval
+      reads, and must not mix with another user's
+- [ ] Buy the account system, so no credential handling is our own
+- [ ] Gate access on an invitation. Untrusted execution behind open
+      registration is an abuse surface with no upside at this size
+- [ ] Deploy the engine, and write down what the deployment holds and for how
+      long. A user cannot check a retention claim that was never written down
+
+### Exit
+- [ ] Someone other than the author completes a sitting
+
+## Phase 10 — the matcher, measured
+
+How much a generated corpus is worth, measured. Moved behind the beta on
+2026-09-09: the drill loop needs problems and not a score, and the attempts
+the loop produces rebuild the eval set the classifier is scored against.
 
 ### Matching the generated corpus by hand
 
@@ -91,73 +166,7 @@ the audit. Generation goes on without the score.
 ### Exit
 - [ ] The matcher carries a per-template score in both directions
 
-## Phase 8 — the engine serves
-
-The first attempts the engine produces itself, through the interface a sitting
-happens in. The interface ships in this phase. A practice loop that is not used
-daily measures nothing, and a sitting does not happen at a command line.
-
-- [ ] Serve every created problem and skip the retired ones. No gate stands
-      between landing and serving until Phase 13
-- [ ] Serve a generated problem, time the sitting, run the submission against
-      the problem's own cases, and mint the attempt
-- [ ] Store the verification result on `Attempt`. The field is additive, and
-      every attempt written before the engine judged one leaves the field empty
-- [ ] Feed the claim classifier its candidates from the problem's derived
-      techniques. No other source supplies candidates now that the tag
-      mapping is gone
-- [ ] Offer marking a problem defective in place of the self-label. A statement
-      that asked the wrong thing would otherwise be recorded as the user's own
-      gap
-- [ ] Exclude a defective problem's attempts from the board, solved and failed
-      alike. Dropping only the failures would raise a technique's solve rate
-      because a problem was broken
-- [ ] Ask for a claim and a self-label as the Phase 2 loop asked for them. The
-      engine now witnesses the sitting, and the user still writes both records
-
-- [ ] Serve the statement, take a submission and show the per-case verdict in
-      one view. A sitting split over several commands is a workflow, and a
-      workflow is not practised daily
-- [ ] Time the sitting in the interface. The loop records only the timing the
-      loop witnessed, so the loop never asks the user for a duration
-- [ ] Show the board and the day's due work as the entry point, so the loop
-      starts from what to practise. A problem id as the entry point leaves the
-      selection to the user
-
-### Exit
-- [ ] Daily practice runs here, in the app, on problems the engine wrote and
-      judged
-
-## Phase 9 — the engine hosted
-
-The same loop, for people who are not the author. The only change is the trust
-the submitted code gets. The local backend is a subprocess per case, because
-our own generated code on our own machine is not a threat model, and another
-person's code is.
-
-- [ ] Add a sandboxed backend behind `runner.run`. The backend keeps the
-      signature and the child protocol, JSON in and JSON out. The `run` boundary
-      was written for a second backend, so no second runner is needed
-- [ ] Keep the comparison against `expected` above the boundary, where the
-      comparison already sits. A sandbox is never told what a case expects
-- [ ] Cap wall clock, memory and output per run, and give the sandbox no
-      network. A submission that spawns a process or opens a connection
-      fails
-- [ ] Key `AttemptLog` by user. The log is the only store that changes.
-      Problems, cases, solutions, matches and cards are shared product data
-- [ ] Make one user's log readable and deletable without touching another's.
-      The author's own log is the evidence of daily use and the set every eval
-      reads, and must not mix with another user's
-- [ ] Buy the account system, so no credential handling is our own
-- [ ] Gate access on an invitation. Untrusted execution behind open
-      registration is an abuse surface with no upside at this size
-- [ ] Deploy the engine, and write down what the deployment holds and for how
-      long. A user cannot check a retention claim that was never written down
-
-### Exit
-- [ ] Someone other than the author completes a sitting
-
-## Phase 10 — ladder, recall and card runs
+## Phase 11 — ladder, recall and card runs
 
 - [ ] Resolve the ladder from the matches, the selector filling out to `size`.
       A retired problem fills no rung
@@ -187,7 +196,7 @@ person's code is.
 ### Exit
 - [ ] Recall and the ladder run daily
 
-## Phase 11 — mastery, scheduling, failure mode
+## Phase 12 — mastery, scheduling, failure mode
 
 - [ ] Land `rust` against `gap` with the mastery model, or drop the
       distinction. The two labels differ only in whether the technique was ever
@@ -205,7 +214,7 @@ person's code is.
       self-labels the loop produced. A call that only ever says `gap` would
       score well on a corpus of gaps
 
-## Phase 12 — alternative solutions
+## Phase 13 — alternative solutions
 
 Every other way to solve a stored problem, by the flow in `flows.md`,
 "Enumerating a problem's other solutions". The schema and the match's subject

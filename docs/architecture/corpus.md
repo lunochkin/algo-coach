@@ -54,7 +54,7 @@ architecture, and `README.md` is the map.
 - **Whether a statement gives its form away is not checked.** A statement can
   name its approach, or reuse the example its template's trigger names, and a
   solver who recognises the problem has not derived the form. A gate over the
-  corpus for this is deferred to Phase 13 in `ROADMAP.md`. It needs a corpus
+  corpus for this is deferred to Phase 14 in `ROADMAP.md`. It needs a corpus
   to measure and a baseline no generator wrote, and a status the gate promotes
   to is an additive change when it comes.
 - **A problem is never edited, and only its status moves.** A statement that
