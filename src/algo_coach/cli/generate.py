@@ -153,7 +153,7 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
             # search or its ladder would be
             unaimed += 1
             print(f"draft {draft.id}: no template {draft.target_template_id}", file=sys.stderr)
-        elif not advances(draft, target.template, bench):
+        elif not advances(draft, target, bench):
             # the run would take the local steps and stop where the draft
             # stopped: nothing it reads moved, and `--drafts` names the reason
             held_back += 1
@@ -168,7 +168,7 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
         result = resume(
             api,
             calls,
-            target.template,
+            target,
             draft,
             corpus,
             bench=bench,

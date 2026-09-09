@@ -11,6 +11,7 @@ from algo_coach.generation import (
     Corpus,
     Notes,
     Progress,
+    Target,
     advances,
     blind,
     inputs,
@@ -22,7 +23,7 @@ from algo_coach.generation import (
 )
 from algo_coach.generation.speedup import CEILING
 from algo_coach.outcomes import OutcomeLog
-from algo_coach.schema import CallSite, Configuration, Draft, Template, WritingState
+from algo_coach.schema import CallSite, Card, Configuration, Draft, WritingState
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 # four mutation sites, so a survivor reaches a round and the loop pays a call
@@ -32,10 +33,17 @@ DECIDES = [{"args": "[0]", "expected": "false"}]
 OTHER = Configuration(model="another-model", effort="medium", pin="a-provider/bf16")
 
 
+def aimed(one: dict) -> Target:
+    """A card and one of its templates, as a run aims at them. The naive
+    site's prompt is built from both."""
+    stored = Card.model_validate(card() | {"id": "c1", "templates": [{"id": "t1", **one}]})
+    return Target(card=stored, template=stored.templates[0])
+
+
 # the form these drafts were written under, and the same one claiming the
 # speedup that makes the search run
-OPTIMUM = Template(id="t1", **template("longest-valid-window"))
-CLAIMS = Template(id="t1", **template("longest-valid-window", speedup=True))
+OPTIMUM = aimed(template("longest-valid-window"))
+CLAIMS = aimed(template("longest-valid-window", speedup=True))
 
 
 def drafted(tmp_path) -> Draft:
@@ -278,7 +286,7 @@ def test_a_moved_naive_solution_configuration_starts_at_the_naive_solution(tmp_p
 def test_an_edited_trigger_re_asks_the_naive_solution_alone(tmp_path):
     """The one prompt carrying more than the statement, so editing a form
     moves the prompt hash of the drafts written for it and no others."""
-    edited = Template(id="t1", **template("longest-valid-window", speedup=True, trigger="Else."))
+    edited = aimed(template("longest-valid-window", speedup=True, trigger="Else."))
 
     written_at = held(tmp_path).naive_provenance.prompt_hash
 
@@ -326,7 +334,7 @@ def test_a_resume_ends_on_the_row_a_writing_ends_on(tmp_path, monkeypatch):
     resume(
         FakeWriter(generator=BUILDS, slow=SLOW),
         CallLog(tmp_path),
-        one.templates[0],
+        Target(card=one, template=one.templates[0]),
         stopped.draft,
         Corpus.at(tmp_path),
         drafts=drafts,
@@ -352,7 +360,7 @@ def test_a_resumed_draw_separates_where_the_stored_naive_solution_did_not(tmp_pa
     result = resume(
         model,
         CallLog(tmp_path),
-        one.templates[0],
+        Target(card=one, template=one.templates[0]),
         stopped.draft,
         Corpus.at(tmp_path),
         drafts=drafts,
@@ -376,7 +384,7 @@ def test_a_redrawn_naive_solution_carries_the_size_its_search_found(tmp_path, mo
     resume(
         FakeWriter(generator=BUILDS, slow=SLOW),
         CallLog(tmp_path),
-        one.templates[0],
+        Target(card=one, template=one.templates[0]),
         stopped.draft,
         Corpus.at(tmp_path),
         outcomes=OutcomeLog(tmp_path),
@@ -400,7 +408,7 @@ def test_a_moved_naive_solution_re_pays_that_call_and_no_other(tmp_path, monkeyp
     result = resume(
         model,
         CallLog(tmp_path),
-        one.templates[0],
+        Target(card=one, template=one.templates[0]),
         stopped.draft,
         Corpus.at(tmp_path),
         bench=BENCH.model_copy(update={"naive": OTHER}),
@@ -428,7 +436,7 @@ def test_a_resume_pays_for_the_step_that_had_no_answer_and_no_other(tmp_path, mo
     result = resume(
         model,
         CallLog(tmp_path),
-        one.templates[0],
+        Target(card=one, template=one.templates[0]),
         stopped.draft,
         Corpus.at(tmp_path),
         notes=Notes(lambda step: stages.append(f"{step.name}: {step.detail}")),
@@ -454,7 +462,7 @@ def test_a_draft_a_raised_call_left_resumes_at_that_call(tmp_path):
     result = resume(
         FakeWriter(),
         CallLog(tmp_path),
-        one.templates[0],
+        Target(card=one, template=one.templates[0]),
         stopped.draft,
         Corpus.at(tmp_path),
         drafts=drafts,
@@ -474,7 +482,7 @@ def test_a_resumed_step_writes_a_second_site_outcome(tmp_path):
     resume(
         FakeWriter(generator=BUILDS),
         CallLog(tmp_path),
-        one.templates[0],
+        Target(card=one, template=one.templates[0]),
         stopped.draft,
         Corpus.at(tmp_path),
         bench=BENCH.model_copy(update={"blind": OTHER}),
@@ -497,7 +505,7 @@ def test_a_resume_that_holds_again_leaves_the_draft_where_it_stopped(tmp_path):
     result = resume(
         FakeWriter(generator=BUILDS),
         CallLog(tmp_path),
-        one.templates[0],
+        Target(card=one, template=one.templates[0]),
         stopped.draft,
         Corpus.at(tmp_path),
         drafts=drafts,
@@ -519,7 +527,7 @@ def test_a_moved_blind_configuration_re_pays_no_input_generator(tmp_path):
     result = resume(
         model,
         CallLog(tmp_path),
-        one.templates[0],
+        Target(card=one, template=one.templates[0]),
         stopped.draft,
         Corpus.at(tmp_path),
         bench=BENCH.model_copy(update={"blind": OTHER}),

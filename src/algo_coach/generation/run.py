@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.drafts import DraftStore
+from algo_coach.generation.aim import Target
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.checks import (
     CAP_MS,
@@ -313,7 +314,7 @@ def finished(
 def resume(
     transport: Transport,
     calls: CallLog,
-    template: Template,
+    target: Target,
     draft: Draft,
     corpus: Corpus,
     *,
@@ -333,17 +334,17 @@ def resume(
     if draft.state is WritingState.REJECTED:
         raise ValueError("a rejected draft is not resumed: its gate said the answer was wrong")
     paid = len(calls.appended)
-    start = starts_at(draft, template, bench)
+    start = starts_at(draft, target, bench)
     notes("resume", f"starting at {start}")
     # the draft's own id, so a resumed step's site outcome groups with the
     # records of the writing it continues
     records: list[SiteOutcome] = []
-    writing = Writing(target_template_id=template.id, into=records, id=draft.id)
+    writing = Writing(target_template_id=target.template.id, into=records, id=draft.id)
     result = Resumed(started_at=start)
     passage = Passage(
         transport,
         calls,
-        template,
+        target,
         draft,
         start,
         bench=bench,

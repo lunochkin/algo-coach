@@ -271,7 +271,8 @@ a second generator call writes a different problem.
   the step the draft never took.
 - **A site is asked again on its own configuration and prompt hash**, as a
   replay skips a pair. The blind and the inputs prompts are the statement alone,
-  and the naive site's is the statement and the form to avoid, so a moved
+  and the naive site's is the statement, the form to avoid and the technique's
+  criterion, so a moved
   configuration re-pays its own call and no other.
 - **The steps after the sites read what the sites left.** The search runs the
   input generator against the naive solution, and the loop's survivors are

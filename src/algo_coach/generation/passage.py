@@ -7,6 +7,7 @@ from time import monotonic
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.drafts import DraftStore
+from algo_coach.generation.aim import Target
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import write_reference
 from algo_coach.generation.checks import (
@@ -67,7 +68,7 @@ class Passage:
 
     transport: Transport
     calls: CallLog
-    template: Template
+    target: Target
     draft: Draft
     start: WritingState
     bench: Bench = BENCH
@@ -80,6 +81,11 @@ class Passage:
     inputs: Inputs = field(default_factory=Inputs)
     naive: Naive = field(default_factory=Naive)
     bar: Bar = field(default_factory=Bar)
+
+    @property
+    def template(self) -> Template:
+        # the card beside it reaches the naive site alone
+        return self.target.template
 
     @property
     def generator(self) -> MachineProvenance:
@@ -120,7 +126,7 @@ def write_one(
     passage = Passage(
         transport,
         calls,
-        template,
+        Target(card=card, template=template),
         draft,
         WritingState.CHECKED,
         bench=bench,
@@ -163,7 +169,7 @@ def to_agreed(p: Passage) -> bool:
         return False
     p.draft = advanced(p.drafts, p.draft, WritingState.CHECKED)
 
-    if re_asks(p.draft, "blind", p.template, p.bench) or p.draft.reference is None:
+    if re_asks(p.draft, "blind", p.target, p.bench) or p.draft.reference is None:
         p.notes("reference", "writing the reference from the statement alone")
         solution, p.blind = write_reference(
             p.transport, p.calls, p.draft.statement, configuration=p.bench.blind
@@ -198,7 +204,7 @@ def to_built(p: Passage) -> bool:
     inputs it builds are what a fuzz pass kills mutants with, and a round is
     then paid for the survivors alone. A call that fails stops nothing here:
     the draft is held at the step that has no answer."""
-    if re_asks(p.draft, "inputs", p.template, p.bench) or p.draft.input_generator is None:
+    if re_asks(p.draft, "inputs", p.target, p.bench) or p.draft.input_generator is None:
         p.inputs = building(
             p.transport, p.calls, p.draft.statement, configuration=p.bench.inputs, notes=p.notes
         )
@@ -228,14 +234,14 @@ def to_paced(p: Passage) -> bool:
         p.transport,
         p.calls,
         p.draft,
-        p.template,
+        p.target,
         configuration=p.bench.naive,
         cap_ms=p.cap_ms,
         notes=p.notes,
         # drawn again where the search separated nothing, though nothing about
         # the bench moved: the site is the one that is sampled
-        reuse=not re_asks(p.draft, "naive", p.template, p.bench)
-        and not draws_again(p.draft, p.template),
+        reuse=not re_asks(p.draft, "naive", p.target, p.bench)
+        and not draws_again(p.draft, p.target),
     )
     if p.naive.code is not None and p.naive.call is not None:
         p.draft = advanced(
@@ -440,7 +446,7 @@ def paced(
     transport: Transport,
     calls: CallLog,
     draft: Draft,
-    template: Template,
+    target: Target,
     *,
     configuration: Configuration,
     cap_ms: int,
@@ -461,7 +467,7 @@ def paced(
         notes("naive", "writing the solution the search measures against")
         try:
             code, call = write_naive(
-                transport, calls, draft.statement, template.trigger, configuration=configuration
+                transport, calls, draft.statement, target, configuration=configuration
             )
         except Exception as failure:
             notes("naive", f"unpaced: {failure!r}")

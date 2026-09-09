@@ -12,6 +12,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from algo_coach.calls import CallLog, Transport
+from algo_coach.generation.aim import Target
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import request_hash as blind_hash
 from algo_coach.generation.blind import write_reference
@@ -81,7 +82,12 @@ class Subject:
     # claims no speedup and on one landed before the role existed
     naive: str | None
     cases: list[TestCase]
-    template: Template | None  # absent where the target named a technique
+    target: Target | None  # absent where the problem was written for a technique
+
+    @property
+    def template(self) -> Template | None:
+        # the card beside it reaches the naive site alone
+        return self.target.template if self.target is not None else None
 
     @property
     def declared(self) -> list[TestCase]:
@@ -108,7 +114,7 @@ def subjects(corpus: Corpus, cards: Iterable[Card]) -> list[Subject]:
 
     A retired problem is excluded, for the reason `flows.md` gives.
     """
-    forms = {one.id: one for card in cards for one in card.templates}
+    forms = {one.id: Target(card=card, template=one) for card in cards for one in card.templates}
     solutions = corpus.solutions.solutions()
     cases = corpus.cases.cases()
     found: list[Subject] = []
@@ -129,7 +135,7 @@ def subjects(corpus: Corpus, cards: Iterable[Card]) -> list[Subject]:
                 reference=blind.code,
                 naive=slow.code if slow is not None else None,
                 cases=theirs,
-                template=forms.get(problem.target_template_id or ""),
+                target=forms.get(problem.target_template_id or ""),
             )
         )
     return found
@@ -246,10 +252,10 @@ def naive_replay(
     """Another naive solution for a stored statement, judged by the cases the
     problem carries. Asked where the template claims a speedup, since that is
     where the generation path writes one."""
-    if subject.template is None or not subject.template.speedup:
+    if subject.target is None or not subject.target.template.speedup:
         return Asked()
     configuration = bench.naive
-    prompt_hash = naive_hash(subject.problem.statement, subject.template.trigger)
+    prompt_hash = naive_hash(subject.problem.statement, subject.target)
     if not fresh and asked_already(stored, CallSite.NAIVE, subject, configuration, prompt_hash):
         notes("naive", "answered at this prompt hash")
         return Asked(skipped=True)
@@ -259,7 +265,7 @@ def naive_replay(
         transport,
         calls,
         subject.problem.statement,
-        subject.template.trigger,
+        subject.target,
         configuration=configuration,
     )
     # no gate: being wrong rejects no draft, and every `Gate` arm says one

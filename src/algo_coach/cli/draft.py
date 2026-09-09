@@ -33,12 +33,12 @@ def waiting_on(draft: Draft, target: Target | None, bench: Bench) -> str:
         # the form its target named is not seeded, and a search reads `speedup`
         # from it
         return f"no template {draft.target_template_id}"
-    if not advances(draft, target.template, bench):
+    if not advances(draft, target, bench):
         # the step `starts_at` names is past the search, and a draft with no
         # separating case is held before the loop: reporting that step would
         # name work the resume never does
         return f"held before the loop: {draft.unseparated}"
-    return f"starts at {starts_at(draft, target.template, bench)}"
+    return f"starts at {starts_at(draft, target, bench)}"
 
 
 def drafts_summary(
@@ -58,7 +58,7 @@ def drafts_summary(
         for draft, target in waiting
         if target is not None
         and draft.state not in (WritingState.REJECTED, WritingState.LANDED)
-        and advances(draft, target.template, bench)
+        and advances(draft, target, bench)
     ]
     line = f"{len(waiting)} draft(s) stored, {len(resuming)} would resume"
     rejected = sum(draft.state is WritingState.REJECTED for draft, _ in waiting)

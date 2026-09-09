@@ -2,11 +2,11 @@ import json
 from dataclasses import dataclass, field
 
 import pytest
-from matching import card, seeded
+from matching import card, seeded, template
 from pydantic import ValidationError
 
 from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import GenerationError, write_naive
+from algo_coach.generation import GenerationError, Target, write_naive
 from algo_coach.generation.blind import SYSTEM as BLIND
 from algo_coach.generation.blind import prompt as blindly
 from algo_coach.generation.naive import (
@@ -20,7 +20,14 @@ from algo_coach.generation.naive import (
 from algo_coach.schema import Configuration
 
 STATEMENT = "Given a list of readings, return the widest stretch that stays fair."
-AVOID = "two indices walking one way over a window that never shrinks"
+AVOIDING = "two indices walking one way over a window that never shrinks"
+
+
+def aimed(root, trigger: str = AVOIDING) -> Target:
+    """The card and the form a writing was aimed at, which is what the naive
+    site's prompt is built from."""
+    (one,) = seeded(root, card(templates=[template("longest-valid-window", trigger=trigger)]))
+    return Target(card=one, template=one.templates[0])
 
 
 @dataclass
@@ -46,10 +53,12 @@ def test_the_form_to_avoid_is_sent_beside_the_statement(tmp_path):
     reach a verdict. No other site may be told it."""
     model = FakeModel(answer())
 
-    code, call = write_naive(model, CallLog(tmp_path), STATEMENT, AVOID)
+    target = aimed(tmp_path)
 
-    assert model.calls[0]["content"] == prompt(STATEMENT, AVOID)
-    assert STATEMENT in model.calls[0]["content"] and AVOID in model.calls[0]["content"]
+    code, call = write_naive(model, CallLog(tmp_path), STATEMENT, target)
+
+    assert model.calls[0]["content"] == prompt(STATEMENT, target)
+    assert STATEMENT in model.calls[0]["content"] and AVOIDING in model.calls[0]["content"]
     assert code.startswith("def solve")
     assert call.response == answer()
 
@@ -61,15 +70,15 @@ def test_the_brief_asks_for_the_replaced_approach_where_the_blind_one_asks_for_p
     statements is the form itself. This one is told what is wanted: what a
     solver writes without the technique, rather than the slowest solution
     there is."""
-    (one,) = seeded(tmp_path, card())
-    sent = SYSTEM + prompt(STATEMENT, one.templates[0].trigger)
+    target = aimed(tmp_path)
+    sent = SYSTEM + prompt(STATEMENT, target)
 
     assert "solver reaches for without one technique" in SYSTEM
     assert "slowest" not in SYSTEM
-    assert one.templates[0].trigger in sent
+    assert target.template.trigger in sent
     # the blind site is prompted for the plainest solution and shown no form,
     # which is what keeps its reading of the statement independent
-    assert one.templates[0].trigger not in BLIND + blindly(STATEMENT)
+    assert target.template.trigger not in BLIND + blindly(STATEMENT)
 
 
 def test_the_brief_bounds_the_candidates_by_the_statement(tmp_path):
@@ -95,7 +104,7 @@ def test_an_answer_cut_short_writes_no_solution(tmp_path):
     model = FakeModel(None)
 
     with pytest.raises(GenerationError):
-        write_naive(model, CallLog(tmp_path), STATEMENT, AVOID)
+        write_naive(model, CallLog(tmp_path), STATEMENT, aimed(tmp_path))
 
     assert len(CallLog(tmp_path).all()) == 1
 
@@ -103,8 +112,9 @@ def test_an_answer_cut_short_writes_no_solution(tmp_path):
 def test_the_site_s_own_configuration_is_the_default(tmp_path):
     model = FakeModel(answer())
 
-    write_naive(model, CallLog(tmp_path), STATEMENT, AVOID)
-    write_naive(model, CallLog(tmp_path), STATEMENT, AVOID, configuration=ELSEWHERE)
+    target = aimed(tmp_path)
+    write_naive(model, CallLog(tmp_path), STATEMENT, target)
+    write_naive(model, CallLog(tmp_path), STATEMENT, target, configuration=ELSEWHERE)
 
     assert model.calls[0]["model"] == NAIVE_DEFAULT.model
     assert model.calls[1]["model"] == ELSEWHERE.model
@@ -120,7 +130,7 @@ def test_the_site_is_sampled_where_the_other_answering_ones_are_greedy(tmp_path)
     """
     model = FakeModel(answer())
 
-    _, call = write_naive(model, CallLog(tmp_path), STATEMENT, AVOID)
+    _, call = write_naive(model, CallLog(tmp_path), STATEMENT, aimed(tmp_path))
 
     assert model.calls[0]["temperature"] is None
     assert call.temperature is None
@@ -129,7 +139,18 @@ def test_the_site_is_sampled_where_the_other_answering_ones_are_greedy(tmp_path)
 def test_two_forms_to_avoid_are_two_questions(tmp_path):
     """The prompt hash keys the skip, so a template whose trigger was edited is
     re-asked and the rest are not."""
-    assert request_hash(STATEMENT, AVOID) != request_hash(STATEMENT, "something else")
+    assert request_hash(STATEMENT, aimed(tmp_path)) != request_hash(
+        STATEMENT, aimed(tmp_path / "elsewhere", trigger="something else")
+    )
+
+
+def test_the_technique_that_earns_the_form_is_sent_beside_it(tmp_path):
+    """A card lists the forms it teaches, and a model reaches the technique
+    through one it does not: tabulation where the form is a memo."""
+    sent = prompt(STATEMENT, aimed(tmp_path))
+
+    assert "sliding-window" in sent
+    assert "Earns it:" in sent
 
 
 def test_the_schema_is_strict():

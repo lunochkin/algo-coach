@@ -38,9 +38,10 @@ solution, and three drafts would resume.
       kruskal-mst's are disconnected, and worked-framing's random digits give
       the recursion almost no branches. The moved prompt hash makes `--resume`
       re-run those three drafts
-- [ ] Name the technique's other templates to the naive site beside the form
-      to avoid. top-down-memo's naive solution wrote tabulation, the same
-      complexity under another form
+- [x] Show the naive site the technique's criterion beside the form to avoid.
+      Three naive solutions reached the technique through a form no template
+      names: tabulation where the form is a memo, a rolling pair where the form
+      is a scan taken twice
 - [x] Add `generate --reject <id>`, the by-hand exit `flows.md` names for a
       held draft no resume would separate. `drafting.reject` existed and no
       command called it, so the two single-query drafts could leave only by
@@ -317,3 +318,7 @@ trigger fires, whatever phase is current.
       then separates on the statement it naturally has. Triggered when a ladder
       needs a rung for a form no input separates, which rotated-array and
       count-based-kth are the first two of
+- [ ] Read the naive solution with the classifier, and hold the draft where the
+      verdict names the card's technique. One call per naive solution, and it
+      catches what the prompt misses rather than hoping. Triggered when a sweep
+      still holds drafts whose naive solution reached the form

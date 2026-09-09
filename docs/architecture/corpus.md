@@ -343,6 +343,11 @@ A solution the engine wrote for a problem, in one of three roles.
 - **The naive solution may be told which form to avoid**, where the reference
   may not. The naive solution settles no case, rejects no draft and is
   scored against nothing, so nothing it is shown can reach a verdict.
+- **A form's name does not bound the technique.** A card lists the forms it
+  teaches, and a model told to avoid one reaches the technique through a form
+  no template names. Tabulation stands in for a memo, and a rolling pair for a
+  scan taken twice. The vocabulary's criterion covers the forms nobody
+  authored, so the naive site is shown the criterion beside the trigger.
 - **The naive site is sampled, for the reason the generator is.** It produces
   an artifact rather than a verdict, so asking again is a second draw rather
   than the answer already stored.
