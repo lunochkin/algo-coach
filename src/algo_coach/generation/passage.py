@@ -25,6 +25,7 @@ from algo_coach.generation.hardening import harden
 from algo_coach.generation.inputs import InputGenerator, write_input_generator
 from algo_coach.generation.naive import write_naive
 from algo_coach.generation.resuming import draws_again, re_asks, reaches
+from algo_coach.generation.speedup import CEILING
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.generation.timing import timed
 from algo_coach.generation.verdicts import (
@@ -268,6 +269,7 @@ def to_searched(p: Passage) -> bool:
                 WritingState.SEARCHED,
                 separating_case=case,
                 unseparated=p.inputs.unseparated,
+                ceiling=CEILING,
             )
     # the claim is what a rung teaches, and a landed problem is repaired
     # nowhere: the draft stops at the step that has no answer, and a resume is

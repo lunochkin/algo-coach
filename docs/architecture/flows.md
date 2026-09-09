@@ -281,9 +281,12 @@ a second generator call writes a different problem.
   size**, though its configuration and its prompt hash stand. The naive site is
   the one sampled answering site, so a second call is a second draw. `corpus.md`
   gives the second draw as an exit.
-- **Only that reason draws again.** A search that never ran, or one whose walk
-  crossed the case ceiling, is the inputs site's to repair. The draft holds
-  the reason, so a resume can tell the two apart.
+- **Only that reason draws again.** A search that never ran is the inputs
+  site's to repair. The draft holds the reason, so a resume can tell the two
+  apart.
+- **A draft whose walk stopped at the ceiling starts at the search once the
+  ceiling is raised.** The draft records the ceiling its search ran under, and
+  a resume reads that number beside the flag and the bench.
 - **The local steps are taken again either way.** Running the canonical and
   settling the cases cost subprocesses rather than a call, so the draft stores
   neither, and the steps after them need both.

@@ -145,7 +145,7 @@ without redefining them. Grouped by the file that specifies the record.
   walk is the sequence of sizes it tries.
 - **Separating case**: the case stored at the size the search found.
   Appended after the loop, naming no round.
-- **Ceiling**: 64 KiB, the most a stored case may weigh.
+- **Ceiling**: 256 KiB, the most a stored case may weigh.
 - **Writing**: one run of the generation flow over one target, from the
   generator's call to landing or rejection. An attempt is a different
   thing: the log's record of a user's solution.

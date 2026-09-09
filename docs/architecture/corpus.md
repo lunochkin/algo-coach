@@ -159,16 +159,17 @@ The test cases decide whether a solution to a generated problem is correct.
 - **Cases are appended, never revised.** An edge case, or a case that forces a
   timeout, is added. An addition leaves behind a canonical needing
   re-verification, and never a record that is now wrong.
-- **A case carries its arguments literally, and weighs at most 64 KiB.** The
+- **A case carries its arguments literally, and weighs at most 256 KiB.** The
   ceiling covers the arguments and the expected value together. A separating
   input is the largest a case ever holds, and separating a quadratic solution
-  from a linear one takes a few thousand elements. A seed and a size would
+  from a linear one takes some ten thousand elements. A seed and a size would
   store less. Such a case would name how its input is built rather than what
   the input holds, and a run would build the input before judging it.
-- **The ceiling is reached at a few thousand elements**, since an integer drawn
-  at full magnitude costs eleven bytes. Four of the first twenty searches
-  crossed the ceiling before the naive solution exceeded the cap, so a
-  quadratic separation may not fit.
+- **The ceiling was 64 KiB first, and a quadratic separation did not fit.** An
+  integer drawn at full magnitude costs eleven bytes, so 64 KiB held a few
+  thousand elements. Under the 2 s cap two quadratic naive solutions crossed
+  the cap only between 64 KiB and 256 KiB: one at 4467 elements with a 94 KB
+  case, one at some 13k elements. The ceiling moved to 256 KiB on 2026-09-09.
 - **The separating case is chosen against the sitting's cap**, and never
   against generation's. The separating size is the size at which a submission
   that did not use the form fails, so the cap a sitting judges under decides
@@ -225,6 +226,10 @@ The test cases decide whether a solution to a generated problem is correct.
 - **A resume watches the template's `speedup` beside the prompt hash.** A flag
   edit moves neither a configuration nor a prompt, so a resume reading only
   those two would leave the draft where the search stopped it.
+- **A resume watches the ceiling too**, where the ceiling stopped the walk. The
+  draft records the ceiling its search ran under, since a raised constant
+  moves neither a configuration nor a prompt hash either, and the search is a
+  local step that costs no call.
 - **A resume asks the naive site again where the naive solution finished at
   every size the input generator reached**, though its configuration and its
   prompt hash both stand. The naive site is sampled, so a second call is a

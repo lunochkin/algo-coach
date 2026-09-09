@@ -22,7 +22,7 @@ DRILL_CAP_MS = 2_000
 
 # the most a stored case may weigh, arguments and expected value together.
 # `corpus.md` gives the reason and what a case over it costs
-CEILING = 65_536
+CEILING = 262_144
 
 
 class Missing(StrEnum):

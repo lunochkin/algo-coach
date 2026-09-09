@@ -233,6 +233,19 @@
       "title": "Cases",
       "type": "array"
     },
+    "ceiling": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ceiling"
+    },
     "declared": {
       "items": {
         "$ref": "#/$defs/DraftCase"

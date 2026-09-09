@@ -17,11 +17,11 @@ solution, and three drafts would resume.
       leaves. Two causes are known: a list grown where runtime follows a value,
       and a separation the ceiling cannot hold. The draft's reason does not
       separate the two causes
-- [ ] Raise `CEILING` to 256 KiB, in `speedup.py`, in `README.md` and in
+- [x] Raise `CEILING` to 256 KiB, in `speedup.py`, in `README.md` and in
       `corpus.md`. Two quadratic naive solutions cross the 2 s cap between
       64 KiB and 256 KiB: dsu-core at 4467 elements with a 94 KB case, and
       next-greater at some 13k elements
-- [ ] Re-enter the search on resume where the ceiling moved, as a resume does
+- [x] Re-enter the search on resume where the ceiling moved, as a resume does
       where `speedup` moved. A changed ceiling moves neither a configuration nor
       a prompt hash, so dsu-core and next-greater would stay held after the
       raise

@@ -1,6 +1,7 @@
 """Where a resume starts: the first step a draft took whose configuration or
-prompt hash is no longer what the bench would send, or the loop where a corrected
-`speedup` released the draft the search held.
+prompt hash is no longer what the bench would send, the loop where a corrected
+`speedup` released the draft the search held, or the search where the ceiling
+that stopped its walk moved.
 
 Where it starts and what it pays for are two questions: a site past the start
 is asked again only where its own configuration or prompt hash moved.
@@ -14,7 +15,7 @@ from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import request_hash as blind_hash
 from algo_coach.generation.inputs import request_hash as inputs_hash
 from algo_coach.generation.naive import request_hash as naive_hash
-from algo_coach.generation.speedup import Missing
+from algo_coach.generation.speedup import CEILING, Missing
 from algo_coach.schema import Draft, Template, WritingState
 
 # the steps a call answers, in the order they run. `checked`, `agreed` and
@@ -113,6 +114,22 @@ def draws_again(draft: Draft, template: Template) -> bool:
     )
 
 
+def re_walks(draft: Draft, template: Template, ceiling: int = CEILING) -> bool:
+    """Whether a resume runs the search again though nothing about the bench
+    moved: the walk stopped at a ceiling that is no longer the one in force.
+
+    Absent counts as moved. The drafts written before the ceiling was recorded
+    were walked under the first one.
+    """
+    return (
+        draft.state is WritingState.SEARCHED
+        and template.speedup
+        and draft.separating_case is None
+        and draft.unseparated in (Missing.INPUT_TOO_LARGE, Missing.CASE_TOO_LARGE)
+        and draft.ceiling != ceiling
+    )
+
+
 def advances(draft: Draft, template: Template, bench: Bench = BENCH) -> bool:
     """Whether a resume would carry this draft past the state it stopped at.
 
@@ -147,6 +164,8 @@ def moved_at(draft: Draft, template: Template, bench: Bench = BENCH) -> WritingS
     # for a draw the search no longer needs
     if draws_again(draft, template):
         return WritingState.PACED
+    if re_walks(draft, template):
+        return WritingState.SEARCHED
     return None
 
 
@@ -159,6 +178,7 @@ __all__ = [
     "moved_at",
     "next_step",
     "re_asks",
+    "re_walks",
     "reaches",
     "sending",
     "starts_at",

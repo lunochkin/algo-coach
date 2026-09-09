@@ -19,6 +19,7 @@ from algo_coach.generation import (
     sending,
     write_problems,
 )
+from algo_coach.generation.speedup import CEILING
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.schema import CallSite, Configuration, Draft, Template, WritingState
 
@@ -211,6 +212,58 @@ def test_a_corrected_speedup_resumes_the_draft_the_search_held(tmp_path):
     """A flag edit moves neither a configuration nor a prompt hash, so a resume
     reading only those would leave the draft where the search stopped it."""
     assert moved_at(held(tmp_path), OPTIMUM, BENCH) is WritingState.HARDENED
+
+
+def test_the_search_records_the_ceiling_it_ran_under(tmp_path):
+    """A raised ceiling is what releases a draft the walk stopped at, and the
+    draft is the only record of which ceiling that was."""
+    assert held(tmp_path).ceiling == CEILING
+
+
+def at_ceiling(tmp_path, reason: str, ceiling: int | None) -> Draft:
+    """A draft the search held at the ceiling, as the search left it."""
+    return held(tmp_path).model_copy(update={"unseparated": reason, "ceiling": ceiling})
+
+
+def test_a_moved_ceiling_re_enters_the_search(tmp_path):
+    """A raised constant moves neither a configuration nor a prompt hash, and
+    the walk it stopped is a local step that costs no call."""
+    stopped = at_ceiling(tmp_path, "input_too_large", CEILING // 4)
+
+    assert moved_at(stopped, CLAIMS, BENCH) is WritingState.SEARCHED
+    assert advances(stopped, CLAIMS, BENCH)
+
+
+def test_a_case_the_ceiling_would_not_hold_re_enters_the_search_too(tmp_path):
+    """The speedup was proved and the case lost, so a larger ceiling is exactly
+    what the draft waits on."""
+    assert moved_at(at_ceiling(tmp_path, "case_too_large", CEILING // 4), CLAIMS, BENCH) is (
+        WritingState.SEARCHED
+    )
+
+
+def test_a_draft_searched_under_the_current_ceiling_waits(tmp_path):
+    """Nothing moved, so a resume would walk the same sizes to the same stop."""
+    stopped = at_ceiling(tmp_path, "input_too_large", CEILING)
+
+    assert moved_at(stopped, CLAIMS, BENCH) is None
+    assert not advances(stopped, CLAIMS, BENCH)
+
+
+def test_a_draft_searched_before_the_ceiling_was_recorded_re_enters_the_search(tmp_path):
+    """Absent is not the current ceiling: the drafts written before the field
+    existed were walked under the 64 KiB one."""
+    assert moved_at(at_ceiling(tmp_path, "input_too_large", None), CLAIMS, BENCH) is (
+        WritingState.SEARCHED
+    )
+
+
+def test_a_naive_solution_that_finished_draws_again_whatever_the_ceiling(tmp_path):
+    """The walk reached the bound, not the ceiling, so a larger ceiling changes
+    nothing it would build."""
+    assert moved_at(at_ceiling(tmp_path, "naive_finished", None), CLAIMS, BENCH) is (
+        WritingState.PACED
+    )
 
 
 def test_a_moved_naive_solution_configuration_starts_at_the_naive_solution(tmp_path):
