@@ -105,7 +105,7 @@ technique, and a card and a mastery estimate share no data.
 - **The claim is asymptotic: the form beats the naive approach by at least a
   factor of log n.** The search can demonstrate only part of that today. It
   separates by wall clock under the sitting's cap, on an input the ceiling
-  holds, and that input carries some twenty thousand integers. A linear or
+  holds, and that input carries some hundred thousand integers. A linear or
   linearithmic naive approach finishes such an input in milliseconds whatever
   the form does, so the search demonstrates the claim only where the naive
   approach is at least quadratic or exponential. A claim the search cannot

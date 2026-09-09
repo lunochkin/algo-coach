@@ -159,17 +159,23 @@ The test cases decide whether a solution to a generated problem is correct.
 - **Cases are appended, never revised.** An edge case, or a case that forces a
   timeout, is added. An addition leaves behind a canonical needing
   re-verification, and never a record that is now wrong.
-- **A case carries its arguments literally, and weighs at most 256 KiB.** The
+- **A case carries its arguments literally, and weighs at most 1 MiB.** The
   ceiling covers the arguments and the expected value together. A separating
   input is the largest a case ever holds, and separating a quadratic solution
-  from a linear one takes some ten thousand elements. A seed and a size would
-  store less. Such a case would name how its input is built rather than what
-  the input holds, and a run would build the input before judging it.
+  from a linear one takes some ten to thirty thousand elements. A seed and a
+  size would store less. Such a case would name how its input is built rather
+  than what the input holds, and a run would build the input before judging
+  it.
 - **The ceiling was 64 KiB first, and a quadratic separation did not fit.** An
   integer drawn at full magnitude costs eleven bytes, so 64 KiB held a few
   thousand elements. Under the 2 s cap two quadratic naive solutions crossed
   the cap only between 64 KiB and 256 KiB: one at 4467 elements with a 94 KB
   case, one at some 13k elements. The ceiling moved to 256 KiB on 2026-09-09.
+- **256 KiB was short by a factor of two as well.** A sliding-window naive
+  solution separated at 23k and 30k elements with a 393 KB case, and the
+  expected list weighed half of that case. A naive Prim over 5355 vertices ran
+  2.0 s and 2.2 s at the largest input 256 KiB held, the cap's own edge. The
+  ceiling moved to 1 MiB the same day.
 - **The separating case is chosen against the sitting's cap**, and never
   against generation's. The separating size is the size at which a submission
   that did not use the form fails, so the cap a sitting judges under decides
