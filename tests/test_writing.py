@@ -2,7 +2,7 @@ from generating import CANONICAL, draft
 from helpers import a_call
 
 from algo_coach.generation import Writing
-from algo_coach.generation.generator import read
+from algo_coach.generation.generator import SYSTEM, read
 from algo_coach.schema import ProblemDifficulty, WritingState
 
 GENERATED = read(draft())
@@ -56,3 +56,10 @@ def test_two_writings_are_two_drafts():
     """The id is minted per writing, so nothing written for one reaches
     another."""
     assert Writing().draft(GENERATED, a_call()).id != Writing().draft(GENERATED, a_call()).id
+
+
+def test_the_brief_asks_for_a_value_that_compares_exactly():
+    """A case is decided by JSON equality, so two correct solutions computing a
+    ratio in different orders disagree in the last bits."""
+    assert "compared exactly" in SYSTEM
+    assert "numerator and the denominator" in SYSTEM

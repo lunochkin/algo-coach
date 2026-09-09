@@ -322,3 +322,7 @@ trigger fires, whatever phase is current.
       verdict names the card's technique. One call per naive solution, and it
       catches what the prompt misses rather than hoping. Triggered when a sweep
       still holds drafts whose naive solution reached the form
+- [ ] Carry a tolerance on a case, and name on the verification that the
+      tolerance decided it. A statement asks for exactly comparable values
+      today, so a real-valued answer cannot be asked for at all. Triggered when
+      a core template's answer is neither an integer nor a reduced fraction

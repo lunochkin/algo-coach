@@ -52,6 +52,12 @@ Produce four things.
    chosen, before the form fits. Hard makes the form one step of a solution
    whose rest has to be derived. Judge the problem you wrote, not the form.
 
+The value `solve` returns is compared exactly, so it is built from integers,
+strings, booleans and lists of those. A problem whose answer is a ratio asks
+for the numerator and the denominator, reduced. A floating-point value is
+compared bit for bit, and two correct solutions computing one in different
+orders disagree in the last bits, so the problem is then discarded.
+
 The cue and the notes name concrete settings so the form is recognisable: a
 domain, an object, a scenario. Your statement uses none of them. Such a setting
 is usually the published problem the cue was written from, and a solver who

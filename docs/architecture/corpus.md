@@ -479,6 +479,12 @@ fixed here rather than by whatever executed it.
 - **A case is decided by JSON equality on the returned value**, encoded with
   sorted keys. A tuple and a list are one answer under that rule, and `True`
   and `1` are two.
+- **A statement asks for a value that compares exactly**: integers, strings,
+  booleans and lists of those. A floating-point answer is compared bit for bit,
+  and two correct solutions computing a ratio in different orders disagree in
+  the last bits. Such a draft is rejected as `disagreed` however sound the
+  statement is, and three weighted-dsu drafts were before the generator was
+  told. A ratio is asked for as a reduced numerator and denominator.
 - **A problem admitting several correct returns does not land.** The
   alternative is a checker per problem, and every stored verdict would then
   depend on code the record does not name. The statement says how ties are
