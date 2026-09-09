@@ -64,6 +64,7 @@ def test_a_speedup_claim_asks_the_generator_for_a_batch(tmp_path):
     (optimum,) = seeded(tmp_path, card(templates=[template("n-queens")]))
 
     assert "batch" in generator_prompt(claims, claims.templates[0])
+    assert "at least a hundred thousand elements" in generator_prompt(claims, claims.templates[0])
     assert "batch" not in generator_prompt(optimum, optimum.templates[0])
 
 

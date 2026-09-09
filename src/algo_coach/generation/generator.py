@@ -85,7 +85,9 @@ and the form does not. That takes a naive approach at least quadratic in the
 input the statement admits. Where one application of the form is sublinear,
 such as one lookup, ask for a batch: many queries over one input, one answer
 per query, both bounded by the constraints. A single query finishes within the
-limit by any approach, and the problem is then discarded."""
+limit by any approach, and the problem is then discarded. The constraints admit
+inputs of at least a hundred thousand elements, since the stored input has to
+be large enough for the naive approach to run over the limit."""
 
 
 def prompt(card: Card, template: Template, written: Sequence[str] = ()) -> str:
