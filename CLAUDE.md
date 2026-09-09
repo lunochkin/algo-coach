@@ -8,9 +8,8 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 - Python ≥3.14, `uv` for env/deps, pydantic v2, pytest.
 - `textual` where a command is a screen rather than a scroll, driven in tests
   through its pilot.
-- `uv sync` to set up; `uv run pytest` to test. It runs on every core by
-  default, 13s against 44s. The workers cost two seconds to start, so one file
-  is faster with `-n 0`.
+- `uv sync` to set up; `uv run pytest -n auto` to test, always, whether one
+  file or the whole suite. It runs on every core, 13s against 44s.
 
 @docs/architecture/README.md
 @docs/architecture/content.md
