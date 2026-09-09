@@ -3,66 +3,7 @@
 The phases still open. A ticked item stays while its phase is open. When a
 phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 
-## Phase 7 — finishing the sweep (current)
-
-The corpus the drill loop needs, before the loop. Phase 6 closed with the gaps
-run stopped by hand. At that point 31 of 37 core templates carried no
-solution, and three drafts would resume.
-
-- [x] Resume the held drafts and run `generate --gaps --count 1` to the end,
-      then record what `gaps` reports. Two of the first seven targets held on
-      `input_too_large`, so the count of held drafts after the sweep is the
-      first number to record
-- [x] Name the input generator shape behind each `input_too_large` the sweep
-      leaves. Two causes are known: a list grown where runtime follows a value,
-      and a separation the ceiling cannot hold. The draft's reason does not
-      separate the two causes
-- [x] Raise `CEILING` to 256 KiB, in `speedup.py`, in `README.md` and in
-      `corpus.md`. Two quadratic naive solutions cross the 2 s cap between
-      64 KiB and 256 KiB: dsu-core at 4467 elements with a 94 KB case, and
-      next-greater at some 13k elements
-- [x] Raise `CEILING` again, to 1 MiB. Two deque-window-max drafts proved a
-      separation at 23k and 30k elements with a 393 KB case, and two
-      kruskal-mst naive solutions ran 2.0 s and 2.2 s at the largest input
-      256 KiB held
-- [x] Re-enter the search on resume where any of its bounds moved: the
-      ceiling, the canonical's share of the cap, or the count bound
-- [x] Re-enter the search on resume where the ceiling moved, as a resume does
-      where `speedup` moved. A changed ceiling moves neither a configuration nor
-      a prompt hash, so dsu-core and next-greater would stay held after the
-      raise
-- [x] Give `speedup` one meaning in `content.md`, then seed rotated-array and
-      count-based-kth by that meaning. The card reads the flag as faster than
-      the naive solution, and the search reads the flag as separable under the
-      ceiling. A log-factor form is faster and is never separable
-- [x] Ask the inputs site for the shape the naive solution is slowest on. Three
-      holds are shape faults: kahn-indegree's graphs are all cyclic at size,
-      kruskal-mst's are disconnected, and worked-framing's random digits give
-      the recursion almost no branches. The moved prompt hash makes `--resume`
-      re-run those three drafts
-- [x] Show the naive site the technique's criterion beside the form to avoid.
-      Three naive solutions reached the technique through a form no template
-      names: tabulation where the form is a memo, a rolling pair where the form
-      is a scan taken twice
-- [x] Add `generate --reject <id>`, the by-hand exit `flows.md` names for a
-      held draft no resume would separate. `drafting.reject` existed and no
-      command called it, so the two single-query drafts could leave only by
-      editing their files
-- [x] Print a gaps run's position over every target, `[k/35]`, and the run's
-      size before the first call. Today the counter reads `[1/1]` on each
-      template, so a sweep's cost is readable only once the sweep has paid it
-- [x] Separate a sublinear form by repeating a case's call, since no input the
-      ceiling holds separates one: a linear scan of the largest storable array
-      takes two milliseconds. The count is the cap divided by one call
-- [x] Require the canonical to finish within a tenth of the cap at the
-      separating point. A case the canonical only just answers fails a correct
-      submission a few percent slower
-
-### Exit
-- [ ] Every held draft has landed or been rejected, and the sweep's numbers
-      are in `docs/ROADMAP.md`
-
-## Phase 8 — the engine serves
+## Phase 8 — the engine serves (current)
 
 The first attempts the engine produces itself, through the interface a sitting
 happens in. The interface ships in this phase. A practice loop that is not used
@@ -329,3 +270,8 @@ trigger fires, whatever phase is current.
       tolerance decided it. A statement asks for exactly comparable values
       today, so a real-valued answer cannot be asked for at all. Triggered when
       a core template's answer is neither an integer nor a reduced fraction
+- [ ] Write the inputs and naive site outcomes where a resume re-ran the search
+      and re-asked neither site. A site that made no call writes no record, so
+      the separating size and the count of a resumed landing are readable
+      nowhere once the draft is cleared. Triggered when a report reads the
+      separating size of a problem a resume landed

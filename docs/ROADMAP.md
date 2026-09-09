@@ -147,21 +147,32 @@ Measured:
   before a stop by hand: 4 landed, 2 held on `input_too_large`, 1 cut.
   `--count` is per template.
 
-## Phase 7 — Finishing the sweep (current)
+## Phase 7 — Finishing the sweep — done
 
 The corpus the drill loop needs, before the loop. Split from Phase 6 on
-2026-09-02. The matcher measurement moved behind the beta on 2026-09-09,
-since the loop needs problems and not a score.
+2026-09-02. The matcher measurement moved behind the beta on 2026-09-09, since
+the loop needs problems and not a score.
 
-- `generate --gaps` run to the end over every core template, and its counts
-  recorded.
-- The held drafts resolved: the case ceiling raised, the inputs site asked for
-  the naive solution's worst shape, the naive site told the technique's other
-  forms, and `speedup` given one meaning.
-- Exit: every held draft has landed or been rejected, and the sweep's numbers
-  are written here.
+- `generate --gaps` reports no gap: 74 problems over 9 cards, and every core
+  template but the framing procedure carries a solution. 760 cases, 10.3 to a
+  problem.
+- 19 drafts were rejected and none is held: 10 `misdeclared`, 5 `unexercised`
+  by hand, 3 `disagreed`, 1 `untested`.
+- The case ceiling went from 64 KiB to 1 MiB over two raises, each paid for by
+  a naive solution that crossed the cap between the two sizes.
+- 57 separating sizes recorded, from 1 to 30,232. Twelve at 1, where the values
+  the input carries drive the naive solution's cost. 31 under 100, where the
+  naive solution is exponential. 18 over 1,000, where it is quadratic.
+- A sublinear form separates by repeating one case's call: rotated-array at
+  94,839 elements over 2,000 calls, count-based-kth at 43,690 over 8,000. The
+  canonical has to finish within a tenth of the cap at that point.
+- Four prompt faults were found by the holds and fixed: random inputs the naive
+  solution is fast on, a statement whose constraints leave the search no room,
+  a naive solution reaching the technique through a form no template names, and
+  a return value no two solutions compare equal on.
+- Exit met: every held draft landed or was rejected.
 
-## Phase 8 — The engine serves
+## Phase 8 — The engine serves (current)
 
 The first attempts the engine produces itself. It serves a generated problem,
 times the sitting, runs the submission against the problem's own cases, and
