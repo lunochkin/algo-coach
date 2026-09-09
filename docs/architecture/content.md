@@ -111,12 +111,17 @@ technique, and a card and a mastery estimate share no data.
   approach is at least quadratic or exponential. A claim the search cannot
   demonstrate holds the draft, and `corpus.md` names what would demonstrate
   it.
-- **The claim reaches the generator, and the statement has to give the search
-  its input.** One lookup in a sorted array is sublinear for the form and
-  linear for the scan it replaces, and both finish within the cap. A
-  statement written for such a form asks for a batch: many queries over one
-  input, one answer per query. The naive approach is then a scan per query,
-  which is quadratic, and the search separates the two.
+- **The statement is written for the solver, not for the search.** One lookup
+  in a sorted array is sublinear for the form and linear for the scan it
+  replaces. The form and the scan both finish within the cap, so no input
+  separates them. Asking for a batch of queries would make the scan quadratic,
+  and the corpus would then carry a question nobody asks. Such a draft is held
+  instead, and the form goes unexercised until the search can time one case run
+  many times.
+- **The claim still reaches the generator**, as the constraints are the
+  statement's own. A statement admitting two thousand elements leaves no input
+  on which a naive solution exceeds the cap, whatever the input generator
+  builds.
 - **One template may sit outside the core set.** Templates are core by
   default, and at most one is marked optional. The optional template is
   authored whole and surfaced on request alone. The hard form is worth

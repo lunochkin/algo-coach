@@ -310,10 +310,10 @@ trigger fires, whatever phase is current.
       never to Anthropic direct, whose compatibility layer ignores
       `response_format`, `strict` and `reasoning_effort`. Triggered when an
       outage blocks a run
-- [ ] Demonstrate a speedup over a linear or linearithmic naive solution, by a
-      cap set per problem from the canonical's measured time or by an
-      operation count in the child instead of a clock. A factor of log n is at
-      most fourteen at the ceiling, and no storable input brings either side to
-      the 2 s cap, so the search today demonstrates a claim only against a
-      quadratic one. Triggered when a core template's naive approach is
-      linearithmic and the card is worth its rung
+- [ ] Add `repeats` to a case, and grow it in the search where the size walk
+      ends at the ceiling with the naive solution still under the cap. The
+      runner calls `solve` that many times, each call isolated from the last,
+      and the cap covers the sum. A form whose one application is sublinear
+      then separates on the statement it naturally has. Triggered when a ladder
+      needs a rung for a form no input separates, which rotated-array and
+      count-based-kth are the first two of

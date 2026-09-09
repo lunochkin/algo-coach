@@ -57,15 +57,17 @@ def test_the_generator_prompt_names_no_technique_and_no_form(tmp_path):
     assert one.templates[0].code in generator_prompt(one, one.templates[0])
 
 
-def test_a_speedup_claim_asks_the_generator_for_a_batch(tmp_path):
-    """One sublinear query finishes within the cap by any approach, so the
-    statement has to make the approach the form replaces at least quadratic."""
+def test_a_speedup_claim_asks_for_constraints_the_search_can_reach(tmp_path):
+    """A statement admitting two thousand elements leaves no input on which a
+    naive solution exceeds the cap, whatever the input generator builds."""
     (claims,) = seeded(tmp_path, card(templates=[template("rotated-array", speedup=True)]))
     (optimum,) = seeded(tmp_path, card(templates=[template("n-queens")]))
 
-    assert "batch" in generator_prompt(claims, claims.templates[0])
-    assert "at least a hundred thousand elements" in generator_prompt(claims, claims.templates[0])
-    assert "batch" not in generator_prompt(optimum, optimum.templates[0])
+    claimed = " ".join(generator_prompt(claims, claims.templates[0]).split())
+    its_own_optimum = " ".join(generator_prompt(optimum, optimum.templates[0]).split())
+
+    assert "hundred thousand elements" in claimed
+    assert "hundred thousand elements" not in its_own_optimum
 
 
 def test_a_reply_carrying_no_solution_fails():

@@ -250,13 +250,13 @@ The test cases decide whether a solution to a generated problem is correct.
 - **Rejection is the exit left when the draws run out.** A model prompted to be
   slow and told the form to avoid, writing the form anyway, is the strongest
   evidence the run can produce that the problem does not exercise the form.
-- **A linearithmic naive solution is out of the clock's reach.** A factor of
-  log n is at most fourteen at the ceiling, and a batch of instances grows both
+- **A linearithmic naive solution is out of the clock's reach today.** A factor
+  of log n is at most fourteen at the ceiling, and growing the input grows both
   solutions' cost alike, so neither side reaches the cap inside a storable
-  case. The speedup claim still holds for such a form. Demonstrating it needs
-  a cap set per problem or an operation count instead of a clock, and both
-  are deferred, so the search today demonstrates a claim only against a naive
-  solution at least quadratic in the input.
+  case. The speedup claim still holds for such a form. Timing one case run many
+  times would reach it, since a repeat count is bounded by the cap rather than
+  by the ceiling, and that is deferred. The search today demonstrates a claim
+  only against a naive solution at least quadratic in the input.
 - **Consistent is not the same as statable.** A set fitting only "compute f,
   except return 7 on this input" is a function nobody can write a statement
   for. Such a problem does not land, and the discrimination bar catches it.
