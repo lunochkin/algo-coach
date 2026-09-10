@@ -1,0 +1,80 @@
+{
+  "$defs": {
+    "Pause": {
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "title": "At",
+          "type": "string"
+        },
+        "until": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Until"
+        }
+      },
+      "required": [
+        "at"
+      ],
+      "title": "Pause",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "ended_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ended At"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "pauses": {
+      "items": {
+        "$ref": "#/$defs/Pause"
+      },
+      "title": "Pauses",
+      "type": "array"
+    },
+    "problem_id": {
+      "minLength": 1,
+      "title": "Problem Id",
+      "type": "string"
+    },
+    "started_at": {
+      "format": "date-time",
+      "title": "Started At",
+      "type": "string"
+    },
+    "user_id": {
+      "minLength": 1,
+      "title": "User Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "user_id",
+    "problem_id",
+    "started_at"
+  ],
+  "title": "Sitting",
+  "type": "object"
+}

@@ -16,6 +16,7 @@ from algo_coach.schema import (
     Problem,
     SelfLabel,
     SiteOutcome,
+    Sitting,
     Solution,
     SolutionClaim,
     TemplateMatch,
@@ -39,6 +40,7 @@ RECORDS: list[type[BaseModel]] = [
     SiteOutcome,
     Verification,
     Draft,
+    Sitting,
 ]
 SNAPSHOTS = Path(__file__).parent / "schemas"
 

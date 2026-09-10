@@ -14,12 +14,17 @@ React frontend the API serves as static files.
 - [x] Move `DRILL_CAP_MS` from `generation/speedup.py` into
       `algo_coach.sitting`, and import it back into generation. The cap is the
       sitting's, and the speedup search only measures a separating size by it
-- [ ] Add the `Sitting` record: an engine-minted id, the user, the problem and
+- [x] Add the `Sitting` record: an engine-minted id, the user, the problem and
       the start. The two calls of one sitting reach the engine as two requests,
       and the start has to outlive the first one
-- [ ] Store sittings in a store revised in place, as the drafts are, and clear a
-      sitting when it ends. The attempts carry the timing, so the record itself
-      is working state rather than a log
+- [x] Add `Pause` and `ended_at` to `Sitting`, and count the elapsed time with
+      every pause excluded. A total of the time paused says how long and never
+      how often
+- [ ] Store sittings in a store revised in place, as the drafts are, and keep
+      the record after the sitting ends. How often practice is interrupted is
+      readable in that store alone
+- [ ] Add `algo_coach.sitting.pause`, `.resume` and `.end`. A sitting the loop
+      leaves open reports an elapsed time that moves with the moment it is read
 - [ ] Add `sitting_id` to `Attempt`, optional as an additive field is. An
       attempt written without it can never be grouped with the sitting's other
       attempts, since the log is append-only
@@ -67,8 +72,8 @@ React frontend the API serves as static files.
 - [ ] Add the read routes the loop's first four steps need: the board, a
       technique's candidates, a card, and a problem's statement
 - [ ] Add the write routes the rest of the loop needs: the submission and its
-      per-case verdict, the claim, the self-label, and marking a problem
-      defective
+      per-case verdict, pausing and resuming the sitting, the claim, the
+      self-label, and marking a problem defective
 - [ ] Serve the statement and the `solve` signature alone, and keep every
       solution and every case's expected value server-side. A canonical in the
       response is the answer in the page source
@@ -98,6 +103,8 @@ React frontend the API serves as static files.
 - [ ] Show the per-case verdict beside the editor rather than on a page of its
       own. A sitting split over several pages is a workflow, and a workflow is
       not practised daily
+- [ ] Pause and resume the sitting from the page, and show it paused. A user
+      who steps away otherwise records a duration the clock kept counting
 - [ ] Show the elapsed time during the sitting, counted from the start the API
       handed out. The engine records that duration, so the page shows the
       number the log will carry

@@ -25,6 +25,7 @@ from algo_coach.schema import (
     ProblemDifficulty,
     SelfLabel,
     SiteOutcome,
+    Sitting,
     Solution,
     SolutionClaim,
     SolutionRole,
@@ -189,6 +190,15 @@ def machine_match(
 
 def self_label(attempt_id: str, mode: FailureMode) -> SelfLabel:
     return SelfLabel(id=new_id(), created_at=datetime.now(UTC), attempt_id=attempt_id, mode=mode)
+
+
+def sitting(user_id: str, problem_id: str) -> Sitting:
+    return Sitting(
+        id=new_id(),
+        user_id=user_id,
+        problem_id=problem_id,
+        started_at=datetime.now(UTC),
+    )
 
 
 def generated_problem(
