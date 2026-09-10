@@ -30,7 +30,7 @@ from algo_coach.schema.problem import (
 from algo_coach.schema.provenance import MachineProvenance
 from algo_coach.schema.record import AttemptRecord
 from algo_coach.schema.seed import CardSeed, TemplateSeed
-from algo_coach.schema.sitting import Sitting
+from algo_coach.schema.sitting import Pause, Sitting
 from algo_coach.schema.solution import Solution, SolutionRole
 from algo_coach.schema.solution_claim import SolutionClaim
 from algo_coach.schema.technique import Kind, Technique
@@ -59,6 +59,7 @@ __all__ = [
     "Kind",
     "MachineProvenance",
     "MatchSource",
+    "Pause",
     "Problem",
     "ProblemDifficulty",
     "ProblemStatus",
