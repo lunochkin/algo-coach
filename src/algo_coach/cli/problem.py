@@ -17,7 +17,7 @@ from algo_coach.cli.display import (
 )
 from algo_coach.generation import Corpus
 from algo_coach.outcomes import OutcomeLog
-from algo_coach.schema import Problem, Solution, TemplateMatch, TestCase
+from algo_coach.schema import Problem, RetirementReason, Solution, TemplateMatch, TestCase
 from algo_coach.solution_claims import SolutionClaimLog, derive
 
 
@@ -27,9 +27,36 @@ def problem(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
     stored = corpus.problems.all()
     if not stored:
         parser.exit(0, "problem: no problem is stored\n")
+    if args.retire:
+        return retired_by_hand(args, parser, stored, corpus, root)
     if not args.id:
         return listed(stored, corpus, root)
     print(page(one_of(stored, args.id, parser, "problem"), corpus, root))
+
+
+def retired_by_hand(
+    args: argparse.Namespace,
+    parser: argparse.ArgumentParser,
+    stored: list[Problem],
+    corpus: Corpus,
+    root: Path,
+) -> None:
+    """The problem read whole, then retired as `defective` once the reader says
+    so. Every user is served it, so the loop never retires one."""
+    if args.id:
+        parser.exit(2, "problem: --retire names the problem it retires\n")
+    one = one_of(stored, args.retire, parser, "problem")
+    if not one.served:
+        parser.exit(0, f"problem {one.id}: already {standing(one)}\n")
+    print(page(one, corpus, root))
+    try:
+        answer = input(f"retire {one.id} as defective? [y/N]: ").strip().lower()
+    except EOFError:
+        answer = ""
+    if answer != "y":
+        parser.exit(0, "problem: nothing retired\n")
+    left = corpus.problems.retire(one.id, RetirementReason.DEFECTIVE)
+    print(f"problem {left.id}: {standing(left)}")
 
 
 def listed(stored: list[Problem], corpus: Corpus, root: Path) -> None:

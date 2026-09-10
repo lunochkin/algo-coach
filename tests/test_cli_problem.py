@@ -117,3 +117,80 @@ def test_an_empty_corpus_says_so(root, monkeypatch, capsys):
 
     assert exit_info.value.code == 0
     assert "no problem is stored" in capsys.readouterr().err
+
+
+def answering(monkeypatch, reply: str | None) -> None:
+    """The confirmation prompt, answered. `None` is the input closing."""
+
+    def given(_prompt: str) -> str:
+        if reply is None:
+            raise EOFError
+        return reply
+
+    monkeypatch.setattr("builtins.input", given)
+
+
+def test_a_confirmed_retirement_moves_the_status(root, monkeypatch, capsys):
+    """The problem is read whole before the question, since the verdict is that
+    this statement asks for something its cases do not decide."""
+    stored = landed(root, monkeypatch)
+    answering(monkeypatch, "y")
+
+    shown(monkeypatch, "--retire", stored.id[:8])
+
+    out = capsys.readouterr().out
+    assert out.index(stored.statement) < out.index("retired: defective")
+    retired = ProblemStore(root).get(stored.id)
+    assert (retired.status, retired.retired_reason) == (
+        ProblemStatus.RETIRED,
+        RetirementReason.DEFECTIVE,
+    )
+
+
+@pytest.mark.parametrize("reply", ["n", "", "yes please", None])
+def test_anything_but_yes_retires_nothing(root, monkeypatch, capsys, reply):
+    """Every user is served the problem, so a stray key or a closed input may not
+    take it away from them."""
+    stored = landed(root, monkeypatch)
+    answering(monkeypatch, reply)
+
+    with pytest.raises(SystemExit) as exit_info:
+        shown(monkeypatch, "--retire", stored.id)
+
+    assert exit_info.value.code == 0
+    assert "nothing retired" in capsys.readouterr().err
+    assert ProblemStore(root).get(stored.id).status is ProblemStatus.CREATED
+
+
+def test_a_retired_problem_is_not_asked_about_again(root, monkeypatch, capsys):
+    stored = landed(root, monkeypatch)
+    ProblemStore(root).retire(stored.id, RetirementReason.DEFECTIVE)
+    monkeypatch.setattr("builtins.input", lambda _prompt: pytest.fail("asked again"))
+
+    with pytest.raises(SystemExit) as exit_info:
+        shown(monkeypatch, "--retire", stored.id)
+
+    assert exit_info.value.code == 0
+    assert "already retired: defective" in capsys.readouterr().err
+
+
+def test_retiring_an_unknown_problem_says_so(root, monkeypatch, capsys):
+    landed(root, monkeypatch)
+
+    with pytest.raises(SystemExit) as exit_info:
+        shown(monkeypatch, "--retire", "beef")
+
+    assert exit_info.value.code == 1
+    assert "no problem beef" in capsys.readouterr().err
+
+
+def test_retire_takes_no_second_id(root, monkeypatch, capsys):
+    """`--retire` names the problem, so a positional id beside it is two answers
+    to one question."""
+    stored = landed(root, monkeypatch)
+
+    with pytest.raises(SystemExit) as exit_info:
+        shown(monkeypatch, stored.id, "--retire", stored.id)
+
+    assert exit_info.value.code == 2
+    assert ProblemStore(root).get(stored.id).status is ProblemStatus.CREATED

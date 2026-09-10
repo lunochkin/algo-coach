@@ -271,6 +271,11 @@ def main() -> None:
     problem_parser.add_argument(
         "id", nargs="?", help="the problem, by id or a prefix of one; every one otherwise"
     )
+    problem_parser.add_argument(
+        "--retire",
+        metavar="ID",
+        help="read one problem whole, then retire it as defective once confirmed",
+    )
 
     gaps_parser = _command(sub, "gaps", "core templates no stored solution displays")
     gaps_parser.add_argument(
