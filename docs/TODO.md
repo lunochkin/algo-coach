@@ -7,8 +7,7 @@ phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 
 The first attempts the engine produces itself, through the interface a sitting
 happens in. The interface is a web app: a JSON API over the domain calls, and a
-React frontend the API serves as static files. A practice loop that is not used
-daily measures nothing, and a sitting does not happen at a command line.
+React frontend the API serves as static files.
 
 ### The loop, as domain calls
 

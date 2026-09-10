@@ -24,6 +24,9 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "src" / "algo_coach"
 TESTS = ROOT / "tests"
 DOCS = [*(ROOT / "docs").rglob("*.md"), ROOT / "README.md", ROOT / "CLAUDE.md"]
+# `TODO.md` names the modules a phase is going to add, so its paths are checked
+# once the items land rather than now
+SPECS = [path for path in DOCS if path.name != "TODO.md"]
 
 # the enums the docs enumerate: states, gates, sources, roles and kinds. Left
 # out are the three scales the docs describe as scales rather than by member:
@@ -185,8 +188,8 @@ def test_a_test_module_carries_no_docstring():
     assert with_one == []
 
 
-def prose() -> str:
-    return "\n".join(path.read_text() for path in DOCS)
+def prose(paths: list[Path] = DOCS) -> str:
+    return "\n".join(path.read_text() for path in paths)
 
 
 def test_the_docs_name_every_state_gate_and_source():
@@ -207,7 +210,7 @@ def test_every_path_the_docs_name_exists():
     """A backticked path or module in the docs points at something in the
     tree, or the doc is describing a repo that moved under it."""
     pattern = r"`((?:src/|docs/|tests/|scripts/)[\w./-]+|algo_coach(?:\.\w+)+)`"
-    named = set(re.findall(pattern, prose()))
+    named = set(re.findall(pattern, prose(SPECS)))
     missing = []
     for ref in sorted(named):
         if ref.startswith("algo_coach"):
