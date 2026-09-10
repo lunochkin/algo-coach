@@ -36,7 +36,7 @@ class Problem(MachineProvenance):
     target_technique: str | None = Field(default=None, min_length=1)
     status: ProblemStatus = ProblemStatus.CREATED
     # A field rather than a record of its own, unlike a self-label or a claim:
-    # nothing but the user ever retires a problem.
+    # nothing but a by-hand pass ever retires a problem.
     retired_reason: RetirementReason | None = None
 
     @property

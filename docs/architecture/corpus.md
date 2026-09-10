@@ -63,6 +63,10 @@ architecture, and `README.md` is the map.
   and no case moves under them. A generated statement passes every gate or is
   retired, so a write path for wording would buy nothing and could change what
   a verdict means.
+- **A problem is retired by hand, in the terminal.** A problem is served to
+  every user, so one user's reading of a statement may not remove the problem
+  from another user's practice. A user's request to retire a problem is
+  deferred until someone other than the author sits.
 - **Retirement names its reason.** `defective` is a statement that asked for
   something its cases do not decide, and it is the only reason today. A reason
   whose attempts are kept is additive when a gate needs one.

@@ -50,9 +50,9 @@ React frontend the API serves as static files.
 - [x] Add the domain call retiring a problem as `defective`, moving the status
       on the stored record and nothing else. `ProblemStore.put` already refuses
       a record whose other fields moved
-- [ ] Offer marking a problem defective in place of the self-label. A statement
-      that asked the wrong thing would otherwise be recorded as the user's own
-      gap
+- [ ] Add `algo-coach problem --retire <id>`, which prints the problem whole and
+      then retires it as `defective`. A problem is served to every user, so
+      retirement is a by-hand act rather than a control in the loop
 - [ ] Exclude a defective problem's attempts from the board, solved and failed
       alike. Dropping only the failures would raise a technique's solve rate
       because a problem was broken
@@ -73,8 +73,8 @@ React frontend the API serves as static files.
 - [ ] Add the read routes the loop's first three steps need: the board, a
       technique's card and candidates, and a problem's statement
 - [ ] Add the write routes the rest of the loop needs: the submission and its
-      per-case verdict, pausing and resuming the sitting, the claim, the
-      self-label, and marking a problem defective
+      per-case verdict, pausing and resuming the sitting, the claim and the
+      self-label
 - [ ] Serve the statement and the `solve` signature alone, and keep every
       solution and every case's expected value server-side. A canonical in the
       response is the answer in the page source
@@ -111,8 +111,7 @@ React frontend the API serves as static files.
       handed out. The engine records that duration, so the page shows the
       number the log will carry
 - [ ] Build the prompt the sitting ends on: the claim over the problem's
-      techniques, the self-label, and marking the problem defective in place of
-      the self-label
+      techniques and the self-label
 - [ ] Drive one whole sitting in a test through the API rather than a browser:
       serve, submit, verdict, claim, self-label. The frontend then carries no
       logic a test can only reach by rendering a page
@@ -359,3 +358,7 @@ trigger fires, whatever phase is current.
       the separating size and the count of a resumed landing are readable
       nowhere once the draft is cleared. Triggered when a report reads the
       separating size of a problem a resume landed
+- [ ] Let a user request a problem's retirement, as a private record an admin
+      reads before retiring the problem by hand. Problems are served to every
+      user, so no user retires one directly. Triggered when someone other than
+      the author sits

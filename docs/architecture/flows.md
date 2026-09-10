@@ -451,7 +451,7 @@ loop does with a failing run. Those questions are answered by using the loop.
 4. The submission runs against the problem's own test cases, and the attempt is
    minted carrying the result.
 5. Keyed to each attempt, the loop asks for an attempt claim and a
-   self-label, or the user marks the problem defective instead.
+   self-label.
 
 - **The card is read before the statement is served.** The drill loop practises
   a form the user has just read, and the clock counts solving rather than
@@ -475,10 +475,10 @@ loop does with a failing run. Those questions are answered by using the loop.
   problem's own two or three techniques, the drilled one is the default since
   selection picked the problem by it, and the attempt is minutes old. Two facts
   a classifier has to infer later cost a keystroke each at this moment.
-- **A statement that asked the wrong thing is marked, not labelled.** The loop
-  offers marking the problem defective in place of the self-label. Asking why
-  the sitting failed would otherwise record the problem's fault as the user's
-  own gap, and a self-label cannot be revised later.
+- **The loop does not retire a problem.** A statement that asks for something
+  its cases do not decide is retired by hand, in the terminal, and `corpus.md`
+  gives who retires one. A self-label written before the retirement stays, and
+  the board's read-time exclusion keeps that attempt out of mastery.
 - **Selection never schedules.** Ordering is a view. The user chooses what to
   drill until the scheduler lands.
 

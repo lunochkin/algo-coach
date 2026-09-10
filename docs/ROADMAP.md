@@ -184,8 +184,8 @@ interface here would be written twice.
   and a React frontend the API serves as static files. The sitting's page
   carries a code editor.
 - `Attempt` gains the verification result.
-- The loop can mark a problem defective in place of a self-label, and the board
-  stops counting that problem's attempts in either direction.
+- A defective problem is retired by hand in the terminal, and the board stops
+  counting that problem's attempts in either direction.
 - Claims and self-labels asked as Phase 2 asked them.
 - Claim candidates come from the problem's derived techniques.
 - Exit: daily practice runs here, on problems the engine wrote and judged.
