@@ -20,7 +20,7 @@ React frontend the API serves as static files.
 - [x] Add `Pause` and `ended_at` to `Sitting`, and count the elapsed time with
       every pause excluded. A total of the time paused says how long and never
       how often
-- [ ] Store sittings in a store revised in place, as the drafts are, and keep
+- [x] Store sittings in a store revised in place, as the drafts are, and keep
       the record after the sitting ends. How often practice is interrupted is
       readable in that store alone
 - [ ] Add `algo_coach.sitting.pause`, `.resume` and `.end`. A sitting the loop

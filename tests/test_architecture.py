@@ -11,7 +11,7 @@ from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
 from algo_coach.drafts import DraftStore
-from algo_coach.log import AttemptLog
+from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.matches import MatchLog
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
@@ -254,13 +254,16 @@ APPEND_ONLY = (
 
 def test_the_stores_write_as_the_data_class_table_says():
     """`README.md`: attempts, claims, cases, solutions, solution claims, matches, site
-    outcomes and calls are append-only; drafts are revised in place; a problem
-    is created once and only its status moves; cards are re-seeded by slug."""
+    outcomes and calls are append-only; drafts and sittings are revised in place;
+    a problem is created once and only its status moves; cards are re-seeded by
+    slug."""
     for log in APPEND_ONLY:
         assert issubclass(log, JsonlLog), log.__name__
         assert not hasattr(log, "put") and not hasattr(log, "remove"), log.__name__
     assert not any(name.startswith(("put", "remove")) for name in vars(AttemptLog))
     assert issubclass(DraftStore, FileStore) and hasattr(DraftStore, "remove")
+    # kept once it ends: the pause history is readable in this store alone
+    assert issubclass(SittingStore, FileStore) and not hasattr(SittingStore, "remove")
     assert issubclass(CardStore, FileStore) and not hasattr(CardStore, "remove")
     # created once: the store's own `put` refuses a change beyond the status
     assert issubclass(ProblemStore, FileStore) and "put" in vars(ProblemStore)
