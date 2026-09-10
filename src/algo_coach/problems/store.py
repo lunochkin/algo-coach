@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from algo_coach.schema import Problem
+from algo_coach.schema import Problem, ProblemStatus, RetirementReason
 from algo_coach.storage import FileStore
 
 # what a stored problem may still move: `corpus.md` gives the states
@@ -25,3 +25,17 @@ class ProblemStore(FileStore[Problem]):
         ):
             raise ValueError(f"problem {record.id} is stored, and only its status moves")
         super().put(record)
+
+    def retire(self, problem_id: str, reason: RetirementReason) -> Problem:
+        stored = self.get(problem_id)
+        if stored is None:
+            raise ValueError(f"no problem {problem_id}")
+        # a sitting asks about each of its attempts in turn, so the second mark
+        # on one problem is the loop repeating itself rather than a mistake
+        if stored.status is ProblemStatus.RETIRED:
+            return stored
+        retired = Problem.model_validate(
+            stored.model_dump() | {"status": ProblemStatus.RETIRED, "retired_reason": reason}
+        )
+        self.put(retired)
+        return retired

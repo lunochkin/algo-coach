@@ -47,7 +47,7 @@ React frontend the API serves as static files.
 - [x] Store each attempt's verification as an `AttemptVerification` in the
       attempt log, keyed by `attempt_id`. The results of the user's own code are
       private, where a solution's verification is product data
-- [ ] Add the domain call retiring a problem as `defective`, moving the status
+- [x] Add the domain call retiring a problem as `defective`, moving the status
       on the stored record and nothing else. `ProblemStore.put` already refuses
       a record whose other fields moved
 - [ ] Offer marking a problem defective in place of the self-label. A statement
