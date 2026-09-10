@@ -8,7 +8,7 @@ from algo_coach.runner.execution import (
     run,
 )
 from algo_coach.runner.outputs import NoValue, answered, outputs
-from algo_coach.runner.verdicts import decide, verify
+from algo_coach.runner.verdicts import decide, judge, verify
 
 __all__ = [
     "RUNNER",
@@ -21,6 +21,7 @@ __all__ = [
     "as_json",
     "decide",
     "defines_solve",
+    "judge",
     "outputs",
     "run",
     "verify",

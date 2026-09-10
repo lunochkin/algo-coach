@@ -79,6 +79,44 @@ def test_a_wrong_answer_is_unsolved(tmp_path):
     assert not Stores(tmp_path).submit(TRIPLE).solved
 
 
+def test_a_failing_submission_shows_the_first_case_it_failed_whole(tmp_path):
+    """`flows.md`: an outcome on an input the solver cannot see is debugged by
+    guessing."""
+    second_wrong = "def solve(n):\n    return 2 if n == 1 else 0\n"
+
+    failure = Stores(tmp_path).submitted(second_wrong).failure
+
+    assert (failure.outcome, failure.args, failure.expected, failure.returned) == (
+        CaseOutcome.WRONG,
+        [3],
+        6,
+        0,
+    )
+
+
+def test_the_first_failure_is_first_in_the_problem_s_case_order(tmp_path):
+    """The statement's own cases are written first, so the small example is
+    the one shown rather than the separating input."""
+    stores = Stores(tmp_path)
+
+    assert stores.submitted(TRIPLE).failure.args == [1]
+
+
+def test_a_passing_submission_shows_no_failure(tmp_path):
+    assert Stores(tmp_path).submitted(DOUBLE).failure is None
+
+
+def test_a_crash_shows_the_case_and_no_returned_value(tmp_path):
+    """A value shown beside a crash would be one the submission never
+    returned."""
+    raising = "def solve(n):\n    raise ValueError(n)\n"
+
+    failure = Stores(tmp_path).submitted(raising).failure
+
+    assert (failure.outcome, failure.args, failure.expected) == (CaseOutcome.CRASHED, [1], 2)
+    assert failure.returned is None
+
+
 def test_code_defining_no_solve_is_unsolved(tmp_path):
     """A submission with a syntax error is the ordinary case, and a verdict
     rather than an error."""

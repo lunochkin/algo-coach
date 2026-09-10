@@ -440,8 +440,7 @@ there is ever asked twice and no two configurations meet the same item.
 Practice on a generated problem. The engine serves the statement, times the
 sitting and judges the submission, and records what only the user can say.
 
-The interaction is not designed here: how a solution is entered, and what the
-loop does with a failing run. Those questions are answered by using the loop.
+The page layout is not designed here, and using the loop decides it.
 
 1. The board, ordered by staleness. The user picks a technique. The
    technique's card is readable from this step on.
@@ -472,6 +471,19 @@ loop does with a failing run. Those questions are answered by using the loop.
   library or from the code already typed. A solver offered `bisect_left` after
   three characters has recalled no form, and the sitting exists to measure
   recalling the form. The recall trainer Phase 11 adds holds the same rule.
+- **A failing submission shows the first case it failed, whole**: the
+  arguments, the expected value, and the value the submission returned. An
+  outcome on an input the solver cannot see is debugged by guessing, and
+  guessing at an input is not the skill a sitting measures.
+- **The first case is first in the order the problem carries its cases.** The
+  cases written with the statement come before the mutation loop's and the
+  separating case, so a small example is shown where one fails.
+- **The case is shown whatever its size.** A trimmed input is an input the
+  submission never failed on.
+- **A shown case can be special-cased, and nothing guards against it.** A
+  solver can patch one input per submission until every case passes.
+  `README.md` gives why the loop does not guard a verdict. Each submission
+  mints an attempt, so the patching stays readable in the log.
 - **A drill can mint several attempts**, and each is asked about in turn. A
   submission that failed on syntax and the one that passed are different
   evidence, and labelling only the last would leave the counts on two

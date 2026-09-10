@@ -20,6 +20,12 @@ sitting, runs the submission against the problem's own test cases, and records
 the verdict. Python only: a canonical is Python, the test cases are
 Python-shaped, and a second language is a runner rather than a record change.
 
+**The engine is a learning platform, not a competitive one.** A verdict is
+evidence about the user's own practice and ranks the user against nobody. A
+solver who games a verdict misleads only their own board. So the drill loop
+shows what helps a solver debug, and does not guard a verdict against the
+solver.
+
 ## Terminology
 
 Words this project gives its own meaning. The files beside this one use them

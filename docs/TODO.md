@@ -72,9 +72,12 @@ React frontend the API serves as static files.
       technique's card and candidates, and a problem's statement
 - [x] Add the write routes the rest of the loop needs: the submission and its
       per-case verdict, pausing and resuming the sitting, and the claim
-- [ ] Decide what a failing case shows the solver, its outcome alone or its
+- [x] Decide what a failing case shows the solver, its outcome alone or its
       arguments too, and write the choice into `flows.md`. Showing the
       arguments hands over a case the solver can special-case
+- [ ] Report a crashed case's exception from the child, and show it beside the
+      failing case. A crash carries no message today, so the solver guesses
+      which line raised
 - [ ] Serve the built frontend from the same process as the API, so the app
       deploys as one unit when Phase 9 hosts it
 

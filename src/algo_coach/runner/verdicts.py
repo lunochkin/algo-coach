@@ -17,6 +17,18 @@ def verify(
     cap_ms: int,
     stop_early: bool = False,
 ) -> list[CaseResult]:
+    return [one for one, _ in judge(code, cases, cap_ms=cap_ms, stop_early=stop_early)]
+
+
+def judge(
+    code: str,
+    cases: Sequence[TestCase],
+    *,
+    cap_ms: int,
+    stop_early: bool = False,
+) -> list[tuple[CaseResult, CaseRun]]:
+    """Each case's result beside the run it was decided from, which holds the
+    returned value a result does not store."""
     # `run` rather than `outputs`: a `CaseResult` carries the elapsed time,
     # and `stop_early` is why the zip is not strict
     ran = run(
@@ -26,7 +38,7 @@ def verify(
         repeats=[case.repeats for case in cases],
         stop_early=stop_early,
     )
-    return [result(case, one) for case, one in zip(cases, ran, strict=False)]
+    return [(result(case, one), one) for case, one in zip(cases, ran, strict=False)]
 
 
 def result(case: TestCase, ran: CaseRun) -> CaseResult:

@@ -51,6 +51,18 @@ def test_a_verdict_carries_no_expected_value(client, sitting_id):
     assert set(result) == {"case_id", "outcome", "elapsed_ms"}
 
 
+def test_a_failing_submission_shows_the_first_failing_case_whole(client, sitting_id):
+    failure = submitted(client, sitting_id, TRIPLE).json()["failure"]
+
+    assert failure == {
+        "case_id": failure["case_id"],
+        "outcome": "wrong",
+        "args": [1],
+        "expected": 2,
+        "returned": 3,
+    }
+
+
 def test_a_submission_without_code_is_unprocessable(client, sitting_id):
     assert client.post(f"/sittings/{sitting_id}/submissions", json={}).status_code == 422
 

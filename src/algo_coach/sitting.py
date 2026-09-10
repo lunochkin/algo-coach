@@ -3,6 +3,7 @@ mints. `log.md` gives what the record holds and why a pause is an interval."""
 
 from collections.abc import Sequence
 from datetime import UTC, datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
@@ -10,16 +11,19 @@ from algo_coach import mint
 from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.problems import ProblemStore
-from algo_coach.runner import RUNNER, verify
+from algo_coach.runner import RUNNER, CaseRun, judge
 from algo_coach.schema import (
     Attempt,
     AttemptClaim,
     AttemptVerification,
+    CaseOutcome,
+    CaseResult,
     ClaimSource,
     Confidence,
     Execution,
     Pause,
     Sitting,
+    TestCase,
 )
 
 # the cap a sitting judges a submission under. The speedup search picks the
@@ -46,6 +50,18 @@ class Served(BaseModel):
     sitting: Sitting
 
 
+class Failure(BaseModel):
+    """The first case a submission failed, shown whole: `flows.md`."""
+
+    model_config = ConfigDict(frozen=True)
+
+    case_id: str
+    outcome: CaseOutcome
+    args: list[Any]
+    expected: Any
+    returned: Any  # on a wrong answer alone: a crash and a timeout return nothing
+
+
 class Submitted(BaseModel):
     """The attempt a submission minted, and the per-case verdict behind its
     `solved`."""
@@ -54,6 +70,7 @@ class Submitted(BaseModel):
 
     attempt: Attempt
     verification: AttemptVerification
+    failure: Failure | None  # none on a submission that passed every case
 
 
 def serve(
@@ -92,16 +109,18 @@ def submit(
     one = _running(sittings, sitting_id, user_id)
     if one.paused:
         raise Refused(f"sitting {sitting_id} is paused")
-    judged = Execution(
-        cap_ms=DRILL_CAP_MS,
-        runner=RUNNER,
-        results=verify(code, cases.for_problem(one.problem_id), cap_ms=DRILL_CAP_MS),
-    )
+    problem_cases = cases.for_problem(one.problem_id)
+    runs = judge(code, problem_cases, cap_ms=DRILL_CAP_MS)
+    judged = Execution(cap_ms=DRILL_CAP_MS, runner=RUNNER, results=[result for result, _ in runs])
     attempt = mint.attempt(one, code, solved=judged.verified, finished_at=at)
     verification = mint.attempt_verification(attempt.id, judged)
     log.append_attempt(attempt)
     log.append_verification(verification)
-    return Submitted(attempt=attempt, verification=verification)
+    return Submitted(
+        attempt=attempt,
+        verification=verification,
+        failure=_first_failure(problem_cases, runs),
+    )
 
 
 def claim(
@@ -189,6 +208,19 @@ def _running(store: SittingStore, sitting_id: str, user_id: str) -> Sitting:
     if one.ended_at is not None:
         raise Refused(f"sitting {sitting_id} has ended")
     return one
+
+
+def _first_failure(cases: list[TestCase], runs: list[tuple[CaseResult, CaseRun]]) -> Failure | None:
+    for one, (result, ran) in zip(cases, runs, strict=True):
+        if result.outcome is not CaseOutcome.PASSED:
+            return Failure(
+                case_id=one.id,
+                outcome=result.outcome,
+                args=one.args,
+                expected=one.expected,
+                returned=ran.value if ran.returned else None,
+            )
+    return None
 
 
 def _closed(pauses: list[Pause], at: datetime) -> list[Pause]:
