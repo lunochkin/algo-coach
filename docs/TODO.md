@@ -30,7 +30,7 @@ React frontend the API serves as static files.
       attempts, since the log is append-only
 - [x] Add `algo_coach.sitting.serve`: a created problem in, its statement and a
       stored `Sitting` out. A restart between the two calls then loses no clock
-- [ ] Serve every created problem and skip the retired ones. No gate stands
+- [x] Serve every created problem and skip the retired ones. No gate stands
       between landing and serving until Phase 14
 - [ ] Add `algo_coach.sitting.submit`: the code and the sitting's id in, an
       `Attempt` in the log out. The call runs the code against the problem's own

@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict
 from algo_coach import mint
 from algo_coach.log import SittingStore
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Pause, ProblemStatus, Sitting
+from algo_coach.schema import Pause, Sitting
 
 # the cap a sitting judges a submission under. The speedup search picks the
 # separating size against it, and generation's own cap sits well above it
@@ -36,7 +36,7 @@ def serve(
     problem = problems.get(problem_id)
     if problem is None:
         raise ValueError(f"no problem {problem_id}")
-    if problem.status is not ProblemStatus.CREATED:
+    if not problem.served:
         raise ValueError(f"problem {problem_id} is {problem.status}")
     # a refresh or a second tab reaches the clock already running, rather than
     # starting a second one on the same problem

@@ -10,7 +10,6 @@ from algo_coach.matches.standing import standing_matches
 from algo_coach.schema import (
     Card,
     Problem,
-    ProblemStatus,
     Solution,
     SolutionRole,
     Template,
@@ -50,7 +49,7 @@ def coverage(
     """Every core template, in the order its card authored it, with what
     displays it. A retired problem's canonicals count for nothing: they fill no
     rung, so a form only they display is still a gap."""
-    served = {problem.id for problem in problems if problem.status is not ProblemStatus.RETIRED}
+    served = {problem.id for problem in problems if problem.served}
     displaying = {
         solution.id
         for solution in solutions

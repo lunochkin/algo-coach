@@ -24,7 +24,7 @@ def candidates(
 ) -> list[ProblemRow]:
     """What could be drilled for a technique, least recently attempted first.
 
-    Membership is the problem's own techniques, never the claims on its
+    Membership is a served problem's own techniques, never the claims on its
     attempts. Problem id breaks a remaining tie, so two renders of one log
     offer the same order.
     """
@@ -35,7 +35,7 @@ def candidates(
     rows = [
         _row(problem, by_problem[problem.id])
         for problem in problems
-        if technique in problem.techniques
+        if problem.served and technique in problem.techniques
     ]
     return sorted(rows, key=_staleness)
 

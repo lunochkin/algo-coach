@@ -8,13 +8,16 @@ from algo_coach.schema import Attempt, Problem
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
 
-def make_problem(id: str, techniques: list[str]) -> Problem:
-    return Problem(
-        id=id,
-        title=id,
-        statement="Given an array, return ...",
-        techniques=techniques,
-        **GENERATED,
+def make_problem(id: str, techniques: list[str], **overrides) -> Problem:
+    return Problem.model_validate(
+        {
+            "id": id,
+            "title": id,
+            "statement": "Given an array, return ...",
+            "techniques": techniques,
+        }
+        | GENERATED
+        | overrides
     )
 
 
@@ -137,3 +140,13 @@ def test_a_problem_carrying_no_technique_is_offered_for_nothing():
     unmapped = make_problem("db-one", [])
 
     assert candidates("greedy", [unmapped], []) == []
+
+
+def test_a_retired_problem_is_offered_for_nothing():
+    """A defective problem was never a fair test, so selection skips it
+    whatever its attempts say."""
+    retired = make_problem(
+        "greedy-retired", ["greedy"], status="retired", retired_reason="defective"
+    )
+
+    assert [row.problem.id for row in candidates("greedy", [GREEDY, retired], [])] == ["greedy-one"]
