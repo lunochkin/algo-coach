@@ -72,9 +72,6 @@ React frontend the API serves as static files.
       technique's card and candidates, and a problem's statement
 - [x] Add the write routes the rest of the loop needs: the submission and its
       per-case verdict, pausing and resuming the sitting, and the claim
-- [ ] Serve the statement and the `solve` signature alone, and keep every
-      solution and every case's expected value server-side. A canonical in the
-      response is the answer in the page source
 - [ ] Decide what a failing case shows the solver, its outcome alone or its
       arguments too, and write the choice into `flows.md`. Showing the
       arguments hands over a case the solver can special-case
