@@ -8,6 +8,7 @@ from typing import Any
 
 from algo_coach.ids import new_id
 from algo_coach.schema import (
+    Attempt,
     AttemptClaim,
     CallSite,
     CaseResult,
@@ -190,6 +191,22 @@ def machine_match(
 
 def self_label(attempt_id: str, mode: FailureMode) -> SelfLabel:
     return SelfLabel(id=new_id(), created_at=datetime.now(UTC), attempt_id=attempt_id, mode=mode)
+
+
+def attempt(sitting: Sitting, code: str, *, solved: bool, finished_at: datetime) -> Attempt:
+    return Attempt(
+        id=new_id(),
+        user_id=sitting.user_id,
+        problem_id=sitting.problem_id,
+        sitting_id=sitting.id,
+        started_at=sitting.started_at,
+        finished_at=finished_at,
+        language="python",
+        # cumulative and with every pause excluded: `log.md` gives why
+        time_to_solve_sec=sitting.elapsed(finished_at),
+        solved=solved,
+        code=code,
+    )
 
 
 def sitting(user_id: str, problem_id: str) -> Sitting:

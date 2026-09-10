@@ -1,0 +1,133 @@
+from datetime import UTC, datetime
+
+import pytest
+from helpers import PROVENANCE
+
+from algo_coach.cases import CaseLog
+from algo_coach.log import AttemptLog, SittingStore
+from algo_coach.mint import case
+from algo_coach.schema import Sitting
+from algo_coach.sitting import submit
+
+STARTED = datetime(2026, 9, 10, 8, tzinfo=UTC)
+NINE = datetime(2026, 9, 10, 9, tzinfo=UTC)
+TEN = datetime(2026, 9, 10, 10, tzinfo=UTC)
+ELEVEN = datetime(2026, 9, 10, 11, tzinfo=UTC)
+
+DOUBLE = "def solve(n):\n    return n * 2\n"
+TRIPLE = "def solve(n):\n    return n * 3\n"
+
+
+class Stores:
+    def __init__(self, root, **sitting) -> None:
+        self.sittings = SittingStore(root)
+        self.cases = CaseLog(root)
+        self.log = AttemptLog(root)
+        self.sittings.put(
+            Sitting.model_validate(
+                {"id": "s1", "user_id": "maks", "problem_id": "p1", "started_at": STARTED} | sitting
+            )
+        )
+        for args, expected in (([1], 2), ([3], 6)):
+            self.cases.append(case("p1", args, expected, provenance=PROVENANCE))
+
+    def submit(self, code: str, *, now: datetime = ELEVEN, sitting_id: str = "s1"):
+        return submit(self.sittings, self.cases, self.log, sitting_id, code, now=now)
+
+
+def test_a_passing_submission_mints_a_solved_attempt_in_the_log(tmp_path):
+    stores = Stores(tmp_path)
+
+    attempt = stores.submit(DOUBLE)
+
+    assert attempt.solved
+    assert stores.log.attempts() == [attempt]
+
+
+def test_the_attempt_names_its_sitting_and_carries_the_code(tmp_path):
+    """The log is append-only, so the grouping and the code go in with the
+    attempt or never."""
+    attempt = Stores(tmp_path).submit(DOUBLE)
+
+    assert (attempt.sitting_id, attempt.user_id, attempt.problem_id) == ("s1", "maks", "p1")
+    assert (attempt.code, attempt.language) == (DOUBLE, "python")
+
+
+def test_a_wrong_answer_is_unsolved(tmp_path):
+    assert not Stores(tmp_path).submit(TRIPLE).solved
+
+
+def test_code_defining_no_solve_is_unsolved(tmp_path):
+    """A submission with a syntax error is the ordinary case, and a verdict
+    rather than an error."""
+    assert not Stores(tmp_path).submit("def solve(n)\n").solved
+
+
+def test_only_the_sitting_s_problem_decides(tmp_path):
+    """A case of another problem would fail every correct submission here."""
+    stores = Stores(tmp_path)
+    stores.cases.append(case("p2", [1], 99, provenance=PROVENANCE))
+
+    assert stores.submit(DOUBLE).solved
+
+
+def test_the_run_is_capped_at_the_sitting_s_cap(tmp_path, monkeypatch):
+    """Generation's cap sits well above the sitting's, and a submission is
+    judged under the one the separating case was chosen against."""
+    monkeypatch.setattr("algo_coach.sitting.DRILL_CAP_MS", 50)
+    slow = "import time\n\n\ndef solve(n):\n    time.sleep(0.5)\n    return n * 2\n"
+
+    assert not Stores(tmp_path).submit(slow).solved
+
+
+def test_the_elapsed_time_runs_from_the_start_to_the_submission(tmp_path):
+    """The attempt carries the sitting's clock at the moment of submission,
+    with every pause excluded."""
+    stores = Stores(tmp_path, pauses=[{"at": NINE, "until": TEN}])
+
+    attempt = stores.submit(DOUBLE, now=ELEVEN)
+
+    assert attempt.started_at == STARTED and attempt.finished_at == ELEVEN
+    assert attempt.time_to_solve_sec == 2 * 3600.0
+
+
+def test_a_second_submission_is_a_second_attempt_on_a_cumulative_clock(tmp_path):
+    """A sitting mints an attempt per submission, and each carries the whole
+    time since the statement was served."""
+    stores = Stores(tmp_path)
+
+    first = stores.submit(TRIPLE, now=NINE)
+    second = stores.submit(DOUBLE, now=TEN)
+
+    assert (first.time_to_solve_sec, second.time_to_solve_sec) == (3600.0, 7200.0)
+    assert {one.sitting_id for one in stores.log.attempts()} == {"s1"}
+
+
+def test_submitting_leaves_the_sitting_running(tmp_path):
+    """Ending is the loop's call: a failed submission is followed by another."""
+    stores = Stores(tmp_path)
+    stores.submit(TRIPLE)
+
+    assert stores.sittings.get("s1").ended_at is None
+
+
+def test_a_paused_sitting_takes_no_submission(tmp_path):
+    """The clock is stopped, so the attempt would carry time the engine did not
+    count for it."""
+    stores = Stores(tmp_path, pauses=[{"at": NINE}])
+
+    with pytest.raises(ValueError, match="paused"):
+        stores.submit(DOUBLE)
+    assert stores.log.attempts() == []
+
+
+def test_an_ended_sitting_takes_no_submission(tmp_path):
+    stores = Stores(tmp_path, ended_at=TEN)
+
+    with pytest.raises(ValueError, match="has ended"):
+        stores.submit(DOUBLE)
+
+
+def test_an_unknown_sitting_is_refused(tmp_path):
+    with pytest.raises(ValueError, match="no sitting"):
+        Stores(tmp_path).submit(DOUBLE, sitting_id="nope")

@@ -6,9 +6,11 @@ from datetime import UTC, datetime
 from pydantic import BaseModel, ConfigDict
 
 from algo_coach import mint
-from algo_coach.log import SittingStore
+from algo_coach.cases import CaseLog
+from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Pause, Sitting
+from algo_coach.runner import verify
+from algo_coach.schema import Attempt, CaseOutcome, Pause, Sitting, severest
 
 # the cap a sitting judges a submission under. The speedup search picks the
 # separating size against it, and generation's own cap sits well above it
@@ -45,6 +47,27 @@ def serve(
         one = mint.sitting(user_id, problem_id)
         sittings.put(one)
     return Served(title=problem.title, statement=problem.statement, sitting=one)
+
+
+def submit(
+    sittings: SittingStore,
+    cases: CaseLog,
+    log: AttemptLog,
+    sitting_id: str,
+    code: str,
+    *,
+    now: datetime | None = None,
+) -> Attempt:
+    # taken before the run: judging takes seconds the solver did not spend
+    at = now or _clock()
+    one = _running(sittings, sitting_id)
+    if one.paused:
+        raise ValueError(f"sitting {sitting_id} is paused")
+    results = verify(code, cases.for_problem(one.problem_id), cap_ms=DRILL_CAP_MS)
+    solved = severest(result.outcome for result in results) is CaseOutcome.PASSED
+    attempt = mint.attempt(one, code, solved=solved, finished_at=at)
+    log.append_attempt(attempt)
+    return attempt
 
 
 def pause(store: SittingStore, sitting_id: str, *, now: datetime | None = None) -> Sitting:

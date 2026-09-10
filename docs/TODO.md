@@ -32,10 +32,10 @@ React frontend the API serves as static files.
       stored `Sitting` out. A restart between the two calls then loses no clock
 - [x] Serve every created problem and skip the retired ones. No gate stands
       between landing and serving until Phase 14
-- [ ] Add `algo_coach.sitting.submit`: the code and the sitting's id in, an
+- [x] Add `algo_coach.sitting.submit`: the code and the sitting's id in, an
       `Attempt` in the log out. The call runs the code against the problem's own
       cases at the drill cap and folds the case results to `solved`
-- [ ] Compute the attempt's duration from the stored sitting's start, and take
+- [x] Compute the attempt's duration from the stored sitting's start, and take
       no duration among `submit`'s arguments. A duration the browser reports is
       a number the engine did not witness
 - [ ] Take `user_id` as an argument to the sitting calls rather than defaulting
