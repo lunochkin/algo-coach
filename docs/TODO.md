@@ -41,7 +41,7 @@ React frontend the API serves as static files.
 - [x] Take `user_id` as an argument to the sitting calls rather than defaulting
       to one user. Phase 9 keys the log by user, and a default here would spread
       that change into this module
-- [ ] Test one whole sitting over `algo_coach.sitting`: serve, a failing
+- [x] Test one whole sitting over `algo_coach.sitting`: serve, a failing
       submit, a passing submit and end, on stores sharing one root. The unit
       tests pin each call alone, and this test pins that the calls compose
 - [ ] Sit one problem the sweep landed by hand, through `algo_coach.sitting` on
