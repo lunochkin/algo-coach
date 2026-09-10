@@ -4,7 +4,7 @@ import pytest
 from helpers import GENERATED
 
 from algo_coach.attempt_claims import standing_attempt_claims
-from algo_coach.board import TechniqueRow, excluded, per_technique, ungrouped
+from algo_coach.board import TechniqueRow, excluded, per_technique, stalest_first, ungrouped
 from algo_coach.log import latest_by_attempt
 from algo_coach.schema import (
     Attempt,
@@ -278,3 +278,34 @@ def test_an_excluded_attempt_is_not_also_grouped_nowhere():
 
     assert ungrouped(attempts, index(BROKEN), {}) == []
     assert [one.id for one in excluded(attempts, index(BROKEN))] == ["a1"]
+
+
+def test_a_technique_nobody_practised_leads_the_drill_board():
+    """An empty log would otherwise open the loop on a board with nothing to
+    pick."""
+    rows = per_technique([make_attempt("a1")], index(GREEDY), {}, {})
+
+    board = stalest_first(rows, [GREEDY, make_problem("sorting-problem", ["sorting"])])
+
+    assert [(row.technique, row.attempt_count, row.last_attempt_at) for row in board] == [
+        ("sorting", 0, None),
+        ("greedy", 1, T0),
+    ]
+
+
+def test_the_least_recently_practised_row_comes_first():
+    """Alphabetical order buries the row a scheduler would pick."""
+    attempts = [
+        make_attempt("a1", finished_at=T0 + timedelta(days=3)),
+        make_attempt("a2", problem_id="trie-problem", finished_at=T0),
+    ]
+    problems = index(GREEDY, make_problem("trie-problem", ["trie"]))
+
+    board = stalest_first(per_technique(attempts, problems, {}, {}), problems.values())
+
+    assert [row.technique for row in board] == ["trie", "greedy"]
+
+
+def test_a_technique_only_a_retired_problem_carries_is_not_offered():
+    """Nothing could be served for it."""
+    assert stalest_first([], [BROKEN]) == []

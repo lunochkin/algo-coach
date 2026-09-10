@@ -5,6 +5,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from algo_coach.attempt_claims import resolve_techniques
+from algo_coach.board.candidates import NEVER
 from algo_coach.schema import Attempt, AttemptClaim, FailureMode, Problem, SelfLabel
 
 
@@ -14,7 +15,7 @@ class TechniqueRow(BaseModel):
     technique: str
     attempt_count: int
     solved_count: int
-    last_attempt_at: datetime
+    last_attempt_at: datetime | None = None  # none on a technique nothing practised yet
     # Only the modes an attempt was labelled with; an unlabelled attempt
     # counts toward the row and toward no mode.
     self_labels: dict[FailureMode, int] = {}
@@ -78,3 +79,18 @@ def excluded(attempts: Iterable[Attempt], problems: Mapping[str, Problem]) -> li
     """The attempts a defective problem took off the board, still readable in
     the log."""
     return [attempt for attempt in attempts if problems[attempt.problem_id].defective]
+
+
+def stalest_first(rows: Iterable[TechniqueRow], problems: Iterable[Problem]) -> list[TechniqueRow]:
+    """The board the drill loop opens on: every row, and an empty one for each
+    technique a served problem carries that no attempt reached. A technique
+    never practised ranks stalest, and the code breaks a tie."""
+    by_technique = {row.technique: row for row in rows}
+    for problem in problems:
+        for technique in problem.techniques if problem.served else []:
+            by_technique.setdefault(
+                technique, TechniqueRow(technique=technique, attempt_count=0, solved_count=0)
+            )
+    return sorted(
+        by_technique.values(), key=lambda row: (row.last_attempt_at or NEVER, row.technique)
+    )

@@ -453,6 +453,11 @@ loop does with a failing run. Those questions are answered by using the loop.
 5. Keyed to each attempt, the loop asks for an attempt claim and a
    self-label.
 
+- **The board offers every technique a served problem carries**, practised or
+  not, and a technique never practised ranks stalest. A board of practised
+  techniques alone opens the first sitting with nothing to pick.
+- **A candidate is offered without its statement.** The clock starts when the
+  statement is served, so a statement shown in the list is read untimed.
 - **The card is read before the statement is served.** The drill loop practises
   a form the user has just read, and the clock counts solving rather than
   reading. A card read only after the solve would review a form the sitting

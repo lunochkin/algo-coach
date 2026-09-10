@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from algo_coach.schema import Attempt, Problem
 
 # Sorts ahead of any real attempt, so never attempted ranks stalest.
-_NEVER = datetime.min.replace(tzinfo=UTC)
+NEVER = datetime.min.replace(tzinfo=UTC)
 
 
 class ProblemRow(BaseModel):
@@ -51,4 +51,4 @@ def _row(problem: Problem, attempts: list[Attempt]) -> ProblemRow:
 
 def _staleness(row: ProblemRow) -> tuple[datetime, float, str]:
     solved_share = row.solved_count / row.attempt_count if row.attempt_count else 0.0
-    return (row.last_attempt_at or _NEVER, solved_share, row.problem.id)
+    return (row.last_attempt_at or NEVER, solved_share, row.problem.id)

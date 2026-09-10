@@ -68,7 +68,7 @@ React frontend the API serves as static files.
 - [x] Add `algo_coach.api`: a FastAPI app over the sitting calls, JSON in and
       JSON out. The API is the second adapter beside the CLI, and neither
       adapter holds domain logic
-- [ ] Add the read routes the loop's first three steps need: the board, a
+- [x] Add the read routes the loop's first three steps need: the board, a
       technique's card and candidates, and a problem's statement
 - [ ] Add the write routes the rest of the loop needs: the submission and its
       per-case verdict, pausing and resuming the sitting, and the claim

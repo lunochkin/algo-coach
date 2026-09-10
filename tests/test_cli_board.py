@@ -203,3 +203,14 @@ def test_json_carries_the_excluded_count(board_root, monkeypatch, capsys):
 
     payload = json.loads(capsys.readouterr().out)
     assert (payload["rows"], payload["excluded"]) == ([], 1)
+
+
+def test_stale_names_a_technique_nobody_practised_first(board_root, monkeypatch, capsys):
+    """Least recently practised includes never, and never is the stalest."""
+    seed_problem(board_root.root, id="minted-trie", techniques=["trie"])
+    board_root.append_attempt(attempt("a1"))
+
+    run(monkeypatch, "--user", "u1", "--stale")
+
+    header, first, *rest = capsys.readouterr().out.splitlines()
+    assert first.split() == ["trie", "0", "0/0", "never"]

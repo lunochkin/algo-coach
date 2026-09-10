@@ -10,3 +10,8 @@ class CardStore(FileStore[Card]):
 
     def by_slug(self, slug: str) -> Card | None:
         return next((card for card in self.all() if card.slug == slug), None)
+
+    def for_technique(self, technique: str) -> list[Card]:
+        return sorted(
+            (card for card in self.all() if card.technique == technique), key=lambda one: one.slug
+        )

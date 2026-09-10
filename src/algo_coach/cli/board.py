@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from algo_coach.attempt_claims import standing_attempt_claims
-from algo_coach.board import TechniqueRow, excluded, per_technique, ungrouped
+from algo_coach.board import TechniqueRow, excluded, per_technique, stalest_first, ungrouped
 from algo_coach.cli.display import age, table
 from algo_coach.log import AttemptLog, latest_by_attempt
 from algo_coach.solution_claims import load_problems
@@ -20,7 +20,7 @@ def board(args: argparse.Namespace, root: Path) -> None:
     labels = latest_by_attempt(log.self_labels())
     rows = per_technique(attempts, problems, claims, labels)
     if args.stale:
-        rows.sort(key=lambda row: row.last_attempt_at)
+        rows = stalest_first(rows, problems.values())
     missed = len(ungrouped(attempts, problems, claims))
     dropped = len(excluded(attempts, problems))
 
