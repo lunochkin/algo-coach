@@ -4,7 +4,7 @@ import pytest
 from helpers import GENERATED
 
 from algo_coach.attempt_claims import standing_attempt_claims
-from algo_coach.board import TechniqueRow, per_technique, ungrouped
+from algo_coach.board import TechniqueRow, excluded, per_technique, ungrouped
 from algo_coach.log import latest_by_attempt
 from algo_coach.schema import (
     Attempt,
@@ -34,13 +34,16 @@ def make_attempt(
     )
 
 
-def make_problem(id: str, techniques: list[str]) -> Problem:
-    return Problem(
-        id=id,
-        title=id,
-        statement="Given an array, return ...",
-        techniques=techniques,
-        **GENERATED,
+def make_problem(id: str, techniques: list[str], **overrides) -> Problem:
+    return Problem.model_validate(
+        {
+            "id": id,
+            "title": id,
+            "statement": "Given an array, return ...",
+            "techniques": techniques,
+        }
+        | GENERATED
+        | overrides
     )
 
 
@@ -229,3 +232,49 @@ def test_ungrouped_and_the_rows_partition_nothing():
 
     assert sum(row.attempt_count for row in rows) == 2
     assert ungrouped(attempts, index(problem), {}) == []
+
+
+BROKEN = make_problem("greedy-broken", ["greedy"], status="retired", retired_reason="defective")
+
+
+def test_a_defective_problem_s_attempts_count_nowhere_solved_or_not():
+    """Dropping only the failures would raise a technique's solve rate because
+    a problem was broken."""
+    rows = per_technique(
+        [
+            make_attempt("a1"),
+            make_attempt("a2", problem_id="greedy-broken", solved=True),
+            make_attempt("a3", problem_id="greedy-broken", solved=False),
+        ],
+        index(GREEDY, BROKEN),
+        {},
+        {},
+    )
+
+    assert [(row.attempt_count, row.solved_count) for row in rows] == [(1, 1)]
+
+
+def test_a_technique_only_a_defective_problem_reached_has_no_row():
+    assert (
+        per_technique([make_attempt("a1", problem_id="greedy-broken")], index(BROKEN), {}, {}) == []
+    )
+
+
+def test_a_claim_does_not_bring_a_defective_problem_s_attempt_back():
+    """The exclusion is about the problem, so what the attempt used does not
+    matter."""
+    claims = {"a1": make_claim(["greedy"])}
+
+    assert (
+        per_technique([make_attempt("a1", problem_id="greedy-broken")], index(BROKEN), claims, {})
+        == []
+    )
+
+
+def test_an_excluded_attempt_is_not_also_grouped_nowhere():
+    """Grouped nowhere means no technique resolved, which is a different
+    thing to tell the reader."""
+    attempts = [make_attempt("a1", problem_id="greedy-broken")]
+
+    assert ungrouped(attempts, index(BROKEN), {}) == []
+    assert [one.id for one in excluded(attempts, index(BROKEN))] == ["a1"]

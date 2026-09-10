@@ -8,11 +8,13 @@ from helpers import seed_problem
 from algo_coach.board import TechniqueRow
 from algo_coach.cli.board import render
 from algo_coach.log import AttemptLog
+from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
     Attempt,
     AttemptClaim,
     ClaimSource,
     FailureMode,
+    RetirementReason,
     SelfLabel,
 )
 
@@ -165,7 +167,7 @@ def test_json_carries_the_ungrouped_count(board_root, monkeypatch, capsys):
 
     run(monkeypatch, "--user", "u1", "--json")
 
-    assert json.loads(capsys.readouterr().out) == {"rows": [], "ungrouped": 1}
+    assert json.loads(capsys.readouterr().out) == {"rows": [], "ungrouped": 1, "excluded": 0}
 
 
 def test_stale_orders_the_least_recently_practised_first(board_root, monkeypatch, capsys):
@@ -180,3 +182,24 @@ def test_stale_orders_the_least_recently_practised_first(board_root, monkeypatch
 
     header, *rows = capsys.readouterr().out.splitlines()
     assert [line.split()[0] for line in rows] == ["greedy", "sorting", "trie"]
+
+
+def test_a_footer_counts_the_attempts_a_defective_problem_took_off(board_root, monkeypatch, capsys):
+    """Exclusion is a read-time rule rather than a deletion, so the reader is
+    told the attempts are there."""
+    board_root.append_attempt(attempt("a1"))
+    ProblemStore(board_root.root).retire("minted-u1", RetirementReason.DEFECTIVE)
+
+    run(monkeypatch, "--user", "u1")
+
+    assert "1 attempt on a defective problem, not counted" in capsys.readouterr().out
+
+
+def test_json_carries_the_excluded_count(board_root, monkeypatch, capsys):
+    board_root.append_attempt(attempt("a1"))
+    ProblemStore(board_root.root).retire("minted-u1", RetirementReason.DEFECTIVE)
+
+    run(monkeypatch, "--user", "u1", "--json")
+
+    payload = json.loads(capsys.readouterr().out)
+    assert (payload["rows"], payload["excluded"]) == ([], 1)

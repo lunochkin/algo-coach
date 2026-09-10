@@ -46,6 +46,12 @@ class Problem(MachineProvenance):
         # report read this one rule
         return self.status is not ProblemStatus.RETIRED
 
+    @property
+    def defective(self) -> bool:
+        # by reason rather than by status: `corpus.md` leaves room for a
+        # retirement whose attempts are kept
+        return self.retired_reason is RetirementReason.DEFECTIVE
+
     @model_validator(mode="after")
     def _provenance_required(self) -> Problem:
         self.check_provenance(True)

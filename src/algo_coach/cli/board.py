@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from algo_coach.attempt_claims import standing_attempt_claims
-from algo_coach.board import TechniqueRow, per_technique, ungrouped
+from algo_coach.board import TechniqueRow, excluded, per_technique, ungrouped
 from algo_coach.cli.display import age, table
 from algo_coach.log import AttemptLog, latest_by_attempt
 from algo_coach.solution_claims import load_problems
@@ -22,20 +22,30 @@ def board(args: argparse.Namespace, root: Path) -> None:
     if args.stale:
         rows.sort(key=lambda row: row.last_attempt_at)
     missed = len(ungrouped(attempts, problems, claims))
+    dropped = len(excluded(attempts, problems))
 
     if args.json:
-        payload = {"rows": [row.model_dump(mode="json") for row in rows], "ungrouped": missed}
+        payload = {
+            "rows": [row.model_dump(mode="json") for row in rows],
+            "ungrouped": missed,
+            "excluded": dropped,
+        }
         print(json.dumps(payload, indent=2))
         return
 
-    if not rows:
+    # a log holding only a defective problem's attempts still names them
+    if not rows and not dropped:
         print(f"no attempts for {args.user}")
         return
 
-    print(render(rows, datetime.now(UTC)))
+    if rows:
+        print(render(rows, datetime.now(UTC)))
     if missed:
         noun = "attempt" if missed == 1 else "attempts"
         print(f"\n{missed} {noun} grouped nowhere — no technique resolved")
+    if dropped:
+        noun = "attempt" if dropped == 1 else "attempts"
+        print(f"\n{dropped} {noun} on a defective problem, not counted")
 
 
 def render(rows: list[TechniqueRow], now: datetime) -> str:

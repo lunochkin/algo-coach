@@ -53,7 +53,7 @@ React frontend the API serves as static files.
 - [x] Add `algo-coach problem --retire <id>`, which prints the problem whole and
       then retires it as `defective`. A problem is served to every user, so
       retirement is a by-hand act rather than a control in the loop
-- [ ] Exclude a defective problem's attempts from the board, solved and failed
+- [x] Exclude a defective problem's attempts from the board, solved and failed
       alike. Dropping only the failures would raise a technique's solve rate
       because a problem was broken
 - [ ] Write the `AttemptClaim` the sitting's question produces, over the

@@ -32,13 +32,16 @@ def per_technique(
 ) -> list[TechniqueRow]:
     """The drill board: one row per technique the log reaches, ordered by code.
 
-    An attempt counts once in every technique it resolves to. `problems` is
-    keyed by problem id, `claims` and `labels` by attempt id; a missing problem
-    raises rather than dropping the attempt.
+    An attempt counts once in every technique it resolves to, and a defective
+    problem's attempts count nowhere, solved or not. `problems` is keyed by
+    problem id, `claims` and `labels` by attempt id; a missing problem raises
+    rather than dropping the attempt.
     """
     grouped: dict[str, list[Attempt]] = defaultdict(list)
     for attempt in attempts:
         problem = problems[attempt.problem_id]
+        if problem.defective:
+            continue
         for technique in resolve_techniques(attempt, problem, claims):
             grouped[technique].append(attempt)
 
@@ -62,9 +65,16 @@ def ungrouped(
     claims: Mapping[str, AttemptClaim],
 ) -> list[Attempt]:
     """The attempts `per_technique` reaches no row for, shown beside the
-    rows."""
+    rows. A defective problem's attempts are `excluded` instead."""
     return [
         attempt
         for attempt in attempts
-        if not resolve_techniques(attempt, problems[attempt.problem_id], claims)
+        if not problems[attempt.problem_id].defective
+        and not resolve_techniques(attempt, problems[attempt.problem_id], claims)
     ]
+
+
+def excluded(attempts: Iterable[Attempt], problems: Mapping[str, Problem]) -> list[Attempt]:
+    """The attempts a defective problem took off the board, still readable in
+    the log."""
+    return [attempt for attempt in attempts if problems[attempt.problem_id].defective]
