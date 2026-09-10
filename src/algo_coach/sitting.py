@@ -15,6 +15,7 @@ from algo_coach.schema import (
     Attempt,
     AttemptClaim,
     AttemptVerification,
+    ClaimSource,
     Confidence,
     Execution,
     Pause,
@@ -118,6 +119,17 @@ def claim(
     )
     log.append_claim(written)
     return written
+
+
+def unclaimed(log: AttemptLog, sitting_id: str, *, user_id: str) -> list[Attempt]:
+    """The sitting's attempts the user has not claimed, in the order they were
+    submitted. A machine claim answers no question the loop asked."""
+    answered = {one.attempt_id for one in log.claims() if one.source is ClaimSource.USER}
+    return [
+        one
+        for one in log.attempts()
+        if one.sitting_id == sitting_id and one.user_id == user_id and one.id not in answered
+    ]
 
 
 def pause(

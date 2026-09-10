@@ -59,7 +59,7 @@ React frontend the API serves as static files.
 - [x] Write the `AttemptClaim` the sitting's question produces, over the
       problem's own techniques and carrying a confidence level.
       `algo-coach claim` asks that question of attempts already in the log
-- [ ] Ask the claim per attempt of the sitting rather than once per sitting. A
+- [x] Ask the claim per attempt of the sitting rather than once per sitting. A
       drill can mint several attempts, and a claim on the last alone would
       leave the earlier attempts to the problem's techniques
 

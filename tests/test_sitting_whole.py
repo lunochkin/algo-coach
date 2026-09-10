@@ -7,7 +7,8 @@ from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.mint import case
 from algo_coach.problems import ProblemStore
-from algo_coach.sitting import end, pause, resume, serve, submit
+from algo_coach.schema import Confidence
+from algo_coach.sitting import claim, end, pause, resume, serve, submit, unclaimed
 
 USER = "u-4f9c2a"
 DOUBLE = "def solve(n):\n    return n * 2\n"
@@ -45,6 +46,15 @@ def test_one_sitting_runs_from_serve_to_end(root):
         sittings, cases, log, sitting_id, DOUBLE, user_id=USER, now=began + timedelta(minutes=30)
     ).attempt
     ended = end(sittings, sitting_id, user_id=USER, now=began + timedelta(minutes=31))
+    for attempt in unclaimed(log, sitting_id, user_id=USER):
+        claim(
+            log,
+            attempt.id,
+            ["arithmetic"],
+            candidates=["arithmetic"],
+            user_id=USER,
+            confidence=Confidence.SURE,
+        )
 
     assert log.attempts() == [failing, passing]
     assert [one.solved for one in log.attempts()] == [False, True]
@@ -53,6 +63,9 @@ def test_one_sitting_runs_from_serve_to_end(root):
     # cumulative from the start, the ten paused minutes left out of both
     assert (failing.time_to_solve_sec, passing.time_to_solve_sec) == (600.0, 1200.0)
     assert sittings.all() == [ended]
+    # each attempt of the sitting carries its own claim
+    assert [one.attempt_id for one in log.claims()] == [failing.id, passing.id]
+    assert unclaimed(log, sitting_id, user_id=USER) == []
     assert ended.ended_at is not None and not ended.paused
 
 
