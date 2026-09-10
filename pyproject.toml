@@ -155,7 +155,12 @@ ignore_names = [
 ]
 
 [tool.ruff]
-line-length = 100
+line-length = 100  # code
+
+# prose: ruff checks comments and docstrings against it, and
+# `tests/test_prose.py` checks the docs
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 80
 
 [tool.ruff.lint]
 # ANN401: `Any` in a signature is a decision, made where the value really is any.

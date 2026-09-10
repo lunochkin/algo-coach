@@ -1,10 +1,15 @@
 import ast
 import re
+import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ARCHITECTURE = sorted((ROOT / "docs" / "architecture").glob("*.md"))
 SRC = ROOT / "src" / "algo_coach"
+DOCS = [*sorted((ROOT / "docs").rglob("*.md")), ROOT / "README.md", ROOT / "CLAUDE.md"]
+PROSE_WIDTH = tomllib.loads((ROOT / "pyproject.toml").read_text())["tool"]["ruff"]["lint"][
+    "pycodestyle"
+]["max-doc-length"]
 
 # `CLAUDE.md`, Writing: one idea per sentence, nothing over forty words, split
 # at the em-dash and the semicolon. Each count is a ratchet: held at zero, and
@@ -98,3 +103,21 @@ def test_a_docstring_is_shorter_than_the_code_it_sits_on():
             if doc > code:
                 longer.append(f"{path.relative_to(ROOT)}:{node.name} ({doc} over {code})")
     assert len(longer) <= LONGER_DOCSTRINGS, longer
+
+
+def test_no_prose_line_in_the_docs_is_wider_than_a_comment():
+    """One prose width, set in `pyproject.toml`, which ruff reads for comments
+    and docstrings. A table, a fenced block and a line holding no space cannot
+    be wrapped, so none of them counts."""
+    wide = []
+    for path in DOCS:
+        fenced = False
+        for number, line in enumerate(path.read_text().splitlines(), 1):
+            if line.lstrip().startswith("```"):
+                fenced = not fenced
+                continue
+            if fenced or line.lstrip().startswith("|") or " " not in line.strip():
+                continue
+            if len(line) > PROSE_WIDTH:
+                wide.append(f"{path.relative_to(ROOT)}:{number}")
+    assert wide == []
