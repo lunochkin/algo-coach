@@ -52,8 +52,8 @@ def user_claim(
 
     `declined` is passed rather than inferred from an empty list, so a writer
     that lost an answer cannot record a verdict nobody gave. `informed_by` is
-    empty unless the caller says otherwise: only a revision has machine claims in
-    view.
+    empty unless the caller says otherwise: only a revision has machine claims
+    in view.
     """
     return AttemptClaim(
         id=new_id(),
@@ -99,9 +99,9 @@ def user_solution_claim(
     *,
     informed_by: Sequence[str] = (),
 ) -> SolutionClaim:
-    """One solution read by hand, which is what a machine solution claim is scored
-    against. An adjudication rather than testimony: nobody sat for a canonical,
-    so this is a verdict on code the user did not produce."""
+    """One solution read by hand, which is what a machine solution claim is
+    scored against. An adjudication rather than testimony: nobody sat for a
+    canonical, so this is a verdict on code the user did not produce."""
     return SolutionClaim(
         id=new_id(),
         created_at=datetime.now(UTC),
@@ -140,8 +140,8 @@ def user_match(
     matched: bool,
     informed_by: Sequence[str] = (),
 ) -> TemplateMatch:
-    """One pair the user matched by hand, positive or negative: whether this solution
-    displays this form.
+    """One pair the user matched by hand, positive or negative: whether this
+    solution displays this form.
 
     The negative is recorded as deliberately as the positive, since the
     machine answers every candidate it was given. `informed_by` is empty unless

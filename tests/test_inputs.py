@@ -92,8 +92,8 @@ def test_the_search_runs_a_generated_input_generator():
     )
 
     assert found.found
-    # what the call's own code built at the size the naive solution decided, rather than
-    # a size a loaded machine moves by one
+    # what the call's own code built at the size the naive solution decided,
+    # rather than a size a loaded machine moves by one
     assert found.args == [list(range(found.size))]
 
 

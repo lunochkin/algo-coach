@@ -120,8 +120,8 @@ CASE_WIDTH = 96
 
 
 def configured(provenance: MachineProvenance | None) -> str:
-    """What one step ran at, or that it never ran. The prompt hash too: it is half
-    of what a resume compares, and a prompt edit moves it alone."""
+    """What one step ran at, or that it never ran. The prompt hash too: it is
+    half of what a resume compares, and a prompt edit moves it alone."""
     if provenance is None:
         return "not taken"
     at = sampled(provenance.temperature)

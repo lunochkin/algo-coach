@@ -293,9 +293,9 @@ def test_the_inputs_record_carries_the_size_the_search_found(tmp_path, monkeypat
 
 
 def test_the_inputs_record_carries_the_bound_the_search_ran_under(tmp_path, monkeypatch):
-    """A landed problem clears its draft, so the size the input generator reported is
-    readable nowhere else and a separating size has nothing to be read
-    against."""
+    """A landed problem clears its draft, so the size the input generator
+    reported is readable nowhere else and a separating size has nothing to be
+    read against."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
@@ -303,7 +303,8 @@ def test_the_inputs_record_carries_the_bound_the_search_ran_under(tmp_path, monk
 
     at = sites(outcomes)
     assert at[CallSite.INPUTS].largest == 8
-    # the input generator's answer, not the naive solution's: the search read it from this call
+    # the input generator's answer, not the naive solution's: the search read it
+    # from this call
     assert at[CallSite.NAIVE].largest is None
 
 

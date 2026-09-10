@@ -111,8 +111,9 @@ class Draft(BaseModel):
     # size the statement admits
     input_generator: str | None = Field(default=None, min_length=1)
     largest: int | None = Field(default=None, gt=0)
-    # paced: the naive solution the search measures the canonical against, written as the
-    # approach the form replaces. Absent where no speedup is claimed
+    # paced: the naive solution the search measures the canonical against,
+    # written as the approach the form replaces. Absent where no speedup is
+    # claimed
     naive: str | None = Field(default=None, min_length=1)
     # searched: the case at the size the naive solution stops fitting, absent
     # where the form is its own optimum or nothing separated. The site outcome
@@ -136,8 +137,8 @@ class Draft(BaseModel):
     won: list[SettledCase] = Field(default_factory=list[SettledCase])
 
     # the configuration each step ran at, copied as its call returned. A resume
-    # starts at the first step whose configuration or prompt hash moved, which is
-    # why both are held here rather than only the outputs
+    # starts at the first step whose configuration or prompt hash moved, which
+    # is why both are held here rather than only the outputs
     generator_provenance: MachineProvenance | None = None
     blind_provenance: MachineProvenance | None = None
     inputs_provenance: MachineProvenance | None = None  # the input generator and the search it fed

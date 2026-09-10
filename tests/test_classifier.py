@@ -77,8 +77,8 @@ def test_the_candidates_are_named_in_the_prompt_too():
 
 
 def test_each_candidate_reaches_the_model_with_its_criterion():
-    """One rulebook, applied where it decides something: the machine claim is made
-    against what earns a code and the near miss it is confused with."""
+    """One rulebook, applied where it decides something: the machine claim is
+    made against what earns a code and the near miss it is confused with."""
     client = answering("greedy")
 
     verdict(client, ["greedy", "sorting"], CODE)
@@ -276,9 +276,9 @@ def test_the_default_configuration_is_known_in_every_part():
 
 
 def test_the_request_hash_is_the_question_this_attempt_would_be_asked():
-    """What decides whether a machine claim is worth paying for again — recomputed
-    rather than compared with a literal, which would assert only that someone
-    edited it."""
+    """What decides whether a machine claim is worth paying for again —
+    recomputed rather than compared with a literal, which would assert only that
+    someone edited it."""
     assert request_hash(["greedy", "sorting"], CODE) == request_hash(["greedy", "sorting"], CODE)
 
 

@@ -253,10 +253,10 @@ APPEND_ONLY = (
 
 
 def test_the_stores_write_as_the_data_class_table_says():
-    """`README.md`: attempts, claims, cases, solutions, solution claims, matches, site
-    outcomes and calls are append-only; drafts and sittings are revised in place;
-    a problem is created once and only its status moves; cards are re-seeded by
-    slug."""
+    """`README.md`: attempts, claims, cases, solutions, solution claims,
+    matches, site outcomes and calls are append-only; drafts and sittings are
+    revised in place; a problem is created once and only its status moves; cards
+    are re-seeded by slug."""
     for log in APPEND_ONLY:
         assert issubclass(log, JsonlLog), log.__name__
         assert not hasattr(log, "put") and not hasattr(log, "remove"), log.__name__

@@ -161,8 +161,8 @@ async def test_naming_none_is_negatives_not_a_decline(hand_match_root):
 
 
 async def test_a_hand_record_carries_no_configuration(hand_match_root):
-    """Nothing re-derives it, which is what makes it the reference a machine match is
-    scored against."""
+    """Nothing re-derives it, which is what makes it the reference a machine
+    match is scored against."""
     await run(hand_match_root, ["space", "enter"], count=1, card="backtracking")
 
     one = by_hand(hand_match_root)[0]
@@ -256,8 +256,8 @@ async def test_the_matcher_is_not_shown_by_default(hand_match_root):
 
 
 async def test_the_matcher_is_shown_on_request(hand_match_root):
-    """Asked for by name, as `claim --revise` shows a machine claim — and what it
-    costs is that the answer is no longer independent of it."""
+    """Asked for by name, as `claim --revise` shows a machine claim — and what
+    it costs is that the answer is no longer independent of it."""
     read_by_matcher(hand_match_root)
     async with sitting(hand_match_root, [], count=1, card="backtracking", verdict=True) as app:
         cue = screen(app, "#cue")

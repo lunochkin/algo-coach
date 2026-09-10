@@ -61,7 +61,8 @@ def test_a_problem_is_read_whole_by_a_prefix_of_its_id(root, monkeypatch, capsys
     out = capsys.readouterr().out
     assert f"# {stored.title} ({stored.id})" in out
     assert stored.statement in out
-    # the canonical, the reference and the naive solution, each headed by its role
+    # the canonical, the reference and the naive solution, each headed by its
+    # role
     assert out.count("```python") == 3
     assert "### naive" in out
 
@@ -149,8 +150,8 @@ def test_a_confirmed_retirement_moves_the_status(root, monkeypatch, capsys):
 
 @pytest.mark.parametrize("reply", ["n", "", "yes please", None])
 def test_anything_but_yes_retires_nothing(root, monkeypatch, capsys, reply):
-    """Every user is served the problem, so a stray key or a closed input may not
-    take it away from them."""
+    """Every user is served the problem, so a stray key or a closed input may
+    not take it away from them."""
     stored = landed(root, monkeypatch)
     answering(monkeypatch, reply)
 

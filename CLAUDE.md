@@ -172,10 +172,10 @@ configuration produced it, or which prompt hash it was sent."
   untracked, since it names exactly what must never be committed. Without the
   list the hooks fail rather than pass. A guard that silently allows everything
   when unconfigured is worse than no guard.
-- Pre-commit also runs ruff, pyright, vulture and `tests/test_architecture.py` when
-  code is staged: the import contracts in `pyproject.toml`, the module size
-  limit, and that a name is imported from where it is defined. The full suite
-  is `just test`, by hand.
+- Pre-commit also runs ruff, pyright, vulture and `tests/test_architecture.py`
+  when code is staged: the import contracts in `pyproject.toml`, the module size
+  limit, and that a name is imported from where it is defined. The full suite is
+  `just test`, by hand.
 - `tests/schemas/` holds each stored record's JSON schema as last agreed, and
   `tests/test_schema_additive.py` refuses a change that is not additive. An
   intended tightening rewrites the snapshots in the same commit: `just

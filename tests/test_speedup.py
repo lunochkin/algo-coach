@@ -5,11 +5,12 @@ from algo_coach.generation.speedup import CEILING, MARGIN, Missing, search
 from algo_coach.runner import weighs
 from algo_coach.schema import ExpectedSource, MachineProvenance
 
-# a naive solution whose cost grows with the square of the size, as a naive solution
-# usually does. Two sleeps take 20ms and three take 45ms, and the cap sits
-# between them, so a bound of two finishes. Which size the search settles on is
-# the naive solution's answer rather than the search's, and no test asserts a number: a
-# loaded machine moves it by one where the behaviour under test is the same
+# a naive solution whose cost grows with the square of the size, as a naive
+# solution usually does. Two sleeps take 20ms and three take 45ms, and the cap
+# sits between them, so a bound of two finishes. Which size the search settles
+# on is the naive solution's answer rather than the search's, and no test
+# asserts a number: a loaded machine moves it by one where the behaviour under
+# test is the same
 SLEEPS = "import time\n\n\ndef solve(n):\n    time.sleep(n * n / 200)\n    return n\n"
 FAST = "def solve(n):\n    return n\n"
 CAP_MS = 37
@@ -17,8 +18,8 @@ MEASURE_MS = 2000
 
 
 def searched(canonical: str = FAST, naive: str = SLEEPS, reference: str = FAST, **overrides):
-    """The naive solution is what the walk times; the reference is what settles the case
-    at the size it stops on."""
+    """The naive solution is what the walk times; the reference is what settles
+    the case at the size it stops on."""
     return search(
         overrides.pop("make", lambda size: [size]),
         canonical=canonical,
@@ -89,8 +90,8 @@ def test_a_naive_solution_that_finishes_everywhere_separates_nothing():
 
 def test_the_largest_legal_size_is_tried_before_the_search_gives_up():
     """Doubling from one reaches two and then four, so a bound of three is
-    reached by clamping alone. A naive solution that fits everywhere is what makes the
-    sizes it was asked for readable."""
+    reached by clamping alone. A naive solution that fits everywhere is what
+    makes the sizes it was asked for readable."""
     asked: list[int] = []
 
     def make(size: int) -> list[int]:
@@ -161,8 +162,8 @@ def test_an_input_over_the_ceiling_is_not_a_case():
 
 def test_the_walk_tries_the_largest_storable_input_before_giving_up():
     """Doubling leaves a factor of two under the ceiling untried, and a
-    quadratic naive solution separates in that gap. Three fits and four does not, and
-    the naive solution exceeds the cap at three."""
+    quadratic naive solution separates in that gap. Three fits and four does
+    not, and the naive solution exceeds the cap at three."""
     # the case weighs its answer beside its arguments
     ceiling = weighs([list(range(3))]) + weighs(3)
     listed = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) ** 2 / 200)\n"

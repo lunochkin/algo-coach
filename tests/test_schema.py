@@ -137,9 +137,9 @@ def test_classifier_claim_without_any_provenance_is_rejected():
 
 @pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_classifier_claim_needs_every_field_that_produced_it(missing):
-    """All of them or none. A machine record whose configuration is partly unknown
-    cannot be compared with one whose configuration is known, and a reader
-    would branch on the absence forever."""
+    """All of them or none. A machine record whose configuration is partly
+    unknown cannot be compared with one whose configuration is known, and a
+    reader would branch on the absence forever."""
     with pytest.raises(ValidationError, match=missing):
         make_claim(
             ClaimSource.CLASSIFIER,

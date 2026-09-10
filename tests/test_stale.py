@@ -34,7 +34,8 @@ def test_a_claim_from_another_model_is_at_another_configuration():
 
 
 def test_an_attempt_with_no_question_matches_nothing():
-    """Nothing to compare against, so a machine claim of it cannot be current."""
+    """Nothing to compare against, so a machine claim of it cannot be
+    current."""
     assert machine_claims_at([machine_claim("a1", ["greedy"])], CONFIGURATION, {}) == {}
 
 
@@ -65,9 +66,9 @@ def test_a_user_claim_is_not_a_reading():
 
 
 def test_a_claim_read_at_another_temperature_is_stale():
-    """What was sampled is part of what produced a machine claim, so two temperatures
-    are two configurations. Mixed under one key, a re-derivation would serve a
-    sampled claim to a greedy run and call it already paid for."""
+    """What was sampled is part of what produced a machine claim, so two
+    temperatures are two configurations. Mixed under one key, a re-derivation
+    would serve a sampled claim to a greedy run and call it already paid for."""
     claim = machine_claim("a1", ["greedy"], temperature=1.0)
 
     assert not at_configuration(claim, CONFIGURATION, PROMPT_HASH)
@@ -75,9 +76,9 @@ def test_a_claim_read_at_another_temperature_is_stale():
 
 
 def test_a_reading_taken_before_a_temperature_was_sent_is_its_own_arm():
-    """`None` is the provider's default, named rather than absent — as an
-    unsent effort is. It is the arm every machine claim already in the log sits in,
-    and the one a greedy run is compared against, so it is never deleted."""
+    """`None` is the provider's default, named rather than absent — as an unsent
+    effort is. It is the arm every machine claim already in the log sits in, and
+    the one a greedy run is compared against, so it is never deleted."""
     claim = machine_claim("a1", ["greedy"], temperature=None)
     unset = CONFIGURATION.model_copy(update={"temperature": None})
 

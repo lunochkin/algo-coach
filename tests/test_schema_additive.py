@@ -46,7 +46,8 @@ RECORDS: list[type[BaseModel]] = [
 ]
 SNAPSHOTS = Path(__file__).parent / "schemas"
 
-# what a property's schema carries that a record already stored does not depend on
+# what a property's schema carries that a record already stored does not depend
+# on
 PROSE = ("title", "description", "default", "examples")
 
 

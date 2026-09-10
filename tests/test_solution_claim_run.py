@@ -117,7 +117,8 @@ def test_the_candidate_order_is_fixed(log):
 def test_one_reader_asks_both_and_the_candidates_are_what_differ(log, tmp_path):
     """One rulebook: the system text and the rendering of a criterion are the
     same, so a disagreement between the two records is about the code. What
-    separates them is the candidate set, which is why the prompt hashes differ."""
+    separates them is the candidate set, which is why the prompt hashes
+    differ."""
     client = answering(Verdict(["sorting"]), Verdict(["sorting"]))
     attempts = AttemptLog(tmp_path)
     attempts.append_attempt(attempt("a1", "p1", code=CODE))

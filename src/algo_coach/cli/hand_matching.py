@@ -174,7 +174,8 @@ class HandMatching(App[None]):
             self.query_one("#forms", Static).update(self.listing())
             self.show_code()
 
-    # `pick` rather than `toggle`: `DOMNode.action_toggle` flips a named attribute
+    # `pick` rather than `toggle`: `DOMNode.action_toggle` flips a named
+    # attribute
     def action_pick(self) -> None:
         form = self.forms[self.focused_form]
         self.picked ^= {form.id}

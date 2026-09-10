@@ -247,8 +247,8 @@ def test_a_draft_holds_the_cases_the_rounds_won():
 
 
 def test_a_draft_carries_the_configuration_of_each_step():
-    """A resume starts at the first step whose configuration or prompt hash moved,
-    which is why both are held here rather than only the outputs."""
+    """A resume starts at the first step whose configuration or prompt hash
+    moved, which is why both are held here rather than only the outputs."""
     for site in ("generator", "blind", "inputs", "naive", "discrimination"):
         draft = make_draft(**{f"{site}_provenance": PROVENANCE_FIELDS})
 

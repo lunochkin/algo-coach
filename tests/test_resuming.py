@@ -95,8 +95,8 @@ def test_a_moved_inputs_configuration_starts_at_the_input_generator(tmp_path):
 
 
 def test_a_moved_discrimination_configuration_starts_at_the_loop(tmp_path):
-    """Its prompt hash carries the survivors, which only the local kill pass names,
-    so the configuration is what answers here."""
+    """Its prompt hash carries the survivors, which only the local kill pass
+    names, so the configuration is what answers here."""
     assert moved_at(
         drafted(tmp_path), OPTIMUM, BENCH.model_copy(update={"discrimination": OTHER})
     ) is (WritingState.HARDENED)
@@ -119,8 +119,8 @@ def test_a_moved_generator_invalidates_no_draft(tmp_path):
 
 
 def test_a_stale_prompt_hash_starts_at_its_own_step(tmp_path):
-    """An edited prompt moves the prompt hash without moving the configuration, and
-    a resume that read only the model would re-run nothing."""
+    """An edited prompt moves the prompt hash without moving the configuration,
+    and a resume that read only the model would re-run nothing."""
     stored = drafted(tmp_path)
     stale = stored.blind_provenance.model_copy(update={"prompt_hash": "ffffffffffff"})
 
@@ -176,8 +176,8 @@ CRASHES = "def solve(size, seed):\n    raise ValueError\n"
 
 
 def unbuilt(tmp_path) -> Draft:
-    """A draft the search never ran for: the input generator's code crashed, so nothing
-    timed the solution it holds."""
+    """A draft the search never ran for: the input generator's code crashed, so
+    nothing timed the solution it holds."""
     (one,) = seeded(tmp_path, card(templates=[template("longest-valid-window", speedup=True)]))
     result = write_problems(
         FakeWriter(generator=CRASHES),
@@ -381,8 +381,8 @@ def test_a_resumed_draw_separates_where_the_stored_naive_solution_did_not(tmp_pa
 
 
 def test_a_redrawn_naive_solution_carries_the_size_its_search_found(tmp_path, monkeypatch):
-    """The input generator was reused, so the inputs site made no call and wrote no
-    record. Filed nowhere, the size a resumed problem landed on would be
+    """The input generator was reused, so the inputs site made no call and wrote
+    no record. Filed nowhere, the size a resumed problem landed on would be
     readable only from the arguments of its own case."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     drafts = DraftStore(tmp_path)

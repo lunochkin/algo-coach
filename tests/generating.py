@@ -9,8 +9,8 @@ from algo_coach.generation import blind, discrimination, inputs, naive
 
 CANONICAL = "def solve(xs):\n    return len(xs)\n"
 BLIND = "def solve(xs):\n    return sum(1 for _ in xs)\n"
-# the naive solution: correct and no slower here, since a run that wants a separation
-# writes its own
+# the naive solution: correct and no slower here, since a run that wants a
+# separation writes its own
 NAIVE = "def solve(xs):\n    return len([one for one in xs])\n"
 
 

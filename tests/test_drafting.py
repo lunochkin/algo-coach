@@ -96,8 +96,8 @@ def test_the_reference_a_rejected_draft_paid_for_is_kept(tmp_path):
 
 
 def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
-    """The statement's own cases, the reference, the input generator and its bound,
-    each written as the step that produced it answered."""
+    """The statement's own cases, the reference, the input generator and its
+    bound, each written as the step that produced it answered."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     result, _ = run(tmp_path, FakeWriter(slow=SLOW, generator=BUILDS), templates=[CLAIMS])
     (stored,) = result.drafted
@@ -110,8 +110,8 @@ def test_a_draft_holds_what_each_step_answered(tmp_path, monkeypatch):
 
 
 def test_each_step_copies_the_configuration_of_its_own_call(tmp_path):
-    """A resume starts at the first step whose configuration or prompt hash moved,
-    so a draft holding one for the run would answer for every step."""
+    """A resume starts at the first step whose configuration or prompt hash
+    moved, so a draft holding one for the run would answer for every step."""
     result, _ = run(tmp_path, FakeWriter(generator=BUILDS))
 
     (stored,) = result.drafted
@@ -156,9 +156,9 @@ def test_a_separated_problem_lands(tmp_path, monkeypatch):
 
 
 def test_an_unseparated_draft_is_held_at_the_search(tmp_path):
-    """The reference finished at every size the input generator wrote, so nothing
-    demonstrates the speedup its template claims and the problem does not
-    land."""
+    """The reference finished at every size the input generator wrote, so
+    nothing demonstrates the speedup its template claims and the problem does
+    not land."""
     result, drafts = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
 
     (one,) = result.held
@@ -199,7 +199,8 @@ def test_a_draft_a_raised_call_left_is_held_with_its_reason(tmp_path):
 
 def test_a_held_draft_is_rejected_where_the_reference_wrote_the_form(tmp_path):
     """The exit no resume reaches: that solution is immutable and it is still
-    the naive solution, so the claim holds and this problem does not exercise it."""
+    the naive solution, so the claim holds and this problem does not exercise
+    it."""
     result, drafts = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
     (one,) = result.held
     stored = one.draft

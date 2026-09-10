@@ -83,7 +83,8 @@ absent value is `null`."""
 
 
 # shown where the template claims a speedup. `content.md` gives what the claim
-# requires of the statement, and why the statement is not bent to help the search
+# requires of the statement, and why the statement is not bent to help the
+# search
 SPEEDUP = """
 This form is faster than the naive approach it replaces, and the problem is
 stored with an input that shows it: the naive approach runs over a time limit

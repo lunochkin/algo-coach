@@ -1,8 +1,8 @@
 """The smallest input under which the naive solution exceeds the cap and the
 canonical does not. Run only where the template claims a speedup.
 
-Two solutions, two jobs: the naive one is the naive solution, and the reference settles
-what the case at that size returns.
+Two solutions, two jobs: the naive one is the naive solution, and the reference
+settles what the case at that size returns.
 """
 
 from collections.abc import Callable, Sequence
@@ -82,8 +82,8 @@ class Searched:
     # ended the size walk with the naive solution still under the cap
     repeats: int = 1
     case: SettledCase | None = None
-    # what the child measured at that size. The naive solution's is absent where it
-    # exceeded the measuring cap rather than merely the drill loop's
+    # what the child measured at that size. The naive solution's is absent where
+    # it exceeded the measuring cap rather than merely the drill loop's
     canonical_ms: int | None = None
     naive_ms: int | None = None
     missing: Missing | None = None
@@ -300,8 +300,8 @@ def _edged(
 
 @dataclass
 class _Walk:
-    """Where the doubling stopped: the last size the naive solution finished at, the
-    first it exceeded the cap at, and whether the ceiling ended it first."""
+    """Where the doubling stopped: the last size the naive solution finished at,
+    the first it exceeded the cap at, and whether the ceiling ended it first."""
 
     size: int
     under: int
@@ -329,8 +329,8 @@ def _doubled(
     walk = _Walk(size=smallest, under=smallest)
     while True:
         args = list(make(walk.size))
-        # stopped before the run rather than after it: an input over the
-        # ceiling is one no case can carry, whatever the naive solution does on it
+        # stopped before the run rather than after it: an input over the ceiling
+        # is one no case can carry, whatever the naive solution does on it
         if weighs(args) > ceiling:
             walk.capped = True
             return walk
@@ -394,10 +394,10 @@ def _settled(
     # a few percent slower, so the margin is what makes it a test of the form
     if (ran.elapsed_ms or 0) * MARGIN > cap_ms:
         return measured(missing=Missing.CANONICAL_TOO_SLOW)
-    # the reference rather than the naive solution: what a case stores is the answer of
-    # the solution written from the statement alone, whichever one was timed.
-    # Settled as the first case set is, and by no round: the search runs after
-    # the loop
+    # the reference rather than the naive solution: what a case stores is the
+    # answer of the solution written from the statement alone, whichever one was
+    # timed. Settled as the first case set is, and by no round: the search runs
+    # after the loop
     [theirs] = run(reference, [args], cap_ms=measure_ms)
     settled = settle(
         [args],
@@ -424,8 +424,8 @@ def _paces(
     measure_ms: int,
     repeats: int = 1,
 ) -> tuple[bool | None, int | None]:
-    """Whether the naive solution exceeds `cap_ms` at this size and what it took. The
-    first is `None` where it crashed, which is neither.
+    """Whether the naive solution exceeds `cap_ms` at this size and what it
+    took. The first is `None` where it crashed, which is neither.
 
     Measured well above the cap, so a run a sitting would have cut short still
     reads as a time rather than as a timeout. What it answered is not read: the

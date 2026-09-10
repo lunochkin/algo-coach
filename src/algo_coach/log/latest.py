@@ -12,5 +12,5 @@ class AttemptKeyed(Protocol):
 
 
 def latest_by_attempt[R: AttemptKeyed](records: Iterable[R]) -> dict[str, R]:
-    """The one reader over the three attempt-keyed records, as `log.md` gives."""
+    """The one reader of the three attempt-keyed records, as `log.md` gives."""
     return latest_by(records, attrgetter("attempt_id"))

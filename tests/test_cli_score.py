@@ -494,8 +494,8 @@ def test_one_configuration_reports_the_columns_the_comparison_does(
 
 def test_a_cut_short_reply_is_its_own_column(hand_claimed, monkeypatch, capsys):
     """A considered decline and a runaway decoder both name nothing, and only
-    one of them is a machine claim. One column carrying both would have said they
-    were a single number in two flavours."""
+    one of them is a machine claim. One column carrying both would have said
+    they were a single number in two flavours."""
     seed_problem(hand_claimed.root, id="second", techniques=["greedy", "sorting"])
     hand_claimed.append_attempt(attempt("a2", "second", finished_at=T0 + timedelta(days=1)))
     hand_claimed.append_claim(user_claim("a2", ["greedy"]))

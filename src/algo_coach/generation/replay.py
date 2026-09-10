@@ -78,8 +78,8 @@ class Subject:
     problem: Problem
     canonical: str
     reference: str
-    # the naive solution the search times against, absent on a problem whose template
-    # claims no speedup and on one landed before the role existed
+    # the naive solution the search times against, absent on a problem whose
+    # template claims no speedup and on one landed before the role existed
     naive: str | None
     cases: list[TestCase]
     target: Target | None  # absent where the problem was written for a technique
@@ -334,15 +334,15 @@ def inputs_replay(
     fresh: bool,
     notes: Notes,
 ) -> Asked:
-    """The input input generator and the search it feeds. Asked only where the template
-    claims a speedup, where the landing path builds for every problem: a replay
-    records what a site's answer was judged by, and without a search there is
-    no verdict on the code this call wrote."""
+    """The input input generator and the search it feeds. Asked only where the
+    template claims a speedup, where the landing path builds for every problem:
+    a replay records what a site's answer was judged by, and without a search
+    there is no verdict on the code this call wrote."""
     if subject.template is None or not subject.template.speedup:
         return Asked()
     if subject.naive is None:
-        # a problem landed before the naive solution was stored with it. The site's own
-        # answer would be judged by a search that cannot run
+        # a problem landed before the naive solution was stored with it. The
+        # site's own answer would be judged by a search that cannot run
         notes("timing", "no naive solution stored")
         return Asked()
     configuration = bench.inputs

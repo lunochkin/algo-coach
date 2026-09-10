@@ -7,9 +7,9 @@ from algo_coach.schema.configuration import Configuration
 
 
 class MachineProvenance(BaseModel):
-    """The configuration a machine record was written at, and the call that wrote it.
-    Optional here and required by the record's own validator, since the
-    hand-written counterpart carries none of it."""
+    """The configuration a machine record was written at, and the call that
+    wrote it. Optional here and required by the record's own validator, since
+    the hand-written counterpart carries none of it."""
 
     model_config = ConfigDict(frozen=True)
 

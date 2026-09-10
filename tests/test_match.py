@@ -42,8 +42,8 @@ def test_a_hand_match_is_blind_unless_it_says_otherwise():
 
 
 def test_a_hand_match_records_the_verdicts_its_author_saw():
-    """Not provenance: provenance is what produced a machine match, this is what its
-    author had in view. A user record carries the second and never the
+    """Not provenance: provenance is what produced a machine match, this is what
+    its author had in view. A user record carries the second and never the
     first."""
     match = make_match(MatchSource.USER, informed_by=["call-1", "call-2"])
 
@@ -96,8 +96,8 @@ def test_a_machine_match_without_any_provenance_is_rejected():
 
 @pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_a_machine_match_needs_every_field_that_produced_it(missing):
-    """All of them or none: a machine match whose configuration is partly unknown
-    compares with nothing."""
+    """All of them or none: a machine match whose configuration is partly
+    unknown compares with nothing."""
     with pytest.raises(ValidationError, match=missing):
         make_match(
             MatchSource.CLASSIFIER,
@@ -167,8 +167,8 @@ def test_a_generator_only_ever_asserts_a_positive():
 
 
 def test_a_generator_match_has_seen_nothing():
-    """The target named a template. No machine match on the pair was in view, and
-    none could have been before the solution existed."""
+    """The target named a template. No machine match on the pair was in view,
+    and none could have been before the solution existed."""
     assert generator_match("t1", "s1").informed_by == []
 
 

@@ -72,8 +72,8 @@ def starts_at(draft: Draft, target: Target, bench: Bench = BENCH) -> WritingStat
 
 
 def sending(draft: Draft, site: str, target: Target) -> str | None:
-    """The prompt hash that site would send about this draft now, or `None` where
-    only a local pass can say."""
+    """The prompt hash that site would send about this draft now, or `None`
+    where only a local pass can say."""
     if site == "blind":
         return blind_hash(draft.statement)
     if site == "inputs":
@@ -97,15 +97,15 @@ def re_asks(draft: Draft, site: str, target: Target, bench: Bench = BENCH) -> bo
     taken = getattr(draft, f"{site}_provenance")
     if taken is None:
         return True
-    # its own prompt hash where a local pass decides one, so the configuration is
-    # what answers there
+    # its own prompt hash where a local pass decides one, so the configuration
+    # is what answers there
     prompt_hash = sending(draft, site, target) or taken.prompt_hash or ""
     return not taken.at_configuration(getattr(bench, site), prompt_hash)
 
 
 def draws_again(draft: Draft, target: Target) -> bool:
-    """Whether a resume asks the naive solution again though nothing about the bench
-    moved.
+    """Whether a resume asks the naive solution again though nothing about the
+    bench moved.
 
     The naive solution finished at every size the input generator reached, or it
     ran within a constant factor of the canonical, and it is the one sampled
@@ -183,9 +183,9 @@ def moved_at(draft: Draft, target: Target, bench: Bench = BENCH) -> WritingState
     for state, site in ANSWERED:
         if getattr(draft, f"{site}_provenance") is not None and re_asks(draft, site, target, bench):
             return state
-    # a flag edit moves neither a configuration nor a prompt hash, and it is what
-    # releases a draft the search held: with no speedup claimed the loop is the
-    # step that has not run
+    # a flag edit moves neither a configuration nor a prompt hash, and it is
+    # what releases a draft the search held: with no speedup claimed the loop is
+    # the step that has not run
     if draft.state is WritingState.SEARCHED and not target.template.speedup:
         return WritingState.HARDENED
     # before the draw: the search costs subprocesses where a second draw costs

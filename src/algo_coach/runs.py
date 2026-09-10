@@ -84,7 +84,8 @@ def as_answered_grouped[K, T, R](
                     key, item = running.pop(future)
                     failure = future.exception()
                     if failure is not None and not isinstance(failure, Exception):
-                        # a KeyboardInterrupt in a worker is the run's, not the item's
+                        # a KeyboardInterrupt in a worker is the run's, not the
+                        # item's
                         raise failure
                     yield item, (None if failure else future.result()), failure
                     # From the stream that answered, never another: the budget

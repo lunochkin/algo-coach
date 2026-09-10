@@ -423,8 +423,9 @@ def test_the_summary_names_one_model_where_every_site_shares_one():
 
 
 def test_the_summary_names_how_each_site_was_sampled():
-    """The built-in bench samples the generator and the naive solution and runs the rest
-    greedy, and two sites on one model differ by nothing else a name shows."""
+    """The built-in bench samples the generator and the naive solution and runs
+    the rest greedy, and two sites on one model differ by nothing else a name
+    shows."""
     named = summary([], [], BENCH)
 
     assert f"generator {GENERATOR_DEFAULT.model} at {GENERATOR_DEFAULT.effort} @default" in named
@@ -751,9 +752,9 @@ CRASHES = "def solve(size, seed):\n    raise ValueError\n"
 
 
 def test_a_draft_no_resume_would_advance_is_listed_as_held(root, monkeypatch, capsys):
-    """The input generator crashed, so the search never ran and nothing about the bench
-    moved. The step a resume would nominally start at is past the search, and
-    the run holds the draft before reaching it."""
+    """The input generator crashed, so the search never ran and nothing about
+    the bench moved. The step a resume would nominally start at is past the
+    search, and the run holds the draft before reaching it."""
     seeded(root, card(templates=CLAIMS))
     run(monkeypatch, FakeWriter(generator=CRASHES), "longest-valid-window")
     capsys.readouterr()

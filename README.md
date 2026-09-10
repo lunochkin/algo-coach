@@ -19,9 +19,10 @@ weakest technique rather than the oldest problem. The spaced repetition is over
 procedural skill rather than facts: built for experienced engineers restoring
 fluency, not beginners learning concepts.
 
-The design is in how the log treats what the model said, not in the fact that
-a model is in the loop: every reading is stored with the configuration that produced it,
-scored against user claims, and outranked by the user's own record forever.
+The design is in how the log treats what the model said, not in the fact that a
+model is in the loop: every reading is stored with the configuration that
+produced it, scored against user claims, and outranked by the user's own record
+forever.
 
 Built and measured: the technique vocabulary, the attribution classifier, cards
 and template matching. Problem generation is built and has written no corpus

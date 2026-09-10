@@ -82,8 +82,8 @@ def test_the_brief_asks_for_the_replaced_approach_where_the_blind_one_asks_for_p
 
 
 def test_the_brief_bounds_the_candidates_by_the_statement(tmp_path):
-    """A naive solution that only tries the values the input contains has used the
-    insight the fast solution is built on, and separates nothing."""
+    """A naive solution that only tries the values the input contains has used
+    the insight the fast solution is built on, and separates nothing."""
     assert "The candidates are what the statement's own bounds admit" in SYSTEM
     assert "the values the input happens to contain" in SYSTEM
 

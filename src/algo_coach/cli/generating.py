@@ -134,7 +134,7 @@ def timing(progress: Progress) -> str:
 
 
 def counted(results: Sequence[GenerationResult], field: str) -> int:
-    """How many of one kind the run left, over every template it was aimed at."""
+    """How many of one kind the run left, over every template it aimed at."""
     return sum(len(getattr(result, field)) for result in results)
 
 
@@ -149,9 +149,9 @@ def summary(results: Sequence[GenerationResult], aimed: list[Target], bench: Ben
     kept = f"{counted(results, 'drafted')} problem(s) stored"
     if len(aimed) > 1:
         kept += f", over {len(aimed)} template(s)"
-    # the rejections repeat the per-problem lines, since a run of ten scrolls past
-    # them. A hold is apart from a rejection: the calls are kept and the form
-    # still has no problem, which is what the next run is aimed at
+    # the rejections repeat the per-problem lines, since a run of ten scrolls
+    # past them. A hold is apart from a rejection: the calls are kept and the
+    # form still has no problem, which is what the next run is aimed at
     kept += tallied(
         (counted(results, "rejected"), "rejected"),
         (counted(results, "held"), "held"),

@@ -23,7 +23,8 @@ def test_a_value_agrees_with_itself(value):
 
 @given(st.lists(json_values))
 def test_a_tuple_and_a_list_are_one_answer(items):
-    """`corpus.md`: a case is decided by JSON equality, and JSON has no tuple."""
+    """`corpus.md`: a case is decided by JSON equality, and JSON has no
+    tuple."""
     assert agrees(tuple(items), items)
 
 

@@ -65,8 +65,8 @@ def test_a_user_claim_is_blind_by_default():
 
 
 def test_a_user_claim_records_what_its_author_had_seen():
-    """A revision is asked with the machine claims in view, and a claim that cannot
-    say so is scored against the machine claim that produced it."""
+    """A revision is asked with the machine claims in view, and a claim that
+    cannot say so is scored against the machine claim that produced it."""
     claim = user_claim("a1", ["greedy"], informed_by=["call-1"])
 
     assert claim.informed_by == ["call-1"]
@@ -80,7 +80,8 @@ def test_a_user_claim_records_how_sure_its_author_was():
 
 def test_a_machine_claim_has_seen_nothing():
     """The classifier reads one attempt's code and candidates, never another
-    writer's claim on it — so there is no configuration it is not independent of."""
+    writer's claim on it — so there is no configuration it is not independent
+    of."""
     assert machine_claim("a1", ["greedy"]).informed_by == []
 
 
@@ -172,8 +173,8 @@ def test_records_are_stamped_when_minted():
 
 
 def test_a_hand_match_carries_no_configuration():
-    """Nothing re-derives it, which is what makes it the reference a machine match is
-    scored against."""
+    """Nothing re-derives it, which is what makes it the reference a machine
+    match is scored against."""
     match = user_match("t1", "s1", matched=True)
 
     assert match.source is MatchSource.USER
@@ -290,8 +291,8 @@ def test_a_generated_problem_is_minted_an_id():
 
 
 def test_generation_records_what_it_sampled_at():
-    """Sampled rather than greedy, which an answering site never is: variance is what
-    stops one model's habits becoming the whole corpus."""
+    """Sampled rather than greedy, which an answering site never is: variance is
+    what stops one model's habits becoming the whole corpus."""
     assert (
         generated(provenance=PROVENANCE.model_copy(update={"temperature": 1.0})).temperature == 1.0
     )

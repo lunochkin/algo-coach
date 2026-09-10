@@ -154,8 +154,8 @@ def write_problems(
     each stored as soon as its runs keep it.
 
     A statement joins the list the next call sees without waiting for the
-    problem to land, rejected ones included. `ABORT_AFTER` counts failures
-    only: a rejection means the calls answered and the runs rejected the writing.
+    problem to land, rejected ones included. `ABORT_AFTER` counts failures only:
+    a rejection means the calls answered and the runs rejected the writing.
     """
     result = GenerationResult()
     swept(drafts)

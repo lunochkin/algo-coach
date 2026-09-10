@@ -137,8 +137,8 @@ def test_a_new_problem_is_the_only_one_re_read(tmp_path):
 
 
 def test_an_edited_template_re_reads_that_card_alone(tmp_path):
-    """The prompt hash is of the question, so a card the edit did not touch stays
-    answered."""
+    """The prompt hash is of the question, so a card the edit did not touch
+    stays answered."""
     cards = seeded(tmp_path, card(), card("backtracking", technique="backtracking"))
     corpus = stored(
         tmp_path,

@@ -337,8 +337,8 @@ def test_a_call_that_wrote_no_input_generator_is_reported_apart_from_a_search(
 def test_two_solutions_disagreeing_at_the_separating_size_reject_the_draft(tmp_path, monkeypatch):
     """A canonical correct on the small cases and wrong at scale, which only
     the separating input reaches."""
-    # correct on the statement's own case and wrong on what the input generator makes,
-    # which is the size only the search reaches
+    # correct on the statement's own case and wrong on what the input generator
+    # makes, which is the size only the search reaches
     blind_solution = "def solve(xs):\n    return len(xs) + (1 if 0 in xs else 0)\n"
     model = FakeWriter(solution=blind_solution, slow=SLOW, generator=BUILDS)
 
@@ -352,8 +352,9 @@ def test_two_solutions_disagreeing_at_the_separating_size_reject_the_draft(tmp_p
 def test_the_naive_solution_is_written_between_the_input_generator_and_the_search(
     tmp_path, monkeypatch
 ):
-    """The input generator is written for every problem, since the fuzz pass builds its
-    inputs with it, and the search measures against what this step writes."""
+    """The input generator is written for every problem, since the fuzz pass
+    builds its inputs with it, and the search measures against what this step
+    writes."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(tmp_path, card(**claiming({})))
     stages: list[str] = []

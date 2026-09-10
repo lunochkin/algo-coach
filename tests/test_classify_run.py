@@ -281,8 +281,8 @@ def store_claim(log, attempt_id, **configuration):
 
 
 def test_a_claim_answering_another_prompt_is_re_derived(backlog):
-    """The rulebook moved for this attempt, so the machine claim is worth paying for
-    again — and only for the attempts the edit reached."""
+    """The rulebook moved for this attempt, so the machine claim is worth paying
+    for again — and only for the attempts the edit reached."""
     store_claim(backlog, "a1", prompt_hash="ffffffffffff")
 
     result = run(answering(Verdict(["greedy"])), backlog, redo=True)
@@ -302,8 +302,8 @@ def test_a_claim_from_another_model_is_re_derived(backlog):
 
 
 def test_a_claim_from_another_effort_is_re_derived(backlog):
-    """How hard the model was asked to think decides the machine claim, so it is a
-    configuration of its own rather than something folded into the version."""
+    """How hard the model was asked to think decides the machine claim, so it is
+    a configuration of its own rather than something folded into the version."""
     store_claim(backlog, "a1", effort="low")
 
     result = run(answering(Verdict(["greedy"])), backlog, redo=True)
@@ -365,7 +365,8 @@ def test_a_user_claim_is_never_stale(backlog):
 def test_a_reading_stored_under_a_hand_claim_is_never_re_derived(backlog):
     """The eval stores what it read on hand-claimed attempts. It holds at this
     configuration and at any other: the user's claim is what stands there, and
-    nothing re-derives it — so the machine claim under it is never asked again."""
+    nothing re-derives it — so the machine claim under it is never asked
+    again."""
     backlog.append_claim(user_claim("a1", ["greedy"]))
     store_claim(backlog, "a1", prompt_hash="ffffffffffff")
     client = answering()

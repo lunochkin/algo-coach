@@ -12,7 +12,8 @@ class SolutionClaim(MachineProvenance):
     id: str
     created_at: datetime
     solution_id: str = Field(min_length=1)
-    # Empty is a stored verdict; no `declined`, since a solution claim is deliberate.
+    # Empty is a stored verdict; no `declined`, since a solution claim is
+    # deliberate.
     techniques: list[str] = Field(default_factory=list[str])
     source: ClaimSource  # required: a mislabelled claim cannot be corrected later
     informed_by: list[str] = Field(

@@ -1,5 +1,5 @@
-"""The speedup search over the input generator's inputs, and what it leaves on the
-inputs site. `corpus.md` gives what a separating size means."""
+"""The speedup search over the input generator's inputs, and what it leaves on
+the inputs site. `corpus.md` gives what a separating size means."""
 
 from collections.abc import Callable
 from typing import Any, cast
@@ -52,8 +52,8 @@ def separated(
     provenance: MachineProvenance,
     cap_ms: int,
 ) -> Searched:
-    """The search over the input generator's inputs. The generation cap measures, and
-    the sitting's cap is what a size is separated against."""
+    """The search over the input generator's inputs. The generation cap
+    measures, and the sitting's cap is what a size is separated against."""
     return search(
         make(generator.code, cap_ms),
         canonical=canonical,

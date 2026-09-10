@@ -434,9 +434,10 @@ def test_a_retired_candidate_costs_its_own_criterion_and_nothing_else(
 def test_revise_shows_a_named_classifier_s_reading_of_the_same_prompt(
     claim_root, monkeypatch, capsys
 ):
-    """The revision pool is what a machine claim disputes, so the command has to ask
-    what each attempt would be sent now — a machine claim of an older rulebook
-    answered a different question and is not a disagreement about this one."""
+    """The revision pool is what a machine claim disputes, so the command has to
+    ask what each attempt would be sent now — a machine claim of an older
+    rulebook answered a different question and is not a disagreement about this
+    one."""
     claim_root.append_claim(user_claim("a1", ["greedy"]))
     claim_root.append_claim(
         classifier_claim(
@@ -461,8 +462,8 @@ def test_revise_shows_a_named_classifier_s_reading_of_the_same_prompt(
 
 
 def disputing(log, techniques: list[str], *, call_id: str = "call-1") -> None:
-    """A machine claim of a1 at the prompt hash the command asks for, so the revision pool
-    holds it."""
+    """A machine claim of a1 at the prompt hash the command asks for, so the
+    revision pool holds it."""
     log.append_claim(
         classifier_claim(
             "a1",
@@ -582,10 +583,10 @@ def test_the_most_disputed_are_still_asked_about_first(claim_root, monkeypatch, 
 
 
 def test_disputed_still_needs_revise(claim_root, monkeypatch, capsys):
-    """The flag only means anything beside the machine claims it filters on. Passing
-    it alone is a request the ordinary pass cannot honour, so it is refused
-    rather than silently ignored — which the default no longer distinguishes
-    by value."""
+    """The flag only means anything beside the machine claims it filters on.
+    Passing it alone is a request the ordinary pass cannot honour, so it is
+    refused rather than silently ignored — which the default no longer
+    distinguishes by value."""
     with pytest.raises(SystemExit) as exit_info:
         run(monkeypatch, [], "--disputed", "1")
 
@@ -630,8 +631,8 @@ def test_revise_ignores_a_reading_of_a_prompt_nobody_sends_now(claim_root, monke
 
 def test_zero_records_a_decline(claim_root, monkeypatch, capsys):
     """`0` is an answer: the candidates do not cover what the code did. It is
-    the machine claim the classifier can already record, and adjudication needs the
-    user to be able to overturn a claim with it."""
+    the machine claim the classifier can already record, and adjudication needs
+    the user to be able to overturn a claim with it."""
     run(monkeypatch, ["0", ""])
 
     (claim,) = claim_root.claims()

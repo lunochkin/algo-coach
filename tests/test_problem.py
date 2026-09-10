@@ -32,8 +32,8 @@ def test_a_problem_without_any_provenance_is_rejected():
 
 @pytest.mark.parametrize("missing", PROVENANCE_FIELDS)
 def test_a_problem_needs_every_field_that_produced_it(missing):
-    """All of them or none, as on a machine record: a record whose configuration is
-    partly unknown compares with nothing."""
+    """All of them or none, as on a machine record: a record whose configuration
+    is partly unknown compares with nothing."""
     kept = {field: value for field, value in GENERATED.items() if field != missing}
     with pytest.raises(ValidationError, match=missing):
         Problem.model_validate(CONTENT | kept)

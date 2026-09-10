@@ -74,7 +74,8 @@ def listed(stored: list[Problem], corpus: Corpus, root: Path) -> None:
 
 
 def aimed_at(one: Problem, forms: dict[str, str]) -> str:
-    """The target, as a reader names it: the template's slug, or the technique."""
+    """The target, as a reader names it: the template's slug, or the
+    technique."""
     if one.target_template_id is not None:
         return forms.get(one.target_template_id, one.target_template_id)
     return one.target_technique or "no target"

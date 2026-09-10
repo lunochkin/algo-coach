@@ -1,4 +1,5 @@
-"""The target a problem was written for, as the records that carry it name it."""
+"""The target a problem was written for, as the records that carry it name
+it."""
 
 
 def one_target(target_template_id: str | None, target_technique: str | None) -> None:

@@ -61,9 +61,9 @@ class Passage:
     are handed, and what each of them left.
 
     `first` is the first case set's verdict, which the first two sites are
-    judged by. A later gate replaces `checked` and leaves it. `start` is where
-    a resume began, and the search reads it: it runs the input generator against the
-    naive, so either site moving takes it again.
+    judged by. A later gate replaces `checked` and leaves it. `start` is where a
+    resume began, and the search reads it: it runs the input generator against
+    the naive, so either site moving takes it again.
     """
 
     transport: Transport
@@ -224,10 +224,11 @@ def to_built(p: Passage) -> bool:
 
 
 def to_paced(p: Passage) -> bool:
-    """The naive solution, after the input generator and only where a speedup is claimed: the
-    input generator is written for every problem, and nothing measures a form that is
-    its own optimum. A draft with no input generator stops at the step before this one,
-    so paying for a naive solution here would buy a step the draft cannot record."""
+    """The naive solution, after the input generator and only where a speedup is
+    claimed: the input generator is written for every problem, and nothing
+    measures a form that is its own optimum. A draft with no input generator
+    stops at the step before this one, so paying for a naive solution here would
+    buy a step the draft cannot record."""
     if not p.measurable:
         return True
     p.naive = paced(
@@ -251,8 +252,8 @@ def to_paced(p: Passage) -> bool:
             naive=p.naive.code,
             naive_provenance=MachineProvenance.of(p.naive.call),
         )
-    # without a naive solution the search has nothing to measure the canonical against,
-    # so the draft stops here rather than at the step after it
+    # without a naive solution the search has nothing to measure the canonical
+    # against, so the draft stops here rather than at the step after it
     return p.naive.code is not None
 
 
@@ -355,8 +356,8 @@ def sites(writing: Writing, call: Call | None, p: Passage) -> None:
     # that round's call. A loop needing none paid for no configuration
     writing(CallSite.DISCRIMINATION, p.bar.call, **loop_verdicts(p.bar))
     writing(CallSite.INPUTS, p.inputs.call, **search_verdicts(p.inputs), killed=p.bar.fuzzed)
-    # the search judged this answer as much as the input generator's, so both records
-    # carry its verdict. A resume that re-asked one writes only that one
+    # the search judged this answer as much as the input generator's, so both
+    # records carry its verdict. A resume that re-asked one writes only that one
     writing(
         CallSite.NAIVE,
         p.naive.call,
@@ -460,9 +461,9 @@ def paced(
     """The naive solution, or the one the draft already holds, run against the
     set the two solutions settled.
 
-    A call that fails costs the naive solution rather than the problem, as a failed
-    input generator does. So does one whose answer is wrong: what it says is that this
-    solution measures nothing, not that the statement is unsound.
+    A call that fails costs the naive solution rather than the problem, as a
+    failed input generator does. So does one whose answer is wrong: what it says
+    is that this solution measures nothing, not that the statement is unsound.
     """
     if reuse and draft.naive is not None:
         notes("naive", "reused, at the configuration that wrote it")

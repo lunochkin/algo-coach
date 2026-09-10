@@ -83,8 +83,8 @@ def test_a_template_nothing_reached_pulls_its_card_forward(tmp_path):
     cards, problems, solutions = corpus(tmp_path)
     id = slugs(cards)
     lopsided = [
-        # Every backtracking problem matched by hand, but only for two of the three
-        # forms — `grid-walk` is the one nothing has reached.
+        # Every backtracking problem matched by hand, but only for two of the
+        # three forms — `grid-walk` is the one nothing has reached.
         user_match(id[form], f"b{n}", matched=False)
         for form in ("subsets", "permutations")
         for n in range(3)
@@ -99,8 +99,9 @@ def test_a_template_nothing_reached_pulls_its_card_forward(tmp_path):
 
 
 def test_one_card_is_asked_about_alone(tmp_path):
-    """Matching a card just added by hand, without the rest of the corpus in the way.
-    The filter narrows what is asked and changes nothing about the order."""
+    """Matching a card just added by hand, without the rest of the corpus in the
+    way. The filter narrows what is asked and changes nothing about the
+    order."""
     cards, problems, solutions = corpus(tmp_path)
     order = unsettled(cards, problems, solutions, [], card="union-find")
     assert {one.card.slug for one in order} == {"union-find"}
