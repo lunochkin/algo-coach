@@ -70,7 +70,7 @@ React frontend the API serves as static files.
       adapter holds domain logic
 - [x] Add the read routes the loop's first three steps need: the board, a
       technique's card and candidates, and a problem's statement
-- [ ] Add the write routes the rest of the loop needs: the submission and its
+- [x] Add the write routes the rest of the loop needs: the submission and its
       per-case verdict, pausing and resuming the sitting, and the claim
 - [ ] Serve the statement and the `solve` signature alone, and keep every
       solution and every case's expected value server-side. A canonical in the

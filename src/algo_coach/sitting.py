@@ -115,10 +115,9 @@ def claim(
     declined: bool = False,
 ) -> AttemptClaim:
     """The user's answer to which of the problem's techniques the attempt
-    used. `candidates` is the problem's derived view, which the caller loads:
-    this module sits beside the one that derives it."""
-    if not any(one.id == attempt_id and one.user_id == user_id for one in log.attempts()):
-        raise Missing(f"no attempt {attempt_id}")
+    used. `candidates` is the problem's derived view, which the caller loads
+    from the solution logs this call never opens."""
+    owned_attempt(log, attempt_id, user_id=user_id)
     outside = [code for code in techniques if code not in candidates]
     if outside:
         raise Refused(f"not among the problem's techniques: {', '.join(outside)}")
@@ -131,6 +130,14 @@ def claim(
         raise Refused("; ".join(one["msg"] for one in error.errors())) from error
     log.append_claim(written)
     return written
+
+
+def owned_attempt(log: AttemptLog, attempt_id: str, *, user_id: str) -> Attempt:
+    # another user's attempt reads as missing, as a sitting does
+    found = next((one for one in log.attempts() if one.id == attempt_id), None)
+    if found is None or found.user_id != user_id:
+        raise Missing(f"no attempt {attempt_id}")
+    return found
 
 
 def unclaimed(log: AttemptLog, sitting_id: str, *, user_id: str) -> list[Attempt]:

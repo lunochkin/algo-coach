@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from algo_coach.api.reads import router as reads
+from algo_coach.api.writes import router as writes
 from algo_coach.sitting import Missing, Refused
 
 
@@ -14,6 +15,7 @@ def create_app(root: Path, *, user_id: str) -> FastAPI:
     app.state.user_id = user_id
     app.add_exception_handler(Refused, _refused)
     app.include_router(reads)
+    app.include_router(writes)
     return app
 
 
