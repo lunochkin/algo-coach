@@ -440,20 +440,24 @@ there is ever asked twice and no two configurations meet the same item.
 Practice on a generated problem. The engine serves the statement, times the
 sitting and judges the submission, and records what only the user can say.
 
-The interaction is not designed here: how a solution is entered, what the loop
-does with a failing run, and whether a sitting can be resumed. Those questions
-are answered by using the loop.
+The interaction is not designed here: how a solution is entered, and what the
+loop does with a failing run. Those questions are answered by using the loop.
 
-1. The board, ordered by staleness. The user picks a technique.
+1. The board, ordered by staleness. The user picks a technique. The
+   technique's card is readable from this step on.
 2. Candidates for the technique, least recently attempted first, lowest solve
    rate breaking a tie. The user picks one.
-3. The technique's card, before the attempt rather than after it.
-4. The sitting is minted, the statement is served, and the clock starts.
-5. The submission runs against the problem's own test cases, and the attempt is
+3. The sitting is minted, the statement is served, and the clock starts.
+4. The submission runs against the problem's own test cases, and the attempt is
    minted carrying the result.
-6. Keyed to each attempt, the loop asks for a attempt claim and a
+5. Keyed to each attempt, the loop asks for an attempt claim and a
    self-label, or the user marks the problem defective instead.
 
+- **The card is read before the statement is served.** The drill loop practises
+  a form the user has just read, and the clock counts solving rather than
+  reading. A card read only after the solve would review a form the sitting
+  never applied. Recognising a form with no card in view is a probe's test,
+  which Phase 11 adds.
 - **An attempt nobody timed stays untimed**, rather than carrying a duration
   reconstructed after the fact.
 - **A sitting is paused and resumed**, and the elapsed time the attempt carries
