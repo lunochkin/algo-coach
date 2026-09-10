@@ -4,7 +4,7 @@ import pytest
 
 from algo_coach.log import SittingStore
 from algo_coach.schema import Sitting
-from algo_coach.sitting import end, pause, resume
+from algo_coach.sitting import Missing, Refused, end, pause, resume
 
 STARTED = datetime(2026, 9, 10, 8, tzinfo=UTC)
 NINE = datetime(2026, 9, 10, 9, tzinfo=UTC)
@@ -79,14 +79,14 @@ def test_pausing_twice_is_refused(tmp_path):
     store = a_store(tmp_path)
     pause(store, "s1", user_id="u-4f9c2a", now=NINE)
 
-    with pytest.raises(ValueError, match="already paused"):
+    with pytest.raises(Refused, match="already paused"):
         pause(store, "s1", user_id="u-4f9c2a", now=TEN)
 
 
 def test_resuming_a_running_sitting_is_refused(tmp_path):
     """Nothing is stopped, so a resume would close an interval that does not
     exist."""
-    with pytest.raises(ValueError, match="not paused"):
+    with pytest.raises(Refused, match="not paused"):
         resume(a_store(tmp_path), "s1", user_id="u-4f9c2a", now=NINE)
 
 
@@ -95,13 +95,13 @@ def test_an_ended_sitting_takes_no_more_calls(tmp_path, call):
     """Its elapsed time is settled, and a later interval would move it."""
     store = a_store(tmp_path, ended_at=TEN)
 
-    with pytest.raises(ValueError, match="has ended"):
+    with pytest.raises(Refused, match="has ended"):
         call(store, "s1", user_id="u-4f9c2a", now=ELEVEN)
 
 
 @pytest.mark.parametrize("call", [pause, resume, end])
 def test_an_unknown_sitting_is_refused(tmp_path, call):
-    with pytest.raises(ValueError, match="no sitting"):
+    with pytest.raises(Missing, match="no sitting"):
         call(SittingStore(tmp_path), "nope", user_id="u-4f9c2a", now=NINE)
 
 
@@ -120,5 +120,5 @@ def test_the_engine_s_clock_is_the_default(tmp_path):
 def test_another_user_s_sitting_reads_as_missing(tmp_path, call):
     """Holding a sitting id grants nothing, and the refusal does not say the
     sitting exists."""
-    with pytest.raises(ValueError, match="no sitting"):
+    with pytest.raises(Missing, match="no sitting"):
         call(a_store(tmp_path), "s1", user_id="u-b71e03", now=NINE)

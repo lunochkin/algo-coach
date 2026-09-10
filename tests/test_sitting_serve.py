@@ -6,7 +6,7 @@ from helpers import make_problem
 from algo_coach.log import SittingStore
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Sitting
-from algo_coach.sitting import Served, serve
+from algo_coach.sitting import Missing, Refused, Served, serve
 
 BEGAN = datetime.now(UTC) - timedelta(hours=1)
 
@@ -90,7 +90,7 @@ def test_another_user_s_sitting_is_not_reused(stores):
 
 
 def test_an_unknown_problem_is_refused(tmp_path):
-    with pytest.raises(ValueError, match="no problem"):
+    with pytest.raises(Missing, match="no problem"):
         serve(ProblemStore(tmp_path), SittingStore(tmp_path), "nope", user_id="u-4f9c2a")
 
 
@@ -99,5 +99,5 @@ def test_a_retired_problem_is_refused(tmp_path):
     problems = ProblemStore(tmp_path)
     problems.put(make_problem("p1", status="retired", retired_reason="defective"))
 
-    with pytest.raises(ValueError, match="retired"):
+    with pytest.raises(Refused, match="retired"):
         serve(problems, SittingStore(tmp_path), "p1", user_id="u-4f9c2a")

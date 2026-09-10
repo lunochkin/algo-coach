@@ -7,7 +7,7 @@ from algo_coach.attempt_claims import standing_attempt_claims
 from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim
 from algo_coach.schema import Attempt, ClaimSource, Confidence
-from algo_coach.sitting import claim, unclaimed
+from algo_coach.sitting import Missing, Refused, claim, unclaimed
 
 USER = "u-4f9c2a"
 CANDIDATES = ["binary-search", "sorting"]
@@ -64,7 +64,7 @@ def test_a_stated_decline_is_stored(log):
 
 def test_naming_nothing_without_declining_is_refused(log):
     """An empty set would make a lost answer and a stated verdict one record."""
-    with pytest.raises(ValueError, match="at least one technique"):
+    with pytest.raises(Refused, match="at least one technique"):
         claimed(log, [])
     assert log.claims() == []
 
@@ -72,7 +72,7 @@ def test_naming_nothing_without_declining_is_refused(log):
 def test_a_technique_outside_the_problem_s_own_is_refused(log):
     """The candidates are the problem's techniques, and the scores compare over
     that set."""
-    with pytest.raises(ValueError, match="greedy"):
+    with pytest.raises(Refused, match="greedy"):
         claimed(log, ["binary-search", "greedy"])
     assert log.claims() == []
 
@@ -86,13 +86,13 @@ def test_a_later_answer_stands_over_an_earlier_one(log):
 
 
 def test_another_user_s_attempt_reads_as_missing(log):
-    with pytest.raises(ValueError, match="no attempt"):
+    with pytest.raises(Missing, match="no attempt"):
         claimed(log, ["sorting"], user_id="u-b71e03")
     assert log.claims() == []
 
 
 def test_an_unknown_attempt_is_refused(log):
-    with pytest.raises(ValueError, match="no attempt"):
+    with pytest.raises(Missing, match="no attempt"):
         claim(
             log,
             "nope",

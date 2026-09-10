@@ -4,7 +4,7 @@ mints. `log.md` gives what the record holds and why a pause is an interval."""
 from collections.abc import Sequence
 from datetime import UTC, datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 from algo_coach import mint
 from algo_coach.cases import CaseLog
@@ -25,6 +25,14 @@ from algo_coach.schema import (
 # the cap a sitting judges a submission under. The speedup search picks the
 # separating size against it, and generation's own cap sits well above it
 DRILL_CAP_MS = 2_000
+
+
+class Refused(ValueError):
+    """A request the sitting's or the problem's state does not allow."""
+
+
+class Missing(Refused):
+    """A record the request names that the user cannot reach."""
 
 
 class Served(BaseModel):
@@ -57,9 +65,9 @@ def serve(
 ) -> Served:
     problem = problems.get(problem_id)
     if problem is None:
-        raise ValueError(f"no problem {problem_id}")
+        raise Missing(f"no problem {problem_id}")
     if not problem.served:
-        raise ValueError(f"problem {problem_id} is {problem.status}")
+        raise Refused(f"problem {problem_id} is {problem.status}")
     # a refresh or a second tab reaches the clock already running, rather than
     # starting a second one on the same problem
     one = sittings.running(user_id, problem_id)
@@ -83,7 +91,7 @@ def submit(
     at = now or _clock()
     one = _running(sittings, sitting_id, user_id)
     if one.paused:
-        raise ValueError(f"sitting {sitting_id} is paused")
+        raise Refused(f"sitting {sitting_id} is paused")
     judged = Execution(
         cap_ms=DRILL_CAP_MS,
         runner=RUNNER,
@@ -110,13 +118,17 @@ def claim(
     used. `candidates` is the problem's derived view, which the caller loads:
     this module sits beside the one that derives it."""
     if not any(one.id == attempt_id and one.user_id == user_id for one in log.attempts()):
-        raise ValueError(f"no attempt {attempt_id}")
+        raise Missing(f"no attempt {attempt_id}")
     outside = [code for code in techniques if code not in candidates]
     if outside:
-        raise ValueError(f"not among the problem's techniques: {', '.join(outside)}")
-    written = mint.user_claim(
-        attempt_id, list(techniques), confidence=confidence, declined=declined
-    )
+        raise Refused(f"not among the problem's techniques: {', '.join(outside)}")
+    try:
+        written = mint.user_claim(
+            attempt_id, list(techniques), confidence=confidence, declined=declined
+        )
+    except ValidationError as error:
+        # the request's fault rather than the engine's: a claim naming nothing
+        raise Refused("; ".join(one["msg"] for one in error.errors())) from error
     log.append_claim(written)
     return written
 
@@ -137,7 +149,7 @@ def pause(
 ) -> Sitting:
     one = _running(store, sitting_id, user_id)
     if one.paused:
-        raise ValueError(f"sitting {sitting_id} is already paused")
+        raise Refused(f"sitting {sitting_id} is already paused")
     return _stored(store, one, pauses=[*one.pauses, Pause(at=now or _clock())])
 
 
@@ -146,7 +158,7 @@ def resume(
 ) -> Sitting:
     one = _running(store, sitting_id, user_id)
     if not one.paused:
-        raise ValueError(f"sitting {sitting_id} is not paused")
+        raise Refused(f"sitting {sitting_id} is not paused")
     return _stored(store, one, pauses=_closed(one.pauses, now or _clock()))
 
 
@@ -166,9 +178,9 @@ def _running(store: SittingStore, sitting_id: str, user_id: str) -> Sitting:
     one = store.get(sitting_id)
     # another user's sitting reads as missing, so an id reveals nothing
     if one is None or one.user_id != user_id:
-        raise ValueError(f"no sitting {sitting_id}")
+        raise Missing(f"no sitting {sitting_id}")
     if one.ended_at is not None:
-        raise ValueError(f"sitting {sitting_id} has ended")
+        raise Refused(f"sitting {sitting_id} has ended")
     return one
 
 

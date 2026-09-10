@@ -7,6 +7,7 @@ license = "Apache-2.0"
 requires-python = ">=3.14"
 authors = [{ name = "Maksim Lunochkin" }]
 dependencies = [
+    "fastapi>=0.141.1",
     "openai>=1.60",
     "pydantic>=2.7",
     "python-dotenv>=1.0",
@@ -20,6 +21,7 @@ algo-coach = "algo_coach.cli:main"
 [dependency-groups]
 dev = [
     "duckdb>=1.5",
+    "httpx>=0.28.1",
     "hypothesis>=6.167.1",
     "import-linter>=2.15",
     "pyright>=1.1.411",
@@ -65,6 +67,7 @@ forbidden_modules = [
     "algo_coach.matches",
     "algo_coach.generation",
     "algo_coach.cli",
+    "algo_coach.api",
 ]
 
 [[tool.importlinter.contracts]]
@@ -79,6 +82,7 @@ forbidden_modules = [
     "algo_coach.matches",
     "algo_coach.generation",
     "algo_coach.cli",
+    "algo_coach.api",
 ]
 
 [[tool.importlinter.contracts]]
@@ -98,7 +102,7 @@ modules = [
 name = "the packages are layered, and nothing imports upward"
 type = "layers"
 layers = [
-    "algo_coach.cli",
+    "algo_coach.cli : algo_coach.api",
     "algo_coach.generation",
     "algo_coach.attempt_claims : algo_coach.solution_claims : algo_coach.matches : algo_coach.board : algo_coach.cards : algo_coach.sitting",
     "algo_coach.classifier : algo_coach.mint : algo_coach.log : algo_coach.outcomes : algo_coach.problems : algo_coach.solutions : algo_coach.cases : algo_coach.drafts : algo_coach.verifications : algo_coach.techniques : algo_coach.mutation : algo_coach.calls : algo_coach.runs",
@@ -107,7 +111,7 @@ layers = [
 ]
 
 [[tool.importlinter.contracts]]
-name = "nothing imports the adapter"
+name = "nothing imports an adapter"
 type = "forbidden"
 source_modules = [
     "algo_coach.attempt_claims",
@@ -119,7 +123,7 @@ source_modules = [
     "algo_coach.runner",
     "algo_coach.mutation",
 ]
-forbidden_modules = ["algo_coach.cli"]
+forbidden_modules = ["algo_coach.cli", "algo_coach.api"]
 
 [tool.coverage.run]
 source = ["algo_coach"]
@@ -142,8 +146,11 @@ paths = ["src", "tests"]
 # a schema field or an enum member no code reads is still one a stored record
 # carries, and a code is never deleted
 exclude = ["src/algo_coach/schema/"]
-# pydantic calls validators by registration, pytest calls fixtures by name
-ignore_decorators = ["@field_validator", "@model_validator", "@pytest.fixture"]
+# pydantic calls validators and FastAPI calls routes by registration, pytest
+# calls fixtures by name
+ignore_decorators = [
+    "@field_validator", "@model_validator", "@app.*", "@router.*", "@pytest.fixture",
+]
 ignore_names = [
     "model_config",
     # textual reads the class attributes and dispatches hooks and actions by name

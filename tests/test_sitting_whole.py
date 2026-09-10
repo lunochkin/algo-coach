@@ -8,7 +8,7 @@ from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.mint import case
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Confidence
-from algo_coach.sitting import claim, end, pause, resume, serve, submit, unclaimed
+from algo_coach.sitting import Refused, claim, end, pause, resume, serve, submit, unclaimed
 
 USER = "u-4f9c2a"
 DOUBLE = "def solve(n):\n    return n * 2\n"
@@ -79,5 +79,5 @@ def test_a_serve_after_the_end_starts_a_new_sitting(root):
     second = serve(problems, sittings, "p1", user_id=USER).sitting
 
     assert second.id != first.id
-    with pytest.raises(ValueError, match="has ended"):
+    with pytest.raises(Refused, match="has ended"):
         submit(sittings, CaseLog(root), AttemptLog(root), first.id, DOUBLE, user_id=USER)

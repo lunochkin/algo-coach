@@ -8,7 +8,7 @@ from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.mint import case
 from algo_coach.runner import RUNNER
 from algo_coach.schema import CaseOutcome, Sitting
-from algo_coach.sitting import DRILL_CAP_MS, Submitted, submit
+from algo_coach.sitting import DRILL_CAP_MS, Missing, Refused, Submitted, submit
 from algo_coach.verifications import VerificationLog
 
 STARTED = datetime(2026, 9, 10, 8, tzinfo=UTC)
@@ -138,7 +138,7 @@ def test_a_paused_sitting_takes_no_submission(tmp_path):
     count for it."""
     stores = Stores(tmp_path, pauses=[{"at": NINE}])
 
-    with pytest.raises(ValueError, match="paused"):
+    with pytest.raises(Refused, match="paused"):
         stores.submit(DOUBLE)
     assert stores.log.attempts() == []
 
@@ -146,12 +146,12 @@ def test_a_paused_sitting_takes_no_submission(tmp_path):
 def test_an_ended_sitting_takes_no_submission(tmp_path):
     stores = Stores(tmp_path, ended_at=TEN)
 
-    with pytest.raises(ValueError, match="has ended"):
+    with pytest.raises(Refused, match="has ended"):
         stores.submit(DOUBLE)
 
 
 def test_an_unknown_sitting_is_refused(tmp_path):
-    with pytest.raises(ValueError, match="no sitting"):
+    with pytest.raises(Missing, match="no sitting"):
         Stores(tmp_path).submit(DOUBLE, sitting_id="nope")
 
 
@@ -160,7 +160,7 @@ def test_another_user_s_sitting_takes_no_submission(tmp_path):
     made."""
     stores = Stores(tmp_path)
 
-    with pytest.raises(ValueError, match="no sitting"):
+    with pytest.raises(Missing, match="no sitting"):
         stores.submit(DOUBLE, user_id="u-b71e03")
     assert stores.log.attempts() == []
 
@@ -225,6 +225,6 @@ def test_the_user_s_results_never_reach_the_product_store(tmp_path):
 def test_a_refused_submission_stores_no_verification(tmp_path):
     stores = Stores(tmp_path, pauses=[{"at": NINE}])
 
-    with pytest.raises(ValueError, match="paused"):
+    with pytest.raises(Refused, match="paused"):
         stores.submitted(DOUBLE)
     assert stores.log.verifications() == []

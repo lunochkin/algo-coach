@@ -65,7 +65,7 @@ React frontend the API serves as static files.
 
 ### The API
 
-- [ ] Add `algo_coach.api`: a FastAPI app over the sitting calls, JSON in and
+- [x] Add `algo_coach.api`: a FastAPI app over the sitting calls, JSON in and
       JSON out. The API is the second adapter beside the CLI, and neither
       adapter holds domain logic
 - [ ] Add the read routes the loop's first three steps need: the board, a
@@ -80,10 +80,6 @@ React frontend the API serves as static files.
       arguments hands over a case the solver can special-case
 - [ ] Serve the built frontend from the same process as the API, so the app
       deploys as one unit when Phase 9 hosts it
-- [ ] Add an import contract forbidding the domain from importing
-      `algo_coach.api`, as the contract in `pyproject.toml` already forbids
-      the CLI. That contract names the CLI alone, so nothing stops the domain
-      from importing the API
 
 ### The frontend
 
