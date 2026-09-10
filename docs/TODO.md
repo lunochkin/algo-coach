@@ -41,9 +41,13 @@ React frontend the API serves as static files.
 - [x] Take `user_id` as an argument to the sitting calls rather than defaulting
       to one user. Phase 9 keys the log by user, and a default here would spread
       that change into this module
-- [ ] Test one sitting end to end over `algo_coach.sitting`, no adapter in
-      between: serve, submit, and an `Attempt` in the log carrying a verdict on
-      a generated problem. That attempt is the first the engine produced itself
+- [ ] Test one whole sitting over `algo_coach.sitting`: serve, a failing
+      submit, a passing submit and end, on stores sharing one root. The unit
+      tests pin each call alone, and this test pins that the calls compose
+- [ ] Sit one problem the sweep landed by hand, through `algo_coach.sitting` on
+      the real store, and write down the attempt id and how long judging took.
+      The stored cases carry separating inputs up to 1 MiB, which no fixture
+      reaches
 - [ ] Store the verification result on `Attempt`. The field is additive, and
       every attempt written before the engine judged one leaves the field empty
 - [ ] Add the domain call retiring a problem as `defective`, moving the status
