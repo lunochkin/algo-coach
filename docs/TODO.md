@@ -12,36 +12,62 @@ daily measures nothing, and a sitting does not happen at a command line.
 
 ### The loop, as domain calls
 
-- [ ] Add `algo_coach.sitting`: serve a created problem, run a submission
-      against the problem's own cases, and mint the attempt. The module takes
-      no adapter, so the API and the tests call the same functions
+- [ ] Move `DRILL_CAP_MS` from `generation/speedup.py` into
+      `algo_coach.sitting`, and import it back into generation. The cap is the
+      sitting's, and the speedup search only measures a separating size by it
+- [ ] Add `algo_coach.sitting.serve`: a created problem in, its statement and
+      the clock's start out. A sitting is no stored record, so the caller holds
+      the start between the two calls
 - [ ] Serve every created problem and skip the retired ones. No gate stands
       between landing and serving until Phase 14
+- [ ] Add `algo_coach.sitting.submit`: the code and the sitting's start in, an
+      `Attempt` in the log out. The call runs the code against the problem's own
+      cases at the drill cap and folds the case results to `solved`
+- [ ] Compute the attempt's duration from the start `serve` handed out, and
+      take no duration among `submit`'s arguments. A duration the browser
+      reports is a number the engine did not witness
+- [ ] Take `user_id` as an argument to the sitting calls rather than defaulting
+      to one user. Phase 9 keys the log by user, and a default here would spread
+      that change into this module
+- [ ] Test one sitting end to end over `algo_coach.sitting`, no adapter in
+      between: serve, submit, and an `Attempt` in the log carrying a verdict on
+      a generated problem. That attempt is the first the engine produced itself
 - [ ] Store the verification result on `Attempt`. The field is additive, and
       every attempt written before the engine judged one leaves the field empty
-- [ ] Time the sitting in the engine, between serving the statement and
-      receiving the submission. A duration the browser reports is a number the
-      engine did not witness, and it is never stored
-- [ ] Feed the claim classifier its candidates from the problem's derived
-      techniques. No other source supplies candidates now that the tag
-      mapping is gone
+- [ ] Add the domain call retiring a problem as `defective`, moving the status
+      on the stored record and nothing else. `ProblemStore.put` already refuses
+      a record whose other fields moved
 - [ ] Offer marking a problem defective in place of the self-label. A statement
       that asked the wrong thing would otherwise be recorded as the user's own
       gap
 - [ ] Exclude a defective problem's attempts from the board, solved and failed
       alike. Dropping only the failures would raise a technique's solve rate
       because a problem was broken
-- [ ] Ask for a claim and a self-label as the Phase 2 loop asked for them. The
-      engine now witnesses the sitting, and the user still writes both records
+- [ ] Write the `AttemptClaim` the sitting's question produces, over the
+      problem's own techniques and carrying a confidence level. `algo-coach
+      claim` asks that question of attempts already in the log
+- [ ] Write the `SelfLabel` the sitting's second question produces. The schema
+      has carried `FailureMode` since Phase 1, and nothing writes one yet
+- [ ] Ask both questions per attempt of the sitting rather than once per
+      sitting. A drill can mint several attempts, and asking only about the
+      last would put the two counts on different denominators
 
 ### The API
 
 - [ ] Add `algo_coach.api`: a FastAPI app over the sitting calls, JSON in and
       JSON out. The API is the second adapter beside the CLI, and neither
       adapter holds domain logic
-- [ ] Add a route per step of the drill loop `flows.md` gives: the board, the
-      candidates for a technique, the card, the statement, the submission and
-      its per-case verdict, the claim and the self-label
+- [ ] Add the read routes the loop's first four steps need: the board, a
+      technique's candidates, a card, and a problem's statement
+- [ ] Add the write routes the rest of the loop needs: the submission and its
+      per-case verdict, the claim, the self-label, and marking a problem
+      defective
+- [ ] Serve the statement and the `solve` signature alone, and keep every
+      solution and every case's expected value server-side. A canonical in the
+      response is the answer in the page source
+- [ ] Decide what a failing case shows the solver, its outcome alone or its
+      arguments too, and write the choice into `flows.md`. Showing the
+      arguments hands over a case the solver can special-case
 - [ ] Serve the built frontend from the same process as the API, so the app
       deploys as one unit when Phase 9 hosts it
 - [ ] Add an import contract forbidding the domain from importing
@@ -59,15 +85,24 @@ daily measures nothing, and a sitting does not happen at a command line.
       the selection to the user
 - [ ] Show the technique's card before the statement. The card is read before
       the attempt rather than after it
-- [ ] Build the sitting page: the statement, a CodeMirror editor, the submit
-      action and the per-case verdict in one view. A sitting split over several
-      pages is a workflow, and a workflow is not practised daily
+- [ ] Build the sitting page: the statement, the `solve` signature, and a
+      CodeMirror editor with completion off. `flows.md` gives why the editor
+      proposes nothing
+- [ ] Show the per-case verdict beside the editor rather than on a page of its
+      own. A sitting split over several pages is a workflow, and a workflow is
+      not practised daily
+- [ ] Show the elapsed time during the sitting, counted from the start the API
+      handed out. The engine records that duration, so the page shows the
+      number the log will carry
 - [ ] Build the prompt the sitting ends on: the claim over the problem's
       techniques, the self-label, and marking the problem defective in place of
       the self-label
 - [ ] Drive one whole sitting in a test through the API rather than a browser:
       serve, submit, verdict, claim, self-label. The frontend then carries no
       logic a test can only reach by rendering a page
+- [ ] Add `just app`: the API and the Vite dev server in one command, the dev
+      server proxying the API. Two commands in two terminals is friction on
+      every session
 - [ ] Run the frontend's type check and lint from `just`, beside the Python
       checks. The pre-commit hook runs the Python checks, and a frontend check
       outside that hook never runs before a commit
