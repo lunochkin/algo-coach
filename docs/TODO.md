@@ -56,9 +56,9 @@ React frontend the API serves as static files.
 - [x] Exclude a defective problem's attempts from the board, solved and failed
       alike. Dropping only the failures would raise a technique's solve rate
       because a problem was broken
-- [ ] Write the `AttemptClaim` the sitting's question produces, over the
-      problem's own techniques and carrying a confidence level. `algo-coach
-      claim` asks that question of attempts already in the log
+- [x] Write the `AttemptClaim` the sitting's question produces, over the
+      problem's own techniques and carrying a confidence level.
+      `algo-coach claim` asks that question of attempts already in the log
 - [ ] Write the `SelfLabel` the sitting's second question produces. The schema
       has carried `FailureMode` since Phase 1, and nothing writes one yet
 - [ ] Ask both questions per attempt of the sitting rather than once per

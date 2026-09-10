@@ -1,6 +1,7 @@
 """One timed session on one problem: what the drill loop serves, judges and
 mints. `log.md` gives what the record holds and why a pause is an interval."""
 
+from collections.abc import Sequence
 from datetime import UTC, datetime
 
 from pydantic import BaseModel, ConfigDict
@@ -10,7 +11,15 @@ from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.problems import ProblemStore
 from algo_coach.runner import RUNNER, verify
-from algo_coach.schema import Attempt, AttemptVerification, Execution, Pause, Sitting
+from algo_coach.schema import (
+    Attempt,
+    AttemptClaim,
+    AttemptVerification,
+    Confidence,
+    Execution,
+    Pause,
+    Sitting,
+)
 
 # the cap a sitting judges a submission under. The speedup search picks the
 # separating size against it, and generation's own cap sits well above it
@@ -84,6 +93,31 @@ def submit(
     log.append_attempt(attempt)
     log.append_verification(verification)
     return Submitted(attempt=attempt, verification=verification)
+
+
+def claim(
+    log: AttemptLog,
+    attempt_id: str,
+    techniques: Sequence[str],
+    *,
+    candidates: Sequence[str],
+    user_id: str,
+    confidence: Confidence,
+    declined: bool = False,
+) -> AttemptClaim:
+    """The user's answer to which of the problem's techniques the attempt
+    used. `candidates` is the problem's derived view, which the caller loads:
+    this module sits beside the one that derives it."""
+    if not any(one.id == attempt_id and one.user_id == user_id for one in log.attempts()):
+        raise ValueError(f"no attempt {attempt_id}")
+    outside = [code for code in techniques if code not in candidates]
+    if outside:
+        raise ValueError(f"not among the problem's techniques: {', '.join(outside)}")
+    written = mint.user_claim(
+        attempt_id, list(techniques), confidence=confidence, declined=declined
+    )
+    log.append_claim(written)
+    return written
 
 
 def pause(
