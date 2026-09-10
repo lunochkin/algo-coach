@@ -4,13 +4,13 @@ The user's private record: what was attempted, what it used, why it went the
 way it did, and the study a card run tracks. Part of the architecture.
 `README.md` is the map.
 
-Every record here is append-only apart from the sitting. A sitting is working
-state, and it is cleared when the sitting ends.
+Every record here is append-only apart from the sitting, which is revised
+while the sitting runs.
 
 ## Sittings
 
-One timed session on one problem. The record exists while the sitting is in
-flight, and the id it carries outlives it.
+One timed session on one problem: when it began, when it ended, and every pause
+between.
 
 - **The engine mints the sitting id as it serves the statement**, and every
   attempt of that sitting carries the id. The log is append-only, so an attempt
@@ -24,13 +24,26 @@ flight, and the id it carries outlives it.
 - **The store is revised in place, as the draft store is.** A sitting's state
   moves while the sitting runs, so the sitting store can be refactored where
   the append-only logs cannot.
-- **The record is cleared when the sitting ends.** Each attempt carries its own
-  start, its finish and the sitting id, so no reader loses a fact with the
-  record. The writing id works the same way: a landed draft is cleared, and the
-  site outcomes of that writing keep the id that grouped them.
-- **Resuming a sitting is deferred**, as `flows.md` defers the rest of the
-  interaction. A stored record leaves the question open, where a start held in
-  the serving process would answer it with no.
+- **The pauses live in that store alone, and a refactor of it can lose them.**
+  No append-only record carries the pause history. That cost is accepted: a
+  sitting is evidence about how practice ran rather than a record the board
+  counts.
+- **The record is kept after the sitting ends**, and `ended_at` closes it. How
+  often practice is interrupted, how many sittings a day holds, and which
+  problems were opened and abandoned are readable in the sitting store alone.
+- **A sitting is paused and resumed, and the clock stops for a pause.** The
+  user steps away from the problem, and a duration counting the hours away says
+  nothing about solving it.
+- **A pause is stored as its own interval**, `at` and `until`. A total of the
+  time paused says how long and never how often, and a sitting paused once for
+  two hours is different practice from a sitting paused nine times.
+- **Only the last pause is open, and a sitting ends with none open.** An
+  ended sitting holding an open pause would report an elapsed time that moved
+  with the moment it was read.
+- **The elapsed time excludes every pause**, and the attempt carries it as
+  `time_to_solve_sec`.
+- **The loop decides what starts and ends a pause**, not the record. A button,
+  a hidden tab and an idle timer each leave the same interval.
 
 ## Attempts
 

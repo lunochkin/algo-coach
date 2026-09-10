@@ -186,7 +186,9 @@ without redefining them. Grouped by the file that specifies the record.
 - **Attempt**: a user's solution to a problem, successful or failed.
 - **Sitting**: one timed session on one problem in the drill loop. It may
   mint several attempts, and each of them carries the sitting's id. The record
-  is stored while the sitting runs and cleared when the sitting ends.
+  is revised while the sitting runs and kept after the sitting ends.
+- **Pause**: an interval a sitting's clock is stopped for. The elapsed time a
+  sitting reports excludes every pause.
 - **Drill loop**: the practice flow: pick a technique and a problem, read the
   card, solve, then answer the claim and the label.
 - **Claim**: a record naming the techniques a piece of code used, by a named
