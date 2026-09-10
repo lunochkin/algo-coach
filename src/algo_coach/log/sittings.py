@@ -10,3 +10,13 @@ class SittingStore(FileStore[Sitting]):
 
     def __init__(self, root: Path) -> None:
         super().__init__(root, "sittings", Sitting)
+
+    def running(self, user_id: str, problem_id: str) -> Sitting | None:
+        return next(
+            (
+                one
+                for one in self.all()
+                if one.user_id == user_id and one.problem_id == problem_id and one.ended_at is None
+            ),
+            None,
+        )

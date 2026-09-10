@@ -28,7 +28,7 @@ React frontend the API serves as static files.
 - [x] Add `sitting_id` to `Attempt`, optional as an additive field is. An
       attempt written without it can never be grouped with the sitting's other
       attempts, since the log is append-only
-- [ ] Add `algo_coach.sitting.serve`: a created problem in, its statement and a
+- [x] Add `algo_coach.sitting.serve`: a created problem in, its statement and a
       stored `Sitting` out. A restart between the two calls then loses no clock
 - [ ] Serve every created problem and skip the retired ones. No gate stands
       between landing and serving until Phase 14
