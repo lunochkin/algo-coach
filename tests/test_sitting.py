@@ -8,7 +8,7 @@ from algo_coach.schema import Sitting
 
 CONTENT = {
     "id": "s1",
-    "user_id": "maks",
+    "user_id": "u-4f9c2a",
     "problem_id": "p1",
     "started_at": "2026-09-10T08:00:00Z",
 }
@@ -41,14 +41,14 @@ def test_a_sitting_is_frozen():
 def test_the_minted_start_is_the_engine_s_own():
     """The clock a duration is measured from is the engine's, never a number a
     caller passed in."""
-    one = sitting("maks", "p1")
+    one = sitting("u-4f9c2a", "p1")
     assert one.id and one.started_at.tzinfo is not None
-    assert (one.user_id, one.problem_id) == ("maks", "p1")
+    assert (one.user_id, one.problem_id) == ("u-4f9c2a", "p1")
 
 
 def test_two_sittings_carry_different_ids():
     """The id groups a sitting's attempts, so two sittings may not share one."""
-    assert sitting("maks", "p1").id != sitting("maks", "p1").id
+    assert sitting("u-4f9c2a", "p1").id != sitting("u-4f9c2a", "p1").id
 
 
 def a_pause(at, until=None) -> dict:

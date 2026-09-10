@@ -38,7 +38,7 @@ React frontend the API serves as static files.
 - [x] Compute the attempt's duration from the stored sitting's start, and take
       no duration among `submit`'s arguments. A duration the browser reports is
       a number the engine did not witness
-- [ ] Take `user_id` as an argument to the sitting calls rather than defaulting
+- [x] Take `user_id` as an argument to the sitting calls rather than defaulting
       to one user. Phase 9 keys the log by user, and a default here would spread
       that change into this module
 - [ ] Test one sitting end to end over `algo_coach.sitting`, no adapter in

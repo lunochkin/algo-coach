@@ -25,14 +25,24 @@ class Stores:
         self.log = AttemptLog(root)
         self.sittings.put(
             Sitting.model_validate(
-                {"id": "s1", "user_id": "maks", "problem_id": "p1", "started_at": STARTED} | sitting
+                {"id": "s1", "user_id": "u-4f9c2a", "problem_id": "p1", "started_at": STARTED}
+                | sitting
             )
         )
         for args, expected in (([1], 2), ([3], 6)):
             self.cases.append(case("p1", args, expected, provenance=PROVENANCE))
 
-    def submit(self, code: str, *, now: datetime = ELEVEN, sitting_id: str = "s1"):
-        return submit(self.sittings, self.cases, self.log, sitting_id, code, now=now)
+    def submit(
+        self,
+        code: str,
+        *,
+        now: datetime = ELEVEN,
+        sitting_id: str = "s1",
+        user_id: str = "u-4f9c2a",
+    ):
+        return submit(
+            self.sittings, self.cases, self.log, sitting_id, code, user_id=user_id, now=now
+        )
 
 
 def test_a_passing_submission_mints_a_solved_attempt_in_the_log(tmp_path):
@@ -49,7 +59,7 @@ def test_the_attempt_names_its_sitting_and_carries_the_code(tmp_path):
     attempt or never."""
     attempt = Stores(tmp_path).submit(DOUBLE)
 
-    assert (attempt.sitting_id, attempt.user_id, attempt.problem_id) == ("s1", "maks", "p1")
+    assert (attempt.sitting_id, attempt.user_id, attempt.problem_id) == ("s1", "u-4f9c2a", "p1")
     assert (attempt.code, attempt.language) == (DOUBLE, "python")
 
 
@@ -131,3 +141,13 @@ def test_an_ended_sitting_takes_no_submission(tmp_path):
 def test_an_unknown_sitting_is_refused(tmp_path):
     with pytest.raises(ValueError, match="no sitting"):
         Stores(tmp_path).submit(DOUBLE, sitting_id="nope")
+
+
+def test_another_user_s_sitting_takes_no_submission(tmp_path):
+    """The attempt would land in the owner's log under a submission they never
+    made."""
+    stores = Stores(tmp_path)
+
+    with pytest.raises(ValueError, match="no sitting"):
+        stores.submit(DOUBLE, user_id="u-b71e03")
+    assert stores.log.attempts() == []

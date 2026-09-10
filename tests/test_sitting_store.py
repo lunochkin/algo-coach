@@ -2,7 +2,7 @@ from algo_coach.log import SittingStore
 from algo_coach.schema import Attempt, Sitting
 
 CONTENT = {
-    "user_id": "maks",
+    "user_id": "u-4f9c2a",
     "problem_id": "p1",
     "started_at": "2026-09-10T08:00:00Z",
 }
@@ -79,7 +79,7 @@ def test_an_attempt_names_the_sitting_it_was_made_in(tmp_path):
     attempt = Attempt.model_validate(
         {
             "id": "a1",
-            "user_id": "maks",
+            "user_id": "u-4f9c2a",
             "problem_id": "p1",
             "sitting_id": "s1",
             "finished_at": AT_TEN,
@@ -92,7 +92,13 @@ def test_an_attempt_names_the_sitting_it_was_made_in(tmp_path):
 def test_an_attempt_no_sitting_minted_carries_none():
     """Every attempt of the pushed corpus predates the engine serving one."""
     attempt = Attempt.model_validate(
-        {"id": "a1", "user_id": "maks", "problem_id": "p1", "finished_at": AT_TEN, "solved": False}
+        {
+            "id": "a1",
+            "user_id": "u-4f9c2a",
+            "problem_id": "p1",
+            "finished_at": AT_TEN,
+            "solved": False,
+        }
     )
     assert attempt.sitting_id is None
 
@@ -101,18 +107,18 @@ def test_a_running_sitting_is_found_by_user_and_problem(tmp_path):
     store = SittingStore(tmp_path)
     store.put(a_sitting())
 
-    assert store.running("maks", "p1").id == "s1"
+    assert store.running("u-4f9c2a", "p1").id == "s1"
 
 
 def test_an_ended_sitting_is_not_running(tmp_path):
     store = SittingStore(tmp_path)
     store.put(a_sitting(ended_at=AT_TEN))
 
-    assert store.running("maks", "p1") is None
+    assert store.running("u-4f9c2a", "p1") is None
 
 
 def test_another_user_s_sitting_is_not_running(tmp_path):
     store = SittingStore(tmp_path)
-    store.put(a_sitting(user_id="someone"))
+    store.put(a_sitting(user_id="u-b71e03"))
 
-    assert store.running("maks", "p1") is None
+    assert store.running("u-4f9c2a", "p1") is None

@@ -56,11 +56,12 @@ def submit(
     sitting_id: str,
     code: str,
     *,
+    user_id: str,
     now: datetime | None = None,
 ) -> Attempt:
     # taken before the run: judging takes seconds the solver did not spend
     at = now or _clock()
-    one = _running(sittings, sitting_id)
+    one = _running(sittings, sitting_id, user_id)
     if one.paused:
         raise ValueError(f"sitting {sitting_id} is paused")
     results = verify(code, cases.for_problem(one.problem_id), cap_ms=DRILL_CAP_MS)
@@ -70,22 +71,28 @@ def submit(
     return attempt
 
 
-def pause(store: SittingStore, sitting_id: str, *, now: datetime | None = None) -> Sitting:
-    one = _running(store, sitting_id)
+def pause(
+    store: SittingStore, sitting_id: str, *, user_id: str, now: datetime | None = None
+) -> Sitting:
+    one = _running(store, sitting_id, user_id)
     if one.paused:
         raise ValueError(f"sitting {sitting_id} is already paused")
     return _stored(store, one, pauses=[*one.pauses, Pause(at=now or _clock())])
 
 
-def resume(store: SittingStore, sitting_id: str, *, now: datetime | None = None) -> Sitting:
-    one = _running(store, sitting_id)
+def resume(
+    store: SittingStore, sitting_id: str, *, user_id: str, now: datetime | None = None
+) -> Sitting:
+    one = _running(store, sitting_id, user_id)
     if not one.paused:
         raise ValueError(f"sitting {sitting_id} is not paused")
     return _stored(store, one, pauses=_closed(one.pauses, now or _clock()))
 
 
-def end(store: SittingStore, sitting_id: str, *, now: datetime | None = None) -> Sitting:
-    one = _running(store, sitting_id)
+def end(
+    store: SittingStore, sitting_id: str, *, user_id: str, now: datetime | None = None
+) -> Sitting:
+    one = _running(store, sitting_id, user_id)
     at = now or _clock()
     # a pause the user never resumed covers the time away, and closing it here
     # is what leaves the sitting ended with none open
@@ -94,9 +101,10 @@ def end(store: SittingStore, sitting_id: str, *, now: datetime | None = None) ->
     )
 
 
-def _running(store: SittingStore, sitting_id: str) -> Sitting:
+def _running(store: SittingStore, sitting_id: str, user_id: str) -> Sitting:
     one = store.get(sitting_id)
-    if one is None:
+    # another user's sitting reads as missing, so an id reveals nothing
+    if one is None or one.user_id != user_id:
         raise ValueError(f"no sitting {sitting_id}")
     if one.ended_at is not None:
         raise ValueError(f"sitting {sitting_id} has ended")
