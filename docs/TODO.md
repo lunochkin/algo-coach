@@ -14,17 +14,25 @@ React frontend the API serves as static files.
 - [x] Move `DRILL_CAP_MS` from `generation/speedup.py` into
       `algo_coach.sitting`, and import it back into generation. The cap is the
       sitting's, and the speedup search only measures a separating size by it
-- [ ] Add `algo_coach.sitting.serve`: a created problem in, its statement and
-      the clock's start out. A sitting is no stored record, so the caller holds
-      the start between the two calls
+- [ ] Add the `Sitting` record: an engine-minted id, the user, the problem and
+      the start. The two calls of one sitting reach the engine as two requests,
+      and the start has to outlive the first one
+- [ ] Store sittings in a store revised in place, as the drafts are, and clear a
+      sitting when it ends. The attempts carry the timing, so the record itself
+      is working state rather than a log
+- [ ] Add `sitting_id` to `Attempt`, optional as an additive field is. An
+      attempt written without it can never be grouped with the sitting's other
+      attempts, since the log is append-only
+- [ ] Add `algo_coach.sitting.serve`: a created problem in, its statement and a
+      stored `Sitting` out. A restart between the two calls then loses no clock
 - [ ] Serve every created problem and skip the retired ones. No gate stands
       between landing and serving until Phase 14
-- [ ] Add `algo_coach.sitting.submit`: the code and the sitting's start in, an
+- [ ] Add `algo_coach.sitting.submit`: the code and the sitting's id in, an
       `Attempt` in the log out. The call runs the code against the problem's own
       cases at the drill cap and folds the case results to `solved`
-- [ ] Compute the attempt's duration from the start `serve` handed out, and
-      take no duration among `submit`'s arguments. A duration the browser
-      reports is a number the engine did not witness
+- [ ] Compute the attempt's duration from the stored sitting's start, and take
+      no duration among `submit`'s arguments. A duration the browser reports is
+      a number the engine did not witness
 - [ ] Take `user_id` as an argument to the sitting calls rather than defaulting
       to one user. Phase 9 keys the log by user, and a default here would spread
       that change into this module

@@ -1,8 +1,36 @@
 # The log
 
-The user's private append-only record: what was attempted, what it used, why it
-went the way it did, and the study a card run tracks. Part of the architecture.
+The user's private record: what was attempted, what it used, why it went the
+way it did, and the study a card run tracks. Part of the architecture.
 `README.md` is the map.
+
+Every record here is append-only apart from the sitting. A sitting is working
+state, and it is cleared when the sitting ends.
+
+## Sittings
+
+One timed session on one problem. The record exists while the sitting is in
+flight, and the id it carries outlives it.
+
+- **The engine mints the sitting id as it serves the statement**, and every
+  attempt of that sitting carries the id. The log is append-only, so an attempt
+  written without the id can never be grouped with the sitting's others.
+- **The alternative is grouping attempts by how close together they were
+  written.** Such a grouping is a guess about a pause, and two readers reading
+  one log would draw the sitting's boundary at different attempts.
+- **The record is stored rather than held in the process that served the
+  statement.** One sitting reaches the engine as two calls, and a restart
+  between them would lose the start the duration is measured from.
+- **The store is revised in place, as the draft store is.** A sitting's state
+  moves while the sitting runs, so the sitting store can be refactored where
+  the append-only logs cannot.
+- **The record is cleared when the sitting ends.** Each attempt carries its own
+  start, its finish and the sitting id, so no reader loses a fact with the
+  record. The writing id works the same way: a landed draft is cleared, and the
+  site outcomes of that writing keep the id that grouped them.
+- **Resuming a sitting is deferred**, as `flows.md` defers the rest of the
+  interaction. A stored record leaves the question open, where a start held in
+  the serving process would answer it with no.
 
 ## Attempts
 

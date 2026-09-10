@@ -185,7 +185,8 @@ without redefining them. Grouped by the file that specifies the record.
 
 - **Attempt**: a user's solution to a problem, successful or failed.
 - **Sitting**: one timed session on one problem in the drill loop. It may
-  mint several attempts.
+  mint several attempts, and each of them carries the sitting's id. The record
+  is stored while the sitting runs and cleared when the sitting ends.
 - **Drill loop**: the practice flow: pick a technique and a problem, read the
   card, solve, then answer the claim and the label.
 - **Claim**: a record naming the techniques a piece of code used, by a named
@@ -225,7 +226,7 @@ times. Each record class is specified in one of the files beside it.
 |---|---|
 | [`content.md`](content.md) | Techniques, cards, template matches |
 | [`corpus.md`](corpus.md) | Problems, test cases, solutions, solution claims |
-| [`log.md`](log.md) | Attempts, claims, self-labels, diagnoses, card runs, recall attempts |
+| [`log.md`](log.md) | Sittings, attempts, claims, self-labels, diagnoses, card runs, recall attempts |
 | [`machine.md`](machine.md) | What a model-written record carries, what a generation run's call sites leave, and the call log |
 | [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, adjudicating the eval set |
 
@@ -243,6 +244,7 @@ times. Each record class is specified in one of the files beside it.
 | Verification runs | product | global | append-only | the store |
 | Template matches | product | global | append-only | the store |
 | Site outcomes | product | global | append-only | the store |
+| Sittings | user | private | revised in place | the store |
 | Card runs | user | private | append-only | the store |
 | Recall attempts | user | private | append-only | the store |
 | Attempts | user | private | append-only | the store |

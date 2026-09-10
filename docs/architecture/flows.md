@@ -448,7 +448,7 @@ are answered by using the loop.
 2. Candidates for the technique, least recently attempted first, lowest solve
    rate breaking a tie. The user picks one.
 3. The technique's card, before the attempt rather than after it.
-4. The statement, and the clock starts.
+4. The sitting is minted, the statement is served, and the clock starts.
 5. The submission runs against the problem's own test cases, and the attempt is
    minted carrying the result.
 6. Keyed to each attempt, the loop asks for a attempt claim and a
