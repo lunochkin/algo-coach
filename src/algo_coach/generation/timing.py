@@ -10,7 +10,7 @@ from algo_coach.generation.checks import (
 )
 from algo_coach.generation.errors import GenerationError
 from algo_coach.generation.inputs import InputGenerator
-from algo_coach.generation.speedup import DRILL_CAP_MS, Missing, Searched, search
+from algo_coach.generation.speedup import Missing, Searched, search
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.generation.verdicts import Inputs, Naive
 from algo_coach.runner import NoValue, outputs
@@ -20,6 +20,7 @@ from algo_coach.schema import (
     SettledCase,
     Template,
 )
+from algo_coach.sitting import DRILL_CAP_MS
 
 # the seed the speedup search builds at, which never varies: the halving
 # compares one size against another, so two inputs of one shape are needed

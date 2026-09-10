@@ -100,7 +100,7 @@ type = "layers"
 layers = [
     "algo_coach.cli",
     "algo_coach.generation",
-    "algo_coach.attempt_claims : algo_coach.solution_claims : algo_coach.matches : algo_coach.board : algo_coach.cards",
+    "algo_coach.attempt_claims : algo_coach.solution_claims : algo_coach.matches : algo_coach.board : algo_coach.cards : algo_coach.sitting",
     "algo_coach.classifier : algo_coach.mint : algo_coach.log : algo_coach.outcomes : algo_coach.problems : algo_coach.solutions : algo_coach.cases : algo_coach.drafts : algo_coach.verifications : algo_coach.techniques : algo_coach.mutation : algo_coach.calls : algo_coach.runs",
     "algo_coach.runner",
     "algo_coach.schema : algo_coach.ids : algo_coach.storage : algo_coach.standing",
@@ -115,6 +115,7 @@ source_modules = [
     "algo_coach.matches",
     "algo_coach.generation",
     "algo_coach.board",
+    "algo_coach.sitting",
     "algo_coach.runner",
     "algo_coach.mutation",
 ]

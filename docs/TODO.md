@@ -11,7 +11,7 @@ React frontend the API serves as static files.
 
 ### The loop, as domain calls
 
-- [ ] Move `DRILL_CAP_MS` from `generation/speedup.py` into
+- [x] Move `DRILL_CAP_MS` from `generation/speedup.py` into
       `algo_coach.sitting`, and import it back into generation. The cap is the
       sitting's, and the speedup search only measures a separating size by it
 - [ ] Add `algo_coach.sitting.serve`: a created problem in, its statement and

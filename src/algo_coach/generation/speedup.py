@@ -16,10 +16,6 @@ from algo_coach.generation.checks import CAP_MS
 from algo_coach.runner import RunOutcome, answered, run, weighs
 from algo_coach.schema import MachineProvenance, SettledCase
 
-# the cap a sitting judges a submission under, which is what the separating
-# case is chosen against. Phase 8 reads it; generation's own cap sits above it
-DRILL_CAP_MS = 2_000
-
 # the most a stored case may weigh, arguments and expected value together.
 # `corpus.md` gives the reason and what a case over it costs
 CEILING = 1_048_576
@@ -444,4 +440,4 @@ def _paces(
     return (ran.elapsed_ms or 0) > cap_ms, ran.elapsed_ms
 
 
-__all__ = ["CEILING", "DRILL_CAP_MS", "Missing", "Searched", "search"]
+__all__ = ["CEILING", "Missing", "Searched", "search"]
