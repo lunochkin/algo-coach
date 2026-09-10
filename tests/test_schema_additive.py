@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from algo_coach.schema import (
     Attempt,
     AttemptClaim,
+    AttemptVerification,
     Call,
     Card,
     Diagnosis,
@@ -41,6 +42,7 @@ RECORDS: list[type[BaseModel]] = [
     Verification,
     Draft,
     Sitting,
+    AttemptVerification,
 ]
 SNAPSHOTS = Path(__file__).parent / "schemas"
 

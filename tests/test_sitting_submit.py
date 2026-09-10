@@ -6,8 +6,10 @@ from helpers import PROVENANCE
 from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.mint import case
-from algo_coach.schema import Sitting
-from algo_coach.sitting import submit
+from algo_coach.runner import RUNNER
+from algo_coach.schema import CaseOutcome, Sitting
+from algo_coach.sitting import DRILL_CAP_MS, Submitted, submit
+from algo_coach.verifications import VerificationLog
 
 STARTED = datetime(2026, 9, 10, 8, tzinfo=UTC)
 NINE = datetime(2026, 9, 10, 9, tzinfo=UTC)
@@ -40,6 +42,16 @@ class Stores:
         sitting_id: str = "s1",
         user_id: str = "u-4f9c2a",
     ):
+        return self.submitted(code, now=now, sitting_id=sitting_id, user_id=user_id).attempt
+
+    def submitted(
+        self,
+        code: str,
+        *,
+        now: datetime = ELEVEN,
+        sitting_id: str = "s1",
+        user_id: str = "u-4f9c2a",
+    ) -> Submitted:
         return submit(
             self.sittings, self.cases, self.log, sitting_id, code, user_id=user_id, now=now
         )
@@ -151,3 +163,68 @@ def test_another_user_s_sitting_takes_no_submission(tmp_path):
     with pytest.raises(ValueError, match="no sitting"):
         stores.submit(DOUBLE, user_id="u-b71e03")
     assert stores.log.attempts() == []
+
+
+def test_the_verification_is_stored_beside_the_attempt(tmp_path):
+    """The log is append-only, so the per-case verdict goes in with the attempt
+    or is never readable."""
+    stores = Stores(tmp_path)
+
+    submitted = stores.submitted(TRIPLE)
+
+    assert stores.log.verifications() == [submitted.verification]
+    assert submitted.verification.attempt_id == submitted.attempt.id
+
+
+def test_the_verification_names_the_cap_and_the_runner(tmp_path):
+    """A timeout means nothing without the cap it hit, and two runs are
+    comparable only within one runner."""
+    verification = Stores(tmp_path).submitted(DOUBLE).verification
+
+    assert (verification.cap_ms, verification.runner) == (DRILL_CAP_MS, RUNNER)
+
+
+def test_every_case_carries_its_own_outcome(tmp_path):
+    """A wrong answer on one case and a pass on another is what a solver needs
+    to read, and `solved` alone drops it."""
+    stores = Stores(tmp_path)
+    stores.cases.append(case("p1", [5], 11, provenance=PROVENANCE))
+
+    verification = stores.submitted(DOUBLE).verification
+
+    assert [one.outcome for one in verification.results] == [
+        CaseOutcome.PASSED,
+        CaseOutcome.PASSED,
+        CaseOutcome.WRONG,
+    ]
+
+
+def test_solved_is_the_projection_of_the_verification(tmp_path):
+    """One rule decides both, so the attempt and its verdict cannot disagree."""
+    stores = Stores(tmp_path)
+
+    for code in (DOUBLE, TRIPLE, "def solve(n)\n"):
+        submitted = stores.submitted(code)
+        assert submitted.attempt.solved is submitted.verification.verified
+
+
+def test_a_crash_is_a_verdict_on_every_case(tmp_path):
+    verification = Stores(tmp_path).submitted("def solve(n)\n").verification
+
+    assert {one.outcome for one in verification.results} == {CaseOutcome.CRASHED}
+
+
+def test_the_user_s_results_never_reach_the_product_store(tmp_path):
+    """The global verification log ships with the corpus, and the user's own
+    code is private."""
+    Stores(tmp_path).submitted(DOUBLE)
+
+    assert VerificationLog(tmp_path).verifications() == []
+
+
+def test_a_refused_submission_stores_no_verification(tmp_path):
+    stores = Stores(tmp_path, pauses=[{"at": NINE}])
+
+    with pytest.raises(ValueError, match="paused"):
+        stores.submitted(DOUBLE)
+    assert stores.log.verifications() == []

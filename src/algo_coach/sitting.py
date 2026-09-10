@@ -9,8 +9,8 @@ from algo_coach import mint
 from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.problems import ProblemStore
-from algo_coach.runner import verify
-from algo_coach.schema import Attempt, CaseOutcome, Pause, Sitting, severest
+from algo_coach.runner import RUNNER, verify
+from algo_coach.schema import Attempt, AttemptVerification, Execution, Pause, Sitting
 
 # the cap a sitting judges a submission under. The speedup search picks the
 # separating size against it, and generation's own cap sits well above it
@@ -26,6 +26,16 @@ class Served(BaseModel):
     title: str
     statement: str  # ends on the `solve` signature
     sitting: Sitting
+
+
+class Submitted(BaseModel):
+    """The attempt a submission minted, and the per-case verdict behind its
+    `solved`."""
+
+    model_config = ConfigDict(frozen=True)
+
+    attempt: Attempt
+    verification: AttemptVerification
 
 
 def serve(
@@ -58,17 +68,22 @@ def submit(
     *,
     user_id: str,
     now: datetime | None = None,
-) -> Attempt:
+) -> Submitted:
     # taken before the run: judging takes seconds the solver did not spend
     at = now or _clock()
     one = _running(sittings, sitting_id, user_id)
     if one.paused:
         raise ValueError(f"sitting {sitting_id} is paused")
-    results = verify(code, cases.for_problem(one.problem_id), cap_ms=DRILL_CAP_MS)
-    solved = severest(result.outcome for result in results) is CaseOutcome.PASSED
-    attempt = mint.attempt(one, code, solved=solved, finished_at=at)
+    judged = Execution(
+        cap_ms=DRILL_CAP_MS,
+        runner=RUNNER,
+        results=verify(code, cases.for_problem(one.problem_id), cap_ms=DRILL_CAP_MS),
+    )
+    attempt = mint.attempt(one, code, solved=judged.verified, finished_at=at)
+    verification = mint.attempt_verification(attempt.id, judged)
     log.append_attempt(attempt)
-    return attempt
+    log.append_verification(verification)
+    return Submitted(attempt=attempt, verification=verification)
 
 
 def pause(

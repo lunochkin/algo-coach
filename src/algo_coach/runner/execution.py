@@ -19,6 +19,10 @@ from typing import Any
 # fires.
 STARTUP_MS = 2000
 
+# the backend and the interpreter, as a verification stores them. Opaque to
+# every reader, so the format is this module's alone
+RUNNER = f"subprocess/{sys.implementation.name}-{sys.version_info.major}.{sys.version_info.minor}"
+
 CHILD = Path(__file__).with_name("child.py")
 
 # how many children are started before the batch they answer. Interpreter start

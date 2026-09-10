@@ -10,12 +10,14 @@ from algo_coach.ids import new_id
 from algo_coach.schema import (
     Attempt,
     AttemptClaim,
+    AttemptVerification,
     CallSite,
     CaseResult,
     ClaimSource,
     Confidence,
     Draft,
     DraftCase,
+    Execution,
     ExpectedSource,
     FailureMode,
     Gate,
@@ -206,6 +208,15 @@ def attempt(sitting: Sitting, code: str, *, solved: bool, finished_at: datetime)
         time_to_solve_sec=sitting.elapsed(finished_at),
         solved=solved,
         code=code,
+    )
+
+
+def attempt_verification(attempt_id: str, execution: Execution) -> AttemptVerification:
+    return AttemptVerification(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        attempt_id=attempt_id,
+        **execution.model_dump(),
     )
 
 

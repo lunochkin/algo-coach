@@ -40,15 +40,16 @@ def test_one_sitting_runs_from_serve_to_end(root):
     resume(sittings, sitting_id, user_id=USER, now=began + timedelta(minutes=15))
     failing = submit(
         sittings, cases, log, sitting_id, TRIPLE, user_id=USER, now=began + timedelta(minutes=20)
-    )
+    ).attempt
     passing = submit(
         sittings, cases, log, sitting_id, DOUBLE, user_id=USER, now=began + timedelta(minutes=30)
-    )
+    ).attempt
     ended = end(sittings, sitting_id, user_id=USER, now=began + timedelta(minutes=31))
 
     assert log.attempts() == [failing, passing]
     assert [one.solved for one in log.attempts()] == [False, True]
     assert {one.sitting_id for one in log.attempts()} == {sitting_id}
+    assert [one.attempt_id for one in log.verifications()] == [failing.id, passing.id]
     # cumulative from the start, the ten paused minutes left out of both
     assert (failing.time_to_solve_sec, passing.time_to_solve_sec) == (600.0, 1200.0)
     assert sittings.all() == [ended]

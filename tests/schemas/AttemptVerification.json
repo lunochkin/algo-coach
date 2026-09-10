@@ -1,0 +1,87 @@
+{
+  "$defs": {
+    "CaseOutcome": {
+      "enum": [
+        "passed",
+        "wrong",
+        "timeout",
+        "crashed"
+      ],
+      "title": "CaseOutcome",
+      "type": "string"
+    },
+    "CaseResult": {
+      "properties": {
+        "case_id": {
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "elapsed_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elapsed Ms"
+        },
+        "outcome": {
+          "$ref": "#/$defs/CaseOutcome"
+        }
+      },
+      "required": [
+        "case_id",
+        "outcome"
+      ],
+      "title": "CaseResult",
+      "type": "object"
+    }
+  },
+  "description": "Private to the user, where a solution's run is product data: `log.md`.",
+  "properties": {
+    "attempt_id": {
+      "title": "Attempt Id",
+      "type": "string"
+    },
+    "cap_ms": {
+      "exclusiveMinimum": 0,
+      "title": "Cap Ms",
+      "type": "integer"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "results": {
+      "items": {
+        "$ref": "#/$defs/CaseResult"
+      },
+      "title": "Results",
+      "type": "array"
+    },
+    "runner": {
+      "minLength": 1,
+      "title": "Runner",
+      "type": "string"
+    }
+  },
+  "required": [
+    "cap_ms",
+    "runner",
+    "id",
+    "created_at",
+    "attempt_id"
+  ],
+  "title": "AttemptVerification",
+  "type": "object"
+}

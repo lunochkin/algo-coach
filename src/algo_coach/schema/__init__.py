@@ -34,12 +34,13 @@ from algo_coach.schema.sitting import Pause, Sitting
 from algo_coach.schema.solution import Solution, SolutionRole
 from algo_coach.schema.solution_claim import SolutionClaim
 from algo_coach.schema.technique import Kind, Technique
-from algo_coach.schema.verification import Verification
+from algo_coach.schema.verification import AttemptVerification, Execution, Verification
 
 __all__ = [
     "Attempt",
     "AttemptClaim",
     "AttemptRecord",
+    "AttemptVerification",
     "Call",
     "CallSite",
     "Card",
@@ -52,6 +53,7 @@ __all__ = [
     "Diagnosis",
     "Draft",
     "DraftCase",
+    "Execution",
     "ExpectedSource",
     "FailureMode",
     "Gate",

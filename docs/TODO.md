@@ -44,7 +44,7 @@ React frontend the API serves as static files.
 - [x] Test one whole sitting over `algo_coach.sitting`: serve, a failing
       submit, a passing submit and end, on stores sharing one root. The unit
       tests pin each call alone, and this test pins that the calls compose
-- [ ] Store each attempt's verification as an `AttemptVerification` in the
+- [x] Store each attempt's verification as an `AttemptVerification` in the
       attempt log, keyed by `attempt_id`. The results of the user's own code are
       private, where a solution's verification is product data
 - [ ] Add the domain call retiring a problem as `defective`, moving the status
