@@ -184,6 +184,9 @@ without redefining them. Grouped by the file that specifies the record.
 ### The log
 
 - **Attempt**: a user's solution to a problem, successful or failed.
+- **Attempt verification**: executing an attempt's code against its problem's
+  cases. An `AttemptVerification` record stores one run, and is private to the
+  user where a solution's `Verification` is product data.
 - **Sitting**: one timed session on one problem in the drill loop. It may
   mint several attempts, and each of them carries the sitting's id. The record
   is revised while the sitting runs and kept after the sitting ends.
@@ -228,7 +231,7 @@ times. Each record class is specified in one of the files beside it.
 |---|---|
 | [`content.md`](content.md) | Techniques, cards, template matches |
 | [`corpus.md`](corpus.md) | Problems, test cases, solutions, solution claims |
-| [`log.md`](log.md) | Sittings, attempts, claims, self-labels, diagnoses, card runs, recall attempts |
+| [`log.md`](log.md) | Sittings, attempts, attempt verifications, claims, self-labels, diagnoses, card runs, recall attempts |
 | [`machine.md`](machine.md) | What a model-written record carries, what a generation run's call sites leave, and the call log |
 | [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, adjudicating the eval set |
 
@@ -250,6 +253,7 @@ times. Each record class is specified in one of the files beside it.
 | Card runs | user | private | append-only | the store |
 | Recall attempts | user | private | append-only | the store |
 | Attempts | user | private | append-only | the store |
+| Attempt verifications | user | private | append-only | the store |
 | Attempt claims | user | private | append-only | the store |
 | Calls | user | private | append-only | the store |
 | Self-labels | user | private | append-only | the store |

@@ -49,11 +49,17 @@ between.
 
 - **The drill loop is the only source.** The engine served the problem and
   watched the sitting, so nothing else is in a position to assert an attempt.
-- **The verification is its own record**, as a canonical's is, and how the
-  verification keys to an attempt is settled in Phase 8. `solved` is the
-  projection over the verification's results, and the raw result carries what
-  the projection drops. A timeout and a wrong answer are both unsolved, and
-  only the timeout is evidence of slowness.
+- **The verification is its own record**, an `AttemptVerification` keyed by
+  `attempt_id`, as a canonical's verification is keyed by `solution_id`.
+  `solved` is the projection over the verification's results, and the raw
+  result carries what the projection drops. A timeout and a wrong answer are
+  both unsolved, and only the timeout is evidence of slowness.
+- **An attempt's verification is a record type apart from a solution's**, as
+  an attempt claim is apart from a solution claim. The results of the user's
+  own code are private, and a solution's verification is product data. One
+  type in both stores would leave privacy to whichever writer chose the file.
+- **The two types share the fields a run is decided by**: the cap, the runner
+  and the per-case results. `corpus.md` fixes what each of those means.
 - **The elapsed time is cumulative, from the sitting's start to that
   submission.** A drill mints an attempt per submission, so the second attempt
   of a sitting carries the whole time since the statement was served, rather

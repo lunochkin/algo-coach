@@ -44,12 +44,9 @@ React frontend the API serves as static files.
 - [x] Test one whole sitting over `algo_coach.sitting`: serve, a failing
       submit, a passing submit and end, on stores sharing one root. The unit
       tests pin each call alone, and this test pins that the calls compose
-- [ ] Sit one problem the sweep landed by hand, through `algo_coach.sitting` on
-      the real store, and write down the attempt id and how long judging took.
-      The stored cases carry separating inputs up to 1 MiB, which no fixture
-      reaches
-- [ ] Store the verification result on `Attempt`. The field is additive, and
-      every attempt written before the engine judged one leaves the field empty
+- [ ] Store each attempt's verification as an `AttemptVerification` in the
+      attempt log, keyed by `attempt_id`. The results of the user's own code are
+      private, where a solution's verification is product data
 - [ ] Add the domain call retiring a problem as `defective`, moving the status
       on the stored record and nothing else. `ProblemStore.put` already refuses
       a record whose other fields moved
