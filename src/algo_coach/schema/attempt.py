@@ -21,6 +21,7 @@ class Attempt(BaseModel):
     id: str
     user_id: str
     problem_id: str
+    sitting_id: str | None = None  # absent on an attempt no sitting of the engine's minted
     started_at: datetime | None = None  # absent where nothing timed the sitting
     finished_at: datetime
     language: str | None = None  # not always recorded; a default would guess

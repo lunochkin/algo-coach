@@ -54,6 +54,17 @@ between.
   projection over the verification's results, and the raw result carries what
   the projection drops. A timeout and a wrong answer are both unsolved, and
   only the timeout is evidence of slowness.
+- **The elapsed time is cumulative, from the sitting's start to that
+  submission.** A drill mints an attempt per submission, so the second attempt
+  of a sitting carries the whole time since the statement was served, rather
+  than the time since the first submission. `time_to_solve_sec` names the time
+  to solve, and a per-segment number would report three minutes on the attempt
+  that solved the problem.
+- **The pauses are excluded already**, since the number is the sitting's
+  elapsed time at the moment the attempt finished.
+- **The time between two submissions is the difference of two attempts.** No
+  field records that gap, and cumulative numbers lose nothing by leaving it
+  derived.
 - **Problem techniques are never denormalized onto an attempt.** Problem
   techniques are re-derivable and the log is not, so a copy taken when the
   attempt was written would drift with no way to tell which is right.

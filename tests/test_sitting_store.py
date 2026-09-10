@@ -1,5 +1,5 @@
 from algo_coach.log import SittingStore
-from algo_coach.schema import Sitting
+from algo_coach.schema import Attempt, Sitting
 
 CONTENT = {
     "user_id": "maks",
@@ -71,3 +71,27 @@ def test_sittings_are_read_in_id_order(tmp_path):
         store.put(a_sitting(id))
 
     assert [one.id for one in store.all()] == ["s1", "s2"]
+
+
+def test_an_attempt_names_the_sitting_it_was_made_in(tmp_path):
+    """The log is append-only, so an attempt written without the id can never
+    be grouped with the sitting's others."""
+    attempt = Attempt.model_validate(
+        {
+            "id": "a1",
+            "user_id": "maks",
+            "problem_id": "p1",
+            "sitting_id": "s1",
+            "finished_at": AT_TEN,
+            "solved": True,
+        }
+    )
+    assert attempt.sitting_id == "s1"
+
+
+def test_an_attempt_no_sitting_minted_carries_none():
+    """Every attempt of the pushed corpus predates the engine serving one."""
+    attempt = Attempt.model_validate(
+        {"id": "a1", "user_id": "maks", "problem_id": "p1", "finished_at": AT_TEN, "solved": False}
+    )
+    assert attempt.sitting_id is None

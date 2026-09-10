@@ -37,6 +37,18 @@
       "title": "Problem Id",
       "type": "string"
     },
+    "sitting_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sitting Id"
+    },
     "solved": {
       "title": "Solved",
       "type": "boolean"

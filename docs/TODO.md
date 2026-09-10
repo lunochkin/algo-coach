@@ -25,7 +25,7 @@ React frontend the API serves as static files.
       readable in that store alone
 - [x] Add `algo_coach.sitting.pause`, `.resume` and `.end`. A sitting the loop
       leaves open reports an elapsed time that moves with the moment it is read
-- [ ] Add `sitting_id` to `Attempt`, optional as an additive field is. An
+- [x] Add `sitting_id` to `Attempt`, optional as an additive field is. An
       attempt written without it can never be grouped with the sitting's other
       attempts, since the log is append-only
 - [ ] Add `algo_coach.sitting.serve`: a created problem in, its statement and a
