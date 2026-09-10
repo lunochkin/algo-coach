@@ -59,11 +59,9 @@ React frontend the API serves as static files.
 - [x] Write the `AttemptClaim` the sitting's question produces, over the
       problem's own techniques and carrying a confidence level.
       `algo-coach claim` asks that question of attempts already in the log
-- [ ] Write the `SelfLabel` the sitting's second question produces. The schema
-      has carried `FailureMode` since Phase 1, and nothing writes one yet
-- [ ] Ask both questions per attempt of the sitting rather than once per
-      sitting. A drill can mint several attempts, and asking only about the
-      last would put the two counts on different denominators
+- [ ] Ask the claim per attempt of the sitting rather than once per sitting. A
+      drill can mint several attempts, and a claim on the last alone would
+      leave the earlier attempts to the problem's techniques
 
 ### The API
 
@@ -73,8 +71,7 @@ React frontend the API serves as static files.
 - [ ] Add the read routes the loop's first three steps need: the board, a
       technique's card and candidates, and a problem's statement
 - [ ] Add the write routes the rest of the loop needs: the submission and its
-      per-case verdict, pausing and resuming the sitting, the claim and the
-      self-label
+      per-case verdict, pausing and resuming the sitting, and the claim
 - [ ] Serve the statement and the `solve` signature alone, and keep every
       solution and every case's expected value server-side. A canonical in the
       response is the answer in the page source
@@ -111,9 +108,9 @@ React frontend the API serves as static files.
       handed out. The engine records that duration, so the page shows the
       number the log will carry
 - [ ] Build the prompt the sitting ends on: the claim over the problem's
-      techniques and the self-label
+      techniques
 - [ ] Drive one whole sitting in a test through the API rather than a browser:
-      serve, submit, verdict, claim, self-label. The frontend then carries no
+      serve, submit, verdict, claim. The frontend then carries no
       logic a test can only reach by rendering a page
 - [ ] Add `just app`: the API and the Vite dev server in one command, the dev
       server proxying the API. Two commands in two terminals is friction on
@@ -242,6 +239,12 @@ the audit. Generation goes on without the score.
 - [ ] Settle what `speed` means before anything writes the label. "Solved but
       too slowly" is about the user, a timeout is about the solution's
       complexity, and only the timeout is in the record
+- [ ] Write the `SelfLabel` the loop asks for at the moment of solving, once
+      `speed`, `rust` and `gap` are settled. A label cannot be given later, so
+      one written under a meaning that later moved can never be corrected
+- [ ] Offer only the failure modes an attempt's verification leaves open. A
+      crash on every case and a timeout are in the record already, and a label
+      contradicting the verdict would be a second answer to one question
 - [ ] Narrow the diagnosis call, the model call that writes a `Diagnosis`, to
       what the record supports: a mechanical slip against a conceptual miss. A
       four-way verdict would ask the call for what the call cannot see

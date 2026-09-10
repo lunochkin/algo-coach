@@ -186,7 +186,8 @@ interface here would be written twice.
 - `Attempt` gains the verification result.
 - A defective problem is retired by hand in the terminal, and the board stops
   counting that problem's attempts in either direction.
-- Claims and self-labels asked as Phase 2 asked them.
+- Claims asked as Phase 2 asked them. The self-label waits for Phase 12, where
+  its failure modes are settled.
 - Claim candidates come from the problem's derived techniques.
 - Exit: daily practice runs here, on problems the engine wrote and judged.
 
@@ -242,7 +243,8 @@ Scheduling targets the diagnosed cause rather than per-problem intervals.
 
 - Failure mode lands here, not beside attribution: only the mastery state
   separates rust from gap. `SPEED` needs settling first.
-- Sessions land here too, as a derived view over the log grouped on read.
+- The loop writes the self-label once those modes are settled, offering only
+  the modes an attempt's verification leaves open.
 - Exit: the scheduler drives daily practice.
 
 ## Phase 13 — Alternative solutions
