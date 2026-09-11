@@ -52,8 +52,9 @@ def test_the_board_counts_the_user_s_own_attempts_alone(client, tmp_path):
     assert {row["technique"]: row["attempt_count"] for row in rows} == {"greedy": 0, "sorting": 0}
 
 
-def test_a_technique_s_cards_come_without_the_optional_template(client, tmp_path):
-    """`content.md`: the optional template is surfaced on request alone."""
+def test_a_technique_s_cards_come_whole(client, tmp_path):
+    """The optional template only says a card is covered without it, so the
+    page receives it beside the core ones."""
     templates = [
         Template(id="t1", slug="core", title="core", trigger="when", code="def f(): pass"),
         Template(
@@ -75,7 +76,7 @@ def test_a_technique_s_cards_come_without_the_optional_template(client, tmp_path
 
     (card,) = client.get("/api/techniques/greedy/cards").json()
 
-    assert [one["slug"] for one in card["templates"]] == ["core"]
+    assert [one["slug"] for one in card["templates"]] == ["core", "hard"]
     assert client.get("/api/techniques/sorting/cards").json() == []
 
 

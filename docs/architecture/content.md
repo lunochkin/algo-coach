@@ -123,10 +123,14 @@ technique, and a card and a mastery estimate share no data.
   on which a naive solution exceeds the cap, whatever the input generator
   builds.
 - **One template may sit outside the core set.** Templates are core by
-  default, and at most one is marked optional. The optional template is
-  authored whole and surfaced on request alone. The hard form is worth
-  deriving before it is read, and a card showing it unasked would remove that
-  chance permanently.
+  default, and at most one is marked optional. A card is covered without its
+  optional template: the gap report skips it, and a rung covering it alone is
+  optional. An optional template differs from a core one in nothing else.
+- **Every template's code is hidden on a card's page until the user reveals
+  it.** A form is worth deriving before it is read, and a card showing its
+  code unasked removes that chance for every template alike. The card's
+  trigger and brief stay visible, since they say when to reach for the
+  technique rather than how the form is written.
 - **The ladder is resolved at import and re-derived whenever the corpus moves
   under it.** The selector is the truth and the ladder a derived view, so
   resolving the ladder again costs nothing. A started card is re-derived too.

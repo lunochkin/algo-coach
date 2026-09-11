@@ -51,7 +51,7 @@ class Template(BaseModel):
     title: str
     trigger: str = Field(min_length=1)  # which form this is, where the card's says which technique
     notes: str | None = None  # this form alone; the card's brief carries what is technique-wide
-    optional: bool = False  # never rendered unless asked for by name
+    optional: bool = False  # a card is covered without it
     speedup: bool = True  # false where the form is its own optimum, so no input separates it
     kind: TemplateKind = TemplateKind.CODE
     code: str  # whatever is blank-filled: a runnable unit, or the steps of a method

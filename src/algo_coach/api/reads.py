@@ -16,7 +16,7 @@ from algo_coach.board import (
     stalest_first,
     ungrouped,
 )
-from algo_coach.cards import CardStore, without_optional
+from algo_coach.cards import CardStore
 from algo_coach.log import AttemptLog, SittingStore, latest_by_attempt
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Attempt, Card, ProblemDifficulty
@@ -60,7 +60,7 @@ def board(root: Root, user_id: UserId) -> Board:
 
 @router.get("/techniques/{technique}/cards")
 def cards(root: Root, technique: str) -> list[Card]:
-    return [without_optional(card) for card in CardStore(root).for_technique(technique)]
+    return CardStore(root).for_technique(technique)
 
 
 @router.get("/techniques/{technique}/candidates")

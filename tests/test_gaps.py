@@ -32,7 +32,7 @@ def missing(cards, problems, solutions, matches) -> list[str]:
 
 
 def test_the_capstone_and_the_procedure_are_not_core(cards):
-    """One is offered on request alone, and the other is displayed by every
+    """A card is covered without the one, and the other is displayed by every
     solution its technique reaches."""
     assert [one.slug for one in core(cards[0])] == ["fixed-window", "longest-valid-window"]
 

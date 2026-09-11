@@ -101,9 +101,18 @@ React frontend built to static files, served on the API's origin.
 - [x] List the picked technique's candidates, least recently attempted first,
       and let the user pick the problem. A list shows no statement, since the
       clock starts when the statement is served
-- [ ] Show the technique's card before serving the statement, and call `serve`
-      when the user leaves the card. The clock then counts solving and not
-      reading
+- [ ] Add read routes for every card and for one card by its slug. A slug
+      stays the same across a re-seed, where the card's id is minted per store
+- [ ] Add the cards list page: every card, grouped by technique, each linking
+      to its own page
+- [ ] Add a card's page: its trigger, its brief and its templates, each
+      template's code hidden until the user reveals it. `content.md` gives why
+- [ ] Link a technique's cards from its candidates page and from the picked
+      problem's page. The card is offered, and no sitting requires it
+- [ ] Add a navigation menu linking the board and the cards list
+- [ ] Start the sitting from the picked problem's page: a button calls `serve`
+      and opens the sitting's page. A card read before that press stays off
+      the clock
 - [ ] Build the sitting page: the statement, the `solve` signature, and a
       CodeMirror editor with completion off. `flows.md` gives why the editor
       proposes nothing

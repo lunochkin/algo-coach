@@ -443,7 +443,7 @@ sitting and judges the submission, and records what only the user can say.
 The page layout is not designed here, and using the loop decides it.
 
 1. The board, ordered by staleness. The user picks a technique. The
-   technique's card is readable from this step on.
+   technique's cards are linked from this step on.
 2. Candidates for the technique, least recently attempted first, lowest solve
    rate breaking a tie. The user picks one.
 3. The sitting is minted, the statement is served, and the clock starts.
@@ -457,11 +457,11 @@ The page layout is not designed here, and using the loop decides it.
   techniques alone opens the first sitting with nothing to pick.
 - **A candidate is offered without its statement.** The clock starts when the
   statement is served, so a statement shown in the list is read untimed.
-- **The card is read before the statement is served.** The drill loop practises
-  a form the user has just read, and the clock counts solving rather than
-  reading. A card read only after the solve would review a form the sitting
-  never applied. Recognising a form with no card in view is a probe's test,
-  which Phase 11 adds.
+- **The card is offered, and no sitting requires it.** A user who holds the
+  form starts the sitting straight away, and a user who does not reads the
+  card first. Reading happens before the statement is served, so the clock
+  counts solving rather than reading. Recognising a form with no card in view
+  is a probe's test, which Phase 11 adds.
 - **An attempt nobody timed stays untimed**, rather than carrying a duration
   reconstructed after the fact.
 - **A sitting is paused and resumed**, and the elapsed time the attempt carries
