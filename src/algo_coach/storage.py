@@ -4,6 +4,7 @@ swaps underneath it. The Postgres tables the stores move to are declared against
 the conventions below, as `docs/architecture/README.md` gives them."""
 
 from enum import StrEnum
+from functools import cache
 from pathlib import Path
 from typing import Any
 
@@ -80,6 +81,9 @@ metadata = MetaData(
 )
 
 
+# one type per enum, however many tables use it: two declarations of one
+# Postgres type would have a migration create it twice
+@cache
 def enumerated(kind: type[StrEnum]) -> Enum:
     # by value, the string a stored JSON record already carries, rather than by
     # member name

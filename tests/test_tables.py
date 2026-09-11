@@ -9,12 +9,31 @@ from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from tables import Stored, mismatches
 
 from algo_coach.calls.table import calls
-from algo_coach.schema import Call, MachineProvenance
+from algo_coach.problems.table import problems
+from algo_coach.schema import (
+    Call,
+    ClaimSource,
+    MachineProvenance,
+    Problem,
+    Solution,
+    SolutionClaim,
+)
+from algo_coach.solution_claims.table import solution_claims
+from algo_coach.solutions.table import solutions
 from algo_coach.storage import call_column, enumerated, metadata, timestamp
 
 # every stored record and its table. Each store adds its own as its tables land
 STORED: list[Stored] = [
     Stored(Call, calls),
+    Stored(
+        Problem,
+        problems,
+        through_call=True,
+        required=frozenset({"call_id"}),
+        elsewhere=frozenset({"techniques"}),
+    ),
+    Stored(SolutionClaim, solution_claims, through_call=True),
+    Stored(Solution, solutions, through_call=True, required=frozenset({"call_id"})),
 ]
 
 
@@ -184,8 +203,41 @@ def test_a_list_of_records_must_name_its_child_table():
 def test_a_call_is_refused_in_the_database_unless_it_answered_or_failed():
     """`Call` rejects both and neither, and a writer that skips the model meets
     the same rule in the table."""
-    checks = {
-        one.name: str(one.sqltext) for one in calls.constraints if isinstance(one, CheckConstraint)
+    assert (
+        checks(calls)["calls_answered_or_failed_check"] == "(response IS NULL) <> (error IS NULL)"
+    )
+
+
+def checks(table: Table) -> dict[str, str]:
+    return {
+        str(one.name): str(one.sqltext)
+        for one in table.constraints
+        if isinstance(one, CheckConstraint)
     }
 
-    assert checks["calls_answered_or_failed_check"] == "(response IS NULL) <> (error IS NULL)"
+
+def test_a_solution_claim_names_a_call_exactly_when_the_classifier_wrote_it():
+    """A user's reading carries no provenance, and a machine's carries all of
+    it, as `SolutionClaim` validates."""
+    assert checks(solution_claims)["solution_claims_call_matches_source_check"] == (
+        "(source = 'classifier') = (call_id IS NOT NULL)"
+    )
+
+
+def test_one_enum_is_one_postgres_type_however_many_tables_use_it():
+    """A second declaration of the same type would have a migration create it
+    twice."""
+    assert enumerated(ClaimSource) is enumerated(ClaimSource)
+
+
+def test_a_problem_s_rules_hold_in_the_table():
+    """A problem names one target at most, and a retired one names why, as
+    `Problem` validates."""
+    held = checks(problems)
+
+    assert held["problems_one_target_check"] == (
+        "target_template_id IS NULL OR target_technique IS NULL"
+    )
+    assert held["problems_retirement_names_its_reason_check"] == (
+        "(status = 'retired') = (retired_reason IS NOT NULL)"
+    )

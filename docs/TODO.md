@@ -23,11 +23,11 @@ backend for our own generated code, which is not a threat model.
       and a test comparing a table's columns with its record's fields. The
       tables and the pydantic models are declared apart, so only a test keeps
       them equal
-- [ ] Declare the problems table beside the problem store
+- [x] Declare the problems table beside the problem store
 - [ ] Declare the test cases table, the arguments and the expected value as
       JSONB
-- [ ] Declare the solutions table
-- [ ] Declare the solution claims table
+- [x] Declare the solutions table
+- [x] Declare the solution claims table
 - [ ] Declare the template matches table
 - [ ] Declare the verifications table and its case results
 - [ ] Declare the site outcomes table
