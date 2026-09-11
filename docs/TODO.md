@@ -103,7 +103,7 @@ React frontend built to static files, served on the API's origin.
 - [x] List the picked technique's candidates, least recently attempted first,
       and let the user pick the problem. A list shows no statement, since the
       clock starts when the statement is served
-- [ ] Add the cards list page: every card, grouped by technique, each linking
+- [x] Add the cards list page: every card, grouped by technique, each linking
       to its own page
 - [ ] Add a card's page: its trigger, its brief and its templates, each
       template's code hidden until the user reveals it. `content.md` gives why
