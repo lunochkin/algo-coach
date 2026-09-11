@@ -10,9 +10,10 @@ from sqlalchemy import (
     Text,
     text,
 )
+from sqlalchemy.dialects.postgresql import ARRAY
 
-from algo_coach.schema import CaseOutcome
-from algo_coach.storage import enumerated, metadata, timestamp
+from algo_coach.schema import CaseOutcome, ClaimSource, Confidence, FailureMode
+from algo_coach.storage import call_column, enumerated, metadata, timestamp
 
 # the engine's own user, whose id a private record's `user_id` references. The
 # account a person signs in with is linked to it, and never stands in for it
@@ -104,4 +105,46 @@ attempt_verification_case_results = Table(
     ),
     CheckConstraint("error IS NULL OR outcome = 'crashed'", name="only_a_crash_names_an_error"),
     CheckConstraint("elapsed_ms >= 0", name="elapsed_counted"),
+)
+
+attempt_claims = Table(
+    "attempt_claims",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("created_at", timestamp(), nullable=False),
+    Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
+    Column("techniques", ARRAY(Text), nullable=False),
+    Column("declined", Boolean, nullable=False),
+    Column("source", enumerated(ClaimSource), nullable=False),
+    Column("informed_by", ARRAY(Text), nullable=False),
+    Column("confidence", enumerated(Confidence)),
+    call_column(nullable=True),
+    # the claim's own rules: a user names a technique or declines, a decline
+    # names nothing, and only the classifier names a call
+    CheckConstraint(
+        "source <> 'user' OR cardinality(techniques) > 0 OR declined", name="user_claim_answers"
+    ),
+    CheckConstraint("NOT (cardinality(techniques) > 0 AND declined)", name="decline_names_nothing"),
+    CheckConstraint("(source = 'classifier') = (call_id IS NOT NULL)", name="call_matches_source"),
+)
+
+self_labels = Table(
+    "self_labels",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("created_at", timestamp(), nullable=False),
+    Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
+    Column("mode", enumerated(FailureMode), nullable=False),
+)
+
+diagnoses = Table(
+    "diagnoses",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("created_at", timestamp(), nullable=False),
+    Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
+    Column("mode", enumerated(FailureMode), nullable=False),
+    Column("evidence", Text, nullable=False),
+    # a model wrote every diagnosis
+    call_column(nullable=False),
 )

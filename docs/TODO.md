@@ -40,9 +40,9 @@ backend for our own generated code, which is not a threat model.
 - [x] Declare the sittings table and its pauses
 - [x] Declare the attempts table
 - [x] Declare the attempt verifications table and its case results
-- [ ] Declare the attempt claims table
-- [ ] Declare the self-labels table
-- [ ] Declare the diagnoses table
+- [x] Declare the attempt claims table
+- [x] Declare the self-labels table
+- [x] Declare the diagnoses table
 - [ ] Check that every stored record has a table. A record left without one is
       a store the copy to Postgres skips
 - [ ] Generate the first Alembic migration from those tables, creating every

@@ -27,9 +27,12 @@ from algo_coach.drafts.table import (
     drafts,
 )
 from algo_coach.log.table import (
+    attempt_claims,
     attempt_verification_case_results,
     attempt_verifications,
     attempts,
+    diagnoses,
+    self_labels,
     sitting_pauses,
     sittings,
     users,
@@ -39,17 +42,20 @@ from algo_coach.outcomes.table import site_outcomes
 from algo_coach.problems.table import problems
 from algo_coach.schema import (
     Attempt,
+    AttemptClaim,
     AttemptVerification,
     Call,
     CallSite,
     Card,
     CaseResult,
     ClaimSource,
+    Diagnosis,
     Draft,
     DraftCase,
     MachineProvenance,
     Pause,
     Problem,
+    SelfLabel,
     SettledCase,
     SiteOutcome,
     Sitting,
@@ -68,6 +74,9 @@ from algo_coach.verifications.table import verification_case_results, verificati
 # every stored record and its table. Each store adds its own as its tables land
 STORED: list[Stored] = [
     Stored(Attempt, attempts),
+    Stored(AttemptClaim, attempt_claims, through_call=True),
+    Stored(SelfLabel, self_labels),
+    Stored(Diagnosis, diagnoses, through_call=True, required=frozenset({"call_id"})),
     Stored(AttemptVerification, attempt_verifications, elsewhere=frozenset({"results"})),
     Stored(
         CaseResult,
@@ -480,3 +489,28 @@ def test_an_attempt_s_case_results_hold_the_rules_a_solution_s_do():
         return {f"{name.removeprefix(prefix)}={sql}" for name, sql in checks(table).items()}
 
     assert rules(attempt_verification_case_results) == rules(verification_case_results)
+
+
+def test_an_attempt_claim_s_rules_hold_in_the_table():
+    """A user names a technique or declines, and a decline names nothing, as
+    `AttemptClaim` validates: an empty user claim would make a lost answer and
+    a stated verdict one row."""
+    held = checks(attempt_claims)
+
+    assert held["attempt_claims_user_claim_answers_check"] == (
+        "source <> 'user' OR cardinality(techniques) > 0 OR declined"
+    )
+    assert held["attempt_claims_decline_names_nothing_check"] == (
+        "NOT (cardinality(techniques) > 0 AND declined)"
+    )
+    assert held["attempt_claims_call_matches_source_check"] == (
+        "(source = 'classifier') = (call_id IS NOT NULL)"
+    )
+
+
+def test_every_record_keyed_to_an_attempt_references_it():
+    """`README.md`: a record keyed to an attempt carries its `attempt_id`, and
+    the table refuses one naming no attempt."""
+    for table in (attempt_verifications, attempt_claims, self_labels, diagnoses):
+        (key,) = table.c.attempt_id.foreign_keys
+        assert key.target_fullname == "attempts.id"
