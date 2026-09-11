@@ -40,21 +40,25 @@ def emptied(engine: Engine) -> None:
         # DELETE, where TRUNCATE takes a lock and new files per table and costs
         # a tenth of a second under a dozen workers. The replica role skips the
         # triggers refusing a delete, and the foreign keys the order would
-        # otherwise have to follow
-        conn.execute(text("SET LOCAL session_replication_role = replica"))
-        names = conn.execute(
-            text(
-                "SELECT tablename FROM pg_tables WHERE schemaname = 'public'"
-                " AND tablename <> 'alembic_version'"
-            )
-        ).scalars()
-        for name in names:
-            conn.execute(text(f'DELETE FROM "{name}"'))
+        # otherwise have to follow. One statement, so one round trip per test
         conn.execute(
-            text(
-                "SELECT setval(format('%I.%I', schemaname, sequencename), 1, false)"
-                " FROM pg_sequences WHERE schemaname = 'public'"
-            )
+            text("""
+                DO $$
+                DECLARE
+                    listed text;
+                BEGIN
+                    SET LOCAL session_replication_role = replica;
+                    FOR listed IN
+                        SELECT tablename FROM pg_tables
+                        WHERE schemaname = 'public' AND tablename <> 'alembic_version'
+                    LOOP
+                        EXECUTE format('DELETE FROM %I', listed);
+                    END LOOP;
+                    PERFORM setval(format('%I.%I', schemaname, sequencename), 1, false)
+                    FROM pg_sequences WHERE schemaname = 'public';
+                END
+                $$
+            """)
         )
 
 
