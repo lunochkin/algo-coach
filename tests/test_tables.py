@@ -4,15 +4,18 @@ from typing import Any
 
 import pytest
 from pydantic import create_model
-from sqlalchemy import Boolean, Column, Integer, MetaData, Table, Text
+from sqlalchemy import Boolean, CheckConstraint, Column, Integer, MetaData, Table, Text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from tables import Stored, mismatches
 
-from algo_coach.schema import MachineProvenance
+from algo_coach.calls.table import calls
+from algo_coach.schema import Call, MachineProvenance
 from algo_coach.storage import call_column, enumerated, metadata, timestamp
 
 # every stored record and its table. Each store adds its own as its tables land
-STORED: list[Stored] = []
+STORED: list[Stored] = [
+    Stored(Call, calls),
+]
 
 
 @pytest.mark.parametrize("stored", STORED, ids=lambda one: one.table.name)
@@ -176,3 +179,13 @@ def test_an_enum_column_with_other_values_is_reported():
 def test_a_list_of_records_must_name_its_child_table():
     with pytest.raises(AssertionError, match="points is a list of records"):
         mismatches(Stored(Shape, shape_table()))
+
+
+def test_a_call_is_refused_in_the_database_unless_it_answered_or_failed():
+    """`Call` rejects both and neither, and a writer that skips the model meets
+    the same rule in the table."""
+    checks = {
+        one.name: str(one.sqltext) for one in calls.constraints if isinstance(one, CheckConstraint)
+    }
+
+    assert checks["calls_answered_or_failed_check"] == "(response IS NULL) <> (error IS NULL)"

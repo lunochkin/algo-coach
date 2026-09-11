@@ -31,7 +31,7 @@ backend for our own generated code, which is not a threat model.
 - [ ] Declare the template matches table
 - [ ] Declare the verifications table and its case results
 - [ ] Declare the site outcomes table
-- [ ] Declare the calls table
+- [x] Declare the calls table
 - [ ] Declare the cards table and its templates
 - [ ] Declare the drafts table, its declared and settled cases, and one table
       for the provenance of its five sites
