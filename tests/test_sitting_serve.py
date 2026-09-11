@@ -38,13 +38,52 @@ def test_serving_stores_the_sitting_it_returns(stores):
 def test_the_statement_and_title_come_through(stores):
     served = serve(*stores, "p1", user_id="u-4f9c2a")
 
-    assert (served.title, served.statement) == ("Rotated", "Given xs ...\n\ndef solve(xs):")
+    assert (served.title, served.statement) == ("Rotated", "Given xs ...")
+
+
+def test_the_signature_is_split_from_the_prose(stores):
+    """A parameter like `max_cost` read as markdown is an emphasis, so the page
+    gets the line apart and shows it as code."""
+    assert serve(*stores, "p1", user_id="u-4f9c2a").signature == "def solve(xs):"
+
+
+def test_a_signature_in_a_fenced_block_is_split_with_its_fence(tmp_path):
+    problems = ProblemStore(tmp_path)
+    statement = (
+        "Find the centre.\n\n```python\ndef solve(n: int, edges: list[list[int]]) -> int:\n```\n"
+    )
+    problems.put(make_problem("p1", statement=statement))
+
+    served = serve(problems, SittingStore(tmp_path), "p1", user_id="u-4f9c2a")
+
+    assert (served.statement, served.signature) == (
+        "Find the centre.",
+        "def solve(n: int, edges: list[list[int]]) -> int:",
+    )
+
+
+@pytest.mark.parametrize(
+    "statement",
+    [
+        "Given an array, return its sum.",
+        "Write `def solve(xs):` returning the sum.",
+        "def solve(xs) is mentioned first.\n\nThen the prose goes on.",
+    ],
+)
+def test_a_statement_not_ending_on_the_line_is_all_prose(tmp_path, statement):
+    """A mention of the call inside a sentence is not the declaration."""
+    problems = ProblemStore(tmp_path)
+    problems.put(make_problem("p1", statement=statement))
+
+    served = serve(problems, SittingStore(tmp_path), "p1", user_id="u-4f9c2a")
+
+    assert (served.statement, served.signature) == (statement, None)
 
 
 def test_nothing_the_problem_was_written_from_is_served():
     """A target template or a technique names the form the sitting tests, so a
     field added here that carries one fails this."""
-    assert set(Served.model_fields) == {"title", "statement", "sitting"}
+    assert set(Served.model_fields) == {"title", "statement", "signature", "sitting"}
 
 
 def test_a_second_serve_returns_the_running_sitting(stores):

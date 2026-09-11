@@ -1156,6 +1156,17 @@
             "type": "string",
             "title": "Statement"
           },
+          "signature": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signature"
+          },
           "sitting": {
             "$ref": "#/components/schemas/Sitting"
           }
@@ -1164,6 +1175,7 @@
         "required": [
           "title",
           "statement",
+          "signature",
           "sitting"
         ],
         "title": "Served",

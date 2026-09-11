@@ -46,7 +46,8 @@ class Served(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     title: str
-    statement: str  # ends on the `solve` signature
+    statement: str  # the prose, without the signature it ends on
+    signature: str | None  # the `def solve(...)` line; none where a statement ends on prose
     sitting: Sitting
 
 
@@ -92,7 +93,7 @@ def serve(
     if one is None:
         one = mint.sitting(user_id, problem_id)
         sittings.put(one)
-    return Served(title=problem.title, statement=problem.statement, sitting=one)
+    return _served(problem.title, problem.statement, one)
 
 
 def get(
@@ -109,7 +110,7 @@ def get(
     problem = problems.get(one.problem_id)
     if problem is None:
         raise ValueError(f"sitting {sitting_id} names no stored problem {one.problem_id}")
-    return Served(title=problem.title, statement=problem.statement, sitting=one)
+    return _served(problem.title, problem.statement, one)
 
 
 def submit(
@@ -216,6 +217,28 @@ def end(
     return _stored(
         store, one, pauses=_closed(one.pauses, at) if one.paused else one.pauses, ended_at=at
     )
+
+
+def _served(title: str, statement: str, one: Sitting) -> Served:
+    prose, signature = _signed(statement)
+    return Served(title=title, statement=prose, signature=signature, sitting=one)
+
+
+def _signed(statement: str) -> tuple[str, str | None]:
+    """The prose before the `def solve(...)` line a statement ends on, and that
+    line. Split here so no renderer reads a parameter name as markup."""
+    text = statement.rstrip()
+    # a generated statement ends on the line bare, or inside a fenced block
+    fenced = text.endswith("```")
+    body = text.removesuffix("```").rstrip()
+    start = body.rfind("def solve(")
+    at_line_start = start == 0 or (start > 0 and body[start - 1] == "\n")
+    if start == -1 or not at_line_start or "\n" in body[start:]:
+        return statement, None
+    prose = body[:start].rstrip()
+    if fenced:
+        prose = prose[: prose.rfind("```")].rstrip()
+    return prose, body[start:]
 
 
 def _owned(store: SittingStore, sitting_id: str, user_id: str) -> Sitting:

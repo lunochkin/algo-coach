@@ -471,6 +471,8 @@ export interface components {
             title: string;
             /** Statement */
             statement: string;
+            /** Signature */
+            signature: string | null;
             sitting: components["schemas"]["Sitting"];
         };
         /** Sitting */

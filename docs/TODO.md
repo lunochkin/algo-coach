@@ -113,7 +113,7 @@ React frontend built to static files, served on the API's origin.
 - [ ] Start the sitting from the picked problem's page: a button calls `serve`
       and opens the sitting's page. A card read before that press stays off
       the clock
-- [ ] Build the sitting page: the statement, the `solve` signature, and a
+- [x] Build the sitting page: the statement, the `solve` signature, and a
       CodeMirror editor with completion off. `flows.md` gives why the editor
       proposes nothing
 - [ ] Show the per-case verdict beside the editor rather than on a page of its
