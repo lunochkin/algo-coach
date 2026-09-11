@@ -26,6 +26,7 @@ from algo_coach.drafts.table import (
     draft_settled_cases,
     drafts,
 )
+from algo_coach.log.table import users
 from algo_coach.matches.table import template_matches
 from algo_coach.outcomes.table import site_outcomes
 from algo_coach.problems.table import problems
@@ -415,3 +416,10 @@ def test_a_draft_s_rules_hold_in_the_table():
     assert held["drafts_input_generator_carries_its_bound_check"] == (
         "(input_generator IS NULL) = (largest IS NULL)"
     )
+
+
+def test_a_user_is_the_engine_s_own_id_and_nothing_of_an_account():
+    """A private record's `user_id` references this row, and a provider switch
+    would otherwise rewrite the log: `README.md`."""
+    assert [one.name for one in users.columns] == ["id", "created_at"]
+    assert users.c.id.primary_key and not users.c.created_at.nullable

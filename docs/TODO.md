@@ -35,7 +35,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Declare the cards table and its templates
 - [x] Declare the drafts table, its declared and settled cases, and a call
       column for each of its five sites
-- [ ] Declare the users table, whose engine-minted id a private record's
+- [x] Declare the users table, whose engine-minted id a private record's
       `user_id` references by foreign key
 - [ ] Declare the sittings table and its pauses
 - [ ] Declare the attempts table
