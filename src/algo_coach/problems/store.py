@@ -27,7 +27,7 @@ class ProblemStore:
         ):
             raise ValueError(f"problem {record.id} is stored, and only its status moves")
         values = record.model_dump(exclude={"techniques", *CONFIGURATION})
-        with self.root.engine.begin() as conn:
+        with self.root.begin() as conn:
             called(conn, [record])
             conn.execute(
                 insert(problems)
@@ -59,7 +59,7 @@ class ProblemStore:
         return retired
 
     def _read(self, *where: ColumnElement[bool]) -> list[Problem]:
-        with self.root.engine.connect() as conn:
+        with self.root.connect() as conn:
             rows = [
                 dict(row)
                 for row in conn.execute(

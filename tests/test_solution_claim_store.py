@@ -1,7 +1,15 @@
-from helpers import PROVENANCE
+import pytest
+from helpers import PROVENANCE, stored_solution
 
 from algo_coach.mint import machine_solution_claim, user_solution_claim
 from algo_coach.solution_claims import SolutionClaimLog
+
+
+@pytest.fixture(autouse=True)
+def referenced(database):
+    """The rows this module's records name by foreign key."""
+    for n in range(5):
+        stored_solution(database, f"s{n}")
 
 
 def make_solution_claim(solution_id: str = "s1", techniques: list[str] | None = None):
@@ -72,7 +80,7 @@ def test_the_set_is_read_per_solution(database):
 
 def test_append_order_is_kept(database):
     """A tie on `created_at` is broken by what landed last, which only holds
-    if the file is read in the order it was written."""
+    if the log is read in the order it was written."""
     log = SolutionClaimLog(database)
     written = [make_solution_claim(f"s{n}") for n in range(5)]
     for one in written:

@@ -1,10 +1,18 @@
 import pytest
-from helpers import PROVENANCE
+from helpers import PROVENANCE, stored_problem, stored_template
 from pydantic import ValidationError
 
 from algo_coach.mint import site_outcome
 from algo_coach.outcomes import OutcomeLog, answered
 from algo_coach.schema import CallSite, Configuration, Gate, SiteOutcome
+
+
+@pytest.fixture(autouse=True)
+def referenced(database):
+    """The rows this module's records name by foreign key."""
+    stored_template(database, "t1")
+    stored_problem(database, "p1")
+    stored_problem(database, "p2")
 
 
 def left(site: CallSite = CallSite.GENERATOR, writing_id: str = "w1", **overrides):

@@ -1,13 +1,23 @@
 import pytest
-from helpers import CONFIGURATION, FakeTransport, Verdict, attempt, make_problem, own
+from helpers import (
+    CONFIGURATION,
+    PROVENANCE,
+    FakeTransport,
+    Verdict,
+    attempt,
+    make_problem,
+    own,
+    stored_problem,
+)
 
 from algo_coach.attempt_claims import ask as claim_one
 from algo_coach.calls import CallLog
 from algo_coach.classifier import request_hash
 from algo_coach.log import AttemptLog
 from algo_coach.mint import solution as mint_solution
-from algo_coach.schema import ClaimSource, MachineProvenance, SolutionRole
+from algo_coach.schema import ClaimSource, SolutionRole
 from algo_coach.solution_claims import SolutionClaimLog, candidates, read, read_one
+from algo_coach.solutions import SolutionLog
 from algo_coach.techniques import codes
 
 answering = FakeTransport.answering
@@ -23,9 +33,7 @@ def canonical(code: str = CODE):
         problem_id="p1",
         code=code,
         role=SolutionRole.CANONICAL,
-        provenance=MachineProvenance(
-            model="a-model", effort="medium", pin="a/pin", prompt_hash="deadbeef", call_id="call-0"
-        ),
+        provenance=PROVENANCE,
     )
 
 
@@ -35,7 +43,16 @@ def log(database) -> SolutionClaimLog:
 
 
 def run(client, log, *, code=CODE):
-    return read(client, log, CallLog(log.root), canonical(code), configuration=CONFIGURATION)
+    one = stored(log.root, canonical(code))
+    return read(client, log, CallLog(log.root), one, configuration=CONFIGURATION)
+
+
+def stored(root, one):
+    """The canonical in the store, with its problem, since the claim's foreign
+    key names the solution."""
+    stored_problem(root, "p1")
+    SolutionLog(root).append(one)
+    return one
 
 
 def test_a_verdict_is_written_as_a_classifier_reading(log):
@@ -53,7 +70,7 @@ def test_the_reading_is_keyed_to_the_solution(log):
     """A form is displayed by code and so is a technique, so the subject is
     the solution rather than the problem it answers."""
     client = answering(Verdict(["sorting"]))
-    one = canonical()
+    one = stored(log.root, canonical())
 
     read(client, log, CallLog(log.root), one, configuration=CONFIGURATION)
 

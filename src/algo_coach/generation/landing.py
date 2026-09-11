@@ -57,55 +57,58 @@ def landing(draft: Draft) -> list[SettledCase]:
 
 
 def land(corpus: Corpus, template: Template, draft: Draft) -> Problem:
-    # minted first, since every other record names its id, and put last, since
-    # it is what a reader finds
-    provenance = copied(draft.generator_provenance)
-    problem = mint.generated_problem(
-        draft.title,
-        draft.statement,
-        target_template_id=template.id,
-        difficulty=draft.difficulty,
-        provenance=provenance,
-    )
-    for case in landing(draft):
-        # the case's own call rather than the problem's: a mutation round and
-        # the speedup search propose arguments at their own configuration
-        corpus.cases.append(
-            mint.case(
-                problem.id,
-                case.args,
-                case.expected,
-                expected_from=case.expected_from,
-                round=case.round,
-                repeats=case.repeats,
-                provenance=case.provenance,
-            )
+    # one transaction: a reader finds the problem with every part of it or
+    # finds nothing, and the problem goes first, since every other record
+    # names it
+    with corpus.problems.root.transaction():
+        provenance = copied(draft.generator_provenance)
+        problem = mint.generated_problem(
+            draft.title,
+            draft.statement,
+            target_template_id=template.id,
+            difficulty=draft.difficulty,
+            provenance=provenance,
         )
-    canonical = mint.solution(
-        problem.id, draft.canonical, SolutionRole.CANONICAL, provenance=provenance
-    )
-    corpus.solutions.append(canonical)
-    blind = copied(draft.blind_provenance)
-    if draft.reference is None:
-        raise ValueError("a landing draft carries the reference its blind call wrote")
-    corpus.solutions.append(
-        mint.solution(problem.id, draft.reference, SolutionRole.REFERENCE, provenance=blind)
-    )
-    if draft.naive is not None:
-        # stored so a later search measures against the solution this run paid
-        # for. Absent where the template claims no speedup, since nothing
-        # measures a form that is its own optimum
+        corpus.problems.put(problem)
+        for case in landing(draft):
+            # the case's own call rather than the problem's: a mutation round
+            # and the speedup search propose arguments at their own
+            # configuration
+            corpus.cases.append(
+                mint.case(
+                    problem.id,
+                    case.args,
+                    case.expected,
+                    expected_from=case.expected_from,
+                    round=case.round,
+                    repeats=case.repeats,
+                    provenance=case.provenance,
+                )
+            )
+        canonical = mint.solution(
+            problem.id, draft.canonical, SolutionRole.CANONICAL, provenance=provenance
+        )
+        corpus.solutions.append(canonical)
+        blind = copied(draft.blind_provenance)
+        if draft.reference is None:
+            raise ValueError("a landing draft carries the reference its blind call wrote")
         corpus.solutions.append(
-            mint.solution(
-                problem.id,
-                draft.naive,
-                SolutionRole.NAIVE,
-                provenance=copied(draft.naive_provenance),
-            )
+            mint.solution(problem.id, draft.reference, SolutionRole.REFERENCE, provenance=blind)
         )
-    corpus.matches.append(mint.generator_match(template.id, canonical.id))
-    corpus.problems.put(problem)
-    return problem
+        if draft.naive is not None:
+            # stored so a later search measures against the solution this run
+            # paid for. Absent where the template claims no speedup, since
+            # nothing measures a form that is its own optimum
+            corpus.solutions.append(
+                mint.solution(
+                    problem.id,
+                    draft.naive,
+                    SolutionRole.NAIVE,
+                    provenance=copied(draft.naive_provenance),
+                )
+            )
+        corpus.matches.append(mint.generator_match(template.id, canonical.id))
+        return problem
 
 
 __all__ = ["Corpus", "copied", "land", "landing"]

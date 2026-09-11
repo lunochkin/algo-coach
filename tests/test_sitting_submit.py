@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 import pytest
-from helpers import PROVENANCE
+from helpers import PROVENANCE, stored_problem
 
 from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog, SittingStore
@@ -31,6 +31,7 @@ class Stores:
                 | sitting
             )
         )
+        stored_problem(root, "p1")
         for args, expected in (([1], 2), ([3], 6)):
             self.cases.append(case("p1", args, expected, provenance=PROVENANCE))
 
@@ -128,6 +129,7 @@ def test_code_defining_no_solve_is_unsolved(database):
 def test_only_the_sitting_s_problem_decides(database):
     """A case of another problem would fail every correct submission here."""
     stores = Stores(database)
+    stored_problem(database, "p2")
     stores.cases.append(case("p2", [1], 99, provenance=PROVENANCE))
 
     assert stores.submit(DOUBLE).solved

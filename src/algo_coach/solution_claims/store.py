@@ -1,17 +1,16 @@
-from pathlib import Path
-
 from algo_coach.schema import SolutionClaim
-from algo_coach.storage import Database, JsonlLog
+from algo_coach.solution_claims.table import solution_claims
+from algo_coach.storage import Database, Log
 
 
-class SolutionClaimLog(JsonlLog[SolutionClaim]):
+class SolutionClaimLog(Log[SolutionClaim]):
     """Solution claims, the user's and the machine's alike."""
 
-    def __init__(self, root: Database | Path) -> None:
-        super().__init__(root, "solution_claims.jsonl", SolutionClaim)
+    def __init__(self, root: Database) -> None:
+        super().__init__(root, solution_claims, SolutionClaim)
 
     def claims(self) -> list[SolutionClaim]:
         return self.all()
 
     def for_solution(self, solution_id: str) -> list[SolutionClaim]:
-        return [one for one in self.all() if one.solution_id == solution_id]
+        return self.where(solution_claims.c.solution_id == solution_id)

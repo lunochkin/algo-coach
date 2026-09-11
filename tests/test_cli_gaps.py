@@ -4,7 +4,6 @@ from matching import canonical, card, problem, seeded, stored, template
 
 from algo_coach.matches import MatchLog
 from algo_coach.mint import generator_match
-from algo_coach.solutions import SolutionLog
 
 
 def run(monkeypatch, *argv: str) -> None:
@@ -17,8 +16,8 @@ def root(database, monkeypatch):
     data = data_root(database, monkeypatch)
     cards = seeded(data, card(templates=[template("fixed-window"), template("shrink-to-fit")]))
     stored(data, problem("p1", techniques=["sliding-window"]))
+    # stored beside the problem, as its claim names it
     solution = canonical("p1")
-    SolutionLog(data).append(solution)
     fixed = next(one.id for one in cards[0].templates if one.slug == "fixed-window")
     MatchLog(data).append(generator_match(fixed, solution.id))
     return data

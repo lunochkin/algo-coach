@@ -138,20 +138,23 @@ def test_a_form_that_is_its_own_optimum_lands_no_naive_solution(database, templa
     assert corpus.solutions.for_problem(problem.id, SolutionRole.NAIVE) == []
 
 
-def test_the_problem_is_written_last(database, template, monkeypatch):
-    """Four stores cannot be written atomically. A run that dies part way
-    leaves records pointing at a problem no reader finds, rather than a problem
-    whose parts are missing."""
+def test_a_landing_that_fails_part_way_writes_nothing(database, template, monkeypatch):
+    """The four stores are written in one transaction, so a run that dies at
+    the last record leaves neither a problem missing its parts nor parts naming
+    a problem."""
     corpus = Corpus.at(database)
     monkeypatch.setattr(
-        corpus.problems, "put", lambda _problem: (_ for _ in ()).throw(OSError("disk"))
+        corpus.matches, "append", lambda _match: (_ for _ in ()).throw(OSError("disk"))
     )
 
     with pytest.raises(OSError, match="disk"):
         land(corpus, template, drafted())
 
-    assert corpus.problems.all() == []
-    assert len(corpus.cases.cases()) == 1
+    assert (corpus.problems.all(), corpus.cases.cases(), corpus.solutions.solutions()) == (
+        [],
+        [],
+        [],
+    )
 
 
 def test_the_problem_carries_what_the_generation_call_asserted(database, template):

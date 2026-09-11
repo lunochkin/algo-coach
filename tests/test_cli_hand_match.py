@@ -2,16 +2,17 @@ import argparse
 from contextlib import asynccontextmanager
 
 import pytest
-from matching import PROCEDURE, canonicals, card, problem, seeded, stored, template
+from helpers import a_call
+from matching import PROCEDURE, card, problem, seeded, stored, template
 from textual.containers import VerticalScroll
 from textual.widgets import Markdown, Static
 
+from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cli.hand_match import hand_matching
 from algo_coach.matches import MatchLog
 from algo_coach.mint import machine_match
 from algo_coach.schema import MachineProvenance, MatchSource
-from algo_coach.solutions import SolutionLog
 
 # Wide and tall: the layout is two panes, and the pilot's default is one
 # eighty-column screen. Nothing here asserts on wrapping.
@@ -36,15 +37,14 @@ def hand_match_root(database, monkeypatch):
             templates=[template("plain-union"), template("weighted-union")],
         ),
     )
-    corpus = stored(
+    # a match is keyed to a solution, and `stored` writes each problem's
+    # canonical beside it
+    stored(
         root,
         problem("b0", techniques=["backtracking"]),
         problem("b1", techniques=["backtracking"]),
         problem("u0", techniques=["union-find"]),
     )
-    # a match is keyed to a solution, so each problem carries a canonical
-    for one in canonicals(*corpus):
-        SolutionLog(root).append(one)
     return root
 
 
@@ -100,6 +100,10 @@ def read_by_matcher(root):
     the order draws first has one to show. Seeded on both, or the test passes
     by drawing the solution nothing read."""
     subsets = next(id for id, name in by_slug(root).items() if name == "subsets")
+    # the call the verdicts name, which holds the configuration they carry
+    CallLog(root).append(
+        a_call("c", model="a-matcher", effort="medium", prompt_hash="h", pin="p", provider=None)
+    )
     for solution_id in ("s-b0", "s-b1"):
         MatchLog(root).append(
             machine_match(
@@ -239,8 +243,7 @@ async def test_a_procedure_template_is_never_offered(hand_match_root):
             templates=[template("next-greater"), template("framing", **PROCEDURE)],
         ),
     )
-    for one in canonicals(*stored(root, problem("m0", techniques=["monotonic-stack"]))):
-        SolutionLog(root).append(one)
+    stored(root, problem("m0", techniques=["monotonic-stack"]))
     await run(root, ["space", "enter"], count=1, card="monotonic-stack")
 
     slug = by_slug(root)

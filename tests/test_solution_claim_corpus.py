@@ -1,8 +1,17 @@
 import pytest
-from helpers import CONFIGURATION, PROVENANCE_FIELDS, T0, FakeTransport, Verdict
+from helpers import (
+    CONFIGURATION,
+    PROVENANCE_FIELDS,
+    T0,
+    FakeTransport,
+    Verdict,
+    a_call,
+    stored_problem,
+)
 
 from algo_coach.calls import CallLog
 from algo_coach.classifier import DEFAULT, request_hash
+from algo_coach.ids import new_id
 from algo_coach.mint import machine_solution_claim, user_solution_claim
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Configuration, MachineProvenance, Solution, SolutionRole
@@ -13,6 +22,7 @@ from algo_coach.solution_claims import (
     outstanding,
     read_corpus,
 )
+from algo_coach.solutions import SolutionLog
 
 answering = FakeTransport.answering
 
@@ -30,25 +40,36 @@ def solution(id: str, *, role: SolutionRole = SolutionRole.CANONICAL, code: str 
     )
 
 
+def kept(log, one: Solution) -> None:
+    """The solution in the store, with its problem, since a claim's foreign key
+    names the solution. Storing one already there changes nothing."""
+    if all(held.id != one.id for held in SolutionLog(log.root).solutions()):
+        stored_problem(log.root, one.problem_id)
+        SolutionLog(log.root).append(one)
+
+
 def already_read(
+    log,
     one: Solution,
     *,
     configuration: Configuration = CONFIGURATION,
     prompt_hash: str | None = None,
 ):
-    """What this configuration would have written, had it read the solution."""
-    return machine_solution_claim(
-        one.id,
-        ["sorting"],
-        provenance=MachineProvenance(
-            model=configuration.model,
-            effort=configuration.effort,
-            prompt_hash=prompt_hash or request_hash(candidates(), one.code),
-            call_id="call-0",
-            pin=configuration.pin,
-            temperature=configuration.temperature,
-        ),
+    """What this configuration would have written, had it read the solution,
+    and the call it would have made, stored, since the claim reads its
+    configuration off it."""
+    call = a_call(
+        new_id(),
+        model=configuration.model,
+        effort=configuration.effort,
+        prompt_hash=prompt_hash or request_hash(candidates(), one.code),
+        pin=configuration.pin,
+        temperature=configuration.temperature,
+        provider=None,
     )
+    CallLog(log.root).append(call)
+    kept(log, one)
+    return machine_solution_claim(one.id, ["sorting"], provenance=MachineProvenance.of(call))
 
 
 @pytest.fixture
@@ -57,6 +78,8 @@ def log(database) -> SolutionClaimLog:
 
 
 def run(client, log, solutions, **kwargs):
+    for one in solutions:
+        kept(log, one)
     return read_corpus(
         client, log, CallLog(log.root), solutions, configuration=CONFIGURATION, **kwargs
     )
@@ -97,7 +120,7 @@ def test_a_canonical_read_at_this_prompt_hash_is_skipped(log):
     """The claim answers the prompt this run would send, so paying for it
     again would buy the same verdict."""
     one = solution("s1")
-    log.append(already_read(one))
+    log.append(already_read(log, one))
     client = answering()
 
     result = run(client, log, [one])
@@ -110,7 +133,7 @@ def test_a_criteria_edit_re_reads_what_it_reached(log):
     """Staleness keys on the prompt hash of what was sent, so a claim taken at
     another rulebook is answered again."""
     one = solution("s1")
-    log.append(already_read(one, prompt_hash="an-older-rulebook"))
+    log.append(already_read(log, one, prompt_hash="an-older-rulebook"))
     client = answering(Verdict(["greedy"]))
 
     result = run(client, log, [one])
@@ -123,7 +146,7 @@ def test_only_the_unread_canonicals_are_asked_about(log):
     """A run resumes where the last stopped: claims are appended as they are
     made, and the ones already at this prompt hash drop out."""
     read, unread = solution("s1"), solution("s2", code="def solve(n):\n    return n\n")
-    log.append(already_read(read))
+    log.append(already_read(log, read))
     client = answering(Verdict(["greedy"]))
 
     result = run(client, log, [read, unread])
@@ -138,7 +161,7 @@ def test_another_configuration_reads_again(log):
     answer from another."""
     one = solution("s1")
     another = DEFAULT.model_copy(update={"model": "another-model"})
-    log.append(already_read(one, configuration=another))
+    log.append(already_read(log, one, configuration=another))
     client = answering(Verdict(["greedy"]))
 
     result = run(client, log, [one])
@@ -150,6 +173,7 @@ def test_a_hand_reading_does_not_take_a_canonical_out_of_the_run(log):
     """The user's claim is what a configuration is scored against, so a
     machine claim of the same solution is what the score needs to exist."""
     one = solution("s1")
+    kept(log, one)
     log.append(user_solution_claim(one.id, ["sorting"]))
     client = answering(Verdict(["greedy"]))
 
@@ -161,7 +185,7 @@ def test_a_hand_reading_does_not_take_a_canonical_out_of_the_run(log):
 def test_fresh_asks_again(log):
     """Measuring a reader against itself needs the question put twice."""
     one = solution("s1")
-    log.append(already_read(one))
+    log.append(already_read(log, one))
     client = answering(Verdict(["greedy"]))
 
     result = run(client, log, [one], fresh=True)
@@ -234,7 +258,10 @@ def test_outstanding_reads_the_prompt_hash_it_is_given(log):
     solution out, and one at another hash does not."""
     one, two = solution("s1"), solution("s2")
     hashes = {"s1": "current", "s2": "current"}
-    claims = [already_read(one, prompt_hash="current"), already_read(two, prompt_hash="older")]
+    claims = [
+        already_read(log, one, prompt_hash="current"),
+        already_read(log, two, prompt_hash="older"),
+    ]
 
     assert [
         left.id for left in outstanding([one, two], claims, hashes, configuration=CONFIGURATION)

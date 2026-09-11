@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
 from algo_coach.calls import Reply
+from algo_coach.cards import CardStore
 from algo_coach.classifier import PIN, TEMPERATURE
 from algo_coach.mint import classifier_claim, user_solution_claim
 from algo_coach.problems import ProblemStore
@@ -15,11 +16,14 @@ from algo_coach.schema import (
     Attempt,
     AttemptClaim,
     Call,
+    Card,
     Configuration,
     MachineProvenance,
     Problem,
+    Selector,
     Solution,
     SolutionRole,
+    Template,
 )
 from algo_coach.solution_claims import SolutionClaimLog
 from algo_coach.solutions import SolutionLog
@@ -267,3 +271,44 @@ def own(records: list) -> list:
     shared helpers."""
     shared = {CALL_ROW["id"]}
     return [one for one in records if one.id not in shared]
+
+
+def stored_problem(root, id: str = "p1", **overrides) -> Problem:
+    """A problem in the store, for a record whose foreign key names it. Storing
+    one already there changes nothing."""
+    problem = make_problem(id, **overrides)
+    ProblemStore(root).put(problem)
+    return problem
+
+
+def stored_solution(root, id: str = "s1", problem_id: str = "p1") -> Solution:
+    """A canonical in the store, and the problem it answers."""
+    stored_problem(root, problem_id)
+    solution = Solution(
+        id=id,
+        created_at=T0,
+        problem_id=problem_id,
+        role=SolutionRole.CANONICAL,
+        code="def solve(xs):\n    return sorted(xs)\n",
+        **PROVENANCE_FIELDS,
+    )
+    SolutionLog(root).append(solution)
+    return solution
+
+
+def stored_template(root, id: str = "t1") -> None:
+    """A card holding one template of this id, for a record naming the
+    template."""
+    template = Template(id=id, slug=id, title=id, trigger="a trigger", code="def f(): pass")
+    CardStore(root).put(
+        Card(
+            id=f"card-{id}",
+            slug=f"card-{id}",
+            technique="greedy",
+            title=id,
+            trigger="a trigger",
+            brief="a brief",
+            templates=[template],
+            selector=Selector(technique="greedy", size=1),
+        )
+    )

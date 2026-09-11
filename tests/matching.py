@@ -8,6 +8,7 @@ from algo_coach.mint import user_solution_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Card, Problem, Solution, SolutionRole, TemplateKind
 from algo_coach.solution_claims import SolutionClaimLog
+from algo_coach.solutions import SolutionLog
 
 
 def template(slug: str, **overrides) -> dict:
@@ -92,6 +93,11 @@ def stored(root, *problems: Problem) -> list[Problem]:
     for one in problems:
         store.put(one.model_copy(update={"techniques": []}))
         if one.techniques:
+            # the canonical the claim names, stored once, since the claim's
+            # foreign key refuses a solution nobody wrote
+            solutions = SolutionLog(root)
+            if not any(held.id == f"s-{one.id}" for held in solutions.for_problem(one.id)):
+                solutions.append(canonical(one.id))
             SolutionClaimLog(root).append(user_solution_claim(f"s-{one.id}", one.techniques))
     return sorted(problems, key=lambda one: one.id)
 

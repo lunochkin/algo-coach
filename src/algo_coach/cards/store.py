@@ -19,7 +19,7 @@ class CardStore:
         values = record.model_dump(exclude={"templates", "selector"}) | {
             f"selector_{name}": value for name, value in record.selector.model_dump().items()
         }
-        with self.root.engine.begin() as conn:
+        with self.root.begin() as conn:
             conn.execute(
                 insert(cards)
                 .values(values)
@@ -66,7 +66,7 @@ class CardStore:
             )
 
     def _read(self, *where: ColumnElement[bool]) -> list[Card]:
-        with self.root.engine.connect() as conn:
+        with self.root.connect() as conn:
             rows = conn.execute(select(cards).where(*where).order_by(cards.c.id)).mappings().all()
             ids = [row["id"] for row in rows]
             held = conn.execute(

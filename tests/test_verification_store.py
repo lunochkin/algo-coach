@@ -1,6 +1,28 @@
+import pytest
+from helpers import PROVENANCE_FIELDS, stored_solution
+
+from algo_coach.cases import CaseLog
 from algo_coach.mint import verification
-from algo_coach.schema import CaseOutcome, CaseResult
+from algo_coach.schema import CaseOutcome, CaseResult, TestCase
 from algo_coach.verifications import VerificationLog
+
+
+@pytest.fixture(autouse=True)
+def referenced(database):
+    """The solutions the runs name, and the case each result names."""
+    stored_solution(database, "s1")
+    stored_solution(database, "s2")
+    CaseLog(database).append(
+        TestCase(
+            id="c1",
+            problem_id="p1",
+            args=[1],
+            expected=1,
+            expected_from="reference",
+            round=0,
+            **PROVENANCE_FIELDS,
+        )
+    )
 
 
 def run(solution_id: str = "s1", **overrides):

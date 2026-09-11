@@ -1,8 +1,16 @@
-from helpers import PROVENANCE
+import pytest
+from helpers import PROVENANCE, stored_problem
 
 from algo_coach import mint
 from algo_coach.cases import CaseLog
 from algo_coach.schema import TestCase
+
+
+@pytest.fixture(autouse=True)
+def referenced(database):
+    """The rows this module's records name by foreign key."""
+    stored_problem(database, "p1")
+    stored_problem(database, "p2")
 
 
 def case(*args, **overrides) -> TestCase:

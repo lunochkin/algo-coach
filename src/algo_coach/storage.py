@@ -3,6 +3,8 @@ directory of one file per record. The schema is the contract, and this is what
 swaps underneath it. The Postgres tables the stores move to are declared against
 the conventions below, as `docs/architecture/README.md` gives them."""
 
+from collections.abc import Generator
+from contextlib import contextmanager
 from enum import StrEnum
 from functools import cache, cached_property
 from pathlib import Path
@@ -12,6 +14,7 @@ from pydantic import BaseModel
 from sqlalchemy import (
     BigInteger,
     Column,
+    ColumnElement,
     Connection,
     DateTime,
     Engine,
@@ -19,8 +22,10 @@ from sqlalchemy import (
     ForeignKey,
     Identity,
     MetaData,
+    Table,
     Text,
     create_engine,
+    insert,
     select,
 )
 
@@ -33,6 +38,40 @@ class Database:
         self.directory = directory
         self._url = url
         self._engine = engine
+        # the connection of the transaction a caller holds open, which every
+        # store's statement joins
+        self._held: Connection | None = None
+
+    @contextmanager
+    def transaction(self) -> Generator[None]:
+        """Every store's writes inside commit together or not at all, as a
+        landing's problem, cases, solutions and match do."""
+        if self._held is not None:
+            yield
+            return
+        with self.engine.begin() as conn:
+            self._held = conn
+            try:
+                yield
+            finally:
+                self._held = None
+
+    @contextmanager
+    def begin(self) -> Generator[Connection]:
+        if self._held is not None:
+            yield self._held
+            return
+        with self.engine.begin() as conn:
+            yield conn
+
+    @contextmanager
+    def connect(self) -> Generator[Connection]:
+        # inside a transaction a read sees what that transaction wrote
+        if self._held is not None:
+            yield self._held
+            return
+        with self.engine.connect() as conn:
+            yield conn
 
     @cached_property
     def engine(self) -> Engine:
@@ -53,6 +92,37 @@ class Database:
 def directory(root: Database | Path) -> Path:
     # a store still on files takes a handle or, as its tests do, the directory
     return root.directory if isinstance(root, Database) else root
+
+
+class Log[T: BaseModel]:
+    """An append-only table of flat records, read in the order they landed. A
+    machine record's configuration is read off the call it names."""
+
+    def __init__(self, root: Database, table: Table, model: type[T]) -> None:
+        self.root = root
+        self.table = table
+        self.model = model
+
+    def append(self, record: T) -> None:
+        dumped = record.model_dump()
+        # the columns alone: a machine record's configuration stays on its call
+        values = {name: value for name, value in dumped.items() if name in self.table.c}
+        with self.root.begin() as conn:
+            if "call_id" in self.table.c:
+                called(conn, [record])
+            conn.execute(insert(self.table).values(values))
+
+    def all(self) -> list[T]:
+        return self.where()
+
+    def where(self, *conditions: ColumnElement[bool]) -> list[T]:
+        query = select(self.table).where(*conditions).order_by(self.table.c.appended)
+        with self.root.connect() as conn:
+            rows = [dict(row) for row in conn.execute(query).mappings()]
+            if "call_id" in self.table.c:
+                known = configurations(conn, {row["call_id"] for row in rows} - {None})
+                rows = [configured(row, known) for row in rows]
+        return [self.model.model_validate(row) for row in rows]
 
 
 class JsonlLog[T: BaseModel]:
@@ -209,6 +279,7 @@ __all__ = [
     "Database",
     "FileStore",
     "JsonlLog",
+    "Log",
     "appended_column",
     "call_column",
     "called",

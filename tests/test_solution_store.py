@@ -1,8 +1,16 @@
-from helpers import PROVENANCE
+import pytest
+from helpers import PROVENANCE, stored_problem
 
 from algo_coach.mint import solution
 from algo_coach.schema import SolutionRole
 from algo_coach.solutions import SolutionLog
+
+
+@pytest.fixture(autouse=True)
+def referenced(database):
+    """The rows this module's records name by foreign key."""
+    stored_problem(database, "p1")
+    stored_problem(database, "p2")
 
 
 def make_canonical(

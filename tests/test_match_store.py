@@ -1,7 +1,19 @@
 from datetime import UTC, datetime, timedelta
 
+import pytest
+from helpers import stored_solution, stored_template
+
 from algo_coach.matches import MatchLog
 from algo_coach.schema import MatchSource, TemplateMatch
+
+
+@pytest.fixture(autouse=True)
+def referenced(database):
+    """The rows this module's records name by foreign key."""
+    stored_template(database, "t1")
+    for id in ("s1", "s2", "s3"):
+        stored_solution(database, id)
+
 
 NOW = datetime.now(UTC)
 

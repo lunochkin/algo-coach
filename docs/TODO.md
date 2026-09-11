@@ -55,12 +55,12 @@ backend for our own generated code, which is not a threat model.
 - [x] Rewrite the calls store on Postgres, its tests on the fixture
 - [x] Rewrite the cards store on Postgres, its tests on the fixture
 - [x] Rewrite the problem store on Postgres, its tests on the fixture
-- [ ] Rewrite the case store on Postgres, its tests on the fixture
-- [ ] Rewrite the solution store on Postgres, its tests on the fixture
-- [ ] Rewrite the solution claims store on Postgres, its tests on the fixture
-- [ ] Rewrite the template matches store on Postgres, its tests on the fixture
-- [ ] Rewrite the verifications store on Postgres, its tests on the fixture
-- [ ] Rewrite the site outcomes store on Postgres, its tests on the fixture
+- [x] Rewrite the case store on Postgres, its tests on the fixture
+- [x] Rewrite the solution store on Postgres, its tests on the fixture
+- [x] Rewrite the solution claims store on Postgres, its tests on the fixture
+- [x] Rewrite the template matches store on Postgres, its tests on the fixture
+- [x] Rewrite the verifications store on Postgres, its tests on the fixture
+- [x] Rewrite the site outcomes store on Postgres, its tests on the fixture
 - [ ] Rewrite the draft store on Postgres: a put replaces the draft's row and
       all its cases in one transaction. Simple, and revisable, since the draft
       store is working state

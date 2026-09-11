@@ -147,9 +147,15 @@ def test_an_edited_template_re_reads_that_card_alone(database):
     )
     run(database, FakeTransport.answering(Verdict([]), Verdict([])), cards, corpus)
 
+    # every form kept, one edited: a template a match names is never dropped
     edited = seeded(
         database,
-        card(templates=[template("longest-valid-window", code="a different form")]),
+        card(
+            templates=[
+                template("longest-valid-window", code="a different form"),
+                template("fixed-window"),
+            ]
+        ),
         card("backtracking", technique="backtracking"),
     )
     client = FakeTransport.answering(Verdict(["longest-valid-window"]))

@@ -1,5 +1,6 @@
 from generating import FakeWriter
 from matching import card, seeded, template
+from sqlalchemy import delete
 
 from algo_coach.calls import CallLog
 from algo_coach.cases import CaseLog
@@ -15,6 +16,7 @@ from algo_coach.schema import (
     SolutionRole,
 )
 from algo_coach.solutions import SolutionLog
+from algo_coach.solutions.table import solutions
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 # slow enough to separate at the cap the tests lower: a reference the search
@@ -116,9 +118,10 @@ def test_a_problem_with_no_stored_naive_solution_is_not_searched_over(database, 
     """One landed before the role existed. The site's own answer would be
     judged by a search that cannot run."""
     cards = landed(database, monkeypatch)
-    log = SolutionLog(database)
-    kept = [one for one in log.solutions() if one.role is not SolutionRole.NAIVE]
-    log.path.write_text("".join(one.model_dump_json() + "\n" for one in kept))
+    # removed behind the store, which keeps an append-only log and has no
+    # delete, as a problem stored before the role existed never had one
+    with database.begin() as conn:
+        conn.execute(delete(solutions).where(solutions.c.role == SolutionRole.NAIVE))
 
     _, outcomes = replayed(database, FakeWriter(generator=BUILDS), cards)
 

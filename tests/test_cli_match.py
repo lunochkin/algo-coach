@@ -1,11 +1,10 @@
 import pytest
 from commands import TRANSPORT, data_root, run_cli
 from helpers import FakeTransport, Verdict
-from matching import canonicals, card, problem, seeded, stored
+from matching import card, problem, seeded, stored
 
 from algo_coach import cli
 from algo_coach.matches import EFFORT, MODEL, MatchLog
-from algo_coach.solutions import SolutionLog
 
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
@@ -16,10 +15,9 @@ def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
 def root(database, monkeypatch):
     data = data_root(database, monkeypatch)
     seeded(data, card())
-    corpus = stored(data, problem("p1", techniques=["sliding-window"]))
-    # a match is keyed to a solution, so a corpus with none asks nothing
-    for one in canonicals(*corpus):
-        SolutionLog(data).append(one)
+    # a match is keyed to a solution, and `stored` writes each problem's
+    # canonical beside it
+    stored(data, problem("p1", techniques=["sliding-window"]))
     return data
 
 

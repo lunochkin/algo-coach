@@ -16,11 +16,11 @@ class CallLog:
         self.appended: list[Call] = []
 
     def append(self, record: Call) -> None:
-        with self.root.engine.begin() as conn:
+        with self.root.begin() as conn:
             conn.execute(insert(calls).values(record.model_dump()))
         self.appended.append(record)
 
     def all(self) -> list[Call]:
-        with self.root.engine.connect() as conn:
+        with self.root.connect() as conn:
             rows = conn.execute(select(calls).order_by(calls.c.appended)).mappings()
             return [Call.model_validate(dict(row)) for row in rows]
