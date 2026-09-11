@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from algo_coach.api.reads import router as reads
+from algo_coach.api.signin import SignIn, install
 from algo_coach.api.writes import router as writes
 from algo_coach.sitting import Missing, Refused
 from algo_coach.storage import Database
@@ -10,7 +11,7 @@ from algo_coach.storage import Database
 PREFIX = "/api"
 
 
-def create_app(root: Database, *, user_id: str) -> FastAPI:
+def create_app(root: Database, *, user_id: str, sign_in: SignIn | None = None) -> FastAPI:
     app = FastAPI(title="algo-coach")
     app.state.root = root
     # one user stands in for authentication until Phase 9 keys the log by user
@@ -18,6 +19,8 @@ def create_app(root: Database, *, user_id: str) -> FastAPI:
     app.add_exception_handler(Refused, _refused)
     app.include_router(reads, prefix=PREFIX)
     app.include_router(writes, prefix=PREFIX)
+    if sign_in is not None:
+        install(app, sign_in, PREFIX)
     return app
 
 

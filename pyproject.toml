@@ -8,13 +8,18 @@ requires-python = ">=3.14"
 authors = [{ name = "Maksim Lunochkin" }]
 dependencies = [
     "alembic>=1.19.2",
+    "authlib>=1.8.0",
     "fastapi>=0.141.1",
+    "httpx>=0.28.1",
+    "itsdangerous>=2.2.0",
+    "joserfc>=1.7.5",
     "openai>=1.60",
     "psycopg[binary]>=3.3.5",
     "pydantic>=2.7",
     "python-dotenv>=1.0",
     "rich>=15.0.0",
     "sqlalchemy>=2.0.52",
+    "starlette>=1.6.0",
     "textual>=8.2.8",
     "uvicorn>=0.52.4",
 ]
@@ -24,7 +29,6 @@ algo-coach = "algo_coach.cli:main"
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28.1",
     "hypothesis>=6.167.1",
     "import-linter>=2.15",
     "pyright>=1.1.411",
@@ -134,9 +138,10 @@ source_modules = [
 forbidden_modules = ["algo_coach.cli", "algo_coach.api"]
 
 # used outside `src`, which is all deptry reads: Alembic runs `migrations/`, and
-# SQLAlchemy loads psycopg from the database URL's scheme
+# SQLAlchemy loads psycopg from the database URL's scheme. Starlette's session
+# middleware signs the sign-in state with itsdangerous, which it never declares
 [tool.deptry.per_rule_ignores]
-DEP002 = ["alembic", "psycopg"]
+DEP002 = ["alembic", "itsdangerous", "psycopg"]
 
 [tool.coverage.run]
 source = ["algo_coach"]

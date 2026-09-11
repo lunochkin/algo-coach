@@ -86,7 +86,7 @@ backend for our own generated code, which is not a threat model.
       users table, minted the first time the account signs in. `README.md`
       requires every reference in an append-only record to be engine-minted,
       and a provider switch would otherwise rewrite the log
-- [ ] Add the Google and GitHub sign-in and callback routes through Authlib,
+- [x] Add the Google and GitHub sign-in and callback routes through Authlib,
       passing on only an email the provider verified. The library checks the
       state, the nonce and PKCE, where a hand-written flow goes wrong
 - [ ] Add a `sessions` table, and set a session's id in an `HttpOnly`,

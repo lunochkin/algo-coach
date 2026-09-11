@@ -10,6 +10,7 @@ from dotenv import find_dotenv, load_dotenv
 from fastapi import FastAPI
 
 from algo_coach.api.app import create_app
+from algo_coach.api.signin import SignIn
 from algo_coach.storage import Database
 
 # the port `web/vite.config.ts` proxies `/api` to
@@ -18,7 +19,11 @@ PORT = 8000
 
 def app() -> FastAPI:
     root = Database(url=os.environ.get("DATABASE_URL"))
-    return create_app(root, user_id=os.environ.get("ALGO_COACH_USER", "local"))
+    return create_app(
+        root,
+        user_id=os.environ.get("ALGO_COACH_USER", "local"),
+        sign_in=SignIn.from_environ(os.environ),
+    )
 
 
 def main() -> None:
