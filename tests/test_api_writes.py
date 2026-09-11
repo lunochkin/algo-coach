@@ -125,7 +125,9 @@ def test_each_attempt_of_the_sitting_is_asked_about_until_claimed(client, sittin
     the earlier ones to the problem's techniques."""
     first = submitted(client, sitting_id, TRIPLE).json()["attempt"]["id"]
     second = submitted(client, sitting_id).json()["attempt"]["id"]
-    assert [one["id"] for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()] == [
+    assert [
+        one["id"] for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
+    ] == [
         first,
         second,
     ]
@@ -135,9 +137,9 @@ def test_each_attempt_of_the_sitting_is_asked_about_until_claimed(client, sittin
     ).json()
 
     assert (written["techniques"], written["source"]) == (["sorting"], "user")
-    assert [one["id"] for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()] == [
-        second
-    ]
+    assert [
+        one["id"] for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
+    ] == [second]
 
 
 def test_a_claim_is_limited_to_the_problem_s_own_techniques(client, sitting_id):
@@ -180,3 +182,20 @@ def test_a_pause_reports_the_elapsed_time_it_froze(client, sitting_id):
 
     assert paused["elapsed_sec"] >= 0
     assert again["elapsed_sec"] == pytest.approx(paused["elapsed_sec"])
+
+
+def test_the_claim_is_asked_over_the_problem_s_own_techniques(client, sitting_id):
+    """The page offers these and no other, and the claim route refuses the
+    rest."""
+    submitted(client, sitting_id)
+
+    assert client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["techniques"] == [
+        "greedy",
+        "sorting",
+    ]
+
+
+def test_another_user_s_unclaimed_attempts_are_not_found(root, client, sitting_id):
+    other = TestClient(create_app(root, user_id="u-b71e03"))
+
+    assert other.get(f"/api/sittings/{sitting_id}/unclaimed").status_code == 404

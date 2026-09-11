@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import { duration } from '@/lib/format'
+
 type Props = {
   // the engine's reading, and the moment the page received it
   elapsedSec: number
@@ -24,15 +26,7 @@ export function ElapsedClock({ elapsedSec, receivedAt, running }: Props) {
 
   return (
     <span className="font-mono text-lg tabular-nums" aria-label="Elapsed time">
-      {formatted(shown)}
+      {duration(shown)}
     </span>
   )
-}
-
-function formatted(seconds: number): string {
-  const whole = Math.floor(seconds)
-  const hours = Math.floor(whole / 3600)
-  const minutes = Math.floor((whole % 3600) / 60)
-  const rest = String(whole % 60).padStart(2, '0')
-  return hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${rest}` : `${minutes}:${rest}`
 }

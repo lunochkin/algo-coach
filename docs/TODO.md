@@ -124,7 +124,7 @@ React frontend built to static files, served on the API's origin.
 - [x] Show the elapsed time during the sitting, counted from the start the API
       handed out. The engine records that duration, so the page shows the
       number the log will carry
-- [ ] Build the prompt the sitting ends on: the claim over the problem's
+- [x] Build the prompt the sitting ends on: the claim over the problem's
       techniques
 - [ ] Drive one whole sitting in a test through the API rather than a browser:
       serve, submit, verdict, claim. The frontend then carries no

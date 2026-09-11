@@ -27,7 +27,10 @@ export function ProblemPage() {
       const { data, error } = await api.POST('/api/problems/{problem_id}/sittings', {
         params: { path: { problem_id: problemId } },
       })
-      if (data) navigate(`/sittings/${encodeURIComponent(data.sitting.id)}`)
+      if (data)
+        navigate(
+          `/sittings/${encodeURIComponent(data.sitting.id)}?technique=${encodeURIComponent(technique)}`,
+        )
       else setRefused(described(error))
     } catch (reason) {
       setRefused(String(reason))

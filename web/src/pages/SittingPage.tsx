@@ -1,17 +1,39 @@
-import { useRef, useState } from 'react'
-import { useParams } from 'react-router'
+import { useCallback, useRef, useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { api, type Sitting, type Submitted } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
+import { ClaimPrompt } from '@/components/ClaimPrompt'
 import { CodeEditor } from '@/components/CodeEditor'
 import { ElapsedClock } from '@/components/ElapsedClock'
 import { Markdown } from '@/components/Markdown'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Verdict } from '@/components/Verdict'
+import { cn } from '@/lib/utils'
 
 export function SittingPage() {
   const { sittingId = '' } = useParams()
+  const [search] = useSearchParams()
+  const navigate = useNavigate()
+  const toBoard = useCallback(() => navigate('/'), [navigate])
   const { data: served, error } = useLoaded(
     async (signal) => {
       const answer = await api.GET('/api/sittings/{sitting_id}', {
@@ -45,14 +67,17 @@ export function SittingPage() {
   const draft = `algo-coach:sitting:${sittingId}:code`
   const initial = stored(draft) ?? (served.signature ? `${served.signature}\n    ` : '')
 
-  async function toggle() {
+  async function move(to: 'pause' | 'resume' | 'end') {
     setMoving(true)
     setRefused(null)
     try {
       const params = { params: { path: { sitting_id: sittingId } } }
-      const { data, error } = paused
-        ? await api.POST('/api/sittings/{sitting_id}/resume', params)
-        : await api.POST('/api/sittings/{sitting_id}/pause', params)
+      const { data, error } =
+        to === 'pause'
+          ? await api.POST('/api/sittings/{sitting_id}/pause', params)
+          : to === 'resume'
+            ? await api.POST('/api/sittings/{sitting_id}/resume', params)
+            : await api.POST('/api/sittings/{sitting_id}/end', params)
       if (data) setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() })
       else setRefused(described(error))
     } catch (reason) {
@@ -88,7 +113,7 @@ export function SittingPage() {
           <div className="flex items-center gap-3">
             {/* the time the pause froze: the clock under the cover is blurred */}
             <ElapsedClock elapsedSec={clock.elapsedSec} receivedAt={clock.at} running={false} />
-            <Button onClick={toggle} disabled={moving}>
+            <Button onClick={() => move('resume')} disabled={moving}>
               Resume
             </Button>
           </div>
@@ -138,9 +163,31 @@ export function SittingPage() {
               {ended ? (
                 <span className="text-sm text-muted-foreground">This sitting has ended</span>
               ) : (
-                <Button variant="outline" onClick={toggle} disabled={moving}>
-                  Pause
-                </Button>
+                <>
+                  <Button variant="outline" onClick={() => move('pause')} disabled={moving}>
+                    Pause
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" disabled={moving}>
+                        End
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>End the sitting?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          The clock stops for good, and no more submissions are taken. Each
+                          attempt is then asked about in turn.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Keep solving</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => move('end')}>End</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
               )}
             </div>
           </div>
@@ -151,6 +198,21 @@ export function SittingPage() {
           )}
         </section>
       </div>
+      {/* the claim the sitting ends on; closing it leaves the attempts to the
+          problem's own techniques, and a reload asks again */}
+      <Dialog open={ended} onOpenChange={(open) => open || toBoard()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>The claim</DialogTitle>
+            <DialogDescription>
+              Asked of each attempt now, while the code is minutes old.
+            </DialogDescription>
+          </DialogHeader>
+          {ended && (
+            <ClaimPrompt sittingId={sittingId} drilled={search.get('technique')} onDone={toBoard} />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

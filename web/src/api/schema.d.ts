@@ -576,6 +576,17 @@ export interface components {
             /** Elapsed Sec */
             elapsed_sec: number;
         };
+        /**
+         * Unclaimed
+         * @description The claim a sitting ends on: the attempts no claim answers yet, and the
+         *     problem's techniques they are answered over.
+         */
+        Unclaimed: {
+            /** Techniques */
+            techniques: string[];
+            /** Attempts */
+            attempts: components["schemas"]["Attempt"][];
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -938,7 +949,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Attempt"][];
+                    "application/json": components["schemas"]["Unclaimed"];
                 };
             };
             /** @description Validation Error */

@@ -435,11 +435,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Attempt"
-                  },
-                  "title": "Response Unanswered Api Sittings  Sitting Id  Unclaimed Get"
+                  "$ref": "#/components/schemas/Unclaimed"
                 }
               }
             }
@@ -1410,6 +1406,31 @@
         ],
         "title": "Timed",
         "description": "A sitting a pause, a resume or an end moved, with its elapsed time on the\nengine's clock."
+      },
+      "Unclaimed": {
+        "properties": {
+          "techniques": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Techniques"
+          },
+          "attempts": {
+            "items": {
+              "$ref": "#/components/schemas/Attempt"
+            },
+            "type": "array",
+            "title": "Attempts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "techniques",
+          "attempts"
+        ],
+        "title": "Unclaimed",
+        "description": "The claim a sitting ends on: the attempts no claim answers yet, and the\nproblem's techniques they are answered over."
       },
       "ValidationError": {
         "properties": {
