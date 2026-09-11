@@ -35,9 +35,14 @@ backend for our own generated code, which is not a threat model.
 - [x] Declare the cards table and its templates
 - [x] Declare the drafts table, its declared and settled cases, and a call
       column for each of its five sites
+- [ ] Declare the users table, whose engine-minted id a private record's
+      `user_id` references by foreign key
 - [ ] Declare the sittings table and its pauses
-- [ ] Declare the attempt log's tables: attempts, attempt verifications and
-      their case results, claims, self-labels and diagnoses
+- [ ] Declare the attempts table
+- [ ] Declare the attempt verifications table and its case results
+- [ ] Declare the attempt claims table
+- [ ] Declare the self-labels table
+- [ ] Declare the diagnoses table
 - [ ] Check that every stored record has a table. A record left without one is
       a store the copy to Postgres skips
 - [ ] Generate the first Alembic migration from those tables, creating every
@@ -61,9 +66,10 @@ backend for our own generated code, which is not a threat model.
 - [ ] Choose the bought account provider, and write into
       `docs/architecture/README.md` what it holds: the identity and the login,
       and nothing of the practice log. No credential handling is our own
-- [ ] Mint the engine's own user id for each account, and key the log on it.
-      `README.md` requires every reference in an append-only record to be
-      engine-minted, and a provider switch would otherwise rewrite the log
+- [ ] Link each provider account to a row of the users table, minted the first
+      time the account signs in. `README.md` requires every reference in an
+      append-only record to be engine-minted, and a provider switch would
+      otherwise rewrite the log
 - [ ] Decide how the records written under the user `local` reach the author's
       account, and write the choice into `log.md`. Those records are the
       author's history, and the log is append-only
@@ -72,9 +78,6 @@ backend for our own generated code, which is not a threat model.
       one dependency
 - [ ] Add login and logout to the pages, and send a request without a session
       to the login. The session cookie stays on the pages' origin
-- [ ] Key every private record by the engine's user id in its table:
-      sittings, attempts, attempt verifications and claims. Problems, cases,
-      solutions, matches and cards stay shared product data
 - [ ] Make one user's log readable and deletable without touching another's.
       The author's own log is the evidence of daily use and the set every eval
       reads, and must not mix with another user's
