@@ -3,8 +3,6 @@ import os
 import sys
 from collections.abc import Callable
 
-from openai import OpenAI
-
 from algo_coach.calls import BASE_URL, OpenRouter, Retry
 from algo_coach.cli.display import held
 
@@ -27,6 +25,10 @@ def transport(
     key = next((os.environ[name] for name in CREDENTIALS if os.environ.get(name)), None)
     if key is None:
         parser.exit(2, f"{args.command}: {' or '.join(CREDENTIALS)} unset\n")
+    # imported on use: the import takes a quarter second, which every command
+    # and every test worker paid
+    from openai import OpenAI  # noqa: PLC0415
+
     # A command drawing a board passes its own `on_retry`, or the line scrolls
     # the block.
     return OpenRouter(OpenAI(api_key=key, base_url=BASE_URL), on_retry=on_retry)
