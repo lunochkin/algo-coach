@@ -1,5 +1,5 @@
 # One job, the same command a commit runs: lint, type-check, test, for the
-# engine and the frontend.
+# engine and the frontend. The tests run against Postgres.
 name: ci
 
 on:
@@ -15,6 +15,24 @@ jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # the integration tests' server, on the version the engine runs against.
+    # Its default user is a superuser, which creates the workers' databases and
+    # sets `session_replication_role`. A throwaway container, so the password is
+    # no secret
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/postgres
     steps:
       - uses: actions/checkout@v7
       # by commit, as its readme asks; the major tags stop at v7

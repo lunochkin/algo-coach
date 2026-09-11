@@ -23,7 +23,7 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
   `session_replication_role`. Each xdist worker keeps a database of its own
   between runs, and recreates it when a migration file changes. A test taking
   the `database` fixture is marked `integration` and finds every table empty.
-  `just test-unit` runs the rest, without a database, as CI does.
+  `just test-unit` runs the rest, without a database.
 - `just app` runs the API and the Vite dev server together, and Ctrl+C stops
   both. The page is at the address Vite prints.
 

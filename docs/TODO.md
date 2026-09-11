@@ -75,7 +75,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Copy every record under `data/` into Postgres with a one-off command, and
       check that each reads back equal. A record the copy loses from an
       append-only log is lost for good
-- [ ] Run Postgres for the suite in CI. The stores run on nothing else
+- [x] Run Postgres for the suite in CI. The stores run on nothing else
 
 ### Users and access
 

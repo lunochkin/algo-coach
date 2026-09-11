@@ -58,9 +58,8 @@ fmt:
 # frontend's own type check and lint.
 check: lint typecheck dead web-check test
 
-# What CI runs: `check` with the unit tests alone, since CI has no Postgres
-# yet. Coverage is gated over the whole suite, by `just coverage`.
-ci: lint typecheck dead web-check test-unit
+# What CI runs: `check`, with the whole suite gated on coverage.
+ci: lint typecheck dead web-check coverage
 
 # Enable the pre-commit and commit-msg hooks. Once per clone.
 hooks:
