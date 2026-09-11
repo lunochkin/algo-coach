@@ -158,7 +158,7 @@ def test_an_unnamed_reason_is_rejected():
 
 
 def test_a_created_problem_is_served_and_a_retired_one_is_not():
-    """No gate stands between landing and serving until Phase 14, so
-    retirement is the only status that stops one."""
+    """No gate stands between landing and serving until the corpus is gated,
+    so retirement is the only status that stops one."""
     assert make_problem().served
     assert not make_problem(status="retired", retired_reason="defective").served

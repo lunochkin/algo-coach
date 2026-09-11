@@ -2,10 +2,10 @@
 
 Each phase ships one capability and a write-up. Ship thin.
 
-A phase exits when its deliverable is in use by whatever consumes it: daily
-practice for a phase the user runs, the next phase for one that builds a
-capability. A phase can also close as superseded: it was built, and something
-later answered it, so its exit no longer applies.
+A phase exits on one act a reader can check: a pass through the flow the phase
+ships, for a phase the user runs, or the next phase using the capability, for
+one that builds a capability. A phase can also close as superseded: it was
+built, and something later answered it, so its exit no longer applies.
 
 `docs/architecture/` owns the concepts, boundaries, and invariants.
 This file owns only sequencing. On any difference, the architecture wins.
@@ -218,10 +218,25 @@ each person signs in to a log of their own, and their code runs in a sandbox.
 - Exit: a sitting completed on the deployed engine by an invited, signed-in
   user, the author included.
 
-## Phase 10 — The matcher, measured
+## Phase 10 — The pages designed
 
-The worth of a generated corpus, measured. Held Phase 7's number until
-2026-09-09.
+The pages given one design, and the flows Phase 12 adds planned before they are
+built.
+
+- A design system in code: the theme tokens in `web/src/index.css`, the
+  components the pages use, and a page showing both.
+- The pages' overall design: the navigation, the main areas and the page a
+  signed-in user lands on, written into `docs/architecture/` and applied to
+  every existing page.
+- The flows of Phase 12, card runs, the ladder and the recall trainer, written
+  as sequences with a low-fidelity wireframe each. A detail only use can
+  answer is named as deferred.
+- Exit: every existing page is built on the design system, and each Phase 12
+  flow is written and drawn.
+
+## Phase 11 — The matcher, measured
+
+The worth of a generated corpus, measured.
 
 - The hand pass, which writes the matcher's reference and is the only reading
   of a generated problem no model produced.
@@ -232,7 +247,7 @@ The worth of a generated corpus, measured. Held Phase 7's number until
 - A configuration pinned before any number is quoted.
 - Exit: the matcher carries a per-template score in both directions.
 
-## Phase 11 — Ladder, recall and card runs
+## Phase 12 — Ladder, recall and card runs
 
 The pieces a card needs once there are problems to fill it.
 
@@ -247,70 +262,42 @@ The pieces a card needs once there are problems to fill it.
   own tests.
 - Status rather than verdicts: the inputs a graduation rule would read.
 - Graduation names no threshold. The numbers do not exist yet.
-- Exit: recall and the ladder run daily.
+- Exit: a card run gone through by hand: a card started, a rung of its ladder
+  solved, a template recalled cold against the card's tests, and a probe
+  offered.
 
-## Phase 12 — Technique mastery, scheduling, failure mode
+## Phase 13 — Mastery and scheduling
 
-Per-technique skill state updated from attempts and the diagnosis signal.
-Scheduling targets the diagnosed cause rather than per-problem intervals.
+Per-technique skill state derived from the log, and a scheduler that picks what
+the user practises next.
 
-- Failure mode lands here, not beside attribution: only the mastery state
-  separates rust from gap. `SPEED` needs settling first.
-- The loop writes the self-label once those modes are settled, offering only
-  the modes an attempt's verification leaves open.
-- Exit: the scheduler drives daily practice.
+- Mastery per technique, derived from attempts, their claims and their
+  verdicts, and never stored.
+- A scheduler picking the next sitting from that state. The board still offers
+  every technique beside the pick.
+- Exit: a sitting started from the scheduler's pick on the board, and
+  completed to the claim.
 
-## Phase 13 — Alternative solutions
+## Further developments
 
-Every other way to solve a stored problem, enumerated over the corpus rather
-than asked for by template. A call proposes the approaches, each becomes its
-own canonical, and the problem's own cases judge them.
+Blocks of work not ready for a phase, unnumbered and unordered. A block becomes
+a planned phase once it is clear enough to plan, and `docs/TODO.md` holds the
+items of each block, the smaller ones included.
 
-Exit: one rung covers a core template and an optional one, through two
-canonicals of one problem.
-
-## Phase 14 — The corpus gated
-
-Whether a generated statement gives its form away, measured rather than
-assumed. A solver who recognises a problem has not derived its form, so such a
-problem teaches recognition of nothing.
-
-- A reader for `data/old/`, the corpus no generator wrote.
-- The rate at which one matcher names a form from the statement alone, over
-  both corpora. The archive's rate is the baseline.
-- A status the gate promotes a created problem to, and a retirement reason
-  whose attempts are kept. Both are additive to the schema.
-- How many generated statements are retrieved public problems rather than
-  written ones.
-- Exit: every stored problem has passed the gate or been retired by it.
-
-## Phase 15 — Program-analysis-grounded diagnosis
-
-Ground the classifier in evidence: AST-diff against canonical solutions,
-execution-trace comparison, empirical complexity measurement. Deliverable:
-measured accuracy delta against LLM-only diagnosis.
-
-## Phase 16 — Retrieval
-
-Similar problems, patterns, and technique briefs retrieved from the corpus and
-the user's own attempts, and weak-spot patterns surfaced.
-
-## Phase 17 — MCP + autonomy
-
-Corpus and tools exposed as an MCP server. A scheduled agent runs the practice
-loop: it picks drills and adapts to history.
-
-## Phase 18 — Multi-agent (conditional)
-
-Only once a real pipeline needs it: diagnose → retrieve → brief → schedule.
-
-## Phase 19 — Soundness-checked synthesis
-
-An upgrade to Phase 6's generation rather than its first appearance. Formal
-constraint specs, property-based test-case generation, adversarial validation.
-
-## Renumbering
-
-On 2026-09-09 the matcher measurement left Phase 7 for a phase of its own,
-Phase 10, and Phases 10 to 18 became 11 to 19. Text written before that date
-reads through this map.
+- **Failure mode.** Why an attempt failed: the self-label written once `speed`,
+  `rust` and `gap` are settled, a diagnosis call narrowed to what the record
+  supports, and a scheduler that targets the diagnosed cause.
+- **Alternative solutions.** Every other way to solve a stored problem,
+  enumerated over the corpus, each approach its own canonical judged by the
+  problem's cases.
+- **The corpus gated.** Whether a generated statement gives its form away,
+  measured against the rate over `data/old/`, the corpus no generator wrote.
+- **Program-analysis-grounded diagnosis.** A diagnosis grounded in AST diffs
+  against the canonicals, execution traces and measured complexity.
+- **Retrieval.** Similar problems, patterns and briefs retrieved from the corpus
+  and the user's own attempts.
+- **MCP and autonomy.** The corpus and tools exposed as an MCP server, and a
+  scheduled agent running the practice loop.
+- **Multi-agent**, only once a real pipeline needs one.
+- **Soundness-checked synthesis.** Generation upgraded with formal constraint
+  specs, property-based cases and adversarial validation.

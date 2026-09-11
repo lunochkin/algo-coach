@@ -2,6 +2,7 @@
 
 The phases still open. A ticked item stays while its phase is open. When a
 phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
+The work not yet ready for a phase waits under Further developments.
 
 ## Phase 9 — the engine hosted (current)
 
@@ -157,11 +158,49 @@ backend for our own generated code, which is not a threat model.
 ### Exit
 - [ ] Complete a sitting on the deployed engine, signed in as an invited user,
       from the board to the claim
-## Phase 10 — the matcher, measured
+## Phase 10 — the pages designed
 
-How much a generated corpus is worth, measured. Moved behind the beta on
-2026-09-09: the drill loop needs problems and not a score, and the attempts
-the loop produces rebuild the eval set the classifier is scored against.
+The pages given one design, and the flows Phase 12 adds planned before they are
+built. The web app holds a handful of pages, so rebuilding them on one design
+costs least before Phase 12 adds its own.
+
+### Design system
+
+- [ ] Write the design tokens into `web/src/index.css` as the theme every
+      component reads: color, type scale, spacing and radius. A value set in one
+      component alone is a design no other component follows
+- [ ] Add a page showing each token and each component the pages use, served in
+      development alone. A component restyled there shows every use of it at
+      once
+
+### Overall design
+
+- [ ] Write the pages' structure into `docs/architecture/`: the navigation, the
+      main areas, and the page a signed-in user lands on. Phase 9's invited
+      sittings are the input
+- [ ] Rebuild each existing page on the design system and that structure: the
+      board, the cards, a card, a technique's candidates, a problem, the
+      sitting and the login
+- [ ] Send a refused sign-in back to the login page with its reason. The
+      callback is a navigation, and it answers a refusal with raw JSON today
+
+### Flows planned
+
+- [ ] Write the card run, ladder and recall trainer flows as sequences in
+      `flows.md`, naming each detail only use can answer as deferred
+- [ ] Draw a low-fidelity wireframe of each of those flows, kept beside
+      `flows.md`. A sequence says what happens in what order, and a wireframe
+      says what the user sees at each step
+
+### Exit
+- [ ] Build every existing page on the design system, and write and draw each
+      flow Phase 12 adds
+
+## Phase 11 — the matcher, measured
+
+How much a generated corpus is worth, measured. Behind the beta: the drill loop
+needs problems and not a score, and the attempts the loop produces rebuild the
+eval set the classifier is scored against.
 
 ### Matching the generated corpus by hand
 
@@ -206,7 +245,7 @@ the audit. Generation goes on without the score.
 ### Exit
 - [ ] The matcher carries a per-template score in both directions
 
-## Phase 11 — ladder, recall and card runs
+## Phase 12 — ladder, recall and card runs
 
 - [ ] Resolve the ladder from the matches, the selector filling out to `size`.
       A retired problem fills no rung
@@ -234,9 +273,36 @@ the audit. Generation goes on without the score.
       graduation rule reads, and no threshold is set yet
 
 ### Exit
-- [ ] Recall and the ladder run daily
+- [ ] Go through a card run by hand: start a card, solve a rung of its ladder,
+      recall a template cold against the card's tests, and see a probe
+      offered
 
-## Phase 12 — mastery, scheduling, failure mode
+## Phase 13 — mastery and scheduling
+
+- [ ] Write into `docs/architecture/` what a technique's mastery is derived
+      from: the attempts, their claims and their verdicts. Mastery is never
+      stored, so the derivation is the whole model
+- [ ] Write into `flows.md` how the scheduler picks the next sitting from
+      mastery, and what the board offers beside the pick. The user picks every
+      technique and problem today
+- [ ] Serve the scheduler's pick on the board, with every technique still on
+      offer beside it
+- [ ] Re-claim thirty attempts with the earlier machine claims hidden, to
+      measure the user's own consistency, which caps every classifier score.
+      Mastery reads claims, and a wrong claim spends practice time
+
+### Exit
+- [ ] Start a sitting from the scheduler's pick on the board, and complete it
+      to the claim
+
+## Further developments
+
+Blocks of work not ready for a phase, grouped and unordered. A planned phase is
+a block that became ready. A block, or a single item of one, is planned into a
+phase once it is clear enough to plan. An item's trigger, where it names one, is
+the event that makes the item ready.
+
+### Failure mode
 
 - [ ] Land `rust` against `gap` with the mastery model, or drop the
       distinction. The two labels differ only in whether the technique was ever
@@ -260,7 +326,7 @@ the audit. Generation goes on without the score.
       self-labels the loop produced. A call that only ever says `gap` would
       score well on a corpus of gaps
 
-## Phase 13 — alternative solutions
+### Alternative solutions
 
 Every other way to solve a stored problem, by the flow in `flows.md`,
 "Enumerating a problem's other solutions". The schema and the match's subject
@@ -286,20 +352,14 @@ one form its target named.
       that a later canonical carries less assurance. The case set was built to
       kill mutants of the first canonical, so a later canonical was never
       tested on its own failure modes
+- [ ] Choose what a matcher reading of a solution stores, a verdict per
+      candidate template or one record naming the templates the matcher found,
+      and write the choice into `content.md`. Scoping through the problem's
+      techniques bounds the pairs until enumeration adds a canonical displaying
+      a form outside them
 
-## Deferred
+### Classifier and matcher
 
-A backlog outside the phase order. Each item names a trigger: the event that
-has to happen before the item is worth doing. An item is picked up when its
-trigger fires, whatever phase is current.
-
-- [ ] Re-claim thirty attempts with the earlier machine claims hidden, to
-      measure the user's own consistency, which caps every classifier score.
-      Triggered when mastery estimation reads claims, and a wrong claim starts
-      spending practice time
-- [ ] Read the architecture doc against the code, landing every divergence as
-      an item in this file. The goal is not that no divergence exists, since
-      the doc is target state. The goal is that no divergence is unknown
 - [ ] Classify an attempt over the whole vocabulary and intersect with the
       problem's techniques in code, once the user claims can score that
       configuration against the one constrained to the problem's techniques. A
@@ -309,27 +369,32 @@ trigger fires, whatever phase is current.
       records apart as attempt claims and solution claims are kept apart.
       Triggered when a rung or a recall probe needs to know which form the
       user's own solution used
+
+### Problem generation
+
 - [ ] Write the generation call for a technique target: a technique and its
       criteria in, a problem out, carrying `target_technique`. A paradigm and a
       problem class have no template, so nothing else reaches those two kinds.
       Triggered when a technique with no card needs problems
-- [ ] Choose what a matcher reading of a solution stores, a verdict per
-      candidate template or one record naming the templates the matcher found,
-      and write the choice into `content.md`. Scoping through the problem's
-      techniques bounds the pairs today. Triggered when a canonical displays a
-      form outside the problem's techniques, which enumeration produces
 - [ ] Decide whether a canonical that yields no value on a proposed case is a
       defect rather than an input the statement excludes, and write the choice
       into `flows.md`. Triggered when a run drops such cases often enough to
       show in the run's report
-- [ ] Run each case in its own subinterpreter inside a pooled worker, where
-      the children are started ahead of their cases today. A subinterpreter
-      cannot be preempted, so a case over the cap kills its worker instead of
-      receiving a signal. Triggered when interpreter start is again the largest
-      cost of a run
 - [ ] Decide how long a rejected draft is kept, and write the choice into
       `flows.md`. Triggered when the draft store outgrows the corpus the drafts
       produced
+- [ ] Read the naive solution with the classifier, and hold the draft where the
+      verdict names the card's technique. One call per naive solution, and it
+      catches what the prompt misses rather than hoping. Triggered when a sweep
+      still holds drafts whose naive solution reached the form
+- [ ] Write the inputs and naive site outcomes where a resume re-ran the search
+      and re-asked neither site. A site that made no call writes no record, so
+      the separating size and the count of a resumed landing are readable
+      nowhere once the draft is cleared. Triggered when a report reads the
+      separating size of a problem a resume landed
+
+### Cases and verdicts
+
 - [ ] Choose how a case with several correct returns is decided, by a
       normaliser over the returned value or by a checker per problem, and write
       the choice into `corpus.md`. Triggered when a core template can only be
@@ -337,32 +402,31 @@ trigger fires, whatever phase is current.
 - [ ] Name on the verification the rule that decided a case, once that rule is
       no longer JSON equality. A verdict stored without the rule cannot be
       re-read after the rule moves. Triggered by a second deciding rule landing
-- [ ] Settle the full shape of a verification's environment, which the `runner`
-      string stands in for. The machine decides a timeout as much as the cap
-      does. Triggered when two runs under one backend disagree
-- [ ] Fall back to another endpoint of the same transport shape on an outage,
-      never to Anthropic direct, whose compatibility layer ignores
-      `response_format`, `strict` and `reasoning_effort`. Triggered when an
-      outage blocks a run
-- [ ] Vary one argument across a separating case's calls, so a submission
-      that caches its own answer fails it. The calls are identical today, and
-      the count separates the two solutions the engine wrote because neither
-      caches. Triggered when the drill loop judges a submission against a case
-      carrying a count
-- [ ] Read the naive solution with the classifier, and hold the draft where the
-      verdict names the card's technique. One call per naive solution, and it
-      catches what the prompt misses rather than hoping. Triggered when a sweep
-      still holds drafts whose naive solution reached the form
 - [ ] Carry a tolerance on a case, and name on the verification that the
       tolerance decided it. A statement asks for exactly comparable values
       today, so a real-valued answer cannot be asked for at all. Triggered when
       a core template's answer is neither an integer nor a reduced fraction
-- [ ] Write the inputs and naive site outcomes where a resume re-ran the search
-      and re-asked neither site. A site that made no call writes no record, so
-      the separating size and the count of a resumed landing are readable
-      nowhere once the draft is cleared. Triggered when a report reads the
-      separating size of a problem a resume landed
+- [ ] Settle the full shape of a verification's environment, which the `runner`
+      string stands in for. The machine decides a timeout as much as the cap
+      does. Triggered when two runs under one backend disagree
+
+### Transport
+
+- [ ] Fall back to another endpoint of the same transport shape on an outage,
+      never to Anthropic direct, whose compatibility layer ignores
+      `response_format`, `strict` and `reasoning_effort`. Triggered when an
+      outage blocks a run
+
+### Product
+
 - [ ] Let a user request a problem's retirement, as a private record an admin
       reads before retiring the problem by hand. Problems are served to every
       user, so no user retires one directly. Triggered when someone other than
       the author sits
+
+### Docs
+
+- [ ] Read the architecture doc against the code, landing every divergence as
+      an item in this file. The goal is not that no divergence exists, since
+      the doc is target state. The goal is that no divergence is unknown.
+      Triggered when a phase closes

@@ -227,7 +227,7 @@ the second origin was no longer worth the branch it cost in every record.
 give its own form away: if a matcher names the form from the statement alone,
 the problem teaches recognition of nothing. Deciding that needs a baseline rate
 from a corpus no generator wrote, and this archive is the only one there will
-be. Phase 14 in the roadmap.
+be. "The corpus gated" in the roadmap.
 
 ## Core loop
 

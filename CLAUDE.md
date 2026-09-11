@@ -163,8 +163,8 @@ configuration produced it, or which prompt hash it was sent."
 
 ## Code style
 
-- Match pydantic/pytest idiom. Keep slices thin: a feature is done when it runs
-  on real daily practice, not when it's feature-complete.
+- Match pydantic/pytest idiom. Keep slices thin: a feature is done when a pass
+  through its flow runs on real data, not when it's feature-complete.
 - **A docstring and its comments stay shorter than the code they sit on.** Over
   that, the reason belongs in `docs/architecture/` and the code cites it.
 - **No docstring where the name and the signature already say it.**

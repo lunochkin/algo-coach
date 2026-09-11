@@ -96,7 +96,8 @@ without redefining them. Grouped by the file that specifies the record.
 - **Enumeration**: a pass over a landed problem proposing other approaches,
   each generated as a further canonical.
 - **Calibration corpus**: the platform problems and attempts under
-  `data/old/`, kept for one deferred measurement, Phase 14 in `ROADMAP.md`.
+  `data/old/`, kept for one deferred measurement, "The corpus gated" in
+  `ROADMAP.md`.
 
 ### Generating a problem
 
@@ -365,7 +366,7 @@ times. Each record class is specified in one of the files beside it.
   problems left behind**, under `data/old/`: a platform's problems, the
   attempts against them, the claims and the calls. It is a corpus rather than
   a store: no store points there, and nothing on the run path reads it.
-  - The corpus is kept for one measurement, deferred to Phase 14 in
+  - The corpus is kept for one measurement, deferred to "The corpus gated" in
     `ROADMAP.md`: how often a matcher names a form from a statement alone. A
     corpus no generator wrote is the baseline for that rate. How the corpus is
     read is deferred to taking the measurement.

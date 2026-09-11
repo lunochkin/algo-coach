@@ -458,7 +458,7 @@ The page layout is not designed here, and using the loop decides it.
   form starts the sitting straight away, and a user who does not reads the
   card first. Reading happens before the statement is served, so the clock
   counts solving rather than reading. Recognising a form with no card in view
-  is a probe's test, which Phase 11 adds.
+  is a probe's test, which Phase 12 adds.
 - **An attempt nobody timed stays untimed**, rather than carrying a duration
   reconstructed after the fact.
 - **A sitting is paused and resumed**, and the elapsed time the attempt carries
@@ -467,7 +467,7 @@ The page layout is not designed here, and using the loop decides it.
   highlights syntax and indents, and it proposes no name from the standard
   library or from the code already typed. A solver offered `bisect_left` after
   three characters has recalled no form, and the sitting exists to measure
-  recalling the form. The recall trainer Phase 11 adds holds the same rule.
+  recalling the form. The recall trainer Phase 12 adds holds the same rule.
 - **A failing submission shows the first case it failed, whole**: the
   arguments, the expected value, and the value the submission returned or the
   exception it raised. An outcome on an input the solver cannot see is debugged

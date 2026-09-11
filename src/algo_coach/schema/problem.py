@@ -42,8 +42,8 @@ class Problem(MachineProvenance):
     @property
     def served(self) -> bool:
         # every status but retirement, since no gate stands between landing and
-        # serving until Phase 14. The serving call, the candidates and the gap
-        # report read this one rule
+        # serving until the corpus is gated. The serving call, the candidates
+        # and the gap report read this one rule
         return self.status is not ProblemStatus.RETIRED
 
     @property

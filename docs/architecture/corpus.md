@@ -54,9 +54,9 @@ architecture, and `README.md` is the map.
 - **Whether a statement gives its form away is not checked.** A statement can
   name its approach, or reuse the example its template's trigger names, and a
   solver who recognises the problem has not derived the form. A gate over the
-  corpus for this is deferred to Phase 14 in `ROADMAP.md`. It needs a corpus
-  to measure and a baseline no generator wrote, and a status the gate promotes
-  to is an additive change when it comes.
+  corpus for this is deferred to "The corpus gated" in `ROADMAP.md`. It needs
+  a corpus to measure and a baseline no generator wrote, and a status the gate
+  promotes to is an additive change when it comes.
 - **A problem is never edited, and only its status moves.** A statement that
   says the wrong thing is retired `defective` and a new problem is written.
   The retired problem's attempts stay with the record they were made against,
@@ -187,10 +187,10 @@ The test cases decide whether a solution to a generated problem is correct.
   Every other case carries one call.
 - **The calls of one case are identical, and each runs on a fresh module.** A
   memo left in a global would otherwise answer the second call from the first.
-  The calls ask the same question all the same, so a submission that caches its
-  own answer passes such a case. Varying the arguments closes that, and varying
-  is deferred. The count separates the two solutions the engine wrote, and
-  neither of them caches.
+  A submission that stores its answer outside the module still passes such a
+  case, and `README.md` gives why the loop does not guard a verdict against
+  that. The count separates the two solutions the engine wrote, and neither of
+  them caches.
 - **The canonical finishes within a tenth of the cap** at the size and count
   the case stores. A case the canonical only just answers fails a correct
   submission a few percent slower. The margin makes the case a test of the form
