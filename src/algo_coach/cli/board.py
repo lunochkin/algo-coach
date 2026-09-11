@@ -12,12 +12,12 @@ from algo_coach.storage import Database
 
 def board(args: argparse.Namespace, root: Database) -> None:
     log = AttemptLog(root)
-    attempts = [attempt for attempt in log.attempts() if attempt.user_id == args.user]
+    attempts = log.attempts(args.user)
     # Every problem, not the user's: an attempt names a minted id, and a
     # narrower index would miss a legitimate one.
     problems = {problem.id: problem for problem in load_problems(root)}
-    claims = standing_attempt_claims(log.claims())
-    labels = latest_by_attempt(log.self_labels())
+    claims = standing_attempt_claims(log.claims(args.user))
+    labels = latest_by_attempt(log.self_labels(args.user))
     rows = per_technique(attempts, problems, claims, labels)
     if args.stale:
         rows = stalest_first(rows, problems.values())

@@ -65,11 +65,11 @@ def score_backlog(
     once though the run writes as it goes — what it writes is the classifier's,
     and a user's claim wins by source rather than by being the earlier record.
     """
-    claims = log.claims()
+    claims = log.claims(user_id)
     standing = standing_attempt_claims(claims)
     hand_claimed = [
         attempt
-        for attempt in one_per_problem(eligible(log.attempts(), problems, user_id=user_id))
+        for attempt in one_per_problem(eligible(log.attempts(user_id), problems, user_id=user_id))
         if answered_by_hand(standing.get(attempt.id))
     ]
 

@@ -177,8 +177,8 @@ def claim(
 
 def owned_attempt(log: AttemptLog, attempt_id: str, *, user_id: str) -> Attempt:
     # another user's attempt reads as missing, as a sitting does
-    found = next((one for one in log.attempts() if one.id == attempt_id), None)
-    if found is None or found.user_id != user_id:
+    found = next((one for one in log.attempts(user_id) if one.id == attempt_id), None)
+    if found is None:
         raise Missing(f"no attempt {attempt_id}")
     return found
 
@@ -186,11 +186,11 @@ def owned_attempt(log: AttemptLog, attempt_id: str, *, user_id: str) -> Attempt:
 def unclaimed(log: AttemptLog, sitting_id: str, *, user_id: str) -> list[Attempt]:
     """The sitting's attempts the user has not claimed, in the order they were
     submitted. A machine claim answers no question the loop asked."""
-    answered = {one.attempt_id for one in log.claims() if one.source is ClaimSource.USER}
+    answered = {one.attempt_id for one in log.claims(user_id) if one.source is ClaimSource.USER}
     return [
         one
-        for one in log.attempts()
-        if one.sitting_id == sitting_id and one.user_id == user_id and one.id not in answered
+        for one in log.attempts(user_id)
+        if one.sitting_id == sitting_id and one.id not in answered
     ]
 
 

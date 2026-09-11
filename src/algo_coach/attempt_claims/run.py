@@ -120,9 +120,9 @@ def classify_backlog(
     where the last stopped. `on_progress` fires once per attempt asked about;
     reporting is the caller's.
     """
-    standing = standing_attempt_claims(log.claims())
+    standing = standing_attempt_claims(log.claims(user_id))
     candidates = sorted(
-        eligible(log.attempts(), problems, user_id=user_id, technique=technique),
+        eligible(log.attempts(user_id), problems, user_id=user_id, technique=technique),
         key=recency,
         reverse=True,
     )

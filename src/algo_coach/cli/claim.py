@@ -34,7 +34,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Datab
     """
     log = AttemptLog(root)
     problems = {problem.id: problem for problem in load_problems(root)}
-    claims = log.claims()
+    claims = log.claims(args.user)
     standing = standing_attempt_claims(claims)
 
     if args.revise:
@@ -44,7 +44,7 @@ def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Datab
             parser.exit(2, "claim: --model, --effort and --disputed need --revise\n")
         pool, machine_claims, names = (
             claimable(
-                log.attempts(),
+                log.attempts(args.user),
                 problems,
                 standing,
                 user_id=args.user,
@@ -131,7 +131,7 @@ def disputed(
     """The revision pool and what each named classifier read it as."""
     named = configurations(args, parser)
     pool = revisable(
-        log.attempts(),
+        log.attempts(args.user),
         problems,
         standing,
         user_id=args.user,

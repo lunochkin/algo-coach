@@ -22,6 +22,7 @@ from algo_coach.cli.problem import problem
 from algo_coach.cli.rows import Rows
 from algo_coach.cli.score import score
 from algo_coach.cli.seed import BadLine, seed
+from algo_coach.cli.user_log import user_log
 from algo_coach.runs import CONCURRENCY
 from algo_coach.storage import Database
 
@@ -312,6 +313,14 @@ def main() -> None:
     )
     _user_argument(movement_parser)
 
+    log_parser = _command(sub, "log", "one user's whole log, read out or erased")
+    action = log_parser.add_subparsers(dest="action", required=True)
+    export_parser = action.add_parser("export", help="print every record of the log as JSON")
+    _user_argument(export_parser)
+    erase_parser = action.add_parser("erase", help="delete every record of the log")
+    # named every time: a default would erase the author's own log
+    erase_parser.add_argument("--user", required=True, help="whose log to erase")
+
     args = parser.parse_args()
     # read at call time, not at import: a test names its own database
     root = Database(url=os.environ.get("DATABASE_URL"))
@@ -339,6 +348,7 @@ COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Datab
     "match": lambda args, parser, root: (hand_match if args.by_hand else match)(args, parser, root),
     "score": score,
     "movement": moved,
+    "log": user_log,
 }
 
 

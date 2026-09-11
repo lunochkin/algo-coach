@@ -385,9 +385,8 @@ times. Each record class is specified in one of the files beside it.
 Properties the system holds at all times.
 
 - Attempts, attempt claims, self-labels and diagnoses are append-only: no
-  record is ever revised or removed in place. Deleting a private log
-  wholesale while it holds nothing irreplaceable is a different act. That
-  allowance ends the first time a record in the log is worth keeping.
+  record is ever revised or removed in place. Erasing one user's whole log is
+  a different act, and `log.md` gives how it is taken.
 - Every record keyed to an attempt carries an engine-minted `id`, its
   `attempt_id` and `created_at`.
 - The user's own record stands over the machine's answer to the same question,

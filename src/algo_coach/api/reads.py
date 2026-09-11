@@ -19,7 +19,7 @@ from algo_coach.board import (
 from algo_coach.cards import CardStore
 from algo_coach.log import AttemptLog, SittingStore, latest_by_attempt
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, Card, ProblemDifficulty
+from algo_coach.schema import Card, ProblemDifficulty
 from algo_coach.sitting import Served, get, serve
 from algo_coach.solution_claims import load_problems
 
@@ -47,10 +47,10 @@ class Candidate(BaseModel):
 @router.get("/board")
 def board(root: Root, user_id: UserId) -> Board:
     log = AttemptLog(root)
-    attempts = _own(log, user_id)
+    attempts = log.attempts(user_id)
     problems = {problem.id: problem for problem in load_problems(root)}
-    claims = standing_attempt_claims(log.claims())
-    rows = per_technique(attempts, problems, claims, latest_by_attempt(log.self_labels()))
+    claims = standing_attempt_claims(log.claims(user_id))
+    rows = per_technique(attempts, problems, claims, latest_by_attempt(log.self_labels(user_id)))
     return Board(
         rows=stalest_first(rows, problems.values()),
         ungrouped=len(ungrouped(attempts, problems, claims)),
@@ -80,7 +80,7 @@ def cards(root: Root, technique: str) -> list[Card]:
 
 @router.get("/techniques/{technique}/candidates")
 def offered(root: Root, user_id: UserId, technique: str) -> list[Candidate]:
-    rows = candidates(technique, load_problems(root), _own(AttemptLog(root), user_id))
+    rows = candidates(technique, load_problems(root), AttemptLog(root).attempts(user_id))
     return [
         Candidate(
             problem_id=row.problem.id,
@@ -104,7 +104,3 @@ def statement(root: Root, user_id: UserId, problem_id: str) -> Served:
 @router.get("/sittings/{sitting_id}")
 def sitting(root: Root, user_id: UserId, sitting_id: str) -> Served:
     return get(ProblemStore(root), SittingStore(root), sitting_id, user_id=user_id)
-
-
-def _own(log: AttemptLog, user_id: str) -> list[Attempt]:
-    return [attempt for attempt in log.attempts() if attempt.user_id == user_id]

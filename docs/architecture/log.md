@@ -23,6 +23,26 @@ how an account signing in is linked to a user.
   held a handful of sittings and attempts when hosting was decided. Carrying
   them over would take a copy of the log and an account linked to an id the
   engine never minted, for records nothing reads.
+- **One user's log is every sitting, attempt, attempt verification, attempt
+  claim, self-label and diagnosis keyed to that user**, and the calls a model
+  made about the user's code.
+- **A reader given a user reads that user's records in its query.** No command
+  loads every user's log to filter it, so the author's log, which every eval
+  reads, never mixes with another user's.
+- **`algo-coach log export` prints one user's whole log as JSON.**
+- **`algo-coach log erase` deletes one user's whole log in one transaction.**
+  The log belongs to its user, so a user leaving takes the log along. The
+  user and its sign-in stay, and a new log starts at the next sitting.
+- **A call is erased with the log only where no other record names it.** A
+  problem's cases name the call that wrote them, and that call is product
+  data.
+- **The append-only tables let a delete through only while an erasure runs.**
+  The erasing transaction sets a setting of its own, and the trigger refusing
+  a delete reads that setting. An update is refused either way, so an erasure
+  removes a log and revises no record.
+- **The erasure asks for the user id typed back, and `--user` has no
+  default.** An erasure cannot be undone, and a default would name the
+  author's own log.
 
 ## Sittings
 

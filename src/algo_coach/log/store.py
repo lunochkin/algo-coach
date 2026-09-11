@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlalchemy import insert, select
+from sqlalchemy import ColumnElement, Table, insert, select
 
 from algo_coach.log.table import (
     attempt_claims,
@@ -17,7 +17,8 @@ from algo_coach.storage import Database, Log
 
 class AttemptLog:
     """The private log: attempts, their verifications, claims, self-labels and
-    diagnoses, one append-only table each."""
+    diagnoses, one append-only table each. A reader given a user reads that
+    user's records alone, in the query."""
 
     def __init__(self, root: Database) -> None:
         self.root = root
@@ -56,22 +57,30 @@ class AttemptLog:
     def append_diagnosis(self, diagnosis: Diagnosis) -> None:
         self._diagnoses.append(diagnosis)
 
-    def attempts(self) -> list[Attempt]:
-        return self._attempts.all()
+    def attempts(self, user_id: str | None = None) -> list[Attempt]:
+        if user_id is None:
+            return self._attempts.all()
+        return self._attempts.where(attempts.c.user_id == user_id)
 
-    def verifications(self) -> list[AttemptVerification]:
+    def verifications(self, user_id: str | None = None) -> list[AttemptVerification]:
         with self.root.connect() as conn:
             runs = (
                 conn.execute(
-                    select(attempt_verifications).order_by(attempt_verifications.c.appended)
+                    select(attempt_verifications)
+                    .where(*theirs(attempt_verifications, user_id))
+                    .order_by(attempt_verifications.c.appended)
                 )
                 .mappings()
                 .all()
             )
             held = conn.execute(
-                select(attempt_verification_case_results).order_by(
-                    attempt_verification_case_results.c.position
+                select(attempt_verification_case_results)
+                .where(
+                    attempt_verification_case_results.c.attempt_verification_id.in_(
+                        [run["id"] for run in runs]
+                    )
                 )
+                .order_by(attempt_verification_case_results.c.position)
             ).mappings()
             results: dict[str, list[dict[str, Any]]] = {run["id"]: [] for run in runs}
             for one in held:
@@ -81,11 +90,19 @@ class AttemptLog:
             for run in runs
         ]
 
-    def claims(self) -> list[AttemptClaim]:
-        return self._claims.all()
+    def claims(self, user_id: str | None = None) -> list[AttemptClaim]:
+        return self._claims.where(*theirs(attempt_claims, user_id))
 
-    def self_labels(self) -> list[SelfLabel]:
-        return self._self_labels.all()
+    def self_labels(self, user_id: str | None = None) -> list[SelfLabel]:
+        return self._self_labels.where(*theirs(self_labels, user_id))
 
-    def diagnoses(self) -> list[Diagnosis]:
-        return self._diagnoses.all()
+    def diagnoses(self, user_id: str | None = None) -> list[Diagnosis]:
+        return self._diagnoses.where(*theirs(diagnoses, user_id))
+
+
+def theirs(table: Table, user_id: str | None) -> list[ColumnElement[bool]]:
+    """The rows of a table keyed to an attempt that are the user's, or every
+    row where no user is named."""
+    if user_id is None:
+        return []
+    return [table.c.attempt_id.in_(select(attempts.c.id).where(attempts.c.user_id == user_id))]

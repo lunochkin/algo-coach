@@ -37,8 +37,8 @@ class SittingStore:
         found = self._read(sittings.c.id == id)
         return found[0] if found else None
 
-    def all(self) -> list[Sitting]:
-        return self._read()
+    def all(self, user_id: str | None = None) -> list[Sitting]:
+        return self._read() if user_id is None else self._read(sittings.c.user_id == user_id)
 
     def running(self, user_id: str, problem_id: str) -> Sitting | None:
         found = self._read(
