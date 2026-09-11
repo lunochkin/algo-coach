@@ -52,7 +52,7 @@ backend for our own generated code, which is not a threat model.
       order it landed in, and readers break a tie on `created_at` by it
 - [x] Add a test database fixture: one database per xdist worker, built by the
       migrations and emptied between tests
-- [ ] Rewrite the calls store on Postgres, its tests on the fixture
+- [x] Rewrite the calls store on Postgres, its tests on the fixture
 - [ ] Rewrite the cards store on Postgres, its tests on the fixture
 - [ ] Rewrite the problem store on Postgres, its tests on the fixture
 - [ ] Rewrite the case store on Postgres, its tests on the fixture

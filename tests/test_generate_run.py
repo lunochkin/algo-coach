@@ -25,10 +25,10 @@ from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Configuration, ExpectedSource, Problem, WritingState
 
 
-def run(tmp_path, model: FakeWriter, *, count: int = 1):
-    (one,) = seeded(tmp_path, card())
+def run(database, model: FakeWriter, *, count: int = 1):
+    (one,) = seeded(database, card())
     return one, write_problems(
-        model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path), count=count
+        model, CallLog(database), one, one.templates[0], Corpus.at(database), count=count
     )
 
 
@@ -41,20 +41,20 @@ class Priced(FakeWriter):
         return replace(answered, cost=0.001)
 
 
-def test_each_row_is_priced_over_its_own_calls(tmp_path):
+def test_each_row_is_priced_over_its_own_calls(database):
     """The stage lines price one call each, and the row is what says what a
     problem cost. A running total would report the second problem as the
     dearer one."""
     seen: list[Progress] = []
-    (one,) = seeded(tmp_path, card())
-    log = CallLog(tmp_path)
+    (one,) = seeded(database, card())
+    log = CallLog(database)
 
     write_problems(
         Priced(statements=["The first.", "The second."]),
         log,
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         count=2,
         on_progress=seen.append,
     )
@@ -63,51 +63,51 @@ def test_each_row_is_priced_over_its_own_calls(tmp_path):
     assert sum(line.cost for line in seen) == sum(call.cost for call in log.appended)
 
 
-def test_a_provider_that_prices_nothing_leaves_the_row_unpriced(tmp_path):
+def test_a_provider_that_prices_nothing_leaves_the_row_unpriced(database):
     """Absent rather than zero: a run of those reports the count alone."""
     seen: list[Progress] = []
-    (one,) = seeded(tmp_path, card())
+    (one,) = seeded(database, card())
 
     write_problems(
         FakeWriter(),
-        CallLog(tmp_path),
+        CallLog(database),
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         on_progress=seen.append,
     )
 
     assert [line.cost for line in seen] == [None]
 
 
-def test_a_problem_takes_three_calls_in_one_order(tmp_path):
+def test_a_problem_takes_three_calls_in_one_order(database):
     """The reference and the input generator are both written from the
     statement, so neither can be asked for before there is one."""
     model = FakeWriter()
 
-    _, result = run(tmp_path, model)
+    _, result = run(database, model)
 
     assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM]
     assert len(result.drafted) == 1
     assert result.drafted[0].reference.startswith("def solve")
 
 
-def test_each_call_is_shown_what_the_run_wrote_before_it(tmp_path):
+def test_each_call_is_shown_what_the_run_wrote_before_it(database):
     """Added without waiting for the problem to land, or a run of ten writes
     ten problems against one list."""
     model = FakeWriter(statements=["The first.", "The second."])
 
-    run(tmp_path, model, count=2)
+    run(database, model, count=2)
 
     assert "The first." not in model.prompts[0]
     assert "The first." in model.prompts[1]
 
 
-def test_the_corpus_seeds_the_list(tmp_path):
+def test_the_corpus_seeds_the_list(database):
     """What a form already carries is what the first call has to differ
     from."""
-    (one,) = seeded(tmp_path, card())
-    corpus = Corpus.at(tmp_path)
+    (one,) = seeded(database, card())
+    corpus = Corpus.at(database)
     corpus.problems.put(
         Problem(
             id="p1",
@@ -119,51 +119,51 @@ def test_the_corpus_seeds_the_list(tmp_path):
     )
     model = FakeWriter()
 
-    write_problems(model, CallLog(tmp_path), one, one.templates[0], corpus)
+    write_problems(model, CallLog(database), one, one.templates[0], corpus)
 
     assert "An earlier statement." in model.prompts[0]
 
 
-def test_a_failure_costs_one_problem(tmp_path):
+def test_a_failure_costs_one_problem(database):
     """A refusal or a reply that does not parse is this problem's, and the run
     behind it still writes."""
     model = FakeWriter(statements=[None, "The second."])
 
-    _, result = run(tmp_path, model, count=2)
+    _, result = run(database, model, count=2)
 
     assert [one.index for one in result.failed] == [1]
     assert len(result.drafted) == 1
     assert not result.aborted
 
 
-def test_several_failures_in_a_row_end_the_run(tmp_path):
+def test_several_failures_in_a_row_end_the_run(database):
     """Consecutive failures mean the configuration is broken rather than the
     model unlucky."""
     model = FakeWriter(statements=[None])
 
-    _, result = run(tmp_path, model, count=ABORT_AFTER + 2)
+    _, result = run(database, model, count=ABORT_AFTER + 2)
 
     assert result.aborted
     assert len(result.failed) == ABORT_AFTER
 
 
-def test_every_call_is_recorded(tmp_path):
+def test_every_call_is_recorded(database):
     """Every one, the failed one included: what a run paid for stays readable
     whatever it produced. One problem failed at its first call, and the other
     took three."""
     model = FakeWriter(statements=[None, "The second."])
 
-    run(tmp_path, model, count=2)
+    run(database, model, count=2)
 
-    assert len(CallLog(tmp_path).all()) == 4
+    assert len(CallLog(database).all()) == 4
 
 
-def test_a_problem_the_runs_reject_is_reported_apart(tmp_path):
+def test_a_problem_the_runs_reject_is_reported_apart(database):
     """A written problem can still be rejected, and a report folding the two
     would say a call refused where the model wrote and the runs rejected."""
     model = FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n")
 
-    _, result = run(tmp_path, model)
+    _, result = run(database, model)
 
     assert result.drafted == []
     assert result.failed == []
@@ -171,18 +171,18 @@ def test_a_problem_the_runs_reject_is_reported_apart(tmp_path):
     assert "disagree on 1 case(s)" in result.rejected[0].reason
 
 
-def test_a_rejection_does_not_end_the_run(tmp_path):
+def test_a_rejection_does_not_end_the_run(database):
     """`ABORT_AFTER` catches a broken configuration. Every call answered here,
     and what the runs rejected is the model's writing."""
     model = FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n")
 
-    _, result = run(tmp_path, model, count=ABORT_AFTER + 1)
+    _, result = run(database, model, count=ABORT_AFTER + 1)
 
     assert not result.aborted
     assert len(result.rejected) == ABORT_AFTER + 1
 
 
-def test_a_rejected_statement_is_still_shown_to_the_next_call(tmp_path):
+def test_a_rejected_statement_is_still_shown_to_the_next_call(database):
     """It was written for this form, and asking for it again is what the list
     exists to prevent."""
     model = FakeWriter(
@@ -190,15 +190,15 @@ def test_a_rejected_statement_is_still_shown_to_the_next_call(tmp_path):
         solution="def solve(xs):\n    return len(xs) + 1\n",
     )
 
-    run(tmp_path, model, count=2)
+    run(database, model, count=2)
 
     assert "The first." in model.prompts[1]
 
 
-def test_a_surviving_problem_carries_what_the_reference_computed(tmp_path):
+def test_a_surviving_problem_carries_what_the_reference_computed(database):
     """The draft's own values were the gate. What would land is the answer the
     independent solution gave, and the case names it."""
-    _, result = run(tmp_path, FakeWriter())
+    _, result = run(database, FakeWriter())
 
     (drafted,) = result.drafted
     assert [one.expected for one in drafted.cases] == [3]
@@ -215,27 +215,27 @@ def claiming(overrides: dict) -> dict:
     return {"templates": [template("longest-valid-window", speedup=True)]} | overrides
 
 
-def timed(tmp_path, monkeypatch, model: FakeWriter, **overrides):
+def timed(database, monkeypatch, model: FakeWriter, **overrides):
     """A run whose sitting cap is small enough to separate in a test, over a
     template claiming the speedup that makes the search run."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
-    (one,) = seeded(tmp_path, card(**claiming(overrides)))
-    return one, write_problems(model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path))
+    (one,) = seeded(database, card(**claiming(overrides)))
+    return one, write_problems(model, CallLog(database), one, one.templates[0], Corpus.at(database))
 
 
-def test_the_separating_case_is_stored_beside_the_others(tmp_path, monkeypatch):
+def test_the_separating_case_is_stored_beside_the_others(database, monkeypatch):
     """A submission is judged at that size, so the naive solution the form
     replaces fails the problem."""
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
-    timed(tmp_path, monkeypatch, model)
+    timed(database, monkeypatch, model)
 
-    stored = CaseLog(tmp_path).cases()
+    stored = CaseLog(database).cases()
     assert [one.args for one in stored] == [[[1, 2, 3]], [[0, 1]]]
     assert stored[-1].expected_from is ExpectedSource.REFERENCE
 
 
-def test_the_mutation_loop_never_sees_the_separating_case(tmp_path, monkeypatch):
+def test_the_mutation_loop_never_sees_the_separating_case(database, monkeypatch):
     """The survivors are decided against the set as the statement left it, so
     the case the search won cannot be in it whichever ran first."""
     seen: list[list] = []
@@ -247,86 +247,86 @@ def test_the_mutation_loop_never_sees_the_separating_case(tmp_path, monkeypatch)
 
     monkeypatch.setattr("algo_coach.generation.passage.harden", capture)
 
-    timed(tmp_path, monkeypatch, FakeWriter(slow=SLOW, generator=BUILDS))
+    timed(database, monkeypatch, FakeWriter(slow=SLOW, generator=BUILDS))
 
     assert seen == [[[[1, 2, 3]]]]
-    assert [one.args for one in CaseLog(tmp_path).cases()] == [[[1, 2, 3]], [[0, 1]]]
+    assert [one.args for one in CaseLog(database).cases()] == [[[1, 2, 3]], [[0, 1]]]
 
 
-def test_a_form_that_is_its_own_optimum_is_still_built_for(tmp_path, monkeypatch):
+def test_a_form_that_is_its_own_optimum_is_still_built_for(database, monkeypatch):
     """Backtracking and exhaustive search have no naive solution to beat, so
     nothing is searched for. The input generator is written all the same, since
     a fuzz pass has no inputs without one."""
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     timed(
-        tmp_path,
+        database,
         monkeypatch,
         model,
         templates=[template("longest-valid-window", speedup=False)],
     )
 
     assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM]
-    assert len(CaseLog(tmp_path).cases()) == 1
+    assert len(CaseLog(database).cases()) == 1
 
 
 CRASHES = "def solve(size, seed):\n    raise ValueError\n"
 
 
-def reported(tmp_path, monkeypatch, model: FakeWriter, **overrides) -> Progress:
+def reported(database, monkeypatch, model: FakeWriter, **overrides) -> Progress:
     """The line one problem left, which is where a site's failure is read."""
     seen: list[Progress] = []
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
-    (one,) = seeded(tmp_path, card(**claiming(overrides)))
+    (one,) = seeded(database, card(**claiming(overrides)))
     write_problems(
         model,
-        CallLog(tmp_path),
+        CallLog(database),
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         on_progress=seen.append,
     )
     (line,) = seen
     return line
 
 
-def test_an_input_generator_that_fails_holds_a_draft_claiming_a_speedup(tmp_path, monkeypatch):
+def test_an_input_generator_that_fails_holds_a_draft_claiming_a_speedup(database, monkeypatch):
     """No code to build with, so no search, so nothing demonstrates the claim.
     A landed problem is repaired nowhere, which is why the draft stops at the
     step the call failed before."""
     model = FakeWriter(slow=SLOW)
 
-    _, result = timed(tmp_path, monkeypatch, model)
+    _, result = timed(database, monkeypatch, model)
 
     (one,) = result.held
     assert one.draft.state is WritingState.AGREED
     assert one.unbuilt is not None
-    assert (result.drafted, CaseLog(tmp_path).cases()) == ([], [])
+    assert (result.drafted, CaseLog(database).cases()) == ([], [])
 
 
-def test_an_input_generator_that_fails_lands_a_form_that_is_its_own_optimum(tmp_path, monkeypatch):
+def test_an_input_generator_that_fails_lands_a_form_that_is_its_own_optimum(database, monkeypatch):
     """Nothing was searched for, so the case the call cost was never one the
     problem needed."""
     model = FakeWriter(slow=SLOW)
 
     _, result = timed(
-        tmp_path,
+        database,
         monkeypatch,
         model,
         templates=[template("longest-valid-window", speedup=False)],
     )
 
     assert len(result.drafted) == 1
-    assert len(CaseLog(tmp_path).cases()) == 1
+    assert len(CaseLog(database).cases()) == 1
 
 
 def test_a_call_that_wrote_no_input_generator_is_reported_apart_from_a_search(
-    tmp_path, monkeypatch
+    database, monkeypatch
 ):
     """A site that answered nothing and a search that separated nothing are
     different facts, and the fuzz pass is lost only by the first."""
-    unwritten = reported(tmp_path, monkeypatch, FakeWriter(slow=SLOW))
-    crashing = reported(tmp_path, monkeypatch, FakeWriter(slow=SLOW, generator=CRASHES))
+    unwritten = reported(database, monkeypatch, FakeWriter(slow=SLOW))
+    crashing = reported(database, monkeypatch, FakeWriter(slow=SLOW, generator=CRASHES))
 
     assert unwritten.unbuilt is not None
     assert unwritten.unseparated is None
@@ -334,7 +334,7 @@ def test_a_call_that_wrote_no_input_generator_is_reported_apart_from_a_search(
     assert "built nothing at size 1" in crashing.unseparated
 
 
-def test_two_solutions_disagreeing_at_the_separating_size_reject_the_draft(tmp_path, monkeypatch):
+def test_two_solutions_disagreeing_at_the_separating_size_reject_the_draft(database, monkeypatch):
     """A canonical correct on the small cases and wrong at scale, which only
     the separating input reaches."""
     # correct on the statement's own case and wrong on what the input generator
@@ -342,58 +342,58 @@ def test_two_solutions_disagreeing_at_the_separating_size_reject_the_draft(tmp_p
     blind_solution = "def solve(xs):\n    return len(xs) + (1 if 0 in xs else 0)\n"
     model = FakeWriter(solution=blind_solution, slow=SLOW, generator=BUILDS)
 
-    _, result = timed(tmp_path, monkeypatch, model)
+    _, result = timed(database, monkeypatch, model)
 
     assert result.drafted == []
     assert [one.gate for one in result.rejected] == ["disagreed"]
-    assert CaseLog(tmp_path).cases() == []
+    assert CaseLog(database).cases() == []
 
 
 def test_the_naive_solution_is_written_between_the_input_generator_and_the_search(
-    tmp_path, monkeypatch
+    database, monkeypatch
 ):
     """The input generator is written for every problem, since the fuzz pass
     builds its inputs with it, and the search measures against what this step
     writes."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
-    (one,) = seeded(tmp_path, card(**claiming({})))
+    (one,) = seeded(database, card(**claiming({})))
     stages: list[str] = []
 
     write_problems(
         FakeWriter(slow=SLOW, generator=BUILDS),
-        CallLog(tmp_path),
+        CallLog(database),
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         on_step=lambda step: stages.append(step.name),
     )
 
     assert stages.index("inputs") < stages.index("naive") < stages.index("timing")
 
 
-def test_a_form_that_is_its_own_optimum_pays_for_no_naive_solution(tmp_path):
+def test_a_form_that_is_its_own_optimum_pays_for_no_naive_solution(database):
     """Nothing measures a solution the naive approach does not beat, so the
     site is asked exactly where the search is run."""
-    (one,) = seeded(tmp_path, card())
+    (one,) = seeded(database, card())
     model = FakeWriter(generator=BUILDS)
 
-    write_problems(model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path))
+    write_problems(model, CallLog(database), one, one.templates[0], Corpus.at(database))
 
     assert naive.SYSTEM not in [asked["system"] for asked in model.calls]
 
 
-def test_a_naive_solution_that_was_not_written_holds_the_draft(tmp_path):
+def test_a_naive_solution_that_was_not_written_holds_the_draft(database):
     """The search has nothing to measure the canonical against, so the draft
     stops here rather than landing undemonstrated."""
-    (one,) = seeded(tmp_path, card(**claiming({})))
-    drafts = DraftStore(tmp_path)
+    (one,) = seeded(database, card(**claiming({})))
+    drafts = DraftStore(database)
 
     result = write_problems(
         FakeWriter(generator=BUILDS, slow=None),
-        CallLog(tmp_path),
+        CallLog(database),
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         drafts=drafts,
     )
 
@@ -409,18 +409,18 @@ WRONG_NAIVE = "def solve(xs):\n    return len(xs) + 1\n"
 UNFINISHED = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs))\n    return len(xs)\n"
 
 
-def test_a_naive_solution_that_answers_a_case_wrongly_holds_the_draft(tmp_path):
+def test_a_naive_solution_that_answers_a_case_wrongly_holds_the_draft(database):
     """It measures nothing, and what it rejects is nothing: being wrong says
     nothing about the statement."""
-    (one,) = seeded(tmp_path, card(**claiming({})))
-    drafts = DraftStore(tmp_path)
+    (one,) = seeded(database, card(**claiming({})))
+    drafts = DraftStore(database)
 
     result = write_problems(
         FakeWriter(generator=BUILDS, slow=WRONG_NAIVE),
-        CallLog(tmp_path),
+        CallLog(database),
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         drafts=drafts,
     )
 
@@ -432,18 +432,18 @@ def test_a_naive_solution_that_answers_a_case_wrongly_holds_the_draft(tmp_path):
     assert stored.naive is None
 
 
-def test_a_naive_solution_answering_no_case_is_not_wrong(tmp_path):
+def test_a_naive_solution_answering_no_case_is_not_wrong(database):
     """A case it does not finish is what the search is looking for at size, so
     a solution too slow to answer one is the naive solution working."""
-    (one,) = seeded(tmp_path, card(**claiming({})))
-    drafts = DraftStore(tmp_path)
+    (one,) = seeded(database, card(**claiming({})))
+    drafts = DraftStore(database)
 
     write_problems(
         FakeWriter(generator=BUILDS, slow=UNFINISHED),
-        CallLog(tmp_path),
+        CallLog(database),
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         cap_ms=100,
         drafts=drafts,
     )
@@ -452,18 +452,18 @@ def test_a_naive_solution_answering_no_case_is_not_wrong(tmp_path):
     assert stored.naive == UNFINISHED
 
 
-def test_a_written_naive_solution_is_held_on_the_draft(tmp_path):
+def test_a_written_naive_solution_is_held_on_the_draft(database):
     """A resume re-deriving it would re-pay the call, so the code and the
     configuration it was written at are both stored."""
-    (one,) = seeded(tmp_path, card(**claiming({})))
-    drafts = DraftStore(tmp_path)
+    (one,) = seeded(database, card(**claiming({})))
+    drafts = DraftStore(database)
 
     write_problems(
         FakeWriter(generator=BUILDS),
-        CallLog(tmp_path),
+        CallLog(database),
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         drafts=drafts,
     )
 
@@ -473,19 +473,19 @@ def test_a_written_naive_solution_is_held_on_the_draft(tmp_path):
     assert stored.naive_provenance.model == BENCH.naive.model
 
 
-def test_the_search_runs_before_the_mutation_loop(tmp_path, monkeypatch):
+def test_the_search_runs_before_the_mutation_loop(database, monkeypatch):
     """A canonical wrong at scale rejects the draft, and the loop is what
     that saves: a round is paid for after the search rather than before it."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
-    (one,) = seeded(tmp_path, card(**claiming({})))
+    (one,) = seeded(database, card(**claiming({})))
     stages: list[str] = []
 
     write_problems(
         FakeWriter(slow=SLOW, generator=BUILDS),
-        CallLog(tmp_path),
+        CallLog(database),
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         on_step=lambda step: stages.append(step.name),
     )
 
@@ -503,43 +503,43 @@ def bounded(**overrides) -> FakeWriter:
     return FakeWriter(**(written | overrides))
 
 
-def test_the_cases_the_mutation_loop_wins_land_with_the_others(tmp_path):
+def test_the_cases_the_mutation_loop_wins_land_with_the_others(database):
     """A submission is judged by them, which is what measures the set against
     the bound rather than against the generator's own judgement."""
     model = bounded(separators=[[[3], [4]]])
 
-    _, result = run(tmp_path, model)
+    _, result = run(database, model)
 
     assert len(result.drafted) == 1
-    assert [one.args for one in CaseLog(tmp_path).cases()] == [[10], [3], [4]]
+    assert [one.args for one in CaseLog(database).cases()] == [[10], [3], [4]]
 
 
-def test_a_proposal_that_killed_nothing_never_reaches_the_store(tmp_path):
+def test_a_proposal_that_killed_nothing_never_reaches_the_store(database):
     """The first run stored fifteen that killed nothing, and every later
     verification would run them."""
     model = bounded(separators=[[[100], [3], [4]]])
 
-    run(tmp_path, model)
+    run(database, model)
 
-    assert [one.args for one in CaseLog(tmp_path).cases()] == [[10], [3], [4]]
+    assert [one.args for one in CaseLog(database).cases()] == [[10], [3], [4]]
 
 
-def test_a_won_case_carries_the_reference_s_answer(tmp_path):
+def test_a_won_case_carries_the_reference_s_answer(database):
     """Settled as the first set is: a case the canonical produced would pass by
     construction."""
-    run(tmp_path, bounded(separators=[[[3]]]))
+    run(database, bounded(separators=[[[3]]]))
 
-    stored = CaseLog(tmp_path).cases()
+    stored = CaseLog(database).cases()
     assert stored[-1].expected is False
     assert stored[-1].expected_from is ExpectedSource.REFERENCE
 
 
-def test_the_input_generator_is_written_before_the_rounds(tmp_path):
+def test_the_input_generator_is_written_before_the_rounds(database):
     """A fuzz pass kills mutants with the inputs it builds, and a round is then
     paid for the survivors alone."""
     model = bounded(separators=[[[3], [4]]], generator=BUILDS)
 
-    run(tmp_path, model)
+    run(database, model)
 
     assert [one["system"] for one in model.calls] == [
         generator.SYSTEM,
@@ -549,15 +549,15 @@ def test_the_input_generator_is_written_before_the_rounds(tmp_path):
     ]
 
 
-def test_an_input_generator_that_failed_costs_the_inputs_and_not_the_round(tmp_path):
+def test_an_input_generator_that_failed_costs_the_inputs_and_not_the_round(database):
     """The call says nothing about the statement, so the loop still runs and
     the problem still lands."""
     model = bounded(separators=[[[3], [4]]])
 
-    _, result = run(tmp_path, model)
+    _, result = run(database, model)
 
     assert len(result.drafted) == 1
-    assert [one.args for one in CaseLog(tmp_path).cases()] == [[10], [3], [4]]
+    assert [one.args for one in CaseLog(database).cases()] == [[10], [3], [4]]
 
 
 # one argument per pair, so the fuzz grid reaches the boundary `BOUNDED` turns
@@ -565,52 +565,52 @@ def test_an_input_generator_that_failed_costs_the_inputs_and_not_the_round(tmp_p
 COUNTS = "def solve(size, seed):\n    return [size + seed]\n"
 
 
-def test_the_fuzz_pass_kills_what_a_round_would_have_been_paid_for(tmp_path):
+def test_the_fuzz_pass_kills_what_a_round_would_have_been_paid_for(database):
     """The inputs cost subprocesses where a round costs a call, so a mutant the
     pass reaches is never asked about."""
     model = bounded(separators=[[[3], [4]]], generator=COUNTS)
 
-    _, result = run(tmp_path, model)
+    _, result = run(database, model)
 
     assert len(result.drafted) == 1
     assert discrimination.SYSTEM not in [one["system"] for one in model.calls]
 
 
-def test_what_the_fuzz_pass_kept_lands_with_the_others(tmp_path):
+def test_what_the_fuzz_pass_kept_lands_with_the_others(database):
     """A submission is judged by them, and the first round's survivors were
     decided against them, which is what `round` zero names."""
     model = bounded(separators=[[[3], [4]]], generator=COUNTS)
 
-    run(tmp_path, model)
+    run(database, model)
 
-    stored = CaseLog(tmp_path).cases()
+    stored = CaseLog(database).cases()
     assert [one.args for one in stored[1:]] == [[3], [4]]
     assert {one.round for one in stored} == {0}
 
 
-def test_a_set_that_kills_every_mutant_pays_for_no_round(tmp_path):
+def test_a_set_that_kills_every_mutant_pays_for_no_round(database):
     """Nothing survived the cases the generation call wrote, so no case has to
     exist."""
     model = FakeWriter()
 
-    run(tmp_path, model)
+    run(database, model)
 
     assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM]
 
 
-def test_a_round_that_fails_holds_the_draft_for_a_resume(tmp_path):
+def test_a_round_that_fails_holds_the_draft_for_a_resume(database):
     """The problem passed every gate that judges it and its set was never
     measured against the bound, so the loop is asked again rather than the set
     stored as it stands."""
     reported: list = []
-    (one,) = seeded(tmp_path, card())
+    (one,) = seeded(database, card())
 
     result = write_problems(
         bounded(),
-        CallLog(tmp_path),
+        CallLog(database),
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         on_progress=reported.append,
     )
 
@@ -619,11 +619,11 @@ def test_a_round_that_fails_holds_the_draft_for_a_resume(tmp_path):
     # earlier
     assert one.draft.state is WritingState.AGREED
     assert one.unmeasured is not None
-    assert (result.drafted, CaseLog(tmp_path).cases()) == ([], [])
+    assert (result.drafted, CaseLog(database).cases()) == ([], [])
     assert reported[0].unmeasured is not None
 
 
-def test_a_proposed_case_the_two_solutions_answer_differently_rejects_it(tmp_path):
+def test_a_proposed_case_the_two_solutions_answer_differently_rejects_it(database):
     """A canonical wrong at a boundary the first set never reached, which is
     what the loop exists to find."""
     model = bounded(
@@ -631,25 +631,25 @@ def test_a_proposed_case_the_two_solutions_answer_differently_rejects_it(tmp_pat
         separators=[[[4]]],
     )
 
-    _, result = run(tmp_path, model)
+    _, result = run(database, model)
 
     assert result.drafted == []
     assert [one.gate for one in result.rejected] == ["disagreed"]
-    assert CaseLog(tmp_path).cases() == []
+    assert CaseLog(database).cases() == []
 
 
-def test_a_run_reports_every_stage_as_it_goes(tmp_path):
+def test_a_run_reports_every_stage_as_it_goes(database):
     """What the run is waiting on, and what each call cost. A problem takes
     minutes, and the line per problem prints when it is over."""
     reported: list = []
-    (one,) = seeded(tmp_path, card())
+    (one,) = seeded(database, card())
 
     write_problems(
         bounded(separators=[[[3], [4]]]),
-        CallLog(tmp_path),
+        CallLog(database),
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         on_step=reported.append,
     )
 
@@ -675,7 +675,7 @@ def models(model: FakeWriter) -> dict[str, str]:
     return {named[one["system"]]: one["model"] for one in model.calls}
 
 
-def test_every_site_is_asked_of_its_own_model(tmp_path):
+def test_every_site_is_asked_of_its_own_model(database):
     """Four calls asking for different things, where one configuration made
     the cheapest of them pay the price of the hardest."""
     bench = Bench(
@@ -685,10 +685,10 @@ def test_every_site_is_asked_of_its_own_model(tmp_path):
         inputs=Configuration(model="builds-inputs", effort="medium", pin="test"),
     )
     model = bounded(separators=[[[3], [4]]], generator=BUILDS)
-    (one,) = seeded(tmp_path, card())
+    (one,) = seeded(database, card())
 
     write_problems(
-        model, CallLog(tmp_path), one, one.templates[0], Corpus.at(tmp_path), bench=bench
+        model, CallLog(database), one, one.templates[0], Corpus.at(database), bench=bench
     )
 
     assert models(model) == {
@@ -699,11 +699,11 @@ def test_every_site_is_asked_of_its_own_model(tmp_path):
     }
 
 
-def test_a_run_naming_no_bench_asks_one_model(tmp_path):
+def test_a_run_naming_no_bench_asks_one_model(database):
     """The bench a run was given none of is the run that ran before there was
     one."""
     model = bounded(separators=[[[3], [4]]], generator=BUILDS)
 
-    run(tmp_path, model)
+    run(database, model)
 
     assert set(models(model).values()) == {GENERATOR_DEFAULT.model}

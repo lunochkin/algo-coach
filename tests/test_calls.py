@@ -41,10 +41,10 @@ def answering(text: str = '{"ok": true}', reasoning: str | None = None) -> FakeT
     )
 
 
-def test_the_stored_prompt_hashes_to_the_prompt_hash_beside_it(tmp_path):
+def test_the_stored_prompt_hashes_to_the_prompt_hash_beside_it(database):
     """The point of keeping the text: a record that cannot be checked against
     its own key is a claim about what was sent rather than the thing itself."""
-    log = CallLog(tmp_path)
+    log = CallLog(database)
 
     ask(
         answering(),
@@ -60,8 +60,8 @@ def test_the_stored_prompt_hashes_to_the_prompt_hash_beside_it(tmp_path):
     )
 
 
-def test_the_prompt_is_both_halves_in_the_order_sent(tmp_path):
-    log = CallLog(tmp_path)
+def test_the_prompt_is_both_halves_in_the_order_sent(database):
+    log = CallLog(database)
 
     ask(
         answering(),
@@ -76,8 +76,8 @@ def test_the_prompt_is_both_halves_in_the_order_sent(tmp_path):
     assert stored.prompt == payload("sys", "body")
 
 
-def test_what_came_back_is_recorded_beside_what_it_cost(tmp_path):
-    log = CallLog(tmp_path)
+def test_what_came_back_is_recorded_beside_what_it_cost(database):
+    log = CallLog(database)
 
     call, text = ask(
         answering('{"techniques": []}', reasoning="weighing the invariant"),
@@ -97,10 +97,10 @@ def test_what_came_back_is_recorded_beside_what_it_cost(tmp_path):
     assert stored.id == call.id
 
 
-def test_a_failure_is_recorded_and_then_raised(tmp_path):
+def test_a_failure_is_recorded_and_then_raised(database):
     """A run that broke at two in the morning is readable afterwards, rather
     than a counter that printed once and vanished."""
-    log = CallLog(tmp_path)
+    log = CallLog(database)
     transport = FakeTransport(error=RuntimeError("rate limited"))
 
     with pytest.raises(RuntimeError):
@@ -117,10 +117,10 @@ def test_a_failure_is_recorded_and_then_raised(tmp_path):
     assert stored.response is None
 
 
-def test_a_reply_with_no_text_is_a_failure_not_an_empty_reading(tmp_path):
+def test_a_reply_with_no_text_is_a_failure_not_an_empty_reading(database):
     """A refusal and an answer cut short both land here. Recording it as a
     response would say the model answered nothing on purpose."""
-    log = CallLog(tmp_path)
+    log = CallLog(database)
     transport = FakeTransport(Reply(text=None, stop_reason="content_filter"))
 
     call, text = ask(
@@ -135,10 +135,10 @@ def test_a_reply_with_no_text_is_a_failure_not_an_empty_reading(tmp_path):
     assert "content_filter" in call.error
 
 
-def test_the_same_prompt_may_be_called_more_than_once(tmp_path):
+def test_the_same_prompt_may_be_called_more_than_once(database):
     """Sampling one prompt on purpose, and a retry after a rate limit, both
     repeat a hash — so nothing may assume one call per hash."""
-    log = CallLog(tmp_path)
+    log = CallLog(database)
 
     ask(
         answering(),
@@ -175,12 +175,12 @@ def test_a_call_carries_an_outcome_or_it_is_not_a_call():
         recorded(model="m", effort="low", prompt="p", prompt_hash="h", response="r", error="e")
 
 
-def test_an_empty_log_reads_as_nothing(tmp_path):
-    assert CallLog(tmp_path).all() == []
+def test_an_empty_log_reads_as_nothing(database):
+    assert CallLog(database).all() == []
 
 
-def test_the_log_round_trips(tmp_path):
-    log = CallLog(tmp_path)
+def test_the_log_round_trips(database):
+    log = CallLog(database)
     call = recorded(model="m", effort="low", prompt="p", prompt_hash="h", response="r")
 
     log.append(call)
@@ -189,11 +189,11 @@ def test_the_log_round_trips(tmp_path):
     assert isinstance(log.all()[0], Call)
 
 
-def test_the_call_records_what_it_was_sampled_at(tmp_path):
+def test_the_call_records_what_it_was_sampled_at(database):
     """A machine record's configuration must be recoverable from its own record.
     The claim carries a copy so the claims file reads alone; this is where the
     copy is taken from, and it cannot drift because both are one append."""
-    log = CallLog(tmp_path)
+    log = CallLog(database)
     transport = answering()
 
     call, _ = ask(
@@ -209,11 +209,11 @@ def test_the_call_records_what_it_was_sampled_at(tmp_path):
     assert log.all()[0].temperature == 0.0
 
 
-def test_a_call_at_the_provider_s_own_default_records_no_temperature(tmp_path):
+def test_a_call_at_the_provider_s_own_default_records_no_temperature(database):
     """Absent rather than guessed. What a provider defaults to is its business
     and moves without notice, so a number written here would be a fact about
     the record rather than about the request."""
-    log = CallLog(tmp_path)
+    log = CallLog(database)
 
     call, _ = ask(
         answering(),
@@ -226,12 +226,12 @@ def test_a_call_at_the_provider_s_own_default_records_no_temperature(tmp_path):
     assert call.temperature is None
 
 
-def test_the_execution_and_its_last_request_are_both_recorded(tmp_path, monkeypatch):
+def test_the_execution_and_its_last_request_are_both_recorded(database, monkeypatch):
     """Two levels: what the caller waited and how many requests that took,
     then the request that answered. Their difference is the endpoint's."""
     ticks = iter([100.0, 100.25])
     monkeypatch.setattr(ASK, "monotonic", lambda: next(ticks))
-    log = CallLog(tmp_path)
+    log = CallLog(database)
     transport = answering()
     transport.reply = replace(transport.reply, request_ms=90, requests=2)
 
@@ -247,13 +247,13 @@ def test_the_execution_and_its_last_request_are_both_recorded(tmp_path, monkeypa
     assert (stored.elapsed_ms, stored.requests, stored.request_ms) == (250, 2, 90)
 
 
-def test_a_failure_records_both_levels_too(tmp_path, monkeypatch):
+def test_a_failure_records_both_levels_too(database, monkeypatch):
     """A request that failed instantly and one that timed out after five tries
     are different facts about an endpoint, and the failure is where knowing
     which matters."""
     ticks = iter([0.0, 30.0])
     monkeypatch.setattr(ASK, "monotonic", lambda: next(ticks))
-    log = CallLog(tmp_path)
+    log = CallLog(database)
     failure = RuntimeError("timed out")
     stamp(failure, Trace(requests=5, request_ms=9_000))
 
@@ -270,10 +270,10 @@ def test_a_failure_records_both_levels_too(tmp_path, monkeypatch):
     assert (stored.elapsed_ms, stored.requests, stored.request_ms) == (30_000, 5, 9_000)
 
 
-def test_a_transport_that_never_retried_stamps_nothing(tmp_path):
+def test_a_transport_that_never_retried_stamps_nothing(database):
     """Absent rather than claimed: a count nothing kept is not a count of
     one."""
-    log = CallLog(tmp_path)
+    log = CallLog(database)
 
     with pytest.raises(RuntimeError):
         ask(

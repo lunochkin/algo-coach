@@ -12,10 +12,10 @@ USER = "u-4f9c2a"
 
 
 @pytest.fixture
-def client(tmp_path):
-    seed_problem(tmp_path, id="p-greedy", techniques=["greedy", "sorting"])
-    seed_problem(tmp_path, id="p-sorting", techniques=["sorting"])
-    return TestClient(create_app(tmp_path, user_id=USER))
+def client(database):
+    seed_problem(database, id="p-greedy", techniques=["greedy", "sorting"])
+    seed_problem(database, id="p-sorting", techniques=["sorting"])
+    return TestClient(create_app(database, user_id=USER))
 
 
 def attempted(root, id: str, *, user_id: str = USER, problem_id: str = "p-greedy") -> None:
@@ -30,10 +30,10 @@ def attempted(root, id: str, *, user_id: str = USER, problem_id: str = "p-greedy
     )
 
 
-def test_the_board_offers_every_technique_a_served_problem_carries(client, tmp_path):
+def test_the_board_offers_every_technique_a_served_problem_carries(client, database):
     """The first sitting opens on an empty log, and a board of attempted
     techniques alone would offer nothing to pick."""
-    attempted(tmp_path, "a1", problem_id="p-sorting")
+    attempted(database, "a1", problem_id="p-sorting")
 
     board = client.get("/api/board").json()
 
@@ -44,8 +44,8 @@ def test_the_board_offers_every_technique_a_served_problem_carries(client, tmp_p
     assert (board["ungrouped"], board["excluded"]) == (0, 0)
 
 
-def test_the_board_counts_the_user_s_own_attempts_alone(client, tmp_path):
-    attempted(tmp_path, "a1", user_id="u-b71e03")
+def test_the_board_counts_the_user_s_own_attempts_alone(client, database):
+    attempted(database, "a1", user_id="u-b71e03")
 
     rows = client.get("/api/board").json()["rows"]
 
@@ -66,7 +66,7 @@ def a_card(slug: str, technique: str, *, templates=None) -> Card:
     )
 
 
-def test_a_technique_s_cards_come_whole(client, tmp_path):
+def test_a_technique_s_cards_come_whole(client, database):
     """The optional template only says a card is covered without it, so the
     page receives it beside the core ones."""
     templates = [
@@ -75,7 +75,7 @@ def test_a_technique_s_cards_come_whole(client, tmp_path):
             id="t2", slug="hard", title="hard", trigger="when", code="def f(): pass", optional=True
         ),
     ]
-    CardStore(tmp_path).put(a_card("greedy-basic", "greedy", templates=templates))
+    CardStore(database).put(a_card("greedy-basic", "greedy", templates=templates))
 
     (card,) = client.get("/api/techniques/greedy/cards").json()
 
@@ -83,10 +83,10 @@ def test_a_technique_s_cards_come_whole(client, tmp_path):
     assert client.get("/api/techniques/sorting/cards").json() == []
 
 
-def test_every_card_is_listed_by_technique_then_slug(client, tmp_path):
+def test_every_card_is_listed_by_technique_then_slug(client, database):
     """The cards list groups by technique, so the order it reads is that
     grouping."""
-    store = CardStore(tmp_path)
+    store = CardStore(database)
     for slug, technique in (
         ("windows", "sliding-window"),
         ("on-answer", "binary-search"),
@@ -103,10 +103,10 @@ def test_every_card_is_listed_by_technique_then_slug(client, tmp_path):
     ]
 
 
-def test_a_card_is_read_by_its_slug(client, tmp_path):
+def test_a_card_is_read_by_its_slug(client, database):
     """A re-seed keeps the slug, so a link to a card outlives the id the store
     minted."""
-    CardStore(tmp_path).put(a_card("greedy-basic", "greedy"))
+    CardStore(database).put(a_card("greedy-basic", "greedy"))
 
     assert client.get("/api/cards/greedy-basic").json()["id"] == "minted-greedy-basic"
 
@@ -126,17 +126,17 @@ def test_a_candidate_carries_no_statement(client):
     assert "statement" not in str(rows)
 
 
-def test_a_retired_problem_is_not_a_candidate(client, tmp_path):
-    ProblemStore(tmp_path).retire("p-greedy", RetirementReason.DEFECTIVE)
+def test_a_retired_problem_is_not_a_candidate(client, database):
+    ProblemStore(database).retire("p-greedy", RetirementReason.DEFECTIVE)
 
     rows = client.get("/api/techniques/sorting/candidates").json()
 
     assert [row["problem_id"] for row in rows] == ["p-sorting"]
 
 
-def test_the_candidates_count_the_user_s_own_attempts_alone(client, tmp_path):
-    attempted(tmp_path, "a1")
-    attempted(tmp_path, "a2", user_id="u-b71e03")
+def test_the_candidates_count_the_user_s_own_attempts_alone(client, database):
+    attempted(database, "a1")
+    attempted(database, "a2", user_id="u-b71e03")
 
     rows = client.get("/api/techniques/greedy/candidates").json()
 
@@ -158,8 +158,8 @@ def test_serving_an_unknown_problem_is_not_found(client):
     assert client.post("/api/problems/nope/sittings").status_code == 404
 
 
-def test_serving_a_retired_problem_is_refused(client, tmp_path):
-    ProblemStore(tmp_path).retire("p-sorting", RetirementReason.DEFECTIVE)
+def test_serving_a_retired_problem_is_refused(client, database):
+    ProblemStore(database).retire("p-sorting", RetirementReason.DEFECTIVE)
 
     assert client.post("/api/problems/p-sorting/sittings").status_code == 409
 
@@ -174,8 +174,8 @@ def test_a_served_sitting_is_read_back_by_its_id(client):
     assert again == served
 
 
-def test_another_user_s_sitting_is_not_found(client, tmp_path):
+def test_another_user_s_sitting_is_not_found(client, database):
     sitting_id = client.post("/api/problems/p-sorting/sittings").json()["sitting"]["id"]
-    other = TestClient(create_app(tmp_path, user_id="u-b71e03"))
+    other = TestClient(create_app(database, user_id="u-b71e03"))
 
     assert other.get(f"/api/sittings/{sitting_id}").status_code == 404

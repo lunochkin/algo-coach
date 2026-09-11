@@ -2,9 +2,9 @@ import threading
 from datetime import timedelta
 
 import pytest
+from commands import data_root
 from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_problem
 
-from algo_coach import cli
 from algo_coach.attempt_claims import classify_backlog, standing_attempt_claims
 from algo_coach.attempt_claims.run import Progress
 from algo_coach.calls import CallLog
@@ -19,12 +19,12 @@ answering = FakeTransport.answering
 
 
 @pytest.fixture
-def backlog(tmp_path, monkeypatch) -> AttemptLog:
+def backlog(database, monkeypatch) -> AttemptLog:
     """One two-tag problem and one single-tag problem, an attempt on each."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     seed_problem(root, id="one-tag", techniques=["trie"])
-    monkeypatch.setattr(cli, "DATA_ROOT", root)
+    data_root(root, monkeypatch)
 
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -64,8 +64,8 @@ def test_a_single_tag_problem_is_never_asked_about(backlog):
     assert len(client.calls) == 1
 
 
-def test_an_attempt_without_code_is_never_asked_about(tmp_path, monkeypatch):
-    root = tmp_path / "data"
+def test_an_attempt_without_code_is_never_asked_about(database, monkeypatch):
+    root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-codes", code=None))
@@ -94,10 +94,10 @@ def test_a_claimed_attempt_is_not_asked_again(backlog):
     assert (result.classified, client.calls) == (0, [])
 
 
-def test_a_run_resumes_where_the_last_one_stopped(tmp_path, monkeypatch):
+def test_a_run_resumes_where_the_last_one_stopped(database, monkeypatch):
     """Claims land as they are made and a claimed attempt drops out, so the
     backlog is not paid for twice."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-codes", finished_at=T0))
@@ -109,9 +109,9 @@ def test_a_run_resumes_where_the_last_one_stopped(tmp_path, monkeypatch):
     assert sorted(claim.attempt_id for claim in log.claims()) == ["a1", "a2"]
 
 
-def test_the_newest_attempts_are_claimed_first(tmp_path, monkeypatch):
+def test_the_newest_attempts_are_claimed_first(database, monkeypatch):
     """A run cut short by `limit` improves the numbers the board is showing."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("old", "two-codes", finished_at=T0))
@@ -143,10 +143,10 @@ def test_a_stored_decline_is_not_asked_again(backlog):
     assert (result.classified, len(client.calls)) == (0, 0)
 
 
-def test_one_failure_does_not_cost_the_attempts_behind_it(tmp_path, monkeypatch):
+def test_one_failure_does_not_cost_the_attempts_behind_it(database, monkeypatch):
     """A refusal, a rate limit or a dropped connection is one attempt's
     problem; a backlog run must not lose the rest."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-codes", finished_at=T0))
@@ -176,11 +176,11 @@ def broken() -> Verdict:
     return Verdict(error=RuntimeError("bad key"))
 
 
-def test_a_run_aborts_once_failures_stop_being_one_attempt_s_problem(tmp_path):
+def test_a_run_aborts_once_failures_stop_being_one_attempt_s_problem(database):
     """A key that does not work, a spent quota or a network that is down fails
     every attempt identically. The run stops rather than paying the same error
     once per attempt in the backlog."""
-    log = backlog_of(tmp_path / "data", ABORT_AFTER + 3)
+    log = backlog_of(database, ABORT_AFTER + 3)
     client = answering(*[broken()] * (ABORT_AFTER + 3))
 
     result = run(client, log)
@@ -191,10 +191,10 @@ def test_a_run_aborts_once_failures_stop_being_one_attempt_s_problem(tmp_path):
     assert log.claims() == []
 
 
-def test_a_success_resets_the_count(tmp_path):
+def test_a_success_resets_the_count(database):
     """Consecutive, not cumulative: a refusal here and a rate limit there is a
     run that is working."""
-    log = backlog_of(tmp_path / "data", ABORT_AFTER * 2)
+    log = backlog_of(database, ABORT_AFTER * 2)
     client = answering(*[broken(), Verdict(["greedy"])] * ABORT_AFTER)
 
     result = run(client, log)
@@ -204,10 +204,10 @@ def test_a_success_resets_the_count(tmp_path):
     assert len(client.calls) == ABORT_AFTER * 2
 
 
-def test_an_undecided_verdict_resets_the_count(tmp_path):
+def test_an_undecided_verdict_resets_the_count(database):
     """Naming no candidate writes nothing, but the call was answered — the
     classifier is reachable and the run is not broken."""
-    log = backlog_of(tmp_path / "data", ABORT_AFTER * 2)
+    log = backlog_of(database, ABORT_AFTER * 2)
     client = answering(*[broken(), Verdict([])] * ABORT_AFTER)
 
     result = run(client, log)
@@ -215,10 +215,10 @@ def test_an_undecided_verdict_resets_the_count(tmp_path):
     assert (result.aborted, result.undecided) == (False, ABORT_AFTER)
 
 
-def test_an_aborted_run_keeps_what_landed_before_it(tmp_path):
+def test_an_aborted_run_keeps_what_landed_before_it(database):
     """Claims are appended as they are made, so the abort costs the attempts
     behind it and nothing in front."""
-    log = backlog_of(tmp_path / "data", ABORT_AFTER + 2)
+    log = backlog_of(database, ABORT_AFTER + 2)
     client = answering(Verdict(["greedy"]), *[broken()] * ABORT_AFTER)
 
     result = run(client, log)
@@ -227,10 +227,10 @@ def test_an_aborted_run_keeps_what_landed_before_it(tmp_path):
     assert [claim.attempt_id for claim in log.claims()] == ["a0"]
 
 
-def test_a_backlog_shorter_than_the_threshold_never_aborts(tmp_path):
+def test_a_backlog_shorter_than_the_threshold_never_aborts(database):
     """Nothing to abort in front of: the failures are reported as they always
     were, and the exit code says the run landed nothing."""
-    log = backlog_of(tmp_path / "data", ABORT_AFTER - 1)
+    log = backlog_of(database, ABORT_AFTER - 1)
     client = answering(*[broken()] * (ABORT_AFTER - 1))
 
     result = run(client, log)
@@ -238,10 +238,10 @@ def test_a_backlog_shorter_than_the_threshold_never_aborts(tmp_path):
     assert (result.aborted, len(result.failed)) == (False, ABORT_AFTER - 1)
 
 
-def test_progress_is_reported_per_attempt_as_the_run_goes(tmp_path):
+def test_progress_is_reported_per_attempt_as_the_run_goes(database):
     """A call takes seconds, so the count at the end is not the report — the
     caller hears about each attempt when it is answered."""
-    log = backlog_of(tmp_path / "data", 3)
+    log = backlog_of(database, 3)
     seen: list[Progress] = []
 
     run(answering(Verdict(["greedy"]), Verdict([]), broken()), log, on_progress=seen.append)
@@ -399,10 +399,10 @@ def test_an_unchanged_verdict_is_still_written(backlog):
     assert (len(backlog.claims()), result.redone) == (2, 0)
 
 
-def test_unclaimed_attempts_are_claimed_before_stale_ones(tmp_path):
+def test_unclaimed_attempts_are_claimed_before_stale_ones(database):
     """A first claim buys a number the board does not have; a re-derivation
     only revises one it does."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("unclaimed", "two-codes", finished_at=T0))
@@ -436,10 +436,10 @@ def test_the_technique_flag_narrows_the_backlog(backlog):
     assert [claim.attempt_id for claim in backlog.claims()] == ["a3"]
 
 
-def test_the_log_has_one_writer_however_many_calls_are_in_flight(tmp_path):
+def test_the_log_has_one_writer_however_many_calls_are_in_flight(database):
     """A torn line in an append-only log cannot be taken back, so the calls fan
     out and the write stays on the thread that drives the run."""
-    log = backlog_of(tmp_path / "data", 6)
+    log = backlog_of(database, 6)
     appending = log.append_claim
     writers: list[threading.Thread] = []
 
@@ -456,10 +456,10 @@ def test_the_log_has_one_writer_however_many_calls_are_in_flight(tmp_path):
     assert set(writers) == {threading.current_thread()}
 
 
-def test_a_concurrent_run_claims_every_attempt_once(tmp_path):
+def test_a_concurrent_run_claims_every_attempt_once(database):
     """Completion order is not the order asked in, and a verdict must still
     land on the attempt it was read from."""
-    log = backlog_of(tmp_path / "data", 8)
+    log = backlog_of(database, 8)
     client = answering(*[Verdict(["greedy"])] * 8)
 
     result = run(client, log, concurrency=4)
@@ -469,10 +469,10 @@ def test_a_concurrent_run_claims_every_attempt_once(tmp_path):
     assert sorted(claimed) == sorted(f"a{age}" for age in range(8))
 
 
-def test_a_concurrent_run_counts_up_as_answers_arrive(tmp_path):
+def test_a_concurrent_run_counts_up_as_answers_arrive(database):
     """A position in the order asked would jump about with calls in flight;
     what a reader wants is a count that climbs."""
-    log = backlog_of(tmp_path / "data", 6)
+    log = backlog_of(database, 6)
     client = answering(*[Verdict(["greedy"])] * 6)
     seen: list[Progress] = []
 
@@ -482,10 +482,10 @@ def test_a_concurrent_run_counts_up_as_answers_arrive(tmp_path):
     assert {progress.total for progress in seen} == {6}
 
 
-def test_a_call_is_recorded_beside_the_claim_it_produced(tmp_path):
+def test_a_call_is_recorded_beside_the_claim_it_produced(database):
     """The claim says what stands; the call says what happened, and carries
     what a claim structurally cannot — the tokens and the reasoning."""
-    log = backlog_of(tmp_path / "data", 1)
+    log = backlog_of(database, 1)
     calls = CallLog(log.root)
 
     classify_backlog(answering(Verdict(["greedy"])), log, calls, stored(log), user_id="u1")
@@ -496,10 +496,10 @@ def test_a_call_is_recorded_beside_the_claim_it_produced(tmp_path):
     assert (claim.model, claim.prompt_hash) == (call.model, call.prompt_hash)
 
 
-def test_a_declined_verdict_is_a_call_and_a_claim_naming_nothing(tmp_path):
+def test_a_declined_verdict_is_a_call_and_a_claim_naming_nothing(database):
     """Both logs hold it: the call says what it cost, the claim says the
     question is answered and needs no second call."""
-    log = backlog_of(tmp_path / "data", 1)
+    log = backlog_of(database, 1)
     calls = CallLog(log.root)
 
     result = classify_backlog(answering(Verdict([])), log, calls, stored(log), user_id="u1")
@@ -509,8 +509,8 @@ def test_a_declined_verdict_is_a_call_and_a_claim_naming_nothing(tmp_path):
     assert len(calls.all()) == 1
 
 
-def test_a_failed_call_is_recorded_though_nothing_claims_it(tmp_path):
-    log = backlog_of(tmp_path / "data", 1)
+def test_a_failed_call_is_recorded_though_nothing_claims_it(database):
+    log = backlog_of(database, 1)
     calls = CallLog(log.root)
 
     result = classify_backlog(answering(broken()), log, calls, stored(log), user_id="u1")
@@ -520,10 +520,10 @@ def test_a_failed_call_is_recorded_though_nothing_claims_it(tmp_path):
     assert call.error and call.response is None
 
 
-def test_fresh_asks_again_where_a_claim_already_answers(tmp_path):
+def test_fresh_asks_again_where_a_claim_already_answers(database):
     """Which a cache exists to prevent — so a run measuring a model against
     itself has to say it wants the question asked twice."""
-    log = backlog_of(tmp_path / "data", 1)
+    log = backlog_of(database, 1)
     store_claim(log, "a0")
 
     result = run(answering(Verdict(["greedy"])), log, redo=True, fresh=True)

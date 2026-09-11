@@ -6,12 +6,12 @@ from algo_coach.sitting import Missing, Refused
 
 
 @pytest.fixture
-def client(tmp_path):
-    app = create_app(tmp_path, user_id="u-4f9c2a")
+def client(database):
+    app = create_app(database, user_id="u-4f9c2a")
 
     @app.get("/whose")
     def whose(root: Root, user_id: UserId) -> dict[str, str]:
-        return {"root": str(root), "user_id": user_id}
+        return {"root": str(root.directory), "user_id": user_id}
 
     @app.get("/missing")
     def missing() -> None:

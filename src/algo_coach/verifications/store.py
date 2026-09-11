@@ -1,14 +1,14 @@
 from pathlib import Path
 
 from algo_coach.schema import Verification
-from algo_coach.storage import JsonlLog
+from algo_coach.storage import Database, JsonlLog
 
 
 class VerificationLog(JsonlLog[Verification]):
     """Verification runs; neither of two runs of one solution supersedes the
     other."""
 
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Database | Path) -> None:
         super().__init__(root, "verifications.jsonl", Verification)
 
     def verifications(self) -> list[Verification]:

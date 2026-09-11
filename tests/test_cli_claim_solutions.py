@@ -13,8 +13,8 @@ def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
 
 
 @pytest.fixture
-def root(tmp_path, monkeypatch):
-    data = data_root(tmp_path, monkeypatch)
+def root(database, monkeypatch):
+    data = data_root(database, monkeypatch)
     corpus = stored(data, problem("p1", techniques=[]))
     for one in canonicals(*corpus):
         SolutionLog(data).append(one)

@@ -33,8 +33,8 @@ def stored_claim(attempt_id: str, techniques: list[str], *, model: str = MODEL):
 
 
 @pytest.fixture
-def hand_claimed(tmp_path, monkeypatch):
-    data = data_root(tmp_path, monkeypatch)
+def hand_claimed(database, monkeypatch):
+    data = data_root(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -262,9 +262,9 @@ def test_a_stored_run_over_nothing_read_exits_nonzero(hand_claimed, monkeypatch,
     assert "nothing every configuration named has read" in capsys.readouterr().err
 
 
-def test_nothing_hand_claimed_exits_nonzero(tmp_path, monkeypatch, capsys):
+def test_nothing_hand_claimed_exits_nonzero(database, monkeypatch, capsys):
     """No ground truth is not a score of zero — there is nothing to score."""
-    data = data_root(tmp_path, monkeypatch)
+    data = data_root(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     AttemptLog(data).append_attempt(attempt("a1", "two-codes"))
 

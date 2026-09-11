@@ -18,9 +18,10 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
   component, so the components stay consistent and an upgrade merges.
 - Postgres is named by `DATABASE_URL` in `.env`. `just migrate` applies the
   migrations, and `just migration <name>` generates the next one.
-- The tests need a Postgres server named by `TEST_DATABASE_URL`, where each
-  xdist worker creates, migrates and drops a database of its own. A test takes
-  the `database` fixture, and finds every table empty.
+- The integration tests need a Postgres server named by `TEST_DATABASE_URL`,
+  where each xdist worker creates, migrates and drops a database of its own. A
+  test taking the `database` fixture is marked `integration` and finds every
+  table empty. `just test-unit` runs the rest, without a database, as CI does.
 - `just app` runs the API and the Vite dev server together, and Ctrl+C stops
   both. The page is at the address Vite prints.
 

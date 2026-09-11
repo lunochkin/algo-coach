@@ -1,5 +1,4 @@
 import argparse
-from pathlib import Path
 
 from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
@@ -8,9 +7,10 @@ from algo_coach.cli.transport import transport
 from algo_coach.matches import EFFORT, MODEL, MatchLog, Progress, match_corpus
 from algo_coach.solution_claims import load_problems
 from algo_coach.solutions import SolutionLog
+from algo_coach.storage import Database
 
 
-def match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     api = transport(args, parser)
     cards = CardStore(root).all()
     if args.card and not any(card.slug == args.card for card in cards):

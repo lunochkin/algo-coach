@@ -194,10 +194,10 @@ def test_a_superseded_machine_claim_never_resurfaces_on_another_attempt():
     assert claims["a2"].techniques == ["two-pointers"]
 
 
-def test_a_machine_claim_on_a_hand_claimed_attempt_is_kept_in_the_log(tmp_path):
+def test_a_machine_claim_on_a_hand_claimed_attempt_is_kept_in_the_log(database):
     """Scored, never a candidate: it never reaches the board and never leaves
     the log, which is what makes it safe to store and scoreable later."""
-    log = AttemptLog(tmp_path)
+    log = AttemptLog(database)
     user = make_claim(["greedy"], id="c1", source=ClaimSource.USER)
     machine = make_claim(
         ["dynamic-programming"],
@@ -273,8 +273,8 @@ def test_resolution_is_never_stored_on_an_attempt():
     assert "techniques" not in Attempt.model_fields
 
 
-def test_claims_read_back_in_append_order(tmp_path):
-    log = AttemptLog(tmp_path)
+def test_claims_read_back_in_append_order(database):
+    log = AttemptLog(database)
     first = make_claim(["greedy"], id="c1")
     second = make_claim(["recursion"], id="c2")
     log.append_claim(first)
@@ -283,8 +283,8 @@ def test_claims_read_back_in_append_order(tmp_path):
     assert log.claims() == [first, second]
 
 
-def test_resolving_an_empty_log(tmp_path):
-    log = AttemptLog(tmp_path)
+def test_resolving_an_empty_log(database):
+    log = AttemptLog(database)
 
     assert standing_attempt_claims(log.claims()) == {}
 

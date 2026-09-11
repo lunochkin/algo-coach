@@ -1,13 +1,13 @@
 """What solving a problem can take. A view, never stored truth."""
 
 from collections.abc import Iterable
-from pathlib import Path
 
 from algo_coach.problems.store import ProblemStore
 from algo_coach.schema import Problem, Solution, SolutionClaim, SolutionRole
 from algo_coach.solution_claims.standing import standing_solution_claims
 from algo_coach.solution_claims.store import SolutionClaimLog
 from algo_coach.solutions.store import SolutionLog
+from algo_coach.storage import Database
 
 
 def derive(
@@ -45,7 +45,7 @@ def with_techniques(
     return [problem.model_copy(update={"techniques": derived[problem.id]}) for problem in problems]
 
 
-def load_problems(root: Path) -> list[Problem]:
+def load_problems(root: Database) -> list[Problem]:
     """Every stored problem carrying the view. The store alone returns the
     record, whose `techniques` is empty on every generated problem."""
     return with_techniques(

@@ -16,64 +16,64 @@ def rows(result):
     return {row.technique: row for row in result}
 
 
-def test_a_narrowed_claim_takes_credit_off_the_other_technique(tmp_path):
+def test_a_narrowed_claim_takes_credit_off_the_other_technique(database):
     """The fallback credits both techniques; the claim credits one, and the
     board is read per technique, so the difference is where practice gets
     steered."""
-    seed_problem(tmp_path, id="two-codes", techniques=["greedy", "sorting"])
+    seed_problem(database, id="two-codes", techniques=["greedy", "sorting"])
     one = attempt("a1", "two-codes")
     claims = {"a1": claim("a1", "greedy")}
 
-    result = rows(movement([one], problems(tmp_path), claims))
+    result = rows(movement([one], problems(database), claims))
 
     assert (result["greedy"].fallback, result["greedy"].claimed) == (1, 1)
     assert (result["sorting"].fallback, result["sorting"].claimed) == (1, 0)
     assert result["sorting"].moved == -1
 
 
-def test_a_claim_naming_every_candidate_moves_nothing(tmp_path):
+def test_a_claim_naming_every_candidate_moves_nothing(database):
     """The hedge the check exists to catch: it agrees with the tags, decides
     nothing, and would still write a claim for every attempt."""
-    seed_problem(tmp_path, id="two-codes", techniques=["greedy", "sorting"])
+    seed_problem(database, id="two-codes", techniques=["greedy", "sorting"])
     one = attempt("a1", "two-codes")
     claims = {"a1": claim("a1", "greedy", "sorting")}
 
-    result = movement([one], problems(tmp_path), claims)
+    result = movement([one], problems(database), claims)
 
     assert all(row.moved == 0 for row in result)
 
 
-def test_an_unclaimed_attempt_moves_nothing(tmp_path):
-    seed_problem(tmp_path, id="two-codes", techniques=["greedy", "sorting"])
+def test_an_unclaimed_attempt_moves_nothing(database):
+    seed_problem(database, id="two-codes", techniques=["greedy", "sorting"])
 
-    result = movement([attempt("a1", "two-codes")], problems(tmp_path), {})
+    result = movement([attempt("a1", "two-codes")], problems(database), {})
 
     assert all(row.moved == 0 for row in result)
 
 
-def test_a_single_tag_problem_cannot_move(tmp_path):
+def test_a_single_tag_problem_cannot_move(database):
     """Nothing to narrow: the fallback already names one code."""
-    seed_problem(tmp_path, id="one-tag", techniques=["trie"])
+    seed_problem(database, id="one-tag", techniques=["trie"])
     one = attempt("a1", "one-tag")
 
-    result = rows(movement([one], problems(tmp_path), {"a1": claim("a1", "trie")}))
+    result = rows(movement([one], problems(database), {"a1": claim("a1", "trie")}))
 
     assert (result["trie"].fallback, result["trie"].claimed, result["trie"].moved) == (1, 1, 0)
 
 
-def test_a_technique_the_claims_emptied_still_gets_a_row(tmp_path):
+def test_a_technique_the_claims_emptied_still_gets_a_row(database):
     """A code narrowed away everywhere is exactly the one worth seeing."""
-    seed_problem(tmp_path, id="two-codes", techniques=["greedy", "sorting"])
+    seed_problem(database, id="two-codes", techniques=["greedy", "sorting"])
     one = attempt("a1", "two-codes")
 
-    result = rows(movement([one], problems(tmp_path), {"a1": claim("a1", "greedy")}))
+    result = rows(movement([one], problems(database), {"a1": claim("a1", "greedy")}))
 
     assert result["sorting"].claimed == 0
 
 
-def test_the_rows_are_ordered_by_technique(tmp_path):
-    seed_problem(tmp_path, id="two-codes", techniques=["greedy", "sorting"])
+def test_the_rows_are_ordered_by_technique(database):
+    seed_problem(database, id="two-codes", techniques=["greedy", "sorting"])
 
-    result = movement([attempt("a1", "two-codes")], problems(tmp_path), {})
+    result = movement([attempt("a1", "two-codes")], problems(database), {})
 
     assert [row.technique for row in result] == ["greedy", "sorting"]

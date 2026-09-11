@@ -3,7 +3,6 @@ asked and written stays here; `hand_matching.py` holds the two-pane prompt."""
 
 import argparse
 from collections.abc import Mapping, Sequence
-from pathlib import Path
 
 from algo_coach.cards import CardStore
 from algo_coach.cli.hand_matching import HandMatching
@@ -12,6 +11,7 @@ from algo_coach.matches import hand_match as recorded
 from algo_coach.schema import Template, TemplateMatch
 from algo_coach.solution_claims import load_problems
 from algo_coach.solutions import SolutionLog
+from algo_coach.storage import Database
 
 
 class Landing:
@@ -29,7 +29,7 @@ class Landing:
 
 
 def hand_matching(
-    args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path
+    args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database
 ) -> HandMatching:
     """The sitting, built but not run."""
     cards = CardStore(root).all()
@@ -54,7 +54,7 @@ def hand_matching(
     return HandMatching(pool[: args.count], read, Landing(log, read))
 
 
-def hand_match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def hand_match(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     app = hand_matching(args, parser, root)
     app.run()
     print(f"{app.count} question(s) matched by hand, {app.answered.written} record(s) written")

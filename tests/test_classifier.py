@@ -1,11 +1,9 @@
 import re
-import tempfile
-from pathlib import Path
 
 import pytest
 from helpers import FakeTransport, Verdict
 
-from algo_coach.calls import UNSENT, CallLog
+from algo_coach.calls import UNSENT
 from algo_coach.classifier import (
     DEFAULT,
     EFFORT,
@@ -21,9 +19,19 @@ from algo_coach.techniques import criteria
 
 CODE = "def f(nums):\n    return sorted(nums)\n"
 
-# One throwaway call log for the whole module: these tests are about the
-# request, and where the record of it lands is another module's subject.
-CALLS = CallLog(Path(tempfile.mkdtemp()))
+
+class Kept:
+    """A call log in memory: these tests are about the request, and where the
+    record of it lands is another module's subject."""
+
+    def __init__(self) -> None:
+        self.appended = []
+
+    def append(self, record) -> None:
+        self.appended.append(record)
+
+
+CALLS = Kept()
 
 
 def verdict(client, candidates, code, **kwargs):

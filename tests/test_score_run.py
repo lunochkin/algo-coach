@@ -35,9 +35,9 @@ def stored_claim(attempt_id: str, techniques: list[str], **configuration):
 
 
 @pytest.fixture
-def hand_claimed(tmp_path) -> AttemptLog:
+def hand_claimed(database) -> AttemptLog:
     """One two-tag problem, one attempt on it, the user's claim standing."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -46,10 +46,10 @@ def hand_claimed(tmp_path) -> AttemptLog:
 
 
 @pytest.fixture
-def two_problems(tmp_path) -> AttemptLog:
+def two_problems(database) -> AttemptLog:
     """A user claim on each of two problems, so neither collapses into the
     other and a run has two attempts to spend a call on."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="p1", techniques=["greedy", "sorting"])
     seed_problem(root, id="p2", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
@@ -127,10 +127,10 @@ def test_a_second_run_at_this_configuration_pays_for_nothing(hand_claimed):
     assert (result.read, result.reused, client.calls) == (0, 1, [])
 
 
-def test_a_reading_stored_before_the_hand_claim_is_reused(tmp_path):
+def test_a_reading_stored_before_the_hand_claim_is_reused(database):
     """The ordinary correction path: the backlog run claims, the user corrects.
     Scoring that attempt is already paid for."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -225,10 +225,10 @@ def test_a_failed_reading_stores_nothing(hand_claimed):
     assert (result.scored, machine_claims(hand_claimed)) == (0, [])
 
 
-def test_a_machine_claim_is_not_ground_truth(tmp_path):
+def test_a_machine_claim_is_not_ground_truth(database):
     """The eval scores one against the other, so an attempt the classifier
     already claimed answers nothing."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -240,9 +240,9 @@ def test_a_machine_claim_is_not_ground_truth(tmp_path):
     assert (result.scored, client.calls) == (0, [])
 
 
-def test_an_unclaimed_attempt_is_not_scored(tmp_path):
+def test_an_unclaimed_attempt_is_not_scored(database):
     """Nothing to score it against — the hand pass has not reached it."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -252,10 +252,10 @@ def test_an_unclaimed_attempt_is_not_scored(tmp_path):
     assert (run(client, log).scored, client.calls) == (0, [])
 
 
-def test_only_the_latest_attempt_of_a_problem_is_scored(tmp_path):
+def test_only_the_latest_attempt_of_a_problem_is_scored(database):
     """A retry asks the identical question, so counting both would weight that
     problem twice."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("older", "two-codes", finished_at=T0))
@@ -292,10 +292,10 @@ def test_the_limit_caps_the_calls_not_the_score(two_problems):
     assert (result.read, result.reused, len(client.calls)) == (1, 1, 1)
 
 
-def test_a_run_of_failures_aborts_rather_than_paying_for_the_eval_set(tmp_path):
+def test_a_run_of_failures_aborts_rather_than_paying_for_the_eval_set(database):
     """A configuration this classifier cannot run fails identically on every
     attempt, and the eval set is the wrong place to learn that once."""
-    root = tmp_path / "data"
+    root = database
     log = AttemptLog(root)
     for index in range(ABORT_AFTER + 2):
         seed_problem(root, id=f"p{index}", techniques=["greedy", "sorting"])
@@ -464,18 +464,18 @@ def spread(root, count: int) -> AttemptLog:
     return log
 
 
-def test_configurations_on_one_deployment_share_a_budget(tmp_path):
+def test_configurations_on_one_deployment_share_a_budget(database):
     """Effort does not change which deployment answers, so two efforts of one
     model are one endpoint's traffic and one endpoint's cap."""
     client = Counting()
 
-    compare(client, spread(tmp_path / "data", 6), configurations=(LOW, HIGH), concurrency=1)
+    compare(client, spread(database, 6), configurations=(LOW, HIGH), concurrency=1)
 
     assert client.peak == {(LOW.model, LOW.pin): 1}
     assert client.calls == 12
 
 
-def test_configurations_on_different_deployments_run_at_once(tmp_path):
+def test_configurations_on_different_deployments_run_at_once(database):
     """The whole change: one budget each, spent together. The barrier clears
     only if both deployments have a call in flight."""
     ready = threading.Barrier(2, timeout=5)
@@ -485,14 +485,12 @@ def test_configurations_on_different_deployments_run_at_once(tmp_path):
         ready.wait()
         return Reply(text=json.dumps({"techniques": ["greedy"]}), stop_reason="stop")
 
-    result = compare(
-        client, spread(tmp_path / "data", 2), configurations=(DEFAULT, other), concurrency=1
-    )
+    result = compare(client, spread(database, 2), configurations=(DEFAULT, other), concurrency=1)
 
     assert [scored.score.read for scored in result.scores] == [2, 2]
 
 
-def test_one_configuration_aborting_leaves_the_others_reading(tmp_path):
+def test_one_configuration_aborting_leaves_the_others_reading(database):
     """A broken model is not a broken endpoint. The plan stops being drawn
     from; the deployment it shares keeps answering."""
     broken = RuntimeError("does not support the effort parameter")
@@ -504,7 +502,7 @@ def test_one_configuration_aborting_leaves_the_others_reading(tmp_path):
             raise broken
         return Reply(text=json.dumps({"techniques": ["greedy"]}), stop_reason="stop")
 
-    result = compare(client, spread(tmp_path / "data", ABORT_AFTER + 2), configurations=(LOW, HIGH))
+    result = compare(client, spread(database, ABORT_AFTER + 2), configurations=(LOW, HIGH))
 
     assert result.scores[0].score.aborted
     assert len(result.scores[0].score.failed) == ABORT_AFTER
@@ -512,10 +510,10 @@ def test_one_configuration_aborting_leaves_the_others_reading(tmp_path):
     assert result.scores[1].score.read == ABORT_AFTER + 2
 
 
-def test_the_log_has_one_writer_however_many_configurations_run(tmp_path, monkeypatch):
+def test_the_log_has_one_writer_however_many_configurations_run(database, monkeypatch):
     """Claims are appended as they are read, and an append-only file cannot be
     written by two threads at once. Every write is the consuming thread's."""
-    log = spread(tmp_path / "data", 6)
+    log = spread(database, 6)
     writers = []
     appended = log.append_claim
 
@@ -532,10 +530,10 @@ def test_the_log_has_one_writer_however_many_configurations_run(tmp_path, monkey
     assert set(writers) == {threading.current_thread()}
 
 
-def test_every_configuration_is_planned_before_the_first_call(tmp_path):
+def test_every_configuration_is_planned_before_the_first_call(database):
     """A reader needs every total up front, and one answered entirely from the
     log asks for nothing — reported as it started, it would never appear."""
-    log = spread(tmp_path / "data", 2)
+    log = spread(database, 2)
     log.append_claim(stored_claim("a0", ["greedy"]))
     log.append_claim(stored_claim("a1", ["greedy"]))
     planned = []
@@ -552,14 +550,14 @@ def test_every_configuration_is_planned_before_the_first_call(tmp_path):
     assert [plan.configuration for plan in plans] == [DEFAULT, CHEAP]
 
 
-def test_a_progress_report_names_the_configuration_that_read_it(tmp_path):
+def test_a_progress_report_names_the_configuration_that_read_it(database):
     """Several answer at once, so a line that did not say whose it was could
     not be attributed at all."""
     seen = []
 
     compare(
         Counting(),
-        spread(tmp_path / "data", 2),
+        spread(database, 2),
         configurations=(LOW, HIGH),
         on_progress=lambda configuration, progress: seen.append((configuration, progress.index)),
     )

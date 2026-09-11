@@ -1,5 +1,4 @@
 import argparse
-from pathlib import Path
 
 from algo_coach.calls import CallLog
 from algo_coach.classifier import EFFORT, MODEL
@@ -8,9 +7,12 @@ from algo_coach.cli.transport import transport
 from algo_coach.problems import ProblemStore
 from algo_coach.solution_claims import Progress, SolutionClaimLog, read_corpus
 from algo_coach.solutions import SolutionLog
+from algo_coach.storage import Database
 
 
-def claim_solutions(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def claim_solutions(
+    args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database
+) -> None:
     api = transport(args, parser)
     titles = {problem.id: problem.title for problem in ProblemStore(root).all()}
 

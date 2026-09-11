@@ -24,6 +24,7 @@ from algo_coach.cli.rows import Rows
 from algo_coach.cli.score import score
 from algo_coach.cli.seed import BadLine, seed
 from algo_coach.runs import CONCURRENCY
+from algo_coach.storage import Database
 
 DATA_ROOT = Path("data")
 
@@ -314,17 +315,19 @@ def main() -> None:
 
     args = parser.parse_args()
     # Read at call time, not at import: tests point DATA_ROOT elsewhere.
-    root = DATA_ROOT
+    root = Database(DATA_ROOT, url=os.environ.get("DATABASE_URL"))
     try:
         dispatch(args, parser, root)
     except KeyboardInterrupt:
         # Not a fault: every command appends as it goes, so what landed is
         # kept and a traceback would name only where the user was.
         parser.exit(INTERRUPTED, "\ninterrupted\n")
+    finally:
+        root.close()
 
 
 # every command takes the parser, whether or not it exits through it
-COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Path], None]] = {
+COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Database], None]] = {
     "seed": seed,
     "board": lambda args, _parser, root: board(args, root),
     # one command per record; the subject names the code, `--by-hand` the writer
@@ -340,5 +343,5 @@ COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Path]
 }
 
 
-def dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def dispatch(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     COMMANDS[args.command](args, parser, root)

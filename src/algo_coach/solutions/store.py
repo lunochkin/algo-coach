@@ -1,13 +1,13 @@
 from pathlib import Path
 
 from algo_coach.schema import Solution, SolutionRole
-from algo_coach.storage import JsonlLog
+from algo_coach.storage import Database, JsonlLog
 
 
 class SolutionLog(JsonlLog[Solution]):
     """The solutions a problem carries, in every role."""
 
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Database | Path) -> None:
         super().__init__(root, "solutions.jsonl", Solution)
 
     def solutions(self) -> list[Solution]:

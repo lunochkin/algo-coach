@@ -1,14 +1,14 @@
 from pathlib import Path
 
 from algo_coach.schema import Attempt, AttemptClaim, AttemptVerification, Diagnosis, SelfLabel
-from algo_coach.storage import JsonlLog
+from algo_coach.storage import Database, JsonlLog
 
 
 class AttemptLog:
     """The private log: attempts, their verifications, claims, self-labels and
     diagnoses, one append-only file each."""
 
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Database | Path) -> None:
         self.root = root
         self._attempts = JsonlLog(root, "attempts.jsonl", Attempt)
         self._verifications = JsonlLog(root, "attempt_verifications.jsonl", AttemptVerification)

@@ -2,8 +2,9 @@
 after every test that uses it.
 
 The server is named by TEST_DATABASE_URL, from the environment or the repo's
-`.env`, and needs the right to create databases. The databases the fixture
-creates are its own, `algo_coach_test_<worker>`, and never the one
+`.env`, and needs the right to create databases. A test taking the fixture is
+marked `integration`, and a run without a server deselects those. The databases
+the fixture creates are its own, `algo_coach_test_<worker>`, and never the one
 DATABASE_URL names.
 """
 
@@ -16,6 +17,8 @@ from alembic import command
 from alembic.config import Config
 from dotenv import dotenv_values
 from sqlalchemy import Engine, create_engine, make_url, text
+
+from algo_coach.storage import Database
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -48,7 +51,9 @@ def emptied(engine: Engine) -> None:
 def database_engine(worker_id: str) -> Iterator[Engine]:
     server = server_url()
     if server is None:
-        pytest.skip("TEST_DATABASE_URL names no Postgres server to test against")
+        # failed rather than skipped: a run without a server selects the unit
+        # tests alone, `-m "not integration"`, and says so
+        pytest.fail("TEST_DATABASE_URL names no Postgres server; run -m 'not integration'")
     name = f"algo_coach_test_{worker_id}"
     admin = create_engine(server, isolation_level="AUTOCOMMIT")
     with admin.connect() as conn:
@@ -71,7 +76,9 @@ def database_engine(worker_id: str) -> Iterator[Engine]:
 
 
 @pytest.fixture
-def database(database_engine: Engine) -> Iterator[Engine]:
-    """The worker's database, empty when the test starts and emptied after."""
-    yield database_engine
+def database(database_engine: Engine, tmp_path: Path) -> Iterator[Database]:
+    """The handle a test builds its stores from: the worker's database, empty
+    when the test starts and emptied after, and the test's own directory for a
+    store still on files."""
+    yield Database(tmp_path, engine=database_engine)
     emptied(database_engine)

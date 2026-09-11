@@ -1,5 +1,4 @@
 import argparse
-from pathlib import Path
 
 from algo_coach.attempt_claims import standing_attempt_claims
 from algo_coach.board import TechniqueMovement, movement
@@ -7,9 +6,10 @@ from algo_coach.cli.display import table
 from algo_coach.log import AttemptLog
 from algo_coach.schema import ClaimSource
 from algo_coach.solution_claims import load_problems
+from algo_coach.storage import Database
 
 
-def moved(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def moved(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     log = AttemptLog(root)
     attempts = [attempt for attempt in log.attempts() if attempt.user_id == args.user]
     problems = {problem.id: problem for problem in load_problems(root)}

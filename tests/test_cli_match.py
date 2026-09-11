@@ -13,8 +13,8 @@ def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
 
 
 @pytest.fixture
-def root(tmp_path, monkeypatch):
-    data = data_root(tmp_path, monkeypatch)
+def root(database, monkeypatch):
+    data = data_root(database, monkeypatch)
     seeded(data, card())
     corpus = stored(data, problem("p1", techniques=["sliding-window"]))
     # a match is keyed to a solution, so a corpus with none asks nothing
@@ -65,10 +65,10 @@ def test_a_missing_key_fails_before_the_run(root, monkeypatch, capsys):
     assert "OPENROUTER_API_KEY unset" in capsys.readouterr().err
 
 
-def test_by_hand_reaches_the_prompt_and_not_the_matcher(tmp_path, monkeypatch, capsys):
+def test_by_hand_reaches_the_prompt_and_not_the_matcher(database, monkeypatch, capsys):
     """One command per record, and the flag picks the writer. With nothing
     seeded the prompt has nothing to ask, and no model is called."""
-    data_root(tmp_path, monkeypatch)
+    data_root(database, monkeypatch)
 
     with pytest.raises(SystemExit) as exit_info:
         run_cli(monkeypatch, "match", "--by-hand")

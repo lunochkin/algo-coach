@@ -16,15 +16,15 @@ DECIDES = [{"args": "[0]", "expected": "false"}]
 COUNTS = "def solve(size, seed):\n    return [size + seed]\n"
 
 
-def run(tmp_path, model: FakeWriter, *, count: int = 1, bench: Bench = BENCH, **overrides):
-    (one,) = seeded(tmp_path, card(**overrides))
-    log = OutcomeLog(tmp_path)
+def run(database, model: FakeWriter, *, count: int = 1, bench: Bench = BENCH, **overrides):
+    (one,) = seeded(database, card(**overrides))
+    log = OutcomeLog(database)
     result = write_problems(
         model,
-        CallLog(tmp_path),
+        CallLog(database),
         one,
         one.templates[0],
-        Corpus.at(tmp_path),
+        Corpus.at(database),
         count=count,
         bench=bench,
         outcomes=log,
@@ -36,80 +36,80 @@ def sites(outcomes) -> dict[CallSite, object]:
     return {one.site: one for one in outcomes}
 
 
-def test_every_site_that_answered_leaves_a_record(tmp_path):
+def test_every_site_that_answered_leaves_a_record(database):
     """A run prints its stages and the process then ends, so what a site was
     asked and what came of it is readable only from a record."""
-    _, result, outcomes = run(tmp_path, FakeWriter(generator=BUILDS))
+    _, result, outcomes = run(database, FakeWriter(generator=BUILDS))
 
     assert len(result.drafted) == 1
     assert set(sites(outcomes)) == {CallSite.GENERATOR, CallSite.BLIND, CallSite.INPUTS}
 
 
-def test_the_four_sites_of_one_writing_share_a_writing_id(tmp_path):
+def test_the_four_sites_of_one_writing_share_a_writing_id(database):
     """Minted per writing rather than taken from the problem: it is what groups
     the sites of a draft that never landed."""
-    _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS))
+    _, _, outcomes = run(database, FakeWriter(generator=BUILDS))
 
     assert len({one.writing_id for one in outcomes}) == 1
 
 
-def test_a_landed_problem_is_named_by_its_records(tmp_path):
+def test_a_landed_problem_is_named_by_its_records(database):
     """The eval reads a site's answers back per problem, and the id exists only
     once the problem lands."""
-    _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS))
+    _, _, outcomes = run(database, FakeWriter(generator=BUILDS))
 
-    (stored,) = ProblemStore(tmp_path).all()
+    (stored,) = ProblemStore(database).all()
     assert {one.problem_id for one in outcomes} == {stored.id}
 
 
-def test_a_rejected_draft_still_leaves_what_its_sites_left(tmp_path):
+def test_a_rejected_draft_still_leaves_what_its_sites_left(database):
     """The draft is the writing with nothing else to point at: unrecorded, what
     the run paid for is lost when it ends."""
     model = FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n")
 
-    _, result, outcomes = run(tmp_path, model)
+    _, result, outcomes = run(database, model)
 
     assert result.drafted == []
     assert set(sites(outcomes)) == {CallSite.GENERATOR, CallSite.BLIND}
     assert {one.problem_id for one in outcomes} == {None}
 
 
-def test_a_disagreement_is_the_blind_sites_gate(tmp_path):
+def test_a_disagreement_is_the_blind_sites_gate(database):
     """A gate is filed under the site whose answer made it decidable. Nothing
     disagrees until there is a second reading of the statement."""
     model = FakeWriter(solution="def solve(xs):\n    return len(xs) + 1\n")
 
-    _, _, outcomes = run(tmp_path, model)
+    _, _, outcomes = run(database, model)
 
     at = sites(outcomes)
     assert at[CallSite.BLIND].gate is Gate.DISAGREED
     assert at[CallSite.GENERATOR].gate is None
 
 
-def test_a_reference_that_computed_nothing_is_the_blind_sites_gate(tmp_path):
+def test_a_reference_that_computed_nothing_is_the_blind_sites_gate(database):
     """Its whole purpose is computing the expected outputs, so a reference that
     answered no case failed at what it was asked for."""
     model = FakeWriter(solution="def solve(xs):\n    raise ValueError\n")
 
-    _, _, outcomes = run(tmp_path, model)
+    _, _, outcomes = run(database, model)
 
     assert sites(outcomes)[CallSite.BLIND].gate is Gate.UNTESTED
 
 
-def test_a_canonical_contradicting_its_own_cases_is_counted_on_the_generator(tmp_path):
+def test_a_canonical_contradicting_its_own_cases_is_counted_on_the_generator(database):
     """One call wrote the code and the declaration, so the contradiction is
     that call's arithmetic rather than a reading of the statement. It rejects
     nothing, and the count is what says how often the site slips."""
     model = FakeWriter(cases=[{"args": "[[1, 2, 3]]", "expected": "99"}])
 
-    _, result, outcomes = run(tmp_path, model)
+    _, result, outcomes = run(database, model)
 
     one = sites(outcomes)[CallSite.GENERATOR]
     assert (one.gate, one.misdeclared) == (None, 1)
     assert len(result.drafted) == 1
 
 
-def test_each_record_carries_the_configuration_of_its_own_call(tmp_path):
+def test_each_record_carries_the_configuration_of_its_own_call(database):
     """Four models in one run stay readable because a record copies its own
     call's configuration rather than the run's."""
     bench = Bench(
@@ -117,7 +117,7 @@ def test_each_record_carries_the_configuration_of_its_own_call(tmp_path):
         blind=Configuration(model="a-reference", effort="low", pin="two", temperature=0.0),
     )
 
-    _, _, outcomes = run(tmp_path, FakeWriter(), bench=bench)
+    _, _, outcomes = run(database, FakeWriter(), bench=bench)
 
     at = sites(outcomes)
     assert at[CallSite.GENERATOR].model == "a-generator"
@@ -125,20 +125,20 @@ def test_each_record_carries_the_configuration_of_its_own_call(tmp_path):
     assert at[CallSite.GENERATOR].prompt_hash != at[CallSite.BLIND].prompt_hash
 
 
-def test_a_site_that_made_no_call_writes_nothing(tmp_path):
+def test_a_site_that_made_no_call_writes_nothing(database):
     """The set written with the statement killed every mutant, so no round was
     asked and the site paid for no configuration an eval could compare."""
-    _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS))
+    _, _, outcomes = run(database, FakeWriter(generator=BUILDS))
 
     assert CallSite.DISCRIMINATION not in sites(outcomes)
 
 
-def test_a_form_that_is_its_own_optimum_records_the_input_generator_it_paid_for(tmp_path):
+def test_a_form_that_is_its_own_optimum_records_the_input_generator_it_paid_for(database):
     """The input generator is written for every problem, so the site answered.
     Nothing was searched for, and the record carries neither a size nor a
     reason there was none."""
     _, _, outcomes = run(
-        tmp_path,
+        database,
         FakeWriter(generator=BUILDS),
         templates=[template("longest-valid-window", speedup=False)],
     )
@@ -148,21 +148,21 @@ def test_a_form_that_is_its_own_optimum_records_the_input_generator_it_paid_for(
     assert one.unseparated is None
 
 
-def test_an_input_generator_call_that_failed_leaves_no_record(tmp_path):
+def test_an_input_generator_call_that_failed_leaves_no_record(database):
     """Provenance is all or none, and a call that answered nothing carries
     none. The problem lands: the site says nothing about the statement."""
-    _, result, outcomes = run(tmp_path, FakeWriter())
+    _, result, outcomes = run(database, FakeWriter())
 
     assert len(result.drafted) == 1
     assert CallSite.INPUTS not in sites(outcomes)
 
 
-def test_the_discrimination_record_carries_what_the_loop_left(tmp_path):
+def test_the_discrimination_record_carries_what_the_loop_left(database):
     """A round is what the site is scored on: the cases it won and the mutants
     they caught, one entry per round."""
     model = FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES, separators=[[[4], [3]]])
 
-    _, _, outcomes = run(tmp_path, model)
+    _, _, outcomes = run(database, model)
 
     one = sites(outcomes)[CallSite.DISCRIMINATION]
     assert one.won > 0
@@ -170,48 +170,48 @@ def test_the_discrimination_record_carries_what_the_loop_left(tmp_path):
     assert one.rounds[0] > 0
 
 
-def test_the_record_says_what_a_round_proposed_and_what_landed(tmp_path):
+def test_the_record_says_what_a_round_proposed_and_what_landed(database):
     """A proposal that killed nothing is not stored, and the difference is what
     the call was paid for and got nothing from."""
     model = FakeWriter(
         canonical=BRANCHING, solution=AGREES, cases=DECIDES, separators=[[[100], [4], [3]]]
     )
 
-    _, _, outcomes = run(tmp_path, model)
+    _, _, outcomes = run(database, model)
 
     one = sites(outcomes)[CallSite.DISCRIMINATION]
     assert one.proposed == 3
     assert one.won == 2
 
 
-def test_the_canonical_s_mutants_are_the_generator_s_own_count(tmp_path):
+def test_the_canonical_s_mutants_are_the_generator_s_own_count(database):
     """It wrote the solution the set is enumerated from, and its record is the
     one every writing leaves."""
     model = FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES, separators=[[[4], [3]]])
 
-    _, _, outcomes = run(tmp_path, model)
+    _, _, outcomes = run(database, model)
 
     assert sites(outcomes)[CallSite.GENERATOR].mutants > 0
 
 
-def test_each_source_is_filed_under_the_site_whose_output_killed(tmp_path):
+def test_each_source_is_filed_under_the_site_whose_output_killed(database):
     """Whether a round earns its call is what the split answers, so the three
     sum to the mutants the canonical yielded."""
     model = FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES, separators=[[[4], [3]]])
 
-    _, _, outcomes = run(tmp_path, model)
+    _, _, outcomes = run(database, model)
 
     at = sites(outcomes)
     killed = at[CallSite.GENERATOR].killed + at[CallSite.DISCRIMINATION].killed
     assert killed + at[CallSite.DISCRIMINATION].survived == at[CallSite.GENERATOR].mutants
 
 
-def test_a_pass_that_needed_no_round_still_records_what_killed(tmp_path):
+def test_a_pass_that_needed_no_round_still_records_what_killed(database):
     """The writing a round was never paid for is the one the measurement wants,
     and no discrimination record exists to carry it."""
     model = FakeWriter(canonical=BRANCHING, solution=AGREES, cases=DECIDES, generator=COUNTS)
 
-    _, _, outcomes = run(tmp_path, model)
+    _, _, outcomes = run(database, model)
 
     at = sites(outcomes)
     assert CallSite.DISCRIMINATION not in at
@@ -221,7 +221,7 @@ def test_a_pass_that_needed_no_round_still_records_what_killed(tmp_path):
     )
 
 
-def test_a_fuzz_disagreement_is_the_inputs_site_s_gate(tmp_path):
+def test_a_fuzz_disagreement_is_the_inputs_site_s_gate(database):
     """Nothing was decidable before the site's code built the input the two
     solutions answered differently, and the discrimination site was never
     asked."""
@@ -232,7 +232,7 @@ def test_a_fuzz_disagreement_is_the_inputs_site_s_gate(tmp_path):
         generator=COUNTS,
     )
 
-    _, result, outcomes = run(tmp_path, model)
+    _, result, outcomes = run(database, model)
 
     assert [one.gate for one in result.rejected] == ["disagreed"]
     assert sites(outcomes)[CallSite.INPUTS].gate is Gate.DISAGREED
@@ -263,43 +263,43 @@ SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    ret
 CLAIMS = template("longest-valid-window", speedup=True)
 
 
-def test_the_naive_solution_leaves_a_record_where_it_answered(tmp_path):
+def test_the_naive_solution_leaves_a_record_where_it_answered(database):
     """A site that made a call writes one, or what the run paid for is
     readable nowhere."""
-    _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
+    _, _, outcomes = run(database, FakeWriter(generator=BUILDS), templates=[CLAIMS])
 
     assert sites(outcomes)[CallSite.NAIVE].model == BENCH.naive.model
 
 
-def test_a_form_that_is_its_own_optimum_leaves_no_naive_solution_record(tmp_path):
+def test_a_form_that_is_its_own_optimum_leaves_no_naive_solution_record(database):
     """Absence on a site means it was never asked, and nothing measures a form
     the naive approach does not beat."""
-    _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS))
+    _, _, outcomes = run(database, FakeWriter(generator=BUILDS))
 
     assert CallSite.NAIVE not in sites(outcomes)
 
 
-def test_the_inputs_record_carries_the_size_the_search_found(tmp_path, monkeypatch):
+def test_the_inputs_record_carries_the_size_the_search_found(database, monkeypatch):
     """What the site is scored on: the code it wrote is what the search ran to
     reach a size."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
-    _, _, outcomes = run(tmp_path, model, templates=[CLAIMS])
+    _, _, outcomes = run(database, model, templates=[CLAIMS])
 
     one = sites(outcomes)[CallSite.INPUTS]
     assert one.separating == 2
     assert one.unseparated is None
 
 
-def test_the_inputs_record_carries_the_bound_the_search_ran_under(tmp_path, monkeypatch):
+def test_the_inputs_record_carries_the_bound_the_search_ran_under(database, monkeypatch):
     """A landed problem clears its draft, so the size the input generator
     reported is readable nowhere else and a separating size has nothing to be
     read against."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
-    _, _, outcomes = run(tmp_path, model, templates=[CLAIMS])
+    _, _, outcomes = run(database, model, templates=[CLAIMS])
 
     at = sites(outcomes)
     assert at[CallSite.INPUTS].largest == 8
@@ -308,11 +308,11 @@ def test_the_inputs_record_carries_the_bound_the_search_ran_under(tmp_path, monk
     assert at[CallSite.NAIVE].largest is None
 
 
-def test_a_bound_is_recorded_where_no_search_ran(tmp_path):
+def test_a_bound_is_recorded_where_no_search_ran(database):
     """The input generator is written for every problem, so the site reported a
     bound whether or not a speedup was claimed."""
     _, _, outcomes = run(
-        tmp_path,
+        database,
         FakeWriter(generator=BUILDS),
         templates=[template("longest-valid-window", speedup=False)],
     )
@@ -320,22 +320,22 @@ def test_a_bound_is_recorded_where_no_search_ran(tmp_path):
     assert sites(outcomes)[CallSite.INPUTS].largest == 8
 
 
-def test_the_naive_solution_record_carries_the_search_it_was_judged_by(tmp_path, monkeypatch):
+def test_the_naive_solution_record_carries_the_search_it_was_judged_by(database, monkeypatch):
     """The search timed this answer against the canonical, so what it found is
     a verdict about the naive solution as much as about the input generator."""
     monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
-    _, _, outcomes = run(tmp_path, model, templates=[CLAIMS])
+    _, _, outcomes = run(database, model, templates=[CLAIMS])
 
     assert sites(outcomes)[CallSite.NAIVE].separating is not None
     assert sites(outcomes)[CallSite.INPUTS].separating is not None
 
 
-def test_a_search_that_separated_nothing_says_why(tmp_path):
+def test_a_search_that_separated_nothing_says_why(database):
     """A missing separation is a defect only where a speedup was claimed, and
     the reason is what tells the two apart."""
-    _, _, outcomes = run(tmp_path, FakeWriter(generator=BUILDS), templates=[CLAIMS])
+    _, _, outcomes = run(database, FakeWriter(generator=BUILDS), templates=[CLAIMS])
 
     one = sites(outcomes)[CallSite.INPUTS]
     assert one.separating is None

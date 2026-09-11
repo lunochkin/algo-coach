@@ -1,13 +1,13 @@
 from pathlib import Path
 
 from algo_coach.schema import TestCase
-from algo_coach.storage import JsonlLog
+from algo_coach.storage import Database, JsonlLog
 
 
 class CaseLog(JsonlLog[TestCase]):
     """The cases that decide a problem."""
 
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Database | Path) -> None:
         super().__init__(root, "test_cases.jsonl", TestCase)
 
     def cases(self) -> list[TestCase]:

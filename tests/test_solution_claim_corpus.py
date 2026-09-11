@@ -52,8 +52,8 @@ def already_read(
 
 
 @pytest.fixture
-def log(tmp_path) -> SolutionClaimLog:
-    return SolutionClaimLog(tmp_path)
+def log(database) -> SolutionClaimLog:
+    return SolutionClaimLog(database)
 
 
 def run(client, log, solutions, **kwargs):

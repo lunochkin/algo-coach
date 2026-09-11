@@ -8,29 +8,29 @@ from algo_coach.calls import CallLog
 from algo_coach.matches import DEFAULT, MatcherError, candidates, match, request_hash
 
 
-def read(tmp_path, client: FakeTransport, cards=None, techniques=("sliding-window",)):
-    (one,) = seeded(tmp_path, *(cards or [card()]))
+def read(database, client: FakeTransport, cards=None, techniques=("sliding-window",)):
+    (one,) = seeded(database, *(cards or [card()]))
     asked = problem("p1", techniques=list(techniques))
-    return one, match(client, CallLog(tmp_path), one, asked, canonical(asked.id))
+    return one, match(client, CallLog(database), one, asked, canonical(asked.id))
 
 
-def test_a_procedure_template_is_no_candidate(tmp_path):
+def test_a_procedure_template_is_no_candidate(database):
     """A framing procedure is displayed by every solution its technique
     reaches, so a per-solution verdict on one carries no information."""
     (one,) = seeded(
-        tmp_path,
+        database,
         card(templates=[template("framing", **PROCEDURE), template("longest-valid-window")]),
     )
 
     assert [t.slug for t in candidates(one)] == ["longest-valid-window"]
 
 
-def test_one_call_carries_every_candidate(tmp_path):
+def test_one_call_carries_every_candidate(database):
     """Not a call per pair: the candidates are the card's templates and the
     answer is the subset, which is one request rather than six."""
     client = FakeTransport.answering(Verdict(["longest-valid-window"]))
 
-    _, (matched, call) = read(tmp_path, client)
+    _, (matched, call) = read(database, client)
 
     assert len(client.calls) == 1
     assert matched == ["longest-valid-window"]
@@ -42,14 +42,14 @@ def test_one_call_carries_every_candidate(tmp_path):
     ]
 
 
-def test_the_solution_is_the_evidence(tmp_path):
+def test_the_solution_is_the_evidence(database):
     """A form is displayed by code. The statement travels with it for what the
     code leaves implicit, never as the verdict."""
     client = FakeTransport.answering(Verdict([]))
-    (one,) = seeded(tmp_path)
+    (one,) = seeded(database)
     asked = problem("p1", techniques=["sliding-window"], statement="Find the longest substring ...")
 
-    match(client, CallLog(tmp_path), one, asked, canonical(asked.id, code="def solve(): return 1"))
+    match(client, CallLog(database), one, asked, canonical(asked.id, code="def solve(): return 1"))
 
     content = client.calls[0]["content"]
     assert "def solve(): return 1" in content
@@ -60,47 +60,47 @@ def test_the_solution_is_the_evidence(tmp_path):
     assert "the cue for longest-valid-window" in content
 
 
-def test_a_single_candidate_is_still_asked(tmp_path):
+def test_a_single_candidate_is_still_asked(database):
     """Unlike a lone technique, where the problem itself answers: here the
     verdict is the record, and yes and no both have to be paid for once."""
     client = FakeTransport.answering(Verdict([]))
 
-    _, (matched, call) = read(tmp_path, client, [card(templates=[template("only-form")])])
+    _, (matched, call) = read(database, client, [card(templates=[template("only-form")])])
 
     assert (matched, call is not None) == ([], True)
 
 
-def test_a_card_of_procedures_alone_asks_nothing(tmp_path):
+def test_a_card_of_procedures_alone_asks_nothing(database):
     client = FakeTransport.answering()
 
     _, (matched, call) = read(
-        tmp_path, client, [card(templates=[template("framing", **PROCEDURE)])]
+        database, client, [card(templates=[template("framing", **PROCEDURE)])]
     )
 
     assert (matched, call, client.calls) == ([], None, [])
 
 
-def test_a_verdict_outside_the_candidates_is_dropped(tmp_path):
+def test_a_verdict_outside_the_candidates_is_dropped(database):
     """The schema's guarantee ends with the request; the record outlives it."""
     client = FakeTransport.answering(Verdict(["longest-valid-window", "invented"]))
 
-    _, (matched, _) = read(tmp_path, client)
+    _, (matched, _) = read(database, client)
 
     assert matched == ["longest-valid-window"]
 
 
-def test_no_verdict_is_an_error(tmp_path):
+def test_no_verdict_is_an_error(database):
     """A refusal or an answer cut short: the pair stays unread rather than
     landing as a card that matches nothing."""
     with pytest.raises(MatcherError):
-        read(tmp_path, FakeTransport.answering(Verdict()))
+        read(database, FakeTransport.answering(Verdict()))
 
 
-def test_the_prompt_hash_is_per_pair(tmp_path):
+def test_the_prompt_hash_is_per_pair(database):
     """A template edited on one card re-tests that card's pairs and leaves
     every other one settled."""
     one, edited = seeded(
-        tmp_path,
+        database,
         card(),
         card("sliding-window-advanced", templates=[template("longest-valid-window", code="new")]),
     )
@@ -114,23 +114,23 @@ def test_the_prompt_hash_is_per_pair(tmp_path):
     assert request_hash(edited, asked, mine) != request_hash(one, asked, mine)
 
 
-def test_the_reading_is_greedy_and_pinned(tmp_path):
+def test_the_reading_is_greedy_and_pinned(database):
     """The configuration is part of what identifies a record, so what a run
     sampled at and which build answered are sent and stored."""
     client = FakeTransport.answering(Verdict([]))
 
-    read(tmp_path, client)
+    read(database, client)
 
     sent = client.calls[0]
     assert (sent["temperature"], sent["pin"]) == (DEFAULT.temperature, DEFAULT.pin)
     assert DEFAULT.temperature == 0.0
 
 
-def test_the_call_is_recorded(tmp_path):
+def test_the_call_is_recorded(database):
     client = FakeTransport.answering(Verdict(["fixed-window"]))
 
-    read(tmp_path, client)
+    read(database, client)
 
-    (call,) = CallLog(tmp_path).all()
+    (call,) = CallLog(database).all()
     assert json.loads(call.response)["templates"] == ["fixed-window"]
     assert call.provider == "fake"

@@ -13,9 +13,13 @@ default:
 sync:
     uv sync
 
-# Run the tests.
+# Run the tests, the integration tests on the Postgres TEST_DATABASE_URL names.
 test *args:
     uv run pytest {{ args }}
+
+# Run the unit tests alone: no database.
+test-unit *args:
+    uv run pytest -m "not integration" {{ args }}
 
 # Lint.
 lint *args:
@@ -54,8 +58,9 @@ fmt:
 # frontend's own type check and lint.
 check: lint typecheck dead web-check test
 
-# What CI runs: `check` with coverage in place of the bare tests.
-ci: lint typecheck dead web-check coverage
+# What CI runs: `check` with the unit tests alone, since CI has no Postgres
+# yet. Coverage is gated over the whole suite, by `just coverage`.
+ci: lint typecheck dead web-check test-unit
 
 # Enable the pre-commit and commit-msg hooks. Once per clone.
 hooks:

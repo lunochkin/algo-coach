@@ -14,8 +14,8 @@ def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
 
 
 @pytest.fixture
-def root(tmp_path, monkeypatch):
-    data = data_root(tmp_path, monkeypatch)
+def root(database, monkeypatch):
+    data = data_root(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     AttemptLog(data).append_attempt(attempt("a1", "two-codes"))
     return data

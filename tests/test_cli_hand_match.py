@@ -19,10 +19,10 @@ SCREEN = (200, 50)
 
 
 @pytest.fixture
-def hand_match_root(tmp_path, monkeypatch):
+def hand_match_root(database, monkeypatch):
     """One card of three forms and two problems its technique reaches, plus a
     second card nothing asks about unless `--card` says so."""
-    root = tmp_path / "data"
+    root = database
     seeded(
         root,
         card(

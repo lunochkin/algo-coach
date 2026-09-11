@@ -42,24 +42,24 @@ def answer(code: str = BUILDS, largest: int = 1000) -> str:
 ELSEWHERE = Configuration(model="another", effort="low", pin="somewhere")
 
 
-def test_the_statement_is_the_whole_of_the_request(tmp_path):
+def test_the_statement_is_the_whole_of_the_request(database):
     """The constraints are what the generator reads, and the statement is
     where they are stated."""
     model = FakeModel(answer())
 
-    built, call = write_input_generator(model, CallLog(tmp_path), STATEMENT)
+    built, call = write_input_generator(model, CallLog(database), STATEMENT)
 
     assert model.calls[0]["content"] == f"<problem>\n{STATEMENT}\n</problem>"
     assert built.code == BUILDS
     assert call.response == answer()
 
 
-def test_the_largest_size_the_statement_allows_is_reported(tmp_path):
+def test_the_largest_size_the_statement_allows_is_reported(database):
     """The search asks for sizes, and an input above the bound separates
     nothing because the problem excludes it."""
     model = FakeModel(answer(largest=1000))
 
-    built, _ = write_input_generator(model, CallLog(tmp_path), STATEMENT)
+    built, _ = write_input_generator(model, CallLog(database), STATEMENT)
 
     assert built.largest == 1000
 
@@ -108,13 +108,13 @@ def test_a_reply_carrying_no_code_fails():
         read(answer(code=""))
 
 
-def test_an_answer_cut_short_writes_no_generator(tmp_path):
+def test_an_answer_cut_short_writes_no_generator(database):
     model = FakeModel(None)
 
     with pytest.raises(GenerationError):
-        write_input_generator(model, CallLog(tmp_path), STATEMENT)
+        write_input_generator(model, CallLog(database), STATEMENT)
 
-    assert len(CallLog(tmp_path).all()) == 1
+    assert len(CallLog(database).all()) == 1
 
 
 def test_the_brief_asks_for_one_input_per_pair(tmp_path):
@@ -152,12 +152,12 @@ def test_the_schema_is_strict():
     assert shape["additionalProperties"] is False
 
 
-def test_the_site_s_own_configuration_is_the_default(tmp_path):
+def test_the_site_s_own_configuration_is_the_default(database):
     """A site names its own model, and a run may aim this call elsewhere."""
     model = FakeModel(answer())
 
-    write_input_generator(model, CallLog(tmp_path), STATEMENT)
-    write_input_generator(model, CallLog(tmp_path), STATEMENT, configuration=ELSEWHERE)
+    write_input_generator(model, CallLog(database), STATEMENT)
+    write_input_generator(model, CallLog(database), STATEMENT, configuration=ELSEWHERE)
 
     assert model.calls[0]["model"] == INPUTS_DEFAULT.model
     assert model.calls[1]["model"] == ELSEWHERE.model

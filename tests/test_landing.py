@@ -66,17 +66,17 @@ def drafted(**overrides) -> Draft:
 
 
 @pytest.fixture
-def template(tmp_path):
+def template(database):
     """A seeded card's template, since a match references a minted id and a
     seed file carries none."""
-    (one,) = seeded(tmp_path, card())
+    (one,) = seeded(database, card())
     return one.templates[0]
 
 
-def test_one_act_writes_every_part(tmp_path, template):
+def test_one_act_writes_every_part(database, template):
     """A statement with no cases is one nothing can judge, and the matcher
     reads whatever the problem store holds."""
-    corpus = Corpus.at(tmp_path)
+    corpus = Corpus.at(database)
 
     problem = land(corpus, template, drafted())
 
@@ -94,10 +94,10 @@ def test_one_act_writes_every_part(tmp_path, template):
 NAIVE = "def solve(xs):\n    return len([one for one in xs])\n"
 
 
-def test_the_naive_solution_lands_beside_the_two_other_solutions(tmp_path, template):
+def test_the_naive_solution_lands_beside_the_two_other_solutions(database, template):
     """A replay re-runs the search over the stored problem, and re-deriving the
     solution it measures against would re-pay the call that wrote it."""
-    corpus = Corpus.at(tmp_path)
+    corpus = Corpus.at(database)
 
     problem = land(
         corpus,
@@ -111,21 +111,21 @@ def test_the_naive_solution_lands_beside_the_two_other_solutions(tmp_path, templ
     assert [one.call_id for one in stored] == ["call-4"]
 
 
-def test_a_form_that_is_its_own_optimum_lands_no_naive_solution(tmp_path, template):
+def test_a_form_that_is_its_own_optimum_lands_no_naive_solution(database, template):
     """Nothing measures it, so the draft carries none and the corpus stores
     none."""
-    corpus = Corpus.at(tmp_path)
+    corpus = Corpus.at(database)
 
     problem = land(corpus, template, drafted())
 
     assert corpus.solutions.for_problem(problem.id, SolutionRole.NAIVE) == []
 
 
-def test_the_problem_is_written_last(tmp_path, template, monkeypatch):
+def test_the_problem_is_written_last(database, template, monkeypatch):
     """Four stores cannot be written atomically. A run that dies part way
     leaves records pointing at a problem no reader finds, rather than a problem
     whose parts are missing."""
-    corpus = Corpus.at(tmp_path)
+    corpus = Corpus.at(database)
     monkeypatch.setattr(
         corpus.problems, "put", lambda _problem: (_ for _ in ()).throw(OSError("disk"))
     )
@@ -137,10 +137,10 @@ def test_the_problem_is_written_last(tmp_path, template, monkeypatch):
     assert len(corpus.cases.cases()) == 1
 
 
-def test_the_problem_carries_what_the_generation_call_asserted(tmp_path, template):
+def test_the_problem_carries_what_the_generation_call_asserted(database, template):
     """The template it was written for, its difficulty, and the configuration
     that wrote it."""
-    problem = land(Corpus.at(tmp_path), template, drafted())
+    problem = land(Corpus.at(database), template, drafted())
 
     assert problem.target_template_id == template.id
     assert (problem.model, problem.effort, problem.call_id) == ("a-model", "high", "call-1")
@@ -149,11 +149,11 @@ def test_the_problem_carries_what_the_generation_call_asserted(tmp_path, templat
     assert problem.techniques == []
 
 
-def test_each_solution_names_the_call_that_wrote_it(tmp_path, template):
+def test_each_solution_names_the_call_that_wrote_it(database, template):
     """The canonical came from the generation call and the reference from its
     own, and a record whose configuration is partly unknown compares with
     nothing."""
-    corpus = Corpus.at(tmp_path)
+    corpus = Corpus.at(database)
 
     problem = land(corpus, template, drafted())
 
@@ -163,7 +163,7 @@ def test_each_solution_names_the_call_that_wrote_it(tmp_path, template):
     assert (canonical.temperature, reference.temperature) == (None, 0.0)
 
 
-def test_a_case_keeps_the_solution_that_computed_it(tmp_path, template):
+def test_a_case_keeps_the_solution_that_computed_it(database, template):
     """Two cases in a set are not equally strong evidence, and the field is
     what says which is which."""
     beyond = drafted(
@@ -177,13 +177,13 @@ def test_a_case_keeps_the_solution_that_computed_it(tmp_path, template):
         ]
     )
 
-    problem = land(Corpus.at(tmp_path), template, beyond)
+    problem = land(Corpus.at(database), template, beyond)
 
-    (one,) = Corpus.at(tmp_path).cases.for_problem(problem.id)
+    (one,) = Corpus.at(database).cases.for_problem(problem.id)
     assert one.expected_from is ExpectedSource.CANONICAL
 
 
-def test_a_case_keeps_the_round_that_won_it(tmp_path, template):
+def test_a_case_keeps_the_round_that_won_it(database, template):
     """A replay rebuilds the set the mutation loop was run against, and only
     this separates a won case from the set written with the statement."""
     won = drafted(
@@ -198,16 +198,16 @@ def test_a_case_keeps_the_round_that_won_it(tmp_path, template):
         ]
     )
 
-    problem = land(Corpus.at(tmp_path), template, won)
+    problem = land(Corpus.at(database), template, won)
 
-    (one,) = Corpus.at(tmp_path).cases.for_problem(problem.id)
+    (one,) = Corpus.at(database).cases.for_problem(problem.id)
     assert one.round == 2
 
 
-def test_a_case_names_the_call_that_proposed_it(tmp_path, template):
+def test_a_case_names_the_call_that_proposed_it(database, template):
     """A mutation round and the speedup search propose arguments at their own
     configuration, so the problem's call does not answer for every case."""
-    problem = land(Corpus.at(tmp_path), template, drafted())
+    problem = land(Corpus.at(database), template, drafted())
 
-    (one,) = Corpus.at(tmp_path).cases.for_problem(problem.id)
+    (one,) = Corpus.at(database).cases.for_problem(problem.id)
     assert one.call_id == "call-3"

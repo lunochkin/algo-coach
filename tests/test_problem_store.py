@@ -18,22 +18,22 @@ def make_problem(id: str = "i1", **overrides) -> Problem:
     return Problem.model_validate(fields)
 
 
-def test_put_and_get(tmp_path):
-    store = ProblemStore(tmp_path)
+def test_put_and_get(database):
+    store = ProblemStore(database)
     problem = make_problem()
     store.put(problem)
 
     assert store.get("i1") == problem
 
 
-def test_get_missing_is_none(tmp_path):
-    assert ProblemStore(tmp_path).get("nope") is None
+def test_get_missing_is_none(database):
+    assert ProblemStore(database).get("nope") is None
 
 
-def test_a_stored_problem_is_not_rewritten(tmp_path):
+def test_a_stored_problem_is_not_rewritten(database):
     """`corpus.md`: a statement that says the wrong thing is retired and a new
     problem written, so the attempts stay with what they were made against."""
-    store = ProblemStore(tmp_path)
+    store = ProblemStore(database)
     store.put(make_problem(title="Two Sum"))
 
     with pytest.raises(ValueError, match="only its status moves"):
@@ -41,9 +41,9 @@ def test_a_stored_problem_is_not_rewritten(tmp_path):
     assert store.get("i1").title == "Two Sum"
 
 
-def test_only_the_status_of_a_stored_problem_moves(tmp_path):
+def test_only_the_status_of_a_stored_problem_moves(database):
     """Created, then retired: the one write an existing problem takes."""
-    store = ProblemStore(tmp_path)
+    store = ProblemStore(database)
     store.put(make_problem())
 
     store.put(make_problem(status=ProblemStatus.RETIRED, retired_reason=RetirementReason.DEFECTIVE))
@@ -52,30 +52,30 @@ def test_only_the_status_of_a_stored_problem_moves(tmp_path):
     assert len(store.all()) == 1
 
 
-def test_a_problem_carrying_its_view_is_refused(tmp_path):
+def test_a_problem_carrying_its_view_is_refused(database):
     """`README.md`: `techniques` is derived from the solution claims, and a
     record stored with it would be truth nothing re-derives."""
     with pytest.raises(ValueError, match="carries a view"):
-        ProblemStore(tmp_path).put(make_problem(techniques=["greedy"]))
+        ProblemStore(database).put(make_problem(techniques=["greedy"]))
 
 
-def test_writing_the_same_problem_again_is_allowed(tmp_path):
+def test_writing_the_same_problem_again_is_allowed(database):
     """A run that died between two writes of one landing may write it again."""
-    store = ProblemStore(tmp_path)
+    store = ProblemStore(database)
     store.put(make_problem())
     store.put(make_problem())
 
     assert len(store.all()) == 1
 
 
-def test_all_on_empty_store(tmp_path):
-    assert ProblemStore(tmp_path).all() == []
+def test_all_on_empty_store(database):
+    assert ProblemStore(database).all() == []
 
 
-def test_retiring_moves_the_status_and_names_the_reason(tmp_path):
+def test_retiring_moves_the_status_and_names_the_reason(database):
     """A defective problem leaves serving, and a bare status would leave every
     reader guessing why."""
-    store = ProblemStore(tmp_path)
+    store = ProblemStore(database)
     store.put(make_problem())
 
     retired = store.retire("i1", RetirementReason.DEFECTIVE)
@@ -88,10 +88,10 @@ def test_retiring_moves_the_status_and_names_the_reason(tmp_path):
     assert not retired.served
 
 
-def test_retiring_moves_nothing_but_the_status(tmp_path):
+def test_retiring_moves_nothing_but_the_status(database):
     """The attempts made against the problem stay with the record they were made
     against."""
-    store = ProblemStore(tmp_path)
+    store = ProblemStore(database)
     store.put(make_problem())
     before = store.get("i1").model_dump(exclude={"status", "retired_reason"})
 
@@ -100,10 +100,10 @@ def test_retiring_moves_nothing_but_the_status(tmp_path):
     assert store.get("i1").model_dump(exclude={"status", "retired_reason"}) == before
 
 
-def test_retiring_a_retired_problem_changes_nothing(tmp_path):
+def test_retiring_a_retired_problem_changes_nothing(database):
     """A sitting asks about each attempt in turn, so a second mark on one
     problem is the loop repeating itself."""
-    store = ProblemStore(tmp_path)
+    store = ProblemStore(database)
     store.put(make_problem())
     first = store.retire("i1", RetirementReason.DEFECTIVE)
 
@@ -111,6 +111,6 @@ def test_retiring_a_retired_problem_changes_nothing(tmp_path):
     assert len(store.all()) == 1
 
 
-def test_retiring_an_unknown_problem_is_refused(tmp_path):
+def test_retiring_an_unknown_problem_is_refused(database):
     with pytest.raises(ValueError, match="no problem"):
-        ProblemStore(tmp_path).retire("nope", RetirementReason.DEFECTIVE)
+        ProblemStore(database).retire("nope", RetirementReason.DEFECTIVE)

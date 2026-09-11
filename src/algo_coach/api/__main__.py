@@ -11,6 +11,7 @@ from dotenv import find_dotenv, load_dotenv
 from fastapi import FastAPI
 
 from algo_coach.api.app import create_app
+from algo_coach.storage import Database
 
 # relative to the working directory, as the CLI's data root is
 DATA_ROOT = Path("data")
@@ -19,7 +20,8 @@ PORT = 8000
 
 
 def app() -> FastAPI:
-    return create_app(DATA_ROOT, user_id=os.environ.get("ALGO_COACH_USER", "local"))
+    root = Database(DATA_ROOT, url=os.environ.get("DATABASE_URL"))
+    return create_app(root, user_id=os.environ.get("ALGO_COACH_USER", "local"))
 
 
 def main() -> None:

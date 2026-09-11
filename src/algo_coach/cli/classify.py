@@ -1,5 +1,4 @@
 import argparse
-from pathlib import Path
 
 from algo_coach.attempt_claims import classify_backlog
 from algo_coach.attempt_claims.run import Progress
@@ -9,9 +8,10 @@ from algo_coach.cli.display import clipped, exit_on, named, progress
 from algo_coach.cli.transport import transport
 from algo_coach.log import AttemptLog
 from algo_coach.solution_claims import load_problems
+from algo_coach.storage import Database
 
 
-def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def classify(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     api = transport(args, parser)
     log = AttemptLog(root)
     calls = CallLog(root)

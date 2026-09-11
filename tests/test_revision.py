@@ -13,9 +13,9 @@ def pool(log):
     return revisable(log.attempts(), problems, standing_attempt_claims(log.claims()), user_id="u1")
 
 
-def test_only_what_the_hand_pass_answered_is_revisable(tmp_path):
+def test_only_what_the_hand_pass_answered_is_revisable(database):
     """`claimable`'s mirror: the same pool, the opposite filter."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="claimed", techniques=["greedy", "sorting"])
     seed_problem(root, id="unclaimed", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
@@ -27,10 +27,10 @@ def test_only_what_the_hand_pass_answered_is_revisable(tmp_path):
     assert [a.id for a in pool(log)] == ["a1"]
 
 
-def test_a_revision_asks_about_the_attempt_that_was_scored(tmp_path):
+def test_a_revision_asks_about_the_attempt_that_was_scored(database):
     """Collapsed before the filter, as the eval set is — asking about an older
     attempt would revise a claim no score ever read."""
-    root = tmp_path / "data"
+    root = database
     seed_problem(root, id="p1", techniques=["greedy", "sorting"])
     log = AttemptLog(root)
     log.append_attempt(attempt("older", "p1", finished_at=T0))
@@ -59,10 +59,10 @@ def test_a_configuration_that_never_read_it_is_not_a_dissenter(tmp_path):
     assert against(claim, machine_claims) == 0
 
 
-def test_the_most_disputed_are_asked_about_first(tmp_path):
+def test_the_most_disputed_are_asked_about_first(database):
     """Every configuration disagreeing says the claim or the vocabulary is
     wrong; one disagreeing usually says that configuration is."""
-    root = tmp_path / "data"
+    root = database
     for name in ("all", "one", "none"):
         seed_problem(root, id=name, techniques=["greedy", "sorting"])
     log = AttemptLog(root)

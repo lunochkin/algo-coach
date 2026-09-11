@@ -1,11 +1,11 @@
 from pathlib import Path
 
 from algo_coach.schema import Card
-from algo_coach.storage import FileStore
+from algo_coach.storage import Database, FileStore
 
 
 class CardStore(FileStore[Card]):
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Database | Path) -> None:
         super().__init__(root, "cards", Card)
 
     def by_slug(self, slug: str) -> Card | None:

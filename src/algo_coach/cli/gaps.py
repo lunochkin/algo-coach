@@ -1,13 +1,13 @@
 import argparse
-from pathlib import Path
 
 from algo_coach.cards import CardStore
 from algo_coach.matches import Coverage, MatchLog, coverage, uncovered
 from algo_coach.solution_claims import load_problems
 from algo_coach.solutions import SolutionLog
+from algo_coach.storage import Database
 
 
-def gaps(args: argparse.Namespace, root: Path) -> None:
+def gaps(args: argparse.Namespace, root: Database) -> None:
     covered = coverage(
         CardStore(root).all(),
         load_problems(root),

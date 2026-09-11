@@ -3,7 +3,6 @@ end, and the claim asked of each attempt."""
 
 from collections.abc import Callable
 from datetime import UTC, datetime
-from pathlib import Path
 
 from fastapi import APIRouter
 from pydantic import BaseModel
@@ -25,6 +24,7 @@ from algo_coach.sitting import (
     unclaimed,
 )
 from algo_coach.solution_claims import load_problems
+from algo_coach.storage import Database
 
 router = APIRouter()
 
@@ -101,13 +101,13 @@ def claimed(root: Root, user_id: UserId, attempt_id: str, body: Claim) -> Attemp
     )
 
 
-def _techniques(root: Path, problem_id: str) -> list[str]:
+def _techniques(root: Database, problem_id: str) -> list[str]:
     # the derived view, which the stored problem does not carry
     (problem,) = [one for one in load_problems(root) if one.id == problem_id]
     return problem.techniques
 
 
-def _timed(move: Callable[..., Sitting], root: Path, sitting_id: str, user_id: str) -> Timed:
+def _timed(move: Callable[..., Sitting], root: Database, sitting_id: str, user_id: str) -> Timed:
     # one instant for the move and the reading, so a resume reports no time
     # between the two
     at = datetime.now(UTC)

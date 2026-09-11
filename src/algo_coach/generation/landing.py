@@ -6,7 +6,6 @@ problem whose parts are missing.
 """
 
 from dataclasses import dataclass
-from pathlib import Path
 
 from algo_coach import mint
 from algo_coach.cases import CaseLog
@@ -21,6 +20,7 @@ from algo_coach.schema import (
     Template,
 )
 from algo_coach.solutions import SolutionLog
+from algo_coach.storage import Database
 
 
 @dataclass(frozen=True)
@@ -32,7 +32,7 @@ class Corpus:
     matches: MatchLog
 
     @classmethod
-    def at(cls, root: Path) -> Corpus:
+    def at(cls, root: Database) -> Corpus:
         return cls(ProblemStore(root), CaseLog(root), SolutionLog(root), MatchLog(root))
 
 

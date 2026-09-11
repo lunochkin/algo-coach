@@ -1,7 +1,6 @@
 import argparse
 import sys
 from collections.abc import Callable
-from pathlib import Path
 
 from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
@@ -44,13 +43,14 @@ from algo_coach.schema import (
 )
 from algo_coach.solution_claims import load_problems
 from algo_coach.solutions import SolutionLog
+from algo_coach.storage import Database
 
 # the modes a run can be put in. Each reads its own input and reports its own
 # summary, so a run doing two would print both under one
 MODES = ("replay", "resume", "drafts", "draft", "reject")
 
 
-def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     if len([one for one in MODES if getattr(args, one)]) > 1:
         named = ", ".join(f"--{one}" for one in MODES)
         parser.exit(2, f"generate: {named} each do their own work, so one at a time\n")
@@ -121,7 +121,7 @@ def rebased(offset: int, total: int) -> tuple[Callable[[Progress], None], Callab
     return on_progress, on_step
 
 
-def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     """Every held draft carried forward, at the bench the flags name.
 
     The store is the input rather than a template, so the flags that aim a
@@ -186,7 +186,7 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
         parser.exit(1, "generate: no problem stored\n")
 
 
-def listed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def listed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     """The drafts a sweep would carry, and what a resume at this bench would do
     with each.
 
@@ -208,7 +208,7 @@ def listed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path
     print(drafts_summary(waiting, bench, listed=args.all))
 
 
-def shown(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def shown(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     """One stored draft, whole: what each step left and what a resume would do
     with it. The listing names a draft, and this is what reads one.
 
@@ -227,7 +227,9 @@ def shown(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path)
     )
 
 
-def rejected_by_hand(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def rejected_by_hand(
+    args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database
+) -> None:
     """The exit a held draft takes where no resume would separate it. The run
     never writes `unexercised`, since it cannot tell a naive solution that
     reached the form from an input generator that built the wrong shape, so
@@ -248,7 +250,7 @@ def rejected_by_hand(args: argparse.Namespace, parser: argparse.ArgumentParser, 
     print(f"draft {left.id}: rejected {left.gate}, {form}")
 
 
-def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     """The answering sites over the stored problems, at the bench the flags
     name.
 
@@ -275,7 +277,9 @@ def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pa
         parser.exit(1, f"generate: aborted after {ABORT_AFTER} consecutive failures\n")
 
 
-def resolve(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> list[Target]:
+def resolve(
+    args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database
+) -> list[Target]:
     """What the run is written for, resolved before any call: the templates
     carrying no match, or the one named."""
     cards = CardStore(root).all()
@@ -296,7 +300,7 @@ def resolve(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Pat
 def aimed_at_gaps(
     args: argparse.Namespace,
     parser: argparse.ArgumentParser,
-    root: Path,
+    root: Database,
     cards: list[Card],
 ) -> list[Target]:
     if args.template:

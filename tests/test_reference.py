@@ -32,22 +32,22 @@ def answer(solution: str = "def solve(xs):\n    return len(xs)\n") -> str:
 ELSEWHERE = Configuration(model="another", effort="low", pin="somewhere")
 
 
-def test_the_statement_is_the_whole_of_the_request(tmp_path):
+def test_the_statement_is_the_whole_of_the_request(database):
     """Shown the canonical or its cases, the reference inherits that
     solution's reading, and agreement then shows only self-consistency."""
     model = FakeModel(answer())
 
-    code, call = write_reference(model, CallLog(tmp_path), STATEMENT)
+    code, call = write_reference(model, CallLog(database), STATEMENT)
 
     assert model.calls[0]["content"] == f"<problem>\n{STATEMENT}\n</problem>"
     assert code.startswith("def solve")
     assert call.response == answer()
 
 
-def test_the_generator_prompt_names_no_technique_and_no_form(tmp_path):
+def test_the_generator_prompt_names_no_technique_and_no_form(database):
     """The template, its cue and the form are what the statement is written to
     withhold, so none of them may reach the reference."""
-    (one,) = seeded(tmp_path, card())
+    (one,) = seeded(database, card())
     sent = SYSTEM + prompt(STATEMENT)
 
     for named in ("Technique:", "Cue:", "Form:", one.templates[0].code):
@@ -57,11 +57,11 @@ def test_the_generator_prompt_names_no_technique_and_no_form(tmp_path):
     assert one.templates[0].code in generator_prompt(one, one.templates[0])
 
 
-def test_a_speedup_claim_asks_for_constraints_the_search_can_reach(tmp_path):
+def test_a_speedup_claim_asks_for_constraints_the_search_can_reach(database):
     """A statement admitting two thousand elements leaves no input on which a
     naive solution exceeds the cap, whatever the input generator builds."""
-    (claims,) = seeded(tmp_path, card(templates=[template("rotated-array", speedup=True)]))
-    (optimum,) = seeded(tmp_path, card(templates=[template("n-queens")]))
+    (claims,) = seeded(database, card(templates=[template("rotated-array", speedup=True)]))
+    (optimum,) = seeded(database, card(templates=[template("n-queens")]))
 
     claimed = " ".join(generator_prompt(claims, claims.templates[0]).split())
     its_own_optimum = " ".join(generator_prompt(optimum, optimum.templates[0]).split())
@@ -75,22 +75,22 @@ def test_a_reply_carrying_no_solution_fails():
         read(json.dumps({"solution": ""}))
 
 
-def test_an_answer_cut_short_writes_no_solution(tmp_path):
+def test_an_answer_cut_short_writes_no_solution(database):
     model = FakeModel(None)
 
     with pytest.raises(GenerationError):
-        write_reference(model, CallLog(tmp_path), STATEMENT)
+        write_reference(model, CallLog(database), STATEMENT)
 
-    assert len(CallLog(tmp_path).all()) == 1
+    assert len(CallLog(database).all()) == 1
 
 
-def test_the_site_s_own_configuration_is_the_default(tmp_path):
+def test_the_site_s_own_configuration_is_the_default(database):
     """A site names its own model. Independence is what this call was shown,
     so it may run the model that wrote the statement."""
     model = FakeModel(answer())
 
-    write_reference(model, CallLog(tmp_path), STATEMENT)
-    write_reference(model, CallLog(tmp_path), STATEMENT, configuration=ELSEWHERE)
+    write_reference(model, CallLog(database), STATEMENT)
+    write_reference(model, CallLog(database), STATEMENT, configuration=ELSEWHERE)
 
     assert model.calls[0]["model"] == BLIND_DEFAULT.model
     assert model.calls[1]["model"] == ELSEWHERE.model

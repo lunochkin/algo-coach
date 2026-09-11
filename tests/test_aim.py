@@ -6,9 +6,9 @@ from algo_coach.mint import generator_match
 
 
 @pytest.fixture
-def cards(tmp_path):
+def cards(database):
     return seeded(
-        tmp_path,
+        database,
         card(
             templates=[
                 template("fixed-window"),

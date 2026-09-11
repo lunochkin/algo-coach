@@ -46,6 +46,10 @@ addopts = "-n auto"
 filterwarnings = ["error"]
 # The annotation prompt is a textual app, and its pilot is an async generator.
 asyncio_mode = "auto"
+markers = [
+    # set by `tests/conftest.py` on every test taking the `database` fixture
+    "integration: runs against the Postgres server TEST_DATABASE_URL names",
+]
 
 [tool.pyright]
 include = ["src"]
@@ -162,8 +166,9 @@ ignore_decorators = [
 ]
 ignore_names = [
     "model_config",
-    # pytest reads the plugins a conftest names
+    # pytest reads the plugins a conftest names, and calls its hooks by name
     "pytest_plugins",
+    "pytest_*",
     # textual reads the class attributes and dispatches hooks and actions by name
     "compose", "on_*", "action_*", "CSS", "BINDINGS", "theme", "can_focus",
     # ast.NodeTransformer dispatches by name

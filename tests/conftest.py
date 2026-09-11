@@ -9,6 +9,14 @@ from algo_coach.schema import Problem
 pytest_plugins = ["database"]
 
 
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    # a test is an integration test exactly when it takes a database, so the
+    # mark follows the fixture rather than a list someone keeps
+    for item in items:
+        if {"database", "database_engine"} & set(getattr(item, "fixturenames", ())):
+            item.add_marker(pytest.mark.integration)
+
+
 @pytest.fixture(autouse=True)
 def off_the_developer_machine(tmp_path, monkeypatch):
     """Nothing outside the repo decides a test's outcome.
@@ -44,9 +52,9 @@ def problems(tmp_path) -> ProblemStore:
 
 
 @pytest.fixture
-def data_root(tmp_path) -> ProblemStore:
+def data_root(database) -> ProblemStore:
     """The same seeding, under the directory the CLI treats as DATA_ROOT."""
-    store = ProblemStore(tmp_path / "data")
+    store = ProblemStore(database)
     seed_problem(store, id="minted-u1")
     seed_problem(store, id="minted-local")
     return store

@@ -30,8 +30,8 @@ def canonical(code: str = CODE):
 
 
 @pytest.fixture
-def log(tmp_path) -> SolutionClaimLog:
-    return SolutionClaimLog(tmp_path)
+def log(database) -> SolutionClaimLog:
+    return SolutionClaimLog(database)
 
 
 def run(client, log, *, code=CODE):
@@ -114,13 +114,13 @@ def test_the_candidate_order_is_fixed(log):
     assert candidates() == sorted(codes())
 
 
-def test_one_reader_asks_both_and_the_candidates_are_what_differ(log, tmp_path):
+def test_one_reader_asks_both_and_the_candidates_are_what_differ(log, database):
     """One rulebook: the system text and the rendering of a criterion are the
     same, so a disagreement between the two records is about the code. What
     separates them is the candidate set, which is why the prompt hashes
     differ."""
     client = answering(Verdict(["sorting"]), Verdict(["sorting"]))
-    attempts = AttemptLog(tmp_path)
+    attempts = AttemptLog(database)
     attempts.append_attempt(attempt("a1", "p1", code=CODE))
     problem = make_problem("p1", techniques=CANDIDATES)
 
@@ -128,7 +128,7 @@ def test_one_reader_asks_both_and_the_candidates_are_what_differ(log, tmp_path):
     claim_one(
         client,
         attempts,
-        CallLog(tmp_path),
+        CallLog(database),
         attempts.attempts()[0],
         problem,
         configuration=CONFIGURATION,
@@ -142,18 +142,18 @@ def test_one_reader_asks_both_and_the_candidates_are_what_differ(log, tmp_path):
     assert client.asked("system") == {client.calls[0]["system"]}
 
 
-def test_the_two_records_land_apart(log, tmp_path):
+def test_the_two_records_land_apart(log, database):
     """A claim is product data about code the engine wrote; a claim is the
     user's private testimony. Neither store holds the other's record."""
     client = answering(Verdict(["sorting"]), Verdict(["greedy"]))
-    attempts = AttemptLog(tmp_path)
+    attempts = AttemptLog(database)
     attempts.append_attempt(attempt("a1", "p1", code=CODE))
 
     run(client, log)
     claim_one(
         client,
         attempts,
-        CallLog(tmp_path),
+        CallLog(database),
         attempts.attempts()[0],
         make_problem("p1", techniques=CANDIDATES),
         configuration=CONFIGURATION,

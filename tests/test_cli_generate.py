@@ -35,8 +35,8 @@ def run(monkeypatch, model: FakeWriter, *argv: str) -> None:
 
 
 @pytest.fixture
-def root(tmp_path, monkeypatch):
-    data = data_root(tmp_path, monkeypatch)
+def root(database, monkeypatch):
+    data = data_root(database, monkeypatch)
     seeded(data, card())
     return data
 

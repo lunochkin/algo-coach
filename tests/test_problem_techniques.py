@@ -142,13 +142,13 @@ def test_standing_is_keyed_by_solution(problem):
     assert {id: one.techniques for id, one in standing.items()} == {"s1": ["greedy"], "s2": []}
 
 
-def test_a_command_loads_the_view(tmp_path, problem):
+def test_a_command_loads_the_view(database, problem):
     """Every command claim techniques loads through this. The store alone
     returns the record, which carries none on any generated problem."""
-    ProblemStore(tmp_path).put(problem)
-    SolutionLog(tmp_path).append(solution("s1"))
-    SolutionClaimLog(tmp_path).append(solution_claim("s1", ["sorting"]))
+    ProblemStore(database).put(problem)
+    SolutionLog(database).append(solution("s1"))
+    SolutionClaimLog(database).append(solution_claim("s1", ["sorting"]))
 
-    (loaded,) = load_problems(tmp_path)
+    (loaded,) = load_problems(database)
 
     assert (loaded.id, loaded.techniques) == ("p1", ["sorting"])

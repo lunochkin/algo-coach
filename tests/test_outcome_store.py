@@ -13,15 +13,15 @@ def left(site: CallSite = CallSite.GENERATOR, writing_id: str = "w1", **override
     )
 
 
-def test_an_empty_store_reads_as_nothing(tmp_path):
-    assert OutcomeLog(tmp_path).outcomes() == []
-    assert OutcomeLog(tmp_path).for_writing("w1") == []
+def test_an_empty_store_reads_as_nothing(database):
+    assert OutcomeLog(database).outcomes() == []
+    assert OutcomeLog(database).for_writing("w1") == []
 
 
-def test_a_record_reads_back_whole(tmp_path):
+def test_a_record_reads_back_whole(database):
     """The gate and the counters are what an eval reads, so they survive the
     round trip rather than collapsing to whether the problem landed."""
-    store = OutcomeLog(tmp_path)
+    store = OutcomeLog(database)
     one = left(CallSite.DISCRIMINATION, gate=Gate.DISAGREED, mutants=53, survived=5, won=15)
     store.append(one)
 
@@ -31,9 +31,9 @@ def test_a_record_reads_back_whole(tmp_path):
     assert read[0].gate is Gate.DISAGREED
 
 
-def test_records_are_read_per_writing(tmp_path):
+def test_records_are_read_per_writing(database):
     """The writing id is what groups a draft's sites, landed or not."""
-    store = OutcomeLog(tmp_path)
+    store = OutcomeLog(database)
     mine = [left(CallSite.GENERATOR, "w1"), left(CallSite.BLIND, "w1")]
     theirs = left(CallSite.GENERATOR, "w2")
     for one in [*mine, theirs]:

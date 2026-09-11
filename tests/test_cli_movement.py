@@ -11,8 +11,8 @@ def run(monkeypatch, *argv: str) -> None:
 
 
 @pytest.fixture
-def classified(tmp_path, monkeypatch) -> AttemptLog:
-    data = data_root(tmp_path, monkeypatch)
+def classified(database, monkeypatch) -> AttemptLog:
+    data = data_root(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -29,10 +29,10 @@ def test_the_command_reports_what_the_claims_took_away(classified, monkeypatch, 
     assert "1 classifier claim(s)" in out
 
 
-def test_a_hand_claim_is_not_the_classifier_s_movement(tmp_path, monkeypatch, capsys):
+def test_a_hand_claim_is_not_the_classifier_s_movement(database, monkeypatch, capsys):
     """A user claim narrows for a different reason; crediting the machine with
     it would read as a classifier that decided something."""
-    data = data_root(tmp_path, monkeypatch)
+    data = data_root(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -45,8 +45,8 @@ def test_a_hand_claim_is_not_the_classifier_s_movement(tmp_path, monkeypatch, ca
     assert "nothing classified" in capsys.readouterr().err
 
 
-def test_nothing_classified_exits_nonzero(tmp_path, monkeypatch, capsys):
-    data = data_root(tmp_path, monkeypatch)
+def test_nothing_classified_exits_nonzero(database, monkeypatch, capsys):
+    data = data_root(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     AttemptLog(data).append_attempt(attempt("a1", "two-codes"))
 

@@ -7,9 +7,9 @@ from algo_coach.schema import ProblemStatus, RetirementReason, SolutionRole
 
 
 @pytest.fixture
-def cards(tmp_path):
+def cards(database):
     return seeded(
-        tmp_path,
+        database,
         card(
             templates=[
                 template("fixed-window"),

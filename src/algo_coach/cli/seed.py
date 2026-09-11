@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from algo_coach.cards import CardStore, seed_cards
+from algo_coach.storage import Database
 
 
 class BadLine(Exception):
@@ -22,7 +23,7 @@ def read_json(source: str) -> Iterator[dict[str, Any]]:
             raise BadLine(f"{file}: {exc.msg}") from exc
 
 
-def seed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def seed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     try:
         result = seed_cards(read_json(args.source), store=CardStore(root))
     except (BadLine, OSError) as exc:

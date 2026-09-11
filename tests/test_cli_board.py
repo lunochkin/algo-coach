@@ -22,9 +22,9 @@ T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
 
 @pytest.fixture
-def board_root(tmp_path, monkeypatch) -> AttemptLog:
+def board_root(database, monkeypatch) -> AttemptLog:
     """A store holding one greedy problem, and a log of attempts on it."""
-    root = data_root(tmp_path, monkeypatch)
+    root = data_root(database, monkeypatch)
     seed_problem(root, id="minted-u1", techniques=["greedy", "sorting"])
     return AttemptLog(root)
 

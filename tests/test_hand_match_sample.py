@@ -35,10 +35,10 @@ def slugs(cards):
     return {one.slug: one.id for card in cards for one in card.templates}
 
 
-def test_a_card_the_hand_settled_whole_drops_out(tmp_path):
+def test_a_card_the_hand_settled_whole_drops_out(database):
     """The question asks about the card, so it stands until every template of
     it is settled for that problem. Same rule the run path skips a pair by."""
-    cards, problems, solutions = corpus(tmp_path)
+    cards, problems, solutions = corpus(database)
     id = slugs(cards)
     settled = [
         user_match(id[form], "s-b0", matched=False)
@@ -48,21 +48,21 @@ def test_a_card_the_hand_settled_whole_drops_out(tmp_path):
     assert ("backtracking", "s-b0") not in {(one.card.slug, one.solution.id) for one in order}
 
 
-def test_a_card_the_hand_settled_partly_still_asks(tmp_path):
+def test_a_card_the_hand_settled_partly_still_asks(database):
     """A partly matched card is a question still worth asking — the call
     covers the templates it left, and answering them again settles nothing
     differently."""
-    cards, problems, solutions = corpus(tmp_path)
+    cards, problems, solutions = corpus(database)
     id = slugs(cards)
     part = [user_match(id["subsets"], "b0", matched=True)]
     order = unsettled(cards, problems, solutions, part)
     assert ("backtracking", "s-b0") in {(one.card.slug, one.solution.id) for one in order}
 
 
-def test_the_template_with_the_fewest_hand_matches_is_drawn_first(tmp_path):
+def test_the_template_with_the_fewest_hand_matches_is_drawn_first(database):
     """A card whose forms the hand has reached many times waits behind one it
     has never reached."""
-    cards, problems, solutions = corpus(tmp_path)
+    cards, problems, solutions = corpus(database)
     id = slugs(cards)
     ahead = [
         user_match(id[form], f"u{n}", matched=False)
@@ -73,14 +73,14 @@ def test_the_template_with_the_fewest_hand_matches_is_drawn_first(tmp_path):
     assert order[0].card.slug == "backtracking"
 
 
-def test_a_template_nothing_reached_pulls_its_card_forward(tmp_path):
+def test_a_template_nothing_reached_pulls_its_card_forward(database):
     """What levelling on template catches and levelling on card cannot.
 
     A re-seeded card gains a form, and its siblings carry forty user matches
     while the new one carries none. Counted per card the card is the best
     covered there is; counted per template it holds the only gap.
     """
-    cards, problems, solutions = corpus(tmp_path)
+    cards, problems, solutions = corpus(database)
     id = slugs(cards)
     lopsided = [
         # Every backtracking problem matched by hand, but only for two of the
@@ -98,50 +98,50 @@ def test_a_template_nothing_reached_pulls_its_card_forward(tmp_path):
     assert order[0].card.slug == "backtracking"
 
 
-def test_one_card_is_asked_about_alone(tmp_path):
+def test_one_card_is_asked_about_alone(database):
     """Matching a card just added by hand, without the rest of the corpus in the
     way. The filter narrows what is asked and changes nothing about the
     order."""
-    cards, problems, solutions = corpus(tmp_path)
+    cards, problems, solutions = corpus(database)
     order = unsettled(cards, problems, solutions, [], card="union-find")
     assert {one.card.slug for one in order} == {"union-find"}
     assert {one.problem.id for one in order} == {"u0", "u1", "u2"}
 
 
-def test_an_unknown_card_asks_nothing(tmp_path):
-    cards, problems, solutions = corpus(tmp_path)
+def test_an_unknown_card_asks_nothing(database):
+    cards, problems, solutions = corpus(database)
     assert unsettled(cards, problems, solutions, [], card="no-such-card") == []
 
 
-def test_every_question_is_asked_once(tmp_path):
+def test_every_question_is_asked_once(database):
     """It reorders the pool and never filters it, so a sample cut at any length
     is that length."""
-    cards, problems, solutions = corpus(tmp_path, backtracking=4, union=4)
+    cards, problems, solutions = corpus(database, backtracking=4, union=4)
     order = unsettled(cards, problems, solutions, [])
     assert len(order) == 8
     assert len({one.key for one in order}) == 8
 
 
-def test_the_same_seed_gives_the_same_order(tmp_path):
-    cards, problems, solutions = corpus(tmp_path, backtracking=5, union=5)
+def test_the_same_seed_gives_the_same_order(database):
+    cards, problems, solutions = corpus(database, backtracking=5, union=5)
     assert [one.key for one in unsettled(cards, problems, solutions, [], seed=7)] == [
         one.key for one in unsettled(cards, problems, solutions, [], seed=7)
     ]
 
 
-def test_another_seed_gives_another_order(tmp_path):
+def test_another_seed_gives_another_order(database):
     """Within a card the choice is the seed's, as a claim sample is described
     by its seed rather than by listing what it held."""
-    cards, problems, solutions = corpus(tmp_path, backtracking=8, union=8)
+    cards, problems, solutions = corpus(database, backtracking=8, union=8)
     assert [one.key for one in unsettled(cards, problems, solutions, [], seed=0)] != [
         one.key for one in unsettled(cards, problems, solutions, [], seed=1)
     ]
 
 
-def test_a_machine_match_does_not_settle_a_question(tmp_path):
+def test_a_machine_match_does_not_settle_a_question(database):
     """The user's match is what a machine match is scored against, so a match
     never takes its own question out of the pool."""
-    cards, problems, solutions = corpus(tmp_path)
+    cards, problems, solutions = corpus(database)
     id = slugs(cards)
     read = [
         machine_match(

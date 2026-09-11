@@ -1,6 +1,5 @@
 import argparse
 from collections.abc import Mapping, Sequence
-from pathlib import Path
 from textwrap import fill
 
 from algo_coach.attempt_claims import (
@@ -20,13 +19,14 @@ from algo_coach.cli.scoring import labels
 from algo_coach.log import AttemptLog
 from algo_coach.schema import Attempt, AttemptClaim, Confidence, Problem
 from algo_coach.solution_claims import load_problems
+from algo_coach.storage import Database
 from algo_coach.techniques import criterion
 
 WIDTH = 100
 LEVELS = list(Confidence)
 
 
-def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     """The drill loop's technique question, over attempts already in the log.
 
     With `--revise`, the same question over what the hand pass already

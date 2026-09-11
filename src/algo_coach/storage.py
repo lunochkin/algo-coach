@@ -4,25 +4,67 @@ swaps underneath it. The Postgres tables the stores move to are declared against
 the conventions below, as `docs/architecture/README.md` gives them."""
 
 from enum import StrEnum
-from functools import cache
+from functools import cache, cached_property
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import BigInteger, Column, DateTime, Enum, ForeignKey, Identity, MetaData, Text
+from sqlalchemy import (
+    BigInteger,
+    Column,
+    DateTime,
+    Engine,
+    Enum,
+    ForeignKey,
+    Identity,
+    MetaData,
+    Text,
+    create_engine,
+)
+
+
+class Database:
+    """What every store is built from: the Postgres database, and the directory
+    a store not yet moved onto Postgres still writes its files under."""
+
+    def __init__(self, directory: Path, *, url: str | None = None, engine: Engine | None = None):
+        self.directory = directory
+        self._url = url
+        self._engine = engine
+
+    @cached_property
+    def engine(self) -> Engine:
+        # made on first use, so a command no store on Postgres runs needs no
+        # database
+        if self._engine is not None:
+            return self._engine
+        if not self._url:
+            raise RuntimeError("DATABASE_URL names no database")
+        return create_engine(self._url.replace("postgres://", "postgresql+psycopg://", 1))
+
+    def close(self) -> None:
+        # only an engine this handle made: one handed in belongs to its maker
+        if self._engine is None and "engine" in self.__dict__:
+            self.engine.dispose()
+
+
+def directory(root: Database | Path) -> Path:
+    # a store still on files takes a handle or, as its tests do, the directory
+    return root.directory if isinstance(root, Database) else root
 
 
 class JsonlLog[T: BaseModel]:
     """Append-only: one record per line, read back in append order, so a tie on
     `created_at` is broken by what landed last."""
 
-    def __init__(self, root: Path, filename: str, model: type[T]) -> None:
+    def __init__(self, root: Database | Path, filename: str, model: type[T]) -> None:
+        # the handle as given, so a caller builds a sibling store from it
         self.root = root
-        self.path = root / filename
+        self.path = directory(root) / filename
         self.model = model
 
     def append(self, record: T) -> None:
-        self.root.mkdir(parents=True, exist_ok=True)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a") as f:
             f.write(record.model_dump_json() + "\n")
 
@@ -42,9 +84,9 @@ class FileStore[T: BaseModel]:
     """One file per record, named by its engine-minted id; a write replaces it.
     For what is revised in place, where a log is for what is not."""
 
-    def __init__(self, root: Path, dirname: str, model: type[T]) -> None:
+    def __init__(self, root: Database | Path, dirname: str, model: type[T]) -> None:
         self.root = root
-        self.path = root / dirname
+        self.path = directory(root) / dirname
         self.model = model
 
     def put(self, record: T) -> None:
@@ -119,10 +161,12 @@ def _snake(name: str) -> str:
 
 
 __all__ = [
+    "Database",
     "FileStore",
     "JsonlLog",
     "appended_column",
     "call_column",
+    "directory",
     "enumerated",
     "metadata",
     "timestamp",

@@ -20,7 +20,7 @@ def call_row(id: str) -> dict:
 def test_the_worker_s_database_is_built_by_the_migrations(database):
     """The tables a test writes to are the ones a deployment runs, rather than
     ones the metadata creates on its own."""
-    with database.connect() as conn:
+    with database.engine.connect() as conn:
         head = conn.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
         tables = set(
             conn.execute(
@@ -33,19 +33,19 @@ def test_the_worker_s_database_is_built_by_the_migrations(database):
 
 
 def test_a_test_starts_on_an_empty_database(database):
-    with database.connect() as conn:
+    with database.engine.connect() as conn:
         assert conn.execute(select(func.count()).select_from(calls)).scalar_one() == 0
 
 
 def test_emptying_removes_every_row_and_restarts_the_append_order(database):
     """A later test reads no row this one wrote, and numbers its first row as
     this one did."""
-    with database.begin() as conn:
+    with database.engine.begin() as conn:
         conn.execute(insert(calls), [call_row("c1"), call_row("c2")])
 
-    emptied(database)
+    emptied(database.engine)
 
-    with database.begin() as conn:
+    with database.engine.begin() as conn:
         assert conn.execute(select(func.count()).select_from(calls)).scalar_one() == 0
         conn.execute(insert(calls), [call_row("c3")])
         assert conn.execute(select(calls.c.appended)).scalar_one() == 1

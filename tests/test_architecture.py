@@ -17,7 +17,6 @@ from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.solution_claims import SolutionClaimLog
 from algo_coach.solutions import SolutionLog
-from algo_coach.storage import FileStore, JsonlLog
 from algo_coach.verifications import VerificationLog
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -257,13 +256,17 @@ def test_the_stores_write_as_the_data_class_table_says():
     matches, site outcomes and calls are append-only; drafts and sittings are
     revised in place; a problem is created once and only its status moves; cards
     are re-seeded by slug."""
+    # by what a store can do rather than by its base: a store's backend moves
+    # under it, and its write semantics do not
     for log in APPEND_ONLY:
-        assert issubclass(log, JsonlLog), log.__name__
+        assert hasattr(log, "append") and hasattr(log, "all"), log.__name__
         assert not hasattr(log, "put") and not hasattr(log, "remove"), log.__name__
     assert not any(name.startswith(("put", "remove")) for name in vars(AttemptLog))
-    assert issubclass(DraftStore, FileStore) and hasattr(DraftStore, "remove")
+    for revised in (DraftStore, SittingStore, CardStore, ProblemStore):
+        assert hasattr(revised, "put") and hasattr(revised, "get"), revised.__name__
+    assert hasattr(DraftStore, "remove")
     # kept once it ends: the pause history is readable in this store alone
-    assert issubclass(SittingStore, FileStore) and not hasattr(SittingStore, "remove")
-    assert issubclass(CardStore, FileStore) and not hasattr(CardStore, "remove")
+    assert not hasattr(SittingStore, "remove")
+    assert not hasattr(CardStore, "remove")
     # created once: the store's own `put` refuses a change beyond the status
-    assert issubclass(ProblemStore, FileStore) and "put" in vars(ProblemStore)
+    assert "put" in vars(ProblemStore)

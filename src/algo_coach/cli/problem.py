@@ -5,7 +5,6 @@ that wrote it, and matching, solution claims and the drill loop all reach it.
 """
 
 import argparse
-from pathlib import Path
 
 from algo_coach.cards import CardStore
 from algo_coach.cli.display import (
@@ -19,9 +18,10 @@ from algo_coach.generation import Corpus
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.schema import Problem, RetirementReason, Solution, TemplateMatch, TestCase
 from algo_coach.solution_claims import SolutionClaimLog, derive
+from algo_coach.storage import Database
 
 
-def problem(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def problem(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     """The corpus listed, or the one problem an id names."""
     corpus = Corpus.at(root)
     stored = corpus.problems.all()
@@ -39,7 +39,7 @@ def retired_by_hand(
     parser: argparse.ArgumentParser,
     stored: list[Problem],
     corpus: Corpus,
-    root: Path,
+    root: Database,
 ) -> None:
     """The problem read whole, then retired as `defective` once the reader says
     so. Every user is served it, so the loop never retires one."""
@@ -59,7 +59,7 @@ def retired_by_hand(
     print(f"problem {left.id}: {standing(left)}")
 
 
-def listed(stored: list[Problem], corpus: Corpus, root: Path) -> None:
+def listed(stored: list[Problem], corpus: Corpus, root: Database) -> None:
     """Every stored problem: how it stands and what it carries."""
     forms = slugs(root)
     cases = corpus.cases.cases()
@@ -89,7 +89,7 @@ def standing(one: Problem) -> str:
     return str(one.status)
 
 
-def page(one: Problem, corpus: Corpus, root: Path) -> str:
+def page(one: Problem, corpus: Corpus, root: Database) -> str:
     """One problem as a page: what it asks, the cases that decide it, every
     solution written for it, and what the run that wrote it left."""
     forms = slugs(root)
@@ -116,7 +116,7 @@ def page(one: Problem, corpus: Corpus, root: Path) -> str:
     )
 
 
-def slugs(root: Path) -> dict[str, str]:
+def slugs(root: Database) -> dict[str, str]:
     """Every seeded template by id, since a problem and a match name one and a
     reader wants the form."""
     return {one.id: one.slug for card in CardStore(root).all() for one in card.templates}

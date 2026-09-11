@@ -12,10 +12,10 @@ BEGAN = datetime.now(UTC) - timedelta(hours=1)
 
 
 @pytest.fixture
-def stores(tmp_path) -> tuple[ProblemStore, SittingStore]:
-    problems = ProblemStore(tmp_path)
+def stores(database) -> tuple[ProblemStore, SittingStore]:
+    problems = ProblemStore(database)
     problems.put(make_problem("p1", title="Rotated", statement="Given xs ...\n\ndef solve(xs):"))
-    return problems, SittingStore(tmp_path)
+    return problems, SittingStore(database)
 
 
 def a_sitting(**overrides) -> Sitting:
@@ -47,14 +47,14 @@ def test_the_signature_is_split_from_the_prose(stores):
     assert serve(*stores, "p1", user_id="u-4f9c2a").signature == "def solve(xs):"
 
 
-def test_a_signature_in_a_fenced_block_is_split_with_its_fence(tmp_path):
-    problems = ProblemStore(tmp_path)
+def test_a_signature_in_a_fenced_block_is_split_with_its_fence(database):
+    problems = ProblemStore(database)
     statement = (
         "Find the centre.\n\n```python\ndef solve(n: int, edges: list[list[int]]) -> int:\n```\n"
     )
     problems.put(make_problem("p1", statement=statement))
 
-    served = serve(problems, SittingStore(tmp_path), "p1", user_id="u-4f9c2a")
+    served = serve(problems, SittingStore(database), "p1", user_id="u-4f9c2a")
 
     assert (served.statement, served.signature) == (
         "Find the centre.",
@@ -70,12 +70,12 @@ def test_a_signature_in_a_fenced_block_is_split_with_its_fence(tmp_path):
         "def solve(xs) is mentioned first.\n\nThen the prose goes on.",
     ],
 )
-def test_a_statement_not_ending_on_the_line_is_all_prose(tmp_path, statement):
+def test_a_statement_not_ending_on_the_line_is_all_prose(database, statement):
     """A mention of the call inside a sentence is not the declaration."""
-    problems = ProblemStore(tmp_path)
+    problems = ProblemStore(database)
     problems.put(make_problem("p1", statement=statement))
 
-    served = serve(problems, SittingStore(tmp_path), "p1", user_id="u-4f9c2a")
+    served = serve(problems, SittingStore(database), "p1", user_id="u-4f9c2a")
 
     assert (served.statement, served.signature) == (statement, None)
 
@@ -128,18 +128,18 @@ def test_another_user_s_sitting_is_not_reused(stores):
     assert served.sitting.user_id == "u-4f9c2a" and served.sitting.id != "s0"
 
 
-def test_an_unknown_problem_is_refused(tmp_path):
+def test_an_unknown_problem_is_refused(database):
     with pytest.raises(Missing, match="no problem"):
-        serve(ProblemStore(tmp_path), SittingStore(tmp_path), "nope", user_id="u-4f9c2a")
+        serve(ProblemStore(database), SittingStore(database), "nope", user_id="u-4f9c2a")
 
 
-def test_a_retired_problem_is_refused(tmp_path):
+def test_a_retired_problem_is_refused(database):
     """A defective problem was never a fair test, so no clock starts on one."""
-    problems = ProblemStore(tmp_path)
+    problems = ProblemStore(database)
     problems.put(make_problem("p1", status="retired", retired_reason="defective"))
 
     with pytest.raises(Refused, match="retired"):
-        serve(problems, SittingStore(tmp_path), "p1", user_id="u-4f9c2a")
+        serve(problems, SittingStore(database), "p1", user_id="u-4f9c2a")
 
 
 def test_a_sitting_is_read_back_as_it_was_served(stores):

@@ -14,8 +14,8 @@ CANDIDATES = ["binary-search", "sorting"]
 
 
 @pytest.fixture
-def log(tmp_path) -> AttemptLog:
-    one = AttemptLog(tmp_path)
+def log(database) -> AttemptLog:
+    one = AttemptLog(database)
     one.append_attempt(
         Attempt(
             id="a1",

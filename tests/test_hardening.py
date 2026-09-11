@@ -37,10 +37,10 @@ class Case:
     expected: object
 
 
-def run(tmp_path, model: Answers, cases: list[Case], *, canonical=CANONICAL, reference=BLIND):
+def run(database, model: Answers, cases: list[Case], *, canonical=CANONICAL, reference=BLIND):
     return harden(
         model,
-        CallLog(tmp_path),
+        CallLog(database),
         "Return 1 above three.",
         canonical=canonical,
         reference=reference,
@@ -55,80 +55,80 @@ WEAK = [Case(args=[0], expected=False), Case(args=[10], expected=True)]
 BOUNDARY = [[4], [3]]
 
 
-def test_a_canonical_with_no_mutant_asks_nothing(tmp_path):
+def test_a_canonical_with_no_mutant_asks_nothing(database):
     """Nothing was changed, so no case has to exist and no round is paid
     for."""
     model = Answers()
 
-    hardened = run(tmp_path, model, WEAK, canonical="def solve(n):\n    return len([n])\n")
+    hardened = run(database, model, WEAK, canonical="def solve(n):\n    return len([n])\n")
 
     assert model.calls == []
     assert hardened.mutants == 0
     assert hardened.played == 0
 
 
-def test_a_set_that_kills_every_mutant_asks_no_call(tmp_path):
+def test_a_set_that_kills_every_mutant_asks_no_call(database):
     """The bar is met by the cases the generation call already wrote."""
     model = Answers()
     kills = WEAK + [Case(args=[3], expected=False), Case(args=[4], expected=True)]
 
-    hardened = run(tmp_path, model, kills)
+    hardened = run(database, model, kills)
 
     assert model.calls == []
     assert hardened.survived == 0
     assert hardened.won == []
 
 
-def test_a_proposal_that_killed_nothing_does_not_land(tmp_path):
+def test_a_proposal_that_killed_nothing_does_not_land(database):
     """Every later verification runs a stored case, and one no mutant names
     catches nothing."""
     model = Answers(rounds=[[[100], *BOUNDARY]])
 
-    hardened = run(tmp_path, model, WEAK)
+    hardened = run(database, model, WEAK)
 
     assert [one.args for one in hardened.won] == BOUNDARY
     assert hardened.proposed == 3
 
 
-def test_two_proposals_killing_one_mutant_land_the_first(tmp_path):
+def test_two_proposals_killing_one_mutant_land_the_first(database):
     """The second decides nothing the set does not already decide, so the
     order the round proposed them in is what settles it."""
     model = Answers(rounds=[[[3], [3], [4]]])
 
-    hardened = run(tmp_path, model, WEAK)
+    hardened = run(database, model, WEAK)
 
     assert [one.args for one in hardened.won] == [[3], [4]]
     assert hardened.survived == 0
 
 
-def test_a_round_whose_proposals_all_killed_nothing_stops_the_loop(tmp_path):
+def test_a_round_whose_proposals_all_killed_nothing_stops_the_loop(database):
     """The next one asks the same question of the same survivors."""
     model = Answers(rounds=[[[100]], BOUNDARY])
 
-    hardened = run(tmp_path, model, WEAK)
+    hardened = run(database, model, WEAK)
 
     assert len(model.calls) == 1
     assert hardened.won == []
     assert hardened.survived == 3
 
 
-def test_a_dropped_proposal_is_still_shown_to_the_next_round(tmp_path):
+def test_a_dropped_proposal_is_still_shown_to_the_next_round(database):
     """It is not in the set, and a round shown neither could propose an input
     that already killed nothing."""
     model = Answers(rounds=[[[100], [4]], [[3]]])
 
-    run(tmp_path, model, WEAK)
+    run(database, model, WEAK)
 
     assert len(model.calls) == 2
     assert "100" in model.calls[1]["content"]
 
 
-def test_a_survivor_draws_one_call_and_the_cases_it_wins_land(tmp_path):
+def test_a_survivor_draws_one_call_and_the_cases_it_wins_land(database):
     """A mutant no case kills names a case that has to exist, and the round is
     what writes it."""
     model = Answers(rounds=[BOUNDARY])
 
-    hardened = run(tmp_path, model, WEAK)
+    hardened = run(database, model, WEAK)
 
     assert len(model.calls) == 1
     assert hardened.played == 1
@@ -136,60 +136,60 @@ def test_a_survivor_draws_one_call_and_the_cases_it_wins_land(tmp_path):
     assert hardened.survived == 0
 
 
-def test_a_won_case_carries_the_reference_s_answer(tmp_path):
+def test_a_won_case_carries_the_reference_s_answer(database):
     """Settled as the first set is: a case the canonical computed passes by
     construction."""
-    hardened = run(tmp_path, Answers(rounds=[BOUNDARY]), WEAK)
+    hardened = run(database, Answers(rounds=[BOUNDARY]), WEAK)
 
     assert [one.expected for one in hardened.won] == [True, False]
     assert {one.expected_from for one in hardened.won} == {ExpectedSource.REFERENCE}
 
 
-def test_a_won_case_names_the_round_that_proposed_it(tmp_path):
+def test_a_won_case_names_the_round_that_proposed_it(database):
     """Not the call that wrote the problem: the round runs at its own
     configuration, and the stored case copies that one."""
-    hardened = run(tmp_path, Answers(rounds=[BOUNDARY]), WEAK)
+    hardened = run(database, Answers(rounds=[BOUNDARY]), WEAK)
 
     assert {one.provenance.call_id for one in hardened.won} == {hardened.call.id}
 
 
-def test_a_won_case_names_the_round_that_won_it(tmp_path):
+def test_a_won_case_names_the_round_that_won_it(database):
     """A replay rebuilds the set as it stood, so which round appended a case is
     what separates it from the set written with the statement."""
-    hardened = run(tmp_path, Answers(rounds=[BOUNDARY]), WEAK)
+    hardened = run(database, Answers(rounds=[BOUNDARY]), WEAK)
 
     assert {one.round for one in hardened.won} == {1}
 
 
-def test_the_cases_the_set_already_has_reach_the_call(tmp_path):
+def test_the_cases_the_set_already_has_reach_the_call(database):
     """A proposal repeating one of them catches what that case already
     catches."""
     model = Answers(rounds=[BOUNDARY])
 
-    run(tmp_path, model, WEAK)
+    run(database, model, WEAK)
 
     assert "[10]" in model.calls[0]["content"]
 
 
-def test_a_proposal_the_canonical_cannot_answer_drops_the_case(tmp_path):
+def test_a_proposal_the_canonical_cannot_answer_drops_the_case(database):
     """Nothing checks a proposed input against the constraints the statement
     gives, so a crash there says nothing about the solution."""
     model = Answers(rounds=[[["four"]]])
 
-    hardened = run(tmp_path, model, WEAK)
+    hardened = run(database, model, WEAK)
 
     assert hardened.dropped == 1
     assert hardened.won == []
     assert hardened.disagreement is None
 
 
-def test_a_proposal_the_two_solutions_answer_differently_is_reported(tmp_path):
+def test_a_proposal_the_two_solutions_answer_differently_is_reported(database):
     """A boundary the first set never reached, read two ways. The caller
     rejects the draft on it."""
     reference = "def solve(n):\n    return 99 if n == 4 else n > 3\n"
     model = Answers(rounds=[[[4]]])
 
-    hardened = run(tmp_path, model, WEAK, reference=reference)
+    hardened = run(database, model, WEAK, reference=reference)
 
     assert hardened.disagreement is not None
     assert hardened.disagreement.canonical is True
@@ -197,24 +197,24 @@ def test_a_proposal_the_two_solutions_answer_differently_is_reported(tmp_path):
     assert hardened.won == []
 
 
-def test_a_round_that_kills_nothing_stops_the_loop(tmp_path):
+def test_a_round_that_kills_nothing_stops_the_loop(database):
     """The next round asks the same question of the same survivors."""
     model = Answers(rounds=[[[5]]])
 
-    hardened = run(tmp_path, model, WEAK)
+    hardened = run(database, model, WEAK)
 
     assert len(model.calls) == 1
     assert hardened.played == 1
     assert hardened.survived == 3
 
 
-def test_a_round_that_proposes_nothing_stops_the_loop(tmp_path):
+def test_a_round_that_proposes_nothing_stops_the_loop(database):
     """No input separates a mutant equivalent to the canonical, so an empty
     reply is the round's answer. Read as a failure it would hold the draft, and
     every resume would ask the same question of the same survivors."""
     model = Answers(rounds=[[]])
 
-    hardened = run(tmp_path, model, WEAK)
+    hardened = run(database, model, WEAK)
 
     assert len(model.calls) == 1
     assert hardened.played == 1
@@ -224,12 +224,12 @@ def test_a_round_that_proposes_nothing_stops_the_loop(tmp_path):
     assert hardened.survived == 3
 
 
-def test_the_loop_stops_at_the_bound(tmp_path):
+def test_the_loop_stops_at_the_bound(database):
     """A survivor two rounds did not kill is usually equivalent to the
     canonical, and no case kills an equivalent mutant."""
     model = Answers(rounds=[[[3]], [[5]]])
 
-    hardened = run(tmp_path, model, WEAK)
+    hardened = run(database, model, WEAK)
 
     assert len(model.calls) == ROUNDS
     assert hardened.played == ROUNDS
@@ -237,8 +237,8 @@ def test_the_loop_stops_at_the_bound(tmp_path):
     assert hardened.survived == 1
 
 
-def test_a_call_that_answers_nothing_raises(tmp_path):
+def test_a_call_that_answers_nothing_raises(database):
     """What a failed round costs is settled where the problem is, so the loop
     itself decides nothing about it."""
     with pytest.raises(GenerationError):
-        run(tmp_path, Answers(), WEAK)
+        run(database, Answers(), WEAK)

@@ -34,12 +34,12 @@ def run(root, client: FakeTransport, cards=None, problems=None, **kwargs):
     )
 
 
-def test_candidates_are_pre_filtered_by_technique(tmp_path):
+def test_candidates_are_pre_filtered_by_technique(database):
     """Or it is every template against every problem for an answer that is
     almost always no."""
-    cards = seeded(tmp_path, card(), card("backtracking", technique="backtracking"))
+    cards = seeded(database, card(), card("backtracking", technique="backtracking"))
     corpus = stored(
-        tmp_path,
+        database,
         problem("window", techniques=["sliding-window"]),
         problem("search", techniques=["backtracking"]),
         problem("neither", techniques=[]),
@@ -53,20 +53,20 @@ def test_candidates_are_pre_filtered_by_technique(tmp_path):
     }
 
 
-def test_a_card_with_nothing_to_ask_asks_nothing(tmp_path):
-    cards = seeded(tmp_path, card(templates=[template("framing", **PROCEDURE)]))
+def test_a_card_with_nothing_to_ask_asks_nothing(database):
+    cards = seeded(database, card(templates=[template("framing", **PROCEDURE)]))
 
-    corpus = stored(tmp_path, problem("p1", techniques=["sliding-window"]))
+    corpus = stored(database, problem("p1", techniques=["sliding-window"]))
 
     assert questions(cards, corpus, canonicals(*corpus)) == []
 
 
-def test_a_naive_solution_is_never_asked_about(tmp_path):
+def test_a_naive_solution_is_never_asked_about(database):
     """A form is displayed by code, and this code was written not to display
     one. A verdict on it would fill a rung with the approach the card
     replaces."""
-    cards = seeded(tmp_path, card())
-    corpus = stored(tmp_path, problem("p1", techniques=["sliding-window"]))
+    cards = seeded(database, card())
+    corpus = stored(database, problem("p1", techniques=["sliding-window"]))
     slow = canonical("p1", id="s-slow").model_copy(update={"role": SolutionRole.NAIVE})
 
     asked = questions(cards, corpus, [slow, *canonicals(*corpus)])
@@ -74,27 +74,27 @@ def test_a_naive_solution_is_never_asked_about(tmp_path):
     assert [question.solution.id for question in asked] == ["s-p1"]
 
 
-def test_one_call_per_card_and_a_record_per_pair(tmp_path):
+def test_one_call_per_card_and_a_record_per_pair(database):
     """The answer is one subset; the records come from it, positive and
     negative alike."""
     client = FakeTransport.answering(Verdict(["longest-valid-window"]))
 
-    result = run(tmp_path, client)
+    result = run(database, client)
 
     assert len(client.calls) == 1
     assert (result.asked, result.matched, result.unmatched) == (1, 1, 1)
-    records = MatchLog(tmp_path).matches()
+    records = MatchLog(database).matches()
     assert sorted(match.matched for match in records) == [False, True]
     assert {match.solution_id for match in records} == {"s-p1"}
 
 
-def test_a_record_carries_what_read_it(tmp_path):
+def test_a_record_carries_what_read_it(database):
     """A re-run has to know what to supersede, and the log has to read without
     opening the calls."""
-    run(tmp_path, FakeTransport.answering(Verdict([])))
+    run(database, FakeTransport.answering(Verdict([])))
 
-    (match, *_) = MatchLog(tmp_path).matches()
-    (call,) = CallLog(tmp_path).all()
+    (match, *_) = MatchLog(database).matches()
+    (call,) = CallLog(database).all()
     assert match.source is MatchSource.CLASSIFIER
     assert (match.model, match.effort, match.pin, match.temperature) == (
         DEFAULT.model,
@@ -105,87 +105,87 @@ def test_a_record_carries_what_read_it(tmp_path):
     assert (match.call_id, match.prompt_hash, match.provider) == (call.id, call.prompt_hash, "fake")
 
 
-def test_a_second_run_pays_for_nothing(tmp_path):
+def test_a_second_run_pays_for_nothing(database):
     """The pairs carrying no record at the current configuration are what
     still needs testing — the rule machine matches already use."""
-    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
-    run(tmp_path, FakeTransport.answering(Verdict([])), cards, corpus)
+    cards, corpus = seeded(database), stored(database, problem("p1", techniques=["sliding-window"]))
+    run(database, FakeTransport.answering(Verdict([])), cards, corpus)
 
     client = FakeTransport.answering()
-    result = run(tmp_path, client, cards, corpus)
+    result = run(database, client, cards, corpus)
 
     assert (client.calls, result.asked) == ([], 0)
 
 
-def test_a_new_problem_is_the_only_one_re_read(tmp_path):
-    cards = seeded(tmp_path)
+def test_a_new_problem_is_the_only_one_re_read(database):
+    cards = seeded(database)
     run(
-        tmp_path,
+        database,
         FakeTransport.answering(Verdict([])),
         cards,
-        stored(tmp_path, problem("p1", techniques=["sliding-window"])),
+        stored(database, problem("p1", techniques=["sliding-window"])),
     )
 
-    grown = stored(tmp_path, problem("p2", techniques=["sliding-window"]))
+    grown = stored(database, problem("p2", techniques=["sliding-window"]))
     client = FakeTransport.answering(Verdict(["fixed-window"]))
-    result = run(tmp_path, client, cards, grown)
+    result = run(database, client, cards, grown)
 
     assert result.asked == 1
-    matched = {match.solution_id for match in MatchLog(tmp_path).matches() if match.matched}
+    matched = {match.solution_id for match in MatchLog(database).matches() if match.matched}
 
     assert matched == {"s-p2"}
 
 
-def test_an_edited_template_re_reads_that_card_alone(tmp_path):
+def test_an_edited_template_re_reads_that_card_alone(database):
     """The prompt hash is of the question, so a card the edit did not touch
     stays answered."""
-    cards = seeded(tmp_path, card(), card("backtracking", technique="backtracking"))
+    cards = seeded(database, card(), card("backtracking", technique="backtracking"))
     corpus = stored(
-        tmp_path,
+        database,
         problem("window", techniques=["sliding-window"]),
         problem("search", techniques=["backtracking"]),
     )
-    run(tmp_path, FakeTransport.answering(Verdict([]), Verdict([])), cards, corpus)
+    run(database, FakeTransport.answering(Verdict([]), Verdict([])), cards, corpus)
 
     edited = seeded(
-        tmp_path,
+        database,
         card(templates=[template("longest-valid-window", code="a different form")]),
         card("backtracking", technique="backtracking"),
     )
     client = FakeTransport.answering(Verdict(["longest-valid-window"]))
-    result = run(tmp_path, client, edited, corpus)
+    result = run(database, client, edited, corpus)
 
     assert result.asked == 1
     assert client.calls[0]["content"].count("a different form") == 1
 
 
-def test_a_reading_at_another_configuration_is_not_an_answer(tmp_path):
-    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
-    run(tmp_path, FakeTransport.answering(Verdict([])), cards, corpus)
+def test_a_reading_at_another_configuration_is_not_an_answer(database):
+    cards, corpus = seeded(database), stored(database, problem("p1", techniques=["sliding-window"]))
+    run(database, FakeTransport.answering(Verdict([])), cards, corpus)
 
     other = DEFAULT.model_copy(update={"model": "another-model"})
     client = FakeTransport.answering(Verdict([]))
-    result = run(tmp_path, client, cards, corpus, configuration=other)
+    result = run(database, client, cards, corpus, configuration=other)
 
     assert result.asked == 1
-    assert MatchLog(tmp_path).matches()[-1].model == "another-model"
+    assert MatchLog(database).matches()[-1].model == "another-model"
 
 
-def test_fresh_asks_again(tmp_path):
+def test_fresh_asks_again(database):
     """What measuring a matcher against itself needs."""
-    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
-    run(tmp_path, FakeTransport.answering(Verdict([])), cards, corpus)
+    cards, corpus = seeded(database), stored(database, problem("p1", techniques=["sliding-window"]))
+    run(database, FakeTransport.answering(Verdict([])), cards, corpus)
 
-    result = run(tmp_path, FakeTransport.answering(Verdict([])), cards, corpus, fresh=True)
+    result = run(database, FakeTransport.answering(Verdict([])), cards, corpus, fresh=True)
 
     assert result.asked == 1
-    assert len(MatchLog(tmp_path).matches()) == 4
+    assert len(MatchLog(database).matches()) == 4
 
 
-def test_a_hand_match_is_never_what_a_run_leans_on(tmp_path):
+def test_a_hand_match_is_never_what_a_run_leans_on(database):
     """It is the reference a machine run is scored against, so it settles
     nothing about what still has to be read."""
-    cards, corpus = seeded(tmp_path), stored(tmp_path, problem("p1", techniques=["sliding-window"]))
+    cards, corpus = seeded(database), stored(database, problem("p1", techniques=["sliding-window"]))
     hashes = {(cards[0].id, "s-p1"): request_hash(cards[0], corpus[0], canonicals(*corpus)[0])}
     user = [
         TemplateMatch(
@@ -207,51 +207,51 @@ def test_a_hand_match_is_never_what_a_run_leans_on(tmp_path):
     )
 
 
-def test_a_limit_cuts_the_run(tmp_path):
-    cards = seeded(tmp_path)
+def test_a_limit_cuts_the_run(database):
+    cards = seeded(database)
     corpus = stored(
-        tmp_path,
+        database,
         problem("p1", techniques=["sliding-window"]),
         problem("p2", techniques=["sliding-window"]),
     )
     client = FakeTransport.answering(Verdict([]))
 
-    result = run(tmp_path, client, cards, corpus, limit=1)
+    result = run(database, client, cards, corpus, limit=1)
 
     assert (result.asked, len(client.calls)) == (1, 1)
 
 
-def test_a_failure_costs_its_own_pair(tmp_path):
-    cards = seeded(tmp_path)
+def test_a_failure_costs_its_own_pair(database):
+    cards = seeded(database)
     corpus = stored(
-        tmp_path,
+        database,
         problem("p1", techniques=["sliding-window"]),
         problem("p2", techniques=["sliding-window"]),
     )
     client = FakeTransport.answering(Verdict(error=RuntimeError("rate limit")), Verdict([]))
 
-    result = run(tmp_path, client, cards, corpus)
+    result = run(database, client, cards, corpus)
 
     assert (result.asked, len(result.failed), result.aborted) == (1, 1, False)
     assert "rate limit" in result.failed[0].reason
 
 
-def test_a_broken_run_aborts(tmp_path):
-    cards = seeded(tmp_path)
+def test_a_broken_run_aborts(database):
+    cards = seeded(database)
     corpus = stored(
-        tmp_path,
+        database,
         *(problem(f"p{index}", techniques=["sliding-window"]) for index in range(ABORT_AFTER + 2)),
     )
     client = FakeTransport.answering(*[Verdict(error=RuntimeError("bad key"))] * (ABORT_AFTER + 2))
 
-    result = run(tmp_path, client, cards, corpus)
+    result = run(database, client, cards, corpus)
 
     assert (result.aborted, len(client.calls)) == (True, ABORT_AFTER)
 
 
-def test_progress_is_reported_as_the_run_goes(tmp_path):
+def test_progress_is_reported_as_the_run_goes(database):
     seen: list[Progress] = []
-    run(tmp_path, FakeTransport.answering(Verdict(["fixed-window"])), on_progress=seen.append)
+    run(database, FakeTransport.answering(Verdict(["fixed-window"])), on_progress=seen.append)
 
     (step,) = seen
     assert (step.index, step.total, step.card_slug, step.templates) == (
@@ -262,16 +262,16 @@ def test_progress_is_reported_as_the_run_goes(tmp_path):
     )
 
 
-def test_one_card_at_a_time(tmp_path):
-    cards = seeded(tmp_path, card(), card("backtracking", technique="backtracking"))
+def test_one_card_at_a_time(database):
+    cards = seeded(database, card(), card("backtracking", technique="backtracking"))
     corpus = stored(
-        tmp_path,
+        database,
         problem("window", techniques=["sliding-window"]),
         problem("search", techniques=["backtracking"]),
     )
     client = FakeTransport.answering(Verdict([]))
 
-    result = run(tmp_path, client, cards, corpus, card_slug="backtracking")
+    result = run(database, client, cards, corpus, card_slug="backtracking")
 
     assert result.asked == 1
-    assert {match.solution_id for match in MatchLog(tmp_path).matches()} == {"s-search"}
+    assert {match.solution_id for match in MatchLog(database).matches()} == {"s-search"}

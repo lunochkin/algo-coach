@@ -1,7 +1,6 @@
 import argparse
 import sys
 from collections.abc import Sequence
-from pathlib import Path
 
 from algo_coach.attempt_claims import score_backlog
 from algo_coach.attempt_claims.plan import Plan
@@ -16,6 +15,7 @@ from algo_coach.log import AttemptLog
 from algo_coach.runs import ABORT_AFTER
 from algo_coach.schema import Configuration
 from algo_coach.solution_claims import load_problems
+from algo_coach.storage import Database
 
 
 def configurations(
@@ -47,7 +47,7 @@ def configurations(
     return built
 
 
-def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Path) -> None:
+def score(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
     if args.stored and args.limit is not None:
         parser.exit(2, "score: --stored with --limit — a cap on a run that pays for nothing\n")
     named = configurations(args, parser)

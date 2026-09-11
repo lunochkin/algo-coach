@@ -26,41 +26,41 @@ from algo_coach.schema import (
 )
 
 
-def generator_prompt(tmp_path, **overrides) -> str:
-    (one,) = seeded(tmp_path, card(**overrides))
+def generator_prompt(database, **overrides) -> str:
+    (one,) = seeded(database, card(**overrides))
     return prompt(one, one.templates[0])
 
 
-def test_the_form_is_sent_rather_than_named(tmp_path):
+def test_the_form_is_sent_rather_than_named(database):
     """A cue and a title name a shape the model would have to guess at, so the
     code it comes back as is what the prompt carries."""
-    content = generator_prompt(tmp_path)
+    content = generator_prompt(database)
 
     assert "def longest_valid_window(): pass" in content
     assert "Cue: the cue for longest-valid-window" in content
 
 
-def test_both_cues_reach_the_brief(tmp_path):
+def test_both_cues_reach_the_brief(database):
     """The technique's cue says when to reach for it at all, the template's
     which of its forms is being asked for."""
-    content = generator_prompt(tmp_path)
+    content = generator_prompt(database)
 
     assert "Technique: sliding-window" in content
     assert "Reach for it when: a window over a contiguous run" in content
 
 
-def test_notes_are_carried_where_the_template_has_them(tmp_path):
+def test_notes_are_carried_where_the_template_has_them(database):
     content = generator_prompt(
-        tmp_path,
+        database,
         templates=[template("longest-valid-window", notes="Grow right.\nShrink left.")],
     )
 
     assert "Notes:\n  Grow right.\n  Shrink left." in content
 
 
-def test_a_template_without_notes_carries_no_heading(tmp_path):
+def test_a_template_without_notes_carries_no_heading(database):
     """An empty heading reads as a field the author left blank."""
-    assert "Notes:" not in generator_prompt(tmp_path)
+    assert "Notes:" not in generator_prompt(database)
 
 
 def test_the_statement_is_asked_for_before_the_solution():
@@ -219,17 +219,17 @@ class FakeModel:
         return Reply(text=self.text, stop_reason="stop" if self.text else "length")
 
 
-def written(tmp_path, model: FakeModel, **overrides):
-    (one,) = seeded(tmp_path, card())
-    return generate(model, CallLog(tmp_path), one, one.templates[0], **overrides)
+def written(database, model: FakeModel, **overrides):
+    (one,) = seeded(database, card())
+    return generate(model, CallLog(database), one, one.templates[0], **overrides)
 
 
-def test_one_call_carries_all_three_parts(tmp_path):
+def test_one_call_carries_all_three_parts(database):
     """Cases asked for in a second call describe the solution that already
     exists, so the prompt and the schema go out together."""
     model = FakeModel(draft())
 
-    result, call = written(tmp_path, model)
+    result, call = written(database, model)
 
     assert len(model.calls) == 1
     assert model.calls[0]["schema"] == schema()
@@ -238,7 +238,7 @@ def test_one_call_carries_all_three_parts(tmp_path):
     assert call.prompt_hash == prompt_hash(SYSTEM, model.calls[0]["content"])
 
 
-def test_generation_is_sampled_at_the_provider_default(tmp_path):
+def test_generation_is_sampled_at_the_provider_default(database):
     """The exception to the greedy rule: generation makes an artifact rather
     than a verdict, and variance is what stops one model's habits becoming the
     whole corpus.
@@ -249,19 +249,19 @@ def test_generation_is_sampled_at_the_provider_default(tmp_path):
     """
     model = FakeModel(draft())
 
-    _, call = written(tmp_path, model)
+    _, call = written(database, model)
 
     assert model.calls[0]["temperature"] is None
     assert call.temperature is None
 
 
-def test_the_configuration_is_what_goes_out(tmp_path):
+def test_the_configuration_is_what_goes_out(database):
     """Its own, since generation asks for an artifact where an answering site
     asks for a verdict."""
     model = FakeModel(draft())
 
     written(
-        tmp_path,
+        database,
         model,
         configuration=Configuration(model="a-writer", effort="medium", pin="somewhere/fp8"),
     )
@@ -270,15 +270,15 @@ def test_the_configuration_is_what_goes_out(tmp_path):
     assert model.calls[0]["pin"] == "somewhere/fp8"
 
 
-def test_an_answer_cut_short_writes_no_draft(tmp_path):
+def test_an_answer_cut_short_writes_no_draft(database):
     """A reply with no text wrote nothing. The call is recorded as the failure
     it is, and nothing downstream sees a problem."""
     model = FakeModel(None)
 
     with pytest.raises(GenerationError):
-        written(tmp_path, model)
+        written(database, model)
 
-    assert len(CallLog(tmp_path).all()) == 1
+    assert len(CallLog(database).all()) == 1
 
 
 def test_the_draft_says_how_hard_the_problem_is():
@@ -294,10 +294,10 @@ def test_a_difficulty_outside_the_vocabulary_fails():
         read(draft(difficulty="trivial"))
 
 
-def test_what_the_form_already_has_is_in_the_brief(tmp_path):
+def test_what_the_form_already_has_is_in_the_brief(database):
     """A model that cannot see them writes the problem the form suggests,
     which is the same problem every run."""
-    (one,) = seeded(tmp_path, card())
+    (one,) = seeded(database, card())
     content = prompt(one, one.templates[0], ["A first statement.", "A second one."])
 
     assert "Already written for this form:" in content
@@ -305,8 +305,8 @@ def test_what_the_form_already_has_is_in_the_brief(tmp_path):
     assert "<written>\nA second one.\n</written>" in content
 
 
-def test_a_form_with_nothing_written_carries_no_heading(tmp_path):
-    (one,) = seeded(tmp_path, card())
+def test_a_form_with_nothing_written_carries_no_heading(database):
+    (one,) = seeded(database, card())
 
     assert "Already written" not in prompt(one, one.templates[0])
 
@@ -319,18 +319,18 @@ def test_the_brief_asks_for_a_different_question(tmp_path):
     assert "Yours asks a different question." in rule
 
 
-def test_written_statements_reach_the_call(tmp_path):
+def test_written_statements_reach_the_call(database):
     model = FakeModel(draft())
 
-    written(tmp_path, model, written=["An earlier statement."])
+    written(database, model, written=["An earlier statement."])
 
     assert "An earlier statement." in model.calls[0]["content"]
 
 
-def test_the_statements_are_the_template_s_own(tmp_path):
+def test_the_statements_are_the_template_s_own(database):
     """Every status, retired included: a repeat of a retired problem is
     still the same problem."""
-    (one,) = seeded(tmp_path, card())
+    (one,) = seeded(database, card())
     mine, theirs = one.templates[0], one.templates[1]
     corpus = [
         Problem(

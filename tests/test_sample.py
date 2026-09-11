@@ -30,29 +30,29 @@ def skewed(root, *, common: int):
     return pool(root, coded)
 
 
-def test_a_short_prefix_covers_every_technique(tmp_path):
+def test_a_short_prefix_covers_every_technique(database):
     """A uniform shuffle would put a sample this size almost all on the pair
     the backlog holds most of, and the score is read per technique."""
-    attempts, problems = skewed(tmp_path, common=40)
+    attempts, problems = skewed(database, common=40)
 
     drawn = spread(attempts, problems)[:4]
 
     assert len(techniques_of(problems, drawn)) == 8
 
 
-def test_the_dominant_technique_takes_one_turn_like_the_rest(tmp_path):
-    attempts, problems = skewed(tmp_path, common=40)
+def test_the_dominant_technique_takes_one_turn_like_the_rest(database):
+    attempts, problems = skewed(database, common=40)
 
     drawn = spread(attempts, problems)[:4]
 
     assert [one.problem_id.startswith("common") for one in drawn].count(True) == 1
 
 
-def test_a_technique_already_covered_waits(tmp_path):
+def test_a_technique_already_covered_waits(database):
     """Covering one technique often covers another, since a claim decides
     every tag its problem carries."""
     attempts, problems = pool(
-        tmp_path,
+        database,
         {
             "both": ["Greedy", "Sorting"],
             "greedy-again": ["Greedy", "Sorting"],
@@ -65,26 +65,26 @@ def test_a_technique_already_covered_waits(tmp_path):
     assert techniques_of(problems, [first]).isdisjoint(techniques_of(problems, [second]))
 
 
-def test_every_attempt_is_drawn_once(tmp_path):
-    attempts, problems = skewed(tmp_path, common=10)
+def test_every_attempt_is_drawn_once(database):
+    attempts, problems = skewed(database, common=10)
 
     drawn = spread(attempts, problems)
 
     assert sorted(one.id for one in drawn) == sorted(one.id for one in attempts)
 
 
-def test_the_same_seed_gives_the_same_order(tmp_path):
-    attempts, problems = skewed(tmp_path, common=10)
+def test_the_same_seed_gives_the_same_order(database):
+    attempts, problems = skewed(database, common=10)
 
     assert [one.id for one in spread(attempts, problems, seed=7)] == [
         one.id for one in spread(attempts, problems, seed=7)
     ]
 
 
-def test_another_seed_gives_another_order(tmp_path):
+def test_another_seed_gives_another_order(database):
     """Within a technique the choice is the seed's; a sample is described by
     it rather than by listing what it held."""
-    attempts, problems = skewed(tmp_path, common=10)
+    attempts, problems = skewed(database, common=10)
 
     assert [one.id for one in spread(attempts, problems, seed=0)] != [
         one.id for one in spread(attempts, problems, seed=1)
@@ -95,13 +95,13 @@ def test_an_empty_pool_is_an_empty_order(tmp_path):
     assert spread([], {}) == []
 
 
-def test_a_technique_already_claimed_waits_like_a_covered_one(tmp_path):
+def test_a_technique_already_claimed_waits_like_a_covered_one(database):
     """The eval set is grown, not drawn fresh. What `spread` levels is the
     claimed set plus the sample, so a technique the hand pass already reached
     forty times is behind one it has never reached — the same rule as within a
     batch, extended to what was claimed before it."""
     attempts, problems = pool(
-        tmp_path,
+        database,
         {
             "fat1": ["Greedy", "Sorting"],
             "fat2": ["Greedy", "Sorting"],
@@ -112,29 +112,29 @@ def test_a_technique_already_claimed_waits_like_a_covered_one(tmp_path):
     assert order[0].id == "a-thin"
 
 
-def test_prior_coverage_does_not_drop_an_attempt(tmp_path):
+def test_prior_coverage_does_not_drop_an_attempt(database):
     """It reorders the pool and never filters it: an attempt on a technique
     already claimed is later, not gone, or a sample cut long would be short."""
-    attempts, problems = skewed(tmp_path, common=10)
+    attempts, problems = skewed(database, common=10)
     order = spread(attempts, problems, covered=Counter({"greedy": 99, "sorting": 99}))
     assert {one.id for one in order} == {one.id for one in attempts}
 
 
-def test_no_prior_coverage_is_the_order_it_had(tmp_path):
+def test_no_prior_coverage_is_the_order_it_had(database):
     """The default is the current behaviour: an empty count is what `spread`
     starts from now, so nothing that does not pass one reads differently."""
-    attempts, problems = skewed(tmp_path, common=20)
+    attempts, problems = skewed(database, common=20)
     assert [one.id for one in spread(attempts, problems, seed=3)] == [
         one.id for one in spread(attempts, problems, covered=Counter(), seed=3)
     ]
 
 
-def test_claimable_levels_against_what_was_already_claimed(tmp_path):
+def test_claimable_levels_against_what_was_already_claimed(database):
     """The pool `claimable` returns has the hand-claimed attempts taken out of
     it, so the counts they carry have to reach `spread` some other way. Without
     that the batch is spread and the eval set it joins is not."""
     attempts, problems = pool(
-        tmp_path,
+        database,
         {
             "done1": ["Backtracking", "Greedy"],
             "done2": ["Backtracking", "Greedy"],

@@ -25,9 +25,9 @@ def card(slug: str, *, technique: str = "binary-search") -> Card:
     )
 
 
-def test_a_technique_reads_every_card_it_carries_and_no_other(tmp_path):
+def test_a_technique_reads_every_card_it_carries_and_no_other(database):
     """Granularity follows teaching, so a technique can carry several cards."""
-    store = CardStore(tmp_path)
+    store = CardStore(database)
     for one in (card("on-answer"), card("basic"), card("windows", technique="sliding-window")):
         store.put(one)
 

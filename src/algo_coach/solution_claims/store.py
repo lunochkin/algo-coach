@@ -1,13 +1,13 @@
 from pathlib import Path
 
 from algo_coach.schema import SolutionClaim
-from algo_coach.storage import JsonlLog
+from algo_coach.storage import Database, JsonlLog
 
 
 class SolutionClaimLog(JsonlLog[SolutionClaim]):
     """Solution claims, the user's and the machine's alike."""
 
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Database | Path) -> None:
         super().__init__(root, "solution_claims.jsonl", SolutionClaim)
 
     def claims(self) -> list[SolutionClaim]:

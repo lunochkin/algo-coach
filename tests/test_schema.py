@@ -58,8 +58,8 @@ def test_a_diagnosis_carries_its_provenance_whole():
         make_diagnosis("a1", FailureMode.RUST, prompt_hash=None)
 
 
-def test_attempt_roundtrip(tmp_path):
-    log = AttemptLog(tmp_path)
+def test_attempt_roundtrip(database):
+    log = AttemptLog(database)
     attempt = make_attempt("a1")
     log.append_attempt(attempt)
     log.append_diagnosis(make_diagnosis("a1", FailureMode.RUST))
@@ -210,8 +210,8 @@ def test_a_self_label_is_its_own_record():
     assert "self_label" not in Attempt.model_fields
 
 
-def test_self_label_roundtrip(tmp_path):
-    log = AttemptLog(tmp_path)
+def test_self_label_roundtrip(database):
+    log = AttemptLog(database)
     now = datetime.now(UTC)
     first = SelfLabel(id="l1", created_at=now, attempt_id="a1", mode=FailureMode.GAP)
     second = SelfLabel(id="l2", created_at=now, attempt_id="a1", mode=FailureMode.RUST)

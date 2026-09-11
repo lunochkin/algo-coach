@@ -48,14 +48,14 @@ def answer(solution: str = "def solve(xs):\n    return len(xs)\n") -> str:
 ELSEWHERE = Configuration(model="another", effort="low", pin="somewhere")
 
 
-def test_the_form_to_avoid_is_sent_beside_the_statement(tmp_path):
+def test_the_form_to_avoid_is_sent_beside_the_statement(database):
     """It settles no case and rejects no draft, so naming the form cannot
     reach a verdict. No other site may be told it."""
     model = FakeModel(answer())
 
-    target = aimed(tmp_path)
+    target = aimed(database)
 
-    code, call = write_naive(model, CallLog(tmp_path), STATEMENT, target)
+    code, call = write_naive(model, CallLog(database), STATEMENT, target)
 
     assert model.calls[0]["content"] == prompt(STATEMENT, target)
     assert STATEMENT in model.calls[0]["content"] and AVOIDING in model.calls[0]["content"]
@@ -64,13 +64,13 @@ def test_the_form_to_avoid_is_sent_beside_the_statement(tmp_path):
 
 
 def test_the_brief_asks_for_the_replaced_approach_where_the_blind_one_asks_for_plain(
-    tmp_path,
+    database,
 ):
     """A plain solution is whatever the model finds obvious, which on some
     statements is the form itself. This one is told what is wanted: what a
     solver writes without the technique, rather than the slowest solution
     there is."""
-    target = aimed(tmp_path)
+    target = aimed(database)
     sent = SYSTEM + prompt(STATEMENT, target)
 
     assert "solver reaches for without one technique" in SYSTEM
@@ -100,27 +100,27 @@ def test_a_reply_carrying_no_solution_fails():
         read(json.dumps({"solution": ""}))
 
 
-def test_an_answer_cut_short_writes_no_solution(tmp_path):
+def test_an_answer_cut_short_writes_no_solution(database):
     model = FakeModel(None)
 
     with pytest.raises(GenerationError):
-        write_naive(model, CallLog(tmp_path), STATEMENT, aimed(tmp_path))
+        write_naive(model, CallLog(database), STATEMENT, aimed(database))
 
-    assert len(CallLog(tmp_path).all()) == 1
+    assert len(CallLog(database).all()) == 1
 
 
-def test_the_site_s_own_configuration_is_the_default(tmp_path):
+def test_the_site_s_own_configuration_is_the_default(database):
     model = FakeModel(answer())
 
-    target = aimed(tmp_path)
-    write_naive(model, CallLog(tmp_path), STATEMENT, target)
-    write_naive(model, CallLog(tmp_path), STATEMENT, target, configuration=ELSEWHERE)
+    target = aimed(database)
+    write_naive(model, CallLog(database), STATEMENT, target)
+    write_naive(model, CallLog(database), STATEMENT, target, configuration=ELSEWHERE)
 
     assert model.calls[0]["model"] == NAIVE_DEFAULT.model
     assert model.calls[1]["model"] == ELSEWHERE.model
 
 
-def test_the_site_is_sampled_where_the_other_answering_ones_are_greedy(tmp_path):
+def test_the_site_is_sampled_where_the_other_answering_ones_are_greedy(database):
     """It produces an artifact rather than a verdict, so a second call is a
     second draw where the first wrote the form.
 
@@ -130,24 +130,24 @@ def test_the_site_is_sampled_where_the_other_answering_ones_are_greedy(tmp_path)
     """
     model = FakeModel(answer())
 
-    _, call = write_naive(model, CallLog(tmp_path), STATEMENT, aimed(tmp_path))
+    _, call = write_naive(model, CallLog(database), STATEMENT, aimed(database))
 
     assert model.calls[0]["temperature"] is None
     assert call.temperature is None
 
 
-def test_two_forms_to_avoid_are_two_questions(tmp_path):
+def test_two_forms_to_avoid_are_two_questions(database):
     """The prompt hash keys the skip, so a template whose trigger was edited is
     re-asked and the rest are not."""
-    assert request_hash(STATEMENT, aimed(tmp_path)) != request_hash(
-        STATEMENT, aimed(tmp_path / "elsewhere", trigger="something else")
+    assert request_hash(STATEMENT, aimed(database)) != request_hash(
+        STATEMENT, aimed(database.directory / "elsewhere", trigger="something else")
     )
 
 
-def test_the_technique_that_earns_the_form_is_sent_beside_it(tmp_path):
+def test_the_technique_that_earns_the_form_is_sent_beside_it(database):
     """A card lists the forms it teaches, and a model reaches the technique
     through one it does not: tabulation where the form is a memo."""
-    sent = prompt(STATEMENT, aimed(tmp_path))
+    sent = prompt(STATEMENT, aimed(database))
 
     assert "sliding-window" in sent
     assert "Earns it:" in sent

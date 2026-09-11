@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from algo_coach.schema import Problem, ProblemStatus, RetirementReason
-from algo_coach.storage import FileStore
+from algo_coach.storage import Database, FileStore
 
 # what a stored problem may still move: `corpus.md` gives the states
 STATUS = {"status", "retired_reason"}
@@ -12,7 +12,7 @@ class ProblemStore(FileStore[Problem]):
     thing is retired and a new problem written, so the attempts stay with the
     record they were made against."""
 
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Database | Path) -> None:
         super().__init__(root, "problems", Problem)
 
     def put(self, record: Problem) -> None:

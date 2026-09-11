@@ -16,11 +16,11 @@ TRIPLE = "def solve(n):\n    return n * 3\n"
 
 
 @pytest.fixture
-def root(tmp_path):
-    ProblemStore(tmp_path).put(make_problem("p1", statement="Double n.\n\ndef solve(n):"))
+def root(database):
+    ProblemStore(database).put(make_problem("p1", statement="Double n.\n\ndef solve(n):"))
     for args, expected in (([1], 2), ([3], 6)):
-        CaseLog(tmp_path).append(case("p1", args, expected, provenance=PROVENANCE))
-    return tmp_path
+        CaseLog(database).append(case("p1", args, expected, provenance=PROVENANCE))
+    return database
 
 
 def test_one_sitting_runs_from_serve_to_end(root):

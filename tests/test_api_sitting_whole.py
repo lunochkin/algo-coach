@@ -13,13 +13,13 @@ TRIPLE = "def solve(n):\n    return n * 3\n"
 
 
 @pytest.fixture
-def client(tmp_path):
+def client(database):
     seed_problem(
-        tmp_path, id="p1", techniques=["greedy", "sorting"], title="Double", statement=STATEMENT
+        database, id="p1", techniques=["greedy", "sorting"], title="Double", statement=STATEMENT
     )
     for args, expected in (([1], 2), ([3], 6)):
-        CaseLog(tmp_path).append(case("p1", args, expected, provenance=PROVENANCE))
-    return TestClient(create_app(tmp_path, user_id=USER))
+        CaseLog(database).append(case("p1", args, expected, provenance=PROVENANCE))
+    return TestClient(create_app(database, user_id=USER))
 
 
 def ok(response):

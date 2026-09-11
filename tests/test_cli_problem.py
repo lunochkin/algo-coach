@@ -14,8 +14,8 @@ SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    ret
 
 
 @pytest.fixture
-def root(tmp_path, monkeypatch):
-    data = data_root(tmp_path, monkeypatch)
+def root(database, monkeypatch):
+    data = data_root(database, monkeypatch)
     return data
 
 

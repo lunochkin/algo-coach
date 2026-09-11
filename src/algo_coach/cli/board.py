@@ -1,16 +1,16 @@
 import argparse
 import json
 from datetime import UTC, datetime
-from pathlib import Path
 
 from algo_coach.attempt_claims import standing_attempt_claims
 from algo_coach.board import TechniqueRow, excluded, per_technique, stalest_first, ungrouped
 from algo_coach.cli.display import age, table
 from algo_coach.log import AttemptLog, latest_by_attempt
 from algo_coach.solution_claims import load_problems
+from algo_coach.storage import Database
 
 
-def board(args: argparse.Namespace, root: Path) -> None:
+def board(args: argparse.Namespace, root: Database) -> None:
     log = AttemptLog(root)
     attempts = [attempt for attempt in log.attempts() if attempt.user_id == args.user]
     # Every problem, not the user's: an attempt names a minted id, and a

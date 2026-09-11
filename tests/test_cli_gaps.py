@@ -2,7 +2,6 @@ import pytest
 from commands import data_root, run_cli
 from matching import canonical, card, problem, seeded, stored, template
 
-from algo_coach import cli
 from algo_coach.matches import MatchLog
 from algo_coach.mint import generator_match
 from algo_coach.solutions import SolutionLog
@@ -13,9 +12,9 @@ def run(monkeypatch, *argv: str) -> None:
 
 
 @pytest.fixture
-def root(tmp_path, monkeypatch):
+def root(database, monkeypatch):
     """One card of two core forms, and a canonical displaying one of them."""
-    data = data_root(tmp_path, monkeypatch)
+    data = data_root(database, monkeypatch)
     cards = seeded(data, card(templates=[template("fixed-window"), template("shrink-to-fit")]))
     stored(data, problem("p1", techniques=["sliding-window"]))
     solution = canonical("p1")
@@ -43,8 +42,8 @@ def test_every_core_template_under_all(root, monkeypatch, capsys):
     assert "1 solution(s)" in out
 
 
-def test_an_empty_store_reports_no_template(tmp_path, monkeypatch, capsys):
-    monkeypatch.setattr(cli, "DATA_ROOT", tmp_path / "data")
+def test_an_empty_store_reports_no_template(database, monkeypatch, capsys):
+    data_root(database, monkeypatch)
 
     run(monkeypatch)
 
