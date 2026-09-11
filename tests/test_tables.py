@@ -15,8 +15,10 @@ from sqlalchemy import (
     Table,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy.exc import ProgrammingError
 from tables import Stored, mismatches
 from test_schema_additive import RECORDS
 
@@ -588,6 +590,34 @@ def test_every_append_only_table_and_no_other_keeps_its_append_order():
     ordered = {name for name, table in metadata.tables.items() if "appended" in table.c}
 
     assert ordered == APPEND_ONLY
+
+
+# the rows a run is stored with, append-only as the run is
+CASE_RESULTS = {"verification_case_results", "attempt_verification_case_results"}
+
+
+def test_every_append_only_table_refuses_a_rewrite_in_the_database(database):
+    """A write path that skips the log's rule is refused by the table rather
+    than trusted to the store."""
+    with database.connect() as conn:
+        guarded = conn.execute(
+            text(
+                "SELECT tgrelid::regclass::text FROM pg_trigger WHERE tgname = 'append_only'"
+                " AND tgenabled <> 'D'"
+            )
+        ).scalars()
+
+        assert set(guarded) == APPEND_ONLY | CASE_RESULTS
+
+
+@pytest.mark.parametrize(
+    ("statement", "op"),
+    [("UPDATE calls SET model = 'another'", "UPDATE"), ("DELETE FROM calls", "DELETE")],
+)
+def test_an_append_only_row_is_neither_updated_nor_deleted(database, statement, op):
+    refused = pytest.raises(ProgrammingError, match=f"calls is append-only: {op} refused")
+    with refused, database.begin() as conn:
+        conn.execute(text(statement))
 
 
 def test_the_append_order_is_the_database_s_alone():

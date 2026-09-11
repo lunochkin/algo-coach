@@ -1,6 +1,6 @@
 from generating import FakeWriter
 from matching import card, seeded, template
-from sqlalchemy import delete
+from sqlalchemy import delete, text
 
 from algo_coach.calls import CallLog
 from algo_coach.cases import CaseLog
@@ -118,10 +118,12 @@ def test_a_problem_with_no_stored_naive_solution_is_not_searched_over(database, 
     """One landed before the role existed. The site's own answer would be
     judged by a search that cannot run."""
     cards = landed(database, monkeypatch)
-    # removed behind the store, which keeps an append-only log and has no
-    # delete, as a problem stored before the role existed never had one
+    # removed behind the store and past the trigger refusing a delete, as a
+    # problem stored before the role existed never had one
     with database.begin() as conn:
+        conn.execute(text("ALTER TABLE solutions DISABLE TRIGGER append_only"))
         conn.execute(delete(solutions).where(solutions.c.role == SolutionRole.NAIVE))
+        conn.execute(text("ALTER TABLE solutions ENABLE TRIGGER append_only"))
 
     _, outcomes = replayed(database, FakeWriter(generator=BUILDS), cards)
 

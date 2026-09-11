@@ -308,6 +308,11 @@ times. Each record class is specified in one of the files beside it.
   - A field added to a record is a nullable column added by a migration, which
     is the additive rule in `## Repo constraints`. A test compares each table's
     columns with its record's fields, since the two are declared apart.
+  - An append-only table refuses an `UPDATE` and a `DELETE` by a trigger, and
+    so do the case results stored with a run. A store with a bug in its write
+    path is then refused by the database instead of rewriting the log. A
+    migration creating an append-only table adds the trigger by hand, since
+    Alembic generates none, and a test lists the tables that carry it.
 - **The calibration corpus is the platform data the pivot to generated
   problems left behind**, under `data/old/`: a platform's problems, the
   attempts against them, the claims and the calls. It is a corpus rather than

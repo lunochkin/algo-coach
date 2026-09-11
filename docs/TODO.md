@@ -69,7 +69,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Connect the CLI and the API to Postgres through `DATABASE_URL`
 - [x] Delete `JsonlLog`, `FileStore` and the copy script, and stop writing
       `data/`, keeping `data/old/`. One backend is one set of write semantics
-- [ ] Refuse an update or a delete on an append-only table in the database
+- [x] Refuse an update or a delete on an append-only table in the database
       itself, by grant or by trigger. A write path that skips the log's rule
       is otherwise one bug away
 - [x] Copy every record under `data/` into Postgres with a one-off command, and
