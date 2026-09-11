@@ -19,8 +19,29 @@ backend for our own generated code, which is not a threat model.
       JSONB beside the columns a store queries, or a column per field, and write
       it into `docs/architecture/README.md`. The pydantic schema stays the
       contract either way
-- [ ] Add the first Alembic migration, creating every table. A table changed by
-      hand on the hosted database is a change no clone reproduces
+- [x] Add the shared `MetaData` to `algo_coach.storage`, the column conventions,
+      and a test comparing a table's columns with its record's fields. The
+      tables and the pydantic models are declared apart, so only a test keeps
+      them equal
+- [ ] Declare the problems table beside the problem store
+- [ ] Declare the test cases table, the arguments and the expected value as
+      JSONB
+- [ ] Declare the solutions table
+- [ ] Declare the solution claims table
+- [ ] Declare the template matches table
+- [ ] Declare the verifications table and its case results
+- [ ] Declare the site outcomes table
+- [ ] Declare the calls table
+- [ ] Declare the cards table and its templates
+- [ ] Declare the drafts table, its declared and settled cases, and one table
+      for the provenance of its five sites
+- [ ] Declare the sittings table and its pauses
+- [ ] Declare the attempt log's tables: attempts, attempt verifications and
+      their case results, claims, self-labels and diagnoses
+- [ ] Check that every stored record has a table. A record left without one is
+      a store the copy to Postgres skips
+- [ ] Generate the first Alembic migration from those tables, creating every
+      table
 - [ ] Back `JsonlLog` and `FileStore` with Postgres behind their current
       interfaces, so no domain call changes. The write semantics in the
       data-class table hold on either backend

@@ -1,10 +1,14 @@
 """The two shapes every store takes: an append-only log of JSON lines, and a
 directory of one file per record. The schema is the contract, and this is what
-swaps underneath it."""
+swaps underneath it. The Postgres tables the stores move to are declared against
+the conventions below, as `docs/architecture/README.md` gives them."""
 
+from enum import StrEnum
 from pathlib import Path
+from typing import Any
 
 from pydantic import BaseModel
+from sqlalchemy import Column, DateTime, Double, Enum, MetaData, Text
 
 
 class JsonlLog[T: BaseModel]:
@@ -63,4 +67,61 @@ class FileStore[T: BaseModel]:
         ]
 
 
-__all__ = ["FileStore", "JsonlLog"]
+# named, so a migration Alembic generates names each constraint the same on
+# every database it runs against
+metadata = MetaData(
+    naming_convention={
+        "pk": "%(table_name)s_pkey",
+        "fk": "%(table_name)s_%(column_0_name)s_fkey",
+        "uq": "%(table_name)s_%(column_0_name)s_key",
+        "ix": "%(table_name)s_%(column_0_name)s_idx",
+        "ck": "%(table_name)s_%(constraint_name)s_check",
+    }
+)
+
+
+def enumerated(kind: type[StrEnum]) -> Enum:
+    # by value, the string a stored JSON record already carries, rather than by
+    # member name
+    return Enum(
+        kind,
+        name=_snake(kind.__name__),
+        values_callable=_values,
+    )
+
+
+def timestamp() -> DateTime:
+    return DateTime(timezone=True)
+
+
+def provenance_columns() -> list[Column[Any]]:
+    """The columns of `MachineProvenance`, which every machine record inherits.
+    Nullable, as the record's own validator decides which of them it needs."""
+    return [
+        Column("model", Text),
+        Column("effort", Text),
+        Column("prompt_hash", Text),
+        Column("call_id", Text),
+        Column("pin", Text),
+        Column("provider", Text),
+        Column("temperature", Double),
+        Column("cost", Double),
+    ]
+
+
+def _values(kind: type[StrEnum]) -> list[str]:
+    return [member.value for member in kind]
+
+
+def _snake(name: str) -> str:
+    return "".join(f"_{char.lower()}" if char.isupper() else char for char in name).lstrip("_")
+
+
+__all__ = [
+    "FileStore",
+    "JsonlLog",
+    "enumerated",
+    "metadata",
+    "provenance_columns",
+    "timestamp",
+]

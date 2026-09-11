@@ -290,6 +290,9 @@ times. Each record class is specified in one of the files beside it.
   - A table holds a column per field, `NOT NULL` where the record requires
     the field. The database then refuses a record the schema refuses, rather
     than storing whatever a writer sent.
+  - A string enum is a Postgres enum type holding the member values, the
+    strings a stored JSON record already carries. A timestamp keeps its time
+    zone.
   - A list of records is a child table keyed to its parent, with its position
     where the order matters: a sitting's pauses, a run's case results, a
     card's templates. A list of strings is a `text[]` column.
