@@ -4,6 +4,7 @@ import ast
 import contextlib
 import json
 import os
+import select
 import signal
 import subprocess
 import sys
@@ -172,17 +173,51 @@ def _answered(
 ) -> CaseRun:
     # one case per child: `corpus.md` requires that no case observes another
     request = json.dumps({"code": code, "args": args, "cap_ms": cap_ms, "repeats": repeats})
+    assert child.stdin is not None
+    # a child that died before reading the whole request is read from how it
+    # died, below
+    with contextlib.suppress(BrokenPipeError):
+        child.stdin.write(request)
+    with contextlib.suppress(BrokenPipeError):
+        child.stdin.close()
     try:
-        child.communicate(request, timeout=(cap_ms + STARTUP_MS) / 1000)
-    except subprocess.TimeoutExpired:
-        _kill(child.pid)
-        child.communicate()
-        return CaseRun(RunOutcome.TIMEOUT)
+        if not _exited(child.pid, (cap_ms + STARTUP_MS) / 1000):
+            return CaseRun(RunOutcome.TIMEOUT)
     finally:
         # on every path: what the solution spawned outlives a child that
-        # reported its own timeout
+        # reported its own timeout. Reaped after, so an exit code is kept
         _kill(child.pid)
+        child.wait()
     return _reported(result_path, child.returncode)
+
+
+def _exited(pid: int, timeout: float) -> bool:
+    """Whether the child exited within the timeout, woken by the exit itself.
+    `Popen.wait` polls instead, sleeping up to 50 ms past a child that already
+    finished, which every case paid."""
+    if sys.platform == "linux":
+        watched = os.pidfd_open(pid)
+        try:
+            ready, _, _ = select.select([watched], [], [], timeout)
+        finally:
+            os.close(watched)
+        return bool(ready)
+    if sys.platform == "darwin":
+        queue = select.kqueue()
+        try:
+            exit = select.kevent(
+                pid,
+                filter=select.KQ_FILTER_PROC,
+                flags=select.KQ_EV_ADD | select.KQ_EV_ONESHOT,
+                fflags=select.KQ_NOTE_EXIT,
+            )
+            return bool(queue.control([exit], 1, timeout))
+        except ProcessLookupError:
+            # exited before it was watched
+            return True
+        finally:
+            queue.close()
+    raise RunnerError(f"no way to wait on a child on {sys.platform}")
 
 
 def _kill(pid: int) -> None:
