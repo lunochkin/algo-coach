@@ -2,7 +2,8 @@ import pytest
 
 from algo_coach.cli.transport import CREDENTIALS
 
-# what `SignIn.from_environ` reads, so a developer's own clients offer no route
+# what signing in reads, so a developer's own clients or dev login user reach no
+# route and no command
 SIGN_IN = (
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
@@ -10,6 +11,7 @@ SIGN_IN = (
     "GITHUB_CLIENT_SECRET",
     "ALGO_COACH_ORIGIN",
     "ALGO_COACH_SECRET",
+    "ALGO_COACH_DEV_LOGIN",
 )
 
 # the Postgres fixtures, one database per worker
@@ -33,5 +35,5 @@ def off_the_developer_machine(tmp_path, monkeypatch):
     every command a test runs.
     """
     monkeypatch.chdir(tmp_path)
-    for name in ("ALGO_COACH_USER", "DATABASE_URL", *CREDENTIALS, *SIGN_IN):
+    for name in ("DATABASE_URL", *CREDENTIALS, *SIGN_IN):
         monkeypatch.delenv(name, raising=False)

@@ -7,6 +7,23 @@ way it did, and the study a card run tracks. Part of the architecture.
 Every record here is append-only apart from the sitting, which is revised
 while the sitting runs.
 
+## Users
+
+The engine's user, whose id every private record carries. `README.md` gives
+how an account signing in is linked to a user.
+
+- **The hosted engine starts with an empty log, the author's included.** The
+  author's account is linked to a user minted at its first sign-in, as every
+  account is.
+- **The records written before hosting stay in the local database**, under the
+  ids the terminal and the local API wrote them under. The dev login signs in as
+  the user `ALGO_COACH_DEV_LOGIN` names, and the terminal reads that user's log
+  by default.
+- **No record is copied from the local log to the hosted one.** The local log
+  held a handful of sittings and attempts when hosting was decided. Carrying
+  them over would take a copy of the log and an account linked to an id the
+  engine never minted, for records nothing reads.
+
 ## Sittings
 
 One timed session on one problem: when it began, when it ended, and every pause

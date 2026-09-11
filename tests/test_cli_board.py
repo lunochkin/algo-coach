@@ -92,6 +92,21 @@ def test_board_json_carries_the_rows(board_root, monkeypatch, capsys):
     ]
 
 
+def test_the_user_defaults_to_the_one_the_dev_login_signs_in_as(board_root, monkeypatch, capsys):
+    """The terminal and the local pages read one log."""
+    monkeypatch.setenv("ALGO_COACH_DEV_LOGIN", "u2")
+    board_root.append_attempt(attempt("a1", user_id="u1"))
+    board_root.append_attempt(attempt("a2", user_id="u2", solved=False))
+
+    run(monkeypatch, "--json")
+
+    rows = json.loads(capsys.readouterr().out)["rows"]
+    assert [(row["technique"], row["solved_count"]) for row in rows] == [
+        ("greedy", 0),
+        ("sorting", 0),
+    ]
+
+
 def test_board_counts_only_the_users_own_attempts(board_root, monkeypatch, capsys):
     board_root.append_attempt(attempt("a1", user_id="u1"))
     board_root.append_attempt(attempt("a2", user_id="u2"))

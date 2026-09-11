@@ -11,6 +11,12 @@ def known(conn: Connection, user_id: str) -> None:
     conn.execute(insert(users).values(id=user_id, created_at=func.now()).on_conflict_do_nothing())
 
 
+def named(root: Database, user_id: str) -> None:
+    """Adds the user a dev login signs in as, where nothing has named it yet."""
+    with root.begin() as conn:
+        known(conn, user_id)
+
+
 def signed_in(root: Database, provider: Provider, provider_user_id: str, email: str) -> str:
     """The engine's user an account signs in as. `email` is one the provider
     verified: an unverified one would join whoever holds that address.

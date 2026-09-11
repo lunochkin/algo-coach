@@ -300,9 +300,15 @@ times. Each record class is specified in one of the files beside it.
   - Sign-in by email is deferred until a user needs it. An emailed link, a
     managed provider or a company's own sign-in would each be one more provider
     an `identities` row names.
-  - A dev login signs in as a named user with no provider, for local work. A
-    flag enables the dev login, and the app refuses to start with the flag
-    unless it is bound to `127.0.0.1`.
+  - A dev login signs in with no provider, for local work, as the user
+    `ALGO_COACH_DEV_LOGIN` names. Setting the variable enables the dev login,
+    and two guards keep it off a deployed engine.
+  - The app refuses to start with the flag beside a provider's client. A
+    deployed engine signs its users in through a provider, so it carries one.
+  - The dev login answers only a request that arrived at a loopback address.
+    Another machine's request never does, however the server is bound. The
+    app cannot check the bound address at start, since it is built before the
+    server binds one.
 - **Storage is one Postgres database**, named by `DATABASE_URL`, and every
   store writes there. The schema is the contract, and the tables are declared
   against it.

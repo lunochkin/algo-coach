@@ -1,8 +1,6 @@
 import pytest
-from fastapi.testclient import TestClient
-from helpers import seed_problem
+from helpers import browsing, seed_problem
 
-from algo_coach.api import create_app
 from algo_coach.cards import CardStore
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
@@ -15,7 +13,7 @@ USER = "u-4f9c2a"
 def client(database):
     seed_problem(database, id="p-greedy", techniques=["greedy", "sorting"])
     seed_problem(database, id="p-sorting", techniques=["sorting"])
-    return TestClient(create_app(database, user_id=USER))
+    return browsing(database, USER)
 
 
 def attempted(root, id: str, *, user_id: str = USER, problem_id: str = "p-greedy") -> None:
@@ -176,6 +174,6 @@ def test_a_served_sitting_is_read_back_by_its_id(client):
 
 def test_another_user_s_sitting_is_not_found(client, database):
     sitting_id = client.post("/api/problems/p-sorting/sittings").json()["sitting"]["id"]
-    other = TestClient(create_app(database, user_id="u-b71e03"))
+    other = browsing(database, "u-b71e03")
 
     assert other.get(f"/api/sittings/{sitting_id}").status_code == 404

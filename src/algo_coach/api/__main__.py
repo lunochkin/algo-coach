@@ -21,8 +21,8 @@ def app() -> FastAPI:
     root = Database(url=os.environ.get("DATABASE_URL"))
     return create_app(
         root,
-        user_id=os.environ.get("ALGO_COACH_USER", "local"),
         sign_in=SignIn.from_environ(os.environ),
+        dev_login=os.environ.get("ALGO_COACH_DEV_LOGIN") or None,
     )
 
 

@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from algo_coach.api.devlogin import router as dev_login_router
 from algo_coach.api.reads import router as reads
 from algo_coach.api.signin import SignIn, install
 from algo_coach.api.writes import router as writes
@@ -11,16 +12,24 @@ from algo_coach.storage import Database
 PREFIX = "/api"
 
 
-def create_app(root: Database, *, user_id: str, sign_in: SignIn | None = None) -> FastAPI:
+def create_app(
+    root: Database, *, sign_in: SignIn | None = None, dev_login: str | None = None
+) -> FastAPI:
+    # a deployed engine signs its users in through a provider, so a client
+    # beside the dev login is a deployment the flag would open
+    if dev_login is not None and sign_in is not None:
+        raise ValueError("the dev login refuses to start beside a provider's client")
     app = FastAPI(title="algo-coach")
     app.state.root = root
-    # one user stands in for authentication until Phase 9 keys the log by user
-    app.state.user_id = user_id
     app.add_exception_handler(Refused, _refused)
     app.include_router(reads, prefix=PREFIX)
     app.include_router(writes, prefix=PREFIX)
     if sign_in is not None:
         install(app, sign_in, PREFIX)
+    if dev_login is not None:
+        # the user the dev login signs in as
+        app.state.dev_user = dev_login
+        app.include_router(dev_login_router, prefix=PREFIX)
     return app
 
 

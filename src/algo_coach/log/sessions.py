@@ -2,7 +2,7 @@ import hashlib
 import secrets
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import insert
+from sqlalchemy import insert, select
 
 from algo_coach.log.table import sessions
 from algo_coach.storage import Database
@@ -23,6 +23,19 @@ def opened(root: Database, user_id: str) -> str:
             )
         )
     return token
+
+
+def user_of(root: Database, token: str) -> str | None:
+    """The user a token signs in as. `None` where no session carries the token,
+    or its session expired or was revoked."""
+    with root.connect() as conn:
+        return conn.execute(
+            select(sessions.c.user_id).where(
+                sessions.c.id == hashed(token),
+                sessions.c.expires_at > datetime.now(UTC),
+                sessions.c.revoked_at.is_(None),
+            )
+        ).scalar_one_or_none()
 
 
 def hashed(token: str) -> str:

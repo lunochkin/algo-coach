@@ -1,8 +1,6 @@
 import pytest
-from fastapi.testclient import TestClient
-from helpers import PROVENANCE, seed_problem
+from helpers import PROVENANCE, browsing, seed_problem
 
-from algo_coach.api import create_app
 from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog
 from algo_coach.mint import case
@@ -22,7 +20,7 @@ def root(database):
 
 @pytest.fixture
 def client(root):
-    return TestClient(create_app(root, user_id=USER))
+    return browsing(root, USER)
 
 
 @pytest.fixture
@@ -114,7 +112,7 @@ def test_an_ended_sitting_takes_no_submission(client, sitting_id):
 
 
 def test_another_user_s_sitting_is_not_found(root, sitting_id):
-    other = TestClient(create_app(root, user_id="u-b71e03"))
+    other = browsing(root, "u-b71e03")
 
     assert other.post(f"/api/sittings/{sitting_id}/pause").status_code == 404
     assert submitted(other, sitting_id).status_code == 404
@@ -165,7 +163,7 @@ def test_a_claim_naming_nothing_is_refused_and_a_decline_is_not(client, sitting_
 
 def test_claiming_another_user_s_attempt_is_not_found(root, client, sitting_id):
     attempt_id = submitted(client, sitting_id).json()["attempt"]["id"]
-    other = TestClient(create_app(root, user_id="u-b71e03"))
+    other = browsing(root, "u-b71e03")
 
     response = other.post(
         f"/api/attempts/{attempt_id}/claims", json={"techniques": ["greedy"], "confidence": "sure"}
@@ -196,6 +194,6 @@ def test_the_claim_is_asked_over_the_problem_s_own_techniques(client, sitting_id
 
 
 def test_another_user_s_unclaimed_attempts_are_not_found(root, client, sitting_id):
-    other = TestClient(create_app(root, user_id="u-b71e03"))
+    other = browsing(root, "u-b71e03")
 
     assert other.get(f"/api/sittings/{sitting_id}/unclaimed").status_code == 404

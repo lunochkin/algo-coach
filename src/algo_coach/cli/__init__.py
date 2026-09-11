@@ -55,8 +55,10 @@ def _command(
 def _user_argument(parser: Flags) -> None:
     parser.add_argument(
         "--user",
-        default=os.environ.get("ALGO_COACH_USER", "local"),
-        help="whose attempts to read; stands in for authentication",
+        # the user the dev login signs in as, so the terminal and the local
+        # pages read one log
+        default=os.environ.get("ALGO_COACH_DEV_LOGIN", "local"),
+        help="whose attempts to read",
     )
 
 

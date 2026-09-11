@@ -92,13 +92,13 @@ backend for our own generated code, which is not a threat model.
 - [x] Add a `sessions` table, and set a session's token in an `HttpOnly`,
       `SameSite=Lax` cookie at the callback. A stored session can be revoked,
       where a signed token stands until it expires
-- [ ] Add a dev login, enabled by `ALGO_COACH_DEV_LOGIN`, that signs in as a
-      named user with no provider. The app refuses to start with it unless
-      bound to `127.0.0.1`, so the flag cannot open a deployed engine
-- [ ] Decide how the records written under the user `local` reach the author's
+- [x] Add a dev login that signs in as the user `ALGO_COACH_DEV_LOGIN` names,
+      with no provider. The app refuses to start with it beside a provider's
+      client, and the route answers on loopback alone
+- [x] Decide how the records written under the user `local` reach the author's
       account, and write the choice into `log.md`. Those records are the
       author's history, and the log is append-only
-- [ ] Read the user in `UserId` from a verified session, in place of the id
+- [x] Read the user in `UserId` from a verified session, in place of the id
       the app was built with. Every route already takes the user through that
       one dependency
 - [ ] Refuse a write route whose request body is not JSON. A form on another

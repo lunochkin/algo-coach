@@ -14,11 +14,9 @@ from fastapi.responses import RedirectResponse
 from joserfc.errors import JoseError
 from starlette.middleware.sessions import SessionMiddleware
 
-from algo_coach.api.context import Root
+from algo_coach.api.context import SESSION_COOKIE, Root
 from algo_coach.log import LIFETIME, Provider, opened, signed_in
 
-# the cookie a signed-in browser carries its session's token in
-SESSION_COOKIE = "session"
 # Google signs its ID tokens under either issuer
 GOOGLE_ISSUERS = ["https://accounts.google.com", "accounts.google.com"]
 # Google's discovery document written out, so a sign-in fetches nothing but the
@@ -139,6 +137,11 @@ async def callback(provider: Provider, request: Request, root: Root) -> Redirect
         signed_in, root, provider, account.provider_user_id, account.email
     )
     token = await run_in_threadpool(opened, root, user_id)
+    return session_redirect(token, secure=request.app.state.origin.startswith("https://"))
+
+
+def session_redirect(token: str, *, secure: bool) -> RedirectResponse:
+    """To the pages, carrying a session opened for the user signed in."""
     response = RedirectResponse("/", status_code=303)
     # out of the pages' scripts' reach, and sent on the navigation back from the
     # provider's site, which Strict would withhold
@@ -148,7 +151,7 @@ async def callback(provider: Provider, request: Request, root: Root) -> Redirect
         max_age=int(LIFETIME.total_seconds()),
         httponly=True,
         samesite="lax",
-        secure=request.app.state.origin.startswith("https://"),
+        secure=secure,
     )
     return response
 

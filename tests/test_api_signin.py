@@ -9,7 +9,8 @@ from joserfc.jwk import RSAKey
 from sqlalchemy import select
 
 from algo_coach.api import create_app
-from algo_coach.api.signin import SESSION_COOKIE, Client, SignIn
+from algo_coach.api.context import SESSION_COOKIE
+from algo_coach.api.signin import Client, SignIn
 from algo_coach.log import LIFETIME, Provider, hashed
 from algo_coach.log.table import identities, sessions
 from algo_coach.storage import Database
@@ -25,7 +26,7 @@ KEY = RSAKey.generate_key(2048, parameters={"kid": "google-key"})
 
 
 def browser(root, clients=CLIENTS, origin=ORIGIN) -> TestClient:
-    app = create_app(root, user_id="local", sign_in=SignIn(origin, "a-test-key", clients))
+    app = create_app(root, sign_in=SignIn(origin, "a-test-key", clients))
     # over TLS where the origin is, or the secure state cookie never comes back
     scheme = "https" if origin.startswith("https://") else "http"
     return TestClient(app, base_url=f"{scheme}://testserver", follow_redirects=False)
@@ -95,7 +96,7 @@ def test_a_provider_with_no_client_offers_no_sign_in():
 
 
 def test_the_routes_are_absent_where_no_provider_has_a_client():
-    client = TestClient(create_app(Database(), user_id="local"), follow_redirects=False)
+    client = TestClient(create_app(Database()), follow_redirects=False)
 
     assert client.get("/api/auth/google").status_code == 404
 

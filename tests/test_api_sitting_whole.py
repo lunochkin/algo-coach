@@ -1,8 +1,6 @@
 import pytest
-from fastapi.testclient import TestClient
-from helpers import PROVENANCE, seed_problem
+from helpers import PROVENANCE, browsing, seed_problem
 
-from algo_coach.api import create_app
 from algo_coach.cases import CaseLog
 from algo_coach.mint import case
 
@@ -19,7 +17,7 @@ def client(database):
     )
     for args, expected in (([1], 2), ([3], 6)):
         CaseLog(database).append(case("p1", args, expected, provenance=PROVENANCE))
-    return TestClient(create_app(database, user_id=USER))
+    return browsing(database, USER)
 
 
 def ok(response):

@@ -7,10 +7,14 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
+from fastapi.testclient import TestClient
+
+from algo_coach.api import create_app
+from algo_coach.api.context import SESSION_COOKIE
 from algo_coach.calls import CallLog, Reply
 from algo_coach.cards import CardStore
 from algo_coach.classifier import PIN, TEMPERATURE
-from algo_coach.log import AttemptLog
+from algo_coach.log import AttemptLog, named, opened
 from algo_coach.mint import classifier_claim, user_solution_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
@@ -347,3 +351,12 @@ def stored_attempt(root, id: str = "a1", problem_id: str = "p1", user_id: str = 
     )
     AttemptLog(root).append_attempt(one)
     return one
+
+
+def browsing(database, user_id: str, **options) -> TestClient:
+    """The app, from a browser signed in as the user: a session opened for it,
+    its token in the cookie a sign-in sets."""
+    named(database, user_id)
+    client = TestClient(create_app(database), **options)
+    client.cookies.set(SESSION_COOKIE, opened(database, user_id))
+    return client

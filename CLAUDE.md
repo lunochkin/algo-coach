@@ -21,6 +21,8 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 - Signing in reads `GOOGLE_CLIENT_ID`, `GITHUB_CLIENT_ID`, their `_SECRET`
   pairs, `ALGO_COACH_ORIGIN` and `ALGO_COACH_SECRET` from `.env`. A provider
   with no client offers no route, and with none the sign-in routes are absent.
+- Locally, `ALGO_COACH_DEV_LOGIN=local` in `.env` and no provider client:
+  opening `/api/auth/dev` on the page's address signs in as `local`.
 - The integration tests need a Postgres server named by `TEST_DATABASE_URL`.
   Its user needs the right to create databases and to set
   `session_replication_role`. Each xdist worker keeps a database of its own
