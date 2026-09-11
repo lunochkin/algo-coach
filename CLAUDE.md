@@ -10,6 +10,8 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
   through its pilot.
 - `uv sync` to set up; `uv run pytest -n auto` to test, always, whether one
   file or the whole suite. It runs on every core, 13s against 44s.
+- `web/` is the frontend: Vite, React and TypeScript, built to static files.
+  `npm install` and `npm run build` run inside `web/`.
 
 @docs/architecture/README.md
 @docs/architecture/content.md

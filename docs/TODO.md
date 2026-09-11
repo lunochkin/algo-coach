@@ -83,7 +83,7 @@ React frontend the API serves as static files.
 
 ### The frontend
 
-- [ ] Add `web/`: a Vite and React app in TypeScript, built to static files.
+- [x] Add `web/`: a Vite and React app in TypeScript, built to static files.
       Phase 9 hosts these same pages, so a terminal interface here would be
       written twice
 - [ ] Build the board as the entry point, showing per-technique progress and
