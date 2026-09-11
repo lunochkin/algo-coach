@@ -110,6 +110,21 @@ def test_a_canonical_that_cannot_answer_at_that_size_separates_nothing():
     assert found.missing is Missing.CANONICAL_FAILED
 
 
+# one sleep of 8ms at any size: over a tenth of the cap, and inside the cap by
+# more than a loaded machine delays one wakeup. A sleep per call of a count
+# summed a delay per wakeup, and crossed the cap under the suite's own load
+TENTH_SLOW = "import time\n\n\ndef solve(n):\n    time.sleep(0.008)\n    return n\n"
+
+
+def test_a_canonical_over_a_tenth_of_the_cap_separates_nothing():
+    """A case the canonical only just answers fails a correct submission a few
+    percent slower, so the margin is what makes it a test of the form."""
+    found = searched(canonical=TENTH_SLOW)
+
+    assert found.missing is Missing.CANONICAL_TOO_SLOW
+    assert found.canonical_ms * MARGIN > CAP_MS
+
+
 def test_a_naive_solution_that_crashes_is_neither():
     """A recursion limit at size says nothing about how long the naive
     solution takes."""
@@ -258,10 +273,6 @@ def test_two_solutions_disagreeing_at_that_size_is_not_a_case():
 # before the naive solution is slow enough and only a count separates the two
 SLOW_ONCE = "import time\n\n\ndef solve(xs):\n    time.sleep(0.003)\n    return len(xs)\n"
 COUNTS = "def solve(xs):\n    return len(xs)\n"
-# a fifth of the naive solution's cost per call, so the canonical lands near a
-# fifth of the cap whatever count the search settles on: inside the cap, and
-# outside a tenth of it
-FIFTH_SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(0.0006)\n    return len(xs)\n"
 
 
 def counted(**overrides):
@@ -295,15 +306,6 @@ def test_the_case_carries_the_count_the_search_settled_on():
     found = counted()
 
     assert found.case.repeats == found.repeats
-
-
-def test_a_canonical_over_a_tenth_of_the_cap_separates_nothing():
-    """A case the canonical only just answers fails a correct submission a few
-    percent slower, so the margin is what makes it a test of the form."""
-    found = counted(canonical=FIFTH_SLOW)
-
-    assert found.missing is Missing.CANONICAL_TOO_SLOW
-    assert found.canonical_ms * MARGIN > CAP_MS
 
 
 def test_a_count_no_ceiling_bounds_still_stops():
