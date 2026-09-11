@@ -8,8 +8,8 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 - Python ≥3.14, `uv` for env/deps, pydantic v2, pytest.
 - `textual` where a command is a screen rather than a scroll, driven in tests
   through its pilot.
-- `uv sync` to set up; `uv run pytest -n auto` to test, always, whether one
-  file or the whole suite. It runs on every core, 13s against 44s.
+- `uv sync` to set up; `uv run pytest` to test, always, whether one file or
+  the whole suite. `addopts` spreads it over every core, 9s against 65s.
 - `web/` is the frontend: Vite, React and TypeScript, built to static files.
   `npm install` and `npm run build` run inside `web/`.
 - shadcn/ui over Radix, with Tailwind, for the components. `npx shadcn add
@@ -18,10 +18,12 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
   component, so the components stay consistent and an upgrade merges.
 - Postgres is named by `DATABASE_URL` in `.env`. `just migrate` applies the
   migrations, and `just migration <name>` generates the next one.
-- The integration tests need a Postgres server named by `TEST_DATABASE_URL`,
-  where each xdist worker creates, migrates and drops a database of its own. A
-  test taking the `database` fixture is marked `integration` and finds every
-  table empty. `just test-unit` runs the rest, without a database, as CI does.
+- The integration tests need a Postgres server named by `TEST_DATABASE_URL`.
+  Its user needs the right to create databases and to set
+  `session_replication_role`. Each xdist worker keeps a database of its own
+  between runs, and recreates it when a migration file changes. A test taking
+  the `database` fixture is marked `integration` and finds every table empty.
+  `just test-unit` runs the rest, without a database, as CI does.
 - `just app` runs the API and the Vite dev server together, and Ctrl+C stops
   both. The page is at the address Vite prints.
 

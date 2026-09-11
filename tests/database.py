@@ -1,5 +1,5 @@
-"""One Postgres database per xdist worker, migrated to head once and emptied
-after every test that uses it.
+"""One Postgres database per xdist worker, kept between runs while the
+migrations stay the same, and emptied after every test that uses it.
 
 The server is named by TEST_DATABASE_URL, from the environment or the repo's
 `.env`, and needs the right to create databases and to set
@@ -9,13 +9,12 @@ the fixture creates are its own, `algo_coach_test_<worker>`, and never the one
 DATABASE_URL names.
 """
 
+import hashlib
 import os
 from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-from alembic import command
-from alembic.config import Config
 from dotenv import dotenv_values
 from helpers import CALL_ROW
 from sqlalchemy import Engine, create_engine, insert, make_url, text
@@ -59,6 +58,16 @@ def emptied(engine: Engine) -> None:
         )
 
 
+def migrated() -> str:
+    """A digest of every migration, stamped on a worker's database: a database
+    stamped with another digest was migrated by other files."""
+    digest = hashlib.sha256()
+    for path in sorted((ROOT / "migrations" / "versions").glob("*.py")):
+        digest.update(path.name.encode())
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
 @pytest.fixture(scope="session")
 def database_engine(worker_id: str) -> Iterator[Engine]:
     server = server_url()
@@ -67,24 +76,39 @@ def database_engine(worker_id: str) -> Iterator[Engine]:
         # tests alone, `-m "not integration"`, and says so
         pytest.fail("TEST_DATABASE_URL names no Postgres server; run -m 'not integration'")
     name = f"algo_coach_test_{worker_id}"
+    url = make_url(server).set(database=name)
+    stamp = migrated()
     admin = create_engine(server, isolation_level="AUTOCOMMIT")
     with admin.connect() as conn:
-        # a run stopped midway leaves its database behind, so each run starts
-        # from nothing
-        conn.execute(text(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)'))
-        conn.execute(text(f'CREATE DATABASE "{name}"'))
-    url = make_url(server).set(database=name)
+        stamped = conn.execute(
+            text(
+                "SELECT shobj_description(oid, 'pg_database') FROM pg_database"
+                " WHERE datname = :name"
+            ),
+            {"name": name},
+        ).scalar()
+        # kept between runs, since creating and migrating a database costs a
+        # second a worker. Stamped only once migrated, so a run stopped midway
+        # leaves a database the next run recreates
+        if stamped != stamp:
+            conn.execute(text(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)'))
+            conn.execute(text(f'CREATE DATABASE "{name}"'))
+            # imported here: a kept database needs no migration, and the import
+            # costs every worker a sixth of a second
+            from alembic import command  # noqa: PLC0415
+            from alembic.config import Config  # noqa: PLC0415
 
-    config = Config(str(ROOT / "alembic.ini"))
-    config.attributes["url"] = url.render_as_string(hide_password=False)
-    command.upgrade(config, "head")
+            config = Config(str(ROOT / "alembic.ini"))
+            config.attributes["url"] = url.render_as_string(hide_password=False)
+            command.upgrade(config, "head")
+            conn.execute(text(f"COMMENT ON DATABASE \"{name}\" IS '{stamp}'"))
+    admin.dispose()
 
     engine = create_engine(url, **UTC)
+    # a run stopped midway leaves the rows of the test it stopped in
+    emptied(engine)
     yield engine
     engine.dispose()
-    with admin.connect() as conn:
-        conn.execute(text(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)'))
-    admin.dispose()
 
 
 @pytest.fixture
