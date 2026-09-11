@@ -39,6 +39,7 @@ from algo_coach.log.table import (
     attempts,
     diagnoses,
     identities,
+    invitations,
     self_labels,
     sessions,
     sitting_pauses,
@@ -147,8 +148,9 @@ def test_a_table_holds_exactly_its_record_s_fields(stored):
 
 
 # the tables no record is stored in whole: the user is an id the records
-# reference, an identity links an account to it, and a session signs it in
-WITHOUT_A_RECORD = {"identities", "sessions", "users"}
+# reference, an identity links an account to it, a session signs it in, and an
+# invitation lets its email sign in at all
+WITHOUT_A_RECORD = {"identities", "invitations", "sessions", "users"}
 
 
 def test_every_stored_record_has_a_table():
@@ -528,6 +530,15 @@ def test_an_identity_s_email_is_stored_as_it_is_matched():
     assert checks(identities)["identities_email_lowercased_check"] == (
         "email = lower(email) AND email <> ''"
     )
+
+
+def test_an_invitation_is_an_email_stored_as_it_is_matched():
+    """Matched lowercased, as an identity's email is, so an invitation in
+    another case would let nobody in."""
+    assert [one.name for one in invitations.primary_key.columns] == ["email"]
+    assert checks(invitations) == {
+        "invitations_email_lowercased_check": "email = lower(email) AND email <> ''"
+    }
 
 
 def test_a_session_ends_when_it_expires_or_is_revoked():

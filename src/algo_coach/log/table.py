@@ -51,6 +51,16 @@ identities = Table(
     CheckConstraint("email = lower(email) AND email <> ''", name="email_lowercased"),
 )
 
+# an email allowed to sign in, whichever provider verified it. Sign-in is by
+# invitation alone: `README.md`
+invitations = Table(
+    "invitations",
+    metadata,
+    Column("email", Text, primary_key=True),
+    Column("created_at", timestamp(), nullable=False),
+    CheckConstraint("email = lower(email) AND email <> ''", name="email_lowercased"),
+)
+
 # a signed-in browser. Keyed by the hash of the token its cookie carries, so a
 # copy of the table signs nobody in
 sessions = Table(

@@ -15,7 +15,7 @@ from joserfc.errors import JoseError
 from starlette.middleware.sessions import SessionMiddleware
 
 from algo_coach.api.context import SESSION_COOKIE, Root
-from algo_coach.log import LIFETIME, Provider, opened, signed_in
+from algo_coach.log import LIFETIME, Provider, invited, opened, signed_in
 
 # Google signs its ID tokens under either issuer
 GOOGLE_ISSUERS = ["https://accounts.google.com", "accounts.google.com"]
@@ -134,6 +134,9 @@ async def callback(provider: Provider, request: Request, root: Root) -> Redirect
         raise HTTPException(400, f"sign-in did not complete: {error}") from None
     if account.email is None:
         raise HTTPException(403, f"the {provider} account has no verified email")
+    # before anything is stored: an uninvited account leaves no user behind
+    if not await run_in_threadpool(invited, root, account.email):
+        raise HTTPException(403, f"{account.email} has no invitation")
     user_id = await run_in_threadpool(
         signed_in, root, provider, account.provider_user_id, account.email
     )

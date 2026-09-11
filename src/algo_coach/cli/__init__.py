@@ -16,6 +16,7 @@ from algo_coach.cli.classify import classify
 from algo_coach.cli.gaps import gaps
 from algo_coach.cli.generate import generate
 from algo_coach.cli.hand_match import hand_match
+from algo_coach.cli.invite import invitation
 from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
 from algo_coach.cli.problem import problem
@@ -313,6 +314,12 @@ def main() -> None:
     )
     _user_argument(movement_parser)
 
+    invite_parser = _command(sub, "invite", "the emails allowed to sign in")
+    invite_action = invite_parser.add_subparsers(dest="action", required=True)
+    for name, help in (("add", "let the email sign in"), ("remove", "stop the email signing in")):
+        invite_action.add_parser(name, help=help).add_argument("email")
+    invite_action.add_parser("list", help="every email invited")
+
     log_parser = _command(sub, "log", "one user's whole log, read out or erased")
     action = log_parser.add_subparsers(dest="action", required=True)
     export_parser = action.add_parser("export", help="print every record of the log as JSON")
@@ -349,6 +356,7 @@ COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Datab
     "score": score,
     "movement": moved,
     "log": user_log,
+    "invite": invitation,
 }
 
 

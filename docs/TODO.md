@@ -109,7 +109,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Make one user's log readable and deletable without touching another's.
       The author's own log is the evidence of daily use and the set every eval
       reads, and must not mix with another user's
-- [ ] Gate sign-in on an `invitations` table of emails, checked at the
+- [x] Gate sign-in on an `invitations` table of emails, checked at the
       callback. Untrusted execution behind open registration is an abuse
       surface with no upside at this size
 

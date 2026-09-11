@@ -290,6 +290,13 @@ times. Each record class is specified in one of the files beside it.
     can be revoked, where a signed token stands until it expires.
   - The table holds the hash of each token, and never the token. A copy of the
     table then signs nobody in.
+  - Sign-in is by invitation. The callback refuses a verified email the
+    `invitations` table does not hold, before any user, identity or session
+    is stored. A signed-in user's code runs on the engine, so open
+    registration is an abuse surface with no upside at this size.
+  - An invitation is added, withdrawn and listed by `algo-coach invite`. A
+    withdrawn invitation stops the next sign-in. The dev login is never gated,
+    since it answers on loopback alone.
   - A request naming a user without a live session answers 401, and the pages
     send the browser to the login page. The login page offers each configured
     provider and the dev login, and needs no session itself.

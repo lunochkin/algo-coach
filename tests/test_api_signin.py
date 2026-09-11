@@ -11,7 +11,7 @@ from sqlalchemy import select
 from algo_coach.api import create_app
 from algo_coach.api.context import SESSION_COOKIE
 from algo_coach.api.signin import Client, SignIn
-from algo_coach.log import LIFETIME, Provider, hashed
+from algo_coach.log import LIFETIME, Provider, hashed, invite
 from algo_coach.log.table import identities, sessions
 from algo_coach.storage import Database
 
@@ -140,6 +140,7 @@ def google_returns(monkeypatch, client, **claims):
 
 
 def test_google_signs_in_the_account_behind_a_verified_email(database, monkeypatch):
+    invite(database, "solver@example.com")
     client = browser(database)
     nonce = redirected(client, Provider.GOOGLE)
     google_returns(monkeypatch, client, nonce=nonce["nonce"])
@@ -152,6 +153,7 @@ def test_google_signs_in_the_account_behind_a_verified_email(database, monkeypat
 
 
 def signed_in_through_google(database, monkeypatch, origin=ORIGIN):
+    invite(database, "solver@example.com")
     client = browser(database, origin=origin)
     sent = redirected(client, Provider.GOOGLE)
     google_returns(monkeypatch, client, nonce=sent["nonce"])
@@ -219,6 +221,23 @@ def test_an_unverified_google_email_signs_nobody_in(database, monkeypatch):
     assert opened_sessions(database) == []
 
 
+def test_an_uninvited_email_signs_nobody_in_and_leaves_no_user(database, monkeypatch):
+    """Sign-in is by invitation: code runs for whoever signs in, so an open
+    door is an abuse surface. Refused before anything is stored."""
+    invite(database, "someone-else@example.com")
+    client = browser(database)
+    sent = redirected(client, Provider.GOOGLE)
+    google_returns(monkeypatch, client, nonce=sent["nonce"])
+
+    response = client.get(f"/api/auth/google/callback?code=abc&state={sent['state']}")
+
+    assert response.status_code == 403
+    assert "no invitation" in response.json()["detail"]
+    assert linked(database) == []
+    assert opened_sessions(database) == []
+    assert session_cookie(response) is None
+
+
 def github_returns(monkeypatch, client, emails: list[dict]) -> list[dict]:
     """GitHub's token endpoint and API, answering as they do. Returns what the
     token request was sent."""
@@ -239,6 +258,7 @@ def github_returns(monkeypatch, client, emails: list[dict]) -> list[dict]:
 
 
 def test_github_signs_in_the_account_behind_its_verified_primary_email(database, monkeypatch):
+    invite(database, "solver@example.com")
     client = browser(database)
     started = redirected(client, Provider.GITHUB)
     sent = github_returns(
