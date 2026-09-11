@@ -1,4 +1,4 @@
-from generating import FakeWriter
+from generating import SLOW, FakeWriter
 from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
@@ -258,7 +258,6 @@ def test_only_the_sites_making_an_artifact_are_sampled():
         assert sampled is (name in SAMPLED), name
 
 
-SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 # the search runs where a speedup is claimed, and nowhere else
 CLAIMS = template("longest-valid-window", speedup=True)
 

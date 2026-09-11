@@ -1,4 +1,4 @@
-from generating import FakeWriter
+from generating import SLOW, FakeWriter
 from matching import card, seeded, template
 from sqlalchemy import delete, text
 
@@ -19,9 +19,6 @@ from algo_coach.solutions import SolutionLog
 from algo_coach.solutions.table import solutions
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
-# slow enough to separate at the cap the tests lower: a reference the search
-# cannot leave behind holds the draft rather than landing it
-SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 BRANCHING = "def solve(n):\n    return n > 3\n"
 AGREES = "def solve(n):\n    return not n <= 3\n"
 DECIDES = [{"args": "[0]", "expected": "false"}]

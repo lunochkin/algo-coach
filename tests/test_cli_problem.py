@@ -1,6 +1,6 @@
 import pytest
 from commands import connected, run_cli
-from generating import FakeWriter
+from generating import SLOW, FakeWriter
 from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
@@ -10,7 +10,6 @@ from algo_coach.problems import ProblemStore
 from algo_coach.schema import ProblemStatus, RetirementReason
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
-SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 
 
 @pytest.fixture

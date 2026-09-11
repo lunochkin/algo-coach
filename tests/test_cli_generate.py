@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 import pytest
 from commands import TRANSPORT, connected, run_cli
-from generating import FakeWriter, Raises
+from generating import SLOW, FakeWriter, Raises
 from helpers import own
 from matching import card, seeded, template
 from sqlalchemy.exc import IntegrityError
@@ -561,8 +561,6 @@ def replaying(monkeypatch, model: FakeWriter, *argv: str) -> None:
 
 # what the input generator returns, so the site answers rather than failing
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
-# slow enough to separate at the cap the test lowers
-SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 ANOTHER = ("--site", "blind", "--model", "another", "--provider", "one")
 
 

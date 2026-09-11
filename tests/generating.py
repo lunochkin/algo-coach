@@ -13,6 +13,14 @@ BLIND = "def solve(xs):\n    return sum(1 for _ in xs)\n"
 # separation writes its own
 NAIVE = "def solve(xs):\n    return len([one for one in xs])\n"
 
+# a naive solution the search separates from the canonical, for a run that
+# lowers the sitting's cap under 80ms. It sleeps once, and only from two
+# elements, so the larger inputs a run builds cost no more than two do
+SLOW = (
+    "import time\n\n\n"
+    "def solve(xs):\n    time.sleep(0.08 if len(xs) > 1 else 0)\n    return len(xs)\n"
+)
+
 
 def draft(statement: str = "Given a list of readings, return ...", **overrides) -> str:
     written = {

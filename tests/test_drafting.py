@@ -1,5 +1,5 @@
 import pytest
-from generating import CANONICAL, FakeWriter, Raises
+from generating import CANONICAL, SLOW, FakeWriter, Raises
 from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
@@ -10,7 +10,6 @@ from algo_coach.problems import ProblemStore
 from algo_coach.schema import Draft, Gate, WritingState
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
-SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 WRONG = "def solve(xs):\n    return len(xs) + 1\n"
 # the search runs where a speedup is claimed, and holds the draft where nothing
 # separated

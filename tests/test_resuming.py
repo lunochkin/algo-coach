@@ -1,5 +1,5 @@
 import pytest
-from generating import CANONICAL, FakeWriter, Raises
+from generating import CANONICAL, SLOW, FakeWriter, Raises
 from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
@@ -310,7 +310,6 @@ def test_a_moved_configuration_is_returned_over_a_corrected_flag(database):
     assert moved_at(held(database), OPTIMUM, bench) is WritingState.REFERENCED
 
 
-SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 CLAIMED = [template("longest-valid-window", speedup=True)]
 WRONG = "def solve(xs):\n    return len(xs) + 1\n"
 

@@ -1,6 +1,6 @@
 from dataclasses import replace
 
-from generating import NAIVE, FakeWriter
+from generating import NAIVE, SLOW, FakeWriter
 from helpers import PROVENANCE_FIELDS, own
 from matching import card, seeded, template
 
@@ -205,7 +205,6 @@ def test_a_surviving_problem_carries_what_the_reference_computed(database):
     assert [one.expected_from for one in drafted.cases] == [ExpectedSource.REFERENCE]
 
 
-SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    return len(xs)\n"
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 
 
