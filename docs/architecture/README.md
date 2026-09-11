@@ -285,9 +285,11 @@ times. Each record class is specified in one of the files beside it.
     state, the nonce and PKCE. A managed account provider is rejected: its
     login and its tokens live on its own domain, and the session cookie stays
     on the pages' origin.
-  - The engine keeps each session in Postgres, and sets the session's id in an
-    `HttpOnly`, `SameSite=Lax` cookie. A stored session can be revoked, where a
-    signed token stands until it expires.
+  - The engine keeps each session in Postgres for 30 days, and sets the
+    session's token in an `HttpOnly`, `SameSite=Lax` cookie. A stored session
+    can be revoked, where a signed token stands until it expires.
+  - The table holds the hash of each token, and never the token. A copy of the
+    table then signs nobody in.
   - An `identities` row links a provider's user id to a user id the engine
     mints at the first sign-in. The log keys on the engine's id, so adding or
     replacing a provider rewrites no record.

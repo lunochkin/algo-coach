@@ -89,7 +89,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Add the Google and GitHub sign-in and callback routes through Authlib,
       passing on only an email the provider verified. The library checks the
       state, the nonce and PKCE, where a hand-written flow goes wrong
-- [ ] Add a `sessions` table, and set a session's id in an `HttpOnly`,
+- [x] Add a `sessions` table, and set a session's token in an `HttpOnly`,
       `SameSite=Lax` cookie at the callback. A stored session can be revoked,
       where a signed token stands until it expires
 - [ ] Add a dev login, enabled by `ALGO_COACH_DEV_LOGIN`, that signs in as a

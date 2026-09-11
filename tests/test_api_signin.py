@@ -9,9 +9,9 @@ from joserfc.jwk import RSAKey
 from sqlalchemy import select
 
 from algo_coach.api import create_app
-from algo_coach.api.signin import Client, SignIn
-from algo_coach.log import Provider
-from algo_coach.log.table import identities
+from algo_coach.api.signin import SESSION_COOKIE, Client, SignIn
+from algo_coach.log import LIFETIME, Provider, hashed
+from algo_coach.log.table import identities, sessions
 from algo_coach.storage import Database
 
 ORIGIN = "http://localhost:5173"
@@ -24,9 +24,11 @@ CLIENTS = {
 KEY = RSAKey.generate_key(2048, parameters={"kid": "google-key"})
 
 
-def browser(root, clients=CLIENTS) -> TestClient:
-    app = create_app(root, user_id="local", sign_in=SignIn(ORIGIN, "a-test-key", clients))
-    return TestClient(app, follow_redirects=False)
+def browser(root, clients=CLIENTS, origin=ORIGIN) -> TestClient:
+    app = create_app(root, user_id="local", sign_in=SignIn(origin, "a-test-key", clients))
+    # over TLS where the origin is, or the secure state cookie never comes back
+    scheme = "https" if origin.startswith("https://") else "http"
+    return TestClient(app, base_url=f"{scheme}://testserver", follow_redirects=False)
 
 
 def remote(client: TestClient, provider: Provider):
@@ -41,6 +43,17 @@ def redirected(client: TestClient, provider: Provider) -> dict[str, str]:
         key: value
         for key, (value,) in parse_qs(urlsplit(response.headers["location"]).query).items()
     }
+
+
+def session_cookie(response) -> str | None:
+    """The `Set-Cookie` header setting the session, whole."""
+    headers = response.headers.get_list("set-cookie")
+    return next((one for one in headers if one.startswith(f"{SESSION_COOKIE}=")), None)
+
+
+def opened_sessions(database) -> list:
+    with database.connect() as conn:
+        return list(conn.execute(select(sessions.c.id, sessions.c.user_id)))
 
 
 def linked(database) -> list[tuple]:
@@ -137,6 +150,43 @@ def test_google_signs_in_the_account_behind_a_verified_email(database, monkeypat
     assert linked(database) == [(Provider.GOOGLE, "108234", "solver@example.com")]
 
 
+def signed_in_through_google(database, monkeypatch, origin=ORIGIN):
+    client = browser(database, origin=origin)
+    sent = redirected(client, Provider.GOOGLE)
+    google_returns(monkeypatch, client, nonce=sent["nonce"])
+    return client.get(f"/api/auth/google/callback?code=abc&state={sent['state']}")
+
+
+def test_the_callback_opens_a_session_for_the_user_it_signed_in(database, monkeypatch):
+    response = signed_in_through_google(database, monkeypatch)
+
+    token = response.cookies[SESSION_COOKIE]
+    (session,) = opened_sessions(database)
+    with database.connect() as conn:
+        user_id = conn.execute(select(identities.c.user_id)).scalar_one()
+    assert tuple(session) == (hashed(token), user_id)
+
+
+def test_the_session_cookie_is_out_of_scripts_reach_and_lax(database, monkeypatch):
+    """HttpOnly keeps a script injected into a page from reading the token. Lax
+    sends the cookie on the navigation back from the provider, which Strict
+    would withhold."""
+    cookie = session_cookie(signed_in_through_google(database, monkeypatch)).lower()
+
+    assert "httponly" in cookie and "samesite=lax" in cookie
+    assert f"max-age={int(LIFETIME.total_seconds())}" in cookie
+    assert "path=/" in cookie
+    assert "secure" not in cookie
+
+
+def test_the_session_cookie_is_secure_on_an_https_origin(database, monkeypatch):
+    """Sent over TLS alone where the pages are served over it. A local origin
+    over plain HTTP could never send a secure cookie back."""
+    response = signed_in_through_google(database, monkeypatch, origin="https://coach.example")
+
+    assert "secure" in session_cookie(response).lower()
+
+
 def test_an_id_token_issued_to_another_sign_in_signs_nobody_in(database, monkeypatch):
     """The nonce ties the token to the redirect this browser made, so a token
     replayed from another sign-in is refused."""
@@ -162,6 +212,8 @@ def test_an_unverified_google_email_signs_nobody_in(database, monkeypatch):
 
     assert response.status_code == 403
     assert linked(database) == []
+    assert session_cookie(response) is None
+    assert opened_sessions(database) == []
 
 
 def github_returns(monkeypatch, client, emails: list[dict]) -> list[dict]:

@@ -51,6 +51,21 @@ identities = Table(
     CheckConstraint("email = lower(email) AND email <> ''", name="email_lowercased"),
 )
 
+# a signed-in browser. Keyed by the hash of the token its cookie carries, so a
+# copy of the table signs nobody in
+sessions = Table(
+    "sessions",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    Column("created_at", timestamp(), nullable=False),
+    Column("expires_at", timestamp(), nullable=False),
+    # set at logout: a stored session ends when revoked, before it expires
+    Column("revoked_at", timestamp()),
+    CheckConstraint("expires_at > created_at", name="expires_after_it_starts"),
+    CheckConstraint("revoked_at >= created_at", name="revoked_after_it_starts"),
+)
+
 attempts = Table(
     "attempts",
     metadata,

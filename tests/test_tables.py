@@ -40,6 +40,7 @@ from algo_coach.log.table import (
     diagnoses,
     identities,
     self_labels,
+    sessions,
     sitting_pauses,
     sittings,
     users,
@@ -146,8 +147,8 @@ def test_a_table_holds_exactly_its_record_s_fields(stored):
 
 
 # the tables no record is stored in whole: the user is an id the records
-# reference, and an identity links an account to it
-WITHOUT_A_RECORD = {"identities", "users"}
+# reference, an identity links an account to it, and a session signs it in
+WITHOUT_A_RECORD = {"identities", "sessions", "users"}
 
 
 def test_every_stored_record_has_a_table():
@@ -527,6 +528,17 @@ def test_an_identity_s_email_is_stored_as_it_is_matched():
     assert checks(identities)["identities_email_lowercased_check"] == (
         "email = lower(email) AND email <> ''"
     )
+
+
+def test_a_session_ends_when_it_expires_or_is_revoked():
+    """A stored session can be revoked before it expires, where a signed token
+    stands until then: `README.md`."""
+    assert [key.target_fullname for key in sessions.c.user_id.foreign_keys] == ["users.id"]
+    assert not sessions.c.expires_at.nullable and sessions.c.revoked_at.nullable
+    assert checks(sessions) == {
+        "sessions_expires_after_it_starts_check": "expires_at > created_at",
+        "sessions_revoked_after_it_starts_check": "revoked_at >= created_at",
+    }
 
 
 def test_an_attempt_references_its_user_problem_and_sitting():

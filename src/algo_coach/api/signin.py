@@ -15,8 +15,10 @@ from joserfc.errors import JoseError
 from starlette.middleware.sessions import SessionMiddleware
 
 from algo_coach.api.context import Root
-from algo_coach.log import Provider, signed_in
+from algo_coach.log import LIFETIME, Provider, opened, signed_in
 
+# the cookie a signed-in browser carries its session's token in
+SESSION_COOKIE = "session"
 # Google signs its ID tokens under either issuer
 GOOGLE_ISSUERS = ["https://accounts.google.com", "accounts.google.com"]
 # Google's discovery document written out, so a sign-in fetches nothing but the
@@ -133,8 +135,22 @@ async def callback(provider: Provider, request: Request, root: Root) -> Redirect
         raise HTTPException(400, f"sign-in did not complete: {error}") from None
     if account.email is None:
         raise HTTPException(403, f"the {provider} account has no verified email")
-    await run_in_threadpool(signed_in, root, provider, account.provider_user_id, account.email)
-    return RedirectResponse("/", status_code=303)
+    user_id = await run_in_threadpool(
+        signed_in, root, provider, account.provider_user_id, account.email
+    )
+    token = await run_in_threadpool(opened, root, user_id)
+    response = RedirectResponse("/", status_code=303)
+    # out of the pages' scripts' reach, and sent on the navigation back from the
+    # provider's site, which Strict would withhold
+    response.set_cookie(
+        SESSION_COOKIE,
+        token,
+        max_age=int(LIFETIME.total_seconds()),
+        httponly=True,
+        samesite="lax",
+        secure=request.app.state.origin.startswith("https://"),
+    )
+    return response
 
 
 async def _google(client: Remote, request: Request) -> Account:
