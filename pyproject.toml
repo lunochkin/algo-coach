@@ -162,6 +162,8 @@ ignore_decorators = [
 ]
 ignore_names = [
     "model_config",
+    # pytest reads the plugins a conftest names
+    "pytest_plugins",
     # textual reads the class attributes and dispatches hooks and actions by name
     "compose", "on_*", "action_*", "CSS", "BINDINGS", "theme", "can_focus",
     # ast.NodeTransformer dispatches by name

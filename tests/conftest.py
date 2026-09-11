@@ -5,6 +5,9 @@ from algo_coach.cli.transport import CREDENTIALS
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Problem
 
+# the Postgres fixtures, one database per worker
+pytest_plugins = ["database"]
+
 
 @pytest.fixture(autouse=True)
 def off_the_developer_machine(tmp_path, monkeypatch):
@@ -15,7 +18,7 @@ def off_the_developer_machine(tmp_path, monkeypatch):
     every command a test runs.
     """
     monkeypatch.chdir(tmp_path)
-    for name in ("ALGO_COACH_USER", *CREDENTIALS):
+    for name in ("ALGO_COACH_USER", "DATABASE_URL", *CREDENTIALS):
         monkeypatch.delenv(name, raising=False)
 
 

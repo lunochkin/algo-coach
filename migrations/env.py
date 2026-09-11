@@ -21,9 +21,10 @@ for path in sorted(source.rglob("table.py")):
 
 
 def url() -> str:
-    # an exported variable wins over the file, as the CLI reads it
+    # a caller migrating a database of its own names it, as the test fixture
+    # does; otherwise an exported variable wins over the file, as the CLI reads
     load_dotenv(find_dotenv(usecwd=True))
-    found = os.environ.get("DATABASE_URL")
+    found = context.config.attributes.get("url") or os.environ.get("DATABASE_URL")
     if not found:
         raise SystemExit("DATABASE_URL names the database to migrate")
     # psycopg 3, whatever scheme the URL was written with
@@ -39,10 +40,16 @@ def offline() -> None:
 
 
 def online() -> None:
-    with create_engine(url()).connect() as connection:
-        context.configure(connection=connection, target_metadata=metadata, compare_type=True)
-        with context.begin_transaction():
-            context.run_migrations()
+    engine = create_engine(url())
+    try:
+        with engine.connect() as connection:
+            context.configure(connection=connection, target_metadata=metadata, compare_type=True)
+            with context.begin_transaction():
+                context.run_migrations()
+    finally:
+        # closed here rather than by the garbage collector, which a caller in
+        # the same process, as the test fixture is, would see as a leak
+        engine.dispose()
 
 
 if context.is_offline_mode():

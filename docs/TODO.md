@@ -50,7 +50,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Add an `appended` identity column to every append-only table, in a
       second migration, and read a log in its order. A JSON line kept the
       order it landed in, and readers break a tie on `created_at` by it
-- [ ] Add a test database fixture: one database per xdist worker, built by the
+- [x] Add a test database fixture: one database per xdist worker, built by the
       migrations and emptied between tests
 - [ ] Rewrite the calls store on Postgres, its tests on the fixture
 - [ ] Rewrite the cards store on Postgres, its tests on the fixture
