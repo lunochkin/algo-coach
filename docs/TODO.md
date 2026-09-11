@@ -37,7 +37,7 @@ backend for our own generated code, which is not a threat model.
       column for each of its five sites
 - [x] Declare the users table, whose engine-minted id a private record's
       `user_id` references by foreign key
-- [ ] Declare the sittings table and its pauses
+- [x] Declare the sittings table and its pauses
 - [x] Declare the attempts table
 - [ ] Declare the attempt verifications table and its case results
 - [ ] Declare the attempt claims table

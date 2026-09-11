@@ -26,7 +26,7 @@ from algo_coach.drafts.table import (
     draft_settled_cases,
     drafts,
 )
-from algo_coach.log.table import attempts, users
+from algo_coach.log.table import attempts, sitting_pauses, sittings, users
 from algo_coach.matches.table import template_matches
 from algo_coach.outcomes.table import site_outcomes
 from algo_coach.problems.table import problems
@@ -40,9 +40,11 @@ from algo_coach.schema import (
     Draft,
     DraftCase,
     MachineProvenance,
+    Pause,
     Problem,
     SettledCase,
     SiteOutcome,
+    Sitting,
     Solution,
     SolutionClaim,
     Template,
@@ -94,6 +96,8 @@ STORED: list[Stored] = [
     Stored(SolutionClaim, solution_claims, through_call=True),
     Stored(TemplateMatch, template_matches, through_call=True),
     Stored(SiteOutcome, site_outcomes, through_call=True, required=frozenset({"call_id"})),
+    Stored(Sitting, sittings, elsewhere=frozenset({"pauses"})),
+    Stored(Pause, sitting_pauses, structural=frozenset({"sitting_id", "position"})),
     Stored(Verification, verifications, elsewhere=frozenset({"results"})),
     Stored(
         CaseResult,
@@ -441,3 +445,13 @@ def test_an_attempt_references_its_user_problem_and_sitting():
         "problem_id": "problems.id",
         "sitting_id": "sittings.id",
     }
+
+
+def test_one_sitting_runs_on_a_problem_for_a_user():
+    """A refresh or a second tab reaches the clock already running, so the table
+    refuses a second one."""
+    (index,) = [one for one in sittings.indexes if one.name == "sittings_one_running_idx"]
+
+    assert index.unique
+    assert [column.name for column in index.columns] == ["user_id", "problem_id"]
+    assert str(index.dialect_options["postgresql"]["where"]) == "ended_at IS NULL"
