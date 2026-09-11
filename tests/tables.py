@@ -14,6 +14,9 @@ from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
 from algo_coach.schema import MachineProvenance
 
+# columns a table carries by convention, which no record names: a log's order
+CONVENTIONS = frozenset({"appended"})
+
 
 @dataclass(frozen=True)
 class Stored:
@@ -40,7 +43,11 @@ def mismatches(stored: Stored) -> list[str]:
     )
     for one in stored.required:
         expected[one] = (expected[one][0], False)
-    actual = {one.name: one for one in stored.table.columns if one.name not in stored.structural}
+    actual = {
+        one.name: one
+        for one in stored.table.columns
+        if one.name not in stored.structural | CONVENTIONS
+    }
     found = [
         f"{name}: no column for the field {one}" for one in sorted(expected.keys() - actual.keys())
     ]

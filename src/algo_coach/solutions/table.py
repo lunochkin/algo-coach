@@ -1,12 +1,13 @@
 from sqlalchemy import CheckConstraint, Column, ForeignKey, Table, Text
 
 from algo_coach.schema import SolutionRole
-from algo_coach.storage import call_column, enumerated, metadata, timestamp
+from algo_coach.storage import appended_column, call_column, enumerated, metadata, timestamp
 
 solutions = Table(
     "solutions",
     metadata,
     Column("id", Text, primary_key=True),
+    appended_column(),
     Column("created_at", timestamp(), nullable=False),
     Column("problem_id", Text, ForeignKey("problems.id"), nullable=False),
     Column("role", enumerated(SolutionRole), nullable=False),

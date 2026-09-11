@@ -1,12 +1,13 @@
 from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, Table, Text
 
 from algo_coach.schema import CaseOutcome
-from algo_coach.storage import enumerated, metadata, timestamp
+from algo_coach.storage import appended_column, enumerated, metadata, timestamp
 
 verifications = Table(
     "verifications",
     metadata,
     Column("id", Text, primary_key=True),
+    appended_column(),
     Column("created_at", timestamp(), nullable=False),
     Column("solution_id", Text, ForeignKey("solutions.id"), nullable=False, index=True),
     Column("cap_ms", Integer, nullable=False),

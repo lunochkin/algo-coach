@@ -47,7 +47,7 @@ backend for our own generated code, which is not a threat model.
       a store the copy to Postgres skips
 - [x] Generate the first Alembic migration from those tables, creating every
       table
-- [ ] Add an `appended` identity column to every append-only table, in a
+- [x] Add an `appended` identity column to every append-only table, in a
       second migration, and read a log in its order. A JSON line kept the
       order it landed in, and readers break a tie on `created_at` by it
 - [ ] Add a test database fixture: one database per xdist worker, built by the

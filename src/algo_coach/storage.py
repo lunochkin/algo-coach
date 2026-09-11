@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, MetaData, Text
+from sqlalchemy import BigInteger, Column, DateTime, Enum, ForeignKey, Identity, MetaData, Text
 
 
 class JsonlLog[T: BaseModel]:
@@ -98,6 +98,13 @@ def timestamp() -> DateTime:
     return DateTime(timezone=True)
 
 
+def appended_column() -> Column[int]:
+    # the order an append-only record landed in, which a JSON line kept for
+    # free: a reader breaks a tie on `created_at` by it. `ALWAYS`, so no writer
+    # supplies an order of its own
+    return Column("appended", BigInteger, Identity(always=True), nullable=False, unique=True)
+
+
 def call_column(*, nullable: bool) -> Column[Any]:
     # the call holds the configuration: `machine.md`
     return Column("call_id", Text, ForeignKey("calls.id"), nullable=nullable)
@@ -114,6 +121,7 @@ def _snake(name: str) -> str:
 __all__ = [
     "FileStore",
     "JsonlLog",
+    "appended_column",
     "call_column",
     "enumerated",
     "metadata",

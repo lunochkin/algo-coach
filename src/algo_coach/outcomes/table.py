@@ -2,12 +2,13 @@ from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, Table, Text
 from sqlalchemy.dialects.postgresql import ARRAY
 
 from algo_coach.schema import CallSite, Gate
-from algo_coach.storage import call_column, enumerated, metadata, timestamp
+from algo_coach.storage import appended_column, call_column, enumerated, metadata, timestamp
 
 site_outcomes = Table(
     "site_outcomes",
     metadata,
     Column("id", Text, primary_key=True),
+    appended_column(),
     Column("created_at", timestamp(), nullable=False),
     Column("site", enumerated(CallSite), nullable=False),
     # no foreign key: a landing clears the draft the writing id names, and a

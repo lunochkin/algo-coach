@@ -2,12 +2,13 @@ from sqlalchemy import CheckConstraint, Column, ForeignKey, Table, Text
 from sqlalchemy.dialects.postgresql import ARRAY
 
 from algo_coach.schema import ClaimSource
-from algo_coach.storage import call_column, enumerated, metadata, timestamp
+from algo_coach.storage import appended_column, call_column, enumerated, metadata, timestamp
 
 solution_claims = Table(
     "solution_claims",
     metadata,
     Column("id", Text, primary_key=True),
+    appended_column(),
     Column("created_at", timestamp(), nullable=False),
     Column("solution_id", Text, ForeignKey("solutions.id"), nullable=False),
     Column("techniques", ARRAY(Text), nullable=False),

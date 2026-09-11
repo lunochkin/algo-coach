@@ -13,7 +13,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import ARRAY
 
 from algo_coach.schema import CaseOutcome, ClaimSource, Confidence, FailureMode
-from algo_coach.storage import call_column, enumerated, metadata, timestamp
+from algo_coach.storage import appended_column, call_column, enumerated, metadata, timestamp
 
 # the engine's own user, whose id a private record's `user_id` references. The
 # account a person signs in with is linked to it, and never stands in for it
@@ -29,6 +29,7 @@ attempts = Table(
     "attempts",
     metadata,
     Column("id", Text, primary_key=True),
+    appended_column(),
     # the board and the candidates read one user's attempts
     Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
     Column("problem_id", Text, ForeignKey("problems.id"), nullable=False),
@@ -79,6 +80,7 @@ attempt_verifications = Table(
     "attempt_verifications",
     metadata,
     Column("id", Text, primary_key=True),
+    appended_column(),
     Column("created_at", timestamp(), nullable=False),
     Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
     Column("cap_ms", Integer, nullable=False),
@@ -111,6 +113,7 @@ attempt_claims = Table(
     "attempt_claims",
     metadata,
     Column("id", Text, primary_key=True),
+    appended_column(),
     Column("created_at", timestamp(), nullable=False),
     Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
     Column("techniques", ARRAY(Text), nullable=False),
@@ -132,6 +135,7 @@ self_labels = Table(
     "self_labels",
     metadata,
     Column("id", Text, primary_key=True),
+    appended_column(),
     Column("created_at", timestamp(), nullable=False),
     Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
     Column("mode", enumerated(FailureMode), nullable=False),
@@ -141,6 +145,7 @@ diagnoses = Table(
     "diagnoses",
     metadata,
     Column("id", Text, primary_key=True),
+    appended_column(),
     Column("created_at", timestamp(), nullable=False),
     Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
     Column("mode", enumerated(FailureMode), nullable=False),

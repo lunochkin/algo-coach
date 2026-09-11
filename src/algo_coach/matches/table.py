@@ -2,12 +2,13 @@ from sqlalchemy import Boolean, CheckConstraint, Column, ForeignKey, Table, Text
 from sqlalchemy.dialects.postgresql import ARRAY
 
 from algo_coach.schema import MatchSource
-from algo_coach.storage import call_column, enumerated, metadata, timestamp
+from algo_coach.storage import appended_column, call_column, enumerated, metadata, timestamp
 
 template_matches = Table(
     "template_matches",
     metadata,
     Column("id", Text, primary_key=True),
+    appended_column(),
     Column("created_at", timestamp(), nullable=False),
     Column("template_id", Text, ForeignKey("card_templates.id"), nullable=False),
     Column("solution_id", Text, ForeignKey("solutions.id"), nullable=False),

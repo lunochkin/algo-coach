@@ -72,7 +72,7 @@ from algo_coach.schema import (
 )
 from algo_coach.solution_claims.table import solution_claims
 from algo_coach.solutions.table import solutions
-from algo_coach.storage import call_column, enumerated, metadata, timestamp
+from algo_coach.storage import appended_column, call_column, enumerated, metadata, timestamp
 from algo_coach.verifications.table import verification_case_results, verifications
 
 # every stored record and its table. Each store adds its own as its tables land
@@ -563,3 +563,36 @@ def test_every_record_keyed_to_an_attempt_references_it():
     for table in (attempt_verifications, attempt_claims, self_labels, diagnoses):
         (key,) = table.c.attempt_id.foreign_keys
         assert key.target_fullname == "attempts.id"
+
+
+# the append-only data classes of `README.md`
+APPEND_ONLY = {
+    "calls",
+    "test_cases",
+    "solutions",
+    "solution_claims",
+    "template_matches",
+    "verifications",
+    "site_outcomes",
+    "attempts",
+    "attempt_verifications",
+    "attempt_claims",
+    "self_labels",
+    "diagnoses",
+}
+
+
+def test_every_append_only_table_and_no_other_keeps_its_append_order():
+    """A JSON line kept the order it landed in, and a reader breaks a tie on
+    `created_at` by it. A table revised in place has no such order to keep."""
+    ordered = {name for name, table in metadata.tables.items() if "appended" in table.c}
+
+    assert ordered == APPEND_ONLY
+
+
+def test_the_append_order_is_the_database_s_alone():
+    """`ALWAYS`: a writer supplying its own order could reorder the log."""
+    column = appended_column()
+
+    assert column.identity is not None and column.identity.always
+    assert column.unique and not column.nullable

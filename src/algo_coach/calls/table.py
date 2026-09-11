@@ -1,11 +1,12 @@
 from sqlalchemy import CheckConstraint, Column, Double, Integer, Table, Text
 
-from algo_coach.storage import metadata, timestamp
+from algo_coach.storage import appended_column, metadata, timestamp
 
 calls = Table(
     "calls",
     metadata,
     Column("id", Text, primary_key=True),
+    appended_column(),
     Column("created_at", timestamp(), nullable=False),
     Column("model", Text, nullable=False),
     Column("effort", Text, nullable=False),
