@@ -110,7 +110,7 @@ React frontend built to static files, served on the API's origin.
 - [x] Link a technique's cards from its candidates page and from the picked
       problem's page. The card is offered, and no sitting requires it
 - [x] Add a navigation menu linking the board and the cards list
-- [ ] Start the sitting from the picked problem's page: a button calls `serve`
+- [x] Start the sitting from the picked problem's page: a button calls `serve`
       and opens the sitting's page. A card read before that press stays off
       the clock
 - [x] Build the sitting page: the statement, the `solve` signature, and a

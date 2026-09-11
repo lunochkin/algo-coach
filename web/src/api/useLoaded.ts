@@ -26,7 +26,7 @@ export function useLoaded<T>(load: (signal: AbortSignal) => Promise<Answer<T>>, 
   return state.key === key ? state : { key }
 }
 
-function described(error: unknown): string {
+export function described(error: unknown): string {
   // the API refuses with the domain's own sentence
   if (error && typeof error === 'object' && 'detail' in error) return String(error.detail)
   return JSON.stringify(error)
