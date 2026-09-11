@@ -109,7 +109,7 @@ React frontend the API serves as static files.
 - [ ] Drive one whole sitting in a test through the API rather than a browser:
       serve, submit, verdict, claim. The frontend then carries no
       logic a test can only reach by rendering a page
-- [ ] Add `just app`: the API and the Vite dev server in one command, the dev
+- [x] Add `just app`: the API and the Vite dev server in one command, the dev
       server proxying the API. Two commands in two terminals is friction on
       every session
 - [ ] Run the frontend's type check and lint from `just`, beside the Python

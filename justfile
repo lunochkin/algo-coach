@@ -63,6 +63,17 @@ seed source="content/cards":
 
 # --- practice ---
 
+# The drill loop: the API and the Vite dev server together, the dev server
+# proxying `/api`. Ctrl+C stops both.
+app:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    [ -d web/node_modules ] || npm --prefix web install
+    # the API on any exit, so none is left holding the port the proxy names
+    trap 'kill $(jobs -p) 2>/dev/null; wait' EXIT
+    uv run python -m algo_coach.api --reload &
+    npm --prefix web run dev
+
 # Per-technique progress.
 board *args:
     uv run algo-coach board {{ args }}
