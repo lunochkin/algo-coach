@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -23,6 +25,30 @@ users = Table(
     Column("id", Text, primary_key=True),
     Column("created_at", timestamp(), nullable=False),
     CheckConstraint("id <> ''", name="id_minted"),
+)
+
+
+class Provider(StrEnum):
+    """Who holds an identity and its login: `README.md`."""
+
+    GOOGLE = "google"
+    GITHUB = "github"
+
+
+# an account a person signs in with, linked to one user: `README.md` gives when
+# two accounts share one. Keyed by the provider's own id, which the account
+# keeps where its email moves
+identities = Table(
+    "identities",
+    metadata,
+    Column("provider", enumerated(Provider), primary_key=True),
+    Column("provider_user_id", Text, primary_key=True),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    # verified by the provider, lowercased, and the one the latest sign-in gave
+    Column("email", Text, nullable=False, index=True),
+    Column("created_at", timestamp(), nullable=False),
+    CheckConstraint("provider_user_id <> ''", name="provider_user_id_named"),
+    CheckConstraint("email = lower(email) AND email <> ''", name="email_lowercased"),
 )
 
 attempts = Table(

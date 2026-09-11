@@ -291,6 +291,10 @@ times. Each record class is specified in one of the files beside it.
   - An `identities` row links a provider's user id to a user id the engine
     mints at the first sign-in. The log keys on the engine's id, so adding or
     replacing a provider rewrites no record.
+  - A new account whose email matches another account's joins that account's
+    user, so one person reaches one log through Google or GitHub. The email
+    counts only where the provider verified it. An address added and never
+    verified would otherwise join the log of whoever holds that address.
   - Sign-in by email is deferred until a user needs it. An emailed link, a
     managed provider or a company's own sign-in would each be one more provider
     an `identities` row names.

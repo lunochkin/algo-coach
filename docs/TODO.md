@@ -82,13 +82,13 @@ backend for our own generated code, which is not a threat model.
 - [x] Write into `docs/architecture/README.md` that Google and GitHub hold each
       identity and its login, and the engine holds the sessions and no
       password. No credential handling is our own
-- [ ] Add an `identities` table linking a provider's user id to a row of the
+- [x] Add an `identities` table linking a provider's user id to a row of the
       users table, minted the first time the account signs in. `README.md`
       requires every reference in an append-only record to be engine-minted,
       and a provider switch would otherwise rewrite the log
-- [ ] Add the Google and GitHub sign-in and callback routes through Authlib. The
-      library checks the state, the nonce and PKCE, where a hand-written flow
-      goes wrong
+- [ ] Add the Google and GitHub sign-in and callback routes through Authlib,
+      passing on only an email the provider verified. The library checks the
+      state, the nonce and PKCE, where a hand-written flow goes wrong
 - [ ] Add a `sessions` table, and set a session's id in an `HttpOnly`,
       `SameSite=Lax` cookie at the callback. A stored session can be revoked,
       where a signed token stands until it expires

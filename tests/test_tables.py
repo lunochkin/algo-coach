@@ -38,6 +38,7 @@ from algo_coach.log.table import (
     attempt_verifications,
     attempts,
     diagnoses,
+    identities,
     self_labels,
     sitting_pauses,
     sittings,
@@ -145,8 +146,8 @@ def test_a_table_holds_exactly_its_record_s_fields(stored):
 
 
 # the tables no record is stored in whole: the user is an id the records
-# reference, before any account fills it
-WITHOUT_A_RECORD = {"users"}
+# reference, and an identity links an account to it
+WITHOUT_A_RECORD = {"identities", "users"}
 
 
 def test_every_stored_record_has_a_table():
@@ -503,6 +504,29 @@ def test_a_user_is_the_engine_s_own_id_and_nothing_of_an_account():
     would otherwise rewrite the log: `README.md`."""
     assert [one.name for one in users.columns] == ["id", "created_at"]
     assert users.c.id.primary_key and not users.c.created_at.nullable
+
+
+def test_an_identity_is_the_provider_s_id_for_an_account_linked_to_a_user():
+    """Keyed by the provider's own id, which one account keeps where its email
+    moves, and linking the user the records reference: `README.md`."""
+    assert [one.name for one in identities.primary_key.columns] == [
+        "provider",
+        "provider_user_id",
+    ]
+    assert [key.target_fullname for key in identities.c.user_id.foreign_keys] == ["users.id"]
+    assert not identities.c.user_id.nullable and identities.c.user_id.index
+    assert checks(identities)["identities_provider_user_id_named_check"] == (
+        "provider_user_id <> ''"
+    )
+
+
+def test_an_identity_s_email_is_stored_as_it_is_matched():
+    """Linking compares lowercased emails, and an email stored in another case
+    would match no later account."""
+    assert not identities.c.email.nullable and identities.c.email.index
+    assert checks(identities)["identities_email_lowercased_check"] == (
+        "email = lower(email) AND email <> ''"
+    )
 
 
 def test_an_attempt_references_its_user_problem_and_sitting():
