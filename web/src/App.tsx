@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router'
 
 import { BoardPage } from '@/pages/BoardPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { ProblemPage } from '@/pages/ProblemPage'
 import { TechniquePage } from '@/pages/TechniquePage'
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
             technique, never a problem id */}
         <Route index element={<BoardPage />} />
         <Route path="techniques/:technique" element={<TechniquePage />} />
+        <Route path="techniques/:technique/problems/:problemId" element={<ProblemPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </main>

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
-import { api, type Board, type TechniqueRow } from '@/api/client'
+import { api } from '@/api/client'
+import { useLoaded } from '@/api/useLoaded'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -11,24 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { lastAt, share } from '@/lib/format'
 
 export function BoardPage() {
-  const [board, setBoard] = useState<Board | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const controller = new AbortController()
-    api
-      .GET('/api/board', { signal: controller.signal })
-      .then(({ data, error }) => {
-        if (data) setBoard(data)
-        else setError(JSON.stringify(error))
-      })
-      .catch((reason: unknown) => {
-        if (!controller.signal.aborted) setError(String(reason))
-      })
-    return () => controller.abort()
-  }, [])
+  const { data: board, error } = useLoaded(
+    (signal) => api.GET('/api/board', { signal }),
+    'board',
+  )
 
   if (error) return <p className="text-destructive">The board did not load: {error}</p>
   if (!board) return <p className="text-muted-foreground">Loading the board…</p>
@@ -59,8 +48,10 @@ export function BoardPage() {
                   </Button>
                 </TableCell>
                 <TableCell className="text-right tabular-nums">{row.attempt_count}</TableCell>
-                <TableCell className="text-right tabular-nums">{solved(row)}</TableCell>
-                <TableCell>{practised(row.last_attempt_at)}</TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {share(row.solved_count, row.attempt_count)}
+                </TableCell>
+                <TableCell>{lastAt(row.last_attempt_at)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -78,14 +69,4 @@ export function BoardPage() {
       )}
     </section>
   )
-}
-
-function solved(row: TechniqueRow): string {
-  return row.attempt_count === 0 ? '—' : `${row.solved_count}/${row.attempt_count}`
-}
-
-function practised(at: string | null | undefined): string {
-  if (!at) return 'never'
-  const days = Math.max(0, Math.floor((Date.now() - new Date(at).getTime()) / 86_400_000))
-  return `${new Date(at).toLocaleDateString()} (${days}d ago)`
 }

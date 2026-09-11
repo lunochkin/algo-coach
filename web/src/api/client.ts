@@ -6,4 +6,11 @@ import type { components, paths } from './schema'
 export const api = createClient<paths>()
 
 export type Board = components['schemas']['Board']
-export type TechniqueRow = components['schemas']['TechniqueRow']
+export type Candidate = components['schemas']['Candidate']
+
+export function candidates(technique: string, signal: AbortSignal) {
+  return api.GET('/api/techniques/{technique}/candidates', {
+    params: { path: { technique } },
+    signal,
+  })
+}
