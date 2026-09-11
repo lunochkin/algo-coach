@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 from commands import data_root, run_cli
-from helpers import seed_problem
+from helpers import logged, seed_problem
 
 from algo_coach.board import TechniqueRow
 from algo_coach.cli.board import render
@@ -103,14 +103,15 @@ def test_board_counts_only_the_users_own_attempts(board_root, monkeypatch, capsy
 
 def test_board_follows_a_claim_over_the_problems_tags(board_root, monkeypatch, capsys):
     board_root.append_attempt(attempt("a1"))
-    board_root.append_claim(
+    logged(
+        board_root,
         AttemptClaim(
             id="c1",
             created_at=T0,
             attempt_id="a1",
             techniques=["two-pointers"],
             source=ClaimSource.USER,
-        )
+        ),
     )
 
     run(monkeypatch, "--user", "u1", "--json")

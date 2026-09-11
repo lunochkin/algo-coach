@@ -89,7 +89,7 @@ def test_a_classifier_claim_names_what_produced_it():
     """Both count the same toward progress, but a machine claim can be
     recomputed by a better classifier and a user's cannot, so re-deriving has
     to find the stale ones and leave the rest."""
-    claim = machine_claim("a1", ["greedy"])
+    claim = machine_claim("a1", ["greedy"], call_id="call-1")
 
     assert claim.source is ClaimSource.CLASSIFIER
     assert (claim.model, claim.effort, claim.call_id, claim.prompt_hash) == (

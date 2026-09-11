@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
-from helpers import GENERATED
+from helpers import GENERATED, logged, stored_attempt
 
 from algo_coach.attempt_claims import resolve_techniques, standing_attempt_claims
 from algo_coach.log import AttemptLog
@@ -54,7 +54,7 @@ def make_claim(
         model="m1" if machine else None,
         effort="medium" if machine else None,
         pin="a-host" if machine else None,
-        call_id="call-1" if machine else None,
+        call_id="call-m1" if machine else None,
         prompt_hash="0123456789ab" if machine else None,
     )
 
@@ -198,6 +198,7 @@ def test_a_machine_claim_on_a_hand_claimed_attempt_is_kept_in_the_log(database):
     """Scored, never a candidate: it never reaches the board and never leaves
     the log, which is what makes it safe to store and scoreable later."""
     log = AttemptLog(database)
+    stored_attempt(database)
     user = make_claim(["greedy"], id="c1", source=ClaimSource.USER)
     machine = make_claim(
         ["dynamic-programming"],
@@ -205,8 +206,8 @@ def test_a_machine_claim_on_a_hand_claimed_attempt_is_kept_in_the_log(database):
         created_at=T0 + timedelta(hours=1),
         source=ClaimSource.CLASSIFIER,
     )
-    log.append_claim(user)
-    log.append_claim(machine)
+    logged(log, user)
+    logged(log, machine)
 
     assert log.claims() == [user, machine]
     assert standing_attempt_claims(log.claims())["a1"] == user
@@ -275,10 +276,11 @@ def test_resolution_is_never_stored_on_an_attempt():
 
 def test_claims_read_back_in_append_order(database):
     log = AttemptLog(database)
+    stored_attempt(database)
     first = make_claim(["greedy"], id="c1")
     second = make_claim(["recursion"], id="c2")
-    log.append_claim(first)
-    log.append_claim(second)
+    logged(log, first)
+    logged(log, second)
 
     assert log.claims() == [first, second]
 

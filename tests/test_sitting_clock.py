@@ -1,10 +1,18 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from helpers import stored_problem
 
 from algo_coach.log import SittingStore
 from algo_coach.schema import Sitting
 from algo_coach.sitting import Missing, Refused, end, pause, resume
+
+
+@pytest.fixture(autouse=True)
+def referenced(database):
+    """The problem this module's sittings and attempts name."""
+    stored_problem(database, "p1")
+
 
 STARTED = datetime(2026, 9, 10, 8, tzinfo=UTC)
 NINE = datetime(2026, 9, 10, 9, tzinfo=UTC)

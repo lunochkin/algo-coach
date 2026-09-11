@@ -1,26 +1,51 @@
-from pathlib import Path
+from typing import Any
 
+from sqlalchemy import insert, select
+
+from algo_coach.log.table import (
+    attempt_claims,
+    attempt_verification_case_results,
+    attempt_verifications,
+    attempts,
+    diagnoses,
+    self_labels,
+)
+from algo_coach.log.users import known
 from algo_coach.schema import Attempt, AttemptClaim, AttemptVerification, Diagnosis, SelfLabel
-from algo_coach.storage import Database, JsonlLog
+from algo_coach.storage import Database, Log
 
 
 class AttemptLog:
     """The private log: attempts, their verifications, claims, self-labels and
-    diagnoses, one append-only file each."""
+    diagnoses, one append-only table each."""
 
-    def __init__(self, root: Database | Path) -> None:
+    def __init__(self, root: Database) -> None:
         self.root = root
-        self._attempts = JsonlLog(root, "attempts.jsonl", Attempt)
-        self._verifications = JsonlLog(root, "attempt_verifications.jsonl", AttemptVerification)
-        self._claims = JsonlLog(root, "attempt_claims.jsonl", AttemptClaim)
-        self._self_labels = JsonlLog(root, "self_labels.jsonl", SelfLabel)
-        self._diagnoses = JsonlLog(root, "diagnoses.jsonl", Diagnosis)
+        self._attempts = Log(root, attempts, Attempt)
+        self._claims = Log(root, attempt_claims, AttemptClaim)
+        self._self_labels = Log(root, self_labels, SelfLabel)
+        self._diagnoses = Log(root, diagnoses, Diagnosis)
 
     def append_attempt(self, attempt: Attempt) -> None:
-        self._attempts.append(attempt)
+        with self.root.transaction():
+            with self.root.begin() as conn:
+                known(conn, attempt.user_id)
+            self._attempts.append(attempt)
 
     def append_verification(self, verification: AttemptVerification) -> None:
-        self._verifications.append(verification)
+        with self.root.begin() as conn:
+            conn.execute(
+                insert(attempt_verifications).values(verification.model_dump(exclude={"results"}))
+            )
+            if verification.results:
+                conn.execute(
+                    insert(attempt_verification_case_results),
+                    [
+                        one.model_dump()
+                        | {"attempt_verification_id": verification.id, "position": position}
+                        for position, one in enumerate(verification.results)
+                    ],
+                )
 
     def append_claim(self, claim: AttemptClaim) -> None:
         self._claims.append(claim)
@@ -35,7 +60,26 @@ class AttemptLog:
         return self._attempts.all()
 
     def verifications(self) -> list[AttemptVerification]:
-        return self._verifications.all()
+        with self.root.connect() as conn:
+            runs = (
+                conn.execute(
+                    select(attempt_verifications).order_by(attempt_verifications.c.appended)
+                )
+                .mappings()
+                .all()
+            )
+            held = conn.execute(
+                select(attempt_verification_case_results).order_by(
+                    attempt_verification_case_results.c.position
+                )
+            ).mappings()
+            results: dict[str, list[dict[str, Any]]] = {run["id"]: [] for run in runs}
+            for one in held:
+                results[one["attempt_verification_id"]].append(dict(one))
+        return [
+            AttemptVerification.model_validate(dict(run) | {"results": results[run["id"]]})
+            for run in runs
+        ]
 
     def claims(self) -> list[AttemptClaim]:
         return self._claims.all()

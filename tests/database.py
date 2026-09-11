@@ -19,7 +19,7 @@ from dotenv import dotenv_values
 from helpers import CALL_ROW
 from sqlalchemy import Engine, create_engine, insert, make_url, text
 
-from algo_coach.storage import Database, metadata
+from algo_coach.storage import UTC, Database, metadata
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -68,7 +68,7 @@ def database_engine(worker_id: str) -> Iterator[Engine]:
     config.attributes["url"] = url.render_as_string(hide_password=False)
     command.upgrade(config, "head")
 
-    engine = create_engine(url)
+    engine = create_engine(url, **UTC)
     yield engine
     engine.dispose()
     with admin.connect() as conn:

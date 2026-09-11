@@ -7,9 +7,10 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
-from algo_coach.calls import Reply
+from algo_coach.calls import CallLog, Reply
 from algo_coach.cards import CardStore
 from algo_coach.classifier import PIN, TEMPERATURE
+from algo_coach.log import AttemptLog
 from algo_coach.mint import classifier_claim, user_solution_claim
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
@@ -109,13 +110,15 @@ def machine_claim(
     model: str = "a-model",
     effort: str = "medium",
     prompt_hash: str = PROMPT_HASH,
-    call_id: str = "call-1",
+    call_id: str | None = None,
     pin: str = PIN,
     temperature: float | None = TEMPERATURE,
     cost: float | None = None,
 ) -> AttemptClaim:
     """A classifier claim under a named configuration, defaulted so a test
-    naming one field says that field is what it is about."""
+    naming one field says that field is what it is about. The call it names is
+    one per configuration, as a run makes, unless the test names one."""
+    configuration = (model, effort, prompt_hash, pin, temperature, cost)
     return classifier_claim(
         attempt_id,
         techniques,
@@ -123,7 +126,7 @@ def machine_claim(
             model=model,
             effort=effort,
             prompt_hash=prompt_hash,
-            call_id=call_id,
+            call_id=call_id or "call-" + "-".join(str(one) for one in configuration),
             pin=pin,
             temperature=temperature,
             cost=cost,
@@ -312,3 +315,35 @@ def stored_template(root, id: str = "t1") -> None:
             selector=Selector(technique="greedy", size=1),
         )
     )
+
+
+def logged(log, claim: AttemptClaim) -> None:
+    """A claim appended, with the call it names stored first where none of that
+    id is, since a machine claim reads its configuration off its call."""
+    if claim.call_id is not None:
+        calls = CallLog(log.root)
+        if all(held.id != claim.call_id for held in calls.all()):
+            calls.append(
+                a_call(
+                    claim.call_id,
+                    model=claim.model,
+                    effort=claim.effort,
+                    prompt_hash=claim.prompt_hash,
+                    pin=claim.pin,
+                    provider=claim.provider,
+                    temperature=claim.temperature,
+                    cost=claim.cost,
+                )
+            )
+    log.append_claim(claim)
+
+
+def stored_attempt(root, id: str = "a1", problem_id: str = "p1", user_id: str = "u1") -> Attempt:
+    """An attempt in the log, and the problem it names, for a record keyed to
+    it."""
+    stored_problem(root, problem_id)
+    one = Attempt(
+        id=id, user_id=user_id, problem_id=problem_id, finished_at=T0, solved=True, code="pass"
+    )
+    AttemptLog(root).append_attempt(one)
+    return one

@@ -1,13 +1,28 @@
 from datetime import UTC, datetime
 
 import pytest
-from helpers import PROVENANCE
+from helpers import PROVENANCE, logged, stored_problem
 
 from algo_coach.attempt_claims import standing_attempt_claims
-from algo_coach.log import AttemptLog
+from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.mint import classifier_claim
-from algo_coach.schema import Attempt, ClaimSource, Confidence
+from algo_coach.schema import Attempt, ClaimSource, Confidence, Sitting
 from algo_coach.sitting import Missing, Refused, claim, unclaimed
+
+
+@pytest.fixture(autouse=True)
+def referenced(database):
+    """The problem and the sitting this module's attempts name."""
+    stored_problem(database, "p1")
+    SittingStore(database).put(
+        Sitting(
+            id="s1",
+            user_id="u-4f9c2a",
+            problem_id="p1",
+            started_at=datetime(2026, 9, 10, 8, tzinfo=UTC),
+        )
+    )
+
 
 USER = "u-4f9c2a"
 CANDIDATES = ["binary-search", "sorting"]
@@ -142,12 +157,21 @@ def test_a_decline_answers_the_question(log):
 def test_a_machine_claim_answers_nothing_the_loop_asked(log):
     """The classifier's reading stands under the user's, and it was never the
     user's answer."""
-    log.append_claim(classifier_claim("a1", ["sorting"], provenance=PROVENANCE))
+    logged(log, classifier_claim("a1", ["sorting"], provenance=PROVENANCE))
 
     assert [one.id for one in unclaimed(log, "s1", user_id=USER)] == ["a1"]
 
 
 def test_only_this_sitting_and_this_user_are_asked_about(log):
+    SittingStore(log.root).put(
+        Sitting(
+            id="s2",
+            user_id="u-4f9c2a",
+            problem_id="p1",
+            started_at=datetime(2026, 9, 10, 8, tzinfo=UTC),
+            ended_at=datetime(2026, 9, 10, 9, tzinfo=UTC),
+        )
+    )
     an_attempt(log, "a2", sitting_id="s2")
     an_attempt(log, "a3", user_id="u-b71e03")
 

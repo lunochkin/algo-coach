@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from helpers import T0, attempt, machine_claim, seed_problem
+from helpers import T0, attempt, logged, machine_claim, seed_problem
 
 from algo_coach.attempt_claims import against, contested, revisable, standing_attempt_claims
 from algo_coach.log import AttemptLog
@@ -21,8 +21,8 @@ def test_only_what_the_hand_pass_answered_is_revisable(database):
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "claimed"))
     log.append_attempt(attempt("a2", "unclaimed"))
-    log.append_claim(user_claim("a1", ["greedy"]))
-    log.append_claim(machine_claim("a2", ["sorting"]))
+    logged(log, user_claim("a1", ["greedy"]))
+    logged(log, machine_claim("a2", ["sorting"]))
 
     assert [a.id for a in pool(log)] == ["a1"]
 
@@ -35,8 +35,8 @@ def test_a_revision_asks_about_the_attempt_that_was_scored(database):
     log = AttemptLog(root)
     log.append_attempt(attempt("older", "p1", finished_at=T0))
     log.append_attempt(attempt("latest", "p1", finished_at=T0 + timedelta(days=1)))
-    log.append_claim(user_claim("older", ["greedy"]))
-    log.append_claim(user_claim("latest", ["sorting"]))
+    logged(log, user_claim("older", ["greedy"]))
+    logged(log, user_claim("latest", ["sorting"]))
 
     assert [a.id for a in pool(log)] == ["latest"]
 
@@ -68,7 +68,7 @@ def test_the_most_disputed_are_asked_about_first(database):
     log = AttemptLog(root)
     for name in ("all", "one", "none"):
         log.append_attempt(attempt(name, name))
-        log.append_claim(user_claim(name, ["greedy"]))
+        logged(log, user_claim(name, ["greedy"]))
     standing = standing_attempt_claims(log.claims())
     machine_claims = [
         {"all": machine_claim("all", ["sorting"]), "one": machine_claim("one", ["sorting"])},

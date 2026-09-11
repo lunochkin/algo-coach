@@ -1,5 +1,15 @@
+import pytest
+from helpers import stored_problem
+
 from algo_coach.log import SittingStore
 from algo_coach.schema import Attempt, Sitting
+
+
+@pytest.fixture(autouse=True)
+def referenced(database):
+    """The problem this module's sittings and attempts name."""
+    stored_problem(database, "p1")
+
 
 CONTENT = {
     "user_id": "u-4f9c2a",
@@ -68,7 +78,8 @@ def test_the_pauses_read_back_whole(database):
 def test_sittings_are_read_in_id_order(database):
     store = SittingStore(database)
     for id in ("s2", "s1"):
-        store.put(a_sitting(id))
+        # ended, since one clock runs on a problem for a user at a time
+        store.put(a_sitting(id, ended_at=AT_TEN))
 
     assert [one.id for one in store.all()] == ["s1", "s2"]
 

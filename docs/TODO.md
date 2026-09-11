@@ -61,11 +61,11 @@ backend for our own generated code, which is not a threat model.
 - [x] Rewrite the template matches store on Postgres, its tests on the fixture
 - [x] Rewrite the verifications store on Postgres, its tests on the fixture
 - [x] Rewrite the site outcomes store on Postgres, its tests on the fixture
-- [ ] Rewrite the draft store on Postgres: a put replaces the draft's row and
+- [x] Rewrite the draft store on Postgres: a put replaces the draft's row and
       all its cases in one transaction. Simple, and revisable, since the draft
       store is working state
-- [ ] Rewrite the sittings store on Postgres, its tests on the fixture
-- [ ] Rewrite the attempt log on Postgres, its tests on the fixture
+- [x] Rewrite the sittings store on Postgres, its tests on the fixture
+- [x] Rewrite the attempt log on Postgres, its tests on the fixture
 - [ ] Connect the CLI and the API to Postgres through `DATABASE_URL`
 - [ ] Delete `JsonlLog`, `FileStore` and the copy script, and stop writing
       `data/`, keeping `data/old/`. One backend is one set of write semantics

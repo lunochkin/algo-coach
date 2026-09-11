@@ -3,7 +3,7 @@ from datetime import timedelta
 
 import pytest
 from commands import data_root
-from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, own, seed_problem
+from helpers import T0, FakeTransport, Verdict, attempt, logged, machine_claim, own, seed_problem
 
 from algo_coach.attempt_claims import classify_backlog, standing_attempt_claims
 from algo_coach.attempt_claims.run import Progress
@@ -78,14 +78,15 @@ def test_an_attempt_without_code_is_never_asked_about(database, monkeypatch):
 def test_a_claimed_attempt_is_not_asked_again(backlog):
     """The user claims first and the classifier fills the rest, so a user
     claim is never overwritten by a machine one."""
-    backlog.append_claim(
+    logged(
+        backlog,
         AttemptClaim(
             id="c1",
             created_at=T0,
             attempt_id="a1",
             techniques=["sorting"],
             source=ClaimSource.USER,
-        )
+        ),
     )
     client = answering()
 
@@ -271,12 +272,13 @@ ASKED = request_hash(["greedy", "sorting"], "def f(): pass")
 def store_claim(log, attempt_id, **configuration):
     """A stored machine claim at this classifier's configuration unless a test
     names the field it differs in."""
-    log.append_claim(
+    logged(
+        log,
         machine_claim(
             attempt_id,
             ["sorting"],
             **{"model": MODEL, "effort": EFFORT, "prompt_hash": ASKED} | configuration,
-        )
+        ),
     )
 
 
@@ -346,14 +348,15 @@ def test_a_stale_claim_is_left_alone_without_the_flag(backlog):
 
 def test_a_user_claim_is_never_stale(backlog):
     """Nothing re-derives it: it is what the classifier is corrected by."""
-    backlog.append_claim(
+    logged(
+        backlog,
         AttemptClaim(
             id="c1",
             created_at=T0,
             attempt_id="a1",
             techniques=["sorting"],
             source=ClaimSource.USER,
-        )
+        ),
     )
     client = answering()
 
@@ -367,7 +370,7 @@ def test_a_reading_stored_under_a_hand_claim_is_never_re_derived(backlog):
     configuration and at any other: the user's claim is what stands there, and
     nothing re-derives it — so the machine claim under it is never asked
     again."""
-    backlog.append_claim(user_claim("a1", ["greedy"]))
+    logged(backlog, user_claim("a1", ["greedy"]))
     store_claim(backlog, "a1", prompt_hash="ffffffffffff")
     client = answering()
 

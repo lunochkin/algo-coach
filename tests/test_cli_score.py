@@ -3,7 +3,7 @@ from datetime import timedelta
 
 import pytest
 from commands import TRANSPORT, data_root, run_cli
-from helpers import T0, FakeTransport, Verdict, attempt, seed_problem
+from helpers import T0, FakeTransport, Verdict, attempt, logged, seed_problem
 
 from algo_coach import cli
 from algo_coach.calls import UNSENT
@@ -25,7 +25,7 @@ def stored_claim(attempt_id: str, techniques: list[str], *, model: str = MODEL):
             model=model,
             effort=EFFORT,
             prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
-            call_id="call-1",
+            call_id=f"call-{model}",
             pin=PIN,
             temperature=TEMPERATURE,
         ),
@@ -38,7 +38,7 @@ def hand_claimed(database, monkeypatch):
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-codes"))
-    log.append_claim(user_claim("a1", ["greedy"]))
+    logged(log, user_claim("a1", ["greedy"]))
     return log
 
 
@@ -88,7 +88,7 @@ def test_the_command_says_how_many_named_no_candidate(hand_claimed, monkeypatch,
     a classifier finds the candidates wanting is worth seeing on its own."""
     seed_problem(hand_claimed.root, id="second", techniques=["greedy", "sorting"])
     hand_claimed.append_attempt(attempt("a2", "second", finished_at=T0 + timedelta(days=1)))
-    hand_claimed.append_claim(user_claim("a2", ["greedy"]))
+    logged(hand_claimed, user_claim("a2", ["greedy"]))
 
     run(monkeypatch, FakeTransport.answering(Verdict([]), Verdict(["greedy"])))
 
@@ -197,7 +197,7 @@ def test_a_classifier_that_fails_every_call_aborts(hand_claimed, monkeypatch, ca
         hand_claimed.append_attempt(
             attempt(f"a{index}", name, finished_at=T0 + timedelta(days=index))
         )
-        hand_claimed.append_claim(user_claim(f"a{index}", ["greedy"]))
+        logged(hand_claimed, user_claim(f"a{index}", ["greedy"]))
     rejected = Verdict(error=RuntimeError("does not support the effort parameter"))
 
     with pytest.raises(SystemExit) as exit_info:
@@ -233,7 +233,7 @@ def test_an_unsupported_effort_can_be_left_unset(hand_claimed, monkeypatch, caps
 def test_a_stored_run_makes_no_call_and_needs_no_key(hand_claimed, monkeypatch, capsys):
     """What makes it the reproducible mode: it can be run anywhere, and
     twice."""
-    hand_claimed.append_claim(stored_claim("a1", ["greedy"]))
+    logged(hand_claimed, stored_claim("a1", ["greedy"]))
     for name in TRANSPORT.CREDENTIALS:
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setattr("sys.argv", ["algo-coach", "score", "--user", "u1", "--stored"])
@@ -498,7 +498,7 @@ def test_a_cut_short_reply_is_its_own_column(hand_claimed, monkeypatch, capsys):
     they were a single number in two flavours."""
     seed_problem(hand_claimed.root, id="second", techniques=["greedy", "sorting"])
     hand_claimed.append_attempt(attempt("a2", "second", finished_at=T0 + timedelta(days=1)))
-    hand_claimed.append_claim(user_claim("a2", ["greedy"]))
+    logged(hand_claimed, user_claim("a2", ["greedy"]))
 
     run(
         monkeypatch,

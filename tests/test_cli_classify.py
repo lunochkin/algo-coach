@@ -1,6 +1,6 @@
 import pytest
 from commands import TRANSPORT, data_root, run_cli
-from helpers import FakeTransport, Verdict, attempt, machine_claim, seed_problem
+from helpers import FakeTransport, Verdict, attempt, logged, machine_claim, seed_problem
 
 from algo_coach import cli
 from algo_coach.attempt_claims import standing_attempt_claims
@@ -86,7 +86,7 @@ def test_an_aborted_run_says_so_and_exits_nonzero(root, monkeypatch, capsys):
 
 def test_redo_re_derives_a_stale_machine_claim(root, monkeypatch, capsys):
     log = AttemptLog(root)
-    log.append_claim(machine_claim("a1", ["sorting"], model=MODEL, prompt_hash="ffffffffffff"))
+    logged(log, machine_claim("a1", ["sorting"], model=MODEL, prompt_hash="ffffffffffff"))
 
     run(monkeypatch, FakeTransport.answering(Verdict(["greedy"])), "--redo")
 

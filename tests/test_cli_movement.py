@@ -1,6 +1,6 @@
 import pytest
 from commands import data_root, run_cli
-from helpers import attempt, machine_claim, seed_problem
+from helpers import attempt, logged, machine_claim, seed_problem
 
 from algo_coach.log import AttemptLog
 from algo_coach.mint import user_claim
@@ -16,7 +16,7 @@ def classified(database, monkeypatch) -> AttemptLog:
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-codes"))
-    log.append_claim(machine_claim("a1", ["greedy"]))
+    logged(log, machine_claim("a1", ["greedy"]))
     return log
 
 
@@ -36,7 +36,7 @@ def test_a_hand_claim_is_not_the_classifier_s_movement(database, monkeypatch, ca
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-codes"))
-    log.append_claim(user_claim("a1", ["greedy"]))
+    logged(log, user_claim("a1", ["greedy"]))
 
     with pytest.raises(SystemExit) as exit_info:
         run(monkeypatch)

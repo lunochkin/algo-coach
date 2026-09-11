@@ -1,5 +1,6 @@
-from helpers import PROVENANCE_FIELDS
+from helpers import PROVENANCE_FIELDS, a_call
 
+from algo_coach.calls import CallLog
 from algo_coach.drafts import DraftStore
 from algo_coach.schema import Draft, ExpectedSource, Gate, WritingState
 
@@ -103,3 +104,48 @@ def test_clearing_a_draft_that_is_gone_is_not_an_error(database):
     """A run that died between landing and clearing leaves the next one this
     to do, and a second clear must not stop it."""
     DraftStore(database).remove("nope")
+
+
+def settled(args, expected, **overrides) -> dict:
+    return {
+        "args": args,
+        "expected": expected,
+        "expected_from": ExpectedSource.REFERENCE,
+        "provenance": PROVENANCE_FIELDS,
+    } | overrides
+
+
+def test_a_whole_draft_reads_back_as_it_was_put(database):
+    """Every list a run settles and every site's call land in their own rows,
+    and a draft read back is the draft that was put."""
+    CallLog(database).append(a_call("blind-call", temperature=0.0, provider=None))
+    blind = PROVENANCE_FIELDS | {"call_id": "blind-call", "temperature": 0.0}
+    draft = make_draft(
+        state=WritingState.HARDENED,
+        reference="def solve(xs):\n    return sum(1 for _ in xs)\n",
+        input_generator="def build(size, seed): ...",
+        largest=100_000,
+        declared=[{"args": [[1, 2]], "expected": 2}, {"args": [[]], "expected": None}],
+        cases=[settled([[1, 2]], 2), settled([[]], 0, expected_from=ExpectedSource.CANONICAL)],
+        kept=[settled([[5]], 1, round=0)],
+        won=[settled([[7, 7]], 2, round=1), settled([[9]], 1, round=2)],
+        separating_case=settled([list(range(50))], 50, round=None, repeats=4),
+        generator_provenance=PROVENANCE_FIELDS,
+        blind_provenance=blind,
+    )
+    store = DraftStore(database)
+
+    store.put(draft)
+
+    assert store.get("w1") == draft
+
+
+def test_a_revised_draft_holds_only_its_latest_cases(database):
+    """A put replaces every case the draft held, so a list a step shortened
+    reads back shorter."""
+    store = DraftStore(database)
+    store.put(make_draft(cases=[settled([[1]], 1), settled([[2]], 2)]))
+
+    store.put(make_draft(cases=[settled([[3]], 3)]))
+
+    assert [one.args for one in store.get("w1").cases] == [[[3]]]

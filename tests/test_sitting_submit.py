@@ -25,6 +25,7 @@ class Stores:
         self.sittings = SittingStore(root)
         self.cases = CaseLog(root)
         self.log = AttemptLog(root)
+        stored_problem(root, "p1")
         self.sittings.put(
             Sitting.model_validate(
                 {"id": "s1", "user_id": "u-4f9c2a", "problem_id": "p1", "started_at": STARTED}

@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from commands import data_root, run_cli
 from database import emptied, shared
-from helpers import seed_problem
+from helpers import logged, seed_problem
 
 from algo_coach.attempt_claims import standing_attempt_claims
 from algo_coach.classifier import PIN, TEMPERATURE, request_hash
@@ -92,14 +92,15 @@ def test_skipping_writes_nothing(claim_root, monkeypatch, capsys):
 
 
 def test_an_already_claimed_attempt_is_not_asked_again(claim_root, monkeypatch, capsys):
-    claim_root.append_claim(
+    logged(
+        claim_root,
         AttemptClaim(
             id="c1",
             created_at=T0,
             attempt_id="a1",
             techniques=["greedy"],
             source=ClaimSource.USER,
-        )
+        ),
     )
 
     with pytest.raises(SystemExit) as exit_info:
@@ -114,7 +115,8 @@ def test_a_machine_claimed_attempt_is_still_offered(claim_root, monkeypatch, cap
     corrects it — so a machine claim leaves the attempt in the pool. A pool
     that emptied as the classifier ran would freeze the eval set at whatever
     was labelled before the first run."""
-    claim_root.append_claim(
+    logged(
+        claim_root,
         classifier_claim(
             "a1",
             ["sorting"],
@@ -122,11 +124,11 @@ def test_a_machine_claimed_attempt_is_still_offered(claim_root, monkeypatch, cap
                 model="a-model",
                 effort="medium",
                 prompt_hash="0123456789ab",
-                call_id="call-1",
+                call_id="call-classifier",
                 pin=PIN,
                 temperature=TEMPERATURE,
             ),
-        )
+        ),
     )
 
     run(monkeypatch, ["1", ""])
@@ -139,7 +141,8 @@ def test_the_machine_verdict_is_never_shown(claim_root, monkeypatch, capsys):
     """Reviewing an answer is the same labour as making one, but anchors on
     it: a plausible wrong call gets waved through. The question is asked from
     the code and the tags, as it would be with nothing claimed."""
-    claim_root.append_claim(
+    logged(
+        claim_root,
         classifier_claim(
             "a1",
             ["sorting"],
@@ -147,11 +150,11 @@ def test_the_machine_verdict_is_never_shown(claim_root, monkeypatch, capsys):
                 model="a-model",
                 effort="medium",
                 prompt_hash="0123456789ab",
-                call_id="call-1",
+                call_id="call-classifier",
                 pin=PIN,
                 temperature=TEMPERATURE,
             ),
-        )
+        ),
     )
 
     run(monkeypatch, ["1", ""])
@@ -443,8 +446,9 @@ def test_revise_shows_a_named_classifier_s_reading_of_the_same_prompt(
     ask what each attempt would be sent now — a machine claim of an older
     rulebook answered a different question and is not a disagreement about this
     one."""
-    claim_root.append_claim(user_claim("a1", ["greedy"]))
-    claim_root.append_claim(
+    logged(claim_root, user_claim("a1", ["greedy"]))
+    logged(
+        claim_root,
         classifier_claim(
             "a1",
             ["sorting"],
@@ -452,11 +456,11 @@ def test_revise_shows_a_named_classifier_s_reading_of_the_same_prompt(
                 model="claude-opus-5",
                 effort="medium",
                 prompt_hash=request_hash(["greedy", "sorting"], "def f(): pass"),
-                call_id="call-1",
+                call_id="call-classifier",
                 pin=PIN,
                 temperature=TEMPERATURE,
             ),
-        )
+        ),
     )
 
     run(monkeypatch, [""], "--revise", "--model", "claude-opus-5", "--provider", PIN)
@@ -466,10 +470,11 @@ def test_revise_shows_a_named_classifier_s_reading_of_the_same_prompt(
     assert "sorting" in out
 
 
-def disputing(log, techniques: list[str], *, call_id: str = "call-1") -> None:
+def disputing(log, techniques: list[str], *, call_id: str = "call-opus") -> None:
     """A machine claim of a1 at the prompt hash the command asks for, so the
     revision pool holds it."""
-    log.append_claim(
+    logged(
+        log,
         classifier_claim(
             "a1",
             techniques,
@@ -481,7 +486,7 @@ def disputing(log, techniques: list[str], *, call_id: str = "call-1") -> None:
                 pin=PIN,
                 temperature=TEMPERATURE,
             ),
-        )
+        ),
     )
 
 
@@ -490,14 +495,14 @@ def test_a_revision_records_the_readings_it_was_shown(claim_root, monkeypatch, c
     independent of those configurations. Recorded per call, since the score
     compares configurations and a claim informed by one still measures
     another."""
-    claim_root.append_claim(user_claim("a1", ["greedy"]))
+    logged(claim_root, user_claim("a1", ["greedy"]))
     disputing(claim_root, ["sorting"])
 
     run(monkeypatch, ["2", ""], "--revise", "--model", "claude-opus-5", "--provider", PIN)
 
     revision = claim_root.claims()[-1]
     assert revision.source is ClaimSource.USER
-    assert revision.informed_by == ["call-1"]
+    assert revision.informed_by == ["call-opus"]
 
 
 def test_a_claim_made_without_the_readings_is_blind(claim_root, monkeypatch, capsys):
@@ -514,8 +519,8 @@ def test_a_reading_of_another_attempt_is_not_recorded(claim_root, monkeypatch, c
     log but not this one was never shown."""
     seed_problem(claim_root.root, id="other", techniques=["greedy", "sorting"])
     claim_root.append_attempt(attempt("a3", "other"))
-    claim_root.append_claim(user_claim("a1", ["greedy"]))
-    claim_root.append_claim(user_claim("a3", ["greedy"]))
+    logged(claim_root, user_claim("a1", ["greedy"]))
+    logged(claim_root, user_claim("a3", ["greedy"]))
     disputing(claim_root, ["sorting"])
 
     run(
@@ -532,7 +537,7 @@ def test_a_reading_of_another_attempt_is_not_recorded(claim_root, monkeypatch, c
 
     revision = claim_root.claims()[-1]
     assert revision.attempt_id == "a1"
-    assert revision.informed_by == ["call-1"]
+    assert revision.informed_by == ["call-opus"]
 
 
 def test_an_undisputed_attempt_is_offered_for_revision(claim_root, monkeypatch, capsys):
@@ -540,7 +545,7 @@ def test_an_undisputed_attempt_is_offered_for_revision(claim_root, monkeypatch, 
     one direction: a claim both readers got wrong the same way is never
     revisited, and agreement climbs for reasons unrelated to either being
     right."""
-    claim_root.append_claim(user_claim("a1", ["greedy"]))
+    logged(claim_root, user_claim("a1", ["greedy"]))
     disputing(claim_root, ["greedy"])
 
     run(monkeypatch, [""], "--revise", "--model", "claude-opus-5", "--provider", PIN)
@@ -553,10 +558,11 @@ def test_the_most_disputed_are_still_asked_about_first(claim_root, monkeypatch, 
     something is still shown before what probably does not."""
     seed_problem(claim_root.root, id="agreed", techniques=["greedy", "sorting"])
     claim_root.append_attempt(attempt("a3", "agreed"))
-    claim_root.append_claim(user_claim("a1", ["greedy"]))
-    claim_root.append_claim(user_claim("a3", ["greedy"]))
+    logged(claim_root, user_claim("a1", ["greedy"]))
+    logged(claim_root, user_claim("a3", ["greedy"]))
     disputing(claim_root, ["sorting"])
-    claim_root.append_claim(
+    logged(
+        claim_root,
         classifier_claim(
             "a3",
             ["greedy"],
@@ -568,7 +574,7 @@ def test_the_most_disputed_are_still_asked_about_first(claim_root, monkeypatch, 
                 pin=PIN,
                 temperature=TEMPERATURE,
             ),
-        )
+        ),
     )
 
     run(
@@ -599,8 +605,9 @@ def test_disputed_still_needs_revise(claim_root, monkeypatch, capsys):
 
 
 def test_revise_ignores_a_reading_of_a_prompt_nobody_sends_now(claim_root, monkeypatch, capsys):
-    claim_root.append_claim(user_claim("a1", ["greedy"]))
-    claim_root.append_claim(
+    logged(claim_root, user_claim("a1", ["greedy"]))
+    logged(
+        claim_root,
         classifier_claim(
             "a1",
             ["sorting"],
@@ -608,11 +615,11 @@ def test_revise_ignores_a_reading_of_a_prompt_nobody_sends_now(claim_root, monke
                 model="claude-opus-5",
                 effort="medium",
                 prompt_hash="ffffffffffff",
-                call_id="call-1",
+                call_id="call-classifier",
                 pin=PIN,
                 temperature=TEMPERATURE,
             ),
-        )
+        ),
     )
 
     # Asked for disputes specifically: the default pool is every claim, so an
@@ -657,7 +664,7 @@ def test_a_skip_still_records_nothing(claim_root, monkeypatch, capsys):
 def test_a_decline_can_supersede_an_earlier_claim(claim_root, monkeypatch, capsys):
     """What the countRangeSum case needs: a user claim revised to name none of
     the candidates, rather than deleted to get it out of the eval set."""
-    claim_root.append_claim(user_claim("a1", ["greedy"]))
+    logged(claim_root, user_claim("a1", ["greedy"]))
 
     run(monkeypatch, ["0", ""], "--revise")
 

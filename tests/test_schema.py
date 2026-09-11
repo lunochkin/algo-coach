@@ -1,8 +1,10 @@
 from datetime import UTC, datetime
 
 import pytest
+from helpers import a_call, stored_attempt, stored_problem
 from pydantic import ValidationError
 
+from algo_coach.calls import CallLog
 from algo_coach.log import AttemptLog
 from algo_coach.schema import (
     Attempt,
@@ -60,6 +62,17 @@ def test_a_diagnosis_carries_its_provenance_whole():
 
 def test_attempt_roundtrip(database):
     log = AttemptLog(database)
+    stored_problem(database, "p1")
+    # the call the diagnosis names, carrying the configuration it copies
+    CallLog(database).append(
+        a_call(
+            "call-test-model",
+            model="test-model",
+            pin="a-host",
+            prompt_hash="0123456789ab",
+            provider=None,
+        )
+    )
     attempt = make_attempt("a1")
     log.append_attempt(attempt)
     log.append_diagnosis(make_diagnosis("a1", FailureMode.RUST))
@@ -119,7 +132,7 @@ PROVENANCE_FIELDS = {
     "effort": "medium",
     "pin": "a-host",
     "prompt_hash": "0123456789ab",
-    "call_id": "call-1",
+    "call_id": "call-test-model",
 }
 
 
@@ -212,6 +225,7 @@ def test_a_self_label_is_its_own_record():
 
 def test_self_label_roundtrip(database):
     log = AttemptLog(database)
+    stored_attempt(database)
     now = datetime.now(UTC)
     first = SelfLabel(id="l1", created_at=now, attempt_id="a1", mode=FailureMode.GAP)
     second = SelfLabel(id="l2", created_at=now, attempt_id="a1", mode=FailureMode.RUST)

@@ -5,6 +5,7 @@ from commands import TRANSPORT, data_root, run_cli
 from generating import FakeWriter, Raises
 from helpers import own
 from matching import card, seeded, template
+from sqlalchemy.exc import IntegrityError
 
 from algo_coach import cli
 from algo_coach.calls import CallLog
@@ -688,18 +689,13 @@ def test_resume_reports_a_draft_that_is_held_again(root, monkeypatch, capsys):
     assert exit_info.value.code == 1
 
 
-def test_resume_skips_a_draft_naming_no_seeded_template(root, monkeypatch, capsys):
-    """The form its target named is gone, so nothing says what its search
-    would be."""
+def test_a_draft_cannot_name_a_template_nobody_seeded(root, monkeypatch, capsys):
+    """The draft's foreign key names the template, so a resume never meets a
+    draft whose form is gone, and its search always has a form to read."""
     stored = held_draft(root, monkeypatch, capsys)
-    DraftStore(root).put(stored.model_copy(update={"target_template_id": "gone"}))
 
-    with pytest.raises(SystemExit):
-        resuming(monkeypatch, FakeWriter())
-
-    printed = capsys.readouterr()
-    assert "no template gone" in printed.err
-    assert "1 naming no template" in printed.out
+    with pytest.raises(IntegrityError, match="target_template_id"):
+        DraftStore(root).put(stored.model_copy(update={"target_template_id": "gone"}))
 
 
 def test_resume_with_no_draft_waiting_says_so(root, monkeypatch, capsys):

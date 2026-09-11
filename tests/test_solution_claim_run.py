@@ -138,6 +138,7 @@ def test_one_reader_asks_both_and_the_candidates_are_what_differ(log, database):
     differ."""
     client = answering(Verdict(["sorting"]), Verdict(["sorting"]))
     attempts = AttemptLog(database)
+    stored_problem(database, "p1")
     attempts.append_attempt(attempt("a1", "p1", code=CODE))
     problem = make_problem("p1", techniques=CANDIDATES)
 
@@ -164,6 +165,7 @@ def test_the_two_records_land_apart(log, database):
     user's private testimony. Neither store holds the other's record."""
     client = answering(Verdict(["sorting"]), Verdict(["greedy"]))
     attempts = AttemptLog(database)
+    stored_problem(database, "p1")
     attempts.append_attempt(attempt("a1", "p1", code=CODE))
 
     run(client, log)

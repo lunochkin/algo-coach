@@ -29,6 +29,10 @@ from sqlalchemy import (
     select,
 )
 
+# every session in UTC, so a timestamp reads back in the zone it was written
+# in rather than the server's
+UTC: dict[str, Any] = {"connect_args": {"options": "-c timezone=UTC"}}
+
 
 class Database:
     """What every store is built from: the Postgres database, and the directory
@@ -81,7 +85,7 @@ class Database:
             return self._engine
         if not self._url:
             raise RuntimeError("DATABASE_URL names no database")
-        return create_engine(self._url.replace("postgres://", "postgresql+psycopg://", 1))
+        return create_engine(self._url.replace("postgres://", "postgresql+psycopg://", 1), **UTC)
 
     def close(self) -> None:
         # only an engine this handle made: one handed in belongs to its maker
@@ -276,6 +280,7 @@ def _snake(name: str) -> str:
 
 __all__ = [
     "CONFIGURATION",
+    "UTC",
     "Database",
     "FileStore",
     "JsonlLog",
