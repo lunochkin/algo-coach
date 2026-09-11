@@ -20,16 +20,26 @@ from tables import Stored, mismatches
 from algo_coach.calls.table import calls
 from algo_coach.cards.table import card_templates, cards
 from algo_coach.cases.table import test_cases
+from algo_coach.drafts.table import (
+    SettledField,
+    draft_declared_cases,
+    draft_settled_cases,
+    drafts,
+)
 from algo_coach.matches.table import template_matches
 from algo_coach.outcomes.table import site_outcomes
 from algo_coach.problems.table import problems
 from algo_coach.schema import (
     Call,
+    CallSite,
     Card,
     CaseResult,
     ClaimSource,
+    Draft,
+    DraftCase,
     MachineProvenance,
     Problem,
+    SettledCase,
     SiteOutcome,
     Solution,
     SolutionClaim,
@@ -46,6 +56,28 @@ from algo_coach.verifications.table import verification_case_results, verificati
 # every stored record and its table. Each store adds its own as its tables land
 STORED: list[Stored] = [
     Stored(Call, calls),
+    Stored(
+        Draft,
+        drafts,
+        elsewhere=frozenset(
+            {
+                "declared",
+                "cases",
+                "kept",
+                "won",
+                "separating_case",
+                *(f"{site}_provenance" for site in CallSite),
+            }
+        ),
+        structural=frozenset(f"{site}_call_id" for site in CallSite),
+    ),
+    Stored(DraftCase, draft_declared_cases, structural=frozenset({"draft_id", "position"})),
+    Stored(
+        SettledCase,
+        draft_settled_cases,
+        structural=frozenset({"draft_id", "draft_field", "position", "call_id"}),
+        elsewhere=frozenset({"provenance"}),
+    ),
     Stored(TestCase, test_cases, through_call=True, required=frozenset({"call_id"})),
     Stored(Card, cards, elsewhere=frozenset({"templates"})),
     Stored(Template, card_templates, structural=frozenset({"card_id", "position"})),
@@ -340,4 +372,46 @@ def test_a_case_result_s_rules_hold_in_the_table():
     )
     assert held["verification_case_results_only_a_crash_names_an_error_check"] == (
         "error IS NULL OR outcome = 'crashed'"
+    )
+
+
+def test_every_list_of_settled_cases_is_a_draft_field():
+    """A row names the list it belongs to by the draft's own field name."""
+    assert {one.value for one in SettledField} <= set(Draft.model_fields)
+
+
+def test_a_draft_names_the_call_of_each_of_its_five_sites():
+    """The configuration a resume compares is on the call, so a site's
+    provenance is one reference, absent where the site has not run."""
+    assert {one.value for one in CallSite} == {
+        name.removesuffix("_provenance")
+        for name in Draft.model_fields
+        if name.endswith("_provenance")
+    }
+    for site in CallSite:
+        column = drafts.c[f"{site}_call_id"]
+        (key,) = column.foreign_keys
+        assert (key.target_fullname, column.nullable) == ("calls.id", True)
+    assert not draft_settled_cases.c.call_id.nullable
+
+
+def test_what_a_draft_held_goes_with_it():
+    """A landing clears the draft, and its cases have nothing left to belong
+    to."""
+    for child in (draft_declared_cases, draft_settled_cases):
+        (key,) = child.c.draft_id.foreign_keys
+        assert key.ondelete == "CASCADE"
+
+
+def test_a_draft_s_rules_hold_in_the_table():
+    held = checks(drafts)
+
+    assert (
+        held["drafts_rejection_names_its_gate_check"] == "(state = 'rejected') = (gate IS NOT NULL)"
+    )
+    assert held["drafts_landing_names_the_problem_check"] == (
+        "(state = 'landed') = (problem_id IS NOT NULL)"
+    )
+    assert held["drafts_input_generator_carries_its_bound_check"] == (
+        "(input_generator IS NULL) = (largest IS NULL)"
     )

@@ -33,8 +33,8 @@ backend for our own generated code, which is not a threat model.
 - [x] Declare the site outcomes table
 - [x] Declare the calls table
 - [x] Declare the cards table and its templates
-- [ ] Declare the drafts table, its declared and settled cases, and one table
-      for the provenance of its five sites
+- [x] Declare the drafts table, its declared and settled cases, and a call
+      column for each of its five sites
 - [ ] Declare the sittings table and its pauses
 - [ ] Declare the attempt log's tables: attempts, attempt verifications and
       their case results, claims, self-labels and diagnoses
