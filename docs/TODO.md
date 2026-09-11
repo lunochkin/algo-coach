@@ -93,6 +93,8 @@ React frontend the API serves as static files.
 - [x] Build the board as the entry point, showing per-technique progress and
       the technique the user picks from. A problem id as the entry point leaves
       the selection to the user
+- [x] Route the pages by URL with React Router, so the address bar names the
+      page and a reload stays on it
 - [ ] List the picked technique's candidates, least recently attempted first,
       and let the user pick the problem. A list shows no statement, since the
       clock starts when the statement is served

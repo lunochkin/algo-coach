@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 
 import { api, type Board, type TechniqueRow } from '@/api/client'
 import { Button } from '@/components/ui/button'
@@ -11,9 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-type Props = { onPick: (technique: string) => void }
-
-export function BoardPage({ onPick }: Props) {
+export function BoardPage() {
   const [board, setBoard] = useState<Board | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -53,8 +52,10 @@ export function BoardPage({ onPick }: Props) {
             {board.rows.map((row) => (
               <TableRow key={row.technique}>
                 <TableCell>
-                  <Button variant="link" className="px-0" onClick={() => onPick(row.technique)}>
-                    {row.technique}
+                  <Button variant="link" className="px-0" asChild>
+                    <Link to={`/techniques/${encodeURIComponent(row.technique)}`}>
+                      {row.technique}
+                    </Link>
                   </Button>
                 </TableCell>
                 <TableCell className="text-right tabular-nums">{row.attempt_count}</TableCell>

@@ -274,6 +274,9 @@ times. Each record class is specified in one of the files beside it.
   them routes `/api` to the API: Vite's proxy locally, the host in Phase 9.
   - A second origin is rejected. Every request would need CORS, and the login
     cookie Phase 9 brings would have to cross domains.
+  - A path naming no file is answered with `index.html`. The frontend routes
+    its pages by URL, so a reload of any page reaches the app rather than a
+    404.
 - **Storage is concrete for now**: JSON files under a gitignored directory,
   with a database later. The schema is the contract, and storage swaps
   underneath it.
