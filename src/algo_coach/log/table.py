@@ -11,7 +11,8 @@ from sqlalchemy import (
     text,
 )
 
-from algo_coach.storage import metadata, timestamp
+from algo_coach.schema import CaseOutcome
+from algo_coach.storage import enumerated, metadata, timestamp
 
 # the engine's own user, whose id a private record's `user_id` references. The
 # account a person signs in with is linked to it, and never stands in for it
@@ -71,4 +72,36 @@ sitting_pauses = Table(
     Column("at", timestamp(), nullable=False),
     Column("until", timestamp()),
     CheckConstraint("until >= at", name="ends_no_earlier_than_it_starts"),
+)
+
+attempt_verifications = Table(
+    "attempt_verifications",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("created_at", timestamp(), nullable=False),
+    Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
+    Column("cap_ms", Integer, nullable=False),
+    Column("runner", Text, nullable=False),
+    CheckConstraint("cap_ms > 0", name="capped"),
+    CheckConstraint("runner <> ''", name="runner_named"),
+)
+
+# the same shape as a solution run's results, declared here rather than
+# imported: the private log reads no product store's module
+attempt_verification_case_results = Table(
+    "attempt_verification_case_results",
+    metadata,
+    Column(
+        "attempt_verification_id", Text, ForeignKey("attempt_verifications.id"), primary_key=True
+    ),
+    Column("position", Integer, primary_key=True),
+    Column("case_id", Text, ForeignKey("test_cases.id"), nullable=False),
+    Column("outcome", enumerated(CaseOutcome), nullable=False),
+    Column("elapsed_ms", Integer),
+    Column("error", Text),
+    CheckConstraint(
+        "outcome NOT IN ('passed', 'wrong') OR elapsed_ms IS NOT NULL", name="returned_was_timed"
+    ),
+    CheckConstraint("error IS NULL OR outcome = 'crashed'", name="only_a_crash_names_an_error"),
+    CheckConstraint("elapsed_ms >= 0", name="elapsed_counted"),
 )

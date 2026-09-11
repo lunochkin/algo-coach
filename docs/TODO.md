@@ -39,7 +39,7 @@ backend for our own generated code, which is not a threat model.
       `user_id` references by foreign key
 - [x] Declare the sittings table and its pauses
 - [x] Declare the attempts table
-- [ ] Declare the attempt verifications table and its case results
+- [x] Declare the attempt verifications table and its case results
 - [ ] Declare the attempt claims table
 - [ ] Declare the self-labels table
 - [ ] Declare the diagnoses table

@@ -26,12 +26,20 @@ from algo_coach.drafts.table import (
     draft_settled_cases,
     drafts,
 )
-from algo_coach.log.table import attempts, sitting_pauses, sittings, users
+from algo_coach.log.table import (
+    attempt_verification_case_results,
+    attempt_verifications,
+    attempts,
+    sitting_pauses,
+    sittings,
+    users,
+)
 from algo_coach.matches.table import template_matches
 from algo_coach.outcomes.table import site_outcomes
 from algo_coach.problems.table import problems
 from algo_coach.schema import (
     Attempt,
+    AttemptVerification,
     Call,
     CallSite,
     Card,
@@ -60,6 +68,12 @@ from algo_coach.verifications.table import verification_case_results, verificati
 # every stored record and its table. Each store adds its own as its tables land
 STORED: list[Stored] = [
     Stored(Attempt, attempts),
+    Stored(AttemptVerification, attempt_verifications, elsewhere=frozenset({"results"})),
+    Stored(
+        CaseResult,
+        attempt_verification_case_results,
+        structural=frozenset({"attempt_verification_id", "position"}),
+    ),
     Stored(Call, calls),
     Stored(
         Draft,
@@ -455,3 +469,14 @@ def test_one_sitting_runs_on_a_problem_for_a_user():
     assert index.unique
     assert [column.name for column in index.columns] == ["user_id", "problem_id"]
     assert str(index.dialect_options["postgresql"]["where"]) == "ended_at IS NULL"
+
+
+def test_an_attempt_s_case_results_hold_the_rules_a_solution_s_do():
+    """The two tables are declared apart, so a rule added to one alone judges
+    the same result two ways."""
+
+    def rules(table: Table) -> set[str]:
+        prefix = f"{table.name}_"
+        return {f"{name.removeprefix(prefix)}={sql}" for name, sql in checks(table).items()}
+
+    assert rules(attempt_verification_case_results) == rules(verification_case_results)
