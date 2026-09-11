@@ -119,7 +119,7 @@ React frontend built to static files, served on the API's origin.
 - [x] Show the per-case verdict beside the editor rather than on a page of its
       own. A sitting split over several pages is a workflow, and a workflow is
       not practised daily
-- [ ] Pause and resume the sitting from the page, and show it paused. A user
+- [x] Pause and resume the sitting from the page, and show it paused. A user
       who steps away otherwise records a duration the clock kept counting
 - [ ] Show the elapsed time during the sitting, counted from the start the API
       handed out. The engine records that duration, so the page shows the

@@ -9,6 +9,7 @@ export type Board = components['schemas']['Board']
 export type Card = components['schemas']['Card']
 export type Template = components['schemas']['Template']
 export type Submitted = components['schemas']['Submitted']
+export type Sitting = components['schemas']['Sitting']
 export type Failure = components['schemas']['Failure']
 export type Candidate = components['schemas']['Candidate']
 
