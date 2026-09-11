@@ -21,6 +21,7 @@ from algo_coach.calls.table import calls
 from algo_coach.cards.table import card_templates, cards
 from algo_coach.cases.table import test_cases
 from algo_coach.matches.table import template_matches
+from algo_coach.outcomes.table import site_outcomes
 from algo_coach.problems.table import problems
 from algo_coach.schema import (
     Call,
@@ -28,6 +29,7 @@ from algo_coach.schema import (
     ClaimSource,
     MachineProvenance,
     Problem,
+    SiteOutcome,
     Solution,
     SolutionClaim,
     Template,
@@ -53,6 +55,7 @@ STORED: list[Stored] = [
     ),
     Stored(SolutionClaim, solution_claims, through_call=True),
     Stored(TemplateMatch, template_matches, through_call=True),
+    Stored(SiteOutcome, site_outcomes, through_call=True, required=frozenset({"call_id"})),
     Stored(Solution, solutions, through_call=True, required=frozenset({"call_id"})),
 ]
 
@@ -303,3 +306,16 @@ def test_a_case_s_arguments_are_a_json_array():
     """The arguments are positional, and anything but an array reaches `solve`
     as one argument."""
     assert checks(test_cases)["test_cases_args_positional_check"] == "jsonb_typeof(args) = 'array'"
+
+
+def test_a_site_outcome_names_one_target_at_most():
+    """As on the draft and the problem, a writing had one target."""
+    assert checks(site_outcomes)["site_outcomes_one_target_check"] == (
+        "target_template_id IS NULL OR target_technique IS NULL"
+    )
+
+
+def test_an_outcome_s_writing_id_is_not_a_foreign_key():
+    """A landing clears the draft the writing id names, and a replay's writing
+    never had one."""
+    assert not site_outcomes.c.writing_id.foreign_keys
