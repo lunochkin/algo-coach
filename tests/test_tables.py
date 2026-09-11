@@ -1,5 +1,7 @@
+import sys
 from datetime import datetime
 from enum import StrEnum
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -16,7 +18,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from tables import Stored, mismatches
+from test_schema_additive import RECORDS
 
+import algo_coach
 from algo_coach.calls.table import calls
 from algo_coach.cards.table import card_templates, cards
 from algo_coach.cases.table import test_cases
@@ -136,6 +140,51 @@ def test_a_table_holds_exactly_its_record_s_fields(stored):
     """The tables and the pydantic models are declared apart, and a field added
     to one alone is a value the copy loses or a column nothing writes."""
     assert mismatches(stored) == []
+
+
+# the tables no record is stored in whole: the user is an id the records
+# reference, before any account fills it
+WITHOUT_A_RECORD = {"users"}
+
+
+def test_every_stored_record_has_a_table():
+    """A record left without one is a store the copy to Postgres skips."""
+    tabled = {one.record for one in STORED}
+
+    assert [one.__name__ for one in RECORDS if one not in tabled] == []
+
+
+def test_every_table_module_is_imported_here():
+    """A table module this file never imports puts no table on the metadata
+    the checks below read."""
+    source = Path(algo_coach.__file__).parent
+    declared = {
+        ".".join(("algo_coach", *path.relative_to(source).with_suffix("").parts))
+        for path in source.rglob("table.py")
+    }
+
+    assert sorted(declared - set(sys.modules)) == []
+
+
+def test_every_table_is_compared_with_its_record():
+    """A table no record is compared with is one a field can leave behind
+    unnoticed."""
+    compared = {one.table.name for one in STORED} | WITHOUT_A_RECORD
+
+    assert sorted(set(metadata.tables) - compared) == []
+
+
+def test_every_foreign_key_names_a_declared_table():
+    """A reference to a table nobody declared fails only when the migration
+    creates the tables, far from the table that named it."""
+    unresolved = [
+        f"{key.parent.table.name}.{key.parent.name} -> {key.target_fullname}"
+        for table in metadata.tables.values()
+        for key in table.foreign_keys
+        if key.column.table.name not in metadata.tables
+    ]
+
+    assert unresolved == []
 
 
 def test_every_table_is_declared_on_the_shared_metadata():

@@ -43,7 +43,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Declare the attempt claims table
 - [x] Declare the self-labels table
 - [x] Declare the diagnoses table
-- [ ] Check that every stored record has a table. A record left without one is
+- [x] Check that every stored record has a table. A record left without one is
       a store the copy to Postgres skips
 - [ ] Generate the first Alembic migration from those tables, creating every
       table
