@@ -148,6 +148,45 @@
         }
       }
     },
+    "/api/sittings/{sitting_id}": {
+      "get": {
+        "summary": "Sitting",
+        "operationId": "sitting_api_sittings__sitting_id__get",
+        "parameters": [
+          {
+            "name": "sitting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sitting Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Served"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/sittings/{sitting_id}/submissions": {
       "post": {
         "summary": "Submission",

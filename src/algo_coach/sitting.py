@@ -95,6 +95,23 @@ def serve(
     return Served(title=problem.title, statement=problem.statement, sitting=one)
 
 
+def get(
+    problems: ProblemStore,
+    sittings: SittingStore,
+    sitting_id: str,
+    *,
+    user_id: str,
+) -> Served:
+    """What `serve` returned for one of the user's sittings, ended or not. A
+    reload of the sitting's page starts no clock."""
+    one = _owned(sittings, sitting_id, user_id)
+    # the problem as stored, retired or not: the sitting was served before
+    problem = problems.get(one.problem_id)
+    if problem is None:
+        raise ValueError(f"sitting {sitting_id} names no stored problem {one.problem_id}")
+    return Served(title=problem.title, statement=problem.statement, sitting=one)
+
+
 def submit(
     sittings: SittingStore,
     cases: CaseLog,
@@ -201,11 +218,16 @@ def end(
     )
 
 
-def _running(store: SittingStore, sitting_id: str, user_id: str) -> Sitting:
+def _owned(store: SittingStore, sitting_id: str, user_id: str) -> Sitting:
     one = store.get(sitting_id)
     # another user's sitting reads as missing, so an id reveals nothing
     if one is None or one.user_id != user_id:
         raise Missing(f"no sitting {sitting_id}")
+    return one
+
+
+def _running(store: SittingStore, sitting_id: str, user_id: str) -> Sitting:
+    one = _owned(store, sitting_id, user_id)
     if one.ended_at is not None:
         raise Refused(f"sitting {sitting_id} has ended")
     return one

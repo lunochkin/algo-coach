@@ -5,8 +5,8 @@ from helpers import make_problem
 
 from algo_coach.log import SittingStore
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Sitting
-from algo_coach.sitting import Missing, Refused, Served, serve
+from algo_coach.schema import RetirementReason, Sitting
+from algo_coach.sitting import Missing, Refused, Served, get, serve
 
 BEGAN = datetime.now(UTC) - timedelta(hours=1)
 
@@ -101,3 +101,39 @@ def test_a_retired_problem_is_refused(tmp_path):
 
     with pytest.raises(Refused, match="retired"):
         serve(problems, SittingStore(tmp_path), "p1", user_id="u-4f9c2a")
+
+
+def test_a_sitting_is_read_back_as_it_was_served(stores):
+    """The sitting's page has its own URL, and a reload there needs the
+    statement without starting a clock."""
+    problems, sittings = stores
+    served = serve(problems, sittings, "p1", user_id="u-4f9c2a")
+
+    assert get(problems, sittings, served.sitting.id, user_id="u-4f9c2a") == served
+    assert len(sittings.all()) == 1
+
+
+def test_an_ended_sitting_is_still_read(stores):
+    """The claim is asked once the sitting ends, on the same page."""
+    problems, sittings = stores
+    sittings.put(a_sitting(ended_at=BEGAN + timedelta(minutes=30)))
+
+    assert get(problems, sittings, "s0", user_id="u-4f9c2a").sitting.ended_at is not None
+
+
+def test_a_sitting_on_a_since_retired_problem_is_still_read(stores):
+    """The statement was served before the retirement, and the attempts stay
+    with it."""
+    problems, sittings = stores
+    sittings.put(a_sitting())
+    problems.retire("p1", RetirementReason.DEFECTIVE)
+
+    assert get(problems, sittings, "s0", user_id="u-4f9c2a").title == "Rotated"
+
+
+def test_another_user_s_sitting_reads_as_missing(stores):
+    problems, sittings = stores
+    sittings.put(a_sitting(user_id="u-b71e03"))
+
+    with pytest.raises(Missing, match="no sitting"):
+        get(problems, sittings, "s0", user_id="u-4f9c2a")

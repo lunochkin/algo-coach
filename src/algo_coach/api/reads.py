@@ -20,7 +20,7 @@ from algo_coach.cards import CardStore, without_optional
 from algo_coach.log import AttemptLog, SittingStore, latest_by_attempt
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Attempt, Card, ProblemDifficulty
-from algo_coach.sitting import Served, serve
+from algo_coach.sitting import Served, get, serve
 from algo_coach.solution_claims import load_problems
 
 router = APIRouter()
@@ -84,6 +84,11 @@ def offered(root: Root, user_id: UserId, technique: str) -> list[Candidate]:
 @router.post("/problems/{problem_id}/sittings")
 def statement(root: Root, user_id: UserId, problem_id: str) -> Served:
     return serve(ProblemStore(root), SittingStore(root), problem_id, user_id=user_id)
+
+
+@router.get("/sittings/{sitting_id}")
+def sitting(root: Root, user_id: UserId, sitting_id: str) -> Served:
+    return get(ProblemStore(root), SittingStore(root), sitting_id, user_id=user_id)
 
 
 def _own(log: AttemptLog, user_id: str) -> list[Attempt]:

@@ -124,3 +124,17 @@ def test_serving_a_retired_problem_is_refused(client, tmp_path):
     ProblemStore(tmp_path).retire("p-sorting", RetirementReason.DEFECTIVE)
 
     assert client.post("/api/problems/p-sorting/sittings").status_code == 409
+
+
+def test_a_served_sitting_is_read_back_by_its_id(client):
+    """A reload of the sitting's page reaches the same statement and clock."""
+    served = client.post("/api/problems/p-sorting/sittings").json()
+
+    assert client.get(f"/api/sittings/{served['sitting']['id']}").json() == served
+
+
+def test_another_user_s_sitting_is_not_found(client, tmp_path):
+    sitting_id = client.post("/api/problems/p-sorting/sittings").json()["sitting"]["id"]
+    other = TestClient(create_app(tmp_path, user_id="u-b71e03"))
+
+    assert other.get(f"/api/sittings/{sitting_id}").status_code == 404
