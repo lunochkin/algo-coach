@@ -2,7 +2,8 @@
 after every test that uses it.
 
 The server is named by TEST_DATABASE_URL, from the environment or the repo's
-`.env`, and needs the right to create databases. A test taking the fixture is
+`.env`, and needs the right to create databases and to set
+`session_replication_role`, which a superuser has. A test taking the fixture is
 marked `integration`, and a run without a server deselects those. The databases
 the fixture creates are its own, `algo_coach_test_<worker>`, and never the one
 DATABASE_URL names.
@@ -37,15 +38,25 @@ def emptied(engine: Engine) -> None:
     """Every table the migrations created, and the append order restarted, so
     no test reads a row or a number another test left."""
     with engine.begin() as conn:
+        # DELETE, where TRUNCATE takes a lock and new files per table and costs
+        # a tenth of a second under a dozen workers. The replica role skips the
+        # triggers refusing a delete, and the foreign keys the order would
+        # otherwise have to follow
+        conn.execute(text("SET LOCAL session_replication_role = replica"))
         names = conn.execute(
             text(
                 "SELECT tablename FROM pg_tables WHERE schemaname = 'public'"
                 " AND tablename <> 'alembic_version'"
             )
         ).scalars()
-        listed = ", ".join(f'"{name}"' for name in names)
-        if listed:
-            conn.execute(text(f"TRUNCATE {listed} RESTART IDENTITY CASCADE"))
+        for name in names:
+            conn.execute(text(f'DELETE FROM "{name}"'))
+        conn.execute(
+            text(
+                "SELECT setval(format('%I.%I', schemaname, sequencename), 1, false)"
+                " FROM pg_sequences WHERE schemaname = 'public'"
+            )
+        )
 
 
 @pytest.fixture(scope="session")

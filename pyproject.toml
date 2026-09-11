@@ -38,8 +38,9 @@ dev = [
 
 [tool.pytest.ini_options]
 python_classes = []
-# The workers cost two seconds to start; `-n 0` for one file.
-addopts = "-n auto"
+# The workers cost two seconds to start; `-n 0` for one file. `worksteal`, since
+# the generation tests are slow and `load` leaves workers idle behind them
+addopts = "-n auto --dist worksteal"
 # a warning is a defect the interpreter noticed first: a leaked child, a
 # deprecated call. The runner's stop-early path leaked one before this was on
 filterwarnings = ["error"]
