@@ -161,18 +161,14 @@ def summary(results: Sequence[GenerationResult], aimed: list[Target], bench: Ben
     return f"{kept}, {wrote(bench)}"
 
 
-def resume_summary(
-    results: Sequence[Resumed], bench: Bench = BENCH, *, unaimed: int = 0, held_back: int = 0
-) -> str:
+def resume_summary(results: Sequence[Resumed], bench: Bench = BENCH, *, held_back: int = 0) -> str:
     """What the resumed drafts became, and where each run started."""
     line = f"{len(results)} draft(s) resumed, {counted(results, 'drafted')} stored"
-    # naming no template is apart from a failure: nothing was asked, since the
-    # form it names is not among the seeded cards. Held back is apart from held
-    # again: the run never started on it, and the listing names why
+    # held back is apart from held again: the run never started on it, and the
+    # listing names why
     line += tallied(
         (counted(results, "held"), "held again"),
         (counted(results, "failed"), "failed"),
-        (unaimed, "naming no template"),
         (held_back, "held before the loop"),
     )
     started = Counter(result.started_at for result in results)

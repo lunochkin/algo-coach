@@ -204,12 +204,3 @@ match-by-hand *args:
 # Match the corpus against a card's templates.
 match *args:
     uv run algo-coach match {{ args }}
-
-# --- analysis ---
-
-views:
-    duckdb -ui views.duckdb
-
-# Rebuild the SQL views over the logs.
-views-rebuild:
-    uv run --with duckdb python scripts/views.py

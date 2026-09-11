@@ -24,7 +24,6 @@ algo-coach = "algo_coach.cli:main"
 
 [dependency-groups]
 dev = [
-    "duckdb>=1.5",
     "httpx>=0.28.1",
     "hypothesis>=6.167.1",
     "import-linter>=2.15",
@@ -195,7 +194,6 @@ select = ["E", "W", "F", "I", "UP", "B", "SIM", "ANN401", "RUF100", "RUF022", "R
 [tool.ruff.lint.per-file-ignores]
 "src/algo_coach/cli/**" = ["T20"]
 "src/algo_coach/api/__main__.py" = ["T20"]
-"scripts/**" = ["T20"]
 ".claude/skills/**" = ["T20"]
 "tests/**" = ["T20"]
 

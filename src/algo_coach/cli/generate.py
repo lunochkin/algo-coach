@@ -145,15 +145,10 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Dat
     # settled before the first call, so the counter runs over what the sweep
     # resumes rather than over the store
     resumable: list[tuple[Target, Draft]] = []
-    unaimed = held_back = 0
+    held_back = 0
     for draft in waiting:
         target = written_for(cards, draft)
-        if target is None:
-            # the form its target named is gone, so nothing says what its
-            # search or its ladder would be
-            unaimed += 1
-            print(f"draft {draft.id}: no template {draft.target_template_id}", file=sys.stderr)
-        elif not advances(draft, target, bench):
+        if not advances(draft, target, bench):
             # the run would take the local steps and stop where the draft
             # stopped: nothing it reads moved, and `--drafts` names the reason
             held_back += 1
@@ -180,7 +175,7 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Dat
         reached.append((target, result))
 
     results = [result for _, result in reached]
-    closing = resume_summary(results, bench, unaimed=unaimed, held_back=held_back)
+    closing = resume_summary(results, bench, held_back=held_back)
     print(finale(reached, closing, calls.all()[before:]))
     if not any(result.drafted for result in results):
         parser.exit(1, "generate: no problem stored\n")
@@ -246,8 +241,7 @@ def rejected_by_hand(
     except ValueError as refused:
         parser.exit(2, f"generate: {refused}\n")
     target = written_for(CardStore(root).all(), left)
-    form = target.template.slug if target is not None else left.target_template_id
-    print(f"draft {left.id}: rejected {left.gate}, {form}")
+    print(f"draft {left.id}: rejected {left.gate}, {target.template.slug}")
 
 
 def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
@@ -320,10 +314,14 @@ def aimed_at_gaps(
     return aimed
 
 
-def written_for(cards: list[Card], draft: Draft) -> Target | None:
+def written_for(cards: list[Card], draft: Draft) -> Target:
     """The card and template a draft was written for, by the id it carries."""
-    for card in cards:
-        for template in card.templates:
-            if template.id == draft.target_template_id:
-                return Target(card=card, template=template)
-    return None
+    # a run writes a draft for a template, and the draft's foreign key keeps
+    # that template seeded
+    (target,) = (
+        Target(card=card, template=template)
+        for card in cards
+        for template in card.templates
+        if template.id == draft.target_template_id
+    )
+    return target

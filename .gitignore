@@ -15,8 +15,6 @@ mutants/
 .env
 data/
 content/
-# Built from the logs by scripts/views.py; holds view definitions, not data.
-views.duckdb
 CLAUDE.local.md
 
 .DS_Store

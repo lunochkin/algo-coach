@@ -332,9 +332,6 @@ a second generator call writes a different problem.
   draft waits.
 - **A resume is aimed at nothing**, as a replay is: the store is the input,
   so the flags that aim a write name no draft.
-- **A draft whose template is not seeded is skipped**, not resumed. A search
-  reads `speedup` from the form the target named, and the run reports the
-  drafts it could not aim.
 - **The store is listed by `generate --drafts`**, each draft named by its
   state, its gate and the step a resume would start at. A sweep is aimed at
   every held draft, and the listing shows the calls a sweep will spend before

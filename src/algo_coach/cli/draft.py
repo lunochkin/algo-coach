@@ -15,24 +15,20 @@ from algo_coach.schema import (
 )
 
 
-def listing(draft: Draft, target: Target | None, bench: Bench) -> str:
+def listing(draft: Draft, target: Target, bench: Bench) -> str:
     """One stored draft: the form its target named, how far it was written,
     and what it is waiting on."""
-    form = target.template.slug if target is not None else str(draft.target_template_id)
+    form = target.template.slug
     return f"{draft.id}  {form[:24]:<24}  {draft.state:<10}  {waiting_on(draft, target, bench)}"
 
 
-def waiting_on(draft: Draft, target: Target | None, bench: Bench) -> str:
+def waiting_on(draft: Draft, target: Target, bench: Bench) -> str:
     """What a resume would do with this draft. A terminal state names what put
     it there, since no step follows it."""
     if draft.state is WritingState.REJECTED:
         return f"rejected by {draft.gate}"
     if draft.state is WritingState.LANDED:
         return f"landed as {draft.problem_id}, cleared by the next run"
-    if target is None:
-        # the form its target named is not seeded, and a search reads `speedup`
-        # from it
-        return f"no template {draft.target_template_id}"
     if not advances(draft, target, bench):
         # the step `starts_at` names is past the search, and a draft with no
         # separating case is held before the loop: reporting that step would
@@ -42,7 +38,7 @@ def waiting_on(draft: Draft, target: Target | None, bench: Bench) -> str:
 
 
 def drafts_summary(
-    waiting: list[tuple[Draft, Target | None]], bench: Bench, *, listed: bool = True
+    waiting: list[tuple[Draft, Target]], bench: Bench, *, listed: bool = True
 ) -> str:
     """How many drafts a sweep would carry, apart from the ones it would pass
     over.
@@ -56,8 +52,7 @@ def drafts_summary(
     resuming = [
         draft
         for draft, target in waiting
-        if target is not None
-        and draft.state not in (WritingState.REJECTED, WritingState.LANDED)
+        if draft.state not in (WritingState.REJECTED, WritingState.LANDED)
         and advances(draft, target, bench)
     ]
     line = f"{len(waiting)} draft(s) stored, {len(resuming)} would resume"
@@ -69,7 +64,7 @@ def drafts_summary(
     return line
 
 
-def report(draft: Draft, target: Target | None, outcomes: list[SiteOutcome], bench: Bench) -> str:
+def report(draft: Draft, target: Target, outcomes: list[SiteOutcome], bench: Bench) -> str:
     """One draft as a page: where it stands, what each step was written at, the
     problem itself, and what the sites left."""
     return "\n".join(
@@ -99,11 +94,9 @@ def report(draft: Draft, target: Target | None, outcomes: list[SiteOutcome], ben
     )
 
 
-def heading(draft: Draft, target: Target | None) -> str:
-    """The form its target named and how far it was written. The id stands in
-    where the card is gone."""
-    form = target.template.slug if target is not None else str(draft.target_template_id)
-    return f"{form}, {draft.difficulty}, {draft.state}"
+def heading(draft: Draft, target: Target) -> str:
+    """The form its target named and how far it was written."""
+    return f"{target.template.slug}, {draft.difficulty}, {draft.state}"
 
 
 def cases(draft: Draft) -> list[str]:
