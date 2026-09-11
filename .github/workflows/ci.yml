@@ -1,4 +1,5 @@
-# One job, the same command a commit runs: lint, type-check, test.
+# One job, the same command a commit runs: lint, type-check, test, for the
+# engine and the frontend.
 name: ci
 
 on:
@@ -24,9 +25,13 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
       - uses: extractions/setup-just@v4
       - run: uv lock --check
       - run: uv sync
+      # the frontend's packages, which `just ci` type-checks and lints against
+      - run: npm ci --prefix web
       - run: just ci
       # a dependency declared and unused, or used and undeclared
       - run: uv run --with deptry deptry src
