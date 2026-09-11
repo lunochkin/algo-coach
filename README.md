@@ -433,14 +433,13 @@ docs/architecture/              concepts, boundaries, invariants, flows
 docs/{ROADMAP,TODO}.md          sequencing, and what is open
 .claude/skills/card-author/  the skill that authors cards
 content/cards/               the authored cards — never committed
-data/                        your attempts and solutions — never committed
 data/old/                    the archived corpus: calibration, not a store
 ```
 
 ## Your data stays yours
 
-Attempt logs, solutions and card content live under `data/` and `content/`,
-both gitignored. The schema is public. The data is not.
+Attempt logs and solutions live in Postgres, and card content under
+`content/`, which is gitignored. The schema is public. The data is not.
 
 ## Development
 

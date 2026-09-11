@@ -3,11 +3,9 @@ from datetime import UTC, datetime, timedelta
 
 from hypothesis import given
 from hypothesis import strategies as st
-from pydantic import BaseModel
 
 from algo_coach.runner import agrees, as_json
 from algo_coach.standing import latest_by, standing
-from algo_coach.storage import JsonlLog
 
 json_values = st.recursive(
     st.none() | st.booleans() | st.integers() | st.floats(allow_nan=False) | st.text(),
@@ -85,17 +83,3 @@ def test_the_weaker_writer_never_stands_where_the_stronger_wrote(machine, user):
     for key, record in stands.items():
         if record.source == "machine":
             assert not any(one.key == key for one in user)
-
-
-class Line(BaseModel):
-    n: int
-    text: str
-
-
-@given(st.lists(st.tuples(st.integers(), st.text()), max_size=20))
-def test_a_log_reads_back_what_was_appended_in_order(tmp_path_factory, rows):
-    """`storage`: append-only, read back in append order."""
-    log = JsonlLog(tmp_path_factory.mktemp("log"), "lines.jsonl", Line)
-    for n, text in rows:
-        log.append(Line(n=n, text=text))
-    assert [(one.n, one.text) for one in log.all()] == rows

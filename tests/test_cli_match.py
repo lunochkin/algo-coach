@@ -1,5 +1,5 @@
 import pytest
-from commands import TRANSPORT, data_root, run_cli
+from commands import TRANSPORT, connected, run_cli
 from helpers import FakeTransport, Verdict
 from matching import card, problem, seeded, stored
 
@@ -13,7 +13,7 @@ def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
 
 @pytest.fixture
 def root(database, monkeypatch):
-    data = data_root(database, monkeypatch)
+    data = connected(database, monkeypatch)
     seeded(data, card())
     # a match is keyed to a solution, and `stored` writes each problem's
     # canonical beside it
@@ -66,7 +66,7 @@ def test_a_missing_key_fails_before_the_run(root, monkeypatch, capsys):
 def test_by_hand_reaches_the_prompt_and_not_the_matcher(database, monkeypatch, capsys):
     """One command per record, and the flag picks the writer. With nothing
     seeded the prompt has nothing to ask, and no model is called."""
-    data_root(database, monkeypatch)
+    connected(database, monkeypatch)
 
     with pytest.raises(SystemExit) as exit_info:
         run_cli(monkeypatch, "match", "--by-hand")

@@ -2,7 +2,7 @@ import json
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from commands import data_root, run_cli
+from commands import connected, run_cli
 from helpers import logged, seed_problem
 
 from algo_coach.board import TechniqueRow
@@ -24,7 +24,7 @@ T0 = datetime(2026, 1, 1, tzinfo=UTC)
 @pytest.fixture
 def board_root(database, monkeypatch) -> AttemptLog:
     """A store holding one greedy problem, and a log of attempts on it."""
-    root = data_root(database, monkeypatch)
+    root = connected(database, monkeypatch)
     seed_problem(root, id="minted-u1", techniques=["greedy", "sorting"])
     return AttemptLog(root)
 

@@ -3,7 +3,6 @@
 import argparse
 import os
 from collections.abc import Callable
-from pathlib import Path
 from typing import TypedDict
 
 from dotenv import find_dotenv, load_dotenv
@@ -26,15 +25,13 @@ from algo_coach.cli.seed import BadLine, seed
 from algo_coach.runs import CONCURRENCY
 from algo_coach.storage import Database
 
-DATA_ROOT = Path("data")
-
 # What a shell reports for a command its user stopped: 128 plus the signal.
 INTERRUPTED = 130
 
 # a parser or one of its groups: both take `add_argument`
 Flags = argparse._ActionsContainer  # pyright: ignore[reportPrivateUsage]
 
-__all__ = ["DATA_ROOT", "INTERRUPTED", "BadLine", "main"]
+__all__ = ["INTERRUPTED", "BadLine", "main"]
 
 
 class _Defaults(argparse.ArgumentDefaultsHelpFormatter):
@@ -314,8 +311,8 @@ def main() -> None:
     _user_argument(movement_parser)
 
     args = parser.parse_args()
-    # Read at call time, not at import: tests point DATA_ROOT elsewhere.
-    root = Database(DATA_ROOT, url=os.environ.get("DATABASE_URL"))
+    # read at call time, not at import: a test names its own database
+    root = Database(url=os.environ.get("DATABASE_URL"))
     try:
         dispatch(args, parser, root)
     except KeyboardInterrupt:

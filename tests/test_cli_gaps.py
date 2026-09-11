@@ -1,5 +1,5 @@
 import pytest
-from commands import data_root, run_cli
+from commands import connected, run_cli
 from matching import canonical, card, problem, seeded, stored, template
 
 from algo_coach.matches import MatchLog
@@ -13,7 +13,7 @@ def run(monkeypatch, *argv: str) -> None:
 @pytest.fixture
 def root(database, monkeypatch):
     """One card of two core forms, and a canonical displaying one of them."""
-    data = data_root(database, monkeypatch)
+    data = connected(database, monkeypatch)
     cards = seeded(data, card(templates=[template("fixed-window"), template("shrink-to-fit")]))
     stored(data, problem("p1", techniques=["sliding-window"]))
     # stored beside the problem, as its claim names it
@@ -42,7 +42,7 @@ def test_every_core_template_under_all(root, monkeypatch, capsys):
 
 
 def test_an_empty_store_reports_no_template(database, monkeypatch, capsys):
-    data_root(database, monkeypatch)
+    connected(database, monkeypatch)
 
     run(monkeypatch)
 

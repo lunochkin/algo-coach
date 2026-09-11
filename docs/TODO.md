@@ -66,8 +66,8 @@ backend for our own generated code, which is not a threat model.
       store is working state
 - [x] Rewrite the sittings store on Postgres, its tests on the fixture
 - [x] Rewrite the attempt log on Postgres, its tests on the fixture
-- [ ] Connect the CLI and the API to Postgres through `DATABASE_URL`
-- [ ] Delete `JsonlLog`, `FileStore` and the copy script, and stop writing
+- [x] Connect the CLI and the API to Postgres through `DATABASE_URL`
+- [x] Delete `JsonlLog`, `FileStore` and the copy script, and stop writing
       `data/`, keeping `data/old/`. One backend is one set of write semantics
 - [ ] Refuse an update or a delete on an append-only table in the database
       itself, by grant or by trigger. A write path that skips the log's rule

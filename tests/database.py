@@ -77,11 +77,10 @@ def database_engine(worker_id: str) -> Iterator[Engine]:
 
 
 @pytest.fixture
-def database(database_engine: Engine, tmp_path: Path) -> Iterator[Database]:
+def database(database_engine: Engine) -> Iterator[Database]:
     """The handle a test builds its stores from: the worker's database, empty
-    when the test starts and emptied after, and the test's own directory for a
-    store still on files."""
-    handle = Database(tmp_path, engine=database_engine)
+    when the test starts but for the helper call, and emptied after."""
+    handle = Database(engine=database_engine)
     shared(handle)
     yield handle
     emptied(database_engine)

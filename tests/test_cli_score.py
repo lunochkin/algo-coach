@@ -2,7 +2,7 @@ import re
 from datetime import timedelta
 
 import pytest
-from commands import TRANSPORT, data_root, run_cli
+from commands import TRANSPORT, connected, run_cli
 from helpers import T0, FakeTransport, Verdict, attempt, logged, seed_problem
 
 from algo_coach import cli
@@ -34,7 +34,7 @@ def stored_claim(attempt_id: str, techniques: list[str], *, model: str = MODEL):
 
 @pytest.fixture
 def hand_claimed(database, monkeypatch):
-    data = data_root(database, monkeypatch)
+    data = connected(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -264,7 +264,7 @@ def test_a_stored_run_over_nothing_read_exits_nonzero(hand_claimed, monkeypatch,
 
 def test_nothing_hand_claimed_exits_nonzero(database, monkeypatch, capsys):
     """No ground truth is not a score of zero — there is nothing to score."""
-    data = data_root(database, monkeypatch)
+    data = connected(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     AttemptLog(data).append_attempt(attempt("a1", "two-codes"))
 

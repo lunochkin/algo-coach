@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from commands import TRANSPORT, data_root
+from commands import TRANSPORT, connected
 from helpers import FakeTransport, Verdict
 
 from algo_coach import cli
@@ -11,7 +11,7 @@ from algo_coach import cli
 def cwd(database, tmp_path, monkeypatch):
     """The working directory every test already runs in, empty of a `.env`
     until one of these writes it."""
-    data_root(database, monkeypatch)
+    connected(database, monkeypatch)
     answering = FakeTransport.answering(Verdict(["greedy"]))
     monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: answering)
     monkeypatch.setattr("sys.argv", ["algo-coach", "claim", "attempts", "--user", "u1"])

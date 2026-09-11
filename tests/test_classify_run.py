@@ -2,7 +2,7 @@ import threading
 from datetime import timedelta
 
 import pytest
-from commands import data_root
+from commands import connected
 from helpers import T0, FakeTransport, Verdict, attempt, logged, machine_claim, own, seed_problem
 
 from algo_coach.attempt_claims import classify_backlog, standing_attempt_claims
@@ -24,7 +24,7 @@ def backlog(database, monkeypatch) -> AttemptLog:
     root = database
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     seed_problem(root, id="one-tag", techniques=["trie"])
-    data_root(root, monkeypatch)
+    connected(root, monkeypatch)
 
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "two-codes"))

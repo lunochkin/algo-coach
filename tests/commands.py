@@ -2,7 +2,6 @@
 
 from algo_coach import cli
 from algo_coach.cli import transport as TRANSPORT
-from algo_coach.storage import Database, directory
 
 
 def run_cli(monkeypatch, *argv: str, client=None) -> None:
@@ -15,12 +14,9 @@ def run_cli(monkeypatch, *argv: str, client=None) -> None:
     cli.main()
 
 
-def data_root(database, monkeypatch):
-    """Points the command under test at the test's own stores: its directory as
-    `DATA_ROOT`, its database as the one DATABASE_URL names. Returns the handle
-    the test seeds those stores through."""
-    monkeypatch.setattr(cli, "DATA_ROOT", directory(database))
-    if isinstance(database, Database):
-        url = database.engine.url.render_as_string(hide_password=False)
-        monkeypatch.setenv("DATABASE_URL", url)
+def connected(database, monkeypatch):
+    """Points the command under test at the test's database, the one
+    DATABASE_URL names, and returns the handle the test seeds it through."""
+    url = database.engine.url.render_as_string(hide_password=False)
+    monkeypatch.setenv("DATABASE_URL", url)
     return database

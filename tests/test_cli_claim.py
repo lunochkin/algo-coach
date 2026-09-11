@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from commands import data_root, run_cli
+from commands import connected, run_cli
 from database import emptied, shared
 from helpers import logged, seed_problem
 
@@ -16,7 +16,6 @@ from algo_coach.schema import (
     Kind,
     MachineProvenance,
 )
-from algo_coach.storage import Database
 from algo_coach.techniques import criteria, criterion
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
@@ -42,7 +41,7 @@ def attempt(
 @pytest.fixture
 def claim_root(database, monkeypatch) -> AttemptLog:
     """One two-tag problem and one single-tag problem, an attempt on each."""
-    root = data_root(database, monkeypatch)
+    root = connected(database, monkeypatch)
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     seed_problem(root, id="one-tag", techniques=["trie"])
 
@@ -169,7 +168,7 @@ def test_the_machine_verdict_is_never_shown(claim_root, monkeypatch, capsys):
 
 def test_an_attempt_without_code_is_not_offered(database, monkeypatch, capsys):
     """The evidence is the code; without it there is nothing to read."""
-    root = data_root(database, monkeypatch)
+    root = connected(database, monkeypatch)
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     AttemptLog(root).append_attempt(attempt("a1", "two-codes", code=None))
 
@@ -186,7 +185,7 @@ def test_the_code_is_shown(claim_root, monkeypatch, capsys):
 
 
 def test_a_long_solution_is_cut_and_says_so(database, monkeypatch, capsys):
-    root = data_root(database, monkeypatch)
+    root = connected(database, monkeypatch)
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
     AttemptLog(root).append_attempt(attempt("a1", "two-codes", code="\n".join("x" * 50)))
 
@@ -199,7 +198,7 @@ def retried(root, monkeypatch, *attempts: Attempt) -> AttemptLog:
     """Several attempts on one two-tag problem — a problem that took
     retries."""
     seed_problem(root, id="two-codes", techniques=["greedy", "sorting"])
-    data_root(root, monkeypatch)
+    connected(root, monkeypatch)
     log = AttemptLog(root)
     for one in attempts:
         log.append_attempt(one)
@@ -302,7 +301,7 @@ def seed_many(root, count: int) -> AttemptLog:
 
 
 def test_count_caps_how_many_are_asked_about(database, monkeypatch, capsys):
-    root = data_root(database, monkeypatch)
+    root = connected(database, monkeypatch)
     log = seed_many(root, 5)
 
     run(monkeypatch, ["1", "", "1", ""], "--count", "2")
@@ -313,7 +312,7 @@ def test_count_caps_how_many_are_asked_about(database, monkeypatch, capsys):
 def test_the_sample_is_spread_across_techniques(database, monkeypatch, capsys):
     """A pile of one pair of tags does not take the whole sample: the rare
     problem is asked about before a sixth greedy one."""
-    root = data_root(database, monkeypatch)
+    root = connected(database, monkeypatch)
     log = seed_many(root, 5)
     seed_problem(root, id="rare", techniques=["backtracking", "trie"])
     log.append_attempt(attempt("a-rare", "rare"))
@@ -335,7 +334,7 @@ def test_the_technique_flag_narrows_the_pool(claim_root, monkeypatch, capsys):
 
 
 def seeded_store(root, monkeypatch) -> AttemptLog:
-    data_root(root, monkeypatch)
+    connected(root, monkeypatch)
     return seed_many(root, 6)
 
 
@@ -345,12 +344,10 @@ def test_the_same_seed_asks_in_the_same_order(database, monkeypatch, capsys):
     first = seeded_store(database, monkeypatch)
     run(monkeypatch, ["1", "", "1", "", "1", ""], "--count", "3")
     asked = [claim.attempt_id for claim in first.claims()]
-    # the same log written again from nothing: an empty database, and a
-    # directory of its own for the stores still on files
+    # the same log written again from nothing
     emptied(database.engine)
     shared(database)
-    again = Database(database.directory / "again", engine=database.engine)
-    second = seeded_store(again, monkeypatch)
+    second = seeded_store(database, monkeypatch)
     run(monkeypatch, ["1", "", "1", "", "1", ""], "--count", "3")
 
     assert asked == [claim.attempt_id for claim in second.claims()]
@@ -367,7 +364,7 @@ def test_a_claimed_attempt_drops_out_of_the_pool(database, monkeypatch, capsys):
 
 
 def test_ending_early_keeps_what_landed(database, monkeypatch, capsys):
-    root = data_root(database, monkeypatch)
+    root = connected(database, monkeypatch)
     log = seed_many(root, 4)
 
     run(monkeypatch, ["1", "a"])
@@ -427,7 +424,7 @@ def test_a_retired_candidate_costs_its_own_criterion_and_nothing_else(
 ):
     """Records outlive the vocabulary, so a stored problem can name a code the
     criteria no longer hold. It is still a legal claim."""
-    root = data_root(database, monkeypatch)
+    root = connected(database, monkeypatch)
     seed_problem(root, id="retired", techniques=["greedy", "dynamic-programming-2d"])
     log = AttemptLog(root)
     log.append_attempt(attempt("a1", "retired"))

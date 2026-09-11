@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 import pytest
-from commands import data_root
+from commands import connected
 from helpers import own
 
 from algo_coach import cli
@@ -156,14 +156,14 @@ def test_empty_batch(database):
     assert result.rejected == []
 
 
-def test_seed_cards_command_over_a_directory(database, monkeypatch, capsys):
-    source = database.directory / "authored"
+def test_seed_cards_command_over_a_directory(database, tmp_path, monkeypatch, capsys):
+    source = tmp_path / "authored"
     source.mkdir()
     (source / "binary-search.json").write_text(json.dumps(record()))
     (source / "union-find.json").write_text(
         json.dumps(record("union-find", technique="union-find"))
     )
-    data_root(database, monkeypatch)
+    connected(database, monkeypatch)
     monkeypatch.setattr("sys.argv", ["algo-coach", "seed", "cards", str(source)])
 
     cli.main()
@@ -172,10 +172,10 @@ def test_seed_cards_command_over_a_directory(database, monkeypatch, capsys):
     assert json.loads(capsys.readouterr().out)["ingested"] == 2
 
 
-def test_seed_cards_command_over_one_file(database, monkeypatch, capsys):
-    source = database.directory / "binary-search.json"
+def test_seed_cards_command_over_one_file(database, tmp_path, monkeypatch, capsys):
+    source = tmp_path / "binary-search.json"
     source.write_text(json.dumps(record()))
-    data_root(database, monkeypatch)
+    connected(database, monkeypatch)
     monkeypatch.setattr("sys.argv", ["algo-coach", "seed", "cards", str(source)])
 
     cli.main()
@@ -183,10 +183,10 @@ def test_seed_cards_command_over_one_file(database, monkeypatch, capsys):
     assert len(own(CardStore(database).all())) == 1
 
 
-def test_a_rejected_card_exits_nonzero(database, monkeypatch, capsys):
-    source = database.directory / "broken.json"
+def test_a_rejected_card_exits_nonzero(database, tmp_path, monkeypatch, capsys):
+    source = tmp_path / "broken.json"
     source.write_text(json.dumps({"slug": "half-written"}))
-    data_root(database, monkeypatch)
+    connected(database, monkeypatch)
     monkeypatch.setattr("sys.argv", ["algo-coach", "seed", "cards", str(source)])
 
     with pytest.raises(SystemExit) as exit:
@@ -196,12 +196,12 @@ def test_a_rejected_card_exits_nonzero(database, monkeypatch, capsys):
     assert json.loads(capsys.readouterr().out)["rejected"]
 
 
-def test_a_file_that_is_not_json_never_reaches_the_engine(database, monkeypatch, capsys):
+def test_a_file_that_is_not_json_never_reaches_the_engine(database, tmp_path, monkeypatch, capsys):
     """Corrupt transport, not an invalid card: it cannot come back as a
     rejection, since nothing validated it."""
-    source = database.directory / "broken.json"
+    source = tmp_path / "broken.json"
     source.write_text("{")
-    data_root(database, monkeypatch)
+    connected(database, monkeypatch)
     monkeypatch.setattr("sys.argv", ["algo-coach", "seed", "cards", str(source)])
 
     with pytest.raises(SystemExit) as exit:

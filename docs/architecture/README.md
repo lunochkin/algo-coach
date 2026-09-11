@@ -277,9 +277,9 @@ times. Each record class is specified in one of the files beside it.
   - A path naming no file is answered with `index.html`. The frontend routes
     its pages by URL, so a reload of any page reaches the app rather than a
     404.
-- **Storage is concrete for now**: JSON files under a gitignored directory,
-  moving to Postgres when Phase 9 hosts the engine. The schema is the
-  contract, and storage swaps underneath it.
+- **Storage is one Postgres database**, named by `DATABASE_URL`, and every
+  store writes there. The schema is the contract, and the tables are declared
+  against it.
   - The engine reaches Postgres through SQLAlchemy Core, and Alembic applies
     the migrations. The tables are declared once in Python, so a field added
     to a record is one column and one generated migration, where hand-written
@@ -375,9 +375,8 @@ Rules on how this repo is built, rather than properties of the running system.
   own schema, and a field kept for a handful of disposable records is one every
   reader branches on forever.
 - `data/` and `content/` are gitignored, and only the schema is public. The
-  generated corpus could be committed, since the product owns it, and is not:
-  those directories also hold the private log, and storage moves to a database
-  before the corpus ships anywhere.
+  generated corpus could be published, since the product owns it, and is not:
+  the database holding the corpus also holds the private log.
 - Prefer tools and functions over agents. Multi-agent is adopted once a
   pipeline needs it, never as the starting structure.
 

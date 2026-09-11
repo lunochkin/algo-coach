@@ -11,7 +11,7 @@ def client(database):
 
     @app.get("/whose")
     def whose(root: Root, user_id: UserId) -> dict[str, str]:
-        return {"root": str(root.directory), "user_id": user_id}
+        return {"database": str(root.engine.url.database), "user_id": user_id}
 
     @app.get("/missing")
     def missing() -> None:
@@ -28,10 +28,13 @@ def client(database):
     return TestClient(app, raise_server_exceptions=False)
 
 
-def test_a_route_reads_the_store_root_and_the_user_the_app_was_built_with(client, tmp_path):
+def test_a_route_reads_the_database_and_the_user_the_app_was_built_with(client, database):
     """One user stands in for authentication, and a route takes neither from
     the request."""
-    assert client.get("/whose").json() == {"root": str(tmp_path), "user_id": "u-4f9c2a"}
+    assert client.get("/whose").json() == {
+        "database": database.engine.url.database,
+        "user_id": "u-4f9c2a",
+    }
 
 
 def test_a_record_the_user_cannot_reach_answers_not_found(client):

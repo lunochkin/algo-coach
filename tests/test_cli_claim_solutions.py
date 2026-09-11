@@ -1,5 +1,5 @@
 import pytest
-from commands import data_root, run_cli
+from commands import connected, run_cli
 from helpers import FakeTransport, Verdict
 from matching import canonicals, problem, stored
 
@@ -14,7 +14,7 @@ def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
 
 @pytest.fixture
 def root(database, monkeypatch):
-    data = data_root(database, monkeypatch)
+    data = connected(database, monkeypatch)
     corpus = stored(data, problem("p1", techniques=[]))
     for one in canonicals(*corpus):
         SolutionLog(data).append(one)

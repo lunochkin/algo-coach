@@ -1,5 +1,5 @@
 import pytest
-from commands import data_root, run_cli
+from commands import connected, run_cli
 from helpers import attempt, logged, machine_claim, seed_problem
 
 from algo_coach.log import AttemptLog
@@ -12,7 +12,7 @@ def run(monkeypatch, *argv: str) -> None:
 
 @pytest.fixture
 def classified(database, monkeypatch) -> AttemptLog:
-    data = data_root(database, monkeypatch)
+    data = connected(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -32,7 +32,7 @@ def test_the_command_reports_what_the_claims_took_away(classified, monkeypatch, 
 def test_a_hand_claim_is_not_the_classifier_s_movement(database, monkeypatch, capsys):
     """A user claim narrows for a different reason; crediting the machine with
     it would read as a classifier that decided something."""
-    data = data_root(database, monkeypatch)
+    data = connected(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     log = AttemptLog(data)
     log.append_attempt(attempt("a1", "two-codes"))
@@ -46,7 +46,7 @@ def test_a_hand_claim_is_not_the_classifier_s_movement(database, monkeypatch, ca
 
 
 def test_nothing_classified_exits_nonzero(database, monkeypatch, capsys):
-    data = data_root(database, monkeypatch)
+    data = connected(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     AttemptLog(data).append_attempt(attempt("a1", "two-codes"))
 

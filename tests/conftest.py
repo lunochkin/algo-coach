@@ -1,9 +1,6 @@
 import pytest
-from helpers import GENERATED
 
 from algo_coach.cli.transport import CREDENTIALS
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import Problem
 
 # the Postgres fixtures, one database per worker
 pytest_plugins = ["database"]
@@ -28,33 +25,3 @@ def off_the_developer_machine(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     for name in ("ALGO_COACH_USER", "DATABASE_URL", *CREDENTIALS):
         monkeypatch.delenv(name, raising=False)
-
-
-def seed_problem(store: ProblemStore, *, id: str) -> None:
-    store.put(
-        Problem(
-            id=id,
-            title="Two Sum",
-            statement="Given an array, return ...",
-            **GENERATED,
-        )
-    )
-
-
-@pytest.fixture
-def problems(tmp_path) -> ProblemStore:
-    """Two stored problems. An attempt names a minted `problem_id`, so what a
-    test needs from here is something to point at."""
-    store = ProblemStore(tmp_path)
-    seed_problem(store, id="minted-u1")
-    seed_problem(store, id="minted-u2")
-    return store
-
-
-@pytest.fixture
-def data_root(database) -> ProblemStore:
-    """The same seeding, under the directory the CLI treats as DATA_ROOT."""
-    store = ProblemStore(database)
-    seed_problem(store, id="minted-u1")
-    seed_problem(store, id="minted-local")
-    return store

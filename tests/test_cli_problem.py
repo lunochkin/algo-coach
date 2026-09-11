@@ -1,5 +1,5 @@
 import pytest
-from commands import data_root, run_cli
+from commands import connected, run_cli
 from generating import FakeWriter
 from matching import card, seeded, template
 
@@ -15,7 +15,7 @@ SLOW = "import time\n\n\ndef solve(xs):\n    time.sleep(len(xs) * 0.04)\n    ret
 
 @pytest.fixture
 def root(database, monkeypatch):
-    data = data_root(database, monkeypatch)
+    data = connected(database, monkeypatch)
     return data
 
 

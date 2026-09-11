@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 import pytest
-from commands import TRANSPORT, data_root, run_cli
+from commands import TRANSPORT, connected, run_cli
 from generating import FakeWriter, Raises
 from helpers import own
 from matching import card, seeded, template
@@ -38,7 +38,7 @@ def run(monkeypatch, model: FakeWriter, *argv: str) -> None:
 
 @pytest.fixture
 def root(database, monkeypatch):
-    data = data_root(database, monkeypatch)
+    data = connected(database, monkeypatch)
     seeded(data, card())
     return data
 

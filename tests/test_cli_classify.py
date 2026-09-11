@@ -1,5 +1,5 @@
 import pytest
-from commands import TRANSPORT, data_root, run_cli
+from commands import TRANSPORT, connected, run_cli
 from helpers import FakeTransport, Verdict, attempt, logged, machine_claim, seed_problem
 
 from algo_coach import cli
@@ -15,7 +15,7 @@ def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
 
 @pytest.fixture
 def root(database, monkeypatch):
-    data = data_root(database, monkeypatch)
+    data = connected(database, monkeypatch)
     seed_problem(data, id="two-codes", techniques=["greedy", "sorting"])
     AttemptLog(data).append_attempt(attempt("a1", "two-codes"))
     return data
