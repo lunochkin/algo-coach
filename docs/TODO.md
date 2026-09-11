@@ -79,26 +79,39 @@ backend for our own generated code, which is not a threat model.
 
 ### Users and access
 
-- [ ] Choose the bought account provider, and write into
-      `docs/architecture/README.md` what it holds: the identity and the login,
-      and nothing of the practice log. No credential handling is our own
-- [ ] Link each provider account to a row of the users table, minted the first
-      time the account signs in. `README.md` requires every reference in an
-      append-only record to be engine-minted, and a provider switch would
-      otherwise rewrite the log
+- [ ] Write into `docs/architecture/README.md` that Google and GitHub hold each
+      identity and its login, and the engine holds the sessions and no
+      password. No credential handling is our own
+- [ ] Add an `identities` table linking a provider's user id to a row of the
+      users table, minted the first time the account signs in. `README.md`
+      requires every reference in an append-only record to be engine-minted,
+      and a provider switch would otherwise rewrite the log
+- [ ] Add the Google and GitHub sign-in and callback routes through Authlib. The
+      library checks the state, the nonce and PKCE, where a hand-written flow
+      goes wrong
+- [ ] Add a `sessions` table, and set a session's id in an `HttpOnly`,
+      `SameSite=Lax` cookie at the callback. A stored session can be revoked,
+      where a signed token stands until it expires
+- [ ] Add a dev login, enabled by `ALGO_COACH_DEV_LOGIN`, that signs in as a
+      named user with no provider. The app refuses to start with it unless
+      bound to `127.0.0.1`, so the flag cannot open a deployed engine
 - [ ] Decide how the records written under the user `local` reach the author's
       account, and write the choice into `log.md`. Those records are the
       author's history, and the log is append-only
 - [ ] Read the user in `UserId` from a verified session, in place of the id
       the app was built with. Every route already takes the user through that
       one dependency
+- [ ] Refuse a write route whose request body is not JSON. A form on another
+      site cannot send JSON without a preflight, so the check stops a forged
+      write the cookie would otherwise carry
 - [ ] Add login and logout to the pages, and send a request without a session
       to the login. The session cookie stays on the pages' origin
 - [ ] Make one user's log readable and deletable without touching another's.
       The author's own log is the evidence of daily use and the set every eval
       reads, and must not mix with another user's
-- [ ] Gate access on an invitation. Untrusted execution behind open
-      registration is an abuse surface with no upside at this size
+- [ ] Gate sign-in on an `invitations` table of emails, checked at the
+      callback. Untrusted execution behind open registration is an abuse
+      surface with no upside at this size
 
 ### The deployment
 

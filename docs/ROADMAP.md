@@ -206,8 +206,8 @@ each person signs in to a log of their own, and their code runs in a sandbox.
 
 - Storage moves from JSON files to Postgres, behind the store interfaces the
   domain already calls, with the append-only rule held by the database.
-- Accounts are bought rather than built, and the log keys on a user id the
-  engine mints.
+- Sign-in is through Google and GitHub, with sessions the engine keeps and no
+  password stored, and the log keys on a user id the engine mints.
 - One person's log is separable and deletable without touching another's.
 - Access is by invitation.
 - The pages and the API are deployed on one origin, with the database backed
