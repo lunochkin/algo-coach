@@ -298,6 +298,9 @@ times. Each record class is specified in one of the files beside it.
     card's templates. A list of strings is a `text[]` column.
   - JSONB holds a value only where the value is JSON of any shape by design,
     as a test case's arguments and its expected value are.
+  - A machine record's table holds its `call_id`, a foreign key to `calls`,
+    and none of the configuration. `machine.md` gives why the configuration
+    is stored once.
   - A field added to a record is a nullable column added by a migration, which
     is the additive rule in `## Repo constraints`. A test compares each table's
     columns with its record's fields, since the two are declared apart.

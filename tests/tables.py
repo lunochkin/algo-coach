@@ -12,6 +12,8 @@ from pydantic import BaseModel
 from sqlalchemy import Boolean, Column, DateTime, Enum, Float, Integer, String, Table
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
+from algo_coach.schema import MachineProvenance
+
 
 @dataclass(frozen=True)
 class Stored:
@@ -22,11 +24,22 @@ class Stored:
     # fields held somewhere other than this table's columns: a list of records
     # in its child table, or a derived view no store writes
     elsewhere: frozenset[str] = field(default_factory=frozenset)
+    # a machine record: the configuration is read from the call its `call_id`
+    # names, so the table holds none of it
+    through_call: bool = False
+    # optional in the annotation and required by the record's validator, so the
+    # column is NOT NULL
+    required: frozenset[str] = field(default_factory=frozenset)
 
 
 def mismatches(stored: Stored) -> list[str]:
     name = stored.table.name
-    expected = _expected(stored.record, stored.elsewhere)
+    configuration = frozenset(MachineProvenance.model_fields) - {"call_id"}
+    expected = _expected(
+        stored.record, stored.elsewhere | (configuration if stored.through_call else frozenset())
+    )
+    for one in stored.required:
+        expected[one] = (expected[one][0], False)
     actual = {one.name: one for one in stored.table.columns if one.name not in stored.structural}
     found = [
         f"{name}: no column for the field {one}" for one in sorted(expected.keys() - actual.keys())

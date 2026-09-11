@@ -23,8 +23,8 @@ fields to stay comparable, and those fields are stated here once.
   The naive site writes the approach the form replaces, and the speedup search
   measures the canonical against it. One configuration over all five sites
   makes the cheapest site pay the price of the hardest.
-- **A run mixing models stays readable, because each record copies its own
-  call's configuration.** The problem names the call that wrote it, its
+- **A run mixing models stays readable, because each record names its own
+  call.** The problem names the call that wrote it, its
   reference names the call written blind, and a case won by a round names the
   call that proposed it. No record reads a run-wide configuration, so there is
   none to be wrong.
@@ -72,10 +72,18 @@ fields to stay comparable, and those fields are stated here once.
   forget to bump a version while the text moves. A prompt hash moves with the
   text. The cost is that a reflowed sentence re-derives what it reaches, and
   that the criteria are cited as a prompt hash rather than as "prompt 3".
-- **The record's own copy of the configuration cannot drift**, because a call
-  is append-only and the copy is made in the same write. The copy exists so the
-  log reads alone: loading the calls to learn which model produced a record
-  would put a megabyte-scale read on every command.
+- **The configuration is stored once, on the call, and a record references
+  the call.** A record carries its provenance whole when it is read, and the
+  store fills the fields from the call the record names. One call writes many
+  records, as a generation call writes a problem's cases, so a copy on each
+  record would be a second place for the configuration to disagree.
+- **The JSON stores copied the configuration onto every record.** Loading the
+  call log to learn which model wrote a record was a megabyte-scale read on
+  every command. On Postgres the call is one indexed row away, and every
+  stored copy matched its call when the stores moved.
+- **A call is never deleted while a record references it.** The call log is
+  append-only already. Generation's calls are product data, and only the
+  classifier's calls on a user's attempts are that user's.
 - **The precedence is a reader, not a write path.** Preferring the user's
   record on read makes overwriting the evidence unrepresentable, where a write
   path that skips what the user answered depends on every writer remembering

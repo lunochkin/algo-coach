@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from tables import Stored, mismatches
 
 from algo_coach.schema import MachineProvenance
-from algo_coach.storage import enumerated, metadata, provenance_columns, timestamp
+from algo_coach.storage import call_column, enumerated, metadata, timestamp
 
 # every stored record and its table. Each store adds its own as its tables land
 STORED: list[Stored] = []
@@ -28,10 +28,37 @@ def test_every_table_is_declared_on_the_shared_metadata():
     assert all(one.table.metadata is metadata for one in STORED)
 
 
-def test_the_provenance_columns_are_the_fields_every_machine_record_inherits():
-    table = Table("provenance", MetaData(), *provenance_columns())
+def test_a_machine_record_holds_its_call_and_none_of_the_configuration():
+    """`machine.md`: the configuration is stored once, on the call."""
+    table = Table("provenance", MetaData(), call_column(nullable=True))
 
-    assert mismatches(Stored(MachineProvenance, table)) == []
+    assert mismatches(Stored(MachineProvenance, table, through_call=True)) == []
+
+
+def test_the_call_column_references_the_calls_table():
+    (key,) = call_column(nullable=False).foreign_keys
+
+    assert key.target_fullname == "calls.id"
+
+
+def test_a_copied_configuration_column_is_reported_on_a_machine_record():
+    table = Table("provenance", MetaData(), call_column(nullable=True), Column("model", Text))
+
+    assert mismatches(Stored(MachineProvenance, table, through_call=True)) == [
+        "provenance.model: no field"
+    ]
+
+
+def test_a_field_the_validator_requires_is_a_not_null_column():
+    """A generated problem always names its call, though a user's claim of the
+    same shape does not."""
+    table = Table("provenance", MetaData(), call_column(nullable=False))
+    stored = Stored(MachineProvenance, table, through_call=True, required=frozenset({"call_id"}))
+
+    assert mismatches(stored) == []
+    assert mismatches(Stored(MachineProvenance, table, through_call=True)) == [
+        "provenance.call_id: the field wants it nullable"
+    ]
 
 
 # built by call rather than by a class statement: the dead-code check reports a

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import Column, DateTime, Double, Enum, MetaData, Text
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, MetaData, Text
 
 
 class JsonlLog[T: BaseModel]:
@@ -94,19 +94,9 @@ def timestamp() -> DateTime:
     return DateTime(timezone=True)
 
 
-def provenance_columns() -> list[Column[Any]]:
-    """The columns of `MachineProvenance`, which every machine record inherits.
-    Nullable, as the record's own validator decides which of them it needs."""
-    return [
-        Column("model", Text),
-        Column("effort", Text),
-        Column("prompt_hash", Text),
-        Column("call_id", Text),
-        Column("pin", Text),
-        Column("provider", Text),
-        Column("temperature", Double),
-        Column("cost", Double),
-    ]
+def call_column(*, nullable: bool) -> Column[Any]:
+    # the call holds the configuration: `machine.md`
+    return Column("call_id", Text, ForeignKey("calls.id"), nullable=nullable)
 
 
 def _values(kind: type[StrEnum]) -> list[str]:
@@ -120,8 +110,8 @@ def _snake(name: str) -> str:
 __all__ = [
     "FileStore",
     "JsonlLog",
+    "call_column",
     "enumerated",
     "metadata",
-    "provenance_columns",
     "timestamp",
 ]
