@@ -5,6 +5,7 @@ Imports nothing from the package: the container backend runs this same script.
 
 import json
 import linecache
+import os
 import signal
 import sys
 import time
@@ -92,6 +93,18 @@ def described(error: BaseException, code: str) -> str:
 
 def _expire(_signum: int, _frame: FrameType | None) -> None:
     raise Expired
+
+
+def case(code: str, args: list[Any], cap_ms: int, repeats: int, result_path: str) -> None:
+    """One case in a child forked for it: its own session, so a solution's own
+    children die with it, and no stream the solution can print to."""
+    os.setsid()
+    silent = os.open(os.devnull, os.O_RDWR)
+    for stream in (0, 1, 2):
+        os.dup2(silent, stream)
+    result = execute(code, args, cap_ms, repeats)
+    with open(result_path, "w") as handle:
+        json.dump(result, handle)
 
 
 def main() -> None:

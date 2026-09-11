@@ -3,10 +3,10 @@
 import ast
 import contextlib
 import json
+import multiprocessing
 import os
 import select
 import signal
-import subprocess
 import sys
 import traceback
 from collections.abc import Sequence
@@ -16,8 +16,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
 
+from algo_coach.runner import child
+
 # slack on the parent's own timer, beyond the cap the child enforces. It covers
-# interpreter start and catches a child stuck where no Python-level timer
+# the child's start and catches a child stuck where no Python-level timer
 # fires.
 STARTUP_MS = 2000
 
@@ -25,13 +27,13 @@ STARTUP_MS = 2000
 # every reader, so the format is this module's alone
 RUNNER = f"subprocess/{sys.implementation.name}-{sys.version_info.major}.{sys.version_info.minor}"
 
-CHILD = Path(__file__).with_name("child.py")
-
-# how many children are started before the batch they answer. Interpreter start
-# is what a case costs, and starting them together spends it on several cores
-# at once. Bounded rather than the whole set: a run of a thousand cases would
-# otherwise hold a thousand idle interpreters
-BATCH = 16
+# a child per case, forked from a server that imported the child's module once:
+# an interpreter start per case cost some 40ms before the solution ran. The
+# server imports `__main__` too, or every child would run the console script's
+# imports again. A plain module run with `python -m` is not preloaded, and pays
+# that per case
+_FORKS = multiprocessing.get_context("forkserver")
+_FORKS.set_forkserver_preload(["__main__", "algo_coach.runner.child"])
 
 
 class RunnerError(RuntimeError):
@@ -88,30 +90,12 @@ def run(
 
     results: list[CaseRun] = []
     with TemporaryDirectory() as work:
-        for start in range(0, len(cases), BATCH):
-            batch = list(
-                zip(cases[start : start + BATCH], counts[start : start + BATCH], strict=True)
-            )
-            # started together and fed one at a time: the cases stay
-            # sequential, so nothing a run measures is timed against another
-            # case
-            waiting = [
-                _started(Path(work) / f"{start + index}.json") for index in range(len(batch))
-            ]
-            stopped = False
-            for (one, count), (child, path) in zip(batch, waiting, strict=True):
-                if stopped:
-                    # killed and reaped: a child left unwaited is a zombie, and
-                    # its open pipe a warning the suite treats as an error
-                    _kill(child.pid)
-                    child.communicate()
-                    continue
-                result = _answered(child, path, code, one, cap_ms, count)
-                results.append(result)
-                # never at a returned value, however wrong: the backend is not
-                # told what a case expects
-                stopped = stop_early and not result.returned
-            if stopped:
+        for index, (one, count) in enumerate(zip(cases, counts, strict=True)):
+            result = _answered(Path(work) / f"{index}.json", code, one, cap_ms, count)
+            results.append(result)
+            # never at a returned value, however wrong: the backend is not told
+            # what a case expects
+            if stop_early and not result.returned:
                 break
     return results
 
@@ -145,26 +129,7 @@ def _defines(node: ast.stmt) -> bool:
             return False
 
 
-def _started(result_path: Path) -> tuple[subprocess.Popen[str], Path]:
-    """One child, blocked on the request it has not been sent.
-
-    It carries no case yet: what it is waiting through is its own interpreter
-    start, which is what a case costs where the solution is fast.
-    """
-    child = subprocess.Popen(
-        [sys.executable, str(CHILD), str(result_path)],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        text=True,
-        # its own session, so a solution's own children die with it
-        start_new_session=True,
-    )
-    return child, result_path
-
-
 def _answered(
-    child: subprocess.Popen[str],
     result_path: Path,
     code: str,
     args: list[Any],
@@ -172,56 +137,29 @@ def _answered(
     repeats: int = 1,
 ) -> CaseRun:
     # one case per child: `corpus.md` requires that no case observes another
-    request = json.dumps({"code": code, "args": args, "cap_ms": cap_ms, "repeats": repeats})
-    assert child.stdin is not None
-    # a child that died before reading the whole request is read from how it
-    # died, below
-    with contextlib.suppress(BrokenPipeError):
-        child.stdin.write(request)
-    with contextlib.suppress(BrokenPipeError):
-        child.stdin.close()
+    process = _FORKS.Process(
+        target=child.case, args=(code, args, cap_ms, repeats, str(result_path))
+    )
+    process.start()
+    assert process.pid is not None
     try:
-        if not _exited(child.pid, (cap_ms + STARTUP_MS) / 1000):
+        # the sentinel is readable once the child exits, so nothing polls
+        ready, _, _ = select.select([process.sentinel], [], [], (cap_ms + STARTUP_MS) / 1000)
+        if not ready:
             return CaseRun(RunOutcome.TIMEOUT)
     finally:
         # on every path: what the solution spawned outlives a child that
         # reported its own timeout. Reaped after, so an exit code is kept
-        _kill(child.pid)
-        child.wait()
-    return _reported(result_path, child.returncode)
-
-
-def _exited(pid: int, timeout: float) -> bool:
-    """Whether the child exited within the timeout, woken by the exit itself.
-    `Popen.wait` polls instead, sleeping up to 50 ms past a child that already
-    finished, which every case paid."""
-    if sys.platform == "linux":
-        watched = os.pidfd_open(pid)
-        try:
-            ready, _, _ = select.select([watched], [], [], timeout)
-        finally:
-            os.close(watched)
-        return bool(ready)
-    if sys.platform == "darwin":
-        queue = select.kqueue()
-        try:
-            exit = select.kevent(
-                pid,
-                filter=select.KQ_FILTER_PROC,
-                flags=select.KQ_EV_ADD | select.KQ_EV_ONESHOT,
-                fflags=select.KQ_NOTE_EXIT,
-            )
-            return bool(queue.control([exit], 1, timeout))
-        except ProcessLookupError:
-            # exited before it was watched
-            return True
-        finally:
-            queue.close()
-    raise RunnerError(f"no way to wait on a child on {sys.platform}")
+        _kill(process.pid)
+        process.join()
+    exitcode = process.exitcode
+    process.close()
+    assert exitcode is not None
+    return _reported(result_path, exitcode)
 
 
 def _kill(pid: int) -> None:
-    """The group, not the process: `start_new_session` made the child its
+    """The group, not the process: the child made itself its session's
     leader."""
     with contextlib.suppress(ProcessLookupError, PermissionError):
         os.killpg(pid, signal.SIGKILL)
