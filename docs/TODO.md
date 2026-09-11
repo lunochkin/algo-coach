@@ -137,8 +137,8 @@ React frontend built to static files, served on the API's origin.
       outside that hook never runs before a commit
 
 ### Exit
-- [ ] Daily practice runs here, in the app, on problems the engine wrote and
-      judged
+- [x] Complete one sitting in the app by hand, from the board to the claim, on
+      a problem the engine wrote and judged
 
 ## Phase 9 — the engine hosted
 

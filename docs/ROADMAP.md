@@ -189,7 +189,8 @@ interface here would be written twice.
 - Claims asked as Phase 2 asked them. The self-label waits for Phase 12, where
   its failure modes are settled.
 - Claim candidates come from the problem's derived techniques.
-- Exit: daily practice runs here, on problems the engine wrote and judged.
+- Exit: one sitting completed in the app by hand, from the board to the claim,
+  on a problem the engine wrote and judged.
 
 ## Phase 9 — The engine hosted
 
