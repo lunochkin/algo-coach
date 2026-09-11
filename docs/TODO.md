@@ -7,7 +7,7 @@ phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 
 The first attempts the engine produces itself, through the interface a sitting
 happens in. The interface is a web app: a JSON API over the domain calls, and a
-React frontend the API serves as static files.
+React frontend built to static files, served on the API's origin.
 
 ### The loop, as domain calls
 
@@ -72,6 +72,9 @@ React frontend the API serves as static files.
       technique's card and candidates, and a problem's statement
 - [x] Add the write routes the rest of the loop needs: the submission and its
       per-case verdict, pausing and resuming the sitting, and the claim
+- [ ] Add a read route for one of the user's sittings by id, returning what
+      `serve` returned. The sitting page has its own URL, and a reload there
+      otherwise has no statement to show
 - [x] Decide what a failing case shows the solver, its outcome alone or its
       arguments too, and write the choice into `flows.md`. Showing the
       arguments hands over a case the solver can special-case

@@ -181,9 +181,9 @@ served locally: Phase 9 hosts the same pages for invited users, so a terminal
 interface here would be written twice.
 
 - A JSON API as the second adapter beside the CLI, over the same domain calls,
-  and a React frontend the API serves as static files. The sitting's page
-  carries a code editor.
-- `Attempt` gains the verification result.
+  and a React frontend built to static files, served on the API's origin. The
+  sitting's page carries a code editor.
+- An attempt's verification is stored as its own record, beside the attempt.
 - A defective problem is retired by hand in the terminal, and the board stops
   counting that problem's attempts in either direction.
 - Claims asked as Phase 2 asked them. The self-label waits for Phase 12, where
