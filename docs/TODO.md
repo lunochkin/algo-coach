@@ -5,33 +5,106 @@ phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 
 ## Phase 9 — the engine hosted (current)
 
-The same loop, for people who are not the author. The only change is the trust
-the submitted code gets. The local backend is a subprocess per case, because
-our own generated code on our own machine is not a threat model, and another
-person's code is.
+The same loop, for people who are not the author. The stores move from JSON
+files to Postgres, each person signs in to a log of their own, the app is
+deployed, and submitted code runs in a sandbox. The local subprocess stays the
+backend for our own generated code, which is not a threat model.
 
-- [ ] Add a sandboxed backend behind `runner.run`. The backend keeps the
-      signature and the child protocol, JSON in and JSON out. The `run` boundary
-      was written for a second backend, so no second runner is needed
-- [ ] Keep the comparison against `expected` above the boundary, where the
-      comparison already sits. A sandbox is never told what a case expects
-- [ ] Cap wall clock, memory and output per run, and give the sandbox no
-      network. A submission that spawns a process or opens a connection
-      fails
-- [ ] Key `AttemptLog` by user. The log is the only store that changes.
-      Problems, cases, solutions, matches and cards are shared product data
+### Storage on Postgres
+
+- [ ] Choose how the engine reaches Postgres, a driver with plain SQL or a
+      query layer over it, and write the choice into
+      `docs/architecture/README.md`. Every store is rewritten against it
+- [ ] Decide the table shape, a table per record class holding the record as
+      JSONB beside the columns a store queries, or a column per field, and write
+      it into `docs/architecture/README.md`. The pydantic schema stays the
+      contract either way
+- [ ] Choose the tool that applies schema migrations, and add the first
+      migration creating every table. A table changed by hand on the hosted
+      database is a change no clone reproduces
+- [ ] Back `JsonlLog` and `FileStore` with Postgres behind their current
+      interfaces, so no domain call changes. The write semantics in the
+      data-class table hold on either backend
+- [ ] Refuse an update or a delete on an append-only table in the database
+      itself, by grant or by trigger. A write path that skips the log's rule
+      is otherwise one bug away
+- [ ] Decide whether the file stores stay beside Postgres, for tests and for
+      offline use, or go. Two backends are two write semantics to keep equal
+- [ ] Copy every record under `data/` into Postgres with a one-off command, and
+      check that each reads back equal. A record the copy loses from an
+      append-only log is lost for good
+- [ ] Run Postgres for `just app` and for the suite in CI. A store tested only
+      against files is untested where it runs
+
+### Users and access
+
+- [ ] Choose the bought account provider, and write into
+      `docs/architecture/README.md` what it holds: the identity and the login,
+      and nothing of the practice log. No credential handling is our own
+- [ ] Mint the engine's own user id for each account, and key the log on it.
+      `README.md` requires every reference in an append-only record to be
+      engine-minted, and a provider switch would otherwise rewrite the log
+- [ ] Decide how the records written under the user `local` reach the author's
+      account, and write the choice into `log.md`. Those records are the
+      author's history, and the log is append-only
+- [ ] Read the user in `UserId` from a verified session, in place of the id
+      the app was built with. Every route already takes the user through that
+      one dependency
+- [ ] Add login and logout to the pages, and send a request without a session
+      to the login. The session cookie stays on the pages' origin
+- [ ] Key every private record by the engine's user id in its table:
+      sittings, attempts, attempt verifications and claims. Problems, cases,
+      solutions, matches and cards stay shared product data
 - [ ] Make one user's log readable and deletable without touching another's.
       The author's own log is the evidence of daily use and the set every eval
       reads, and must not mix with another user's
-- [ ] Buy the account system, so no credential handling is our own
 - [ ] Gate access on an invitation. Untrusted execution behind open
       registration is an abuse surface with no upside at this size
-- [ ] Deploy the engine, and write down what the deployment holds and for how
-      long. A user cannot check a retention claim that was never written down
+
+### The deployment
+
+- [ ] Choose the host for the API, the pages, Postgres and the sandbox, and
+      write the choice into `docs/architecture/README.md`. The sandbox needs a
+      container runtime, which rules out a host that runs only functions
+- [ ] Serve the pages and route `/api` to the API on one origin, answering a
+      path naming no file with `index.html`. `README.md` gives why the two
+      share an origin
+- [ ] Keep the database URL and the provider's keys in the host's secret store,
+      and out of the repo
+- [ ] Back up the database on a schedule, and restore one backup into a scratch
+      database. A backup never restored is not known to restore
+- [ ] Write down what the deployment holds, for how long, and who can read it.
+      A user cannot check a retention claim that was never written down
+
+### The sandbox
+
+- [ ] Add a container backend behind `runner.run`, keeping the signature and
+      the child protocol, JSON in and JSON out. The `run` boundary was written
+      for a second backend, so no second runner is needed
+- [ ] Give the container no network, a read-only root filesystem, a non-root
+      user, and limits on memory, processes and output. A submission that
+      spawns a process or opens a connection fails
+- [ ] Enforce the cap from outside the container as well as in the child. A
+      child that ignores its own timer otherwise holds the machine
+- [ ] Add a test that the sandbox backend's request carries no expected value.
+      `corpus.md` keeps the comparison above the boundary, and a sandbox told
+      the answer can be made to agree with it
+- [ ] Run every problem's canonical under the sandbox at the drill cap, and
+      write down which cases it no longer finishes within a tenth of the cap.
+      The separating sizes were found on the local subprocess, and a CPU limit
+      moves them
+- [ ] Cap submissions per user per minute. Each submission runs untrusted code
+      on our machine
+
+### Other items
+
+- [ ] Decide what ends a sitting the user leaves without pressing End, and
+      write the choice into `log.md`. Two of the first seven sittings were left
+      running, and serving that problem again reaches the old clock
 
 ### Exit
-- [ ] Someone other than the author completes a sitting
-
+- [ ] Complete a sitting on the deployed engine, signed in as an invited user,
+      from the board to the claim
 ## Phase 10 — the matcher, measured
 
 How much a generated corpus is worth, measured. Moved behind the beta on
@@ -212,10 +285,6 @@ trigger fires, whatever phase is current.
 - [ ] Name on the verification the rule that decided a case, once that rule is
       no longer JSON equality. A verdict stored without the rule cannot be
       re-read after the rule moves. Triggered by a second deciding rule landing
-- [ ] Add a container backend behind `runner.run`, with no network, a read-only
-      root filesystem, memory and pid limits, a non-root user, and the cap
-      enforced from outside as well as in the child. Triggered when the
-      platform serves code someone else wrote
 - [ ] Settle the full shape of a verification's environment, which the `runner`
       string stands in for. The machine decides a timeout as much as the cap
       does. Triggered when two runs under one backend disagree

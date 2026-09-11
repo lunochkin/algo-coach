@@ -278,8 +278,8 @@ times. Each record class is specified in one of the files beside it.
     its pages by URL, so a reload of any page reaches the app rather than a
     404.
 - **Storage is concrete for now**: JSON files under a gitignored directory,
-  with a database later. The schema is the contract, and storage swaps
-  underneath it.
+  moving to Postgres when Phase 9 hosts the engine. The schema is the
+  contract, and storage swaps underneath it.
 - **The calibration corpus is the platform data the pivot to generated
   problems left behind**, under `data/old/`: a platform's problems, the
   attempts against them, the claims and the calls. It is a corpus rather than

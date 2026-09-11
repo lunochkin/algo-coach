@@ -201,17 +201,22 @@ twice.
 
 ## Phase 9 — The engine hosted (current)
 
-The same loop, for people who are not the author. The difference from Phase 8
-is the trust the submitted code gets.
+The same loop, for people who are not the author. The stores move to Postgres,
+each person signs in to a log of their own, and their code runs in a sandbox.
 
-- Submitted code runs in a sandbox, as a second backend behind the boundary
-  `run` already defines.
-- Comparison against `expected` stays above that boundary.
-- The practice log becomes per-user, and is the only store that does.
+- Storage moves from JSON files to Postgres, behind the store interfaces the
+  domain already calls, with the append-only rule held by the database.
+- Accounts are bought rather than built, and the log keys on a user id the
+  engine mints.
 - One person's log is separable and deletable without touching another's.
-- Accounts are bought rather than built.
 - Access is by invitation.
-- Exit: someone other than the author completes a sitting.
+- The pages and the API are deployed on one origin, with the database backed
+  up and a restore tried.
+- Submitted code runs in a container behind the boundary `run` already
+  defines, with comparison against `expected` staying above it.
+- The separating cases are re-checked under the sandbox's limits.
+- Exit: a sitting completed on the deployed engine by an invited, signed-in
+  user, the author included.
 
 ## Phase 10 — The matcher, measured
 
