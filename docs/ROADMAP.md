@@ -172,27 +172,34 @@ the loop needs problems and not a score.
   a return value no two solutions compare equal on.
 - Exit met: every held draft landed or was rejected.
 
-## Phase 8 — The engine serves (current)
+## Phase 8 — The engine serves — done
 
 The first attempts the engine produces itself. It serves a generated problem,
 times the sitting, runs the submission against the problem's own cases, and
-records the verdict. The interface ships in this phase, and it is a web app
-served locally: Phase 9 hosts the same pages for invited users, so a terminal
-interface here would be written twice.
+records the verdict. The interface is a web app served locally: Phase 9 hosts
+the same pages for invited users, so a terminal interface here would be written
+twice.
 
-- A JSON API as the second adapter beside the CLI, over the same domain calls,
-  and a React frontend built to static files, served on the API's origin. The
-  sitting's page carries a code editor.
-- An attempt's verification is stored as its own record, beside the attempt.
+- A JSON API under `/api` as the second adapter beside the CLI, and a React
+  frontend built to static files on the API's origin: the board, the cards, a
+  technique's candidates, and the sitting's page with its editor, verdict,
+  clock and claim.
+- A sitting is stored and kept after it ends, its pauses as intervals, and an
+  attempt carries the sitting's elapsed time with every pause excluded.
+- An attempt's verification is its own record. A failing submission shows its
+  first failing case whole, and a crashed case carries what raised it.
 - A defective problem is retired by hand in the terminal, and the board stops
   counting that problem's attempts in either direction.
-- Claims asked as Phase 2 asked them. The self-label waits for Phase 12, where
-  its failure modes are settled.
-- Claim candidates come from the problem's derived techniques.
-- Exit: one sitting completed in the app by hand, from the board to the claim,
-  on a problem the engine wrote and judged.
+- The claim is asked of each attempt when the sitting ends. The self-label
+  waits for Phase 12, where its failure modes are settled.
+- 26 of the 74 problems the sweep landed carried no `def solve(...)` line,
+  written before a statement had to end on one, and were retired `defective`.
+  The board offers 14 techniques on the 48 left.
+- Exit met: sittings completed by hand from the board to the claim, over three
+  attempts: a wrong answer, a timeout on a separating case, and a pass, each
+  claimed and one declined.
 
-## Phase 9 — The engine hosted
+## Phase 9 — The engine hosted (current)
 
 The same loop, for people who are not the author. The difference from Phase 8
 is the trust the submitted code gets.

@@ -330,7 +330,7 @@ Properties the system holds at all times.
 - The technique vocabulary and the cards are product-owned and global, and no
   user authors a technique or a card.
 - Domain logic stays adapter-free and directly callable. The CLI is one
-  adapter, and the web app Phase 8 adds is the second. A sitting happens in
+  adapter, and the web app is the second. A sitting happens in
   the web app, and the by-hand passes stay in the terminal.
 - No third-party problem statements or test cases in git, in any repo.
 

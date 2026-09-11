@@ -486,8 +486,8 @@ A verification run is one execution of a solution against a problem's cases.
 - **The verification result is per case, and names how each case went**:
   passed, wrong, timed out or crashed. A share cannot say which input timed
   out, and the set of cases that passed cannot say why the rest did not. A
-  failure mode is read from which case failed and how. Phase 8 stores the same
-  result for an attempt.
+  failure mode is read from which case failed and how. An attempt's
+  verification stores the same result.
 - **A run covers the whole case set**, including the cases it answered
   before. A run answering only the cases added since the last run would fold
   to their outcome alone and say nothing about the rest. Executing code is
@@ -531,7 +531,7 @@ fixed here rather than by whatever executed it.
   decided differently by where it ran.
 - **A solution defining no module-level `solve` fails every case as
   `CRASHED`.** Code that does not parse is rejected the same way. It is a
-  verdict rather than an error, because Phase 8 reads this path for an
+  verdict rather than an error, because a sitting reads this path for an
   attempt, and a submission with a syntax error is the ordinary case.
 - **A crashed case carries what raised it**, as a traceback prints it over the
   solution's own lines. The runner's frames are left out, since they name no
