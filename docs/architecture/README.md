@@ -277,6 +277,26 @@ times. Each record class is specified in one of the files beside it.
   - A path naming no file is answered with `index.html`. The frontend routes
     its pages by URL, so a reload of any page reaches the app rather than a
     404.
+- **Google and GitHub hold each identity and its login.** A person signs in
+  through one of the two, and the engine stores no password. Password resets,
+  second factors and leaked credentials are the provider's to handle, so no
+  credential handling is the engine's own.
+  - The engine runs the sign-in flow itself, through Authlib, which checks the
+    state, the nonce and PKCE. A managed account provider is rejected: its
+    login and its tokens live on its own domain, and the session cookie stays
+    on the pages' origin.
+  - The engine keeps each session in Postgres, and sets the session's id in an
+    `HttpOnly`, `SameSite=Lax` cookie. A stored session can be revoked, where a
+    signed token stands until it expires.
+  - An `identities` row links a provider's user id to a user id the engine
+    mints at the first sign-in. The log keys on the engine's id, so adding or
+    replacing a provider rewrites no record.
+  - Sign-in by email is deferred until a user needs it. An emailed link, a
+    managed provider or a company's own sign-in would each be one more provider
+    an `identities` row names.
+  - A dev login signs in as a named user with no provider, for local work. A
+    flag enables the dev login, and the app refuses to start with the flag
+    unless it is bound to `127.0.0.1`.
 - **Storage is one Postgres database**, named by `DATABASE_URL`, and every
   store writes there. The schema is the contract, and the tables are declared
   against it.

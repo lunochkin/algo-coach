@@ -79,7 +79,7 @@ backend for our own generated code, which is not a threat model.
 
 ### Users and access
 
-- [ ] Write into `docs/architecture/README.md` that Google and GitHub hold each
+- [x] Write into `docs/architecture/README.md` that Google and GitHub hold each
       identity and its login, and the engine holds the sessions and no
       password. No credential handling is our own
 - [ ] Add an `identities` table linking a provider's user id to a row of the
