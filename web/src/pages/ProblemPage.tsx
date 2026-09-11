@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router'
 
 import { candidates } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
+import { TechniqueCards } from '@/components/TechniqueCards'
 import { Button } from '@/components/ui/button'
 
 // the problem a user picked, before its statement is served
@@ -25,7 +26,10 @@ export function ProblemPage() {
       ) : !picked ? (
         <p className="text-muted-foreground">This problem is not a candidate for {technique}.</p>
       ) : (
-        <h1 className="text-2xl font-semibold">{picked.title}</h1>
+        <>
+          <h1 className="text-2xl font-semibold">{picked.title}</h1>
+          <TechniqueCards technique={technique} />
+        </>
       )}
     </section>
   )

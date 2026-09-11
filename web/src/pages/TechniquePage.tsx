@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router'
 
 import { candidates } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
+import { TechniqueCards } from '@/components/TechniqueCards'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -26,6 +27,7 @@ export function TechniquePage() {
         <Link to="/">Back to the board</Link>
       </Button>
       <h1 className="text-2xl font-semibold">{technique}</h1>
+      <TechniqueCards technique={technique} />
       {error ? (
         <p className="text-destructive">The candidates did not load: {error}</p>
       ) : !rows ? (

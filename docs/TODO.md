@@ -107,7 +107,7 @@ React frontend built to static files, served on the API's origin.
       to its own page
 - [x] Add a card's page: its trigger, its brief and its templates, each
       template's code hidden until the user reveals it. `content.md` gives why
-- [ ] Link a technique's cards from its candidates page and from the picked
+- [x] Link a technique's cards from its candidates page and from the picked
       problem's page. The card is offered, and no sitting requires it
 - [x] Add a navigation menu linking the board and the cards list
 - [ ] Start the sitting from the picked problem's page: a button calls `serve`
