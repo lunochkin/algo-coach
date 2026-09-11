@@ -1,7 +1,7 @@
 function App() {
   return (
-    <main>
-      <h1>algo-coach</h1>
+    <main className="mx-auto max-w-6xl p-4">
+      <h1 className="text-2xl font-semibold">algo-coach</h1>
     </main>
   )
 }

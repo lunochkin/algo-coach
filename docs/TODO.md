@@ -87,6 +87,9 @@ React frontend the API serves as static files.
 - [x] Add `web/`: a Vite and React app in TypeScript, built to static files.
       Phase 9 hosts these same pages, so a terminal interface here would be
       written twice
+- [x] Add shadcn/ui over Radix to `web/`, with Tailwind. The components are
+      copied into the repo as code to edit, and Radix keeps the keyboard and
+      accessibility behaviour
 - [ ] Build the board as the entry point, showing per-technique progress and
       the technique the user picks from. A problem id as the entry point leaves
       the selection to the user
