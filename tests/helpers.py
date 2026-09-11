@@ -45,12 +45,26 @@ PROVENANCE_FIELDS = {
     "call_id": "call-1",
 }
 
-# Provenance and the template the target named. A site caring about neither
-# spreads this. One testing a match against a template names its own.
-GENERATED = PROVENANCE_FIELDS | {"target_template_id": "t1"}
+# Provenance and a technique target. A site caring about neither spreads this.
+# A technique rather than a template, so a stored problem names no card: one
+# testing a template's target names its own, and stores the card
+GENERATED = PROVENANCE_FIELDS | {"target_technique": "greedy"}
 
 # The same, as the record a minter takes.
 PROVENANCE = MachineProvenance(**PROVENANCE_FIELDS)
+
+# The call `PROVENANCE` cites, as the database fixture stores it before every
+# test.
+CALL_ROW = {
+    "id": "call-1",
+    "created_at": datetime(2026, 1, 1, tzinfo=UTC),
+    "model": "a-model",
+    "effort": "medium",
+    "pin": PIN,
+    "prompt": "a prompt",
+    "prompt_hash": PROMPT_HASH,
+    "response": "{}",
+}
 
 
 def a_call(id: str = "call-1", **overrides) -> Call:
@@ -246,3 +260,10 @@ def attempt(
         solved=True,
         code=code,
     )
+
+
+def own(records: list) -> list:
+    """What a test wrote, without the rows the database fixture stores for the
+    shared helpers."""
+    shared = {CALL_ROW["id"]}
+    return [one for one in records if one.id not in shared]

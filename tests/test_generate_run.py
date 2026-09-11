@@ -1,7 +1,7 @@
 from dataclasses import replace
 
 from generating import NAIVE, FakeWriter
-from helpers import PROVENANCE_FIELDS
+from helpers import PROVENANCE_FIELDS, own
 from matching import card, seeded, template
 
 from algo_coach.calls import CallLog
@@ -155,7 +155,7 @@ def test_every_call_is_recorded(database):
 
     run(database, model, count=2)
 
-    assert len(CallLog(database).all()) == 4
+    assert len(own(CallLog(database).all())) == 4
 
 
 def test_a_problem_the_runs_reject_is_reported_apart(database):

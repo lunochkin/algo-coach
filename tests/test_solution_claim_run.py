@@ -1,5 +1,5 @@
 import pytest
-from helpers import CONFIGURATION, FakeTransport, Verdict, attempt, make_problem
+from helpers import CONFIGURATION, FakeTransport, Verdict, attempt, make_problem, own
 
 from algo_coach.attempt_claims import ask as claim_one
 from algo_coach.calls import CallLog
@@ -70,7 +70,7 @@ def test_the_configuration_is_copied_from_the_call(log):
     run(client, log)
 
     (claim,) = log.claims()
-    (call,) = CallLog(log.root).all()
+    (call,) = own(CallLog(log.root).all())
     assert (claim.model, claim.effort, claim.pin) == (
         CONFIGURATION.model,
         CONFIGURATION.effort,

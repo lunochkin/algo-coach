@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass, field
 
 import pytest
+from helpers import own
 
 from algo_coach.calls import CallLog, Reply
 from algo_coach.generation import GenerationError, propose_cases
@@ -126,7 +127,7 @@ def test_an_answer_cut_short_proposes_nothing(database):
     with pytest.raises(GenerationError):
         asked(model, survivors=[SURVIVOR], tmp_path=database)
 
-    assert len(CallLog(database).all()) == 1
+    assert len(own(CallLog(database).all())) == 1
 
 
 def test_a_reply_proposing_no_case_is_read_as_a_verdict():

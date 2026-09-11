@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass, field
 
 import pytest
+from helpers import own
 from matching import card, seeded, template
 from pydantic import ValidationError
 
@@ -81,7 +82,7 @@ def test_an_answer_cut_short_writes_no_solution(database):
     with pytest.raises(GenerationError):
         write_reference(model, CallLog(database), STATEMENT)
 
-    assert len(CallLog(database).all()) == 1
+    assert len(own(CallLog(database).all())) == 1
 
 
 def test_the_site_s_own_configuration_is_the_default(database):

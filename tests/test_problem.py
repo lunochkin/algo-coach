@@ -12,7 +12,11 @@ CONTENT = {
 
 
 def make_problem(**overrides) -> Problem:
-    return Problem.model_validate(CONTENT | GENERATED | overrides)
+    fields = CONTENT | GENERATED | overrides
+    if "target_template_id" in overrides and "target_technique" not in overrides:
+        # one target: a template named here replaces the helpers' technique
+        fields.pop("target_technique", None)
+    return Problem.model_validate(fields)
 
 
 def test_a_problem_records_what_produced_it():
@@ -102,7 +106,7 @@ def test_one_template_is_named_rather_than_a_set():
     """It says what the problem was written for, never what it exercises. The
     templates it also matches are the matcher's question, and they are
     `TemplateMatch` records rather than a field here."""
-    assert isinstance(make_problem().target_template_id, str)
+    assert isinstance(make_problem(target_template_id="t1").target_template_id, str)
 
 
 def test_a_problem_starts_created_rather_than_served():

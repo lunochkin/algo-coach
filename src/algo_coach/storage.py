@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy import (
     BigInteger,
     Column,
+    Connection,
     DateTime,
     Engine,
     Enum,
@@ -20,6 +21,7 @@ from sqlalchemy import (
     MetaData,
     Text,
     create_engine,
+    select,
 )
 
 
@@ -152,6 +154,48 @@ def call_column(*, nullable: bool) -> Column[Any]:
     return Column("call_id", Text, ForeignKey("calls.id"), nullable=nullable)
 
 
+# what a machine record reads from its call, rather than storing a copy:
+# `machine.md`
+CONFIGURATION = ("model", "effort", "prompt_hash", "pin", "provider", "temperature", "cost")
+
+
+def configurations(conn: Connection, call_ids: set[str]) -> dict[str, dict[str, Any]]:
+    """Each named call's configuration, as the records it wrote carry it."""
+    calls = metadata.tables["calls"]
+    rows = conn.execute(
+        select(calls.c.id, *(calls.c[name] for name in CONFIGURATION)).where(
+            calls.c.id.in_(call_ids)
+        )
+    ).mappings()
+    return {row["id"]: {name: row[name] for name in CONFIGURATION} for row in rows}
+
+
+def configured(row: dict[str, Any], known: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    # none where the row names no call, as a user's record carries none
+    return row | known.get(row.get("call_id") or "", dict.fromkeys(CONFIGURATION))
+
+
+def called(conn: Connection, records: list[BaseModel]) -> None:
+    """Refuses a record copying a configuration its call does not carry: the
+    table keeps the call alone, and the difference would be lost on write."""
+    known = configurations(conn, {one.model_dump()["call_id"] for one in records} - {None})
+    for record in records:
+        dumped = record.model_dump()
+        if dumped["call_id"] is None:
+            continue
+        call = known.get(dumped["call_id"])
+        if call is None:
+            raise ValueError(
+                f"{type(record).__name__} names call {dumped['call_id']}, which is not stored"
+            )
+        differ = [name for name in CONFIGURATION if dumped[name] != call[name]]
+        if differ:
+            raise ValueError(
+                f"{type(record).__name__} copies {', '.join(differ)} "
+                f"its call {dumped['call_id']} does not carry"
+            )
+
+
 def _values(kind: type[StrEnum]) -> list[str]:
     return [member.value for member in kind]
 
@@ -161,11 +205,15 @@ def _snake(name: str) -> str:
 
 
 __all__ = [
+    "CONFIGURATION",
     "Database",
     "FileStore",
     "JsonlLog",
     "appended_column",
     "call_column",
+    "called",
+    "configurations",
+    "configured",
     "directory",
     "enumerated",
     "metadata",

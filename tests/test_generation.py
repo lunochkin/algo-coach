@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass, field
 
 import pytest
-from helpers import PROVENANCE_FIELDS
+from helpers import PROVENANCE_FIELDS, own
 from matching import card, seeded, template
 from pydantic import ValidationError
 
@@ -278,7 +278,7 @@ def test_an_answer_cut_short_writes_no_draft(database):
     with pytest.raises(GenerationError):
         written(database, model)
 
-    assert len(CallLog(database).all()) == 1
+    assert len(own(CallLog(database).all())) == 1
 
 
 def test_the_draft_says_how_hard_the_problem_is():

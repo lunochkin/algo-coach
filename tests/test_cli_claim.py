@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 from commands import data_root, run_cli
+from database import emptied, shared
 from helpers import seed_problem
 
 from algo_coach.attempt_claims import standing_attempt_claims
@@ -15,6 +16,7 @@ from algo_coach.schema import (
     Kind,
     MachineProvenance,
 )
+from algo_coach.storage import Database
 from algo_coach.techniques import criteria, criterion
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
@@ -334,22 +336,26 @@ def seeded_store(root, monkeypatch) -> AttemptLog:
     return seed_many(root, 6)
 
 
-def test_the_same_seed_asks_in_the_same_order(tmp_path, monkeypatch, capsys):
+def test_the_same_seed_asks_in_the_same_order(database, monkeypatch, capsys):
     """Two identical logs, same seed, same sequence — so a sample can be
     described by its seed rather than by listing what it held."""
-    first = seeded_store(tmp_path / "one", monkeypatch)
+    first = seeded_store(database, monkeypatch)
     run(monkeypatch, ["1", "", "1", "", "1", ""], "--count", "3")
-    second = seeded_store(tmp_path / "two", monkeypatch)
+    asked = [claim.attempt_id for claim in first.claims()]
+    # the same log written again from nothing: an empty database, and a
+    # directory of its own for the stores still on files
+    emptied(database.engine)
+    shared(database)
+    again = Database(database.directory / "again", engine=database.engine)
+    second = seeded_store(again, monkeypatch)
     run(monkeypatch, ["1", "", "1", "", "1", ""], "--count", "3")
 
-    assert [claim.attempt_id for claim in first.claims()] == [
-        claim.attempt_id for claim in second.claims()
-    ]
+    assert asked == [claim.attempt_id for claim in second.claims()]
 
 
-def test_a_claimed_attempt_drops_out_of_the_pool(tmp_path, monkeypatch, capsys):
+def test_a_claimed_attempt_drops_out_of_the_pool(database, monkeypatch, capsys):
     """Successive runs make progress rather than re-asking."""
-    log = seeded_store(tmp_path / "one", monkeypatch)
+    log = seeded_store(database, monkeypatch)
     run(monkeypatch, ["1", ""], "--count", "1")
     run(monkeypatch, ["1", ""], "--count", "1")
 

@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 import pytest
 from commands import TRANSPORT, data_root, run_cli
 from generating import FakeWriter, Raises
+from helpers import own
 from matching import card, seeded, template
 
 from algo_coach import cli
@@ -49,7 +50,7 @@ def test_the_command_writes_problems(root, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "2 problem(s) stored, written by" in out
     assert f"generator {GENERATOR_DEFAULT.model} at {GENERATOR_DEFAULT.effort}" in out
-    assert len(CallLog(root).all()) == 6
+    assert len(own(CallLog(root).all())) == 6
 
 
 def test_the_run_names_each_stored_problem_and_not_its_statement(root, monkeypatch, capsys):
@@ -107,7 +108,7 @@ def test_a_rejected_draft_stores_nothing(root, monkeypatch, capsys):
     assert ProblemStore(root).all() == []
     assert CaseLog(root).cases() == []
     assert "1 rejected" in capsys.readouterr().out
-    assert len(CallLog(root).all()) == 2
+    assert len(own(CallLog(root).all())) == 2
 
 
 def test_an_unseeded_card_is_named_before_any_call(root, monkeypatch, capsys):
@@ -737,7 +738,7 @@ def listing(monkeypatch, *argv: str) -> None:
 def test_the_drafts_are_listed_with_the_step_each_would_resume_at(root, monkeypatch, capsys):
     """A sweep names what it will spend before it spends it."""
     stored = held_draft(root, monkeypatch, capsys)
-    spent = len(CallLog(root).all())
+    spent = len(own(CallLog(root).all()))
 
     listing(monkeypatch)
 
@@ -745,7 +746,7 @@ def test_the_drafts_are_listed_with_the_step_each_would_resume_at(root, monkeypa
     assert f"{stored.id}  longest-valid-window" in out
     assert "checked" in out and "starts at referenced" in out
     assert "1 draft(s) stored, 1 would resume" in out
-    assert len(CallLog(root).all()) == spent
+    assert len(own(CallLog(root).all())) == spent
 
 
 CRASHES = "def solve(size, seed):\n    raise ValueError\n"
@@ -850,7 +851,7 @@ def test_a_held_draft_is_rejected_by_hand(root, monkeypatch, capsys):
     """The exit the run never takes: every site answered and none was wrong,
     so the gate is a reader's verdict. The draft is kept for the record."""
     stored = searched_draft(root, monkeypatch, capsys)
-    spent = len(CallLog(root).all())
+    spent = len(own(CallLog(root).all()))
 
     rejected(monkeypatch, stored.id[:8])
 
@@ -860,7 +861,7 @@ def test_a_held_draft_is_rejected_by_hand(root, monkeypatch, capsys):
     assert (
         f"draft {stored.id}: rejected unexercised, longest-valid-window" in capsys.readouterr().out
     )
-    assert len(CallLog(root).all()) == spent
+    assert len(own(CallLog(root).all())) == spent
 
 
 def test_a_rejected_draft_is_not_rejected_again(root, monkeypatch, capsys):
@@ -890,7 +891,7 @@ def test_a_draft_is_read_whole_by_its_id(root, monkeypatch, capsys):
     """What a listing cannot hold: the statement, both solutions and the set
     the steps settled."""
     stored = searched_draft(root, monkeypatch, capsys)
-    spent = len(CallLog(root).all())
+    spent = len(own(CallLog(root).all()))
 
     shown(monkeypatch, stored.id)
 
@@ -903,7 +904,7 @@ def test_a_draft_is_read_whole_by_its_id(root, monkeypatch, capsys):
     assert f"## cases ({len(stored.cases)} settled, 0 kept, 0 won, 0 separating)" in out
     # the loop never ran, so the step that would have paid for it took nothing
     assert "discrimination  not taken" in out
-    assert len(CallLog(root).all()) == spent
+    assert len(own(CallLog(root).all())) == spent
 
 
 def test_the_sites_say_which_step_left_the_draft_where_it_is(root, monkeypatch, capsys):

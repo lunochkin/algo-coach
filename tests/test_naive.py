@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass, field
 
 import pytest
+from helpers import own
 from matching import card, seeded, template
 from pydantic import ValidationError
 
@@ -106,7 +107,7 @@ def test_an_answer_cut_short_writes_no_solution(database):
     with pytest.raises(GenerationError):
         write_naive(model, CallLog(database), STATEMENT, aimed(database))
 
-    assert len(CallLog(database).all()) == 1
+    assert len(own(CallLog(database).all())) == 1
 
 
 def test_the_site_s_own_configuration_is_the_default(database):
@@ -140,7 +141,7 @@ def test_two_forms_to_avoid_are_two_questions(database):
     """The prompt hash keys the skip, so a template whose trigger was edited is
     re-asked and the rest are not."""
     assert request_hash(STATEMENT, aimed(database)) != request_hash(
-        STATEMENT, aimed(database.directory / "elsewhere", trigger="something else")
+        STATEMENT, aimed(database, trigger="something else")
     )
 
 

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 from commands import data_root
+from helpers import own
 
 from algo_coach import cli
 from algo_coach.cards import CardStore, seed_cards
@@ -167,7 +168,7 @@ def test_seed_cards_command_over_a_directory(database, monkeypatch, capsys):
 
     cli.main()
 
-    assert len(CardStore(database).all()) == 2
+    assert len(own(CardStore(database).all())) == 2
     assert json.loads(capsys.readouterr().out)["ingested"] == 2
 
 
@@ -179,7 +180,7 @@ def test_seed_cards_command_over_one_file(database, monkeypatch, capsys):
 
     cli.main()
 
-    assert len(CardStore(database).all()) == 1
+    assert len(own(CardStore(database).all())) == 1
 
 
 def test_a_rejected_card_exits_nonzero(database, monkeypatch, capsys):

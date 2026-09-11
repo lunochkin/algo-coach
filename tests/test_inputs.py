@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass, field
 
 import pytest
-from helpers import a_call
+from helpers import a_call, own
 from pydantic import ValidationError
 
 from algo_coach.calls import CallLog, Reply
@@ -114,7 +114,7 @@ def test_an_answer_cut_short_writes_no_generator(database):
     with pytest.raises(GenerationError):
         write_input_generator(model, CallLog(database), STATEMENT)
 
-    assert len(CallLog(database).all()) == 1
+    assert len(own(CallLog(database).all())) == 1
 
 
 def test_the_brief_asks_for_one_input_per_pair(tmp_path):

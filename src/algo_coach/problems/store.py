@@ -1,19 +1,21 @@
-from pathlib import Path
+from sqlalchemy import ColumnElement, select
+from sqlalchemy.dialects.postgresql import insert
 
+from algo_coach.problems.table import problems
 from algo_coach.schema import Problem, ProblemStatus, RetirementReason
-from algo_coach.storage import Database, FileStore
+from algo_coach.storage import CONFIGURATION, Database, called, configurations, configured
 
 # what a stored problem may still move: `corpus.md` gives the states
 STATUS = {"status", "retired_reason"}
 
 
-class ProblemStore(FileStore[Problem]):
+class ProblemStore:
     """Created once; only its status moves. A statement that says the wrong
     thing is retired and a new problem written, so the attempts stay with the
     record they were made against."""
 
-    def __init__(self, root: Database | Path) -> None:
-        super().__init__(root, "problems", Problem)
+    def __init__(self, root: Database) -> None:
+        self.root = root
 
     def put(self, record: Problem) -> None:
         if record.techniques:
@@ -24,7 +26,23 @@ class ProblemStore(FileStore[Problem]):
             exclude=STATUS
         ):
             raise ValueError(f"problem {record.id} is stored, and only its status moves")
-        super().put(record)
+        values = record.model_dump(exclude={"techniques", *CONFIGURATION})
+        with self.root.engine.begin() as conn:
+            called(conn, [record])
+            conn.execute(
+                insert(problems)
+                .values(values)
+                .on_conflict_do_update(
+                    index_elements=["id"], set_={name: values[name] for name in STATUS}
+                )
+            )
+
+    def get(self, id: str) -> Problem | None:
+        found = self._read(problems.c.id == id)
+        return found[0] if found else None
+
+    def all(self) -> list[Problem]:
+        return self._read()
 
     def retire(self, problem_id: str, reason: RetirementReason) -> Problem:
         stored = self.get(problem_id)
@@ -39,3 +57,14 @@ class ProblemStore(FileStore[Problem]):
         )
         self.put(retired)
         return retired
+
+    def _read(self, *where: ColumnElement[bool]) -> list[Problem]:
+        with self.root.engine.connect() as conn:
+            rows = [
+                dict(row)
+                for row in conn.execute(
+                    select(problems).where(*where).order_by(problems.c.id)
+                ).mappings()
+            ]
+            known = configurations(conn, {row["call_id"] for row in rows})
+        return [Problem.model_validate(configured(row, known)) for row in rows]

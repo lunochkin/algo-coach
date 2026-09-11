@@ -33,8 +33,13 @@ def test_the_worker_s_database_is_built_by_the_migrations(database):
 
 
 def test_a_test_starts_on_an_empty_database(database):
+    """Every table but the helper call the fixture stores for the shared
+    helpers."""
     with database.engine.connect() as conn:
-        assert conn.execute(select(func.count()).select_from(calls)).scalar_one() == 0
+        ids = conn.execute(select(calls.c.id)).scalars().all()
+        held = conn.execute(select(func.count()).select_from(metadata.tables["problems"]))
+
+        assert (ids, held.scalar_one()) == (["call-1"], 0)
 
 
 def test_emptying_removes_every_row_and_restarts_the_append_order(database):

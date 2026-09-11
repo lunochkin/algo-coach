@@ -114,3 +114,22 @@ def test_retiring_a_retired_problem_changes_nothing(database):
 def test_retiring_an_unknown_problem_is_refused(database):
     with pytest.raises(ValueError, match="no problem"):
         ProblemStore(database).retire("nope", RetirementReason.DEFECTIVE)
+
+
+def test_a_problem_copying_another_configuration_than_its_call_s_is_refused(database):
+    """`machine.md`: the table keeps the call alone, so a copy disagreeing with
+    it would be lost on write rather than stored."""
+    with pytest.raises(ValueError, match="copies effort"):
+        ProblemStore(database).put(make_problem(effort="high"))
+
+
+def test_a_problem_naming_a_call_nobody_stored_is_refused(database):
+    with pytest.raises(ValueError, match="not stored"):
+        ProblemStore(database).put(make_problem(call_id="call-unlogged"))
+
+
+def test_a_stored_problem_reads_its_configuration_off_its_call(database):
+    store = ProblemStore(database)
+    store.put(make_problem())
+
+    assert store.get("i1").model_dump() == make_problem().model_dump()

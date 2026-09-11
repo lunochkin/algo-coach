@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 import pytest
 from matching import card, seeded
 
+from algo_coach.calls import CallLog
 from algo_coach.generation import Corpus, land
 from algo_coach.schema import (
     Call,
@@ -34,6 +35,22 @@ def call(id: str, **overrides) -> Call:
     )
 
 
+# each call a landing's records cite, as the run logged it before landing
+CALLS = {
+    "landing-call-1": {},
+    "landing-call-2": {"temperature": 0.0},
+    "landing-call-3": {},
+    "landing-call-4": {"temperature": None},
+}
+
+
+@pytest.fixture(autouse=True)
+def logged(database):
+    log = CallLog(database)
+    for id, overrides in CALLS.items():
+        log.append(call(id, **overrides))
+
+
 def provenance(one: Call) -> MachineProvenance:
     """The configuration a step copied off its call, as a draft holds it."""
     return MachineProvenance.of(one)
@@ -46,7 +63,7 @@ def drafted(**overrides) -> Draft:
                 args=[[1, 2, 3]],
                 expected=3,
                 expected_from=ExpectedSource.REFERENCE,
-                provenance=MachineProvenance.of(call("call-3")),
+                provenance=MachineProvenance.of(call("landing-call-3")),
             )
         ]
     } | overrides
@@ -59,8 +76,8 @@ def drafted(**overrides) -> Draft:
         declared=[{"args": [[1, 2, 3]], "expected": 3}],
         difficulty="medium",
         reference=BLIND,
-        generator_provenance=provenance(call("call-1")),
-        blind_provenance=provenance(call("call-2", temperature=0.0)),
+        generator_provenance=provenance(call("landing-call-1")),
+        blind_provenance=provenance(call("landing-call-2", temperature=0.0)),
         **fields,
     )
 
@@ -102,13 +119,13 @@ def test_the_naive_solution_lands_beside_the_two_other_solutions(database, templ
     problem = land(
         corpus,
         template,
-        drafted(naive=NAIVE, naive_provenance=provenance(call("call-4", temperature=None))),
+        drafted(naive=NAIVE, naive_provenance=provenance(call("landing-call-4", temperature=None))),
     )
 
     stored = corpus.solutions.for_problem(problem.id, SolutionRole.NAIVE)
     assert [one.code for one in stored] == [NAIVE]
     # its own call rather than the problem's: a configuration is per call site
-    assert [one.call_id for one in stored] == ["call-4"]
+    assert [one.call_id for one in stored] == ["landing-call-4"]
 
 
 def test_a_form_that_is_its_own_optimum_lands_no_naive_solution(database, template):
@@ -143,7 +160,7 @@ def test_the_problem_carries_what_the_generation_call_asserted(database, templat
     problem = land(Corpus.at(database), template, drafted())
 
     assert problem.target_template_id == template.id
-    assert (problem.model, problem.effort, problem.call_id) == ("a-model", "high", "call-1")
+    assert (problem.model, problem.effort, problem.call_id) == ("a-model", "high", "landing-call-1")
     assert problem.difficulty == "medium"
     # a view over the problem's canonicals, derived rather than written here
     assert problem.techniques == []
@@ -158,8 +175,8 @@ def test_each_solution_names_the_call_that_wrote_it(database, template):
     problem = land(corpus, template, drafted())
 
     canonical, reference = corpus.solutions.for_problem(problem.id)
-    assert (canonical.code, canonical.call_id) == (CANONICAL, "call-1")
-    assert (reference.code, reference.call_id) == (BLIND, "call-2")
+    assert (canonical.code, canonical.call_id) == (CANONICAL, "landing-call-1")
+    assert (reference.code, reference.call_id) == (BLIND, "landing-call-2")
     assert (canonical.temperature, reference.temperature) == (None, 0.0)
 
 
@@ -172,7 +189,7 @@ def test_a_case_keeps_the_solution_that_computed_it(database, template):
                 args=[[1]],
                 expected=1,
                 expected_from=ExpectedSource.CANONICAL,
-                provenance=MachineProvenance.of(call("call-3")),
+                provenance=MachineProvenance.of(call("landing-call-3")),
             )
         ]
     )
@@ -192,7 +209,7 @@ def test_a_case_keeps_the_round_that_won_it(database, template):
                 args=[[1]],
                 expected=1,
                 expected_from=ExpectedSource.REFERENCE,
-                provenance=MachineProvenance.of(call("call-3")),
+                provenance=MachineProvenance.of(call("landing-call-3")),
                 round=2,
             )
         ]
@@ -210,4 +227,4 @@ def test_a_case_names_the_call_that_proposed_it(database, template):
     problem = land(Corpus.at(database), template, drafted())
 
     (one,) = Corpus.at(database).cases.for_problem(problem.id)
-    assert one.call_id == "call-3"
+    assert one.call_id == "landing-call-3"

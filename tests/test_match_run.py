@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from helpers import FakeTransport, Verdict
+from helpers import FakeTransport, Verdict, own
 from matching import PROCEDURE, canonical, canonicals, card, problem, seeded, stored, template
 
 from algo_coach.calls import CallLog
@@ -94,7 +94,7 @@ def test_a_record_carries_what_read_it(database):
     run(database, FakeTransport.answering(Verdict([])))
 
     (match, *_) = MatchLog(database).matches()
-    (call,) = CallLog(database).all()
+    (call,) = own(CallLog(database).all())
     assert match.source is MatchSource.CLASSIFIER
     assert (match.model, match.effort, match.pin, match.temperature) == (
         DEFAULT.model,

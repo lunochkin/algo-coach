@@ -16,9 +16,10 @@ import pytest
 from alembic import command
 from alembic.config import Config
 from dotenv import dotenv_values
-from sqlalchemy import Engine, create_engine, make_url, text
+from helpers import CALL_ROW
+from sqlalchemy import Engine, create_engine, insert, make_url, text
 
-from algo_coach.storage import Database
+from algo_coach.storage import Database, metadata
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -80,5 +81,14 @@ def database(database_engine: Engine, tmp_path: Path) -> Iterator[Database]:
     """The handle a test builds its stores from: the worker's database, empty
     when the test starts and emptied after, and the test's own directory for a
     store still on files."""
-    yield Database(tmp_path, engine=database_engine)
+    handle = Database(tmp_path, engine=database_engine)
+    shared(handle)
+    yield handle
     emptied(database_engine)
+
+
+def shared(database: Database) -> None:
+    """The call `PROVENANCE` cites, which every machine record the shared
+    helpers build names. A test counting calls reads past it with `own`."""
+    with database.engine.begin() as conn:
+        conn.execute(insert(metadata.tables["calls"]).values(CALL_ROW))

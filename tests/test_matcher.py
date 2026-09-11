@@ -1,7 +1,7 @@
 import json
 
 import pytest
-from helpers import FakeTransport, Verdict
+from helpers import FakeTransport, Verdict, own
 from matching import PROCEDURE, canonical, card, problem, seeded, template
 
 from algo_coach.calls import CallLog
@@ -131,6 +131,6 @@ def test_the_call_is_recorded(database):
 
     read(database, client)
 
-    (call,) = CallLog(database).all()
+    (call,) = own(CallLog(database).all())
     assert json.loads(call.response)["templates"] == ["fixed-window"]
     assert call.provider == "fake"

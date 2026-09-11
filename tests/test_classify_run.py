@@ -3,7 +3,7 @@ from datetime import timedelta
 
 import pytest
 from commands import data_root
-from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, seed_problem
+from helpers import T0, FakeTransport, Verdict, attempt, machine_claim, own, seed_problem
 
 from algo_coach.attempt_claims import classify_backlog, standing_attempt_claims
 from algo_coach.attempt_claims.run import Progress
@@ -491,7 +491,7 @@ def test_a_call_is_recorded_beside_the_claim_it_produced(database):
     classify_backlog(answering(Verdict(["greedy"])), log, calls, stored(log), user_id="u1")
 
     (claim,) = log.claims()
-    (call,) = calls.all()
+    (call,) = own(calls.all())
     assert claim.call_id == call.id
     assert (claim.model, claim.prompt_hash) == (call.model, call.prompt_hash)
 
@@ -506,7 +506,7 @@ def test_a_declined_verdict_is_a_call_and_a_claim_naming_nothing(database):
 
     (claim,) = log.claims()
     assert (result.undecided, claim.techniques) == (1, [])
-    assert len(calls.all()) == 1
+    assert len(own(calls.all())) == 1
 
 
 def test_a_failed_call_is_recorded_though_nothing_claims_it(database):
@@ -516,7 +516,7 @@ def test_a_failed_call_is_recorded_though_nothing_claims_it(database):
     result = classify_backlog(answering(broken()), log, calls, stored(log), user_id="u1")
 
     assert (len(result.failed), log.claims()) == (1, [])
-    (call,) = calls.all()
+    (call,) = own(calls.all())
     assert call.error and call.response is None
 
 

@@ -3,6 +3,7 @@ from hashlib import sha256
 from importlib import import_module
 
 import pytest
+from helpers import own
 
 from algo_coach.calls import CallLog, Reply, Trace, ask, payload, prompt_hash, recorded, stamp
 from algo_coach.schema import Call, Configuration
@@ -54,7 +55,7 @@ def test_the_stored_prompt_hashes_to_the_prompt_hash_beside_it(database):
         configuration=CONFIGURATION,
     )
 
-    (stored,) = log.all()
+    (stored,) = own(log.all())
     assert sha256(stored.prompt.encode()).hexdigest()[: len(stored.prompt_hash)] == (
         stored.prompt_hash
     )
@@ -71,7 +72,7 @@ def test_the_prompt_is_both_halves_in_the_order_sent(database):
         configuration=CONFIGURATION,
     )
 
-    (stored,) = log.all()
+    (stored,) = own(log.all())
     assert "sys" in stored.prompt and "body" in stored.prompt
     assert stored.prompt == payload("sys", "body")
 
@@ -88,7 +89,7 @@ def test_what_came_back_is_recorded_beside_what_it_cost(database):
     )
 
     assert text == '{"techniques": []}'
-    (stored,) = log.all()
+    (stored,) = own(log.all())
     assert stored.response == '{"techniques": []}'
     assert stored.reasoning == "weighing the invariant"
     assert (stored.input_tokens, stored.output_tokens) == (11, 22)
@@ -112,7 +113,7 @@ def test_a_failure_is_recorded_and_then_raised(database):
             configuration=CONFIGURATION,
         )
 
-    (stored,) = log.all()
+    (stored,) = own(log.all())
     assert stored.error == "RuntimeError: rate limited"
     assert stored.response is None
 
@@ -155,7 +156,7 @@ def test_the_same_prompt_may_be_called_more_than_once(database):
         configuration=CONFIGURATION,
     )
 
-    first, second = log.all()
+    first, second = own(log.all())
     assert first.prompt_hash == second.prompt_hash
     assert first.id != second.id
 
@@ -176,7 +177,7 @@ def test_a_call_carries_an_outcome_or_it_is_not_a_call():
 
 
 def test_an_empty_log_reads_as_nothing(database):
-    assert CallLog(database).all() == []
+    assert own(CallLog(database).all()) == []
 
 
 def test_the_log_round_trips(database):
@@ -185,7 +186,7 @@ def test_the_log_round_trips(database):
 
     log.append(call)
 
-    assert log.all() == [call]
+    assert own(log.all()) == [call]
     assert isinstance(log.all()[0], Call)
 
 
@@ -206,7 +207,7 @@ def test_the_call_records_what_it_was_sampled_at(database):
 
     assert transport.calls[0]["temperature"] == 0.0
     assert call.temperature == 0.0
-    assert log.all()[0].temperature == 0.0
+    assert own(log.all())[0].temperature == 0.0
 
 
 def test_a_call_at_the_provider_s_own_default_records_no_temperature(database):
@@ -243,7 +244,7 @@ def test_the_execution_and_its_last_request_are_both_recorded(database, monkeypa
         configuration=CONFIGURATION,
     )
 
-    (stored,) = log.all()
+    (stored,) = own(log.all())
     assert (stored.elapsed_ms, stored.requests, stored.request_ms) == (250, 2, 90)
 
 
@@ -266,7 +267,7 @@ def test_a_failure_records_both_levels_too(database, monkeypatch):
             configuration=CONFIGURATION,
         )
 
-    (stored,) = log.all()
+    (stored,) = own(log.all())
     assert (stored.elapsed_ms, stored.requests, stored.request_ms) == (30_000, 5, 9_000)
 
 
@@ -284,7 +285,7 @@ def test_a_transport_that_never_retried_stamps_nothing(database):
             configuration=CONFIGURATION,
         )
 
-    (stored,) = log.all()
+    (stored,) = own(log.all())
     assert (stored.requests, stored.request_ms) == (None, None)
 
 

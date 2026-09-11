@@ -53,8 +53,8 @@ backend for our own generated code, which is not a threat model.
 - [x] Add a test database fixture: one database per xdist worker, built by the
       migrations and emptied between tests
 - [x] Rewrite the calls store on Postgres, its tests on the fixture
-- [ ] Rewrite the cards store on Postgres, its tests on the fixture
-- [ ] Rewrite the problem store on Postgres, its tests on the fixture
+- [x] Rewrite the cards store on Postgres, its tests on the fixture
+- [x] Rewrite the problem store on Postgres, its tests on the fixture
 - [ ] Rewrite the case store on Postgres, its tests on the fixture
 - [ ] Rewrite the solution store on Postgres, its tests on the fixture
 - [ ] Rewrite the solution claims store on Postgres, its tests on the fixture
