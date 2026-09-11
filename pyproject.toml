@@ -7,8 +7,10 @@ license = "Apache-2.0"
 requires-python = ">=3.14"
 authors = [{ name = "Maksim Lunochkin" }]
 dependencies = [
+    "alembic>=1.19.2",
     "fastapi>=0.141.1",
     "openai>=1.60",
+    "psycopg[binary]>=3.3.5",
     "pydantic>=2.7",
     "python-dotenv>=1.0",
     "rich>=15.0.0",
@@ -126,6 +128,11 @@ source_modules = [
     "algo_coach.mutation",
 ]
 forbidden_modules = ["algo_coach.cli", "algo_coach.api"]
+
+# used outside `src`, which is all deptry reads: Alembic runs `migrations/`, and
+# SQLAlchemy loads psycopg from the database URL's scheme
+[tool.deptry.per_rule_ignores]
+DEP002 = ["alembic", "psycopg"]
 
 [tool.coverage.run]
 source = ["algo_coach"]

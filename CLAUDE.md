@@ -16,6 +16,8 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
   <name>` inside `web/` copies one into `web/src/components/ui/`. Restyle
   through the theme tokens in `web/src/index.css`, not by editing a copied
   component, so the components stay consistent and an upgrade merges.
+- Postgres is named by `DATABASE_URL` in `.env`. `just migrate` applies the
+  migrations, and `just migration <name>` generates the next one.
 - `just app` runs the API and the Vite dev server together, and Ctrl+C stops
   both. The page is at the address Vite prints.
 

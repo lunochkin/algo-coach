@@ -86,6 +86,15 @@ types:
     uv run python -m algo_coach.api --openapi > web/src/api/openapi.json
     cd web && npx openapi-typescript src/api/openapi.json -o src/api/schema.d.ts
 
+# Apply every migration the database named by DATABASE_URL has not had.
+migrate:
+    uv run alembic upgrade head
+
+# Generate a migration from what the declared tables add, to be read before it
+# is committed. A new enum type or value is written by hand.
+migration name:
+    uv run alembic revision --autogenerate -m "{{ name }}"
+
 # Per-technique progress.
 board *args:
     uv run algo-coach board {{ args }}

@@ -45,7 +45,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Declare the diagnoses table
 - [x] Check that every stored record has a table. A record left without one is
       a store the copy to Postgres skips
-- [ ] Generate the first Alembic migration from those tables, creating every
+- [x] Generate the first Alembic migration from those tables, creating every
       table
 - [ ] Back `JsonlLog` and `FileStore` with Postgres behind their current
       interfaces, so no domain call changes. The write semantics in the
