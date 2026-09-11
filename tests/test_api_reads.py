@@ -35,7 +35,7 @@ def test_the_board_offers_every_technique_a_served_problem_carries(client, tmp_p
     techniques alone would offer nothing to pick."""
     attempted(tmp_path, "a1", problem_id="p-sorting")
 
-    board = client.get("/board").json()
+    board = client.get("/api/board").json()
 
     assert [(row["technique"], row["attempt_count"]) for row in board["rows"]] == [
         ("greedy", 0),
@@ -47,7 +47,7 @@ def test_the_board_offers_every_technique_a_served_problem_carries(client, tmp_p
 def test_the_board_counts_the_user_s_own_attempts_alone(client, tmp_path):
     attempted(tmp_path, "a1", user_id="u-b71e03")
 
-    rows = client.get("/board").json()["rows"]
+    rows = client.get("/api/board").json()["rows"]
 
     assert {row["technique"]: row["attempt_count"] for row in rows} == {"greedy": 0, "sorting": 0}
 
@@ -73,16 +73,16 @@ def test_a_technique_s_cards_come_without_the_optional_template(client, tmp_path
         )
     )
 
-    (card,) = client.get("/techniques/greedy/cards").json()
+    (card,) = client.get("/api/techniques/greedy/cards").json()
 
     assert [one["slug"] for one in card["templates"]] == ["core"]
-    assert client.get("/techniques/sorting/cards").json() == []
+    assert client.get("/api/techniques/sorting/cards").json() == []
 
 
 def test_a_candidate_carries_no_statement(client):
     """The clock starts when the statement is served, so a statement in the
     list would be read untimed."""
-    rows = client.get("/techniques/sorting/candidates").json()
+    rows = client.get("/api/techniques/sorting/candidates").json()
 
     assert [row["problem_id"] for row in rows] == ["p-greedy", "p-sorting"]
     assert "statement" not in str(rows)
@@ -91,7 +91,7 @@ def test_a_candidate_carries_no_statement(client):
 def test_a_retired_problem_is_not_a_candidate(client, tmp_path):
     ProblemStore(tmp_path).retire("p-greedy", RetirementReason.DEFECTIVE)
 
-    rows = client.get("/techniques/sorting/candidates").json()
+    rows = client.get("/api/techniques/sorting/candidates").json()
 
     assert [row["problem_id"] for row in rows] == ["p-sorting"]
 
@@ -100,7 +100,7 @@ def test_the_candidates_count_the_user_s_own_attempts_alone(client, tmp_path):
     attempted(tmp_path, "a1")
     attempted(tmp_path, "a2", user_id="u-b71e03")
 
-    rows = client.get("/techniques/greedy/candidates").json()
+    rows = client.get("/api/techniques/greedy/candidates").json()
 
     assert [row["attempt_count"] for row in rows] == [1]
 
@@ -108,19 +108,19 @@ def test_the_candidates_count_the_user_s_own_attempts_alone(client, tmp_path):
 def test_serving_the_statement_stores_the_sitting_for_the_user(client):
     """Serving writes the sitting, so the route is a POST though the loop reads
     the statement through it."""
-    served = client.post("/problems/p-sorting/sittings").json()
+    served = client.post("/api/problems/p-sorting/sittings").json()
 
     assert served["statement"] == "Given an array, return ..."
     assert (served["sitting"]["user_id"], served["sitting"]["problem_id"]) == (USER, "p-sorting")
-    again = client.post("/problems/p-sorting/sittings").json()
+    again = client.post("/api/problems/p-sorting/sittings").json()
     assert again["sitting"]["id"] == served["sitting"]["id"]
 
 
 def test_serving_an_unknown_problem_is_not_found(client):
-    assert client.post("/problems/nope/sittings").status_code == 404
+    assert client.post("/api/problems/nope/sittings").status_code == 404
 
 
 def test_serving_a_retired_problem_is_refused(client, tmp_path):
     ProblemStore(tmp_path).retire("p-sorting", RetirementReason.DEFECTIVE)
 
-    assert client.post("/problems/p-sorting/sittings").status_code == 409
+    assert client.post("/api/problems/p-sorting/sittings").status_code == 409

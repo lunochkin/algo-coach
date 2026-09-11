@@ -27,11 +27,11 @@ def client(root):
 
 @pytest.fixture
 def sitting_id(client) -> str:
-    return client.post("/problems/p1/sittings").json()["sitting"]["id"]
+    return client.post("/api/problems/p1/sittings").json()["sitting"]["id"]
 
 
 def submitted(client, sitting_id: str, code: str = DOUBLE):
-    return client.post(f"/sittings/{sitting_id}/submissions", json={"code": code})
+    return client.post(f"/api/sittings/{sitting_id}/submissions", json={"code": code})
 
 
 def test_a_submission_answers_with_its_verdict_per_case(client, sitting_id, root):
@@ -75,23 +75,25 @@ def test_a_crashing_submission_shows_what_raised(client, sitting_id):
 
 
 def test_a_submission_without_code_is_unprocessable(client, sitting_id):
-    assert client.post(f"/sittings/{sitting_id}/submissions", json={}).status_code == 422
+    assert client.post(f"/api/sittings/{sitting_id}/submissions", json={}).status_code == 422
 
 
 def test_a_paused_sitting_refuses_a_submission_until_resumed(client, sitting_id):
     """A submission while paused would stamp a time the clock was not
     counting."""
-    assert client.post(f"/sittings/{sitting_id}/pause").json()["pauses"][0]["until"] is None
+    assert client.post(f"/api/sittings/{sitting_id}/pause").json()["pauses"][0]["until"] is None
     assert submitted(client, sitting_id).status_code == 409
 
-    assert client.post(f"/sittings/{sitting_id}/resume").json()["pauses"][0]["until"] is not None
+    assert (
+        client.post(f"/api/sittings/{sitting_id}/resume").json()["pauses"][0]["until"] is not None
+    )
     assert submitted(client, sitting_id).status_code == 200
 
 
 def test_pausing_twice_is_refused_with_the_domain_s_reason(client, sitting_id):
-    client.post(f"/sittings/{sitting_id}/pause")
+    client.post(f"/api/sittings/{sitting_id}/pause")
 
-    response = client.post(f"/sittings/{sitting_id}/pause")
+    response = client.post(f"/api/sittings/{sitting_id}/pause")
 
     assert (response.status_code, response.json()["detail"]) == (
         409,
@@ -102,7 +104,7 @@ def test_pausing_twice_is_refused_with_the_domain_s_reason(client, sitting_id):
 def test_an_ended_sitting_takes_no_submission(client, sitting_id):
     """The loop ends a sitting on its claim, and a sitting left open reports an
     elapsed time that moves with the moment it is read."""
-    assert client.post(f"/sittings/{sitting_id}/end").json()["ended_at"] is not None
+    assert client.post(f"/api/sittings/{sitting_id}/end").json()["ended_at"] is not None
 
     assert submitted(client, sitting_id).status_code == 409
 
@@ -110,7 +112,7 @@ def test_an_ended_sitting_takes_no_submission(client, sitting_id):
 def test_another_user_s_sitting_is_not_found(root, sitting_id):
     other = TestClient(create_app(root, user_id="u-b71e03"))
 
-    assert other.post(f"/sittings/{sitting_id}/pause").status_code == 404
+    assert other.post(f"/api/sittings/{sitting_id}/pause").status_code == 404
     assert submitted(other, sitting_id).status_code == 404
 
 
@@ -119,17 +121,19 @@ def test_each_attempt_of_the_sitting_is_asked_about_until_claimed(client, sittin
     the earlier ones to the problem's techniques."""
     first = submitted(client, sitting_id, TRIPLE).json()["attempt"]["id"]
     second = submitted(client, sitting_id).json()["attempt"]["id"]
-    assert [one["id"] for one in client.get(f"/sittings/{sitting_id}/unclaimed").json()] == [
+    assert [one["id"] for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()] == [
         first,
         second,
     ]
 
     written = client.post(
-        f"/attempts/{first}/claims", json={"techniques": ["sorting"], "confidence": "sure"}
+        f"/api/attempts/{first}/claims", json={"techniques": ["sorting"], "confidence": "sure"}
     ).json()
 
     assert (written["techniques"], written["source"]) == (["sorting"], "user")
-    assert [one["id"] for one in client.get(f"/sittings/{sitting_id}/unclaimed").json()] == [second]
+    assert [one["id"] for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()] == [
+        second
+    ]
 
 
 def test_a_claim_is_limited_to_the_problem_s_own_techniques(client, sitting_id):
@@ -138,7 +142,7 @@ def test_a_claim_is_limited_to_the_problem_s_own_techniques(client, sitting_id):
     attempt_id = submitted(client, sitting_id).json()["attempt"]["id"]
 
     response = client.post(
-        f"/attempts/{attempt_id}/claims", json={"techniques": ["trie"], "confidence": "guess"}
+        f"/api/attempts/{attempt_id}/claims", json={"techniques": ["trie"], "confidence": "guess"}
     )
 
     assert response.status_code == 409
@@ -147,7 +151,7 @@ def test_a_claim_is_limited_to_the_problem_s_own_techniques(client, sitting_id):
 
 def test_a_claim_naming_nothing_is_refused_and_a_decline_is_not(client, sitting_id):
     attempt_id = submitted(client, sitting_id).json()["attempt"]["id"]
-    route = f"/attempts/{attempt_id}/claims"
+    route = f"/api/attempts/{attempt_id}/claims"
 
     assert client.post(route, json={"confidence": "sure"}).status_code == 409
     assert client.post(route, json={"confidence": "sure", "declined": True}).status_code == 200
@@ -158,7 +162,7 @@ def test_claiming_another_user_s_attempt_is_not_found(root, client, sitting_id):
     other = TestClient(create_app(root, user_id="u-b71e03"))
 
     response = other.post(
-        f"/attempts/{attempt_id}/claims", json={"techniques": ["greedy"], "confidence": "sure"}
+        f"/api/attempts/{attempt_id}/claims", json={"techniques": ["greedy"], "confidence": "sure"}
     )
 
     assert response.status_code == 404

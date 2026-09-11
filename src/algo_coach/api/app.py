@@ -7,6 +7,9 @@ from algo_coach.api.reads import router as reads
 from algo_coach.api.writes import router as writes
 from algo_coach.sitting import Missing, Refused
 
+# the path whatever serves the pages routes to the API, on the pages' origin
+PREFIX = "/api"
+
 
 def create_app(root: Path, *, user_id: str) -> FastAPI:
     app = FastAPI(title="algo-coach")
@@ -14,8 +17,8 @@ def create_app(root: Path, *, user_id: str) -> FastAPI:
     # one user stands in for authentication until Phase 9 keys the log by user
     app.state.user_id = user_id
     app.add_exception_handler(Refused, _refused)
-    app.include_router(reads)
-    app.include_router(writes)
+    app.include_router(reads, prefix=PREFIX)
+    app.include_router(writes, prefix=PREFIX)
     return app
 
 

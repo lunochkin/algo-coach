@@ -269,6 +269,11 @@ times. Each record class is specified in one of the files beside it.
 
 - **Verification runs locally**, so every submission is judged by whatever
   ran it.
+- **The web app is two deployables on one origin.** The API answers JSON under
+  `/api` and serves no page. The frontend is static files, and whatever serves
+  them routes `/api` to the API: Vite's proxy locally, the host in Phase 9.
+  - A second origin is rejected. Every request would need CORS, and the login
+    cookie Phase 9 brings would have to cross domains.
 - **Storage is concrete for now**: JSON files under a gitignored directory,
   with a database later. The schema is the contract, and storage swaps
   underneath it.

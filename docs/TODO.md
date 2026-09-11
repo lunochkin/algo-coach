@@ -78,8 +78,9 @@ React frontend the API serves as static files.
 - [x] Report a crashed case's exception from the child, and show it beside the
       failing case. A crash carries no message today, so the solver guesses
       which line raised
-- [ ] Serve the built frontend from the same process as the API, so the app
-      deploys as one unit when Phase 9 hosts it
+- [x] Serve the pages and the API from one origin, the frontend proxying
+      `/api` to an API that holds no page. A second origin puts CORS on every
+      request and the login cookie across domains once Phase 9 buys accounts
 
 ### The frontend
 
