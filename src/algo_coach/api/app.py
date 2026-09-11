@@ -1,4 +1,6 @@
-from fastapi import FastAPI, Request
+from collections.abc import Awaitable, Callable
+
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 
 from algo_coach.api.devlogin import router as dev_login_router
@@ -10,6 +12,8 @@ from algo_coach.storage import Database
 
 # the path whatever serves the pages routes to the API, on the pages' origin
 PREFIX = "/api"
+# the methods a write is sent with
+WRITES = {"POST", "PUT", "PATCH", "DELETE"}
 
 
 def create_app(
@@ -21,6 +25,7 @@ def create_app(
         raise ValueError("the dev login refuses to start beside a provider's client")
     app = FastAPI(title="algo-coach")
     app.state.root = root
+    app.middleware("http")(_json_writes)
     app.add_exception_handler(Refused, _refused)
     app.include_router(reads, prefix=PREFIX)
     app.include_router(writes, prefix=PREFIX)
@@ -31,6 +36,18 @@ def create_app(
         app.state.dev_user = dev_login
         app.include_router(dev_login_router, prefix=PREFIX)
     return app
+
+
+async def _json_writes(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    # a form on another site sends a form's content type, and JSON from another
+    # origin needs a preflight this API never answers. So a write the session
+    # cookie carries is refused unless it is JSON
+    media_type = request.headers.get("content-type", "").split(";")[0].strip().lower()
+    if request.method in WRITES and media_type != "application/json":
+        return JSONResponse({"detail": "a write is sent as JSON"}, status_code=415)
+    return await call_next(request)
 
 
 async def _refused(_: Request, error: Exception) -> JSONResponse:

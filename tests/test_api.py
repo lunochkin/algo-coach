@@ -13,6 +13,14 @@ from algo_coach.sitting import Missing, Refused
 USER = "u-4f9c2a"
 
 
+written: list[bool] = []
+
+
+@pytest.fixture(autouse=True)
+def nothing_written():
+    written.clear()
+
+
 @pytest.fixture
 def client(database):
     app = create_app(database)
@@ -32,6 +40,11 @@ def client(database):
     @app.get("/broken")
     def broken() -> None:
         raise ValueError("a stored record the engine wrote wrong")
+
+    @app.post("/write")
+    def write() -> dict[str, bool]:
+        written.append(True)
+        return {"written": True}
 
     return TestClient(app, raise_server_exceptions=False)
 
@@ -96,6 +109,34 @@ def test_an_expired_session_signs_nobody_in(client, database):
         )
 
     assert client.get("/whose").status_code == 401
+
+
+@pytest.mark.parametrize(
+    "content_type", ["application/x-www-form-urlencoded", "multipart/form-data", "text/plain"]
+)
+def test_a_write_a_form_can_send_is_refused_before_the_route_runs(client, content_type):
+    """A form on another site sends one of these, with the session cookie, and
+    a route that ran it would write as the signed-in user."""
+    response = client.post("/write", content=b"a=1", headers={"content-type": content_type})
+
+    assert response.status_code == 415
+    assert written == []
+
+
+def test_a_write_with_no_content_type_is_refused(client):
+    """A body-less request from another site sends no content type either."""
+    assert client.post("/write").status_code == 415
+    assert written == []
+
+
+@pytest.mark.parametrize("content_type", ["application/json", "Application/JSON; charset=utf-8"])
+def test_a_json_write_reaches_its_route(client, content_type):
+    assert client.post("/write", headers={"content-type": content_type}).status_code == 200
+    assert written == [True]
+
+
+def test_a_read_needs_no_content_type(client):
+    assert client.get("/missing").status_code == 404
 
 
 def test_a_route_that_names_no_user_needs_no_session(client):

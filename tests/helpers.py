@@ -357,6 +357,8 @@ def browsing(database, user_id: str, **options) -> TestClient:
     """The app, from a browser signed in as the user: a session opened for it,
     its token in the cookie a sign-in sets."""
     named(database, user_id)
-    client = TestClient(create_app(database), **options)
+    # as the pages send every request: the API refuses a write that is not JSON
+    headers = {"content-type": "application/json"}
+    client = TestClient(create_app(database), headers=headers, **options)
     client.cookies.set(SESSION_COOKIE, opened(database, user_id))
     return client

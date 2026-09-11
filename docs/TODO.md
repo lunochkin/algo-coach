@@ -101,7 +101,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Read the user in `UserId` from a verified session, in place of the id
       the app was built with. Every route already takes the user through that
       one dependency
-- [ ] Refuse a write route whose request body is not JSON. A form on another
+- [x] Refuse a write route whose request body is not JSON. A form on another
       site cannot send JSON without a preflight, so the check stops a forged
       write the cookie would otherwise carry
 - [ ] Add login and logout to the pages, and send a request without a session

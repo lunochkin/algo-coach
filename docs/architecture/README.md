@@ -290,6 +290,10 @@ times. Each record class is specified in one of the files beside it.
     can be revoked, where a signed token stands until it expires.
   - The table holds the hash of each token, and never the token. A copy of the
     table then signs nobody in.
+  - A write is refused unless it is sent as JSON, and the pages send every
+    request as JSON. A form on another site cannot send JSON, and JSON from
+    another origin needs a preflight the API never answers. So the session
+    cookie carries no write another site forged.
   - An `identities` row links a provider's user id to a user id the engine
     mints at the first sign-in. The log keys on the engine's id, so adding or
     replacing a provider rewrites no record.
