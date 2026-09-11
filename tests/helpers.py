@@ -215,10 +215,10 @@ class FakeTransport:
         )
 
 
-def seed_problem(root, *, id: str, techniques: list[str]) -> None:
+def seed_problem(root, *, id: str, techniques: list[str], **problem) -> None:
     """A stored problem deriving `techniques`: one canonical, read by hand as
     using them. The record itself carries none, as a generated one does."""
-    ProblemStore(root).put(make_problem(id))
+    ProblemStore(root).put(make_problem(id, **problem))
     canonical = Solution(
         id=f"{id}-canonical",
         created_at=T0,

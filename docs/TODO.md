@@ -126,7 +126,7 @@ React frontend built to static files, served on the API's origin.
       number the log will carry
 - [x] Build the prompt the sitting ends on: the claim over the problem's
       techniques
-- [ ] Drive one whole sitting in a test through the API rather than a browser:
+- [x] Drive one whole sitting in a test through the API rather than a browser:
       serve, submit, verdict, claim. The frontend then carries no
       logic a test can only reach by rendering a page
 - [x] Add `just app`: the API and the Vite dev server in one command, the dev
