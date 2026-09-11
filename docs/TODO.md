@@ -24,7 +24,7 @@ backend for our own generated code, which is not a threat model.
       tables and the pydantic models are declared apart, so only a test keeps
       them equal
 - [x] Declare the problems table beside the problem store
-- [ ] Declare the test cases table, the arguments and the expected value as
+- [x] Declare the test cases table, the arguments and the expected value as
       JSONB
 - [x] Declare the solutions table
 - [x] Declare the solution claims table

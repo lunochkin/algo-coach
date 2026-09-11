@@ -19,6 +19,7 @@ from tables import Stored, mismatches
 
 from algo_coach.calls.table import calls
 from algo_coach.cards.table import card_templates, cards
+from algo_coach.cases.table import test_cases
 from algo_coach.matches.table import template_matches
 from algo_coach.problems.table import problems
 from algo_coach.schema import (
@@ -31,6 +32,7 @@ from algo_coach.schema import (
     SolutionClaim,
     Template,
     TemplateMatch,
+    TestCase,
 )
 from algo_coach.solution_claims.table import solution_claims
 from algo_coach.solutions.table import solutions
@@ -39,6 +41,7 @@ from algo_coach.storage import call_column, enumerated, metadata, timestamp
 # every stored record and its table. Each store adds its own as its tables land
 STORED: list[Stored] = [
     Stored(Call, calls),
+    Stored(TestCase, test_cases, through_call=True, required=frozenset({"call_id"})),
     Stored(Card, cards, elsewhere=frozenset({"templates"})),
     Stored(Template, card_templates, structural=frozenset({"card_id", "position"})),
     Stored(
@@ -287,3 +290,16 @@ def test_a_match_names_a_call_only_where_the_matcher_wrote_it():
     assert checks(template_matches)["template_matches_call_matches_source_check"] == (
         "(source = 'classifier') = (call_id IS NOT NULL)"
     )
+
+
+def test_a_case_s_expected_null_is_a_value_the_column_keeps():
+    """`None` is a return a solution may give, so absence cannot stand in for
+    it, and the JSONB column stores it as JSON `null` rather than SQL NULL."""
+    assert test_cases.c.expected.type.none_as_null is False
+    assert not test_cases.c.expected.nullable
+
+
+def test_a_case_s_arguments_are_a_json_array():
+    """The arguments are positional, and anything but an array reaches `solve`
+    as one argument."""
+    assert checks(test_cases)["test_cases_args_positional_check"] == "jsonb_typeof(args) = 'array'"
