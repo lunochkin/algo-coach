@@ -79,7 +79,7 @@ function ClaimForm({ attempt, position, techniques, drilled, onClaimed }: FormPr
     try {
       const { data, error } = await api.POST('/api/attempts/{attempt_id}/claims', {
         params: { path: { attempt_id: attempt.id } },
-        body: { techniques: declined ? [] : chosen, declined, confidence },
+        body: { techniques: chosen, declined, confidence },
       })
       if (data) onClaimed()
       else setRefused(described(error))
@@ -103,7 +103,7 @@ function ClaimForm({ attempt, position, techniques, drilled, onClaimed }: FormPr
           <div key={technique} className="flex items-center gap-2">
             <Checkbox
               id={`claim-${technique}`}
-              checked={!declined && chosen.includes(technique)}
+              checked={chosen.includes(technique)}
               disabled={declined}
               onCheckedChange={(checked) =>
                 setChosen(
@@ -120,7 +120,12 @@ function ClaimForm({ attempt, position, techniques, drilled, onClaimed }: FormPr
           <Checkbox
             id="claim-declined"
             checked={declined}
-            onCheckedChange={(checked) => setDeclined(checked === true)}
+            onCheckedChange={(checked) => {
+              // a decline clears the ticks rather than hiding them, so undoing
+              // it starts from nothing instead of bringing back an earlier choice
+              setDeclined(checked === true)
+              if (checked === true) setChosen([])
+            }}
           />
           <Label htmlFor="claim-declined">None of these</Label>
         </div>
