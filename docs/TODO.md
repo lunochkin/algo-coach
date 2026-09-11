@@ -109,7 +109,7 @@ React frontend built to static files, served on the API's origin.
       template's code hidden until the user reveals it. `content.md` gives why
 - [ ] Link a technique's cards from its candidates page and from the picked
       problem's page. The card is offered, and no sitting requires it
-- [ ] Add a navigation menu linking the board and the cards list
+- [x] Add a navigation menu linking the board and the cards list
 - [ ] Start the sitting from the picked problem's page: a button calls `serve`
       and opens the sitting's page. A card read before that press stays off
       the clock
