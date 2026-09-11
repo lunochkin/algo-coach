@@ -474,6 +474,8 @@ export interface components {
             /** Signature */
             signature: string | null;
             sitting: components["schemas"]["Sitting"];
+            /** Elapsed Sec */
+            elapsed_sec: number;
         };
         /** Sitting */
         Sitting: {
@@ -564,6 +566,16 @@ export interface components {
          * @enum {string}
          */
         TemplateKind: "code" | "procedure";
+        /**
+         * Timed
+         * @description A sitting a pause, a resume or an end moved, with its elapsed time on the
+         *     engine's clock.
+         */
+        Timed: {
+            sitting: components["schemas"]["Sitting"];
+            /** Elapsed Sec */
+            elapsed_sec: number;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -833,7 +845,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Sitting"];
+                    "application/json": components["schemas"]["Timed"];
                 };
             };
             /** @description Validation Error */
@@ -864,7 +876,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Sitting"];
+                    "application/json": components["schemas"]["Timed"];
                 };
             };
             /** @description Validation Error */
@@ -895,7 +907,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Sitting"];
+                    "application/json": components["schemas"]["Timed"];
                 };
             };
             /** @description Validation Error */

@@ -81,11 +81,15 @@ def test_a_submission_without_code_is_unprocessable(client, sitting_id):
 def test_a_paused_sitting_refuses_a_submission_until_resumed(client, sitting_id):
     """A submission while paused would stamp a time the clock was not
     counting."""
-    assert client.post(f"/api/sittings/{sitting_id}/pause").json()["pauses"][0]["until"] is None
+    assert (
+        client.post(f"/api/sittings/{sitting_id}/pause").json()["sitting"]["pauses"][0]["until"]
+        is None
+    )
     assert submitted(client, sitting_id).status_code == 409
 
     assert (
-        client.post(f"/api/sittings/{sitting_id}/resume").json()["pauses"][0]["until"] is not None
+        client.post(f"/api/sittings/{sitting_id}/resume").json()["sitting"]["pauses"][0]["until"]
+        is not None
     )
     assert submitted(client, sitting_id).status_code == 200
 
@@ -104,7 +108,7 @@ def test_pausing_twice_is_refused_with_the_domain_s_reason(client, sitting_id):
 def test_an_ended_sitting_takes_no_submission(client, sitting_id):
     """The loop ends a sitting on its claim, and a sitting left open reports an
     elapsed time that moves with the moment it is read."""
-    assert client.post(f"/api/sittings/{sitting_id}/end").json()["ended_at"] is not None
+    assert client.post(f"/api/sittings/{sitting_id}/end").json()["sitting"]["ended_at"] is not None
 
     assert submitted(client, sitting_id).status_code == 409
 
@@ -166,3 +170,13 @@ def test_claiming_another_user_s_attempt_is_not_found(root, client, sitting_id):
     )
 
     assert response.status_code == 404
+
+
+def test_a_pause_reports_the_elapsed_time_it_froze(client, sitting_id):
+    """The page counts on from the engine's number, so a paused clock shows
+    what the next attempt would carry."""
+    paused = client.post(f"/api/sittings/{sitting_id}/pause").json()
+    again = client.get(f"/api/sittings/{sitting_id}").json()
+
+    assert paused["elapsed_sec"] >= 0
+    assert again["elapsed_sec"] == pytest.approx(paused["elapsed_sec"])

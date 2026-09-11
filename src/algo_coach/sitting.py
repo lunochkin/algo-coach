@@ -49,6 +49,9 @@ class Served(BaseModel):
     statement: str  # the prose, without the signature it ends on
     signature: str | None  # the `def solve(...)` line; none where a statement ends on prose
     sitting: Sitting
+    # taken on the engine's clock, so a page counting on from it shows the
+    # number an attempt would carry rather than one its own clock skews
+    elapsed_sec: float
 
 
 class Failure(BaseModel):
@@ -81,6 +84,7 @@ def serve(
     problem_id: str,
     *,
     user_id: str,
+    now: datetime | None = None,
 ) -> Served:
     problem = problems.get(problem_id)
     if problem is None:
@@ -93,7 +97,7 @@ def serve(
     if one is None:
         one = mint.sitting(user_id, problem_id)
         sittings.put(one)
-    return _served(problem.title, problem.statement, one)
+    return _served(problem.title, problem.statement, one, now or _clock())
 
 
 def get(
@@ -102,6 +106,7 @@ def get(
     sitting_id: str,
     *,
     user_id: str,
+    now: datetime | None = None,
 ) -> Served:
     """What `serve` returned for one of the user's sittings, ended or not. A
     reload of the sitting's page starts no clock."""
@@ -110,7 +115,7 @@ def get(
     problem = problems.get(one.problem_id)
     if problem is None:
         raise ValueError(f"sitting {sitting_id} names no stored problem {one.problem_id}")
-    return _served(problem.title, problem.statement, one)
+    return _served(problem.title, problem.statement, one, now or _clock())
 
 
 def submit(
@@ -219,9 +224,15 @@ def end(
     )
 
 
-def _served(title: str, statement: str, one: Sitting) -> Served:
+def _served(title: str, statement: str, one: Sitting, now: datetime) -> Served:
     prose, signature = _signed(statement)
-    return Served(title=title, statement=prose, signature=signature, sitting=one)
+    return Served(
+        title=title,
+        statement=prose,
+        signature=signature,
+        sitting=one,
+        elapsed_sec=one.elapsed(now),
+    )
 
 
 def _signed(statement: str) -> tuple[str, str | None]:

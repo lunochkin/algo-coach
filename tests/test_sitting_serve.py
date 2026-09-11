@@ -83,7 +83,7 @@ def test_a_statement_not_ending_on_the_line_is_all_prose(tmp_path, statement):
 def test_nothing_the_problem_was_written_from_is_served():
     """A target template or a technique names the form the sitting tests, so a
     field added here that carries one fails this."""
-    assert set(Served.model_fields) == {"title", "statement", "signature", "sitting"}
+    assert set(Served.model_fields) == {"title", "statement", "signature", "sitting", "elapsed_sec"}
 
 
 def test_a_second_serve_returns_the_running_sitting(stores):
@@ -146,9 +146,10 @@ def test_a_sitting_is_read_back_as_it_was_served(stores):
     """The sitting's page has its own URL, and a reload there needs the
     statement without starting a clock."""
     problems, sittings = stores
-    served = serve(problems, sittings, "p1", user_id="u-4f9c2a")
+    at = datetime.now(UTC)
+    served = serve(problems, sittings, "p1", user_id="u-4f9c2a", now=at)
 
-    assert get(problems, sittings, served.sitting.id, user_id="u-4f9c2a") == served
+    assert get(problems, sittings, served.sitting.id, user_id="u-4f9c2a", now=at) == served
     assert len(sittings.all()) == 1
 
 
@@ -176,3 +177,18 @@ def test_another_user_s_sitting_reads_as_missing(stores):
 
     with pytest.raises(Missing, match="no sitting"):
         get(problems, sittings, "s0", user_id="u-4f9c2a")
+
+
+def test_the_elapsed_time_is_read_on_the_engine_s_clock(stores):
+    """A page counting on from the browser's clock would show a duration no
+    attempt carries."""
+    problems, sittings = stores
+    sittings.put(
+        a_sitting(
+            pauses=[{"at": BEGAN + timedelta(minutes=10), "until": BEGAN + timedelta(minutes=40)}]
+        )
+    )
+
+    served = get(problems, sittings, "s0", user_id="u-4f9c2a", now=BEGAN + timedelta(hours=1))
+
+    assert served.elapsed_sec == 30 * 60

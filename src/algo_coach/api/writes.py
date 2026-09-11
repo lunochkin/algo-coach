@@ -1,6 +1,10 @@
 """The routes the rest of the drill loop takes: the submission, the pause, the
 end, and the claim asked of each attempt."""
 
+from collections.abc import Callable
+from datetime import UTC, datetime
+from pathlib import Path
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -27,6 +31,14 @@ class Submission(BaseModel):
     code: str
 
 
+class Timed(BaseModel):
+    """A sitting a pause, a resume or an end moved, with its elapsed time on the
+    engine's clock."""
+
+    sitting: Sitting
+    elapsed_sec: float
+
+
 class Claim(BaseModel):
     techniques: list[str] = []
     confidence: Confidence
@@ -41,18 +53,18 @@ def submission(root: Root, user_id: UserId, sitting_id: str, body: Submission) -
 
 
 @router.post("/sittings/{sitting_id}/pause")
-def paused(root: Root, user_id: UserId, sitting_id: str) -> Sitting:
-    return pause(SittingStore(root), sitting_id, user_id=user_id)
+def paused(root: Root, user_id: UserId, sitting_id: str) -> Timed:
+    return _timed(pause, root, sitting_id, user_id)
 
 
 @router.post("/sittings/{sitting_id}/resume")
-def resumed(root: Root, user_id: UserId, sitting_id: str) -> Sitting:
-    return resume(SittingStore(root), sitting_id, user_id=user_id)
+def resumed(root: Root, user_id: UserId, sitting_id: str) -> Timed:
+    return _timed(resume, root, sitting_id, user_id)
 
 
 @router.post("/sittings/{sitting_id}/end")
-def ended(root: Root, user_id: UserId, sitting_id: str) -> Sitting:
-    return end(SittingStore(root), sitting_id, user_id=user_id)
+def ended(root: Root, user_id: UserId, sitting_id: str) -> Timed:
+    return _timed(end, root, sitting_id, user_id)
 
 
 @router.get("/sittings/{sitting_id}/unclaimed")
@@ -74,3 +86,11 @@ def claimed(root: Root, user_id: UserId, attempt_id: str, body: Claim) -> Attemp
         confidence=body.confidence,
         declined=body.declined,
     )
+
+
+def _timed(move: Callable[..., Sitting], root: Path, sitting_id: str, user_id: str) -> Timed:
+    # one instant for the move and the reading, so a resume reports no time
+    # between the two
+    at = datetime.now(UTC)
+    one = move(SittingStore(root), sitting_id, user_id=user_id, now=at)
+    return Timed(sitting=one, elapsed_sec=one.elapsed(at))

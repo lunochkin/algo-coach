@@ -318,7 +318,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Sitting"
+                  "$ref": "#/components/schemas/Timed"
                 }
               }
             }
@@ -357,7 +357,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Sitting"
+                  "$ref": "#/components/schemas/Timed"
                 }
               }
             }
@@ -396,7 +396,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Sitting"
+                  "$ref": "#/components/schemas/Timed"
                 }
               }
             }
@@ -1169,6 +1169,10 @@
           },
           "sitting": {
             "$ref": "#/components/schemas/Sitting"
+          },
+          "elapsed_sec": {
+            "type": "number",
+            "title": "Elapsed Sec"
           }
         },
         "type": "object",
@@ -1176,7 +1180,8 @@
           "title",
           "statement",
           "signature",
-          "sitting"
+          "sitting",
+          "elapsed_sec"
         ],
         "title": "Served",
         "description": "What a solver is handed: the statement and the clock, and nothing the\nproblem was written from."
@@ -1387,6 +1392,24 @@
           "procedure"
         ],
         "title": "TemplateKind"
+      },
+      "Timed": {
+        "properties": {
+          "sitting": {
+            "$ref": "#/components/schemas/Sitting"
+          },
+          "elapsed_sec": {
+            "type": "number",
+            "title": "Elapsed Sec"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sitting",
+          "elapsed_sec"
+        ],
+        "title": "Timed",
+        "description": "A sitting a pause, a resume or an end moved, with its elapsed time on the\nengine's clock."
       },
       "ValidationError": {
         "properties": {

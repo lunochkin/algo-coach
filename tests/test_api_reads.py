@@ -167,8 +167,11 @@ def test_serving_a_retired_problem_is_refused(client, tmp_path):
 def test_a_served_sitting_is_read_back_by_its_id(client):
     """A reload of the sitting's page reaches the same statement and clock."""
     served = client.post("/api/problems/p-sorting/sittings").json()
+    again = client.get(f"/api/sittings/{served['sitting']['id']}").json()
 
-    assert client.get(f"/api/sittings/{served['sitting']['id']}").json() == served
+    # the clock ran between the two requests, and nothing else moved
+    assert again.pop("elapsed_sec") >= served.pop("elapsed_sec")
+    assert again == served
 
 
 def test_another_user_s_sitting_is_not_found(client, tmp_path):

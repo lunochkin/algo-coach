@@ -121,7 +121,7 @@ React frontend built to static files, served on the API's origin.
       not practised daily
 - [x] Pause and resume the sitting from the page, and show it paused. A user
       who steps away otherwise records a duration the clock kept counting
-- [ ] Show the elapsed time during the sitting, counted from the start the API
+- [x] Show the elapsed time during the sitting, counted from the start the API
       handed out. The engine records that duration, so the page shows the
       number the log will carry
 - [ ] Build the prompt the sitting ends on: the claim over the problem's

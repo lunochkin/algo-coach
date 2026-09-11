@@ -4,6 +4,7 @@ import { useParams } from 'react-router'
 import { api, type Sitting, type Submitted } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
 import { CodeEditor } from '@/components/CodeEditor'
+import { ElapsedClock } from '@/components/ElapsedClock'
 import { Markdown } from '@/components/Markdown'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -12,25 +13,33 @@ import { Verdict } from '@/components/Verdict'
 export function SittingPage() {
   const { sittingId = '' } = useParams()
   const { data: served, error } = useLoaded(
-    (signal) =>
-      api.GET('/api/sittings/{sitting_id}', {
+    async (signal) => {
+      const answer = await api.GET('/api/sittings/{sitting_id}', {
         params: { path: { sitting_id: sittingId } },
         signal,
-      }),
+      })
+      // stamped on arrival: the clock counts on from the moment this reading
+      // reached the page
+      return { ...answer, data: answer.data && { ...answer.data, receivedAt: performance.now() } }
+    },
     `sitting:${sittingId}`,
   )
   const code = useRef<string | null>(null)
   const [running, setRunning] = useState(false)
   const [submitted, setSubmitted] = useState<Submitted | null>(null)
   const [refused, setRefused] = useState<string | null>(null)
-  // the sitting as the last pause or resume left it, over the one first loaded
-  const [moved, setMoved] = useState<Sitting | null>(null)
+  // the sitting as the last pause or resume left it, over the one first loaded,
+  // with the engine's elapsed time and when the page received it
+  const [moved, setMoved] = useState<{ sitting: Sitting; elapsedSec: number; at: number } | null>(
+    null,
+  )
   const [moving, setMoving] = useState(false)
 
   if (error) return <p className="text-destructive">The sitting did not load: {error}</p>
   if (!served) return <p className="text-muted-foreground">Loading the sitting…</p>
 
-  const sitting = moved ?? served.sitting
+  const sitting = moved?.sitting ?? served.sitting
+  const clock = moved ?? { elapsedSec: served.elapsed_sec, at: served.receivedAt }
   const paused = sitting.pauses?.at(-1)?.until === null
   const ended = sitting.ended_at != null
   const draft = `algo-coach:sitting:${sittingId}:code`
@@ -44,7 +53,7 @@ export function SittingPage() {
       const { data, error } = paused
         ? await api.POST('/api/sittings/{sitting_id}/resume', params)
         : await api.POST('/api/sittings/{sitting_id}/pause', params)
-      if (data) setMoved(data)
+      if (data) setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() })
       else setRefused(described(error))
     } catch (reason) {
       setRefused(String(reason))
@@ -76,9 +85,13 @@ export function SittingPage() {
       {paused && (
         <div className="flex items-center justify-between rounded-md border border-amber-500/50 bg-amber-500/10 p-3">
           <span className="font-medium">Paused: the clock is stopped</span>
-          <Button onClick={toggle} disabled={moving}>
-            Resume
-          </Button>
+          <div className="flex items-center gap-3">
+            {/* the time the pause froze: the clock under the cover is blurred */}
+            <ElapsedClock elapsedSec={clock.elapsedSec} receivedAt={clock.at} running={false} />
+            <Button onClick={toggle} disabled={moving}>
+              Resume
+            </Button>
+          </div>
         </div>
       )}
       {refused && <p className="text-destructive">Refused: {refused}</p>}
@@ -116,13 +129,20 @@ export function SittingPage() {
               {running ? 'Running…' : 'Submit'}
             </Button>
             <span className="text-sm text-muted-foreground">⌘/Ctrl + Enter</span>
-            {ended ? (
-              <span className="ml-auto text-sm text-muted-foreground">This sitting has ended</span>
-            ) : (
-              <Button variant="outline" className="ml-auto" onClick={toggle} disabled={moving}>
-                Pause
-              </Button>
-            )}
+            <div className="ml-auto flex items-center gap-3">
+              <ElapsedClock
+                elapsedSec={clock.elapsedSec}
+                receivedAt={clock.at}
+                running={!paused && !ended}
+              />
+              {ended ? (
+                <span className="text-sm text-muted-foreground">This sitting has ended</span>
+              ) : (
+                <Button variant="outline" onClick={toggle} disabled={moving}>
+                  Pause
+                </Button>
+              )}
+            </div>
           </div>
           {submitted && (
             <div className="max-h-[45%] overflow-auto">
