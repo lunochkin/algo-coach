@@ -47,19 +47,35 @@ backend for our own generated code, which is not a threat model.
       a store the copy to Postgres skips
 - [x] Generate the first Alembic migration from those tables, creating every
       table
-- [ ] Back `JsonlLog` and `FileStore` with Postgres behind their current
-      interfaces, so no domain call changes. The write semantics in the
-      data-class table hold on either backend
+- [ ] Add an `appended` identity column to every append-only table, in a
+      second migration, and read a log in its order. A JSON line kept the
+      order it landed in, and readers break a tie on `created_at` by it
+- [ ] Add a test database fixture: one database per xdist worker, built by the
+      migrations and emptied between tests
+- [ ] Rewrite the calls store on Postgres, its tests on the fixture
+- [ ] Rewrite the cards store on Postgres, its tests on the fixture
+- [ ] Rewrite the problem store on Postgres, its tests on the fixture
+- [ ] Rewrite the case store on Postgres, its tests on the fixture
+- [ ] Rewrite the solution store on Postgres, its tests on the fixture
+- [ ] Rewrite the solution claims store on Postgres, its tests on the fixture
+- [ ] Rewrite the template matches store on Postgres, its tests on the fixture
+- [ ] Rewrite the verifications store on Postgres, its tests on the fixture
+- [ ] Rewrite the site outcomes store on Postgres, its tests on the fixture
+- [ ] Rewrite the draft store on Postgres: a put replaces the draft's row and
+      all its cases in one transaction. Simple, and revisable, since the draft
+      store is working state
+- [ ] Rewrite the sittings store on Postgres, its tests on the fixture
+- [ ] Rewrite the attempt log on Postgres, its tests on the fixture
+- [ ] Connect the CLI and the API to Postgres through `DATABASE_URL`
+- [ ] Delete `JsonlLog`, `FileStore` and the copy script, and stop writing
+      `data/`, keeping `data/old/`. One backend is one set of write semantics
 - [ ] Refuse an update or a delete on an append-only table in the database
       itself, by grant or by trigger. A write path that skips the log's rule
       is otherwise one bug away
-- [ ] Decide whether the file stores stay beside Postgres, for tests and for
-      offline use, or go. Two backends are two write semantics to keep equal
-- [ ] Copy every record under `data/` into Postgres with a one-off command, and
+- [x] Copy every record under `data/` into Postgres with a one-off command, and
       check that each reads back equal. A record the copy loses from an
       append-only log is lost for good
-- [ ] Run Postgres for `just app` and for the suite in CI. A store tested only
-      against files is untested where it runs
+- [ ] Run Postgres for the suite in CI. The stores run on nothing else
 
 ### Users and access
 
