@@ -116,7 +116,7 @@ React frontend built to static files, served on the API's origin.
 - [x] Build the sitting page: the statement, the `solve` signature, and a
       CodeMirror editor with completion off. `flows.md` gives why the editor
       proposes nothing
-- [ ] Show the per-case verdict beside the editor rather than on a page of its
+- [x] Show the per-case verdict beside the editor rather than on a page of its
       own. A sitting split over several pages is a workflow, and a workflow is
       not practised daily
 - [ ] Pause and resume the sitting from the page, and show it paused. A user

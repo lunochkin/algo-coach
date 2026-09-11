@@ -17,14 +17,16 @@ import {
 } from '@codemirror/view'
 import { useEffect, useRef } from 'react'
 
-type Props = { initial: string; onChange: (code: string) => void }
+type Props = { initial: string; onChange: (code: string) => void; onSubmit: () => void }
 
 // highlighting and indentation, and no `autocompletion()`: `flows.md` gives
 // why the editor a sitting is typed into proposes nothing
-export function CodeEditor({ initial, onChange }: Props) {
+export function CodeEditor({ initial, onChange, onSubmit }: Props) {
   const host = useRef<HTMLDivElement>(null)
   const changed = useRef(onChange)
   changed.current = onChange
+  const submitted = useRef(onSubmit)
+  submitted.current = onSubmit
 
   useEffect(() => {
     if (!host.current) return
@@ -43,7 +45,13 @@ export function CodeEditor({ initial, onChange }: Props) {
           bracketMatching(),
           syntaxHighlighting(defaultHighlightStyle),
           python(),
-          keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
+          // ahead of the default keymap, where Mod-Enter inserts a blank line
+          keymap.of([
+            { key: 'Mod-Enter', run: () => (submitted.current(), true) },
+            ...defaultKeymap,
+            ...historyKeymap,
+            indentWithTab,
+          ]),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) changed.current(update.state.doc.toString())
           }),
