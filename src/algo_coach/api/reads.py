@@ -1,9 +1,9 @@
-"""The routes the drill loop's first three steps read: the board, a technique's
-cards and candidates, and a problem's statement."""
+"""The routes the drill loop reads: the board, the cards, a technique's
+candidates, and a sitting's statement."""
 
 from datetime import datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from algo_coach.api.context import Root, UserId
@@ -56,6 +56,21 @@ def board(root: Root, user_id: UserId) -> Board:
         ungrouped=len(ungrouped(attempts, problems, claims)),
         excluded=len(excluded(attempts, problems)),
     )
+
+
+@router.get("/cards")
+def every_card(root: Root) -> list[Card]:
+    return sorted(CardStore(root).all(), key=lambda one: (one.technique, one.slug))
+
+
+# by slug: a re-seed keeps the slug and the URL a page links to, where the id
+# is minted per store
+@router.get("/cards/{slug}")
+def card(root: Root, slug: str) -> Card:
+    found = CardStore(root).by_slug(slug)
+    if found is None:
+        raise HTTPException(status_code=404, detail=f"no card {slug}")
+    return found
 
 
 @router.get("/techniques/{technique}/cards")

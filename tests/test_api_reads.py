@@ -52,6 +52,20 @@ def test_the_board_counts_the_user_s_own_attempts_alone(client, tmp_path):
     assert {row["technique"]: row["attempt_count"] for row in rows} == {"greedy": 0, "sorting": 0}
 
 
+def a_card(slug: str, technique: str, *, templates=None) -> Card:
+    return Card(
+        id=f"minted-{slug}",
+        slug=slug,
+        technique=technique,
+        title=slug,
+        trigger="a choice",
+        brief="## Core idea",
+        templates=templates
+        or [Template(id=f"t-{slug}", slug="core", title="core", trigger="when", code="pass")],
+        selector=Selector(technique=technique, size=3),
+    )
+
+
 def test_a_technique_s_cards_come_whole(client, tmp_path):
     """The optional template only says a card is covered without it, so the
     page receives it beside the core ones."""
@@ -61,23 +75,46 @@ def test_a_technique_s_cards_come_whole(client, tmp_path):
             id="t2", slug="hard", title="hard", trigger="when", code="def f(): pass", optional=True
         ),
     ]
-    CardStore(tmp_path).put(
-        Card(
-            id="c1",
-            slug="greedy-basic",
-            technique="greedy",
-            title="Greedy",
-            trigger="a choice",
-            brief="## Core idea",
-            templates=templates,
-            selector=Selector(technique="greedy", size=3),
-        )
-    )
+    CardStore(tmp_path).put(a_card("greedy-basic", "greedy", templates=templates))
 
     (card,) = client.get("/api/techniques/greedy/cards").json()
 
     assert [one["slug"] for one in card["templates"]] == ["core", "hard"]
     assert client.get("/api/techniques/sorting/cards").json() == []
+
+
+def test_every_card_is_listed_by_technique_then_slug(client, tmp_path):
+    """The cards list groups by technique, so the order it reads is that
+    grouping."""
+    store = CardStore(tmp_path)
+    for slug, technique in (
+        ("windows", "sliding-window"),
+        ("on-answer", "binary-search"),
+        ("basic", "binary-search"),
+    ):
+        store.put(a_card(slug, technique))
+
+    listed = client.get("/api/cards").json()
+
+    assert [(one["technique"], one["slug"]) for one in listed] == [
+        ("binary-search", "basic"),
+        ("binary-search", "on-answer"),
+        ("sliding-window", "windows"),
+    ]
+
+
+def test_a_card_is_read_by_its_slug(client, tmp_path):
+    """A re-seed keeps the slug, so a link to a card outlives the id the store
+    minted."""
+    CardStore(tmp_path).put(a_card("greedy-basic", "greedy"))
+
+    assert client.get("/api/cards/greedy-basic").json()["id"] == "minted-greedy-basic"
+
+
+def test_an_unknown_card_is_not_found(client):
+    response = client.get("/api/cards/nope")
+
+    assert (response.status_code, response.json()) == (404, {"detail": "no card nope"})
 
 
 def test_a_candidate_carries_no_statement(client):

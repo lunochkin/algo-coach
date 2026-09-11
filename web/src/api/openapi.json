@@ -23,6 +23,67 @@
         }
       }
     },
+    "/api/cards": {
+      "get": {
+        "summary": "Every Card",
+        "operationId": "every_card_api_cards_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Card"
+                  },
+                  "type": "array",
+                  "title": "Response Every Card Api Cards Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cards/{slug}": {
+      "get": {
+        "summary": "Card",
+        "operationId": "card_api_cards__slug__get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Card"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/techniques/{technique}/cards": {
       "get": {
         "summary": "Cards",

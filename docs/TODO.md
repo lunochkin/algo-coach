@@ -75,6 +75,8 @@ React frontend built to static files, served on the API's origin.
 - [x] Add a read route for one of the user's sittings by id, returning what
       `serve` returned. The sitting page has its own URL, and a reload there
       otherwise has no statement to show
+- [x] Add read routes for every card and for one card by its slug. A slug
+      stays the same across a re-seed, where the card's id is minted per store
 - [x] Decide what a failing case shows the solver, its outcome alone or its
       arguments too, and write the choice into `flows.md`. Showing the
       arguments hands over a case the solver can special-case
@@ -101,8 +103,6 @@ React frontend built to static files, served on the API's origin.
 - [x] List the picked technique's candidates, least recently attempted first,
       and let the user pick the problem. A list shows no statement, since the
       clock starts when the statement is served
-- [ ] Add read routes for every card and for one card by its slug. A slug
-      stays the same across a re-seed, where the card's id is minted per store
 - [ ] Add the cards list page: every card, grouped by technique, each linking
       to its own page
 - [ ] Add a card's page: its trigger, its brief and its templates, each
