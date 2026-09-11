@@ -104,7 +104,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Refuse a write route whose request body is not JSON. A form on another
       site cannot send JSON without a preflight, so the check stops a forged
       write the cookie would otherwise carry
-- [ ] Add login and logout to the pages, and send a request without a session
+- [x] Add login and logout to the pages, and send a request without a session
       to the login. The session cookie stays on the pages' origin
 - [ ] Make one user's log readable and deletable without touching another's.
       The author's own log is the evidence of daily use and the set every eval

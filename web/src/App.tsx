@@ -1,10 +1,12 @@
 import { lazy, Suspense } from 'react'
 import { Route, Routes, useMatch } from 'react-router'
 
+import { LOGIN } from '@/api/client'
 import { NavMenu } from '@/components/NavMenu'
 import { cn } from '@/lib/utils'
 import { BoardPage } from '@/pages/BoardPage'
 import { CardsPage } from '@/pages/CardsPage'
+import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProblemPage } from '@/pages/ProblemPage'
 import { TechniquePage } from '@/pages/TechniquePage'
@@ -20,10 +22,12 @@ function App() {
   // the statement and the editor sit side by side, which a reading column is
   // too narrow for
   const wide = useMatch('/sittings/:sittingId') !== null
+  // nothing in the menu is reachable before signing in
+  const signingIn = useMatch(LOGIN) !== null
 
   return (
     <>
-      <NavMenu />
+      {!signingIn && <NavMenu />}
       <main className={cn('mx-auto p-6', wide ? 'max-w-screen-2xl' : 'max-w-4xl')}>
         <Suspense fallback={<p className="text-muted-foreground">Loading…</p>}>
           <Routes>
@@ -35,6 +39,7 @@ function App() {
             <Route path="techniques/:technique" element={<TechniquePage />} />
             <Route path="techniques/:technique/problems/:problemId" element={<ProblemPage />} />
             <Route path="sittings/:sittingId" element={<SittingPage />} />
+            <Route path={LOGIN} element={<LoginPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>

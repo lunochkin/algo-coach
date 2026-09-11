@@ -3,6 +3,7 @@ from collections.abc import Awaitable, Callable
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 
+from algo_coach.api.account import router as account
 from algo_coach.api.devlogin import router as dev_login_router
 from algo_coach.api.reads import router as reads
 from algo_coach.api.signin import SignIn, install
@@ -25,15 +26,17 @@ def create_app(
         raise ValueError("the dev login refuses to start beside a provider's client")
     app = FastAPI(title="algo-coach")
     app.state.root = root
+    # what the login page offers, filled in below by what is configured
+    app.state.providers = []
+    app.state.dev_user = dev_login
     app.middleware("http")(_json_writes)
     app.add_exception_handler(Refused, _refused)
     app.include_router(reads, prefix=PREFIX)
     app.include_router(writes, prefix=PREFIX)
+    app.include_router(account, prefix=PREFIX)
     if sign_in is not None:
         install(app, sign_in, PREFIX)
     if dev_login is not None:
-        # the user the dev login signs in as
-        app.state.dev_user = dev_login
         app.include_router(dev_login_router, prefix=PREFIX)
     return app
 

@@ -290,6 +290,11 @@ times. Each record class is specified in one of the files beside it.
     can be revoked, where a signed token stands until it expires.
   - The table holds the hash of each token, and never the token. A copy of the
     table then signs nobody in.
+  - A request naming a user without a live session answers 401, and the pages
+    send the browser to the login page. The login page offers each configured
+    provider and the dev login, and needs no session itself.
+  - Signing out revokes the session and clears its cookie. A copy of the
+    cookie kept elsewhere then signs nobody in either.
   - A write is refused unless it is sent as JSON, and the pages send every
     request as JSON. A form on another site cannot send JSON, and JSON from
     another origin needs a preflight the API never answers. So the session

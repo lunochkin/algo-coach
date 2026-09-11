@@ -501,6 +501,35 @@
           }
         }
       }
+    },
+    "/api/sign-in": {
+      "get": {
+        "summary": "Offered",
+        "operationId": "offered_api_sign_in_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Offered"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/session": {
+      "delete": {
+        "summary": "Signed Out",
+        "operationId": "signed_out_api_session_delete",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1080,6 +1109,35 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "Offered": {
+        "properties": {
+          "providers": {
+            "items": {
+              "$ref": "#/components/schemas/Provider"
+            },
+            "type": "array",
+            "title": "Providers"
+          },
+          "dev_login": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dev Login"
+          }
+        },
+        "type": "object",
+        "required": [
+          "providers",
+          "dev_login"
+        ],
+        "title": "Offered",
+        "description": "What the login page offers."
+      },
       "Pause": {
         "properties": {
           "at": {
@@ -1114,6 +1172,15 @@
           "hard"
         ],
         "title": "ProblemDifficulty"
+      },
+      "Provider": {
+        "type": "string",
+        "enum": [
+          "google",
+          "github"
+        ],
+        "title": "Provider",
+        "description": "Who holds an identity and its login: `README.md`."
       },
       "Selector": {
         "properties": {

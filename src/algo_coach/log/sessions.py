@@ -2,7 +2,7 @@ import hashlib
 import secrets
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 
 from algo_coach.log.table import sessions
 from algo_coach.storage import Database
@@ -23,6 +23,16 @@ def opened(root: Database, user_id: str) -> str:
             )
         )
     return token
+
+
+def revoked(root: Database, token: str) -> None:
+    """Ends the session the token carries, where one is still open."""
+    with root.begin() as conn:
+        conn.execute(
+            update(sessions)
+            .where(sessions.c.id == hashed(token), sessions.c.revoked_at.is_(None))
+            .values(revoked_at=datetime.now(UTC))
+        )
 
 
 def user_of(root: Database, token: str) -> str | None:

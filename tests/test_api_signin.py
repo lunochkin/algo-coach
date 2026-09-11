@@ -175,6 +175,8 @@ def test_the_session_cookie_is_out_of_scripts_reach_and_lax(database, monkeypatc
     cookie = session_cookie(signed_in_through_google(database, monkeypatch)).lower()
 
     assert "httponly" in cookie and "samesite=lax" in cookie
+    # no domain: the browser keeps the cookie on the pages' origin alone
+    assert "domain=" not in cookie
     assert f"max-age={int(LIFETIME.total_seconds())}" in cookie
     assert "path=/" in cookie
     assert "secure" not in cookie

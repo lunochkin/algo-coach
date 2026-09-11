@@ -1,5 +1,5 @@
 from algo_coach.log.latest import latest_by_attempt
-from algo_coach.log.sessions import LIFETIME, hashed, opened, user_of
+from algo_coach.log.sessions import LIFETIME, hashed, opened, revoked, user_of
 from algo_coach.log.sittings import SittingStore
 from algo_coach.log.store import AttemptLog
 from algo_coach.log.table import Provider
@@ -14,6 +14,7 @@ __all__ = [
     "latest_by_attempt",
     "named",
     "opened",
+    "revoked",
     "signed_in",
     "user_of",
 ]

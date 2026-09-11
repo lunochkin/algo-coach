@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router'
 
+import { api, LOGIN } from '@/api/client'
 import { Button } from '@/components/ui/button'
 
 // a technique and a picked problem are steps down from the board, so the board
@@ -8,6 +9,12 @@ const SECTIONS = [
   { label: 'Board', to: '/', owns: (path: string) => path === '/' || path.startsWith('/techniques/') },
   { label: 'Cards', to: '/cards', owns: (path: string) => path.startsWith('/cards') },
 ]
+
+// revoked on the server, not only dropped from the browser, then to the login
+async function signOut() {
+  await api.DELETE('/api/session')
+  window.location.assign(LOGIN)
+}
 
 export function NavMenu() {
   const { pathname } = useLocation()
@@ -26,6 +33,9 @@ export function NavMenu() {
             </Button>
           )
         })}
+        <Button variant="ghost" size="sm" className="ml-auto" onClick={signOut}>
+          Sign out
+        </Button>
       </nav>
     </header>
   )

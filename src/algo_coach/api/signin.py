@@ -100,6 +100,7 @@ def install(app: FastAPI, sign_in: SignIn, prefix: str) -> None:
             provider.value, client_id=client.id, client_secret=client.secret, **REGISTERED[provider]
         )
     app.state.oauth = oauth
+    app.state.providers = list(sign_in.clients)
     app.state.origin = sign_in.origin
     # the state, the nonce and the PKCE verifier, between the redirect and the
     # callback. Lax, since the callback is a navigation from the provider's site
