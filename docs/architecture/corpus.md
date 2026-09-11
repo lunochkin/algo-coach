@@ -533,6 +533,13 @@ fixed here rather than by whatever executed it.
   `CRASHED`.** Code that does not parse is rejected the same way. It is a
   verdict rather than an error, because Phase 8 reads this path for an
   attempt, and a submission with a syntax error is the ordinary case.
+- **A crashed case carries what raised it**, as a traceback prints it over the
+  solution's own lines. The runner's frames are left out, since they name no
+  line the solver wrote. The solver reads which line raised, and a diagnosis
+  reads a compile error the outcome alone would lose.
+- **The error is stored on the case result**, not only shown. `log.md` has a
+  diagnosis read a compile error months after the attempt, when only the record
+  is left.
 - **No case observes another.** A solution memoising in a module global would
   otherwise answer one case from a cache built for a different one, and a wrong
   key would pass. Which mechanism gives that isolation is the runner's to

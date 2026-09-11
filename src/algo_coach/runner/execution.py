@@ -7,6 +7,7 @@ import os
 import signal
 import subprocess
 import sys
+import traceback
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
@@ -51,6 +52,7 @@ class CaseRun:
     # absent where the child measured nothing: code that never reached `solve`,
     # or a timeout the parent's own timer decided
     elapsed_ms: int | None = None
+    error: str | None = None  # what raised, on a crash alone
 
     @property
     def returned(self) -> bool:
@@ -77,10 +79,11 @@ def run(
     counts = list(repeats) if repeats is not None else [1] * len(cases)
     if len(counts) != len(cases):
         raise ValueError("a repeat count per argument tuple, or none at all")
-    if not defines_solve(code):
+    why = unrunnable(code)
+    if why is not None:
         # every case, whatever `stop_early` says: nothing ran, so there is
         # nothing to stop at
-        return [CaseRun(RunOutcome.CRASHED) for _ in cases]
+        return [CaseRun(RunOutcome.CRASHED, error=why) for _ in cases]
 
     results: list[CaseRun] = []
     with TemporaryDirectory() as work:
@@ -113,13 +116,20 @@ def run(
 
 
 def defines_solve(code: str) -> bool:
+    return unrunnable(code) is None
+
+
+def unrunnable(code: str) -> str | None:
+    """Why the code cannot reach `solve`, or `None` where it can."""
     # read from the tree: a module whose import does not terminate must not
     # reach the cap
     try:
-        tree = ast.parse(code)
-    except SyntaxError:
-        return False
-    return any(_defines(node) for node in tree.body)
+        tree = ast.parse(code, "<solution>")
+    except SyntaxError as error:
+        return "".join(traceback.format_exception_only(error))
+    if not any(_defines(node) for node in tree.body):
+        return "no module-level `solve` is defined"
+    return None
 
 
 def _defines(node: ast.stmt) -> bool:
@@ -190,7 +200,7 @@ def _reported(path: Path, returncode: int) -> CaseRun:
         # a signal is where a segfault and an OOM kill land; anything else is
         # the runner's own fault
         if returncode < 0:
-            return CaseRun(RunOutcome.CRASHED)
+            return CaseRun(RunOutcome.CRASHED, error=f"killed by signal {-returncode}")
         raise RunnerError(f"the child wrote no result and exited {returncode}") from None
 
     outcome = RunOutcome(reported["outcome"])
@@ -199,4 +209,5 @@ def _reported(path: Path, returncode: int) -> CaseRun:
         outcome,
         json.loads(encoded) if encoded is not None else None,
         reported["elapsed_ms"],
+        reported.get("error"),
     )

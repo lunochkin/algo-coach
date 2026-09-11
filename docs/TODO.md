@@ -75,7 +75,7 @@ React frontend the API serves as static files.
 - [x] Decide what a failing case shows the solver, its outcome alone or its
       arguments too, and write the choice into `flows.md`. Showing the
       arguments hands over a case the solver can special-case
-- [ ] Report a crashed case's exception from the child, and show it beside the
+- [x] Report a crashed case's exception from the child, and show it beside the
       failing case. A crash carries no message today, so the solver guesses
       which line raised
 - [ ] Serve the built frontend from the same process as the API, so the app

@@ -92,6 +92,7 @@ def test_a_failing_submission_shows_the_first_case_it_failed_whole(tmp_path):
         6,
         0,
     )
+    assert failure.error is None
 
 
 def test_the_first_failure_is_first_in_the_problem_s_case_order(tmp_path):
@@ -115,6 +116,7 @@ def test_a_crash_shows_the_case_and_no_returned_value(tmp_path):
 
     assert (failure.outcome, failure.args, failure.expected) == (CaseOutcome.CRASHED, [1], 2)
     assert failure.returned is None
+    assert failure.error.rstrip().endswith("ValueError: 1")
 
 
 def test_code_defining_no_solve_is_unsolved(tmp_path):

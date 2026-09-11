@@ -30,6 +30,18 @@
           "default": null,
           "title": "Elapsed Ms"
         },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        },
         "outcome": {
           "$ref": "#/$defs/CaseOutcome"
         }

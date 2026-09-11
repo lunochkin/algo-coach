@@ -57,6 +57,48 @@ def test_a_solution_that_raises_crashed():
     assert only("def solve():\n    raise ValueError('no')\n").outcome is RunOutcome.CRASHED
 
 
+def test_a_crash_reports_the_exception_over_the_solution_s_own_lines():
+    """The solver reads which line raised. The child's frames name no line the
+    solver wrote."""
+    code = "def solve(n):\n    return helper(n)\n\n\ndef helper(n):\n    return [1][n]\n"
+
+    error = only(code, 3).error
+
+    assert error.startswith("Traceback (most recent call last):\n")
+    assert 'File "<solution>", line 6, in helper\n    return [1][n]' in error
+    assert error.rstrip().endswith("IndexError: list index out of range")
+    assert "child.py" not in error
+
+
+def test_a_crash_at_the_module_s_top_level_is_reported_too():
+    error = only("x = 1 / 0\n\n\ndef solve():\n    return x\n").error
+
+    assert "in <module>" in error and "ZeroDivisionError" in error
+
+
+def test_code_that_does_not_parse_names_the_syntax_error():
+    """A submission with a syntax error is the ordinary case, and the parent
+    decides it before any child starts."""
+    error = only("def solve(n)\n    return n\n").error
+
+    assert 'File "<solution>", line 1' in error and "SyntaxError" in error
+
+
+def test_code_defining_no_solve_says_so():
+    assert only("def other():\n    return 1\n").error == "no module-level `solve` is defined"
+
+
+def test_a_return_json_cannot_encode_names_the_type():
+    assert only("def solve():\n    return {1, 2}\n").error == (
+        "solve returned a set, which JSON cannot encode"
+    )
+
+
+def test_a_value_or_a_timeout_names_no_error():
+    assert only(DOUBLE, 1).error is None
+    assert only("def solve():\n    while True:\n        pass\n", cap_ms=50).error is None
+
+
 def test_a_return_json_cannot_encode_is_crashed():
     """The fault is the solution's rather than the case's. `WRONG` would file
     it beside an answer that was computed and is merely incorrect."""

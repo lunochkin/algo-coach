@@ -48,7 +48,7 @@ def test_a_verdict_carries_no_expected_value(client, sitting_id):
     """The answers stay server-side, or a response is the case set."""
     (result, _) = submitted(client, sitting_id, TRIPLE).json()["verification"]["results"]
 
-    assert set(result) == {"case_id", "outcome", "elapsed_ms"}
+    assert set(result) == {"case_id", "outcome", "elapsed_ms", "error"}
 
 
 def test_a_failing_submission_shows_the_first_failing_case_whole(client, sitting_id):
@@ -60,7 +60,18 @@ def test_a_failing_submission_shows_the_first_failing_case_whole(client, sitting
         "args": [1],
         "expected": 2,
         "returned": 3,
+        "error": None,
     }
+
+
+def test_a_crashing_submission_shows_what_raised(client, sitting_id):
+    """A crash with no message leaves the solver guessing which line raised."""
+    raising = "def solve(n):\n    return [n][1]\n"
+
+    failure = submitted(client, sitting_id, raising).json()["failure"]
+
+    assert failure["outcome"] == "crashed"
+    assert "line 2, in solve" in failure["error"] and "IndexError" in failure["error"]
 
 
 def test_a_submission_without_code_is_unprocessable(client, sitting_id):

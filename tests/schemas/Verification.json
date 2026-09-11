@@ -30,6 +30,18 @@
           "default": null,
           "title": "Elapsed Ms"
         },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        },
         "outcome": {
           "$ref": "#/$defs/CaseOutcome"
         }
@@ -76,11 +88,11 @@
     }
   },
   "required": [
+    "cap_ms",
+    "runner",
     "id",
     "created_at",
-    "solution_id",
-    "cap_ms",
-    "runner"
+    "solution_id"
   ],
   "title": "Verification",
   "type": "object"

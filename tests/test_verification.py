@@ -167,3 +167,12 @@ def test_a_case_the_child_never_timed_carries_no_number():
 def test_a_negative_measurement_is_rejected():
     with pytest.raises(ValidationError, match="elapsed_ms"):
         CaseResult(case_id="c1", outcome="passed", elapsed_ms=-1)
+
+
+def test_only_a_crashed_case_names_an_error():
+    """A wrong answer or a timeout raised nothing, and an error beside one would
+    send the reader looking for a line that never raised."""
+    assert CaseResult(case_id="c1", outcome="crashed", error="ValueError: 1").error
+    for outcome, timed in (("passed", 1), ("wrong", 1), ("timeout", None)):
+        with pytest.raises(ValidationError, match="names no error"):
+            CaseResult(case_id="c1", outcome=outcome, elapsed_ms=timed, error="ValueError: 1")

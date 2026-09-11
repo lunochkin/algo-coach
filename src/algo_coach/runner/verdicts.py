@@ -43,7 +43,10 @@ def judge(
 
 def result(case: TestCase, ran: CaseRun) -> CaseResult:
     return CaseResult(
-        case_id=case.id, outcome=decide(ran, case.expected), elapsed_ms=ran.elapsed_ms
+        case_id=case.id,
+        outcome=decide(ran, case.expected),
+        elapsed_ms=ran.elapsed_ms,
+        error=ran.error,
     )
 
 

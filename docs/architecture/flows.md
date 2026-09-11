@@ -472,9 +472,9 @@ The page layout is not designed here, and using the loop decides it.
   three characters has recalled no form, and the sitting exists to measure
   recalling the form. The recall trainer Phase 11 adds holds the same rule.
 - **A failing submission shows the first case it failed, whole**: the
-  arguments, the expected value, and the value the submission returned. An
-  outcome on an input the solver cannot see is debugged by guessing, and
-  guessing at an input is not the skill a sitting measures.
+  arguments, the expected value, and the value the submission returned or the
+  exception it raised. An outcome on an input the solver cannot see is debugged
+  by guessing, and guessing at an input is not the skill a sitting measures.
 - **The first case is first in the order the problem carries its cases.** The
   cases written with the statement come before the mutation loop's and the
   separating case, so a small example is shown where one fails.

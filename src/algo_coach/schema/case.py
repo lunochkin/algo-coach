@@ -56,12 +56,19 @@ class CaseResult(BaseModel):
     case_id: str = Field(min_length=1)
     outcome: CaseOutcome
     elapsed_ms: int | None = Field(default=None, ge=0)  # absent where the child measured nothing
+    error: str | None = None  # what raised, on a crash; absent on one run before it was kept
 
     @model_validator(mode="after")
     def _a_case_that_yielded_a_value_was_timed(self) -> CaseResult:
         """Rejects a `PASSED` or `WRONG` case that carries no measurement."""
         if self.outcome in (CaseOutcome.PASSED, CaseOutcome.WRONG) and self.elapsed_ms is None:
             raise ValueError(f"a {self.outcome} case carries the elapsed_ms the child measured")
+        return self
+
+    @model_validator(mode="after")
+    def _only_a_crash_names_an_error(self) -> CaseResult:
+        if self.error is not None and self.outcome is not CaseOutcome.CRASHED:
+            raise ValueError(f"a {self.outcome} case raised nothing, so it names no error")
         return self
 
 

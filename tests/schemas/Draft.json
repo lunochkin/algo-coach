@@ -40,7 +40,7 @@
       "type": "string"
     },
     "MachineProvenance": {
-      "description": "The configuration a machine record was written at, and the call that wrote it.\nOptional here and required by the record's own validator, since the\nhand-written counterpart carries none of it.",
+      "description": "The configuration a machine record was written at, and the call that\nwrote it. Optional here and required by the record's own validator, since\nthe hand-written counterpart carries none of it.",
       "properties": {
         "call_id": {
           "anyOf": [

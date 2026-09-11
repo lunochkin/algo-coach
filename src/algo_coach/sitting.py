@@ -60,6 +60,7 @@ class Failure(BaseModel):
     args: list[Any]
     expected: Any
     returned: Any  # on a wrong answer alone: a crash and a timeout return nothing
+    error: str | None  # on a crash alone
 
 
 class Submitted(BaseModel):
@@ -219,6 +220,7 @@ def _first_failure(cases: list[TestCase], runs: list[tuple[CaseResult, CaseRun]]
                 args=one.args,
                 expected=one.expected,
                 returned=ran.value if ran.returned else None,
+                error=result.error,
             )
     return None
 
