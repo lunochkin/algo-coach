@@ -26,6 +26,7 @@ from algo_coach.problems.table import problems
 from algo_coach.schema import (
     Call,
     Card,
+    CaseResult,
     ClaimSource,
     MachineProvenance,
     Problem,
@@ -35,10 +36,12 @@ from algo_coach.schema import (
     Template,
     TemplateMatch,
     TestCase,
+    Verification,
 )
 from algo_coach.solution_claims.table import solution_claims
 from algo_coach.solutions.table import solutions
 from algo_coach.storage import call_column, enumerated, metadata, timestamp
+from algo_coach.verifications.table import verification_case_results, verifications
 
 # every stored record and its table. Each store adds its own as its tables land
 STORED: list[Stored] = [
@@ -56,6 +59,12 @@ STORED: list[Stored] = [
     Stored(SolutionClaim, solution_claims, through_call=True),
     Stored(TemplateMatch, template_matches, through_call=True),
     Stored(SiteOutcome, site_outcomes, through_call=True, required=frozenset({"call_id"})),
+    Stored(Verification, verifications, elsewhere=frozenset({"results"})),
+    Stored(
+        CaseResult,
+        verification_case_results,
+        structural=frozenset({"verification_id", "position"}),
+    ),
     Stored(Solution, solutions, through_call=True, required=frozenset({"call_id"})),
 ]
 
@@ -319,3 +328,16 @@ def test_an_outcome_s_writing_id_is_not_a_foreign_key():
     """A landing clears the draft the writing id names, and a replay's writing
     never had one."""
     assert not site_outcomes.c.writing_id.foreign_keys
+
+
+def test_a_case_result_s_rules_hold_in_the_table():
+    """A value the child returned was timed, and only a crash names what raised,
+    as `CaseResult` validates."""
+    held = checks(verification_case_results)
+
+    assert held["verification_case_results_returned_was_timed_check"] == (
+        "outcome NOT IN ('passed', 'wrong') OR elapsed_ms IS NOT NULL"
+    )
+    assert held["verification_case_results_only_a_crash_names_an_error_check"] == (
+        "error IS NULL OR outcome = 'crashed'"
+    )

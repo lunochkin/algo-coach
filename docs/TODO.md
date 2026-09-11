@@ -29,7 +29,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Declare the solutions table
 - [x] Declare the solution claims table
 - [x] Declare the template matches table
-- [ ] Declare the verifications table and its case results
+- [x] Declare the verifications table and its case results
 - [x] Declare the site outcomes table
 - [x] Declare the calls table
 - [x] Declare the cards table and its templates
