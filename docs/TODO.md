@@ -28,11 +28,11 @@ backend for our own generated code, which is not a threat model.
       JSONB
 - [x] Declare the solutions table
 - [x] Declare the solution claims table
-- [ ] Declare the template matches table
+- [x] Declare the template matches table
 - [ ] Declare the verifications table and its case results
 - [ ] Declare the site outcomes table
 - [x] Declare the calls table
-- [ ] Declare the cards table and its templates
+- [x] Declare the cards table and its templates
 - [ ] Declare the drafts table, its declared and settled cases, and one table
       for the provenance of its five sites
 - [ ] Declare the sittings table and its pauses

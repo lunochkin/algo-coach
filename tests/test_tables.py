@@ -4,19 +4,33 @@ from typing import Any
 
 import pytest
 from pydantic import create_model
-from sqlalchemy import Boolean, CheckConstraint, Column, Integer, MetaData, Table, Text
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Column,
+    Integer,
+    MetaData,
+    Table,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from tables import Stored, mismatches
 
 from algo_coach.calls.table import calls
+from algo_coach.cards.table import card_templates, cards
+from algo_coach.matches.table import template_matches
 from algo_coach.problems.table import problems
 from algo_coach.schema import (
     Call,
+    Card,
     ClaimSource,
     MachineProvenance,
     Problem,
     Solution,
     SolutionClaim,
+    Template,
+    TemplateMatch,
 )
 from algo_coach.solution_claims.table import solution_claims
 from algo_coach.solutions.table import solutions
@@ -25,6 +39,8 @@ from algo_coach.storage import call_column, enumerated, metadata, timestamp
 # every stored record and its table. Each store adds its own as its tables land
 STORED: list[Stored] = [
     Stored(Call, calls),
+    Stored(Card, cards, elsewhere=frozenset({"templates"})),
+    Stored(Template, card_templates, structural=frozenset({"card_id", "position"})),
     Stored(
         Problem,
         problems,
@@ -33,6 +49,7 @@ STORED: list[Stored] = [
         elsewhere=frozenset({"techniques"}),
     ),
     Stored(SolutionClaim, solution_claims, through_call=True),
+    Stored(TemplateMatch, template_matches, through_call=True),
     Stored(Solution, solutions, through_call=True, required=frozenset({"call_id"})),
 ]
 
@@ -240,4 +257,33 @@ def test_a_problem_s_rules_hold_in_the_table():
     )
     assert held["problems_retirement_names_its_reason_check"] == (
         "(status = 'retired') = (retired_reason IS NOT NULL)"
+    )
+
+
+def test_a_card_holds_one_optional_template_at_most():
+    """`Card` rejects a second one, and the index refuses it in the table."""
+    (index,) = [
+        one for one in card_templates.indexes if one.name == "card_templates_one_optional_idx"
+    ]
+
+    assert index.unique and str(index.dialect_options["postgresql"]["where"]) == "optional"
+
+
+def test_a_template_slug_is_unique_within_its_card():
+    """A re-seed matches a template by its slug, so two of one slug leave no
+    rule for which id to keep."""
+    keys = {
+        tuple(column.name for column in one.columns)
+        for one in card_templates.constraints
+        if isinstance(one, UniqueConstraint)
+    }
+
+    assert ("card_id", "slug") in keys
+
+
+def test_a_match_names_a_call_only_where_the_matcher_wrote_it():
+    """A generator's match is an assertion and a user's a reading, and neither
+    carries provenance, as `TemplateMatch` validates."""
+    assert checks(template_matches)["template_matches_call_matches_source_check"] == (
+        "(source = 'classifier') = (call_id IS NOT NULL)"
     )
