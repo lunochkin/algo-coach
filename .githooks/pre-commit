@@ -44,4 +44,15 @@ if echo "$FILES" | grep -qE '\.py$|^pyproject\.toml$'; then
     uv run vulture || exit 1
     uv run pytest -q -n 0 tests/test_architecture.py || exit 1
 fi
+
+# The frontend's type check and lint, where the staging touches `web/`. A
+# warning fails the lint, as a finding a commit carries past is one nobody reads
+# again.
+if echo "$FILES" | grep -qE '^web/'; then
+    if [ ! -d web/node_modules ]; then
+        echo "pre-commit: web/node_modules is missing; run npm --prefix web install" >&2
+        exit 1
+    fi
+    (cd web && npm run --silent typecheck && npm run --silent lint) || exit 1
+fi
 exit 0

@@ -29,6 +29,11 @@ typecheck:
 dead:
     uv run vulture
 
+# Type-check and lint the frontend; a warning fails it.
+web-check:
+    cd web && npm run --silent typecheck
+    cd web && npm run --silent lint
+
 # Rewrite the schema snapshots after an intended tightening; the test holds them otherwise.
 schemas:
     SCHEMA_SNAPSHOT=write uv run pytest -q -n 0 tests/test_schema_additive.py
@@ -45,11 +50,12 @@ mutate *args:
 fmt:
     uv run ruff format .
 
-# Lint, type-check, dead-code check and test, as a commit does.
-check: lint typecheck dead test
+# Lint, type-check, dead-code check and test, as a commit does, and the
+# frontend's own type check and lint.
+check: lint typecheck dead web-check test
 
 # What CI runs: `check` with coverage in place of the bare tests.
-ci: lint typecheck dead coverage
+ci: lint typecheck dead web-check coverage
 
 # Enable the pre-commit and commit-msg hooks. Once per clone.
 hooks:

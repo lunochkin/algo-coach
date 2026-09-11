@@ -132,7 +132,7 @@ React frontend built to static files, served on the API's origin.
 - [x] Add `just app`: the API and the Vite dev server in one command, the dev
       server proxying the API. Two commands in two terminals is friction on
       every session
-- [ ] Run the frontend's type check and lint from `just`, beside the Python
+- [x] Run the frontend's type check and lint from `just`, beside the Python
       checks. The pre-commit hook runs the Python checks, and a frontend check
       outside that hook never runs before a commit
 
