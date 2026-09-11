@@ -12,16 +12,15 @@ backend for our own generated code, which is not a threat model.
 
 ### Storage on Postgres
 
-- [ ] Choose how the engine reaches Postgres, a driver with plain SQL or a
+- [x] Choose how the engine reaches Postgres, a driver with plain SQL or a
       query layer over it, and write the choice into
       `docs/architecture/README.md`. Every store is rewritten against it
-- [ ] Decide the table shape, a table per record class holding the record as
+- [x] Decide the table shape, a table per record class holding the record as
       JSONB beside the columns a store queries, or a column per field, and write
       it into `docs/architecture/README.md`. The pydantic schema stays the
       contract either way
-- [ ] Choose the tool that applies schema migrations, and add the first
-      migration creating every table. A table changed by hand on the hosted
-      database is a change no clone reproduces
+- [ ] Add the first Alembic migration, creating every table. A table changed by
+      hand on the hosted database is a change no clone reproduces
 - [ ] Back `JsonlLog` and `FileStore` with Postgres behind their current
       interfaces, so no domain call changes. The write semantics in the
       data-class table hold on either backend

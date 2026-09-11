@@ -280,6 +280,24 @@ times. Each record class is specified in one of the files beside it.
 - **Storage is concrete for now**: JSON files under a gitignored directory,
   moving to Postgres when Phase 9 hosts the engine. The schema is the
   contract, and storage swaps underneath it.
+  - The engine reaches Postgres through SQLAlchemy Core, and Alembic applies
+    the migrations. The tables are declared once in Python, so a field added
+    to a record is one column and one generated migration, where hand-written
+    SQL names the field again in every statement that lists columns.
+  - The ORM is not used. Core builds each statement explicitly, so a write the
+    code does not name never happens, and the append-only logs stay visible
+    as inserts alone.
+  - A table holds a column per field, `NOT NULL` where the record requires
+    the field. The database then refuses a record the schema refuses, rather
+    than storing whatever a writer sent.
+  - A list of records is a child table keyed to its parent, with its position
+    where the order matters: a sitting's pauses, a run's case results, a
+    card's templates. A list of strings is a `text[]` column.
+  - JSONB holds a value only where the value is JSON of any shape by design,
+    as a test case's arguments and its expected value are.
+  - A field added to a record is a nullable column added by a migration, which
+    is the additive rule in `## Repo constraints`. A test compares each table's
+    columns with its record's fields, since the two are declared apart.
 - **The calibration corpus is the platform data the pivot to generated
   problems left behind**, under `data/old/`: a platform's problems, the
   attempts against them, the claims and the calls. It is a corpus rather than
