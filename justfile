@@ -74,6 +74,12 @@ app:
     uv run python -m algo_coach.api --reload &
     npm --prefix web run dev
 
+# Regenerate the page's API types from the app's OpenAPI schema, after a route
+# or a response model changes.
+types:
+    uv run python -m algo_coach.api --openapi > web/src/api/openapi.json
+    cd web && npx openapi-typescript src/api/openapi.json -o src/api/schema.d.ts
+
 # Per-technique progress.
 board *args:
     uv run algo-coach board {{ args }}

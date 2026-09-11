@@ -1,0 +1,1321 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "algo-coach",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/board": {
+      "get": {
+        "summary": "Board",
+        "operationId": "board_api_board_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Board"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/techniques/{technique}/cards": {
+      "get": {
+        "summary": "Cards",
+        "operationId": "cards_api_techniques__technique__cards_get",
+        "parameters": [
+          {
+            "name": "technique",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Technique"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Card"
+                  },
+                  "title": "Response Cards Api Techniques  Technique  Cards Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/techniques/{technique}/candidates": {
+      "get": {
+        "summary": "Offered",
+        "operationId": "offered_api_techniques__technique__candidates_get",
+        "parameters": [
+          {
+            "name": "technique",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Technique"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Candidate"
+                  },
+                  "title": "Response Offered Api Techniques  Technique  Candidates Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/problems/{problem_id}/sittings": {
+      "post": {
+        "summary": "Statement",
+        "operationId": "statement_api_problems__problem_id__sittings_post",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Served"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sittings/{sitting_id}/submissions": {
+      "post": {
+        "summary": "Submission",
+        "operationId": "submission_api_sittings__sitting_id__submissions_post",
+        "parameters": [
+          {
+            "name": "sitting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sitting Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Submission"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Submitted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sittings/{sitting_id}/pause": {
+      "post": {
+        "summary": "Paused",
+        "operationId": "paused_api_sittings__sitting_id__pause_post",
+        "parameters": [
+          {
+            "name": "sitting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sitting Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sitting"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sittings/{sitting_id}/resume": {
+      "post": {
+        "summary": "Resumed",
+        "operationId": "resumed_api_sittings__sitting_id__resume_post",
+        "parameters": [
+          {
+            "name": "sitting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sitting Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sitting"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sittings/{sitting_id}/end": {
+      "post": {
+        "summary": "Ended",
+        "operationId": "ended_api_sittings__sitting_id__end_post",
+        "parameters": [
+          {
+            "name": "sitting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sitting Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sitting"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sittings/{sitting_id}/unclaimed": {
+      "get": {
+        "summary": "Unanswered",
+        "operationId": "unanswered_api_sittings__sitting_id__unclaimed_get",
+        "parameters": [
+          {
+            "name": "sitting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sitting Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Attempt"
+                  },
+                  "title": "Response Unanswered Api Sittings  Sitting Id  Unclaimed Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/attempts/{attempt_id}/claims": {
+      "post": {
+        "summary": "Claimed",
+        "operationId": "claimed_api_attempts__attempt_id__claims_post",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Attempt Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Claim"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptClaim"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Attempt": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "problem_id": {
+            "type": "string",
+            "title": "Problem Id"
+          },
+          "sitting_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sitting Id"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Finished At"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "time_to_solve_sec": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time To Solve Sec"
+          },
+          "solved": {
+            "type": "boolean",
+            "title": "Solved"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "problem_id",
+          "finished_at",
+          "solved"
+        ],
+        "title": "Attempt"
+      },
+      "AttemptClaim": {
+        "properties": {
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "effort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effort"
+          },
+          "prompt_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Hash"
+          },
+          "call_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Id"
+          },
+          "pin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pin"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature"
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "attempt_id": {
+            "type": "string",
+            "title": "Attempt Id"
+          },
+          "techniques": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Techniques"
+          },
+          "declined": {
+            "type": "boolean",
+            "title": "Declined",
+            "default": false
+          },
+          "source": {
+            "$ref": "#/components/schemas/ClaimSource"
+          },
+          "informed_by": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Informed By"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Confidence"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "attempt_id",
+          "source"
+        ],
+        "title": "AttemptClaim",
+        "description": "Which techniques an attempt used, as one writer claimed them."
+      },
+      "AttemptVerification": {
+        "properties": {
+          "cap_ms": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Cap Ms"
+          },
+          "runner": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Runner"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/CaseResult"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "attempt_id": {
+            "type": "string",
+            "title": "Attempt Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cap_ms",
+          "runner",
+          "id",
+          "created_at",
+          "attempt_id"
+        ],
+        "title": "AttemptVerification",
+        "description": "Private to the user, where a solution's run is product data: `log.md`."
+      },
+      "Board": {
+        "properties": {
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/TechniqueRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "ungrouped": {
+            "type": "integer",
+            "title": "Ungrouped"
+          },
+          "excluded": {
+            "type": "integer",
+            "title": "Excluded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rows",
+          "ungrouped",
+          "excluded"
+        ],
+        "title": "Board"
+      },
+      "Candidate": {
+        "properties": {
+          "problem_id": {
+            "type": "string",
+            "title": "Problem Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProblemDifficulty"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "attempt_count": {
+            "type": "integer",
+            "title": "Attempt Count"
+          },
+          "solved_count": {
+            "type": "integer",
+            "title": "Solved Count"
+          },
+          "last_attempt_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Attempt At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem_id",
+          "title",
+          "difficulty",
+          "attempt_count",
+          "solved_count",
+          "last_attempt_at"
+        ],
+        "title": "Candidate",
+        "description": "A problem offered for a drill. The statement is left out: the clock\nstarts when it is served."
+      },
+      "Card": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Slug"
+          },
+          "technique": {
+            "type": "string",
+            "title": "Technique"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "trigger": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Trigger"
+          },
+          "brief": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Brief"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/Template"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Templates"
+          },
+          "selector": {
+            "$ref": "#/components/schemas/Selector"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "technique",
+          "title",
+          "trigger",
+          "brief",
+          "templates",
+          "selector"
+        ],
+        "title": "Card",
+        "description": "Teaching content for one technique: forms to reproduce, and a\nselector."
+      },
+      "CaseOutcome": {
+        "type": "string",
+        "enum": [
+          "passed",
+          "wrong",
+          "timeout",
+          "crashed"
+        ],
+        "title": "CaseOutcome"
+      },
+      "CaseResult": {
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Case Id"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/CaseOutcome"
+          },
+          "elapsed_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Ms"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "case_id",
+          "outcome"
+        ],
+        "title": "CaseResult"
+      },
+      "Claim": {
+        "properties": {
+          "techniques": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Techniques",
+            "default": []
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/Confidence"
+          },
+          "declined": {
+            "type": "boolean",
+            "title": "Declined",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "confidence"
+        ],
+        "title": "Claim"
+      },
+      "ClaimSource": {
+        "type": "string",
+        "enum": [
+          "user",
+          "classifier"
+        ],
+        "title": "ClaimSource"
+      },
+      "Confidence": {
+        "type": "string",
+        "enum": [
+          "guess",
+          "leaning",
+          "sure"
+        ],
+        "title": "Confidence"
+      },
+      "Failure": {
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "title": "Case Id"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/CaseOutcome"
+          },
+          "args": {
+            "items": {},
+            "type": "array",
+            "title": "Args"
+          },
+          "expected": {
+            "title": "Expected"
+          },
+          "returned": {
+            "title": "Returned"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "case_id",
+          "outcome",
+          "args",
+          "expected",
+          "returned",
+          "error"
+        ],
+        "title": "Failure",
+        "description": "The first case a submission failed, shown whole: `flows.md`."
+      },
+      "FailureMode": {
+        "type": "string",
+        "enum": [
+          "speed",
+          "rust",
+          "gap",
+          "syntax",
+          "none"
+        ],
+        "title": "FailureMode"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Pause": {
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "At"
+          },
+          "until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Until"
+          }
+        },
+        "type": "object",
+        "required": [
+          "at"
+        ],
+        "title": "Pause"
+      },
+      "ProblemDifficulty": {
+        "type": "string",
+        "enum": [
+          "easy",
+          "medium",
+          "hard"
+        ],
+        "title": "ProblemDifficulty"
+      },
+      "Selector": {
+        "properties": {
+          "technique": {
+            "type": "string",
+            "title": "Technique"
+          },
+          "difficulty": {
+            "items": {
+              "$ref": "#/components/schemas/ProblemDifficulty"
+            },
+            "type": "array",
+            "title": "Difficulty"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "technique",
+          "size"
+        ],
+        "title": "Selector",
+        "description": "What a ladder resolves from. Named fields rather than a filter map, so\na new filter is an additive optional field."
+      },
+      "Served": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "statement": {
+            "type": "string",
+            "title": "Statement"
+          },
+          "sitting": {
+            "$ref": "#/components/schemas/Sitting"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "statement",
+          "sitting"
+        ],
+        "title": "Served",
+        "description": "What a solver is handed: the statement and the clock, and nothing the\nproblem was written from."
+      },
+      "Sitting": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "User Id"
+          },
+          "problem_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Problem Id"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended At"
+          },
+          "pauses": {
+            "items": {
+              "$ref": "#/components/schemas/Pause"
+            },
+            "type": "array",
+            "title": "Pauses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "problem_id",
+          "started_at"
+        ],
+        "title": "Sitting"
+      },
+      "Submission": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "title": "Submission"
+      },
+      "Submitted": {
+        "properties": {
+          "attempt": {
+            "$ref": "#/components/schemas/Attempt"
+          },
+          "verification": {
+            "$ref": "#/components/schemas/AttemptVerification"
+          },
+          "failure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Failure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "attempt",
+          "verification",
+          "failure"
+        ],
+        "title": "Submitted",
+        "description": "The attempt a submission minted, and the per-case verdict behind its\n`solved`."
+      },
+      "TechniqueRow": {
+        "properties": {
+          "technique": {
+            "type": "string",
+            "title": "Technique"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "title": "Attempt Count"
+          },
+          "solved_count": {
+            "type": "integer",
+            "title": "Solved Count"
+          },
+          "last_attempt_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Attempt At"
+          },
+          "self_labels": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/FailureMode"
+            },
+            "type": "object",
+            "title": "Self Labels",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "technique",
+          "attempt_count",
+          "solved_count"
+        ],
+        "title": "TechniqueRow",
+        "description": "One technique's progress, derived from the log on every read."
+      },
+      "Template": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Slug"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "trigger": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Trigger"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "optional": {
+            "type": "boolean",
+            "title": "Optional",
+            "default": false
+          },
+          "speedup": {
+            "type": "boolean",
+            "title": "Speedup",
+            "default": true
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TemplateKind",
+            "default": "code"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "title",
+          "trigger",
+          "code"
+        ],
+        "title": "Template",
+        "description": "One form reproduced from memory. The unit of recall."
+      },
+      "TemplateKind": {
+        "type": "string",
+        "enum": [
+          "code",
+          "procedure"
+        ],
+        "title": "TemplateKind"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

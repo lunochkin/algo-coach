@@ -2,6 +2,7 @@
 the same origin: `README.md` gives why."""
 
 import argparse
+import json
 import os
 from pathlib import Path
 
@@ -24,7 +25,13 @@ def app() -> FastAPI:
 def main() -> None:
     parser = argparse.ArgumentParser(prog="python -m algo_coach.api")
     parser.add_argument("--reload", action="store_true", help="restart when the source changes")
+    parser.add_argument(
+        "--openapi", action="store_true", help="print the OpenAPI schema the page is typed from"
+    )
     args = parser.parse_args()
+    if args.openapi:
+        print(json.dumps(app().openapi(), indent=2))
+        return
     load_dotenv(find_dotenv(usecwd=True))
     # by import path: a reload re-imports the factory rather than reusing an app
     uvicorn.run(

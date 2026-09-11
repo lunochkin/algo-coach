@@ -90,9 +90,12 @@ React frontend the API serves as static files.
 - [x] Add shadcn/ui over Radix to `web/`, with Tailwind. The components are
       copied into the repo as code to edit, and Radix keeps the keyboard and
       accessibility behaviour
-- [ ] Build the board as the entry point, showing per-technique progress and
+- [x] Build the board as the entry point, showing per-technique progress and
       the technique the user picks from. A problem id as the entry point leaves
       the selection to the user
+- [ ] List the picked technique's candidates, least recently attempted first,
+      and let the user pick the problem. A list shows no statement, since the
+      clock starts when the statement is served
 - [ ] Show the technique's card before serving the statement, and call `serve`
       when the user leaves the card. The clock then counts solving and not
       reading
