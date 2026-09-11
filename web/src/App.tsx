@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router'
 
 import { NavMenu } from '@/components/NavMenu'
 import { BoardPage } from '@/pages/BoardPage'
+import { CardPage } from '@/pages/CardPage'
 import { CardsPage } from '@/pages/CardsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProblemPage } from '@/pages/ProblemPage'
@@ -17,6 +18,7 @@ function App() {
               technique, never a problem id */}
           <Route index element={<BoardPage />} />
           <Route path="cards" element={<CardsPage />} />
+          <Route path="cards/:slug" element={<CardPage />} />
           <Route path="techniques/:technique" element={<TechniquePage />} />
           <Route path="techniques/:technique/problems/:problemId" element={<ProblemPage />} />
           <Route path="*" element={<NotFoundPage />} />
