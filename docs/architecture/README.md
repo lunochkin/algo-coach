@@ -168,6 +168,16 @@ without redefining them. Grouped by the file that specifies the record.
   bench. It writes nothing to the corpus.
 - **Sweep**: one `generate` run over every target, or over every held draft.
 
+### Execution
+
+- **Sandbox**: what a submission runs under: a container with no network, a
+  read-only root filesystem, a non-root user, dropped capabilities and limits
+  on memory, processes and time. It shares the server's kernel.
+- **Broker**: the process holding the container runtime's socket and starting a
+  submission's container. It answers one request, carrying the code, the
+  arguments and the cap. Every other option a container is started with is
+  fixed in the broker's own source.
+
 ### Machine records
 
 - **Machine record**: any record a model wrote: a claim, a match, a solution, a
@@ -270,6 +280,79 @@ times. Each record class is specified in one of the files beside it.
 
 - **Verification runs locally**, so every submission is judged by whatever
   ran it.
+- **The engine runs on one virtual server, and Docker Compose starts its
+  containers.** The API, the frontend's files, Postgres and the sandbox share
+  that server. A host running only functions is rejected, since a submission
+  needs a container runtime. This file gives the shape the engine depends on:
+  one server, what shares it, and what a failure costs. The provider, the sizes
+  and the commands that build the server are in the deployment repo.
+  - Postgres writes to storage that outlives the server. A lost server is
+    replaced by creating another and attaching that storage again, so losing
+    the server costs the time a rebuild takes rather than the log.
+  - The database is dumped on a schedule, and the dump is copied off the
+    server. A dump left on the same storage as the database is lost with it.
+  - One server carries no failover, and that is accepted. A second server
+    carries a second Postgres, which needs replication, automatic failover and
+    a rule stopping both servers from accepting writes at once. The failures
+    this size of deployment meets are a bad deploy, a full disk and a
+    submission eating the memory, and a second server answers none of them.
+  - The server, the volume, the firewall and the commands that rebuild them
+    live in a private repo of their own. This repo is read as public, and the
+    server's address is not.
+  - The image carries the compose file it is deployed with, at
+    `/app/deploy/compose.yaml`, and the server extracts that file from the
+    image it pulled. The server clones no repository and holds no credential
+    reading one, and deploying an older image restores the service definitions
+    that image was built with.
+  - Secrets reach the server as a file the server alone holds. Whoever can pull
+    an image can read what was built into it, so a secret is never built in.
+  - Postgres listens on the server's loopback address, and a command run off
+    the server reaches it through an SSH tunnel. The generation commands write
+    to the store from wherever the author runs them, and the tunnel gives them
+    the store over the port that is already open.
+  - Opening the database's port to the author's address is rejected. An open
+    port is reachable from outside the server, and a password guards it. The
+    tunnel is guarded by a key instead, and it opens no further port.
+- **A submission runs in a container the broker starts, and the API reaches no
+  container runtime.** The image, the flags and the limits are fixed in the
+  broker's source. No field of a request names an image, a mount or a
+  capability.
+  - An API holding the container runtime's socket would turn its own
+    compromise into a root shell on the server. A request to that socket can
+    start a privileged container with the host's filesystem mounted into it,
+    and the API is the process running whatever a signed-in person submits.
+  - The submission's image carries a Python interpreter and no engine code.
+    The submitted code arrives on the child's standard input, so a run mounts
+    nothing.
+  - The container runs under gVisor, a kernel written in user space that
+    answers the container's system calls. An exploit of the host's own kernel
+    reaches gVisor first. The broker names the runtime as a constant.
+  - gVisor answers a system call more slowly than the host's kernel does, and a
+    verdict is wall clock against the cap. So the canonicals are timed under
+    gVisor, and a separating size found on the local subprocess is measured
+    again there. Installing gVisor after that measurement would spend it twice.
+  - A virtual machine per submission is deferred until access is opened beyond
+    invitations. gVisor's KVM platform needs `/dev/kvm`, which this server does
+    not offer, so the step is a microVM service rather than a flag.
+  - The sandbox moves to a server of its own at the same point. An escape then
+    crosses a network before it reaches Postgres.
+  - Submissions run one at a time, and the broker admits them. A verdict is
+    wall clock against the cap, so a submission running beside another measures
+    the contention between them. The broker is one process, so the limit holds
+    however many API workers there are, where a limit inside the API would hold
+    only within one worker.
+  - A submission waiting for the broker is refused once the wait passes a
+    bound. A submission that waits without a bound looks to the user like a
+    sandbox that hung. The wait changes no verdict, since the cap is measured
+    in the child around the `solve` call.
+  - Generation runs off this server. The mutation loop starts many subprocesses
+    at a cap well above the sitting's, so a generation run beside a sitting
+    moves the wall clock that sitting's verdict is read from. Generation writes
+    the corpus rather than serving a page, so it runs wherever the author is.
+  - Several submissions run at once only where each run holds a core of its
+    own. Two runs sharing a core measure each other, and two runs on separate
+    cores share memory bandwidth alone. A longer queue admits more submissions
+    without changing what either one measures.
 - **The web app is two deployables on one origin.** The API answers JSON under
   `/api` and serves no page. The frontend is static files, and whatever serves
   them routes `/api` to the API: Vite's proxy locally, the host in Phase 9.

@@ -116,24 +116,49 @@ backend for our own generated code, which is not a threat model.
 
 ### The deployment
 
-- [ ] Choose the host for the API, the pages, Postgres and the sandbox, and
+- [x] Choose the host for the API, the pages, Postgres and the sandbox, and
       write the choice into `docs/architecture/README.md`. The sandbox needs a
       container runtime, which rules out a host that runs only functions
+- [ ] Write the `Dockerfile` and `deploy/compose.yaml`, the compose file copied
+      into the image. The server extracts the compose file from the image it
+      pulled, so a deploy needs no checkout of this repo
+- [ ] Add the deploy job: build the image, push it to the registry, then send
+      one command the server's forced command accepts. It runs on a push to
+      main, behind the checks
 - [ ] Serve the pages and route `/api` to the API on one origin, answering a
       path naming no file with `index.html`. `README.md` gives why the two
       share an origin
-- [ ] Keep the database URL and the provider's keys in the host's secret store,
-      and out of the repo
+- [ ] Publish Postgres on the server's loopback address alone in
+      `deploy/compose.yaml`, and reach it from a laptop over an SSH tunnel. The
+      generation commands run off the server, since their subprocesses move the
+      wall clock a sitting's verdict is read from
+- [ ] Keep the database URL and the provider's keys in the file the server
+      alone holds, and out of both repos
 - [ ] Back up the database on a schedule, and restore one backup into a scratch
       database. A backup never restored is not known to restore
+- [ ] Rebuild the server once from nothing: create it, attach the volume,
+      restore the latest dump, deploy, and sit a problem on it. The steps that
+      fail are the volume, the secrets file and DNS, and only a rehearsal shows
+      which
 - [ ] Write down what the deployment holds, for how long, and who can read it.
       A user cannot check a retention claim that was never written down
 
 ### The sandbox
 
-- [ ] Add a container backend behind `runner.run`, keeping the signature and
-      the child protocol, JSON in and JSON out. The `run` boundary was written
-      for a second backend, so no second runner is needed
+- [ ] Write the broker: a service holding the container runtime's socket and
+      answering one request, the code, the arguments and the cap. The API holds
+      no socket
+- [ ] Fix the image, the flags and the limits in the broker's source, and add a
+      test that a request naming an image, a mount or a capability is refused.
+      Every later hardening step inherits a field a request can influence
+- [ ] Pin the submission's image by digest, an interpreter and no engine code.
+      A tag moves under the run that a stored verdict was measured by
+- [ ] Install gVisor on the server, name its runtime in the broker, and check
+      that the submission's image runs a canonical under it. A container under
+      the host's own kernel is one kernel exploit away from the host
+- [ ] Add a backend behind `runner.run` that calls the broker, keeping the
+      signature and the child protocol, JSON in and JSON out. The `run`
+      boundary was written for a second backend, so no second runner is needed
 - [ ] Give the container no network, a read-only root filesystem, a non-root
       user, and limits on memory, processes and output. A submission that
       spawns a process or opens a connection fails
@@ -142,12 +167,17 @@ backend for our own generated code, which is not a threat model.
 - [ ] Add a test that the sandbox backend's request carries no expected value.
       `corpus.md` keeps the comparison above the boundary, and a sandbox told
       the answer can be made to agree with it
-- [ ] Run every problem's canonical under the sandbox at the drill cap, and
-      write down which cases it no longer finishes within a tenth of the cap.
-      The separating sizes were found on the local subprocess, and a CPU limit
-      moves them
+- [ ] Run every problem's canonical under the sandbox at the drill cap, with
+      gVisor already installed, and write down which cases it no longer
+      finishes within a tenth of the cap. The separating sizes were found on
+      the local subprocess, and a CPU limit and a slower system call both move
+      them
 - [ ] Cap submissions per user per minute. Each submission runs untrusted code
       on our machine
+- [ ] Admit one submission at a time in the broker, and refuse a submission
+      whose wait passes a bound. A submission running beside another moves the
+      wall clock a verdict is read from, and an unbounded wait reads to the
+      user as a sandbox that hung
 
 ### Other items
 
