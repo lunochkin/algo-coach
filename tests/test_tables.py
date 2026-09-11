@@ -26,11 +26,12 @@ from algo_coach.drafts.table import (
     draft_settled_cases,
     drafts,
 )
-from algo_coach.log.table import users
+from algo_coach.log.table import attempts, users
 from algo_coach.matches.table import template_matches
 from algo_coach.outcomes.table import site_outcomes
 from algo_coach.problems.table import problems
 from algo_coach.schema import (
+    Attempt,
     Call,
     CallSite,
     Card,
@@ -56,6 +57,7 @@ from algo_coach.verifications.table import verification_case_results, verificati
 
 # every stored record and its table. Each store adds its own as its tables land
 STORED: list[Stored] = [
+    Stored(Attempt, attempts),
     Stored(Call, calls),
     Stored(
         Draft,
@@ -423,3 +425,19 @@ def test_a_user_is_the_engine_s_own_id_and_nothing_of_an_account():
     would otherwise rewrite the log: `README.md`."""
     assert [one.name for one in users.columns] == ["id", "created_at"]
     assert users.c.id.primary_key and not users.c.created_at.nullable
+
+
+def test_an_attempt_references_its_user_problem_and_sitting():
+    """Every reference in an append-only record is engine-minted, and the table
+    refuses one that names nothing: `README.md`."""
+    targets = {
+        column.name: key.target_fullname
+        for column in attempts.columns
+        for key in column.foreign_keys
+    }
+
+    assert targets == {
+        "user_id": "users.id",
+        "problem_id": "problems.id",
+        "sitting_id": "sittings.id",
+    }
