@@ -1,0 +1,53 @@
+# What the server runs. The server extracts this file from the image it pulled
+# and starts it with `docker compose up -d`, so a deploy needs no checkout of
+# this repo. `docs/architecture/README.md` gives the shape it describes: one
+# server, the API and Postgres on it, and a sandbox the broker adds later.
+#
+# `.env` sits beside this file on the server and is held nowhere else. It names
+# the image to run, ALGO_COACH_IMAGE, by digest rather than by tag, so a
+# restart runs what the deploy pulled. It also names POSTGRES_USER,
+# POSTGRES_PASSWORD and POSTGRES_DB, the DATABASE_URL the engine reaches the
+# `db` service by, ALGO_COACH_ORIGIN and ALGO_COACH_SECRET, and each provider's
+# client id and secret.
+
+name: algo-coach
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    env_file: [.env]
+    volumes:
+      # the path postgres 18 declares, holding the cluster under it. The
+      # deployment repo backs this volume with the disk that outlives the server
+      - database:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # the schema, before the API answers anything. A one-shot service rather than
+  # a step inside the API's own command: a failed migration then stops the
+  # deploy, where a failed step inside a restarting service retries forever
+  migrate:
+    image: ${ALGO_COACH_IMAGE}
+    command: ["alembic", "upgrade", "head"]
+    env_file: [.env]
+    depends_on:
+      db: {condition: service_healthy}
+
+  api:
+    image: ${ALGO_COACH_IMAGE}
+    restart: unless-stopped
+    env_file: [.env]
+    ports:
+      # the server's loopback address alone, and whatever fronts the pages
+      # routes `/api` here
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db: {condition: service_healthy}
+      migrate: {condition: service_completed_successfully}
+
+volumes:
+  database:

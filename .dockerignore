@@ -1,0 +1,15 @@
+# Everything the build does not read. `data/` and `content/` are the private
+# ones: whoever can pull the image can read what was built into it.
+.git
+.github
+.venv
+data
+content
+dist
+web/dist
+web/node_modules
+tests
+docs
+**/__pycache__
+.env
+CLAUDE.local.md

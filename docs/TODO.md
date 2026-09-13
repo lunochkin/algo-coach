@@ -119,7 +119,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Choose the host for the API, the pages, Postgres and the sandbox, and
       write the choice into `docs/architecture/README.md`. The sandbox needs a
       container runtime, which rules out a host that runs only functions
-- [ ] Write the `Dockerfile` and `deploy/compose.yaml`, the compose file copied
+- [x] Write the `Dockerfile` and `deploy/compose.yaml`, the compose file copied
       into the image. The server extracts the compose file from the image it
       pulled, so a deploy needs no checkout of this repo
 - [ ] Add the deploy job: build the image, push it to the registry, then send
