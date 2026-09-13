@@ -122,7 +122,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Write the `Dockerfile` and `deploy/compose.yaml`, the compose file copied
       into the image. The server extracts the compose file from the image it
       pulled, so a deploy needs no checkout of this repo
-- [ ] Add the deploy job: build the image, push it to the registry, then send
+- [x] Add the deploy job: build the image, push it to the registry, then send
       one command the server's forced command accepts. It runs on a push to
       main, behind the checks
 - [ ] Serve the pages and route `/api` to the API on one origin, answering a

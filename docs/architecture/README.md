@@ -304,6 +304,10 @@ times. Each record class is specified in one of the files beside it.
     image it pulled. The server clones no repository and holds no credential
     reading one, and deploying an older image restores the service definitions
     that image was built with.
+  - A push to main builds the image, pushes it to the registry, and sends the
+    server one command naming that image by digest. The key that command
+    arrives on carries a forced command, so a holder of the key deploys an
+    image and runs nothing else.
   - Secrets reach the server as a file the server alone holds. Whoever can pull
     an image can read what was built into it, so a secret is never built in.
   - Postgres listens on the server's loopback address, and a command run off
