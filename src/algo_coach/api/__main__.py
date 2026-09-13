@@ -1,9 +1,11 @@
-"""`python -m algo_coach.api`: the API alone. The pages are served elsewhere, on
-the same origin: `README.md` gives why."""
+"""`python -m algo_coach.api`: the API, and the built pages where
+ALGO_COACH_PAGES names them. Locally Vite serves the pages instead, on the same
+origin: `README.md` gives why."""
 
 import argparse
 import json
 import os
+from pathlib import Path
 
 import uvicorn
 from dotenv import find_dotenv, load_dotenv
@@ -23,6 +25,7 @@ def app() -> FastAPI:
         root,
         sign_in=SignIn.from_environ(os.environ),
         dev_login=os.environ.get("ALGO_COACH_DEV_LOGIN") or None,
+        pages=Path(pages) if (pages := os.environ.get("ALGO_COACH_PAGES")) else None,
     )
 
 

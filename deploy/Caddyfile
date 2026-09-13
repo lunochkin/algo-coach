@@ -1,0 +1,9 @@
+# The one public entry to the engine. Caddy issues and renews the certificate
+# for ALGO_COACH_DOMAIN, and hands every request to the API, which serves the
+# pages beside `/api`. `docs/architecture/README.md` gives why the pages and the
+# API share one origin.
+
+{$ALGO_COACH_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy api:8000
+}

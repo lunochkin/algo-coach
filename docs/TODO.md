@@ -125,7 +125,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Add the deploy job: build the image, push it to the registry, then send
       one command the server's forced command accepts. It runs on a push to
       main, behind the checks
-- [ ] Serve the pages and route `/api` to the API on one origin, answering a
+- [x] Serve the pages and route `/api` to the API on one origin, answering a
       path naming no file with `index.html`. `README.md` gives why the two
       share an origin
 - [ ] Publish Postgres on the server's loopback address alone in

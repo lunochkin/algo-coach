@@ -8,7 +8,9 @@
 # restart runs what the deploy pulled. It also names POSTGRES_USER,
 # POSTGRES_PASSWORD and POSTGRES_DB, the DATABASE_URL the engine reaches the
 # `db` service by, ALGO_COACH_ORIGIN and ALGO_COACH_SECRET, and each provider's
-# client id and secret.
+# client id and secret. ALGO_COACH_DOMAIN is the host ALGO_COACH_ORIGIN names,
+# since Caddy issues the certificate for it and the sign-in callback returns
+# there.
 
 name: algo-coach
 
@@ -49,5 +51,23 @@ services:
       db: {condition: service_healthy}
       migrate: {condition: service_completed_successfully}
 
+  # the one service a browser reaches. `Caddyfile` sits beside this file, and
+  # the server extracts both from the image
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    env_file: [.env]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # the certificates and the ACME account. Without them a redeploy issues
+      # again, and the certificate authority limits how often it issues
+      - certificates:/data
+    depends_on: [api]
+
 volumes:
   database:
+  certificates:

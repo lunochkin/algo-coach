@@ -357,14 +357,24 @@ times. Each record class is specified in one of the files beside it.
     own. Two runs sharing a core measure each other, and two runs on separate
     cores share memory bandwidth alone. A longer queue admits more submissions
     without changing what either one measures.
-- **The web app is two deployables on one origin.** The API answers JSON under
-  `/api` and serves no page. The frontend is static files, and whatever serves
-  them routes `/api` to the API: Vite's proxy locally, the host in Phase 9.
-  - A second origin is rejected. Every request would need CORS, and the login
-    cookie Phase 9 brings would have to cross domains.
+- **The web app is served from one origin.** The API answers JSON under
+  `/api`, and the frontend is built to static files. Locally, Vite serves the
+  files and proxies `/api` to the API. Deployed, the API serves the built files
+  beside `/api`, and Caddy in front of the API holds the certificate.
+  - A second origin is rejected. Every request would need CORS, and the session
+    cookie would have to cross domains.
   - A path naming no file is answered with `index.html`. The frontend routes
     its pages by URL, so a reload of any page reaches the app rather than a
-    404.
+    404. A path under `/api` naming no route stays a 404.
+  - Caddy terminates TLS and passes every request to the API. Caddy issues and
+    renews the certificate itself, so no certificate is handled by hand.
+  - Caddy serving the files itself is rejected. The files are built into the
+    engine's image, and Caddy could reach them only through a second image the
+    deploy also pushes, or a volume the API fills at start and a rollback
+    leaves stale.
+  - Caddy keeps its certificates on a volume. Without the volume a redeploy
+    issues a certificate again, and the certificate authority limits how often
+    it issues one.
 - **Google and GitHub hold each identity and its login.** A person signs in
   through one of the two, and the engine stores no password. Password resets,
   second factors and leaked credentials are the provider's to handle, so no

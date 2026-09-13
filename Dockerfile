@@ -27,7 +27,7 @@ FROM python:3.14-slim
 # and the process answering requests still owns nothing it does not need
 RUN useradd --create-home --uid 10001 engine
 WORKDIR /app
-ENV PATH=/app/.venv/bin:$PATH
+ENV PATH=/app/.venv/bin:$PATH ALGO_COACH_PAGES=/app/web/dist
 COPY --from=engine /app/.venv .venv
 COPY alembic.ini ./
 COPY migrations migrations

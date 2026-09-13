@@ -1,10 +1,12 @@
 from collections.abc import Awaitable, Callable
+from pathlib import Path
 
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 
 from algo_coach.api.account import router as account
 from algo_coach.api.devlogin import router as dev_login_router
+from algo_coach.api.pages import Pages
 from algo_coach.api.reads import router as reads
 from algo_coach.api.signin import SignIn, install
 from algo_coach.api.writes import router as writes
@@ -18,7 +20,11 @@ WRITES = {"POST", "PUT", "PATCH", "DELETE"}
 
 
 def create_app(
-    root: Database, *, sign_in: SignIn | None = None, dev_login: str | None = None
+    root: Database,
+    *,
+    sign_in: SignIn | None = None,
+    dev_login: str | None = None,
+    pages: Path | None = None,
 ) -> FastAPI:
     # a deployed engine signs its users in through a provider, so a client
     # beside the dev login is a deployment the flag would open
@@ -38,6 +44,9 @@ def create_app(
         install(app, sign_in, PREFIX)
     if dev_login is not None:
         app.include_router(dev_login_router, prefix=PREFIX)
+    # last, since a mount at the root answers every path the routes above left
+    if pages is not None:
+        app.mount("/", Pages(pages, PREFIX))
     return app
 
 
