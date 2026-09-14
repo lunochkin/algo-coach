@@ -132,14 +132,6 @@ backend for our own generated code, which is not a threat model.
       `deploy/compose.yaml`, and reach it from a laptop over an SSH tunnel. The
       generation commands run off the server, since their subprocesses move the
       wall clock a sitting's verdict is read from
-- [ ] Back up the database on a schedule, and restore one backup into a scratch
-      database. A backup never restored is not known to restore
-- [ ] Rebuild the server once from nothing: create it, attach the volume,
-      restore the latest dump, deploy, and sit a problem on it. The steps that
-      fail are the volume, the secrets file and DNS, and only a rehearsal shows
-      which
-- [ ] Write down what the deployment holds, for how long, and who can read it.
-      A user cannot check a retention claim that was never written down
 
 ### The sandbox
 
