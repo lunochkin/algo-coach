@@ -19,6 +19,11 @@ services:
     image: postgres:18
     restart: unless-stopped
     env_file: [.env]
+    ports:
+      # the server's loopback address alone: a command run off the server
+      # reaches it through an SSH tunnel, and no open port is guarded by a
+      # password alone
+      - "127.0.0.1:5432:5432"
     volumes:
       # the path postgres 18 declares, holding the cluster under it. The
       # deployment repo backs this volume with the disk that outlives the server
