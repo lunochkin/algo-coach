@@ -128,12 +128,10 @@ backend for our own generated code, which is not a threat model.
 - [x] Serve the pages and route `/api` to the API on one origin, answering a
       path naming no file with `index.html`. `README.md` gives why the two
       share an origin
-- [ ] Publish Postgres on the server's loopback address alone in
+- [x] Publish Postgres on the server's loopback address alone in
       `deploy/compose.yaml`, and reach it from a laptop over an SSH tunnel. The
       generation commands run off the server, since their subprocesses move the
       wall clock a sitting's verdict is read from
-- [ ] Keep the database URL and the provider's keys in the file the server
-      alone holds, and out of both repos
 - [ ] Back up the database on a schedule, and restore one backup into a scratch
       database. A backup never restored is not known to restore
 - [ ] Rebuild the server once from nothing: create it, attach the volume,
