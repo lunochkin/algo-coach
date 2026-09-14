@@ -1,4 +1,6 @@
-import { api, type Provider } from '@/api/client'
+import { Link } from 'react-router'
+
+import { api, PRIVACY, type Provider } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Button } from '@/components/ui/button'
 
@@ -30,6 +32,11 @@ export function LoginPage() {
           <a href="/api/auth/dev">Dev login as {offered.dev_login}</a>
         </Button>
       )}
+      <p className="text-sm text-muted-foreground">
+        <Link to={PRIVACY} className="underline underline-offset-4">
+          Privacy policy
+        </Link>
+      </p>
     </section>
   )
 }

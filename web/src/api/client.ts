@@ -9,6 +9,9 @@ export const api = createClient<paths>({ headers: { 'Content-Type': 'application
 
 // the login page needs no session, so it is the one page a refusal leaves be
 export const LOGIN = '/login'
+// sends no request, so a person with no account reads it; Google's consent
+// screen links here
+export const PRIVACY = '/privacy'
 
 // a request with no session sends the browser to the login. A full load rather
 // than the router's: the login's own links leave the app for the provider

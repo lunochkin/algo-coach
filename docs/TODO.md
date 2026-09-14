@@ -113,6 +113,9 @@ backend for our own generated code, which is not a threat model.
 - [x] Gate sign-in on an `invitations` table of emails, checked at the
       callback. Untrusted execution behind open registration is an abuse
       surface with no upside at this size
+- [x] Serve a privacy policy at `/privacy` that opens without a session, and
+      enter its URL on Google's OAuth consent screen. Google's sign-in asks for
+      that URL, and a person reading it needs no account
 
 ### The deployment
 

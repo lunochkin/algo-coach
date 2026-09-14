@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Route, Routes, useMatch } from 'react-router'
 
-import { LOGIN } from '@/api/client'
+import { LOGIN, PRIVACY } from '@/api/client'
 import { NavMenu } from '@/components/NavMenu'
 import { cn } from '@/lib/utils'
 import { BoardPage } from '@/pages/BoardPage'
@@ -17,17 +17,22 @@ const CardPage = lazy(() => import('@/pages/CardPage').then((m) => ({ default: m
 const SittingPage = lazy(() =>
   import('@/pages/SittingPage').then((m) => ({ default: m.SittingPage })),
 )
+const PrivacyPage = lazy(() =>
+  import('@/pages/PrivacyPage').then((m) => ({ default: m.PrivacyPage })),
+)
 
 function App() {
   // the statement and the editor sit side by side, which a reading column is
   // too narrow for
   const wide = useMatch('/sittings/:sittingId') !== null
-  // nothing in the menu is reachable before signing in
+  // nothing in the menu is reachable before signing in, and both pages open
+  // without a session
   const signingIn = useMatch(LOGIN) !== null
+  const readingPolicy = useMatch(PRIVACY) !== null
 
   return (
     <>
-      {!signingIn && <NavMenu />}
+      {!signingIn && !readingPolicy && <NavMenu />}
       <main className={cn('mx-auto p-6', wide ? 'max-w-screen-2xl' : 'max-w-4xl')}>
         <Suspense fallback={<p className="text-muted-foreground">Loading…</p>}>
           <Routes>
@@ -40,6 +45,7 @@ function App() {
             <Route path="techniques/:technique/problems/:problemId" element={<ProblemPage />} />
             <Route path="sittings/:sittingId" element={<SittingPage />} />
             <Route path={LOGIN} element={<LoginPage />} />
+            <Route path={PRIVACY} element={<PrivacyPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
