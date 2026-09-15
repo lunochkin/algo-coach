@@ -141,7 +141,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Rewrite `child.py`'s entry point to take a whole run on standard input,
       fork a child per case, and print one result line per case. The broker
       parses standard output, so a solution's prints must not reach it
-- [ ] Add the broker's module: one `POST /run` route taking the code, the
+- [x] Add the broker's module: one `POST /run` route taking the code, the
       arguments, the cap, the repeat counts and whether to stop early, answered
       by one `docker run -i`, and refusing any other field. The API holds no
       socket, and every later hardening step inherits a field a request can set
