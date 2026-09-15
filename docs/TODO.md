@@ -151,7 +151,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Start the container under `runsc`, with no network, a read-only root
       filesystem and a non-root user, and add a test that the argument list
       holds those flags. No committed broker starts an unconfined container
-- [ ] Add the docker CLI to the engine's image, and a `broker` service to
+- [x] Add the docker CLI to the engine's image, and a `broker` service to
       `deploy/compose.yaml` mounting the socket as a non-root user in the group
       `DOCKER_GID` names. The deployment repo writes that id per server
 - [ ] Put the API and the broker on a compose network that Caddy and Postgres

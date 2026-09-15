@@ -26,6 +26,9 @@ FROM python:3.14-slim
 # a submission runs in the container the broker starts rather than in this one,
 # and the process answering requests still owns nothing it does not need
 RUN useradd --create-home --uid 10001 engine
+# the binary alone: the broker starts a run's container through it, and no
+# daemon runs in this image
+COPY --from=docker:29-cli /usr/local/bin/docker /usr/local/bin/docker
 WORKDIR /app
 ENV PATH=/app/.venv/bin:$PATH ALGO_COACH_PAGES=/app/web/dist
 COPY --from=engine /app/.venv .venv

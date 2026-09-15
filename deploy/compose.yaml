@@ -1,7 +1,7 @@
 # What the server runs. The server extracts this file from the image it pulled
 # and starts it with `docker compose up -d`, so a deploy needs no checkout of
 # this repo. `docs/architecture/README.md` gives the shape it describes: one
-# server, the API and Postgres on it, and a sandbox the broker adds later.
+# server, the API and Postgres on it, and the broker starting a run's container.
 #
 # `.env` sits beside this file on the server and is held nowhere else. It names
 # the image to run, ALGO_COACH_IMAGE, by digest rather than by tag, so a
@@ -10,7 +10,8 @@
 # `db` service by, ALGO_COACH_ORIGIN and ALGO_COACH_SECRET, and each provider's
 # client id and secret. ALGO_COACH_DOMAIN is the host ALGO_COACH_ORIGIN names,
 # since Caddy issues the certificate for it and the sign-in callback returns
-# there.
+# there. DOCKER_GID is the id of the host's docker group, which the deployment
+# repo writes per server.
 
 name: algo-coach
 
@@ -55,6 +56,19 @@ services:
     depends_on:
       db: {condition: service_healthy}
       migrate: {condition: service_completed_successfully}
+
+  # the one service holding the container runtime's socket. No env_file: the
+  # process holding the socket reads no secret either
+  broker:
+    image: ${ALGO_COACH_IMAGE}
+    restart: unless-stopped
+    command: ["python", "-m", "algo_coach.broker"]
+    # the image's non-root user, in the host's docker group. The id differs
+    # between servers, and a missing one stops the deploy rather than starting
+    # a broker the socket refuses
+    group_add: ["${DOCKER_GID:?DOCKER_GID names the host's docker group}"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
   # the one service a browser reaches. `Caddyfile` sits beside this file, and
   # the server extracts both from the image
