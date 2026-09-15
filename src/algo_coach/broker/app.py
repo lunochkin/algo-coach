@@ -1,9 +1,12 @@
+import asyncio
+import math
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal, Self
 
 from fastapi import APIRouter, FastAPI, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
+from starlette.concurrency import run_in_threadpool
 
 from algo_coach.broker.container import (
     Clear,
@@ -17,6 +20,10 @@ from algo_coach.broker.container import (
     output_limit,
     remove_leftovers,
 )
+
+# how long a run waits for the run before it. Past it the run is refused: a
+# wait with no bound reads to the user as a sandbox that hung
+WAIT_SECONDS = 30.0
 
 router = APIRouter()
 
@@ -56,7 +63,10 @@ class Ran(BaseModel):
 
 
 def create_app(
-    execute: Execute = docker, stop: Stop = kill, clear: Clear = remove_leftovers
+    execute: Execute = docker,
+    stop: Stop = kill,
+    clear: Clear = remove_leftovers,
+    wait_seconds: float = WAIT_SECONDS,
 ) -> FastAPI:
     @asynccontextmanager
     async def started(_: FastAPI) -> AsyncGenerator[None]:
@@ -68,15 +78,38 @@ def create_app(
     app = FastAPI(title="algo-coach broker", lifespan=started)
     app.state.execute = execute
     app.state.stop = stop
+    # one run at a time: a run beside another measures the contention between
+    # them. The broker is one process, so one lock holds for every API worker
+    app.state.admission = asyncio.Lock()
+    app.state.wait_seconds = wait_seconds
     app.include_router(router)
     return app
 
 
-# sync: the container blocks, and FastAPI runs a sync route on its thread pool
+# async for the wait alone: a waiting run holds no thread, so no pool of
+# threads queues it ahead of the bound
 @router.post("/run")
-def run(body: Run, request: Request) -> Ran:
-    execute: Execute = request.app.state.execute
-    stop: Stop = request.app.state.stop
+async def run(body: Run, request: Request) -> Ran:
+    state = request.app.state
+    admission: asyncio.Lock = state.admission
+    wait_seconds: float = state.wait_seconds
+    try:
+        await asyncio.wait_for(admission.acquire(), wait_seconds)
+    except TimeoutError:
+        raise HTTPException(
+            503,
+            f"another run held the sandbox past {wait_seconds} s",
+            headers={"Retry-After": str(math.ceil(wait_seconds))},
+        ) from None
+    try:
+        # a cancelled request does not abandon the thread, so the lock is
+        # released only once the container is done
+        return await run_in_threadpool(_answered, body, state.execute, state.stop)
+    finally:
+        admission.release()
+
+
+def _answered(body: Run, execute: Execute, stop: Stop) -> Ran:
     name = container_name()
     wanted = len(body.args)
     done = execute(

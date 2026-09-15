@@ -167,7 +167,7 @@ backend for our own generated code, which is not a threat model.
       child stuck outside Python never fires its own timer
 - [x] Remove every container labelled `algo-coach.run` when the broker starts.
       A broker that died mid-run leaves its container running
-- [ ] Admit one submission at a time in the broker, and refuse a submission
+- [x] Admit one submission at a time in the broker, and refuse a submission
       whose wait passes a bound. A submission running beside another moves the
       wall clock a verdict is read from, and an unbounded wait reads to the
       user as a sandbox that hung
