@@ -1,11 +1,14 @@
 """One solution, one case, and what the call produced.
 
-Imports nothing from the package: the container backend runs this same script.
+Imports nothing from the package: the broker sends this script to a run's
+container, and `main` is that container's entry process.
 """
 
+import contextlib
 import json
 import linecache
 import os
+import select
 import signal
 import sys
 import time
@@ -20,6 +23,10 @@ CRASHED = "crashed"
 # the filename the solution is compiled under, and the frames a crash report
 # keeps
 SOLUTION = "<solution>"
+
+# slack on the entry's own timer, beyond the cap the child enforces. The local
+# runner's STARTUP_MS, which this script cannot import
+SLACK_MS = 2000
 
 
 class Expired(Exception):
@@ -96,23 +103,90 @@ def _expire(_signum: int, _frame: FrameType | None) -> None:
 
 
 def case(code: str, args: list[Any], cap_ms: int, repeats: int, result_path: str) -> None:
-    """One case in a child forked for it: its own session, so a solution's own
-    children die with it, and no stream the solution can print to."""
-    os.setsid()
-    silent = os.open(os.devnull, os.O_RDWR)
-    for stream in (0, 1, 2):
-        os.dup2(silent, stream)
+    """One case in a child the local runner forked for it."""
+    _isolate()
     result = execute(code, args, cap_ms, repeats)
     with open(result_path, "w") as handle:
         json.dump(result, handle)
 
 
+def _isolate() -> None:
+    """Its own session, so a solution's own children die with it, and no
+    stream the solution can print to."""
+    os.setsid()
+    silent = os.open(os.devnull, os.O_RDWR)
+    for stream in (0, 1, 2):
+        os.dup2(silent, stream)
+
+
 def main() -> None:
+    """A whole run from standard input, one result line per case on standard
+    output."""
     request = json.loads(sys.stdin.read())
-    result = execute(request["code"], request["args"], request["cap_ms"], request.get("repeats", 1))
-    # to a file rather than stdout, which belongs to the solution
-    with open(sys.argv[1], "w") as handle:
-        json.dump(result, handle)
+    cases: list[list[Any]] = request["args"]
+    counts: list[int] = request.get("repeats") or [1] * len(cases)
+    for args, repeats in zip(cases, counts, strict=True):
+        result = forked(request["code"], args, request["cap_ms"], repeats)
+        sys.stdout.write(json.dumps(result) + "\n")
+        sys.stdout.flush()
+        # never at a returned value, however wrong: nothing here knows what a
+        # case expects
+        if request.get("stop_early") and result["outcome"] != RETURNED:
+            break
+
+
+def forked(code: str, args: list[Any], cap_ms: int, repeats: int) -> dict[str, Any]:
+    """One case in a child of its own, its result read back over a pipe."""
+    read, write = os.pipe()
+    pid = os.fork()
+    if pid == 0:
+        try:
+            os.close(read)
+            _isolate()
+            result = execute(code, args, cap_ms, repeats)
+            with os.fdopen(write, "w") as channel:
+                channel.write(json.dumps(result) + "\n")
+        finally:
+            # never back into the entry's loop, whatever raised
+            os._exit(0)
+
+    os.close(write)
+    try:
+        line = _line(read, time.monotonic() + (cap_ms + SLACK_MS) / 1000)
+    finally:
+        os.close(read)
+        # on every path: what the solution spawned outlives a child that
+        # reported, and holds the pipe open besides
+        for kill in (os.killpg, os.kill):
+            with contextlib.suppress(ProcessLookupError, PermissionError):
+                kill(pid, signal.SIGKILL)
+        _, status = os.waitpid(pid, 0)
+
+    if line is None:
+        return {"outcome": TIMEOUT, "value": None, "elapsed_ms": None}
+    if line:
+        return json.loads(line)
+    exitcode = os.waitstatus_to_exitcode(status)
+    if exitcode < 0:
+        return crashed(None, f"killed by signal {-exitcode}")
+    raise RuntimeError(f"the child wrote no result and exited {exitcode}")
+
+
+def _line(fd: int, deadline: float) -> bytes | None:
+    """The child's result line, empty where the pipe closed without one, or
+    `None` where the deadline passed first."""
+    # up to the newline rather than to the pipe's close: a process the solution
+    # forked holds the pipe open past the child's own exit
+    chunks: list[bytes] = []
+    while (left := deadline - time.monotonic()) > 0:
+        ready, _, _ = select.select([fd], [], [], left)
+        if not ready:
+            break
+        chunk = os.read(fd, 1 << 16)
+        chunks.append(chunk)
+        if not chunk or chunk.endswith(b"\n"):
+            return b"".join(chunks)
+    return None
 
 
 if __name__ == "__main__":
