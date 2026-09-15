@@ -5,8 +5,13 @@ import contextlib
 import os
 import selectors
 import subprocess
+import threading
+import time
+import uuid
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
+from typing import IO, Literal
 
 # the submission's image: an interpreter and no engine code
 IMAGE = "python:3.14-slim"
@@ -14,8 +19,6 @@ IMAGE = "python:3.14-slim"
 # read as a file rather than imported: importing it would load the runner's
 # package, and the process holding the socket loads no engine code
 SCRIPT = (Path(__file__).parent.parent / "runner" / "child.py").read_text()
-
-type Execute = Callable[[list[str], bytes, int], subprocess.CompletedProcess[bytes]]
 
 # gVisor, named here and never by a request: `docs/architecture/README.md`
 RUNTIME = "runsc"
@@ -54,14 +57,46 @@ OUTPUT_PER_CASE = 4 << 20
 # docker's own messages, and the entry process's traceback on a fault
 OUTPUT_SLACK = 64 << 10
 
+# above the entry process's own slack of 2 s a case, so a sound entry's timer
+# fires first
+CASE_SLACK_MS = 3000
+# the container's start under gVisor and the interpreter's, which no cap counts
+STARTUP_MS = 10_000
+# `docker kill` itself, which a daemon under load answers slowly
+KILL_SECONDS = 10
+
+
+@dataclass(frozen=True)
+class Finished:
+    """How a command ended, and what it wrote until then."""
+
+    how: Literal["exited", "overflowed", "expired"]
+    returncode: int
+    stdout: bytes
+    stderr: bytes
+
+
+type Execute = Callable[[list[str], bytes, int, float], Finished]
+type Stop = Callable[[str], None]
+
 
 def output_limit(cases: int) -> int:
     return cases * OUTPUT_PER_CASE + OUTPUT_SLACK
 
 
-def command() -> list[str]:
+def deadline(cases: int, cap_ms: int) -> float:
+    """The seconds a run may take: every case's cap and slack, and the start."""
+    return (cases * (cap_ms + CASE_SLACK_MS) + STARTUP_MS) / 1000
+
+
+def container_name() -> str:
+    return f"algo-coach-run-{uuid.uuid4().hex}"
+
+
+def command(name: str) -> list[str]:
     # --pull never: a tag pulled per run would move under the run a verdict was
-    # measured by
+    # measured by. --name: the client dying leaves the container running, so
+    # past the deadline the container is killed by name
     return [
         "docker",
         "run",
@@ -69,6 +104,8 @@ def command() -> list[str]:
         "-i",
         "--pull",
         "never",
+        "--name",
+        name,
         *FLAGS,
         IMAGE,
         "python",
@@ -77,52 +114,73 @@ def command() -> list[str]:
     ]
 
 
-def docker(argv: list[str], stdin: bytes, limit: int) -> subprocess.CompletedProcess[bytes]:
-    """The command's output, read to `limit` bytes across both streams, and the
-    command killed past it."""
+def docker(argv: list[str], stdin: bytes, limit: int, seconds: float) -> Finished:
+    """The command, its output read to `limit` bytes across both streams and
+    its run to `seconds`, and the command killed past either."""
     process = subprocess.Popen(
         argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=0
     )
     assert process.stdin is not None and process.stdout is not None and process.stderr is not None
-    # whole before reading: the entry process reads the run to its end before
-    # it prints. A command that exited early closed the pipe
-    view = memoryview(stdin)
-    with contextlib.suppress(BrokenPipeError):
-        while view:
-            view = view[process.stdin.write(view) :]
-    process.stdin.close()
+    # beside the read rather than before it, so a command that never reads its
+    # input cannot hold the broker past the deadline
+    threading.Thread(target=_feed, args=(process.stdin, stdin), daemon=True).start()
     try:
-        read = _bounded([process.stdout.fileno(), process.stderr.fileno()], limit)
-        if read is None:
-            # the client, not the container: killing a run's container by name
-            # is the outer timer's step
+        how, stdout, stderr = _bounded(
+            process.stdout.fileno(), process.stderr.fileno(), limit, time.monotonic() + seconds
+        )
+        if how != "exited":
+            # the client alone: the container outlives it, and the route stops
+            # the container by name
             process.kill()
-            message = f"the run's output passed {limit} bytes".encode()
-            return subprocess.CompletedProcess(argv, process.wait(), b"", message)
-        stdout, stderr = read
-        return subprocess.CompletedProcess(argv, process.wait(), stdout, stderr)
+        if how == "overflowed":
+            stdout, stderr = b"", f"the run's output passed {limit} bytes".encode()
+        return Finished(how, process.wait(), stdout, stderr)
     finally:
         process.stdout.close()
         process.stderr.close()
 
 
-def _bounded(fds: list[int], limit: int) -> list[bytes] | None:
-    """Each stream to its end, or `None` once they carry more than `limit`
-    bytes together."""
+def kill(name: str) -> None:
+    """Stops a run's container. One already gone answers that no such container
+    exists, which is the same end."""
+    with contextlib.suppress(subprocess.TimeoutExpired):
+        subprocess.run(
+            ["docker", "kill", name], capture_output=True, check=False, timeout=KILL_SECONDS
+        )
+
+
+def _feed(pipe: IO[bytes], data: bytes) -> None:
+    view = memoryview(data)
+    # a command that exited, or was killed, closed the pipe
+    with contextlib.suppress(OSError):
+        while view:
+            view = view[pipe.write(view) :]
+    with contextlib.suppress(OSError):
+        pipe.close()
+
+
+def _bounded(
+    out: int, err: int, limit: int, until: float
+) -> tuple[Literal["exited", "overflowed", "expired"], bytes, bytes]:
+    """Both streams to their end, or to the point they carry more than `limit`
+    bytes together, or to `until`, whichever comes first."""
     # both at once: a stream left unread fills its pipe and stalls the other
-    kept = {fd: bytearray() for fd in fds}
+    kept = {out: bytearray(), err: bytearray()}
     total = 0
     with selectors.DefaultSelector() as selector:
-        for fd in fds:
+        for fd in kept:
             selector.register(fd, selectors.EVENT_READ)
         while selector.get_map():
-            for key, _ in selector.select():
+            left = until - time.monotonic()
+            if left <= 0:
+                return "expired", bytes(kept[out]), bytes(kept[err])
+            for key, _ in selector.select(left):
                 chunk = os.read(key.fd, 1 << 16)
                 if not chunk:
                     selector.unregister(key.fd)
                     continue
                 total += len(chunk)
                 if total > limit:
-                    return None
+                    return "overflowed", b"", b""
                 kept[key.fd] += chunk
-    return [bytes(kept[fd]) for fd in fds]
+    return "exited", bytes(kept[out]), bytes(kept[err])

@@ -162,7 +162,7 @@ backend for our own generated code, which is not a threat model.
       Linux, so CI is the one place the test runs
 - [x] Limit the container's memory, processes and output. A submission that
       spawns or prints without bound otherwise holds the machine
-- [ ] Kill the run's container by name once the broker's own timer passes the
+- [x] Kill the run's container by name once the broker's own timer passes the
       caps and a startup slack, and answer each unreported case `TIMEOUT`. A
       child stuck outside Python never fires its own timer
 - [ ] Remove every container labelled `algo-coach.run` when the broker starts.

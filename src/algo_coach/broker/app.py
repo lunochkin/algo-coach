@@ -3,7 +3,16 @@ from typing import Annotated, Literal, Self
 from fastapi import APIRouter, FastAPI, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
-from algo_coach.broker.container import Execute, command, docker, output_limit
+from algo_coach.broker.container import (
+    Execute,
+    Stop,
+    command,
+    container_name,
+    deadline,
+    docker,
+    kill,
+    output_limit,
+)
 
 router = APIRouter()
 
@@ -42,9 +51,10 @@ class Ran(BaseModel):
     cases: list[CaseResult]
 
 
-def create_app(execute: Execute = docker) -> FastAPI:
+def create_app(execute: Execute = docker, stop: Stop = kill) -> FastAPI:
     app = FastAPI(title="algo-coach broker")
     app.state.execute = execute
+    app.state.stop = stop
     app.include_router(router)
     return app
 
@@ -53,14 +63,47 @@ def create_app(execute: Execute = docker) -> FastAPI:
 @router.post("/run")
 def run(body: Run, request: Request) -> Ran:
     execute: Execute = request.app.state.execute
-    done = execute(command(), body.model_dump_json().encode(), output_limit(len(body.args)))
+    stop: Stop = request.app.state.stop
+    name = container_name()
+    wanted = len(body.args)
+    done = execute(
+        command(name),
+        body.model_dump_json().encode(),
+        output_limit(wanted),
+        deadline(wanted, body.cap_ms),
+    )
+    if done.how == "expired":
+        # past every cap and the start: a child stuck outside Python, or an
+        # entry process that stopped answering
+        stop(name)
+        # the last line may be cut off by the kill, and a cut line is no result
+        return Ran(cases=_rest_timed_out(_cases(done.stdout.split(b"\n")[:-1], body), body))
     # a fault of the container or the entry process says nothing about the
     # solution, so it is raised and never answered as a verdict
-    if done.returncode != 0:
+    if done.how == "overflowed" or done.returncode != 0:
         stderr = done.stderr.decode(errors="replace")[-2000:]
         raise HTTPException(500, f"the run's container exited {done.returncode}: {stderr}")
-    cases = [CaseResult.model_validate_json(line) for line in done.stdout.splitlines()]
-    wanted = len(body.args)
-    if len(cases) > wanted or (not body.stop_early and len(cases) < wanted):
+    cases = _cases(done.stdout.splitlines(), body)
+    if not body.stop_early and len(cases) < wanted:
         raise HTTPException(500, f"the entry process reported {len(cases)} of {wanted} cases")
     return Ran(cases=cases)
+
+
+def _cases(lines: list[bytes], body: Run) -> list[CaseResult]:
+    cases = [CaseResult.model_validate_json(line) for line in lines]
+    if len(cases) > len(body.args):
+        raise HTTPException(
+            500, f"the entry process reported {len(cases)} of {len(body.args)} cases"
+        )
+    return cases
+
+
+def _rest_timed_out(reported: list[CaseResult], body: Run) -> list[CaseResult]:
+    """Each case the entry process never reported, read as the parent's timer
+    firing: `TIMEOUT`."""
+    cases = list(reported)
+    while len(cases) < len(body.args):
+        if body.stop_early and cases and cases[-1].outcome != "returned":
+            break
+        cases.append(CaseResult(outcome="timeout", value=None, elapsed_ms=None))
+    return cases
