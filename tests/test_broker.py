@@ -66,13 +66,38 @@ def test_a_run_is_one_docker_run_reading_the_run_on_standard_input():
 def test_the_container_runs_the_entry_process_s_script_whole():
     """Sent with each run rather than built into the image, so the entry process
     always matches the broker that sent it."""
-    recorded = Recorded(stdout=RETURNED * 2)
+    argv = one_run_argv()
 
-    client(recorded).post("/run", json=RUN)
-
-    ((argv, _),) = recorded.calls
     script = Path(child.__file__).read_text()
     assert argv[argv.index(IMAGE) :] == [IMAGE, "python", "-c", script]
+
+
+@pytest.mark.parametrize(
+    "flag",
+    [
+        ["--runtime", "runsc"],
+        ["--network", "none"],
+        ["--read-only"],
+        ["--user", "65534:65534"],
+        ["--cap-drop", "ALL"],
+        ["--security-opt", "no-new-privileges"],
+    ],
+)
+def test_the_container_starts_confined(flag):
+    """Each flag sits among docker's options, before the image. After the image
+    it would be an argument to `python`, and the container would start
+    unconfined."""
+    argv = one_run_argv()
+    options = argv[: argv.index(IMAGE)]
+
+    assert any(options[at : at + len(flag)] == flag for at in range(len(options)))
+
+
+def one_run_argv() -> list[str]:
+    recorded = Recorded(stdout=RETURNED * 2)
+    client(recorded).post("/run", json=RUN)
+    ((argv, _),) = recorded.calls
+    return argv
 
 
 @pytest.mark.parametrize("field", ["image", "mounts", "volumes", "flags", "runtime", "network"])

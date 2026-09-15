@@ -148,7 +148,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Add an import contract keeping the broker's module from importing the
       rest of the package. The process holding the socket then loads no engine
       code
-- [ ] Start the container under `runsc`, with no network, a read-only root
+- [x] Start the container under `runsc`, with no network, a read-only root
       filesystem and a non-root user, and add a test that the argument list
       holds those flags. No committed broker starts an unconfined container
 - [ ] Add the docker CLI to the engine's image, and a `broker` service to
@@ -177,6 +177,9 @@ backend for our own generated code, which is not a threat model.
       `ALGO_COACH_BROKER` names one, and a test that its request carries no
       expected value. The local subprocess runs a submission everywhere else,
       and `corpus.md` keeps the comparison above the boundary
+- [ ] Fork one throwaway child running a trivial `solve` before a run's first
+      case, and add a test that no result line reports it. The first case after
+      a container boots otherwise runs cold under gVisor
 - [ ] Run every problem's canonical through the broker on the server at the
       drill cap, and write down which cases it no longer finishes within a tenth
       of the cap. A CPU limit and a slower system call both move the separating
