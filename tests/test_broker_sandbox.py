@@ -29,6 +29,28 @@ PROBES = (
 )
 
 
+# a case that exhausts memory, a case that spawns without bound, and a case
+# after both that asks for nothing
+LIMITS = (
+    "import os, time\n"
+    "\n"
+    "\n"
+    "def solve(probe):\n"
+    "    if probe == 'memory':\n"
+    "        return len(bytearray(1 << 30))\n"
+    "    if probe == 'processes':\n"
+    "        try:\n"
+    "            for _ in range(200):\n"
+    "                if os.fork() == 0:\n"
+    "                    time.sleep(10)\n"
+    "                    os._exit(0)\n"
+    "        except OSError:\n"
+    "            return 'refused'\n"
+    "        return 'allowed'\n"
+    "    return 'answered'\n"
+)
+
+
 @pytest.fixture(scope="module")
 def sandbox() -> TestClient:
     """The broker as deployed: its own executor, starting a container under
@@ -69,3 +91,17 @@ def test_the_container_holds_the_confinement_its_flags_claim(sandbox: TestClient
     assert response.status_code == 200, response.text
     values = [json.loads(each["value"]) for each in response.json()["cases"]]
     assert values == [65534, "refused", "refused"]
+
+
+def test_a_case_past_the_memory_or_process_limit_fails_alone(sandbox: TestClient):
+    """The container's limits refuse a case that exhausts memory or spawns
+    without bound, and the next case still answers."""
+    run = {"code": LIMITS, "args": [["memory"], ["processes"], ["after"]], "cap_ms": 10_000}
+
+    response = sandbox.post("/run", json=run)
+
+    assert response.status_code == 200, response.text
+    memory, processes, after = response.json()["cases"]
+    assert memory["outcome"] == "crashed"
+    assert json.loads(processes["value"]) == "refused"
+    assert json.loads(after["value"]) == "answered"

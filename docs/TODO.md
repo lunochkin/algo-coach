@@ -160,7 +160,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Install gVisor in CI, and add a test sending one run through the broker
       end to end, skipped where Docker or gVisor is missing. gVisor runs only on
       Linux, so CI is the one place the test runs
-- [ ] Limit the container's memory, processes and output. A submission that
+- [x] Limit the container's memory, processes and output. A submission that
       spawns or prints without bound otherwise holds the machine
 - [ ] Kill the run's container by name once the broker's own timer passes the
       caps and a startup slack, and answer each unreported case `TIMEOUT`. A

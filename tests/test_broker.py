@@ -1,13 +1,14 @@
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
 from algo_coach.broker import create_app
-from algo_coach.broker.container import IMAGE, Execute
+from algo_coach.broker.container import IMAGE, OUTPUT_PER_CASE, Execute, docker
 from algo_coach.runner import child
 
 DOUBLE = "def solve(n):\n    return n * 2\n"
@@ -23,18 +24,20 @@ class Recorded:
         self.stdout = stdout
         self.returncode = returncode
         self.stderr = stderr
-        self.calls: list[tuple[list[str], bytes]] = []
+        self.calls: list[tuple[list[str], bytes, int]] = []
 
-    def __call__(self, argv: list[str], stdin: bytes) -> subprocess.CompletedProcess[bytes]:
-        self.calls.append((argv, stdin))
+    def __call__(
+        self, argv: list[str], stdin: bytes, limit: int
+    ) -> subprocess.CompletedProcess[bytes]:
+        self.calls.append((argv, stdin, limit))
         return subprocess.CompletedProcess(argv, self.returncode, self.stdout, self.stderr)
 
 
-def local(argv: list[str], stdin: bytes) -> subprocess.CompletedProcess[bytes]:
-    """The container's command run on this machine, with this interpreter
-    standing in for the image's `python`."""
+def local(argv: list[str], stdin: bytes, limit: int) -> subprocess.CompletedProcess[bytes]:
+    """The container's command run on this machine through the broker's own
+    reader, with this interpreter standing in for the image's `python`."""
     _python, *rest = argv[argv.index(IMAGE) + 1 :]
-    return subprocess.run([sys.executable, *rest], input=stdin, capture_output=True, check=False)
+    return docker([sys.executable, *rest], stdin, limit)
 
 
 def client(execute: Execute) -> TestClient:
@@ -57,7 +60,7 @@ def test_a_run_is_one_docker_run_reading_the_run_on_standard_input():
 
     client(recorded).post("/run", json=RUN)
 
-    ((argv, stdin),) = recorded.calls
+    ((argv, stdin, _),) = recorded.calls
     assert argv[:2] == ["docker", "run"]
     assert "-i" in argv
     assert json.loads(stdin) == RUN | {"repeats": None, "stop_early": False}
@@ -81,6 +84,9 @@ def test_the_container_runs_the_entry_process_s_script_whole():
         ["--user", "65534:65534"],
         ["--cap-drop", "ALL"],
         ["--security-opt", "no-new-privileges"],
+        ["--memory", "512m"],
+        ["--memory-swap", "512m"],
+        ["--pids-limit", "64"],
     ],
 )
 def test_the_container_starts_confined(flag):
@@ -96,7 +102,7 @@ def test_the_container_starts_confined(flag):
 def one_run_argv() -> list[str]:
     recorded = Recorded(stdout=RETURNED * 2)
     client(recorded).post("/run", json=RUN)
-    ((argv, _),) = recorded.calls
+    ((argv, _, _),) = recorded.calls
     return argv
 
 
@@ -145,3 +151,51 @@ def test_stop_early_may_answer_fewer_cases():
     response = client(local).post("/run", json=RUN | {"code": code, "stop_early": True})
 
     assert [each["outcome"] for each in response.json()["cases"]] == ["crashed"]
+
+
+def test_a_run_s_output_limit_grows_with_its_cases():
+    """A fixed limit would refuse a sound run only for how many cases it
+    carries."""
+    recorded = Recorded(stdout=RETURNED * 2)
+
+    client(recorded).post("/run", json=RUN)
+    client(recorded).post("/run", json=RUN | {"args": [[1]] * 5})
+
+    (_, _, two), (_, _, five) = recorded.calls
+    assert five - two == 3 * OUTPUT_PER_CASE
+
+
+def test_a_run_whose_output_passes_its_limit_answers_no_verdict():
+    """The broker reads what the container writes into its own memory, so a
+    return past the limit stops the read instead of holding the machine."""
+    code = f"def solve():\n    return 'x' * {2 * OUTPUT_PER_CASE}\n"
+
+    response = client(local).post("/run", json=RUN | {"code": code, "args": [[]]})
+
+    assert response.status_code == 500
+    assert "output passed" in response.json()["detail"]
+
+
+def test_output_within_the_limit_is_read_whole_from_both_streams():
+    script = "import sys\nsys.stdout.write('x' * 200_000)\nsys.stderr.write('e' * 100_000)\n"
+
+    done = docker([sys.executable, "-c", script], b"", 400_000)
+
+    assert done.returncode == 0
+    assert (len(done.stdout), len(done.stderr)) == (200_000, 100_000)
+
+
+def test_output_past_the_limit_kills_the_command_at_once():
+    """Either stream carries what the container writes, and a command still
+    writing would otherwise be read until it exits."""
+    script = (
+        "import sys, time\nsys.stderr.write('e' * 100_000)\nsys.stderr.flush()\ntime.sleep(30)\n"
+    )
+
+    started = time.monotonic()
+    done = docker([sys.executable, "-c", script], b"", 50_000)
+
+    assert time.monotonic() - started < 10
+    assert done.returncode != 0
+    assert done.stdout == b""
+    assert b"passed 50000 bytes" in done.stderr

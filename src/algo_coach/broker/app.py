@@ -3,7 +3,7 @@ from typing import Annotated, Literal, Self
 from fastapi import APIRouter, FastAPI, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
-from algo_coach.broker.container import Execute, command, docker
+from algo_coach.broker.container import Execute, command, docker, output_limit
 
 router = APIRouter()
 
@@ -53,7 +53,7 @@ def create_app(execute: Execute = docker) -> FastAPI:
 @router.post("/run")
 def run(body: Run, request: Request) -> Ran:
     execute: Execute = request.app.state.execute
-    done = execute(command(), body.model_dump_json().encode())
+    done = execute(command(), body.model_dump_json().encode(), output_limit(len(body.args)))
     # a fault of the container or the entry process says nothing about the
     # solution, so it is raised and never answered as a verdict
     if done.returncode != 0:
