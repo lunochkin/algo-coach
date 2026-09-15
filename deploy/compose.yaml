@@ -53,6 +53,9 @@ services:
       # the server's loopback address alone, and whatever fronts the pages
       # routes `/api` here
       - "127.0.0.1:8000:8000"
+    # default for Postgres, Caddy and the sign-in providers, and api-broker for
+    # the one service nothing else reaches
+    networks: [default, api-broker]
     depends_on:
       db: {condition: service_healthy}
       migrate: {condition: service_completed_successfully}
@@ -69,6 +72,7 @@ services:
     group_add: ["${DOCKER_GID:?DOCKER_GID names the host's docker group}"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    networks: [api-broker]
 
   # the one service a browser reaches. `Caddyfile` sits beside this file, and
   # the server extracts both from the image
@@ -86,6 +90,13 @@ services:
       # again, and the certificate authority limits how often it issues
       - certificates:/data
     depends_on: [api]
+
+networks:
+  # joined by the API and the broker alone, so Caddy and Postgres cannot open a
+  # connection to the broker. Internal: the broker reaches the socket, not a
+  # registry or the internet
+  api-broker:
+    internal: true
 
 volumes:
   database:

@@ -154,7 +154,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Add the docker CLI to the engine's image, and a `broker` service to
       `deploy/compose.yaml` mounting the socket as a non-root user in the group
       `DOCKER_GID` names. The deployment repo writes that id per server
-- [ ] Put the API and the broker on a compose network that Caddy and Postgres
+- [x] Put the API and the broker on a compose network that Caddy and Postgres
       do not join, and add a test that only `broker` mounts the socket. The
       network guards the broker with no secret to rotate
 - [ ] Install gVisor in CI, and add a test sending one run through the broker
