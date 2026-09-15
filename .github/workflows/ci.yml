@@ -63,7 +63,12 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y runsc
           sudo runsc install
-          sudo systemctl restart docker
+          # reloaded rather than restarted: a restart stops this job's own
+          # service containers, and Postgres is one of them. The daemon reads
+          # the runtimes `runsc install` wrote on a reload
+          sudo systemctl reload docker
+          # here rather than as a sandbox test that skipped
+          docker info --format '{{json .Runtimes}}' | grep -q runsc
           docker pull "$(uv run python -c 'from algo_coach.broker.container import IMAGE; print(IMAGE)')"
       - run: just ci
       # a dependency declared and unused, or used and undeclared
