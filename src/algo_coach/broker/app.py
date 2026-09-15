@@ -1,9 +1,12 @@
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from typing import Annotated, Literal, Self
 
 from fastapi import APIRouter, FastAPI, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 from algo_coach.broker.container import (
+    Clear,
     Execute,
     Stop,
     command,
@@ -12,6 +15,7 @@ from algo_coach.broker.container import (
     docker,
     kill,
     output_limit,
+    remove_leftovers,
 )
 
 router = APIRouter()
@@ -51,8 +55,17 @@ class Ran(BaseModel):
     cases: list[CaseResult]
 
 
-def create_app(execute: Execute = docker, stop: Stop = kill) -> FastAPI:
-    app = FastAPI(title="algo-coach broker")
+def create_app(
+    execute: Execute = docker, stop: Stop = kill, clear: Clear = remove_leftovers
+) -> FastAPI:
+    @asynccontextmanager
+    async def started(_: FastAPI) -> AsyncGenerator[None]:
+        # before the first run: a broker that died mid-run left its container
+        # running, and nothing else ever removes it
+        clear()
+        yield
+
+    app = FastAPI(title="algo-coach broker", lifespan=started)
     app.state.execute = execute
     app.state.stop = stop
     app.include_router(router)

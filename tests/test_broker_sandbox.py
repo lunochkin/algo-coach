@@ -2,12 +2,13 @@ import json
 import shutil
 import subprocess
 import time
+import uuid
 
 import pytest
 from fastapi.testclient import TestClient
 
 from algo_coach.broker import create_app
-from algo_coach.broker.container import kill
+from algo_coach.broker.container import IMAGE, kill, remove_leftovers
 
 DOUBLE = "def solve(n):\n    return n * 2\n"
 
@@ -58,7 +59,8 @@ STOPS_ENTRY = "import os, signal\n\n\ndef solve():\n    os.kill(os.getppid(), si
 @pytest.fixture(scope="module")
 def sandbox() -> TestClient:
     """The broker as deployed: its own executor, starting a container under
-    runsc."""
+    runsc. Never entered with `with`, which would remove the containers the
+    other workers' runs are using."""
     if not _runsc():
         pytest.skip("a run's container needs docker's runsc runtime, which runs only on Linux")
     return TestClient(create_app())
@@ -130,6 +132,29 @@ def test_a_run_whose_entry_stops_answering_times_out_and_leaves_no_container(
     assert [each["outcome"] for each in response.json()["cases"]] == ["timeout", "timeout"]
     (name,) = stopped
     assert _gone(name)
+
+
+def test_leftover_containers_are_removed_running_or_not(sandbox: TestClient):
+    """A label of this test's own, since the broker's label would reach the
+    containers the other workers' runs are using."""
+    label = f"algo-coach.test-{uuid.uuid4().hex}"
+    running, exited = (f"algo-coach-leftover-{uuid.uuid4().hex}" for _ in range(2))
+    _leftover(running, label, ["sleep", "60"], detach=True)
+    _leftover(exited, label, ["true"])
+
+    remove_leftovers(label)
+
+    assert _gone(running)
+    assert _gone(exited)
+
+
+def _leftover(name: str, label: str, command: list[str], *, detach: bool = False) -> None:
+    options = ["--pull", "never", "--runtime", "runsc", "--name", name, "--label", label]
+    subprocess.run(
+        ["docker", "run", *(["--detach"] if detach else []), *options, IMAGE, *command],
+        capture_output=True,
+        check=True,
+    )
 
 
 def _gone(name: str) -> bool:

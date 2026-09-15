@@ -165,7 +165,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Kill the run's container by name once the broker's own timer passes the
       caps and a startup slack, and answer each unreported case `TIMEOUT`. A
       child stuck outside Python never fires its own timer
-- [ ] Remove every container labelled `algo-coach.run` when the broker starts.
+- [x] Remove every container labelled `algo-coach.run` when the broker starts.
       A broker that died mid-run leaves its container running
 - [ ] Admit one submission at a time in the broker, and refuse a submission
       whose wait passes a bound. A submission running beside another moves the

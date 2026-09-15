@@ -20,6 +20,10 @@ IMAGE = "python:3.14-slim"
 # package, and the process holding the socket loads no engine code
 SCRIPT = (Path(__file__).parent.parent / "runner" / "child.py").read_text()
 
+# every run's container carries it, so a starting broker finds the containers
+# a broker that died mid-run left
+LABEL = "algo-coach.run"
+
 # gVisor, named here and never by a request: `docs/architecture/README.md`
 RUNTIME = "runsc"
 # nobody, by number, so the image's own user list decides nothing
@@ -62,8 +66,9 @@ OUTPUT_SLACK = 64 << 10
 CASE_SLACK_MS = 3000
 # the container's start under gVisor and the interpreter's, which no cap counts
 STARTUP_MS = 10_000
-# `docker kill` itself, which a daemon under load answers slowly
-KILL_SECONDS = 10
+# one docker command of the broker's own, which a daemon under load answers
+# slowly
+DOCKER_SECONDS = 10
 
 
 @dataclass(frozen=True)
@@ -78,6 +83,7 @@ class Finished:
 
 type Execute = Callable[[list[str], bytes, int, float], Finished]
 type Stop = Callable[[str], None]
+type Clear = Callable[[], None]
 
 
 def output_limit(cases: int) -> int:
@@ -106,6 +112,8 @@ def command(name: str) -> list[str]:
         "never",
         "--name",
         name,
+        "--label",
+        LABEL,
         *FLAGS,
         IMAGE,
         "python",
@@ -145,7 +153,29 @@ def kill(name: str) -> None:
     exists, which is the same end."""
     with contextlib.suppress(subprocess.TimeoutExpired):
         subprocess.run(
-            ["docker", "kill", name], capture_output=True, check=False, timeout=KILL_SECONDS
+            ["docker", "kill", name], capture_output=True, check=False, timeout=DOCKER_SECONDS
+        )
+
+
+def remove_leftovers(label: str = LABEL) -> None:
+    """Removes every container carrying `label`, running or not."""
+    # a failed listing is raised: a broker that cannot reach docker has no run
+    # to answer, so it does not start
+    listed = subprocess.run(
+        ["docker", "ps", "--all", "--quiet", "--filter", f"label={label}"],
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=DOCKER_SECONDS,
+    )
+    if ids := listed.stdout.split():
+        # unchecked: a container `--rm` removed since the listing is the same
+        # end
+        subprocess.run(
+            ["docker", "rm", "--force", *ids],
+            capture_output=True,
+            check=False,
+            timeout=DOCKER_SECONDS,
         )
 
 

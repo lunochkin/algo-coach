@@ -71,7 +71,29 @@ def local(argv: list[str], stdin: bytes, limit: int, seconds: float) -> Finished
 
 
 def client(execute: Execute, stop: Stop | None = None) -> TestClient:
-    return TestClient(create_app(execute, stop or Stopped()))
+    return TestClient(create_app(execute, stop or Stopped(), _nothing))
+
+
+def _nothing() -> None:
+    """Stands in for removing leftover containers, which a test client entered
+    with `with` would otherwise do against the real docker."""
+
+
+def test_a_starting_broker_removes_leftover_containers_before_its_first_run():
+    """A broker that died mid-run left its container running, and nothing else
+    ever removes it."""
+    cleared: list[str] = []
+    app = create_app(Recorded(stdout=RETURNED * 2), Stopped(), lambda: cleared.append("cleared"))
+
+    with TestClient(app) as started:
+        assert cleared == ["cleared"]
+        started.post("/run", json=RUN)
+
+    assert cleared == ["cleared"]
+
+
+def test_each_run_s_container_carries_the_label_leftovers_are_found_by():
+    assert _holds(_options(one_run().argv), ["--label", "algo-coach.run"])
 
 
 def test_a_run_answers_a_result_per_case():
