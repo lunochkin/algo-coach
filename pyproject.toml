@@ -137,6 +137,14 @@ source_modules = [
 ]
 forbidden_modules = ["algo_coach.cli", "algo_coach.api"]
 
+# the process holding the container runtime's socket loads no engine code. The
+# wildcard covers a package added later, and matches none of the broker's own
+[[tool.importlinter.contracts]]
+name = "the broker imports nothing of the engine"
+type = "forbidden"
+source_modules = ["algo_coach.broker"]
+forbidden_modules = ["algo_coach.*"]
+
 # used outside `src`, which is all deptry reads: Alembic runs `migrations/`, and
 # SQLAlchemy loads psycopg from the database URL's scheme. Starlette's session
 # middleware signs the sign-in state with itsdangerous, which it never declares

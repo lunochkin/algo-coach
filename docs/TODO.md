@@ -145,7 +145,7 @@ backend for our own generated code, which is not a threat model.
       arguments, the cap, the repeat counts and whether to stop early, answered
       by one `docker run -i`, and refusing any other field. The API holds no
       socket, and every later hardening step inherits a field a request can set
-- [ ] Add an import contract keeping the broker's module from importing the
+- [x] Add an import contract keeping the broker's module from importing the
       rest of the package. The process holding the socket then loads no engine
       code
 - [ ] Start the container under `runsc`, with no network, a read-only root
