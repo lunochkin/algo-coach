@@ -35,5 +35,7 @@ def off_the_developer_machine(tmp_path, monkeypatch):
     every command a test runs.
     """
     monkeypatch.chdir(tmp_path)
-    for name in ("DATABASE_URL", *CREDENTIALS, *SIGN_IN):
+    # ALGO_COACH_BROKER too: a developer's broker would answer every run a
+    # test makes, in a container rather than the local subprocess
+    for name in ("DATABASE_URL", "ALGO_COACH_BROKER", *CREDENTIALS, *SIGN_IN):
         monkeypatch.delenv(name, raising=False)

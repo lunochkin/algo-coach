@@ -6,7 +6,7 @@ from helpers import PROVENANCE, stored_problem
 from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.mint import case
-from algo_coach.runner import RUNNER
+from algo_coach.runner import runner
 from algo_coach.schema import CaseOutcome, Sitting
 from algo_coach.sitting import DRILL_CAP_MS, Missing, Refused, Submitted, submit
 from algo_coach.verifications import VerificationLog
@@ -224,7 +224,7 @@ def test_the_verification_names_the_cap_and_the_runner(database):
     comparable only within one runner."""
     verification = Stores(database).submitted(DOUBLE).verification
 
-    assert (verification.cap_ms, verification.runner) == (DRILL_CAP_MS, RUNNER)
+    assert (verification.cap_ms, verification.runner) == (DRILL_CAP_MS, runner())
 
 
 def test_every_case_carries_its_own_outcome(database):

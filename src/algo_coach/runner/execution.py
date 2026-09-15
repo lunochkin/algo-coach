@@ -16,7 +16,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
 
-from algo_coach.runner import child
+from algo_coach.runner import child, remote
 
 # slack on the parent's own timer, beyond the cap the child enforces. It covers
 # the child's start and catches a child stuck where no Python-level timer
@@ -25,7 +25,9 @@ STARTUP_MS = 2000
 
 # the backend and the interpreter, as a verification stores them. Opaque to
 # every reader, so the format is this module's alone
-RUNNER = f"subprocess/{sys.implementation.name}-{sys.version_info.major}.{sys.version_info.minor}"
+LOCAL_RUNNER = (
+    f"subprocess/{sys.implementation.name}-{sys.version_info.major}.{sys.version_info.minor}"
+)
 
 # a child per case, forked from a server that imported the child's module once:
 # an interpreter start per case cost some 40ms before the solution ran. The
@@ -62,6 +64,11 @@ class CaseRun:
         return self.outcome is RunOutcome.RETURNED
 
 
+def runner() -> str:
+    """The backend a run is answered by, as a verification stores it."""
+    return remote.RUNNER if os.environ.get(remote.BROKER) else LOCAL_RUNNER
+
+
 def run(
     code: str,
     args: Sequence[Sequence[Any]],
@@ -87,6 +94,9 @@ def run(
         # every case, whatever `stop_early` says: nothing ran, so there is
         # nothing to stop at
         return [CaseRun(RunOutcome.CRASHED, error=why) for _ in cases]
+
+    if base := os.environ.get(remote.BROKER):
+        return _brokered(base, code, cases, cap_ms, counts, stop_early)
 
     results: list[CaseRun] = []
     with TemporaryDirectory() as work:
@@ -127,6 +137,31 @@ def _defines(node: ast.stmt) -> bool:
             return value is not None
         case _:
             return False
+
+
+def _brokered(
+    base: str,
+    code: str,
+    cases: list[list[Any]],
+    cap_ms: int,
+    counts: list[int],
+    stop_early: bool,
+) -> list[CaseRun]:
+    try:
+        answered = remote.brokered(base, remote.request(code, cases, cap_ms, counts, stop_early))
+    except remote.RemoteFault as fault:
+        raise RunnerError(str(fault)) from fault
+    return [_reads(one) for one in answered]
+
+
+def _reads(case: dict[str, Any]) -> CaseRun:
+    encoded = case["value"]
+    return CaseRun(
+        RunOutcome(case["outcome"]),
+        json.loads(encoded) if encoded is not None else None,
+        case["elapsed_ms"],
+        case.get("error"),
+    )
 
 
 def _answered(
@@ -175,12 +210,4 @@ def _reported(path: Path, returncode: int) -> CaseRun:
         if returncode < 0:
             return CaseRun(RunOutcome.CRASHED, error=f"killed by signal {-returncode}")
         raise RunnerError(f"the child wrote no result and exited {returncode}") from None
-
-    outcome = RunOutcome(reported["outcome"])
-    encoded = reported["value"]
-    return CaseRun(
-        outcome,
-        json.loads(encoded) if encoded is not None else None,
-        reported["elapsed_ms"],
-        reported.get("error"),
-    )
+    return _reads(reported)

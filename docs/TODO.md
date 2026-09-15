@@ -173,7 +173,7 @@ backend for our own generated code, which is not a threat model.
       user as a sandbox that hung
 - [x] Pin the submission's image by digest, an interpreter and no engine code.
       A tag moves under the run that a stored verdict was measured by
-- [ ] Add a backend behind `runner.run` that calls the broker where
+- [x] Add a backend behind `runner.run` that calls the broker where
       `ALGO_COACH_BROKER` names one, and a test that its request carries no
       expected value. The local subprocess runs a submission everywhere else,
       and `corpus.md` keeps the comparison above the boundary

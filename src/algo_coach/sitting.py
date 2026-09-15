@@ -11,7 +11,7 @@ from algo_coach import mint
 from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.problems import ProblemStore
-from algo_coach.runner import RUNNER, CaseRun, judge
+from algo_coach.runner import CaseRun, judge, runner
 from algo_coach.schema import (
     Attempt,
     AttemptClaim,
@@ -135,7 +135,7 @@ def submit(
         raise Refused(f"sitting {sitting_id} is paused")
     problem_cases = cases.for_problem(one.problem_id)
     runs = judge(code, problem_cases, cap_ms=DRILL_CAP_MS)
-    judged = Execution(cap_ms=DRILL_CAP_MS, runner=RUNNER, results=[result for result, _ in runs])
+    judged = Execution(cap_ms=DRILL_CAP_MS, runner=runner(), results=[result for result, _ in runs])
     attempt = mint.attempt(one, code, solved=judged.verified, finished_at=at)
     verification = mint.attempt_verification(attempt.id, judged)
     log.append_attempt(attempt)
