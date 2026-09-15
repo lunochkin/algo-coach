@@ -173,10 +173,13 @@ without redefining them. Grouped by the file that specifies the record.
 - **Sandbox**: what a submission runs under: a container with no network, a
   read-only root filesystem, a non-root user, dropped capabilities and limits
   on memory, processes and time. It shares the server's kernel.
-- **Broker**: the process holding the container runtime's socket and starting a
-  submission's container. It answers one request, carrying the code, the
+- **Broker**: the process holding the container runtime's socket and starting
+  one container per run. It answers one request, carrying the code, the
   arguments and the cap. Every other option a container is started with is
   fixed in the broker's own source.
+- **Entry process**: the first process in a run's container. It reads the run
+  from standard input, forks a child per case, and prints each case's result as
+  one line on standard output.
 
 ### Machine records
 
@@ -325,9 +328,40 @@ times. Each record class is specified in one of the files beside it.
     compromise into a root shell on the server. A request to that socket can
     start a privileged container with the host's filesystem mounted into it,
     and the API is the process running whatever a signed-in person submits.
+  - The broker starts a container with the docker CLI, and the fixed flags are
+    one argument list in the broker's source. The request reaches the entry
+    process on standard input through `docker run -i`. Docker's HTTP API needs a
+    hijacked connection to write a container's standard input, and the Docker
+    SDK for Python is untyped.
+  - One container holds a whole run, and the entry process forks a child per
+    case inside it. No case observes another, as `corpus.md` requires. A
+    container per case would pay a container's start once per case, where a
+    fork costs far less.
   - The submission's image carries a Python interpreter and no engine code.
-    The submitted code arrives on the child's standard input, so a run mounts
-    nothing.
+    The broker sends the entry process's script with each run, as `python -c`,
+    so the script always matches the deployed broker. The submitted code arrives
+    on standard input, so a run mounts nothing.
+  - Each case's child points its standard streams at `/dev/null` and returns its
+    result to the entry process over a pipe. The entry process prints one line
+    per case on standard output. A solution's own prints therefore never reach
+    the output the broker parses.
+  - The broker runs from the engine's image, under a command of its own. An
+    import contract keeps the broker's module from importing the rest of the
+    package, so the process holding the socket loads no engine code. A second
+    image would add a second digest to every deploy.
+  - The broker runs as a non-root user in the host's `docker` group. That group
+    already controls the host through the socket, so running the broker as root
+    would add only write access inside the broker's own container. The group's
+    id differs between servers, so the server writes it into the secrets file
+    and compose reads it from there.
+  - The API reaches the broker over HTTP, on a compose network that only the API
+    and the broker join. Caddy and Postgres cannot open a connection to the
+    broker. A shared token was rejected, since the separate network guards the
+    broker with no secret to rotate.
+  - A submission runs in the local subprocess wherever no broker is configured.
+    gVisor runs only on Linux, so a sitting on the author's laptop uses the
+    subprocess. The broker's own tests run where Docker and gVisor are
+    installed.
   - The container runs under gVisor, a kernel written in user space that
     answers the container's system calls. An exploit of the host's own kernel
     reaches gVisor first. The broker names the runtime as a constant.

@@ -138,39 +138,51 @@ backend for our own generated code, which is not a threat model.
 
 ### The sandbox
 
-- [ ] Write the broker: a service holding the container runtime's socket and
-      answering one request, the code, the arguments and the cap. The API holds
-      no socket
-- [ ] Fix the image, the flags and the limits in the broker's source, and add a
-      test that a request naming an image, a mount or a capability is refused.
-      Every later hardening step inherits a field a request can influence
-- [ ] Pin the submission's image by digest, an interpreter and no engine code.
-      A tag moves under the run that a stored verdict was measured by
-- [ ] Install gVisor on the server, name its runtime in the broker, and check
-      that the submission's image runs a canonical under it. A container under
-      the host's own kernel is one kernel exploit away from the host
-- [ ] Add a backend behind `runner.run` that calls the broker, keeping the
-      signature and the child protocol, JSON in and JSON out. The `run`
-      boundary was written for a second backend, so no second runner is needed
-- [ ] Give the container no network, a read-only root filesystem, a non-root
-      user, and limits on memory, processes and output. A submission that
-      spawns a process or opens a connection fails
-- [ ] Enforce the cap from outside the container as well as in the child. A
-      child that ignores its own timer otherwise holds the machine
-- [ ] Add a test that the sandbox backend's request carries no expected value.
-      `corpus.md` keeps the comparison above the boundary, and a sandbox told
-      the answer can be made to agree with it
-- [ ] Run every problem's canonical under the sandbox at the drill cap, with
-      gVisor already installed, and write down which cases it no longer
-      finishes within a tenth of the cap. The separating sizes were found on
-      the local subprocess, and a CPU limit and a slower system call both move
-      them
-- [ ] Cap submissions per user per minute. Each submission runs untrusted code
-      on our machine
+- [ ] Rewrite `child.py`'s entry point to take a whole run on standard input,
+      fork a child per case, and print one result line per case. The broker
+      parses standard output, so a solution's prints must not reach it
+- [ ] Add the broker's module: one `POST /run` route taking the code, the
+      arguments, the cap, the repeat counts and whether to stop early, answered
+      by one `docker run -i`, and refusing any other field. The API holds no
+      socket, and every later hardening step inherits a field a request can set
+- [ ] Add an import contract keeping the broker's module from importing the
+      rest of the package. The process holding the socket then loads no engine
+      code
+- [ ] Start the container under `runsc`, with no network, a read-only root
+      filesystem and a non-root user, and add a test that the argument list
+      holds those flags. No committed broker starts an unconfined container
+- [ ] Add the docker CLI to the engine's image, and a `broker` service to
+      `deploy/compose.yaml` mounting the socket as a non-root user in the group
+      `DOCKER_GID` names. The deployment repo writes that id per server
+- [ ] Put the API and the broker on a compose network that Caddy and Postgres
+      do not join, and add a test that only `broker` mounts the socket. The
+      network guards the broker with no secret to rotate
+- [ ] Install gVisor in CI, and add a test sending one run through the broker
+      end to end, skipped where Docker or gVisor is missing. gVisor runs only on
+      Linux, so CI is the one place the test runs
+- [ ] Limit the container's memory, processes and output. A submission that
+      spawns or prints without bound otherwise holds the machine
+- [ ] Kill the run's container by name once the broker's own timer passes the
+      caps and a startup slack, and answer each unreported case `TIMEOUT`. A
+      child stuck outside Python never fires its own timer
+- [ ] Remove every container labelled `algo-coach.run` when the broker starts.
+      A broker that died mid-run leaves its container running
 - [ ] Admit one submission at a time in the broker, and refuse a submission
       whose wait passes a bound. A submission running beside another moves the
       wall clock a verdict is read from, and an unbounded wait reads to the
       user as a sandbox that hung
+- [ ] Pin the submission's image by digest, an interpreter and no engine code.
+      A tag moves under the run that a stored verdict was measured by
+- [ ] Add a backend behind `runner.run` that calls the broker where
+      `ALGO_COACH_BROKER` names one, and a test that its request carries no
+      expected value. The local subprocess runs a submission everywhere else,
+      and `corpus.md` keeps the comparison above the boundary
+- [ ] Run every problem's canonical through the broker on the server at the
+      drill cap, and write down which cases it no longer finishes within a tenth
+      of the cap. A CPU limit and a slower system call both move the separating
+      sizes the local subprocess found
+- [ ] Cap submissions per user per minute. Each submission runs untrusted code
+      on the server
 
 ### Other items
 
