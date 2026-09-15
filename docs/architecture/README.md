@@ -349,6 +349,14 @@ times. Each record class is specified in one of the files beside it.
     result to the entry process over a pipe. The entry process prints one line
     per case on standard output. A solution's own prints therefore never reach
     the output the broker parses.
+  - Each case's child holds an address-space limit under the container's memory
+    limit, so a case that exhausts memory raises inside that child and fails
+    alone. Under the container's limit alone the host kills the whole
+    container, which leaves every later case of the run unanswered.
+  - gVisor mounts a tmpfs over `/tmp` inside the container, so a solution
+    writes there however read-only the root filesystem is. That tmpfs is
+    removed with the container, and what it holds counts against the
+    container's memory limit.
   - The broker runs from the engine's image, under a command of its own. An
     import contract keeps the broker's module from importing the rest of the
     package, so the process holding the socket loads no engine code. A second

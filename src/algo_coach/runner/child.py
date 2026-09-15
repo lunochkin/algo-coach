@@ -8,6 +8,7 @@ import contextlib
 import json
 import linecache
 import os
+import resource
 import select
 import signal
 import sys
@@ -27,6 +28,11 @@ SOLUTION = "<solution>"
 # slack on the entry's own timer, beyond the cap the child enforces. The local
 # runner's STARTUP_MS, which this script cannot import
 SLACK_MS = 2000
+
+# a case's own address space, under the container's memory limit. A case that
+# exhausts memory then raises in its own child, where the container's limit
+# alone has the host kill the container and every later case with it
+CASE_MEMORY_BYTES = 320 << 20
 
 
 class Expired(Exception):
@@ -143,6 +149,7 @@ def forked(code: str, args: list[Any], cap_ms: int, repeats: int) -> dict[str, A
         try:
             os.close(read)
             _isolate()
+            _limit_memory()
             result = execute(code, args, cap_ms, repeats)
             with os.fdopen(write, "w") as channel:
                 channel.write(json.dumps(result) + "\n")
@@ -170,6 +177,13 @@ def forked(code: str, args: list[Any], cap_ms: int, repeats: int) -> dict[str, A
     if exitcode < 0:
         return crashed(None, f"killed by signal {-exitcode}")
     raise RuntimeError(f"the child wrote no result and exited {exitcode}")
+
+
+def _limit_memory() -> None:
+    # suppressed where the platform refuses the limit, which leaves the
+    # container's own limit as it was
+    with contextlib.suppress(OSError, ValueError):
+        resource.setrlimit(resource.RLIMIT_AS, (CASE_MEMORY_BYTES, CASE_MEMORY_BYTES))
 
 
 def _line(fd: int, deadline: float) -> bytes | None:

@@ -13,7 +13,8 @@ from algo_coach.broker.container import IMAGE, kill, remove_leftovers
 DOUBLE = "def solve(n):\n    return n * 2\n"
 
 # one case per confinement the broker's flags claim, answered from inside the
-# container. /tmp is writable by anyone, so only a read-only root refuses it
+# container. /var/tmp is writable by anyone and sits on the root filesystem,
+# where gVisor mounts a tmpfs over /tmp whatever the root allows
 PROBES = (
     "import os, socket\n"
     "\n"
@@ -25,7 +26,7 @@ PROBES = (
     "        if probe == 'network':\n"
     "            socket.create_connection(('1.1.1.1', 53), timeout=1).close()\n"
     "        if probe == 'write':\n"
-    "            open('/tmp/probe', 'w').close()\n"
+    "            open('/var/tmp/probe', 'w').close()\n"
     "    except OSError:\n"
     "        return 'refused'\n"
     "    return 'allowed'\n"
