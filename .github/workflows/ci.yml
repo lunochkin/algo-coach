@@ -52,8 +52,8 @@ jobs:
       - run: npm ci --prefix web
       # gVisor, for the tests that send a run through the broker's own
       # container. runsc runs only on Linux, so this runner is the one place
-      # those tests run. The broker pulls nothing, so the submission's image,
-      # `IMAGE` in the broker, is pulled here
+      # those tests run. A run starts with `--pull never`, so the submission's
+      # image is pulled here, by the pin the broker names
       - name: Install gVisor
         run: |
           curl -fsSL https://gvisor.dev/archive.key \
@@ -64,7 +64,7 @@ jobs:
           sudo apt-get install -y runsc
           sudo runsc install
           sudo systemctl restart docker
-          docker pull python:3.14-slim
+          docker pull "$(uv run python -c 'from algo_coach.broker.container import IMAGE; print(IMAGE)')"
       - run: just ci
       # a dependency declared and unused, or used and undeclared
       - run: uv run --with deptry deptry src

@@ -1,4 +1,5 @@
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -71,25 +72,36 @@ def local(argv: list[str], stdin: bytes, limit: int, seconds: float) -> Finished
 
 
 def client(execute: Execute, stop: Stop | None = None) -> TestClient:
-    return TestClient(create_app(execute, stop or Stopped(), _nothing))
+    return TestClient(create_app(execute, stop or Stopped(), _nothing, _nothing))
 
 
 def _nothing() -> None:
-    """Stands in for removing leftover containers, which a test client entered
-    with `with` would otherwise do against the real docker."""
+    """Stands in for removing leftover containers and pulling the image, which
+    a test client entered with `with` would otherwise do against the real
+    docker."""
 
 
-def test_a_starting_broker_removes_leftover_containers_before_its_first_run():
-    """A broker that died mid-run left its container running, and nothing else
-    ever removes it."""
-    cleared: list[str] = []
-    app = create_app(Recorded(stdout=RETURNED * 2), Stopped(), lambda: cleared.append("cleared"))
+def test_a_starting_broker_clears_leftovers_and_pulls_its_image_before_its_first_run():
+    """A broker that died mid-run left its container running, and every run
+    starts with `--pull never`, so both happen once, before any run."""
+    started: list[str] = []
+    app = create_app(
+        Recorded(stdout=RETURNED * 2),
+        Stopped(),
+        lambda: started.append("cleared"),
+        lambda: started.append("pulled"),
+    )
 
-    with TestClient(app) as started:
-        assert cleared == ["cleared"]
-        started.post("/run", json=RUN)
+    with TestClient(app) as broker:
+        assert started == ["cleared", "pulled"]
+        broker.post("/run", json=RUN)
 
-    assert cleared == ["cleared"]
+    assert started == ["cleared", "pulled"]
+
+
+def test_the_submission_s_image_is_pinned_by_digest():
+    """A tag moves under the run a stored verdict was measured by."""
+    assert re.fullmatch(r"python:3\.14-slim@sha256:[0-9a-f]{64}", IMAGE)
 
 
 def test_each_run_s_container_carries_the_label_leftovers_are_found_by():

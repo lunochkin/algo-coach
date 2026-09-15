@@ -341,6 +341,10 @@ times. Each record class is specified in one of the files beside it.
     The broker sends the entry process's script with each run, as `python -c`,
     so the script always matches the deployed broker. The submitted code arrives
     on standard input, so a run mounts nothing.
+  - The broker names the submission's image by digest, and pulls that image
+    when it starts. A tag moves under the run a stored verdict was measured by.
+    The host's daemon carries out the pull on the broker's behalf, since the
+    broker's own network leads nowhere outside.
   - Each case's child points its standard streams at `/dev/null` and returns its
     result to the entry process over a pipe. The entry process prints one line
     per case on standard output. A solution's own prints therefore never reach

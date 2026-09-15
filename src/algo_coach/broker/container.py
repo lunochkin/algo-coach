@@ -13,8 +13,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import IO, Literal
 
-# the submission's image: an interpreter and no engine code
-IMAGE = "python:3.14-slim"
+# the submission's image: an interpreter and no engine code. By digest, since a
+# tag moves under the run a stored verdict was measured by. The index's digest,
+# so each host resolves its own platform from it; the tag is only for a reader
+DIGEST = "sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6"
+IMAGE = f"python:3.14-slim@{DIGEST}"
 
 # read as a file rather than imported: importing it would load the runner's
 # package, and the process holding the socket loads no engine code
@@ -69,6 +72,8 @@ STARTUP_MS = 10_000
 # one docker command of the broker's own, which a daemon under load answers
 # slowly
 DOCKER_SECONDS = 10
+# the image's first pull, over the host's own connection
+PULL_SECONDS = 300
 
 
 @dataclass(frozen=True)
@@ -84,6 +89,7 @@ class Finished:
 type Execute = Callable[[list[str], bytes, int, float], Finished]
 type Stop = Callable[[str], None]
 type Clear = Callable[[], None]
+type Pull = Callable[[], None]
 
 
 def output_limit(cases: int) -> int:
@@ -100,9 +106,9 @@ def container_name() -> str:
 
 
 def command(name: str) -> list[str]:
-    # --pull never: a tag pulled per run would move under the run a verdict was
-    # measured by. --name: the client dying leaves the container running, so
-    # past the deadline the container is killed by name
+    # --pull never: the broker pulled the pinned image when it started, and a
+    # run never waits on a registry. --name: the client dying leaves the
+    # container running, so past the deadline the container is killed by name
     return [
         "docker",
         "run",
@@ -177,6 +183,11 @@ def remove_leftovers(label: str = LABEL) -> None:
             check=False,
             timeout=DOCKER_SECONDS,
         )
+
+
+def pull_image() -> None:
+    # the host's daemon pulls, since the broker's own network leads nowhere
+    subprocess.run(["docker", "pull", IMAGE], capture_output=True, check=True, timeout=PULL_SECONDS)
 
 
 def _feed(pipe: IO[bytes], data: bytes) -> None:

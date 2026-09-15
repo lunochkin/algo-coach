@@ -171,7 +171,7 @@ backend for our own generated code, which is not a threat model.
       whose wait passes a bound. A submission running beside another moves the
       wall clock a verdict is read from, and an unbounded wait reads to the
       user as a sandbox that hung
-- [ ] Pin the submission's image by digest, an interpreter and no engine code.
+- [x] Pin the submission's image by digest, an interpreter and no engine code.
       A tag moves under the run that a stored verdict was measured by
 - [ ] Add a backend behind `runner.run` that calls the broker where
       `ALGO_COACH_BROKER` names one, and a test that its request carries no

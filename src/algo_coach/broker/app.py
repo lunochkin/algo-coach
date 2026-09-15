@@ -11,6 +11,7 @@ from starlette.concurrency import run_in_threadpool
 from algo_coach.broker.container import (
     Clear,
     Execute,
+    Pull,
     Stop,
     command,
     container_name,
@@ -18,6 +19,7 @@ from algo_coach.broker.container import (
     docker,
     kill,
     output_limit,
+    pull_image,
     remove_leftovers,
 )
 
@@ -66,13 +68,16 @@ def create_app(
     execute: Execute = docker,
     stop: Stop = kill,
     clear: Clear = remove_leftovers,
+    pull: Pull = pull_image,
     wait_seconds: float = WAIT_SECONDS,
 ) -> FastAPI:
     @asynccontextmanager
     async def started(_: FastAPI) -> AsyncGenerator[None]:
         # before the first run: a broker that died mid-run left its container
-        # running, and nothing else ever removes it
+        # running, and nothing else ever removes it. Every run starts with
+        # `--pull never`, so the pinned image is pulled here once
         clear()
+        pull()
         yield
 
     app = FastAPI(title="algo-coach broker", lifespan=started)
