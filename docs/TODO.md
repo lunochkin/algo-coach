@@ -157,7 +157,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Put the API and the broker on a compose network that Caddy and Postgres
       do not join, and add a test that only `broker` mounts the socket. The
       network guards the broker with no secret to rotate
-- [ ] Install gVisor in CI, and add a test sending one run through the broker
+- [x] Install gVisor in CI, and add a test sending one run through the broker
       end to end, skipped where Docker or gVisor is missing. gVisor runs only on
       Linux, so CI is the one place the test runs
 - [ ] Limit the container's memory, processes and output. A submission that

@@ -50,6 +50,21 @@ jobs:
       - run: uv sync
       # the frontend's packages, which `just ci` type-checks and lints against
       - run: npm ci --prefix web
+      # gVisor, for the tests that send a run through the broker's own
+      # container. runsc runs only on Linux, so this runner is the one place
+      # those tests run. The broker pulls nothing, so the submission's image,
+      # `IMAGE` in the broker, is pulled here
+      - name: Install gVisor
+        run: |
+          curl -fsSL https://gvisor.dev/archive.key \
+            | sudo gpg --dearmor -o /usr/share/keyrings/gvisor-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/gvisor-archive-keyring.gpg] https://storage.googleapis.com/gvisor/releases release main" \
+            | sudo tee /etc/apt/sources.list.d/gvisor.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y runsc
+          sudo runsc install
+          sudo systemctl restart docker
+          docker pull python:3.14-slim
       - run: just ci
       # a dependency declared and unused, or used and undeclared
       - run: uv run --with deptry deptry src
