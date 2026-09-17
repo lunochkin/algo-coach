@@ -32,15 +32,20 @@ PROBES = (
     "    return 'allowed'\n"
 )
 
-# a case that exhausts memory, a case that spawns without bound, and a case
-# after both that asks for nothing
-LIMITS = (
+# a case that exhausts memory, and a case after it that asks for nothing
+MEMORY = (
+    "def solve(probe):\n"
+    "    if probe == 'memory':\n"
+    "        return len(bytearray(1 << 30))\n"
+    "    return 'answered'\n"
+)
+
+# a case that spawns without bound, and a case after it that asks for nothing
+PROCESSES = (
     "import os, time\n"
     "\n"
     "\n"
     "def solve(probe):\n"
-    "    if probe == 'memory':\n"
-    "        return len(bytearray(1 << 30))\n"
     "    if probe == 'processes':\n"
     "        try:\n"
     "            for _ in range(200):\n"
@@ -100,17 +105,30 @@ def test_the_container_holds_the_confinement_its_flags_claim(sandbox: TestClient
     assert values == [65534, "refused", "refused"]
 
 
-def test_a_case_past_the_memory_or_process_limit_fails_alone(sandbox: TestClient):
-    """The container's limits refuse a case that exhausts memory or spawns
-    without bound, and the next case still answers."""
-    run = {"code": LIMITS, "args": [["memory"], ["processes"], ["after"]], "cap_ms": 10_000}
+def test_a_case_that_exhausts_memory_fails_alone(sandbox: TestClient):
+    """A case's child holds an address-space limit under the container's
+    memory, so the case raises where the host would kill the container and
+    every later case with it."""
+    run = {"code": MEMORY, "args": [["memory"], ["after"]], "cap_ms": 10_000}
 
     response = sandbox.post("/run", json=run)
 
     assert response.status_code == 200, response.text
-    memory, processes, after = response.json()["cases"]
-    assert memory["outcome"] == "crashed"
-    assert json.loads(processes["value"]) == "refused"
+    hog, after = response.json()["cases"]
+    assert hog["outcome"] == "crashed"
+    assert json.loads(after["value"]) == "answered"
+
+
+def test_a_case_that_spawns_without_bound_fails_alone(sandbox: TestClient):
+    """The process limit refuses the fork, and the container's init reaps what
+    the case orphaned, so the next case still forks a child of its own."""
+    run = {"code": PROCESSES, "args": [["processes"], ["after"]], "cap_ms": 10_000}
+
+    response = sandbox.post("/run", json=run)
+
+    assert response.status_code == 200, response.text
+    spawning, after = response.json()["cases"]
+    assert json.loads(spawning["value"]) == "refused"
     assert json.loads(after["value"]) == "answered"
 
 

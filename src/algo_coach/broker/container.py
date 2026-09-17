@@ -56,6 +56,10 @@ FLAGS = (
     MEMORY,
     "--pids-limit",
     PROCESSES,
+    # an init as the container's first process, which reaps what a solution
+    # orphaned. A zombie counts against the process limit, and the entry
+    # process reaps only the children it forked itself
+    "--init",
 )
 
 # a case's result line: a value within the 1 MiB ceiling, encoded once more

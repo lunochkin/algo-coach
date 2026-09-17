@@ -133,7 +133,14 @@ def _answered(body: Run, execute: Execute, stop: Stop) -> Ran:
     # solution, so it is raised and never answered as a verdict
     if done.how == "overflowed" or done.returncode != 0:
         stderr = done.stderr.decode(errors="replace")[-2000:]
-        raise HTTPException(500, f"the run's container exited {done.returncode}: {stderr}")
+        # the count too: a container that died mid-run says nothing about which
+        # case ended it, and its own streams are the solution's
+        reported = len(done.stdout.splitlines())
+        raise HTTPException(
+            500,
+            f"the run's container exited {done.returncode} "
+            f"after {reported} of {wanted} cases: {stderr}",
+        )
     cases = _cases(done.stdout.splitlines(), body)
     if not body.stop_early and len(cases) < wanted:
         raise HTTPException(500, f"the entry process reported {len(cases)} of {wanted} cases")
