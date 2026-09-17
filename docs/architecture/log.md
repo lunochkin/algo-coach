@@ -81,6 +81,28 @@ between.
   `time_to_solve_sec`.
 - **The loop decides what starts and ends a pause**, not the record. A button,
   a hidden tab and an idle timer each leave the same interval.
+- **A sitting records when it was last touched**, as `last_active_at`. Serving
+  the sitting, a submission, a pause and a resume each set it. The record then
+  says when practice stopped, without a reader joining the attempt log to it.
+- **A sitting idle longer than 45 minutes is ended at its `last_active_at`.**
+  Two of the first seven sittings were left running, and serving that problem
+  again reached the old clock, which reports the hours away as time to solve.
+  An open pause is closed at the same moment, so an ended sitting holds no open
+  pause.
+- **The ending happens where the sitting is next read**, and nothing runs in
+  the background. An abandoned sitting therefore stays running in the store
+  until someone serves, reads or lists it. The elapsed time it reports is the
+  same whenever that happens, since the end is `last_active_at` rather than
+  the moment of reading.
+- **Serving the problem again mints a new sitting** once the idle one is
+  ended, so the clock the solver sees starts at zero.
+- **Pressing End does not touch `last_active_at`.** A sitting the user ended
+  therefore carries an `ended_at` later than its last activity, and one the
+  bound ended carries the two equal. No field states which happened, and the
+  two timestamps say it.
+- **The bound counts idleness, not elapsed time.** A solver thinking for an
+  hour with the page open is practising, and the loop keeps that sitting
+  touched. `flows.md` gives the loop's own steps, a hidden page among them.
 
 ## Attempts
 
