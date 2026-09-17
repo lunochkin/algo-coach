@@ -192,8 +192,8 @@ Every page under a section carries the same two rows above its body.
 ```
 
 - The two columns stack, the statement above the editor.
-- The sitting is designed for a keyboard and a wide window, and the stack is
-  what a narrow window gets rather than a layout drawn for it.
+- The sitting is designed for a keyboard and a wide window. The stack keeps a
+  narrow window readable, and no layout is drawn for one.
 
 ## The claim
 
