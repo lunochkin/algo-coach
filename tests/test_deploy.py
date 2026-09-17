@@ -6,6 +6,8 @@ from typing import Any
 
 import pytest
 
+from algo_coach.broker.__main__ import PORT
+
 DEPLOY = Path(__file__).parent.parent / "deploy"
 SOCKET = "/var/run/docker.sock"
 BROKER_NETWORK = "api-broker"
@@ -62,3 +64,11 @@ def test_the_broker_s_network_leads_nowhere_outside(resolved: dict[str, Any]):
     """The broker reaches Docker through the socket and pulls nothing, so a
     route out would serve only an attacker holding the broker."""
     assert resolved["networks"][BROKER_NETWORK]["internal"] is True
+
+
+def test_the_api_runs_a_submission_through_the_broker(resolved: dict[str, Any]):
+    """Without the broker named, a sitting runs in the API's own subprocess,
+    outside the sandbox."""
+    environment = resolved["services"]["api"]["environment"]
+
+    assert environment["ALGO_COACH_BROKER"] == f"http://broker:{PORT}"

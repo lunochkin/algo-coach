@@ -53,6 +53,9 @@ services:
       # the server's loopback address alone, and whatever fronts the pages
       # routes `/api` here
       - "127.0.0.1:8000:8000"
+    # a submission runs in the broker's container rather than in this one
+    environment:
+      ALGO_COACH_BROKER: http://broker:8001
     # default for Postgres, Caddy and the sign-in providers, and api-broker for
     # the one service nothing else reaches
     networks: [default, api-broker]
