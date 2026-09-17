@@ -353,6 +353,11 @@ times. Each record class is specified in one of the files beside it.
     limit, so a case that exhausts memory raises inside that child and fails
     alone. Under the container's limit alone the host kills the whole
     container, which leaves every later case of the run unanswered.
+  - Each case's child holds a process limit under the container's, for the same
+    reason. gVisor backs every process a case starts with a host process, so a
+    case reaching the container's limit ends the sandbox itself. The process
+    limit counts every process of a user, so the entry process sets it only
+    where the broker marks the container as the run's alone.
   - gVisor mounts a tmpfs over `/tmp` inside the container, so a solution
     writes there however read-only the root filesystem is. That tmpfs is
     removed with the container, and what it holds counts against the

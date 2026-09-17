@@ -150,8 +150,9 @@ def test_the_container_runs_the_entry_process_s_script_whole():
         ["--security-opt", "no-new-privileges"],
         ["--memory", "512m"],
         ["--memory-swap", "512m"],
-        ["--pids-limit", "64"],
+        ["--pids-limit", "256"],
         ["--init"],
+        ["--env", "ALGO_COACH_SANDBOX=1"],
     ],
 )
 def test_the_container_starts_confined(flag):

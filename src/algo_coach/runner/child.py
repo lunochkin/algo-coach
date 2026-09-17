@@ -34,6 +34,15 @@ SLACK_MS = 2000
 # alone has the host kill the container and every later case with it
 CASE_MEMORY_BYTES = 320 << 20
 
+# a case's own processes, under the container's process limit, for the same
+# reason: gVisor backs each process a case starts with a host process, so a
+# case reaching the container's limit ends the sandbox itself
+CASE_PROCESSES = 32
+
+# set on a run's container by the broker. The process limit counts every
+# process of a user, so it holds only where that user owns the run alone
+SANDBOX = "ALGO_COACH_SANDBOX"
+
 
 class Expired(Exception):
     """Its own exception, so a solution catching `Exception` cannot swallow the
@@ -156,7 +165,7 @@ def forked(code: str, args: list[Any], cap_ms: int, repeats: int) -> dict[str, A
         try:
             os.close(read)
             _isolate()
-            _limit_memory()
+            _limit()
             result = execute(code, args, cap_ms, repeats)
             with os.fdopen(write, "w") as channel:
                 channel.write(json.dumps(result) + "\n")
@@ -186,11 +195,15 @@ def forked(code: str, args: list[Any], cap_ms: int, repeats: int) -> dict[str, A
     raise RuntimeError(f"the child wrote no result and exited {exitcode}")
 
 
-def _limit_memory() -> None:
-    # suppressed where the platform refuses the limit, which leaves the
-    # container's own limit as it was
-    with contextlib.suppress(OSError, ValueError):
-        resource.setrlimit(resource.RLIMIT_AS, (CASE_MEMORY_BYTES, CASE_MEMORY_BYTES))
+def _limit() -> None:
+    limits = [(resource.RLIMIT_AS, CASE_MEMORY_BYTES)]
+    if os.environ.get(SANDBOX):
+        limits.append((resource.RLIMIT_NPROC, CASE_PROCESSES))
+    # suppressed where the platform refuses a limit, which leaves the
+    # container's own limits as they were
+    for kind, most in limits:
+        with contextlib.suppress(OSError, ValueError):
+            resource.setrlimit(kind, (most, most))
 
 
 def _line(fd: int, deadline: float) -> bytes | None:

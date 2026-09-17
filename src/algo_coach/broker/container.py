@@ -34,8 +34,10 @@ USER = "65534:65534"
 # the whole container: the entry process, a case's child and gVisor's own share.
 # Swap equal to it, so a run past the limit is refused rather than paged out
 MEMORY = "512m"
-# the entry process, a case's child, and whatever the solution starts
-PROCESSES = "64"
+# every process of the container, gVisor's own among them, since gVisor backs
+# each process a case starts with a host process. A backstop above the limit
+# `child.py` sets on each case, because reaching this one ends the sandbox
+PROCESSES = "256"
 # docker's options, so they sit before the image: after it they would be
 # arguments to `python`
 FLAGS = (
@@ -60,6 +62,10 @@ FLAGS = (
     # orphaned. A zombie counts against the process limit, and the entry
     # process reaps only the children it forked itself
     "--init",
+    # tells the entry process that its user owns this run alone, so the process
+    # limit it sets on each case counts the run's processes and nothing else
+    "--env",
+    "ALGO_COACH_SANDBOX=1",
 )
 
 # a case's result line: a value within the 1 MiB ceiling, encoded once more
