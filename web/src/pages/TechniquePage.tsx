@@ -47,7 +47,9 @@ export function TechniquePage() {
                   <TableRow key={row.problem_id}>
                     <TableCell>
                       <Button variant="link" className="px-0" asChild>
-                        <Link to={`problems/${encodeURIComponent(row.problem_id)}`}>
+                        <Link
+                          to={`/problems/${encodeURIComponent(row.problem_id)}?technique=${encodeURIComponent(technique)}`}
+                        >
                           {row.title}
                         </Link>
                       </Button>

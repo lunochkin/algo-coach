@@ -41,7 +41,7 @@ costs least before Phase 12 adds its own.
       header a page carries with its way back
 - [x] Rebuild the Practice pages on the design system: the board, a technique's
       candidates, and the picked problem
-- [ ] Move the picked problem to `/problems/:problem_id`, with `?technique=`
+- [x] Move the picked problem to `/problems/:problem_id`, with `?technique=`
       naming where the pick came from. Phase 12 opens the same problem as a rung
       of a card's ladder, which no path under a technique can name
 - [ ] Serve `GET /api/problems/{problem_id}`: the title, the difficulty, the
