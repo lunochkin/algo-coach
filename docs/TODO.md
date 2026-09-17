@@ -180,7 +180,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Fork one throwaway child running a trivial `solve` before a run's first
       case, and add a test that no result line reports it. The first case after
       a container boots otherwise runs cold under gVisor
-- [ ] Run every problem's canonical through the broker on the server at the
+- [x] Run every problem's canonical through the broker on the server at the
       drill cap, and write down which cases it no longer finishes within a tenth
       of the cap. A CPU limit and a slower system call both move the separating
       sizes the local subprocess found
