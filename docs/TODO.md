@@ -195,9 +195,10 @@ backend for our own generated code, which is not a threat model.
 - [x] Store `last_active_at` on a sitting, set it where the loop acts, and end
       a sitting idle past the bound at that moment when it is next read.
       `log.md` gives the rule and why the end is read-time
-- [ ] Keep a visible sitting touched from the page, and pause it where the page
-      is hidden. A solver thinking past the bound is practising, and an
-      untouched sitting would be ended mid-thought
+- [x] Keep a visible sitting touched from the page. A solver thinking past the
+      bound is practising, and an untouched sitting would be ended mid-thought.
+      A hidden page touches nothing, so the bound ends that sitting where the
+      page was left
 
 ### Exit
 - [ ] Complete a sitting on the deployed engine, signed in as an invited user,
@@ -227,6 +228,9 @@ costs least before Phase 12 adds its own.
       sitting and the login
 - [ ] Send a refused sign-in back to the login page with its reason. The
       callback is a navigation, and it answers a refusal with raw JSON today
+- [ ] Pause a sitting where its page is hidden and resume it where the page
+      returns, leaving a sitting the user paused alone. The clock counts the
+      time on the problem, and a hidden page is time away from it
 
 ### Flows planned
 

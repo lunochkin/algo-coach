@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { api, type Sitting, type Submitted } from '@/api/client'
@@ -56,6 +56,32 @@ export function SittingPage() {
     null,
   )
   const [moving, setMoving] = useState(false)
+
+  // the engine ends a sitting nothing has touched, and a solver thinking is
+  // practising, so a visible page reads the sitting again and that read
+  // touches it. A hidden page touches nothing, and the bound then ends the
+  // sitting where the page was left
+  useEffect(() => {
+    const tick = setInterval(
+      () => {
+        if (document.hidden) return
+        void api
+          .GET('/api/sittings/{sitting_id}', { params: { path: { sitting_id: sittingId } } })
+          .then(({ data }) => {
+            if (data) {
+              setMoved({
+                sitting: data.sitting,
+                elapsedSec: data.elapsed_sec,
+                at: performance.now(),
+              })
+            }
+          })
+      },
+      // well under the 45 minutes an untouched sitting is ended at
+      10 * 60 * 1000,
+    )
+    return () => clearInterval(tick)
+  }, [sittingId])
 
   if (error) return <p className="text-destructive">The sitting did not load: {error}</p>
   if (!served) return <p className="text-muted-foreground">Loading the sitting…</p>
