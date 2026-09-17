@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import { api, PRIVACY, type Provider } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
@@ -7,12 +7,27 @@ import { Button } from '@/components/ui/button'
 
 const NAMES: Record<Provider, string> = { google: 'Google', github: 'GitHub' }
 
+// the codes `Refusal` in `api/signin.py` sends back, as sentences. The code
+// carries no address, so a refusal names none
+const REFUSALS: Record<string, string> = {
+  incomplete: 'That sign-in did not complete. Try again.',
+  'no-email': 'That account has no verified email address, which signs nobody in.',
+  uninvited: 'That address has no invitation.',
+}
+
 export function LoginPage() {
   const offered = useLoaded((signal) => api.GET('/api/sign-in', { signal }), 'sign-in')
+  const [search] = useSearchParams()
+  const refused = search.get('refused')
 
   return (
     <section className="mx-auto max-w-form space-y-stack pt-16">
       <h1 className="text-title font-semibold">Sign in to algo-coach</h1>
+      {refused !== null && (
+        <p className="text-destructive">
+          {REFUSALS[refused] ?? 'That sign-in did not complete. Try again.'}
+        </p>
+      )}
       <Loaded
         of="the sign-in"
         state={offered}

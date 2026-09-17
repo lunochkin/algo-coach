@@ -46,6 +46,17 @@ def redirected(client: TestClient, provider: Provider) -> dict[str, str]:
     }
 
 
+def refusal(response) -> str | None:
+    """The code the login page is sent back with, or `None` where the answer
+    was no refusal."""
+    if response.status_code != 303:
+        return None
+    location = urlsplit(response.headers["location"])
+    if location.path != "/login":
+        return None
+    return parse_qs(location.query).get("refused", [None])[0]
+
+
 def session_cookie(response) -> str | None:
     """The `Set-Cookie` header setting the session, whole."""
     headers = response.headers.get_list("set-cookie")
@@ -106,15 +117,13 @@ def test_a_callback_no_sign_in_started_signs_nobody_in():
     request the state exists to refuse."""
     response = browser(Database()).get("/api/auth/github/callback?code=abc&state=forged")
 
-    assert response.status_code == 400
-    assert "mismatching_state" in response.json()["detail"]
+    assert refusal(response) == "incomplete"
 
 
 def test_a_refused_consent_signs_nobody_in():
     response = browser(Database()).get("/api/auth/google/callback?error=access_denied")
 
-    assert response.status_code == 400
-    assert "access_denied" in response.json()["detail"]
+    assert refusal(response) == "incomplete"
 
 
 def google_returns(monkeypatch, client, **claims):
@@ -201,8 +210,7 @@ def test_an_id_token_issued_to_another_sign_in_signs_nobody_in(database, monkeyp
 
     response = client.get(f"/api/auth/google/callback?code=abc&state={sent['state']}")
 
-    assert response.status_code == 400
-    assert "nonce" in response.json()["detail"]
+    assert refusal(response) == "incomplete"
     assert linked(database) == []
 
 
@@ -215,7 +223,7 @@ def test_an_unverified_google_email_signs_nobody_in(database, monkeypatch):
 
     response = client.get(f"/api/auth/google/callback?code=abc&state={sent['state']}")
 
-    assert response.status_code == 403
+    assert refusal(response) == "no-email"
     assert linked(database) == []
     assert session_cookie(response) is None
     assert opened_sessions(database) == []
@@ -231,8 +239,7 @@ def test_an_uninvited_email_signs_nobody_in_and_leaves_no_user(database, monkeyp
 
     response = client.get(f"/api/auth/google/callback?code=abc&state={sent['state']}")
 
-    assert response.status_code == 403
-    assert "no invitation" in response.json()["detail"]
+    assert refusal(response) == "uninvited"
     assert linked(database) == []
     assert opened_sessions(database) == []
     assert session_cookie(response) is None
@@ -296,7 +303,7 @@ def test_an_unverified_github_primary_email_signs_nobody_in(database, monkeypatc
 
     response = client.get(f"/api/auth/github/callback?code=abc&state={started['state']}")
 
-    assert response.status_code == 403
+    assert refusal(response) == "no-email"
     assert linked(database) == []
 
 

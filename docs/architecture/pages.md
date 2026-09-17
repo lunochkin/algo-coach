@@ -47,6 +47,11 @@ those steps at low fidelity.
 
 - **A page's path names the record the page serves**, so a reload reaches the
   same page. `README.md` gives how the server answers a path naming no file.
+- **A refused sign-in returns to the login page as a code.** The callback is a
+  navigation from the provider's site, so a refusal answers with the page that
+  explains it. `?refused=` carries a code rather than a sentence, since a
+  sentence names the address that was refused and a URL is kept in the
+  browser's history.
 - **A query parameter names where the user came from.** The picked problem is
   `/problems/:problem_id` whichever page offered it, since Phase 12 opens the
   same problem as a rung of a card's ladder. `?technique=` names the technique

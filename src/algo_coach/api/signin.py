@@ -2,8 +2,10 @@
 no password. Authlib runs the round trip and checks the state, the nonce and
 PKCE; this module reads who signed in."""
 
+import logging
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Any, NamedTuple, Protocol, cast
 
 import httpx
@@ -16,6 +18,21 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from algo_coach.api.context import SESSION_COOKIE, Root
 from algo_coach.log import LIFETIME, Provider, invited, opened, signed_in
+
+LOGGER = logging.getLogger(__name__)
+# the page the frontend routes a refusal to
+LOGIN_PAGE = "/login"
+
+
+class Refusal(StrEnum):
+    """Why a sign-in did not complete, as the login page reads it. A code
+    rather than a sentence: a sentence names the address that was refused, and
+    a URL is kept in the browser's history and in every log it passes."""
+
+    INCOMPLETE = "incomplete"
+    NO_EMAIL = "no-email"
+    UNINVITED = "uninvited"
+
 
 # Google signs its ID tokens under either issuer
 GOOGLE_ISSUERS = ["https://accounts.google.com", "accounts.google.com"]
@@ -131,17 +148,27 @@ async def callback(provider: Provider, request: Request, root: Root) -> Redirect
     # a refused consent, a state no redirect stored, or an ID token another
     # sign-in was issued
     except (OAuthError, JoseError) as error:
-        raise HTTPException(400, f"sign-in did not complete: {error}") from None
+        # the browser is sent back to the login, so the reason is readable
+        # nowhere else
+        LOGGER.warning("sign-in through %s did not complete: %s", provider, error)
+        return refused(Refusal.INCOMPLETE)
     if account.email is None:
-        raise HTTPException(403, f"the {provider} account has no verified email")
+        return refused(Refusal.NO_EMAIL)
     # before anything is stored: an uninvited account leaves no user behind
     if not await run_in_threadpool(invited, root, account.email):
-        raise HTTPException(403, f"{account.email} has no invitation")
+        return refused(Refusal.UNINVITED)
     user_id = await run_in_threadpool(
         signed_in, root, provider, account.provider_user_id, account.email
     )
     token = await run_in_threadpool(opened, root, user_id)
     return session_redirect(token, secure=request.app.state.origin.startswith("https://"))
+
+
+# the callback is a navigation from the provider's site, so a refusal answers
+# with the page that explains it rather than a record of it
+def refused(reason: Refusal) -> RedirectResponse:
+    """Back to the login page, which says what the code means."""
+    return RedirectResponse(f"{LOGIN_PAGE}?refused={reason}", status_code=303)
 
 
 def session_redirect(token: str, *, secure: bool) -> RedirectResponse:
