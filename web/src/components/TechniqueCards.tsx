@@ -15,7 +15,7 @@ export function TechniqueCards({ technique }: { technique: string }) {
   if (!cards || cards.length === 0) return null
 
   return (
-    <p className="text-sm text-muted-foreground">
+    <p className="text-meta text-muted-foreground">
       {cards.length === 1 ? 'Card' : 'Cards'}:{' '}
       {cards.map((card, index) => (
         <span key={card.slug}>

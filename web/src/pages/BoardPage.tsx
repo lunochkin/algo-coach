@@ -19,7 +19,7 @@ export function BoardPage() {
   const board = useLoaded((signal) => api.GET('/api/board', { signal }), 'board')
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-section">
       <PageHeader title="Pick a technique" />
       <Loaded
         of="the board"
@@ -28,7 +28,7 @@ export function BoardPage() {
         blankWhen={(one) => one.rows.length === 0}
       >
         {(board) => (
-          <div className="space-y-4">
+          <div className="space-y-stack">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -57,14 +57,15 @@ export function BoardPage() {
                 ))}
               </TableBody>
             </Table>
-            {board.ungrouped > 0 && (
+            {/* the attempts no row holds, on one line under the table */}
+            {(board.ungrouped > 0 || board.excluded > 0) && (
               <p className="text-meta text-muted-foreground">
-                {board.ungrouped} attempt(s) grouped nowhere: no technique resolved
-              </p>
-            )}
-            {board.excluded > 0 && (
-              <p className="text-meta text-muted-foreground">
-                {board.excluded} attempt(s) on a defective problem, not counted
+                {[
+                  board.ungrouped > 0 && `${board.ungrouped} attempt(s) grouped nowhere`,
+                  board.excluded > 0 && `${board.excluded} on a defective problem`,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
               </p>
             )}
           </div>

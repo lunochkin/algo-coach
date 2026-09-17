@@ -39,7 +39,7 @@ costs least before Phase 12 adds its own.
 
 - [x] Rebuild the app shell: the two sections, the marked section, and the
       header a page carries with its way back
-- [ ] Rebuild the Practice pages on the design system: the board, a technique's
+- [x] Rebuild the Practice pages on the design system: the board, a technique's
       candidates, and the picked problem
 - [ ] Move the picked problem to `/problems/:problem_id`, with `?technique=`
       naming where the pick came from. Phase 12 opens the same problem as a rung

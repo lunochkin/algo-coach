@@ -21,21 +21,17 @@ export function TechniquePage() {
   const rows = useLoaded((signal) => candidates(technique, signal), `candidates:${technique}`)
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-section">
       <PageHeader
         back={{ to: '/', label: 'Board' }}
         title={technique}
         note={<TechniqueCards technique={technique} />}
       />
-      <Loaded
-        of="the candidates"
-        state={rows}
-        blank="No served problem carries this technique."
-      >
+      <Loaded of="the candidates" state={rows} blank="No served problem carries this technique.">
         {(rows) => (
-          <>
+          <div className="space-y-stack">
             {/* no statement in the list: the clock starts when it is served */}
-            <h2 className="text-lg font-medium">Pick a problem</h2>
+            <h2 className="text-heading font-medium">Pick a problem</h2>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -66,7 +62,7 @@ export function TechniquePage() {
                 ))}
               </TableBody>
             </Table>
-          </>
+          </div>
         )}
       </Loaded>
     </section>
