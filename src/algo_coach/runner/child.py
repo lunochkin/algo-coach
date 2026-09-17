@@ -125,12 +125,19 @@ def _isolate() -> None:
         os.dup2(silent, stream)
 
 
+# run once before a run's first case and thrown away: the first case after a
+# container boots otherwise runs on pages and caches gVisor has not yet touched
+WARM_UP = "def solve():\n    return 0\n"
+
+
 def main() -> None:
     """A whole run from standard input, one result line per case on standard
     output."""
     request = json.loads(sys.stdin.read())
     cases: list[list[Any]] = request["args"]
     counts: list[int] = request.get("repeats") or [1] * len(cases)
+    if cases:
+        forked(WARM_UP, [], request["cap_ms"], 1)
     for args, repeats in zip(cases, counts, strict=True):
         result = forked(request["code"], args, request["cap_ms"], repeats)
         sys.stdout.write(json.dumps(result) + "\n")

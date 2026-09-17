@@ -177,7 +177,7 @@ backend for our own generated code, which is not a threat model.
       `ALGO_COACH_BROKER` names one, and a test that its request carries no
       expected value. The local subprocess runs a submission everywhere else,
       and `corpus.md` keeps the comparison above the boundary
-- [ ] Fork one throwaway child running a trivial `solve` before a run's first
+- [x] Fork one throwaway child running a trivial `solve` before a run's first
       case, and add a test that no result line reports it. The first case after
       a container boots otherwise runs cold under gVisor
 - [ ] Run every problem's canonical through the broker on the server at the
