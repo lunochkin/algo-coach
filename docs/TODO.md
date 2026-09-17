@@ -201,7 +201,7 @@ backend for our own generated code, which is not a threat model.
       page was left
 
 ### Exit
-- [ ] Complete a sitting on the deployed engine, signed in as an invited user,
+- [x] Complete a sitting on the deployed engine, signed in as an invited user,
       from the board to the claim
 ## Phase 10 — the pages designed
 
