@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/problems/{problem_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Picked */
+        get: operations["picked_api_problems__problem_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/problems/{problem_id}/sittings": {
         parameters: {
             query?: never;
@@ -488,6 +505,26 @@ export interface components {
             until?: string | null;
         };
         /**
+         * Picked
+         * @description The problem a user picked, before its statement is served. The statement
+         *     is left out, as a candidate's is.
+         */
+        Picked: {
+            /** Problem Id */
+            problem_id: string;
+            /** Title */
+            title: string;
+            difficulty: components["schemas"]["ProblemDifficulty"] | null;
+            /** Techniques */
+            techniques: string[];
+            /** Attempt Count */
+            attempt_count: number;
+            /** Solved Count */
+            solved_count: number;
+            /** Last Attempt At */
+            last_attempt_at: string | null;
+        };
+        /**
          * ProblemDifficulty
          * @enum {string}
          */
@@ -781,6 +818,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Candidate"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    picked_api_problems__problem_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                problem_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Picked"];
                 };
             };
             /** @description Validation Error */

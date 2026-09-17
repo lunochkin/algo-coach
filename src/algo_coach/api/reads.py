@@ -1,5 +1,5 @@
 """The routes the drill loop reads: the board, the cards, a technique's
-candidates, and a sitting's statement."""
+candidates, one picked problem, and a sitting's statement."""
 
 from datetime import datetime
 
@@ -13,6 +13,7 @@ from algo_coach.board import (
     candidates,
     excluded,
     per_technique,
+    problem_row,
     stalest_first,
     ungrouped,
 )
@@ -21,7 +22,7 @@ from algo_coach.log import AttemptLog, SittingStore, latest_by_attempt
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Card, ProblemDifficulty
 from algo_coach.sitting import Served, get, serve
-from algo_coach.solution_claims import load_problems
+from algo_coach.solution_claims import load_problem, load_problems
 
 router = APIRouter()
 
@@ -39,6 +40,19 @@ class Candidate(BaseModel):
     problem_id: str
     title: str
     difficulty: ProblemDifficulty | None
+    attempt_count: int
+    solved_count: int
+    last_attempt_at: datetime | None
+
+
+class Picked(BaseModel):
+    """The problem a user picked, before its statement is served. The statement
+    is left out, as a candidate's is."""
+
+    problem_id: str
+    title: str
+    difficulty: ProblemDifficulty | None
+    techniques: list[str]
     attempt_count: int
     solved_count: int
     last_attempt_at: datetime | None
@@ -92,6 +106,30 @@ def offered(root: Root, user_id: UserId, technique: str) -> list[Candidate]:
         )
         for row in rows
     ]
+
+
+# by id alone: a rung of a card's ladder reaches the same problem, and no path
+# under a technique names that
+@router.get("/problems/{problem_id}")
+def picked(root: Root, user_id: UserId, problem_id: str) -> Picked:
+    problem = load_problem(root, problem_id)
+    if problem is None or not problem.served:
+        raise HTTPException(status_code=404, detail=f"no problem {problem_id}")
+    attempts = [
+        attempt
+        for attempt in AttemptLog(root).attempts(user_id)
+        if attempt.problem_id == problem_id
+    ]
+    row = problem_row(problem, attempts)
+    return Picked(
+        problem_id=problem.id,
+        title=problem.title,
+        difficulty=problem.difficulty,
+        techniques=problem.techniques,
+        attempt_count=row.attempt_count,
+        solved_count=row.solved_count,
+        last_attempt_at=row.last_attempt_at,
+    )
 
 
 # a write, though the loop reads the statement through it: serving mints the

@@ -141,6 +141,39 @@ def test_the_candidates_count_the_user_s_own_attempts_alone(client, database):
     assert [row["attempt_count"] for row in rows] == [1]
 
 
+def test_a_picked_problem_is_read_by_its_id_alone(client):
+    """A rung of a card's ladder reaches the same problem, so no technique
+    names the path."""
+    picked = client.get("/api/problems/p-greedy").json()
+
+    assert (picked["title"], picked["techniques"]) == ("p-greedy", ["greedy", "sorting"])
+    assert "statement" not in picked
+
+
+def test_a_picked_problem_counts_the_user_s_own_attempts_alone(client, database):
+    attempted(database, "a1")
+    attempted(database, "a2", user_id="u-b71e03")
+    attempted(database, "a3", problem_id="p-sorting")
+
+    picked = client.get("/api/problems/p-greedy").json()
+
+    assert (picked["attempt_count"], picked["solved_count"]) == (1, 1)
+
+
+def test_an_unknown_problem_is_not_found(client):
+    response = client.get("/api/problems/nope")
+
+    assert (response.status_code, response.json()) == (404, {"detail": "no problem nope"})
+
+
+def test_a_retired_problem_is_not_picked(client, database):
+    """A defective problem was never a fair test, so the page it would open
+    offers nothing to sit."""
+    ProblemStore(database).retire("p-greedy", RetirementReason.DEFECTIVE)
+
+    assert client.get("/api/problems/p-greedy").status_code == 404
+
+
 def test_serving_the_statement_stores_the_sitting_for_the_user(client):
     """Serving writes the sitting, so the route is a POST though the loop reads
     the statement through it."""

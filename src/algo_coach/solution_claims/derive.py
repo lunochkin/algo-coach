@@ -45,6 +45,21 @@ def with_techniques(
     return [problem.model_copy(update={"techniques": derived[problem.id]}) for problem in problems]
 
 
+def load_problem(root: Database, problem_id: str) -> Problem | None:
+    """One stored problem carrying the view, read without the rest of the
+    corpus. `None` where the store holds no such problem."""
+    problem = ProblemStore(root).get(problem_id)
+    if problem is None:
+        return None
+    solutions = SolutionLog(root).for_problem(problem_id)
+    claims = [
+        claim
+        for solution in solutions
+        for claim in SolutionClaimLog(root).for_solution(solution.id)
+    ]
+    return with_techniques([problem], solutions, claims)[0]
+
+
 def load_problems(root: Database) -> list[Problem]:
     """Every stored problem carrying the view. The store alone returns the
     record, whose `techniques` is empty on every generated problem."""

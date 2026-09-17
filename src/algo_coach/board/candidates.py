@@ -33,14 +33,16 @@ def candidates(
         by_problem[attempt.problem_id].append(attempt)
 
     rows = [
-        _row(problem, by_problem[problem.id])
+        problem_row(problem, by_problem[problem.id])
         for problem in problems
         if problem.served and technique in problem.techniques
     ]
     return sorted(rows, key=_staleness)
 
 
-def _row(problem: Problem, attempts: list[Attempt]) -> ProblemRow:
+def problem_row(problem: Problem, attempts: Iterable[Attempt]) -> ProblemRow:
+    """One problem with the history behind it, as a candidates row carries."""
+    attempts = list(attempts)
     return ProblemRow(
         problem=problem,
         attempt_count=len(attempts),

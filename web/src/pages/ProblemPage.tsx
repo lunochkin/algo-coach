@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 
-import { api, type Candidate, candidates } from '@/api/client'
+import { api, type Picked } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
@@ -16,18 +16,16 @@ export function ProblemPage() {
   const [search] = useSearchParams()
   const technique = search.get('technique')
   const navigate = useNavigate()
-  // read through the technique the pick came from until the engine serves one
-  // problem by its id
-  const rows = useLoaded(
+  const picked = useLoaded(
     (signal) =>
-      technique === null
-        ? Promise.resolve({ data: [] as Candidate[] })
-        : candidates(technique, signal),
-    technique === null ? 'no-technique' : `candidates:${technique}`,
+      api.GET('/api/problems/{problem_id}', {
+        params: { path: { problem_id: problemId } },
+        signal,
+      }),
+    `problem:${problemId}`,
   )
   const [starting, setStarting] = useState(false)
   const [refused, setRefused] = useState<string | null>(null)
-  const picked = rows.data?.find((row) => row.problem_id === problemId)
 
   // the clock starts on this press, so a card read before it stays off the
   // clock. A sitting already running on the problem is reached, not restarted
@@ -55,37 +53,30 @@ export function ProblemPage() {
             ? { to: '/', label: 'Board' }
             : { to: `/techniques/${encodeURIComponent(technique)}`, label: technique }
         }
-        title={picked?.title ?? 'The problem'}
-        note={picked && standing(picked)}
+        title={picked.data?.title ?? 'The problem'}
+        note={picked.data && standing(picked.data)}
       />
-      {technique === null ? (
-        <p className="text-meta text-muted-foreground">
-          Pick this problem from a technique: the engine serves no problem by its id yet.
-        </p>
-      ) : (
-        <Loaded
-          of="the problem"
-          state={rows}
-          blank={`This problem is not a candidate for ${technique}.`}
-          blankWhen={(rows) => !rows.some((row) => row.problem_id === problemId)}
-        >
-          {() => (
-            <div className="space-y-stack">
-              <TechniqueCards technique={technique} />
-              {/* the one act this page asks for */}
-              <div>
-                <Button onClick={start} disabled={starting}>
-                  {starting ? 'Starting…' : 'Start the sitting'}
-                </Button>
-              </div>
-              <p className="text-meta text-muted-foreground">
-                The statement is served on that press, and the clock starts with it.
-              </p>
-              {refused && <p className="text-destructive">The sitting did not start: {refused}</p>}
+      <Loaded of="the problem" state={picked}>
+        {(picked) => (
+          <div className="space-y-stack">
+            {/* the cards of the technique the pick came from, and of the
+                problem's own techniques where it came from nowhere */}
+            {(technique === null ? picked.techniques : [technique]).map((one) => (
+              <TechniqueCards key={one} technique={one} />
+            ))}
+            {/* the one act this page asks for */}
+            <div>
+              <Button onClick={start} disabled={starting}>
+                {starting ? 'Starting…' : 'Start the sitting'}
+              </Button>
             </div>
-          )}
-        </Loaded>
-      )}
+            <p className="text-meta text-muted-foreground">
+              The statement is served on that press, and the clock starts with it.
+            </p>
+            {refused && <p className="text-destructive">The sitting did not start: {refused}</p>}
+          </div>
+        )}
+      </Loaded>
     </section>
   )
 }
@@ -96,8 +87,8 @@ function sittingPath(sittingId: string, technique: string | null): string {
   return technique === null ? path : `${path}?technique=${encodeURIComponent(technique)}`
 }
 
-// what the user has done on this problem, as the candidates list reports it
-function standing(picked: Candidate): string {
+// what the user has done on this problem
+function standing(picked: Picked): string {
   return [
     picked.difficulty ?? 'no difficulty',
     `${picked.attempt_count} attempt(s), ${share(picked.solved_count, picked.attempt_count)} solved`,

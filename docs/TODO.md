@@ -44,7 +44,7 @@ costs least before Phase 12 adds its own.
 - [x] Move the picked problem to `/problems/:problem_id`, with `?technique=`
       naming where the pick came from. Phase 12 opens the same problem as a rung
       of a card's ladder, which no path under a technique can name
-- [ ] Serve `GET /api/problems/{problem_id}`: the title, the difficulty, the
+- [x] Serve `GET /api/problems/{problem_id}`: the title, the difficulty, the
       problem's techniques and the user's counts on it, without the statement.
       The page then reads its own record rather than a technique's candidates
 - [ ] Rebuild the Cards pages: the card list, and one card with its templates
