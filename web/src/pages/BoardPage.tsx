@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
+import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -19,7 +20,7 @@ export function BoardPage() {
 
   return (
     <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">Pick a technique</h1>
+      <PageHeader title="Pick a technique" />
       <Loaded
         of="the board"
         state={board}

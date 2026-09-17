@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import { api, candidates } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
+import { PageHeader } from '@/components/PageHeader'
 import { TechniqueCards } from '@/components/TechniqueCards'
 import { Button } from '@/components/ui/button'
 
@@ -38,9 +39,11 @@ export function ProblemPage() {
 
   return (
     <section className="space-y-4">
-      <Button variant="outline" asChild>
-        <Link to={`/techniques/${encodeURIComponent(technique)}`}>Back to the candidates</Link>
-      </Button>
+      <PageHeader
+        back={{ to: `/techniques/${encodeURIComponent(technique)}`, label: technique }}
+        title={rows.data?.find((row) => row.problem_id === problemId)?.title ?? 'The problem'}
+        note={<TechniqueCards technique={technique} />}
+      />
       <Loaded
         of="the problem"
         state={rows}
@@ -51,8 +54,9 @@ export function ProblemPage() {
           const picked = rows.find((row) => row.problem_id === problemId)
           return (
             <div className="space-y-4">
-              <h1 className="text-2xl font-semibold">{picked?.title}</h1>
-              <TechniqueCards technique={technique} />
+              <p className="text-meta text-muted-foreground">
+                {picked?.difficulty ?? 'no difficulty'} · {picked?.attempt_count} attempt(s)
+              </p>
               <Button onClick={start} disabled={starting}>
                 {starting ? 'Starting…' : 'Start the sitting'}
               </Button>

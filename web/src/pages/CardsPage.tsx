@@ -3,13 +3,14 @@ import { Link } from 'react-router'
 import { api, type Card } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
+import { PageHeader } from '@/components/PageHeader'
 
 export function CardsPage() {
   const cards = useLoaded((signal) => api.GET('/api/cards', { signal }), 'cards')
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">Cards</h1>
+      <PageHeader title="Cards" />
       <Loaded of="the cards" state={cards} blank="No card is seeded yet.">
         {(cards) => (
           <div className="space-y-6">

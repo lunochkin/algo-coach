@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router'
 import { candidates } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
+import { PageHeader } from '@/components/PageHeader'
 import { TechniqueCards } from '@/components/TechniqueCards'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,11 +22,11 @@ export function TechniquePage() {
 
   return (
     <section className="space-y-4">
-      <Button variant="outline" asChild>
-        <Link to="/">Back to the board</Link>
-      </Button>
-      <h1 className="text-2xl font-semibold">{technique}</h1>
-      <TechniqueCards technique={technique} />
+      <PageHeader
+        back={{ to: '/', label: 'Board' }}
+        title={technique}
+        note={<TechniqueCards technique={technique} />}
+      />
       <Loaded
         of="the candidates"
         state={rows}

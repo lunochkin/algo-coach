@@ -37,7 +37,7 @@ costs least before Phase 12 adds its own.
 
 ### The pages rebuilt
 
-- [ ] Rebuild the app shell: the two sections, the marked section, and the
+- [x] Rebuild the app shell: the two sections, the marked section, and the
       header a page carries with its way back
 - [ ] Rebuild the Practice pages on the design system: the board, a technique's
       candidates, and the picked problem

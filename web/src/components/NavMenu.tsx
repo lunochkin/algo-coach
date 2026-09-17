@@ -2,11 +2,20 @@ import { Link, useLocation } from 'react-router'
 
 import { api, LOGIN } from '@/api/client'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
-// a technique and a picked problem are steps down from the board, so the board
-// stays marked while the user is on them
+// the two sections `pages.md` names. A technique, a picked problem and a
+// sitting are steps down from the board, so Practice stays marked on them
 const SECTIONS = [
-  { label: 'Board', to: '/', owns: (path: string) => path === '/' || path.startsWith('/techniques/') },
+  {
+    label: 'Practice',
+    to: '/',
+    owns: (path: string) =>
+      path === '/' ||
+      path.startsWith('/techniques/') ||
+      path.startsWith('/problems/') ||
+      path.startsWith('/sittings/'),
+  },
   { label: 'Cards', to: '/cards', owns: (path: string) => path.startsWith('/cards') },
 ]
 
@@ -16,12 +25,17 @@ async function signOut() {
   window.location.assign(LOGIN)
 }
 
-export function NavMenu() {
+export function NavMenu({ wide }: { wide: boolean }) {
   const { pathname } = useLocation()
 
   return (
     <header className="border-b">
-      <nav className="mx-auto flex max-w-reading items-center gap-1 px-gutter py-2">
+      <nav
+        className={cn(
+          'mx-auto flex items-center gap-1 px-gutter py-2',
+          wide ? 'max-w-wide' : 'max-w-reading',
+        )}
+      >
         <span className="mr-4 font-semibold">algo-coach</span>
         {SECTIONS.map(({ label, to, owns }) => {
           const current = owns(pathname)

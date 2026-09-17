@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { useParams } from 'react-router'
 
 import { api, type Template } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
+import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
@@ -17,16 +18,14 @@ export function CardPage() {
 
   return (
     <article className="space-y-6">
-      <Button variant="outline" asChild>
-        <Link to="/cards">Back to the cards</Link>
-      </Button>
+      <PageHeader
+        back={{ to: '/cards', label: 'Cards' }}
+        title={card.data?.title ?? slug}
+        note={card.data?.technique}
+      />
       <Loaded of="the card" state={card}>
         {(card) => (
           <div className="space-y-6">
-            <header className="space-y-1">
-              <p className="text-meta text-muted-foreground">{card.technique}</p>
-              <h1 className="text-2xl font-semibold">{card.title}</h1>
-            </header>
             <section className="space-y-1">
               <h2 className="text-lg font-medium">When to reach for it</h2>
               <p>{card.trigger}</p>

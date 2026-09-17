@@ -5,6 +5,7 @@ import { CodeEditor } from '@/components/CodeEditor'
 import { ElapsedClock } from '@/components/ElapsedClock'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
+import { PageHeader } from '@/components/PageHeader'
 import { Verdict } from '@/components/Verdict'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -85,10 +86,10 @@ const NOTHING = { retry: () => {} }
 export function GalleryPage() {
   return (
     <div className="space-y-section">
-      <h1 className="text-title font-semibold">The gallery</h1>
-      <p className="text-meta text-muted-foreground">
-        Served in development alone. `pages.md` gives the design system this page shows.
-      </p>
+      <PageHeader
+        title="The gallery"
+        note="Served in development alone. pages.md gives the design system this page shows."
+      />
 
       <Section title="Colour">
         <Swatches names={SURFACES} />

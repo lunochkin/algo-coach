@@ -37,7 +37,7 @@ function App() {
 
   return (
     <>
-      {!signingIn && !readingPolicy && <NavMenu />}
+      {!signingIn && !readingPolicy && <NavMenu wide={wide} />}
       <main className={cn('mx-auto p-gutter', wide ? 'max-w-wide' : 'max-w-reading')}>
         <Suspense fallback={<p className="text-muted-foreground">Loading…</p>}>
           <Routes>

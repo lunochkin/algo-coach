@@ -23,6 +23,9 @@ those steps at low fidelity.
 - **Each page names one way back: the page the user came from.** A rung of a
   ladder is a sitting reached from a card, and the same sitting is reached from
   the board, so the section a page sits in cannot say where the user came from.
+- **The sitting names no way back.** A sitting ends on the End press rather
+  than on leaving the page, so a link reading as the way out would end nothing.
+  The navigation is the way off the page.
 - **The login page and the privacy policy carry no navigation.** The two pages
   open without a session, and every section behind the menu answers 401 to a
   request carrying none.
