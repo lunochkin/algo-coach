@@ -9,14 +9,14 @@ export function CardsPage() {
   const cards = useLoaded((signal) => api.GET('/api/cards', { signal }), 'cards')
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-section">
       <PageHeader title="Cards" />
       <Loaded of="the cards" state={cards} blank="No card is seeded yet.">
         {(cards) => (
-          <div className="space-y-6">
+          <div className="space-y-section">
             {byTechnique(cards).map(([technique, group]) => (
               <div key={technique} className="space-y-2">
-                <h2 className="text-lg font-medium">{technique}</h2>
+                <h2 className="text-heading font-medium">{technique}</h2>
                 <ul className="space-y-1">
                   {group.map((card) => (
                     <li key={card.slug} className="flex items-baseline gap-2">
@@ -27,7 +27,9 @@ export function CardsPage() {
                         {card.title}
                       </Link>
                       <span className="text-meta text-muted-foreground">
-                        {card.templates.length} template(s)
+                        {card.templates.length === 1
+                          ? '1 template'
+                          : `${card.templates.length} templates`}
                       </span>
                     </li>
                   ))}

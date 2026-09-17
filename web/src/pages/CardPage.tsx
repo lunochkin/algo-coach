@@ -17,7 +17,7 @@ export function CardPage() {
   )
 
   return (
-    <article className="space-y-6">
+    <article className="space-y-section">
       <PageHeader
         back={{ to: '/cards', label: 'Cards' }}
         title={card.data?.title ?? slug}
@@ -25,16 +25,16 @@ export function CardPage() {
       />
       <Loaded of="the card" state={card}>
         {(card) => (
-          <div className="space-y-6">
+          <div className="space-y-section">
             <section className="space-y-1">
-              <h2 className="text-lg font-medium">When to reach for it</h2>
+              <h2 className="text-heading font-medium">When to reach for it</h2>
               <p>{card.trigger}</p>
             </section>
             <section>
               <Markdown>{card.brief}</Markdown>
             </section>
-            <section className="space-y-4">
-              <h2 className="text-lg font-medium">Templates</h2>
+            <section className="space-y-stack">
+              <h2 className="text-heading font-medium">Templates</h2>
               {card.templates.map((template) => (
                 <TemplateView key={template.slug} template={template} />
               ))}
@@ -52,16 +52,16 @@ function TemplateView({ template }: { template: Template }) {
   const [revealed, setRevealed] = useState(false)
 
   return (
-    <div className="space-y-3 rounded-lg border p-4">
+    <div className="space-y-stack rounded-lg border p-4">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="font-medium">{template.title}</h3>
         {template.optional && <Badge variant="secondary">optional</Badge>}
         {template.kind === 'procedure' && <Badge variant="outline">procedure</Badge>}
       </div>
-      <p className="text-sm">{template.trigger}</p>
+      <p>{template.trigger}</p>
       {revealed ? (
         <>
-          <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-sm">
+          <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">
             {template.code}
           </pre>
           {template.notes && <Markdown>{template.notes}</Markdown>}
@@ -73,7 +73,7 @@ function TemplateView({ template }: { template: Template }) {
         <div className="relative">
           <pre
             aria-hidden="true"
-            className="pointer-events-none max-h-40 overflow-hidden rounded-md bg-muted p-3 font-mono text-sm blur-md select-none"
+            className="pointer-events-none max-h-40 overflow-hidden rounded-md bg-muted p-3 font-mono text-code blur-md select-none"
           >
             {template.code}
           </pre>

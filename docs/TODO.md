@@ -47,7 +47,7 @@ costs least before Phase 12 adds its own.
 - [x] Serve `GET /api/problems/{problem_id}`: the title, the difficulty, the
       problem's techniques and the user's counts on it, without the statement.
       The page then reads its own record rather than a technique's candidates
-- [ ] Rebuild the Cards pages: the card list, and one card with its templates
+- [x] Rebuild the Cards pages: the card list, and one card with its templates
 - [ ] Rebuild the sitting: its two columns, the clock, the verdict and the claim
       prompt
 - [ ] Rebuild the login page and the privacy policy, which carry no navigation
