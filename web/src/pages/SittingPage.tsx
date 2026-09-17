@@ -6,6 +6,7 @@ import { described, useLoaded } from '@/api/useLoaded'
 import { ClaimPrompt } from '@/components/ClaimPrompt'
 import { CodeEditor } from '@/components/CodeEditor'
 import { ElapsedClock } from '@/components/ElapsedClock'
+import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
 import {
   AlertDialog,
@@ -34,7 +35,7 @@ export function SittingPage() {
   const [search] = useSearchParams()
   const navigate = useNavigate()
   const toBoard = useCallback(() => navigate('/'), [navigate])
-  const { data: served, error } = useLoaded(
+  const loaded = useLoaded(
     async (signal) => {
       const answer = await api.GET('/api/sittings/{sitting_id}', {
         params: { path: { sitting_id: sittingId } },
@@ -83,9 +84,11 @@ export function SittingPage() {
     return () => clearInterval(tick)
   }, [sittingId])
 
-  if (error) return <p className="text-destructive">The sitting did not load: {error}</p>
-  if (!served) return <p className="text-muted-foreground">Loading the sitting…</p>
+  // the three readings; the sitting's own page starts once one has loaded
+  if (loaded.data === undefined)
+    return <Loaded of="the sitting" state={loaded}>{() => null}</Loaded>
 
+  const served = loaded.data
   const sitting = moved?.sitting ?? served.sitting
   const clock = moved ?? { elapsedSec: served.elapsed_sec, at: served.receivedAt }
   const paused = sitting.pauses?.at(-1)?.until === null

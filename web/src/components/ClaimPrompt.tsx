@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { api, type Attempt } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
+import { Loaded } from '@/components/Loaded'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -21,7 +22,7 @@ type Props = {
 // asked of every attempt the sitting minted, in the order they were submitted:
 // the attempts a claim skips are left to the problem's own techniques
 export function ClaimPrompt({ sittingId, drilled, onDone }: Props) {
-  const { data, error } = useLoaded(
+  const loaded = useLoaded(
     (signal) =>
       api.GET('/api/sittings/{sitting_id}/unclaimed', {
         params: { path: { sitting_id: sittingId } },
@@ -30,6 +31,7 @@ export function ClaimPrompt({ sittingId, drilled, onDone }: Props) {
     `unclaimed:${sittingId}`,
   )
   const [answered, setAnswered] = useState(0)
+  const data = loaded.data
   const attempts = data?.attempts ?? []
   const finished = data !== undefined && answered >= attempts.length
 
@@ -37,8 +39,8 @@ export function ClaimPrompt({ sittingId, drilled, onDone }: Props) {
     if (finished) onDone()
   }, [finished, onDone])
 
-  if (error) return <p className="text-destructive">The claim did not load: {error}</p>
-  if (!data || finished) return <p className="text-muted-foreground">Loading the claim…</p>
+  if (data === undefined || finished)
+    return <Loaded of="the claim" state={loaded}>{() => null}</Loaded>
 
   const attempt = attempts[answered]
   return (

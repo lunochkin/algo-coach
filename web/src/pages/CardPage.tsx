@@ -3,42 +3,46 @@ import { Link, useParams } from 'react-router'
 
 import { api, type Template } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
+import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 export function CardPage() {
   const { slug = '' } = useParams()
-  const { data: card, error } = useLoaded(
+  const card = useLoaded(
     (signal) => api.GET('/api/cards/{slug}', { params: { path: { slug } }, signal }),
     `card:${slug}`,
   )
-
-  if (error) return <p className="text-destructive">The card did not load: {error}</p>
-  if (!card) return <p className="text-muted-foreground">Loading the card…</p>
 
   return (
     <article className="space-y-6">
       <Button variant="outline" asChild>
         <Link to="/cards">Back to the cards</Link>
       </Button>
-      <header className="space-y-1">
-        <p className="text-sm text-muted-foreground">{card.technique}</p>
-        <h1 className="text-2xl font-semibold">{card.title}</h1>
-      </header>
-      <section className="space-y-1">
-        <h2 className="text-lg font-medium">When to reach for it</h2>
-        <p>{card.trigger}</p>
-      </section>
-      <section>
-        <Markdown>{card.brief}</Markdown>
-      </section>
-      <section className="space-y-4">
-        <h2 className="text-lg font-medium">Templates</h2>
-        {card.templates.map((template) => (
-          <TemplateView key={template.slug} template={template} />
-        ))}
-      </section>
+      <Loaded of="the card" state={card}>
+        {(card) => (
+          <div className="space-y-6">
+            <header className="space-y-1">
+              <p className="text-meta text-muted-foreground">{card.technique}</p>
+              <h1 className="text-2xl font-semibold">{card.title}</h1>
+            </header>
+            <section className="space-y-1">
+              <h2 className="text-lg font-medium">When to reach for it</h2>
+              <p>{card.trigger}</p>
+            </section>
+            <section>
+              <Markdown>{card.brief}</Markdown>
+            </section>
+            <section className="space-y-4">
+              <h2 className="text-lg font-medium">Templates</h2>
+              {card.templates.map((template) => (
+                <TemplateView key={template.slug} template={template} />
+              ))}
+            </section>
+          </div>
+        )}
+      </Loaded>
     </article>
   )
 }

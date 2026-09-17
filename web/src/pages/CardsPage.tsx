@@ -2,40 +2,40 @@ import { Link } from 'react-router'
 
 import { api, type Card } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
+import { Loaded } from '@/components/Loaded'
 
 export function CardsPage() {
-  const { data: cards, error } = useLoaded((signal) => api.GET('/api/cards', { signal }), 'cards')
-
-  if (error) return <p className="text-destructive">The cards did not load: {error}</p>
-  if (!cards) return <p className="text-muted-foreground">Loading the cards…</p>
+  const cards = useLoaded((signal) => api.GET('/api/cards', { signal }), 'cards')
 
   return (
     <section className="space-y-6">
       <h1 className="text-2xl font-semibold">Cards</h1>
-      {cards.length === 0 ? (
-        <p className="text-muted-foreground">No card is seeded yet.</p>
-      ) : (
-        byTechnique(cards).map(([technique, group]) => (
-          <div key={technique} className="space-y-2">
-            <h2 className="text-lg font-medium">{technique}</h2>
-            <ul className="space-y-1">
-              {group.map((card) => (
-                <li key={card.slug} className="flex items-baseline gap-2">
-                  <Link
-                    to={`/cards/${encodeURIComponent(card.slug)}`}
-                    className="font-medium underline-offset-4 hover:underline"
-                  >
-                    {card.title}
-                  </Link>
-                  <span className="text-sm text-muted-foreground">
-                    {card.templates.length} template(s)
-                  </span>
-                </li>
-              ))}
-            </ul>
+      <Loaded of="the cards" state={cards} blank="No card is seeded yet.">
+        {(cards) => (
+          <div className="space-y-6">
+            {byTechnique(cards).map(([technique, group]) => (
+              <div key={technique} className="space-y-2">
+                <h2 className="text-lg font-medium">{technique}</h2>
+                <ul className="space-y-1">
+                  {group.map((card) => (
+                    <li key={card.slug} className="flex items-baseline gap-2">
+                      <Link
+                        to={`/cards/${encodeURIComponent(card.slug)}`}
+                        className="font-medium underline-offset-4 hover:underline"
+                      >
+                        {card.title}
+                      </Link>
+                      <span className="text-meta text-muted-foreground">
+                        {card.templates.length} template(s)
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-        ))
-      )}
+        )}
+      </Loaded>
     </section>
   )
 }

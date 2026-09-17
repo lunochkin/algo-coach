@@ -11,7 +11,7 @@ export function TechniqueCards({ technique }: { technique: string }) {
     `technique-cards:${technique}`,
   )
 
-  if (error) return <p className="text-sm text-destructive">The cards did not load: {error}</p>
+  if (error) return <p className="text-meta text-destructive">The cards did not load: {error}</p>
   if (!cards || cards.length === 0) return null
 
   return (
