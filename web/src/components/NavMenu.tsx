@@ -21,7 +21,7 @@ export function NavMenu() {
 
   return (
     <header className="border-b">
-      <nav className="mx-auto flex max-w-4xl items-center gap-1 px-6 py-2">
+      <nav className="mx-auto flex max-w-reading items-center gap-1 px-gutter py-2">
         <span className="mr-4 font-semibold">algo-coach</span>
         {SECTIONS.map(({ label, to, owns }) => {
           const current = owns(pathname)

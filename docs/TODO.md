@@ -21,7 +21,7 @@ costs least before Phase 12 adds its own.
 
 ### The design system
 
-- [ ] Write the type scale, the spacing steps, the reading width and the mono
+- [x] Write the type scale, the spacing steps, the reading width and the mono
       family into `web/src/index.css`, beside the colour tokens already there. A
       size chosen inside one component is a design no other component follows
 - [ ] Add a token per verdict outcome — passed, wrong, timed out, crashed — and

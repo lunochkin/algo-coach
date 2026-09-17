@@ -90,6 +90,9 @@ those steps at low fidelity.
 - **Each of a verdict's four outcomes carries a token**: passed, wrong, timed
   out and crashed. One `destructive` token cannot separate a wrong answer from a
   timeout, and the drill loop shows that difference on every failing submission.
+- **The type scale is named by the role a page reads a size in**: title,
+  heading, body, meta and code. A page asking for a size by its role cannot
+  choose a size no other page uses.
 - **Code reads in one mono family, named as a token.** The editor, a template's
   form and a failing case's arguments are all code, and a reader who sees three
   mono families reads three kinds of thing.

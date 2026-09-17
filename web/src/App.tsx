@@ -33,7 +33,7 @@ function App() {
   return (
     <>
       {!signingIn && !readingPolicy && <NavMenu />}
-      <main className={cn('mx-auto p-6', wide ? 'max-w-screen-2xl' : 'max-w-4xl')}>
+      <main className={cn('mx-auto p-gutter', wide ? 'max-w-wide' : 'max-w-reading')}>
         <Suspense fallback={<p className="text-muted-foreground">Loading…</p>}>
           <Routes>
             {/* the board is where every sitting starts: the user picks the
