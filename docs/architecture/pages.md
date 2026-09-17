@@ -28,7 +28,8 @@ those steps at low fidelity.
   The navigation is the way off the page.
 - **The login page and the privacy policy carry no navigation.** The two pages
   open without a session, and every section behind the menu answers 401 to a
-  request carrying none.
+  request carrying none. The policy names the login as its way back, since the
+  login is the page it is reached from.
 
 ## The pages
 

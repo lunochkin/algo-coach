@@ -50,7 +50,7 @@ costs least before Phase 12 adds its own.
 - [x] Rebuild the Cards pages: the card list, and one card with its templates
 - [x] Rebuild the sitting: its two columns, the clock, the verdict and the claim
       prompt
-- [ ] Rebuild the login page and the privacy policy, which carry no navigation
+- [x] Rebuild the login page and the privacy policy, which carry no navigation
 - [ ] Send a refused sign-in back to the login page with its reason. The
       callback is a navigation, and it answers a refusal with raw JSON today
 - [ ] Pause a sitting where its page is hidden and resume it where the page

@@ -11,8 +11,8 @@ export function LoginPage() {
   const offered = useLoaded((signal) => api.GET('/api/sign-in', { signal }), 'sign-in')
 
   return (
-    <section className="mx-auto max-w-form space-y-4 pt-16">
-      <h1 className="text-2xl font-semibold">Sign in to algo-coach</h1>
+    <section className="mx-auto max-w-form space-y-stack pt-16">
+      <h1 className="text-title font-semibold">Sign in to algo-coach</h1>
       <Loaded
         of="the sign-in"
         state={offered}
@@ -20,7 +20,7 @@ export function LoginPage() {
         blankWhen={(one) => one.providers.length === 0 && one.dev_login === null}
       >
         {(offered) => (
-          <div className="space-y-4">
+          <div className="space-y-stack">
             {/* plain links, not the router's: each leaves the app for the API,
                 which answers with a redirect */}
             {offered.providers.map((provider) => (
