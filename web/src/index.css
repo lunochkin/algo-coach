@@ -32,6 +32,13 @@
     --spacing-section: 1.5rem;
     --spacing-stack: 1rem;
 
+    /* one per case outcome: a run that timed out asks for a different fix
+       from one that answered wrongly */
+    --color-verdict-passed: var(--verdict-passed);
+    --color-verdict-wrong: var(--verdict-wrong);
+    --color-verdict-timeout: var(--verdict-timeout);
+    --color-verdict-crashed: var(--verdict-crashed);
+
     /* pages.md gives the reading column and the sitting as its exception */
     --container-reading: 56rem;
     --container-wide: 96rem;
@@ -101,6 +108,10 @@
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
     --radius: 0.625rem;
+    --verdict-passed: oklch(0.55 0.14 150);
+    --verdict-wrong: oklch(0.55 0.21 27);
+    --verdict-timeout: oklch(0.58 0.13 70);
+    --verdict-crashed: oklch(0.52 0.22 320);
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.205 0 0);
@@ -130,6 +141,10 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
+    --verdict-passed: oklch(0.78 0.16 150);
+    --verdict-wrong: oklch(0.72 0.19 25);
+    --verdict-timeout: oklch(0.80 0.14 75);
+    --verdict-crashed: oklch(0.75 0.20 320);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);

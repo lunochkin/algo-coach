@@ -24,7 +24,7 @@ costs least before Phase 12 adds its own.
 - [x] Write the type scale, the spacing steps, the reading width and the mono
       family into `web/src/index.css`, beside the colour tokens already there. A
       size chosen inside one component is a design no other component follows
-- [ ] Add a token per verdict outcome — passed, wrong, timed out, crashed — and
+- [x] Add a token per verdict outcome — passed, wrong, timed out, crashed — and
       read them in `Verdict.tsx`. One `destructive` token cannot separate a
       wrong answer from a timeout
 - [ ] Apply the dark tokens from the browser's colour-scheme preference. The

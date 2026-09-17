@@ -5,19 +5,27 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 const OUTCOME = {
-  passed: { label: 'passed', tone: 'bg-emerald-500' },
-  wrong: { label: 'wrong answer', tone: 'bg-red-500' },
-  timeout: { label: 'timed out', tone: 'bg-amber-500' },
-  crashed: { label: 'crashed', tone: 'bg-fuchsia-600' },
+  passed: { label: 'passed', mark: 'bg-verdict-passed', text: 'text-verdict-passed' },
+  wrong: { label: 'wrong answer', mark: 'bg-verdict-wrong', text: 'text-verdict-wrong' },
+  timeout: { label: 'timed out', mark: 'bg-verdict-timeout', text: 'text-verdict-timeout' },
+  crashed: { label: 'crashed', mark: 'bg-verdict-crashed', text: 'text-verdict-crashed' },
 } as const
+
+type Outcome = keyof typeof OUTCOME
+
+// the order `corpus.md` folds a run by: a solution that only ran slowly is
+// otherwise correct, which is a different remedy from one answering wrongly
+const SEVEREST: Outcome[] = ['crashed', 'wrong', 'timeout', 'passed']
 
 export function Verdict({ submitted }: { submitted: Submitted }) {
   const results = submitted.verification.results ?? []
   const passed = results.filter((one) => one.outcome === 'passed').length
+  // the run reads as its severest case, so the line and the strip agree
+  const overall = SEVEREST.find((outcome) => results.some((one) => one.outcome === outcome))
 
   return (
     <div className="space-y-3">
-      <p className={cn('font-medium', submitted.attempt.solved ? 'text-emerald-600' : 'text-red-600')}>
+      <p className={cn('font-medium', overall && OUTCOME[overall].text)}>
         {submitted.attempt.solved ? 'Solved' : 'Not solved'}: {passed} of {results.length} cases
         passed
       </p>
@@ -28,7 +36,7 @@ export function Verdict({ submitted }: { submitted: Submitted }) {
             title={`case ${index + 1}: ${OUTCOME[one.outcome].label}${
               one.elapsed_ms == null ? '' : `, ${one.elapsed_ms} ms`
             }`}
-            className={cn('size-3 rounded-sm', OUTCOME[one.outcome].tone)}
+            className={cn('size-3 rounded-sm', OUTCOME[one.outcome].mark)}
           />
         ))}
       </ol>
@@ -42,7 +50,7 @@ export function Verdict({ submitted }: { submitted: Submitted }) {
 function FailureView({ failure, index }: { failure: Failure; index: number }) {
   return (
     <div className="space-y-2 rounded-md border p-3 text-sm">
-      <p className="font-medium">
+      <p className={cn('font-medium', OUTCOME[failure.outcome].text)}>
         Case {index + 1}: {OUTCOME[failure.outcome].label}
       </p>
       <Value label="Arguments" value={failure.args} />
