@@ -242,6 +242,13 @@ without redefining them. Grouped by the file that specifies the record.
 - **Adjudication**: resolving each divergence between the user's blind claims
   and a frontier model's claims, by editing the criterion or the claim.
 
+### The pages
+
+- **Section**: one of the two destinations the web app's navigation names,
+  Practice and Cards. Every page sits under one of them or under neither.
+- **Gallery**: the page showing every design token and every component the
+  pages use, built in development alone.
+
 ## Where the rest lives
 
 This file is the map: what the system is, where it ends, and what holds at all
@@ -254,6 +261,7 @@ times. Each record class is specified in one of the files beside it.
 | [`log.md`](log.md) | Sittings, attempts, attempt verifications, claims, self-labels, diagnoses, card runs, recall attempts |
 | [`machine.md`](machine.md) | What a model-written record carries, what a generation run's call sites leave, and the call log |
 | [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, adjudicating the eval set |
+| [`pages.md`](pages.md) | The web app's sections and pages, a page's areas, the design system |
 
 ## Data classes
 

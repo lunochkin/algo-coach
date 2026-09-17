@@ -10,36 +10,65 @@ The pages given one design, and the flows Phase 12 adds planned before they are
 built. The web app holds a handful of pages, so rebuilding them on one design
 costs least before Phase 12 adds its own.
 
-### Design system
+### The overall design
 
-- [ ] Write the design tokens into `web/src/index.css` as the theme every
-      component reads: color, type scale, spacing and radius. A value set in one
-      component alone is a design no other component follows
-- [ ] Add a page showing each token and each component the pages use, served in
-      development alone. A component restyled there shows every use of it at
-      once
+- [x] Write `docs/architecture/pages.md`: the two sections, the pages under
+      each, a page's areas and the design system. Every item below applies that
+      structure
+- [ ] Draw a low-fidelity wireframe of each existing page under that structure,
+      into `docs/architecture/wireframes.md`. Drawing a page is cheaper than
+      rebuilding it twice
 
-### Overall design
+### The design system
 
-- [ ] Write the pages' structure into `docs/architecture/`: the navigation, the
-      main areas, and the page a signed-in user lands on. Phase 9's invited
-      sittings are the input
-- [ ] Rebuild each existing page on the design system and that structure: the
-      board, the cards, a card, a technique's candidates, a problem, the
-      sitting and the login
+- [ ] Write the type scale, the spacing steps, the reading width and the mono
+      family into `web/src/index.css`, beside the colour tokens already there. A
+      size chosen inside one component is a design no other component follows
+- [ ] Add a token per verdict outcome — passed, wrong, timed out, crashed — and
+      read them in `Verdict.tsx`. One `destructive` token cannot separate a
+      wrong answer from a timeout
+- [ ] Apply the dark tokens from the browser's colour-scheme preference. The
+      `.dark` block is written and nothing sets the class, so the app is light
+      whatever the reader prefers
+- [ ] Render loading, failure and empty through one component, and use it on
+      every page. Each page spells its own wording for the three today
+- [ ] Add the gallery at `/gallery`, built in development alone, showing each
+      token and each component the pages use
+
+### The pages rebuilt
+
+- [ ] Rebuild the app shell: the two sections, the marked section, and the
+      header a page carries with its way back
+- [ ] Rebuild the Practice pages on the design system: the board, a technique's
+      candidates, and the picked problem
+- [ ] Move the picked problem to `/problems/:problem_id`, with `?technique=`
+      naming where the pick came from. Phase 12 opens the same problem as a rung
+      of a card's ladder, which no path under a technique can name
+- [ ] Serve `GET /api/problems/{problem_id}`: the title, the difficulty, the
+      problem's techniques and the user's counts on it, without the statement.
+      The page then reads its own record rather than a technique's candidates
+- [ ] Rebuild the Cards pages: the card list, and one card with its templates
+- [ ] Rebuild the sitting: its two columns, the clock, the verdict and the claim
+      prompt
+- [ ] Rebuild the login page and the privacy policy, which carry no navigation
 - [ ] Send a refused sign-in back to the login page with its reason. The
       callback is a navigation, and it answers a refusal with raw JSON today
 - [ ] Pause a sitting where its page is hidden and resume it where the page
       returns, leaving a sitting the user paused alone. The clock counts the
       time on the problem, and a hidden page is time away from it
 
-### Flows planned
+### Phase 12's flows planned
 
-- [ ] Write the card run, ladder and recall trainer flows as sequences in
-      `flows.md`, naming each detail only use can answer as deferred
-- [ ] Draw a low-fidelity wireframe of each of those flows, kept beside
-      `flows.md`. A sequence says what happens in what order, and a wireframe
-      says what the user sees at each step
+- [ ] Write starting a card run as a sequence in `flows.md`: the start, the
+      probes assigned, and what the card shows once a run is open. A detail only
+      use can answer is named as deferred
+- [ ] Write solving a rung as a sequence in `flows.md`: the ladder on a card,
+      the rung picked, the sitting it opens, and where that sitting returns
+- [ ] Write recalling a template as a sequence in `flows.md`: what names the
+      template, the hints offered, the blank file and the card's own tests
+- [ ] Draw a low-fidelity wireframe per step of those three flows into
+      `docs/architecture/wireframes.md`. A sequence says what happens in what
+      order, and a wireframe says what the user sees
 
 ### Exit
 - [ ] Build every existing page on the design system, and write and draw each
