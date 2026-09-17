@@ -199,26 +199,58 @@ twice.
   attempts: a wrong answer, a timeout on a separating case, and a pass, each
   claimed and one declined.
 
-## Phase 9 — The engine hosted (current)
+## Phase 9 — The engine hosted — done
 
-The same loop, for people who are not the author. The stores move to Postgres,
+The same loop, for people who are not the author. The stores moved to Postgres,
 each person signs in to a log of their own, and their code runs in a sandbox.
 
-- Storage moves from JSON files to Postgres, behind the store interfaces the
-  domain already calls, with the append-only rule held by the database.
-- Sign-in is through Google and GitHub, with sessions the engine keeps and no
-  password stored, and the log keys on a user id the engine mints.
-- One person's log is separable and deletable without touching another's.
-- Access is by invitation.
-- The pages and the API are deployed on one origin, with the database backed
-  up and a restore tried.
-- Submitted code runs in a container behind the boundary `run` already
-  defines, with comparison against `expected` staying above it.
-- The separating cases are re-checked under the sandbox's limits.
-- Exit: a sitting completed on the deployed engine by an invited, signed-in
-  user, the author included.
+- Storage is one Postgres database behind the store interfaces the domain
+  already called, a column per field, with the append-only rule held by
+  triggers.
+- Sign-in is through Google and GitHub, and a session lives in Postgres for 30
+  days as a hashed token. Access is by invitation, checked at the callback
+  before any record is stored.
+- One user's log is exported and erased whole, and the dev login answers a
+  loopback request alone.
+- The pages and the API are deployed on one origin behind Caddy, from an image
+  carrying the compose file it deploys with, on a push to main. Postgres
+  listens on the server's loopback, and a command run off the server reaches it
+  through an SSH tunnel.
+- A submission runs in a container under gVisor: no network, a read-only root,
+  a non-root user, dropped capabilities, and limits on memory, processes and
+  output. The image is pinned by digest.
+- The broker holds the container runtime's socket, admits one run at a time,
+  refuses a wait past a bound, kills a run past its deadline by name, and
+  removes what a dead broker left. The API holds no socket and reaches the
+  broker on a network only the two join.
+- `runner.run` calls the broker where `ALGO_COACH_BROKER` names one, and the
+  local subprocess everywhere else. The comparison against `expected` stays
+  above that boundary.
+- A user's submissions are capped at ten a minute. A sitting nothing has
+  touched for 45 minutes ends at its last activity, where it is next read.
+- A privacy policy page opens without a session, which Google's consent screen
+  asks for.
+- Measured: the 50 served problems' canonicals ran through the broker under
+  gVisor at the drill cap, over all 506 of their cases, and none took over a
+  tenth of the cap. The separating sizes found on the local subprocess stand
+  under the clock a verdict is now read from.
+- Measured: gVisor holds a case's own address-space limit, where the
+  container's memory limit alone has the host kill the container. A container
+  process limit of 64 ended the sandbox itself, since gVisor backs each process
+  a case starts with a host process of its own. `/tmp` is writable inside the
+  container whatever the root filesystem allows.
+- The corpus moved to the hosted store as product data: 76 problems, 779 cases,
+  223 solutions, 9 cards, and the 574 calls those records name. No log record
+  was copied.
+- Left to the deployment repo, and open there: the scheduled backup with a
+  restore tried, the rebuild rehearsal, and the retention statement the privacy
+  policy already promises.
+- Exit met: a sitting on the deployed engine, signed in through a provider,
+  from the board to the claim. Its attempt was judged under
+  `container/cpython-3.14` at the drill cap. The self-label the loop is
+  specified to ask for is unbuilt, and Phase 12 settles its failure modes.
 
-## Phase 10 — The pages designed
+## Phase 10 — The pages designed (current)
 
 The pages given one design, and the flows Phase 12 adds planned before they are
 built.
