@@ -27,7 +27,7 @@ costs least before Phase 12 adds its own.
 - [x] Add a token per verdict outcome — passed, wrong, timed out, crashed — and
       read them in `Verdict.tsx`. One `destructive` token cannot separate a
       wrong answer from a timeout
-- [ ] Apply the dark tokens from the browser's colour-scheme preference. The
+- [x] Apply the dark tokens from the browser's colour-scheme preference. The
       `.dark` block is written and nothing sets the class, so the app is light
       whatever the reader prefers
 - [ ] Render loading, failure and empty through one component, and use it on

@@ -2,7 +2,7 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirro
 import { python } from '@codemirror/lang-python'
 import {
   bracketMatching,
-  defaultHighlightStyle,
+  HighlightStyle,
   indentOnInput,
   indentUnit,
   syntaxHighlighting,
@@ -15,7 +15,18 @@ import {
   keymap,
   lineNumbers,
 } from '@codemirror/view'
+import { tags } from '@lezer/highlight'
 import { useEffect, useRef } from 'react'
+
+// the editor reads the theme's tokens rather than CodeMirror's own colours,
+// so the form is legible in whichever scheme the browser asked for
+const HIGHLIGHT = HighlightStyle.define([
+  { tag: [tags.keyword, tags.operatorKeyword], color: 'var(--color-code-keyword)' },
+  { tag: [tags.function(tags.variableName), tags.definition(tags.variableName)], color: 'var(--color-code-name)' },
+  { tag: [tags.string, tags.special(tags.string)], color: 'var(--color-code-string)' },
+  { tag: [tags.number, tags.bool, tags.null], color: 'var(--color-code-number)' },
+  { tag: tags.comment, color: 'var(--color-code-comment)', fontStyle: 'italic' },
+])
 
 type Props = { initial: string; onChange: (code: string) => void; onSubmit: () => void }
 
@@ -43,7 +54,7 @@ export function CodeEditor({ initial, onChange, onSubmit }: Props) {
           indentUnit.of('    '),
           EditorState.tabSize.of(4),
           bracketMatching(),
-          syntaxHighlighting(defaultHighlightStyle),
+          syntaxHighlighting(HIGHLIGHT),
           python(),
           // ahead of the default keymap, where Mod-Enter inserts a blank line
           keymap.of([
@@ -56,8 +67,23 @@ export function CodeEditor({ initial, onChange, onSubmit }: Props) {
             if (update.docChanged) changed.current(update.state.doc.toString())
           }),
           EditorView.theme({
-            '&': { height: '100%', fontSize: '14px' },
-            '.cm-scroller': { fontFamily: 'var(--font-mono, ui-monospace, monospace)' },
+            '&': {
+              height: '100%',
+              fontSize: 'var(--text-code)',
+              backgroundColor: 'var(--color-background)',
+              color: 'var(--color-foreground)',
+            },
+            '.cm-scroller': { fontFamily: 'var(--font-mono)' },
+            '.cm-gutters': {
+              backgroundColor: 'var(--color-muted)',
+              color: 'var(--color-muted-foreground)',
+              border: 'none',
+            },
+            '.cm-activeLine, .cm-activeLineGutter': { backgroundColor: 'var(--color-accent)' },
+            '.cm-cursor': { borderLeftColor: 'var(--color-foreground)' },
+            '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection': {
+              backgroundColor: 'var(--color-secondary)',
+            },
           }),
         ],
       }),
