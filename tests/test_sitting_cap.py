@@ -31,6 +31,9 @@ class Stores:
                         "user_id": user_id,
                         "problem_id": "p1",
                         "started_at": STARTED,
+                        # touched where the submissions land, since the bound
+                        # would otherwise end a sitting left since STARTED
+                        "last_active_at": TEN,
                     }
                 )
             )

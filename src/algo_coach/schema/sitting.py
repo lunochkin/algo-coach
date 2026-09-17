@@ -30,6 +30,9 @@ class Sitting(BaseModel):
     problem_id: str = Field(min_length=1)
     started_at: datetime
     ended_at: datetime | None = None  # absent while the sitting runs
+    # when the loop last acted on the sitting. Absent on a sitting stored
+    # before the field, where the start stands in
+    last_active_at: datetime | None = None
     pauses: list[Pause] = Field(default_factory=list[Pause])
 
     @property

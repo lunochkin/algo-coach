@@ -542,6 +542,8 @@ export interface components {
             started_at: string;
             /** Ended At */
             ended_at?: string | null;
+            /** Last Active At */
+            last_active_at?: string | null;
             /** Pauses */
             pauses?: components["schemas"]["Pause"][];
         };

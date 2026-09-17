@@ -13,6 +13,8 @@ from algo_coach.verifications import VerificationLog
 
 STARTED = datetime(2026, 9, 10, 8, tzinfo=UTC)
 NINE = datetime(2026, 9, 10, 9, tzinfo=UTC)
+# a second submission within the idle bound, which counts from the first
+NINE_THIRTY = datetime(2026, 9, 10, 9, 30, tzinfo=UTC)
 TEN = datetime(2026, 9, 10, 10, tzinfo=UTC)
 ELEVEN = datetime(2026, 9, 10, 11, tzinfo=UTC)
 
@@ -28,7 +30,16 @@ class Stores:
         stored_problem(root, "p1")
         self.sittings.put(
             Sitting.model_validate(
-                {"id": "s1", "user_id": "u-4f9c2a", "problem_id": "p1", "started_at": STARTED}
+                # touched at the last of these clocks: a sitting running for
+                # hours is one the loop kept touching, and an untouched one
+                # ends at the bound `log.md` gives
+                {
+                    "id": "s1",
+                    "user_id": "u-4f9c2a",
+                    "problem_id": "p1",
+                    "started_at": STARTED,
+                    "last_active_at": ELEVEN,
+                }
                 | sitting
             )
         )
@@ -162,9 +173,9 @@ def test_a_second_submission_is_a_second_attempt_on_a_cumulative_clock(database)
     stores = Stores(database)
 
     first = stores.submit(TRIPLE, now=NINE)
-    second = stores.submit(DOUBLE, now=TEN)
+    second = stores.submit(DOUBLE, now=NINE_THIRTY)
 
-    assert (first.time_to_solve_sec, second.time_to_solve_sec) == (3600.0, 7200.0)
+    assert (first.time_to_solve_sec, second.time_to_solve_sec) == (3600.0, 5400.0)
     assert {one.sitting_id for one in stores.log.attempts()} == {"s1"}
 
 

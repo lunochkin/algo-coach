@@ -192,7 +192,7 @@ backend for our own generated code, which is not a threat model.
 - [x] Decide what ends a sitting the user leaves without pressing End, and
       write the choice into `log.md`. Two of the first seven sittings were left
       running, and serving that problem again reaches the old clock
-- [ ] Store `last_active_at` on a sitting, set it where the loop acts, and end
+- [x] Store `last_active_at` on a sitting, set it where the loop acts, and end
       a sitting idle past the bound at that moment when it is next read.
       `log.md` gives the rule and why the end is read-time
 - [ ] Keep a visible sitting touched from the page, and pause it where the page

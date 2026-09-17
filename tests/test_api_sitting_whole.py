@@ -43,7 +43,13 @@ def test_one_sitting_runs_through_the_api_as_the_page_calls_it(client):
         "Double `n`.",
         "def solve(n: int) -> int:",
     )
-    assert ok(client.get(f"/api/sittings/{sitting_id}"))["sitting"] == served["sitting"]
+    reloaded = ok(client.get(f"/api/sittings/{sitting_id}"))["sitting"]
+    assert (reloaded["id"], reloaded["started_at"]) == (
+        sitting_id,
+        served["sitting"]["started_at"],
+    )
+    # the reload is the loop acting, so the bound counts from it
+    assert reloaded["last_active_at"] >= served["sitting"]["last_active_at"]
 
     # a paused clock takes no submission until resumed
     assert (

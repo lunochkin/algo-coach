@@ -20,7 +20,16 @@ def stores(database) -> tuple[ProblemStore, SittingStore]:
 
 def a_sitting(**overrides) -> Sitting:
     return Sitting.model_validate(
-        {"id": "s0", "user_id": "u-4f9c2a", "problem_id": "p1", "started_at": BEGAN} | overrides
+        {
+            "id": "s0",
+            "user_id": "u-4f9c2a",
+            "problem_id": "p1",
+            "started_at": BEGAN,
+            # still running an hour on, so the loop has been touching it: an
+            # untouched sitting ends at the bound `log.md` gives
+            "last_active_at": datetime.now(UTC),
+        }
+        | overrides
     )
 
 

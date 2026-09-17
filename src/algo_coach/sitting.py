@@ -35,6 +35,10 @@ DRILL_CAP_MS = 2_000
 # every other user's wait
 SUBMISSIONS_PER_MINUTE = 10
 
+# how long a sitting may go untouched before the loop ends it at the moment it
+# was last touched. `log.md` gives why the ending is read-time
+IDLE_MINUTES = 45
+
 
 class Refused(ValueError):
     """A request the sitting's or the problem's state does not allow."""
@@ -100,13 +104,20 @@ def serve(
         raise Missing(f"no problem {problem_id}")
     if not problem.served:
         raise Refused(f"problem {problem_id} is {problem.status}")
+    at = now or _clock()
     # a refresh or a second tab reaches the clock already running, rather than
     # starting a second one on the same problem
     one = sittings.running(user_id, problem_id)
+    if one is not None and _idle(one, at):
+        # the clock stopped where the user left, and this serve starts another
+        _ended_idle(sittings, one)
+        one = None
     if one is None:
-        one = mint.sitting(user_id, problem_id)
+        one = mint.sitting(user_id, problem_id, at)
         sittings.put(one)
-    return _served(problem.title, problem.statement, one, now or _clock())
+    else:
+        one = _stored(sittings, one, at)
+    return _served(problem.title, problem.statement, one, at)
 
 
 def get(
@@ -124,7 +135,10 @@ def get(
     problem = problems.get(one.problem_id)
     if problem is None:
         raise ValueError(f"sitting {sitting_id} names no stored problem {one.problem_id}")
-    return _served(problem.title, problem.statement, one, now or _clock())
+    at = now or _clock()
+    if one.ended_at is None:
+        one = _ended_idle(sittings, one) if _idle(one, at) else _stored(sittings, one, at)
+    return _served(problem.title, problem.statement, one, at)
 
 
 def submit(
@@ -142,9 +156,14 @@ def submit(
     one = _running(sittings, sitting_id, user_id)
     if one.paused:
         raise Refused(f"sitting {sitting_id} is paused")
+    if _idle(one, at):
+        # the clock it would stamp counts the hours the user was away
+        _ended_idle(sittings, one)
+        raise Refused(f"sitting {sitting_id} was left idle and has ended")
     # before the run: a submission past the cap starts no container
     if len(log.attempts(user_id, since=at - timedelta(minutes=1))) >= SUBMISSIONS_PER_MINUTE:
         raise TooOften(f"{SUBMISSIONS_PER_MINUTE} submissions a minute is the cap")
+    one = _stored(sittings, one, at)
     problem_cases = cases.for_problem(one.problem_id)
     runs = judge(code, problem_cases, cap_ms=DRILL_CAP_MS)
     judged = Execution(cap_ms=DRILL_CAP_MS, runner=runner(), results=[result for result, _ in runs])
@@ -212,7 +231,8 @@ def pause(
     one = _running(store, sitting_id, user_id)
     if one.paused:
         raise Refused(f"sitting {sitting_id} is already paused")
-    return _stored(store, one, pauses=[*one.pauses, Pause(at=now or _clock())])
+    at = now or _clock()
+    return _stored(store, one, at, pauses=[*one.pauses, Pause(at=at)])
 
 
 def resume(
@@ -221,7 +241,8 @@ def resume(
     one = _running(store, sitting_id, user_id)
     if not one.paused:
         raise Refused(f"sitting {sitting_id} is not paused")
-    return _stored(store, one, pauses=_closed(one.pauses, now or _clock()))
+    at = now or _clock()
+    return _stored(store, one, at, pauses=_closed(one.pauses, at))
 
 
 def end(
@@ -279,6 +300,24 @@ def _running(store: SittingStore, sitting_id: str, user_id: str) -> Sitting:
     return one
 
 
+def _active(one: Sitting) -> datetime:
+    # a sitting stored before the field carries none, and its start stands in
+    return one.last_active_at or one.started_at
+
+
+def _idle(one: Sitting, at: datetime) -> bool:
+    return at - _active(one) > timedelta(minutes=IDLE_MINUTES)
+
+
+def _ended_idle(store: SittingStore, one: Sitting) -> Sitting:
+    """The sitting closed where the loop last touched it, rather than where a
+    reader happened to find it."""
+    at = _active(one)
+    return _stored(
+        store, one, pauses=_closed(one.pauses, at) if one.paused else one.pauses, ended_at=at
+    )
+
+
 def _first_failure(cases: list[TestCase], runs: list[tuple[CaseResult, CaseRun]]) -> Failure | None:
     for one, (result, ran) in zip(cases, runs, strict=True):
         if result.outcome is not CaseOutcome.PASSED:
@@ -297,9 +336,13 @@ def _closed(pauses: list[Pause], at: datetime) -> list[Pause]:
     return [*pauses[:-1], Pause(at=pauses[-1].at, until=at)]
 
 
-def _stored(store: SittingStore, one: Sitting, **changes: object) -> Sitting:
+def _stored(
+    store: SittingStore, one: Sitting, touched: datetime | None = None, **changes: object
+) -> Sitting:
     # revalidated rather than copied: `model_copy` would write a record the
     # interval rules never read
+    if touched is not None:
+        changes["last_active_at"] = touched
     revised = Sitting.model_validate(one.model_dump() | changes)
     store.put(revised)
     return revised

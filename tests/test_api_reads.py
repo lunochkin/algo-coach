@@ -167,8 +167,10 @@ def test_a_served_sitting_is_read_back_by_its_id(client):
     served = client.post("/api/problems/p-sorting/sittings").json()
     again = client.get(f"/api/sittings/{served['sitting']['id']}").json()
 
-    # the clock ran between the two requests, and nothing else moved
+    # the clock ran between the two requests, and the reload touched the
+    # sitting, so its last activity moved too
     assert again.pop("elapsed_sec") >= served.pop("elapsed_sec")
+    assert again["sitting"].pop("last_active_at") >= served["sitting"].pop("last_active_at")
     assert again == served
 
 

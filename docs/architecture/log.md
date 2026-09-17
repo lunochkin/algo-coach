@@ -91,11 +91,14 @@ between.
   pause.
 - **The ending happens where the sitting is next read**, and nothing runs in
   the background. An abandoned sitting therefore stays running in the store
-  until someone serves, reads or lists it. The elapsed time it reports is the
+  until the loop serves or reads it. The elapsed time it reports is the
   same whenever that happens, since the end is `last_active_at` rather than
   the moment of reading.
 - **Serving the problem again mints a new sitting** once the idle one is
   ended, so the clock the solver sees starts at zero.
+- **A submission to a sitting idle past the bound ends it and is refused.**
+  The elapsed time that attempt would carry counts the hours the user was
+  away, and no attempt is worth more than the time it reports.
 - **Pressing End does not touch `last_active_at`.** A sitting the user ended
   therefore carries an `ended_at` later than its last activity, and one the
   bound ended carries the two equal. No field states which happened, and the
