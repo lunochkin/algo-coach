@@ -15,7 +15,7 @@ costs least before Phase 12 adds its own.
 - [x] Write `docs/architecture/pages.md`: the two sections, the pages under
       each, a page's areas and the design system. Every item below applies that
       structure
-- [ ] Draw a low-fidelity wireframe of each existing page under that structure,
+- [x] Draw a low-fidelity wireframe of each existing page under that structure,
       into `docs/architecture/wireframes.md`. Drawing a page is cheaper than
       rebuilding it twice
 

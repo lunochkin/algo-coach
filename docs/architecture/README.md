@@ -262,6 +262,7 @@ times. Each record class is specified in one of the files beside it.
 | [`machine.md`](machine.md) | What a model-written record carries, what a generation run's call sites leave, and the call log |
 | [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, adjudicating the eval set |
 | [`pages.md`](pages.md) | The web app's sections and pages, a page's areas, the design system |
+| [`wireframes.md`](wireframes.md) | Each page drawn at low fidelity |
 
 ## Data classes
 
