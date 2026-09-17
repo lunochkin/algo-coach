@@ -57,6 +57,9 @@ export function SittingPage() {
     null,
   )
   const [moving, setMoving] = useState(false)
+  // true where hiding the page paused the sitting, so a pause the user pressed
+  // is not resumed on return
+  const byHiding = useRef(false)
 
   // the engine ends a sitting nothing has touched, and a solver thinking is
   // practising, so a visible page reads the sitting again and that read
@@ -84,21 +87,15 @@ export function SittingPage() {
     return () => clearInterval(tick)
   }, [sittingId])
 
-  // the three readings; the sitting's own page starts once one has loaded
-  if (loaded.data === undefined)
-    return <Loaded of="the sitting" state={loaded}>{() => null}</Loaded>
+  const current = moved?.sitting ?? loaded.data?.sitting
+  const paused = current?.pauses?.at(-1)?.until === null
+  const ended = current?.ended_at != null
 
-  const served = loaded.data
-  const sitting = moved?.sitting ?? served.sitting
-  const clock = moved ?? { elapsedSec: served.elapsed_sec, at: served.receivedAt }
-  const paused = sitting.pauses?.at(-1)?.until === null
-  const ended = sitting.ended_at != null
-  const draft = `algo-coach:sitting:${sittingId}:code`
-  const initial = stored(draft) ?? (served.signature ? `${served.signature}\n    ` : '')
-
-  async function move(to: 'pause' | 'resume' | 'end') {
+  // a move the page took by itself says nothing to the user, so it reports no
+  // refusal: the next reading of the sitting carries whatever happened
+  async function move(to: 'pause' | 'resume' | 'end', { quiet = false } = {}) {
     setMoving(true)
-    setRefused(null)
+    if (!quiet) setRefused(null)
     try {
       const params = { params: { path: { sitting_id: sittingId } } }
       const { data, error } =
@@ -107,14 +104,45 @@ export function SittingPage() {
           : to === 'resume'
             ? await api.POST('/api/sittings/{sitting_id}/resume', params)
             : await api.POST('/api/sittings/{sitting_id}/end', params)
-      if (data) setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() })
-      else setRefused(described(error))
+      if (data)
+        setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() })
+      else if (!quiet) setRefused(described(error))
     } catch (reason) {
-      setRefused(String(reason))
+      if (!quiet) setRefused(String(reason))
     } finally {
       setMoving(false)
     }
   }
+
+  // the clock counts the time on the problem, and a hidden page is time away
+  // from it. A sitting the user paused is left alone: returning resumes what
+  // hiding paused and nothing else
+  useEffect(() => {
+    function hid() {
+      // nothing to move before the sitting has been read
+      if (current === undefined || ended) return
+      if (document.hidden && !paused) {
+        byHiding.current = true
+        void move('pause', { quiet: true })
+      } else if (!document.hidden && byHiding.current) {
+        byHiding.current = false
+        void move('resume', { quiet: true })
+      }
+    }
+    document.addEventListener('visibilitychange', hid)
+    return () => document.removeEventListener('visibilitychange', hid)
+    // `move` is a new closure on every render, and it reads `sittingId` alone
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, paused, ended, sittingId])
+
+  // the three readings; the sitting's own page starts once one has loaded
+  if (loaded.data === undefined)
+    return <Loaded of="the sitting" state={loaded}>{() => null}</Loaded>
+
+  const served = loaded.data
+  const clock = moved ?? { elapsedSec: served.elapsed_sec, at: served.receivedAt }
+  const draft = `algo-coach:sitting:${sittingId}:code`
+  const initial = stored(draft) ?? (served.signature ? `${served.signature}\n    ` : '')
 
   async function submit() {
     if (running || paused) return

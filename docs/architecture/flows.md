@@ -463,6 +463,10 @@ The page layout is not designed here, and using the loop decides it.
   reconstructed after the fact.
 - **A sitting is paused and resumed**, and the elapsed time the attempt carries
   excludes every pause. `log.md` gives what the record holds.
+- **A hidden page pauses the sitting, and the page returning resumes it.** The
+  clock counts the time on the problem, and a solver who left the tab is away
+  from it. A sitting the user paused stays paused when the page returns, since
+  the page resumes only the pause hiding it started.
 - **The editor completes nothing.** The editor a sitting is typed into
   highlights syntax and indents, and it proposes no name from the standard
   library or from the code already typed. A solver offered `bisect_left` after
