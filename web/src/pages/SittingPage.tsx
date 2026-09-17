@@ -135,9 +135,9 @@ export function SittingPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-stack">
       {paused && (
-        <div className="flex items-center justify-between rounded-md border border-amber-500/50 bg-amber-500/10 p-3">
+        <div className="flex items-center justify-between rounded-md border bg-muted p-3">
           <span className="font-medium">Paused: the clock is stopped</span>
           <div className="flex items-center gap-3">
             {/* the time the pause froze: the clock under the cover is blurred */}
@@ -155,11 +155,11 @@ export function SittingPage() {
         inert={paused}
         className={cn('grid gap-6 lg:grid-cols-2', paused && 'blur-md select-none')}
       >
-        <section className="space-y-4">
-          <h1 className="text-2xl font-semibold">{served.title}</h1>
+        <section className="space-y-stack">
+          <h1 className="text-title font-semibold">{served.title}</h1>
           <Markdown>{served.statement}</Markdown>
           {served.signature && (
-            <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-sm">
+            <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">
               {served.signature}
             </pre>
           )}
@@ -182,7 +182,7 @@ export function SittingPage() {
             <Button onClick={submit} disabled={running || paused || ended}>
               {running ? 'Running…' : 'Submit'}
             </Button>
-            <span className="text-sm text-muted-foreground">⌘/Ctrl + Enter</span>
+            <span className="text-meta text-muted-foreground">⌘/Ctrl + Enter</span>
             <div className="ml-auto flex items-center gap-3">
               <ElapsedClock
                 elapsedSec={clock.elapsedSec}
@@ -190,7 +190,7 @@ export function SittingPage() {
                 running={!paused && !ended}
               />
               {ended ? (
-                <span className="text-sm text-muted-foreground">This sitting has ended</span>
+                <span className="text-meta text-muted-foreground">This sitting has ended</span>
               ) : (
                 <>
                   <Button variant="outline" onClick={() => move('pause')} disabled={moving}>

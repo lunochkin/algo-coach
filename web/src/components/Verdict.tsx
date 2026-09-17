@@ -22,13 +22,21 @@ export function Verdict({ submitted }: { submitted: Submitted }) {
   const passed = results.filter((one) => one.outcome === 'passed').length
   // the run reads as its severest case, so the line and the strip agree
   const overall = SEVEREST.find((outcome) => results.some((one) => one.outcome === outcome))
+  // the mix of failures in words, since the strip carries it in colour alone
+  const failures = SEVEREST.filter((outcome) => outcome !== 'passed')
+    .map((outcome) => [outcome, results.filter((one) => one.outcome === outcome).length] as const)
+    .filter(([, count]) => count > 0)
+    .map(([outcome, count]) => `${count} ${OUTCOME[outcome].label}`)
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-stack">
       <p className={cn('font-medium', overall && OUTCOME[overall].text)}>
         {submitted.attempt.solved ? 'Solved' : 'Not solved'}: {passed} of {results.length} cases
         passed
       </p>
+      {failures.length > 0 && (
+        <p className="text-meta text-muted-foreground">{failures.join(' · ')}</p>
+      )}
       <ol className="flex flex-wrap gap-1" aria-label="Cases, in order">
         {results.map((one, index) => (
           <li
@@ -49,7 +57,7 @@ export function Verdict({ submitted }: { submitted: Submitted }) {
 
 function FailureView({ failure, index }: { failure: Failure; index: number }) {
   return (
-    <div className="space-y-2 rounded-md border p-3 text-sm">
+    <div className="space-y-2 rounded-md border p-3 text-meta">
       <p className={cn('font-medium', OUTCOME[failure.outcome].text)}>
         Case {index + 1}: {OUTCOME[failure.outcome].label}
       </p>
@@ -85,7 +93,7 @@ function Value({ label, value, text }: { label: string; value?: unknown; text?: 
           </>
         )}
       </div>
-      <pre className="max-h-64 overflow-auto rounded bg-muted p-2 font-mono text-xs whitespace-pre-wrap break-all">
+      <pre className="max-h-64 overflow-auto rounded bg-muted p-2 font-mono text-code whitespace-pre-wrap break-all">
         {cut ? `${full.slice(0, SHOWN)}…` : full}
       </pre>
     </div>

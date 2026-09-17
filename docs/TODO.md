@@ -48,7 +48,7 @@ costs least before Phase 12 adds its own.
       problem's techniques and the user's counts on it, without the statement.
       The page then reads its own record rather than a technique's candidates
 - [x] Rebuild the Cards pages: the card list, and one card with its templates
-- [ ] Rebuild the sitting: its two columns, the clock, the verdict and the claim
+- [x] Rebuild the sitting: its two columns, the clock, the verdict and the claim
       prompt
 - [ ] Rebuild the login page and the privacy policy, which carry no navigation
 - [ ] Send a refused sign-in back to the login page with its reason. The

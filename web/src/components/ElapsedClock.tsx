@@ -25,7 +25,7 @@ export function ElapsedClock({ elapsedSec, receivedAt, running }: Props) {
   const shown = running ? elapsedSec + Math.max(0, now - receivedAt) / 1000 : elapsedSec
 
   return (
-    <span className="font-mono text-lg tabular-nums" aria-label="Elapsed time">
+    <span className="font-mono text-heading tabular-nums" aria-label="Elapsed time">
       {duration(shown)}
     </span>
   )

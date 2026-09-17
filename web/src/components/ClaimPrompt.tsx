@@ -94,7 +94,7 @@ function ClaimForm({ attempt, position, techniques, drilled, onClaimed }: FormPr
 
   return (
     <div className="space-y-5">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-meta text-muted-foreground">
         {position} · {attempt.solved ? 'solved' : 'not solved'}
         {attempt.time_to_solve_sec != null && ` · ${duration(attempt.time_to_solve_sec)}`}
       </p>
