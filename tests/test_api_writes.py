@@ -76,6 +76,17 @@ def test_a_submission_without_code_is_unprocessable(client, sitting_id):
     assert client.post(f"/api/sittings/{sitting_id}/submissions", json={}).status_code == 422
 
 
+def test_a_user_past_the_submission_cap_is_refused(client, sitting_id):
+    """429 rather than 409: the request is sound, and the same one stands a
+    minute later. Each submission runs untrusted code on the server."""
+    codes: list[int] = []
+    while len(codes) < 30 and 429 not in codes:
+        codes.append(submitted(client, sitting_id).status_code)
+
+    assert codes[0] == 200
+    assert codes[-1] == 429
+
+
 def test_a_paused_sitting_refuses_a_submission_until_resumed(client, sitting_id):
     """A submission while paused would stamp a time the clock was not
     counting."""

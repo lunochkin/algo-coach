@@ -2,7 +2,7 @@
 mints. `log.md` gives what the record holds and why a pause is an interval."""
 
 from collections.abc import Sequence
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, ValidationError
@@ -30,6 +30,11 @@ from algo_coach.schema import (
 # separating size against it, and generation's own cap sits well above it
 DRILL_CAP_MS = 2_000
 
+# the submissions a user may make in a minute. Each one runs untrusted code on
+# the server, and the broker admits one run at a time, so one user's burst is
+# every other user's wait
+SUBMISSIONS_PER_MINUTE = 10
+
 
 class Refused(ValueError):
     """A request the sitting's or the problem's state does not allow."""
@@ -37,6 +42,10 @@ class Refused(ValueError):
 
 class Missing(Refused):
     """A record the request names that the user cannot reach."""
+
+
+class TooOften(Refused):
+    """More submissions in the last minute than the cap allows."""
 
 
 class Served(BaseModel):
@@ -133,6 +142,9 @@ def submit(
     one = _running(sittings, sitting_id, user_id)
     if one.paused:
         raise Refused(f"sitting {sitting_id} is paused")
+    # before the run: a submission past the cap starts no container
+    if len(log.attempts(user_id, since=at - timedelta(minutes=1))) >= SUBMISSIONS_PER_MINUTE:
+        raise TooOften(f"{SUBMISSIONS_PER_MINUTE} submissions a minute is the cap")
     problem_cases = cases.for_problem(one.problem_id)
     runs = judge(code, problem_cases, cap_ms=DRILL_CAP_MS)
     judged = Execution(cap_ms=DRILL_CAP_MS, runner=runner(), results=[result for result, _ in runs])

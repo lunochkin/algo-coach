@@ -400,6 +400,11 @@ times. Each record class is specified in one of the files beside it.
     bound. A submission that waits without a bound looks to the user like a
     sandbox that hung. The wait changes no verdict, since the cap is measured
     in the child around the `solve` call.
+  - A user's submissions are capped per minute. A submission runs untrusted
+    code on the server, and the broker admits one run at a time, so one user's
+    burst is every other user's wait. The cap is counted over the user's own
+    attempts of the last minute, and a submission past it is refused before any
+    container starts.
   - Generation runs off this server. The mutation loop starts many subprocesses
     at a cap well above the sitting's, so a generation run beside a sitting
     moves the wall clock that sitting's verdict is read from. Generation writes

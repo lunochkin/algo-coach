@@ -184,7 +184,7 @@ backend for our own generated code, which is not a threat model.
       drill cap, and write down which cases it no longer finishes within a tenth
       of the cap. A CPU limit and a slower system call both move the separating
       sizes the local subprocess found
-- [ ] Cap submissions per user per minute. Each submission runs untrusted code
+- [x] Cap submissions per user per minute. Each submission runs untrusted code
       on the server
 
 ### Other items
