@@ -39,6 +39,7 @@ those steps at low fidelity.
 | `/cards/:slug` | reads a card and reveals its templates | Cards |
 | `/login` | signs in | none |
 | `/privacy` | reads the privacy policy | none |
+| `/gallery` | reads the design system, in development alone | none |
 
 - **A page's path names the record the page serves**, so a reload reaches the
   same page. `README.md` gives how the server answers a path naming no file.

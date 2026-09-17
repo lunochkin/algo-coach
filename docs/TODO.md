@@ -32,7 +32,7 @@ costs least before Phase 12 adds its own.
       whatever the reader prefers
 - [x] Render loading, failure and empty through one component, and use it on
       every page. Each page spells its own wording for the three today
-- [ ] Add the gallery at `/gallery`, built in development alone, showing each
+- [x] Add the gallery at `/gallery`, built in development alone, showing each
       token and each component the pages use
 
 ### The pages rebuilt

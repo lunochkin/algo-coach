@@ -20,6 +20,11 @@ const SittingPage = lazy(() =>
 const PrivacyPage = lazy(() =>
   import('@/pages/PrivacyPage').then((m) => ({ default: m.PrivacyPage })),
 )
+// the ternary folds in a production build, so the gallery and every example it
+// renders leave the bundle
+const GalleryPage = import.meta.env.DEV
+  ? lazy(() => import('@/pages/GalleryPage').then((m) => ({ default: m.GalleryPage })))
+  : null
 
 function App() {
   // the statement and the editor sit side by side, which a reading column is
@@ -46,6 +51,7 @@ function App() {
             <Route path="sittings/:sittingId" element={<SittingPage />} />
             <Route path={LOGIN} element={<LoginPage />} />
             <Route path={PRIVACY} element={<PrivacyPage />} />
+            {GalleryPage && <Route path="gallery" element={<GalleryPage />} />}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
