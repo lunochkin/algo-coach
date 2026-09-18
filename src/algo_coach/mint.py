@@ -12,6 +12,7 @@ from algo_coach.schema import (
     AttemptClaim,
     AttemptVerification,
     CallSite,
+    CardRun,
     CaseResult,
     ClaimSource,
     Confidence,
@@ -24,6 +25,7 @@ from algo_coach.schema import (
     Json,
     MachineProvenance,
     MatchSource,
+    Probe,
     Problem,
     ProblemDifficulty,
     SelfLabel,
@@ -230,6 +232,24 @@ def sitting(user_id: str, problem_id: str, at: datetime | None = None) -> Sittin
         problem_id=problem_id,
         started_at=at,
         last_active_at=at,
+    )
+
+
+def card_run(
+    user_id: str, card_id: str, probes: Sequence[str], at: datetime | None = None
+) -> CardRun:
+    """The run a start mints, with the probes that start drew.
+
+    The probes carry the start's own moment, so a later probe reads as the
+    later offer it is.
+    """
+    at = at or datetime.now(UTC)
+    return CardRun(
+        id=new_id(),
+        user_id=user_id,
+        card_id=card_id,
+        started_at=at,
+        probes=[Probe(problem_id=one, assigned_at=at) for one in probes],
     )
 
 

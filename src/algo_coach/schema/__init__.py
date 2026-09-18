@@ -8,6 +8,7 @@ from algo_coach.schema.attempt import (
 )
 from algo_coach.schema.call import Call
 from algo_coach.schema.card import Card, Selector, Template, TemplateCase, TemplateKind
+from algo_coach.schema.card_run import CardRun, Probe
 from algo_coach.schema.case import (
     CaseOutcome,
     CaseResult,
@@ -44,6 +45,7 @@ __all__ = [
     "Call",
     "CallSite",
     "Card",
+    "CardRun",
     "CardSeed",
     "CaseOutcome",
     "CaseResult",
@@ -62,6 +64,7 @@ __all__ = [
     "MachineProvenance",
     "MatchSource",
     "Pause",
+    "Probe",
     "Problem",
     "ProblemDifficulty",
     "ProblemStatus",
