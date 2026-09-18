@@ -19,32 +19,66 @@ The work not yet ready for a phase waits under Further developments.
       `docs/architecture/wireframes.md`. A sequence says what happens in what
       order, and a wireframe says what the user sees
 
-### The records and the pages
+### The template's cases
 
-- [ ] Resolve the ladder from the matches, the selector filling out to `size`.
-      A retired problem fills no rung
+- [ ] Add `cases` to `TemplateSeed` and `Template`: positional arguments and an
+      expected return per case, calling `solve`. The field is optional, so a
+      card seeded before it keeps working
+- [ ] Have the `card-author` skill write a template's cases beside its form.
+      The author writes the form, and the cases are the only thing that can
+      check a reproduction of it
+- [ ] Re-seed the nine cards with cases on every code template, so the trainer
+      has a template to offer
+
+### The ladder
+
+- [ ] Resolve the ladder from the template matches, the selector filling it out
+      to `size`. A retired problem fills no rung
 - [ ] Derive requiredness from the templates a rung covers. A rung covering a
       core template is required. A rung covering only the optional template is
       optional. A rung covering both is required, with the optional template
       offered as the alternative approach
-- [ ] Re-derive the ladder whenever the corpus moves under the ladder, a
-      started card included. Progress is a fold over attempts, so a solved rung
-      stays solved
-- [ ] Add `CardRun`, minted where a card is started, since the ladder is
-      measured from that start. The run holds when the run began and the
-      probes assigned, and later probes append
-- [ ] Add `RecallAttempt`, keyed to a card and a template. A recall attempt has
-      no problem and no submission, so no field keys the record to an attempt.
-      The hints taken before a pass are part of the record
-- [ ] Generate probes from the corpus, as a skill, since choosing a probe is
-      judgment
-- [ ] Build the recall trainer. The template's name is hidden, the user types
-      the form into a blank file from memory, and the file runs against the
-      card's own tests. The template is never printed, since reading the form
-      is not recalling the form
-- [ ] Show a card's status: when each template was last recalled, which rungs
-      are outstanding, and which probes are available. Those are the inputs a
-      graduation rule reads, and no threshold is set yet
+- [ ] Re-derive the ladder whenever the corpus moves under it, a started card
+      included. Progress is a fold over attempts, so a solved rung stays solved
+- [ ] Report a core template no solution displays as a gap on the card. The
+      ladder never substitutes another problem, and a quietly shorter ladder
+      hides the problem nobody has written
+
+### The records
+
+- [ ] Add `CardRun`, minted where a card is started, carrying the user, the
+      card, when the run began and the probes it was given. Later probes append
+- [ ] Add `RecallAttempt`, keyed to a card and a template, carrying the hints
+      taken, how the cases went and the form the user typed. No field keys it to
+      an attempt
+- [ ] Add the two tables with their migrations, the append-only trigger on both,
+      and the schema snapshots `just schemas` writes
+
+### The runs, served
+
+- [ ] Serve starting a run: the route mints the `CardRun` and draws its probes
+      in one act, since the ladder is measured from the start
+- [ ] Draw the probes by the rule: a problem the card's technique carries,
+      unseen first, then least recently attempted, never one the ladder holds
+- [ ] Settle what the probe skill decides beyond that draw, or drop it. The
+      draw is a rule over the corpus, and a skill choosing a probe would decide
+      something the rule already answers
+- [ ] Extend the card's own route with the run: the ladder and its progress, the
+      recall state per template, and the probes the start drew
+- [ ] Serve a recall attempt: run the typed file against the template's cases
+      through the runner a submission uses, and write the record
+- [ ] Cap a user's recall runs per minute, as a submission is capped. A recall
+      runs untrusted code on the server, and the broker admits one run at a time
+
+### The pages
+
+- [ ] Rebuild the card page on its two wireframes: the start press, the ladder,
+      the recall state and the probes
+- [ ] Build the recall trainer page: the trigger shown, the title and the form
+      withheld, the signature given, the file blank and the hints in one order
+- [ ] Read `?card=` on the problem page: the way back names the card, and the
+      claim answers for the card's technique
+- [ ] Return the sitting to the card it came from, where the next rung is
 
 ### Exit
 - [ ] Go through a card run by hand: start a card, solve a rung of its ladder,
