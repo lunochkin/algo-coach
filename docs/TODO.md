@@ -48,7 +48,7 @@ The work not yet ready for a phase waits under Further developments.
 
 - [x] Add `CardRun`, minted where a card is started, carrying the user, the
       card, when the run began and the probes it was given. Later probes append
-- [ ] Add `RecallAttempt`, keyed to a card and a template, carrying the hints
+- [x] Add `RecallAttempt`, keyed to a card and a template, carrying the hints
       taken, how the cases went and the form the user typed. No field keys it to
       an attempt
 - [ ] Add the two tables with their migrations, the append-only trigger on both,

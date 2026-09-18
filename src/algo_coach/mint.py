@@ -22,12 +22,14 @@ from algo_coach.schema import (
     ExpectedSource,
     FailureMode,
     Gate,
+    Hint,
     Json,
     MachineProvenance,
     MatchSource,
     Probe,
     Problem,
     ProblemDifficulty,
+    RecallAttempt,
     SelfLabel,
     SiteOutcome,
     Sitting,
@@ -250,6 +252,28 @@ def card_run(
         card_id=card_id,
         started_at=at,
         probes=[Probe(problem_id=one, assigned_at=at) for one in probes],
+    )
+
+
+def recall_attempt(
+    user_id: str,
+    card_id: str,
+    template_id: str,
+    *,
+    code: str,
+    hints: Sequence[Hint],
+    execution: Execution,
+) -> RecallAttempt:
+    """One reproduction, with the hints it took and how the cases went."""
+    return RecallAttempt(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        user_id=user_id,
+        card_id=card_id,
+        template_id=template_id,
+        code=code,
+        hints=list(hints),
+        **execution.model_dump(),
     )
 
 

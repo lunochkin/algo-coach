@@ -29,6 +29,7 @@ from algo_coach.schema.problem import (
     RetirementReason,
 )
 from algo_coach.schema.provenance import MachineProvenance
+from algo_coach.schema.recall import Hint, RecallAttempt
 from algo_coach.schema.record import AttemptRecord
 from algo_coach.schema.seed import CardSeed, TemplateSeed
 from algo_coach.schema.sitting import Pause, Sitting
@@ -59,6 +60,7 @@ __all__ = [
     "ExpectedSource",
     "FailureMode",
     "Gate",
+    "Hint",
     "Json",
     "Kind",
     "MachineProvenance",
@@ -68,6 +70,7 @@ __all__ = [
     "Problem",
     "ProblemDifficulty",
     "ProblemStatus",
+    "RecallAttempt",
     "RetirementReason",
     "Selector",
     "SelfLabel",
