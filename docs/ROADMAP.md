@@ -252,18 +252,48 @@ each person signs in to a log of their own, and their code runs in a sandbox.
   specified to ask for is unbuilt, and the failure-mode block settles its
   failure modes.
 
-## Phase 10 — The pages designed (current)
+## Phase 10 — The pages designed — done
 
-The pages given one design.
+The pages given one design, before Phase 11 adds its own.
 
-- A design system in code: the theme tokens in `web/src/index.css`, the
-  components the pages use, and a page showing both.
-- The pages' overall design: the navigation, the main areas and the page a
-  signed-in user lands on, written into `docs/architecture/` and applied to
-  every existing page.
-- Exit: every existing page is built on the design system.
+- A design system in the theme: a type scale named by the role a page reads a
+  size in, the spacing steps, the layout widths, one mono family, a token per
+  verdict outcome, and the editor's five syntax colours.
+- The dark set applies from the browser's colour-scheme preference, and no
+  switch stores one.
+- `/gallery`, built in development alone, shows every token and every component
+  the pages read.
+- `pages.md` and `wireframes.md`: the two sections, the pages under each, a
+  page's areas, the design system, and thirteen views drawn at low fidelity.
+- One shell: the navigation naming Practice and Cards, and one header carrying
+  the way back, the title and the line identifying what the title names.
+- Every page rebuilt on it: the board, a technique's candidates, the picked
+  problem, the cards, one card, the sitting, the login, the policy and the
+  missing page.
+- Loading, the failure with its retry, and the blank answer render through one
+  component.
+- The picked problem moved to `/problems/:problem_id`, served by a route of its
+  own, so a rung of a ladder reaches the same page.
+- A refused sign-in returns to the login page as a code, which names no address.
+- A hidden page pauses the sitting, and the page returning resumes the pause
+  hiding started.
+- Exit met: every existing page is built on the design system.
 
-## Phase 11 — Ladder, recall and card runs
+Measured:
+
+- Every verdict and code colour clears a contrast of 4.5 against its own
+  background: 4.55 to 6.99 in the light scheme, 6.12 to 11.15 in the dark one.
+  Two light values were under the bar as first chosen, and were darkened.
+- The gallery leaves the production bundle. The build folds the guard on the
+  route, and `dist/` names neither the page nor its examples.
+
+Left open:
+
+- No page was read by eye. The browser extension was not connected and the
+  frontend carries no test framework, so every page stands on the typecheck,
+  the lint and the build alone.
+
+## Phase 11 — Ladder, recall and card runs (current)
 
 The pieces a card needs once there are problems to fill it.
 

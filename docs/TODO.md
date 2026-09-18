@@ -4,62 +4,7 @@ The phases still open. A ticked item stays while its phase is open. When a
 phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 The work not yet ready for a phase waits under Further developments.
 
-## Phase 10 — the pages designed (current)
-
-The pages given one design. The web app holds a handful of pages, so rebuilding
-them on one design costs least before Phase 11 adds its own.
-
-### The overall design
-
-- [x] Write `docs/architecture/pages.md`: the two sections, the pages under
-      each, a page's areas and the design system. Every item below applies that
-      structure
-- [x] Draw a low-fidelity wireframe of each existing page under that structure,
-      into `docs/architecture/wireframes.md`. Drawing a page is cheaper than
-      rebuilding it twice
-
-### The design system
-
-- [x] Write the type scale, the spacing steps, the reading width and the mono
-      family into `web/src/index.css`, beside the colour tokens already there. A
-      size chosen inside one component is a design no other component follows
-- [x] Add a token per verdict outcome — passed, wrong, timed out, crashed — and
-      read them in `Verdict.tsx`. One `destructive` token cannot separate a
-      wrong answer from a timeout
-- [x] Apply the dark tokens from the browser's colour-scheme preference. The
-      `.dark` block is written and nothing sets the class, so the app is light
-      whatever the reader prefers
-- [x] Render loading, failure and empty through one component, and use it on
-      every page. Each page spells its own wording for the three today
-- [x] Add the gallery at `/gallery`, built in development alone, showing each
-      token and each component the pages use
-
-### The pages rebuilt
-
-- [x] Rebuild the app shell: the two sections, the marked section, and the
-      header a page carries with its way back
-- [x] Rebuild the Practice pages on the design system: the board, a technique's
-      candidates, and the picked problem
-- [x] Move the picked problem to `/problems/:problem_id`, with `?technique=`
-      naming where the pick came from. Phase 11 opens the same problem as a rung
-      of a card's ladder, which no path under a technique can name
-- [x] Serve `GET /api/problems/{problem_id}`: the title, the difficulty, the
-      problem's techniques and the user's counts on it, without the statement.
-      The page then reads its own record rather than a technique's candidates
-- [x] Rebuild the Cards pages: the card list, and one card with its templates
-- [x] Rebuild the sitting: its two columns, the clock, the verdict and the claim
-      prompt
-- [x] Rebuild the login page and the privacy policy, which carry no navigation
-- [x] Send a refused sign-in back to the login page with its reason. The
-      callback is a navigation, and it answers a refusal with raw JSON today
-- [x] Pause a sitting where its page is hidden and resume it where the page
-      returns, leaving a sitting the user paused alone. The clock counts the
-      time on the problem, and a hidden page is time away from it
-
-### Exit
-- [ ] Build every existing page on the design system
-
-## Phase 11 — ladder, recall and card runs
+## Phase 11 — ladder, recall and card runs (current)
 
 ### The flows written first
 
