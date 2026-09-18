@@ -663,6 +663,8 @@ Deferred, since only use answers each:
 - Whether a template authors a hint of its own beside the three.
 - How a template whose form is a class is exercised, since the cases call one
   function.
+- How a form answering with one of several valid orders is checked, since a
+  case carries a value rather than a predicate.
 - The step a failed recall leads to, which the scheduler settles.
 
 ## Adjudicating the eval set

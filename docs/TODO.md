@@ -27,7 +27,7 @@ The work not yet ready for a phase waits under Further developments.
 - [x] Have the `card-author` skill write a template's cases beside its form.
       The author writes the form, and the cases are the only thing that can
       check a reproduction of it
-- [ ] Re-seed the nine cards with cases on every code template, so the trainer
+- [x] Re-seed the nine cards with cases on every code template, so the trainer
       has a template to offer
 
 ### The ladder

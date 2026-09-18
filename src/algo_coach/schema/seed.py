@@ -23,6 +23,7 @@ class TemplateSeed(BaseModel):
     speedup: bool = True
     kind: TemplateKind = TemplateKind.CODE
     code: str
+    unordered: bool = False
     cases: list[TemplateCase] = Field(default_factory=list[TemplateCase])
 
 

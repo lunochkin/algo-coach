@@ -191,6 +191,20 @@ file in place.
    - **The arguments and the expected value are JSON**: integers, strings,
      booleans and lists of those. A returned value is compared exactly, so a
      float is the one thing a case may not ask for.
+   - **A form taking a callable carries its call site**, named `solve`. The
+     skeleton stays what it is, and `solve` below it supplies the predicate
+     from JSON arguments — the lambda the skill calls the way a base is used.
+     Reproducing both is what a solve types anyway.
+   - **Mark `"unordered": true` where the answer is a set** — every subset,
+     every permutation, the centres of a tree. The case then compares the
+     returned list sorted, so two correct reproductions emitting it in
+     different orders both pass. The inner order is left alone, which keeps two
+     permutations of one multiset different answers.
+   - **An answer that is neither unique nor a set carries no cases.** A
+     topological order is one of many valid orders, and sorting would accept an
+     invalid one as readily as a valid one, since it compares multisets. Such a
+     form is read on the card until a case can carry a check rather than a
+     value.
    - **A case is about the form rather than about the technique.** It checks
      that what the user typed behaves, and it is not a test suite for every
      problem the technique reaches.

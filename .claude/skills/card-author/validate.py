@@ -15,7 +15,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from algo_coach.runner import agrees, defines_solve, run
+from algo_coach.runner import agrees, as_json, defines_solve, run
 from algo_coach.schema import CardSeed, TemplateKind, TemplateSeed
 from algo_coach.sitting import DRILL_CAP_MS
 from algo_coach.techniques import is_known
@@ -58,9 +58,17 @@ def recallable(template: TemplateSeed) -> list[str]:
         if not ran.returned:
             raised = "" if ran.error is None else f": {ran.error.splitlines()[-1]}"
             found.append(f"case {index} {ran.outcome}{raised}")
-        elif not agrees(ran.value, case.expected):
+        elif not agrees(settled(ran.value, template), settled(case.expected, template)):
             found.append(f"case {index} returned {ran.value!r}, not {case.expected!r}")
     return found
+
+
+def settled(value: object, template: TemplateSeed) -> object:
+    """A set answer's top level sorted, so the order two correct
+    reproductions emit it in is not a difference."""
+    if not template.unordered or not isinstance(value, list):
+        return value
+    return sorted(value, key=as_json)
 
 
 def main(paths: list[str]) -> int:

@@ -50,6 +50,7 @@ card_templates = Table(
     Column("speedup", Boolean, nullable=False),
     Column("kind", enumerated(TemplateKind), nullable=False),
     Column("code", Text, nullable=False),
+    Column("unordered", Boolean, nullable=False, server_default=text("false")),
     UniqueConstraint("card_id", "position"),
     # a re-seed matches a template by its slug within the card
     UniqueConstraint("card_id", "slug"),

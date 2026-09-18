@@ -649,6 +649,11 @@ export interface components {
             kind: components["schemas"]["TemplateKind"];
             /** Code */
             code: string;
+            /**
+             * Unordered
+             * @default false
+             */
+            unordered: boolean;
             /** Cases */
             cases?: components["schemas"]["TemplateCase"][];
         };

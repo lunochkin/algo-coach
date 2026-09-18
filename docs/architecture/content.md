@@ -138,6 +138,15 @@ technique, and a card and a mastery estimate share no data.
 - **The cases call `solve`**, as a problem's cases do. `corpus.md` gives why
   that name is fixed: a function called `lower_bound` announces the form the
   recall is asking for.
+- **A template whose answer is a set says so, and its cases are compared after
+  the top level is sorted.** Every subset and every permutation of an input is
+  one answer, and two correct reproductions emit that answer in different
+  orders. The sort reaches the top level alone, so two permutations of one
+  multiset stay two answers.
+- **An answer that is neither unique nor a set carries no cases.** A
+  topological order is one of many valid orders, and a sort compares multisets,
+  so it would accept an invalid order as readily as a valid one. Such a form is
+  read on the card until a case can carry a check rather than a value.
 - **A template with no cases is read and never recalled.** The cases are an
   added field, so a card authored before it keeps working, and a template whose
   form no case checks is study material rather than a recall subject. A

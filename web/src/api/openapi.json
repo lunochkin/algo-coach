@@ -1548,6 +1548,11 @@
             "type": "string",
             "title": "Code"
           },
+          "unordered": {
+            "type": "boolean",
+            "title": "Unordered",
+            "default": false
+          },
           "cases": {
             "items": {
               "$ref": "#/components/schemas/TemplateCase"

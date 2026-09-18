@@ -65,6 +65,9 @@ class Template(BaseModel):
     speedup: bool = True  # false where the form is its own optimum, so no input separates it
     kind: TemplateKind = TemplateKind.CODE
     code: str  # whatever is blank-filled: a runnable unit, or the steps of a method
+    # the form's answer is a set: a case compares the returned list sorted, and
+    # the order two correct reproductions emit it in is not a difference
+    unordered: bool = False
     # what a recall is checked against; a template carrying none is read and
     # never recalled, as `content.md` gives it
     cases: list[TemplateCase] = Field(default_factory=list[TemplateCase])
