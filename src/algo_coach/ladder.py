@@ -27,13 +27,25 @@ class Rung(BaseModel):
     solved: bool = False
 
 
+class Gap(BaseModel):
+    """A core template no solution displays, named as the card names it.
+
+    The card claims to teach the form, so the ladder reports the gap rather
+    than substituting another problem for the rung. The next generation run is
+    aimed at what this names.
+    """
+
+    template_id: str
+    slug: str
+    title: str
+
+
 class Ladder(BaseModel):
     """What studying one card has the user solve."""
 
     card_slug: str
     rungs: list[Rung]
-    # the core templates no solution displays, reported rather than substituted
-    gaps: list[str]  # template slugs
+    gaps: list[Gap]
 
 
 def ladder(
@@ -62,7 +74,8 @@ def ladder(
     by_id = {problem.id: problem for problem in problems if problem.served}
 
     covering: dict[str, list[str]] = {}
-    gaps: list[str] = []
+    gaps: list[Gap] = []
+    titles = {template.id: template.title for template in card.templates}
     core = {template.id for template in card.templates if not template.optional}
     for covered in coverage([card], problems, solutions, matches):
         filling = sorted(
@@ -71,7 +84,13 @@ def ladder(
         )
         if not filling:
             if covered.gap:
-                gaps.append(covered.template_slug)
+                gaps.append(
+                    Gap(
+                        template_id=covered.template_id,
+                        slug=covered.template_slug,
+                        title=titles[covered.template_id],
+                    )
+                )
             continue
         covering.setdefault(filling[0], []).append(covered.template_id)
 

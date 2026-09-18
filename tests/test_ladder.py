@@ -113,7 +113,7 @@ def test_a_retired_problem_fills_no_rung(database):
     assert [one.problem.id for one in resolved.rungs] == ["p-live"]
     # the retired problem's canonical displayed the first form, and displays
     # nothing once the problem is out of the corpus
-    assert resolved.gaps == ["longest-valid-window", "fixed-window"]
+    assert [one.slug for one in resolved.gaps] == ["longest-valid-window", "fixed-window"]
 
 
 def test_a_core_template_nothing_displays_is_a_gap(database):
@@ -126,7 +126,7 @@ def test_a_core_template_nothing_displays_is_a_gap(database):
 
     resolved = ladder(held, problems, solutions, matches, [])
 
-    assert resolved.gaps == ["longest-valid-window"]
+    assert [one.slug for one in resolved.gaps] == ["longest-valid-window"]
     assert resolved.rungs[0].problem.id == "p-1"
 
 
@@ -157,7 +157,7 @@ def test_a_user_match_stands_over_the_generator_s(database):
 
     resolved = ladder(held, problems, solutions, matches, [])
 
-    assert resolved.gaps == [one.slug for one in held.templates]
+    assert [one.slug for one in resolved.gaps] == [one.slug for one in held.templates]
     assert [one.templates for one in resolved.rungs] == [[]]
 
 
@@ -336,3 +336,29 @@ def test_a_retired_problem_leaves_the_ladder_and_the_rest_keeps_its_progress(dat
     resolved = ladder(held, [live, retired], solutions, [], attempts, since=BEGAN)
 
     assert [(one.problem.id, one.solved) for one in resolved.rungs] == [("p-live", True)]
+
+
+def test_a_gap_names_the_template_the_card_named(database):
+    """The card page reports the form it claims to teach, and a slug alone
+    reads as an id to whoever has not authored the card."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    matches = [generator_match(held.templates[0].id, "s-p-1")]
+
+    resolved = ladder(held, problems, [canonical("p-1")], matches, [])
+
+    assert [(one.slug, one.title) for one in resolved.gaps] == [("fixed-window", "fixed-window")]
+    assert resolved.gaps[0].template_id == held.templates[1].id
+
+
+def test_a_gap_leaves_the_ladder_its_length(database):
+    """The fill reaches `size` whether or not a form is covered, so a gap is
+    read from the report rather than from a ladder that came up short."""
+    held = a_card(database, size=3)
+    problems = [problem(f"p-{one}", techniques=[TECHNIQUE]) for one in range(4)]
+    matches = [generator_match(held.templates[0].id, "s-p-0")]
+
+    resolved = ladder(held, problems, [canonical("p-0")], matches, [])
+
+    assert len(resolved.rungs) == 3
+    assert [one.slug for one in resolved.gaps] == ["fixed-window"]

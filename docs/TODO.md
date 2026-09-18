@@ -40,7 +40,7 @@ The work not yet ready for a phase waits under Further developments.
       offered as the alternative approach
 - [x] Re-derive the ladder whenever the corpus moves under it, a started card
       included. Progress is a fold over attempts, so a solved rung stays solved
-- [ ] Report a core template no solution displays as a gap on the card. The
+- [x] Report a core template no solution displays as a gap on the card. The
       ladder never substitutes another problem, and a quietly shorter ladder
       hides the problem nobody has written
 
