@@ -32,7 +32,7 @@ The work not yet ready for a phase waits under Further developments.
 
 ### The ladder
 
-- [ ] Resolve the ladder from the template matches, the selector filling it out
+- [x] Resolve the ladder from the template matches, the selector filling it out
       to `size`. A retired problem fills no rung
 - [ ] Derive requiredness from the templates a rung covers. A rung covering a
       core template is required. A rung covering only the optional template is
