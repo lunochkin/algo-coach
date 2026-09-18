@@ -3,8 +3,8 @@ from typing import Any
 from sqlalchemy import ColumnElement, Connection, delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 
-from algo_coach.cards.table import card_templates, cards
-from algo_coach.schema import Card
+from algo_coach.cards.table import card_templates, cards, template_cases
+from algo_coach.schema import Card, Template
 from algo_coach.storage import Database
 
 
@@ -58,11 +58,26 @@ class CardStore:
             .values(position=-card_templates.c.position - 1)
         )
         for position, template in enumerate(record.templates):
-            values = template.model_dump() | {"card_id": record.id, "position": position}
+            values = template.model_dump(exclude={"cases"}) | {
+                "card_id": record.id,
+                "position": position,
+            }
             conn.execute(
                 insert(card_templates)
                 .values(values)
                 .on_conflict_do_update(index_elements=["id"], set_=values)
+            )
+            self._cases(conn, template)
+
+    def _cases(self, conn: Connection, template: Template) -> None:
+        """A template's cases, replaced whole: no record points at one, so a
+        re-seed rewrites the set the author last wrote."""
+        conn.execute(delete(template_cases).where(template_cases.c.template_id == template.id))
+        for position, case in enumerate(template.cases):
+            conn.execute(
+                insert(template_cases).values(
+                    template_id=template.id, position=position, **case.model_dump()
+                )
             )
 
     def _read(self, *where: ColumnElement[bool]) -> list[Card]:
@@ -76,7 +91,21 @@ class CardStore:
             ).mappings()
             templates: dict[str, list[dict[str, Any]]] = {id: [] for id in ids}
             for one in held:
-                templates[one["card_id"]].append(dict(one))
+                templates[one["card_id"]].append(dict(one) | {"cases": []})
+            authored = conn.execute(
+                select(template_cases)
+                .where(
+                    template_cases.c.template_id.in_(
+                        [one["id"] for group in templates.values() for one in group]
+                    )
+                )
+                .order_by(template_cases.c.position)
+            ).mappings()
+            by_template = {one["id"]: one["cases"] for group in templates.values() for one in group}
+            for case in authored:
+                by_template[case["template_id"]].append(
+                    {"args": case["args"], "expected": case["expected"]}
+                )
         return [
             Card.model_validate(
                 {key: value for key, value in row.items() if not key.startswith("selector_")}

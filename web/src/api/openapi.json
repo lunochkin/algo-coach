@@ -1547,6 +1547,13 @@
           "code": {
             "type": "string",
             "title": "Code"
+          },
+          "cases": {
+            "items": {
+              "$ref": "#/components/schemas/TemplateCase"
+            },
+            "type": "array",
+            "title": "Cases"
           }
         },
         "type": "object",
@@ -1559,6 +1566,24 @@
         ],
         "title": "Template",
         "description": "One form reproduced from memory. The unit of recall."
+      },
+      "TemplateCase": {
+        "properties": {
+          "args": {
+            "items": {},
+            "type": "array",
+            "title": "Args"
+          },
+          "expected": {
+            "title": "Expected"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected"
+        ],
+        "title": "TemplateCase",
+        "description": "One case a reproduced form is checked against. The arguments are\npositional, and `solve` is the function they call."
       },
       "TemplateKind": {
         "type": "string",

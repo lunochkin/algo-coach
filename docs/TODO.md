@@ -21,7 +21,7 @@ The work not yet ready for a phase waits under Further developments.
 
 ### The template's cases
 
-- [ ] Add `cases` to `TemplateSeed` and `Template`: positional arguments and an
+- [x] Add `cases` to `TemplateSeed` and `Template`: positional arguments and an
       expected return per case, calling `solve`. The field is optional, so a
       card seeded before it keeps working
 - [ ] Have the `card-author` skill write a template's cases beside its form.

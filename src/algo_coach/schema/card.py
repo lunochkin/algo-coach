@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -41,6 +41,16 @@ def unique_slugs(slugs: list[str]) -> None:
         raise ValueError("template slugs are unique within a card")
 
 
+class TemplateCase(BaseModel):
+    """One case a reproduced form is checked against. The arguments are
+    positional, and `solve` is the function they call."""
+
+    model_config = ConfigDict(frozen=True)
+
+    args: list[Any] = Field(default_factory=list[Any])  # positional; empty is legal
+    expected: Any  # required: `None` is a value the form may return
+
+
 class Template(BaseModel):
     """One form reproduced from memory. The unit of recall."""
 
@@ -55,6 +65,9 @@ class Template(BaseModel):
     speedup: bool = True  # false where the form is its own optimum, so no input separates it
     kind: TemplateKind = TemplateKind.CODE
     code: str  # whatever is blank-filled: a runnable unit, or the steps of a method
+    # what a recall is checked against; a template carrying none is read and
+    # never recalled, as `content.md` gives it
+    cases: list[TemplateCase] = Field(default_factory=list[TemplateCase])
 
 
 class Card(BaseModel):

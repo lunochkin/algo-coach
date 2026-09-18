@@ -649,6 +649,19 @@ export interface components {
             kind: components["schemas"]["TemplateKind"];
             /** Code */
             code: string;
+            /** Cases */
+            cases?: components["schemas"]["TemplateCase"][];
+        };
+        /**
+         * TemplateCase
+         * @description One case a reproduced form is checked against. The arguments are
+         *     positional, and `solve` is the function they call.
+         */
+        TemplateCase: {
+            /** Args */
+            args?: unknown[];
+            /** Expected */
+            expected: unknown;
         };
         /**
          * TemplateKind

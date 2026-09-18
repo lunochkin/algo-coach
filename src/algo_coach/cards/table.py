@@ -10,7 +10,7 @@ from sqlalchemy import (
     UniqueConstraint,
     text,
 )
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
 from algo_coach.schema import ProblemDifficulty, TemplateKind
 from algo_coach.storage import enumerated, metadata
@@ -60,4 +60,18 @@ card_templates = Table(
     Index(
         "card_templates_one_optional_idx", "card_id", unique=True, postgresql_where=text("optional")
     ),
+)
+
+
+# one row per case a template's form is checked against, in the authored order
+template_cases = Table(
+    "template_cases",
+    metadata,
+    Column("template_id", Text, ForeignKey("card_templates.id"), primary_key=True),
+    Column("position", Integer, primary_key=True),
+    # JSON of any shape by design, so JSONB. A `None` the form returns is stored
+    # as JSON `null`, a value, so the column stays NOT NULL
+    Column("args", JSONB(none_as_null=False), nullable=False),
+    Column("expected", JSONB(none_as_null=False), nullable=False),
+    CheckConstraint("jsonb_typeof(args) = 'array'", name="args_positional"),
 )

@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, model_validator
 from algo_coach.schema.card import (
     Selector,
     Slug,
+    TemplateCase,
     TemplateKind,
     optional_budget,
     unique_slugs,
@@ -22,6 +23,7 @@ class TemplateSeed(BaseModel):
     speedup: bool = True
     kind: TemplateKind = TemplateKind.CODE
     code: str
+    cases: list[TemplateCase] = Field(default_factory=list[TemplateCase])
 
 
 class CardSeed(BaseModel):

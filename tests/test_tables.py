@@ -24,7 +24,7 @@ from test_schema_additive import RECORDS
 
 import algo_coach
 from algo_coach.calls.table import calls
-from algo_coach.cards.table import card_templates, cards
+from algo_coach.cards.table import card_templates, cards, template_cases
 from algo_coach.cases.table import test_cases
 from algo_coach.drafts.table import (
     SettledField,
@@ -71,6 +71,7 @@ from algo_coach.schema import (
     Solution,
     SolutionClaim,
     Template,
+    TemplateCase,
     TemplateMatch,
     TestCase,
     Verification,
@@ -117,7 +118,13 @@ STORED: list[Stored] = [
     ),
     Stored(TestCase, test_cases, through_call=True, required=frozenset({"call_id"})),
     Stored(Card, cards, elsewhere=frozenset({"templates"})),
-    Stored(Template, card_templates, structural=frozenset({"card_id", "position"})),
+    Stored(
+        Template,
+        card_templates,
+        structural=frozenset({"card_id", "position"}),
+        elsewhere=frozenset({"cases"}),
+    ),
+    Stored(TemplateCase, template_cases, structural=frozenset({"template_id", "position"})),
     Stored(
         Problem,
         problems,
