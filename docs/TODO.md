@@ -8,7 +8,7 @@ The work not yet ready for a phase waits under Further developments.
 
 ### The flows written first
 
-- [ ] Write starting a card run as a sequence in `flows.md`: the start, the
+- [x] Write starting a card run as a sequence in `flows.md`: the start, the
       probes assigned, and what the card shows once a run is open. A detail only
       use can answer is named as deferred
 - [ ] Write solving a rung as a sequence in `flows.md`: the ladder on a card,

@@ -500,6 +500,58 @@ The page layout is not designed here, and using the loop decides it.
 - **Selection never schedules.** Ordering is a view. The user chooses what to
   drill until the scheduler lands.
 
+## Starting a card run
+
+Studying a card is an explicit act. The user opens a card, reads it, and starts
+a run when they mean to study the technique. The ladder is measured from that
+start, and the probes are drawn at it.
+
+1. The card, opened from the Cards section or from a technique's page. The
+   trigger, the brief and the templates read whether or not a run is open.
+2. The user starts the run.
+3. A `CardRun` is minted, carrying when the run began.
+4. The probes are drawn from the corpus and stored on the run: a problem the
+   card's technique carries, unseen first, then least recently attempted, and
+   never one the ladder holds.
+5. The card then shows its ladder, its templates with their recall state, and
+   the probes the run was given.
+
+- **A run is minted rather than inferred from an attempt.** A ladder problem
+  solved before the card began does not count toward the ladder, and only a
+  stored start says which attempts came after it.
+- **The card reads the same before the start and after it.** The trigger, the
+  brief and the templates are the study material, and withholding them until a
+  run opens would make starting a run the price of reading the card.
+- **The ladder is shown before a run opens.** The ladder names the problems
+  studying this card will have the user solve, and the user decides the start on
+  that list. Progress against the ladder is shown once a run measures it.
+- **A card with a gap still starts.** A core template no solution displays is
+  reported on the card, as `content.md` requires, and the rungs the ladder does
+  hold are still worth solving. Refusing the start would leave the user waiting
+  on a problem nobody has written yet.
+- **The probes are drawn at the start, and never at import.** A problem unseen
+  at import need not still be unseen when the user starts the card, and a probe
+  the user has already solved tests no recognition.
+- **A probe is stored on the run, not derived.** The draw reads the attempt log
+  as it stood at the start, so a later attempt would change what a re-derivation
+  returned. The probes the run offered have to stay readable.
+- **Later probes append.** A run given another probe keeps the ones it was given
+  first, so what was offered and when stays readable.
+- **A probe opens the problem page a rung opens**, named by the card it came
+  from. "Solving a rung" gives that page.
+- **The run holds no verdict.** Ladder progress, the recall state of each
+  template, and whether the card is done are folds over the attempts, the recall
+  attempts and the corpus. `log.md` gives why none of the three is stored.
+
+Deferred, since only use answers each:
+
+- How many probes a start draws.
+- When a run is given a further probe, and what asks for one.
+- Whether a card can be started again, and what a second run means for a ladder
+  the first run already measures.
+- The card's reading once every rung is solved and every template recalled.
+  "Done" is a view, and graduation names no threshold yet.
+
 ## Adjudicating the eval set
 
 The reference the classifier is scored against. One writer's blind claims cap
