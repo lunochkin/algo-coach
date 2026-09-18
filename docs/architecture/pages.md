@@ -12,7 +12,7 @@ those steps at low fidelity.
 
 - **The navigation names two sections, Practice and Cards.** Practice holds the
   board, a technique's candidates, a picked problem and the sitting. Cards holds
-  the card list, one card, and the recall trainer Phase 12 adds. Two sections
+  the card list, one card, and the recall trainer Phase 11 adds. Two sections
   cover every page the roadmap plans, so no later page needs a third menu entry.
 - **A signed-in user lands on the board.** Every sitting starts from a technique
   the user picks there, and Phase 13 serves the scheduler's pick on the same
@@ -53,7 +53,7 @@ those steps at low fidelity.
   sentence names the address that was refused and a URL is kept in the
   browser's history.
 - **A query parameter names where the user came from.** The picked problem is
-  `/problems/:problem_id` whichever page offered it, since Phase 12 opens the
+  `/problems/:problem_id` whichever page offered it, since Phase 11 opens the
   same problem as a rung of a card's ladder. `?technique=` names the technique
   the pick came from, and the sitting carries it on as the claim's default
   answer.
@@ -64,7 +64,7 @@ those steps at low fidelity.
 - **A sitting's unsent code is the only state the browser keeps.** The code is
   stored under the sitting's id, so a reload during a sitting restores what the
   user typed. Every other reading is fetched from the API at each load.
-- **The pages Phase 12 adds are deferred to Phase 12**, which writes its flows
+- **The pages Phase 11 adds are deferred to Phase 11**, which writes its flows
   before it builds them: starting a card run, the ladder on a card, and the
   recall trainer.
 

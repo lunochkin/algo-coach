@@ -48,7 +48,7 @@ function App() {
             <Route path="cards/:slug" element={<CardPage />} />
             <Route path="techniques/:technique" element={<TechniquePage />} />
             {/* the path names the problem, and `?technique=` names where the
-                pick came from: Phase 12 opens the same page from a ladder */}
+                pick came from: Phase 11 opens the same page from a ladder */}
             <Route path="problems/:problemId" element={<ProblemPage />} />
             <Route path="sittings/:sittingId" element={<SittingPage />} />
             <Route path={LOGIN} element={<LoginPage />} />

@@ -191,7 +191,8 @@ twice.
 - A defective problem is retired by hand in the terminal, and the board stops
   counting that problem's attempts in either direction.
 - The claim is asked of each attempt when the sitting ends. The self-label
-  waits for Phase 12, where its failure modes are settled.
+  waits for the failure-mode block, which settles `speed`, `rust` and `gap`
+  before anything writes a label under them.
 - 26 of the 74 problems the sweep landed carried no `def solve(...)` line,
   written before a statement had to end on one, and were retired `defective`.
   The board offers 14 techniques on the 48 left.
@@ -248,41 +249,27 @@ each person signs in to a log of their own, and their code runs in a sandbox.
 - Exit met: a sitting on the deployed engine, signed in through a provider,
   from the board to the claim. Its attempt was judged under
   `container/cpython-3.14` at the drill cap. The self-label the loop is
-  specified to ask for is unbuilt, and Phase 12 settles its failure modes.
+  specified to ask for is unbuilt, and the failure-mode block settles its
+  failure modes.
 
 ## Phase 10 — The pages designed (current)
 
-The pages given one design, and the flows Phase 12 adds planned before they are
-built.
+The pages given one design.
 
 - A design system in code: the theme tokens in `web/src/index.css`, the
   components the pages use, and a page showing both.
 - The pages' overall design: the navigation, the main areas and the page a
   signed-in user lands on, written into `docs/architecture/` and applied to
   every existing page.
-- The flows of Phase 12, card runs, the ladder and the recall trainer, written
-  as sequences with a low-fidelity wireframe each. A detail only use can
-  answer is named as deferred.
-- Exit: every existing page is built on the design system, and each Phase 12
-  flow is written and drawn.
+- Exit: every existing page is built on the design system.
 
-## Phase 11 — The matcher, measured
-
-The worth of a generated corpus, measured.
-
-- The hand pass, which writes the matcher's reference and is the only reading
-  of a generated problem no model produced.
-- User matches over pairs of a template and a solution, from the templates
-  alone.
-- The matcher scored per pair and grouped per template, positive verdicts in
-  both directions.
-- A configuration pinned before any number is quoted.
-- Exit: the matcher carries a per-template score in both directions.
-
-## Phase 12 — Ladder, recall and card runs
+## Phase 11 — Ladder, recall and card runs
 
 The pieces a card needs once there are problems to fill it.
 
+- The flows written and drawn first: starting a card run, solving a rung, and
+  recalling a template, each a sequence with a low-fidelity wireframe. A detail
+  only use can answer is named as deferred.
 - The ladder resolved at import from the selector and the template matches, at
   least one rung per core template. An unfilled core template is a
   reported gap.
@@ -297,6 +284,19 @@ The pieces a card needs once there are problems to fill it.
 - Exit: a card run gone through by hand: a card started, a rung of its ladder
   solved, a template recalled cold against the card's tests, and a probe
   offered.
+
+## Phase 12 — The matcher, measured
+
+The worth of a generated corpus, measured.
+
+- The hand pass, which writes the matcher's reference and is the only reading
+  of a generated problem no model produced.
+- User matches over pairs of a template and a solution, from the templates
+  alone.
+- The matcher scored per pair and grouped per template, positive verdicts in
+  both directions.
+- A configuration pinned before any number is quoted.
+- Exit: the matcher carries a per-template score in both directions.
 
 ## Phase 13 — Mastery and scheduling
 

@@ -113,7 +113,7 @@ Every page under a section carries the same two rows above its body.
 - The page asks for one press, and that press starts the clock.
 - The counts are the user's own on this problem, and they say whether the
   problem has been sat before.
-- Phase 12 opens the same page as a rung of a card's ladder. The way back then
+- Phase 11 opens the same page as a rung of a card's ladder. The way back then
   names the card, and the rest of the drawing stands.
 
 ## The sitting

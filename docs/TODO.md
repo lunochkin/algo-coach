@@ -6,9 +6,8 @@ The work not yet ready for a phase waits under Further developments.
 
 ## Phase 10 — the pages designed (current)
 
-The pages given one design, and the flows Phase 12 adds planned before they are
-built. The web app holds a handful of pages, so rebuilding them on one design
-costs least before Phase 12 adds its own.
+The pages given one design. The web app holds a handful of pages, so rebuilding
+them on one design costs least before Phase 11 adds its own.
 
 ### The overall design
 
@@ -42,7 +41,7 @@ costs least before Phase 12 adds its own.
 - [x] Rebuild the Practice pages on the design system: the board, a technique's
       candidates, and the picked problem
 - [x] Move the picked problem to `/problems/:problem_id`, with `?technique=`
-      naming where the pick came from. Phase 12 opens the same problem as a rung
+      naming where the pick came from. Phase 11 opens the same problem as a rung
       of a card's ladder, which no path under a technique can name
 - [x] Serve `GET /api/problems/{problem_id}`: the title, the difficulty, the
       problem's techniques and the user's counts on it, without the statement.
@@ -57,7 +56,12 @@ costs least before Phase 12 adds its own.
       returns, leaving a sitting the user paused alone. The clock counts the
       time on the problem, and a hidden page is time away from it
 
-### Phase 12's flows planned
+### Exit
+- [ ] Build every existing page on the design system
+
+## Phase 11 — ladder, recall and card runs
+
+### The flows written first
 
 - [ ] Write starting a card run as a sequence in `flows.md`: the start, the
       probes assigned, and what the card shows once a run is open. A detail only
@@ -70,11 +74,39 @@ costs least before Phase 12 adds its own.
       `docs/architecture/wireframes.md`. A sequence says what happens in what
       order, and a wireframe says what the user sees
 
-### Exit
-- [ ] Build every existing page on the design system, and write and draw each
-      flow Phase 12 adds
+### The records and the pages
 
-## Phase 11 — the matcher, measured
+- [ ] Resolve the ladder from the matches, the selector filling out to `size`.
+      A retired problem fills no rung
+- [ ] Derive requiredness from the templates a rung covers. A rung covering a
+      core template is required. A rung covering only the optional template is
+      optional. A rung covering both is required, with the optional template
+      offered as the alternative approach
+- [ ] Re-derive the ladder whenever the corpus moves under the ladder, a
+      started card included. Progress is a fold over attempts, so a solved rung
+      stays solved
+- [ ] Add `CardRun`, minted where a card is started, since the ladder is
+      measured from that start. The run holds when the run began and the
+      probes assigned, and later probes append
+- [ ] Add `RecallAttempt`, keyed to a card and a template. A recall attempt has
+      no problem and no submission, so no field keys the record to an attempt.
+      The hints taken before a pass are part of the record
+- [ ] Generate probes from the corpus, as a skill, since choosing a probe is
+      judgment
+- [ ] Build the recall trainer. The template's name is hidden, the user types
+      the form into a blank file from memory, and the file runs against the
+      card's own tests. The template is never printed, since reading the form
+      is not recalling the form
+- [ ] Show a card's status: when each template was last recalled, which rungs
+      are outstanding, and which probes are available. Those are the inputs a
+      graduation rule reads, and no threshold is set yet
+
+### Exit
+- [ ] Go through a card run by hand: start a card, solve a rung of its ladder,
+      recall a template cold against the card's tests, and see a probe
+      offered
+
+## Phase 12 — the matcher, measured
 
 How much a generated corpus is worth, measured. Behind the beta: the drill loop
 needs problems and not a score, and the attempts the loop produces rebuild the
@@ -122,38 +154,6 @@ the audit. Generation goes on without the score.
 
 ### Exit
 - [ ] The matcher carries a per-template score in both directions
-
-## Phase 12 — ladder, recall and card runs
-
-- [ ] Resolve the ladder from the matches, the selector filling out to `size`.
-      A retired problem fills no rung
-- [ ] Derive requiredness from the templates a rung covers. A rung covering a
-      core template is required. A rung covering only the optional template is
-      optional. A rung covering both is required, with the optional template
-      offered as the alternative approach
-- [ ] Re-derive the ladder whenever the corpus moves under the ladder, a
-      started card included. Progress is a fold over attempts, so a solved rung
-      stays solved
-- [ ] Add `CardRun`, minted where a card is started, since the ladder is
-      measured from that start. The run holds when the run began and the
-      probes assigned, and later probes append
-- [ ] Add `RecallAttempt`, keyed to a card and a template. A recall attempt has
-      no problem and no submission, so no field keys the record to an attempt.
-      The hints taken before a pass are part of the record
-- [ ] Generate probes from the corpus, as a skill, since choosing a probe is
-      judgment
-- [ ] Build the recall trainer. The template's name is hidden, the user types
-      the form into a blank file from memory, and the file runs against the
-      card's own tests. The template is never printed, since reading the form
-      is not recalling the form
-- [ ] Show a card's status: when each template was last recalled, which rungs
-      are outstanding, and which probes are available. Those are the inputs a
-      graduation rule reads, and no threshold is set yet
-
-### Exit
-- [ ] Go through a card run by hand: start a card, solve a rung of its ladder,
-      recall a template cold against the card's tests, and see a probe
-      offered
 
 ## Phase 13 — mastery and scheduling
 
