@@ -661,6 +661,8 @@ Deferred, since only use answers each:
 - How many templates one recall asks for before it stops.
 - Whether the user may ask for a template by name, which shows them the title.
 - Whether a template authors a hint of its own beside the three.
+- How a template whose form is a class is exercised, since the cases call one
+  function.
 - The step a failed recall leads to, which the scheduler settles.
 
 ## Adjudicating the eval set

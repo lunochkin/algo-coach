@@ -161,6 +161,8 @@ file in place.
      true, since most forms replace one. Generation searches for the smallest
      input separating the canonical from the reference only where a speedup is
      claimed, and a false claim makes a sound problem read as defective.
+   - **Its own `cases`**, where the form is a function — the only thing that
+     can check a reproduction of it. See below.
    - **`notes` for what is true of this form only**: when it applies, its
      unlock, its variations, what it transfers to, and the derivation of the
      line that goes wrong — the derivation, not a warning. Omit when the trigger
@@ -169,6 +171,34 @@ file in place.
      the naive form that shows why the optimisation exists is a contrast to
      read, marked as one. A template is drilled until automatic, so the wrong
      version must not be one.
+
+   ### The cases the form is checked against
+
+   A recall is typed into a blank file and run. Nothing compares it with the
+   stored code — two correct reproductions differ in their whitespace and in
+   the names they choose — so the cases are the whole verdict, and a template
+   without them is read on the card and never offered for recall.
+
+   - **The form's entry point is `solve`**, as every solution in this engine
+     defines. The cases call it, and the trainer gives that signature to type
+     against, so a form naming its function anything else is a form the recall
+     cannot run.
+   - **Three to six cases, each answering a different question**: the ordinary
+     shape, and every boundary the form's own lines are easy to get wrong at —
+     an empty input, one element, ties, a target past the end, the answer at
+     either edge. A second case of the shape the first already covers decides
+     nothing and runs on every recall.
+   - **The arguments and the expected value are JSON**: integers, strings,
+     booleans and lists of those. A returned value is compared exactly, so a
+     float is the one thing a case may not ask for.
+   - **A case is about the form rather than about the technique.** It checks
+     that what the user typed behaves, and it is not a test suite for every
+     problem the technique reaches.
+   - **A class template and a procedure template carry none.** The cases call
+     one function, and exercising a structure through the form the user types
+     is not settled. Both are read on the card until it is.
+   - **The author's own form must pass them**, which `validate.py` runs. A case
+     the stored form fails would fail every reproduction of it.
 
    ### When the template is a method, not code
 
@@ -189,10 +219,12 @@ file in place.
      where a solve types a function, a class where a solve types a class. A
      structure carried across a whole solve (a disjoint set, a trie node) is a
      class with its methods; forcing it into a standalone function trains a form
-     nobody writes.
+     nobody writes. A function template names its function `solve`, as every
+     solution in this engine does, and the cases below call it.
    - **A later template may use an earlier one by name**, since that is the
      typing order: the base structure, then the lines that use it. Order the
-     templates accordingly.
+     templates accordingly. A blank file holds everything the form needs, so a
+     template carrying cases defines what it uses beside its own `solve`.
    - **No placeholder standing for work** — no `feasible()`, no `complete()`, no
      bare `return True`. A *callable parameter* is not a placeholder: a base
      taking a predicate is the reusable skeleton, and a lambda at the call site
@@ -219,7 +251,9 @@ file in place.
    technique needs, not by what the store happens to hold. A core template
    no problem matches is a reported gap, and generation writes for that gap.
 
-7. **Validate**, and fix what it reports:
+7. **Validate**, and fix what it reports. It matches the file against
+   `CardSeed`, checks the technique codes, parses every template, and runs each
+   template's own form against the cases authored beside it:
 
    ```bash
    uv run python .claude/skills/card-author/validate.py content/cards/<slug>.json

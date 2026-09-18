@@ -24,7 +24,7 @@ The work not yet ready for a phase waits under Further developments.
 - [x] Add `cases` to `TemplateSeed` and `Template`: positional arguments and an
       expected return per case, calling `solve`. The field is optional, so a
       card seeded before it keeps working
-- [ ] Have the `card-author` skill write a template's cases beside its form.
+- [x] Have the `card-author` skill write a template's cases beside its form.
       The author writes the form, and the cases are the only thing that can
       check a reproduction of it
 - [ ] Re-seed the nine cards with cases on every code template, so the trainer

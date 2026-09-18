@@ -1,9 +1,10 @@
 """Check an authored card before it is seeded.
 
-Three things the author cannot see by reading the file: whether it matches
-`CardSeed`, whether the technique code is one the vocabulary carries, and
-whether each template parses. Compiling is not passing — the trainer runs the
-templates for real — but it catches a truncated paste at authoring time.
+Four things the author cannot see by reading the file: whether it matches
+`CardSeed`, whether the technique code is one the vocabulary carries, whether
+each template parses, and whether a template's form passes the cases authored
+beside it. The trainer runs a recalled form against those cases, so a case the
+form itself fails would fail every reproduction of it.
 
 Usage: uv run python .claude/skills/card-author/validate.py
 content/cards/*.json
@@ -14,7 +15,9 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from algo_coach.schema import CardSeed, TemplateKind
+from algo_coach.runner import agrees, defines_solve, run
+from algo_coach.schema import CardSeed, TemplateKind, TemplateSeed
+from algo_coach.sitting import DRILL_CAP_MS
 from algo_coach.techniques import is_known
 
 
@@ -38,6 +41,25 @@ def problems(path: Path) -> list[str]:
             compile(template.code, f"{card.slug}/{template.slug}", "exec")
         except SyntaxError as error:
             found.append(f"template {template.slug} does not parse: {error}")
+            continue
+        found.extend(f"template {template.slug}: {one}" for one in recallable(template))
+    return found
+
+
+def recallable(template: TemplateSeed) -> list[str]:
+    """What stops the trainer checking a reproduction of this form."""
+    if not template.cases:
+        return []  # read on the card, and never offered for recall
+    if not defines_solve(template.code):
+        return ["the cases call `solve`, and the form defines no module-level `solve`"]
+    found = []
+    for index, case in enumerate(template.cases):
+        (ran,) = run(template.code, [case.args], cap_ms=DRILL_CAP_MS)
+        if not ran.returned:
+            raised = "" if ran.error is None else f": {ran.error.splitlines()[-1]}"
+            found.append(f"case {index} {ran.outcome}{raised}")
+        elif not agrees(ran.value, case.expected):
+            found.append(f"case {index} returned {ran.value!r}, not {case.expected!r}")
     return found
 
 
