@@ -38,7 +38,7 @@ The work not yet ready for a phase waits under Further developments.
       core template is required. A rung covering only the optional template is
       optional. A rung covering both is required, with the optional template
       offered as the alternative approach
-- [ ] Re-derive the ladder whenever the corpus moves under it, a started card
+- [x] Re-derive the ladder whenever the corpus moves under it, a started card
       included. Progress is a fold over attempts, so a solved rung stays solved
 - [ ] Report a core template no solution displays as a gap on the card. The
       ladder never substitutes another problem, and a quietly shorter ladder

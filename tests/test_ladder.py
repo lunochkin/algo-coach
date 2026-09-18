@@ -231,3 +231,108 @@ def test_the_optional_template_is_no_gap(database):
     resolved = ladder(held, problems, [canonical("p-1")], matches, [])
 
     assert resolved.gaps == []
+
+
+BEGAN = datetime.fromisoformat("2026-06-01T00:00:00Z")
+BEFORE = datetime.fromisoformat("2026-05-01T00:00:00Z")
+AFTER = datetime.fromisoformat("2026-07-01T00:00:00Z")
+
+
+def test_a_rung_is_solved_by_an_attempt_since_the_run_began(database):
+    """Ladder progress is a fold over the attempts, which is why no mark is
+    written on a rung."""
+    held = a_card(database, size=2)
+    problems = [problem("p-1", techniques=[TECHNIQUE]), problem("p-2", techniques=[TECHNIQUE])]
+    matches = [generator_match(held.templates[0].id, "s-p-1")]
+
+    resolved = ladder(
+        held, problems, [canonical("p-1")], matches, [attempted("p-1", at=AFTER)], since=BEGAN
+    )
+
+    assert [(one.problem.id, one.solved) for one in resolved.rungs] == [
+        ("p-1", True),
+        ("p-2", False),
+    ]
+
+
+def test_an_attempt_before_the_run_began_solves_no_rung(database):
+    """Having solved the problem once is not having studied the form, and the
+    run is minted to draw that line."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+
+    resolved = ladder(held, problems, [], [], [attempted("p-1", at=BEFORE)], since=BEGAN)
+
+    assert [one.solved for one in resolved.rungs] == [False]
+
+
+def test_a_failed_attempt_solves_no_rung(database):
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    failed = attempted("p-1", at=AFTER).model_copy(update={"solved": False})
+
+    resolved = ladder(held, problems, [], [], [failed], since=BEGAN)
+
+    assert [one.solved for one in resolved.rungs] == [False]
+
+
+def test_a_card_with_no_run_measures_no_progress(database):
+    """The ladder is measured from the start, so an attempt outside a run
+    counts toward nothing."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+
+    resolved = ladder(held, problems, [], [], [attempted("p-1", at=AFTER)])
+
+    assert [one.solved for one in resolved.rungs] == [False]
+
+
+def test_a_solved_rung_stays_solved_when_the_corpus_moves(database):
+    """The ladder re-derives under a corpus that grew, and the fold reports
+    the same attempt whatever rung the problem now fills."""
+    held = a_card(database, size=2, optional=True)
+    problems = [problem("p-1", techniques=[TECHNIQUE]), problem("p-2", techniques=[TECHNIQUE])]
+    solutions = [canonical("p-1"), canonical("p-2")]
+    attempts = [attempted("p-1", at=AFTER)]
+    before = ladder(
+        held,
+        problems,
+        solutions,
+        [generator_match(held.templates[0].id, "s-p-1")],
+        attempts,
+        since=BEGAN,
+    )
+
+    # a second form lands on the same problem, so the rung now covers two
+    after = ladder(
+        held,
+        problems,
+        solutions,
+        [generator_match(one.id, "s-p-1") for one in (held.templates[0], held.templates[2])],
+        attempts,
+        since=BEGAN,
+    )
+
+    assert [one.templates for one in before.rungs][0] == [held.templates[0].id]
+    assert [one.templates for one in after.rungs][0] == [
+        held.templates[0].id,
+        held.templates[2].id,
+    ]
+    assert before.rungs[0].solved and after.rungs[0].solved
+
+
+def test_a_retired_problem_leaves_the_ladder_and_the_rest_keeps_its_progress(database):
+    """Re-deriving removes the retired problem, which is the other reason a
+    started card is re-derived."""
+    held = a_card(database, size=2)
+    live = problem("p-live", techniques=[TECHNIQUE])
+    gone = problem("p-gone", techniques=[TECHNIQUE])
+    attempts = [attempted("p-live", at=AFTER), attempted("p-gone", at=AFTER)]
+    solutions = [canonical("p-live"), canonical("p-gone")]
+
+    retired = gone.model_copy(
+        update={"status": ProblemStatus.RETIRED, "retired_reason": RetirementReason.DEFECTIVE}
+    )
+    resolved = ladder(held, [live, retired], solutions, [], attempts, since=BEGAN)
+
+    assert [(one.problem.id, one.solved) for one in resolved.rungs] == [("p-live", True)]

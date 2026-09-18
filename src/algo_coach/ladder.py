@@ -2,6 +2,7 @@
 and the card's selector. A view, never stored: `content.md` gives why."""
 
 from collections.abc import Iterable
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -21,6 +22,9 @@ class Rung(BaseModel):
     problem: Problem
     templates: list[str]  # template ids, in the order the card authored them
     required: bool
+    # folded from the attempts made since the run began, never marked on the
+    # rung: a ladder re-derived under a moved corpus keeps what was solved
+    solved: bool = False
 
 
 class Ladder(BaseModel):
@@ -38,14 +42,20 @@ def ladder(
     solutions: Iterable[Solution],
     matches: Iterable[TemplateMatch],
     attempts: Iterable[Attempt],
+    *,
+    since: datetime | None = None,
 ) -> Ladder:
     """A rung per template the corpus covers, then the selector's fill.
 
     The covering rungs come first, in the order the card authored its
     templates, and the fill follows least recently attempted first. A retired
-    problem fills no rung, here and in `coverage`.
+    problem fills no rung, here and in `coverage`. `since` is when the card's
+    run began, and a rung is solved by an attempt finished after it: having
+    solved the problem once is not having studied the form.
     """
     problems = list(problems)
+    attempts = list(attempts)
+    done = _solved(attempts, since)
     answers = {solution.id: solution.problem_id for solution in solutions}
     offered = _offered(card, problems, attempts)
     rank = {problem.id: place for place, problem in enumerate(offered)}
@@ -66,16 +76,33 @@ def ladder(
         covering.setdefault(filling[0], []).append(covered.template_id)
 
     rungs = [
-        Rung(problem=by_id[id], templates=templates, required=bool(core & set(templates)))
+        Rung(
+            problem=by_id[id],
+            templates=templates,
+            required=bool(core & set(templates)),
+            solved=id in done,
+        )
         for id, templates in covering.items()
     ]
     # out to `size`, and never past a core template the corpus does not cover
     fill = [one for one in offered if one.id not in covering]
     rungs += [
-        Rung(problem=one, templates=[], required=False)
+        Rung(problem=one, templates=[], required=False, solved=one.id in done)
         for one in fill[: max(0, card.selector.size - len(rungs))]
     ]
     return Ladder(card_slug=card.slug, rungs=rungs, gaps=gaps)
+
+
+def _solved(attempts: Iterable[Attempt], since: datetime | None) -> set[str]:
+    """The problems solved since the run began. No run measures nothing, since
+    the ladder is measured from the start."""
+    if since is None:
+        return set()
+    return {
+        attempt.problem_id
+        for attempt in attempts
+        if attempt.solved and attempt.finished_at >= since
+    }
 
 
 def _offered(card: Card, problems: Iterable[Problem], attempts: Iterable[Attempt]) -> list[Problem]:
