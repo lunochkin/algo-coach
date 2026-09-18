@@ -19,7 +19,8 @@ def gaps(args: argparse.Namespace, root: Database) -> None:
         width = max(len(one.card_slug) for one in shown)
         for one in shown:
             print(f"{one.card_slug:<{width}}  {line(one)}")
-    print(f"{len(uncovered(covered))} of {len(covered)} core template(s) carry no solution")
+    core = [one for one in covered if not one.optional]
+    print(f"{len(uncovered(covered))} of {len(core)} core template(s) carry no solution")
 
 
 def line(one: Coverage) -> str:

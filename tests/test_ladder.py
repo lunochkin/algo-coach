@@ -10,12 +10,17 @@ from algo_coach.schema import Attempt, ProblemDifficulty, ProblemStatus, Retirem
 TECHNIQUE = "sliding-window"
 
 
-def a_card(root, size: int = 5, **overrides):
-    """One card with two core templates, as the engine holds it."""
+def a_card(root, size: int = 5, optional: bool = False, **overrides):
+    """One card with two core templates, and the optional one where a test
+    asks for it."""
     (held,) = seeded(
         root,
         card(
-            templates=[template("longest-valid-window"), template("fixed-window")],
+            templates=[
+                template("longest-valid-window"),
+                template("fixed-window"),
+                *([template("shrink-to-fit", optional=True)] if optional else []),
+            ],
             selector={"technique": TECHNIQUE, "size": size} | overrides.pop("selector", {}),
             **overrides,
         ),
@@ -154,3 +159,75 @@ def test_a_user_match_stands_over_the_generator_s(database):
 
     assert resolved.gaps == [one.slug for one in held.templates]
     assert [one.templates for one in resolved.rungs] == [[]]
+
+
+def test_a_rung_covering_a_core_template_is_required(database):
+    """The card claims to teach the form, so the rung that teaches it is not
+    a suggestion."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    matches = [generator_match(held.templates[0].id, "s-p-1")]
+
+    resolved = ladder(held, problems, [canonical("p-1")], matches, [])
+
+    assert [(one.problem.id, one.required) for one in resolved.rungs] == [("p-1", True)]
+
+
+def test_a_rung_covering_the_optional_template_alone_is_optional(database):
+    """A card is covered without its optional template, so the rung that
+    teaches that form alone is a stretch rather than the day's work."""
+    held = a_card(database, size=1, optional=True)
+    problems = [problem("p-1", techniques=[TECHNIQUE]), problem("p-2", techniques=[TECHNIQUE])]
+    solutions = [canonical("p-1"), canonical("p-2")]
+    matches = [
+        generator_match(held.templates[0].id, "s-p-1"),
+        generator_match(held.templates[2].id, "s-p-2"),
+    ]
+
+    resolved = ladder(held, problems, solutions, matches, [])
+
+    assert [(one.problem.id, one.required) for one in resolved.rungs] == [
+        ("p-1", True),
+        ("p-2", False),
+    ]
+
+
+def test_a_rung_covering_both_is_required_and_offers_the_alternative(database):
+    """One problem two forms solve is one rung, required for the core form,
+    with the optional form offered as the other approach."""
+    held = a_card(database, size=1, optional=True)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    matches = [generator_match(one.id, "s-p-1") for one in (held.templates[0], held.templates[2])]
+
+    resolved = ladder(held, problems, [canonical("p-1")], matches, [])
+
+    (rung,) = resolved.rungs
+    assert rung.required
+    assert rung.templates == [held.templates[0].id, held.templates[2].id]
+
+
+def test_a_fill_rung_is_optional(database):
+    """The selector's fill exercises the technique and teaches no form of it,
+    so nothing on the card requires it."""
+    held = a_card(database, size=2)
+    problems = [problem("p-1", techniques=[TECHNIQUE]), problem("p-2", techniques=[TECHNIQUE])]
+    matches = [generator_match(held.templates[0].id, "s-p-1")]
+
+    resolved = ladder(held, problems, [canonical("p-1")], matches, [])
+
+    assert [(one.problem.id, one.required) for one in resolved.rungs] == [
+        ("p-1", True),
+        ("p-2", False),
+    ]
+
+
+def test_the_optional_template_is_no_gap(database):
+    """The gap report skips it: a card is covered without it, and no
+    generation run is aimed at it."""
+    held = a_card(database, size=1, optional=True)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    matches = [generator_match(one.id, "s-p-1") for one in held.templates[:2]]
+
+    resolved = ladder(held, problems, [canonical("p-1")], matches, [])
+
+    assert resolved.gaps == []

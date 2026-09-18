@@ -11,14 +11,16 @@ from algo_coach.schema import Attempt, Card, Problem, Solution, TemplateMatch
 
 
 class Rung(BaseModel):
-    """One problem on a ladder, with the core templates its canonicals display.
+    """One problem on a ladder, with the templates its canonicals display.
 
-    A rung the selector filled covers none, and requiredness is derived from
-    what it covers rather than stored.
+    A rung the selector filled covers none. `required` is derived from what the
+    rung covers rather than stored, and a rung covering the optional template
+    beside a core one offers that form as the alternative approach.
     """
 
     problem: Problem
     templates: list[str]  # template ids, in the order the card authored them
+    required: bool
 
 
 class Ladder(BaseModel):
@@ -37,7 +39,7 @@ def ladder(
     matches: Iterable[TemplateMatch],
     attempts: Iterable[Attempt],
 ) -> Ladder:
-    """A rung per core template the corpus covers, then the selector's fill.
+    """A rung per template the corpus covers, then the selector's fill.
 
     The covering rungs come first, in the order the card authored its
     templates, and the fill follows least recently attempted first. A retired
@@ -51,21 +53,27 @@ def ladder(
 
     covering: dict[str, list[str]] = {}
     gaps: list[str] = []
+    core = {template.id for template in card.templates if not template.optional}
     for covered in coverage([card], problems, solutions, matches):
         filling = sorted(
             {answers[one] for one in covered.solution_ids if answers.get(one) in by_id},
             key=lambda id: (rank.get(id, len(rank)), id),
         )
         if not filling:
-            gaps.append(covered.template_slug)
+            if covered.gap:
+                gaps.append(covered.template_slug)
             continue
         covering.setdefault(filling[0], []).append(covered.template_id)
 
-    rungs = [Rung(problem=by_id[id], templates=templates) for id, templates in covering.items()]
+    rungs = [
+        Rung(problem=by_id[id], templates=templates, required=bool(core & set(templates)))
+        for id, templates in covering.items()
+    ]
     # out to `size`, and never past a core template the corpus does not cover
     fill = [one for one in offered if one.id not in covering]
     rungs += [
-        Rung(problem=one, templates=[]) for one in fill[: max(0, card.selector.size - len(rungs))]
+        Rung(problem=one, templates=[], required=False)
+        for one in fill[: max(0, card.selector.size - len(rungs))]
     ]
     return Ladder(card_slug=card.slug, rungs=rungs, gaps=gaps)
 
