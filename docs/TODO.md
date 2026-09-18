@@ -15,7 +15,7 @@ The work not yet ready for a phase waits under Further developments.
       the rung picked, the sitting it opens, and where that sitting returns
 - [x] Write recalling a template as a sequence in `flows.md`: what names the
       template, the hints offered, the blank file and the card's own tests
-- [ ] Draw a low-fidelity wireframe per step of those three flows into
+- [x] Draw a low-fidelity wireframe per step of those three flows into
       `docs/architecture/wireframes.md`. A sequence says what happens in what
       order, and a wireframe says what the user sees
 

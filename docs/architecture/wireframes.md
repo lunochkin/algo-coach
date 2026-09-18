@@ -1,8 +1,9 @@
 # Wireframes
 
-Every page of the web app, drawn at low fidelity. Part of the architecture, and
-`README.md` is the map. `pages.md` gives the sections, the pages and the design
-system. This file draws what the user sees on each page.
+Every page of the web app, drawn at low fidelity, and the pages Phase 11 adds
+beside them. Part of the architecture, and `README.md` is the map. `pages.md`
+gives the sections, the pages and the design system, and `flows.md` gives the
+steps of a flow. This file draws what the user sees at each step.
 
 - **A drawing fixes what sits on a page and in what order.** The size of a box,
   the weight of a line and the wording of a label are the design system's to
@@ -358,3 +359,197 @@ Every page under a section carries the same two rows above its body.
 - One component renders the three, so a page that is loading, failed or empty
   reads the same wherever the user stands.
 - The failure names what failed and offers the request again.
+
+## A card, before a run
+
+```
++- /cards/binary-search, no run open ------------------------------------+
+| algo-coach      Practice  [ Cards ]               Sign out             |
++------------------------------------------------------------------------+
+| < Cards                                                                |
+| Binary search                                                          |
+| binary-search                                                          |
+|                                                                        |
+| When to reach for it                                                   |
+| the trigger, one or two lines                                          |
+|                                                                        |
+| the brief, as prose                                                    |
+| ...........................................................            |
+|                                                                        |
+|         [ Start studying this card ]                                   |
+|                                                                        |
+| Ladder                                        5 rungs                  |
+|    Smallest feasible speed                    required                 |
+|    Split the array                            required                 |
+|    Ship within days                           optional                 |
+|    ...                                                                 |
+|    No problem covers 'upper bound' yet             a gap               |
+|                                                                        |
+| Templates                                                              |
+| +--------------------------------------------------------+             |
+| | Lower bound                                            |             |
+| | trigger: ............................................  |             |
+| | ########  the form, blurred  ########                  |             |
+| |            [ Reveal the form ]                         |             |
+| +--------------------------------------------------------+             |
++------------------------------------------------------------------------+
+```
+
+- The trigger, the brief and the templates read before a run opens, so starting
+  a run is not the price of reading the card.
+- The ladder is listed before the start, since the user decides the start on
+  the list of problems it names. No rung carries progress yet.
+- A core template no problem covers is named on the card as a gap, and the card
+  starts anyway.
+
+## A card, once a run is open
+
+```
++- /cards/binary-search, a run open -------------------------------------+
+| algo-coach      Practice  [ Cards ]               Sign out             |
++------------------------------------------------------------------------+
+| < Cards                                                                |
+| Binary search                                                          |
+| binary-search . studying since 3 days ago                              |
+|                                                                        |
+| Ladder                            2 of 5 rungs solved                  |
+|    [x] Smallest feasible speed                required                 |
+|    [x] Split the array                        required                 |
+|    [ ] Ship within days                       optional                 |
+|    [ ] Minimise the maximum                   required                 |
+|                                                                        |
+| Recall                                                                 |
+|    Lower bound        2 days ago, no hint taken                        |
+|    Upper bound        never recalled                                   |
+|    [ Recall a form ]                                                   |
+|                                                                        |
+| Probes                             drawn at the start                  |
+|    Kth smallest pair distance      not attempted                       |
+|                                                                        |
+| Templates                          the trigger and the                 |
+|                                    form, as above                      |
++------------------------------------------------------------------------+
+```
+
+- The same card, with three views the run makes readable: the ladder's
+  progress, the recall state of each template, and the probes the start drew.
+- Every one of the three is a fold rather than a stored verdict, so a corpus
+  that moved under the card re-derives them.
+- The probes sit apart from the ladder, since a probe is never drawn from it.
+
+## A rung of the ladder
+
+```
++- the ladder, one rung -------------------------------------------------+
+| [ ] Split the array                            required                |
+|     covers: lower bound, upper bound                                   |
+|     hard . 0 attempt(s) since the run began                            |
++------------------------------------------------------------------------+
+```
+
+- A rung names the templates it covers, so the user reads why this problem is
+  on this ladder.
+- The templates decide whether the rung is required, which no record stores.
+- The count is the attempts since the run began, since an earlier attempt
+  counts for nothing.
+
+## The picked problem, opened from a card
+
+```
++- /problems/p-8c21?card=binary-search ----------------------------------+
+| algo-coach      [ Practice ]  Cards              Sign out              |
++------------------------------------------------------------------------+
+| < Binary search                                                        |
+| Split the array                                                        |
+| hard . 0 attempt(s), - solved . last never                             |
+|                                                                        |
+| Cards: Binary search                                                   |
+|                                                                        |
+|         +---------------------+                                        |
+|         |  Start the sitting  |   the sitting returns to               |
+|         +---------------------+   the card it came from                |
+|                                                                        |
+| No statement on this page.                                             |
++------------------------------------------------------------------------+
+```
+
+- The page is the one a technique's candidates open, with the card named in
+  place of the technique.
+- The way back returns to the card, and the sitting returns there when it ends.
+
+## The recall trainer, before a hint
+
+```
++- the recall trainer, before a hint ------------------------------------+
+| algo-coach      Practice  [ Cards ]               Sign out             |
++------------------------------------------------------------------------+
+| < Binary search                                                        |
+| Recall a form                                                          |
+| the title and the form are withheld                                    |
+|                                                                        |
+| When to reach for it                                                   |
+|    the template's trigger, one or two lines                            |
+|                                                                        |
+| +--------------------------------------------------------+             |
+| | def solve(xs, target):                                 |             |
+| |     |                                                  |             |
+| |                                                        |             |
+| |          the blank file                                |             |
+| +--------------------------------------------------------+             |
+|                                                                        |
+| [ Run ]                        [ Hint: the title ]                     |
++------------------------------------------------------------------------+
+```
+
+- The trigger names the template. The title and the form are withheld, and
+  mapping the trigger to the form is the recall being measured.
+- The signature is shown, since the cases call the form with a parameter order
+  the user cannot infer.
+- The file is otherwise blank, and the editor proposes nothing.
+
+## The recall trainer, with hints taken
+
+```
++- the recall trainer, two hints taken ----------------------------------+
+| < Binary search                                                        |
+| Recall a form                                                          |
+|                                                                        |
+| When to reach for it                                                   |
+|    the template's trigger, one or two lines                            |
+|                                                                        |
+| Title    Lower bound                        hint 1                     |
+| Notes    the authored notes, as prose       hint 2                     |
+|                                                                        |
+| +--------------------------------------------------------+             |
+| | def solve(xs, target):                                 |             |
+| |     lo, hi = 0, len(xs)                                |             |
+| |     while lo < hi:                                     |             |
+| |         |                                              |             |
+| +--------------------------------------------------------+             |
+|                                                                        |
+| [ Run ]                         [ Hint: the form ]                     |
++------------------------------------------------------------------------+
+```
+
+- The hints arrive in one order, and each one stays on the page: the title,
+  then the notes, then the form.
+- The press names the hint it gives next, so the user knows the price before
+  taking it.
+
+## A recall attempt, run
+
+```
++- the recall attempt, run ----------------------------------------------+
+| Lower bound                                                            |
+| 6 of 6 cases passed, 2 hints taken                                     |
+| + + + + + +                                                            |
+|                                                                        |
+| A hinted pass is not a pass: the record keeps both.                    |
+|                                                                        |
+| [ Recall another ]              [ Back to the card ]                   |
++------------------------------------------------------------------------+
+```
+
+- The cases decide the attempt, and the strip reads as the verdict's does.
+- The hints taken are shown beside the outcome, since a hinted pass is not a
+  pass.
