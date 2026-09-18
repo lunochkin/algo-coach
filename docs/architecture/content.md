@@ -131,6 +131,17 @@ technique, and a card and a mastery estimate share no data.
   code unasked removes that chance for every template alike. The card's
   trigger and brief stay visible, since they say when to reach for the
   technique rather than how the form is written.
+- **A template carries the cases its form is checked against.** The trainer
+  runs what the user typed rather than comparing it with the stored code. Two
+  correct reproductions of one form differ in their whitespace and in the names
+  they choose, and neither difference is a recall failure.
+- **The cases call `solve`**, as a problem's cases do. `corpus.md` gives why
+  that name is fixed: a function called `lower_bound` announces the form the
+  recall is asking for.
+- **A template with no cases is read and never recalled.** The cases are an
+  added field, so a card authored before it keeps working, and a template whose
+  form no case checks is study material rather than a recall subject. A
+  procedure template carries prose steps, which no case decides.
 - **The ladder is resolved at import and re-derived whenever the corpus moves
   under it.** The selector is the truth and the ladder a derived view, so
   resolving the ladder again costs nothing. A started card is re-derived too.

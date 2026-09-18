@@ -13,7 +13,7 @@ The work not yet ready for a phase waits under Further developments.
       use can answer is named as deferred
 - [x] Write solving a rung as a sequence in `flows.md`: the ladder on a card,
       the rung picked, the sitting it opens, and where that sitting returns
-- [ ] Write recalling a template as a sequence in `flows.md`: what names the
+- [x] Write recalling a template as a sequence in `flows.md`: what names the
       template, the hints offered, the blank file and the card's own tests
 - [ ] Draw a low-fidelity wireframe per step of those three flows into
       `docs/architecture/wireframes.md`. A sequence says what happens in what

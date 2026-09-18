@@ -260,7 +260,7 @@ times. Each record class is specified in one of the files beside it.
 | [`corpus.md`](corpus.md) | Problems, test cases, solutions, solution claims |
 | [`log.md`](log.md) | Sittings, attempts, attempt verifications, claims, self-labels, diagnoses, card runs, recall attempts |
 | [`machine.md`](machine.md) | What a model-written record carries, what a generation run's call sites leave, and the call log |
-| [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, starting a card run, solving a rung, adjudicating the eval set |
+| [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, starting a card run, solving a rung, recalling a template, adjudicating the eval set |
 | [`pages.md`](pages.md) | The web app's sections and pages, a page's areas, the design system |
 | [`wireframes.md`](wireframes.md) | Each page drawn at low fidelity |
 

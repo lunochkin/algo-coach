@@ -608,6 +608,61 @@ Deferred, since only use answers each:
 - The card's reading where a required rung's problem was retired and no problem
   replaces it.
 
+## Recalling a template
+
+A form reproduced from memory, typed into a blank file and run against the
+cases the template carries. Reading the form is not recalling it, so the
+trainer never prints the form until the user asks for it as a hint.
+
+1. The user starts a recall on the card.
+2. The trainer draws one template: never recalled first, then least recently
+   recalled.
+3. The template's trigger is shown, and its title and its form are withheld.
+4. The signature the cases call is shown, and the file is otherwise blank.
+5. The user types the form, and asks for a hint where memory fails: the title,
+   then the notes, then the form itself.
+6. The file runs against the template's cases, under the runner a submission
+   runs under.
+7. A `RecallAttempt` is written, carrying the hints taken and how the cases
+   went.
+
+- **The trigger names the template, and the title does not.** The trigger says
+  when to reach for this form, and mapping that situation to the form is the
+  recall the trainer measures. A title names the form, which answers half the
+  question before the user types a line.
+- **The card still lists its templates by title.** A user knows which forms the
+  card teaches, and hiding the list would hide what studying the card covers.
+  The trainer withholds which of them this attempt asks for.
+- **The signature is shown.** The cases call the form with a parameter order,
+  and that order has to be stated somewhere, as `corpus.md` says of a
+  statement. A signature the user infers wrongly fails every case for a form
+  recalled correctly.
+- **The file is otherwise blank, and the editor proposes nothing.** The editor
+  the drill loop gives holds the same rule, and a solver offered `bisect_left`
+  after three characters has recalled no form.
+- **The hints are three, in one order: the title, the notes, the form.** Each
+  answers more of the question than the last, so a record of which hint was
+  taken says how far the memory reached.
+- **A hinted pass is recorded as a pass with its hints**, which `log.md`
+  requires. Reading the form and typing it back is the last hint rather than a
+  separate outcome, and the record says which hints were taken.
+- **The trainer runs the file rather than comparing it with the stored form.**
+  A comparison would fail a reproduction that renamed a variable, and pass one
+  that copied the form with its loop condition inverted.
+- **A recall attempt needs no open card run.** The record is keyed to a card
+  and a template, as `log.md` gives it, and the run measures the ladder rather
+  than the recall.
+- **The trainer draws, and nothing schedules.** Never recalled first, then
+  least recently recalled, which is the ordering the board uses for a
+  technique. The scheduler Phase 13 adds may draw differently.
+
+Deferred, since only use answers each:
+
+- How many templates one recall asks for before it stops.
+- Whether the user may ask for a template by name, which shows them the title.
+- Whether a template authors a hint of its own beside the three.
+- The step a failed recall leads to, which the scheduler settles.
+
 ## Adjudicating the eval set
 
 The reference the classifier is scored against. One writer's blind claims cap
