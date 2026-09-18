@@ -11,7 +11,7 @@ The work not yet ready for a phase waits under Further developments.
 - [x] Write starting a card run as a sequence in `flows.md`: the start, the
       probes assigned, and what the card shows once a run is open. A detail only
       use can answer is named as deferred
-- [ ] Write solving a rung as a sequence in `flows.md`: the ladder on a card,
+- [x] Write solving a rung as a sequence in `flows.md`: the ladder on a card,
       the rung picked, the sitting it opens, and where that sitting returns
 - [ ] Write recalling a template as a sequence in `flows.md`: what names the
       template, the hints offered, the blank file and the card's own tests

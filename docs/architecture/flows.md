@@ -552,6 +552,62 @@ Deferred, since only use answers each:
 - The card's reading once every rung is solved and every template recalled.
   "Done" is a view, and graduation names no threshold yet.
 
+## Solving a rung
+
+The card has the user solve problems, and each of them is a rung of its ladder.
+The rung is picked on the card, sat as any problem is, and the sitting returns
+to the card it came from.
+
+1. The ladder on the card: a rung per problem, each naming the templates it
+   covers and whether it is required.
+2. The user picks a rung.
+3. The problem's page opens, named by the card the pick came from, and the
+   sitting starts on the press that serves the statement.
+4. The submission, the verdict and the claim run as the drill loop gives them.
+5. The sitting ends and returns to the card, where the next rung is.
+
+- **The ladder follows the card's own template order.** A card authors its
+  templates in the order it teaches them, and a rung covering the first template
+  comes before a rung covering the third. The rungs the selector fills the
+  ladder out with follow, least recently attempted first, as a technique's
+  candidates are ordered.
+- **A rung names the templates it covers**, so the user reads why this problem
+  is on this ladder. The templates also decide whether the rung is required,
+  which `content.md` derives rather than stores.
+- **A rung carries no statement**, as a candidate carries none. The clock starts
+  when the statement is served, and a statement read on the card is read
+  untimed.
+- **The problem's page is the one a technique's candidates open.** A rung is a
+  problem, and a second page for the same record would serve the same statement
+  under another URL.
+- **The page names the card rather than a technique**, since the user came from
+  the card. The way back returns to the card, and the claim answers for the
+  card's own technique.
+- **The sitting returns to the card.** A user solving a ladder is working
+  through a list, and returning to the board would make them find the card
+  again for every rung.
+- **Progress is a fold over attempts, never a mark on a rung.** A rung is solved
+  where an attempt on its problem, finished after the run began, was solved. The
+  rung carries no mark, so a ladder re-derived under a moved corpus keeps every
+  rung the user already solved.
+- **An attempt reached from the board counts too.** The fold reads the attempts
+  on the rung's problem, whichever page served them, since the ladder measures
+  solving rather than the route taken to it.
+- **An attempt finished before the run began counts for nothing.** Having solved
+  the problem once is not having studied the form. The run is minted to draw
+  that line.
+- **A retired problem fills no rung**, and the ladder is re-derived.
+  `content.md` gives both, and the attempts on the retired problem stay in the
+  log.
+
+Deferred, since only use answers each:
+
+- Whether a rung the user skips is marked, and what marks it.
+- Whether the ladder is extended while a run is open, and what asks for more
+  rungs.
+- The card's reading where a required rung's problem was retired and no problem
+  replaces it.
+
 ## Adjudicating the eval set
 
 The reference the classifier is scored against. One writer's blind claims cap
