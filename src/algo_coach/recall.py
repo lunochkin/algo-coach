@@ -4,14 +4,16 @@ The runner a submission uses, at the same cap: a recall executes code a user
 wrote, and nothing about it is safer than a submission.
 """
 
-from collections.abc import Sequence
+import ast
+from collections.abc import Iterable, Sequence
 from datetime import UTC, datetime, timedelta
 
 from algo_coach import mint
-from algo_coach.log import RecallLog
+from algo_coach.log import RecallLog, latest_recalls
 from algo_coach.runner import CaseRun, agrees, as_json, run, runner
 from algo_coach.schema import (
     LADDER,
+    Card,
     CaseOutcome,
     CaseResult,
     Execution,
@@ -95,3 +97,37 @@ def settled(value: Json, unordered: bool) -> Json:
     if not unordered or not isinstance(value, list):
         return value
     return sorted(value, key=as_json)
+
+
+def drawn(card: Card, recalled: Iterable[RecallAttempt]) -> Template | None:
+    """The template the trainer asks for: never recalled first, then least
+    recently recalled. `None` where no template of this card carries cases."""
+    latest = latest_recalls(recalled)
+    offered = [one for one in card.templates if one.cases]
+    if not offered:
+        return None
+    return min(offered, key=lambda one: _staleness(latest.get(one.id)))
+
+
+def signature(template: Template) -> str:
+    """The line the cases call, which the trainer gives the user to type
+    against. `corpus.md`: the parameter order has to be stated somewhere."""
+    for node in ast.parse(template.code).body:
+        if isinstance(node, ast.FunctionDef) and node.name == "solve":
+            returns = f" -> {ast.unparse(node.returns)}" if node.returns else ""
+            return f"def solve({ast.unparse(node.args)}){returns}:"
+    raise Missing(f"template {template.slug} defines no `solve` for a recall to answer")
+
+
+def reveal(template: Template, hint: Hint) -> str:
+    """What one hint gives. Each answers more of the question than the last."""
+    if hint is Hint.TITLE:
+        return template.title
+    if hint is Hint.NOTES:
+        return template.notes or "This form carries no notes."
+    return template.code
+
+
+def _staleness(one: RecallAttempt | None) -> tuple[int, datetime]:
+    # never recalled sorts ahead of every reproduction, whatever its moment
+    return (1, one.created_at) if one else (0, datetime.min.replace(tzinfo=UTC))

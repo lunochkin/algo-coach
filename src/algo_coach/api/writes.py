@@ -18,6 +18,7 @@ from algo_coach.recall import reproduce
 from algo_coach.schema import (
     Attempt,
     AttemptClaim,
+    Card,
     CardRun,
     Confidence,
     Hint,
@@ -95,28 +96,34 @@ def started(root: Root, user_id: UserId, slug: str) -> CardRun:
     )
 
 
-# the template by its authored slug, as the card is: an id is minted per store
-@router.post("/cards/{slug}/templates/{template_slug}/recalls")
+# by the minted id rather than the authored slug: a slug spells the form's own
+# name, and the trainer withholds it
+@router.post("/cards/{slug}/recall/{template_id}")
 def recalled(
-    root: Root, user_id: UserId, slug: str, template_slug: str, body: Reproduction
+    root: Root, user_id: UserId, slug: str, template_id: str, body: Reproduction
 ) -> RecallAttempt:
-    card = CardStore(root).by_slug(slug)
-    if card is None:
-        raise HTTPException(status_code=404, detail=f"no card {slug}")
+    card = _card(root, slug)
     return reproduce(
         RecallLog(root),
         card.id,
-        _template(card.templates, template_slug),
+        _template(card, template_id),
         body.code,
         body.hints,
         user_id=user_id,
     )
 
 
-def _template(templates: list[Template], slug: str) -> Template:
-    found = [one for one in templates if one.slug == slug]
+def _card(root: Database, slug: str) -> Card:
+    found = CardStore(root).by_slug(slug)
+    if found is None:
+        raise HTTPException(status_code=404, detail=f"no card {slug}")
+    return found
+
+
+def _template(card: Card, template_id: str) -> Template:
+    found = [one for one in card.templates if one.id == template_id]
     if not found:
-        raise HTTPException(status_code=404, detail=f"no template {slug}")
+        raise HTTPException(status_code=404, detail=f"no template {template_id}")
     return found[0]
 
 

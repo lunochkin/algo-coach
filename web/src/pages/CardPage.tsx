@@ -160,7 +160,12 @@ function RecallView({ studied }: { studied: Studied }) {
 
   return (
     <section className="space-y-1">
-      <h2 className="text-heading font-medium">Recall</h2>
+      <div className="flex items-baseline justify-between">
+        <h2 className="text-heading font-medium">Recall</h2>
+        <Button variant="outline" size="sm" asChild>
+          <Link to={`/cards/${encodeURIComponent(studied.card.slug)}/recall`}>Recall a form</Link>
+        </Button>
+      </div>
       <ul className="space-y-1">
         {studied.recall.map((one: Recalled) => (
           <li key={one.template_id} className="flex flex-wrap items-baseline gap-2">

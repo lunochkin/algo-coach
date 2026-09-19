@@ -14,6 +14,9 @@ import { TechniquePage } from '@/pages/TechniquePage'
 // loaded when first opened: the editor and the markdown with its math are most
 // of the bundle, and the board needs neither
 const CardPage = lazy(() => import('@/pages/CardPage').then((m) => ({ default: m.CardPage })))
+const RecallPage = lazy(() =>
+  import('@/pages/RecallPage').then((m) => ({ default: m.RecallPage })),
+)
 const SittingPage = lazy(() =>
   import('@/pages/SittingPage').then((m) => ({ default: m.SittingPage })),
 )
@@ -46,6 +49,7 @@ function App() {
             <Route index element={<BoardPage />} />
             <Route path="cards" element={<CardsPage />} />
             <Route path="cards/:slug" element={<CardPage />} />
+            <Route path="cards/:slug/recall" element={<RecallPage />} />
             <Route path="techniques/:technique" element={<TechniquePage />} />
             {/* the path names the problem, and `?technique=` names where the
                 pick came from: Phase 11 opens the same page from a ladder */}

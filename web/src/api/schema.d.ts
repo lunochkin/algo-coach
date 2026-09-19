@@ -55,6 +55,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/cards/{slug}/recall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Prompt */
+        get: operations["prompt_api_cards__slug__recall_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cards/{slug}/recall/{template_id}/hints/{hint}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Hinted */
+        get: operations["hinted_api_cards__slug__recall__template_id__hints__hint__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/techniques/{technique}/cards": {
         parameters: {
             query?: never;
@@ -157,7 +191,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/cards/{slug}/templates/{template_slug}/recalls": {
+    "/api/cards/{slug}/recall/{template_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -167,7 +201,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Recalled */
-        post: operations["recalled_api_cards__slug__templates__template_slug__recalls_post"];
+        post: operations["recalled_api_cards__slug__recall__template_id__post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -557,6 +591,12 @@ export interface components {
          * @enum {string}
          */
         Hint: "title" | "notes" | "form";
+        /** Hinted */
+        Hinted: {
+            hint: components["schemas"]["Hint"];
+            /** Text */
+            text: string;
+        };
         /**
          * Offered
          * @description What the login page offers.
@@ -672,6 +712,20 @@ export interface components {
          * @enum {string}
          */
         ProblemStatus: "created" | "retired";
+        /**
+         * Prompted
+         * @description What the trainer shows: the template's trigger and the signature its
+         *     cases call. The title and the form are withheld, and mapping the trigger
+         *     to the form is the recall being measured.
+         */
+        Prompted: {
+            /** Template Id */
+            template_id: string;
+            /** Trigger */
+            trigger: string;
+            /** Signature */
+            signature: string;
+        };
         /**
          * Provider
          * @description Who holds an identity and its login: `README.md`.
@@ -1030,6 +1084,70 @@ export interface operations {
             };
         };
     };
+    prompt_api_cards__slug__recall_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Prompted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    hinted_api_cards__slug__recall__template_id__hints__hint__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+                template_id: string;
+                hint: components["schemas"]["Hint"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Hinted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     cards_api_techniques__technique__cards_get: {
         parameters: {
             query?: never;
@@ -1216,13 +1334,13 @@ export interface operations {
             };
         };
     };
-    recalled_api_cards__slug__templates__template_slug__recalls_post: {
+    recalled_api_cards__slug__recall__template_id__post: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 slug: string;
-                template_slug: string;
+                template_id: string;
             };
             cookie?: never;
         };

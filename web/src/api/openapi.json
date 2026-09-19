@@ -84,6 +84,101 @@
         }
       }
     },
+    "/api/cards/{slug}/recall": {
+      "get": {
+        "summary": "Prompt",
+        "operationId": "prompt_api_cards__slug__recall_get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prompted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cards/{slug}/recall/{template_id}/hints/{hint}": {
+      "get": {
+        "summary": "Hinted",
+        "operationId": "hinted_api_cards__slug__recall__template_id__hints__hint__get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          },
+          {
+            "name": "template_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Template Id"
+            }
+          },
+          {
+            "name": "hint",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Hint"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hinted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/techniques/{technique}/cards": {
       "get": {
         "summary": "Cards",
@@ -326,10 +421,10 @@
         }
       }
     },
-    "/api/cards/{slug}/templates/{template_slug}/recalls": {
+    "/api/cards/{slug}/recall/{template_id}": {
       "post": {
         "summary": "Recalled",
-        "operationId": "recalled_api_cards__slug__templates__template_slug__recalls_post",
+        "operationId": "recalled_api_cards__slug__recall__template_id__post",
         "parameters": [
           {
             "name": "slug",
@@ -341,12 +436,12 @@
             }
           },
           {
-            "name": "template_slug",
+            "name": "template_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Template Slug"
+              "title": "Template Id"
             }
           }
         ],
@@ -1317,6 +1412,23 @@
         "title": "Hint",
         "description": "What the trainer gives when memory fails, in the order it gives them.\nEach answers more of the question than the last."
       },
+      "Hinted": {
+        "properties": {
+          "hint": {
+            "$ref": "#/components/schemas/Hint"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hint",
+          "text"
+        ],
+        "title": "Hinted"
+      },
       "Offered": {
         "properties": {
           "providers": {
@@ -1661,6 +1773,30 @@
           "retired"
         ],
         "title": "ProblemStatus"
+      },
+      "Prompted": {
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "title": "Template Id"
+          },
+          "trigger": {
+            "type": "string",
+            "title": "Trigger"
+          },
+          "signature": {
+            "type": "string",
+            "title": "Signature"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_id",
+          "trigger",
+          "signature"
+        ],
+        "title": "Prompted",
+        "description": "What the trainer shows: the template's trigger and the signature its\ncases call. The title and the form are withheld, and mapping the trigger\nto the form is the recall being measured."
       },
       "Provider": {
         "type": "string",

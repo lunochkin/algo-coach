@@ -71,7 +71,7 @@ The work not yet ready for a phase waits under Further developments.
 
 - [x] Rebuild the card page on its two wireframes: the start press, the ladder,
       the recall state and the probes
-- [ ] Build the recall trainer page: the trigger shown, the title and the form
+- [x] Build the recall trainer page: the trigger shown, the title and the form
       withheld, the signature given, the file blank and the hints in one order
 - [ ] Read `?card=` on the problem page: the way back names the card, and the
       claim answers for the card's technique

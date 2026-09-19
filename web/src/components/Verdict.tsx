@@ -1,32 +1,17 @@
 import { useState } from 'react'
 
-import type { Failure, Submitted } from '@/api/client'
+import type { CaseResult, Failure, Submitted } from '@/api/client'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-
-const OUTCOME = {
-  passed: { label: 'passed', mark: 'bg-verdict-passed', text: 'text-verdict-passed' },
-  wrong: { label: 'wrong answer', mark: 'bg-verdict-wrong', text: 'text-verdict-wrong' },
-  timeout: { label: 'timed out', mark: 'bg-verdict-timeout', text: 'text-verdict-timeout' },
-  crashed: { label: 'crashed', mark: 'bg-verdict-crashed', text: 'text-verdict-crashed' },
-} as const
-
-type Outcome = keyof typeof OUTCOME
-
-// the order `corpus.md` folds a run by: a solution that only ran slowly is
-// otherwise correct, which is a different remedy from one answering wrongly
-const SEVEREST: Outcome[] = ['crashed', 'wrong', 'timeout', 'passed']
+import { OUTCOME, failures, severest } from '@/lib/verdicts'
 
 export function Verdict({ submitted }: { submitted: Submitted }) {
   const results = submitted.verification.results ?? []
   const passed = results.filter((one) => one.outcome === 'passed').length
   // the run reads as its severest case, so the line and the strip agree
-  const overall = SEVEREST.find((outcome) => results.some((one) => one.outcome === outcome))
+  const overall = severest(results)
   // the mix of failures in words, since the strip carries it in colour alone
-  const failures = SEVEREST.filter((outcome) => outcome !== 'passed')
-    .map((outcome) => [outcome, results.filter((one) => one.outcome === outcome).length] as const)
-    .filter(([, count]) => count > 0)
-    .map(([outcome, count]) => `${count} ${OUTCOME[outcome].label}`)
+  const mix = failures(results)
 
   return (
     <div className="space-y-stack">
@@ -34,24 +19,29 @@ export function Verdict({ submitted }: { submitted: Submitted }) {
         {submitted.attempt.solved ? 'Solved' : 'Not solved'}: {passed} of {results.length} cases
         passed
       </p>
-      {failures.length > 0 && (
-        <p className="text-meta text-muted-foreground">{failures.join(' · ')}</p>
-      )}
-      <ol className="flex flex-wrap gap-1" aria-label="Cases, in order">
-        {results.map((one, index) => (
-          <li
-            key={one.case_id}
-            title={`case ${index + 1}: ${OUTCOME[one.outcome].label}${
-              one.elapsed_ms == null ? '' : `, ${one.elapsed_ms} ms`
-            }`}
-            className={cn('size-3 rounded-sm', OUTCOME[one.outcome].mark)}
-          />
-        ))}
-      </ol>
+      {mix.length > 0 && <p className="text-meta text-muted-foreground">{mix.join(' · ')}</p>}
+      <CaseStrip results={results} />
       {submitted.failure && (
         <FailureView failure={submitted.failure} index={indexOf(submitted)} />
       )}
     </div>
+  )
+}
+
+// one mark per case, in the order the problem carries them
+export function CaseStrip({ results }: { results: CaseResult[] }) {
+  return (
+    <ol className="flex flex-wrap gap-1" aria-label="Cases, in order">
+      {results.map((one, index) => (
+        <li
+          key={one.case_id}
+          title={`case ${index + 1}: ${OUTCOME[one.outcome].label}${
+            one.elapsed_ms == null ? '' : `, ${one.elapsed_ms} ms`
+          }`}
+          className={cn('size-3 rounded-sm', OUTCOME[one.outcome].mark)}
+        />
+      ))}
+    </ol>
   )
 }
 

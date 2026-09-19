@@ -30,6 +30,7 @@ from algo_coach.log import (
 )
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
+from algo_coach.recall import drawn, reveal, signature
 from algo_coach.schema import (
     Attempt,
     Card,
@@ -42,6 +43,7 @@ from algo_coach.schema import (
 from algo_coach.sitting import Served, get, serve
 from algo_coach.solution_claims import load_problem, load_problems
 from algo_coach.solutions import SolutionLog
+from algo_coach.storage import Database
 
 router = APIRouter()
 
@@ -132,9 +134,7 @@ def every_card(root: Root) -> list[Card]:
 # is minted per store
 @router.get("/cards/{slug}")
 def card(root: Root, user_id: UserId, slug: str) -> Studied:
-    found = CardStore(root).by_slug(slug)
-    if found is None:
-        raise HTTPException(status_code=404, detail=f"no card {slug}")
+    found = _card(root, slug)
     run = CardRunLog(root).started(user_id, found.id)
     problems = load_problems(root)
     attempts = AttemptLog(root).attempts(user_id)
@@ -187,6 +187,50 @@ def _recall(card: Card, attempts: list[RecallAttempt]) -> list[Recalled]:
         for template in card.templates
         for one in [latest.get(template.id)]
     ]
+
+
+class Prompted(BaseModel):
+    """What the trainer shows: the template's trigger and the signature its
+    cases call. The title and the form are withheld, and mapping the trigger
+    to the form is the recall being measured."""
+
+    template_id: str
+    trigger: str
+    signature: str
+
+
+class Hinted(BaseModel):
+    hint: Hint
+    text: str
+
+
+# drawn rather than chosen: never recalled first, then least recently recalled
+@router.get("/cards/{slug}/recall")
+def prompt(root: Root, user_id: UserId, slug: str) -> Prompted:
+    card = _card(root, slug)
+    template = drawn(card, RecallLog(root).for_card(user_id, card.id))
+    if template is None:
+        raise HTTPException(status_code=404, detail=f"no template of {slug} carries a case")
+    return Prompted(
+        template_id=template.id, trigger=template.trigger, signature=signature(template)
+    )
+
+
+# one hint per request, so the page holds nothing it has not been given
+@router.get("/cards/{slug}/recall/{template_id}/hints/{hint}")
+def hinted(root: Root, slug: str, template_id: str, hint: Hint) -> Hinted:
+    card = _card(root, slug)
+    found = [one for one in card.templates if one.id == template_id]
+    if not found:
+        raise HTTPException(status_code=404, detail=f"no template {template_id}")
+    return Hinted(hint=hint, text=reveal(found[0], hint))
+
+
+def _card(root: Database, slug: str) -> Card:
+    found = CardStore(root).by_slug(slug)
+    if found is None:
+        raise HTTPException(status_code=404, detail=f"no card {slug}")
+    return found
 
 
 @router.get("/techniques/{technique}/cards")
