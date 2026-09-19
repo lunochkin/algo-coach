@@ -16,16 +16,15 @@ The hand pass does two jobs at once. It writes the matcher's reference, and it
 is the only reading of a generated problem that no model produced. A generator
 that drifted from its target shows in the hand pass whatever the matcher says.
 
-- [ ] Match by hand a sample of the problems the sweep landed, across the core
-      templates the sweep reached. `--gaps` already names those templates, so
-      no aiming is left
-- [ ] Sample and match by hand through `algo-coach match --by-hand`, over pairs
-      of a template and a solution. The command already samples across
-      templates, and only the pair's subject changes, from a problem to a
-      solution
-- [ ] Match the eval set by hand from the templates alone, with no matcher
-      reading in view. The first hand pass set the criterion, and a score over
-      those same pairs measures the criterion against itself
+- [ ] Match by hand a sample of pairs through `algo-coach match --by-hand`,
+      across the core templates the sweep reached. The command samples and
+      writes a record per candidate already
+- [ ] Match the eval set by hand with no matcher reading in view, which is
+      `--by-hand` without `--verdict`. The first pass set the criterion, and a
+      score over those same pairs measures the criterion against itself
+- [ ] Write down how many pairs the two passes settled, and over how many
+      templates. A score prints a denominator, and nothing else says what the
+      reference covers
 
 ### Scoring the matcher
 
@@ -33,22 +32,31 @@ Generation asserts a match and the matcher audits that match, so an unmeasured
 matcher audits at an unknown error rate. An unmeasured matcher blocks trusting
 the audit. Generation goes on without the score.
 
-- [ ] Score the matcher per pair, grouped per template, over the pairs both the
-      user and the matcher read. A match asserts one pair, so a score over a set
-      would hide which template the matcher over-matches
+- [ ] Lift the scorer out of `attempt_claims/score.py` for the matcher to
+      share. It prints denominators and reports both directions already, which
+      is the shape a per-pair score needs
+- [ ] Score the matcher per pair, over the pairs both the user and the matcher
+      read. A match asserts one pair, and a score over a solution's whole set
+      would hide which pair moved
+- [ ] Group the score per template. A form the matcher over-matches fills its
+      rung with problems that do not teach it, and one number over the card
+      would average that away
 - [ ] Report the positive verdicts in both directions: the templates the user
       named and the matcher missed, and the templates the matcher named and the
       user did not. Most pairs are negative, so accuracy would score a matcher
-      that names nothing in the nineties
-- [ ] Skip a pair the user settled on the run path, and read that pair in the
-      eval. The skip's condition follows from the shape of the matcher's record,
-      which `content.md` defers
-- [ ] Lift the scorer out of `claims` for the matcher to share. The scorer
-      already prints denominators and reports both directions, which is the
-      shape a per-pair score needs
-- [ ] Let the matcher read the pair the generator's match asserts, and report
-      the disagreements. The disagreements mean something only once the matcher
-      carries a score
+      naming nothing in the nineties
+- [ ] Serve the score from a command, `algo-coach match --score`, beside the
+      run and the hand pass. `algo-coach score` reads attempts, and a second
+      subject on it would make every flag mean two things
+- [ ] Skip a question the hand pass settled whole, and read those pairs in the
+      eval alone. A user match carries no configuration, so the run path counts
+      the pair unread and pays for a verdict that can never stand
+- [ ] Report where the matcher disagrees with the generator's own match. The
+      run already reads those pairs, and the disagreement means something only
+      once the matcher carries a score
+- [ ] Pin one configuration before any number is quoted, as the classifier's
+      score does. A score read at a configuration nobody recorded compares with
+      nothing
 
 ### Exit
 - [ ] The matcher carries a per-template score in both directions
