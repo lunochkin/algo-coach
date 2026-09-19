@@ -326,6 +326,64 @@
         }
       }
     },
+    "/api/cards/{slug}/templates/{template_slug}/recalls": {
+      "post": {
+        "summary": "Recalled",
+        "operationId": "recalled_api_cards__slug__templates__template_slug__recalls_post",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          },
+          {
+            "name": "template_slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Template Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reproduction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecallAttempt"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/sittings/{sitting_id}/submissions": {
       "post": {
         "summary": "Submission",
@@ -1589,6 +1647,75 @@
         "title": "Provider",
         "description": "Who holds an identity and its login: `README.md`."
       },
+      "RecallAttempt": {
+        "properties": {
+          "cap_ms": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Cap Ms"
+          },
+          "runner": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Runner"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/CaseResult"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "user_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "User Id"
+          },
+          "card_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Card Id"
+          },
+          "template_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Template Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "hints": {
+            "items": {
+              "$ref": "#/components/schemas/Hint"
+            },
+            "type": "array",
+            "title": "Hints"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cap_ms",
+          "runner",
+          "id",
+          "created_at",
+          "user_id",
+          "card_id",
+          "template_id",
+          "code"
+        ],
+        "title": "RecallAttempt",
+        "description": "A form typed into a blank file and run against the template's cases."
+      },
       "Recalled": {
         "properties": {
           "template_id": {
@@ -1628,6 +1755,28 @@
         ],
         "title": "Recalled",
         "description": "One template's recall state: the last reproduction of it, and nothing\nof the ones before, which stay in the log."
+      },
+      "Reproduction": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "hints": {
+            "items": {
+              "$ref": "#/components/schemas/Hint"
+            },
+            "type": "array",
+            "title": "Hints",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "title": "Reproduction",
+        "description": "What the trainer sends: the form as typed, and the hints taken before\nit ran."
       },
       "RetirementReason": {
         "type": "string",

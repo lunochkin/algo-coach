@@ -157,6 +157,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/cards/{slug}/templates/{template_slug}/recalls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recalled */
+        post: operations["recalled_api_cards__slug__templates__template_slug__recalls_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sittings/{sitting_id}/submissions": {
         parameters: {
             query?: never;
@@ -646,6 +663,35 @@ export interface components {
          */
         Provider: "google" | "github";
         /**
+         * RecallAttempt
+         * @description A form typed into a blank file and run against the template's cases.
+         */
+        RecallAttempt: {
+            /** Cap Ms */
+            cap_ms: number;
+            /** Runner */
+            runner: string;
+            /** Results */
+            results?: components["schemas"]["CaseResult"][];
+            /** Id */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** User Id */
+            user_id: string;
+            /** Card Id */
+            card_id: string;
+            /** Template Id */
+            template_id: string;
+            /** Code */
+            code: string;
+            /** Hints */
+            hints?: components["schemas"]["Hint"][];
+        };
+        /**
          * Recalled
          * @description One template's recall state: the last reproduction of it, and nothing
          *     of the ones before, which stay in the log.
@@ -659,6 +705,20 @@ export interface components {
             hints: components["schemas"]["Hint"][];
             /** Verified */
             verified: boolean;
+        };
+        /**
+         * Reproduction
+         * @description What the trainer sends: the form as typed, and the hints taken before
+         *     it ran.
+         */
+        Reproduction: {
+            /** Code */
+            code: string;
+            /**
+             * Hints
+             * @default []
+             */
+            hints: components["schemas"]["Hint"][];
         };
         /**
          * RetirementReason
@@ -1125,6 +1185,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CardRun"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recalled_api_cards__slug__templates__template_slug__recalls_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+                template_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Reproduction"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecallAttempt"];
                 };
             };
             /** @description Validation Error */

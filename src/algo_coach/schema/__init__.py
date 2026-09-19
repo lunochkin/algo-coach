@@ -29,7 +29,7 @@ from algo_coach.schema.problem import (
     RetirementReason,
 )
 from algo_coach.schema.provenance import MachineProvenance
-from algo_coach.schema.recall import Hint, RecallAttempt
+from algo_coach.schema.recall import LADDER, Hint, RecallAttempt
 from algo_coach.schema.record import AttemptRecord
 from algo_coach.schema.seed import CardSeed, TemplateSeed
 from algo_coach.schema.sitting import Pause, Sitting
@@ -39,6 +39,7 @@ from algo_coach.schema.technique import Kind, Technique
 from algo_coach.schema.verification import AttemptVerification, Execution, Verification
 
 __all__ = [
+    "LADDER",
     "Attempt",
     "AttemptClaim",
     "AttemptRecord",

@@ -11,10 +11,20 @@ from algo_coach.api.context import Root, UserId
 from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
 from algo_coach.ladder import start
-from algo_coach.log import AttemptLog, CardRunLog, SittingStore
+from algo_coach.log import AttemptLog, CardRunLog, RecallLog, SittingStore
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, AttemptClaim, CardRun, Confidence, Sitting
+from algo_coach.recall import reproduce
+from algo_coach.schema import (
+    Attempt,
+    AttemptClaim,
+    CardRun,
+    Confidence,
+    Hint,
+    RecallAttempt,
+    Sitting,
+    Template,
+)
 from algo_coach.sitting import (
     Submitted,
     claim,
@@ -35,6 +45,14 @@ router = APIRouter()
 
 class Submission(BaseModel):
     code: str
+
+
+class Reproduction(BaseModel):
+    """What the trainer sends: the form as typed, and the hints taken before
+    it ran."""
+
+    code: str
+    hints: list[Hint] = []
 
 
 class Timed(BaseModel):
@@ -75,6 +93,31 @@ def started(root: Root, user_id: UserId, slug: str) -> CardRun:
         AttemptLog(root).attempts(user_id),
         user_id=user_id,
     )
+
+
+# the template by its authored slug, as the card is: an id is minted per store
+@router.post("/cards/{slug}/templates/{template_slug}/recalls")
+def recalled(
+    root: Root, user_id: UserId, slug: str, template_slug: str, body: Reproduction
+) -> RecallAttempt:
+    card = CardStore(root).by_slug(slug)
+    if card is None:
+        raise HTTPException(status_code=404, detail=f"no card {slug}")
+    return reproduce(
+        RecallLog(root),
+        card.id,
+        _template(card.templates, template_slug),
+        body.code,
+        body.hints,
+        user_id=user_id,
+    )
+
+
+def _template(templates: list[Template], slug: str) -> Template:
+    found = [one for one in templates if one.slug == slug]
+    if not found:
+        raise HTTPException(status_code=404, detail=f"no template {slug}")
+    return found[0]
 
 
 @router.post("/sittings/{sitting_id}/submissions")
