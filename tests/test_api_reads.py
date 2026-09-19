@@ -106,7 +106,12 @@ def test_a_card_is_read_by_its_slug(client, database):
     minted."""
     CardStore(database).put(a_card("greedy-basic", "greedy"))
 
-    assert client.get("/api/cards/greedy-basic").json()["id"] == "minted-greedy-basic"
+    studied = client.get("/api/cards/greedy-basic").json()
+
+    assert studied["card"]["id"] == "minted-greedy-basic"
+    # unstarted, and a row per template whether or not it was ever recalled
+    assert studied["run"] is None
+    assert [one["last_at"] for one in studied["recall"]] == [None]
 
 
 def test_an_unknown_card_is_not_found(client):

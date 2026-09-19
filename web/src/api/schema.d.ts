@@ -512,11 +512,34 @@ export interface components {
          * @enum {string}
          */
         FailureMode: "speed" | "rust" | "gap" | "syntax" | "none";
+        /**
+         * Gap
+         * @description A core template no solution displays, named as the card names it.
+         *
+         *     The card claims to teach the form, so the ladder reports the gap rather
+         *     than substituting another problem for the rung. The next generation run is
+         *     aimed at what this names.
+         */
+        Gap: {
+            /** Template Id */
+            template_id: string;
+            /** Slug */
+            slug: string;
+            /** Title */
+            title: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /**
+         * Hint
+         * @description What the trainer gives when memory fails, in the order it gives them.
+         *     Each answers more of the question than the last.
+         * @enum {string}
+         */
+        Hint: "title" | "notes" | "form";
         /**
          * Offered
          * @description What the login page offers.
@@ -571,17 +594,97 @@ export interface components {
              */
             assigned_at: string;
         };
+        /** Problem */
+        Problem: {
+            /** Model */
+            model?: string | null;
+            /** Effort */
+            effort?: string | null;
+            /** Prompt Hash */
+            prompt_hash?: string | null;
+            /** Call Id */
+            call_id?: string | null;
+            /** Pin */
+            pin?: string | null;
+            /** Provider */
+            provider?: string | null;
+            /** Temperature */
+            temperature?: number | null;
+            /** Cost */
+            cost?: number | null;
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+            /** Techniques */
+            techniques?: string[];
+            difficulty?: components["schemas"]["ProblemDifficulty"] | null;
+            /** Statement */
+            statement: string;
+            /** Target Template Id */
+            target_template_id?: string | null;
+            /** Target Technique */
+            target_technique?: string | null;
+            /** @default created */
+            status: components["schemas"]["ProblemStatus"];
+            retired_reason?: components["schemas"]["RetirementReason"] | null;
+        };
         /**
          * ProblemDifficulty
          * @enum {string}
          */
         ProblemDifficulty: "easy" | "medium" | "hard";
         /**
+         * ProblemStatus
+         * @enum {string}
+         */
+        ProblemStatus: "created" | "retired";
+        /**
          * Provider
          * @description Who holds an identity and its login: `README.md`.
          * @enum {string}
          */
         Provider: "google" | "github";
+        /**
+         * Recalled
+         * @description One template's recall state: the last reproduction of it, and nothing
+         *     of the ones before, which stay in the log.
+         */
+        Recalled: {
+            /** Template Id */
+            template_id: string;
+            /** Last At */
+            last_at: string | null;
+            /** Hints */
+            hints: components["schemas"]["Hint"][];
+            /** Verified */
+            verified: boolean;
+        };
+        /**
+         * RetirementReason
+         * @enum {string}
+         */
+        RetirementReason: "defective";
+        /**
+         * Rung
+         * @description One problem on a ladder, with the templates its canonicals display.
+         *
+         *     A rung the selector filled covers none. `required` is derived from what the
+         *     rung covers rather than stored, and a rung covering the optional template
+         *     beside a core one offers that form as the alternative approach.
+         */
+        Rung: {
+            problem: components["schemas"]["Problem"];
+            /** Templates */
+            templates: string[];
+            /** Required */
+            required: boolean;
+            /**
+             * Solved
+             * @default false
+             */
+            solved: boolean;
+        };
         /**
          * Selector
          * @description What a ladder resolves from. Named fields rather than a filter map, so
@@ -630,6 +733,21 @@ export interface components {
             last_active_at?: string | null;
             /** Pauses */
             pauses?: components["schemas"]["Pause"][];
+        };
+        /**
+         * Studied
+         * @description A card as its page reads it. The ladder, the progress and the recall
+         *     state are folds, and `content.md` gives why none of them is stored.
+         */
+        Studied: {
+            card: components["schemas"]["Card"];
+            run: components["schemas"]["CardRun"] | null;
+            /** Rungs */
+            rungs: components["schemas"]["Rung"][];
+            /** Gaps */
+            gaps: components["schemas"]["Gap"][];
+            /** Recall */
+            recall: components["schemas"]["Recalled"][];
         };
         /** Submission */
         Submission: {
@@ -820,7 +938,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Card"];
+                    "application/json": components["schemas"]["Studied"];
                 };
             };
             /** @description Validation Error */

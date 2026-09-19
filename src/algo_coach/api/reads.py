@@ -1,5 +1,6 @@
-"""The routes the drill loop reads: the board, the cards, a technique's
-candidates, one picked problem, and a sitting's statement."""
+"""The routes the drill loop reads: the board, the cards, one card as its page
+studies it, a technique's candidates, one picked problem, and a sitting's
+statement."""
 
 from datetime import datetime
 
@@ -18,11 +19,21 @@ from algo_coach.board import (
     ungrouped,
 )
 from algo_coach.cards import CardStore
-from algo_coach.log import AttemptLog, SittingStore, latest_by_attempt
+from algo_coach.ladder import Gap, Rung, ladder
+from algo_coach.log import (
+    AttemptLog,
+    CardRunLog,
+    RecallLog,
+    SittingStore,
+    latest_by_attempt,
+    latest_recalls,
+)
+from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Card, ProblemDifficulty
+from algo_coach.schema import Card, CardRun, Hint, ProblemDifficulty, RecallAttempt
 from algo_coach.sitting import Served, get, serve
 from algo_coach.solution_claims import load_problem, load_problems
+from algo_coach.solutions import SolutionLog
 
 router = APIRouter()
 
@@ -58,6 +69,27 @@ class Picked(BaseModel):
     last_attempt_at: datetime | None
 
 
+class Recalled(BaseModel):
+    """One template's recall state: the last reproduction of it, and nothing
+    of the ones before, which stay in the log."""
+
+    template_id: str
+    last_at: datetime | None  # absent where the form was never recalled
+    hints: list[Hint]
+    verified: bool
+
+
+class Studied(BaseModel):
+    """A card as its page reads it. The ladder, the progress and the recall
+    state are folds, and `content.md` gives why none of them is stored."""
+
+    card: Card
+    run: CardRun | None  # absent until the card is started
+    rungs: list[Rung]
+    gaps: list[Gap]
+    recall: list[Recalled]
+
+
 @router.get("/board")
 def board(root: Root, user_id: UserId) -> Board:
     log = AttemptLog(root)
@@ -80,11 +112,42 @@ def every_card(root: Root) -> list[Card]:
 # by slug: a re-seed keeps the slug and the URL a page links to, where the id
 # is minted per store
 @router.get("/cards/{slug}")
-def card(root: Root, slug: str) -> Card:
+def card(root: Root, user_id: UserId, slug: str) -> Studied:
     found = CardStore(root).by_slug(slug)
     if found is None:
         raise HTTPException(status_code=404, detail=f"no card {slug}")
-    return found
+    run = CardRunLog(root).started(user_id, found.id)
+    resolved = ladder(
+        found,
+        load_problems(root),
+        SolutionLog(root).solutions(),
+        MatchLog(root).matches(),
+        AttemptLog(root).attempts(user_id),
+        since=run.started_at if run else None,
+    )
+    return Studied(
+        card=found,
+        run=run,
+        rungs=resolved.rungs,
+        gaps=resolved.gaps,
+        recall=_recall(found, RecallLog(root).for_card(user_id, found.id)),
+    )
+
+
+def _recall(card: Card, attempts: list[RecallAttempt]) -> list[Recalled]:
+    # a row per template, in the order the card authored them, so a form never
+    # recalled reads beside the ones that were
+    latest = latest_recalls(attempts)
+    return [
+        Recalled(
+            template_id=template.id,
+            last_at=one.created_at if one else None,
+            hints=one.hints if one else [],
+            verified=bool(one and one.verified),
+        )
+        for template in card.templates
+        for one in [latest.get(template.id)]
+    ]
 
 
 @router.get("/techniques/{technique}/cards")

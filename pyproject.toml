@@ -188,6 +188,9 @@ ignore_names = [
     "visit_*",
     # a result record names the pair that failed; the report reads only the reason
     "card_id",
+    # a card's recall state says when a form was last reproduced, which the page
+    # reads and no module does
+    "last_at",
 ]
 
 [tool.ruff]

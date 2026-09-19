@@ -66,7 +66,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Card"
+                  "$ref": "#/components/schemas/Studied"
                 }
               }
             }
@@ -1212,6 +1212,30 @@
         ],
         "title": "FailureMode"
       },
+      "Gap": {
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "title": "Template Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_id",
+          "slug",
+          "title"
+        ],
+        "title": "Gap",
+        "description": "A core template no solution displays, named as the card names it.\n\nThe card claims to teach the form, so the ladder reports the gap rather\nthan substituting another problem for the rung. The next generation run is\naimed at what this names."
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1224,6 +1248,16 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "Hint": {
+        "type": "string",
+        "enum": [
+          "title",
+          "notes",
+          "form"
+        ],
+        "title": "Hint",
+        "description": "What the trainer gives when memory fails, in the order it gives them.\nEach answers more of the question than the last."
       },
       "Offered": {
         "properties": {
@@ -1362,6 +1396,173 @@
         "title": "Probe",
         "description": "One problem a run was given, testing whether the form is recognised\nunprompted. Drawn from outside the ladder, which teaches the form."
       },
+      "Problem": {
+        "properties": {
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "effort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effort"
+          },
+          "prompt_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Hash"
+          },
+          "call_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Id"
+          },
+          "pin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pin"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature"
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "techniques": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Techniques"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProblemDifficulty"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Statement"
+          },
+          "target_template_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Template Id"
+          },
+          "target_technique": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Technique"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProblemStatus",
+            "default": "created"
+          },
+          "retired_reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RetirementReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "statement"
+        ],
+        "title": "Problem"
+      },
       "ProblemDifficulty": {
         "type": "string",
         "enum": [
@@ -1371,6 +1572,14 @@
         ],
         "title": "ProblemDifficulty"
       },
+      "ProblemStatus": {
+        "type": "string",
+        "enum": [
+          "created",
+          "retired"
+        ],
+        "title": "ProblemStatus"
+      },
       "Provider": {
         "type": "string",
         "enum": [
@@ -1379,6 +1588,84 @@
         ],
         "title": "Provider",
         "description": "Who holds an identity and its login: `README.md`."
+      },
+      "Recalled": {
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "title": "Template Id"
+          },
+          "last_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last At"
+          },
+          "hints": {
+            "items": {
+              "$ref": "#/components/schemas/Hint"
+            },
+            "type": "array",
+            "title": "Hints"
+          },
+          "verified": {
+            "type": "boolean",
+            "title": "Verified"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_id",
+          "last_at",
+          "hints",
+          "verified"
+        ],
+        "title": "Recalled",
+        "description": "One template's recall state: the last reproduction of it, and nothing\nof the ones before, which stay in the log."
+      },
+      "RetirementReason": {
+        "type": "string",
+        "enum": [
+          "defective"
+        ],
+        "title": "RetirementReason"
+      },
+      "Rung": {
+        "properties": {
+          "problem": {
+            "$ref": "#/components/schemas/Problem"
+          },
+          "templates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Templates"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required"
+          },
+          "solved": {
+            "type": "boolean",
+            "title": "Solved",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem",
+          "templates",
+          "required"
+        ],
+        "title": "Rung",
+        "description": "One problem on a ladder, with the templates its canonicals display.\n\nA rung the selector filled covers none. `required` is derived from what the\nrung covers rather than stored, and a rung covering the optional template\nbeside a core one offers that form as the alternative approach."
       },
       "Selector": {
         "properties": {
@@ -1508,6 +1795,54 @@
           "started_at"
         ],
         "title": "Sitting"
+      },
+      "Studied": {
+        "properties": {
+          "card": {
+            "$ref": "#/components/schemas/Card"
+          },
+          "run": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CardRun"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rungs": {
+            "items": {
+              "$ref": "#/components/schemas/Rung"
+            },
+            "type": "array",
+            "title": "Rungs"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/Gap"
+            },
+            "type": "array",
+            "title": "Gaps"
+          },
+          "recall": {
+            "items": {
+              "$ref": "#/components/schemas/Recalled"
+            },
+            "type": "array",
+            "title": "Recall"
+          }
+        },
+        "type": "object",
+        "required": [
+          "card",
+          "run",
+          "rungs",
+          "gaps",
+          "recall"
+        ],
+        "title": "Studied",
+        "description": "A card as its page reads it. The ladder, the progress and the recall\nstate are folds, and `content.md` gives why none of them is stored."
       },
       "Submission": {
         "properties": {

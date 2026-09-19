@@ -1,6 +1,7 @@
 from algo_coach.log.invitations import invitations_held, invite, invited, withdraw
 from algo_coach.log.latest import latest_by_attempt
 from algo_coach.log.owned import erased, whole_log
+from algo_coach.log.recalls import RecallLog, latest_recalls
 from algo_coach.log.runs import CardRunLog
 from algo_coach.log.sessions import LIFETIME, hashed, opened, revoked, user_of
 from algo_coach.log.sittings import SittingStore
@@ -13,6 +14,7 @@ __all__ = [
     "AttemptLog",
     "CardRunLog",
     "Provider",
+    "RecallLog",
     "SittingStore",
     "erased",
     "hashed",
@@ -20,6 +22,7 @@ __all__ = [
     "invite",
     "invited",
     "latest_by_attempt",
+    "latest_recalls",
     "named",
     "opened",
     "revoked",

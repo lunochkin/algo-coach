@@ -1,8 +1,17 @@
+from datetime import datetime, timedelta
+
 import pytest
 from helpers import browsing, seed_problem
 from matching import card, seeded, template
 
-from algo_coach.log import CardRunLog
+from algo_coach.log import AttemptLog, CardRunLog, RecallLog
+from algo_coach.mint import recall_attempt
+from algo_coach.schema import Attempt, CaseOutcome, CaseResult, Execution, Hint
+
+
+def solved_attempt(problem_id: str, *, at: datetime, id: str) -> Attempt:
+    return Attempt(id=id, user_id=USER, problem_id=problem_id, finished_at=at, solved=True)
+
 
 USER = "u-4f9c2a"
 TECHNIQUE = "sliding-window"
@@ -88,3 +97,69 @@ def test_a_card_whose_ladder_holds_the_corpus_offers_no_probe(database):
     run = browsing(database, USER).post("/api/cards/sliding-window/runs").json()
 
     assert run["probes"] == []
+
+
+def test_the_card_reads_its_run_the_ladder_and_the_probes(client):
+    """The three views a start makes measurable, on the card's own route."""
+    started = client.post("/api/cards/sliding-window/runs").json()
+
+    studied = client.get("/api/cards/sliding-window").json()
+
+    assert studied["run"]["id"] == started["id"]
+    assert [one["problem"]["id"] for one in studied["rungs"]] == ["p-1", "p-2"]
+    assert [one["problem_id"] for one in studied["run"]["probes"]] == ["p-3"]
+
+
+def test_the_ladder_s_progress_counts_the_run(client, database):
+    """A rung is solved by an attempt since the run began, and an attempt from
+    before it counts for nothing."""
+    # a ladder over the whole corpus, so an attempt reorders no rung off it
+    seeded(
+        database,
+        card(
+            slug="windows-wide",
+            templates=[template("longest-valid-window")],
+            selector={"technique": TECHNIQUE, "size": 3},
+        ),
+    )
+    started = client.post("/api/cards/windows-wide/runs").json()
+    began = datetime.fromisoformat(started["started_at"])
+    log = AttemptLog(database)
+    log.append_attempt(solved_attempt("p-1", at=began - timedelta(days=1), id="a-before"))
+    log.append_attempt(solved_attempt("p-2", at=began + timedelta(minutes=5), id="a-after"))
+
+    studied = client.get("/api/cards/windows-wide").json()
+
+    assert {one["problem"]["id"]: one["solved"] for one in studied["rungs"]} == {
+        "p-1": False,
+        "p-2": True,
+        "p-3": False,
+    }
+
+
+def test_a_card_reads_the_recall_state_of_each_template(client, database):
+    """The last reproduction per template, and a row for the form never
+    recalled."""
+    studied = client.get("/api/cards/sliding-window").json()
+    first = studied["card"]["templates"][0]["id"]
+    RecallLog(database).append(
+        recall_attempt(
+            USER,
+            studied["card"]["id"],
+            first,
+            code="def solve():\n    return 1\n",
+            hints=[Hint.TITLE],
+            execution=Execution(
+                cap_ms=2_000,
+                runner="local/cpython-3.14",
+                results=[CaseResult(case_id="c0", outcome=CaseOutcome.PASSED, elapsed_ms=1)],
+            ),
+        )
+    )
+
+    read = client.get("/api/cards/sliding-window").json()["recall"]
+
+    assert [(one["template_id"] == first, one["hints"], one["verified"]) for one in read] == [
+        (True, ["title"], True),
+        (False, [], False),
+    ]

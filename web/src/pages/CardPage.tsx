@@ -20,11 +20,11 @@ export function CardPage() {
     <article className="space-y-section">
       <PageHeader
         back={{ to: '/cards', label: 'Cards' }}
-        title={card.data?.title ?? slug}
-        note={card.data?.technique}
+        title={card.data?.card.title ?? slug}
+        note={card.data?.card.technique}
       />
       <Loaded of="the card" state={card}>
-        {(card) => (
+        {({ card }) => (
           <div className="space-y-section">
             <section className="space-y-1">
               <h2 className="text-heading font-medium">When to reach for it</h2>
