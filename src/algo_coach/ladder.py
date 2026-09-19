@@ -179,9 +179,18 @@ def probes(
     count: int = PROBES,
 ) -> list[str]:
     """The problems a start offers as probes: the card's technique, unseen
-    first, then least recently attempted, and never one the ladder holds."""
+    first, then least recently attempted, and never one the ladder holds.
+
+    The whole technique rather than the selector's own filters. The filters
+    narrow what the ladder teaches, and a probe asks whether the technique is
+    recognised at all.
+    """
+    attempts = list(attempts)
     taught = {rung.problem.id for rung in resolved.rungs}
     seen = {attempt.problem_id for attempt in attempts}
-    offered = [one for one in _offered(card, problems, attempts) if one.id not in taught]
-    unseen = [one.id for one in offered if one.id not in seen]
-    return (unseen + [one.id for one in offered if one.id in seen])[:count]
+    offered = [
+        row.problem.id
+        for row in candidates(card.selector.technique, problems, attempts)
+        if row.problem.id not in taught
+    ]
+    return sorted(offered, key=lambda id: id in seen)[:count]

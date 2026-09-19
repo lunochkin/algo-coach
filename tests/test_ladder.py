@@ -3,7 +3,7 @@ from datetime import datetime
 from helpers import T0
 from matching import canonical, card, problem, seeded, template
 
-from algo_coach.ladder import ladder
+from algo_coach.ladder import ladder, probes
 from algo_coach.mint import generator_match, user_match
 from algo_coach.schema import Attempt, ProblemDifficulty, ProblemStatus, RetirementReason
 
@@ -362,3 +362,85 @@ def test_a_gap_leaves_the_ladder_its_length(database):
 
     assert len(resolved.rungs) == 3
     assert [one.slug for one in resolved.gaps] == ["fixed-window"]
+
+
+def drawn(held, problems, attempts=(), *, count=1, solutions=(), matches=()):
+    """The probes a start would offer, over the ladder those inputs resolve."""
+    resolved = ladder(held, problems, solutions, matches, attempts)
+    return probes(held, resolved, problems, attempts, count=count)
+
+
+def test_a_probe_is_unseen_before_it_is_stale(database):
+    """A problem the user has never opened tests recognition, where one they
+    attempted a year ago tests memory of that attempt."""
+    held = a_card(database, size=1)
+    problems = [
+        problem("p-seen", techniques=[TECHNIQUE]),
+        problem("p-unseen", techniques=[TECHNIQUE]),
+    ]
+    attempts = [attempted("p-seen", at=BEFORE)]
+
+    # the ladder takes the stalest, so the draw chooses between what is left
+    assert drawn(held, problems + [problem("p-rung", techniques=[TECHNIQUE])], attempts) == [
+        "p-unseen"
+    ]
+
+
+def test_a_seen_probe_is_least_recently_attempted_first(database):
+    """The same order a technique's candidates take, since the draw reads that
+    list."""
+    held = a_card(database, size=1)
+    problems = [
+        problem("p-rung", techniques=[TECHNIQUE]),
+        problem("p-old", techniques=[TECHNIQUE]),
+        problem("p-new", techniques=[TECHNIQUE]),
+    ]
+    attempts = [
+        # the stalest, so the ladder takes it and the draw reads the rest
+        attempted("p-rung", at=datetime.fromisoformat("2026-01-01T00:00:00Z"), id="a-1"),
+        attempted("p-old", at=datetime.fromisoformat("2026-02-01T00:00:00Z"), id="a-2"),
+        attempted("p-new", at=datetime.fromisoformat("2026-08-01T00:00:00Z"), id="a-3"),
+    ]
+
+    assert drawn(held, problems, attempts, count=2) == ["p-old", "p-new"]
+
+
+def test_a_probe_is_never_one_the_ladder_holds(database):
+    """The ladder teaches the form, and a probe tests whether the form is
+    recognised unprompted."""
+    held = a_card(database, size=2)
+    problems = [problem(f"p-{one}", techniques=[TECHNIQUE]) for one in range(3)]
+
+    assert drawn(held, problems) == ["p-2"]
+
+
+def test_another_technique_s_problem_is_no_probe(database):
+    """A probe asks whether this technique is recognised, so it is drawn from
+    the problems that technique carries."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE]), problem("p-other", techniques=["greedy"])]
+
+    assert drawn(held, problems) == []
+
+
+def test_a_retired_problem_is_no_probe(database):
+    """A defective problem was never a fair test, here as on the ladder."""
+    held = a_card(database, size=1)
+    retired = problem("p-retired", techniques=[TECHNIQUE]).model_copy(
+        update={"status": ProblemStatus.RETIRED, "retired_reason": RetirementReason.DEFECTIVE}
+    )
+
+    assert drawn(held, [problem("p-1", techniques=[TECHNIQUE]), retired]) == []
+
+
+def test_the_selector_s_difficulty_does_not_narrow_the_draw(database):
+    """The filter narrows what the ladder teaches. A probe asks whether the
+    technique is recognised at all, so the whole technique is drawn from."""
+    held = a_card(database, size=1, selector={"difficulty": [ProblemDifficulty.HARD.value]})
+    problems = [
+        problem("p-hard", techniques=[TECHNIQUE]).model_copy(update={"difficulty": "hard"}),
+        problem("p-easy", techniques=[TECHNIQUE]).model_copy(update={"difficulty": "easy"}),
+    ]
+
+    # the ladder takes the hard one, and the easy one is still a probe
+    assert drawn(held, problems) == ["p-easy"]
