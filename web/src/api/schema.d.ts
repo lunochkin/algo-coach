@@ -140,6 +140,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/cards/{slug}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Started */
+        post: operations["started_api_cards__slug__runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sittings/{sitting_id}/submissions": {
         parameters: {
             query?: never;
@@ -418,6 +435,22 @@ export interface components {
             templates: components["schemas"]["Template"][];
             selector: components["schemas"]["Selector"];
         };
+        /** CardRun */
+        CardRun: {
+            /** Id */
+            id: string;
+            /** User Id */
+            user_id: string;
+            /** Card Id */
+            card_id: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Probes */
+            probes?: components["schemas"]["Probe"][];
+        };
         /**
          * CaseOutcome
          * @enum {string}
@@ -523,6 +556,20 @@ export interface components {
             solved_count: number;
             /** Last Attempt At */
             last_attempt_at: string | null;
+        };
+        /**
+         * Probe
+         * @description One problem a run was given, testing whether the form is recognised
+         *     unprompted. Drawn from outside the ladder, which teaches the form.
+         */
+        Probe: {
+            /** Problem Id */
+            problem_id: string;
+            /**
+             * Assigned At
+             * Format: date-time
+             */
+            assigned_at: string;
         };
         /**
          * ProblemDifficulty
@@ -929,6 +976,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Served"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    started_api_cards__slug__runs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardRun"];
                 };
             };
             /** @description Validation Error */

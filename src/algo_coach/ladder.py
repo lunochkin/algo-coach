@@ -1,5 +1,9 @@
 """The problems a card has the user solve, derived from the template matches
-and the card's selector. A view, never stored: `content.md` gives why."""
+and the card's selector. A view, never stored: `content.md` gives why.
+
+Starting a card is here too, since the start draws the probes the ladder is
+not allowed to hold.
+"""
 
 from collections.abc import Iterable
 from datetime import datetime
@@ -7,8 +11,14 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from algo_coach.board import candidates
+from algo_coach.log import CardRunLog
 from algo_coach.matches import coverage
-from algo_coach.schema import Attempt, Card, Problem, Solution, TemplateMatch
+from algo_coach.mint import card_run
+from algo_coach.schema import Attempt, Card, CardRun, Problem, Solution, TemplateMatch
+
+# how many probes a start draws. One until use says otherwise, which
+# `flows.md` names as deferred
+PROBES = 1
 
 
 class Rung(BaseModel):
@@ -133,3 +143,45 @@ def _offered(card: Card, problems: Iterable[Problem], attempts: Iterable[Attempt
         for row in candidates(card.selector.technique, problems, attempts)
         if not wanted or row.problem.difficulty in wanted
     ]
+
+
+def start(
+    runs: CardRunLog,
+    card: Card,
+    problems: Iterable[Problem],
+    solutions: Iterable[Solution],
+    matches: Iterable[TemplateMatch],
+    attempts: Iterable[Attempt],
+    *,
+    user_id: str,
+) -> CardRun:
+    """The run a start mints, with the probes drawn in the same act.
+
+    The ladder is measured from the start, so a run reaches the store carrying
+    what the start drew. A card already started is returned rather than started
+    again: `flows.md` leaves a second run deferred.
+    """
+    open_already = runs.started(user_id, card.id)
+    if open_already is not None:
+        return open_already
+    problems, attempts = list(problems), list(attempts)
+    resolved = ladder(card, problems, solutions, matches, attempts)
+    run = card_run(user_id, card.id, probes(card, resolved, problems, attempts))
+    runs.append(run)
+    return run
+
+
+def probes(
+    card: Card,
+    resolved: Ladder,
+    problems: Iterable[Problem],
+    attempts: Iterable[Attempt],
+    count: int = PROBES,
+) -> list[str]:
+    """The problems a start offers as probes: the card's technique, unseen
+    first, then least recently attempted, and never one the ladder holds."""
+    taught = {rung.problem.id for rung in resolved.rungs}
+    seen = {attempt.problem_id for attempt in attempts}
+    offered = [one for one in _offered(card, problems, attempts) if one.id not in taught]
+    unseen = [one.id for one in offered if one.id not in seen]
+    return (unseen + [one.id for one in offered if one.id in seen])[:count]

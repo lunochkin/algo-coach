@@ -1,17 +1,20 @@
 """The routes the rest of the drill loop takes: the submission, the pause, the
-end, and the claim asked of each attempt."""
+end, the claim asked of each attempt, and the start of a card's run."""
 
 from collections.abc import Callable
 from datetime import UTC, datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from algo_coach.api.context import Root, UserId
+from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
-from algo_coach.log import AttemptLog, SittingStore
+from algo_coach.ladder import start
+from algo_coach.log import AttemptLog, CardRunLog, SittingStore
+from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, AttemptClaim, Confidence, Sitting
+from algo_coach.schema import Attempt, AttemptClaim, CardRun, Confidence, Sitting
 from algo_coach.sitting import (
     Submitted,
     claim,
@@ -24,6 +27,7 @@ from algo_coach.sitting import (
     unclaimed,
 )
 from algo_coach.solution_claims import load_problems
+from algo_coach.solutions import SolutionLog
 from algo_coach.storage import Database
 
 router = APIRouter()
@@ -53,6 +57,24 @@ class Claim(BaseModel):
     techniques: list[str] = []
     confidence: Confidence
     declined: bool = False
+
+
+# by slug, as the card's own route is: a re-seed keeps the slug and the id is
+# minted per store
+@router.post("/cards/{slug}/runs")
+def started(root: Root, user_id: UserId, slug: str) -> CardRun:
+    card = CardStore(root).by_slug(slug)
+    if card is None:
+        raise HTTPException(status_code=404, detail=f"no card {slug}")
+    return start(
+        CardRunLog(root),
+        card,
+        load_problems(root),
+        SolutionLog(root).solutions(),
+        MatchLog(root).matches(),
+        AttemptLog(root).attempts(user_id),
+        user_id=user_id,
+    )
 
 
 @router.post("/sittings/{sitting_id}/submissions")

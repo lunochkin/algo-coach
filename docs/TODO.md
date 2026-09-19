@@ -56,7 +56,7 @@ The work not yet ready for a phase waits under Further developments.
 
 ### The runs, served
 
-- [ ] Serve starting a run: the route mints the `CardRun` and draws its probes
+- [x] Serve starting a run: the route mints the `CardRun` and draws its probes
       in one act, since the ladder is measured from the start
 - [ ] Draw the probes by the rule: a problem the card's technique carries,
       unseen first, then least recently attempted, never one the ladder holds

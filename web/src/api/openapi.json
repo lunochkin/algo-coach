@@ -287,6 +287,45 @@
         }
       }
     },
+    "/api/cards/{slug}/runs": {
+      "post": {
+        "summary": "Started",
+        "operationId": "started_api_cards__slug__runs_post",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardRun"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/sittings/{sitting_id}/submissions": {
       "post": {
         "summary": "Submission",
@@ -987,6 +1026,44 @@
         "title": "Card",
         "description": "Teaching content for one technique: forms to reproduce, and a\nselector."
       },
+      "CardRun": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "User Id"
+          },
+          "card_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Card Id"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "probes": {
+            "items": {
+              "$ref": "#/components/schemas/Probe"
+            },
+            "type": "array",
+            "title": "Probes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "card_id",
+          "started_at"
+        ],
+        "title": "CardRun"
+      },
       "CaseOutcome": {
         "type": "string",
         "enum": [
@@ -1263,6 +1340,27 @@
         ],
         "title": "Picked",
         "description": "The problem a user picked, before its statement is served. The statement\nis left out, as a candidate's is."
+      },
+      "Probe": {
+        "properties": {
+          "problem_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Problem Id"
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Assigned At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem_id",
+          "assigned_at"
+        ],
+        "title": "Probe",
+        "description": "One problem a run was given, testing whether the form is recognised\nunprompted. Drawn from outside the ladder, which teaches the form."
       },
       "ProblemDifficulty": {
         "type": "string",
