@@ -64,7 +64,7 @@ The work not yet ready for a phase waits under Further developments.
       recall state per template, and the probes the start drew
 - [x] Serve a recall attempt: run the typed file against the template's cases
       through the runner a submission uses, and write the record
-- [ ] Cap a user's recall runs per minute, as a submission is capped. A recall
+- [x] Cap a user's recall runs per minute, as a submission is capped. A recall
       runs untrusted code on the server, and the broker admits one run at a time
 
 ### The pages

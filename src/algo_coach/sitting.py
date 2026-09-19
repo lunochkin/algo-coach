@@ -33,7 +33,9 @@ DRILL_CAP_MS = 2_000
 # the submissions a user may make in a minute. Each one runs untrusted code on
 # the server, and the broker admits one run at a time, so one user's burst is
 # every other user's wait
-SUBMISSIONS_PER_MINUTE = 10
+# the runs of one kind a user may start in a minute. The broker admits one
+# run at a time, so a burst is every other user's wait
+RUNS_PER_MINUTE = 10
 
 # how long a sitting may go untouched before the loop ends it at the moment it
 # was last touched. `log.md` gives why the ending is read-time
@@ -161,8 +163,8 @@ def submit(
         _ended_idle(sittings, one)
         raise Refused(f"sitting {sitting_id} was left idle and has ended")
     # before the run: a submission past the cap starts no container
-    if len(log.attempts(user_id, since=at - timedelta(minutes=1))) >= SUBMISSIONS_PER_MINUTE:
-        raise TooOften(f"{SUBMISSIONS_PER_MINUTE} submissions a minute is the cap")
+    if len(log.attempts(user_id, since=at - timedelta(minutes=1))) >= RUNS_PER_MINUTE:
+        raise TooOften(f"{RUNS_PER_MINUTE} submissions a minute is the cap")
     one = _stored(sittings, one, at)
     problem_cases = cases.for_problem(one.problem_id)
     runs = judge(code, problem_cases, cap_ms=DRILL_CAP_MS)

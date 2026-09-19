@@ -409,11 +409,15 @@ times. Each record class is specified in one of the files beside it.
     bound. A submission that waits without a bound looks to the user like a
     sandbox that hung. The wait changes no verdict, since the cap is measured
     in the child around the `solve` call.
-  - A user's submissions are capped per minute. A submission runs untrusted
-    code on the server, and the broker admits one run at a time, so one user's
-    burst is every other user's wait. The cap is counted over the user's own
-    attempts of the last minute, and a submission past it is refused before any
-    container starts.
+  - A user's submissions are capped per minute, and a user's recalls are capped
+    by the same bound. Each runs untrusted code on the server, and the broker
+    admits one run at a time, so one user's burst is every other user's wait.
+    The cap is counted over the user's own records of the last minute, and a
+    run past it is refused before any container starts.
+  - The two are counted apart, each against the bound. A recall runs a
+    template's few cases where a submission runs a problem's whole set, and one
+    counter over both would refuse the cheaper run for the more expensive one's
+    burst.
   - Generation runs off this server. The mutation loop starts many subprocesses
     at a cap well above the sitting's, so a generation run beside a sitting
     moves the wall clock that sitting's verdict is read from. Generation writes

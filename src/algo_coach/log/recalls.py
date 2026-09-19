@@ -1,6 +1,7 @@
 """The templates a user reproduced from memory, and how each one went."""
 
 from collections.abc import Iterable
+from datetime import datetime
 
 from sqlalchemy import ColumnElement, insert, select
 
@@ -31,10 +32,17 @@ class RecallLog:
                     ],
                 )
 
-    def all(self, user_id: str | None = None) -> list[RecallAttempt]:
-        if user_id is None:
-            return self._read()
-        return self._read(recall_attempts.c.user_id == user_id)
+    def all(
+        self, user_id: str | None = None, *, since: datetime | None = None
+    ) -> list[RecallAttempt]:
+        """`since` reads the reproductions written at or after it, so a rate is
+        counted in the query rather than over the user's whole log."""
+        conditions: list[ColumnElement[bool]] = []
+        if user_id is not None:
+            conditions.append(recall_attempts.c.user_id == user_id)
+        if since is not None:
+            conditions.append(recall_attempts.c.created_at >= since)
+        return self._read(*conditions)
 
     def for_card(self, user_id: str, card_id: str) -> list[RecallAttempt]:
         return self._read(

@@ -5,6 +5,7 @@ wrote, and nothing about it is safer than a submission.
 """
 
 from collections.abc import Sequence
+from datetime import UTC, datetime, timedelta
 
 from algo_coach import mint
 from algo_coach.log import RecallLog
@@ -20,7 +21,7 @@ from algo_coach.schema import (
     Template,
     TemplateCase,
 )
-from algo_coach.sitting import DRILL_CAP_MS, Missing, Refused
+from algo_coach.sitting import DRILL_CAP_MS, RUNS_PER_MINUTE, Missing, Refused, TooOften
 
 DECIDED = {"timeout": CaseOutcome.TIMEOUT, "crashed": CaseOutcome.CRASHED}
 
@@ -33,14 +34,20 @@ def reproduce(
     hints: Sequence[Hint],
     *,
     user_id: str,
+    now: datetime | None = None,
 ) -> RecallAttempt:
     """One reproduction: run what was typed, and record how it went."""
+    at = now or datetime.now(UTC)
     if not template.cases:
         raise Missing(f"template {template.slug} carries no case to check a recall against")
     # the record refuses it too; refused here, so the trainer reads a verdict
     # rather than a defect
     if tuple(hints) != LADDER[: len(hints)]:
         raise Refused(f"the hints are taken in order: {', '.join(LADDER)}")
+    # before the run: a recall past the cap starts no container, as a
+    # submission past it does not
+    if len(log.all(user_id, since=at - timedelta(minutes=1))) >= RUNS_PER_MINUTE:
+        raise TooOften(f"{RUNS_PER_MINUTE} recalls a minute is the cap")
     record = mint.recall_attempt(
         user_id,
         card_id,

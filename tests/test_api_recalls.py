@@ -3,6 +3,7 @@ from helpers import browsing
 from matching import card, seeded, template
 
 from algo_coach.log import RecallLog
+from algo_coach.sitting import RUNS_PER_MINUTE
 
 USER = "u-4f9c2a"
 TECHNIQUE = "sliding-window"
@@ -90,3 +91,25 @@ def test_an_unknown_card_is_not_found(client):
     response = client.post("/api/cards/nope/templates/any/recalls", json={"code": LOWER})
 
     assert (response.status_code, response.json()) == (404, {"detail": "no card nope"})
+
+
+def test_a_user_s_recalls_are_capped_per_minute(client, database):
+    """A recall runs untrusted code on the server, and the broker admits one
+    run at a time, so one user's burst is every other user's wait."""
+    for _ in range(RUNS_PER_MINUTE):
+        assert client.post(RECALLS, json={"code": LOWER}).status_code == 200
+
+    refused = client.post(RECALLS, json={"code": LOWER})
+
+    assert refused.status_code == 429
+    assert len(RecallLog(database).all(USER)) == RUNS_PER_MINUTE
+
+
+def test_the_cap_counts_the_user_s_own_recalls_alone(client, database):
+    """Another user's minute is their own, as another user's submissions are."""
+    for _ in range(RUNS_PER_MINUTE):
+        client.post(RECALLS, json={"code": LOWER})
+
+    other = browsing(database, "u-b71e03").post(RECALLS, json={"code": LOWER})
+
+    assert other.status_code == 200

@@ -7,7 +7,7 @@ from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.mint import case
 from algo_coach.schema import Sitting
-from algo_coach.sitting import SUBMISSIONS_PER_MINUTE, TooOften, submit
+from algo_coach.sitting import RUNS_PER_MINUTE, TooOften, submit
 
 STARTED = datetime(2026, 9, 10, 8, tzinfo=UTC)
 TEN = datetime(2026, 9, 10, 10, tzinfo=UTC)
@@ -45,7 +45,7 @@ class Stores:
         )
 
     def fill(self, **whose: str) -> None:
-        for _ in range(SUBMISSIONS_PER_MINUTE):
+        for _ in range(RUNS_PER_MINUTE):
             self.submit(**whose)
 
 
@@ -68,7 +68,7 @@ def test_a_refused_submission_mints_no_attempt(database):
     with pytest.raises(TooOften):
         stores.submit()
 
-    assert len(stores.log.attempts("u-4f9c2a")) == SUBMISSIONS_PER_MINUTE
+    assert len(stores.log.attempts("u-4f9c2a")) == RUNS_PER_MINUTE
 
 
 def test_the_cap_is_a_rate_rather_than_a_total(database):
