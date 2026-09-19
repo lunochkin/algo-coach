@@ -12,9 +12,11 @@ from algo_coach.schema import (
     AttemptVerification,
     Call,
     Card,
+    CardRun,
     Diagnosis,
     Draft,
     Problem,
+    RecallAttempt,
     SelfLabel,
     SiteOutcome,
     Sitting,
@@ -43,6 +45,8 @@ RECORDS: list[type[BaseModel]] = [
     Draft,
     Sitting,
     AttemptVerification,
+    CardRun,
+    RecallAttempt,
 ]
 SNAPSHOTS = Path(__file__).parent / "schemas"
 

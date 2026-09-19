@@ -119,6 +119,11 @@ def test_erasing_counts_what_left_each_table(practised):
         "attempts": 1,
         "sitting_pauses": 1,
         "sittings": 1,
+        # the card runs and the recalls of a user who studied no card
+        "recall_attempt_case_results": 0,
+        "recall_attempts": 0,
+        "card_run_probes": 0,
+        "card_runs": 0,
         "calls": 1,
     }
 

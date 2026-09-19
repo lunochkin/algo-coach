@@ -39,6 +39,13 @@
     "Template": {
       "description": "One form reproduced from memory. The unit of recall.",
       "properties": {
+        "cases": {
+          "items": {
+            "$ref": "#/$defs/TemplateCase"
+          },
+          "title": "Cases",
+          "type": "array"
+        },
         "code": {
           "title": "Code",
           "type": "string"
@@ -86,6 +93,11 @@
           "minLength": 1,
           "title": "Trigger",
           "type": "string"
+        },
+        "unordered": {
+          "default": false,
+          "title": "Unordered",
+          "type": "boolean"
         }
       },
       "required": [
@@ -96,6 +108,24 @@
         "code"
       ],
       "title": "Template",
+      "type": "object"
+    },
+    "TemplateCase": {
+      "description": "One case a reproduced form is checked against. The arguments are\npositional, and `solve` is the function they call.",
+      "properties": {
+        "args": {
+          "items": {},
+          "title": "Args",
+          "type": "array"
+        },
+        "expected": {
+          "title": "Expected"
+        }
+      },
+      "required": [
+        "expected"
+      ],
+      "title": "TemplateCase",
       "type": "object"
     },
     "TemplateKind": {

@@ -1,0 +1,61 @@
+{
+  "$defs": {
+    "Probe": {
+      "description": "One problem a run was given, testing whether the form is recognised\nunprompted. Drawn from outside the ladder, which teaches the form.",
+      "properties": {
+        "assigned_at": {
+          "format": "date-time",
+          "title": "Assigned At",
+          "type": "string"
+        },
+        "problem_id": {
+          "minLength": 1,
+          "title": "Problem Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "problem_id",
+        "assigned_at"
+      ],
+      "title": "Probe",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "card_id": {
+      "minLength": 1,
+      "title": "Card Id",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "probes": {
+      "items": {
+        "$ref": "#/$defs/Probe"
+      },
+      "title": "Probes",
+      "type": "array"
+    },
+    "started_at": {
+      "format": "date-time",
+      "title": "Started At",
+      "type": "string"
+    },
+    "user_id": {
+      "minLength": 1,
+      "title": "User Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "user_id",
+    "card_id",
+    "started_at"
+  ],
+  "title": "CardRun",
+  "type": "object"
+}

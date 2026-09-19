@@ -37,9 +37,13 @@ from algo_coach.log.table import (
     attempt_verification_case_results,
     attempt_verifications,
     attempts,
+    card_run_probes,
+    card_runs,
     diagnoses,
     identities,
     invitations,
+    recall_attempt_case_results,
+    recall_attempts,
     self_labels,
     sessions,
     sitting_pauses,
@@ -56,6 +60,7 @@ from algo_coach.schema import (
     Call,
     CallSite,
     Card,
+    CardRun,
     CaseResult,
     ClaimSource,
     Diagnosis,
@@ -63,7 +68,9 @@ from algo_coach.schema import (
     DraftCase,
     MachineProvenance,
     Pause,
+    Probe,
     Problem,
+    RecallAttempt,
     SelfLabel,
     SettledCase,
     SiteOutcome,
@@ -136,6 +143,14 @@ STORED: list[Stored] = [
     Stored(TemplateMatch, template_matches, through_call=True),
     Stored(SiteOutcome, site_outcomes, through_call=True, required=frozenset({"call_id"})),
     Stored(Sitting, sittings, elsewhere=frozenset({"pauses"})),
+    Stored(CardRun, card_runs, elsewhere=frozenset({"probes"})),
+    Stored(Probe, card_run_probes, structural=frozenset({"card_run_id", "position"})),
+    Stored(RecallAttempt, recall_attempts, elsewhere=frozenset({"results"})),
+    Stored(
+        CaseResult,
+        recall_attempt_case_results,
+        structural=frozenset({"recall_attempt_id", "position"}),
+    ),
     Stored(Pause, sitting_pauses, structural=frozenset({"sitting_id", "position"})),
     Stored(Verification, verifications, elsewhere=frozenset({"results"})),
     Stored(
@@ -635,6 +650,8 @@ APPEND_ONLY = {
     "attempt_claims",
     "self_labels",
     "diagnoses",
+    "card_runs",
+    "recall_attempts",
 }
 
 
@@ -646,8 +663,14 @@ def test_every_append_only_table_and_no_other_keeps_its_append_order():
     assert ordered == APPEND_ONLY
 
 
-# the rows a run is stored with, append-only as the run is
-CASE_RESULTS = {"verification_case_results", "attempt_verification_case_results"}
+# the rows a parent is stored with, append-only as the parent is: a run's case
+# results, and the probes a card run was given
+CASE_RESULTS = {
+    "verification_case_results",
+    "attempt_verification_case_results",
+    "recall_attempt_case_results",
+    "card_run_probes",
+}
 
 
 def test_every_append_only_table_refuses_a_rewrite_in_the_database(database):

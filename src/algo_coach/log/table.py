@@ -10,11 +10,12 @@ from sqlalchemy import (
     Integer,
     Table,
     Text,
+    UniqueConstraint,
     text,
 )
 from sqlalchemy.dialects.postgresql import ARRAY
 
-from algo_coach.schema import CaseOutcome, ClaimSource, Confidence, FailureMode
+from algo_coach.schema import CaseOutcome, ClaimSource, Confidence, FailureMode, Hint
 from algo_coach.storage import appended_column, call_column, enumerated, metadata, timestamp
 
 # the engine's own user, whose id a private record's `user_id` references. The
@@ -205,4 +206,67 @@ diagnoses = Table(
     Column("evidence", Text, nullable=False),
     # a model wrote every diagnosis
     call_column(nullable=False),
+)
+
+
+# that a card was started, and what the ladder is measured from
+card_runs = Table(
+    "card_runs",
+    metadata,
+    Column("id", Text, primary_key=True),
+    appended_column(),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    Column("card_id", Text, ForeignKey("cards.id"), nullable=False),
+    Column("started_at", timestamp(), nullable=False),
+)
+
+# the probes a run was given, in the order they were offered. A later probe
+# appends a row, which is how the run stays append-only
+card_run_probes = Table(
+    "card_run_probes",
+    metadata,
+    Column("card_run_id", Text, ForeignKey("card_runs.id"), primary_key=True),
+    Column("position", Integer, primary_key=True),
+    Column("problem_id", Text, ForeignKey("problems.id"), nullable=False),
+    Column("assigned_at", timestamp(), nullable=False),
+    # one offer per problem, since a second tests no recognition the first did
+    # not
+    UniqueConstraint("card_run_id", "problem_id"),
+)
+
+recall_attempts = Table(
+    "recall_attempts",
+    metadata,
+    Column("id", Text, primary_key=True),
+    appended_column(),
+    Column("created_at", timestamp(), nullable=False),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    Column("card_id", Text, ForeignKey("cards.id"), nullable=False),
+    Column("template_id", Text, ForeignKey("card_templates.id"), nullable=False, index=True),
+    Column("code", Text, nullable=False),  # empty where the user ran a blank file
+    # taken in the order the trainer offers them, which the record checks
+    Column("hints", ARRAY(enumerated(Hint)), nullable=False),
+    Column("cap_ms", Integer, nullable=False),
+    Column("runner", Text, nullable=False),
+    CheckConstraint("cap_ms > 0", name="capped"),
+    CheckConstraint("runner <> ''", name="runner_named"),
+)
+
+# the shape a run's results always take. `case_id` names the template's case by
+# its position rather than by a key: a re-seed rewrites a template's cases
+# whole, and a foreign key would refuse the card its next seeding
+recall_attempt_case_results = Table(
+    "recall_attempt_case_results",
+    metadata,
+    Column("recall_attempt_id", Text, ForeignKey("recall_attempts.id"), primary_key=True),
+    Column("position", Integer, primary_key=True),
+    Column("case_id", Text, nullable=False),
+    Column("outcome", enumerated(CaseOutcome), nullable=False),
+    Column("elapsed_ms", Integer),
+    Column("error", Text),
+    CheckConstraint(
+        "outcome NOT IN ('passed', 'wrong') OR elapsed_ms IS NOT NULL", name="returned_was_timed"
+    ),
+    CheckConstraint("error IS NULL OR outcome = 'crashed'", name="only_a_crash_names_an_error"),
+    CheckConstraint("elapsed_ms >= 0", name="elapsed_counted"),
 )

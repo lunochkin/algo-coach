@@ -1,0 +1,134 @@
+{
+  "$defs": {
+    "CaseOutcome": {
+      "enum": [
+        "passed",
+        "wrong",
+        "timeout",
+        "crashed"
+      ],
+      "title": "CaseOutcome",
+      "type": "string"
+    },
+    "CaseResult": {
+      "properties": {
+        "case_id": {
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "elapsed_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elapsed Ms"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        },
+        "outcome": {
+          "$ref": "#/$defs/CaseOutcome"
+        }
+      },
+      "required": [
+        "case_id",
+        "outcome"
+      ],
+      "title": "CaseResult",
+      "type": "object"
+    },
+    "Hint": {
+      "description": "What the trainer gives when memory fails, in the order it gives them.\nEach answers more of the question than the last.",
+      "enum": [
+        "title",
+        "notes",
+        "form"
+      ],
+      "title": "Hint",
+      "type": "string"
+    }
+  },
+  "description": "A form typed into a blank file and run against the template's cases.",
+  "properties": {
+    "cap_ms": {
+      "exclusiveMinimum": 0,
+      "title": "Cap Ms",
+      "type": "integer"
+    },
+    "card_id": {
+      "minLength": 1,
+      "title": "Card Id",
+      "type": "string"
+    },
+    "code": {
+      "title": "Code",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "hints": {
+      "items": {
+        "$ref": "#/$defs/Hint"
+      },
+      "title": "Hints",
+      "type": "array"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "results": {
+      "items": {
+        "$ref": "#/$defs/CaseResult"
+      },
+      "title": "Results",
+      "type": "array"
+    },
+    "runner": {
+      "minLength": 1,
+      "title": "Runner",
+      "type": "string"
+    },
+    "template_id": {
+      "minLength": 1,
+      "title": "Template Id",
+      "type": "string"
+    },
+    "user_id": {
+      "minLength": 1,
+      "title": "User Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "cap_ms",
+    "runner",
+    "id",
+    "created_at",
+    "user_id",
+    "card_id",
+    "template_id",
+    "code"
+  ],
+  "title": "RecallAttempt",
+  "type": "object"
+}

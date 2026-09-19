@@ -51,7 +51,7 @@ The work not yet ready for a phase waits under Further developments.
 - [x] Add `RecallAttempt`, keyed to a card and a template, carrying the hints
       taken, how the cases went and the form the user typed. No field keys it to
       an attempt
-- [ ] Add the two tables with their migrations, the append-only trigger on both,
+- [x] Add the two tables with their migrations, the append-only trigger on both,
       and the schema snapshots `just schemas` writes
 
 ### The runs, served
