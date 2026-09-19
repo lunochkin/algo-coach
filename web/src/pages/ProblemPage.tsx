@@ -10,12 +10,22 @@ import { Button } from '@/components/ui/button'
 import { lastAt, share } from '@/lib/format'
 
 // the problem a user picked, before its statement is served. The path names
-// the problem, and `?technique=` names the page the pick came from
+// the problem, and `?technique=` or `?card=` names the page the pick came from
 export function ProblemPage() {
   const { problemId = '' } = useParams()
   const [search] = useSearchParams()
   const technique = search.get('technique')
+  const slug = search.get('card')
   const navigate = useNavigate()
+  // read only where the pick came from a card: the page names the card it
+  // returns to, and the claim answers for that card's technique
+  const card = useLoaded(
+    (signal) =>
+      slug === null
+        ? Promise.resolve({ data: null })
+        : api.GET('/api/cards/{slug}', { params: { path: { slug } }, signal }),
+    slug === null ? 'no-card' : `card:${slug}`,
+  )
   const picked = useLoaded(
     (signal) =>
       api.GET('/api/problems/{problem_id}', {
@@ -36,7 +46,13 @@ export function ProblemPage() {
       const { data, error } = await api.POST('/api/problems/{problem_id}/sittings', {
         params: { path: { problem_id: problemId } },
       })
-      if (data) navigate(sittingPath(data.sitting.id, technique))
+      if (data)
+        navigate(
+          sittingPath(data.sitting.id, {
+            technique: card.data?.card.technique ?? technique,
+            card: slug,
+          }),
+        )
       else setRefused(described(error))
     } catch (reason) {
       setRefused(String(reason))
@@ -49,9 +65,14 @@ export function ProblemPage() {
     <section className="space-y-section">
       <PageHeader
         back={
-          technique === null
-            ? { to: '/', label: 'Board' }
-            : { to: `/techniques/${encodeURIComponent(technique)}`, label: technique }
+          slug !== null
+            ? {
+                to: `/cards/${encodeURIComponent(slug)}`,
+                label: card.data?.card.title ?? slug,
+              }
+            : technique === null
+              ? { to: '/', label: 'Board' }
+              : { to: `/techniques/${encodeURIComponent(technique)}`, label: technique }
         }
         title={picked.data?.title ?? 'The problem'}
         note={picked.data && standing(picked.data)}
@@ -59,9 +80,9 @@ export function ProblemPage() {
       <Loaded of="the problem" state={picked}>
         {(picked) => (
           <div className="space-y-stack">
-            {/* the cards of the technique the pick came from, and of the
-                problem's own techniques where it came from nowhere */}
-            {(technique === null ? picked.techniques : [technique]).map((one) => (
+            {/* the technique the pick came from, the card's own where it came
+                from a card, and the problem's where it came from neither */}
+            {cards(picked, technique, card.data?.card.technique ?? null).map((one) => (
               <TechniqueCards key={one} technique={one} />
             ))}
             {/* the one act this page asks for */}
@@ -81,10 +102,23 @@ export function ProblemPage() {
   )
 }
 
-// the sitting carries the technique on, as the claim answers for it
-function sittingPath(sittingId: string, technique: string | null): string {
-  const path = `/sittings/${encodeURIComponent(sittingId)}`
-  return technique === null ? path : `${path}?technique=${encodeURIComponent(technique)}`
+// the sitting carries both on: the claim answers for the technique, and the
+// sitting returns to the card it came from
+function sittingPath(
+  sittingId: string,
+  from: { technique: string | null; card: string | null },
+): string {
+  const query = new URLSearchParams()
+  if (from.technique !== null) query.set('technique', from.technique)
+  if (from.card !== null) query.set('card', from.card)
+  const asked = query.toString()
+  return `/sittings/${encodeURIComponent(sittingId)}${asked ? `?${asked}` : ''}`
+}
+
+// the techniques whose cards are offered beside the problem
+function cards(picked: Picked, technique: string | null, carded: string | null): string[] {
+  if (carded !== null) return [carded]
+  return technique === null ? picked.techniques : [technique]
 }
 
 // what the user has done on this problem

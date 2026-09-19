@@ -55,9 +55,9 @@ those steps at low fidelity.
 - **A query parameter names where the user came from.** The picked problem is
   `/problems/:problem_id` whichever page offered it, since Phase 11 opens the
   same problem as a rung of a card's ladder. `?technique=` names the technique
-  the pick came from and `?card=` names the card, and the sitting carries the
-  one it was given on: the way back returns there, and the claim answers for
-  that technique.
+  the pick came from and `?card=` names the card. The sitting carries both on:
+  the way back returns where the pick came from, and the claim answers for the
+  card's own technique where a card offered the problem.
 - **A page loads the record its path names.** The picked problem is read as its
   own record rather than found in the technique's candidates, since a page
   reached from two places would otherwise load a different list at each of
