@@ -30,7 +30,15 @@ from algo_coach.log import (
 )
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Card, CardRun, Hint, ProblemDifficulty, RecallAttempt
+from algo_coach.schema import (
+    Attempt,
+    Card,
+    CardRun,
+    Hint,
+    Problem,
+    ProblemDifficulty,
+    RecallAttempt,
+)
 from algo_coach.sitting import Served, get, serve
 from algo_coach.solution_claims import load_problem, load_problems
 from algo_coach.solutions import SolutionLog
@@ -79,6 +87,16 @@ class Recalled(BaseModel):
     verified: bool
 
 
+class Probed(BaseModel):
+    """One probe the start drew, named as the page shows it. A probe tests
+    whether the form is recognised unprompted, so the page names the problem
+    and says nothing of the technique behind it."""
+
+    problem: Problem
+    assigned_at: datetime
+    attempted: bool
+
+
 class Studied(BaseModel):
     """A card as its page reads it. The ladder, the progress and the recall
     state are folds, and `content.md` gives why none of them is stored."""
@@ -88,6 +106,7 @@ class Studied(BaseModel):
     rungs: list[Rung]
     gaps: list[Gap]
     recall: list[Recalled]
+    probes: list[Probed]
 
 
 @router.get("/board")
@@ -117,12 +136,14 @@ def card(root: Root, user_id: UserId, slug: str) -> Studied:
     if found is None:
         raise HTTPException(status_code=404, detail=f"no card {slug}")
     run = CardRunLog(root).started(user_id, found.id)
+    problems = load_problems(root)
+    attempts = AttemptLog(root).attempts(user_id)
     resolved = ladder(
         found,
-        load_problems(root),
+        problems,
         SolutionLog(root).solutions(),
         MatchLog(root).matches(),
-        AttemptLog(root).attempts(user_id),
+        attempts,
         since=run.started_at if run else None,
     )
     return Studied(
@@ -131,7 +152,25 @@ def card(root: Root, user_id: UserId, slug: str) -> Studied:
         rungs=resolved.rungs,
         gaps=resolved.gaps,
         recall=_recall(found, RecallLog(root).for_card(user_id, found.id)),
+        probes=_probes(run, problems, attempts),
     )
+
+
+def _probes(run: CardRun | None, problems: list[Problem], attempts: list[Attempt]) -> list[Probed]:
+    # the problem rather than its id, since the page names what it offers
+    if run is None:
+        return []
+    by_id = {problem.id: problem for problem in problems}
+    tried = {attempt.problem_id for attempt in attempts}
+    return [
+        Probed(
+            problem=by_id[one.problem_id],
+            assigned_at=one.assigned_at,
+            attempted=one.problem_id in tried,
+        )
+        for one in run.probes
+        if one.problem_id in by_id
+    ]
 
 
 def _recall(card: Card, attempts: list[RecallAttempt]) -> list[Recalled]:

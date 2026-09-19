@@ -1454,6 +1454,30 @@
         "title": "Probe",
         "description": "One problem a run was given, testing whether the form is recognised\nunprompted. Drawn from outside the ladder, which teaches the form."
       },
+      "Probed": {
+        "properties": {
+          "problem": {
+            "$ref": "#/components/schemas/Problem"
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Assigned At"
+          },
+          "attempted": {
+            "type": "boolean",
+            "title": "Attempted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem",
+          "assigned_at",
+          "attempted"
+        ],
+        "title": "Probed",
+        "description": "One probe the start drew, named as the page shows it. A probe tests\nwhether the form is recognised unprompted, so the page names the problem\nand says nothing of the technique behind it."
+      },
       "Problem": {
         "properties": {
           "model": {
@@ -1980,6 +2004,13 @@
             },
             "type": "array",
             "title": "Recall"
+          },
+          "probes": {
+            "items": {
+              "$ref": "#/components/schemas/Probed"
+            },
+            "type": "array",
+            "title": "Probes"
           }
         },
         "type": "object",
@@ -1988,7 +2019,8 @@
           "run",
           "rungs",
           "gaps",
-          "recall"
+          "recall",
+          "probes"
         ],
         "title": "Studied",
         "description": "A card as its page reads it. The ladder, the progress and the recall\nstate are folds, and `content.md` gives why none of them is stored."

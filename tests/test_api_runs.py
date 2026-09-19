@@ -107,7 +107,10 @@ def test_the_card_reads_its_run_the_ladder_and_the_probes(client):
 
     assert studied["run"]["id"] == started["id"]
     assert [one["problem"]["id"] for one in studied["rungs"]] == ["p-1", "p-2"]
-    assert [one["problem_id"] for one in studied["run"]["probes"]] == ["p-3"]
+    # named by the problem, since the page shows what it offers
+    assert [(one["problem"]["title"], one["attempted"]) for one in studied["probes"]] == [
+        ("p-3", False)
+    ]
 
 
 def test_the_ladder_s_progress_counts_the_run(client, database):

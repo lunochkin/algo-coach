@@ -611,6 +611,22 @@ export interface components {
              */
             assigned_at: string;
         };
+        /**
+         * Probed
+         * @description One probe the start drew, named as the page shows it. A probe tests
+         *     whether the form is recognised unprompted, so the page names the problem
+         *     and says nothing of the technique behind it.
+         */
+        Probed: {
+            problem: components["schemas"]["Problem"];
+            /**
+             * Assigned At
+             * Format: date-time
+             */
+            assigned_at: string;
+            /** Attempted */
+            attempted: boolean;
+        };
         /** Problem */
         Problem: {
             /** Model */
@@ -808,6 +824,8 @@ export interface components {
             gaps: components["schemas"]["Gap"][];
             /** Recall */
             recall: components["schemas"]["Recalled"][];
+            /** Probes */
+            probes: components["schemas"]["Probed"][];
         };
         /** Submission */
         Submission: {
