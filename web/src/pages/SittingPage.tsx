@@ -34,7 +34,13 @@ export function SittingPage() {
   const { sittingId = '' } = useParams()
   const [search] = useSearchParams()
   const navigate = useNavigate()
-  const toBoard = useCallback(() => navigate('/'), [navigate])
+  // a solver working through a ladder is working through a list, so the
+  // sitting returns to the card it came from, where the next rung is
+  const card = search.get('card')
+  const done = useCallback(
+    () => navigate(card === null ? '/' : `/cards/${encodeURIComponent(card)}`),
+    [navigate, card],
+  )
   const loaded = useLoaded(
     async (signal) => {
       const answer = await api.GET('/api/sittings/{sitting_id}', {
@@ -257,7 +263,7 @@ export function SittingPage() {
       </div>
       {/* the claim the sitting ends on; closing it leaves the attempts to the
           problem's own techniques, and a reload asks again */}
-      <Dialog open={ended} onOpenChange={(open) => open || toBoard()}>
+      <Dialog open={ended} onOpenChange={(open) => open || done()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>The claim</DialogTitle>
@@ -266,7 +272,7 @@ export function SittingPage() {
             </DialogDescription>
           </DialogHeader>
           {ended && (
-            <ClaimPrompt sittingId={sittingId} drilled={search.get('technique')} onDone={toBoard} />
+            <ClaimPrompt sittingId={sittingId} drilled={search.get('technique')} onDone={done} />
           )}
         </DialogContent>
       </Dialog>
