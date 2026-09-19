@@ -60,9 +60,6 @@ The work not yet ready for a phase waits under Further developments.
       in one act, since the ladder is measured from the start
 - [x] Draw the probes by the rule: a problem the card's technique carries,
       unseen first, then least recently attempted, never one the ladder holds
-- [ ] Settle what the probe skill decides beyond that draw, or drop it. The
-      draw is a rule over the corpus, and a skill choosing a probe would decide
-      something the rule already answers
 - [ ] Extend the card's own route with the run: the ladder and its progress, the
       recall state per template, and the probes the start drew
 - [ ] Serve a recall attempt: run the typed file against the template's cases

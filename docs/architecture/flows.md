@@ -532,6 +532,16 @@ start, and the probes are drawn at it.
 - **The probes are drawn at the start, and never at import.** A problem unseen
   at import need not still be unseen when the user starts the card, and a probe
   the user has already solved tests no recognition.
+- **The draw is a rule, and no model chooses a probe.** The rule reads the
+  technique's problems, unseen first, then least recently attempted. A model
+  asked to choose would answer the question the rule already answers, and it
+  would answer it differently each time the same card was started.
+- **The draw reads the technique rather than the selector's filters.** The
+  filters narrow what the ladder teaches, and a probe asks whether the
+  technique is recognised at all.
+- **Whether a statement gives its own form away is not read here.** A statement
+  naming its approach is a property of the corpus rather than of the pick, and
+  `ROADMAP.md` defers the measurement to "The corpus gated".
 - **A probe is stored on the run, not derived.** The draw reads the attempt log
   as it stood at the start, so a later attempt would change what a re-derivation
   returned. The probes the run offered have to stay readable.
