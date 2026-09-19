@@ -293,29 +293,33 @@ Left open:
   frontend carries no test framework, so every page stands on the typecheck,
   the lint and the build alone.
 
-## Phase 11 — Ladder, recall and card runs (current)
+## Phase 11 — Ladder, recall and card runs — done
 
 The pieces a card needs once there are problems to fill it.
 
-- The flows written and drawn first: starting a card run, solving a rung, and
-  recalling a template, each a sequence with a low-fidelity wireframe. A detail
-  only use can answer is named as deferred.
-- The ladder resolved at import from the selector and the template matches, at
-  least one rung per core template. An unfilled core template is a
-  reported gap.
-- Studying a card is an explicit act: the ladder is measured from it, and
-  probes are assigned at it.
-- A recall attempt is its own record, keyed to a card and a template. A hinted
-  pass is not a pass.
-- The trainer never prints a template: reproduced cold, run against the card's
-  own tests.
-- Status rather than verdicts: the inputs a graduation rule would read.
-- Graduation names no threshold. The numbers do not exist yet.
-- Exit: a card run gone through by hand: a card started, a rung of its ladder
-  solved, a template recalled cold against the card's tests, and a probe
-  offered.
+- The three flows written and drawn first: starting a card run, solving a rung,
+  and recalling a template, each a sequence with a low-fidelity wireframe.
+- A template carries the cases a reproduction of its form is checked against,
+  and `unordered` says its answer is a set, compared with its top level sorted.
+- The ladder resolved from the template matches, one rung per core template and
+  the selector filling out to `size`. A rung's requiredness is derived from what
+  it covers, and a core template nothing displays is reported as a gap.
+- Ladder progress is a fold over the attempts made since the run began, so a
+  re-derived ladder keeps what was solved and a retired problem leaves it.
+- `CardRun` and `RecallAttempt`, both append-only, with the probes and the case
+  results as child rows and the erasure reaching all four tables.
+- Starting a card mints the run and draws its probes in one act: the technique's
+  problems, unseen first, then least recently attempted, never a rung.
+- A recall runs the typed file through the runner a submission uses, at the same
+  cap and under the same per-minute bound.
+- The trainer withholds the title and the form. The API sends the trigger and
+  the signature alone, and each hint is its own request.
+- The card page on its two wireframes, the trainer, `?card=` on a problem, and
+  the sitting returning to the card it came from.
+- Exit met: a card run gone through by hand, from the start to a rung solved, a
+  template recalled cold, and a probe offered.
 
-## Phase 12 — The matcher, measured
+## Phase 12 — The matcher, measured (current)
 
 The worth of a generated corpus, measured.
 
