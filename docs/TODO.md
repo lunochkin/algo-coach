@@ -46,7 +46,7 @@ already, and renders every attempt as unlabelled.
 - [x] Draw the label on the claim wireframe in `wireframes.md`, which the loop
       already opens over the ended sitting. Phase 11 drew its flows before it
       built them
-- [ ] Write into `flows.md` where the label sits against the claim in the drill
+- [x] Write into `flows.md` where the label sits against the claim in the drill
       loop's step 5. The step names both records and orders neither
 - [ ] Serve `POST /attempts/{attempt_id}/labels` beside the claim's route in
       `api/writes.py`. The store, the mint, the export and the erasure reach

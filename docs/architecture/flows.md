@@ -446,8 +446,8 @@ The page layout is not designed here, and using the loop decides it.
 3. The sitting is minted, the statement is served, and the clock starts.
 4. The submission runs against the problem's own test cases, and the attempt is
    minted carrying the result.
-5. Keyed to each attempt, the loop asks for an attempt claim and a
-   self-label.
+5. Keyed to each attempt, the loop asks for an attempt claim and then for a
+   self-label, and one press stores both.
 
 - **The board offers every technique a served problem carries**, practised or
   not, and a technique never practised ranks stalest. A board of practised
@@ -493,6 +493,15 @@ The page layout is not designed here, and using the loop decides it.
   problem's own two or three techniques, the drilled one is the default since
   selection picked the problem by it, and the attempt is minutes old. Two facts
   a classifier has to infer later cost a keystroke each at this moment.
+- **The claim is asked before the label.** The claim asks which techniques the
+  code used, and naming them puts the approach the solver took into words. The
+  label then asks whether the solver held that approach, which is the question
+  the claim has just framed.
+- **One press stores the claim and the label.** The two answer one attempt, so
+  a press each would have the solver confirm the same attempt twice.
+  `wireframes.md` draws the overlay the two are asked in.
+- **A skipped label stops nothing.** The loop moves to the next attempt of the
+  sitting, and the attempt stays unlabelled. `log.md` gives what a skip leaves.
 - **The loop does not retire a problem.** A statement that asks for something
   its cases do not decide is retired by hand, in the terminal, and `corpus.md`
   gives who retires one. A self-label written before the retirement stays, and
