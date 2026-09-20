@@ -365,6 +365,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * Asked
+         * @description One attempt the loop still asks about, and the modes its verdict leaves
+         *     open. No mode is offered where the record already answers why.
+         */
+        Asked: {
+            attempt: components["schemas"]["Attempt"];
+            /** Modes */
+            modes: components["schemas"]["FailureMode"][];
+        };
         /** Attempt */
         Attempt: {
             /** Id */
@@ -1022,14 +1032,15 @@ export interface components {
         };
         /**
          * Unclaimed
-         * @description The claim a sitting ends on: the attempts no claim answers yet, and the
-         *     problem's techniques they are answered over.
+         * @description The claim a sitting ends on: the attempts no claim answers yet with the
+         *     modes each one's verdict leaves open, and the problem's techniques they are
+         *     answered over.
          */
         Unclaimed: {
             /** Techniques */
             techniques: string[];
             /** Attempts */
-            attempts: components["schemas"]["Attempt"][];
+            attempts: components["schemas"]["Asked"][];
         };
         /** ValidationError */
         ValidationError: {

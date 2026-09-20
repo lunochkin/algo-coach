@@ -814,6 +814,27 @@
   },
   "components": {
     "schemas": {
+      "Asked": {
+        "properties": {
+          "attempt": {
+            "$ref": "#/components/schemas/Attempt"
+          },
+          "modes": {
+            "items": {
+              "$ref": "#/components/schemas/FailureMode"
+            },
+            "type": "array",
+            "title": "Modes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "attempt",
+          "modes"
+        ],
+        "title": "Asked",
+        "description": "One attempt the loop still asks about, and the modes its verdict leaves\nopen. No mode is offered where the record already answers why."
+      },
       "Attempt": {
         "properties": {
           "id": {
@@ -2468,7 +2489,7 @@
           },
           "attempts": {
             "items": {
-              "$ref": "#/components/schemas/Attempt"
+              "$ref": "#/components/schemas/Asked"
             },
             "type": "array",
             "title": "Attempts"
@@ -2480,7 +2501,7 @@
           "attempts"
         ],
         "title": "Unclaimed",
-        "description": "The claim a sitting ends on: the attempts no claim answers yet, and the\nproblem's techniques they are answered over."
+        "description": "The claim a sitting ends on: the attempts no claim answers yet with the\nmodes each one's verdict leaves open, and the problem's techniques they are\nanswered over."
       },
       "ValidationError": {
         "properties": {

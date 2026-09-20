@@ -95,6 +95,16 @@ class Submitted(BaseModel):
     failure: Failure | None  # none on a submission that passed every case
 
 
+class Asked(BaseModel):
+    """One attempt the loop still asks about, and the modes its verdict leaves
+    open. No mode is offered where the record already answers why."""
+
+    model_config = ConfigDict(frozen=True)
+
+    attempt: Attempt
+    modes: list[FailureMode]
+
+
 def serve(
     problems: ProblemStore,
     sittings: SittingStore,
@@ -210,23 +220,34 @@ def claim(
     return written
 
 
-def modes(*, solved: bool) -> tuple[FailureMode, ...]:
+def modes(attempt: Attempt, run: AttemptVerification | None) -> list[FailureMode]:
     """The failure modes an attempt's verdict leaves open, which `log.md`
-    splits by whether the attempt solved the problem."""
-    if solved:
-        return (FailureMode.SPEED, FailureMode.NONE)
-    return (FailureMode.GAP, FailureMode.RUST, FailureMode.SYNTAX)
+    splits by whether the attempt solved the problem. An attempt that crashed
+    on every case is asked nothing: the code reached no answer, so no mode is
+    more than a guess."""
+    if attempt.solved:
+        return [FailureMode.SPEED, FailureMode.NONE]
+    judged = run.results if run is not None else []
+    if judged and all(one.outcome is CaseOutcome.CRASHED for one in judged):
+        return []
+    return [FailureMode.GAP, FailureMode.RUST, FailureMode.SYNTAX]
 
 
 def label(log: AttemptLog, attempt_id: str, mode: FailureMode, *, user_id: str) -> SelfLabel:
     """The user's own verdict on why the attempt went the way it did."""
     attempt = owned_attempt(log, attempt_id, user_id=user_id)
-    if mode not in modes(solved=attempt.solved):
+    if mode not in modes(attempt, _verification(log, attempt_id)):
         # a label contradicting the verdict answers a settled question
         raise Refused(f"{mode.value} is not open to this attempt")
     written = mint.self_label(attempt_id, mode)
     log.append_self_label(written)
     return written
+
+
+def _verification(log: AttemptLog, attempt_id: str) -> AttemptVerification | None:
+    # the latest run: a submission mints one, and a re-run appends another
+    runs = [one for one in log.verifications() if one.attempt_id == attempt_id]
+    return runs[-1] if runs else None
 
 
 def owned_attempt(log: AttemptLog, attempt_id: str, *, user_id: str) -> Attempt:
@@ -237,12 +258,14 @@ def owned_attempt(log: AttemptLog, attempt_id: str, *, user_id: str) -> Attempt:
     return found
 
 
-def unclaimed(log: AttemptLog, sitting_id: str, *, user_id: str) -> list[Attempt]:
+def unclaimed(log: AttemptLog, sitting_id: str, *, user_id: str) -> list[Asked]:
     """The sitting's attempts the user has not claimed, in the order they were
-    submitted. A machine claim answers no question the loop asked."""
+    submitted, each with the modes its verdict leaves open. A machine claim
+    answers no question the loop asked."""
     answered = {one.attempt_id for one in log.claims(user_id) if one.source is ClaimSource.USER}
+    runs = {one.attempt_id: one for one in log.verifications(user_id)}
     return [
-        one
+        Asked(attempt=one, modes=modes(one, runs.get(one.id)))
         for one in log.attempts(user_id)
         if one.sitting_id == sitting_id and one.id not in answered
     ]

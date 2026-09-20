@@ -46,10 +46,10 @@ def test_one_sitting_runs_from_serve_to_end(root):
         sittings, cases, log, sitting_id, DOUBLE, user_id=USER, now=began + timedelta(minutes=30)
     ).attempt
     ended = end(sittings, sitting_id, user_id=USER, now=began + timedelta(minutes=31))
-    for attempt in unclaimed(log, sitting_id, user_id=USER):
+    for asked in unclaimed(log, sitting_id, user_id=USER):
         claim(
             log,
-            attempt.id,
+            asked.attempt.id,
             ["arithmetic"],
             candidates=["arithmetic"],
             user_id=USER,

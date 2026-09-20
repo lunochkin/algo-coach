@@ -314,6 +314,10 @@ from. A mode says why the attempt went the way it did.
   `gap`, `rust` or `syntax`.** An attempt that returned no answer failed for a
   reason, and how long the solver took is not that reason. A submission that
   passed reached the form and carries no slip.
+- **An attempt that crashed on every case is asked for no label.** The code
+  reached no answer, so no mode is more than a guess, and the traceback each
+  case result carries already names what raised. The loop asks about that
+  attempt's claim and offers no mode.
 - **A skipped label writes no record.** The solver who skips the question
   asserts nothing, so the attempt stays unlabelled and the board counts it
   under no mode.

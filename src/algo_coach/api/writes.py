@@ -17,7 +17,6 @@ from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
 from algo_coach.recall import reproduce
 from algo_coach.schema import (
-    Attempt,
     AttemptClaim,
     Card,
     CardRun,
@@ -30,6 +29,7 @@ from algo_coach.schema import (
     Template,
 )
 from algo_coach.sitting import (
+    Asked,
     Submitted,
     claim,
     end,
@@ -69,11 +69,12 @@ class Timed(BaseModel):
 
 
 class Unclaimed(BaseModel):
-    """The claim a sitting ends on: the attempts no claim answers yet, and the
-    problem's techniques they are answered over."""
+    """The claim a sitting ends on: the attempts no claim answers yet with the
+    modes each one's verdict leaves open, and the problem's techniques they are
+    answered over."""
 
     techniques: list[str]
-    attempts: list[Attempt]
+    attempts: list[Asked]
 
 
 class Claim(BaseModel):

@@ -78,7 +78,7 @@ def test_one_sitting_runs_through_the_api_as_the_page_calls_it(client):
     assert client.post(submissions, json={"code": DOUBLE}).status_code == 409
     asked = ok(client.get(f"/api/sittings/{sitting_id}/unclaimed"))
     assert asked["techniques"] == ["greedy", "sorting"]
-    assert [one["id"] for one in asked["attempts"]] == [
+    assert [one["attempt"]["id"] for one in asked["attempts"]] == [
         failing["attempt"]["id"],
         passing["attempt"]["id"],
     ]

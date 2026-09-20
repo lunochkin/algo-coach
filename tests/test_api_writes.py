@@ -135,7 +135,8 @@ def test_each_attempt_of_the_sitting_is_asked_about_until_claimed(client, sittin
     first = submitted(client, sitting_id, TRIPLE).json()["attempt"]["id"]
     second = submitted(client, sitting_id).json()["attempt"]["id"]
     assert [
-        one["id"] for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
+        one["attempt"]["id"]
+        for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
     ] == [
         first,
         second,
@@ -147,7 +148,8 @@ def test_each_attempt_of_the_sitting_is_asked_about_until_claimed(client, sittin
 
     assert (written["techniques"], written["source"]) == (["sorting"], "user")
     assert [
-        one["id"] for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
+        one["attempt"]["id"]
+        for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
     ] == [second]
 
 
@@ -239,3 +241,19 @@ def test_labelling_another_user_s_attempt_is_not_found(root, client, sitting_id)
     response = other.post(f"/api/attempts/{attempt_id}/labels", json={"mode": "none"})
 
     assert response.status_code == 404
+
+
+def test_the_modes_each_attempt_leaves_open_are_served(client, sitting_id):
+    """The page offers what the route sends, so the split by verdict lives in
+    one place."""
+    submitted(client, sitting_id, TRIPLE)
+    submitted(client, sitting_id, "def solve(n):\n    raise ValueError(n)\n")
+    submitted(client, sitting_id)
+
+    asked = client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
+
+    assert [one["modes"] for one in asked] == [
+        ["gap", "rust", "syntax"],
+        [],
+        ["speed", "none"],
+    ]

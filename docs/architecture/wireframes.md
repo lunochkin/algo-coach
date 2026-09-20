@@ -229,8 +229,12 @@ Every page under a section carries the same two rows above its body.
   so it sits under the claim and the confidence.
 - Each mode is drawn as its own word beside a gloss in the first person. A
   solver reading `rust` alone cannot tell which of the two failures it names.
-- An unsolved attempt is offered `gap`, `rust` and `syntax`, and a solved one
-  is offered `speed` and `none`. `log.md` gives why the five split that way.
+- The modes are the ones the route sent, so the split by verdict lives in one
+  place. An unsolved attempt is offered `gap`, `rust` and `syntax`, and a solved
+  one is offered `speed` and `none`.
+- An attempt that crashed on every case is offered no mode, and the overlay
+  then asks for its claim alone. `log.md` gives why the record answers that
+  attempt already.
 - One press stores both records. The claim and the label answer two questions
   about one attempt, and a press each would ask the solver to confirm twice.
 - A press with no mode selected stores no label, and `log.md` gives why a skip

@@ -53,7 +53,7 @@ already, and renders every attempt as unlabelled.
       `self_labels` already
 - [x] Ask for the label in the sitting, beside `ClaimPrompt.tsx`, for each
       attempt the claim already asks about
-- [ ] Offer only the failure modes an attempt's verification leaves open. A
+- [x] Offer only the failure modes an attempt's verification leaves open. A
       crash on every case and a timeout are in the record already, and a label
       contradicting the verdict would be a second answer to one question
 

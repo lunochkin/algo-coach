@@ -12,20 +12,15 @@ import { duration } from '@/lib/format'
 
 type Confidence = 'guess' | 'leaning' | 'sure'
 
-// the modes an attempt's verdict leaves open, which `log.md` splits by whether
-// the attempt solved the problem. The route refuses the rest, and each mode is
-// offered as its own word beside a gloss: the word alone does not separate
-// `rust` from `gap`
-const MODES: Record<'solved' | 'failed', { mode: FailureMode; gloss: string }[]> = {
-  solved: [
-    { mode: 'speed', gloss: 'I got there, slower than I should have' },
-    { mode: 'none', gloss: 'Nothing went wrong' },
-  ],
-  failed: [
-    { mode: 'gap', gloss: 'I did not hold the form' },
-    { mode: 'rust', gloss: 'I held the form and did not reach it' },
-    { mode: 'syntax', gloss: 'I slipped writing code I know' },
-  ],
+// each mode is offered as its own word beside a gloss: the word alone does not
+// separate `rust` from `gap`. Which of them an attempt leaves open is the
+// route's answer, since the verdict decides it
+const GLOSS: Record<FailureMode, string> = {
+  speed: 'I got there, slower than I should have',
+  none: 'Nothing went wrong',
+  gap: 'I did not hold the form',
+  rust: 'I held the form and did not reach it',
+  syntax: 'I slipped writing code I know',
 }
 
 type Props = {
@@ -60,12 +55,13 @@ export function ClaimPrompt({ sittingId, drilled, onDone }: Props) {
   if (data === undefined || finished)
     return <Loaded of="the claim" state={loaded}>{() => null}</Loaded>
 
-  const attempt = attempts[answered]
+  const asked = attempts[answered]
   return (
     <ClaimForm
       // a fresh form per attempt, so no answer carries over to the next
-      key={attempt.id}
-      attempt={attempt}
+      key={asked.attempt.id}
+      attempt={asked.attempt}
+      modes={asked.modes}
       position={`Attempt ${answered + 1} of ${attempts.length}`}
       techniques={data.techniques}
       drilled={drilled}
@@ -76,13 +72,16 @@ export function ClaimPrompt({ sittingId, drilled, onDone }: Props) {
 
 type FormProps = {
   attempt: Attempt
+  // the modes this attempt's verdict leaves open; none where the record
+  // already answers why it went that way
+  modes: FailureMode[]
   position: string
   techniques: string[]
   drilled: string | null
   onClaimed: () => void
 }
 
-function ClaimForm({ attempt, position, techniques, drilled, onClaimed }: FormProps) {
+function ClaimForm({ attempt, modes, position, techniques, drilled, onClaimed }: FormProps) {
   const [chosen, setChosen] = useState<string[]>(
     drilled && techniques.includes(drilled) ? [drilled] : [],
   )
@@ -175,26 +174,25 @@ function ClaimForm({ attempt, position, techniques, drilled, onClaimed }: FormPr
         </ToggleGroup>
       </div>
 
-      <fieldset className="space-y-2">
-        <legend className="mb-2 font-medium">Why did it go that way?</legend>
-        <RadioGroup
-          value={mode ?? ''}
-          onValueChange={(value) => setMode(value as FailureMode)}
-        >
-          {MODES[attempt.solved ? 'solved' : 'failed'].map(({ mode: one, gloss }) => (
-            <div key={one} className="flex items-center gap-2">
-              <RadioGroupItem id={`label-${one}`} value={one} />
-              <Label htmlFor={`label-${one}`} className="gap-2">
-                <span className="font-mono">{one}</span>
-                <span className="text-muted-foreground">{gloss}</span>
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-        <p className="text-meta text-muted-foreground">
-          Answering is optional, and a skipped label leaves the attempt unlabelled.
-        </p>
-      </fieldset>
+      {modes.length > 0 && (
+        <fieldset className="space-y-2">
+          <legend className="mb-2 font-medium">Why did it go that way?</legend>
+          <RadioGroup value={mode ?? ''} onValueChange={(value) => setMode(value as FailureMode)}>
+            {modes.map((one) => (
+              <div key={one} className="flex items-center gap-2">
+                <RadioGroupItem id={`label-${one}`} value={one} />
+                <Label htmlFor={`label-${one}`} className="gap-2">
+                  <span className="font-mono">{one}</span>
+                  <span className="text-muted-foreground">{GLOSS[one]}</span>
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+          <p className="text-meta text-muted-foreground">
+            Answering is optional, and a skipped label leaves the attempt unlabelled.
+          </p>
+        </fieldset>
+      )}
 
       {refused && <p className="text-destructive">The answer was refused: {refused}</p>}
       <Button onClick={send} disabled={!answers || !confidence || sending}>
