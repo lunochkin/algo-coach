@@ -268,6 +268,24 @@ attempt, for the same reason a claim is.
   compile error. A label recalled that late is either invention or the
   classifier's own input handed back as evidence against it.
 
+### What each mode selects
+
+`FailureMode` is the vocabulary a self-label and a diagnosis both name a mode
+from. A mode says why the attempt went the way it did.
+
+- **`speed` is the time the solver took, and never the solution's
+  complexity.** The solver reached the answer, and reached it more slowly than
+  they judge they should have. No record holds the bar that judgement is made
+  against, so the loop asks the solver for it.
+- **A timeout is not labelled `speed`.** The attempt's verification stores
+  `timed out` on each case the submission exceeded the cap on, so a label
+  repeating that outcome answers a question the record already settled. A
+  timeout is labelled by its cause, as any other failure is.
+- **`speed` is offered on a solved attempt alone.** An attempt that returned no
+  answer took however long it took, and the time it took is not why it failed.
+- **A diagnosis never names `speed`.** The machine reads the record, and the
+  record holds no bar to read a solver's own judgement from.
+
 ## Diagnoses
 
 Why an attempt failed, inferred rather than reported. Keyed to an attempt and

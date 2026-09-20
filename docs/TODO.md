@@ -22,7 +22,7 @@ in `docs/architecture/` says what any of them selects. Each decision below is
 irreversible once one label is stored, since a member cannot be removed while a
 record carries it.
 
-- [ ] Settle what `speed` means before anything writes the label. "Solved but
+- [x] Settle what `speed` means before anything writes the label. "Solved but
       too slowly" is about the user, a timeout is about the solution's
       complexity, and only the timeout is in the record
 - [ ] Land `rust` against `gap`, or drop the distinction and fold `rust` into
