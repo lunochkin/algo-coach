@@ -196,10 +196,10 @@ Every page under a section carries the same two rows above its body.
 - The sitting is designed for a keyboard and a wide window. The stack keeps a
   narrow window readable, and no layout is drawn for one.
 
-## The claim
+## The claim and the label
 
 ```
-+- the claim, over the ended sitting ------------------------------------+
++- the claim and the label, over the ended sitting ----------------------+
 | The claim                                                              |
 | Asked of each attempt now, while the code is minutes old.              |
 |                                                                        |
@@ -212,15 +212,30 @@ Every page under a section carries the same two rows above its body.
 |                                                                        |
 | Confidence   ( guess | leaning | sure )                                |
 |                                                                        |
-|                                           [ Claim ]                    |
+| Why did it go that way?                                                |
+|   ( ) gap      I did not hold the form                                 |
+|   ( ) rust     I held the form and did not reach it                    |
+|   ( ) syntax   I slipped writing code I know                           |
+|                                                                        |
+|                                         [ Save ]                       |
 +------------------------------------------------------------------------+
 ```
 
-- The claim opens over the ended sitting, and it asks about each attempt the
-  sitting minted in turn.
+- The claim and the label open together over the ended sitting, and the two
+  are asked of each attempt the sitting minted in turn.
 - The technique the problem was picked by is answered for already, since
   selection chose the problem for that technique.
-- Closing the claim leaves the attempts to the problem's own techniques.
+- The label reads as a question about the solver rather than about the code,
+  so it sits under the claim and the confidence.
+- Each mode is drawn as its own word beside a gloss in the first person. A
+  solver reading `rust` alone cannot tell which of the two failures it names.
+- An unsolved attempt is offered `gap`, `rust` and `syntax`, and a solved one
+  is offered `speed` and `none`. `log.md` gives why the five split that way.
+- One press stores both records. The claim and the label answer two questions
+  about one attempt, and a press each would ask the solver to confirm twice.
+- A press with no mode selected stores no label, and `log.md` gives why a skip
+  writes no record. Closing leaves the attempts to the problem's own
+  techniques, and leaves them unlabelled.
 
 ## The cards
 

@@ -43,7 +43,7 @@ record carries it.
 The sitting asks for the claim and stops. The board reads `self_labels`
 already, and renders every attempt as unlabelled.
 
-- [ ] Draw the label on the claim wireframe in `wireframes.md`, which the loop
+- [x] Draw the label on the claim wireframe in `wireframes.md`, which the loop
       already opens over the ended sitting. Phase 11 drew its flows before it
       built them
 - [ ] Write into `flows.md` where the label sits against the claim in the drill
