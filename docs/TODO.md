@@ -34,7 +34,7 @@ record carries it.
 - [x] Write each surviving mode's meaning into `log.md` under Self-labels, and
       add the modes to `README.md` `## Terminology`. The loop offers each mode
       to the user as a word, and no file glosses one
-- [ ] Decide what a skipped label leaves, and write the decision into
+- [x] Decide what a skipped label leaves, and write the decision into
       `log.md`. A claim states a decline with `declined`, where `none` is
       already a mode rather than an absence
 

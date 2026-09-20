@@ -314,6 +314,20 @@ from. A mode says why the attempt went the way it did.
   `gap`, `rust` or `syntax`.** An attempt that returned no answer failed for a
   reason, and how long the solver took is not that reason. A submission that
   passed reached the form and carries no slip.
+- **A skipped label writes no record.** The solver who skips the question
+  asserts nothing, so the attempt stays unlabelled and the board counts it
+  under no mode.
+- **A skip is never stored as `none`.** `none` asserts that the attempt went
+  the way it should, and a board counting a skipped attempt under `none` would
+  report a clean pass the solver never claimed.
+- **A self-label needs no `declined`, where a claim carries one.** A claim
+  declines against a list of candidate techniques, and that decline asserts
+  that no candidate on the list applies. A mode names why the attempt went the
+  way it did, and `none` already carries the verdict that nothing went wrong.
+- **An attempt asked and skipped reads as an attempt the loop never asked**,
+  and that cost is accepted. Every attempt written before Phase 12 carries no
+  label, so a reader counting labels reads a denominator of labelled attempts
+  rather than a rate of answers.
 
 ## Diagnoses
 
