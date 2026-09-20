@@ -319,20 +319,31 @@ The pieces a card needs once there are problems to fill it.
 - Exit met: a card run gone through by hand, from the start to a rung solved, a
   template recalled cold, and a probe offered.
 
-## Phase 12 — The self-label (current)
+## Phase 12 — The self-label — done
 
 The user's own verdict on why an attempt went the way it did, asked at the
-moment of solving. A label cannot be given later, so it comes before the
+moment of solving. A label cannot be given later, so the phase came before the
 sittings that fill the log.
 
-- The failure modes settled before anything writes one, and each mode's
-  meaning written into `log.md` and the glossary.
-- The `SelfLabel` the loop asks for, beside the claim it already asks for,
-  offering only the modes an attempt's verification leaves open.
-- Exit: a sitting ends on a self-label the user gave, stored against the
-  attempt.
+- `speed` settled as the time the solver took, never the solution's
+  complexity. A timeout is a stored verdict, and it is labelled by its cause.
+- `rust` and `gap` landed apart: a form the solver held and did not reach
+  against a form the solver did not hold. The two name different remedies, the
+  recall trainer and the card's own ladder.
+- `FailureMode` kept all five members, and each one's meaning is written into
+  `log.md` with one glossary entry in `README.md`.
+- A skipped label writes no record, and the label carries no `declined`: a
+  claim declines against a candidate list, where a mode names a cause.
+- The claim overlay drawn and then built with the label under the claim, one
+  press storing both records per attempt.
+- `POST /attempts/{attempt_id}/labels`, refusing a mode the attempt's verdict
+  leaves closed, as the claim route refuses a technique outside the problem's.
+- The open modes served per attempt, so the split by verdict lives in the
+  engine alone. An attempt that crashed on every case is offered none.
+- Exit not met at close: the loop asks for a label, and no sitting has stored
+  one yet. The first sitting on the deployed engine settles it.
 
-## Phase 13 — The matcher, measured
+## Phase 13 — The matcher, measured (current)
 
 How often the matcher is right, measured.
 

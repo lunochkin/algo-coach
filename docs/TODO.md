@@ -4,63 +4,7 @@ The phases still open. A ticked item stays while its phase is open. When a
 phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 The work not yet ready for a phase waits under Further developments.
 
-## Phase 12 — the self-label (current)
-
-The user's own verdict on why an attempt went the way it did, asked at the
-moment of solving. `self_labels` holds no row, and nothing writes one. The
-board already reads the table, and the sitting asks for the claim alone.
-
-The phase comes before the sittings that fill the log. A claim can be written
-months later from the code, and a label cannot: its evidence is what the solver
-recalls. Every attempt made before the loop asks carries no label and never
-will.
-
-### What a failure mode means
-
-`FailureMode` carries `speed`, `rust`, `gap`, `syntax` and `none`, and no file
-in `docs/architecture/` says what any of them selects. Each decision below is
-irreversible once one label is stored, since a member cannot be removed while a
-record carries it.
-
-- [x] Settle what `speed` means before anything writes the label. "Solved but
-      too slowly" is about the user, a timeout is about the solution's
-      complexity, and only the timeout is in the record
-- [x] Land `rust` against `gap`, or drop the distinction and fold `rust` into
-      `gap`. The two labels differ only in whether the technique was ever
-      fluent, and a single attempt does not carry that history
-- [x] Remove from `FailureMode` whatever that decision drops, in the same
-      commit. Removing a member is a tightening, legal only while no record
-      carries it, and `self_labels` holds no row today
-- [x] Write each surviving mode's meaning into `log.md` under Self-labels, and
-      add the modes to `README.md` `## Terminology`. The loop offers each mode
-      to the user as a word, and no file glosses one
-- [x] Decide what a skipped label leaves, and write the decision into
-      `log.md`. A claim states a decline with `declined`, where `none` is
-      already a mode rather than an absence
-
-### The loop asks
-
-The sitting asks for the claim and stops. The board reads `self_labels`
-already, and renders every attempt as unlabelled.
-
-- [x] Draw the label on the claim wireframe in `wireframes.md`, which the loop
-      already opens over the ended sitting. Phase 11 drew its flows before it
-      built them
-- [x] Write into `flows.md` where the label sits against the claim in the drill
-      loop's step 5. The step names both records and orders neither
-- [x] Serve `POST /attempts/{attempt_id}/labels` beside the claim's route in
-      `api/writes.py`. The store, the mint, the export and the erasure reach
-      `self_labels` already
-- [x] Ask for the label in the sitting, beside `ClaimPrompt.tsx`, for each
-      attempt the claim already asks about
-- [x] Offer only the failure modes an attempt's verification leaves open. A
-      crash on every case and a timeout are in the record already, and a label
-      contradicting the verdict would be a second answer to one question
-
-### Exit
-- [ ] A sitting ends on a self-label the user gave, stored against the attempt
-
-## Phase 13 — the matcher, measured
+## Phase 13 — the matcher, measured (current)
 
 The matcher says which templates a generated solution displays, and every
 ladder is built from those matches. No number says how often the matcher is
