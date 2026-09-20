@@ -13,7 +13,12 @@ concurrency:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # Ubuntu 26 ahead of 2026-10-19, the day `ubuntu-latest` migrates to it.
+    # This job installs gVisor and reloads the runner's Docker daemon, so the
+    # runner's kernel and daemon decide whether the sandbox tests run at all.
+    # Named rather than taken from `ubuntu-latest`, so the migration lands on a
+    # commit that read what the sandbox tests said
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     # the integration tests' server, on the version the engine runs against.
     # Its default user is a superuser, which creates the workers' databases and
