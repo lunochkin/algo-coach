@@ -51,7 +51,7 @@ already, and renders every attempt as unlabelled.
 - [x] Serve `POST /attempts/{attempt_id}/labels` beside the claim's route in
       `api/writes.py`. The store, the mint, the export and the erasure reach
       `self_labels` already
-- [ ] Ask for the label in the sitting, beside `ClaimPrompt.tsx`, for each
+- [x] Ask for the label in the sitting, beside `ClaimPrompt.tsx`, for each
       attempt the claim already asks about
 - [ ] Offer only the failure modes an attempt's verification leaves open. A
       crash on every case and a timeout are in the record already, and a label

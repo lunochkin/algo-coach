@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 const SURFACES = [
@@ -155,6 +156,22 @@ export function GalleryPage() {
           <ToggleGroupItem value="leaning">leaning</ToggleGroupItem>
           <ToggleGroupItem value="sure">sure</ToggleGroupItem>
         </ToggleGroup>
+        <RadioGroup>
+          <div className="flex items-center gap-2">
+            <RadioGroupItem id="gallery-mode-gap" value="gap" />
+            <Label htmlFor="gallery-mode-gap" className="gap-2">
+              <span className="font-mono">gap</span>
+              <span className="text-muted-foreground">I did not hold the form</span>
+            </Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <RadioGroupItem id="gallery-mode-rust" value="rust" />
+            <Label htmlFor="gallery-mode-rust" className="gap-2">
+              <span className="font-mono">rust</span>
+              <span className="text-muted-foreground">I held the form and did not reach it</span>
+            </Label>
+          </div>
+        </RadioGroup>
       </Section>
 
       <Section title="Table">
