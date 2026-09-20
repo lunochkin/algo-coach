@@ -25,10 +25,10 @@ record carries it.
 - [x] Settle what `speed` means before anything writes the label. "Solved but
       too slowly" is about the user, a timeout is about the solution's
       complexity, and only the timeout is in the record
-- [ ] Land `rust` against `gap`, or drop the distinction and fold `rust` into
+- [x] Land `rust` against `gap`, or drop the distinction and fold `rust` into
       `gap`. The two labels differ only in whether the technique was ever
       fluent, and a single attempt does not carry that history
-- [ ] Remove from `FailureMode` whatever that decision drops, in the same
+- [x] Remove from `FailureMode` whatever that decision drops, in the same
       commit. Removing a member is a tightening, legal only while no record
       carries it, and `self_labels` holds no row today
 - [ ] Write each surviving mode's meaning into `log.md` under Self-labels, and

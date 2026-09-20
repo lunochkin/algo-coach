@@ -285,6 +285,22 @@ from. A mode says why the attempt went the way it did.
   answer took however long it took, and the time it took is not why it failed.
 - **A diagnosis never names `speed`.** The machine reads the record, and the
   record holds no bar to read a solver's own judgement from.
+- **`gap` is a form the solver did not hold.** Reading the card would have
+  supplied the form, and the solver had not read it or had not kept it.
+- **`rust` is a form the solver held and did not reach.** The trigger went
+  unrecognised, or the form came back in pieces. A solver who recognises the
+  approach the moment they read a solution held the form.
+- **The solver reports which of the two, and no record decides it.** The log
+  holds the attempts made since the log began, and a solver learned techniques
+  before that. A first sitting on a technique is therefore the same record
+  whether the solver has practised the technique for years or has never met it.
+- **The two modes name different remedies.** A solver who does not hold the
+  form reads the card and solves its ladder. A solver who holds the form and
+  did not reach it runs the recall trainer. One mode over both would leave the
+  scheduler two remedies and no way to pick between them.
+- **A diagnosis names either of the two.** The machine reads the code and the
+  log, so it can propose which one the attempt shows, and the eval scores that
+  proposal against the solver's own label.
 
 ## Diagnoses
 
