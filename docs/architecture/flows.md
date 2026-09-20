@@ -673,7 +673,7 @@ trainer never prints the form until the user asks for it as a hint.
   than the recall.
 - **The trainer draws, and nothing schedules.** Never recalled first, then
   least recently recalled, which is the ordering the board uses for a
-  technique. The scheduler Phase 14 adds may draw differently.
+  technique. The scheduler Phase 15 adds may draw differently.
 
 Deferred, since only use answers each:
 

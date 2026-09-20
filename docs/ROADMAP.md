@@ -343,7 +343,23 @@ sittings that fill the log.
 - Exit not met at close: the loop asks for a label, and no sitting has stored
   one yet. The first sitting on the deployed engine settles it.
 
-## Phase 13 — The matcher, measured (current)
+## Phase 13 — The loop in use (current)
+
+The author practises on the deployed engine, and what the sittings surface
+decides the work. The phase opens with no list of its own: an item is written
+when a sitting finds a fault, a page reads badly, or a flow asks for a step
+that does not exist. `docs/TODO.md` carries those items as they are found.
+
+- The design revised against pages carrying real problems, real verdicts and a
+  real log, rather than the seeded reading Phase 10 designed for.
+- The faults the sittings surface, fixed in the flows that carry them.
+- The flows and pages use asks for, written into `docs/architecture/` before
+  they are built, as Phase 11 wrote its own.
+- Problems generated where a technique runs out of ones the user has not seen.
+- Exit: every item this phase opened is ticked, and a stretch of sittings
+  opened no new one.
+
+## Phase 14 — The matcher, measured
 
 How often the matcher is right, measured.
 
@@ -356,7 +372,7 @@ How often the matcher is right, measured.
 - A configuration pinned before any number is quoted.
 - Exit: the matcher carries a per-template score in both directions.
 
-## Phase 14 — Mastery and scheduling
+## Phase 15 — Mastery and scheduling
 
 Per-technique skill state derived from the log, and a scheduler that picks what
 the user practises next.
@@ -374,9 +390,9 @@ Blocks of work not ready for a phase, unnumbered and unordered. A block becomes
 a planned phase once it is clear enough to plan, and `docs/TODO.md` holds the
 items of each block, the smaller ones included.
 
-- **Failure mode.** Why an attempt failed: the self-label written once `speed`,
-  `rust` and `gap` are settled, a diagnosis call narrowed to what the record
-  supports, and a scheduler that targets the diagnosed cause.
+- **The diagnosis.** The machine counterpart of the self-label: a call narrowed
+  to what the record supports, scored per failure mode against the labels the
+  loop produced, and a scheduler that targets the cause it names.
 - **Alternative solutions.** Every other way to solve a stored problem,
   enumerated over the corpus, each approach its own canonical judged by the
   problem's cases.

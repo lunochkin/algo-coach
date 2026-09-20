@@ -4,7 +4,43 @@ The phases still open. A ticked item stays while its phase is open. When a
 phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 The work not yet ready for a phase waits under Further developments.
 
-## Phase 13 — the matcher, measured (current)
+## Phase 13 — the loop in use (current)
+
+The author practises on the deployed engine, and the sittings decide the work.
+This phase starts with almost no items. An item is written when a sitting finds
+a fault, a page reads badly, or a flow wants a step nothing serves, and it is
+written as any item here is: an imperative naming what exists when it is done.
+
+The phase closes when its own backlog is empty and a stretch of sittings has
+opened nothing new. No count of sittings is its exit, since the phase measures
+what use surfaces rather than how much use happened.
+
+### Sitting on the deployed engine
+
+- [ ] Sit one problem through on the deployed engine, from the board to the
+      claim and the label, which is Phase 12's unmet exit
+- [ ] Write down, per sitting, what read badly or worked badly, as items under
+      the headings below. A fault nobody wrote down is fixed twice or never
+
+### The design
+
+- [ ] Read every page against real data and list what the design gets wrong,
+      one item per page. Phase 10 designed against seeded readings
+
+### The flows
+
+Nothing yet. A fault a sitting surfaces is written here as its own item.
+
+### The corpus
+
+- [ ] Run a sweep for a technique the drill loop runs out of unseen problems
+      on. The trigger is a technique whose candidates the user has all attempted
+
+### Exit
+- [ ] Every item this phase opened is ticked, and a stretch of sittings opened
+      no new one
+
+## Phase 14 — the matcher, measured
 
 The matcher says which templates a generated solution displays, and every
 ladder is built from those matches. No number says how often the matcher is
@@ -64,7 +100,7 @@ the audit. Generation goes on without the score.
 ### Exit
 - [ ] The matcher carries a per-template score in both directions
 
-## Phase 14 — mastery and scheduling
+## Phase 15 — mastery and scheduling
 
 - [ ] Write into `docs/architecture/` what a technique's mastery is derived
       from: the attempts, their claims and their verdicts. Mastery is never
