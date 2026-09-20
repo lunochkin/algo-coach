@@ -9,8 +9,8 @@ from algo_coach.schema.record import AttemptRecord
 
 class FailureMode(StrEnum):
     SPEED = "speed"  # solved, and slower than the solver judges; never a timeout
-    RUST = "rust"  # once-fluent technique, retrieval/fluency failure
-    GAP = "gap"  # technique not actually known
+    RUST = "rust"  # the form was held and not reached
+    GAP = "gap"  # the form was not held
     SYNTAX = "syntax"  # language/implementation slip
     NONE = "none"  # clean pass
 

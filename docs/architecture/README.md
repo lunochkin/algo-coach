@@ -229,6 +229,11 @@ without redefining them. Grouped by the file that specifies the record.
   did.
 - **Diagnosis**: the machine's verdict on why an attempt failed. A
   `Diagnosis` record stores it.
+- **Failure mode**: why an attempt went the way it did, as one of the five
+  words a self-label and a diagnosis both name: `speed`, the solver took
+  longer than they judge they should have; `rust`, the form was held and not
+  reached; `gap`, the form was not held; `syntax`, a slip in code the solver
+  could have written correctly; `none`, nothing went wrong.
 - **Card run**: the record that a card was started, and the probes it was
   given.
 - **Recall attempt**: one template reproduced from memory, with the hints

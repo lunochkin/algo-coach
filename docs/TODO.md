@@ -31,7 +31,7 @@ record carries it.
 - [x] Remove from `FailureMode` whatever that decision drops, in the same
       commit. Removing a member is a tightening, legal only while no record
       carries it, and `self_labels` holds no row today
-- [ ] Write each surviving mode's meaning into `log.md` under Self-labels, and
+- [x] Write each surviving mode's meaning into `log.md` under Self-labels, and
       add the modes to `README.md` `## Terminology`. The loop offers each mode
       to the user as a word, and no file glosses one
 - [ ] Decide what a skipped label leaves, and write the decision into

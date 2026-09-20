@@ -281,8 +281,6 @@ from. A mode says why the attempt went the way it did.
   `timed out` on each case the submission exceeded the cap on, so a label
   repeating that outcome answers a question the record already settled. A
   timeout is labelled by its cause, as any other failure is.
-- **`speed` is offered on a solved attempt alone.** An attempt that returned no
-  answer took however long it took, and the time it took is not why it failed.
 - **A diagnosis never names `speed`.** The machine reads the record, and the
   record holds no bar to read a solver's own judgement from.
 - **`gap` is a form the solver did not hold.** Reading the card would have
@@ -301,6 +299,21 @@ from. A mode says why the attempt went the way it did.
 - **A diagnosis names either of the two.** The machine reads the code and the
   log, so it can propose which one the attempt shows, and the eval scores that
   proposal against the solver's own label.
+- **`syntax` is a slip in code the solver could have written correctly.** The
+  form came and the approach was right, and the submission failed on how the
+  code was typed: a name misspelled, a bound written the wrong way round, a
+  method called with its arguments swapped.
+- **A slip inside the form is `rust`.** A binary search whose bound moves the
+  wrong way is the form coming back in pieces, where the same mistake in a loop
+  the solver wrote from scratch is a slip. The solver reports which of the two
+  the mistake sat in.
+- **`none` is an attempt that went the way it should.** The form came, the code
+  ran, and the solver reached the answer in the time they expected. `none` is a
+  verdict the solver states rather than an absence of one.
+- **A solved attempt takes `speed` or `none`, and an unsolved attempt takes
+  `gap`, `rust` or `syntax`.** An attempt that returned no answer failed for a
+  reason, and how long the solver took is not that reason. A submission that
+  passed reached the form and carries no slip.
 
 ## Diagnoses
 
