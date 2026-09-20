@@ -208,3 +208,34 @@ def test_another_user_s_unclaimed_attempts_are_not_found(root, client, sitting_i
     other = browsing(root, "u-b71e03")
 
     assert other.get(f"/api/sittings/{sitting_id}/unclaimed").status_code == 404
+
+
+def test_the_label_is_stored_against_the_attempt(client, sitting_id, root):
+    """The loop asks for the label beside the claim, and one press sends
+    both."""
+    attempt_id = submitted(client, sitting_id, TRIPLE).json()["attempt"]["id"]
+
+    written = client.post(f"/api/attempts/{attempt_id}/labels", json={"mode": "rust"}).json()
+
+    assert (written["attempt_id"], written["mode"]) == (attempt_id, "rust")
+    assert [one.id for one in AttemptLog(root).self_labels(USER)] == [written["id"]]
+
+
+def test_a_label_the_verdict_leaves_closed_is_refused(client, sitting_id):
+    """A solved attempt failed at nothing, so the modes naming a failure are
+    not open to it."""
+    attempt_id = submitted(client, sitting_id).json()["attempt"]["id"]
+
+    response = client.post(f"/api/attempts/{attempt_id}/labels", json={"mode": "gap"})
+
+    assert response.status_code == 409
+    assert "gap" in response.json()["detail"]
+
+
+def test_labelling_another_user_s_attempt_is_not_found(root, client, sitting_id):
+    attempt_id = submitted(client, sitting_id).json()["attempt"]["id"]
+    other = browsing(root, "u-b71e03")
+
+    response = other.post(f"/api/attempts/{attempt_id}/labels", json={"mode": "none"})
+
+    assert response.status_code == 404

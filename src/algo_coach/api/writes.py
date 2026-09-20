@@ -1,5 +1,6 @@
 """The routes the rest of the drill loop takes: the submission, the pause, the
-end, the claim asked of each attempt, and the start of a card's run."""
+end, the claim and the label asked of each attempt, and the start of a card's
+run."""
 
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -21,8 +22,10 @@ from algo_coach.schema import (
     Card,
     CardRun,
     Confidence,
+    FailureMode,
     Hint,
     RecallAttempt,
+    SelfLabel,
     Sitting,
     Template,
 )
@@ -31,6 +34,7 @@ from algo_coach.sitting import (
     claim,
     end,
     get,
+    label,
     owned_attempt,
     pause,
     resume,
@@ -76,6 +80,12 @@ class Claim(BaseModel):
     techniques: list[str] = []
     confidence: Confidence
     declined: bool = False
+
+
+class Label(BaseModel):
+    """The one mode the solver picked. A skipped label sends no request."""
+
+    mode: FailureMode
 
 
 # by slug, as the card's own route is: a re-seed keeps the slug and the id is
@@ -171,6 +181,11 @@ def claimed(root: Root, user_id: UserId, attempt_id: str, body: Claim) -> Attemp
         confidence=body.confidence,
         declined=body.declined,
     )
+
+
+@router.post("/attempts/{attempt_id}/labels")
+def labelled(root: Root, user_id: UserId, attempt_id: str, body: Label) -> SelfLabel:
+    return label(AttemptLog(root), attempt_id, body.mode, user_id=user_id)
 
 
 def _techniques(root: Database, problem_id: str) -> list[str]:

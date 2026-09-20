@@ -21,7 +21,9 @@ from algo_coach.schema import (
     ClaimSource,
     Confidence,
     Execution,
+    FailureMode,
     Pause,
+    SelfLabel,
     Sitting,
     TestCase,
 )
@@ -205,6 +207,25 @@ def claim(
         # the request's fault rather than the engine's: a claim naming nothing
         raise Refused("; ".join(one["msg"] for one in error.errors())) from error
     log.append_claim(written)
+    return written
+
+
+def modes(*, solved: bool) -> tuple[FailureMode, ...]:
+    """The failure modes an attempt's verdict leaves open, which `log.md`
+    splits by whether the attempt solved the problem."""
+    if solved:
+        return (FailureMode.SPEED, FailureMode.NONE)
+    return (FailureMode.GAP, FailureMode.RUST, FailureMode.SYNTAX)
+
+
+def label(log: AttemptLog, attempt_id: str, mode: FailureMode, *, user_id: str) -> SelfLabel:
+    """The user's own verdict on why the attempt went the way it did."""
+    attempt = owned_attempt(log, attempt_id, user_id=user_id)
+    if mode not in modes(solved=attempt.solved):
+        # a label contradicting the verdict answers a settled question
+        raise Refused(f"{mode.value} is not open to this attempt")
+    written = mint.self_label(attempt_id, mode)
+    log.append_self_label(written)
     return written
 
 

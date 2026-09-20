@@ -733,6 +733,55 @@
         }
       }
     },
+    "/api/attempts/{attempt_id}/labels": {
+      "post": {
+        "summary": "Labelled",
+        "operationId": "labelled_api_attempts__attempt_id__labels_post",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Attempt Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Label"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelfLabel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/sign-in": {
       "get": {
         "summary": "Offered",
@@ -1429,6 +1478,19 @@
         ],
         "title": "Hinted"
       },
+      "Label": {
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/FailureMode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "title": "Label",
+        "description": "The one mode the solver picked. A skipped label sends no request."
+      },
       "Offered": {
         "properties": {
           "providers": {
@@ -2002,6 +2064,35 @@
         ],
         "title": "Selector",
         "description": "What a ladder resolves from. Named fields rather than a filter map, so\na new filter is an additive optional field."
+      },
+      "SelfLabel": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "attempt_id": {
+            "type": "string",
+            "title": "Attempt Id"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/FailureMode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "attempt_id",
+          "mode"
+        ],
+        "title": "SelfLabel",
+        "description": "The user's own verdict on why an attempt went the way it did."
       },
       "Served": {
         "properties": {

@@ -310,6 +310,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/attempts/{attempt_id}/labels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Labelled */
+        post: operations["labelled_api_attempts__attempt_id__labels_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sign-in": {
         parameters: {
             query?: never;
@@ -598,6 +615,13 @@ export interface components {
             text: string;
         };
         /**
+         * Label
+         * @description The one mode the solver picked. A skipped label sends no request.
+         */
+        Label: {
+            mode: components["schemas"]["FailureMode"];
+        };
+        /**
          * Offered
          * @description What the login page offers.
          */
@@ -827,6 +851,22 @@ export interface components {
             difficulty?: components["schemas"]["ProblemDifficulty"][];
             /** Size */
             size: number;
+        };
+        /**
+         * SelfLabel
+         * @description The user's own verdict on why an attempt went the way it did.
+         */
+        SelfLabel: {
+            /** Id */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Attempt Id */
+            attempt_id: string;
+            mode: components["schemas"]["FailureMode"];
         };
         /**
          * Served
@@ -1551,6 +1591,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AttemptClaim"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    labelled_api_attempts__attempt_id__labels_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Label"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelfLabel"];
                 };
             };
             /** @description Validation Error */

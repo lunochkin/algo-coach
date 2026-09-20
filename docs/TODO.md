@@ -48,7 +48,7 @@ already, and renders every attempt as unlabelled.
       built them
 - [x] Write into `flows.md` where the label sits against the claim in the drill
       loop's step 5. The step names both records and orders neither
-- [ ] Serve `POST /attempts/{attempt_id}/labels` beside the claim's route in
+- [x] Serve `POST /attempts/{attempt_id}/labels` beside the claim's route in
       `api/writes.py`. The store, the mint, the export and the erasure reach
       `self_labels` already
 - [ ] Ask for the label in the sitting, beside `ClaimPrompt.tsx`, for each
