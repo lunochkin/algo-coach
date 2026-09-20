@@ -319,9 +319,22 @@ The pieces a card needs once there are problems to fill it.
 - Exit met: a card run gone through by hand, from the start to a rung solved, a
   template recalled cold, and a probe offered.
 
-## Phase 12 — The matcher, measured (current)
+## Phase 12 — The self-label (current)
 
-The worth of a generated corpus, measured.
+The user's own verdict on why an attempt went the way it did, asked at the
+moment of solving. A label cannot be given later, so it comes before the
+sittings that fill the log.
+
+- The failure modes settled before anything writes one, and each mode's
+  meaning written into `log.md` and the glossary.
+- The `SelfLabel` the loop asks for, beside the claim it already asks for,
+  offering only the modes an attempt's verification leaves open.
+- Exit: a sitting ends on a self-label the user gave, stored against the
+  attempt.
+
+## Phase 13 — The matcher, measured
+
+How often the matcher is right, measured.
 
 - The hand pass, which writes the matcher's reference and is the only reading
   of a generated problem no model produced.
@@ -332,7 +345,7 @@ The worth of a generated corpus, measured.
 - A configuration pinned before any number is quoted.
 - Exit: the matcher carries a per-template score in both directions.
 
-## Phase 13 — Mastery and scheduling
+## Phase 14 — Mastery and scheduling
 
 Per-technique skill state derived from the log, and a scheduler that picks what
 the user practises next.

@@ -15,7 +15,7 @@ those steps at low fidelity.
   the card list, one card, and the recall trainer Phase 11 adds. Two sections
   cover every page the roadmap plans, so no later page needs a third menu entry.
 - **A signed-in user lands on the board.** Every sitting starts from a technique
-  the user picks there, and Phase 13 serves the scheduler's pick on the same
+  the user picks there, and Phase 14 serves the scheduler's pick on the same
   page.
 - **A section is marked while the user is on a page under it.** A technique and
   a picked problem are steps down from the board, so the board's own section

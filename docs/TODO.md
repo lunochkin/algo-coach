@@ -4,11 +4,70 @@ The phases still open. A ticked item stays while its phase is open. When a
 phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 The work not yet ready for a phase waits under Further developments.
 
-## Phase 12 — the matcher, measured (current)
+## Phase 12 — the self-label (current)
 
-How much a generated corpus is worth, measured. Behind the beta: the drill loop
-needs problems and not a score, and the attempts the loop produces rebuild the
-eval set the classifier is scored against.
+The user's own verdict on why an attempt went the way it did, asked at the
+moment of solving. `self_labels` holds no row, and nothing writes one. The
+board already reads the table, and the sitting asks for the claim alone.
+
+The phase comes before the sittings that fill the log. A claim can be written
+months later from the code, and a label cannot: its evidence is what the solver
+recalls. Every attempt made before the loop asks carries no label and never
+will.
+
+### What a failure mode means
+
+`FailureMode` carries `speed`, `rust`, `gap`, `syntax` and `none`, and no file
+in `docs/architecture/` says what any of them selects. Each decision below is
+irreversible once one label is stored, since a member cannot be removed while a
+record carries it.
+
+- [ ] Settle what `speed` means before anything writes the label. "Solved but
+      too slowly" is about the user, a timeout is about the solution's
+      complexity, and only the timeout is in the record
+- [ ] Land `rust` against `gap`, or drop the distinction and fold `rust` into
+      `gap`. The two labels differ only in whether the technique was ever
+      fluent, and a single attempt does not carry that history
+- [ ] Remove from `FailureMode` whatever that decision drops, in the same
+      commit. Removing a member is a tightening, legal only while no record
+      carries it, and `self_labels` holds no row today
+- [ ] Write each surviving mode's meaning into `log.md` under Self-labels, and
+      add the modes to `README.md` `## Terminology`. The loop offers each mode
+      to the user as a word, and no file glosses one
+- [ ] Decide what a skipped label leaves, and write the decision into
+      `log.md`. A claim states a decline with `declined`, where `none` is
+      already a mode rather than an absence
+
+### The loop asks
+
+The sitting asks for the claim and stops. The board reads `self_labels`
+already, and renders every attempt as unlabelled.
+
+- [ ] Draw the label on the claim wireframe in `wireframes.md`, which the loop
+      already opens over the ended sitting. Phase 11 drew its flows before it
+      built them
+- [ ] Write into `flows.md` where the label sits against the claim in the drill
+      loop's step 5. The step names both records and orders neither
+- [ ] Serve `POST /attempts/{attempt_id}/labels` beside the claim's route in
+      `api/writes.py`. The store, the mint, the export and the erasure reach
+      `self_labels` already
+- [ ] Ask for the label in the sitting, beside `ClaimPrompt.tsx`, for each
+      attempt the claim already asks about
+- [ ] Offer only the failure modes an attempt's verification leaves open. A
+      crash on every case and a timeout are in the record already, and a label
+      contradicting the verdict would be a second answer to one question
+
+### Exit
+- [ ] A sitting ends on a self-label the user gave, stored against the attempt
+
+## Phase 13 — the matcher, measured
+
+The matcher says which templates a generated solution displays, and every
+ladder is built from those matches. No number says how often the matcher is
+right. This phase matches a sample of pairs by hand and scores the matcher
+against them. The phase sits behind the beta: the drill loop needs problems
+rather than a score, and the attempts the loop produces rebuild the eval set
+the classifier is scored against.
 
 ### Matching the generated corpus by hand
 
@@ -61,7 +120,7 @@ the audit. Generation goes on without the score.
 ### Exit
 - [ ] The matcher carries a per-template score in both directions
 
-## Phase 13 — mastery and scheduling
+## Phase 14 — mastery and scheduling
 
 - [ ] Write into `docs/architecture/` what a technique's mastery is derived
       from: the attempts, their claims and their verdicts. Mastery is never
@@ -86,20 +145,11 @@ a block that became ready. A block, or a single item of one, is planned into a
 phase once it is clear enough to plan. An item's trigger, where it names one, is
 the event that makes the item ready.
 
-### Failure mode
+### The diagnosis
 
-- [ ] Land `rust` against `gap` with the mastery model, or drop the
-      distinction. The two labels differ only in whether the technique was ever
-      fluent, and a single attempt does not carry that history
-- [ ] Settle what `speed` means before anything writes the label. "Solved but
-      too slowly" is about the user, a timeout is about the solution's
-      complexity, and only the timeout is in the record
-- [ ] Write the `SelfLabel` the loop asks for at the moment of solving, once
-      `speed`, `rust` and `gap` are settled. A label cannot be given later, so
-      one written under a meaning that later moved can never be corrected
-- [ ] Offer only the failure modes an attempt's verification leaves open. A
-      crash on every case and a timeout are in the record already, and a label
-      contradicting the verdict would be a second answer to one question
+The machine counterpart of the self-label, which Phase 12 writes. The eval
+scores one against the other, so a body of self-labels has to exist first.
+
 - [ ] Narrow the diagnosis call, the model call that writes a `Diagnosis`, to
       what the record supports: a mechanical slip against a conceptual miss. A
       four-way verdict would ask the call for what the call cannot see

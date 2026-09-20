@@ -64,7 +64,7 @@ Every page under a section carries the same two rows above its body.
 - A row is a technique. The line under the table counts the attempts no row
   holds: the attempts no technique resolved, and the attempts on a retired
   problem.
-- Phase 13 serves the scheduler's pick above the table, and every technique
+- Phase 14 serves the scheduler's pick above the table, and every technique
   stays on offer below it.
 
 ## A technique's candidates
