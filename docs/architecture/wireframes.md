@@ -291,7 +291,7 @@ Every page under a section carries the same two rows above its body.
 
 - A card reads as a row: its title, how many templates it teaches, and its
   trigger cut to two lines. The trigger says when to reach for the technique,
-  which is what a reader picks a card by.
+  and a reader picks a card by that sentence.
 - A technique several cards teach carries a header naming it, since the cards
   under it are one thing to choose between.
 - A technique one card teaches carries no header, and that row names the
@@ -346,8 +346,8 @@ Every page under a section carries the same two rows above its body.
 - A template is a panel: its title, its badges and the press that reveals the
   form in the header, then its trigger.
 - A template's form is hidden until the user reveals it. The hidden state names
-  how many lines the form runs to, which is what a reader decides by, and shows
-  nothing of the form itself.
+  how many lines the form runs to, and shows nothing of the form itself. A
+  reader decides whether to try recalling the form from that length.
 - A revealed template shows its form and its notes, and the press then covers
   the form again.
 
