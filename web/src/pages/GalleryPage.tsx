@@ -258,7 +258,9 @@ function Swatches({ names }: { names: string[] }) {
         <div key={name} className="w-32 space-y-1">
           <div
             className="h-10 rounded-md border"
-            style={{ background: `var(--color-${name})` }}
+            // the raw variable, not `--color-*`: `@theme inline` resolves a
+            // token into the utility and emits no custom property for it
+            style={{ background: `var(--${name})` }}
           />
           <span className="text-meta text-muted-foreground">{name}</span>
         </div>
