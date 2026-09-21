@@ -85,6 +85,8 @@ those steps at low fidelity.
 | `/sittings/:sitting_id` | solves, submits, claims | Practice |
 | `/cards` | picks a card | Cards |
 | `/cards/:slug` | reads a card and reveals its templates | Cards |
+| `/cards/:slug/recall` | opens the recall of the template the trainer draws | Cards |
+| `/cards/:slug/recall/:template` | reproduces one template from memory | Cards |
 | `/login` | signs in | none |
 | `/privacy` | reads the privacy policy | none |
 | `/gallery` | reads the design system, in development alone | none |
@@ -112,9 +114,10 @@ those steps at low fidelity.
   browser keeps.** The code is stored under the sitting's id, so a reload
   during a sitting restores what the user typed. Every other reading is fetched
   from the API at each load.
-- **The pages Phase 11 adds are deferred to Phase 11**, which writes its flows
-  before it builds them: starting a card run, the ladder on a card, and the
-  recall trainer.
+- **The recall's path names the template by its authored slug**, and the drawn
+  path sends the browser to it. A reload then asks for the same form, and a
+  user who means to practise one form reaches it by name. `flows.md` gives why
+  naming the template costs the recall nothing.
 
 ## A page's areas
 

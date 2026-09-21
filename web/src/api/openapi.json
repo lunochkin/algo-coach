@@ -123,10 +123,10 @@
         }
       }
     },
-    "/api/cards/{slug}/recall/{template_id}/hints/{hint}": {
+    "/api/cards/{slug}/recall/{template_slug}": {
       "get": {
-        "summary": "Hinted",
-        "operationId": "hinted_api_cards__slug__recall__template_id__hints__hint__get",
+        "summary": "Asked",
+        "operationId": "asked_api_cards__slug__recall__template_slug__get",
         "parameters": [
           {
             "name": "slug",
@@ -138,12 +138,116 @@
             }
           },
           {
-            "name": "template_id",
+            "name": "template_slug",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Template Id"
+              "title": "Template Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prompted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Recalled",
+        "operationId": "recalled_api_cards__slug__recall__template_slug__post",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          },
+          {
+            "name": "template_slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Template Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reproduction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecallAttempt"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cards/{slug}/recall/{template_slug}/hints/{hint}": {
+      "get": {
+        "summary": "Hinted",
+        "operationId": "hinted_api_cards__slug__recall__template_slug__hints__hint__get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          },
+          {
+            "name": "template_slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Template Slug"
             }
           },
           {
@@ -426,64 +530,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CardRun"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/cards/{slug}/recall/{template_id}": {
-      "post": {
-        "summary": "Recalled",
-        "operationId": "recalled_api_cards__slug__recall__template_id__post",
-        "parameters": [
-          {
-            "name": "slug",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Slug"
-            }
-          },
-          {
-            "name": "template_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Template Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Reproduction"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RecallAttempt"
                 }
               }
             }
@@ -1515,7 +1561,6 @@
       "Hint": {
         "type": "string",
         "enum": [
-          "title",
           "notes",
           "form"
         ],
@@ -1638,6 +1683,35 @@
         ],
         "title": "Me",
         "description": "Who the session signs in as. The engine mints the id, and the address is\nthe provider's, so a user reached by the dev login carries none."
+      },
+      "Named": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "optional": {
+            "type": "boolean",
+            "title": "Optional"
+          },
+          "recallable": {
+            "type": "boolean",
+            "title": "Recallable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "title",
+          "optional",
+          "recallable"
+        ],
+        "title": "Named",
+        "description": "One template of the card, as the trainer lists it: what it is called,\nwhether it is optional, and whether a case can check a reproduction of\nit."
       },
       "Offered": {
         "properties": {
@@ -1991,9 +2065,13 @@
       },
       "Prompted": {
         "properties": {
-          "template_id": {
+          "template_slug": {
             "type": "string",
-            "title": "Template Id"
+            "title": "Template Slug"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
           },
           "trigger": {
             "type": "string",
@@ -2002,16 +2080,25 @@
           "signature": {
             "type": "string",
             "title": "Signature"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/Named"
+            },
+            "type": "array",
+            "title": "Templates"
           }
         },
         "type": "object",
         "required": [
-          "template_id",
+          "template_slug",
+          "title",
           "trigger",
-          "signature"
+          "signature",
+          "templates"
         ],
         "title": "Prompted",
-        "description": "What the trainer shows: the template's trigger and the signature its\ncases call. The title and the form are withheld, and mapping the trigger\nto the form is the recall being measured."
+        "description": "What the trainer shows: the template it asks for, its trigger, the\nsignature its cases call and the card's templates to switch between. The\nform is withheld, and typing it from memory is the recall being\nmeasured."
       },
       "Provider": {
         "type": "string",

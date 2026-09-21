@@ -191,6 +191,9 @@ ignore_names = [
     # a card's recall state says when a form was last reproduced, which the page
     # reads and no module does
     "last_at",
+    # the trainer lists the card's templates, and the page decides which of them
+    # it offers to switch to
+    "recallable",
 ]
 
 [tool.ruff]

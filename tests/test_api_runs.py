@@ -151,7 +151,7 @@ def test_a_card_reads_the_recall_state_of_each_template(client, database):
             studied["card"]["id"],
             first,
             code="def solve():\n    return 1\n",
-            hints=[Hint.TITLE],
+            hints=[Hint.NOTES],
             execution=Execution(
                 cap_ms=2_000,
                 runner="local/cpython-3.14",
@@ -163,6 +163,6 @@ def test_a_card_reads_the_recall_state_of_each_template(client, database):
     read = client.get("/api/cards/sliding-window").json()["recall"]
 
     assert [(one["template_id"] == first, one["hints"], one["verified"]) for one in read] == [
-        (True, ["title"], True),
+        (True, ["notes"], True),
         (False, [], False),
     ]

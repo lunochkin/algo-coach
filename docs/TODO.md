@@ -56,6 +56,16 @@ what use surfaces rather than how much use happened.
 - [x] Serve `GET /api/me` and put the account in a menu at the right of the
       navigation. Sign out sat among the sections, which name places, and the
       pages knew nothing about the user behind the session
+- [x] Address a recall by the template's slug, `/cards/:slug/recall/:template`,
+      and have the drawn path send the browser to it. The path named the card
+      alone, so a reload redrew and no URL asked for one form
+- [x] Name the template on the recall page and offer its form on the result,
+      and drop the title hint the visible name answers. `Hint` carries the
+      notes and the form, and the one stored attempt taking a title was deleted
+- [x] Start the recall of any form from the card's Recall section, and name
+      every template of the card on the trainer to switch between. The draw
+      reached one form at a time, and the form a user meant to practise was
+      reachable only by exhausting the others
 - [ ] Carry a single picked tag into the problem as `?technique=`, or write
       into `pages.md` why a listing pick names no technique. A row links with
       `?from=problems` alone, so the claim opens with nothing ticked where a

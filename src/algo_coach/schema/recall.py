@@ -17,13 +17,12 @@ class Hint(StrEnum):
     """What the trainer gives when memory fails, in the order it gives them.
     Each answers more of the question than the last."""
 
-    TITLE = "title"
     NOTES = "notes"
     FORM = "form"
 
 
 # the order a hint is offered in, which the record is checked against
-LADDER = (Hint.TITLE, Hint.NOTES, Hint.FORM)
+LADDER = (Hint.NOTES, Hint.FORM)
 
 
 class RecallAttempt(Execution):

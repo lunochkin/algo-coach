@@ -633,25 +633,39 @@ A form reproduced from memory, typed into a blank file and run against the
 cases the template carries. Reading the form is not recalling it, so the
 trainer never prints the form until the user asks for it as a hint.
 
-1. The user starts a recall on the card.
-2. The trainer draws one template: never recalled first, then least recently
-   recalled.
-3. The template's trigger is shown, and its title and its form are withheld.
+1. The user starts a recall on the card, or opens one template's recall by its
+   slug.
+2. The trainer draws one template where the user named none: never recalled
+   first, then least recently recalled.
+3. The template's title and its trigger are shown, and its form is withheld.
 4. The signature the cases call is shown, and the file is otherwise blank.
-5. The user types the form, and asks for a hint where memory fails: the title,
-   then the notes, then the form itself.
+5. The user types the form, and asks for a hint where memory fails: the notes,
+   then the form itself.
 6. The file runs against the template's cases, under the runner a submission
    runs under.
 7. A `RecallAttempt` is written, carrying the hints taken and how the cases
    went.
 
-- **The trigger names the template, and the title does not.** The trigger says
-  when to reach for this form, and mapping that situation to the form is the
-  recall the trainer measures. A title names the form, which answers half the
-  question before the user types a line.
-- **The card still lists its templates by title.** A user knows which forms the
-  card teaches, and hiding the list would hide what studying the card covers.
-  The trainer withholds which of them this attempt asks for.
+- **The trainer withholds the form and names the template.** Typing the form
+  from memory is the recall, and a user who knows which form is asked has still
+  typed nothing. The title, the slug and the trigger all read on the page.
+- **A drawn recall withholds the title all the same.** The trainer chose the
+  form, so the trigger names it alone, and a draw measures mapping the trigger
+  to the form. A recall the user asked for by name carries
+  the title already, since they typed the name.
+- **The recall is addressed by the template's slug**, as `pages.md` gives the
+  path. A drawn recall that named nothing could not be reloaded, and the user
+  could not ask for the form they mean to practise.
+- **The user may ask for a template by name.** A card teaches several forms,
+  and a rule that draws for them makes the one form a user wants to practise
+  reachable only by exhausting the others.
+- **The card's Recall section starts the recall of any form it lists.** The
+  section already names every template and its recall state, so the row the
+  user reads is the row that opens the recall.
+- **The trainer names every template of the card and switches between them.**
+  A user practising one form reaches the next without returning to the card. A
+  template no case checks is named and never opened, as `content.md` has it
+  read rather than recalled.
 - **The signature is shown.** The cases call the form with a parameter order,
   and that order has to be stated somewhere, as `corpus.md` says of a
   statement. A signature the user infers wrongly fails every case for a form
@@ -659,9 +673,16 @@ trainer never prints the form until the user asks for it as a hint.
 - **The file is otherwise blank, and the editor proposes nothing.** The editor
   the drill loop gives holds the same rule, and a solver offered `bisect_left`
   after three characters has recalled no form.
-- **The hints are three, in one order: the title, the notes, the form.** Each
-  answers more of the question than the last, so a record of which hint was
-  taken says how far the memory reached.
+- **The hints are two, in one order: the notes, then the form.** Each answers
+  more of the question than the last, so a record of which hint was taken says
+  how far the memory reached. The title was the first hint until the page
+  started naming the template, and `Hint` carries the two that are left. A
+  drawn recall takes the same two, and its title is named by the result rather
+  than bought as a hint.
+- **The result names the template and offers its form.** The verdict, the
+  cases and the hints taken read beside the title, and the form is revealed on
+  a press rather than printed. A user who failed to recall a form learns which
+  form it was, and decides whether to read it.
 - **A hinted pass is recorded as a pass with its hints**, which `log.md`
   requires. Reading the form and typing it back is the last hint rather than a
   separate outcome, and the record says which hints were taken.
@@ -678,8 +699,7 @@ trainer never prints the form until the user asks for it as a hint.
 Deferred, since only use answers each:
 
 - How many templates one recall asks for before it stops.
-- Whether the user may ask for a template by name, which shows them the title.
-- Whether a template authors a hint of its own beside the three.
+- Whether a template authors a hint of its own beside the two.
 - How a template whose form is a class is exercised, since the cases call one
   function.
 - How a form answering with one of several valid orders is checked, since a

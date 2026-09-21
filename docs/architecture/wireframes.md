@@ -646,8 +646,10 @@ Every page under a section carries the same two rows above its body.
 | algo-coach   Practice  Problems  [ Cards ]          ☀  ≡               |
 +------------------------------------------------------------------------+
 | < Binary search                                                        |
-| Recall a form                                                          |
-| the title and the form are withheld                                    |
+| Lower bound                                                            |
+| the form is withheld                                                   |
+|                                                                        |
+| [ Lower bound ] Upper bound  Answer-space search                       |
 |                                                                        |
 | When to reach for it                                                   |
 |    the template's trigger, one or two lines                            |
@@ -659,12 +661,15 @@ Every page under a section carries the same two rows above its body.
 | |          the blank file                                |             |
 | +--------------------------------------------------------+             |
 |                                                                        |
-| [ Run ]                        [ Hint: the title ]                     |
+| [ Run ]                        [ Hint: the notes ]                     |
 +------------------------------------------------------------------------+
 ```
 
-- The trigger names the template. The title and the form are withheld, and
-  mapping the trigger to the form is the recall being measured.
+- The title names the template, and the path names it by the template's slug.
+  Typing the form from memory is the recall being measured, so the form is the
+  one thing withheld.
+- The row under the header names every template of the card, the one being
+  recalled marked. A form no case checks is named and opens nothing.
 - The signature is shown, since the cases call the form with a parameter order
   the user cannot infer.
 - The file is otherwise blank, and the editor proposes nothing.
@@ -672,15 +677,14 @@ Every page under a section carries the same two rows above its body.
 ## The recall trainer, with hints taken
 
 ```
-+- the recall trainer, two hints taken ----------------------------------+
++- the recall trainer, one hint taken -----------------------------------+
 | < Binary search                                                        |
-| Recall a form                                                          |
+| Lower bound                                                            |
 |                                                                        |
 | When to reach for it                                                   |
 |    the template's trigger, one or two lines                            |
 |                                                                        |
-| Title    Lower bound                        hint 1                     |
-| Notes    the authored notes, as prose       hint 2                     |
+| Notes    the authored notes, as prose       hint 1                     |
 |                                                                        |
 | +--------------------------------------------------------+             |
 | | def solve(xs, target):                                 |             |
@@ -693,8 +697,8 @@ Every page under a section carries the same two rows above its body.
 +------------------------------------------------------------------------+
 ```
 
-- The hints arrive in one order, and each one stays on the page: the title,
-  then the notes, then the form.
+- The hints arrive in one order, and each one stays on the page: the notes,
+  then the form.
 - The press names the hint it gives next, so the user knows the price before
   taking it.
 

@@ -40,6 +40,7 @@ from algo_coach.schema import (
     Problem,
     ProblemDifficulty,
     RecallAttempt,
+    Template,
 )
 from algo_coach.sitting import Served, get, serve
 from algo_coach.solution_claims import load_problem, load_problems
@@ -204,14 +205,28 @@ def _recall(card: Card, attempts: list[RecallAttempt]) -> list[Recalled]:
     ]
 
 
-class Prompted(BaseModel):
-    """What the trainer shows: the template's trigger and the signature its
-    cases call. The title and the form are withheld, and mapping the trigger
-    to the form is the recall being measured."""
+class Named(BaseModel):
+    """One template of the card, as the trainer lists it: what it is called,
+    whether it is optional, and whether a case can check a reproduction of
+    it."""
 
-    template_id: str
+    slug: str
+    title: str
+    optional: bool
+    recallable: bool
+
+
+class Prompted(BaseModel):
+    """What the trainer shows: the template it asks for, its trigger, the
+    signature its cases call and the card's templates to switch between. The
+    form is withheld, and typing it from memory is the recall being
+    measured."""
+
+    template_slug: str
+    title: str
     trigger: str
     signature: str
+    templates: list[Named]
 
 
 class Hinted(BaseModel):
@@ -226,19 +241,49 @@ def prompt(root: Root, user_id: UserId, slug: str) -> Prompted:
     template = drawn(card, RecallLog(root).for_card(user_id, card.id))
     if template is None:
         raise HTTPException(status_code=404, detail=f"no template of {slug} carries a case")
-    return Prompted(
-        template_id=template.id, trigger=template.trigger, signature=signature(template)
-    )
+    return _prompted(card, template)
+
+
+# by slug, as the page's own path is: the trainer names the template it asks
+# for, and withholds the form alone
+@router.get("/cards/{slug}/recall/{template_slug}")
+def asked(root: Root, slug: str, template_slug: str) -> Prompted:
+    card = _card(root, slug)
+    return _prompted(card, _template(card, template_slug))
 
 
 # one hint per request, so the page holds nothing it has not been given
-@router.get("/cards/{slug}/recall/{template_id}/hints/{hint}")
-def hinted(root: Root, slug: str, template_id: str, hint: Hint) -> Hinted:
-    card = _card(root, slug)
-    found = [one for one in card.templates if one.id == template_id]
+@router.get("/cards/{slug}/recall/{template_slug}/hints/{hint}")
+def hinted(root: Root, slug: str, template_slug: str, hint: Hint) -> Hinted:
+    template = _template(_card(root, slug), template_slug)
+    return Hinted(hint=hint, text=reveal(template, hint))
+
+
+def _prompted(card: Card, template: Template) -> Prompted:
+    return Prompted(
+        template_slug=template.slug,
+        title=template.title,
+        trigger=template.trigger,
+        signature=signature(template),
+        # the card's own order, and no form among them: a user practising one
+        # form switches to another without reading the card again
+        templates=[
+            Named(
+                slug=one.slug,
+                title=one.title,
+                optional=one.optional,
+                recallable=bool(one.cases),
+            )
+            for one in card.templates
+        ],
+    )
+
+
+def _template(card: Card, template_slug: str) -> Template:
+    found = [one for one in card.templates if one.slug == template_slug]
     if not found:
-        raise HTTPException(status_code=404, detail=f"no template {template_id}")
-    return Hinted(hint=hint, text=reveal(found[0], hint))
+        raise HTTPException(status_code=404, detail=f"no template {template_slug}")
+    return found[0]
 
 
 def _card(root: Database, slug: str) -> Card:

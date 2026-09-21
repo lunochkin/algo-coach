@@ -13,8 +13,8 @@ PROMPT = "/api/cards/sliding-window/recall"
 
 
 def recalls(client) -> str:
-    """The route the trainer posts to, keyed by the id the prompt drew."""
-    return f"{PROMPT}/{client.get(PROMPT).json()['template_id']}"
+    """The route the trainer posts to, keyed by the slug the prompt drew."""
+    return f"{PROMPT}/{client.get(PROMPT).json()['template_slug']}"
 
 
 @pytest.fixture
@@ -62,9 +62,9 @@ def test_a_file_that_defines_no_solve_crashes_every_case(client):
 def test_the_hints_taken_are_part_of_the_record(client, database):
     """`log.md`: which hints were taken before succeeding is what keeps a
     decaying form from scoring like a fluent one."""
-    recall = client.post(recalls(client), json={"code": LOWER, "hints": ["title"]}).json()
+    recall = client.post(recalls(client), json={"code": LOWER, "hints": ["notes"]}).json()
 
-    assert recall["hints"] == ["title"]
+    assert recall["hints"] == ["notes"]
     assert not RecallLog(database).all(USER)[0].cold
 
 
@@ -79,23 +79,12 @@ def test_a_template_with_no_case_is_never_drawn(client):
     """`content.md`: such a template is read on the card, since nothing can
     check a reproduction of it."""
     drawn = client.get(PROMPT).json()
-    fixed = [
-        one
-        for one in client.get("/api/cards/sliding-window").json()["card"]["templates"]
-        if one["slug"] == "fixed-window"
-    ]
 
-    assert drawn["template_id"] != fixed[0]["id"]
+    assert drawn["template_slug"] == "longest-valid-window"
 
 
 def test_recalling_a_template_with_no_case_is_refused(client):
-    fixed = [
-        one
-        for one in client.get("/api/cards/sliding-window").json()["card"]["templates"]
-        if one["slug"] == "fixed-window"
-    ][0]
-
-    response = client.post(f"{PROMPT}/{fixed['id']}", json={"code": LOWER})
+    response = client.post(f"{PROMPT}/fixed-window", json={"code": LOWER})
 
     assert response.status_code == 404
     assert "no case" in response.json()["detail"]
@@ -136,28 +125,38 @@ def test_the_cap_counts_the_user_s_own_recalls_alone(client, database):
     assert other.status_code == 200
 
 
-def test_the_prompt_withholds_the_title_and_the_form(client):
-    """Mapping the trigger to the form is the recall being measured, and a
-    payload carrying the title answers half of it."""
+def test_the_prompt_names_the_template_and_withholds_the_form(client):
+    """Typing the form from memory is the recall being measured, and knowing
+    which form is asked leaves it untyped."""
     prompt = client.get(PROMPT).json()
 
+    assert (prompt["template_slug"], prompt["title"]) == (
+        "longest-valid-window",
+        "longest-valid-window",
+    )
     assert prompt["trigger"] == "the cue for longest-valid-window"
     assert prompt["signature"] == "def solve(xs, target):"
-    assert "longest" not in str(prompt.get("title", "")) and "title" not in prompt
     assert LOWER not in str(prompt)
+
+
+def test_a_template_is_asked_for_by_its_slug(client):
+    """The page's path names the template, so a reload asks for the same
+    form."""
+    asked = client.get(f"{PROMPT}/longest-valid-window").json()
+
+    assert asked["template_slug"] == "longest-valid-window"
+    assert LOWER not in str(asked)
 
 
 def test_a_hint_is_given_one_at_a_time(client):
     """The page holds nothing it was not given, so each hint is its own
     request."""
-    template_id = client.get(PROMPT).json()["template_id"]
-
     given = {
-        hint: client.get(f"{PROMPT}/{template_id}/hints/{hint}").json()
-        for hint in ("title", "notes", "form")
+        hint: client.get(f"{PROMPT}/longest-valid-window/hints/{hint}").json()
+        for hint in ("notes", "form")
     }
 
-    assert given["title"]["text"] == "longest-valid-window"
+    assert given["notes"]["text"] == "This form carries no notes."
     assert given["form"]["text"] == LOWER
 
 
@@ -173,9 +172,31 @@ def test_the_draw_takes_the_template_never_recalled(client, database):
             ],
         ),
     )
-    first = client.get("/api/cards/two-forms/recall").json()["template_id"]
+    first = client.get("/api/cards/two-forms/recall").json()["template_slug"]
     client.post(f"/api/cards/two-forms/recall/{first}", json={"code": LOWER})
 
-    again = client.get("/api/cards/two-forms/recall").json()["template_id"]
+    again = client.get("/api/cards/two-forms/recall").json()["template_slug"]
 
     assert again != first
+
+
+def test_the_prompt_lists_the_card_s_templates(client):
+    """A user practising one form switches to another without reading the card
+    again, and a template no case checks is listed and never asked for."""
+    listed = client.get(f"{PROMPT}/longest-valid-window").json()["templates"]
+
+    assert listed == [
+        {
+            "slug": "longest-valid-window",
+            "title": "longest-valid-window",
+            "optional": False,
+            "recallable": True,
+        },
+        {
+            "slug": "fixed-window",
+            "title": "fixed-window",
+            "optional": False,
+            "recallable": False,
+        },
+    ]
+    assert LOWER not in str(listed)

@@ -63,7 +63,7 @@ def test_a_hinted_pass_is_not_a_cold_one():
         "c-1",
         "t-1",
         code=FORM,
-        hints=[Hint.TITLE, Hint.NOTES],
+        hints=[Hint.NOTES],
         execution=ran(CaseOutcome.PASSED),
     )
     cold = recall_attempt(
@@ -90,7 +90,7 @@ def test_a_hint_taken_twice_is_refused():
             "c-1",
             "t-1",
             code=FORM,
-            hints=[Hint.TITLE, Hint.TITLE],
+            hints=[Hint.NOTES, Hint.NOTES],
             execution=ran(CaseOutcome.PASSED),
         )
 

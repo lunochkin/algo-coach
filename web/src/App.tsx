@@ -18,6 +18,9 @@ const CardPage = lazy(() => import('@/pages/CardPage').then((m) => ({ default: m
 const RecallPage = lazy(() =>
   import('@/pages/RecallPage').then((m) => ({ default: m.RecallPage })),
 )
+const DrawnRecallPage = lazy(() =>
+  import('@/pages/RecallPage').then((m) => ({ default: m.DrawnRecallPage })),
+)
 const SittingPage = lazy(() =>
   import('@/pages/SittingPage').then((m) => ({ default: m.SittingPage })),
 )
@@ -51,7 +54,8 @@ function App() {
             <Route path="problems" element={<ProblemsPage />} />
             <Route path="cards" element={<CardsPage />} />
             <Route path="cards/:slug" element={<CardPage />} />
-            <Route path="cards/:slug/recall" element={<RecallPage />} />
+            <Route path="cards/:slug/recall" element={<DrawnRecallPage />} />
+            <Route path="cards/:slug/recall/:template" element={<RecallPage />} />
             <Route path="techniques/:technique" element={<TechniquePage />} />
             {/* the path names the problem, and `?technique=` names where the
                 pick came from: Phase 11 opens the same page from a ladder */}

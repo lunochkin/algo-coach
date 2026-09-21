@@ -72,7 +72,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/cards/{slug}/recall/{template_id}/hints/{hint}": {
+    "/api/cards/{slug}/recall/{template_slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Asked */
+        get: operations["asked_api_cards__slug__recall__template_slug__get"];
+        put?: never;
+        /** Recalled */
+        post: operations["recalled_api_cards__slug__recall__template_slug__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cards/{slug}/recall/{template_slug}/hints/{hint}": {
         parameters: {
             query?: never;
             header?: never;
@@ -80,7 +98,7 @@ export interface paths {
             cookie?: never;
         };
         /** Hinted */
-        get: operations["hinted_api_cards__slug__recall__template_id__hints__hint__get"];
+        get: operations["hinted_api_cards__slug__recall__template_slug__hints__hint__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -202,23 +220,6 @@ export interface paths {
         put?: never;
         /** Started */
         post: operations["started_api_cards__slug__runs_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/cards/{slug}/recall/{template_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Recalled */
-        post: operations["recalled_api_cards__slug__recall__template_id__post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -651,7 +652,7 @@ export interface components {
          *     Each answers more of the question than the last.
          * @enum {string}
          */
-        Hint: "title" | "notes" | "form";
+        Hint: "notes" | "form";
         /** Hinted */
         Hinted: {
             hint: components["schemas"]["Hint"];
@@ -695,6 +696,22 @@ export interface components {
             user_id: string;
             /** Email */
             email: string | null;
+        };
+        /**
+         * Named
+         * @description One template of the card, as the trainer lists it: what it is called,
+         *     whether it is optional, and whether a case can check a reproduction of
+         *     it.
+         */
+        Named: {
+            /** Slug */
+            slug: string;
+            /** Title */
+            title: string;
+            /** Optional */
+            optional: boolean;
+            /** Recallable */
+            recallable: boolean;
         };
         /**
          * Offered
@@ -818,17 +835,22 @@ export interface components {
         ProblemStatus: "created" | "retired";
         /**
          * Prompted
-         * @description What the trainer shows: the template's trigger and the signature its
-         *     cases call. The title and the form are withheld, and mapping the trigger
-         *     to the form is the recall being measured.
+         * @description What the trainer shows: the template it asks for, its trigger, the
+         *     signature its cases call and the card's templates to switch between. The
+         *     form is withheld, and typing it from memory is the recall being
+         *     measured.
          */
         Prompted: {
-            /** Template Id */
-            template_id: string;
+            /** Template Slug */
+            template_slug: string;
+            /** Title */
+            title: string;
             /** Trigger */
             trigger: string;
             /** Signature */
             signature: string;
+            /** Templates */
+            templates: components["schemas"]["Named"][];
         };
         /**
          * Provider
@@ -1236,13 +1258,81 @@ export interface operations {
             };
         };
     };
-    hinted_api_cards__slug__recall__template_id__hints__hint__get: {
+    asked_api_cards__slug__recall__template_slug__get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 slug: string;
-                template_id: string;
+                template_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Prompted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recalled_api_cards__slug__recall__template_slug__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+                template_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Reproduction"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecallAttempt"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    hinted_api_cards__slug__recall__template_slug__hints__hint__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+                template_slug: string;
                 hint: components["schemas"]["Hint"];
             };
             cookie?: never;
@@ -1462,42 +1552,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CardRun"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    recalled_api_cards__slug__recall__template_id__post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-                template_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Reproduction"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecallAttempt"];
                 };
             };
             /** @description Validation Error */

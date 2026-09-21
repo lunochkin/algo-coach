@@ -2,7 +2,7 @@ import { ChevronDown } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
-import { api, type Gap, type Recalled, type Studied } from '@/api/client'
+import { api, type Gap, type Recalled, type Studied, type Template } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
@@ -284,7 +284,9 @@ function Mark({ solved }: { solved: boolean }) {
   )
 }
 
-// the last reproduction of each form, and a row for one never recalled
+// the last reproduction of each form, and a row for one never recalled. Each
+// row starts the recall of its own form, since a card teaches several and the
+// draw reaches one of them at a time
 function RecallView({
   studied,
   closed,
@@ -294,19 +296,57 @@ function RecallView({
   closed: boolean
   onToggle: (id: string) => void
 }) {
-  const titles = new Map(studied.card.templates.map((one) => [one.id, one.title]))
+  const templates = new Map(studied.card.templates.map((one) => [one.id, one]))
 
   return (
     <Section id="recall" title="Recall" closed={closed} onToggle={onToggle}>
       <div className="divide-y divide-border">
         {studied.recall.map((one: Recalled) => (
-          <div key={one.template_id} className="flex flex-wrap items-baseline gap-3 py-3">
-            <span>{titles.get(one.template_id) ?? one.template_id}</span>
-            <span className="ml-auto text-meta text-muted-foreground">{reads(one)}</span>
-          </div>
+          <RecallRow
+            key={one.template_id}
+            slug={studied.card.slug}
+            template={templates.get(one.template_id)}
+            recalled={one}
+          />
         ))}
       </div>
     </Section>
+  )
+}
+
+function RecallRow({
+  slug,
+  template,
+  recalled,
+}: {
+  slug: string
+  template: Template | undefined
+  recalled: Recalled
+}) {
+  const title = template?.title ?? recalled.template_id
+
+  // `content.md`: a template no case checks is read on the card and never
+  // recalled, so its row opens nothing
+  if (!template || (template.cases ?? []).length === 0)
+    return (
+      <div className="flex flex-wrap items-baseline gap-3 py-3">
+        <span>{title}</span>
+        {template?.optional && <Badge variant="secondary">optional</Badge>}
+        <span className="ml-auto text-meta text-muted-foreground">
+          no case checks this form
+        </span>
+      </div>
+    )
+
+  return (
+    <Link
+      to={`/cards/${encodeURIComponent(slug)}/recall/${encodeURIComponent(template.slug)}`}
+      className="group -mx-3 flex flex-wrap items-baseline gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-accent"
+    >
+      <span className="underline-offset-4 group-hover:underline">{title}</span>
+      {template.optional && <Badge variant="secondary">optional</Badge>}
+      <span className="ml-auto text-meta text-muted-foreground">{reads(recalled)}</span>
+    </Link>
   )
 }
 

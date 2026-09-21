@@ -56,7 +56,6 @@
     "Hint": {
       "description": "What the trainer gives when memory fails, in the order it gives them.\nEach answers more of the question than the last.",
       "enum": [
-        "title",
         "notes",
         "form"
       ],

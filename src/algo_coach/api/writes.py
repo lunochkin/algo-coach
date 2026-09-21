@@ -107,17 +107,17 @@ def started(root: Root, user_id: UserId, slug: str) -> CardRun:
     )
 
 
-# by the minted id rather than the authored slug: a slug spells the form's own
-# name, and the trainer withholds it
-@router.post("/cards/{slug}/recall/{template_id}")
+# by the template's authored slug, as the page's own path is: the trainer names
+# the template it asks for and withholds the form alone
+@router.post("/cards/{slug}/recall/{template_slug}")
 def recalled(
-    root: Root, user_id: UserId, slug: str, template_id: str, body: Reproduction
+    root: Root, user_id: UserId, slug: str, template_slug: str, body: Reproduction
 ) -> RecallAttempt:
     card = _card(root, slug)
     return reproduce(
         RecallLog(root),
         card.id,
-        _template(card, template_id),
+        _template(card, template_slug),
         body.code,
         body.hints,
         user_id=user_id,
@@ -131,10 +131,10 @@ def _card(root: Database, slug: str) -> Card:
     return found
 
 
-def _template(card: Card, template_id: str) -> Template:
-    found = [one for one in card.templates if one.id == template_id]
+def _template(card: Card, template_slug: str) -> Template:
+    found = [one for one in card.templates if one.slug == template_slug]
     if not found:
-        raise HTTPException(status_code=404, detail=f"no template {template_id}")
+        raise HTTPException(status_code=404, detail=f"no template {template_slug}")
     return found[0]
 
 

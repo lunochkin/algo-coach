@@ -121,8 +121,6 @@ def signature(template: Template) -> str:
 
 def reveal(template: Template, hint: Hint) -> str:
     """What one hint gives. Each answers more of the question than the last."""
-    if hint is Hint.TITLE:
-        return template.title
     if hint is Hint.NOTES:
         return template.notes or "This form carries no notes."
     return template.code
