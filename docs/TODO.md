@@ -19,17 +19,32 @@ what use surfaces rather than how much use happened.
 
 - [ ] Sit one problem through on the deployed engine, from the board to the
       claim and the label, which is Phase 12's unmet exit
-- [ ] Write down, per sitting, what read badly or worked badly, as items under
+- [x] Write down, per sitting, what read badly or worked badly, as items under
       the headings below. A fault nobody wrote down is fixed twice or never
 
 ### The design
 
-- [ ] Read every page against real data and list what the design gets wrong,
+- [x] Read every page against real data and list what the design gets wrong,
       one item per page. Phase 10 designed against seeded readings
+- [x] Add the panel, the pick row, the section bar, the account menu, the
+      scheme switch and the template panel to `/gallery`. `pages.md` has the
+      gallery show every component the pages use, and it shows none of the six
+- [x] Drop the table from `/gallery`, or restore a page that reads as a table.
+      The rework replaced every table with rows, and `components/ui/table` is
+      imported by the gallery alone
+- [ ] Read the sitting page against a real submission on a narrow window. Every
+      other page was reworked as rows and panels, and the sitting is the one
+      page `pages.md` exempts from phone width
 
 ### The flows
 
-Nothing yet. A fault a sitting surfaces is written here as its own item.
+- [ ] Carry a single picked tag into the problem as `?technique=`, or write
+      into `pages.md` why a listing pick names no technique. A row links with
+      `?from=problems` alone, so the claim opens with nothing ticked where a
+      pick from the board ticks the technique it was drilled for
+- [ ] Decide what `/problems` does with a retired problem, and write the
+      decision into `pages.md`. `GET /api/problems` answers the served ones, so
+      a retired problem is absent where the board still counts its attempts
 
 ### The corpus
 
@@ -233,6 +248,10 @@ one form its target named.
 
 ### Product
 
+- [ ] Page the rows in `GET /api/problems`, and keep the tag counts over the
+      whole corpus. The listing fetches every problem today, since a page of
+      rows cannot count the tags. Triggered when the corpus outgrows one
+      request
 - [ ] Let a user request a problem's retirement, as a private record an admin
       reads before retiring the problem by hand. Problems are served to every
       user, so no user retires one directly. Triggered when someone other than
