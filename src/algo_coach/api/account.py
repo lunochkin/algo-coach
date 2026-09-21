@@ -1,11 +1,12 @@
 """The routes the pages sign in and out through: the sign-ins the engine
-offers, and ending the session a browser carries. Neither needs a session."""
+offers, who the session signs in as, and ending the session a browser
+carries."""
 
 from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel
 
-from algo_coach.api.context import SESSION_COOKIE, Root
-from algo_coach.log import Provider, revoked
+from algo_coach.api.context import SESSION_COOKIE, Root, UserId
+from algo_coach.log import Provider, email_of, revoked
 
 router = APIRouter()
 
@@ -21,6 +22,19 @@ class Offered(BaseModel):
 @router.get("/sign-in")
 def offered(request: Request) -> Offered:
     return Offered(providers=request.app.state.providers, dev_login=request.app.state.dev_user)
+
+
+class Me(BaseModel):
+    """Who the session signs in as. The engine mints the id, and the address is
+    the provider's, so a user reached by the dev login carries none."""
+
+    user_id: str
+    email: str | None
+
+
+@router.get("/me")
+def me(root: Root, user_id: UserId) -> Me:
+    return Me(user_id=user_id, email=email_of(root, user_id))
 
 
 @router.delete("/session", status_code=204)

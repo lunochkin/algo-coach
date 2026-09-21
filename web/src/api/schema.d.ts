@@ -361,6 +361,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Me */
+        get: operations["me_api_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/session": {
         parameters: {
             query?: never;
@@ -667,6 +684,17 @@ export interface components {
             solved_count: number;
             /** Last Attempt At */
             last_attempt_at: string | null;
+        };
+        /**
+         * Me
+         * @description Who the session signs in as. The engine mints the id, and the address is
+         *     the provider's, so a user reached by the dev login carries none.
+         */
+        Me: {
+            /** User Id */
+            user_id: string;
+            /** Email */
+            email: string | null;
         };
         /**
          * Offered
@@ -1723,6 +1751,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Offered"];
+                };
+            };
+        };
+    };
+    me_api_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
                 };
             };
         };
