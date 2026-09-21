@@ -34,12 +34,14 @@ export function BoardPage() {
               {untouched.length > 0 && (
                 <section className="space-y-stack">
                   <Heading count={untouched.length}>Not practised yet</Heading>
-                  <div className="flex flex-wrap gap-2">
+                  {/* names rather than chips: a bordered chip is what the
+                      listing's filters are, and these open a technique */}
+                  <div className="flex flex-wrap gap-x-5 gap-y-1">
                     {untouched.map((row) => (
                       <Link
                         key={row.technique}
                         to={`/techniques/${encodeURIComponent(row.technique)}`}
-                        className="rounded-lg border px-2.5 py-1 text-meta transition-colors hover:bg-accent"
+                        className="underline-offset-4 hover:underline"
                       >
                         {row.technique}
                       </Link>
