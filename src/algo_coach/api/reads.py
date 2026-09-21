@@ -91,6 +91,7 @@ class Picked(BaseModel):
     attempt_count: int
     solved_count: int
     last_attempt_at: datetime | None
+    retired: bool = False  # the listing names no retired problem, and its URL answers
 
 
 class Recalled(BaseModel):
@@ -292,7 +293,7 @@ def every_problem(root: Root, user_id: UserId) -> list[Listed]:
 @router.get("/problems/{problem_id}")
 def picked(root: Root, user_id: UserId, problem_id: str) -> Picked:
     problem = load_problem(root, problem_id)
-    if problem is None or not problem.served:
+    if problem is None:
         raise HTTPException(status_code=404, detail=f"no problem {problem_id}")
     attempts = [
         attempt
@@ -308,6 +309,7 @@ def picked(root: Root, user_id: UserId, problem_id: str) -> Picked:
         attempt_count=row.attempt_count,
         solved_count=row.solved_count,
         last_attempt_at=row.last_attempt_at,
+        retired=not problem.served,
     )
 
 

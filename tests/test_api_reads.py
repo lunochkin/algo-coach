@@ -209,12 +209,15 @@ def test_an_unknown_problem_is_not_found(client):
     assert (response.status_code, response.json()) == (404, {"detail": "no problem nope"})
 
 
-def test_a_retired_problem_is_not_picked(client, database):
-    """A defective problem was never a fair test, so the page it would open
-    offers nothing to sit."""
+def test_a_retired_problem_is_read_at_its_own_url(client, database):
+    """The listing names no retired problem, and a link kept from before the
+    retirement opens the page the user's attempts sit on."""
     ProblemStore(database).retire("p-greedy", RetirementReason.DEFECTIVE)
 
-    assert client.get("/api/problems/p-greedy").status_code == 404
+    picked = client.get("/api/problems/p-greedy")
+
+    assert picked.status_code == 200
+    assert picked.json()["retired"] is True
 
 
 def test_serving_the_statement_stores_the_sitting_for_the_user(client):

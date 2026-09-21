@@ -1740,6 +1740,11 @@
               }
             ],
             "title": "Last Attempt At"
+          },
+          "retired": {
+            "type": "boolean",
+            "title": "Retired",
+            "default": false
           }
         },
         "type": "object",

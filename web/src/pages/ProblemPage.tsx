@@ -103,13 +103,16 @@ export function ProblemPage() {
                 {standing(picked).map((stat) => (
                   <Stat key={stat.label} value={stat.value} label={stat.label} />
                 ))}
-                <Button className="ml-auto" onClick={start} disabled={starting}>
-                  {starting ? 'Starting…' : 'Start the sitting'}
-                </Button>
+                {!picked.retired && (
+                  <Button className="ml-auto" onClick={start} disabled={starting}>
+                    {starting ? 'Starting…' : 'Start the sitting'}
+                  </Button>
+                )}
               </Stats>
               <p className="text-meta text-muted-foreground">
-                No statement on this page. It is served on that press, and the clock starts with
-                it.
+                {picked.retired
+                  ? 'This problem was retired: its statement asked for something its cases do not decide. It is served to nobody, and the attempts above stay in your log.'
+                  : 'No statement on this page. It is served on that press, and the clock starts with it.'}
               </p>
               {refused && (
                 <p className="text-meta text-destructive">The sitting did not start: {refused}</p>

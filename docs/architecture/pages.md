@@ -49,6 +49,14 @@ those steps at low fidelity.
   past several screens, and a reader picking one compares a handful at a time.
 - **Picking either filter returns the listing to its first page.** The page the
   reader was on may hold nothing once the list is narrowed.
+- **The listing names no retired problem, and the problem's own URL still
+  answers.** A retired problem was never a fair test, so a reader picking one
+  to sit is picking a problem the engine refuses to serve. The user's attempts
+  on it stay in the log, and a link kept from before the retirement therefore
+  opens a page rather than a 404.
+- **A retired page says so and offers no press that starts a sitting.** The
+  serving call refuses a retired problem, so a press there would ask for a
+  refusal. The page reads as the record of what the user did on that problem.
 - **The whole listing is fetched, and a page is a slice of it.** The tags count
   every problem the corpus carries, so a page of rows cannot produce them. The
   API pages the rows instead once the corpus outgrows one request.

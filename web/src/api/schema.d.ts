@@ -735,6 +735,11 @@ export interface components {
             solved_count: number;
             /** Last Attempt At */
             last_attempt_at: string | null;
+            /**
+             * Retired
+             * @default false
+             */
+            retired: boolean;
         };
         /**
          * Probe
