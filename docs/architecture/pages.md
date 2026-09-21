@@ -88,6 +88,26 @@ those steps at low fidelity.
 - **A page has four readings: loading, failed, empty and the content.** One
   component renders the first three, so a page that failed reads the same
   whichever request failed.
+- **A list of picks reads as rows, and the whole row is the link.** The board's
+  techniques, a technique's problems and the cards are each such a list. A
+  table spreads one pick over four columns, and the reader then joins the
+  columns back together to judge the pick.
+- **A row's counts read as one cluster at its right**, each count beside the
+  word it counts. A row with nothing counted says so in one word, since three
+  counts of nothing say less than `never` does.
+- **What a page holds beside its reading is a panel**: a bordered block on the
+  card surface. The counts a card run reached, the press that starts a sitting
+  and a submission's verdict are each one. Every panel carries the same border,
+  radius and ground, so a reader tells a panel from the reading by its shape
+  alone.
+- **A page longer than a screen carries a bar naming its sections.** The bar
+  stays at the top of the window while the page scrolls, and it marks the
+  section the reader is in. A press on it jumps to that section.
+- **A section collapses from its own heading**, and every section is open until
+  the reader closes it. The count beside the heading stays readable while the
+  section is closed.
+- **Which sections a reader closed is not stored.** A sitting's unsent code is
+  the only state the browser keeps, so a reload opens every section again.
 
 ## The design system
 
@@ -104,9 +124,21 @@ those steps at low fidelity.
 - **The type scale is named by the role a page reads a size in**: title,
   heading, body, meta and code. A page asking for a size by its role cannot
   choose a size no other page uses.
+- **Code inside a line of prose takes a step below the code role.** The mono
+  family has a larger x-height than the sans beside it, so mono set at the code
+  role reads larger than the prose around it. The step is its own token.
 - **Code reads in one mono family, named as a token.** The editor, a template's
   form and a failing case's arguments are all code, and a reader who sees three
   mono families reads three kinds of thing.
+- **One mapping colours Python wherever it appears.** The editor and a
+  template's form read the same mapping from the language's tags to the five
+  code tokens, so a form on a card is coloured as the editor colours it. A
+  form on a card is rendered from that mapping rather than by mounting an
+  editor, which takes no input and would ship the editor to show ten lines.
+- **Authored prose reads on these tokens too.** The markdown renderer ships a
+  scale and a palette of its own, and each of its variables is bound to a
+  token. A document's own title reads at the title role, and its headings at
+  the heading role.
 - **The app follows the browser's colour-scheme preference and offers no
   switch.** A switch is a stored preference, and no store holds a user's
   settings.
