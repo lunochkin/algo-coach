@@ -24,6 +24,18 @@ what use surfaces rather than how much use happened.
 
 ### The design
 
+- [x] Rework every list of picks as rows and panels, and give a long page a bar
+      naming its sections. A table spread one pick over four columns, and the
+      reader joined them back together to judge it
+- [x] Move the neutrals to a warm paper ground and square the radii, with each
+      colour token declaring both schemes in one `light-dark()` call. A solver
+      reads a statement for many minutes
+- [x] Offer a scheme switch in the navigation, stored in the browser and
+      applied before the first paint. The app followed the browser's preference
+      alone, which left a reader on a machine set the other way no way to read
+- [x] Bind the prose renderer and the Python colouring to the tokens, one
+      mapping for the editor and for a template's form. Each shipped a scale
+      and a palette of its own
 - [x] Read every page against real data and list what the design gets wrong,
       one item per page. Phase 10 designed against seeded readings
 - [x] Add the panel, the pick row, the section bar, the account menu, the
@@ -38,11 +50,17 @@ what use surfaces rather than how much use happened.
 
 ### The flows
 
+- [x] Serve `GET /api/problems` and a `/problems` listing the reader filters by
+      tag and by level, with both filters and the page in the URL. The board
+      reached problems one technique at a time
+- [x] Serve `GET /api/me` and put the account in a menu at the right of the
+      navigation. Sign out sat among the sections, which name places, and the
+      pages knew nothing about the user behind the session
 - [ ] Carry a single picked tag into the problem as `?technique=`, or write
       into `pages.md` why a listing pick names no technique. A row links with
       `?from=problems` alone, so the claim opens with nothing ticked where a
       pick from the board ticks the technique it was drilled for
-- [ ] Decide what `/problems` does with a retired problem, and write the
+- [x] Decide what `/problems` does with a retired problem, and write the
       decision into `pages.md`. `GET /api/problems` answers the served ones, so
       a retired problem is absent where the board still counts its attempts
 
