@@ -1,24 +1,22 @@
-import type { ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 
-import type { Submitted } from '@/api/client'
+import type { Submitted, Template } from '@/api/client'
+import { AccountMenu } from '@/components/AccountMenu'
 import { CodeEditor } from '@/components/CodeEditor'
 import { ElapsedClock } from '@/components/ElapsedClock'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
 import { PageHeader } from '@/components/PageHeader'
+import { Panel, Stat, Stats } from '@/components/Panel'
+import { PickList, PickRow } from '@/components/PickRow'
+import { SectionBar } from '@/components/SectionBar'
+import { TemplatePanel } from '@/components/TemplatePanel'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Verdict } from '@/components/Verdict'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
@@ -81,6 +79,36 @@ const SUBMITTED: Submitted = {
 }
 
 const NOTHING = { retry: () => {} }
+
+// a template shaped like a card's, so the panel hides and reveals a real form
+const TEMPLATE: Template = {
+  id: 't-gallery',
+  slug: 'lower-bound',
+  title: 'Lower bound',
+  trigger: 'The first index whose value is **not less** than a target.',
+  notes: 'The half-open interval is what keeps the two ends comparable.',
+  optional: false,
+  speedup: true,
+  kind: 'code',
+  code:
+    'def solve(xs: list[int], target: int) -> int:\n' +
+    '    lo, hi = 0, len(xs)\n' +
+    '    while lo < hi:\n' +
+    '        mid = (lo + hi) // 2\n' +
+    '        if xs[mid] < target:\n' +
+    '            lo = mid + 1\n' +
+    '        else:\n' +
+    '            hi = mid\n' +
+    '    return lo\n',
+  unordered: false,
+  cases: [],
+}
+
+const SECTIONS = [
+  { id: 'gallery-brief', label: 'The brief' },
+  { id: 'gallery-templates', label: 'The templates' },
+  { id: 'gallery-ladder', label: 'The ladder' },
+]
 
 // every token and every component the pages read, on one page: a token edited
 // in `index.css` reaches eight pages, and this page shows each use at once
@@ -174,28 +202,51 @@ export function GalleryPage() {
         </RadioGroup>
       </Section>
 
-      <Section title="Table">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Technique</TableHead>
-              <TableHead className="text-right">Attempts</TableHead>
-              <TableHead>Last practised</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell>binary-search</TableCell>
-              <TableCell className="text-right tabular-nums">12</TableCell>
-              <TableCell>3 days ago</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>monotonic-stack</TableCell>
-              <TableCell className="text-right tabular-nums">4</TableCell>
-              <TableCell>17 days ago</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+      <Section title="The navigation's right">
+        {/* the two the shell ends on. The menu reads `/api/me`, so it names
+            the signed-in user rather than a sample */}
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <AccountMenu />
+        </div>
+      </Section>
+
+      <Section title="A list of picks">
+        <PickList>
+          <PickRow
+            to="/gallery"
+            title="Smallest feasible speed"
+            badge={<Badge variant="outline">medium</Badge>}
+            stats={[
+              { label: 'attempts', value: 2 },
+              { label: 'solved', value: '1/2' },
+              { label: 'last', value: '6d ago' },
+            ]}
+          />
+          <PickRow
+            to="/gallery"
+            title="Monotonic stack"
+            stats={[{ label: 'attempts', value: 0 }]}
+          />
+        </PickList>
+      </Section>
+
+      <Section title="A panel of counts">
+        <Panel>
+          <Stats>
+            <Stat value={48} label="problems" />
+            <Stat value={14} label="techniques" />
+            <Stat value="1/2" label="solved" />
+          </Stats>
+        </Panel>
+      </Section>
+
+      <Section title="A long page's sections">
+        <JumpBar />
+      </Section>
+
+      <Section title="A template">
+        <TemplatePanel template={TEMPLATE} />
       </Section>
 
       <Section title="The three readings">
@@ -240,6 +291,13 @@ export function GalleryPage() {
       </Section>
     </div>
   )
+}
+
+// the bar is stateful on a card page, and the state is the reading it shows
+function JumpBar() {
+  const [current, setCurrent] = useState<string | null>(SECTIONS[0].id)
+
+  return <SectionBar items={SECTIONS} current={current} onJump={setCurrent} />
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
