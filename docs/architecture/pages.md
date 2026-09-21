@@ -62,9 +62,10 @@ those steps at low fidelity.
   own record rather than found in the technique's candidates, since a page
   reached from two places would otherwise load a different list at each of
   them.
-- **A sitting's unsent code is the only state the browser keeps.** The code is
-  stored under the sitting's id, so a reload during a sitting restores what the
-  user typed. Every other reading is fetched from the API at each load.
+- **A sitting's unsent code and the chosen colour scheme are the state the
+  browser keeps.** The code is stored under the sitting's id, so a reload
+  during a sitting restores what the user typed. Every other reading is fetched
+  from the API at each load.
 - **The pages Phase 11 adds are deferred to Phase 11**, which writes its flows
   before it builds them: starting a card run, the ladder on a card, and the
   recall trainer.
@@ -95,19 +96,19 @@ those steps at low fidelity.
 - **A row's counts read as one cluster at its right**, each count beside the
   word it counts. A row with nothing counted says so in one word, since three
   counts of nothing say less than `never` does.
-- **What a page holds beside its reading is a panel**: a bordered block on the
-  card surface. The counts a card run reached, the press that starts a sitting
-  and a submission's verdict are each one. Every panel carries the same border,
-  radius and ground, so a reader tells a panel from the reading by its shape
-  alone.
+- **A panel holds what a page carries beside its reading**: a bordered block on
+  the card surface. The counts a card run reached, the press that starts a
+  sitting and a submission's verdict are each one. Every panel carries the same
+  border, radius and ground, so a reader tells a panel from the reading by its
+  shape alone.
 - **A page longer than a screen carries a bar naming its sections.** The bar
   stays at the top of the window while the page scrolls, and it marks the
   section the reader is in. A press on it jumps to that section.
 - **A section collapses from its own heading**, and every section is open until
   the reader closes it. The count beside the heading stays readable while the
   section is closed.
-- **Which sections a reader closed is not stored.** A sitting's unsent code is
-  the only state the browser keeps, so a reload opens every section again.
+- **Which sections a reader closed is not stored**, in the browser or
+  anywhere else, so a reload opens every section again.
 
 ## The design system
 
@@ -139,9 +140,20 @@ those steps at low fidelity.
   scale and a palette of its own, and each of its variables is bound to a
   token. A document's own title reads at the title role, and its headings at
   the heading role.
-- **The app follows the browser's colour-scheme preference and offers no
-  switch.** A switch is a stored preference, and no store holds a user's
-  settings.
+- **The app opens in the browser's colour-scheme and carries a switch.** The
+  switch writes the chosen scheme to the browser, and a reader who never
+  presses it follows their browser for as long as they never press it. No
+  store holds the choice, since the choice is about the machine the reader is
+  at rather than about the user.
+- **Each colour token carries both schemes in one declaration**, and the root
+  says which of the two is read. A token declared twice would be a value in
+  two places, and the two drift.
+- **The neutrals carry a warm cast, and the light ground is paper rather than
+  white.** A solver reads a statement for many minutes, and a warm ground is
+  easier to sit in front of than white. The dark ground is a warm charcoal for
+  the same reason.
+- **Every radius is derived from one base**, so a single edit rounds or squares
+  the whole app.
 - **The gallery is a page showing every token and every component the pages
   use.** A component restyled there shows every use of it at once.
 - **The gallery is built in development alone.** The deployed bundle carries

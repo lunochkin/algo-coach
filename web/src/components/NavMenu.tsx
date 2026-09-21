@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router'
 
 import { api, LOGIN } from '@/api/client'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -36,7 +37,10 @@ export function NavMenu({ wide }: { wide: boolean }) {
           wide ? 'max-w-wide' : 'max-w-reading',
         )}
       >
-        <span className="mr-4 font-semibold">algo-coach</span>
+        {/* the wordmark reaches the board, as a site's own name does */}
+        <Link to="/" className="mr-4 font-semibold underline-offset-4 hover:underline">
+          algo-coach
+        </Link>
         {SECTIONS.map(({ label, to, owns }) => {
           const current = owns(pathname)
           return (
@@ -47,9 +51,12 @@ export function NavMenu({ wide }: { wide: boolean }) {
             </Button>
           )
         })}
-        <Button variant="ghost" size="sm" className="ml-auto" onClick={signOut}>
-          Sign out
-        </Button>
+        <div className="ml-auto flex items-center gap-1">
+          <ThemeToggle />
+          <Button variant="ghost" size="sm" onClick={signOut}>
+            Sign out
+          </Button>
+        </div>
       </nav>
     </header>
   )
