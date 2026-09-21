@@ -246,7 +246,7 @@ export function GalleryPage() {
       </Section>
 
       <Section title="A template">
-        <TemplatePanel template={TEMPLATE} />
+        <TemplatePanel template={TEMPLATE} card="gallery" recalled={undefined} />
       </Section>
 
       <Section title="The three readings">
