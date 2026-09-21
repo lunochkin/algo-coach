@@ -44,7 +44,7 @@ function Panel({ technique, cards }: { technique: string | null; cards: Card[] }
           <span className="ml-auto text-meta text-muted-foreground">{cards.length} cards</span>
         </div>
       )}
-      <div className="divide-y divide-border px-4">
+      <div className="divide-y divide-border">
         {cards.map((card) => (
           <CardRow key={card.slug} card={card} named={technique === null} />
         ))}
@@ -61,7 +61,7 @@ function CardRow({ card, named = false }: { card: Card; named?: boolean }) {
   return (
     <Link
       to={`/cards/${encodeURIComponent(card.slug)}`}
-      className="group -mx-3 block rounded-lg px-3 py-3 transition-colors hover:bg-accent"
+      className="group block px-4 py-3 transition-colors hover:bg-accent"
     >
       <div className="flex items-baseline gap-3">
         <span className="font-medium underline-offset-4 group-hover:underline">{card.title}</span>
