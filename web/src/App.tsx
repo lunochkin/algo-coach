@@ -9,6 +9,7 @@ import { CardsPage } from '@/pages/CardsPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProblemPage } from '@/pages/ProblemPage'
+import { ProblemsPage } from '@/pages/ProblemsPage'
 import { TechniquePage } from '@/pages/TechniquePage'
 
 // loaded when first opened: the editor and the markdown with its math are most
@@ -47,6 +48,7 @@ function App() {
             {/* the board is where every sitting starts: the user picks the
                 technique, never a problem id */}
             <Route index element={<BoardPage />} />
+            <Route path="problems" element={<ProblemsPage />} />
             <Route path="cards" element={<CardsPage />} />
             <Route path="cards/:slug" element={<CardPage />} />
             <Route path="cards/:slug/recall" element={<RecallPage />} />

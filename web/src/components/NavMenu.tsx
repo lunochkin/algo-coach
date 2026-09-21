@@ -5,8 +5,8 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-// the two sections `pages.md` names. A technique, a picked problem and a
-// sitting are steps down from the board, so Practice stays marked on them
+// the three the navigation names. A technique, a picked problem and a sitting
+// are steps down from the board, so Practice stays marked on them
 const SECTIONS = [
   {
     label: 'Practice',
@@ -17,6 +17,9 @@ const SECTIONS = [
       path.startsWith('/problems/') ||
       path.startsWith('/sittings/'),
   },
+  // the listing alone: a picked problem is a step down from the board, from a
+  // technique or from a card, and the section it sits under cannot say which
+  { label: 'Problems', to: '/problems', owns: (path: string) => path === '/problems' },
   { label: 'Cards', to: '/cards', owns: (path: string) => path.startsWith('/cards') },
 ]
 

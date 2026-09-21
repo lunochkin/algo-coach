@@ -40,6 +40,7 @@ export type CaseResult = components['schemas']['CaseResult']
 export type Hint = components['schemas']['Hint']
 export type RecallAttempt = components['schemas']['RecallAttempt']
 export type Candidate = components['schemas']['Candidate']
+export type Listed = components['schemas']['Listed']
 export type Picked = components['schemas']['Picked']
 export type Provider = components['schemas']['Provider']
 

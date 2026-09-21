@@ -18,6 +18,9 @@ export function ProblemPage() {
   const [search] = useSearchParams()
   const technique = search.get('technique')
   const slug = search.get('card')
+  // the listing is the third page a pick comes from, beside a technique and a
+  // card, and it names no record of its own
+  const listing = search.get('from') === 'problems'
   const navigate = useNavigate()
   // read only where the pick came from a card: the page names the card it
   // returns to, and the claim answers for that card's technique
@@ -72,9 +75,11 @@ export function ProblemPage() {
                 to: `/cards/${encodeURIComponent(slug)}`,
                 label: card.data?.card.title ?? slug,
               }
-            : technique === null
-              ? { to: '/', label: 'Board' }
-              : { to: `/techniques/${encodeURIComponent(technique)}`, label: technique }
+            : listing
+              ? { to: '/problems', label: 'Problems' }
+              : technique === null
+                ? { to: '/', label: 'Board' }
+                : { to: `/techniques/${encodeURIComponent(technique)}`, label: technique }
         }
         title={picked.data?.title ?? 'The problem'}
         note={
