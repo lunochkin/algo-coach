@@ -2,7 +2,6 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirro
 import { python } from '@codemirror/lang-python'
 import {
   bracketMatching,
-  HighlightStyle,
   indentOnInput,
   indentUnit,
   syntaxHighlighting,
@@ -15,18 +14,9 @@ import {
   keymap,
   lineNumbers,
 } from '@codemirror/view'
-import { tags } from '@lezer/highlight'
 import { useEffect, useRef } from 'react'
 
-// the editor reads the theme's tokens rather than CodeMirror's own colours,
-// so the form is legible in whichever scheme the browser asked for
-const HIGHLIGHT = HighlightStyle.define([
-  { tag: [tags.keyword, tags.operatorKeyword], color: 'var(--color-code-keyword)' },
-  { tag: [tags.function(tags.variableName), tags.definition(tags.variableName)], color: 'var(--color-code-name)' },
-  { tag: [tags.string, tags.special(tags.string)], color: 'var(--color-code-string)' },
-  { tag: [tags.number, tags.bool, tags.null], color: 'var(--color-code-number)' },
-  { tag: tags.comment, color: 'var(--color-code-comment)', fontStyle: 'italic' },
-])
+import { HIGHLIGHTER } from '@/lib/python'
 
 type Props = { initial: string; onChange: (code: string) => void; onSubmit: () => void }
 
@@ -54,7 +44,7 @@ export function CodeEditor({ initial, onChange, onSubmit }: Props) {
           indentUnit.of('    '),
           EditorState.tabSize.of(4),
           bracketMatching(),
-          syntaxHighlighting(HIGHLIGHT),
+          syntaxHighlighting(HIGHLIGHTER),
           python(),
           // ahead of the default keymap, where Mod-Enter inserts a blank line
           keymap.of([
@@ -95,5 +85,5 @@ export function CodeEditor({ initial, onChange, onSubmit }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return <div ref={host} className="h-full min-h-96 overflow-hidden rounded-md border" />
+  return <div ref={host} className="h-full min-h-96 overflow-hidden rounded-xl border" />
 }

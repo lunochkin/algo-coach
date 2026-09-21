@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Verdict } from '@/components/Verdict'
+import { pieces } from '@/lib/python'
 import { cn } from '@/lib/utils'
 
 export function SittingPage() {
@@ -170,19 +171,56 @@ export function SittingPage() {
 
   return (
     <div className="space-y-stack">
-      {paused && (
-        <div className="flex items-center justify-between rounded-md border bg-muted p-3">
-          <span className="font-medium">Paused: the clock is stopped</span>
-          <div className="flex items-center gap-3">
-            {/* the time the pause froze: the clock under the cover is blurred */}
-            <ElapsedClock elapsedSec={clock.elapsedSec} receivedAt={clock.at} running={false} />
-            <Button onClick={() => move('resume')} disabled={moving}>
-              Resume
-            </Button>
+      {/* the sitting is run from one row, and it stays in view while the
+          statement scrolls: the clock is what the solver is watched by */}
+      <div className="sticky top-0 z-10 -mx-gutter border-b bg-background px-gutter">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2">
+          <span className="min-w-0 truncate text-meta text-muted-foreground">
+            {paused ? 'Paused: the clock is stopped' : served.title}
+          </span>
+          <div className="ml-auto flex items-center gap-3">
+            <ElapsedClock
+              elapsedSec={clock.elapsedSec}
+              receivedAt={clock.at}
+              running={!paused && !ended}
+            />
+            {ended ? (
+              <span className="text-meta text-muted-foreground">This sitting has ended</span>
+            ) : paused ? (
+              <Button onClick={() => move('resume')} disabled={moving}>
+                Resume
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" onClick={() => move('pause')} disabled={moving}>
+                  Pause
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" disabled={moving}>
+                      End
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>End the sitting?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        The clock stops for good, and no more submissions are taken. Each attempt
+                        is then asked about in turn.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Keep solving</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => move('end')}>End</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
           </div>
         </div>
-      )}
-      {refused && <p className="text-destructive">Refused: {refused}</p>}
+      </div>
+      {refused && <p className="text-meta text-destructive">Refused: {refused}</p>}
       {/* inert and covered while paused: the time away is not spent on the
           problem, and no keystroke reaches the editor */}
       <div
@@ -192,14 +230,25 @@ export function SittingPage() {
         <section className="space-y-stack">
           <h1 className="text-title font-semibold">{served.title}</h1>
           <Markdown>{served.statement}</Markdown>
+          {/* the parameter order the cases call with, which prose cannot be
+              relied on to give */}
           {served.signature && (
-            <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">
-              {served.signature}
-            </pre>
+            <div className="space-y-1">
+              <p className="text-meta text-muted-foreground">The function every case calls</p>
+              <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">
+                <code>
+                  {pieces(served.signature).map((piece, index) => (
+                    <span key={index} className={piece.token}>
+                      {piece.text}
+                    </span>
+                  ))}
+                </code>
+              </pre>
+            </div>
           )}
         </section>
         {/* the verdict sits under the editor: one page is the whole sitting */}
-        <section className="flex flex-col gap-3 lg:sticky lg:top-6 lg:h-[calc(100vh-8rem)]">
+        <section className="flex flex-col gap-3 lg:sticky lg:top-6 lg:h-[calc(100vh-10rem)]">
           <div className="min-h-96 flex-1 lg:min-h-0">
             <CodeEditor
               // what was typed survives a reload; a first visit starts on the
@@ -212,50 +261,18 @@ export function SittingPage() {
               onSubmit={submit}
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <Button onClick={submit} disabled={running || paused || ended}>
               {running ? 'Running…' : 'Submit'}
             </Button>
-            <span className="text-meta text-muted-foreground">⌘/Ctrl + Enter</span>
-            <div className="ml-auto flex items-center gap-3">
-              <ElapsedClock
-                elapsedSec={clock.elapsedSec}
-                receivedAt={clock.at}
-                running={!paused && !ended}
-              />
-              {ended ? (
-                <span className="text-meta text-muted-foreground">This sitting has ended</span>
-              ) : (
-                <>
-                  <Button variant="outline" onClick={() => move('pause')} disabled={moving}>
-                    Pause
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="outline" disabled={moving}>
-                        End
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>End the sitting?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          The clock stops for good, and no more submissions are taken. Each
-                          attempt is then asked about in turn.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Keep solving</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => move('end')}>End</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </>
-              )}
-            </div>
+            <span className="text-meta text-muted-foreground">
+              ⌘/Ctrl + Enter · judged against the problem&rsquo;s own test cases
+            </span>
           </div>
+          {/* the verdict sits under the editor: a failing case is read beside
+              the code that failed it */}
           {submitted && (
-            <div className="max-h-[45%] overflow-auto">
+            <div className="max-h-[45%] overflow-auto rounded-xl border bg-card px-4 py-3">
               <Verdict submitted={submitted} />
             </div>
           )}

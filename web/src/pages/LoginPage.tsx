@@ -21,13 +21,21 @@ export function LoginPage() {
   const refused = search.get('refused')
 
   return (
-    <section className="mx-auto max-w-form space-y-stack pt-16">
-      <h1 className="text-title font-semibold">Sign in to algo-coach</h1>
+    <section className="mx-auto max-w-form space-y-section py-16">
+      <div className="space-y-1">
+        <p className="font-semibold">algo-coach</p>
+        <h1 className="text-title font-semibold">Sign in</h1>
+        <p className="text-meta text-muted-foreground">
+          Deliberate practice of algorithmic problem-solving. Access is by invitation.
+        </p>
+      </div>
+
       {refused !== null && (
-        <p className="text-destructive">
+        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-meta text-destructive">
           {REFUSALS[refused] ?? 'That sign-in did not complete. Try again.'}
         </p>
       )}
+
       <Loaded
         of="the sign-in"
         state={offered}
@@ -40,19 +48,28 @@ export function LoginPage() {
                 which answers with a redirect */}
             {offered.providers.map((provider) => (
               <Button key={provider} className="w-full" asChild>
-                <a href={`/api/auth/${provider}`}>Sign in with {NAMES[provider]}</a>
+                <a href={`/api/auth/${provider}`}>Continue with {NAMES[provider]}</a>
               </Button>
             ))}
             {offered.dev_login !== null && (
-              <Button variant="outline" className="w-full" asChild>
-                <a href="/api/auth/dev">Dev login as {offered.dev_login}</a>
-              </Button>
+              <>
+                {offered.providers.length > 0 && (
+                  // the dev login answers a loopback request alone, so it is
+                  // never the act the page asks for
+                  <p className="text-center text-meta text-muted-foreground">or</p>
+                )}
+                <Button variant="outline" className="w-full" asChild>
+                  <a href="/api/auth/dev">Dev login as {offered.dev_login}</a>
+                </Button>
+              </>
             )}
           </div>
         )}
       </Loaded>
-      <p className="text-meta text-muted-foreground">
-        <Link to={PRIVACY} className="underline underline-offset-4">
+
+      <p className="border-t pt-4 text-meta text-muted-foreground">
+        The app stores what you attempt and what a model says about it.{' '}
+        <Link to={PRIVACY} className="text-foreground underline underline-offset-4">
           Privacy policy
         </Link>
       </p>

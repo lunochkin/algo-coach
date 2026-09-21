@@ -25,6 +25,9 @@
     --text-meta--line-height: 1.25rem;
     --text-code: 0.875rem;
     --text-code--line-height: 1.5rem;
+    /* mono set beside sans reads larger at the same size, so code inside a
+       line of prose takes a step of its own */
+    --text-code-inline: 0.8125rem;
 
     /* the rhythm a page is laid out on, over the 0.25rem step every other
        spacing utility is a multiple of */
@@ -194,4 +197,131 @@
   html {
     @apply font-sans;
     }
+}
+/* the typography plugin ships a scale and a palette of its own, and the pages
+   read one set of tokens. Prose is bound to them here, in the one place a
+   value is defined, rather than per page. Unlayered, so it wins over the
+   plugin's own rules */
+.prose {
+    --tw-prose-body: var(--foreground);
+    --tw-prose-headings: var(--foreground);
+    --tw-prose-lead: var(--muted-foreground);
+    --tw-prose-links: var(--foreground);
+    --tw-prose-bold: var(--foreground);
+    --tw-prose-counters: var(--muted-foreground);
+    --tw-prose-bullets: var(--border);
+    --tw-prose-hr: var(--border);
+    --tw-prose-quotes: var(--muted-foreground);
+    --tw-prose-quote-borders: var(--border);
+    --tw-prose-captions: var(--muted-foreground);
+    --tw-prose-code: var(--foreground);
+    --tw-prose-pre-code: var(--foreground);
+    --tw-prose-pre-bg: var(--muted);
+    --tw-prose-th-borders: var(--border);
+    --tw-prose-td-borders: var(--border);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+}
+
+/* a document's own title, where prose carries one, reads at the page's title
+   role */
+.prose :is(h1) {
+    font-size: var(--text-title);
+    line-height: var(--text-title--line-height);
+    font-weight: 600;
+}
+
+/* a heading inside a card's brief is a heading like any other: the page's own
+   role, never a second scale that competes with the page title */
+.prose :is(h2, h3, h4) {
+    font-size: var(--text-heading);
+    line-height: var(--text-heading--line-height);
+    font-weight: 500;
+    margin-top: var(--spacing-section);
+    margin-bottom: 0.5rem;
+}
+
+.prose :is(p, ul, ol, blockquote, pre, table) {
+    margin-block: var(--spacing-stack);
+}
+
+.prose :is(li) {
+    margin-block: 0.25rem;
+}
+
+.prose :is(li)::marker {
+    color: var(--muted-foreground);
+}
+
+/* the plugin draws a backtick on either side of inline code; a reader sees
+   the mark the author typed rather than the code they meant */
+.prose :is(code)::before,
+.prose :is(code)::after {
+    content: none;
+}
+
+.prose :is(code) {
+    font-size: var(--text-code-inline);
+    font-weight: 400;
+    background: var(--muted);
+    border-radius: var(--radius-sm);
+    padding: 0.1em 0.35em;
+}
+
+.prose :is(pre) {
+    font-size: var(--text-code);
+    line-height: var(--text-code--line-height);
+    border-radius: var(--radius-md);
+    padding: 0.75rem;
+}
+
+.prose :is(pre) :is(code) {
+    background: none;
+    padding: 0;
+}
+
+.prose :is(a) {
+    text-decoration-line: underline;
+    text-underline-offset: 4px;
+}
+
+.prose :is(blockquote) {
+    font-style: normal;
+    font-weight: 400;
+}
+
+.prose :is(thead th, td) {
+    font-size: var(--text-meta);
+}
+
+.prose > :first-child {
+    margin-top: 0;
+}
+
+.prose > :last-child {
+    margin-bottom: 0;
+}
+
+/* the five code tokens, as the classes `lib/python.ts` maps Python's tags to.
+   The editor and a template's form read the same mapping, so a form on a card
+   is coloured as the editor colours it */
+.tok-keyword {
+    color: var(--code-keyword);
+}
+
+.tok-name {
+    color: var(--code-name);
+}
+
+.tok-string {
+    color: var(--code-string);
+}
+
+.tok-number {
+    color: var(--code-number);
+}
+
+.tok-comment {
+    color: var(--code-comment);
+    font-style: italic;
 }

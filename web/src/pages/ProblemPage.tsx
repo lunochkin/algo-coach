@@ -5,7 +5,9 @@ import { api, type Picked } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
+import { Panel, Stat, Stats } from '@/components/Panel'
 import { TechniqueCards } from '@/components/TechniqueCards'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { lastAt, share } from '@/lib/format'
 
@@ -75,26 +77,52 @@ export function ProblemPage() {
               : { to: `/techniques/${encodeURIComponent(technique)}`, label: technique }
         }
         title={picked.data?.title ?? 'The problem'}
-        note={picked.data && standing(picked.data)}
+        note={
+          picked.data && (
+            <span className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="font-normal">
+                {picked.data.difficulty ?? 'no difficulty'}
+              </Badge>
+              <span>{picked.data.techniques.join(' · ')}</span>
+            </span>
+          )
+        }
       />
       <Loaded of="the problem" state={picked}>
         {(picked) => (
-          <div className="space-y-stack">
+          <div className="space-y-section">
+            {/* the one act this page asks for, beside what the user has done
+                on this problem before */}
+            <Panel>
+              <Stats>
+                {standing(picked).map((stat) => (
+                  <Stat key={stat.label} value={stat.value} label={stat.label} />
+                ))}
+                <Button className="ml-auto" onClick={start} disabled={starting}>
+                  {starting ? 'Starting…' : 'Start the sitting'}
+                </Button>
+              </Stats>
+              <p className="text-meta text-muted-foreground">
+                No statement on this page. It is served on that press, and the clock starts with
+                it.
+              </p>
+              {refused && (
+                <p className="text-meta text-destructive">The sitting did not start: {refused}</p>
+              )}
+            </Panel>
+
             {/* the technique the pick came from, the card's own where it came
                 from a card, and the problem's where it came from neither */}
-            {cards(picked, technique, card.data?.card.technique ?? null).map((one) => (
-              <TechniqueCards key={one} technique={one} />
-            ))}
-            {/* the one act this page asks for */}
-            <div>
-              <Button onClick={start} disabled={starting}>
-                {starting ? 'Starting…' : 'Start the sitting'}
-              </Button>
-            </div>
-            <p className="text-meta text-muted-foreground">
-              The statement is served on that press, and the clock starts with it.
-            </p>
-            {refused && <p className="text-destructive">The sitting did not start: {refused}</p>}
+            <section className="space-y-stack">
+              <h2 className="text-heading font-medium">Before you start</h2>
+              <p className="text-meta text-muted-foreground">
+                The card teaches the form this problem is written for. Reading it is off the
+                clock, and no sitting requires it.
+              </p>
+              {cards(picked, technique, card.data?.card.technique ?? null).map((one) => (
+                <TechniqueCards key={one} technique={one} />
+              ))}
+            </section>
           </div>
         )}
       </Loaded>
@@ -121,11 +149,12 @@ function cards(picked: Picked, technique: string | null, carded: string | null):
   return technique === null ? picked.techniques : [technique]
 }
 
-// what the user has done on this problem
-function standing(picked: Picked): string {
+// what the user has done on this problem, as counts rather than a sentence
+function standing(picked: Picked): { value: string | number; label: string }[] {
+  if (picked.attempt_count === 0) return [{ value: 'never', label: 'attempted' }]
   return [
-    picked.difficulty ?? 'no difficulty',
-    `${picked.attempt_count} attempt(s), ${share(picked.solved_count, picked.attempt_count)} solved`,
-    `last ${lastAt(picked.last_attempt_at)}`,
-  ].join(' · ')
+    { value: picked.attempt_count, label: picked.attempt_count === 1 ? 'attempt' : 'attempts' },
+    { value: share(picked.solved_count, picked.attempt_count), label: 'solved' },
+    { value: lastAt(picked.last_attempt_at), label: 'last attempted' },
+  ]
 }
