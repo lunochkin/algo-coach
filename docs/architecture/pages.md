@@ -14,22 +14,41 @@ those steps at low fidelity.
   Practice holds the board, a technique's candidates, a picked problem and the
   sitting. Problems holds the listing of every problem. Cards holds the card
   list, one card, and the recall trainer Phase 11 adds.
+- **The scheme switch and the account menu sit at the right of the
+  navigation**, apart from the sections, since neither names a page.
+- **The account menu names who the session signs in as**, and holds the
+  sign-out. The address the provider verified names the user, with the
+  engine's own id under it. A user no provider linked is named by that id
+  instead, since the dev login mints no identity to carry an address.
 - **Problems is marked on the listing alone.** A picked problem is a step down
   from the board, from a technique or from a card, so Practice stays marked on
   it and the way back names where the pick came from.
 - **A signed-in user lands on the board.** Every sitting starts from a technique
   the user picks there, and Phase 15 serves the scheduler's pick on the same
   page.
-- **The listing filters by the techniques a problem carries**, and the tags it
-  offers are the techniques the listing itself holds. A problem is shown where
-  it carries any tag the user picked, so a second tag widens the list rather
-  than narrowing it to the problems carrying both.
-- **The tags picked and the page are in the URL**, so a filtered listing is a
-  link the user can keep. The two are the page's whole state.
+- **The listing filters by two things a problem carries: its techniques and
+  its difficulty.** The tags it offers are the techniques the listing itself
+  holds, and the levels are the three a problem can carry.
+- **A second pick inside one filter widens the list, and the two filters
+  narrow each other.** A problem is shown where it carries any tag the user
+  picked and sits at any level they asked for. Two techniques ask for the
+  problems of either, where a technique and a level ask for the problems of
+  both.
+- **Each chip counts what pressing it would leave**, so the levels count what
+  the tags left and the tags count what the levels left. A count over the whole
+  corpus would offer a chip that returns nothing.
+- **Picking a filter moves no row of the page.** The chips keep the order the
+  whole listing gives and a fixed width for their count, and the press that
+  clears the filters sits in the heading rather than on a line of its own. A
+  reader comparing two problems otherwise loses the one they were reading as
+  the chips above rewrap.
+- **The URL carries the tags, the levels and the page**, as `?technique=`,
+  `?difficulty=` and `?page=`. A filtered listing is then a link the user can
+  keep, and the three are the page's whole state.
 - **The listing is read in pages of twenty rows.** Fifty problems already scroll
   past several screens, and a reader picking one compares a handful at a time.
-- **Picking a tag returns the listing to its first page.** The page the reader
-  was on may hold nothing once the list is narrowed.
+- **Picking either filter returns the listing to its first page.** The page the
+  reader was on may hold nothing once the list is narrowed.
 - **The whole listing is fetched, and a page is a slice of it.** The tags count
   every problem the corpus carries, so a page of rows cannot produce them. The
   API pages the rows instead once the corpus outgrows one request.
@@ -108,6 +127,11 @@ those steps at low fidelity.
 - **A page has four readings: loading, failed, empty and the content.** One
   component renders the first three, so a page that failed reads the same
   whichever request failed.
+- **A bordered chip is a control, and a destination reads as a link.** The
+  listing's filters are chips, since a press toggles one. The techniques the
+  board offers are names that underline on hover, since a press opens the
+  technique. Two shapes that look alike and act differently teach a reader the
+  wrong thing about both.
 - **A list of picks reads as rows, and the whole row is the link.** The board's
   techniques, a technique's problems and the cards are each such a list. A
   table spreads one pick over four columns, and the reader then joins the

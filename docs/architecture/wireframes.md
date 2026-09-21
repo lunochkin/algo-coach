@@ -18,7 +18,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- any page under a section ---------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          Sign out           |
+| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
 |                                                                        |
 | < Binary search                  the way back, named                   |
@@ -33,9 +33,14 @@ Every page under a section carries the same two rows above its body.
 +------------------------------------------------------------------------+
 ```
 
-- The navigation carries the three sections, the scheme switch and the
-  sign-out, and it marks the section the page sits under. The wordmark reaches
-  the board.
+- The navigation carries the three sections at the left, and the scheme switch
+  and the account menu at the right. It marks the section the page sits under,
+  and the wordmark reaches the board.
+- The account menu names who the session signs in as: the address the provider
+  verified, and the engine's own id under it. A user no provider linked is
+  named by that id, and the menu says so.
+- Signing out is in that menu, since it is an act on the account rather than a
+  place the navigation names.
 - The header carries the way back, the title, and the one line identifying what
   the title names.
 - A section's root page carries no way back, since the navigation reaches that
@@ -45,14 +50,14 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- / --------------------------------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          Sign out           |
+| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
 | Pick a technique                                                       |
 | Every technique a served problem carries, stalest first.               |
 |                                                                        |
 | Not practised yet  12                                                  |
-| ( bit-manipulation ) ( breadth-first-search ) ( greedy )               |
-| ( monotonic-stack ) ( sliding-window ) ( two-pointers ) ...            |
+| bit-manipulation   breadth-first-search   greedy                       |
+| monotonic-stack   sliding-window   two-pointers ...                    |
 |                                                                        |
 | Practised  2                                                           |
 | binary-search        12 attempts    9/12 solved    3 days ago          |
@@ -66,6 +71,8 @@ Every page under a section carries the same two rows above its body.
   back.
 - A technique never practised ranks stalest, so the untouched techniques read
   first. Each is a name alone, since every count on such a row is zero.
+- A name here is a link, not a chip. The listing's filters are chips, and a
+  press there toggles rather than opens.
 - A practised technique is a row: the attempts, the share solved and when it
   was last practised.
 - The line under the two groups counts the attempts no row holds: the attempts
@@ -76,22 +83,21 @@ Every page under a section carries the same two rows above its body.
 ## Every problem
 
 ```
-+- /problems?technique=binary-search ------------------------------------+
-| algo-coach   Practice  [ Problems ]  Cards          Sign out           |
++- /problems?technique=binary-search&difficulty=medium ------------------+
+| algo-coach   Practice  [ Problems ]  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
 | Problems                                                               |
-| Every problem the engine has written. A tag narrows the list to the    |
-| technique it names.                                                    |
+| Every problem the engine has written. A level and a tag narrow the     |
+| list, and a problem shows where it matches both.                       |
 |                                                                        |
-| ( dynamic-programming 17 )( depth-first-search 9 )( sliding-window 7 ) |
-| ( backtracking 5 )( hashing 5 )( [binary-search 2] )( greedy 2 ) ...   |
-| Clear the tag                                                          |
+| ( easy 1 )( [medium 1] )( hard 0 )                                     |
 |                                                                        |
-| Carrying a tag you picked  2                                           |
+| ( dynamic-programming 3 )( depth-first-search 2 )( backtracking 1 )    |
+| ( [binary-search 1] )( sorting 1 )( greedy 1 ) ...                     |
+|                                                                        |
+| Matching your filters  1                        Clear all 2 filters    |
 | Combined Frequency Rank   (medium)            never attempted          |
 | binary-search . sorting                                                |
-| Cyclic Sensor Calibration Search (easy)  2 attempts . 0/2 . 9 days ago |
-| binary-search                                                          |
 |                                                                        |
 | [ Previous ]  Page 1 of 3  [ Next ]        with no tag picked          |
 +------------------------------------------------------------------------+
@@ -99,10 +105,16 @@ Every page under a section carries the same two rows above its body.
 
 - The navigation names the listing, and marks Problems on it alone. A picked
   problem is a step down from the board, from a technique or from a card.
-- A tag is a technique the listing holds, with how many problems carry it. The
-  tags are ordered by that count, and a picked tag is marked.
-- A problem is shown where it carries any tag the user picked. A second tag
-  widens the list, so picking two techniques asks for the problems of either.
+- A tag is a technique the listing holds, with how many problems carry it. A
+  picked tag is marked. The levels are the three a problem can carry, in the
+  order a solver reads them.
+- The tags keep the order the whole listing gives, and each count holds a fixed
+  width, so picking a filter moves no row of the page.
+- A problem is shown where it carries any tag the user picked and sits at any
+  level they asked for. Two techniques ask for the problems of either, where a
+  technique and a level ask for the problems of both.
+- Each chip counts what pressing it would leave: the levels count what the tags
+  left, and the tags count what the levels left.
 - The tags picked are in the URL, so a filtered listing is a link the user can
   keep.
 - A row names the problem's techniques under its title, since the counts take
@@ -116,7 +128,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /techniques/binary-search --------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          Sign out           |
+| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
 | < Board                                                                |
 | binary-search                                                          |
@@ -139,7 +151,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /problems/p-7f3a?technique=binary-search -----------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          Sign out           |
+| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
 | < binary-search                                                        |
 | Smallest feasible speed                                                |
@@ -169,7 +181,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /sittings/s-91c2, solving --------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          Sign out           |
+| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
 | Smallest feasible speed              12:04  [ Pause ]  [ End ]         |
 +----------------------------------+-------------------------------------+
@@ -216,7 +228,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /sittings/s-91c2, paused ---------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          Sign out           |
+| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
 | Paused: the clock is stopped         12:04     [ Resume ]              |
 +------------------------------------------------------------------------+
@@ -237,7 +249,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /sittings/s-91c2, at phone width -------------------------------------+
-| algo-coach  [ Practice ] Problems Cards      Sign out                  |
+| algo-coach  [ Practice ] Problems Cards      ☀  ≡                      |
 +------------------------------------------------------------------------+
 | Smallest feasible speed                                                |
 | the statement, as prose                                                |
@@ -303,7 +315,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /cards ---------------------------------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]          Sign out           |
+| algo-coach   Practice  Problems  [ Cards ]          ☀  ≡               |
 +------------------------------------------------------------------------+
 | Cards                                                                  |
 | One card teaches one technique: when to reach for it, and the forms to |
@@ -343,7 +355,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /cards/binary-search -------------------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]          Sign out           |
+| algo-coach   Practice  Problems  [ Cards ]          ☀  ≡               |
 +------------------------------------------------------------------------+
 | < Cards                                                                |
 | Binary search                                                          |
@@ -458,7 +470,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- any path naming no page ----------------------------------------------+
-| algo-coach   Practice  Problems  Cards              Sign out           |
+| algo-coach   Practice  Problems  Cards              ☀  ≡               |
 +------------------------------------------------------------------------+
 | No page here.                                                          |
 |                                                                        |
@@ -495,7 +507,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /cards/binary-search, no run open ------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]          Sign out           |
+| algo-coach   Practice  Problems  [ Cards ]          ☀  ≡               |
 +------------------------------------------------------------------------+
 | < Cards                                                                |
 | Binary search                                                          |
@@ -547,7 +559,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /cards/binary-search, a run open -------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]          Sign out           |
+| algo-coach   Practice  Problems  [ Cards ]          ☀  ≡               |
 +------------------------------------------------------------------------+
 | < Cards                                                                |
 | Binary search                                                          |
@@ -607,7 +619,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /problems/p-8c21?card=binary-search ----------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          Sign out           |
+| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
 | < Binary search                                                        |
 | Split the array                                                        |
@@ -631,7 +643,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- the recall trainer, before a hint ------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]          Sign out           |
+| algo-coach   Practice  Problems  [ Cards ]          ☀  ≡               |
 +------------------------------------------------------------------------+
 | < Binary search                                                        |
 | Recall a form                                                          |
