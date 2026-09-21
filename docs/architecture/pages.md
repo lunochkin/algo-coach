@@ -10,13 +10,29 @@ those steps at low fidelity.
 
 ## Sections
 
-- **The navigation names two sections, Practice and Cards.** Practice holds the
-  board, a technique's candidates, a picked problem and the sitting. Cards holds
-  the card list, one card, and the recall trainer Phase 11 adds. Two sections
-  cover every page the roadmap plans, so no later page needs a third menu entry.
+- **The navigation names three sections: Practice, Problems and Cards.**
+  Practice holds the board, a technique's candidates, a picked problem and the
+  sitting. Problems holds the listing of every problem. Cards holds the card
+  list, one card, and the recall trainer Phase 11 adds.
+- **Problems is marked on the listing alone.** A picked problem is a step down
+  from the board, from a technique or from a card, so Practice stays marked on
+  it and the way back names where the pick came from.
 - **A signed-in user lands on the board.** Every sitting starts from a technique
   the user picks there, and Phase 15 serves the scheduler's pick on the same
   page.
+- **The listing filters by the techniques a problem carries**, and the tags it
+  offers are the techniques the listing itself holds. A problem is shown where
+  it carries any tag the user picked, so a second tag widens the list rather
+  than narrowing it to the problems carrying both.
+- **The tags picked and the page are in the URL**, so a filtered listing is a
+  link the user can keep. The two are the page's whole state.
+- **The listing is read in pages of twenty rows.** Fifty problems already scroll
+  past several screens, and a reader picking one compares a handful at a time.
+- **Picking a tag returns the listing to its first page.** The page the reader
+  was on may hold nothing once the list is narrowed.
+- **The whole listing is fetched, and a page is a slice of it.** The tags count
+  every problem the corpus carries, so a page of rows cannot produce them. The
+  API pages the rows instead once the corpus outgrows one request.
 - **A section is marked while the user is on a page under it.** A technique and
   a picked problem are steps down from the board, so the board's own section
   stays marked on both.
@@ -36,6 +52,7 @@ those steps at low fidelity.
 | URL | The user | Section |
 |---|---|---|
 | `/` | picks a technique | Practice |
+| `/problems` | picks a problem across every technique | Practice |
 | `/techniques/:technique` | picks a problem | Practice |
 | `/problems/:problem_id` | reads the pick and starts the sitting | Practice |
 | `/sittings/:sitting_id` | solves, submits, claims | Practice |
@@ -55,9 +72,11 @@ those steps at low fidelity.
 - **A query parameter names where the user came from.** The picked problem is
   `/problems/:problem_id` whichever page offered it, since Phase 11 opens the
   same problem as a rung of a card's ladder. `?technique=` names the technique
-  the pick came from and `?card=` names the card. The sitting carries both on:
-  the way back returns where the pick came from, and the claim answers for the
-  card's own technique where a card offered the problem.
+  the pick came from, `?card=` names the card, and `?from=problems` names the
+  listing, which holds no record of its own to name. The sitting carries the
+  technique and the card on: the way back returns where the pick came from, and
+  the claim answers for the card's own technique where a card offered the
+  problem.
 - **A page loads the record its path names.** The picked problem is read as its
   own record rather than found in the technique's candidates, since a page
   reached from two places would otherwise load a different list at each of
