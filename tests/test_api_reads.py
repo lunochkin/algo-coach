@@ -146,6 +146,44 @@ def test_the_candidates_count_the_user_s_own_attempts_alone(client, database):
     assert [row["attempt_count"] for row in rows] == [1]
 
 
+def test_every_problem_is_listed_with_the_techniques_it_carries(client):
+    """The page filters by tag, so a listed problem names its techniques."""
+    rows = client.get("/api/problems").json()
+
+    assert [(row["problem_id"], row["techniques"]) for row in rows] == [
+        ("p-greedy", ["greedy", "sorting"]),
+        ("p-sorting", ["sorting"]),
+    ]
+    assert "statement" not in str(rows)
+
+
+def test_a_retired_problem_is_not_listed(client, database):
+    ProblemStore(database).retire("p-greedy", RetirementReason.DEFECTIVE)
+
+    rows = client.get("/api/problems").json()
+
+    assert [row["problem_id"] for row in rows] == ["p-sorting"]
+
+
+def test_the_listing_counts_the_user_s_own_attempts_alone(client, database):
+    attempted(database, "a1")
+    attempted(database, "a2", user_id="u-b71e03")
+
+    rows = {row["problem_id"]: row["attempt_count"] for row in client.get("/api/problems").json()}
+
+    assert rows == {"p-greedy": 1, "p-sorting": 0}
+
+
+def test_the_listing_offers_the_stalest_problem_first(client, database):
+    """One ordering serves both listings: a technique's candidates are a
+    filter over every problem."""
+    attempted(database, "a1", problem_id="p-greedy")
+
+    rows = client.get("/api/problems").json()
+
+    assert [row["problem_id"] for row in rows] == ["p-sorting", "p-greedy"]
+
+
 def test_a_picked_problem_is_read_by_its_id_alone(client):
     """A rung of a card's ladder reaches the same problem, so no technique
     names the path."""

@@ -12,6 +12,7 @@ from algo_coach.attempt_claims import standing_attempt_claims
 from algo_coach.board import (
     TechniqueRow,
     candidates,
+    every,
     excluded,
     per_technique,
     problem_row,
@@ -61,6 +62,19 @@ class Candidate(BaseModel):
     problem_id: str
     title: str
     difficulty: ProblemDifficulty | None
+    attempt_count: int
+    solved_count: int
+    last_attempt_at: datetime | None
+
+
+class Listed(BaseModel):
+    """One problem on the listing of every served problem. It carries the
+    problem's techniques, which the page filters by, and no statement."""
+
+    problem_id: str
+    title: str
+    difficulty: ProblemDifficulty | None
+    techniques: list[str]
     attempt_count: int
     solved_count: int
     last_attempt_at: datetime | None
@@ -246,6 +260,25 @@ def offered(root: Root, user_id: UserId, technique: str) -> list[Candidate]:
             problem_id=row.problem.id,
             title=row.problem.title,
             difficulty=row.problem.difficulty,
+            attempt_count=row.attempt_count,
+            solved_count=row.solved_count,
+            last_attempt_at=row.last_attempt_at,
+        )
+        for row in rows
+    ]
+
+
+# every served problem at once, where the candidates are one technique's. The
+# page filters by the techniques a problem carries, so the route sends them
+@router.get("/problems")
+def every_problem(root: Root, user_id: UserId) -> list[Listed]:
+    rows = every(load_problems(root), AttemptLog(root).attempts(user_id))
+    return [
+        Listed(
+            problem_id=row.problem.id,
+            title=row.problem.title,
+            difficulty=row.problem.difficulty,
+            techniques=row.problem.techniques,
             attempt_count=row.attempt_count,
             solved_count=row.solved_count,
             last_attempt_at=row.last_attempt_at,

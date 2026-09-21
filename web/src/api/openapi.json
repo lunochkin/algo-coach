@@ -265,6 +265,28 @@
         }
       }
     },
+    "/api/problems": {
+      "get": {
+        "summary": "Every Problem",
+        "operationId": "every_problem_api_problems_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Listed"
+                  },
+                  "type": "array",
+                  "title": "Response Every Problem Api Problems Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/problems/{problem_id}": {
       "get": {
         "summary": "Picked",
@@ -1511,6 +1533,67 @@
         ],
         "title": "Label",
         "description": "The one mode the solver picked. A skipped label sends no request."
+      },
+      "Listed": {
+        "properties": {
+          "problem_id": {
+            "type": "string",
+            "title": "Problem Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProblemDifficulty"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "techniques": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Techniques"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "title": "Attempt Count"
+          },
+          "solved_count": {
+            "type": "integer",
+            "title": "Solved Count"
+          },
+          "last_attempt_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Attempt At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem_id",
+          "title",
+          "difficulty",
+          "techniques",
+          "attempt_count",
+          "solved_count",
+          "last_attempt_at"
+        ],
+        "title": "Listed",
+        "description": "One problem on the listing of every served problem. It carries the\nproblem's techniques, which the page filters by, and no statement."
       },
       "Offered": {
         "properties": {

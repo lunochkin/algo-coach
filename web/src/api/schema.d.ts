@@ -123,6 +123,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/problems": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every Problem */
+        get: operations["every_problem_api_problems_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/problems/{problem_id}": {
         parameters: {
             query?: never;
@@ -630,6 +647,26 @@ export interface components {
          */
         Label: {
             mode: components["schemas"]["FailureMode"];
+        };
+        /**
+         * Listed
+         * @description One problem on the listing of every served problem. It carries the
+         *     problem's techniques, which the page filters by, and no statement.
+         */
+        Listed: {
+            /** Problem Id */
+            problem_id: string;
+            /** Title */
+            title: string;
+            difficulty: components["schemas"]["ProblemDifficulty"] | null;
+            /** Techniques */
+            techniques: string[];
+            /** Attempt Count */
+            attempt_count: number;
+            /** Solved Count */
+            solved_count: number;
+            /** Last Attempt At */
+            last_attempt_at: string | null;
         };
         /**
          * Offered
@@ -1257,6 +1294,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    every_problem_api_problems_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Listed"][];
                 };
             };
         };

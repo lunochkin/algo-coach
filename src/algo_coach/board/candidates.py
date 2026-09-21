@@ -19,25 +19,25 @@ class ProblemRow(BaseModel):
     last_attempt_at: datetime | None = None
 
 
-def candidates(
-    technique: str, problems: Iterable[Problem], attempts: Iterable[Attempt]
-) -> list[ProblemRow]:
-    """What could be drilled for a technique, least recently attempted first.
-
-    Membership is a served problem's own techniques, never the claims on its
-    attempts. Problem id breaks a remaining tie, so two renders of one log
-    offer the same order.
-    """
+# problem id breaks a remaining tie, so two renders of one log offer the same
+# order
+def every(problems: Iterable[Problem], attempts: Iterable[Attempt]) -> list[ProblemRow]:
+    """Every served problem, least recently attempted first."""
     by_problem: dict[str, list[Attempt]] = defaultdict(list)
     for attempt in attempts:
         by_problem[attempt.problem_id].append(attempt)
 
-    rows = [
-        problem_row(problem, by_problem[problem.id])
-        for problem in problems
-        if problem.served and technique in problem.techniques
-    ]
+    rows = [problem_row(problem, by_problem[problem.id]) for problem in problems if problem.served]
     return sorted(rows, key=_staleness)
+
+
+# membership is a served problem's own techniques, never the claims on its
+# attempts
+def candidates(
+    technique: str, problems: Iterable[Problem], attempts: Iterable[Attempt]
+) -> list[ProblemRow]:
+    """What could be drilled for a technique, in the order `every` gives."""
+    return [row for row in every(problems, attempts) if technique in row.problem.techniques]
 
 
 def problem_row(problem: Problem, attempts: Iterable[Attempt]) -> ProblemRow:
