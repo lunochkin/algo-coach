@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router'
 
-import { api, LOGIN } from '@/api/client'
+import { AccountMenu } from '@/components/AccountMenu'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -22,12 +22,6 @@ const SECTIONS = [
   { label: 'Problems', to: '/problems', owns: (path: string) => path === '/problems' },
   { label: 'Cards', to: '/cards', owns: (path: string) => path.startsWith('/cards') },
 ]
-
-// revoked on the server, not only dropped from the browser, then to the login
-async function signOut() {
-  await api.DELETE('/api/session')
-  window.location.assign(LOGIN)
-}
 
 export function NavMenu({ wide }: { wide: boolean }) {
   const { pathname } = useLocation()
@@ -56,9 +50,7 @@ export function NavMenu({ wide }: { wide: boolean }) {
         })}
         <div className="ml-auto flex items-center gap-1">
           <ThemeToggle />
-          <Button variant="ghost" size="sm" onClick={signOut}>
-            Sign out
-          </Button>
+          <AccountMenu />
         </div>
       </nav>
     </header>
