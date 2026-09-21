@@ -205,14 +205,23 @@ summary {
     font-weight: 600;
 }
 
-/* a heading inside a card's brief is a heading like any other: the page's own
-   role, never a second scale that competes with the page title */
-.prose :is(h2, h3, h4) {
-    font-size: var(--text-heading);
-    line-height: var(--text-heading--line-height);
-    font-weight: 500;
+/* a heading inside authored prose sits a step under the page's own section
+   headings, which read at the heading role: a brief whose parts read at that
+   role makes the page one flat list of headings */
+.prose :is(h2) {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: 600;
     margin-top: var(--spacing-section);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.prose :is(h3, h4) {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: 500;
+    margin-top: var(--spacing-stack);
+    margin-bottom: 0.25rem;
 }
 
 .prose :is(p, ul, ol, blockquote, pre, table) {
