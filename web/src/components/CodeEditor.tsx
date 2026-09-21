@@ -64,14 +64,15 @@ export function CodeEditor({ initial, onChange, onSubmit }: Props) {
               color: 'var(--color-foreground)',
             },
             '.cm-scroller': { fontFamily: 'var(--font-mono)' },
-            // the editor insets as the page does, and the first line's
-            // highlight then stops short of the border rather than running
-            // into its rounded corner. The gutter takes no padding of its
-            // own: CodeMirror offsets the first gutter element by the
-            // content's, and a second one would drop every number below its
-            // line
-            '.cm-content': { padding: '0.5rem 0' },
-            '.cm-line': { padding: '0 1rem' },
+            // one inset for the whole box, the 0.75rem a code block on any
+            // page takes. The first line's highlight then stops short of the
+            // border rather than running into its rounded corner, and the
+            // code sits as far from its numbers as the numbers sit from the
+            // edge. The gutter takes no padding of its own: CodeMirror
+            // offsets the first gutter element by the content's, and a second
+            // one would drop every number below its line
+            '.cm-content': { padding: '0.75rem 0' },
+            '.cm-line': { padding: '0 0.75rem' },
             '.cm-gutters': {
               backgroundColor: 'var(--color-muted)',
               color: 'var(--color-muted-foreground)',
