@@ -83,7 +83,53 @@ what use surfaces rather than how much use happened.
 - [ ] Every item this phase opened is ticked, and a stretch of sittings opened
       no new one
 
-## Phase 14 — the matcher, measured
+## Phase 14 — recognition, scheduling and mastery
+
+- [ ] Write into `docs/architecture/` what a technique's mastery is derived
+      from: the attempts, their claims, their verdicts and the drills, with
+      recognition kept apart from execution. Mastery is never stored, so the
+      derivation is the whole model
+- [ ] Re-claim thirty attempts with the earlier machine claims hidden, to
+      measure the user's own consistency, which caps every classifier score.
+      Mastery reads claims, and a wrong claim spends practice time
+
+### The recognition drill
+
+Spotting a form and writing it are different skills, and the first is the one
+that goes quiet. A drill that runs no code fits a spare minute, and it fills
+the log faster than sittings can.
+
+- [ ] Serve a problem without naming its technique, with the choices drawn
+      from the techniques the matcher rejected for it. A distractor nothing
+      rejected is a second right answer
+- [ ] Store a drill as an attempt of its own mode, so the state can read
+      recognition apart from execution
+- [ ] Show the drill on the phone's width first. A drill that needs a desk is
+      a sitting with fewer steps
+
+### The schedule
+
+The board orders by staleness and the user picks. Sitting daily makes that pick
+itself the work, so the board serves one, read from FSRS and the mastery state.
+
+- [ ] Write the pick's rule into `flows.md`: what it reads from FSRS and from
+      mastery, what breaks a tie, and what the board offers beside the pick.
+      `flows.md` has selection never schedule today
+- [ ] Time reviews with FSRS, whose unit is the technique and the mode. A
+      schedule over problems says when to redo one; a schedule over techniques
+      says when a form is about to go
+- [ ] Write down the FSRS parameters the schedule starts from and why each was
+      chosen. A number nobody wrote down is guessed again at every change
+- [ ] Serve one pick on the board, naming a technique and a problem, with every
+      technique still on offer beside it
+- [ ] Record what was predicted before each attempt, from FSRS alone and from
+      the mastery state. A prediction written after the outcome is fitted to it
+
+### Exit
+- [ ] Start a sitting from the scheduler's pick on the board, and complete it
+      to the claim, with a drill feeding the same state
+
+## Phase 15 — the matcher, measured
 
 The matcher says which templates a generated solution displays, and every
 ladder is built from those matches. No number says how often the matcher is
@@ -140,26 +186,50 @@ the audit. Generation goes on without the score.
       score does. A score read at a configuration nobody recorded compares with
       nothing
 
-### Exit
-- [ ] The matcher carries a per-template score in both directions
+### The corpus gate, on the same pass
 
-## Phase 15 — mastery and scheduling
+A generated statement can name its own form, or be a public problem the model
+returned. Both are read off the sample the hand pass already covers.
 
-- [ ] Write into `docs/architecture/` what a technique's mastery is derived
-      from: the attempts, their claims and their verdicts. Mastery is never
-      stored, so the derivation is the whole model
-- [ ] Write into `flows.md` how the scheduler picks the next sitting from
-      mastery, and what the board offers beside the pick. The user picks every
-      technique and problem today
-- [ ] Serve the scheduler's pick on the board, with every technique still on
-      offer beside it
-- [ ] Re-claim thirty attempts with the earlier machine claims hidden, to
-      measure the user's own consistency, which caps every classifier score.
-      Mastery reads claims, and a wrong claim spends practice time
+- [ ] Judge the same sample for whether the statement names its own form, and
+      whether it is a public problem the model returned. The reader is already
+      reading it, and a second pass pays twice for one reading
+- [ ] Report both shares against the rate over `data/old/`, with the
+      denominator the pass covered
 
 ### Exit
-- [ ] Start a sitting from the scheduler's pick on the board, and complete it
-      to the claim
+- [ ] The matcher carries a per-template score in both directions, and the
+      gate carries a share with the denominator the pass covered
+
+## Phase 16 — the diagnosis, measured
+
+The machine counterpart of the self-label, and how much the program-analysis
+tools add to it. The mutants make the eval set: a mutant carries its mistake by
+construction, so a labelled failure exists for every one without waiting for
+the log to fill.
+
+- [ ] Narrow the diagnosis call, the model call that writes a `Diagnosis`, to
+      what the record supports: a mechanical slip against a conceptual miss. A
+      four-way verdict would ask the call for what the call cannot see
+- [ ] Write the verdict as a `Diagnosis` carrying its provenance whole. A
+      diagnosis never supersedes a self-label, because the eval scores the
+      diagnosis against the self-label
+- [ ] Build the eval set from the stored mutants, each one labelled by the
+      mistake it was written to make
+- [ ] Score the diagnosis call per failure mode, with no overall share,
+      against the self-labels the loop produced and the mutants' own labels. A
+      call that only ever says `gap` would score well on a corpus of gaps
+- [ ] Give the call a structural diff against the nearest passing solution,
+      and score again. The difference is what the tool bought
+- [ ] Give it the first case where execution diverges, and score again
+- [ ] Give it how the running time grows, and score again. The runner already
+      times each case and minimises a separating input
+- [ ] Report the score per tool, not only the best one. A stack of tools with
+      one carrying all of it is a simpler product
+
+### Exit
+- [ ] The call carries a per-mode score, and each tool carries the difference
+      it made
 
 ## Further developments
 
@@ -168,26 +238,19 @@ a block that became ready. A block, or a single item of one, is planned into a
 phase once it is clear enough to plan. An item's trigger, where it names one, is
 the event that makes the item ready.
 
-### The diagnosis
+### Scheduling on the diagnosed cause
 
-The machine counterpart of the self-label, which Phase 12 writes. The eval
-scores one against the other, so a body of self-labels has to exist first.
+Waits on the scores Phase 16 produces: a cause nothing measured is a guess the
+board would act on.
 
-- [ ] Narrow the diagnosis call, the model call that writes a `Diagnosis`, to
-      what the record supports: a mechanical slip against a conceptual miss. A
-      four-way verdict would ask the call for what the call cannot see
-- [ ] Write the verdict as a `Diagnosis` carrying its provenance whole. A
-      diagnosis never supersedes a self-label, because the eval scores the
-      diagnosis against the self-label
-- [ ] Score the diagnosis call per failure mode, with no overall share, against
-      self-labels the loop produced. A call that only ever says `gap` would
-      score well on a corpus of gaps
+- [ ] Have the pick read the diagnosed cause beside mastery, once the call
+      carries a per-mode score
 
 ### Alternative solutions
 
 Every other way to solve a stored problem, by the flow in `flows.md`,
 "Enumerating a problem's other solutions". The schema and the match's subject
-are in place already, and nothing before this phase writes a second canonical.
+are in place already, and nothing yet writes a second canonical.
 
 Enumeration buys a rung covering two forms at once, a scale case cross-checked
 between two efficient solutions, and a problem's techniques widening past the
@@ -266,6 +329,94 @@ one form its target named.
 - [ ] Settle the full shape of a verification's environment, which the `runner`
       string stands in for. The machine decides a timeout as much as the cap
       does. Triggered when two runs under one backend disagree
+
+### Repair as diagnosis
+
+- [ ] Write the repair search: a failing attempt and the problem's canonicals
+      in, the smallest edit on the parsed tree passing every case out. The
+      search returns no edit when none is found within a stated budget.
+      Triggered when Phase 16 scores its first tool
+- [ ] Measure the repair by what it adds to the diagnosis call, the same way
+      Phase 16 measures each tool. A tool nobody measured is a guess the call
+      acts on
+
+### Technique detection by static analysis
+
+- [ ] Write rules per core template that say from the parsed tree whether a
+      solution displays the template's form. Triggered when Phase 15 names
+      templates the matcher reads badly
+- [ ] Compare the rules with the matcher per template on the hand pass, and
+      send each pair where the two disagree to adjudication
+
+### Misconception discovery
+
+- [ ] Mine the log for failed attempts that no failure mode and no known
+      mutant explains, grouped by the edit that repairs them. Triggered when
+      the log holds enough failed attempts per technique to group
+- [ ] Write each proposed mistake as a mutant of the canonical. Keep the
+      proposal only where a case kills the proposal's mutant and no known
+      mutant fails the same cases
+
+### Soundness-checked synthesis
+
+- [ ] Search for an input killing each survivor after the fuzz pass, with a
+      solver over the input's constraints or a coverage-guided search.
+      Triggered when survivors remain after the fuzz pass on a core template
+- [ ] Compare each remaining survivor with the canonical on every input up to
+      a bound, and label the survivor equivalent when no input separates the
+      two. An unlabelled survivor leaves the case set's assurance unstated
+- [ ] Write the guarantee a landed case set carries into `corpus.md`: the
+      mutants the case set kills, and the bound up to which the rest are
+      equivalent
+
+### Judging concurrent code
+
+- [ ] Choose how a concurrent submission is judged, by repeated runs under the
+      race detector, by a scheduler exploring thread interleavings, or by
+      both. Write the choice into `corpus.md`. Triggered when problems about
+      concurrent code are planned
+
+### Knowledge tracing
+
+- [ ] Fit a knowledge-tracing model to the log, and score the model on the
+      predictions each pick records against FSRS alone and the mastery state.
+      Triggered when Phase 14 has recorded predictions for a few hundred picks
+
+### Forgetting per technique
+
+- [ ] Fit the decay of the chance of passing per technique and mode, and
+      compare the decay with FSRS's forgetting curve. Triggered by the same
+      count of recorded picks
+
+### Difficulty calibrated from attempts
+
+- [ ] Estimate each problem's difficulty with item response theory from pass
+      and fail records, and store the estimate with its provenance. Triggered
+      when problems carry attempts from more than one user
+- [ ] Aim generation at a stated difficulty, and score each landing by the gap
+      between the stated and the estimated difficulty. Triggered when
+      difficulty estimates exist
+
+### Retrieval
+
+- [ ] Write the high-level design of retrieval: what is indexed from the
+      corpus and the user's own attempts, and which page or call reads what is
+      retrieved. Triggered when a flow needs a similar problem that the
+      technique alone cannot select
+
+### MCP and autonomy
+
+- [ ] Expose the corpus and the engine's commands as an MCP server.
+      Triggered when an agent outside the engine needs to read the corpus
+- [ ] Run the practice loop as a scheduled agent over the MCP server, serving
+      the scheduler's pick. Triggered when Phase 14's pick is served on the
+      board
+
+### Design simulation
+
+- [ ] Write the high-level design of the simulator: the component kinds, the
+      load and failure scenarios, and the numbers a run reports. Triggered when
+      system design is planned as a track
 
 ### Transport
 

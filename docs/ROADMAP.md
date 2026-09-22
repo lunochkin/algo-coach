@@ -359,7 +359,37 @@ that does not exist. `docs/TODO.md` carries those items as they are found.
 - Exit: every item this phase opened is ticked, and a stretch of sittings
   opened no new one.
 
-## Phase 14 — The matcher, measured
+## Phase 14 — Recognition, scheduling and mastery
+
+Per-technique skill state derived from the log, a scheduler that says what is
+due, and a second mode that exercises recognition on its own.
+
+Ordered ahead of the matcher on 2026-09-22. What this phase is worth is read
+from attempts made after it ships, so a week earlier is a week more log to
+read it on. The matcher's score waits on work alone and loses nothing by
+following.
+
+- **The recognition drill**: a problem served without its technique named, and
+  a technique picked from the ones the matcher already rejected for it. No
+  code runs, so a drill fits a spare minute, and it produces attempts far
+  faster than sittings do.
+- **Reviews timed with FSRS**, whose unit is the technique and the mode, never
+  the problem. A schedule over problems says when to redo a puzzle; a schedule
+  over techniques says when a form is about to go.
+- **Mastery per technique**, derived from attempts, their claims, their
+  verdicts and the drills, and never stored. Recognition and execution stay
+  apart in the state and on the board: a form the user spots and cannot write
+  is a different remedy from one they cannot spot.
+- One pick served on the board, a technique and a problem, made from that
+  state. The board still offers every technique beside the pick.
+- **Every pick records what it predicted before the attempt**, from FSRS alone
+  and from the mastery state, so the two can be compared on what actually
+  happened. A prediction reconstructed later is fitted to the outcome it is
+  scored against.
+- Exit: a sitting started from the scheduler's pick on the board, and
+  completed to the claim, with the drill feeding the same state.
+
+## Phase 15 — The matcher, measured
 
 How often the matcher is right, measured.
 
@@ -370,19 +400,32 @@ How often the matcher is right, measured.
 - The matcher scored per pair and grouped per template, positive verdicts in
   both directions.
 - A configuration pinned before any number is quoted.
-- Exit: the matcher carries a per-template score in both directions.
+- **The corpus gate rides the same pass**: whether a statement gives its form
+  away, and whether it is a public problem the model returned, judged on the
+  sample already being read and against the rate over `data/old/`. A second
+  hand pass would pay twice for one reading.
+- Exit: the matcher carries a per-template score in both directions, and the
+  gate carries a share with the denominator the pass covered.
 
-## Phase 15 — Mastery and scheduling
+## Phase 16 — The diagnosis, measured
 
-Per-technique skill state derived from the log, and a scheduler that picks what
-the user practises next.
+The machine counterpart of the self-label, and how much the program-analysis
+tools add to it.
 
-- Mastery per technique, derived from attempts, their claims and their
-  verdicts, and never stored.
-- A scheduler picking the next sitting from that state. The board still offers
-  every technique beside the pick.
-- Exit: a sitting started from the scheduler's pick on the board, and
-  completed to the claim.
+- The diagnosis call narrowed to what the record supports, written as a
+  `Diagnosis` carrying its provenance whole.
+- **The mutants become the eval set.** A mutant carries its mistake by
+  construction, so a labelled failure exists for every one of them without
+  waiting for the log to fill. The self-labels score the call on real
+  attempts; the mutants score it on many.
+- **Each tool measured by what it adds**: the call alone, then with a
+  structural diff against the nearest passing solution, then the first case
+  where execution diverges, then how the running time grows. The runner
+  already times each case and minimises a separating input.
+- Scored per failure mode, with no overall share. A call that only ever says
+  `gap` scores well on a corpus of gaps.
+- Exit: the call carries a per-mode score, and each tool carries the
+  difference it made.
 
 ## Further developments
 
@@ -390,20 +433,42 @@ Blocks of work not ready for a phase, unnumbered and unordered. A block becomes
 a planned phase once it is clear enough to plan, and `docs/TODO.md` holds the
 items of each block, the smaller ones included.
 
-- **The diagnosis.** The machine counterpart of the self-label: a call narrowed
-  to what the record supports, scored per failure mode against the labels the
-  loop produced, and a scheduler that targets the cause it names.
+- **Scheduling on the diagnosed cause.** What Phase 16 names, fed back into
+  what the board picks next. It waits on the scores that phase produces.
 - **Alternative solutions.** Every other way to solve a stored problem,
   enumerated over the corpus, each approach its own canonical judged by the
   problem's cases.
-- **The corpus gated.** Whether a generated statement gives its form away,
-  measured against the rate over `data/old/`, the corpus no generator wrote.
-- **Program-analysis-grounded diagnosis.** A diagnosis grounded in AST diffs
-  against the canonicals, execution traces and measured complexity.
+- **Misconception discovery.** Recurring mistakes mined from attempts, each
+  proposal written as broken code and kept only where the cases tell it apart
+  from every mutant already known.
+- **Repair as diagnosis.** The smallest edit on the parsed tree that makes a
+  failing attempt pass every case, searched against the problem's canonicals.
+  The edit's location and kind name the mistake, and Phase 16 can score the
+  repair as one more tool.
+- **Technique detection by static analysis.** Rules per template that read a
+  solution's form from its parsed tree, run beside the matcher. A pair where
+  the rules and the matcher disagree goes to adjudication.
 - **Retrieval.** Similar problems, patterns and briefs retrieved from the corpus
   and the user's own attempts.
 - **MCP and autonomy.** The corpus and tools exposed as an MCP server, and a
   scheduled agent running the practice loop.
-- **Multi-agent**, only once a real pipeline needs one.
-- **Soundness-checked synthesis.** Generation upgraded with formal constraint
-  specs, property-based cases and adversarial validation.
+- **Soundness-checked synthesis.** After the fuzz pass, a solver or a coverage-guided search looks for an input killing each
+  survivor. A survivor no search kills is compared with the canonical on every
+  input up to a bound. A landed case set then carries a stated guarantee: the
+  mutants it kills, and the bound up to which the rest are equivalent.
+- **Judging concurrent code.** A concurrent submission run under many thread
+  schedules, explored systematically, with the race detector on. One passing
+  run of concurrent code says nothing about the next run.
+- **Knowledge tracing.** A model that estimates from attempts the probability
+  that a user holds a technique, fitted to the log. The model is scored on the
+  predictions Phase 14 records, against FSRS alone and the mastery state.
+- **Forgetting per technique.** The decay of the chance of passing with time
+  since the last pass, fitted per technique and mode from the log. A form that
+  decays differently from a recalled fact needs different review intervals.
+- **Difficulty calibrated from attempts.** Item response theory estimates each
+  problem's difficulty and each user's ability together from pass and fail
+  records. Generation then aims at a stated difficulty, and each landing is
+  scored by how far the estimate falls from the stated one.
+- **Design simulation.** A system design assembled from components and run as a
+  discrete-event simulation under a stated load and failure scenario. The run
+  reports latency, error rate and cost, so a design is checked by running it.

@@ -77,7 +77,7 @@ Every page under a section carries the same two rows above its body.
   was last practised.
 - The line under the two groups counts the attempts no row holds: the attempts
   no technique resolved, and the attempts on a retired problem.
-- Phase 15 serves the scheduler's pick above both groups, and every technique
+- Phase 14 serves the scheduler's pick above both groups, and every technique
   stays on offer below it.
 
 ## Every problem
