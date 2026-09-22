@@ -452,10 +452,11 @@ items of each block, the smaller ones included.
   and the user's own attempts.
 - **MCP and autonomy.** The corpus and tools exposed as an MCP server, and a
   scheduled agent running the practice loop.
-- **Soundness-checked synthesis.** After the fuzz pass, a solver or a coverage-guided search looks for an input killing each
-  survivor. A survivor no search kills is compared with the canonical on every
-  input up to a bound. A landed case set then carries a stated guarantee: the
-  mutants it kills, and the bound up to which the rest are equivalent.
+- **Soundness-checked synthesis.** After the fuzz pass, a solver or a
+  coverage-guided search looks for an input killing each survivor. A survivor
+  no search kills is compared with the canonical on every input up to a bound.
+  A landed case set then carries a stated guarantee: the mutants it kills, and
+  the bound up to which the rest are equivalent.
 - **Judging concurrent code.** A concurrent submission run under many thread
   schedules, explored systematically, with the race detector on. One passing
   run of concurrent code says nothing about the next run.
