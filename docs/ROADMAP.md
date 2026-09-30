@@ -370,9 +370,19 @@ read it on. The matcher's score waits on work alone and loses nothing by
 following.
 
 - **The recognition drill**: a problem served without its technique named, and
-  a technique picked from the ones the matcher already rejected for it. No
-  code runs, so a drill fits a spare minute, and it produces attempts far
-  faster than sittings do.
+  the approach framed in words — the algorithm, why it is correct (the
+  invariant or recurrence) and its runtime. Naming the technique is part of
+  the answer, not all of it. No code runs, so a drill fits a spare minute,
+  and it produces attempts far faster than sittings do.
+- **A judge grades the framing** against the problem's canonical solutions,
+  on that three-part rubric. It is scored against a small hand-labelled set
+  before its verdicts feed mastery; a judge that credits a vague answer
+  inflates recognition exactly where the state must be honest.
+- **The drill trains a part of the skill, never the whole.** The scheduler
+  interleaves drills with full sittings; a technique is not mastered on
+  drills alone.
+- Text first. A spoken answer is transcription in front of the same judge,
+  and follows once the judge's score holds.
 - **Reviews timed with FSRS**, whose unit is the technique and the mode, never
   the problem. A schedule over problems says when to redo a puzzle; a schedule
   over techniques says when a form is about to go.
