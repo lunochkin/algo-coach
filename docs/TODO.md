@@ -108,7 +108,7 @@ choice.
       timing, not the practice
 - [x] End a sitting at its solving submission. A user who solved and left had
       a sitting nobody closed
-- [ ] Count a sitting with no submission for nothing, and an untimed one by its
+- [x] Count a sitting with no submission for nothing, and an untimed one by its
       verdict alone, wherever the board and the candidates read sittings
 
 ### The statements

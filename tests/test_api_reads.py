@@ -50,6 +50,34 @@ def test_the_board_counts_the_user_s_own_attempts_alone(client, database):
     assert {row["technique"]: row["attempt_count"] for row in rows} == {"greedy": 0, "sorting": 0}
 
 
+def test_a_sitting_with_no_submission_counts_for_nothing(client):
+    """Opening a problem serves it, so a sitting nobody submitted to records
+    that the user looked, not that they tried."""
+    client.post("/api/problems/p-sorting/sittings")
+
+    rows = client.get("/api/board").json()["rows"]
+    candidates = client.get("/api/techniques/sorting/candidates").json()
+
+    assert {row["technique"]: row["attempt_count"] for row in rows} == {"greedy": 0, "sorting": 0}
+    assert {row["problem_id"]: row["attempt_count"] for row in candidates} == {
+        "p-greedy": 0,
+        "p-sorting": 0,
+    }
+
+
+def test_an_untimed_attempt_counts_by_its_verdict(client, database):
+    """A clock nobody started says nothing about speed, and the solve still
+    counts."""
+    attempted(database, "a1", problem_id="p-sorting")
+    assert AttemptLog(database).attempts(USER)[0].time_to_solve_sec is None
+
+    (row,) = [
+        one for one in client.get("/api/board").json()["rows"] if one["technique"] == "sorting"
+    ]
+
+    assert (row["attempt_count"], row["solved_count"]) == (1, 1)
+
+
 def a_card(slug: str, technique: str, *, templates=None) -> Card:
     return Card(
         id=f"minted-{slug}",
@@ -158,8 +186,8 @@ def test_an_unknown_card_is_not_found(client):
 
 
 def test_a_candidate_carries_no_statement(client):
-    """The clock starts when the statement is served, so a statement in the
-    list would be read untimed."""
+    """Opening the problem serves the statement, so the list stays a list of
+    picks."""
     rows = client.get("/api/techniques/sorting/candidates").json()
 
     assert [row["problem_id"] for row in rows] == ["p-greedy", "p-sorting"]
