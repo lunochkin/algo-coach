@@ -111,6 +111,24 @@ choice.
 - [x] Count a sitting with no submission for nothing, and an untimed one by its
       verdict alone, wherever the board and the candidates read sittings
 
+### The editor's carried code
+
+The editor opened every sitting on the signature, so reopening a half-solved
+problem lost the work. `flows.md` now gives what the editor carries.
+
+- [ ] Key the browser's unsent code by problem with the moment it was typed,
+      rather than by sitting. A new sitting on the problem cannot find a draft
+      keyed to the sitting before it
+- [ ] Serve the last attempt's code and time when it did not solve and, where
+      the problem is opened from a card with a run open, was written after the
+      run began, and open the editor on the newer of it and the draft. A solve
+      and code from before a run are never carried
+- [ ] Offer a press restoring the last solve where the editor did not carry it,
+      and add `restored` to the attempt it then submits. A solve typed over a
+      restored one is not an independent solve
+- [ ] Count a restored attempt as no solve in mastery, wherever the board and
+      the ladder read `solved`
+
 ### The statements
 
 - [x] Have the generator bound every input in a `### Constraints` section, one

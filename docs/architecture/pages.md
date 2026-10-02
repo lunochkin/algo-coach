@@ -120,9 +120,10 @@ those steps at low fidelity.
   level, the techniques, the counts the user reached on the problem, and the
   cards. Those facts sit in one line above the statement, and the statement
   is the page's body.
-- **A sitting's unsent code, the clock preference and the chosen colour scheme
-  are the state the browser keeps.** The code is stored under the sitting's
-  id, so a reload during a sitting restores what the user typed. The clock
+- **A problem's unsent code, the clock preference and the chosen colour scheme
+  are the state the browser keeps.** The code is stored under the problem's id
+  with the moment it was typed, so a reload restores what the user typed, and
+  the next sitting on the problem can carry it as `flows.md` gives. The clock
   preference and the scheme are about how the user practises at this machine,
   and a store holding them would carry them between machines nobody asked it
   to join. Every other reading is fetched from the API at each load.

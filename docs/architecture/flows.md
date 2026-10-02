@@ -494,6 +494,22 @@ The page layout is not designed here, and using the loop decides it.
   library or from the code already typed. A solver offered `bisect_left` after
   three characters has recalled no form, and the sitting exists to measure
   recalling the form. The recall trainer Phase 11 adds holds the same rule.
+- **The editor opens on the user's latest code for the problem, where that code
+  is work in progress.** The latest code is the newer of the unsent draft the
+  browser holds and the code of the last attempt the engine stored. Reopening a
+  half-solved problem continues it, where a blank file would cost the work.
+- **Code from a solve is never carried.** The editor opens on the signature
+  when the user's last attempt on the problem solved it. Prefilling an answer
+  turns a re-solve into reading it, and nothing is then retrieved.
+- **Code from before a card run is never carried into that run's problems.** A
+  problem opened from a card with a run open carries only code written after
+  the run began. The run measures solving from its start, as `log.md` gives.
+- **A press restores the user's last solve into the editor.** The press is
+  offered where the user has solved the problem before and the editor did not
+  carry that code. The editor's undo takes the restore back.
+- **An attempt made after a restore says so.** The attempt carries `restored`,
+  and mastery does not count it as a solve. A solve typed over a restored solve
+  is not an independent solve, as a hinted recall pass is not a pass.
 - **A failing submission shows the first case it failed, whole**: the
   arguments, the expected value, and the value the submission returned or the
   exception it raised. An outcome on an input the solver cannot see is debugged

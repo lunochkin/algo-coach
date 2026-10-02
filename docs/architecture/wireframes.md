@@ -208,6 +208,8 @@ problem's path reads as its record, as "Every problem" gives.
   value the submission returned.
 - The submit press sits under the editor, beside the shortcut that fires it and
   the line saying what judges the submission.
+- A quiet `Restore my last solve` press sits beside the submit press where the
+  user has solved the problem before and the editor did not carry that code.
 
 ## The sitting, paused
 

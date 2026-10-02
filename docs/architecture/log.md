@@ -123,6 +123,12 @@ ended, and every pause between.
 
 - **The drill loop is the only source.** The engine served the problem and
   watched the sitting, so nothing else is in a position to assert an attempt.
+- **An attempt records whether its sitting restored an earlier solve**, as
+  `restored`. The page sends it with the submission, and the engine does not
+  check it, for the reason `README.md` gives about guarding a verdict. Absent
+  on every attempt written before the field, and absent means no restore.
+- **A restored attempt is not counted as a solve by mastery.** Its verdict
+  stands, and its sitting counts as a failure to solve independently.
 - **The verification is its own record**, an `AttemptVerification` keyed by
   `attempt_id`, as a canonical's verification is keyed by `solution_id`.
   `solved` is the projection over the verification's results, and the raw
