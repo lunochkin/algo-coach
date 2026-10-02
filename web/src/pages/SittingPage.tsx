@@ -30,7 +30,6 @@ import {
 } from '@/components/ui/dialog'
 import { Verdict } from '@/components/Verdict'
 import { autoStarts, pressed } from '@/lib/clock'
-import { cn } from '@/lib/utils'
 
 export function SittingPage() {
   const { sittingId = '' } = useParams()
@@ -172,7 +171,7 @@ export function SittingPage() {
   const initial = stored(draft) ?? (served.signature ? `${served.signature}\n    ` : '')
 
   async function submit() {
-    if (running || paused) return
+    if (running) return
     setRunning(true)
     setRefused(null)
     try {
@@ -197,19 +196,14 @@ export function SittingPage() {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2">
           {/* the page's one title: it stays in view while the statement
               scrolls, so the statement column repeats none */}
-          {paused ? (
-            <span className="min-w-0 truncate text-meta text-muted-foreground">
-              Paused: the clock is stopped
-            </span>
-          ) : (
-            <h1 className="min-w-0 truncate text-heading font-semibold">{served.title}</h1>
-          )}
+          <h1 className="min-w-0 truncate text-heading font-semibold">{served.title}</h1>
           <div className="ml-auto flex items-center gap-3">
             <ElapsedClock
               elapsedSec={clock.elapsedSec}
               receivedAt={clock.at}
               running={!paused && !ended && !unstarted}
             />
+            {paused && !ended && <span className="text-meta text-muted-foreground">paused</span>}
             {ended ? (
               <span className="text-meta text-muted-foreground">This sitting has ended</span>
             ) : (
@@ -260,12 +254,9 @@ export function SittingPage() {
         </div>
       </div>
       {refused && <p className="text-meta text-destructive">Refused: {refused}</p>}
-      {/* inert and covered while paused: the time away is not spent on the
-          problem, and no keystroke reaches the editor */}
-      <div
-        inert={paused}
-        className={cn('grid gap-6 lg:grid-cols-2', paused && 'blur-md select-none')}
-      >
+      {/* a paused clock leaves the page as it was: a pause stops the timing,
+          not the practice */}
+      <div className="grid gap-6 lg:grid-cols-2">
         <section className="space-y-stack">
           <ProblemFacts
             problemId={served.sitting.problem_id}
@@ -288,7 +279,7 @@ export function SittingPage() {
             />
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <Button onClick={submit} disabled={running || paused || ended}>
+            <Button onClick={submit} disabled={running || ended}>
               {running ? 'Running…' : 'Submit'}
             </Button>
             <span className="text-meta text-muted-foreground">

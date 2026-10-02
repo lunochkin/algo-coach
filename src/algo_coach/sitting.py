@@ -168,9 +168,9 @@ def submit(
 ) -> Submitted:
     # taken before the run: judging takes seconds the solver did not spend
     at = now or _clock()
+    # a paused clock stops the timing, not the practice: the attempt carries
+    # the time the clock ran, which excludes the open pause
     one = _running(sittings, sitting_id, user_id)
-    if one.paused:
-        raise Refused(f"sitting {sitting_id} is paused")
     if _idle(one, at):
         # the clock it would stamp counts the hours the user was away
         _ended_idle(sittings, one)

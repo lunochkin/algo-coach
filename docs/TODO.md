@@ -104,7 +104,7 @@ choice.
 - [x] Start the clock on a press in the bar, or on opening where the clock
       preference is on, and have the user's last press set the preference in
       the browser. A hidden page's pause sets nothing
-- [ ] Leave the page usable while the clock is paused. A pause stops the
+- [x] Leave the page usable while the clock is paused. A pause stops the
       timing, not the practice
 - [ ] End a sitting at its solving submission. A user who solved and left had
       a sitting nobody closed

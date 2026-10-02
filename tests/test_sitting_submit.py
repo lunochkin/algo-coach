@@ -188,14 +188,14 @@ def test_submitting_leaves_the_sitting_running(database):
     assert stores.sittings.get("s1").ended_at is None
 
 
-def test_a_paused_sitting_takes_no_submission(database):
-    """The clock is stopped, so the attempt would carry time the engine did not
-    count for it."""
+def test_a_paused_sitting_takes_a_submission_timed_to_the_pause(database):
+    """A pause stops the timing, not the practice, so the attempt carries the
+    time the clock ran before it."""
     stores = Stores(database, pauses=[{"at": NINE}])
 
-    with pytest.raises(Refused, match="paused"):
-        stores.submit(DOUBLE)
-    assert stores.log.attempts() == []
+    attempt = stores.submit(DOUBLE)
+
+    assert attempt.time_to_solve_sec == (NINE - STARTED).total_seconds()
 
 
 def test_an_ended_sitting_takes_no_submission(database):
@@ -278,8 +278,8 @@ def test_the_user_s_results_never_reach_the_product_store(database):
 
 
 def test_a_refused_submission_stores_no_verification(database):
-    stores = Stores(database, pauses=[{"at": NINE}])
+    stores = Stores(database, ended_at=TEN)
 
-    with pytest.raises(Refused, match="paused"):
+    with pytest.raises(Refused, match="has ended"):
         stores.submitted(DOUBLE)
     assert stores.log.verifications() == []

@@ -482,6 +482,9 @@ The page layout is not designed here, and using the loop decides it.
   carries excludes every pause. `log.md` gives what the record holds. A pause
   and a stop are one press: a paused clock stays paused until the user resumes
   it.
+- **A paused clock leaves the page usable, and a submission is still taken.**
+  A pause stops the timing, not the practice. The attempt carries the time the
+  clock ran before the pause.
 - **A hidden page pauses a running clock, and the page returning resumes it.**
   The clock counts the time on the problem, and a solver who left the tab is
   away from it. A clock the user paused stays paused when the page returns,

@@ -90,18 +90,11 @@ def test_a_user_past_the_submission_cap_is_refused(client, sitting_id):
     assert codes[-1] == 429
 
 
-def test_a_paused_sitting_refuses_a_submission_until_resumed(client, sitting_id):
-    """A submission while paused would stamp a time the clock was not
-    counting."""
+def test_a_paused_sitting_takes_a_submission(client, sitting_id):
+    """A pause stops the timing, not the practice."""
     assert (
         client.post(f"/api/sittings/{sitting_id}/pause").json()["sitting"]["pauses"][0]["until"]
         is None
-    )
-    assert submitted(client, sitting_id).status_code == 409
-
-    assert (
-        client.post(f"/api/sittings/{sitting_id}/resume").json()["sitting"]["pauses"][0]["until"]
-        is not None
     )
     assert submitted(client, sitting_id).status_code == 200
 
