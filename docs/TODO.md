@@ -87,6 +87,16 @@ what use surfaces rather than how much use happened.
       vocabulary. A problem carries a narrower DP code only once a solution
       claim names it, so the knapsack ladder has no rung until then
 
+### The statements
+
+- [x] Have the generator bound every input in a `### Constraints` section, one
+      bound per bullet: each list's length, each integer's range and sign,
+      each string's length. A sitting met a statement giving no range for its
+      values, and the solver picks an approach from those bounds
+- [ ] Read the served statements for an unbounded input, and list each one
+      found here. A problem is never edited, so a list is what decides whether
+      any is worth retiring
+
 ### The corpus
 
 - [ ] Run a sweep for a technique the drill loop runs out of unseen problems

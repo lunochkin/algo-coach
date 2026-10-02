@@ -34,10 +34,15 @@ the code it comes back as. Write a problem that this form solves.
 
 Produce four things.
 
-1. A statement. Self-contained prose: what the input is, what to return, the
-   constraints that bound them, and one worked example. It must not name the
-   technique, the template, or the data structure the solution uses. The solver
-   has to derive the form from what is asked. It ends with {SIGNATURE}. Two
+1. A statement. Self-contained prose: what the input is, what to return, and
+   one worked example, then a section headed `### Constraints`. That section
+   bounds every input, one bound per bullet: each list's length, each
+   integer's range with its sign stated (whether it may be negative or zero),
+   each string's length and alphabet. A solver picks an approach from those
+   bounds, and a value left unbounded is one they have to guess. Every bound
+   sits in that section, and the prose above it states none. It must not name
+   the technique, the template, or the data structure the solution uses. The
+   solver has to derive the form from what is asked. It ends with {SIGNATURE}. Two
    more solutions are written from this prose alone, and a parameter order
    they have to infer is one they can infer differently.
 2. A canonical solution. {RUNTIME}, {ENTRY},
