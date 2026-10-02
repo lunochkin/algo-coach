@@ -32,6 +32,11 @@ class Attempt(BaseModel):
     # Absent on an attempt written before the field, which restored nothing
     restored: bool | None = None
 
+    # what mastery counts as a solve: `log.md`. The verdict in `solved` stands
+    @property
+    def solved_unaided(self) -> bool:
+        return self.solved and not self.restored
+
 
 class SelfLabel(AttemptRecord):
     """The user's own verdict on why an attempt went the way it did."""

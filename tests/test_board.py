@@ -95,6 +95,17 @@ def test_a_row_splits_solved_from_unsolved():
     assert (row.solved_count, row.unsolved_count) == (1, 2)
 
 
+def test_a_restored_solve_counts_as_no_solve():
+    """A solve typed over a restored one is not an independent solve. The
+    attempt still counts on the row, and its verdict stands."""
+    restored = make_attempt("a1").model_copy(update={"restored": True})
+
+    (row,) = per_technique([restored], index(GREEDY), {}, {})
+
+    assert (row.attempt_count, row.solved_count) == (1, 0)
+    assert restored.solved
+
+
 def test_recency_is_the_latest_attempt():
     """Not the latest written: attempts can land out of order."""
     attempts = [

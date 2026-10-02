@@ -130,7 +130,7 @@ def _solved(attempts: Iterable[Attempt], since: datetime | None) -> set[str]:
     return {
         attempt.problem_id
         for attempt in attempts
-        if attempt.solved and attempt.finished_at >= since
+        if attempt.solved_unaided and attempt.finished_at >= since
     }
 
 

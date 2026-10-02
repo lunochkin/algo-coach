@@ -132,7 +132,7 @@ problem lost the work. `flows.md` now gives what the editor carries.
 - [x] Offer a press restoring the last solve where the editor did not carry it,
       and add `restored` to the attempt it then submits. A solve typed over a
       restored one is not an independent solve
-- [ ] Count a restored attempt as no solve in mastery, wherever the board and
+- [x] Count a restored attempt as no solve in mastery, wherever the board and
       the ladder read `solved`
 
 ### The statements

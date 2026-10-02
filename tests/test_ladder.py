@@ -255,6 +255,17 @@ def test_a_rung_is_solved_by_an_attempt_since_the_run_began(database):
     ]
 
 
+def test_a_restored_solve_solves_no_rung(database):
+    """A solve typed over a restored one is not having solved the rung."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    restored = attempted("p-1", at=AFTER).model_copy(update={"restored": True})
+
+    resolved = ladder(held, problems, [], [], [restored], since=BEGAN)
+
+    assert [one.solved for one in resolved.rungs] == [False]
+
+
 def test_an_attempt_before_the_run_began_solves_no_rung(database):
     """Having solved the problem once is not having studied the form, and the
     run is minted to draw that line."""

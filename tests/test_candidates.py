@@ -150,3 +150,13 @@ def test_a_retired_problem_is_offered_for_nothing():
     )
 
     assert [row.problem.id for row in candidates("greedy", [GREEDY, retired], [])] == ["greedy-one"]
+
+
+def test_a_restored_solve_counts_as_no_solve():
+    """The candidates' solve rate counts independent solves, as the board's
+    does."""
+    restored = make_attempt("a1", "greedy-one").model_copy(update={"restored": True})
+
+    (row,) = candidates("greedy", [GREEDY], [restored])
+
+    assert (row.attempt_count, row.solved_count) == (1, 0)

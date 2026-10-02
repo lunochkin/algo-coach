@@ -46,7 +46,7 @@ def problem_row(problem: Problem, attempts: Iterable[Attempt]) -> ProblemRow:
     return ProblemRow(
         problem=problem,
         attempt_count=len(attempts),
-        solved_count=sum(attempt.solved for attempt in attempts),
+        solved_count=sum(attempt.solved_unaided for attempt in attempts),
         last_attempt_at=max((attempt.finished_at for attempt in attempts), default=None),
     )
 
