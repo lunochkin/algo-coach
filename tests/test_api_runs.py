@@ -235,30 +235,3 @@ def test_the_carry_bounds_the_editor_by_the_card_s_run(client, database):
 
     assert in_run["code"] is None and in_run["run_started_at"] == started["started_at"]
     assert elsewhere["code"] == "half done"
-
-
-def test_the_board_names_each_card_in_progress_and_its_next_rung(client, database):
-    """A card with a run open is the study the user declared, so the board
-    names it first with the rung one press opens."""
-    seeded(
-        database,
-        card(
-            slug="windows-wide",
-            templates=[template("longest-valid-window")],
-            selector={"technique": TECHNIQUE, "size": 3},
-        ),
-    )
-    started = client.post("/api/cards/windows-wide/runs").json()
-    began = datetime.fromisoformat(started["started_at"])
-    AttemptLog(database).append_attempt(
-        solved_attempt("p-1", at=began + timedelta(minutes=5), id="a-after")
-    )
-
-    (studying,) = client.get("/api/board").json()["studying"]
-
-    assert (studying["slug"], studying["solved"], studying["rungs"]) == ("windows-wide", 1, 3)
-    assert studying["next"]["id"] == "p-2"
-
-
-def test_an_unstarted_card_is_not_on_the_board(client):
-    assert client.get("/api/board").json()["studying"] == []

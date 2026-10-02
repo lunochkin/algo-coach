@@ -122,9 +122,9 @@ choice.
 
 ### The board and the cards
 
-- [x] Read the cards with a run open first on the board, each naming its
-      ladder's progress and its next rung, which one press opens. A card in
-      progress sat wherever staleness ranked its technique
+- [x] Read the cards with a run open first on the board, each the same row the
+      cards list draws for it. A card in progress sat wherever staleness ranked
+      its technique
 
 ### The editor's carried code
 

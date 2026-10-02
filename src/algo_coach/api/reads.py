@@ -53,23 +53,10 @@ from algo_coach.techniques import family, with_ancestors
 router = APIRouter()
 
 
-class Studying(BaseModel):
-    """A card with a run open, as the board names it: its progress and the
-    rung one press opens. `next` is absent once every rung is solved."""
-
-    slug: str
-    title: str
-    rungs: int
-    solved: int
-    next: Problem | None
-    last_at: datetime | None
-
-
 class Board(BaseModel):
     rows: list[TechniqueRow]
     ungrouped: int
     excluded: int
-    studying: list[Studying]  # the cards in progress, the most recently active first
 
 
 class Candidate(BaseModel):
@@ -154,42 +141,6 @@ def board(root: Root, user_id: UserId) -> Board:
         rows=stalest_first(rows, problems.values()),
         ungrouped=len(ungrouped(attempts, problems, claims)),
         excluded=len(excluded(attempts, problems)),
-        studying=_studying(root, user_id, list(problems.values()), attempts),
-    )
-
-
-def _studying(
-    root: Database, user_id: str, problems: list[Problem], attempts: list[Attempt]
-) -> list[Studying]:
-    solutions = SolutionLog(root).solutions()
-    matches = MatchLog(root).matches()
-    runs = CardRunLog(root)
-    recalls = RecallLog(root)
-    found: list[Studying] = []
-    for card in CardStore(root).all():
-        run = runs.started(user_id, card.id)
-        if run is None:
-            continue
-        resolved = ladder(card, problems, solutions, matches, attempts, since=run.started_at)
-        open_rungs = [rung for rung in resolved.rungs if not rung.solved]
-        # a required rung before an optional one, each in the ladder's order
-        open_rungs.sort(key=lambda rung: not rung.required)
-        status = _status(
-            card, run, problems, solutions, matches, attempts, recalls.for_card(user_id, card.id)
-        )
-        found.append(
-            Studying(
-                slug=card.slug,
-                title=card.title,
-                rungs=status.rungs,
-                solved=status.solved,
-                next=open_rungs[0].problem if open_rungs else None,
-                last_at=status.last_at,
-            )
-        )
-    # a started card's last activity is at least its run's start
-    return sorted(
-        found, key=lambda one: one.last_at.isoformat() if one.last_at else "", reverse=True
     )
 
 

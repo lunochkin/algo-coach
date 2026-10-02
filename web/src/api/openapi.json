@@ -1322,21 +1322,13 @@
           "excluded": {
             "type": "integer",
             "title": "Excluded"
-          },
-          "studying": {
-            "items": {
-              "$ref": "#/components/schemas/Studying"
-            },
-            "type": "array",
-            "title": "Studying"
           }
         },
         "type": "object",
         "required": [
           "rows",
           "ungrouped",
-          "excluded",
-          "studying"
+          "excluded"
         ],
         "title": "Board"
       },
@@ -2838,59 +2830,6 @@
         ],
         "title": "Studied",
         "description": "A card as its page reads it. The ladder, the progress and the recall\nstate are folds, and `content.md` gives why none of them is stored."
-      },
-      "Studying": {
-        "properties": {
-          "slug": {
-            "type": "string",
-            "title": "Slug"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "rungs": {
-            "type": "integer",
-            "title": "Rungs"
-          },
-          "solved": {
-            "type": "integer",
-            "title": "Solved"
-          },
-          "next": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Problem"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "last_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last At"
-          }
-        },
-        "type": "object",
-        "required": [
-          "slug",
-          "title",
-          "rungs",
-          "solved",
-          "next",
-          "last_at"
-        ],
-        "title": "Studying",
-        "description": "A card with a run open, as the board names it: its progress and the\nrung one press opens. `next` is absent once every rung is solved."
       },
       "Submission": {
         "properties": {

@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 
+import { cn } from '@/lib/utils'
+
 type Props = {
   to: string
   title: string
@@ -8,16 +10,21 @@ type Props = {
   badge?: ReactNode
   // the counts, right-aligned: each a label and its reading
   stats: { label: string; value: ReactNode }[]
+  // inside a panel the row runs edge to edge, as a card's row does
+  inPanel?: boolean
 }
 
 // one pick on a list of picks: a technique on the board, a problem under a
 // technique. The whole row is the link, so the pointer never hunts for the
 // title, and the counts read as one cluster rather than as four columns
-export function PickRow({ to, title, badge, stats }: Props) {
+export function PickRow({ to, title, badge, stats, inPanel = false }: Props) {
   return (
     <Link
       to={to}
-      className="group -mx-3 flex items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-accent"
+      className={cn(
+        'group flex items-center gap-3 py-3 transition-colors hover:bg-accent',
+        inPanel ? 'px-4' : '-mx-3 rounded-lg px-3',
+      )}
     >
       <span className="min-w-0 font-medium underline-offset-4 group-hover:underline">
         {title}

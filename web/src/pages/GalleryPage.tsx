@@ -9,6 +9,7 @@ import { Markdown } from '@/components/Markdown'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel, Stat, Stats } from '@/components/Panel'
 import { PickList, PickRow } from '@/components/PickRow'
+import { SectionHeading } from '@/components/SectionHeading'
 import { SectionBar } from '@/components/SectionBar'
 import { TemplatePanel } from '@/components/TemplatePanel'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -235,6 +236,28 @@ export function GalleryPage() {
             stats={[{ label: 'attempts', value: 0 }]}
           />
         </PickList>
+      </Section>
+
+      <Section title="A section of picks in a panel">
+        <div className="space-y-stack">
+          <SectionHeading title="Techniques practised" count={2} />
+          <div className="overflow-hidden rounded-xl border">
+            <PickList>
+              <PickRow
+                inPanel
+                to="/gallery"
+                title="binary-search"
+                stats={[{ label: 'solved', value: '9/12' }]}
+              />
+              <PickRow
+                inPanel
+                to="/gallery"
+                title="greedy"
+                stats={[{ label: 'solved', value: '1/4' }]}
+              />
+            </PickList>
+          </div>
+        </div>
       </Section>
 
       <Section title="A panel of counts">

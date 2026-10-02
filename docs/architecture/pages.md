@@ -28,7 +28,7 @@ those steps at low fidelity.
   page.
 - **The board names the cards in progress first.** A card with a run open is the
   study the user declared, and ranking techniques by staleness alone can bury
-  it. Each such card offers its next rung as one press.
+  it. Each reads as its row on the cards list does, and opens the card.
 - **The listing filters by two things a problem carries: its techniques and
   its difficulty.** The tags it offers are the techniques the listing itself
   holds, and the levels are the three a problem can carry.
@@ -83,7 +83,7 @@ those steps at low fidelity.
 
 | URL | The user | Section |
 |---|---|---|
-| `/` | picks a technique | Practice |
+| `/` | continues a card or picks a technique | Practice |
 | `/problems` | picks a problem across every technique | Practice |
 | `/techniques/:technique` | picks a problem | Practice |
 | `/problems/:problem_id` | opens the problem, which serves it, or reads a retired one | Practice |
@@ -142,11 +142,11 @@ those steps at low fidelity.
 - **A page carries a header and a body.** The header holds the way back, the
   title, and the one line that identifies what the title names, such as the
   technique a card teaches.
-- **One page asks for one act.** The board asks for a technique, the candidates
-  ask for a problem, and the sitting asks for a submission. The clock's press
-  sits in the bar as a control, not as an act the page waits on. A page
-  offering two acts of equal weight makes the user choose before the flow asks
-  them to.
+- **One page asks for one act.** The board asks what to practise next, a card in
+  progress or a technique. The candidates ask for a problem, and the sitting
+  asks for a submission. The clock's press sits in the bar as a control, not as
+  an act the page waits on. A page offering two acts of equal weight makes the
+  user choose before the flow asks them to.
 - **The body reads in one column of at most 56rem.** A line of prose wider than
   that is hard to track back to the next line's start.
 - **The sitting is the exception, and reads in two columns.** The statement and
@@ -170,6 +170,15 @@ those steps at low fidelity.
   on `knapsack` sits under the `dynamic-programming` heading and names its own
   technique on its row. A reader looking for DP then finds every DP card in
   one place.
+- **A list split into sections reads each section under a plain heading with
+  its count, above a bordered panel of rows.** The board and the cards list
+  split their lists the same way, so a reader learns one shape.
+- **One record reads as one row wherever it is listed.** A card in progress on
+  the board is the same row as on the cards list, so a reader never learns a
+  second shape for it.
+- **A panel's header strip names a record, and opens it.** A family on the
+  cards list opens its technique. A strip that named a record and opened
+  nothing would be a dead end.
 - **A row's counts read as one cluster at its right**, each count beside the
   word it counts. A row with nothing counted says so in one word, since three
   counts of nothing say less than `never` does.
@@ -188,6 +197,11 @@ those steps at low fidelity.
   anywhere else, so a reload opens every section again.
 
 ## The design system
+
+- **Consistency across pages outranks fitting one page better.** A shape that
+  reads one way on one page and another way on the next teaches the reader two
+  rules for one thing. A page that wants an exception gets a different layout
+  of the shared shapes instead, and a shape changes everywhere or nowhere.
 
 - **The tokens in `web/src/index.css` are the only place a colour, a radius, a
   spacing step, a type size or a font family is defined.** Every component reads

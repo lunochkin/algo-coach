@@ -52,19 +52,21 @@ Every page under a section carries the same two rows above its body.
 +- / --------------------------------------------------------------------+
 | algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
-| Pick a technique                                                       |
-| Every technique a served problem carries, stalest first.               |
+| Practice                                                               |
+| Continue a card in progress, or pick a technique.                      |
 |                                                                        |
-| Continue  1                                                            |
+| Cards in progress  1                                                   |
 | +--------------------------------------------------------+             |
-| | Sliding window   ladder 5/8   next: Signal Bands  med  |             |
+| | Sliding window    sliding-window        2 days ago     |             |
+| | started 09-28 . ladder 5/8, required 4/5               |             |
+| | recall  ✓ ✓ ✗ · · -                                    |             |
 | +--------------------------------------------------------+             |
 |                                                                        |
-| Not practised yet  12                                                  |
+| Techniques not practised yet  12                                       |
 | bit-manipulation   breadth-first-search   greedy                       |
 | monotonic-stack   sliding-window   two-pointers ...                    |
 |                                                                        |
-| Practised  2                                                           |
+| Techniques practised  2                                                |
 | binary-search        12 attempts    9/12 solved    3 days ago          |
 | monotonic-stack       4 attempts     2/4 solved    17 days ago         |
 |                                                                        |
@@ -74,12 +76,9 @@ Every page under a section carries the same two rows above its body.
 
 - The board is the landing page, so it opens under the navigation with no way
   back.
-- "Continue" reads first: one row per card with a run open, the most recently
-  active first. The row names the card, its ladder's progress and the next
-  rung, a required one before an optional one. A press opens that rung's
-  problem from the card, so a card in progress is one press away.
-- A card whose ladder is all solved names no next rung, and its press opens the
-  card instead.
+- "Cards in progress" reads first: the cards with a run open, the most recently
+  active first, each the same row the cards list draws for it. A press opens
+  the card, where the next rung is.
 - A technique never practised ranks stalest, so the untouched techniques read
   first. Each is a name alone, since every count on such a row is zero.
 - A name here is a link, not a chip. The listing's filters are chips, and a
@@ -89,8 +88,8 @@ Every page under a section carries the same two rows above its body.
 - The line under the two groups counts the attempts no row holds: the attempts
   no technique resolved, and the attempts on a retired problem.
 - Phase 14 serves the scheduler's pick above both groups, and every technique
-  stays on offer below it. The pick then reads the open runs, and replaces the
-  Continue rows rather than competing with them.
+  stays on offer below it. The pick then reads the open runs, so it can name a
+  card's next rung beside the cards in progress.
 
 ## Every problem
 
@@ -341,7 +340,8 @@ problem's path reads as its record, as "Every problem" gives.
 
 - The page is the user's dashboard of cards. The cards with a run open read
   first, under "Studying", the most recently active first. The rest read under
-  "Not started", grouped by family as before.
+  "Not started", grouped by family as before. A family's header strip opens
+  its technique.
 - A started card's row reads its progress: when the run began, the ladder's
   solved rungs, the required rungs among them, and when the card was last
   active. The trigger gives way to that line, since the user already chose the

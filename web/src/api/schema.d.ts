@@ -543,8 +543,6 @@ export interface components {
             ungrouped: number;
             /** Excluded */
             excluded: number;
-            /** Studying */
-            studying: components["schemas"]["Studying"][];
         };
         /**
          * Candidate
@@ -1126,24 +1124,6 @@ export interface components {
             recall: components["schemas"]["Recalled"][];
             /** Probes */
             probes: components["schemas"]["Probed"][];
-        };
-        /**
-         * Studying
-         * @description A card with a run open, as the board names it: its progress and the
-         *     rung one press opens. `next` is absent once every rung is solved.
-         */
-        Studying: {
-            /** Slug */
-            slug: string;
-            /** Title */
-            title: string;
-            /** Rungs */
-            rungs: number;
-            /** Solved */
-            solved: number;
-            next: components["schemas"]["Problem"] | null;
-            /** Last At */
-            last_at: string | null;
         };
         /** Submission */
         Submission: {

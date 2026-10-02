@@ -1,20 +1,28 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 
-import { api, type Studying, type TechniqueRow } from '@/api/client'
+import { api, type TechniqueRow } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
+import { CardPanel } from '@/components/CardPanel'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { PickList, PickRow } from '@/components/PickRow'
+import { SectionHeading } from '@/components/SectionHeading'
+import { inProgress } from '@/lib/cards'
 import { counts } from '@/lib/format'
 
 export function BoardPage() {
   const board = useLoaded((signal) => api.GET('/api/board', { signal }), 'board')
+  // the cards in progress read as the cards list draws them, so one card reads
+  // one way on both pages
+  const cards = useLoaded((signal) => api.GET('/api/cards', { signal }), 'cards')
+  const studying = inProgress(cards.data ?? [])
 
   return (
     <section className="space-y-section">
       <PageHeader
-        title="Pick a technique"
-        note="Every technique a served problem carries, stalest first."
+        title="Practice"
+        note="Continue a card in progress, or pick a technique, stalest first."
       />
       <Loaded
         of="the board"
@@ -32,23 +40,18 @@ export function BoardPage() {
           return (
             <div className="space-y-section">
               {/* the study the user declared, ahead of any staleness ranking */}
-              {board.studying.length > 0 && (
+              {studying.length > 0 && (
                 <section className="space-y-stack">
-                  <Heading count={board.studying.length}>Continue</Heading>
-                  <PickList>
-                    {board.studying.map((one) => (
-                      <Continue key={one.slug} card={one} />
-                    ))}
-                  </PickList>
+                  <SectionHeading title="Cards in progress" count={studying.length} />
+                  <CardPanel technique={null} cards={studying} />
                 </section>
               )}
 
               {untouched.length > 0 && (
-                <section className="space-y-stack">
-                  <Heading count={untouched.length}>Not practised yet</Heading>
+                <Group title="Techniques not practised yet" count={untouched.length}>
                   {/* names rather than chips: a bordered chip is what the
                       listing's filters are, and these open a technique */}
-                  <div className="flex flex-wrap gap-x-5 gap-y-1">
+                  <div className="flex flex-wrap gap-x-5 gap-y-1 px-4 py-3">
                     {untouched.map((row) => (
                       <Link
                         key={row.technique}
@@ -59,18 +62,17 @@ export function BoardPage() {
                       </Link>
                     ))}
                   </div>
-                </section>
+                </Group>
               )}
 
               {practised.length > 0 && (
-                <section className="space-y-stack">
-                  <Heading count={practised.length}>Practised</Heading>
+                <Group title="Techniques practised" count={practised.length}>
                   <PickList>
                     {practised.map((row) => (
                       <Practised key={row.technique} row={row} />
                     ))}
                   </PickList>
-                </section>
+                </Group>
               )}
 
               {/* the attempts no row holds, on one line under the lists */}
@@ -92,35 +94,10 @@ export function BoardPage() {
   )
 }
 
-// a card in progress and the rung one press opens; a card whose ladder is all
-// solved opens the card instead
-function Continue({ card }: { card: Studying }) {
-  const next = card.next
-  return (
-    <PickRow
-      to={
-        next
-          ? `/problems/${encodeURIComponent(next.id)}?card=${encodeURIComponent(card.slug)}`
-          : `/cards/${encodeURIComponent(card.slug)}`
-      }
-      title={card.title}
-      stats={[
-        { label: 'solved', value: `${card.solved}/${card.rungs}` },
-        {
-          label: '',
-          // the level belongs to the next rung, so it reads beside that title
-          value: next
-            ? `next: ${next.title}${next.difficulty ? ` (${next.difficulty})` : ''}`
-            : 'ladder done',
-        },
-      ]}
-    />
-  )
-}
-
 function Practised({ row }: { row: TechniqueRow }) {
   return (
     <PickRow
+      inPanel
       to={`/techniques/${encodeURIComponent(row.technique)}`}
       title={row.technique}
       stats={counts(row)}
@@ -128,11 +105,13 @@ function Practised({ row }: { row: TechniqueRow }) {
   )
 }
 
-function Heading({ count, children }: { count: number; children: string }) {
+// a section heading above a bordered panel, as the cards list draws its
+// sections. A panel's own header strip is kept for naming a record
+function Group({ title, count, children }: { title: string; count: number; children: ReactNode }) {
   return (
-    <h2 className="flex items-baseline gap-2 text-heading font-medium">
-      {children}
-      <span className="text-meta font-normal text-muted-foreground tabular-nums">{count}</span>
-    </h2>
+    <section className="space-y-stack">
+      <SectionHeading title={title} count={count} />
+      <div className="overflow-hidden rounded-xl border">{children}</div>
+    </section>
   )
 }
