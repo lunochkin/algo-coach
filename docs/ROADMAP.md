@@ -343,22 +343,45 @@ sittings that fill the log.
 - Exit not met at close: the loop asks for a label, and no sitting has stored
   one yet. The first sitting on the deployed engine settles it.
 
-## Phase 13 — The loop in use (current)
+## Phase 13 — The loop in use — done
 
-The author practises on the deployed engine, and what the sittings surface
-decides the work. The phase opens with no list of its own: an item is written
-when a sitting finds a fault, a page reads badly, or a flow asks for a step
-that does not exist. `docs/TODO.md` carries those items as they are found.
+The author practised on the deployed engine, and what the sittings surfaced
+decided the work.
 
-- The design revised against pages carrying real problems, real verdicts and a
-  real log, rather than the seeded reading Phase 10 designed for.
-- The faults the sittings surface, fixed in the flows that carry them.
-- The flows and pages use asks for, written into `docs/architecture/` before
-  they are built, as Phase 11 wrote its own.
-- Exit: every item this phase opened is ticked, and a stretch of sittings
-  opened no new one.
+- The pages reworked against real data: rows and panels in place of tables, a
+  warm paper ground, a scheme switch, prose and code bound to the tokens, and
+  the sitting fitted to a phone's width.
+- A `/problems` listing filtered by tag and level, an account menu, and a
+  recall addressed by its template's slug, with every form reachable from the
+  card.
+- Six DP codes under `dynamic-programming`, with `parents` added wherever codes
+  are grouped, and the cards listed under their technique's family.
+- The sitting unforced: opening a problem serves it, the clock starts on a
+  press or a browser-kept preference, a pause stops only the timing, a solve
+  ends the sitting, and the page stays put with a way back.
+- The editor carries work in progress into a new sitting, never a solve or code
+  from before a card run. A press restores the last solve, and an attempt made
+  after it counts as no solve.
+- `/cards` as the user's dashboard of runs, ladders and recall, the board
+  leading with the cards in progress, and a started card offering its next
+  rung.
+- The generator bounding every input in a `### Constraints` section.
+- Exit met in part at close: every item the phase opened is ticked, and the
+  sittings kept opening new ones until the phase was closed by hand.
 
-## Phase 14 — Scheduling and mastery
+Measured:
+
+- The first sitting on the deployed engine, on 2026-10-02: three attempts, each
+  verified in the sandbox at the 2 s cap, claimed and labelled. Phase 12's exit
+  is met by it.
+- A press starting the clock before the statement was shown made opening a
+  problem a commitment, and the author avoided opening problems because of it.
+  The sitting was redesigned around that finding.
+- Generation's cost, read from the deployed call log on 2026-10-02: $3.34 over
+  100 writings for 72 landed problems, $0.046 per landing and $0.067 per
+  problem still served. The generator's call is the largest share, at $0.015.
+
+## Phase 14 — Scheduling and mastery (current)
 
 Per-technique skill state derived from the log, a scheduler that says what is
 due, and a comparison of that scheduler against a simpler policy.
