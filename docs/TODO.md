@@ -116,7 +116,7 @@ choice.
 The editor opened every sitting on the signature, so reopening a half-solved
 problem lost the work. `flows.md` now gives what the editor carries.
 
-- [ ] Key the browser's unsent code by problem with the moment it was typed,
+- [x] Key the browser's unsent code by problem with the moment it was typed,
       rather than by sitting. A new sitting on the problem cannot find a draft
       keyed to the sitting before it
 - [ ] Serve the last attempt's code and time when it did not solve and, where

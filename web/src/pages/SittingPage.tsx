@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/dialog'
 import { Verdict } from '@/components/Verdict'
 import { autoStarts, pressed } from '@/lib/clock'
+import { draftOf, keepDraft } from '@/lib/draft'
 
 export function SittingPage() {
   const { sittingId = '' } = useParams()
@@ -167,8 +168,12 @@ export function SittingPage() {
 
   const served = loaded.data
   const clock = moved ?? { elapsedSec: served.elapsed_sec, at: served.receivedAt }
-  const draft = `algo-coach:sitting:${sittingId}:code`
-  const initial = stored(draft) ?? (served.signature ? `${served.signature}\n    ` : '')
+  const problemId = served.sitting.problem_id
+  // a reload during the sitting restores what was typed in it. A draft from an
+  // earlier sitting waits for the carry rules `flows.md` gives
+  const kept = draftOf(problemId)
+  const blank = served.signature ? `${served.signature}\n    ` : ''
+  const initial = kept?.sitting === sittingId ? kept.code : blank
 
   async function submit() {
     if (running) return
@@ -280,7 +285,7 @@ export function SittingPage() {
               initial={initial}
               onChange={(typed) => {
                 code.current = typed
-                store(draft, typed)
+                keepDraft(problemId, sittingId, typed)
               }}
               onSubmit={submit}
             />
@@ -319,20 +324,4 @@ export function SittingPage() {
       </Dialog>
     </div>
   )
-}
-
-function stored(key: string): string | null {
-  try {
-    return localStorage.getItem(key)
-  } catch {
-    return null
-  }
-}
-
-function store(key: string, value: string): void {
-  try {
-    localStorage.setItem(key, value)
-  } catch {
-    // a browser refusing storage costs the draft on reload, not the sitting
-  }
 }
