@@ -83,7 +83,7 @@ what use surfaces rather than how much use happened.
 - [ ] Every item this phase opened is ticked, and a stretch of sittings opened
       no new one
 
-## Phase 14 — recognition, scheduling and mastery
+## Phase 14 — scheduling and mastery
 
 - [x] Write into `docs/architecture/` what a technique's mastery is derived
       from: the attempts, their claims, their verdicts and the drills, with
@@ -93,41 +93,50 @@ what use surfaces rather than how much use happened.
       measure the user's own consistency, which caps every classifier score.
       Mastery reads claims, and a wrong claim spends practice time
 
-### The recognition drill
-
-Spotting a form and writing it are different skills, and the first is the one
-that goes quiet. A drill that runs no code fits a spare minute, and it fills
-the log faster than sittings can.
-
-- [ ] Serve a problem without naming its technique, with the choices drawn
-      from the techniques the matcher rejected for it. A distractor nothing
-      rejected is a second right answer
-- [ ] Store a drill as an attempt of its own mode, so the state can read
-      recognition apart from execution
-- [ ] Show the drill on the phone's width first. A drill that needs a desk is
-      a sitting with fewer steps
-
 ### The schedule
 
 The board orders by staleness and the user picks. Sitting daily makes that pick
 itself the work, so the board serves one, read from FSRS and the mastery state.
 
 - [ ] Write the pick's rule into `flows.md`: what it reads from FSRS and from
-      mastery, what breaks a tie, and what the board offers beside the pick.
+      mastery, how it aims at the technique and form a failed sitting missed,
+      what breaks a tie, and what the board offers beside the pick.
       `flows.md` has selection never schedule today
-- [ ] Time reviews with FSRS, whose unit is the technique and the mode. A
-      schedule over problems says when to redo one; a schedule over techniques
-      says when a form is about to go
+- [ ] Time reviews with FSRS, whose unit is the template. A template is one
+      form, and a technique mixes forms that fade at different rates. A
+      technique with no template keeps the board's staleness order
+- [ ] Write into `flows.md` what counts as a review of a template: a recall
+      attempt, graded by the hints taken, and a sitting on a problem whose
+      `target_template_id` names the template. The matcher is unscored, so a
+      review never reads a match
 - [ ] Write down the FSRS parameters the schedule starts from and why each was
       chosen. A number nobody wrote down is guessed again at every change
-- [ ] Serve one pick on the board, naming a technique and a problem, with every
-      technique still on offer beside it
+- [ ] Serve one pick on the board, naming a due template and a problem
+      written for it, with every technique still on offer beside it
 - [ ] Record what was predicted before each attempt, from FSRS alone and from
       the mastery state. A prediction written after the outcome is fitted to it
 
+### The comparison
+
+The scheduler is worth building only if it beats a simpler policy over the same
+problems. The comparison runs from the first pick, so its design lands with
+the schedule.
+
+- [ ] Write into `log.md` what ready means per technique: the bar, the
+      difficulty and the time limit. A criterion written after the data is
+      read is fitted to the data
+- [ ] Choose the strongest baseline among a list, spacing per problem and a
+      difficulty ladder, and write the choice and its reason into `flows.md`
+- [ ] Implement that baseline over the same problems, each step checked
+      against the method's published description. A baseline weaker than the
+      original flatters the scheduler
+- [ ] Assign each technique to the scheduler or the baseline, balanced by
+      difficulty, and store the assignment before the first pick. An
+      assignment made later can follow the outcomes it is compared on
+
 ### Exit
 - [ ] Start a sitting from the scheduler's pick on the board, and complete it
-      to the claim, with a drill feeding the same state
+      to the claim, with the pick's prediction and its arm stored
 
 ## Phase 15 — the matcher, measured
 
@@ -237,6 +246,27 @@ Blocks of work not ready for a phase, grouped and unordered. A planned phase is
 a block that became ready. A block, or a single item of one, is planned into a
 phase once it is clear enough to plan. An item's trigger, where it names one, is
 the event that makes the item ready.
+
+### The recognition drill
+
+A problem served without its technique, answered in words with no code run.
+Moved out of Phase 14 on 2026-10-02: hiding the technique matters less than
+the schedule, and the mastery state reads recognition as unknown until a drill
+feeds it.
+
+- [ ] Write the rubric the framing judge grades on into `log.md`: the
+      algorithm in words, why it is correct, and its runtime
+- [ ] Decide the drill's record and write it into `log.md`. A drill carries no
+      code and no verification, so an `Attempt` would leave both empty
+- [ ] Grade a set of framings by hand, and score the framing judge against
+      it. A judge that accepts vague answers raises recognition on the
+      techniques the user cannot spot
+- [ ] Serve a problem without its technique, take the framing as text, and
+      store the judge's grade
+- [ ] Show the drill on the phone's width first. A drill that needs a desk is
+      a sitting with fewer steps
+- [ ] Take the framing spoken, transcribed in front of the same judge.
+      Triggered when the judge's score holds on text
 
 ### Scheduling on the diagnosed cause
 

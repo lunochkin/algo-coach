@@ -359,45 +359,38 @@ that does not exist. `docs/TODO.md` carries those items as they are found.
 - Exit: every item this phase opened is ticked, and a stretch of sittings
   opened no new one.
 
-## Phase 14 — Recognition, scheduling and mastery
+## Phase 14 — Scheduling and mastery
 
 Per-technique skill state derived from the log, a scheduler that says what is
-due, and a second mode that exercises recognition on its own.
+due, and a comparison of that scheduler against a simpler policy.
 
 Ordered ahead of the matcher on 2026-09-22. What this phase is worth is read
 from attempts made after it ships, so a week earlier is a week more log to
 read it on. The matcher's score waits on work alone and loses nothing by
-following.
+following. The recognition drill moved to Further developments on 2026-10-02.
 
-- **The recognition drill**: a problem served without its technique named, and
-  the approach framed in words — the algorithm, why it is correct (the
-  invariant or recurrence) and its runtime. Naming the technique is part of
-  the answer, not all of it. No code runs, so a drill fits a spare minute,
-  and it produces attempts far faster than sittings do.
-- **A judge grades the framing** against the problem's canonical solutions,
-  on that three-part rubric. It is scored against a small hand-labelled set
-  before its verdicts feed mastery; a judge that credits a vague answer
-  inflates recognition exactly where the state must be honest.
-- **The drill trains a part of the skill, never the whole.** The scheduler
-  interleaves drills with full sittings; a technique is not mastered on
-  drills alone.
-- Text first. A spoken answer is transcription in front of the same judge,
-  and follows once the judge's score holds.
-- **Reviews timed with FSRS**, whose unit is the technique and the mode, never
-  the problem. A schedule over problems says when to redo a puzzle; a schedule
-  over techniques says when a form is about to go.
-- **Mastery per technique**, derived from attempts, their claims, their
-  verdicts and the drills, and never stored. Recognition and execution stay
-  apart in the state and on the board: a form the user spots and cannot write
-  is a different remedy from one they cannot spot.
-- One pick served on the board, a technique and a problem, made from that
-  state. The board still offers every technique beside the pick.
+- **Mastery per technique**, derived from attempts, their claims and their
+  verdicts, and never stored. Recognition and execution stay apart in the
+  state and on the board. Recognition reads as unknown until the recognition
+  drill feeds it.
+- **Reviews timed with FSRS**, whose unit is the template, never the problem.
+  A review is a recall attempt, graded by the hints taken, or a sitting on a
+  problem written for the template. A technique with no template keeps the
+  board's staleness order.
+- One pick served on the board, a due template and a problem written for it,
+  made from FSRS and the mastery state and aimed at the form a failed sitting
+  missed. The board still offers every technique beside the pick.
 - **Every pick records what it predicted before the attempt**, from FSRS alone
-  and from the mastery state, so the two can be compared on what actually
-  happened. A prediction reconstructed later is fitted to the outcome it is
-  scored against.
+  and from the mastery state. A prediction reconstructed later is fitted to
+  the outcome it is scored against.
+- **A readiness criterion per technique**, written before any data is read
+  against it: the bar, the difficulty and the time limit.
+- **Each technique assigned to the scheduler or to the strongest baseline**,
+  balanced by difficulty and stored before the first pick. The baseline is a
+  list, spacing per problem or a difficulty ladder, run over the same
+  problems.
 - Exit: a sitting started from the scheduler's pick on the board, and
-  completed to the claim, with the drill feeding the same state.
+  completed to the claim, with the pick's prediction and its arm stored.
 
 ## Phase 15 — The matcher, measured
 
@@ -443,6 +436,12 @@ Blocks of work not ready for a phase, unnumbered and unordered. A block becomes
 a planned phase once it is clear enough to plan, and `docs/TODO.md` holds the
 items of each block, the smaller ones included.
 
+- **The recognition drill.** A problem served without its technique, and the
+  approach answered in words: the algorithm, why it is correct and its
+  runtime. A framing judge grades the answer against the problem's canonicals,
+  and is scored against a hand-graded set before its grades feed mastery. The
+  scheduler mixes drills with full sittings and never replaces a sitting with
+  one. Text first, and a spoken answer later in front of the same judge.
 - **Scheduling on the diagnosed cause.** What Phase 16 names, fed back into
   what the board picks next. It waits on the scores that phase produces.
 - **Alternative solutions.** Every other way to solve a stored problem,

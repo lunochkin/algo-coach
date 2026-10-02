@@ -420,6 +420,8 @@ model of mastery.
 - **Recognition is counted only from recognition drills.** The problem page
   lists the problem's techniques before the statement is served. So every
   sitting tells the user the technique, and no sitting tests recognition.
+  Until the recognition drill is built, recognition has no evidence and reads
+  as unknown.
 - **A recognition drill counts for the techniques its problem carries.** The
   user describes the approach in words. The framing judge grades the
   description against the problem's canonicals, and that grade is the drill's
