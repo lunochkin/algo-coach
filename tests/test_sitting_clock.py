@@ -1,11 +1,14 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from helpers import stored_problem
+from helpers import PROVENANCE, stored_problem
 
-from algo_coach.log import SittingStore
+from algo_coach.cases import CaseLog
+from algo_coach.log import AttemptLog, SittingStore
+from algo_coach.mint import case
+from algo_coach.problems import ProblemStore
 from algo_coach.schema import Sitting
-from algo_coach.sitting import Missing, Refused, end, pause, resume
+from algo_coach.sitting import Missing, Refused, end, pause, resume, serve, start_clock, submit
 
 
 @pytest.fixture(autouse=True)
@@ -136,3 +139,55 @@ def test_another_user_s_sitting_reads_as_missing(database, call):
     sitting exists."""
     with pytest.raises(Missing, match="no sitting"):
         call(a_store(database), "s1", user_id="u-b71e03", now=NINE)
+
+
+def test_a_served_sitting_runs_no_clock(database):
+    """Opening a problem serves it, and the clock waits for the user's press
+    or the preference."""
+    one = serve(ProblemStore(database), SittingStore(database), "p1", user_id="u-4f9c2a")
+
+    assert one.sitting.clock_started_at is None and one.elapsed_sec is None
+
+
+def test_a_start_runs_the_clock_from_the_press(database):
+    """Reading done before the press is not counted."""
+    store = a_store(database, clock_started_at=None)
+
+    one = start_clock(store, "s1", user_id="u-4f9c2a", now=NINE)
+
+    assert one.clock_started_at == NINE
+    assert one.elapsed(TEN) == 3600.0
+
+
+def test_starting_a_started_clock_is_refused(database):
+    """A clock that ran and stopped is resumed, so its pauses stay counted."""
+    store = a_store(database)
+
+    with pytest.raises(Refused, match="already started"):
+        start_clock(store, "s1", user_id="u-4f9c2a", now=NINE)
+
+
+def test_a_clock_that_has_not_started_cannot_pause(database):
+    store = a_store(database, clock_started_at=None)
+
+    with pytest.raises(Refused, match="has not started"):
+        pause(store, "s1", user_id="u-4f9c2a", now=NINE)
+
+
+def test_an_untimed_sitting_still_takes_a_submission(database):
+    """Untimed practice is legitimate, and its attempt carries no time."""
+    CaseLog(database).append(case("p1", [1], 2, provenance=PROVENANCE))
+    store = a_store(database, clock_started_at=None)
+
+    submitted = submit(
+        store,
+        CaseLog(database),
+        AttemptLog(database),
+        "s1",
+        "def solve(n):\n    return n * 2\n",
+        user_id="u-4f9c2a",
+        # inside the idle bound, which counts from the serve
+        now=STARTED + timedelta(minutes=10),
+    )
+
+    assert submitted.attempt.solved and submitted.attempt.time_to_solve_sec is None

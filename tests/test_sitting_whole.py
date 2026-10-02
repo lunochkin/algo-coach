@@ -8,7 +8,17 @@ from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.mint import case
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Confidence
-from algo_coach.sitting import Refused, claim, end, pause, resume, serve, submit, unclaimed
+from algo_coach.sitting import (
+    Refused,
+    claim,
+    end,
+    pause,
+    resume,
+    serve,
+    start_clock,
+    submit,
+    unclaimed,
+)
 
 USER = "u-4f9c2a"
 DOUBLE = "def solve(n):\n    return n * 2\n"
@@ -37,6 +47,7 @@ def test_one_sitting_runs_from_serve_to_end(root):
     served = serve(problems, sittings, "p1", user_id=USER)
     sitting_id, began = served.sitting.id, served.sitting.started_at
 
+    start_clock(sittings, sitting_id, user_id=USER, now=began)
     pause(sittings, sitting_id, user_id=USER, now=began + timedelta(minutes=5))
     resume(sittings, sitting_id, user_id=USER, now=began + timedelta(minutes=15))
     failing = submit(

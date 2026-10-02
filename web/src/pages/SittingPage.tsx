@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Verdict } from '@/components/Verdict'
+import { autoStarts, pressed } from '@/lib/clock'
 import { cn } from '@/lib/utils'
 
 export function SittingPage() {
@@ -97,20 +98,23 @@ export function SittingPage() {
   const current = moved?.sitting ?? loaded.data?.sitting
   const paused = current?.pauses?.at(-1)?.until === null
   const ended = current?.ended_at != null
+  const unstarted = current !== undefined && current.clock_started_at == null
 
   // a move the page took by itself says nothing to the user, so it reports no
   // refusal: the next reading of the sitting carries whatever happened
-  async function move(to: 'pause' | 'resume' | 'end', { quiet = false } = {}) {
+  async function move(to: 'start' | 'pause' | 'resume' | 'end', { quiet = false } = {}) {
     setMoving(true)
     if (!quiet) setRefused(null)
     try {
       const params = { params: { path: { sitting_id: sittingId } } }
       const { data, error } =
-        to === 'pause'
-          ? await api.POST('/api/sittings/{sitting_id}/pause', params)
-          : to === 'resume'
-            ? await api.POST('/api/sittings/{sitting_id}/resume', params)
-            : await api.POST('/api/sittings/{sitting_id}/end', params)
+        to === 'start'
+          ? await api.POST('/api/sittings/{sitting_id}/start', params)
+          : to === 'pause'
+            ? await api.POST('/api/sittings/{sitting_id}/pause', params)
+            : to === 'resume'
+              ? await api.POST('/api/sittings/{sitting_id}/resume', params)
+              : await api.POST('/api/sittings/{sitting_id}/end', params)
       if (data)
         setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() })
       else if (!quiet) setRefused(described(error))
@@ -121,13 +125,29 @@ export function SittingPage() {
     }
   }
 
+  // the user's own press on the clock, which alone sets the clock preference
+  function press(to: 'start' | 'pause' | 'resume') {
+    pressed(to !== 'pause')
+    void move(to)
+  }
+
+  // the preference starts a clock the user has not, once per page
+  const autoStarted = useRef(false)
+  useEffect(() => {
+    if (!unstarted || ended || autoStarted.current || !autoStarts()) return
+    autoStarted.current = true
+    void move('start', { quiet: true })
+    // `move` is a new closure on every render, and it reads `sittingId` alone
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unstarted, ended])
+
   // the clock counts the time on the problem, and a hidden page is time away
   // from it. A sitting the user paused is left alone: returning resumes what
   // hiding paused and nothing else
   useEffect(() => {
     function hid() {
       // nothing to move before the sitting has been read
-      if (current === undefined || ended) return
+      if (current === undefined || ended || unstarted) return
       if (document.hidden && !paused) {
         byHiding.current = true
         void move('pause', { quiet: true })
@@ -140,7 +160,7 @@ export function SittingPage() {
     return () => document.removeEventListener('visibilitychange', hid)
     // `move` is a new closure on every render, and it reads `sittingId` alone
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, paused, ended, sittingId])
+  }, [current, paused, ended, unstarted, sittingId])
 
   // the three readings; the sitting's own page starts once one has loaded
   if (loaded.data === undefined)
@@ -188,19 +208,32 @@ export function SittingPage() {
             <ElapsedClock
               elapsedSec={clock.elapsedSec}
               receivedAt={clock.at}
-              running={!paused && !ended}
+              running={!paused && !ended && !unstarted}
             />
             {ended ? (
               <span className="text-meta text-muted-foreground">This sitting has ended</span>
-            ) : paused ? (
-              <Button onClick={() => move('resume')} disabled={moving}>
-                Resume
-              </Button>
             ) : (
               <>
-                <Button variant="outline" size="sm" onClick={() => move('pause')} disabled={moving}>
-                  Pause
-                </Button>
+                {/* one press for the clock: it starts a clock that never ran,
+                    resumes a paused one, and pauses a running one */}
+                {unstarted || paused ? (
+                  <Button
+                    size="sm"
+                    onClick={() => press(unstarted ? 'start' : 'resume')}
+                    disabled={moving}
+                  >
+                    Start
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => press('pause')}
+                    disabled={moving}
+                  >
+                    Pause
+                  </Button>
+                )}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="outline" size="sm" disabled={moving}>

@@ -464,7 +464,8 @@ The page layout is not designed here, and using the loop decides it.
   legitimate way to practise.
 - **The clock preference decides whether the next clock starts by itself.**
   The user's last press sets it: starting or resuming a clock turns it on, and
-  pausing one turns it off. The automatic pause on a hidden page sets nothing,
+  pausing one turns it off. It is off until the user first starts a
+  clock. The automatic pause on a hidden page sets nothing,
   or one tab switch would stop every later clock unnoticed.
 - **The clock measures from its own start.** Reading done before the press is
   not counted, and the attempt carries the time the clock ran.

@@ -51,7 +51,9 @@ def test_one_sitting_runs_through_the_api_as_the_page_calls_it(client):
     # the reload is the loop acting, so the bound counts from it
     assert reloaded["last_active_at"] >= served["sitting"]["last_active_at"]
 
-    # a paused clock takes no submission until resumed
+    # the clock runs once the user starts it, and a paused one takes no
+    # submission until resumed
+    ok(client.post(f"/api/sittings/{sitting_id}/start"))
     assert (
         ok(client.post(f"/api/sittings/{sitting_id}/pause"))["sitting"]["pauses"][0]["until"]
         is None

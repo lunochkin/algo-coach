@@ -596,6 +596,45 @@
         }
       }
     },
+    "/api/sittings/{sitting_id}/start": {
+      "post": {
+        "summary": "Clock Started",
+        "operationId": "clock_started_api_sittings__sitting_id__start_post",
+        "parameters": [
+          {
+            "name": "sitting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sitting Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Timed"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/sittings/{sitting_id}/pause": {
       "post": {
         "summary": "Paused",
@@ -2780,7 +2819,7 @@
           "elapsed_sec"
         ],
         "title": "Timed",
-        "description": "A sitting a pause, a resume or an end moved, with its elapsed time on the\nengine's clock."
+        "description": "A sitting a start, a pause, a resume or an end moved, with its elapsed\ntime on the engine's clock."
       },
       "Unclaimed": {
         "properties": {

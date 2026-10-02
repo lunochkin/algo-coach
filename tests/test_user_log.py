@@ -34,6 +34,7 @@ def practised(database):
 def practise(database, user_id: str) -> None:
     client = browsing(database, user_id)
     sitting_id = client.post("/api/problems/p1/sittings").json()["sitting"]["id"]
+    client.post(f"/api/sittings/{sitting_id}/start")
     client.post(f"/api/sittings/{sitting_id}/pause")
     client.post(f"/api/sittings/{sitting_id}/resume")
     submitted = client.post(f"/api/sittings/{sitting_id}/submissions", json={"code": DOUBLE})

@@ -1,5 +1,6 @@
-"""One timed session on one problem: what the drill loop serves, judges and
-mints. `log.md` gives what the record holds and why a pause is an interval."""
+"""One session on one problem, timed or not: what the drill loop serves,
+judges and mints. `log.md` gives what the record holds and why a pause is an
+interval."""
 
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
@@ -271,10 +272,25 @@ def unclaimed(log: AttemptLog, sitting_id: str, *, user_id: str) -> list[Asked]:
     ]
 
 
+def start_clock(
+    store: SittingStore, sitting_id: str, *, user_id: str, now: datetime | None = None
+) -> Sitting:
+    """The clock's first run, on the user's press or the clock preference.
+    A clock that ran and stopped is resumed instead, so its pauses stay
+    counted."""
+    one = _running(store, sitting_id, user_id)
+    if one.clock_started_at is not None:
+        raise Refused(f"sitting {sitting_id}'s clock has already started")
+    at = now or _clock()
+    return _stored(store, one, at, clock_started_at=at)
+
+
 def pause(
     store: SittingStore, sitting_id: str, *, user_id: str, now: datetime | None = None
 ) -> Sitting:
     one = _running(store, sitting_id, user_id)
+    if one.clock_started_at is None:
+        raise Refused(f"sitting {sitting_id}'s clock has not started")
     if one.paused:
         raise Refused(f"sitting {sitting_id} is already paused")
     at = now or _clock()

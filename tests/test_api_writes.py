@@ -25,7 +25,10 @@ def client(root):
 
 @pytest.fixture
 def sitting_id(client) -> str:
-    return client.post("/api/problems/p1/sittings").json()["sitting"]["id"]
+    """A sitting whose clock runs, as a press or the preference starts it."""
+    sitting_id = client.post("/api/problems/p1/sittings").json()["sitting"]["id"]
+    client.post(f"/api/sittings/{sitting_id}/start")
+    return sitting_id
 
 
 def submitted(client, sitting_id: str, code: str = DOUBLE):

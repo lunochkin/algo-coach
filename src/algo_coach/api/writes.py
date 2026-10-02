@@ -38,6 +38,7 @@ from algo_coach.sitting import (
     owned_attempt,
     pause,
     resume,
+    start_clock,
     submit,
     unclaimed,
 )
@@ -61,8 +62,8 @@ class Reproduction(BaseModel):
 
 
 class Timed(BaseModel):
-    """A sitting a pause, a resume or an end moved, with its elapsed time on the
-    engine's clock."""
+    """A sitting a start, a pause, a resume or an end moved, with its elapsed
+    time on the engine's clock."""
 
     sitting: Sitting
     elapsed_sec: float | None  # none while the clock has not run
@@ -143,6 +144,11 @@ def submission(root: Root, user_id: UserId, sitting_id: str, body: Submission) -
     return submit(
         SittingStore(root), CaseLog(root), AttemptLog(root), sitting_id, body.code, user_id=user_id
     )
+
+
+@router.post("/sittings/{sitting_id}/start")
+def clock_started(root: Root, user_id: UserId, sitting_id: str) -> Timed:
+    return _timed(start_clock, root, sitting_id, user_id)
 
 
 @router.post("/sittings/{sitting_id}/pause")

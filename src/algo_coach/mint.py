@@ -234,8 +234,6 @@ def sitting(user_id: str, problem_id: str, at: datetime | None = None) -> Sittin
         user_id=user_id,
         problem_id=problem_id,
         started_at=at,
-        # the clock runs from serving until the start press lands
-        clock_started_at=at,
         last_active_at=at,
     )
 

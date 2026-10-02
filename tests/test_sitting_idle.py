@@ -72,7 +72,7 @@ def test_serving_after_the_bound_ends_the_idle_sitting_where_it_was_left(databas
     assert left is not None
     assert left.ended_at == STARTED
     assert served.sitting.id != "s1"
-    assert served.elapsed_sec == 0
+    assert served.elapsed_sec is None
 
 
 def test_reading_an_idle_sitting_ends_it_at_its_last_activity(database):

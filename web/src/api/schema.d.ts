@@ -243,6 +243,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/sittings/{sitting_id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Clock Started */
+        post: operations["clock_started_api_sittings__sitting_id__start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sittings/{sitting_id}/pause": {
         parameters: {
             query?: never;
@@ -1136,8 +1153,8 @@ export interface components {
         TemplateKind: "code" | "procedure";
         /**
          * Timed
-         * @description A sitting a pause, a resume or an end moved, with its elapsed time on the
-         *     engine's clock.
+         * @description A sitting a start, a pause, a resume or an end moved, with its elapsed
+         *     time on the engine's clock.
          */
         Timed: {
             sitting: components["schemas"]["Sitting"];
@@ -1609,6 +1626,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Submitted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clock_started_api_sittings__sitting_id__start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sitting_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Timed"];
                 };
             };
             /** @description Validation Error */
