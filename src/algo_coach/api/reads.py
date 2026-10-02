@@ -46,6 +46,7 @@ from algo_coach.sitting import Served, get, serve
 from algo_coach.solution_claims import load_problem, load_problems
 from algo_coach.solutions import SolutionLog
 from algo_coach.storage import Database
+from algo_coach.techniques import family, with_ancestors
 
 router = APIRouter()
 
@@ -141,9 +142,20 @@ def board(root: Root, user_id: UserId) -> Board:
     )
 
 
+class ListedCard(Card):
+    family: str  # the technique the cards list groups this card under
+
+
 @router.get("/cards")
-def every_card(root: Root) -> list[Card]:
-    return sorted(CardStore(root).all(), key=lambda one: (one.technique, one.slug))
+def every_card(root: Root) -> list[ListedCard]:
+    listed = [
+        ListedCard(**card.model_dump(), family=family(card.technique))
+        for card in CardStore(root).all()
+    ]
+    # a family's own cards first, then its narrower techniques'
+    return sorted(
+        listed, key=lambda one: (one.family, one.technique != one.family, one.technique, one.slug)
+    )
 
 
 # by slug: a re-seed keeps the slug and the URL a page links to, where the id
@@ -295,7 +307,10 @@ def _card(root: Database, slug: str) -> Card:
 
 @router.get("/techniques/{technique}/cards")
 def cards(root: Root, technique: str) -> list[Card]:
-    return CardStore(root).for_technique(technique)
+    taught = [
+        card for card in CardStore(root).all() if technique in with_ancestors([card.technique])
+    ]
+    return sorted(taught, key=lambda one: one.slug)
 
 
 @router.get("/techniques/{technique}/candidates")

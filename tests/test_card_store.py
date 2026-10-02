@@ -26,15 +26,6 @@ def card(slug: str, *, technique: str = "binary-search") -> Card:
     )
 
 
-def test_a_technique_reads_every_card_it_carries_and_no_other(database):
-    """Granularity follows teaching, so a technique can carry several cards."""
-    store = CardStore(database)
-    for one in (card("on-answer"), card("basic"), card("windows", technique="sliding-window")):
-        store.put(one)
-
-    assert [one.slug for one in store.for_technique("binary-search")] == ["basic", "on-answer"]
-
-
 def test_a_re_seed_reorders_templates_and_keeps_their_ids(database):
     """A problem names its template by id, so a card revised in place moves its
     templates rather than minting new ones."""

@@ -59,3 +59,13 @@ def with_ancestors(codes: Iterable[str]) -> set[str]:
         if entry is not None:
             pending.extend(entry.parents)
     return found
+
+
+def family(code: str) -> str:
+    """The ancestor a listing groups a code under: one with no parent, the
+    first by name where there are several."""
+    return min(
+        ancestor
+        for ancestor in with_ancestors([code])
+        if not (entry := criteria().get(ancestor)) or not entry.parents
+    )

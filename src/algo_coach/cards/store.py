@@ -38,9 +38,6 @@ class CardStore:
         found = self._read(cards.c.slug == slug)
         return found[0] if found else None
 
-    def for_technique(self, technique: str) -> list[Card]:
-        return sorted(self._read(cards.c.technique == technique), key=lambda one: one.slug)
-
     def _templates(self, conn: Connection, record: Card) -> None:
         # upserted by id rather than replaced: a problem names its template, and
         # a deleted row would refuse the problem pointing at it

@@ -147,6 +147,10 @@ those steps at low fidelity.
   techniques, a technique's problems and the cards are each such a list. A
   table spreads one pick over four columns, and the reader then joins the
   columns back together to judge the pick.
+- **The cards list groups cards by the technique each is a kind of.** A card
+  on `knapsack` sits under the `dynamic-programming` heading and names its own
+  technique on its row. A reader looking for DP then finds every DP card in
+  one place.
 - **A row's counts read as one cluster at its right**, each count beside the
   word it counts. A row with nothing counted says so in one word, since three
   counts of nothing say less than `never` does.

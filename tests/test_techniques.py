@@ -12,7 +12,7 @@ from algo_coach.schema import (
     Problem,
     Technique,
 )
-from algo_coach.techniques import codes, criteria, is_known, with_ancestors
+from algo_coach.techniques import codes, criteria, family, is_known, with_ancestors
 
 
 def raw_list() -> list[dict]:
@@ -159,3 +159,11 @@ def test_a_retired_code_reaches_no_parent():
     """A record can carry a code the vocabulary no longer holds, and grouping
     must still read it."""
     assert with_ancestors(["retired-code"]) == {"retired-code"}
+
+
+def test_a_family_is_the_ancestor_with_no_parent():
+    """A listing groups knapsack under DP, and DP and a retired code under
+    themselves."""
+    assert family("knapsack") == "dynamic-programming"
+    assert family("dynamic-programming") == "dynamic-programming"
+    assert family("retired-code") == "retired-code"

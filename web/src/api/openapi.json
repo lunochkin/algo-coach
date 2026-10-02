@@ -34,7 +34,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Card"
+                    "$ref": "#/components/schemas/ListedCard"
                   },
                   "type": "array",
                   "title": "Response Every Card Api Cards Get"
@@ -1657,6 +1657,65 @@
         ],
         "title": "Listed",
         "description": "One problem on the listing of every served problem. It carries the\nproblem's techniques, which the page filters by, and no statement."
+      },
+      "ListedCard": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Slug"
+          },
+          "technique": {
+            "type": "string",
+            "title": "Technique"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "trigger": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Trigger"
+          },
+          "brief": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Brief"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/Template"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Templates"
+          },
+          "selector": {
+            "$ref": "#/components/schemas/Selector"
+          },
+          "family": {
+            "type": "string",
+            "title": "Family"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "technique",
+          "title",
+          "trigger",
+          "brief",
+          "templates",
+          "selector",
+          "family"
+        ],
+        "title": "ListedCard"
       },
       "Me": {
         "properties": {

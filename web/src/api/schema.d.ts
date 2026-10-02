@@ -686,6 +686,26 @@ export interface components {
             /** Last Attempt At */
             last_attempt_at: string | null;
         };
+        /** ListedCard */
+        ListedCard: {
+            /** Id */
+            id: string;
+            /** Slug */
+            slug: string;
+            /** Technique */
+            technique: string;
+            /** Title */
+            title: string;
+            /** Trigger */
+            trigger: string;
+            /** Brief */
+            brief: string;
+            /** Templates */
+            templates: components["schemas"]["Template"][];
+            selector: components["schemas"]["Selector"];
+            /** Family */
+            family: string;
+        };
         /**
          * Me
          * @description Who the session signs in as. The engine mints the id, and the address is
@@ -1191,7 +1211,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Card"][];
+                    "application/json": components["schemas"]["ListedCard"][];
                 };
             };
         };

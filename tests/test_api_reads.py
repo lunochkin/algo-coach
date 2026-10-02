@@ -101,6 +101,43 @@ def test_every_card_is_listed_by_technique_then_slug(client, database):
     ]
 
 
+def test_a_card_is_listed_under_the_family_its_technique_belongs_to(client, database):
+    """Knapsack is a kind of DP, so its card is read beside the DP cards
+    rather than apart from them."""
+    store = CardStore(database)
+    for slug, technique in (
+        ("knapsack-01", "knapsack"),
+        ("windows", "sliding-window"),
+        ("linear", "dynamic-programming"),
+    ):
+        store.put(a_card(slug, technique))
+
+    listed = client.get("/api/cards").json()
+
+    assert [(one["family"], one["slug"]) for one in listed] == [
+        ("dynamic-programming", "linear"),
+        ("dynamic-programming", "knapsack-01"),
+        ("sliding-window", "windows"),
+    ]
+
+
+def test_a_technique_s_cards_include_its_narrower_techniques(client, database):
+    """The DP page offers the knapsack card, since solving knapsack is
+    practising DP. Granularity follows teaching, so one technique carries
+    several cards."""
+    store = CardStore(database)
+    for slug, technique in (
+        ("linear", "dynamic-programming"),
+        ("knapsack-01", "knapsack"),
+        ("windows", "sliding-window"),
+    ):
+        store.put(a_card(slug, technique))
+
+    listed = client.get("/api/techniques/dynamic-programming/cards").json()
+
+    assert [one["slug"] for one in listed] == ["knapsack-01", "linear"]
+
+
 def test_a_card_is_read_by_its_slug(client, database):
     """A re-seed keeps the slug, so a link to a card outlives the id the store
     minted."""

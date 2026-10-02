@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import { api, type Card } from '@/api/client'
+import { api, type ListedCard } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
@@ -32,10 +32,10 @@ export function CardsPage() {
   )
 }
 
-// every block is the same panel: a technique several cards teach carries a
-// header naming it, and the cards that teach a technique of their own carry
-// the name on the row instead
-function Panel({ technique, cards }: { technique: string | null; cards: Card[] }) {
+// every block is the same panel: a family several cards teach carries a
+// header naming it, and the cards that teach a family of their own carry the
+// name on the row instead
+function Panel({ technique, cards }: { technique: string | null; cards: ListedCard[] }) {
   return (
     <section className="overflow-hidden rounded-xl border">
       {technique && (
@@ -46,16 +46,16 @@ function Panel({ technique, cards }: { technique: string | null; cards: Card[] }
       )}
       <div className="divide-y divide-border">
         {cards.map((card) => (
-          <CardRow key={card.slug} card={card} named={technique === null} />
+          <CardRow key={card.slug} card={card} named={card.technique !== technique} />
         ))}
       </div>
     </section>
   )
 }
 
-// `named` carries the technique on the row, for a card that stands alone:
-// only a group of cards has a heading to carry it instead
-function CardRow({ card, named = false }: { card: Card; named?: boolean }) {
+// `named` carries the technique on the row wherever no heading names it: a
+// card that stands alone, or a narrower technique under its family's heading
+function CardRow({ card, named = false }: { card: ListedCard; named?: boolean }) {
   const optional = card.templates.filter((one) => one.optional).length
 
   return (
@@ -82,18 +82,19 @@ function templates(count: number, optional: number): string {
   return optional === 0 ? all : `${all}, ${optional} optional`
 }
 
-type Block = { technique: string; cards: Card[] } | { cards: Card[] }
+type Block = { technique: string; cards: ListedCard[] } | { cards: ListedCard[] }
 
-// the API orders the cards by technique. A technique with one card is a row
-// like any other, since a heading over a single row names what the row says
-function blocks(cards: Card[]): Block[] {
+// the API orders the cards by family, the technique a narrower one is a kind
+// of. A family with one card is a row like any other, since a heading over a
+// single row names what the row says
+function blocks(cards: ListedCard[]): Block[] {
   const out: Block[] = []
   for (const card of cards) {
     const last = out.at(-1)
-    const taught = cards.filter((one) => one.technique === card.technique)
+    const taught = cards.filter((one) => one.family === card.family)
     if (taught.length > 1) {
-      if (last && 'technique' in last && last.technique === card.technique) last.cards.push(card)
-      else out.push({ technique: card.technique, cards: [card] })
+      if (last && 'technique' in last && last.technique === card.family) last.cards.push(card)
+      else out.push({ technique: card.family, cards: [card] })
     } else if (last && !('technique' in last)) last.cards.push(card)
     else out.push({ cards: [card] })
   }
