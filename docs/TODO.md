@@ -87,6 +87,30 @@ what use surfaces rather than how much use happened.
       vocabulary. A problem carries a narrower DP code only once a solution
       claim names it, so the knapsack ladder has no rung until then
 
+### The sitting, unforced
+
+The sitting was a commitment: a press started the clock before the statement
+was shown, and the author avoided opening problems because of it. `flows.md`,
+`log.md` and `pages.md` now give the sitting opened by reading and timed by
+choice.
+
+- [ ] Add `clock_started_at` to the sitting, absent on a sitting whose clock
+      never ran, and measure the elapsed time from it. A sitting begun at
+      serving would count the reading done before the press
+- [ ] Serve a problem on opening `/problems/:problem_id` and send the browser to
+      the sitting, with the level, techniques, counts and cards in one line
+      above the statement. The picked problem's page was a gate before the
+      statement
+- [ ] Start the clock on a press in the bar, or on opening where the clock
+      preference is on, and have the user's last press set the preference in
+      the browser. A hidden page's pause sets nothing
+- [ ] Leave the page usable while the clock is paused. A pause stops the
+      timing, not the practice
+- [ ] End a sitting at its solving submission. A user who solved and left had
+      a sitting nobody closed
+- [ ] Count a sitting with no submission for nothing, and an untimed one by its
+      verdict alone, wherever the board and the candidates read sittings
+
 ### The statements
 
 - [x] Have the generator bound every input in a `### Constraints` section, one

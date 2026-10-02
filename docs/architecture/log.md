@@ -47,8 +47,8 @@ how an account signing in is linked to a user.
 
 ## Sittings
 
-One timed session on one problem: when it began, when it ended, and every pause
-between.
+One session on one problem: when it began, when its clock started, when it
+ended, and every pause between.
 
 - **The engine mints the sitting id as it serves the statement**, and every
   attempt of that sitting carries the id. The log is append-only, so an attempt
@@ -69,17 +69,28 @@ between.
 - **The record is kept after the sitting ends**, and `ended_at` closes it. How
   often practice is interrupted, how many sittings a day holds, and which
   problems were opened and abandoned are readable in the sitting store alone.
-- **A sitting is paused and resumed, and the clock stops for a pause.** The
-  user steps away from the problem, and a duration counting the hours away says
-  nothing about solving it.
+- **A sitting records when its clock started**, as `clock_started_at`. The
+  sitting begins when the statement is served, and the clock begins on the
+  user's press or by the clock preference `flows.md` gives. Reading done before
+  the press is not counted.
+- **A sitting whose clock never started is untimed.** `clock_started_at` stays
+  absent, and the sitting's attempts carry no `time_to_solve_sec`. Untimed
+  practice is legitimate, and a time reconstructed afterwards would be a guess.
+- **A running clock is paused and resumed, and the clock stops for a pause.**
+  The user steps away from the problem, and a duration counting the hours away
+  says nothing about solving it. A clock that never started has nothing to
+  pause, so every pause falls after `clock_started_at`.
 - **A pause is stored as its own interval**, `at` and `until`. A total of the
   time paused says how long and never how often, and a sitting paused once for
   two hours is different practice from a sitting paused nine times.
 - **Only the last pause is open, and a sitting ends with none open.** An
   ended sitting holding an open pause would report an elapsed time that moved
   with the moment it was read.
-- **The elapsed time excludes every pause**, and the attempt carries it as
-  `time_to_solve_sec`.
+- **The elapsed time runs from `clock_started_at` and excludes every pause**,
+  and the attempt carries it as `time_to_solve_sec`.
+- **A solving submission ends the sitting.** A user who solved and left the page
+  then has nothing left open, and the next opening of the problem mints a new
+  sitting.
 - **The loop decides what starts and ends a pause**, not the record. A button,
   a hidden tab and an idle timer each leave the same interval.
 - **A sitting records when it was last touched**, as `last_active_at`. Serving
@@ -407,6 +418,12 @@ model of mastery.
 - **Execution is counted per sitting.** One sitting can hold several
   attempts, one per submission. Counting attempts would punish a user who
   submits often, though they solved the same problem.
+- **A sitting with no submission counts for nothing.** Opening a problem
+  serves it, so such a sitting records that the user looked at the problem,
+  not that they tried it.
+- **An untimed sitting counts by its verdict alone.** It says whether the user
+  solved the problem and nothing about how long the solve took, so any reading
+  of speed comes from timed sittings.
 - **A sitting counts for every technique its attempts used.** Those
   techniques come from the standing attempt claim, or from the problem's own
   techniques when no claim stands. `## Attempt claims` gives that rule.

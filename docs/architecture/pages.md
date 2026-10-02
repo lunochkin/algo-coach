@@ -54,9 +54,9 @@ those steps at low fidelity.
   to sit is picking a problem the engine refuses to serve. The user's attempts
   on it stay in the log, and a link kept from before the retirement therefore
   opens a page rather than a 404.
-- **A retired page says so and offers no press that starts a sitting.** The
-  serving call refuses a retired problem, so a press there would ask for a
-  refusal. The page reads as the record of what the user did on that problem.
+- **A retired page says so and serves nothing.** The serving call refuses a
+  retired problem, so opening one mints no sitting. The page reads as the
+  record of what the user did on that problem.
 - **The whole listing is fetched, and a page is a slice of it.** The tags count
   every problem the corpus carries, so a page of rows cannot produce them. The
   API pages the rows instead once the corpus outgrows one request.
@@ -81,7 +81,7 @@ those steps at low fidelity.
 | `/` | picks a technique | Practice |
 | `/problems` | picks a problem across every technique | Practice |
 | `/techniques/:technique` | picks a problem | Practice |
-| `/problems/:problem_id` | reads the pick and starts the sitting | Practice |
+| `/problems/:problem_id` | opens the problem, which serves it, or reads a retired one | Practice |
 | `/sittings/:sitting_id` | solves, submits, claims | Practice |
 | `/cards` | picks a card | Cards |
 | `/cards/:slug` | reads a card and reveals its templates | Cards |
@@ -110,10 +110,20 @@ those steps at low fidelity.
   own record rather than found in the technique's candidates, since a page
   reached from two places would otherwise load a different list at each of
   them.
-- **A sitting's unsent code and the chosen colour scheme are the state the
-  browser keeps.** The code is stored under the sitting's id, so a reload
-  during a sitting restores what the user typed. Every other reading is fetched
-  from the API at each load.
+- **Opening a served problem sends the browser to its sitting.** The problem's
+  path serves the statement and replaces itself with `/sittings/:sitting_id`,
+  so a reload reaches the sitting rather than serving the problem again. A
+  retired problem's path reads as its record and serves nothing.
+- **The sitting page carries what the picked problem's page carried**: the
+  level, the techniques, the counts the user reached on the problem, and the
+  cards. Those facts sit in one line above the statement, and the statement
+  is the page's body.
+- **A sitting's unsent code, the clock preference and the chosen colour scheme
+  are the state the browser keeps.** The code is stored under the sitting's
+  id, so a reload during a sitting restores what the user typed. The clock
+  preference and the scheme are about how the user practises at this machine,
+  and a store holding them would carry them between machines nobody asked it
+  to join. Every other reading is fetched from the API at each load.
 - **The recall's path names the template by its authored slug**, and the drawn
   path sends the browser to it. A reload then asks for the same form, and a
   user who means to practise one form reaches it by name. `flows.md` gives why
@@ -125,9 +135,10 @@ those steps at low fidelity.
   title, and the one line that identifies what the title names, such as the
   technique a card teaches.
 - **One page asks for one act.** The board asks for a technique, the candidates
-  ask for a problem, and the picked problem asks for the press that starts the
-  clock. A page offering two acts of equal weight makes the user choose before
-  the flow asks them to.
+  ask for a problem, and the sitting asks for a submission. The clock's press
+  sits in the bar as a control, not as an act the page waits on. A page
+  offering two acts of equal weight makes the user choose before the flow asks
+  them to.
 - **The body reads in one column of at most 56rem.** A line of prose wider than
   that is hard to track back to the next line's start.
 - **The sitting is the exception, and reads in two columns.** The statement and
@@ -155,8 +166,8 @@ those steps at low fidelity.
   word it counts. A row with nothing counted says so in one word, since three
   counts of nothing say less than `never` does.
 - **A panel holds what a page carries beside its reading**: a bordered block on
-  the card surface. The counts a card run reached, the press that starts a
-  sitting and a submission's verdict are each one. Every panel carries the same
+  the card surface. The counts a card run reached and a submission's verdict
+  are each one. Every panel carries the same
   border, radius and ground, so a reader tells a panel from the reading by its
   shape alone.
 - **A page longer than a screen carries a bar naming its sections.** The bar
@@ -220,8 +231,8 @@ those steps at low fidelity.
 
 ## Rules a page holds, specified elsewhere
 
-- A candidate is offered without its statement, since the clock starts when the
-  statement is served (`flows.md`).
+- A candidate is offered without its statement, since opening the problem
+  serves it (`flows.md`).
 - A template's code is hidden until the user reveals it (`content.md`).
 - The editor proposes no name from the standard library or from the code already
   typed (`flows.md`).

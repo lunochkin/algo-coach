@@ -209,11 +209,14 @@ without redefining them. Grouped by the file that specifies the record.
 - **Attempt verification**: executing an attempt's code against its problem's
   cases. An `AttemptVerification` record stores one run, and is private to the
   user where a solution's `Verification` is product data.
-- **Sitting**: one timed session on one problem in the drill loop. It may
-  mint several attempts, and each of them carries the sitting's id. The record
-  is revised while the sitting runs and kept after the sitting ends.
+- **Sitting**: one session on one problem in the drill loop, timed or not. It
+  may mint several attempts, and each of them carries the sitting's id. The
+  record is revised while the sitting runs and kept after the sitting ends.
 - **Pause**: an interval a sitting's clock is stopped for. The elapsed time a
   sitting reports excludes every pause.
+- **Clock preference**: whether a sitting's clock starts by itself when the
+  statement is served. The user's last press on a clock sets it, and the
+  browser keeps it.
 - **Drill loop**: the practice flow: pick a technique and a problem, read the
   card, solve, then answer the claim and the label.
 - **Claim**: a record naming the techniques a piece of code used, by a named

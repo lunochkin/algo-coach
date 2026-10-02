@@ -149,33 +149,9 @@ Every page under a section carries the same two rows above its body.
 
 ## The picked problem
 
-```
-+- /problems/p-7f3a?technique=binary-search -----------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
-+------------------------------------------------------------------------+
-| < binary-search                                                        |
-| Smallest feasible speed                                                |
-| (medium)  binary-search                                                |
-|                                                                        |
-| +--------------------------------------------------------+             |
-| |  2          1/2        6 days ago   [ Start the sitting ] |           |
-| |  attempts   solved     last attempted                   |             |
-| |  No statement on this page. It is served on that press, |             |
-| |  and the clock starts with it.                          |             |
-| +--------------------------------------------------------+             |
-|                                                                        |
-| Before you start                                                       |
-| The card teaches the form this problem is written for. Reading it is   |
-| off the clock, and no sitting requires it.                             |
-| Cards: Binary search, Answer-space search                              |
-+------------------------------------------------------------------------+
-```
-
-- The page asks for one press, and that press starts the clock.
-- The press sits in one panel with the counts the user reached on this problem,
-  so the page says what has been tried before it asks for the next sitting.
-- Phase 11 opens the same page as a rung of a card's ladder. The way back then
-  names the card, and the rest of the drawing stands.
+A served problem has no page of its own. Opening `/problems/:problem_id` serves
+the statement and sends the browser to the sitting, drawn below. A retired
+problem's path reads as its record, as "Every problem" gives.
 
 ## The sitting
 
@@ -183,9 +159,12 @@ Every page under a section carries the same two rows above its body.
 +- /sittings/s-91c2, solving --------------------------------------------+
 | algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
+| < binary-search                                                        |
 | Smallest feasible speed              12:04  [ Pause ]  [ End ]         |
 +----------------------------------+-------------------------------------+
-| the statement, as prose          | +----------------------------+      |
+| medium . binary-search . 2 tried |                                     |
+| . Cards: Binary search           | +----------------------------+      |
+| the statement, as prose          | |                            |      |
 |                                  | | def solve(piles, h) -> int:|      |
 |                                  | |     |                      |      |
 | ...........................      | |                            |      |
@@ -206,9 +185,14 @@ Every page under a section carries the same two rows above its body.
 +------------------------------------------------------------------------+
 ```
 
-- A bar across the top carries the clock, the pause and the end, and it stays
-  at the top of the window while the statement scrolls. The clock is the
-  reading the sitting is run by, so it is never scrolled out of sight.
+- A bar across the top carries the clock, its press and the end, and it stays
+  at the top of the window while the statement scrolls. The clock is never
+  scrolled out of sight.
+- The clock reads `0:00` beside `[ Start ]` until the user starts it, or until
+  the clock preference starts it on opening. Once running, the press reads
+  `[ Pause ]`, and once paused, `[ Start ]` again.
+- One line above the statement carries what the picked problem's page used to:
+  the level, the techniques, the attempts on this problem and the cards.
 - The bar carries the problem's title, the page's only one, at the heading
   size. The statement column repeats none, since the bar keeps the title in view
   while the statement scrolls.
@@ -232,20 +216,17 @@ Every page under a section carries the same two rows above its body.
 +- /sittings/s-91c2, paused ---------------------------------------------+
 | algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
-| Paused: the clock is stopped         12:04     [ Resume ]              |
+| Smallest feasible speed     12:04 paused  [ Start ]  [ End ]           |
 +------------------------------------------------------------------------+
-|                                                                        |
-| ##### the statement and the editor, blurred and inert ####             |
-| ##########################################################             |
-| ##########################################################             |
+| the statement and the editor, as they were, and still usable           |
 +------------------------------------------------------------------------+
 ```
 
-- The same bar carries the pause: the problem's name is replaced by the state,
-  and the two presses by the one that resumes. No row is added, so the page
-  under the cover does not move when the sitting is paused.
-- The statement and the editor are covered and take no keystroke, since the time
-  away is not spent on the problem.
+- A paused clock stops measuring and leaves the page as it was. A pause stops
+  the timing, not the practice, and an untimed stretch is a legitimate way to
+  work.
+- The bar keeps its rows, so the page under it does not move when the clock
+  stops.
 
 ## The sitting, at phone width
 
@@ -619,27 +600,8 @@ Every page under a section carries the same two rows above its body.
 
 ## The picked problem, opened from a card
 
-```
-+- /problems/p-8c21?card=binary-search ----------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
-+------------------------------------------------------------------------+
-| < Binary search                                                        |
-| Split the array                                                        |
-| hard . 0 attempt(s), - solved . last never                             |
-|                                                                        |
-| Cards: Binary search                                                   |
-|                                                                        |
-|         +---------------------+                                        |
-|         |  Start the sitting  |   the sitting returns to               |
-|         +---------------------+   the card it came from                |
-|                                                                        |
-| No statement on this page.                                             |
-+------------------------------------------------------------------------+
-```
-
-- The page is the one a technique's candidates open, with the card named in
-  place of the technique.
-- The way back returns to the card, and the sitting returns there when it ends.
+Opening a rung serves it as any problem is served, and the sitting's way back
+names the card. The sitting returns to the card when it ends.
 
 ## The recall trainer, before a hint
 

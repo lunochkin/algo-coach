@@ -443,7 +443,8 @@ The page layout is not designed here, and using the loop decides it.
    technique's cards are linked from this step on.
 2. Candidates for the technique, least recently attempted first, lowest solve
    rate breaking a tie. The user picks one.
-3. The sitting is minted, the statement is served, and the clock starts.
+3. Opening the problem serves its statement and mints the sitting. The clock
+   starts on the user's press, or at once where the clock preference is on.
 4. The submission runs against the problem's own test cases, and the attempt is
    minted carrying the result.
 5. Keyed to each attempt, the loop asks for an attempt claim and then for a
@@ -452,21 +453,38 @@ The page layout is not designed here, and using the loop decides it.
 - **The board offers every technique a served problem carries**, practised or
   not, and a technique never practised ranks stalest. A board of practised
   techniques alone opens the first sitting with nothing to pick.
-- **A candidate is offered without its statement.** The clock starts when the
-  statement is served, so a statement shown in the list is read untimed.
+- **A candidate is offered without its statement.** Opening the problem is
+  the act that serves the statement, so the list stays a list of picks.
+- **No press stands between the pick and the statement.** A press that started
+  the clock before the statement was shown made opening a problem a commitment,
+  and the author avoided opening problems because of it.
+- **The clock is shown, and the user starts it.** The sitting exists from the
+  moment the statement is served, and its clock does not run until the user
+  presses start. A sitting whose clock never ran is untimed, and that is a
+  legitimate way to practise.
+- **The clock preference decides whether the next clock starts by itself.**
+  The user's last press sets it: starting or resuming a clock turns it on, and
+  pausing one turns it off. The automatic pause on a hidden page sets nothing,
+  or one tab switch would stop every later clock unnoticed.
+- **The clock measures from its own start.** Reading done before the press is
+  not counted, and the attempt carries the time the clock ran.
 - **The card is offered, and no sitting requires it.** A user who holds the
-  form starts the sitting straight away, and a user who does not reads the
-  card first. Reading happens before the statement is served, so the clock
-  counts solving rather than reading. Recognising a form with no card in view
-  is a probe's test, which Phase 11 adds.
+  form solves straight away, and a user who does not reads the card first.
+  Recognising a form with no card in view is a probe's test.
+- **Opening a problem and leaving it ends nothing the user has to close.** The
+  sitting ends at a solve, at the End press, or at the idle bound `log.md`
+  gives. A sitting with no submission is browsing, and mastery reads nothing
+  from it.
 - **An attempt nobody timed stays untimed**, rather than carrying a duration
   reconstructed after the fact.
-- **A sitting is paused and resumed**, and the elapsed time the attempt carries
-  excludes every pause. `log.md` gives what the record holds.
-- **A hidden page pauses the sitting, and the page returning resumes it.** The
-  clock counts the time on the problem, and a solver who left the tab is away
-  from it. A sitting the user paused stays paused when the page returns, since
-  the page resumes only the pause hiding it started.
+- **A running clock is paused and resumed**, and the elapsed time the attempt
+  carries excludes every pause. `log.md` gives what the record holds. A pause
+  and a stop are one press: a paused clock stays paused until the user resumes
+  it.
+- **A hidden page pauses a running clock, and the page returning resumes it.**
+  The clock counts the time on the problem, and a solver who left the tab is
+  away from it. A clock the user paused stays paused when the page returns,
+  since the page resumes only the pause hiding it started.
 - **The editor completes nothing.** The editor a sitting is typed into
   highlights syntax and indents, and it proposes no name from the standard
   library or from the code already typed. A solver offered `bisect_left` after
@@ -580,8 +598,8 @@ to the card it came from.
 1. The ladder on the card: a rung per problem, each naming the templates it
    covers and whether it is required.
 2. The user picks a rung.
-3. The problem's page opens, named by the card the pick came from, and the
-   sitting starts on the press that serves the statement.
+3. The problem opens, named by the card the pick came from, which serves the
+   statement and mints the sitting as the drill loop gives.
 4. The submission, the verdict and the claim run as the drill loop gives them.
 5. The sitting ends and returns to the card, where the next rung is.
 
@@ -593,9 +611,8 @@ to the card it came from.
 - **A rung names the templates it covers**, so the user reads why this problem
   is on this ladder. The templates also decide whether the rung is required,
   which `content.md` derives rather than stores.
-- **A rung carries no statement**, as a candidate carries none. The clock starts
-  when the statement is served, and a statement read on the card is read
-  untimed.
+- **A rung carries no statement**, as a candidate carries none. Opening the
+  rung serves the statement, so the ladder stays a list of picks.
 - **The problem's page is the one a technique's candidates open.** A rung is a
   problem, and a second page for the same record would serve the same statement
   under another URL.
