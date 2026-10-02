@@ -74,6 +74,19 @@ what use surfaces rather than how much use happened.
       decision into `pages.md`. `GET /api/problems` answers the served ones, so
       a retired problem is absent where the board still counts its attempts
 
+### The vocabulary
+
+- [x] Add `knapsack`, `interval-dp`, `sequence-dp`, `tree-dp`, `bitmask-dp` and
+      `digit-dp` under `dynamic-programming`, with a `parents` field added
+      wherever codes are grouped. One DP row averaged families a user
+      recognises and loses apart
+- [x] List a card under its technique's family on `/cards` and on a
+      technique's page. The knapsack card sat apart from the DP cards once it
+      moved to `knapsack`
+- [x] Re-claim the served canonicals on the deployed store against the new
+      vocabulary. A problem carries a narrower DP code only once a solution
+      claim names it, so the knapsack ladder has no rung until then
+
 ### The corpus
 
 - [ ] Run a sweep for a technique the drill loop runs out of unseen problems
