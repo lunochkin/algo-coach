@@ -17,7 +17,7 @@ what use surfaces rather than how much use happened.
 
 ### Sitting on the deployed engine
 
-- [ ] Sit one problem through on the deployed engine, from the board to the
+- [x] Sit one problem through on the deployed engine, from the board to the
       claim and the label, which is Phase 12's unmet exit
 - [x] Write down, per sitting, what read badly or worked badly, as items under
       the headings below. A fault nobody wrote down is fixed twice or never
