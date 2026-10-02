@@ -26,6 +26,8 @@ export function ProblemsPage() {
   // the tags in the URL, so a filtered listing is a link the user can keep
   const [search, setSearch] = useSearchParams()
   const picked = search.getAll('technique')
+  // one tag picked is a technique drilled for, as a pick from the board is
+  const drilled = picked.length === 1 ? picked[0] : null
   const levels = search.getAll('difficulty')
   const page = Math.max(1, Number(search.get('page') ?? 1) || 1)
 
@@ -143,7 +145,7 @@ export function ProblemsPage() {
                   <>
                     <PickList>
                       {held.map((one) => (
-                        <ProblemRow key={one.problem_id} listed={one} />
+                        <ProblemRow key={one.problem_id} listed={one} drilled={drilled} />
                       ))}
                     </PickList>
                     {pages > 1 && (
@@ -182,10 +184,14 @@ export function ProblemsPage() {
 
 // the techniques read under the title, where a row's right-hand cluster is
 // the counts: three badges and three counts on one line wrap into each other
-function ProblemRow({ listed }: { listed: Listed }) {
+// `drilled` is the one tag the listing is filtered to, which the claim then
+// ticks as a pick from the board ticks its technique
+function ProblemRow({ listed, drilled }: { listed: Listed; drilled: string | null }) {
+  const query = new URLSearchParams({ from: 'problems' })
+  if (drilled !== null) query.set('technique', drilled)
   return (
     <Link
-      to={`/problems/${encodeURIComponent(listed.problem_id)}?from=problems`}
+      to={`/problems/${encodeURIComponent(listed.problem_id)}?${query.toString()}`}
       className="group -mx-3 block rounded-lg px-3 py-3 transition-colors hover:bg-accent"
     >
       <div className="flex items-baseline gap-3">

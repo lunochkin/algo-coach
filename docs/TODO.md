@@ -66,7 +66,7 @@ what use surfaces rather than how much use happened.
       every template of the card on the trainer to switch between. The draw
       reached one form at a time, and the form a user meant to practise was
       reachable only by exhausting the others
-- [ ] Carry a single picked tag into the problem as `?technique=`, or write
+- [x] Carry a single picked tag into the problem as `?technique=`, or write
       into `pages.md` why a listing pick names no technique. A row links with
       `?from=problems` alone, so the claim opens with nothing ticked where a
       pick from the board ticks the technique it was drilled for

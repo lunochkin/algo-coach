@@ -102,7 +102,9 @@ those steps at low fidelity.
   `/problems/:problem_id` whichever page offered it, since Phase 11 opens the
   same problem as a rung of a card's ladder. `?technique=` names the technique
   the pick came from, `?card=` names the card, and `?from=problems` names the
-  listing, which holds no record of its own to name. The sitting carries the
+  listing, which holds no record of its own to name. A listing filtered to one
+  tag adds that tag as `?technique=`, since picking one tag is drilling for
+  that technique as a pick from the board is. The sitting carries the
   technique and the card on: the way back returns where the pick came from, and
   the claim answers for the card's own technique where a card offered the
   problem.
