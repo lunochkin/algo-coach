@@ -97,7 +97,7 @@ choice.
 - [x] Add `clock_started_at` to the sitting, absent on a sitting whose clock
       never ran, and measure the elapsed time from it. A sitting begun at
       serving would count the reading done before the press
-- [ ] Serve a problem on opening `/problems/:problem_id` and send the browser to
+- [x] Serve a problem on opening `/problems/:problem_id` and send the browser to
       the sitting, with the level, techniques, counts and cards in one line
       above the statement. The picked problem's page was a gate before the
       statement

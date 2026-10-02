@@ -8,6 +8,7 @@ import { CodeEditor } from '@/components/CodeEditor'
 import { ElapsedClock } from '@/components/ElapsedClock'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
+import { ProblemFacts } from '@/components/ProblemFacts'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -233,6 +234,10 @@ export function SittingPage() {
         className={cn('grid gap-6 lg:grid-cols-2', paused && 'blur-md select-none')}
       >
         <section className="space-y-stack">
+          <ProblemFacts
+            problemId={served.sitting.problem_id}
+            technique={search.get('technique')}
+          />
           <Markdown>{served.statement}</Markdown>
         </section>
         {/* the verdict sits under the editor: one page is the whole sitting */}

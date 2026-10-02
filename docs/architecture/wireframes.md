@@ -159,7 +159,6 @@ problem's path reads as its record, as "Every problem" gives.
 +- /sittings/s-91c2, solving --------------------------------------------+
 | algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
-| < binary-search                                                        |
 | Smallest feasible speed              12:04  [ Pause ]  [ End ]         |
 +----------------------------------+-------------------------------------+
 | medium . binary-search . 2 tried |                                     |
