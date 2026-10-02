@@ -174,6 +174,10 @@ export function CardPage() {
 function Progress({ studied }: { studied: Studied }) {
   const solved = studied.rungs.filter((one) => one.solved).length;
   const recalled = studied.recall.filter((one) => one.last_at !== null).length;
+  // the next rung: the first unsolved required one, else the first unsolved,
+  // each in the ladder's order. None once every rung is solved
+  const open = studied.rungs.filter((one) => !one.solved);
+  const next = open.find((one) => one.required) ?? open[0];
 
   return (
     <Panel>
@@ -192,6 +196,15 @@ function Progress({ studied }: { studied: Studied }) {
             Recall a form
           </Link>
         </Button>
+        {next && (
+          <Button size="sm" asChild>
+            <Link
+              to={`/problems/${encodeURIComponent(next.problem.id)}?card=${encodeURIComponent(studied.card.slug)}`}
+            >
+              Next rung: {next.problem.title}
+            </Link>
+          </Button>
+        )}
       </Stats>
     </Panel>
   );

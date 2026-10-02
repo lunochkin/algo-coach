@@ -569,8 +569,8 @@ problem's path reads as its record, as "Every problem" gives.
 | binary-search . studying since 3 days ago                              |
 |                                                                        |
 | +--------------------------------------------------------+             |
-| |  2/5          1/5           1        [ Recall a form ] |             |
-| |  rungs solved forms recalled probes drawn              |             |
+| |  2/5     1/5      1    [ Recall a form ] [ Next rung: |             |
+| |  rungs   forms    probes   Ship within days ]          |             |
 | +--------------------------------------------------------+             |
 |                                                                        |
 | ( When to reach for it )( The brief )( Ladder )( Recall )( Probes )    |
@@ -596,8 +596,10 @@ problem's path reads as its record, as "Every problem" gives.
 - The three read as counts in one panel at the top, and each has its own
   section below. The panel says how far the run has got without the reader
   scrolling to the sections.
-- The press that opens the recall trainer sits in that panel, since recall is
-  the one act the card offers while a run is open.
+- The panel carries the run's two acts as presses: the recall trainer, and the
+  next rung. The next rung is the first unsolved required rung, else the first
+  unsolved one, and its press opens that problem from the card. Once every rung
+  is solved, the press is absent.
 - Every one of the three is a fold rather than a stored verdict, so a corpus
   that moved under the card re-derives them.
 - The probes sit apart from the ladder, since a probe is never drawn from it.
