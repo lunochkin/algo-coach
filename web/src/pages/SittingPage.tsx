@@ -28,7 +28,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Verdict } from '@/components/Verdict'
-import { pieces } from '@/lib/python'
 import { cn } from '@/lib/utils'
 
 export function SittingPage() {
@@ -230,22 +229,6 @@ export function SittingPage() {
         <section className="space-y-stack">
           <h1 className="text-title font-semibold">{served.title}</h1>
           <Markdown>{served.statement}</Markdown>
-          {/* the parameter order the cases call with, which prose cannot be
-              relied on to give */}
-          {served.signature && (
-            <div className="space-y-1">
-              <p className="text-meta text-muted-foreground">The function every case calls</p>
-              <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">
-                <code>
-                  {pieces(served.signature).map((piece, index) => (
-                    <span key={index} className={piece.token}>
-                      {piece.text}
-                    </span>
-                  ))}
-                </code>
-              </pre>
-            </div>
-          )}
         </section>
         {/* the verdict sits under the editor: one page is the whole sitting */}
         <section className="flex flex-col gap-3 lg:sticky lg:top-6 lg:h-[calc(100vh-10rem)]">

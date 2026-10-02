@@ -186,16 +186,16 @@ Every page under a section carries the same two rows above its body.
 | Smallest feasible speed              12:04  [ Pause ]  [ End ]         |
 +----------------------------------+-------------------------------------+
 | Smallest feasible speed          | +----------------------------+      |
-|                                  | | def solve(piles, h):       |      |
+|                                  | | def solve(piles, h) -> int:|      |
 | the statement, as prose          | |     |                      |      |
 | ...........................      | |                            |      |
 | ...........................      | |   the editor               |      |
 | ...........................      | |                            |      |
 |                                  | +----------------------------+      |
-| The function every case calls    | [ Submit ]  Cmd+Enter . judged      |
-| +-----------------------------+  |             against the problem's   |
-| | def solve(piles, h) -> int: |  |             own test cases          |
-| +-----------------------------+  | +----------------------------+      |
+|                                  | [ Submit ]  Cmd+Enter . judged      |
+|                                  |             against the problem's   |
+|                                  |             own test cases          |
+|                                  | +----------------------------+      |
 |                                  | | Not solved: 7 of 11 cases  |      |
 |                                  | | + + + + + + + x + ~ ~      |      |
 |                                  | | Case 8: wrong answer       |      |
@@ -213,8 +213,9 @@ Every page under a section carries the same two rows above its body.
   statement column, as every other page's title reads in its own body.
 - The statement reads on the left and the editor takes the right, which is the
   one page in two columns.
-- The signature is named as the function every case calls, and it is coloured
-  as the editor colours it.
+- The editor opens on the signature every case calls, and the statement column
+  does not repeat it. A second copy beside the editor's first line says the
+  same thing twice.
 - The verdict sits under the editor, so a failing case is read beside the code
   that failed it.
 - The case strip carries one mark per case, in the order the problem carries its
