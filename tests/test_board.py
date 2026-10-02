@@ -167,6 +167,16 @@ def test_a_claim_moves_an_attempt_to_the_technique_it_claims():
     assert [row.technique for row in rows] == ["two-pointers"]
 
 
+def test_a_claimed_code_counts_toward_its_parent():
+    """A user claiming knapsack alone has solved a DP problem, and the DP row
+    counts it."""
+    claims = standing_attempt_claims([make_claim(["knapsack"])])
+
+    rows = per_technique([make_attempt("a1")], index(GREEDY), claims, {})
+
+    assert [row.technique for row in rows] == ["dynamic-programming", "knapsack"]
+
+
 def test_an_attempt_resolving_to_no_technique_produces_no_row():
     """An unmapped tag blocks nothing and invents nothing."""
     problem = make_problem("unmapped", [])

@@ -32,6 +32,19 @@ The vocabulary the append-only log references.
   Exceptions are per code and stated in the entry: `recursion` names a
   language mechanism rather than an approach, so a row counting every
   self-call would name no skill.
+- **A code may name its parents, each a code it is a kind of.** Interval DP
+  is a kind of DP, so `interval-dp` names `dynamic-programming`. A code with
+  a parent is defined as a narrowing of that parent, so the parent is part of
+  the definition rather than a judgement made pair by pair. Containment
+  between codes defined apart stays unwritten, since nothing generates it.
+- **A parent is added wherever codes are grouped**, and never written into a
+  claim. A claim keeps the codes its writer named. The board, mastery and a
+  problem's techniques count a claim naming `knapsack` toward
+  `dynamic-programming` as well.
+- **A parent means only "is a kind of".** A code that always uses another, as
+  a bitmask DP uses bit operations, does not name it as a parent. Whether one
+  code always uses another is a judgement per pair, and the classifier makes
+  it from the criteria as it makes any claim.
 - **Only incidental use disqualifies a code.** Another
   candidate covering the code does not. The near miss states that line in
   full: a sorted lookup beside a linear pass that dominates, a map standing in
@@ -60,8 +73,8 @@ The vocabulary the append-only log references.
 
 A card organises studying one technique: what to read, what to reproduce from
 memory, and what to solve. A card is not the vocabulary itself, and not an
-ability estimate. Mastery is what a user can recognise and execute, per
-technique, and a card and a mastery estimate share no data.
+ability estimate. Mastery measures how well a user recognises and executes
+each technique, and a card and a mastery estimate share no data.
 
 - **Product data, not code.** Cards live in the engine datastore, seeded from
   `content/`, which is gitignored like `data/`. One location, whatever the

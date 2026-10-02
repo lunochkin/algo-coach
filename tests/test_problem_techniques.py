@@ -57,6 +57,14 @@ def test_the_techniques_are_the_union_over_the_canonicals(problem):
     assert techniques(problem, solutions, claims) == ["hashing", "sorting"]
 
 
+def test_a_claimed_code_brings_its_parent(problem):
+    """A canonical read as knapsack is a DP solution, so the problem counts on
+    the DP row too."""
+    claims = [solution_claim("s1", ["knapsack"])]
+
+    assert techniques(problem, [solution("s1")], claims) == ["dynamic-programming", "knapsack"]
+
+
 def test_the_reference_is_excluded(problem):
     """It is written from the statement alone, so counting it would credit the
     naive approach the canonical's form replaces."""

@@ -36,6 +36,8 @@ without redefining them. Grouped by the file that specifies the record.
 - **Technique**: one entry in the vocabulary of skills the log references. A
   procedure, a structure, a paradigm or a problem class. Shipped as code.
 - **Vocabulary**: every technique, each with the criterion for claiming it.
+- **Parent**: a technique another technique is a kind of, named on the
+  narrower one's entry. `dynamic-programming` is the parent of `knapsack`.
 - **Card**: the study material for one technique: what to read, the
   templates to reproduce from memory, and a selector for problems to solve.
 - **Template**: one form of a technique, authored on a card, that a user

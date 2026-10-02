@@ -8,6 +8,7 @@ from algo_coach.solution_claims.standing import standing_solution_claims
 from algo_coach.solution_claims.store import SolutionClaimLog
 from algo_coach.solutions.store import SolutionLog
 from algo_coach.storage import Database
+from algo_coach.techniques import with_ancestors
 
 
 def derive(
@@ -19,7 +20,7 @@ def derive(
 
     The reference is excluded, for the reason `corpus.md` gives. A canonical
     nothing has read contributes nothing, which is not a verdict that it used
-    no technique.
+    no technique. A claimed code brings every code it is a kind of.
     """
     standing = standing_solution_claims(claims)
     derived: dict[str, set[str]] = {problem.id: set() for problem in problems}
@@ -28,7 +29,7 @@ def derive(
             continue
         claim = standing.get(solution.id)
         if claim is not None:
-            derived[solution.problem_id] |= set(claim.techniques)
+            derived[solution.problem_id] |= with_ancestors(claim.techniques)
     # sorted: a claim's prompt is rendered from these, and the prompt hash is
     # taken over that text.
     return {problem_id: sorted(codes) for problem_id, codes in derived.items()}

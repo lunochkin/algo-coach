@@ -35,3 +35,5 @@ class Technique(BaseModel):
     kind: Kind
     earns: str = Field(min_length=1)
     near_miss: str = Field(min_length=1)  # the code it is confused with, which decides cases
+    # each a code this one is a kind of, added wherever codes are grouped
+    parents: tuple[str, ...] = ()

@@ -1,5 +1,5 @@
 import json
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from functools import cache
 from importlib import resources
 from types import MappingProxyType
@@ -43,3 +43,19 @@ def codes() -> frozenset[str]:
 # and must still load.
 def is_known(code: str) -> bool:
     return code in codes()
+
+
+def with_ancestors(codes: Iterable[str]) -> set[str]:
+    """The codes and every code each is a kind of. A retired code has no entry,
+    so it reaches no parent."""
+    found: set[str] = set()
+    pending = list(codes)
+    while pending:
+        code = pending.pop()
+        if code in found:
+            continue
+        found.add(code)
+        entry = criteria().get(code)
+        if entry is not None:
+            pending.extend(entry.parents)
+    return found

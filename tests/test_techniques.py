@@ -12,7 +12,7 @@ from algo_coach.schema import (
     Problem,
     Technique,
 )
-from algo_coach.techniques import codes, criteria, is_known
+from algo_coach.techniques import codes, criteria, is_known, with_ancestors
 
 
 def raw_list() -> list[dict]:
@@ -129,3 +129,33 @@ def test_every_kind_names_its_test():
     for kind in Kind:
         assert kind.test.strip()
     assert len({kind.test for kind in Kind}) == len(Kind)
+
+
+def test_a_parent_names_a_code_that_exists():
+    """A parent nothing defines would add a code the vocabulary cannot claim."""
+    for entry in criteria().values():
+        for parent in entry.parents:
+            assert parent in criteria()
+
+
+def test_no_code_is_its_own_ancestor():
+    """A cycle would make two codes kinds of each other, which is one code
+    under two names."""
+    for code, entry in criteria().items():
+        assert code not in with_ancestors(entry.parents)
+
+
+def test_a_code_brings_every_ancestor():
+    """Interval DP is a kind of DP, so a claim naming the first counts toward
+    the second."""
+    assert with_ancestors(["interval-dp", "sorting"]) == {
+        "interval-dp",
+        "dynamic-programming",
+        "sorting",
+    }
+
+
+def test_a_retired_code_reaches_no_parent():
+    """A record can carry a code the vocabulary no longer holds, and grouping
+    must still read it."""
+    assert with_ancestors(["retired-code"]) == {"retired-code"}
