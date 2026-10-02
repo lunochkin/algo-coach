@@ -2418,7 +2418,14 @@
             "$ref": "#/components/schemas/Sitting"
           },
           "elapsed_sec": {
-            "type": "number",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Elapsed Sec"
           }
         },
@@ -2453,6 +2460,18 @@
             "type": "string",
             "format": "date-time",
             "title": "Started At"
+          },
+          "clock_started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock Started At"
           },
           "ended_at": {
             "anyOf": [
@@ -2744,7 +2763,14 @@
             "$ref": "#/components/schemas/Sitting"
           },
           "elapsed_sec": {
-            "type": "number",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Elapsed Sec"
           }
         },

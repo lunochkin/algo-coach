@@ -25,6 +25,7 @@ def a_sitting(**overrides) -> Sitting:
             "user_id": "u-4f9c2a",
             "problem_id": "p1",
             "started_at": BEGAN,
+            "clock_started_at": BEGAN,
             # still running an hour on, so the loop has been touching it: an
             # untouched sitting ends at the bound `log.md` gives
             "last_active_at": datetime.now(UTC),

@@ -59,7 +59,7 @@ export function SittingPage() {
   const [refused, setRefused] = useState<string | null>(null)
   // the sitting as the last pause or resume left it, over the one first loaded,
   // with the engine's elapsed time and when the page received it
-  const [moved, setMoved] = useState<{ sitting: Sitting; elapsedSec: number; at: number } | null>(
+  const [moved, setMoved] = useState<{ sitting: Sitting; elapsedSec: number | null; at: number } | null>(
     null,
   )
   const [moving, setMoving] = useState(false)

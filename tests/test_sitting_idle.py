@@ -33,6 +33,7 @@ class Stores:
                     "user_id": USER,
                     "problem_id": "p1",
                     "started_at": STARTED,
+                    "clock_started_at": STARTED,
                     "last_active_at": STARTED,
                 }
                 | sitting

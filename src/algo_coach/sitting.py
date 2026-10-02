@@ -68,7 +68,7 @@ class Served(BaseModel):
     sitting: Sitting
     # taken on the engine's clock, so a page counting on from it shows the
     # number an attempt would carry rather than one its own clock skews
-    elapsed_sec: float
+    elapsed_sec: float | None  # none while the clock has not run
 
 
 class Failure(BaseModel):

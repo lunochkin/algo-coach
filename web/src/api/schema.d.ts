@@ -1004,7 +1004,7 @@ export interface components {
             signature: string | null;
             sitting: components["schemas"]["Sitting"];
             /** Elapsed Sec */
-            elapsed_sec: number;
+            elapsed_sec: number | null;
         };
         /** Sitting */
         Sitting: {
@@ -1019,6 +1019,8 @@ export interface components {
              * Format: date-time
              */
             started_at: string;
+            /** Clock Started At */
+            clock_started_at?: string | null;
             /** Ended At */
             ended_at?: string | null;
             /** Last Active At */
@@ -1140,7 +1142,7 @@ export interface components {
         Timed: {
             sitting: components["schemas"]["Sitting"];
             /** Elapsed Sec */
-            elapsed_sec: number;
+            elapsed_sec: number | null;
         };
         /**
          * Unclaimed

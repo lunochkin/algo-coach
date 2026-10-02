@@ -103,10 +103,12 @@ sittings = Table(
     Column("user_id", Text, ForeignKey("users.id"), nullable=False),
     Column("problem_id", Text, ForeignKey("problems.id"), nullable=False),
     Column("started_at", timestamp(), nullable=False),
+    Column("clock_started_at", timestamp()),
     Column("ended_at", timestamp()),
     # when the loop last acted on it: a sitting idle past the bound ends here
     Column("last_active_at", timestamp()),
     CheckConstraint("ended_at >= started_at", name="ends_after_it_starts"),
+    CheckConstraint("clock_started_at >= started_at", name="clock_after_serving"),
     # one clock running on a problem for a user: a second serve reaches it
     # rather than starting another
     Index(

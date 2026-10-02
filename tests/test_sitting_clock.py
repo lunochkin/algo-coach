@@ -24,7 +24,13 @@ def a_store(database, **overrides) -> SittingStore:
     store = SittingStore(database)
     store.put(
         Sitting.model_validate(
-            {"id": "s1", "user_id": "u-4f9c2a", "problem_id": "p1", "started_at": STARTED}
+            {
+                "id": "s1",
+                "user_id": "u-4f9c2a",
+                "problem_id": "p1",
+                "started_at": STARTED,
+                "clock_started_at": STARTED,
+            }
             | overrides
         )
     )
@@ -117,7 +123,7 @@ def test_the_engine_s_clock_is_the_default(database):
     """The loop passes no time of its own, so a duration the browser reports
     reaches no record."""
     began = datetime.now(UTC) - timedelta(minutes=1)
-    store = a_store(database, started_at=began)
+    store = a_store(database, started_at=began, clock_started_at=began)
 
     one = pause(store, "s1", user_id="u-4f9c2a")
 

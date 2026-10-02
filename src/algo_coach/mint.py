@@ -208,7 +208,8 @@ def attempt(sitting: Sitting, code: str, *, solved: bool, finished_at: datetime)
         started_at=sitting.started_at,
         finished_at=finished_at,
         language="python",
-        # cumulative and with every pause excluded: `log.md` gives why
+        # cumulative and with every pause excluded, none where no clock ran:
+        # `log.md` gives why
         time_to_solve_sec=sitting.elapsed(finished_at),
         solved=solved,
         code=code,
@@ -233,6 +234,8 @@ def sitting(user_id: str, problem_id: str, at: datetime | None = None) -> Sittin
         user_id=user_id,
         problem_id=problem_id,
         started_at=at,
+        # the clock runs from serving until the start press lands
+        clock_started_at=at,
         last_active_at=at,
     )
 

@@ -94,7 +94,7 @@ was shown, and the author avoided opening problems because of it. `flows.md`,
 `log.md` and `pages.md` now give the sitting opened by reading and timed by
 choice.
 
-- [ ] Add `clock_started_at` to the sitting, absent on a sitting whose clock
+- [x] Add `clock_started_at` to the sitting, absent on a sitting whose clock
       never ran, and measure the elapsed time from it. A sitting begun at
       serving would count the reading done before the press
 - [ ] Serve a problem on opening `/problems/:problem_id` and send the browser to

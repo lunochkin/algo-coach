@@ -65,7 +65,7 @@ class Timed(BaseModel):
     engine's clock."""
 
     sitting: Sitting
-    elapsed_sec: float
+    elapsed_sec: float | None  # none while the clock has not run
 
 
 class Unclaimed(BaseModel):
