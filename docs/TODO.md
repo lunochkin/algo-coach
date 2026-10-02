@@ -150,14 +150,6 @@ problem lost the work. `flows.md` now gives what the editor carries.
       bound per bullet: each list's length, each integer's range and sign,
       each string's length. A sitting met a statement giving no range for its
       values, and the solver picks an approach from those bounds
-- [ ] Read the served statements for an unbounded input, and list each one
-      found here. A problem is never edited, so a list is what decides whether
-      any is worth retiring
-
-### The corpus
-
-- [ ] Run a sweep for a technique the drill loop runs out of unseen problems
-      on. The trigger is a technique whose candidates the user has all attempted
 
 ### Exit
 - [ ] Every item this phase opened is ticked, and a stretch of sittings opened
@@ -172,6 +164,9 @@ problem lost the work. `flows.md` now gives what the editor carries.
 - [ ] Re-claim thirty attempts with the earlier machine claims hidden, to
       measure the user's own consistency, which caps every classifier score.
       Mastery reads claims, and a wrong claim spends practice time
+- [ ] Read the served statements for an unbounded input, and list each one
+      found here. A problem is never edited, so a list is what decides whether
+      any is worth retiring
 
 ### The schedule
 
@@ -403,6 +398,9 @@ one form its target named.
 
 ### Problem generation
 
+- [ ] Run a sweep for a technique the drill loop runs out of unseen problems
+      on. Triggered when the user has attempted every candidate a technique
+      offers
 - [ ] Write the generation call for a technique target: a technique and its
       criteria in, a problem out, carrying `target_technique`. A paradigm and a
       problem class have no template, so nothing else reaches those two kinds.

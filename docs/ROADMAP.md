@@ -355,7 +355,6 @@ that does not exist. `docs/TODO.md` carries those items as they are found.
 - The faults the sittings surface, fixed in the flows that carry them.
 - The flows and pages use asks for, written into `docs/architecture/` before
   they are built, as Phase 11 wrote its own.
-- Problems generated where a technique runs out of ones the user has not seen.
 - Exit: every item this phase opened is ticked, and a stretch of sittings
   opened no new one.
 
