@@ -194,6 +194,8 @@ ignore_names = [
     # the trainer lists the card's templates, and the page decides which of them
     # it offers to switch to
     "recallable",
+    # the cards list reads a card's required rungs solved, and no module does
+    "required_solved",
 ]
 
 [tool.ruff]

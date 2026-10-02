@@ -111,6 +111,12 @@ choice.
 - [x] Count a sitting with no submission for nothing, and an untimed one by its
       verdict alone, wherever the board and the candidates read sittings
 
+### The cards dashboard
+
+- [x] Read where each card stands on `/cards`: the cards with a run open first,
+      each with its run, its ladder, its gaps and the recall state of every
+      template. algo-prep's drill board held this by hand
+
 ### The editor's carried code
 
 The editor opened every sitting on the signature, so reopening a half-solved

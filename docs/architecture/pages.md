@@ -83,7 +83,7 @@ those steps at low fidelity.
 | `/techniques/:technique` | picks a problem | Practice |
 | `/problems/:problem_id` | opens the problem, which serves it, or reads a retired one | Practice |
 | `/sittings/:sitting_id` | solves, submits, claims | Practice |
-| `/cards` | picks a card | Cards |
+| `/cards` | reads where each card stands, and picks one | Cards |
 | `/cards/:slug` | reads a card and reveals its templates | Cards |
 | `/cards/:slug/recall` | opens the recall of the template the trainer draws | Cards |
 | `/cards/:slug/recall/:template` | reproduces one template from memory | Cards |

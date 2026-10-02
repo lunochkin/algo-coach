@@ -305,35 +305,42 @@ problem's path reads as its record, as "Every problem" gives.
 | One card teaches one technique: when to reach for it, and the forms to |
 | reproduce from memory.                                                 |
 |                                                                        |
+| Studying                                                               |
+| +--------------------------------------------------------+             |
+| | Sliding window    sliding-window        2 days ago     |             |
+| | started 09-28 . ladder 5/8, required 4/5               |             |
+| | recall  ✓ ✓ ✗ · · -                                    |             |
+| +--------------------------------------------------------+             |
+|                                                                        |
+| Not started                                                            |
 | +--------------------------------------------------------+             |
 | | Monotonic stack   monotonic-stack          4 templates |             |
 | | For each element, the next or previous greater ...     |             |
-| | ------------------------------------------------------ |            |
-| | Sliding window    sliding-window           6 templates |             |
-| | The answer is about a contiguous subarray ...          |             |
+| | recall  ✓ ✓ · ·                                        |             |
 | +--------------------------------------------------------+             |
-|                                                                        |
 | +--------------------------------------------------------+             |
-| | binary-search                                  2 cards |             |
+| | dynamic-programming                            3 cards |             |
 | | ------------------------------------------------------ |            |
-| | Binary search                              5 templates |             |
-| | A sorted array, or any space with a monotone ...       |             |
-| | ------------------------------------------------------ |            |
-| | Answer-space search                        1 template  |             |
-| | The answer is a number in a known range ...            |             |
+| | DP: knapsack, 0/1 and unbounded   knapsack  7 templates|             |
+| | Choose items to hit a target ...                       |             |
 | +--------------------------------------------------------+             |
 +------------------------------------------------------------------------+
 ```
 
-- A card reads as a row: its title, how many templates it teaches, and its
-  trigger cut to two lines. The trigger says when to reach for the technique,
-  and a reader picks a card by that sentence.
-- A technique several cards teach carries a header naming it, since the cards
-  under it are one thing to choose between.
-- A technique one card teaches carries no header, and that row names the
-  technique itself. A header over a single row repeats what the row says.
-- Every block is the same panel, so the page reads as a list of panels rather
-  than as two kinds of thing.
+- The page is the user's dashboard of cards. The cards with a run open read
+  first, under "Studying", the most recently active first. The rest read under
+  "Not started", grouped by family as before.
+- A started card's row reads its progress: when the run began, the ladder's
+  solved rungs, the required rungs among them, and when the card was last
+  active. The trigger gives way to that line, since the user already chose the
+  card.
+- Every row carries the recall state of its templates, one mark each in the
+  card's order: `✓` recalled clean, `◐` passed with hints, `✗` failed, `·`
+  never recalled, and `-` a template no case checks.
+- A gap reads on the row as `n forms uncovered`, as the card's own page
+  reports it.
+- Phases such as graduation and a due date are absent. `flows.md` names no
+  threshold for done, and Phase 14's schedule adds the due date to the row.
 
 ## A card
 

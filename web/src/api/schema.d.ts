@@ -582,6 +582,29 @@ export interface components {
             probes?: components["schemas"]["Probe"][];
         };
         /**
+         * CardStatus
+         * @description Where the user stands on a card, as the cards list reads it. Folded on
+         *     every read, as the card's own page folds it.
+         */
+        CardStatus: {
+            /** Started At */
+            started_at: string | null;
+            /** Rungs */
+            rungs: number;
+            /** Solved */
+            solved: number;
+            /** Required */
+            required: number;
+            /** Required Solved */
+            required_solved: number;
+            /** Gaps */
+            gaps: number;
+            /** Recall */
+            recall: components["schemas"]["Recalled"][];
+            /** Last At */
+            last_at: string | null;
+        };
+        /**
          * CaseOutcome
          * @enum {string}
          */
@@ -722,6 +745,7 @@ export interface components {
             selector: components["schemas"]["Selector"];
             /** Family */
             family: string;
+            status: components["schemas"]["CardStatus"];
         };
         /**
          * Me

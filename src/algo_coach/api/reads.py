@@ -40,7 +40,9 @@ from algo_coach.schema import (
     Problem,
     ProblemDifficulty,
     RecallAttempt,
+    Solution,
     Template,
+    TemplateMatch,
 )
 from algo_coach.sitting import Served, get, serve
 from algo_coach.solution_claims import load_problem, load_problems
@@ -142,14 +144,49 @@ def board(root: Root, user_id: UserId) -> Board:
     )
 
 
+class CardStatus(BaseModel):
+    """Where the user stands on a card, as the cards list reads it. Folded on
+    every read, as the card's own page folds it."""
+
+    started_at: datetime | None  # absent until the card is started
+    rungs: int
+    solved: int  # since the run began, as the card's page counts a rung
+    required: int
+    required_solved: int
+    gaps: int
+    recall: list[Recalled]
+    # the latest of the run's start, a recall, and an attempt on a rung since
+    # the run began
+    last_at: datetime | None
+
+
 class ListedCard(Card):
     family: str  # the technique the cards list groups this card under
+    status: CardStatus
 
 
 @router.get("/cards")
-def every_card(root: Root) -> list[ListedCard]:
+def every_card(root: Root, user_id: UserId) -> list[ListedCard]:
+    problems = load_problems(root)
+    attempts = AttemptLog(root).attempts(user_id)
+    solutions = SolutionLog(root).solutions()
+    matches = MatchLog(root).matches()
+    runs = CardRunLog(root)
+    recalls = RecallLog(root)
     listed = [
-        ListedCard(**card.model_dump(), family=family(card.technique))
+        ListedCard(
+            **card.model_dump(),
+            family=family(card.technique),
+            status=_status(
+                card,
+                runs.started(user_id, card.id),
+                problems,
+                solutions,
+                matches,
+                attempts,
+                recalls.for_card(user_id, card.id),
+            ),
+        )
         for card in CardStore(root).all()
     ]
     # a family's own cards first, then its narrower techniques'
@@ -181,6 +218,40 @@ def card(root: Root, user_id: UserId, slug: str) -> Studied:
         gaps=resolved.gaps,
         recall=_recall(found, RecallLog(root).for_card(user_id, found.id)),
         probes=_probes(run, problems, attempts),
+    )
+
+
+def _status(
+    card: Card,
+    run: CardRun | None,
+    problems: list[Problem],
+    solutions: list[Solution],
+    matches: list[TemplateMatch],
+    attempts: list[Attempt],
+    recalls: list[RecallAttempt],
+) -> CardStatus:
+    since = run.started_at if run else None
+    resolved = ladder(card, problems, solutions, matches, attempts, since=since)
+    recall = _recall(card, recalls)
+    taught = {rung.problem.id for rung in resolved.rungs}
+    touched = [
+        *([since] if since else []),
+        *(one.last_at for one in recall if one.last_at),
+        *(
+            one.finished_at
+            for one in attempts
+            if since and one.problem_id in taught and one.finished_at >= since
+        ),
+    ]
+    return CardStatus(
+        started_at=since,
+        rungs=len(resolved.rungs),
+        solved=sum(rung.solved for rung in resolved.rungs),
+        required=sum(rung.required for rung in resolved.rungs),
+        required_solved=sum(rung.required and rung.solved for rung in resolved.rungs),
+        gaps=len(resolved.gaps),
+        recall=recall,
+        last_at=max(touched, default=None),
     )
 
 

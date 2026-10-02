@@ -1412,6 +1412,74 @@
         ],
         "title": "CardRun"
       },
+      "CardStatus": {
+        "properties": {
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "rungs": {
+            "type": "integer",
+            "title": "Rungs"
+          },
+          "solved": {
+            "type": "integer",
+            "title": "Solved"
+          },
+          "required": {
+            "type": "integer",
+            "title": "Required"
+          },
+          "required_solved": {
+            "type": "integer",
+            "title": "Required Solved"
+          },
+          "gaps": {
+            "type": "integer",
+            "title": "Gaps"
+          },
+          "recall": {
+            "items": {
+              "$ref": "#/components/schemas/Recalled"
+            },
+            "type": "array",
+            "title": "Recall"
+          },
+          "last_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "started_at",
+          "rungs",
+          "solved",
+          "required",
+          "required_solved",
+          "gaps",
+          "recall",
+          "last_at"
+        ],
+        "title": "CardStatus",
+        "description": "Where the user stands on a card, as the cards list reads it. Folded on\nevery read, as the card's own page folds it."
+      },
       "CaseOutcome": {
         "type": "string",
         "enum": [
@@ -1740,6 +1808,9 @@
           "family": {
             "type": "string",
             "title": "Family"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CardStatus"
           }
         },
         "type": "object",
@@ -1752,7 +1823,8 @@
           "brief",
           "templates",
           "selector",
-          "family"
+          "family",
+          "status"
         ],
         "title": "ListedCard"
       },

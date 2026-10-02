@@ -166,3 +166,49 @@ def test_a_card_reads_the_recall_state_of_each_template(client, database):
         (True, ["notes"], True),
         (False, [], False),
     ]
+
+
+def test_the_cards_list_reads_where_each_card_stands(client, database):
+    """The cards page is the user's dashboard: a started card reads its run,
+    its ladder and its recall, and an unstarted one reads its recall alone."""
+    # a ladder over the whole corpus, so an attempt reorders no rung off it
+    seeded(
+        database,
+        card(
+            slug="windows-wide",
+            templates=[template("longest-valid-window"), template("fixed-window")],
+            selector={"technique": TECHNIQUE, "size": 3},
+        ),
+    )
+    started = client.post("/api/cards/windows-wide/runs").json()
+    began = datetime.fromisoformat(started["started_at"])
+    AttemptLog(database).append_attempt(
+        solved_attempt("p-1", at=began + timedelta(minutes=5), id="a-after")
+    )
+
+    listed = {one["slug"]: one for one in client.get("/api/cards").json()}
+    status = listed["windows-wide"]["status"]
+
+    assert status["started_at"] == started["started_at"]
+    assert (status["rungs"], status["solved"]) == (3, 1)
+    # no canonical displays either template, so both are gaps and no rung is
+    # required
+    assert (status["required"], status["required_solved"], status["gaps"]) == (0, 0, 2)
+    assert [one["verified"] for one in status["recall"]] == [False, False]
+    assert status["last_at"] == (began + timedelta(minutes=5)).isoformat().replace("+00:00", "Z")
+
+
+def test_an_unstarted_card_reads_no_progress(client):
+    (listed,) = client.get("/api/cards").json()
+
+    assert listed["status"]["started_at"] is None
+    assert listed["status"]["solved"] == 0
+
+
+def test_the_cards_list_reads_the_user_s_own_status(client, database):
+    client.post("/api/cards/sliding-window/runs")
+
+    other = browsing(database, "u-b71e03")
+    (listed,) = other.get("/api/cards").json()
+
+    assert listed["status"]["started_at"] is None

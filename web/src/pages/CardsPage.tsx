@@ -4,7 +4,7 @@ import { api, type ListedCard } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
-import { plain } from '@/lib/format'
+import { lastAt, plain } from '@/lib/format'
 
 export function CardsPage() {
   const cards = useLoaded((signal) => api.GET('/api/cards', { signal }), 'cards')
@@ -16,17 +16,36 @@ export function CardsPage() {
         note="One card teaches one technique: when to reach for it, and the forms to reproduce from memory."
       />
       <Loaded of="the cards" state={cards} blank="No card is seeded yet.">
-        {(cards) => (
-          <div className="space-y-section">
-            {blocks(cards).map((block) => (
-              <Panel
-                key={'technique' in block ? block.technique : block.cards[0].slug}
-                technique={'technique' in block ? block.technique : null}
-                cards={block.cards}
-              />
-            ))}
-          </div>
-        )}
+        {(cards) => {
+          // the cards with a run open read first, the most recently active
+          // first: they are the ones the user is working through
+          const studying = cards
+            .filter((card) => card.status.started_at)
+            .sort((a, b) => (b.status.last_at ?? '').localeCompare(a.status.last_at ?? ''))
+          const rest = cards.filter((card) => !card.status.started_at)
+          return (
+            <div className="space-y-section">
+              {studying.length > 0 && (
+                <section className="space-y-stack">
+                  <h2 className="text-heading font-medium">Studying</h2>
+                  <Panel technique={null} cards={studying} />
+                </section>
+              )}
+              {rest.length > 0 && (
+                <section className="space-y-stack">
+                  {studying.length > 0 && <h2 className="text-heading font-medium">Not started</h2>}
+                  {blocks(rest).map((block) => (
+                    <Panel
+                      key={'technique' in block ? block.technique : block.cards[0].slug}
+                      technique={'technique' in block ? block.technique : null}
+                      cards={block.cards}
+                    />
+                  ))}
+                </section>
+              )}
+            </div>
+          )
+        }}
       </Loaded>
     </section>
   )
@@ -57,6 +76,7 @@ function Panel({ technique, cards }: { technique: string | null; cards: ListedCa
 // card that stands alone, or a narrower technique under its family's heading
 function CardRow({ card, named = false }: { card: ListedCard; named?: boolean }) {
   const optional = card.templates.filter((one) => one.optional).length
+  const { status } = card
 
   return (
     <Link
@@ -67,14 +87,54 @@ function CardRow({ card, named = false }: { card: ListedCard; named?: boolean })
         <span className="font-medium underline-offset-4 group-hover:underline">{card.title}</span>
         {named && <span className="font-mono text-meta text-muted-foreground">{card.technique}</span>}
         <span className="ml-auto shrink-0 text-meta text-muted-foreground tabular-nums">
-          {templates(card.templates.length, optional)}
+          {status.started_at ? lastAt(status.last_at) : templates(card.templates.length, optional)}
         </span>
       </div>
-      {/* the trigger says when to reach for the technique, which is what a
-          reader picks a card by */}
-      <p className="mt-1 line-clamp-2 text-meta text-muted-foreground">{plain(card.trigger)}</p>
+      {status.started_at ? (
+        // a started card was already chosen, so its progress replaces the
+        // trigger it was chosen by
+        <p className="mt-1 text-meta text-muted-foreground tabular-nums">
+          started {new Date(status.started_at).toLocaleDateString()} · ladder {status.solved}/
+          {status.rungs}, required {status.required_solved}/{status.required}
+          {status.gaps > 0 && ` · ${status.gaps} ${status.gaps === 1 ? 'form' : 'forms'} uncovered`}
+        </p>
+      ) : (
+        // the trigger says when to reach for the technique, which is what a
+        // reader picks a card by
+        <p className="mt-1 line-clamp-2 text-meta text-muted-foreground">{plain(card.trigger)}</p>
+      )}
+      <RecallMarks card={card} />
     </Link>
   )
+}
+
+// one mark per template in the card's order: the last recall of each form
+function RecallMarks({ card }: { card: ListedCard }) {
+  const recalled = new Map(card.status.recall.map((one) => [one.template_id, one]))
+  return (
+    <p className="mt-1 flex items-center gap-1.5 text-meta text-muted-foreground">
+      recall
+      {card.templates.map((template) => {
+        const [mark, reading] = recallMark(template.cases?.length ?? 0, recalled.get(template.id))
+        return (
+          <span key={template.id} title={`${template.title}: ${reading}`} className="font-mono">
+            {mark}
+          </span>
+        )
+      })}
+    </p>
+  )
+}
+
+function recallMark(
+  cases: number,
+  last: ListedCard['status']['recall'][number] | undefined,
+): [string, string] {
+  // a template no case checks is read on the card and never recalled
+  if (cases === 0) return ['-', 'read, not recalled']
+  if (!last?.last_at) return ['·', 'never recalled']
+  if (!last.verified) return ['✗', 'failed']
+  return last.hints.length > 0 ? ['◐', 'passed with hints'] : ['✓', 'recalled clean']
 }
 
 function templates(count: number, optional: number): string {
