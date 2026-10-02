@@ -268,6 +268,11 @@ function LadderView({
               <span className="font-medium underline-offset-4 group-hover:underline">
                 {rung.problem.title}
               </span>
+              {rung.problem.difficulty && (
+                <Badge variant="outline" className="ml-2 align-middle font-normal">
+                  {rung.problem.difficulty}
+                </Badge>
+              )}
               {rung.templates.length > 0 && (
                 <span className="block text-meta text-muted-foreground">
                   covers{" "}
@@ -352,6 +357,11 @@ function ProbesView({
             <span className="font-medium underline-offset-4 group-hover:underline">
               {one.problem.title}
             </span>
+            {one.problem.difficulty && (
+              <Badge variant="outline" className="font-normal">
+                {one.problem.difficulty}
+              </Badge>
+            )}
             <span className="ml-auto shrink-0 text-meta text-muted-foreground">
               {one.attempted ? "attempted" : "not attempted"}
             </span>
