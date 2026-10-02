@@ -110,6 +110,8 @@ class Carry(BaseModel):
     # before that solve or before the run began
     solved_at: datetime | None
     solved_sitting_id: str | None
+    # the last solve's code, which the page restores only on the user's press
+    solved_code: str | None
     run_started_at: datetime | None
 
 
@@ -181,6 +183,7 @@ def submit(
     code: str,
     *,
     user_id: str,
+    restored: bool = False,
     now: datetime | None = None,
 ) -> Submitted:
     # taken before the run: judging takes seconds the solver did not spend
@@ -199,7 +202,7 @@ def submit(
     problem_cases = cases.for_problem(one.problem_id)
     runs = judge(code, problem_cases, cap_ms=DRILL_CAP_MS)
     judged = Execution(cap_ms=DRILL_CAP_MS, runner=runner(), results=[result for result, _ in runs])
-    attempt = mint.attempt(one, code, solved=judged.verified, finished_at=at)
+    attempt = mint.attempt(one, code, solved=judged.verified, finished_at=at, restored=restored)
     verification = mint.attempt_verification(attempt.id, judged)
     log.append_attempt(attempt)
     log.append_verification(verification)
@@ -234,6 +237,7 @@ def carry(attempts: Sequence[Attempt], *, run_started_at: datetime | None) -> Ca
         at=last.finished_at if carried and last else None,
         solved_at=solves[-1].finished_at if solves else None,
         solved_sitting_id=solves[-1].sitting_id if solves else None,
+        solved_code=solves[-1].code if solves else None,
         run_started_at=run_started_at,
     )
 

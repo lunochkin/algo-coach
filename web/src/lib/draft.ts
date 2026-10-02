@@ -4,7 +4,9 @@ import type { Carry } from '@/api/client'
 // so the next sitting on it can find it. `at` is when it was typed: `flows.md`
 // carries a draft only by when it was written. `sitting` is where it was
 // typed, so a reload finds its own draft whatever the browser's clock says
-export type Draft = { code: string; at: string; sitting: string }
+// `restored` says the sitting restored an earlier solve, which its attempts
+// then report
+export type Draft = { code: string; at: string; sitting: string; restored?: boolean }
 
 const key = (problemId: string) => `algo-coach:problem:${problemId}:draft`
 
@@ -19,8 +21,13 @@ export function draftOf(problemId: string): Draft | null {
   }
 }
 
-export function keepDraft(problemId: string, sittingId: string, code: string): void {
-  const draft: Draft = { code, at: new Date().toISOString(), sitting: sittingId }
+export function keepDraft(
+  problemId: string,
+  sittingId: string,
+  code: string,
+  restored = false,
+): void {
+  const draft: Draft = { code, at: new Date().toISOString(), sitting: sittingId, restored }
   try {
     localStorage.setItem(key(problemId), JSON.stringify(draft))
   } catch {

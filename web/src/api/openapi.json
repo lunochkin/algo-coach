@@ -1093,6 +1093,17 @@
               }
             ],
             "title": "Code"
+          },
+          "restored": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restored"
           }
         },
         "type": "object",
@@ -1583,6 +1594,17 @@
             ],
             "title": "Solved Sitting Id"
           },
+          "solved_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Solved Code"
+          },
           "run_started_at": {
             "anyOf": [
               {
@@ -1602,6 +1624,7 @@
           "at",
           "solved_at",
           "solved_sitting_id",
+          "solved_code",
           "run_started_at"
         ],
         "title": "Carry",
@@ -2813,6 +2836,11 @@
           "code": {
             "type": "string",
             "title": "Code"
+          },
+          "restored": {
+            "type": "boolean",
+            "title": "Restored",
+            "default": false
           }
         },
         "type": "object",

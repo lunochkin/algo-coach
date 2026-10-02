@@ -469,6 +469,8 @@ export interface components {
             solved: boolean;
             /** Code */
             code?: string | null;
+            /** Restored */
+            restored?: boolean | null;
         };
         /**
          * AttemptClaim
@@ -636,6 +638,8 @@ export interface components {
             solved_at: string | null;
             /** Solved Sitting Id */
             solved_sitting_id: string | null;
+            /** Solved Code */
+            solved_code: string | null;
             /** Run Started At */
             run_started_at: string | null;
         };
@@ -1125,6 +1129,11 @@ export interface components {
         Submission: {
             /** Code */
             code: string;
+            /**
+             * Restored
+             * @default false
+             */
+            restored: boolean;
         };
         /**
          * Submitted

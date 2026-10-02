@@ -199,7 +199,9 @@ def self_label(attempt_id: str, mode: FailureMode) -> SelfLabel:
     return SelfLabel(id=new_id(), created_at=datetime.now(UTC), attempt_id=attempt_id, mode=mode)
 
 
-def attempt(sitting: Sitting, code: str, *, solved: bool, finished_at: datetime) -> Attempt:
+def attempt(
+    sitting: Sitting, code: str, *, solved: bool, finished_at: datetime, restored: bool = False
+) -> Attempt:
     return Attempt(
         id=new_id(),
         user_id=sitting.user_id,
@@ -213,6 +215,7 @@ def attempt(sitting: Sitting, code: str, *, solved: bool, finished_at: datetime)
         time_to_solve_sec=sitting.elapsed(finished_at),
         solved=solved,
         code=code,
+        restored=restored,
     )
 
 

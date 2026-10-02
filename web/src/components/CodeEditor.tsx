@@ -14,16 +14,33 @@ import {
   keymap,
   lineNumbers,
 } from '@codemirror/view'
-import { useEffect, useRef } from 'react'
+import { type Ref, useEffect, useImperativeHandle, useRef } from 'react'
 
 import { HIGHLIGHTER } from '@/lib/python'
 
-type Props = { initial: string; onChange: (code: string) => void; onSubmit: () => void }
+// replacing the document is one transaction, so the editor's undo takes it back
+export type EditorHandle = { replace: (code: string) => void }
+
+type Props = {
+  initial: string
+  onChange: (code: string) => void
+  onSubmit: () => void
+  handle?: Ref<EditorHandle>
+}
 
 // highlighting and indentation, and no `autocompletion()`: `flows.md` gives
 // why the editor a sitting is typed into proposes nothing
-export function CodeEditor({ initial, onChange, onSubmit }: Props) {
+export function CodeEditor({ initial, onChange, onSubmit, handle }: Props) {
   const host = useRef<HTMLDivElement>(null)
+  const live = useRef<EditorView | null>(null)
+  useImperativeHandle(handle, () => ({
+    replace(code) {
+      const view = live.current
+      if (!view) return
+      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: code } })
+      view.focus()
+    },
+  }))
   const changed = useRef(onChange)
   changed.current = onChange
   const submitted = useRef(onSubmit)
@@ -88,8 +105,12 @@ export function CodeEditor({ initial, onChange, onSubmit }: Props) {
         ],
       }),
     })
+    live.current = view
     view.focus()
-    return () => view.destroy()
+    return () => {
+      live.current = null
+      view.destroy()
+    }
     // created once per mount: `initial` seeds the document and is never
     // pushed into a live editor, which would move the cursor
     // eslint-disable-next-line react-hooks/exhaustive-deps

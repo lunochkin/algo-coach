@@ -36,6 +36,13 @@ def test_a_solve_is_never_carried():
     assert (one.solved_at, one.solved_sitting_id) == (T0 + timedelta(minutes=5), "s-a2")
 
 
+def test_the_last_solve_s_code_is_offered_for_the_restore_press():
+    """The page restores it only on the user's press."""
+    one = carry([attempt("a1", minutes=0, solved=True, code="answer")], run_started_at=None)
+
+    assert (one.code, one.solved_code) == (None, "answer")
+
+
 def test_work_after_a_solve_is_carried():
     """A wrong attempt after the solve is new work in progress."""
     one = carry(

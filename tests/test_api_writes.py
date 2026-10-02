@@ -254,3 +254,14 @@ def test_the_modes_each_attempt_leaves_open_are_served(client, sitting_id):
         [],
         ["speed", "none"],
     ]
+
+
+def test_a_submission_after_a_restore_says_so(client, sitting_id):
+    """A solve typed over a restored one is not an independent solve, so the
+    attempt records the restore the page reports."""
+    restored = client.post(
+        f"/api/sittings/{sitting_id}/submissions", json={"code": TRIPLE, "restored": True}
+    ).json()["attempt"]
+    plain = submitted(client, sitting_id, TRIPLE).json()["attempt"]
+
+    assert (restored["restored"], plain["restored"]) == (True, False)

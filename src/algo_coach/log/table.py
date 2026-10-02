@@ -93,6 +93,7 @@ attempts = Table(
     Column("time_to_solve_sec", Double[float]()),
     Column("solved", Boolean, nullable=False),
     Column("code", Text),
+    Column("restored", Boolean),
     CheckConstraint("time_to_solve_sec >= 0", name="time_counted"),
 )
 

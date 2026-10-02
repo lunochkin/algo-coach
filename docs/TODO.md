@@ -129,7 +129,7 @@ problem lost the work. `flows.md` now gives what the editor carries.
       the problem is opened from a card with a run open, was written after the
       run began, and open the editor on the newer of it and the draft. A solve
       and code from before a run are never carried
-- [ ] Offer a press restoring the last solve where the editor did not carry it,
+- [x] Offer a press restoring the last solve where the editor did not carry it,
       and add `restored` to the attempt it then submits. A solve typed over a
       restored one is not an independent solve
 - [ ] Count a restored attempt as no solve in mastery, wherever the board and

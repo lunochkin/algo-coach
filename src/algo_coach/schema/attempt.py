@@ -28,6 +28,9 @@ class Attempt(BaseModel):
     time_to_solve_sec: float | None = None
     solved: bool
     code: str | None = None
+    # whether the sitting restored an earlier solve before this submission.
+    # Absent on an attempt written before the field, which restored nothing
+    restored: bool | None = None
 
 
 class SelfLabel(AttemptRecord):

@@ -37,6 +37,18 @@
       "title": "Problem Id",
       "type": "string"
     },
+    "restored": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Restored"
+    },
     "sitting_id": {
       "anyOf": [
         {

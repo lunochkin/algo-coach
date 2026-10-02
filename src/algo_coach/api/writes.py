@@ -51,6 +51,8 @@ router = APIRouter()
 
 class Submission(BaseModel):
     code: str
+    # the page restored an earlier solve in this sitting: `log.md`
+    restored: bool = False
 
 
 class Reproduction(BaseModel):
@@ -142,7 +144,13 @@ def _template(card: Card, template_slug: str) -> Template:
 @router.post("/sittings/{sitting_id}/submissions")
 def submission(root: Root, user_id: UserId, sitting_id: str, body: Submission) -> Submitted:
     return submit(
-        SittingStore(root), CaseLog(root), AttemptLog(root), sitting_id, body.code, user_id=user_id
+        SittingStore(root),
+        CaseLog(root),
+        AttemptLog(root),
+        sitting_id,
+        body.code,
+        user_id=user_id,
+        restored=body.restored,
     )
 
 

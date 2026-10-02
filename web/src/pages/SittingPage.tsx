@@ -4,7 +4,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { api, type Sitting, type Submitted } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
 import { ClaimPrompt } from '@/components/ClaimPrompt'
-import { CodeEditor } from '@/components/CodeEditor'
+import { CodeEditor, type EditorHandle } from '@/components/CodeEditor'
 import { ElapsedClock } from '@/components/ElapsedClock'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
@@ -71,6 +71,9 @@ export function SittingPage() {
     `carry:${problemOf ?? ''}:${card ?? ''}`,
   )
   const code = useRef<string | null>(null)
+  const editor = useRef<EditorHandle>(null)
+  // set by the restore press, and kept with the draft so a reload keeps it
+  const restored = useRef<boolean | null>(null)
   const [running, setRunning] = useState(false)
   const [submitted, setSubmitted] = useState<Submitted | null>(null)
   const [refused, setRefused] = useState<string | null>(null)
@@ -192,6 +195,15 @@ export function SittingPage() {
   const blank = served.signature ? `${served.signature}\n    ` : ''
   const initial =
     kept?.sitting === sittingId ? kept.code : (opening(kept, carried.data ?? null) ?? blank)
+  const keptRestored = kept?.sitting === sittingId && kept.restored === true
+  const solve = carried.data?.solved_code ?? null
+
+  // the user's own act: the solve is never carried, so it returns only here
+  function restore() {
+    if (solve === null) return
+    restored.current = true
+    editor.current?.replace(solve)
+  }
 
   async function submit() {
     if (running) return
@@ -200,7 +212,7 @@ export function SittingPage() {
     try {
       const { data, error } = await api.POST('/api/sittings/{sitting_id}/submissions', {
         params: { path: { sitting_id: sittingId } },
-        body: { code: code.current ?? initial },
+        body: { code: code.current ?? initial, restored: restored.current ?? keptRestored },
       })
       if (data) {
         setSubmitted(data)
@@ -303,9 +315,10 @@ export function SittingPage() {
               initial={initial}
               onChange={(typed) => {
                 code.current = typed
-                keepDraft(problemId, sittingId, typed)
+                keepDraft(problemId, sittingId, typed, restored.current ?? keptRestored)
               }}
               onSubmit={submit}
+              handle={editor}
             />
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -315,6 +328,13 @@ export function SittingPage() {
             <span className="text-meta text-muted-foreground">
               ⌘/Ctrl + Enter · judged against the problem&rsquo;s own test cases
             </span>
+            {/* quiet, and marked on the attempt: a solve typed over a restored
+                one is not an independent solve */}
+            {solve !== null && !ended && (
+              <Button variant="ghost" size="sm" className="ml-auto" onClick={restore}>
+                Restore my last solve
+              </Button>
+            )}
           </div>
           {/* the verdict sits under the editor: a failing case is read beside
               the code that failed it */}
