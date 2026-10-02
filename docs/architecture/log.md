@@ -1,7 +1,8 @@
 # The log
 
 The user's private record: what was attempted, what it used, why it went the
-way it did, and the study a card run tracks. Part of the architecture.
+way it did, the study a card run tracks, and the mastery derived from all of
+it. Part of the architecture.
 `README.md` is the map.
 
 Every record here is append-only apart from the sitting, which is revised
@@ -388,3 +389,65 @@ One template reproduced from memory, and how it went.
   recognising it unprompted, so recall fluency never stands in for mastery. The
   gap between recall fluency and solving fluency is the false fluency that
   blocked practice trains.
+
+## Mastery
+
+How well a user knows one technique. The engine computes mastery from the log
+each time it is asked, and never stores it. So the rules below are the whole
+model of mastery.
+
+- **Mastery has two parts per technique: recognition and execution.**
+  Recognition means the user sees that a problem needs the technique when
+  nobody told them. Execution means the user writes a correct solution once
+  they know the technique.
+- **The two parts are kept separate.** A user who misses the technique needs
+  recognition drills. A user who sees it and cannot write it needs the card's
+  ladder and the recall trainer. A single score would hide which of the two
+  the user needs.
+- **Execution is counted per sitting.** One sitting can hold several
+  attempts, one per submission. Counting attempts would punish a user who
+  submits often, though they solved the same problem.
+- **A sitting counts for every technique its attempts used.** Those
+  techniques come from the standing attempt claim, or from the problem's own
+  techniques when no claim stands. `## Attempt claims` gives that rule.
+- **A sitting solved on the first submission counts more than one solved
+  later.** After a failed submission the user sees the failing case, which
+  helps them debug. The order of the attempts shows which submission passed.
+- **The self-label on the sitting's last attempt adjusts the count.** `speed`
+  marks a solve that took too long. `syntax` counts less as a failure, since
+  the user knew the form. `gap` and `rust` mean the user did not write the
+  form. An attempt without a label counts by its verdict alone.
+- **Recognition is counted only from recognition drills.** The problem page
+  lists the problem's techniques before the statement is served. So every
+  sitting tells the user the technique, and no sitting tests recognition.
+- **A recognition drill counts for the techniques its problem carries.** The
+  user describes the approach in words. The framing judge grades the
+  description against the problem's canonicals, and that grade is the drill's
+  result.
+- **The judge's grades count only after the judge itself is tested** against
+  drills graded by hand. A judge that accepts vague answers would raise
+  recognition for exactly the techniques the user cannot spot. Grades written
+  before that test are stored and ignored.
+- **Sittings and drills on a defective problem do not count**, solved or not.
+  `corpus.md` gives the reason for sittings. A drill on such a problem was
+  graded against a statement that asks the wrong thing.
+- **Recall attempts do not count toward mastery.** Typing a form from memory
+  is neither spotting it in a problem nor solving a problem with it. The card
+  shows recall progress on its own, as `## Recall attempts` gives.
+- **Diagnoses count only after they are tested** against the user's
+  self-labels. An untested diagnosis would put a guess where the user's own
+  answer belongs.
+- **The formula is code, so changing it changes no record.** Mastery is
+  recomputed on every read, so a new formula applies to every technique at
+  once.
+- **Each pick stores the prediction the formula made before the attempt.**
+  That prediction is the only stored trace of mastery. It lets a later
+  formula be compared with what an earlier one predicted.
+
+Deferred, since only use answers each:
+
+- The formula itself: how old evidence fades, and how much less a solve after
+  a shown case counts.
+- How much evidence a technique needs before the board shows a number rather
+  than "unknown".
+- Whether a solve labelled `speed` counts as a full solve.

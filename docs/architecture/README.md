@@ -240,8 +240,17 @@ without redefining them. Grouped by the file that specifies the record.
   taken.
 - **Board**: the per-technique view of progress, derived from attempts and
   claims. Never stored.
-- **Mastery**: what a user can solve, per technique. Derived from the board's
-  inputs, never stored.
+- **Mastery**: how well a user knows one technique, in two parts:
+  recognition and execution. Computed from the log on every read, never
+  stored.
+- **Recognition**: seeing that a problem needs a technique when nobody named
+  it. Counted from recognition drills alone.
+- **Execution**: writing a correct solution once the technique is known.
+  Counted from sittings.
+- **Recognition drill**: a problem shown without its technique, where the user
+  describes the approach in words and runs no code.
+- **Framing judge**: the model call grading a recognition drill's description
+  against the problem's canonicals.
 - **Eval set**: the hand-claimed attempts a classifier configuration is
   scored against.
 - **Adjudication**: resolving each divergence between the user's blind claims
@@ -263,7 +272,7 @@ times. Each record class is specified in one of the files beside it.
 |---|---|
 | [`content.md`](content.md) | Techniques, cards, template matches |
 | [`corpus.md`](corpus.md) | Problems, test cases, solutions, solution claims |
-| [`log.md`](log.md) | Sittings, attempts, attempt verifications, claims, self-labels, diagnoses, card runs, recall attempts |
+| [`log.md`](log.md) | Sittings, attempts, attempt verifications, claims, self-labels, diagnoses, card runs, recall attempts, and the mastery derived from them |
 | [`machine.md`](machine.md) | What a model-written record carries, what a generation run's call sites leave, and the call log |
 | [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, starting a card run, solving a rung, recalling a template, adjudicating the eval set |
 | [`pages.md`](pages.md) | The web app's sections and pages, a page's areas, the design system |

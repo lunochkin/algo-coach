@@ -85,7 +85,7 @@ what use surfaces rather than how much use happened.
 
 ## Phase 14 — recognition, scheduling and mastery
 
-- [ ] Write into `docs/architecture/` what a technique's mastery is derived
+- [x] Write into `docs/architecture/` what a technique's mastery is derived
       from: the attempts, their claims, their verdicts and the drills, with
       recognition kept apart from execution. Mastery is never stored, so the
       derivation is the whole model

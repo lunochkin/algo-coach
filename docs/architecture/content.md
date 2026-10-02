@@ -60,7 +60,7 @@ The vocabulary the append-only log references.
 
 A card organises studying one technique: what to read, what to reproduce from
 memory, and what to solve. A card is not the vocabulary itself, and not an
-ability estimate. Mastery is the set of problems a user can solve, per
+ability estimate. Mastery is what a user can recognise and execute, per
 technique, and a card and a mastery estimate share no data.
 
 - **Product data, not code.** Cards live in the engine datastore, seeded from
