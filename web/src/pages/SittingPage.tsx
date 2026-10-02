@@ -179,8 +179,15 @@ export function SittingPage() {
         params: { path: { sitting_id: sittingId } },
         body: { code: code.current ?? initial },
       })
-      if (data) setSubmitted(data)
-      else setRefused(described(error))
+      if (data) {
+        setSubmitted(data)
+        // a solve ends the sitting, and the ended sitting asks for the claims
+        setMoved({
+          sitting: data.sitting,
+          elapsedSec: data.attempt.time_to_solve_sec ?? null,
+          at: performance.now(),
+        })
+      } else setRefused(described(error))
     } catch (reason) {
       setRefused(String(reason))
     } finally {

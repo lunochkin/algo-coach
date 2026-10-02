@@ -12,7 +12,9 @@ from algo_coach.sitting import RUNS_PER_MINUTE, TooOften, submit
 STARTED = datetime(2026, 9, 10, 8, tzinfo=UTC)
 TEN = datetime(2026, 9, 10, 10, tzinfo=UTC)
 
-DOUBLE = "def solve(n):\n    return n * 2\n"
+# a wrong answer: a solving one ends the sitting, and the cap is counted on
+# one sitting
+TRIPLE = "def solve(n):\n    return n * 3\n"
 
 
 class Stores:
@@ -42,7 +44,7 @@ class Stores:
 
     def submit(self, *, at: datetime = TEN, sitting_id: str = "s1", user_id: str = "u-4f9c2a"):
         return submit(
-            self.sittings, self.cases, self.log, sitting_id, DOUBLE, user_id=user_id, now=at
+            self.sittings, self.cases, self.log, sitting_id, TRIPLE, user_id=user_id, now=at
         )
 
     def fill(self, **whose: str) -> None:
@@ -80,7 +82,7 @@ def test_the_cap_is_a_rate_rather_than_a_total(database):
 
     later = stores.submit(at=TEN + timedelta(minutes=1, seconds=1))
 
-    assert later.attempt.solved
+    assert later.verification.results
 
 
 def test_the_cap_counts_one_user_s_own_submissions(database):
@@ -91,4 +93,4 @@ def test_the_cap_counts_one_user_s_own_submissions(database):
 
     theirs = stores.submit(sitting_id="s2", user_id="u-77b3e1")
 
-    assert theirs.attempt.solved
+    assert theirs.verification.results

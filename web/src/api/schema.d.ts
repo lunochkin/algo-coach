@@ -1069,11 +1069,12 @@ export interface components {
         };
         /**
          * Submitted
-         * @description The attempt a submission minted, and the per-case verdict behind its
-         *     `solved`.
+         * @description The attempt a submission minted, the per-case verdict behind its
+         *     `solved`, and the sitting as the submission left it.
          */
         Submitted: {
             attempt: components["schemas"]["Attempt"];
+            sitting: components["schemas"]["Sitting"];
             verification: components["schemas"]["AttemptVerification"];
             failure: components["schemas"]["Failure"] | null;
         };

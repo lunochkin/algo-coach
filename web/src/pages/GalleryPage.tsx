@@ -54,6 +54,12 @@ const SUBMITTED: Submitted = {
     finished_at: '2026-09-18T09:00:00Z',
     solved: false,
   },
+  sitting: {
+    id: 's-gallery',
+    user_id: 'u-4f9c2a',
+    problem_id: 'p-gallery',
+    started_at: '2026-09-18T08:40:00Z',
+  },
   verification: {
     id: 'v-gallery',
     attempt_id: 'a-gallery',

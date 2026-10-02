@@ -258,7 +258,8 @@ def test_solved_is_the_projection_of_the_verification(database):
     """One rule decides both, so the attempt and its verdict cannot disagree."""
     stores = Stores(database)
 
-    for code in (DOUBLE, TRIPLE, "def solve(n)\n"):
+    # the solving one last: it ends the sitting
+    for code in (TRIPLE, "def solve(n)\n", DOUBLE):
         submitted = stores.submitted(code)
         assert submitted.attempt.solved is submitted.verification.verified
 
@@ -283,3 +284,29 @@ def test_a_refused_submission_stores_no_verification(database):
     with pytest.raises(Refused, match="has ended"):
         stores.submitted(DOUBLE)
     assert stores.log.verifications() == []
+
+
+def test_a_solving_submission_ends_the_sitting(database):
+    """A user who solved and left has nothing left to close."""
+    stores = Stores(database)
+
+    submitted = stores.submitted(DOUBLE, now=NINE)
+
+    assert submitted.sitting.ended_at == NINE
+    assert stores.sittings.get("s1") == submitted.sitting
+
+
+def test_a_wrong_submission_leaves_the_sitting_open(database):
+    submitted = Stores(database).submitted(TRIPLE)
+
+    assert submitted.sitting.ended_at is None
+
+
+def test_a_solve_while_paused_closes_the_pause(database):
+    """An ended sitting holds no open pause, or its elapsed time would move
+    with the moment it is read."""
+    stores = Stores(database, pauses=[{"at": NINE}])
+
+    submitted = stores.submitted(DOUBLE, now=NINE_THIRTY)
+
+    assert not submitted.sitting.paused and submitted.sitting.ended_at == NINE_THIRTY

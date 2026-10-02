@@ -2627,6 +2627,9 @@
           "attempt": {
             "$ref": "#/components/schemas/Attempt"
           },
+          "sitting": {
+            "$ref": "#/components/schemas/Sitting"
+          },
           "verification": {
             "$ref": "#/components/schemas/AttemptVerification"
           },
@@ -2644,11 +2647,12 @@
         "type": "object",
         "required": [
           "attempt",
+          "sitting",
           "verification",
           "failure"
         ],
         "title": "Submitted",
-        "description": "The attempt a submission minted, and the per-case verdict behind its\n`solved`."
+        "description": "The attempt a submission minted, the per-case verdict behind its\n`solved`, and the sitting as the submission left it."
       },
       "TechniqueRow": {
         "properties": {

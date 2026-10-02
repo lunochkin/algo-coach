@@ -106,7 +106,7 @@ choice.
       the browser. A hidden page's pause sets nothing
 - [x] Leave the page usable while the clock is paused. A pause stops the
       timing, not the practice
-- [ ] End a sitting at its solving submission. A user who solved and left had
+- [x] End a sitting at its solving submission. A user who solved and left had
       a sitting nobody closed
 - [ ] Count a sitting with no submission for nothing, and an untimed one by its
       verdict alone, wherever the board and the candidates read sittings

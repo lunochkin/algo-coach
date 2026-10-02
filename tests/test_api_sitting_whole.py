@@ -73,9 +73,9 @@ def test_one_sitting_runs_through_the_api_as_the_page_calls_it(client):
     assert passing["attempt"]["solved"] is True and passing["failure"] is None
     assert [one["outcome"] for one in passing["verification"]["results"]] == ["passed", "passed"]
 
-    # the end asks about each attempt over the problem's own techniques
-    ended = ok(client.post(f"/api/sittings/{sitting_id}/end"))
-    assert ended["sitting"]["ended_at"] is not None
+    # the solve ends the sitting, and the end asks about each attempt over the
+    # problem's own techniques
+    assert passing["sitting"]["ended_at"] is not None
     assert client.post(submissions, json={"code": DOUBLE}).status_code == 409
     asked = ok(client.get(f"/api/sittings/{sitting_id}/unclaimed"))
     assert asked["techniques"] == ["greedy", "sorting"]

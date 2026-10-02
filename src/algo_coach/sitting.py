@@ -86,12 +86,13 @@ class Failure(BaseModel):
 
 
 class Submitted(BaseModel):
-    """The attempt a submission minted, and the per-case verdict behind its
-    `solved`."""
+    """The attempt a submission minted, the per-case verdict behind its
+    `solved`, and the sitting as the submission left it."""
 
     model_config = ConfigDict(frozen=True)
 
     attempt: Attempt
+    sitting: Sitting  # ended where the submission solved the problem
     verification: AttemptVerification
     failure: Failure | None  # none on a submission that passed every case
 
@@ -186,8 +187,14 @@ def submit(
     verification = mint.attempt_verification(attempt.id, judged)
     log.append_attempt(attempt)
     log.append_verification(verification)
+    if attempt.solved:
+        # a user who solved and left has nothing left to close
+        one = _stored(
+            sittings, one, pauses=_closed(one.pauses, at) if one.paused else one.pauses, ended_at=at
+        )
     return Submitted(
         attempt=attempt,
+        sitting=one,
         verification=verification,
         failure=_first_failure(problem_cases, runs),
     )
