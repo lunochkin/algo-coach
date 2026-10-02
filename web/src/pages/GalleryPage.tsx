@@ -33,7 +33,7 @@ const SURFACES = [
   'border',
 ]
 const VERDICTS = ['verdict-passed', 'verdict-wrong', 'verdict-timeout', 'verdict-crashed']
-const CODE = ['code-keyword', 'code-name', 'code-string', 'code-number', 'code-comment']
+const CODE = ['code-keyword', 'code-name', 'code-string', 'code-number', 'code-comment', 'code-selection']
 const ROLES = [
   ['title', 'text-title'],
   ['heading', 'text-heading'],

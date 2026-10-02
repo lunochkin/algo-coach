@@ -28,6 +28,9 @@
     /* mono set beside sans reads larger at the same size, so code inside a
        line of prose takes a step of its own */
     --text-code-inline: 0.8125rem;
+    /* KaTeX sets math at 1.21em of the line around it, which reads a size up
+       from the prose; relative, so math in a heading still scales with it */
+    --text-math: 1.05em;
 
     /* the rhythm a page is laid out on, over the 0.25rem step every other
        spacing utility is a multiple of */
@@ -41,6 +44,7 @@
     --color-code-string: var(--code-string);
     --color-code-number: var(--code-number);
     --color-code-comment: var(--code-comment);
+    --color-code-selection: var(--code-selection);
 
     /* one per case outcome: a run that timed out asks for a different fix
        from one that answered wrongly */
@@ -132,6 +136,9 @@
     --code-string: light-dark(oklch(0.50 0.12 150), oklch(0.80 0.12 150));
     --code-number: light-dark(oklch(0.52 0.12 60), oklch(0.82 0.11 70));
     --code-comment: light-dark(oklch(0.53 0.02 260), oklch(0.65 0.02 260));
+    /* apart from `accent`, which the editor's active line reads: a selection
+       inside that line would otherwise vanish into it */
+    --code-selection: light-dark(oklch(0.86 0.06 250), oklch(0.45 0.08 250));
     --sidebar: light-dark(oklch(0.985 0 0), oklch(0.205 0 0));
     --sidebar-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
     --sidebar-primary: light-dark(oklch(0.205 0 0), oklch(0.488 0.243 264.376));
@@ -234,6 +241,10 @@ summary {
 
 .prose :is(li)::marker {
     color: var(--muted-foreground);
+}
+
+.prose .katex {
+    font-size: var(--text-math);
 }
 
 /* the plugin draws a backtick on either side of inline code; a reader sees

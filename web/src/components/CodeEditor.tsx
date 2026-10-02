@@ -82,7 +82,7 @@ export function CodeEditor({ initial, onChange, onSubmit }: Props) {
             '.cm-activeLine, .cm-activeLineGutter': { backgroundColor: 'var(--color-accent)' },
             '.cm-cursor': { borderLeftColor: 'var(--color-foreground)' },
             '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection': {
-              backgroundColor: 'var(--color-secondary)',
+              backgroundColor: 'var(--color-code-selection)',
             },
           }),
         ],
