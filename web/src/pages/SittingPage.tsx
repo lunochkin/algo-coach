@@ -255,7 +255,9 @@ export function SittingPage() {
             <BackLink to={back.to} label={back.label} />
           )}
           <h1 className="min-w-0 truncate text-heading font-semibold">{served.title}</h1>
-          <div className="ml-auto flex items-center gap-3">
+          {/* pushed right only where it shares the title's row: wrapped under
+              a narrow title, it starts where the title does */}
+          <div className="flex items-center gap-3 sm:ml-auto">
             <ElapsedClock
               elapsedSec={clock.elapsedSec}
               receivedAt={clock.at}
@@ -316,7 +318,9 @@ export function SittingPage() {
       {refused && <p className="text-meta text-destructive">Refused: {refused}</p>}
       {/* a paused clock leaves the page as it was: a pause stops the timing,
           not the practice */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* explicit columns: an implicit one grows to the editor's longest line,
+          and a narrow window then scrolls sideways */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <section className="space-y-stack">
           <ProblemFacts
             problemId={served.sitting.problem_id}
@@ -343,7 +347,9 @@ export function SittingPage() {
             <Button onClick={submit} disabled={running || ended}>
               {running ? 'Running…' : 'Submit'}
             </Button>
-            <span className="text-meta text-muted-foreground">
+            {/* a keyboard's shortcut, so a narrow window leaves it out and the
+                restore press keeps the submit press's row */}
+            <span className="hidden text-meta text-muted-foreground sm:inline">
               ⌘/Ctrl + Enter · judged against the problem&rsquo;s own test cases
             </span>
             {/* quiet, and marked on the attempt: a solve typed over a restored

@@ -33,33 +33,31 @@ export function ProblemFacts({
   const offered = (cards.data ?? []).filter((card) => taught(card, asked))
 
   return (
-    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-muted-foreground">
+    // spaced rather than dotted, as a row's counts are: a separator of its own
+    // would start a line wherever the line wraps
+    <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-muted-foreground">
       {problem.difficulty && (
         <Badge variant="outline" className="font-normal">
           {problem.difficulty}
         </Badge>
       )}
       <span>{problem.techniques.join(' · ')}</span>
-      <span aria-hidden>·</span>
       <span>{tried(problem)}</span>
       {offered.length > 0 && (
-        <>
-          <span aria-hidden>·</span>
-          <span>
-            {offered.length === 1 ? 'Card' : 'Cards'}:{' '}
-            {offered.map((card, index) => (
-              <span key={card.slug}>
-                {index > 0 && ', '}
-                <Link
-                  to={`/cards/${encodeURIComponent(card.slug)}`}
-                  className="font-medium text-foreground underline-offset-4 hover:underline"
-                >
-                  {card.title}
-                </Link>
-              </span>
-            ))}
-          </span>
-        </>
+        <span>
+          {offered.length === 1 ? 'Card' : 'Cards'}:{' '}
+          {offered.map((card, index) => (
+            <span key={card.slug}>
+              {index > 0 && ', '}
+              <Link
+                to={`/cards/${encodeURIComponent(card.slug)}`}
+                className="font-medium text-foreground underline-offset-4 hover:underline"
+              >
+                {card.title}
+              </Link>
+            </span>
+          ))}
+        </span>
       )}
     </p>
   )

@@ -44,7 +44,7 @@ what use surfaces rather than how much use happened.
 - [x] Drop the table from `/gallery`, or restore a page that reads as a table.
       The rework replaced every table with rows, and `components/ui/table` is
       imported by the gallery alone
-- [ ] Read the sitting page against a real submission on a narrow window. Every
+- [x] Read the sitting page against a real submission on a narrow window. Every
       other page was reworked as rows and panels, and the sitting is the one
       page `pages.md` exempts from phone width
 

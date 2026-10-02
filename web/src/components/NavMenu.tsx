@@ -35,7 +35,10 @@ export function NavMenu({ wide }: { wide: boolean }) {
         )}
       >
         {/* the wordmark reaches the board, as a site's own name does */}
-        <Link to="/" className="mr-4 font-semibold underline-offset-4 hover:underline">
+        <Link
+          to="/"
+          className="mr-1 shrink-0 font-semibold whitespace-nowrap underline-offset-4 hover:underline sm:mr-4"
+        >
           algo-coach
         </Link>
         {SECTIONS.map(({ label, to, owns }) => {

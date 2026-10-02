@@ -83,7 +83,9 @@ function Value({ label, value, text }: { label: string; value?: unknown; text?: 
           </>
         )}
       </div>
-      <pre className="max-h-64 overflow-auto rounded bg-muted p-2 font-mono text-code whitespace-pre-wrap break-all">
+      {/* a word breaks only where it alone overflows the line: a traceback keeps
+          its words, and a long value without spaces still wraps */}
+      <pre className="max-h-64 overflow-auto rounded bg-muted p-2 font-mono text-code whitespace-pre-wrap break-words">
         {cut ? `${full.slice(0, SHOWN)}…` : full}
       </pre>
     </div>
