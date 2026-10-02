@@ -110,6 +110,9 @@ choice.
       a sitting nobody closed
 - [x] Count a sitting with no submission for nothing, and an untimed one by its
       verdict alone, wherever the board and the candidates read sittings
+- [x] Keep an ended sitting on its page after the claim, with a press back to
+      the card or the board. The page left by itself the moment the claim was
+      answered, before the solve could be read back
 
 ### The cards dashboard
 

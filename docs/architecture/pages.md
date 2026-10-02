@@ -66,9 +66,11 @@ those steps at low fidelity.
 - **Each page names one way back: the page the user came from.** A rung of a
   ladder is a sitting reached from a card, and the same sitting is reached from
   the board, so the section a page sits in cannot say where the user came from.
-- **The sitting names no way back.** A sitting ends on the End press rather
-  than on leaving the page, so a link reading as the way out would end nothing.
-  The navigation is the way off the page.
+- **The sitting names its way back as a press, running or ended.** Leaving a
+  sitting's page costs nothing: the clock is the user's to run, and the
+  unsent code is kept. The press returns to the card the problem came from, or
+  to the board. An ended sitting stays on the page after the claim, and its
+  press is the page's next act.
 - **The login page and the privacy policy carry no navigation.** The two pages
   open without a session, and every section behind the menu answers 401 to a
   request carrying none. The policy names the login as its way back, since the

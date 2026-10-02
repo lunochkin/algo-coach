@@ -621,7 +621,8 @@ to the card it came from.
 3. The problem opens, named by the card the pick came from, which serves the
    statement and mints the sitting as the drill loop gives.
 4. The submission, the verdict and the claim run as the drill loop gives them.
-5. The sitting ends and returns to the card, where the next rung is.
+5. The sitting ends and stays on the page, with a press back to the card, where
+   the next rung is.
 
 - **The ladder follows the card's own template order.** A card authors its
   templates in the order it teaches them, and a rung covering the first template
@@ -639,9 +640,10 @@ to the card it came from.
 - **The page names the card rather than a technique**, since the user came from
   the card. The way back returns to the card, and the claim answers for the
   card's own technique.
-- **The sitting returns to the card.** A user solving a ladder is working
-  through a list, and returning to the board would make them find the card
-  again for every rung.
+- **A sitting offers a press back to the card, and an ended one stays on the
+  page.** A user reads a solve back after it passes, so the page does not leave
+  by itself. A user solving a ladder is working through a list, and the press
+  returns to the card rather than to the board.
 - **Progress is a fold over attempts, never a mark on a rung.** A rung is solved
   where an attempt on its problem, finished after the run began, was solved. The
   rung carries no mark, so a ladder re-derived under a moved corpus keeps every

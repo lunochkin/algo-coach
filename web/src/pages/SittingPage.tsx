@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router'
+import { ChevronLeft } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router'
 
 import { api, type Sitting, type Submitted } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
+import { BackLink } from '@/components/BackLink'
 import { ClaimPrompt } from '@/components/ClaimPrompt'
 import { CodeEditor, type EditorHandle } from '@/components/CodeEditor'
 import { ElapsedClock } from '@/components/ElapsedClock'
@@ -37,14 +39,16 @@ type Moved = { sitting: Sitting; elapsedSec: number | null; at: number }
 export function SittingPage() {
   const { sittingId = '' } = useParams()
   const [search] = useSearchParams()
-  const navigate = useNavigate()
-  // a solver working through a ladder is working through a list, so the
-  // sitting returns to the card it came from, where the next rung is
+  // the way back: the card the problem came from, where the next rung is, or
+  // the board. An ended sitting stays on the page, so the solve reads back
   const card = search.get('card')
-  const done = useCallback(
-    () => navigate(card === null ? '/' : `/cards/${encodeURIComponent(card)}`),
-    [navigate, card],
-  )
+  const back =
+    card === null
+      ? { to: '/', label: 'Back to the board' }
+      : { to: `/cards/${encodeURIComponent(card)}`, label: 'Back to the card' }
+  // the claim is asked once the sitting ends, and answering it closes the
+  // dialog over the page rather than leaving it
+  const [answered, setAnswered] = useState(false)
   const loaded = useLoaded(
     async (signal) => {
       const answer = await api.GET('/api/sittings/{sitting_id}', {
@@ -238,6 +242,18 @@ export function SittingPage() {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2">
           {/* the page's one title: it stays in view while the statement
               scrolls, so the statement column repeats none */}
+          {/* the way back, at any point: leaving a sitting ends nothing, and an
+              ended one has nothing left to do here */}
+          {ended ? (
+            <Button asChild size="sm">
+              <Link to={back.to}>
+                <ChevronLeft className="size-4" />
+                {back.label}
+              </Link>
+            </Button>
+          ) : (
+            <BackLink to={back.to} label={back.label} />
+          )}
           <h1 className="min-w-0 truncate text-heading font-semibold">{served.title}</h1>
           <div className="ml-auto flex items-center gap-3">
             <ElapsedClock
@@ -247,7 +263,9 @@ export function SittingPage() {
             />
             {paused && !ended && <span className="text-meta text-muted-foreground">paused</span>}
             {ended ? (
-              <span className="text-meta text-muted-foreground">This sitting has ended</span>
+              <>
+                <span className="text-meta text-muted-foreground">This sitting has ended</span>
+              </>
             ) : (
               <>
                 {/* one press for the clock: it starts a clock that never ran,
@@ -347,7 +365,7 @@ export function SittingPage() {
       </div>
       {/* the claim the sitting ends on; closing it leaves the attempts to the
           problem's own techniques, and a reload asks again */}
-      <Dialog open={ended} onOpenChange={(open) => open || done()}>
+      <Dialog open={ended && !answered} onOpenChange={(open) => open || setAnswered(true)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>The claim</DialogTitle>
@@ -356,7 +374,11 @@ export function SittingPage() {
             </DialogDescription>
           </DialogHeader>
           {ended && (
-            <ClaimPrompt sittingId={sittingId} drilled={search.get('technique')} onDone={done} />
+            <ClaimPrompt
+              sittingId={sittingId}
+              drilled={search.get('technique')}
+              onDone={() => setAnswered(true)}
+            />
           )}
         </DialogContent>
       </Dialog>

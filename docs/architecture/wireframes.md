@@ -609,7 +609,7 @@ problem's path reads as its record, as "Every problem" gives.
 ## The picked problem, opened from a card
 
 Opening a rung serves it as any problem is served, and the sitting's way back
-names the card. The sitting returns to the card when it ends.
+names the card. The sitting's bar offers a press back to the card throughout.
 
 ## The recall trainer, before a hint
 
