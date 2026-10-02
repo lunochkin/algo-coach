@@ -96,7 +96,7 @@ function CardRow({ card, named = false }: { card: ListedCard; named?: boolean })
         <p className="mt-1 text-meta text-muted-foreground tabular-nums">
           started {new Date(status.started_at).toLocaleDateString()} · ladder {status.solved}/
           {status.rungs}, required {status.required_solved}/{status.required}
-          {status.gaps > 0 && ` · ${status.gaps} ${status.gaps === 1 ? 'form' : 'forms'} uncovered`}
+          {status.gaps > 0 && ` · ${uncovered(status.gaps)}`}
         </p>
       ) : (
         // the trigger says when to reach for the technique, which is what a
@@ -135,6 +135,10 @@ function recallMark(
   if (!last?.last_at) return ['·', 'never recalled']
   if (!last.verified) return ['✗', 'failed']
   return last.hints.length > 0 ? ['◐', 'passed with hints'] : ['✓', 'recalled clean']
+}
+
+function uncovered(gaps: number): string {
+  return gaps === 1 ? '1 form uncovered' : `${gaps} forms uncovered`
 }
 
 function templates(count: number, optional: number): string {

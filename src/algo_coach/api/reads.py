@@ -44,7 +44,7 @@ from algo_coach.schema import (
     Template,
     TemplateMatch,
 )
-from algo_coach.sitting import Served, get, serve
+from algo_coach.sitting import Carry, Served, carry, get, serve
 from algo_coach.solution_claims import load_problem, load_problems
 from algo_coach.solutions import SolutionLog
 from algo_coach.storage import Database
@@ -454,3 +454,12 @@ def statement(root: Root, user_id: UserId, problem_id: str) -> Served:
 @router.get("/sittings/{sitting_id}")
 def sitting(root: Root, user_id: UserId, sitting_id: str) -> Served:
     return get(ProblemStore(root), SittingStore(root), sitting_id, user_id=user_id)
+
+
+# `card` names the card the problem was opened from: its open run bounds what
+# is carried
+@router.get("/problems/{problem_id}/carry")
+def carried(root: Root, user_id: UserId, problem_id: str, card: str | None = None) -> Carry:
+    attempts = [one for one in AttemptLog(root).attempts(user_id) if one.problem_id == problem_id]
+    run = CardRunLog(root).started(user_id, _card(root, card).id) if card else None
+    return carry(attempts, run_started_at=run.started_at if run else None)

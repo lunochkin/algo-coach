@@ -30,7 +30,9 @@ import {
 } from '@/components/ui/dialog'
 import { Verdict } from '@/components/Verdict'
 import { autoStarts, pressed } from '@/lib/clock'
-import { draftOf, keepDraft } from '@/lib/draft'
+import { draftOf, keepDraft, opening } from '@/lib/draft'
+
+type Moved = { sitting: Sitting; elapsedSec: number | null; at: number }
 
 export function SittingPage() {
   const { sittingId = '' } = useParams()
@@ -55,15 +57,26 @@ export function SittingPage() {
     },
     `sitting:${sittingId}`,
   )
+  // what a new sitting on the problem may open on, bounded by the card's run
+  // where the problem came from a card
+  const problemOf = loaded.data?.sitting.problem_id
+  const carried = useLoaded(
+    (signal) =>
+      problemOf === undefined
+        ? Promise.resolve({ data: null })
+        : api.GET('/api/problems/{problem_id}/carry', {
+            params: { path: { problem_id: problemOf }, query: { card } },
+            signal,
+          }),
+    `carry:${problemOf ?? ''}:${card ?? ''}`,
+  )
   const code = useRef<string | null>(null)
   const [running, setRunning] = useState(false)
   const [submitted, setSubmitted] = useState<Submitted | null>(null)
   const [refused, setRefused] = useState<string | null>(null)
   // the sitting as the last pause or resume left it, over the one first loaded,
   // with the engine's elapsed time and when the page received it
-  const [moved, setMoved] = useState<{ sitting: Sitting; elapsedSec: number | null; at: number } | null>(
-    null,
-  )
+  const [moved, setMoved] = useState<Moved | null>(null)
   const [moving, setMoving] = useState(false)
   // true where hiding the page paused the sitting, so a pause the user pressed
   // is not resumed on return
@@ -165,15 +178,20 @@ export function SittingPage() {
   // the three readings; the sitting's own page starts once one has loaded
   if (loaded.data === undefined)
     return <Loaded of="the sitting" state={loaded}>{() => null}</Loaded>
+  // the editor seeds once, so it waits for the carry. A carry that failed
+  // opens the editor on the signature rather than holding the sitting
+  if (carried.data === undefined && carried.error === undefined)
+    return <Loaded of="the sitting" state={{ ...carried, data: undefined }}>{() => null}</Loaded>
 
   const served = loaded.data
   const clock = moved ?? { elapsedSec: served.elapsed_sec, at: served.receivedAt }
   const problemId = served.sitting.problem_id
-  // a reload during the sitting restores what was typed in it. A draft from an
-  // earlier sitting waits for the carry rules `flows.md` gives
+  // a reload during the sitting restores what was typed in it, and a new
+  // sitting opens on the work in progress `flows.md` carries
   const kept = draftOf(problemId)
   const blank = served.signature ? `${served.signature}\n    ` : ''
-  const initial = kept?.sitting === sittingId ? kept.code : blank
+  const initial =
+    kept?.sitting === sittingId ? kept.code : (opening(kept, carried.data ?? null) ?? blank)
 
   async function submit() {
     if (running) return

@@ -97,6 +97,22 @@ class Submitted(BaseModel):
     failure: Failure | None  # none on a submission that passed every case
 
 
+class Carry(BaseModel):
+    """What the editor may open on, which `flows.md` gives: the last attempt's
+    code where it is work in progress, and the bounds the page holds its own
+    draft to."""
+
+    model_config = ConfigDict(frozen=True)
+
+    code: str | None  # the last attempt's code, none where it may not be carried
+    at: datetime | None  # when that code was submitted
+    # the page carries no draft from the sitting that solved, nor one typed
+    # before that solve or before the run began
+    solved_at: datetime | None
+    solved_sitting_id: str | None
+    run_started_at: datetime | None
+
+
 class Asked(BaseModel):
     """One attempt the loop still asks about, and the modes its verdict leaves
     open. No mode is offered where the record already answers why."""
@@ -197,6 +213,28 @@ def submit(
         sitting=one,
         verification=verification,
         failure=_first_failure(problem_cases, runs),
+    )
+
+
+def carry(attempts: Sequence[Attempt], *, run_started_at: datetime | None) -> Carry:
+    """The code a new sitting on a problem may open on. `attempts` are one
+    user's on one problem; `run_started_at` is the start of the card run the
+    problem was opened from, none where it was opened elsewhere."""
+    ordered = sorted(attempts, key=lambda one: one.finished_at)
+    solves = [one for one in ordered if one.solved]
+    last = ordered[-1] if ordered else None
+    carried = (
+        last is not None
+        and last.code is not None
+        and not last.solved
+        and (run_started_at is None or last.finished_at >= run_started_at)
+    )
+    return Carry(
+        code=last.code if carried and last else None,
+        at=last.finished_at if carried and last else None,
+        solved_at=solves[-1].finished_at if solves else None,
+        solved_sitting_id=solves[-1].sitting_id if solves else None,
+        run_started_at=run_started_at,
     )
 
 

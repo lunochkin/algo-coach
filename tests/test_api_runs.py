@@ -212,3 +212,26 @@ def test_the_cards_list_reads_the_user_s_own_status(client, database):
     (listed,) = other.get("/api/cards").json()
 
     assert listed["status"]["started_at"] is None
+
+
+def test_the_carry_bounds_the_editor_by_the_card_s_run(client, database):
+    """Code written before the card's run is not carried into its problems,
+    and the same code is carried where the problem is opened elsewhere."""
+    started = client.post("/api/cards/sliding-window/runs").json()
+    began = datetime.fromisoformat(started["started_at"])
+    AttemptLog(database).append_attempt(
+        Attempt(
+            id="a-wip",
+            user_id=USER,
+            problem_id="p-1",
+            finished_at=began - timedelta(days=1),
+            solved=False,
+            code="half done",
+        )
+    )
+
+    in_run = client.get("/api/problems/p-1/carry", params={"card": "sliding-window"}).json()
+    elsewhere = client.get("/api/problems/p-1/carry").json()
+
+    assert in_run["code"] is None and in_run["run_started_at"] == started["started_at"]
+    assert elsewhere["code"] == "half done"

@@ -209,6 +209,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/problems/{problem_id}/carry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Carried */
+        get: operations["carried_api_problems__problem_id__carry_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/cards/{slug}/runs": {
         parameters: {
             query?: never;
@@ -603,6 +620,24 @@ export interface components {
             recall: components["schemas"]["Recalled"][];
             /** Last At */
             last_at: string | null;
+        };
+        /**
+         * Carry
+         * @description What the editor may open on, which `flows.md` gives: the last attempt's
+         *     code where it is work in progress, and the bounds the page holds its own
+         *     draft to.
+         */
+        Carry: {
+            /** Code */
+            code: string | null;
+            /** At */
+            at: string | null;
+            /** Solved At */
+            solved_at: string | null;
+            /** Solved Sitting Id */
+            solved_sitting_id: string | null;
+            /** Run Started At */
+            run_started_at: string | null;
         };
         /**
          * CaseOutcome
@@ -1585,6 +1620,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Served"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    carried_api_problems__problem_id__carry_get: {
+        parameters: {
+            query?: {
+                card?: string | null;
+            };
+            header?: never;
+            path: {
+                problem_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Carry"];
                 };
             };
             /** @description Validation Error */

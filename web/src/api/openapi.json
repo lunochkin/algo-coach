@@ -508,6 +508,61 @@
         }
       }
     },
+    "/api/problems/{problem_id}/carry": {
+      "get": {
+        "summary": "Carried",
+        "operationId": "carried_api_problems__problem_id__carry_get",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Problem Id"
+            }
+          },
+          {
+            "name": "card",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Card"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Carry"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/cards/{slug}/runs": {
       "post": {
         "summary": "Started",
@@ -1479,6 +1534,78 @@
         ],
         "title": "CardStatus",
         "description": "Where the user stands on a card, as the cards list reads it. Folded on\nevery read, as the card's own page folds it."
+      },
+      "Carry": {
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          },
+          "solved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Solved At"
+          },
+          "solved_sitting_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Solved Sitting Id"
+          },
+          "run_started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Started At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "at",
+          "solved_at",
+          "solved_sitting_id",
+          "run_started_at"
+        ],
+        "title": "Carry",
+        "description": "What the editor may open on, which `flows.md` gives: the last attempt's\ncode where it is work in progress, and the bounds the page holds its own\ndraft to."
       },
       "CaseOutcome": {
         "type": "string",
