@@ -185,9 +185,9 @@ Every page under a section carries the same two rows above its body.
 +------------------------------------------------------------------------+
 | Smallest feasible speed              12:04  [ Pause ]  [ End ]         |
 +----------------------------------+-------------------------------------+
-| Smallest feasible speed          | +----------------------------+      |
+| the statement, as prose          | +----------------------------+      |
 |                                  | | def solve(piles, h) -> int:|      |
-| the statement, as prose          | |     |                      |      |
+|                                  | |     |                      |      |
 | ...........................      | |                            |      |
 | ...........................      | |   the editor               |      |
 | ...........................      | |                            |      |
@@ -209,8 +209,9 @@ Every page under a section carries the same two rows above its body.
 - A bar across the top carries the clock, the pause and the end, and it stays
   at the top of the window while the statement scrolls. The clock is the
   reading the sitting is run by, so it is never scrolled out of sight.
-- The bar names the problem in the quiet size. The title itself reads in the
-  statement column, as every other page's title reads in its own body.
+- The bar carries the problem's title, the page's only one, at the heading
+  size. The statement column repeats none, since the bar keeps the title in view
+  while the statement scrolls.
 - The statement reads on the left and the editor takes the right, which is the
   one page in two columns.
 - The editor opens on the signature every case calls, and the statement column

@@ -174,9 +174,15 @@ export function SittingPage() {
           statement scrolls: the clock is what the solver is watched by */}
       <div className="sticky top-0 z-10 -mx-gutter border-b bg-background px-gutter">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2">
-          <span className="min-w-0 truncate text-meta text-muted-foreground">
-            {paused ? 'Paused: the clock is stopped' : served.title}
-          </span>
+          {/* the page's one title: it stays in view while the statement
+              scrolls, so the statement column repeats none */}
+          {paused ? (
+            <span className="min-w-0 truncate text-meta text-muted-foreground">
+              Paused: the clock is stopped
+            </span>
+          ) : (
+            <h1 className="min-w-0 truncate text-heading font-semibold">{served.title}</h1>
+          )}
           <div className="ml-auto flex items-center gap-3">
             <ElapsedClock
               elapsedSec={clock.elapsedSec}
@@ -227,7 +233,6 @@ export function SittingPage() {
         className={cn('grid gap-6 lg:grid-cols-2', paused && 'blur-md select-none')}
       >
         <section className="space-y-stack">
-          <h1 className="text-title font-semibold">{served.title}</h1>
           <Markdown>{served.statement}</Markdown>
         </section>
         {/* the verdict sits under the editor: one page is the whole sitting */}
