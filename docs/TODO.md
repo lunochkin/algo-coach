@@ -10,36 +10,67 @@ The work not yet ready for a phase waits under Further developments.
       from: the attempts, their claims, their verdicts and the drills, with
       recognition kept apart from execution. Mastery is never stored, so the
       derivation is the whole model
-- [ ] Re-claim thirty attempts with the earlier machine claims hidden, to
-      measure the user's own consistency, which caps every classifier score.
-      Mastery reads claims, and a wrong claim spends practice time
+- [ ] Re-claim thirty attempts with the earlier machine claims hidden, and write
+      the agreement with the first claims into `log.md`. The user's consistency
+      caps every classifier score, and mastery reads claims
 - [ ] Read the served statements for an unbounded input, and list each one
       found here. A problem is never edited, so a list is what decides whether
       any is worth retiring
 
+### Mastery
+
+- [ ] Compute each technique's execution reading from its sittings, as `log.md`
+      gives, and show it on the board beside recognition read as unknown. The
+      pick and the predictions both read it
+
+### The card lifecycle
+
+A card's study has phases a template's FSRS state does not hold: the ladder,
+a spaced check that consolidates it, and a lapse after graduation. algo-prep's
+drill board tracked them by hand.
+
+- [ ] Write a card's states into `content.md` and `log.md`: not started,
+      acquiring, consolidating, graduated and lapsed, each derived from the log
+      and never stored. `flows.md` defers what done means, and this answers it
+- [ ] Write the graduation rule: the required rungs solved, every recallable
+      template recalled clean after the spacing gap, and a probe solved
+      unprompted. algo-prep's Pass-2 is this rule, and a rung solved warm proves
+      no retention
+- [ ] Write the lapse rule: a graduated card lapses when one of its templates
+      fails its FSRS review. The card is offered again rather than left
+      graduated on a form that went
+- [ ] Show each card's state and its next due recall on `/cards` and on the
+      board's cards in progress. The dashboard left both for this phase
+
 ### The schedule
 
 The board orders by staleness and the user picks. Sitting daily makes that pick
-itself the work, so the board serves one, read from FSRS and the mastery state.
+itself the work, so the board serves one, read from FSRS, mastery and the
+cards' states.
 
-- [ ] Write the pick's rule into `flows.md`: what it reads from FSRS, from
-      mastery and from the open card runs, how it aims at the technique and form
-      a failed sitting missed, what breaks a tie, and what the board offers
-      beside the pick.
-      `flows.md` has selection never schedule today
-- [ ] Time reviews with FSRS, whose unit is the template. A template is one
-      form, and a technique mixes forms that fade at different rates. A
-      technique with no template keeps the board's staleness order
 - [ ] Write into `flows.md` what counts as a review of a template: a recall
       attempt, graded by the hints taken, and a sitting on a problem whose
       `target_template_id` names the template. The matcher is unscored, so a
       review never reads a match
 - [ ] Write down the FSRS parameters the schedule starts from and why each was
       chosen. A number nobody wrote down is guessed again at every change
-- [ ] Serve one pick on the board, naming a due template and a problem
-      written for it, with every technique still on offer beside it
-- [ ] Record what was predicted before each attempt, from FSRS alone and from
-      the mastery state. A prediction written after the outcome is fitted to it
+- [ ] Write down the card spacing gap and the in-flight cap the schedule starts
+      from: five days and two cards, algo-prep's measured decay edge and its
+      proven limit. Each moves only on what the log measures
+- [ ] Compute a due date per template with FSRS over its reviews. A template is
+      one form, and a technique mixes forms that fade at different rates
+- [ ] Write the pick's rule into `flows.md`: what it reads, how it aims at the
+      form a failed sitting missed, what breaks a tie, and what the board offers
+      beside it. `flows.md` has selection never schedule today
+- [ ] Write into the pick's rule what it offers per card state: a due recall,
+      an open run's next rung, an owed spaced check, a new card only below the
+      cap, and a lapsed card again. Owed checks come before new starts
+- [ ] Serve one pick on the board, naming a due template and a problem written
+      for it, with every technique still on offer beside it. A technique with no
+      template keeps the board's staleness order
+- [ ] Store what each pick predicted before its attempt, from FSRS alone and
+      from the mastery state. A prediction written after the outcome is fitted
+      to it
 
 ### The comparison
 

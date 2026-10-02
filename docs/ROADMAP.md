@@ -399,9 +399,16 @@ following. The recognition drill moved to Further developments on 2026-10-02.
   A review is a recall attempt, graded by the hints taken, or a sitting on a
   problem written for the template. A technique with no template keeps the
   board's staleness order.
+- **A card's lifecycle**, derived from the log and never stored: not started,
+  acquiring, consolidating, graduated and lapsed. Graduation is the required
+  rungs solved, every recallable template recalled clean after a spacing gap,
+  and a probe solved unprompted. A failed FSRS review of a graduated card's
+  template lapses the card.
 - One pick served on the board, a due template and a problem written for it,
-  made from FSRS and the mastery state and aimed at the form a failed sitting
-  missed. The board still offers every technique beside the pick.
+  made from FSRS, the mastery state and the cards' states, and aimed at the
+  form a failed sitting missed. Owed spaced checks come before new cards, and
+  at most two cards are in flight. The board still offers every technique
+  beside the pick.
 - **Every pick records what it predicted before the attempt**, from FSRS alone
   and from the mastery state. A prediction reconstructed later is fitted to
   the outcome it is scored against.
