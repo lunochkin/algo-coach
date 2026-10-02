@@ -120,6 +120,12 @@ choice.
       each with its run, its ladder, its gaps and the recall state of every
       template. algo-prep's drill board held this by hand
 
+### The board and the cards
+
+- [x] Read the cards with a run open first on the board, each naming its
+      ladder's progress and its next rung, which one press opens. A card in
+      progress sat wherever staleness ranked its technique
+
 ### The editor's carried code
 
 The editor opened every sitting on the signature, so reopening a half-solved
@@ -172,9 +178,10 @@ problem lost the work. `flows.md` now gives what the editor carries.
 The board orders by staleness and the user picks. Sitting daily makes that pick
 itself the work, so the board serves one, read from FSRS and the mastery state.
 
-- [ ] Write the pick's rule into `flows.md`: what it reads from FSRS and from
-      mastery, how it aims at the technique and form a failed sitting missed,
-      what breaks a tie, and what the board offers beside the pick.
+- [ ] Write the pick's rule into `flows.md`: what it reads from FSRS, from
+      mastery and from the open card runs, how it aims at the technique and form
+      a failed sitting missed, what breaks a tie, and what the board offers
+      beside the pick.
       `flows.md` has selection never schedule today
 - [ ] Time reviews with FSRS, whose unit is the template. A template is one
       form, and a technique mixes forms that fade at different rates. A

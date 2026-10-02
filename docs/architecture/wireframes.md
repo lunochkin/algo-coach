@@ -55,6 +55,11 @@ Every page under a section carries the same two rows above its body.
 | Pick a technique                                                       |
 | Every technique a served problem carries, stalest first.               |
 |                                                                        |
+| Continue  1                                                            |
+| +--------------------------------------------------------+             |
+| | Sliding window   ladder 5/8   next: Signal Bands  med  |             |
+| +--------------------------------------------------------+             |
+|                                                                        |
 | Not practised yet  12                                                  |
 | bit-manipulation   breadth-first-search   greedy                       |
 | monotonic-stack   sliding-window   two-pointers ...                    |
@@ -69,6 +74,12 @@ Every page under a section carries the same two rows above its body.
 
 - The board is the landing page, so it opens under the navigation with no way
   back.
+- "Continue" reads first: one row per card with a run open, the most recently
+  active first. The row names the card, its ladder's progress and the next
+  rung, a required one before an optional one. A press opens that rung's
+  problem from the card, so a card in progress is one press away.
+- A card whose ladder is all solved names no next rung, and its press opens the
+  card instead.
 - A technique never practised ranks stalest, so the untouched techniques read
   first. Each is a name alone, since every count on such a row is zero.
 - A name here is a link, not a chip. The listing's filters are chips, and a
@@ -78,7 +89,8 @@ Every page under a section carries the same two rows above its body.
 - The line under the two groups counts the attempts no row holds: the attempts
   no technique resolved, and the attempts on a retired problem.
 - Phase 14 serves the scheduler's pick above both groups, and every technique
-  stays on offer below it.
+  stays on offer below it. The pick then reads the open runs, and replaces the
+  Continue rows rather than competing with them.
 
 ## Every problem
 

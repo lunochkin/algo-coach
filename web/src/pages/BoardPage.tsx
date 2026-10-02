@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import { api, type TechniqueRow } from '@/api/client'
+import { api, type Studying, type TechniqueRow } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
@@ -31,6 +31,18 @@ export function BoardPage() {
 
           return (
             <div className="space-y-section">
+              {/* the study the user declared, ahead of any staleness ranking */}
+              {board.studying.length > 0 && (
+                <section className="space-y-stack">
+                  <Heading count={board.studying.length}>Continue</Heading>
+                  <PickList>
+                    {board.studying.map((one) => (
+                      <Continue key={one.slug} card={one} />
+                    ))}
+                  </PickList>
+                </section>
+              )}
+
               {untouched.length > 0 && (
                 <section className="space-y-stack">
                   <Heading count={untouched.length}>Not practised yet</Heading>
@@ -77,6 +89,32 @@ export function BoardPage() {
         }}
       </Loaded>
     </section>
+  )
+}
+
+// a card in progress and the rung one press opens; a card whose ladder is all
+// solved opens the card instead
+function Continue({ card }: { card: Studying }) {
+  const next = card.next
+  return (
+    <PickRow
+      to={
+        next
+          ? `/problems/${encodeURIComponent(next.id)}?card=${encodeURIComponent(card.slug)}`
+          : `/cards/${encodeURIComponent(card.slug)}`
+      }
+      title={card.title}
+      stats={[
+        { label: 'solved', value: `${card.solved}/${card.rungs}` },
+        {
+          label: '',
+          // the level belongs to the next rung, so it reads beside that title
+          value: next
+            ? `next: ${next.title}${next.difficulty ? ` (${next.difficulty})` : ''}`
+            : 'ladder done',
+        },
+      ]}
+    />
   )
 }
 

@@ -26,6 +26,9 @@ those steps at low fidelity.
 - **A signed-in user lands on the board.** Every sitting starts from a technique
   the user picks there, and Phase 14 serves the scheduler's pick on the same
   page.
+- **The board names the cards in progress first.** A card with a run open is the
+  study the user declared, and ranking techniques by staleness alone can bury
+  it. Each such card offers its next rung as one press.
 - **The listing filters by two things a problem carries: its techniques and
   its difficulty.** The tags it offers are the techniques the listing itself
   holds, and the levels are the three a problem can carry.

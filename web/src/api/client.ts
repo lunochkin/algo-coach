@@ -25,6 +25,7 @@ api.use({
 
 export type Board = components['schemas']['Board']
 export type TechniqueRow = components['schemas']['TechniqueRow']
+export type Studying = components['schemas']['Studying']
 export type Card = components['schemas']['Card']
 export type Carry = components['schemas']['Carry']
 export type ListedCard = components['schemas']['ListedCard']
