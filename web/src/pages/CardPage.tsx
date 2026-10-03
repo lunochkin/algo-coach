@@ -148,6 +148,7 @@ export function CardPage() {
                 id="templates"
                 title="Templates"
                 aside={countOf(studied.card.templates.length, "template")}
+                body="bare"
                 closed={closed.includes("templates")}
                 onToggle={toggle}
               >
@@ -263,6 +264,7 @@ function LadderView({
   return (
     <Section
       id="ladder"
+      body="rows"
       title="Ladder"
       closed={closed}
       onToggle={onToggle}
@@ -277,7 +279,7 @@ function LadderView({
           <Link
             key={rung.problem.id}
             to={`/problems/${encodeURIComponent(rung.problem.id)}?card=${encodeURIComponent(slug)}`}
-            className="group -mx-3 flex items-baseline gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-accent"
+            className="group flex items-baseline gap-3 px-4 py-3 transition-colors hover:bg-accent"
           >
             {studied.run && <Mark solved={rung.solved} />}
             <span className="min-w-0">
@@ -304,7 +306,7 @@ function LadderView({
         {studied.gaps.map((gap: Gap) => (
           <p
             key={gap.template_id}
-            className="flex items-baseline gap-3 py-3 text-meta text-muted-foreground"
+            className="flex items-baseline gap-3 px-4 py-3 text-meta text-muted-foreground"
           >
             No problem covers {gap.title} yet.
             <Badge variant="outline" className="ml-auto font-normal">
@@ -358,6 +360,7 @@ function ProbesView({
   return (
     <Section
       id="probes"
+      body="rows"
       title="Probes"
       aside="drawn at the start, never from the ladder"
       closed={closed}
@@ -368,7 +371,7 @@ function ProbesView({
           <Link
             key={one.problem.id}
             to={`/problems/${encodeURIComponent(one.problem.id)}?card=${encodeURIComponent(slug)}`}
-            className="group -mx-3 flex items-baseline gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-accent"
+            className="group flex items-baseline gap-3 px-4 py-3 transition-colors hover:bg-accent"
           >
             <span className="font-medium underline-offset-4 group-hover:underline">
               {one.problem.title}
@@ -394,6 +397,7 @@ function Section({
   id,
   title,
   aside,
+  body = "prose",
   closed,
   onToggle,
   children,
@@ -401,14 +405,17 @@ function Section({
   id: string;
   title: string;
   aside?: string;
+  // the panel the body sits in: prose padded, rows edge to edge, or none
+  // where the body brings panels of its own
+  body?: "prose" | "rows" | "bare";
   closed: boolean;
   onToggle: (id: string) => void;
   children: ReactNode;
 }) {
   return (
-    // a rule over each one: the sections are the page's own structure, and a
-    // brief carrying headings of its own reads inside one of them
-    <section id={id} className="scroll-mt-16 space-y-stack border-t pt-section">
+    // a heading over a bordered panel, as every page's sections read: a brief
+    // carrying headings of its own then reads inside one of them
+    <section id={id} className="scroll-mt-16 space-y-stack">
       <div className="flex items-baseline justify-between gap-3">
         <button
           type="button"
@@ -429,7 +436,19 @@ function Section({
           <span className="text-meta text-muted-foreground">{aside}</span>
         )}
       </div>
-      {!closed && children}
+      {!closed &&
+        (body === "bare" ? (
+          children
+        ) : (
+          <div
+            className={cn(
+              "rounded-xl border",
+              body === "prose" ? "px-4 py-3" : "overflow-hidden",
+            )}
+          >
+            {children}
+          </div>
+        ))}
     </section>
   );
 }

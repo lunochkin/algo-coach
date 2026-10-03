@@ -193,6 +193,9 @@ those steps at low fidelity.
 - **A section collapses from its own heading**, and every section is open until
   the reader closes it. The count beside the heading stays readable while the
   section is closed.
+- **A section's body sits in a bordered panel under its heading**, prose padded
+  and rows edge to edge, on a long page as on a list. A card's brief carries
+  headings of its own, and the panel keeps them inside one section.
 - **Which sections a reader closed is not stored**, in the browser or
   anywhere else, so a reload opens every section again.
 
