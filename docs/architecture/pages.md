@@ -207,9 +207,15 @@ those steps at low fidelity.
   spacing step, a type size or a font family is defined.** Every component reads
   a token. A value set inside one component alone is a design no other component
   follows.
-- **The palette carries no brand hue.** The pages show code, prose and verdicts,
-  and colour carries meaning on the verdict alone, so a brand hue would compete
-  with the colours a verdict is read by.
+- **The app takes the site's palette and shapes**, so the product reads as one
+  thing from the landing page to a sitting. The neutrals, the type, the code
+  colours and the verdict colours were already shared. The flame and the
+  rounder shapes come from the site.
+- **The flame marks the brand and the focus, and nothing else.** The wordmark
+  carries a flame dot, and the focus ring is its deep shade. The press a page
+  asks for is an ink pill, as the site's navigation press is: a flame press on
+  every working page read louder than the page around it. No verdict reads in
+  the flame either: its hue sits between wrong and timed out.
 - **Each of a verdict's four outcomes carries a token**: passed, wrong, timed
   out and crashed. One `destructive` token cannot separate a wrong answer from a
   timeout, and the drill loop shows that difference on every failing submission.
@@ -244,7 +250,9 @@ those steps at low fidelity.
   easier to sit in front of than white. The dark ground is a warm charcoal for
   the same reason.
 - **Every radius is derived from one base**, so a single edit rounds or squares
-  the whole app.
+  the whole app. The base follows the site's rounder panels.
+- **A press is a pill**, as on the site. The pill is set once in
+  `web/src/index.css`, so the copied button component stays as it ships.
 - **The gallery is a page showing every token and every component the pages
   use.** A component restyled there shows every use of it at once.
 - **The gallery is built in development alone.** The deployed bundle carries

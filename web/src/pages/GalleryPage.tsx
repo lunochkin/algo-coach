@@ -33,6 +33,7 @@ const SURFACES = [
   'destructive',
   'border',
 ]
+const BRAND = ['brand', 'brand-deep', 'brand-wash']
 const VERDICTS = ['verdict-passed', 'verdict-wrong', 'verdict-timeout', 'verdict-crashed']
 const CODE = ['code-keyword', 'code-name', 'code-string', 'code-number', 'code-comment', 'code-selection']
 const ROLES = [
@@ -129,6 +130,7 @@ export function GalleryPage() {
 
       <Section title="Colour">
         <Swatches names={SURFACES} />
+        <Swatches names={BRAND} />
         <Swatches names={VERDICTS} />
         <Swatches names={CODE} />
       </Section>

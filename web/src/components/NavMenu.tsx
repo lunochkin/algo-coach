@@ -37,8 +37,13 @@ export function NavMenu({ wide }: { wide: boolean }) {
         {/* the wordmark reaches the board, as a site's own name does */}
         <Link
           to="/"
-          className="mr-1 shrink-0 font-semibold whitespace-nowrap underline-offset-4 hover:underline sm:mr-4"
+          className={cn(
+            'mr-1 flex shrink-0 items-center gap-2 whitespace-nowrap sm:mr-4',
+            'font-semibold underline-offset-4 hover:underline',
+          )}
         >
+          {/* the flame dot the site's wordmark carries */}
+          <span aria-hidden className="size-2.5 rounded-full bg-brand" />
           algo-coach
         </Link>
         {SECTIONS.map(({ label, to, owns }) => {

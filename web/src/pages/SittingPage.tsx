@@ -274,6 +274,8 @@ export function SittingPage() {
                     resumes a paused one, and pauses a running one */}
                 {unstarted || paused ? (
                   <Button
+                    // a control rather than the page's act
+                    variant="outline"
                     size="sm"
                     onClick={() => press(unstarted ? 'start' : 'resume')}
                     disabled={moving}
