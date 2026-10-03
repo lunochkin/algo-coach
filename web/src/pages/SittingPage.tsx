@@ -258,6 +258,15 @@ export function SittingPage() {
           {/* pushed right only where it shares the title's row: wrapped under
               a narrow title, it starts where the title does */}
           <div className="flex items-center gap-3 sm:ml-auto">
+            {/* a dot while the clock runs: the label on the press alone left
+                running and stopped looking alike */}
+            {!paused && !ended && !unstarted && (
+              <span
+                role="img"
+                aria-label="The clock is running"
+                className="size-2 rounded-full bg-clock-running"
+              />
+            )}
             <ElapsedClock
               elapsedSec={clock.elapsedSec}
               receivedAt={clock.at}

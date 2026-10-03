@@ -1,7 +1,9 @@
 import { Link } from 'react-router'
 
 import type { ListedCard } from '@/api/client'
+import { ProgressBar } from '@/components/ProgressBar'
 import { lastAt, plain } from '@/lib/format'
+import { cn } from '@/lib/utils'
 
 // every block is the same panel: a family several cards teach carries a
 // header naming it, and the cards that teach a family of their own carry the
@@ -45,7 +47,9 @@ function CardRow({ card, named = false }: { card: ListedCard; named?: boolean })
     >
       <div className="flex items-baseline gap-3">
         <span className="font-medium underline-offset-4 group-hover:underline">{card.title}</span>
-        {named && <span className="font-mono text-meta text-muted-foreground">{card.technique}</span>}
+        {named && (
+          <span className="font-mono text-meta text-muted-foreground">{card.technique}</span>
+        )}
         <span className="ml-auto shrink-0 text-meta text-muted-foreground tabular-nums">
           {status.started_at ? lastAt(status.last_at) : templates(card.templates.length, optional)}
         </span>
@@ -53,11 +57,16 @@ function CardRow({ card, named = false }: { card: ListedCard; named?: boolean })
       {status.started_at ? (
         // a started card was already chosen, so its progress replaces the
         // trigger it was chosen by
-        <p className="mt-1 text-meta text-muted-foreground tabular-nums">
-          started {new Date(status.started_at).toLocaleDateString()} · ladder {status.solved}/
-          {status.rungs}, required {status.required_solved}/{status.required}
-          {status.gaps > 0 && ` · ${uncovered(status.gaps)}`}
-        </p>
+        <>
+          <p className="mt-1 text-meta text-muted-foreground tabular-nums">
+            started {new Date(status.started_at).toLocaleDateString()} · ladder {status.solved}/
+            {status.rungs}, required {status.required_solved}/{status.required}
+            {status.gaps > 0 && ` · ${uncovered(status.gaps)}`}
+          </p>
+          <div className="mt-2 max-w-xs">
+            <ProgressBar value={status.solved} total={status.rungs} label="Rungs solved" />
+          </div>
+        </>
       ) : (
         // the trigger says when to reach for the technique, which is what a
         // reader picks a card by
@@ -77,7 +86,17 @@ function RecallMarks({ card }: { card: ListedCard }) {
       {card.templates.map((template) => {
         const [mark, reading] = recallMark(template.cases?.length ?? 0, recalled.get(template.id))
         return (
-          <span key={template.id} title={`${template.title}: ${reading}`} className="font-mono">
+          <span
+            key={template.id}
+            title={`${template.title}: ${reading}`}
+            // a pass and a fail read in the verdict's own colours, which mean
+            // the same outcome here; a hinted pass and no recall stay grey
+            className={cn(
+              'font-mono',
+              mark === '✓' && 'text-verdict-passed',
+              mark === '✗' && 'text-verdict-wrong',
+            )}
+          >
             {mark}
           </span>
         )

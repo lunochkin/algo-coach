@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Panel, Stat, Stats } from "@/components/Panel";
 import { SectionBar } from "@/components/SectionBar";
 import { TemplatePanel } from "@/components/TemplatePanel";
+import { ProgressBar } from "@/components/ProgressBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { lastAt } from "@/lib/format";
@@ -206,6 +207,8 @@ function Progress({ studied }: { studied: Studied }) {
           </Button>
         )}
       </Stats>
+      {/* the ladder's progress, drawn as the cards list draws it */}
+      <ProgressBar value={solved} total={studied.rungs.length} label="Rungs solved" />
     </Panel>
   );
 }

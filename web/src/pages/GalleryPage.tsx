@@ -9,6 +9,7 @@ import { Markdown } from '@/components/Markdown'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel, Stat, Stats } from '@/components/Panel'
 import { PickList, PickRow } from '@/components/PickRow'
+import { ProgressBar } from '@/components/ProgressBar'
 import { SectionHeading } from '@/components/SectionHeading'
 import { SectionBar } from '@/components/SectionBar'
 import { TemplatePanel } from '@/components/TemplatePanel'
@@ -33,7 +34,7 @@ const SURFACES = [
   'destructive',
   'border',
 ]
-const BRAND = ['brand', 'brand-deep', 'brand-wash']
+const BRAND = ['brand', 'brand-deep', 'brand-wash', 'clock-running']
 const VERDICTS = ['verdict-passed', 'verdict-wrong', 'verdict-timeout', 'verdict-crashed']
 const CODE = ['code-keyword', 'code-name', 'code-string', 'code-number', 'code-comment', 'code-selection']
 const ROLES = [
@@ -259,6 +260,12 @@ export function GalleryPage() {
               />
             </PickList>
           </div>
+        </div>
+      </Section>
+
+      <Section title="Progress">
+        <div className="max-w-xs">
+          <ProgressBar value={5} total={8} label="Rungs solved" />
         </div>
       </Section>
 

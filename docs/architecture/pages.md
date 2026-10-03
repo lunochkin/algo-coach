@@ -211,11 +211,19 @@ those steps at low fidelity.
   thing from the landing page to a sitting. The neutrals, the type, the code
   colours and the verdict colours were already shared. The flame and the
   rounder shapes come from the site.
-- **The flame marks the brand and the focus, and nothing else.** The wordmark
-  carries a flame dot, and the focus ring is its deep shade. The press a page
+- **The flame marks the brand, the focus and progress, and nothing else.** The
+  wordmark carries a flame dot, the focus ring is its deep shade, and a
+  ladder's progress is a thin flame bar. Progress is the study's own rather
+  than a verdict, so it reads in the brand. The press a page
   asks for is an ink pill, as the site's navigation press is: a flame press on
   every working page read louder than the page around it. No verdict reads in
   the flame either: its hue sits between wrong and timed out.
+- **A recall's pass and fail read in the verdict's colours**, since they are the
+  same outcomes: a clean recall in passed, a failed one in wrong. A hinted pass
+  and a form never recalled stay grey.
+- **A running clock carries a green dot.** The press's label alone left a
+  running clock and a stopped one looking alike. The dot has a token of its
+  own, since a running clock is not a passed case.
 - **Each of a verdict's four outcomes carries a token**: passed, wrong, timed
   out and crashed. One `destructive` token cannot separate a wrong answer from a
   timeout, and the drill loop shows that difference on every failing submission.

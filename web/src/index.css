@@ -52,6 +52,9 @@
     --color-brand-deep: var(--brand-deep);
     --color-brand-wash: var(--brand-wash);
 
+    /* a sitting's clock running, so running and stopped differ at a glance */
+    --color-clock-running: var(--clock-running);
+
     /* one per case outcome: a run that timed out asks for a different fix
        from one that answered wrongly */
     --color-verdict-passed: var(--verdict-passed);
@@ -118,6 +121,7 @@
     --brand: light-dark(oklch(0.69 0.215 41), oklch(0.72 0.19 41));
     --brand-deep: light-dark(oklch(0.56 0.19 38), oklch(0.78 0.15 45));
     --brand-wash: light-dark(oklch(0.95 0.035 55), oklch(0.32 0.05 45));
+    --clock-running: light-dark(oklch(0.53 0.14 150), oklch(0.78 0.16 150));
     /* the page's one act is an ink pill, as the site's navigation press is:
        the flame on a working page's every press is louder than the reading */
     --primary: light-dark(oklch(0.268 0.020 96.0), oklch(0.930 0.004 106.4));
