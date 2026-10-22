@@ -101,7 +101,7 @@ def test_a_starting_broker_clears_leftovers_and_pulls_its_image_before_its_first
 
 def test_the_submission_s_image_is_pinned_by_digest():
     """A tag moves under the run a stored verdict was measured by."""
-    assert re.fullmatch(r"python:3\.14-slim@sha256:[0-9a-f]{64}", IMAGE)
+    assert re.fullmatch(r"python:3\.15\.1-slim@sha256:[0-9a-f]{64}", IMAGE)
 
 
 def test_each_run_s_container_carries_the_label_leftovers_are_found_by():

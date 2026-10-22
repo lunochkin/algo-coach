@@ -5,6 +5,7 @@ import contextlib
 import json
 import multiprocessing
 import os
+import platform
 import select
 import signal
 import sys
@@ -25,9 +26,7 @@ STARTUP_MS = 2000
 
 # the backend and the interpreter, as a verification stores them. Opaque to
 # every reader, so the format is this module's alone
-LOCAL_RUNNER = (
-    f"subprocess/{sys.implementation.name}-{sys.version_info.major}.{sys.version_info.minor}"
-)
+LOCAL_RUNNER = f"subprocess/{sys.implementation.name}-{platform.python_version()}"
 
 # a child per case, forked from a server that imported the child's module once:
 # an interpreter start per case cost some 40ms before the solution ran. The

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "AI coaching layer for deliberate practice of algorithmic problem-solving: SRS over a technique-mastery model, on a problem corpus the engine writes and owns"
 readme = "README.md"
 license = "Apache-2.0"
-requires-python = ">=3.14"
+requires-python = ">=3.15.1"
 authors = [{ name = "Maksim Lunochkin" }]
 dependencies = [
     "alembic>=1.19.2",
@@ -59,7 +59,7 @@ markers = [
 include = ["src"]
 # tests are unannotated by design: pydantic coerces what strict rejects
 ignore = ["tests"]
-pythonVersion = "3.14"
+pythonVersion = "3.15"
 typeCheckingMode = "strict"
 
 [tool.importlinter]

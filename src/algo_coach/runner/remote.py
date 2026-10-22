@@ -15,7 +15,7 @@ BROKER = "ALGO_COACH_BROKER"
 
 # what a verification stores for a run the broker answered. The image is
 # pinned, so the interpreter is the container's rather than this process's
-RUNNER = "container/cpython-3.14"
+RUNNER = "container/cpython-3.15.1"
 
 # the broker's own bounds, copied rather than imported: the process holding the
 # container runtime's socket loads no engine code, so nothing imports it back

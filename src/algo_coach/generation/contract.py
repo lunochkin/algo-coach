@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 
 # named because the runner executes under it: a model writing for an older
 # interpreter reaches stdlib behaviour this one rejects
-RUNTIME = "Python 3.14"
+RUNTIME = "Python 3.15.1"
 
 ENTRY = "one module-level function named `solve`"
 
