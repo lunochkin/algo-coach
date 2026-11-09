@@ -6,7 +6,7 @@ The work not yet ready for a phase waits under Further developments.
 
 ## Phase 14 — the knowledge module (current)
 
-learn, a personal study app with a native Android client, merges into the
+learn, a personal study app with a native client, merges into the
 engine: its question bank, its FSRS schedule, its queues and its app. Practice
 then happens in one app with one log, and declarative knowledge becomes the
 third part of mastery. Content is authored in files and seeded into Postgres,
@@ -30,7 +30,7 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 - [x] Write the seed's two rules into `knowledge.md`: a question with attempts
       is retired, never deleted, and a question asking something new takes a
       new slug. The attempts answered the old question
-- [ ] Write the app into `README.md` as a third adapter carrying the domain in
+- [x] Write the app into `README.md` as a third adapter carrying the domain in
       TypeScript, held to the Python side by shared fixtures. The invariant
       names two adapters and one copy of the domain
 - [ ] Write the app's sign-in into `README.md`: a token the user mints from
@@ -53,7 +53,7 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 
 ### The app
 
-- [ ] Move learn's app into `mobile/` with its TypeScript core, the FSRS
+- [ ] Move learn's app into `native/` with its TypeScript core, the FSRS
       parity fixtures and its USB install recipe. A store release is deferred
 - [ ] Keep the app's signing key out of git and backed up off the laptop.
       learn's app carries its debug keystore in the repo, and a sideloaded

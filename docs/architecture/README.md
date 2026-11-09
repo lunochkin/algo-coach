@@ -317,6 +317,12 @@ without redefining them. Grouped by the file that specifies the record.
 - **Certification**: one scope, a topic or a whole module, at one rank. Earned
   on coverage, retention, an exam and its prerequisites.
 
+### The native app
+
+- **Native app**: the engine's client on a phone, built from one codebase for
+  Android and iOS. It runs the knowledge module's rules itself and schedules
+  offline. Distinct from the web app opened on a phone, which does neither.
+
 ### The pages
 
 - **Section**: one of the two destinations the web app's navigation names,
@@ -522,6 +528,22 @@ times. Each record class is specified in one of the files beside it.
   - Caddy keeps its certificates on a volume. Without the volume a redeploy
     issues a certificate again, and the certificate authority limits how often
     it issues one.
+- **The native app is the knowledge module's client, and schedules offline.**
+  It holds its own copy of the knowledge module's rules, in TypeScript, and
+  syncs with the engine through the API.
+  - The app answers questions with no network. A queue picks each question at
+    the moment it is needed, so a round trip per pick would stall practice on
+    a train or a plane.
+  - The Python side generates the fixtures, and both suites check them. A
+    fixture is regenerated from the Python side, never edited by hand, so a
+    rule changed in one copy fails the other copy's tests.
+  - A rule changes in `knowledge.md` first, then in both copies. The doc is
+    the contract the fixtures are generated against.
+  - The app serves the knowledge modules alone. Every other page of the engine
+    stays in the web app until a feature is chosen for the phone.
+  - The app runs on Android first, and iOS follows from the same code. It is
+    installed directly from a build signed by a key kept out of git. A store
+    release is deferred until someone other than the author installs it.
 - **Google and GitHub hold each identity and its login.** A person signs in
   through one of the two, and the engine stores no password. Password resets,
   second factors and leaked credentials are the provider's to handle, so no
@@ -656,8 +678,12 @@ Properties the system holds at all times.
 - The technique vocabulary and the cards are product-owned and global, and no
   user authors a technique or a card.
 - Domain logic stays adapter-free and directly callable. The CLI is one
-  adapter, and the web app is the second. A sitting happens in
-  the web app, and the by-hand passes stay in the terminal.
+  adapter, the web app is the second, and the native app is the third. A
+  sitting happens in the web app, the knowledge module's queues in the
+  native app, and the by-hand passes stay in the terminal.
+- The native app carries the knowledge module's domain in TypeScript, the one
+  copy of domain logic outside Python. Fixtures generated from the Python side
+  hold the two copies to `knowledge.md`.
 - No third-party problem statements or test cases in git, in any repo.
 
 ## Repo constraints

@@ -5,7 +5,7 @@ schedule that spaces them, and the records the answers leave. Part of the
 architecture, and `README.md` is the map.
 
 The rules here were learn's, a personal study app merged into the engine in
-Phase 14. learn's Android app became the engine's client, and it carries the
+Phase 14. learn's native app became the engine's client, and it carries the
 same rules in TypeScript. Shared fixtures hold the app and the server to this
 file.
 

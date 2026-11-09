@@ -392,7 +392,7 @@ does not hold.
   and execution, fed by question attempts.
 - **Modules of questions**, Python first, authored in files and seeded into
   Postgres. A question with attempts is retired, never deleted.
-- **learn's Android app as the engine's client**, scheduling offline with its
+- **learn's native app as the engine's client**, scheduling offline with its
   TypeScript core and syncing through the engine's API, signed in by a token
   minted from the account menu.
 - **A sync API** appending a user's records by client-minted id, and a content
