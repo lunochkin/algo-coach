@@ -2,7 +2,7 @@
 # compose file the server deploys with. `docs/architecture/README.md` gives why
 # the image carries that compose file.
 
-FROM node:24-slim AS pages
+FROM node:26-slim AS pages
 WORKDIR /web
 # the manifests alone first, so a page edit reuses the installed layer
 COPY web/package.json web/package-lock.json ./
