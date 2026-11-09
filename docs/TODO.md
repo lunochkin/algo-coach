@@ -29,7 +29,7 @@ A card's study has phases a template's FSRS state does not hold: the ladder,
 a spaced check that consolidates it, and a lapse after graduation. algo-prep's
 drill board tracked them by hand.
 
-- [ ] Write a card's states into `content.md` and `log.md`: not started,
+- [x] Write a card's states into `content.md` and `log.md`: not started,
       acquiring, consolidating, graduated and lapsed, each derived from the log
       and never stored. `flows.md` defers what done means, and this answers it
 - [ ] Write the graduation rule: the required rungs solved, every recallable

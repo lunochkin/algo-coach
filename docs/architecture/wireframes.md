@@ -358,8 +358,8 @@ problem's path reads as its record, as "Every problem" gives.
   never recalled, and `-` a template no case checks.
 - A gap reads on the row as `n forms uncovered`, as the card's own page
   reports it.
-- Phases such as graduation and a due date are absent. `flows.md` names no
-  threshold for done, and Phase 14's schedule adds the due date to the row.
+- The card state and a due date are absent from the row. Phase 14 adds both,
+  and `log.md` gives the card states.
 
 ## A card
 
