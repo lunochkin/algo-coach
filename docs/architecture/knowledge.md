@@ -29,6 +29,27 @@ A module is one subject: Python first, then algorithms and system design.
   record then references a minted id, as `README.md` requires of every
   append-only record.
 
+## Seeding
+
+The seed reads the authored files and writes the content tables. A re-seed
+refreshes what the files still hold, and the log keeps every reference it
+already made.
+
+- **A seeded row a log record references is retired, never deleted.** This
+  holds for a module, a topic, a subtopic, a question and a lesson. A deleted
+  row would leave its answers and marks pointing at nothing.
+- **A retired question is never served and never counted.** It leaves its
+  group, its coverage and its certification, and its answers stay readable.
+- **A question's slug names one question for good.** A fixed typo or a
+  clearer wording keeps the slug, and the seed refreshes the row.
+- **A question asking something new takes a new slug.** The old answers
+  answered the old question, and a new slug keeps them from counting toward
+  the new one. The old slug is retired.
+- **A retired slug is never reused.** A reused slug would attach the old
+  answers to whatever question took it.
+- **The author decides which of the two an edit is.** The seed sees changed
+  text and cannot tell a clearer wording from a different question.
+
 ## Questions
 
 - **A question carries a prompt, a kind and a format.** The kind is the

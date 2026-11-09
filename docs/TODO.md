@@ -27,7 +27,7 @@ learn's app does, so the switch changes the backend and nothing the user sees.
       drill loop. One name carries one meaning
 - [x] Write declarative knowledge into `log.md` as the third part of mastery,
       fed by question attempts, with its formula deferred as the other two are
-- [ ] Write the seed's two rules into `knowledge.md`: a question with attempts
+- [x] Write the seed's two rules into `knowledge.md`: a question with attempts
       is retired, never deleted, and a question asking something new takes a
       new slug. The attempts answered the old question
 - [ ] Write the app into `README.md` as a third adapter carrying the domain in
