@@ -2,13 +2,70 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark ([data-theme="dark"] &);
 
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: 'Geist Variable', sans-serif;
+    /* one family for every piece of code: a statement's signature, a
+       template's form, the editor and a failing case's arguments */
+    --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+    /* the type scale, named by the role a page reads it in */
+    --text-title: 1.5rem;
+    --text-title--line-height: 2rem;
+    --text-heading: 1.125rem;
+    --text-heading--line-height: 1.625rem;
+    --text-body: 1rem;
+    --text-body--line-height: 1.5rem;
+    --text-meta: 0.875rem;
+    --text-meta--line-height: 1.25rem;
+    --text-code: 0.875rem;
+    --text-code--line-height: 1.5rem;
+    /* mono set beside sans reads larger at the same size, so code inside a
+       line of prose takes a step of its own */
+    --text-code-inline: 0.8125rem;
+    /* KaTeX sets math at 1.21em of the line around it, which reads a size up
+       from the prose; relative, so math in a heading still scales with it */
+    --text-math: 1.05em;
+
+    /* the rhythm a page is laid out on, over the 0.25rem step every other
+       spacing utility is a multiple of */
+    --spacing-gutter: 1.5rem;
+    --spacing-section: 1.5rem;
+    --spacing-stack: 1rem;
+
+    /* the editor's syntax colours, so the form reads in either scheme */
+    --color-code-keyword: var(--code-keyword);
+    --color-code-name: var(--code-name);
+    --color-code-string: var(--code-string);
+    --color-code-number: var(--code-number);
+    --color-code-comment: var(--code-comment);
+    --color-code-selection: var(--code-selection);
+
+    /* the brand's flame, shared with the site: the wordmark's dot and the focus
+       ring. Never a verdict, which reads by its own four */
+    --color-brand: var(--brand);
+    --color-brand-deep: var(--brand-deep);
+    --color-brand-wash: var(--brand-wash);
+
+    /* a sitting's clock running, so running and stopped differ at a glance */
+    --color-clock-running: var(--clock-running);
+
+    /* one per case outcome: a run that timed out asks for a different fix
+       from one that answered wrongly */
+    --color-verdict-passed: var(--verdict-passed);
+    --color-verdict-wrong: var(--verdict-wrong);
+    --color-verdict-timeout: var(--verdict-timeout);
+    --color-verdict-crashed: var(--verdict-crashed);
+
+    /* pages.md gives the reading column and the sitting as its exception */
+    --container-reading: 56rem;
+    --container-wide: 96rem;
+    --container-form: 24rem;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,73 +106,69 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* the neutrals are the "Claude +" community theme on tweakcn, converted to
+   oklch, and the site at alg-site carries the same ones. The flame is the
+   site's: it marks the brand, and no verdict reads in it, since its hue sits
+   between `verdict-wrong` and `verdict-timeout` */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
+    color-scheme: light;
+    --background: light-dark(oklch(0.982 0.005 95.1), oklch(0.268 0.004 106.6));
+    --foreground: light-dark(oklch(0.344 0.027 95.7), oklch(0.958 0.003 106.4));
+    --card: light-dark(oklch(0.967 0.007 97.4), oklch(0.293 0.002 106.5));
+    --card-foreground: light-dark(oklch(0.344 0.027 95.7), oklch(0.958 0.003 106.4));
+    --popover: light-dark(oklch(0.967 0.007 97.4), oklch(0.293 0.002 106.5));
+    --popover-foreground: light-dark(oklch(0.344 0.027 95.7), oklch(0.958 0.003 106.4));
+    --brand: light-dark(oklch(0.69 0.215 41), oklch(0.72 0.19 41));
+    --brand-deep: light-dark(oklch(0.56 0.19 38), oklch(0.78 0.15 45));
+    --brand-wash: light-dark(oklch(0.95 0.035 55), oklch(0.32 0.05 45));
+    --clock-running: light-dark(oklch(0.53 0.14 150), oklch(0.78 0.16 150));
+    /* the page's one act is an ink pill, as the site's navigation press is:
+       the flame on a working page's every press is louder than the reading */
+    --primary: light-dark(oklch(0.268 0.020 96.0), oklch(0.930 0.004 106.4));
+    --primary-foreground: light-dark(oklch(0.982 0.005 95.1), oklch(0.268 0.004 106.6));
+    --secondary: light-dark(oklch(0.925 0.014 93.0), oklch(0.395 0.011 106.9));
+    --secondary-foreground: light-dark(oklch(0.344 0.027 95.7), oklch(0.958 0.003 106.4));
+    --muted: light-dark(oklch(0.934 0.015 90.2), oklch(0.221 0.004 106.7));
+    --muted-foreground: light-dark(oklch(0.534 0.008 97.5), oklch(0.771 0.017 99.1));
+    --accent: light-dark(oklch(0.925 0.014 93.0), oklch(0.362 0.010 106.9));
+    --accent-foreground: light-dark(oklch(0.344 0.027 95.7), oklch(0.958 0.003 106.4));
+    --destructive: light-dark(oklch(0.577 0.245 27.325), oklch(0.704 0.191 22.216));
+    --border: light-dark(oklch(0.885 0.007 97.4), oklch(0.362 0.010 106.9));
+    --input: light-dark(oklch(0.885 0.007 97.4), oklch(0.362 0.010 106.9));
+    --ring: var(--brand-deep);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
+    /* rounder, as the site draws its panels */
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
+    --verdict-passed: light-dark(oklch(0.53 0.14 150), oklch(0.78 0.16 150));
+    --verdict-wrong: light-dark(oklch(0.55 0.21 27), oklch(0.72 0.19 25));
+    --verdict-timeout: light-dark(oklch(0.55 0.13 70), oklch(0.80 0.14 75));
+    --verdict-crashed: light-dark(oklch(0.52 0.22 320), oklch(0.75 0.20 320));
+    --code-keyword: light-dark(oklch(0.48 0.16 290), oklch(0.78 0.13 290));
+    --code-name: light-dark(oklch(0.48 0.13 250), oklch(0.80 0.10 250));
+    --code-string: light-dark(oklch(0.50 0.12 150), oklch(0.80 0.12 150));
+    --code-number: light-dark(oklch(0.52 0.12 60), oklch(0.82 0.11 70));
+    --code-comment: light-dark(oklch(0.53 0.02 260), oklch(0.65 0.02 260));
+    /* apart from `accent`, which the editor's active line reads: a selection
+       inside that line would otherwise vanish into it */
+    --code-selection: light-dark(oklch(0.86 0.06 250), oklch(0.45 0.08 250));
+    --sidebar: light-dark(oklch(0.985 0 0), oklch(0.205 0 0));
+    --sidebar-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
+    --sidebar-primary: light-dark(oklch(0.205 0 0), oklch(0.488 0.243 264.376));
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --sidebar-accent: light-dark(oklch(0.97 0 0), oklch(0.269 0 0));
+    --sidebar-accent-foreground: light-dark(oklch(0.205 0 0), oklch(0.985 0 0));
+    --sidebar-border: light-dark(oklch(0.922 0 0), oklch(1 0 0 / 10%));
+    --sidebar-ring: light-dark(oklch(0.708 0 0), oklch(0.556 0 0));
 }
 
-.dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+/* the scheme the viewer chose, which `light-dark()` reads off the root and
+   the `dark` variant reads as an attribute */
+:root[data-theme="dark"] {
+    color-scheme: dark;
 }
 
 @layer base {
@@ -128,4 +181,163 @@
   html {
     @apply font-sans;
     }
+}
+/* a press reads as a press: the reset gives a button the arrow cursor, and a
+   menu item is a div carrying `cursor-default` besides. Unlayered, so it wins
+   over that utility */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+[role="menuitem"]:not([data-disabled]),
+[role="menuitemcheckbox"]:not([data-disabled]),
+[role="menuitemradio"]:not([data-disabled]),
+[role="option"]:not([data-disabled]),
+summary {
+    cursor: pointer;
+}
+
+/* the typography plugin ships a scale and a palette of its own, and the pages
+   read one set of tokens. Prose is bound to them here, in the one place a
+   value is defined, rather than per page. Unlayered, so it wins over the
+   plugin's own rules */
+.prose {
+    --tw-prose-body: var(--foreground);
+    --tw-prose-headings: var(--foreground);
+    --tw-prose-lead: var(--muted-foreground);
+    --tw-prose-links: var(--foreground);
+    --tw-prose-bold: var(--foreground);
+    --tw-prose-counters: var(--muted-foreground);
+    --tw-prose-bullets: var(--border);
+    --tw-prose-hr: var(--border);
+    --tw-prose-quotes: var(--muted-foreground);
+    --tw-prose-quote-borders: var(--border);
+    --tw-prose-captions: var(--muted-foreground);
+    --tw-prose-code: var(--foreground);
+    --tw-prose-pre-code: var(--foreground);
+    --tw-prose-pre-bg: var(--muted);
+    --tw-prose-th-borders: var(--border);
+    --tw-prose-td-borders: var(--border);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+}
+
+/* a document's own title, where prose carries one, reads at the page's title
+   role */
+.prose :is(h1) {
+    font-size: var(--text-title);
+    line-height: var(--text-title--line-height);
+    font-weight: 600;
+}
+
+/* a heading inside authored prose sits a step under the page's own section
+   headings, which read at the heading role: a brief whose parts read at that
+   role makes the page one flat list of headings */
+.prose :is(h2) {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: 600;
+    margin-top: var(--spacing-section);
+    margin-bottom: 0.25rem;
+}
+
+.prose :is(h3, h4) {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: 500;
+    margin-top: var(--spacing-stack);
+    margin-bottom: 0.25rem;
+}
+
+.prose :is(p, ul, ol, blockquote, pre, table) {
+    margin-block: var(--spacing-stack);
+}
+
+.prose :is(li) {
+    margin-block: 0.25rem;
+}
+
+.prose :is(li)::marker {
+    color: var(--muted-foreground);
+}
+
+.prose .katex {
+    font-size: var(--text-math);
+}
+
+/* the plugin draws a backtick on either side of inline code; a reader sees
+   the mark the author typed rather than the code they meant */
+.prose :is(code)::before,
+.prose :is(code)::after {
+    content: none;
+}
+
+.prose :is(code) {
+    font-size: var(--text-code-inline);
+    font-weight: 400;
+    background: var(--muted);
+    border-radius: var(--radius-sm);
+    padding: 0.1em 0.35em;
+}
+
+.prose :is(pre) {
+    font-size: var(--text-code);
+    line-height: var(--text-code--line-height);
+    border-radius: var(--radius-md);
+    padding: 0.75rem;
+}
+
+.prose :is(pre) :is(code) {
+    background: none;
+    padding: 0;
+}
+
+.prose :is(a) {
+    text-decoration-line: underline;
+    text-underline-offset: 4px;
+}
+
+.prose :is(blockquote) {
+    font-style: normal;
+    font-weight: 400;
+}
+
+.prose :is(thead th, td) {
+    font-size: var(--text-meta);
+}
+
+.prose > :first-child {
+    margin-top: 0;
+}
+
+.prose > :last-child {
+    margin-bottom: 0;
+}
+
+/* the five code tokens, as the classes `lib/python.ts` maps Python's tags to.
+   The editor and a template's form read the same mapping, so a form on a card
+   is coloured as the editor colours it */
+.tok-keyword {
+    color: var(--code-keyword);
+}
+
+.tok-name {
+    color: var(--code-name);
+}
+
+.tok-string {
+    color: var(--code-string);
+}
+
+.tok-number {
+    color: var(--code-number);
+}
+
+.tok-comment {
+    color: var(--code-comment);
+    font-style: italic;
+}
+
+/* a press is a pill, as on the site. Unlayered, so it outranks the rounding
+   the copied button sets per size, and the component stays as shadcn ships it */
+[data-slot="button"] {
+    border-radius: 9999px;
 }

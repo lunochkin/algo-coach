@@ -3,6 +3,7 @@ from operator import attrgetter
 
 from algo_coach.schema import Attempt, AttemptClaim, ClaimSource, Problem
 from algo_coach.standing import standing
+from algo_coach.techniques import with_ancestors
 
 # Weakest first: the user's claim stands over the machine's.
 BY_WHAT_EACH_KNEW = (ClaimSource.CLASSIFIER, ClaimSource.USER)
@@ -17,6 +18,9 @@ def standing_attempt_claims(claims: Iterable[AttemptClaim]) -> dict[str, Attempt
 def resolve_techniques(
     attempt: Attempt, problem: Problem, claims: Mapping[str, AttemptClaim]
 ) -> list[str]:
-    """The claim's techniques if it names any, otherwise the problem's."""
+    """The claim's techniques if it names any, otherwise the problem's, each
+    with every code it is a kind of."""
     claim = claims.get(attempt.id)
-    return sorted(set(claim.techniques if claim and claim.techniques else problem.techniques))
+    return sorted(
+        with_ancestors(claim.techniques if claim and claim.techniques else problem.techniques)
+    )

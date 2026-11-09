@@ -443,31 +443,73 @@ The page layout is not designed here, and using the loop decides it.
    technique's cards are linked from this step on.
 2. Candidates for the technique, least recently attempted first, lowest solve
    rate breaking a tie. The user picks one.
-3. The sitting is minted, the statement is served, and the clock starts.
+3. Opening the problem serves its statement and mints the sitting. The clock
+   starts on the user's press, or at once where the clock preference is on.
 4. The submission runs against the problem's own test cases, and the attempt is
    minted carrying the result.
-5. Keyed to each attempt, the loop asks for an attempt claim and a
-   self-label.
+5. Keyed to each attempt, the loop asks for an attempt claim and then for a
+   self-label, and one press stores both.
 
 - **The board offers every technique a served problem carries**, practised or
   not, and a technique never practised ranks stalest. A board of practised
   techniques alone opens the first sitting with nothing to pick.
-- **A candidate is offered without its statement.** The clock starts when the
-  statement is served, so a statement shown in the list is read untimed.
+- **A candidate is offered without its statement.** Opening the problem is
+  the act that serves the statement, so the list stays a list of picks.
+- **No press stands between the pick and the statement.** A press that started
+  the clock before the statement was shown made opening a problem a commitment,
+  and the author avoided opening problems because of it.
+- **The clock is shown, and the user starts it.** The sitting exists from the
+  moment the statement is served, and its clock does not run until the user
+  presses start. A sitting whose clock never ran is untimed, and that is a
+  legitimate way to practise.
+- **The clock preference decides whether the next clock starts by itself.**
+  The user's last press sets it: starting or resuming a clock turns it on, and
+  pausing one turns it off. It is off until the user first starts a
+  clock. The automatic pause on a hidden page sets nothing,
+  or one tab switch would stop every later clock unnoticed.
+- **The clock measures from its own start.** Reading done before the press is
+  not counted, and the attempt carries the time the clock ran.
 - **The card is offered, and no sitting requires it.** A user who holds the
-  form starts the sitting straight away, and a user who does not reads the
-  card first. Reading happens before the statement is served, so the clock
-  counts solving rather than reading. Recognising a form with no card in view
-  is a probe's test, which Phase 12 adds.
+  form solves straight away, and a user who does not reads the card first.
+  Recognising a form with no card in view is a probe's test.
+- **Opening a problem and leaving it ends nothing the user has to close.** The
+  sitting ends at a solve, at the End press, or at the idle bound `log.md`
+  gives. A sitting with no submission is browsing, and mastery reads nothing
+  from it.
 - **An attempt nobody timed stays untimed**, rather than carrying a duration
   reconstructed after the fact.
-- **A sitting is paused and resumed**, and the elapsed time the attempt carries
-  excludes every pause. `log.md` gives what the record holds.
+- **A running clock is paused and resumed**, and the elapsed time the attempt
+  carries excludes every pause. `log.md` gives what the record holds. A pause
+  and a stop are one press: a paused clock stays paused until the user resumes
+  it.
+- **A paused clock leaves the page usable, and a submission is still taken.**
+  A pause stops the timing, not the practice. The attempt carries the time the
+  clock ran before the pause.
+- **A hidden page pauses a running clock, and the page returning resumes it.**
+  The clock counts the time on the problem, and a solver who left the tab is
+  away from it. A clock the user paused stays paused when the page returns,
+  since the page resumes only the pause hiding it started.
 - **The editor completes nothing.** The editor a sitting is typed into
   highlights syntax and indents, and it proposes no name from the standard
   library or from the code already typed. A solver offered `bisect_left` after
   three characters has recalled no form, and the sitting exists to measure
-  recalling the form. The recall trainer Phase 12 adds holds the same rule.
+  recalling the form. The recall trainer Phase 11 adds holds the same rule.
+- **The editor opens on the user's latest code for the problem, where that code
+  is work in progress.** The latest code is the newer of the unsent draft the
+  browser holds and the code of the last attempt the engine stored. Reopening a
+  half-solved problem continues it, where a blank file would cost the work.
+- **Code from a solve is never carried.** The editor opens on the signature
+  when the user's last attempt on the problem solved it. Prefilling an answer
+  turns a re-solve into reading it, and nothing is then retrieved.
+- **Code from before a card run is never carried into that run's problems.** A
+  problem opened from a card with a run open carries only code written after
+  the run began. The run measures solving from its start, as `log.md` gives.
+- **A press restores the user's last solve into the editor.** The press is
+  offered where the user has solved the problem before and the editor did not
+  carry that code. The editor's undo takes the restore back.
+- **An attempt made after a restore says so.** The attempt carries `restored`,
+  and mastery does not count it as a solve. A solve typed over a restored solve
+  is not an independent solve, as a hinted recall pass is not a pass.
 - **A failing submission shows the first case it failed, whole**: the
   arguments, the expected value, and the value the submission returned or the
   exception it raised. An outcome on an input the solver cannot see is debugged
@@ -489,12 +531,219 @@ The page layout is not designed here, and using the loop decides it.
   problem's own two or three techniques, the drilled one is the default since
   selection picked the problem by it, and the attempt is minutes old. Two facts
   a classifier has to infer later cost a keystroke each at this moment.
+- **The claim is asked before the label.** The claim asks which techniques the
+  code used, and naming them puts the approach the solver took into words. The
+  label then asks whether the solver held that approach, which is the question
+  the claim has just framed.
+- **One press stores the claim and the label.** The two answer one attempt, so
+  a press each would have the solver confirm the same attempt twice.
+  `wireframes.md` draws the overlay the two are asked in.
+- **A skipped label stops nothing.** The loop moves to the next attempt of the
+  sitting, and the attempt stays unlabelled. `log.md` gives what a skip leaves.
 - **The loop does not retire a problem.** A statement that asks for something
   its cases do not decide is retired by hand, in the terminal, and `corpus.md`
   gives who retires one. A self-label written before the retirement stays, and
   the board's read-time exclusion keeps that attempt out of mastery.
 - **Selection never schedules.** Ordering is a view. The user chooses what to
   drill until the scheduler lands.
+
+## Starting a card run
+
+Studying a card is an explicit act. The user opens a card, reads it, and starts
+a run when they mean to study the technique. The ladder is measured from that
+start, and the probes are drawn at it.
+
+1. The card, opened from the Cards section or from a technique's page. The
+   trigger, the brief and the templates read whether or not a run is open.
+2. The user starts the run.
+3. A `CardRun` is minted, carrying when the run began.
+4. The probes are drawn from the corpus and stored on the run: a problem the
+   card's technique carries, unseen first, then least recently attempted, and
+   never one the ladder holds.
+5. The card then shows its ladder, its templates with their recall state, and
+   the probes the run was given.
+
+- **A run is minted rather than inferred from an attempt.** A ladder problem
+  solved before the card began does not count toward the ladder, and only a
+  stored start says which attempts came after it.
+- **The card reads the same before the start and after it.** The trigger, the
+  brief and the templates are the study material, and withholding them until a
+  run opens would make starting a run the price of reading the card.
+- **The ladder is shown before a run opens.** The ladder names the problems
+  studying this card will have the user solve, and the user decides the start on
+  that list. Progress against the ladder is shown once a run measures it.
+- **A card with a gap still starts.** A core template no solution displays is
+  reported on the card, as `content.md` requires, and the rungs the ladder does
+  hold are still worth solving. Refusing the start would leave the user waiting
+  on a problem nobody has written yet.
+- **The probes are drawn at the start, and never at import.** A problem unseen
+  at import need not still be unseen when the user starts the card, and a probe
+  the user has already solved tests no recognition.
+- **The draw is a rule, and no model chooses a probe.** The rule reads the
+  technique's problems, unseen first, then least recently attempted. A model
+  asked to choose would answer the question the rule already answers, and it
+  would answer it differently each time the same card was started.
+- **The draw reads the technique rather than the selector's filters.** The
+  filters narrow what the ladder teaches, and a probe asks whether the
+  technique is recognised at all.
+- **Whether a statement gives its own form away is not read here.** A statement
+  naming its approach is a property of the corpus rather than of the pick, and
+  `ROADMAP.md` defers the measurement to "The corpus gated".
+- **A probe is stored on the run, not derived.** The draw reads the attempt log
+  as it stood at the start, so a later attempt would change what a re-derivation
+  returned. The probes the run offered have to stay readable.
+- **Later probes append.** A run given another probe keeps the ones it was given
+  first, so what was offered and when stays readable.
+- **A probe opens the problem page a rung opens**, named by the card it came
+  from. "Solving a rung" gives that page.
+- **The run holds no verdict.** Ladder progress, the recall state of each
+  template, and the card state are folds over the attempts, the recall attempts
+  and the corpus. `log.md` gives why none of the three is stored.
+- **A card is done once it graduates.** `log.md` gives the five card states and
+  what each one reads.
+
+Deferred, since only use answers each:
+
+- How many probes a start draws.
+- When a run is given a further probe, and what asks for one.
+- Whether a card can be started again, and what a second run means for a ladder
+  the first run already measures.
+
+## Solving a rung
+
+The card has the user solve problems, and each of them is a rung of its ladder.
+The rung is picked on the card, sat as any problem is, and the sitting returns
+to the card it came from.
+
+1. The ladder on the card: a rung per problem, each naming the templates it
+   covers and whether it is required.
+2. The user picks a rung.
+3. The problem opens, named by the card the pick came from, which serves the
+   statement and mints the sitting as the drill loop gives.
+4. The submission, the verdict and the claim run as the drill loop gives them.
+5. The sitting ends and stays on the page, with a press back to the card, where
+   the next rung is.
+
+- **The ladder follows the card's own template order.** A card authors its
+  templates in the order it teaches them, and a rung covering the first template
+  comes before a rung covering the third. The rungs the selector fills the
+  ladder out with follow, least recently attempted first, as a technique's
+  candidates are ordered.
+- **A rung names the templates it covers**, so the user reads why this problem
+  is on this ladder. The templates also decide whether the rung is required,
+  which `content.md` derives rather than stores.
+- **A rung carries no statement**, as a candidate carries none. Opening the
+  rung serves the statement, so the ladder stays a list of picks.
+- **The problem's page is the one a technique's candidates open.** A rung is a
+  problem, and a second page for the same record would serve the same statement
+  under another URL.
+- **The page names the card rather than a technique**, since the user came from
+  the card. The way back returns to the card, and the claim answers for the
+  card's own technique.
+- **A sitting offers a press back to the card, and an ended one stays on the
+  page.** A user reads a solve back after it passes, so the page does not leave
+  by itself. A user solving a ladder is working through a list, and the press
+  returns to the card rather than to the board.
+- **Progress is a fold over attempts, never a mark on a rung.** A rung is solved
+  where an attempt on its problem, finished after the run began, was solved. The
+  rung carries no mark, so a ladder re-derived under a moved corpus keeps every
+  rung the user already solved.
+- **An attempt reached from the board counts too.** The fold reads the attempts
+  on the rung's problem, whichever page served them, since the ladder measures
+  solving rather than the route taken to it.
+- **An attempt finished before the run began counts for nothing.** Having solved
+  the problem once is not having studied the form. The run is minted to draw
+  that line.
+- **A retired problem fills no rung**, and the ladder is re-derived.
+  `content.md` gives both, and the attempts on the retired problem stay in the
+  log.
+
+Deferred, since only use answers each:
+
+- Whether a rung the user skips is marked, and what marks it.
+- Whether the ladder is extended while a run is open, and what asks for more
+  rungs.
+- The card's reading where a required rung's problem was retired and no problem
+  replaces it.
+
+## Recalling a template
+
+A form reproduced from memory, typed into a blank file and run against the
+cases the template carries. Reading the form is not recalling it, so the
+trainer never prints the form until the user asks for it as a hint.
+
+1. The user starts a recall on the card, or opens one template's recall by its
+   slug.
+2. The trainer draws one template where the user named none: never recalled
+   first, then least recently recalled.
+3. The template's title and its trigger are shown, and its form is withheld.
+4. The signature the cases call is shown, and the file is otherwise blank.
+5. The user types the form, and asks for a hint where memory fails: the notes,
+   then the form itself.
+6. The file runs against the template's cases, under the runner a submission
+   runs under.
+7. A `RecallAttempt` is written, carrying the hints taken and how the cases
+   went.
+
+- **The trainer withholds the form and names the template.** Typing the form
+  from memory is the recall, and a user who knows which form is asked has still
+  typed nothing. The title, the slug and the trigger all read on the page.
+- **A drawn recall withholds the title all the same.** The trainer chose the
+  form, so the trigger names it alone, and a draw measures mapping the trigger
+  to the form. A recall the user asked for by name carries
+  the title already, since they typed the name.
+- **The recall is addressed by the template's slug**, as `pages.md` gives the
+  path. A drawn recall that named nothing could not be reloaded, and the user
+  could not ask for the form they mean to practise.
+- **The user may ask for a template by name.** A card teaches several forms,
+  and a rule that draws for them makes the one form a user wants to practise
+  reachable only by exhausting the others.
+- **The card's Recall section starts the recall of any form it lists.** The
+  section already names every template and its recall state, so the row the
+  user reads is the row that opens the recall.
+- **The trainer names every template of the card and switches between them.**
+  A user practising one form reaches the next without returning to the card. A
+  template no case checks is named and never opened, as `content.md` has it
+  read rather than recalled.
+- **The signature is shown.** The cases call the form with a parameter order,
+  and that order has to be stated somewhere, as `corpus.md` says of a
+  statement. A signature the user infers wrongly fails every case for a form
+  recalled correctly.
+- **The file is otherwise blank, and the editor proposes nothing.** The editor
+  the drill loop gives holds the same rule, and a solver offered `bisect_left`
+  after three characters has recalled no form.
+- **The hints are two, in one order: the notes, then the form.** Each answers
+  more of the question than the last, so a record of which hint was taken says
+  how far the memory reached. The title was the first hint until the page
+  started naming the template, and `Hint` carries the two that are left. A
+  drawn recall takes the same two, and its title is named by the result rather
+  than bought as a hint.
+- **The result names the template and offers its form.** The verdict, the
+  cases and the hints taken read beside the title, and the form is revealed on
+  a press rather than printed. A user who failed to recall a form learns which
+  form it was, and decides whether to read it.
+- **A hinted pass is recorded as a pass with its hints**, which `log.md`
+  requires. Reading the form and typing it back is the last hint rather than a
+  separate outcome, and the record says which hints were taken.
+- **The trainer runs the file rather than comparing it with the stored form.**
+  A comparison would fail a reproduction that renamed a variable, and pass one
+  that copied the form with its loop condition inverted.
+- **A recall attempt needs no open card run.** The record is keyed to a card
+  and a template, as `log.md` gives it, and the run measures the ladder rather
+  than the recall.
+- **The trainer draws, and nothing schedules.** Never recalled first, then
+  least recently recalled, which is the ordering the board uses for a
+  technique. The scheduler Phase 14 adds may draw differently.
+
+Deferred, since only use answers each:
+
+- How many templates one recall asks for before it stops.
+- Whether a template authors a hint of its own beside the two.
+- How a template whose form is a class is exercised, since the cases call one
+  function.
+- How a form answering with one of several valid orders is checked, since a
+  case carries a value rather than a predicate.
+- The step a failed recall leads to, which the scheduler settles.
 
 ## Adjudicating the eval set
 

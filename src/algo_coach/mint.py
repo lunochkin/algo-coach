@@ -12,6 +12,7 @@ from algo_coach.schema import (
     AttemptClaim,
     AttemptVerification,
     CallSite,
+    CardRun,
     CaseResult,
     ClaimSource,
     Confidence,
@@ -21,11 +22,14 @@ from algo_coach.schema import (
     ExpectedSource,
     FailureMode,
     Gate,
+    Hint,
     Json,
     MachineProvenance,
     MatchSource,
+    Probe,
     Problem,
     ProblemDifficulty,
+    RecallAttempt,
     SelfLabel,
     SiteOutcome,
     Sitting,
@@ -195,7 +199,9 @@ def self_label(attempt_id: str, mode: FailureMode) -> SelfLabel:
     return SelfLabel(id=new_id(), created_at=datetime.now(UTC), attempt_id=attempt_id, mode=mode)
 
 
-def attempt(sitting: Sitting, code: str, *, solved: bool, finished_at: datetime) -> Attempt:
+def attempt(
+    sitting: Sitting, code: str, *, solved: bool, finished_at: datetime, restored: bool = False
+) -> Attempt:
     return Attempt(
         id=new_id(),
         user_id=sitting.user_id,
@@ -204,10 +210,12 @@ def attempt(sitting: Sitting, code: str, *, solved: bool, finished_at: datetime)
         started_at=sitting.started_at,
         finished_at=finished_at,
         language="python",
-        # cumulative and with every pause excluded: `log.md` gives why
+        # cumulative and with every pause excluded, none where no clock ran:
+        # `log.md` gives why
         time_to_solve_sec=sitting.elapsed(finished_at),
         solved=solved,
         code=code,
+        restored=restored,
     )
 
 
@@ -220,12 +228,56 @@ def attempt_verification(attempt_id: str, execution: Execution) -> AttemptVerifi
     )
 
 
-def sitting(user_id: str, problem_id: str) -> Sitting:
+def sitting(user_id: str, problem_id: str, at: datetime | None = None) -> Sitting:
+    # the caller's clock where it has one, so the sitting it serves and the
+    # elapsed time it reports read the same moment
+    at = at or datetime.now(UTC)
     return Sitting(
         id=new_id(),
         user_id=user_id,
         problem_id=problem_id,
-        started_at=datetime.now(UTC),
+        started_at=at,
+        last_active_at=at,
+    )
+
+
+def card_run(
+    user_id: str, card_id: str, probes: Sequence[str], at: datetime | None = None
+) -> CardRun:
+    """The run a start mints, with the probes that start drew.
+
+    The probes carry the start's own moment, so a later probe reads as the
+    later offer it is.
+    """
+    at = at or datetime.now(UTC)
+    return CardRun(
+        id=new_id(),
+        user_id=user_id,
+        card_id=card_id,
+        started_at=at,
+        probes=[Probe(problem_id=one, assigned_at=at) for one in probes],
+    )
+
+
+def recall_attempt(
+    user_id: str,
+    card_id: str,
+    template_id: str,
+    *,
+    code: str,
+    hints: Sequence[Hint],
+    execution: Execution,
+) -> RecallAttempt:
+    """One reproduction, with the hints it took and how the cases went."""
+    return RecallAttempt(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        user_id=user_id,
+        card_id=card_id,
+        template_id=template_id,
+        code=code,
+        hints=list(hints),
+        **execution.model_dump(),
     )
 
 

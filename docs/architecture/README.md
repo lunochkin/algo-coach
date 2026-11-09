@@ -36,6 +36,8 @@ without redefining them. Grouped by the file that specifies the record.
 - **Technique**: one entry in the vocabulary of skills the log references. A
   procedure, a structure, a paradigm or a problem class. Shipped as code.
 - **Vocabulary**: every technique, each with the criterion for claiming it.
+- **Parent**: a technique another technique is a kind of, named on the
+  narrower one's entry. `dynamic-programming` is the parent of `knapsack`.
 - **Card**: the study material for one technique: what to read, the
   templates to reproduce from memory, and a selector for problems to solve.
 - **Template**: one form of a technique, authored on a card, that a user
@@ -173,10 +175,13 @@ without redefining them. Grouped by the file that specifies the record.
 - **Sandbox**: what a submission runs under: a container with no network, a
   read-only root filesystem, a non-root user, dropped capabilities and limits
   on memory, processes and time. It shares the server's kernel.
-- **Broker**: the process holding the container runtime's socket and starting a
-  submission's container. It answers one request, carrying the code, the
+- **Broker**: the process holding the container runtime's socket and starting
+  one container per run. It answers one request, carrying the code, the
   arguments and the cap. Every other option a container is started with is
   fixed in the broker's own source.
+- **Entry process**: the first process in a run's container. It reads the run
+  from standard input, forks a child per case, and prints each case's result as
+  one line on standard output.
 
 ### Machine records
 
@@ -204,11 +209,14 @@ without redefining them. Grouped by the file that specifies the record.
 - **Attempt verification**: executing an attempt's code against its problem's
   cases. An `AttemptVerification` record stores one run, and is private to the
   user where a solution's `Verification` is product data.
-- **Sitting**: one timed session on one problem in the drill loop. It may
-  mint several attempts, and each of them carries the sitting's id. The record
-  is revised while the sitting runs and kept after the sitting ends.
+- **Sitting**: one session on one problem in the drill loop, timed or not. It
+  may mint several attempts, and each of them carries the sitting's id. The
+  record is revised while the sitting runs and kept after the sitting ends.
 - **Pause**: an interval a sitting's clock is stopped for. The elapsed time a
   sitting reports excludes every pause.
+- **Clock preference**: whether a sitting's clock starts by itself when the
+  statement is served. The user's last press on a clock sets it, and the
+  browser keeps it.
 - **Drill loop**: the practice flow: pick a technique and a problem, read the
   card, solve, then answer the claim and the label.
 - **Claim**: a record naming the techniques a piece of code used, by a named
@@ -226,18 +234,52 @@ without redefining them. Grouped by the file that specifies the record.
   did.
 - **Diagnosis**: the machine's verdict on why an attempt failed. A
   `Diagnosis` record stores it.
+- **Failure mode**: why an attempt went the way it did, as one of five words a
+  self-label and a diagnosis both name. `speed` is the time the solver took,
+  and `rust` a form the solver held and did not reach. `gap` is a form the
+  solver did not hold, `syntax` a slip in code the solver could have written
+  correctly, and `none` an attempt that went the way it should.
 - **Card run**: the record that a card was started, and the probes it was
   given.
+- **Card state**: how far one user's study of one card has gone: not started,
+  acquiring, consolidating, graduated or lapsed. Derived from the log, never
+  stored.
+- **Acquiring**: the card state of a started card with a required rung not
+  solved since the run began.
+- **Consolidating**: the card state once every required rung is solved, until
+  the card graduates.
+- **Graduated**: the card state once the graduation rule held, until a lapse.
+  A graduated card is done.
+- **Lapsed**: the card state of a graduated card one of whose templates has
+  since failed a review.
 - **Recall attempt**: one template reproduced from memory, with the hints
   taken.
+- **Review**: one check that a user still holds a template's form. Which
+  recall attempts and sittings count as a review is deferred to the schedule.
 - **Board**: the per-technique view of progress, derived from attempts and
   claims. Never stored.
-- **Mastery**: what a user can solve, per technique. Derived from the board's
-  inputs, never stored.
+- **Mastery**: how well a user knows one technique, in two parts:
+  recognition and execution. Computed from the log on every read, never
+  stored.
+- **Recognition**: seeing that a problem needs a technique when nobody named
+  it. Counted from recognition drills alone.
+- **Execution**: writing a correct solution once the technique is known.
+  Counted from sittings.
+- **Recognition drill**: a problem shown without its technique, where the user
+  describes the approach in words and runs no code.
+- **Framing judge**: the model call grading a recognition drill's description
+  against the problem's canonicals.
 - **Eval set**: the hand-claimed attempts a classifier configuration is
   scored against.
 - **Adjudication**: resolving each divergence between the user's blind claims
   and a frontier model's claims, by editing the criterion or the claim.
+
+### The pages
+
+- **Section**: one of the two destinations the web app's navigation names,
+  Practice and Cards. Every page sits under one of them or under neither.
+- **Gallery**: the page showing every design token and every component the
+  pages use, built in development alone.
 
 ## Where the rest lives
 
@@ -248,9 +290,11 @@ times. Each record class is specified in one of the files beside it.
 |---|---|
 | [`content.md`](content.md) | Techniques, cards, template matches |
 | [`corpus.md`](corpus.md) | Problems, test cases, solutions, solution claims |
-| [`log.md`](log.md) | Sittings, attempts, attempt verifications, claims, self-labels, diagnoses, card runs, recall attempts |
+| [`log.md`](log.md) | Sittings, attempts, attempt verifications, claims, self-labels, diagnoses, card runs, recall attempts, and the mastery derived from them |
 | [`machine.md`](machine.md) | What a model-written record carries, what a generation run's call sites leave, and the call log |
-| [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, adjudicating the eval set |
+| [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, starting a card run, solving a rung, recalling a template, adjudicating the eval set |
+| [`pages.md`](pages.md) | The web app's sections and pages, a page's areas, the design system |
+| [`wireframes.md`](wireframes.md) | Each page drawn at low fidelity |
 
 ## Data classes
 
@@ -325,9 +369,57 @@ times. Each record class is specified in one of the files beside it.
     compromise into a root shell on the server. A request to that socket can
     start a privileged container with the host's filesystem mounted into it,
     and the API is the process running whatever a signed-in person submits.
+  - The broker starts a container with the docker CLI, and the fixed flags are
+    one argument list in the broker's source. The request reaches the entry
+    process on standard input through `docker run -i`. Docker's HTTP API needs a
+    hijacked connection to write a container's standard input, and the Docker
+    SDK for Python is untyped.
+  - One container holds a whole run, and the entry process forks a child per
+    case inside it. No case observes another, as `corpus.md` requires. A
+    container per case would pay a container's start once per case, where a
+    fork costs far less.
   - The submission's image carries a Python interpreter and no engine code.
-    The submitted code arrives on the child's standard input, so a run mounts
-    nothing.
+    The broker sends the entry process's script with each run, as `python -c`,
+    so the script always matches the deployed broker. The submitted code arrives
+    on standard input, so a run mounts nothing.
+  - The broker names the submission's image by digest, and pulls that image
+    when it starts. A tag moves under the run a stored verdict was measured by.
+    The host's daemon carries out the pull on the broker's behalf, since the
+    broker's own network leads nowhere outside.
+  - Each case's child points its standard streams at `/dev/null` and returns its
+    result to the entry process over a pipe. The entry process prints one line
+    per case on standard output. A solution's own prints therefore never reach
+    the output the broker parses.
+  - Each case's child holds an address-space limit under the container's memory
+    limit, so a case that exhausts memory raises inside that child and fails
+    alone. Under the container's limit alone the host kills the whole
+    container, which leaves every later case of the run unanswered.
+  - Each case's child holds a process limit under the container's, for the same
+    reason. gVisor backs every process a case starts with a host process, so a
+    case reaching the container's limit ends the sandbox itself. The process
+    limit counts every process of a user, so the entry process sets it only
+    where the broker marks the container as the run's alone.
+  - gVisor mounts a tmpfs over `/tmp` inside the container, so a solution
+    writes there however read-only the root filesystem is. That tmpfs is
+    removed with the container, and what it holds counts against the
+    container's memory limit.
+  - The broker runs from the engine's image, under a command of its own. An
+    import contract keeps the broker's module from importing the rest of the
+    package, so the process holding the socket loads no engine code. A second
+    image would add a second digest to every deploy.
+  - The broker runs as a non-root user in the host's `docker` group. That group
+    already controls the host through the socket, so running the broker as root
+    would add only write access inside the broker's own container. The group's
+    id differs between servers, so the server writes it into the secrets file
+    and compose reads it from there.
+  - The API reaches the broker over HTTP, on a compose network that only the API
+    and the broker join. Caddy and Postgres cannot open a connection to the
+    broker. A shared token was rejected, since the separate network guards the
+    broker with no secret to rotate.
+  - A submission runs in the local subprocess wherever no broker is configured.
+    gVisor runs only on Linux, so a sitting on the author's laptop uses the
+    subprocess. The broker's own tests run where Docker and gVisor are
+    installed.
   - The container runs under gVisor, a kernel written in user space that
     answers the container's system calls. An exploit of the host's own kernel
     reaches gVisor first. The broker names the runtime as a constant.
@@ -349,6 +441,15 @@ times. Each record class is specified in one of the files beside it.
     bound. A submission that waits without a bound looks to the user like a
     sandbox that hung. The wait changes no verdict, since the cap is measured
     in the child around the `solve` call.
+  - A user's submissions are capped per minute, and a user's recalls are capped
+    by the same bound. Each runs untrusted code on the server, and the broker
+    admits one run at a time, so one user's burst is every other user's wait.
+    The cap is counted over the user's own records of the last minute, and a
+    run past it is refused before any container starts.
+  - The two are counted apart, each against the bound. A recall runs a
+    template's few cases where a submission runs a problem's whole set, and one
+    counter over both would refuse the cheaper run for the more expensive one's
+    burst.
   - Generation runs off this server. The mutation loop starts many subprocesses
     at a cap well above the sitting's, so a generation run beside a sitting
     moves the wall clock that sitting's verdict is read from. Generation writes

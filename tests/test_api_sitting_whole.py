@@ -43,16 +43,23 @@ def test_one_sitting_runs_through_the_api_as_the_page_calls_it(client):
         "Double `n`.",
         "def solve(n: int) -> int:",
     )
-    assert ok(client.get(f"/api/sittings/{sitting_id}"))["sitting"] == served["sitting"]
+    reloaded = ok(client.get(f"/api/sittings/{sitting_id}"))["sitting"]
+    assert (reloaded["id"], reloaded["started_at"]) == (
+        sitting_id,
+        served["sitting"]["started_at"],
+    )
+    # the reload is the loop acting, so the bound counts from it
+    assert reloaded["last_active_at"] >= served["sitting"]["last_active_at"]
 
-    # a paused clock takes no submission until resumed
+    # the clock runs once the user starts it, and pausing and resuming it
+    # leaves the sitting open to submissions throughout
+    ok(client.post(f"/api/sittings/{sitting_id}/start"))
     assert (
         ok(client.post(f"/api/sittings/{sitting_id}/pause"))["sitting"]["pauses"][0]["until"]
         is None
     )
-    submissions = f"/api/sittings/{sitting_id}/submissions"
-    assert client.post(submissions, json={"code": DOUBLE}).status_code == 409
     ok(client.post(f"/api/sittings/{sitting_id}/resume"))
+    submissions = f"/api/sittings/{sitting_id}/submissions"
 
     # a wrong answer shows its first failing case whole, then a right one
     failing = ok(client.post(submissions, json={"code": TRIPLE}))
@@ -66,13 +73,13 @@ def test_one_sitting_runs_through_the_api_as_the_page_calls_it(client):
     assert passing["attempt"]["solved"] is True and passing["failure"] is None
     assert [one["outcome"] for one in passing["verification"]["results"]] == ["passed", "passed"]
 
-    # the end asks about each attempt over the problem's own techniques
-    ended = ok(client.post(f"/api/sittings/{sitting_id}/end"))
-    assert ended["sitting"]["ended_at"] is not None
+    # the solve ends the sitting, and the end asks about each attempt over the
+    # problem's own techniques
+    assert passing["sitting"]["ended_at"] is not None
     assert client.post(submissions, json={"code": DOUBLE}).status_code == 409
     asked = ok(client.get(f"/api/sittings/{sitting_id}/unclaimed"))
     assert asked["techniques"] == ["greedy", "sorting"]
-    assert [one["id"] for one in asked["attempts"]] == [
+    assert [one["attempt"]["id"] for one in asked["attempts"]] == [
         failing["attempt"]["id"],
         passing["attempt"]["id"],
     ]

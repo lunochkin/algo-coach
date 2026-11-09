@@ -110,7 +110,9 @@ def test_coverage_names_what_displays_each_form(cards):
         solutions,
         [generator_match(fixed, one.id) for one in solutions],
     )
-    assert [(one.template_slug, one.solution_ids) for one in covered] == [
-        ("fixed-window", ["s-p1", "s-p2"]),
-        ("longest-valid-window", []),
+    assert [(one.template_slug, one.optional, one.solution_ids) for one in covered] == [
+        ("fixed-window", False, ["s-p1", "s-p2"]),
+        ("longest-valid-window", False, []),
+        # read for the ladder, and no gap: a card is covered without it
+        ("shrink-to-fit", True, []),
     ]

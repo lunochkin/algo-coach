@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "AI coaching layer for deliberate practice of algorithmic problem-solving: SRS over a technique-mastery model, on a problem corpus the engine writes and owns"
 readme = "README.md"
 license = "Apache-2.0"
-requires-python = ">=3.14"
+requires-python = ">=3.15.1"
 authors = [{ name = "Maksim Lunochkin" }]
 dependencies = [
     "alembic>=1.19.2",
@@ -50,6 +50,7 @@ addopts = "-n auto --dist worksteal"
 filterwarnings = ["error"]
 # The annotation prompt is a textual app, and its pilot is an async generator.
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 markers = [
     # set by `tests/conftest.py` on every test taking the `database` fixture
     "integration: runs against the Postgres server TEST_DATABASE_URL names",
@@ -59,7 +60,7 @@ markers = [
 include = ["src"]
 # tests are unannotated by design: pydantic coerces what strict rejects
 ignore = ["tests"]
-pythonVersion = "3.14"
+pythonVersion = "3.15"
 typeCheckingMode = "strict"
 
 [tool.importlinter]
@@ -115,7 +116,7 @@ name = "the packages are layered, and nothing imports upward"
 type = "layers"
 layers = [
     "algo_coach.cli | algo_coach.api",
-    "algo_coach.generation",
+    "algo_coach.generation : algo_coach.ladder : algo_coach.recall",
     "algo_coach.attempt_claims : algo_coach.solution_claims : algo_coach.matches : algo_coach.board : algo_coach.cards : algo_coach.sitting",
     "algo_coach.classifier : algo_coach.mint : algo_coach.log : algo_coach.outcomes : algo_coach.problems : algo_coach.solutions : algo_coach.cases : algo_coach.drafts : algo_coach.verifications : algo_coach.techniques : algo_coach.mutation : algo_coach.calls : algo_coach.runs",
     "algo_coach.runner",
@@ -136,6 +137,14 @@ source_modules = [
     "algo_coach.mutation",
 ]
 forbidden_modules = ["algo_coach.cli", "algo_coach.api"]
+
+# the process holding the container runtime's socket loads no engine code. The
+# wildcard covers a package added later, and matches none of the broker's own
+[[tool.importlinter.contracts]]
+name = "the broker imports nothing of the engine"
+type = "forbidden"
+source_modules = ["algo_coach.broker"]
+forbidden_modules = ["algo_coach.*"]
 
 # used outside `src`, which is all deptry reads: Alembic runs `migrations/`, and
 # SQLAlchemy loads psycopg from the database URL's scheme. Starlette's session
@@ -180,6 +189,14 @@ ignore_names = [
     "visit_*",
     # a result record names the pair that failed; the report reads only the reason
     "card_id",
+    # a card's recall state says when a form was last reproduced, which the page
+    # reads and no module does
+    "last_at",
+    # the trainer lists the card's templates, and the page decides which of them
+    # it offers to switch to
+    "recallable",
+    # the cards list reads a card's required rungs solved, and no module does
+    "required_solved",
 ]
 
 [tool.ruff]

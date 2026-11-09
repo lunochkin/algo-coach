@@ -1,4 +1,9 @@
-from algo_coach.solution_claims.derive import derive, load_problems, with_techniques
+from algo_coach.solution_claims.derive import (
+    derive,
+    load_problem,
+    load_problems,
+    with_techniques,
+)
 from algo_coach.solution_claims.reader import candidates, read, read_one
 from algo_coach.solution_claims.run import Progress, read_corpus
 from algo_coach.solution_claims.stale import outstanding
@@ -10,6 +15,7 @@ __all__ = [
     "SolutionClaimLog",
     "candidates",
     "derive",
+    "load_problem",
     "load_problems",
     "outstanding",
     "read",

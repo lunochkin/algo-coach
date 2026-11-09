@@ -1,0 +1,457 @@
+from datetime import datetime
+
+from helpers import T0
+from matching import canonical, card, problem, seeded, template
+
+from algo_coach.ladder import ladder, probes
+from algo_coach.mint import generator_match, user_match
+from algo_coach.schema import Attempt, ProblemDifficulty, ProblemStatus, RetirementReason
+
+TECHNIQUE = "sliding-window"
+
+
+def a_card(root, size: int = 5, optional: bool = False, **overrides):
+    """One card with two core templates, and the optional one where a test
+    asks for it."""
+    (held,) = seeded(
+        root,
+        card(
+            templates=[
+                template("longest-valid-window"),
+                template("fixed-window"),
+                *([template("shrink-to-fit", optional=True)] if optional else []),
+            ],
+            selector={"technique": TECHNIQUE, "size": size} | overrides.pop("selector", {}),
+            **overrides,
+        ),
+    )
+    return held
+
+
+def attempted(problem_id: str, *, at: datetime = T0, id: str | None = None) -> Attempt:
+    return Attempt(
+        id=id or f"a-{problem_id}",
+        user_id="u-4f9c2a",
+        problem_id=problem_id,
+        finished_at=at,
+        solved=True,
+    )
+
+
+def test_a_rung_per_core_template_in_the_card_s_order(database):
+    """The card authors its templates in the order it teaches them, so a rung
+    covering the first comes before a rung covering the second."""
+    held = a_card(database)
+    first, second = held.templates[0], held.templates[1]
+    problems = [problem("p-2", techniques=[TECHNIQUE]), problem("p-1", techniques=[TECHNIQUE])]
+    solutions = [canonical("p-1"), canonical("p-2")]
+    matches = [generator_match(first.id, "s-p-2"), generator_match(second.id, "s-p-1")]
+
+    resolved = ladder(held, problems, solutions, matches, [])
+
+    assert [one.problem.id for one in resolved.rungs[:2]] == ["p-2", "p-1"]
+    assert [one.templates for one in resolved.rungs[:2]] == [[first.id], [second.id]]
+
+
+def test_one_problem_covering_two_templates_is_one_rung(database):
+    """A rung names every core template its canonicals display, and
+    requiredness is derived from that set."""
+    held = a_card(database)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    solutions = [canonical("p-1")]
+    matches = [generator_match(one.id, "s-p-1") for one in held.templates]
+
+    resolved = ladder(held, problems, solutions, matches, [])
+
+    assert len(resolved.rungs) == 1
+    assert resolved.rungs[0].templates == [one.id for one in held.templates]
+
+
+def test_the_selector_fills_the_ladder_out_to_size(database):
+    """The covering rungs teach the forms, and the selector fills the rest so
+    the card has a ladder rather than a pair of problems."""
+    held = a_card(database, size=3)
+    problems = [problem(f"p-{one}", techniques=[TECHNIQUE]) for one in range(5)]
+    solutions = [canonical("p-0")]
+    matches = [generator_match(held.templates[0].id, "s-p-0")]
+
+    resolved = ladder(held, problems, solutions, matches, [])
+
+    assert len(resolved.rungs) == 3
+    assert resolved.rungs[0].problem.id == "p-0"
+    assert [one.templates for one in resolved.rungs[1:]] == [[], []]
+
+
+def test_the_fill_is_least_recently_attempted_first(database):
+    """A technique's candidates are ordered that way, and a ladder draws from
+    the same list."""
+    held = a_card(database, size=2)
+    problems = [problem("p-old", techniques=[TECHNIQUE]), problem("p-new", techniques=[TECHNIQUE])]
+    attempts = [
+        attempted("p-old", at=datetime.fromisoformat("2026-01-01T00:00:00Z")),
+        attempted("p-new", at=datetime.fromisoformat("2026-09-01T00:00:00Z")),
+    ]
+
+    resolved = ladder(held, problems, [], [], attempts)
+
+    assert [one.problem.id for one in resolved.rungs] == ["p-old", "p-new"]
+
+
+def test_a_retired_problem_fills_no_rung(database):
+    """A defective problem was never a fair test, so it neither covers a
+    template nor fills the ladder out."""
+    held = a_card(database, size=3)
+    retired = problem("p-retired", techniques=[TECHNIQUE]).model_copy(
+        update={"status": ProblemStatus.RETIRED, "retired_reason": RetirementReason.DEFECTIVE}
+    )
+    problems = [retired, problem("p-live", techniques=[TECHNIQUE])]
+    solutions = [canonical("p-retired"), canonical("p-live")]
+    matches = [generator_match(held.templates[0].id, "s-p-retired")]
+
+    resolved = ladder(held, problems, solutions, matches, [])
+
+    assert [one.problem.id for one in resolved.rungs] == ["p-live"]
+    # the retired problem's canonical displayed the first form, and displays
+    # nothing once the problem is out of the corpus
+    assert [one.slug for one in resolved.gaps] == ["longest-valid-window", "fixed-window"]
+
+
+def test_a_core_template_nothing_displays_is_a_gap(database):
+    """The ladder never substitutes another problem: a substitution hides the
+    gap, and the missing problem is then never written."""
+    held = a_card(database, size=2)
+    problems = [problem("p-1", techniques=[TECHNIQUE]), problem("p-2", techniques=[TECHNIQUE])]
+    solutions = [canonical("p-1")]
+    matches = [generator_match(held.templates[1].id, "s-p-1")]
+
+    resolved = ladder(held, problems, solutions, matches, [])
+
+    assert [one.slug for one in resolved.gaps] == ["longest-valid-window"]
+    assert resolved.rungs[0].problem.id == "p-1"
+
+
+def test_the_selector_s_difficulty_narrows_the_fill(database):
+    """The selector says what to draw from, and a filter it carries is part of
+    that."""
+    held = a_card(database, size=2, selector={"difficulty": [ProblemDifficulty.HARD.value]})
+    problems = [
+        problem("p-easy", techniques=[TECHNIQUE]).model_copy(update={"difficulty": "easy"}),
+        problem("p-hard", techniques=[TECHNIQUE]).model_copy(update={"difficulty": "hard"}),
+    ]
+
+    resolved = ladder(held, problems, [], [], [])
+
+    assert [one.problem.id for one in resolved.rungs] == ["p-hard"]
+
+
+def test_a_user_match_stands_over_the_generator_s(database):
+    """The ladder reads the verdict that stands on a pair, as every other
+    reader of the matches does."""
+    held = a_card(database)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    solutions = [canonical("p-1")]
+    matches = [
+        generator_match(held.templates[0].id, "s-p-1"),
+        user_match(held.templates[0].id, "s-p-1", matched=False),
+    ]
+
+    resolved = ladder(held, problems, solutions, matches, [])
+
+    assert [one.slug for one in resolved.gaps] == [one.slug for one in held.templates]
+    assert [one.templates for one in resolved.rungs] == [[]]
+
+
+def test_a_rung_covering_a_core_template_is_required(database):
+    """The card claims to teach the form, so the rung that teaches it is not
+    a suggestion."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    matches = [generator_match(held.templates[0].id, "s-p-1")]
+
+    resolved = ladder(held, problems, [canonical("p-1")], matches, [])
+
+    assert [(one.problem.id, one.required) for one in resolved.rungs] == [("p-1", True)]
+
+
+def test_a_rung_covering_the_optional_template_alone_is_optional(database):
+    """A card is covered without its optional template, so the rung that
+    teaches that form alone is a stretch rather than the day's work."""
+    held = a_card(database, size=1, optional=True)
+    problems = [problem("p-1", techniques=[TECHNIQUE]), problem("p-2", techniques=[TECHNIQUE])]
+    solutions = [canonical("p-1"), canonical("p-2")]
+    matches = [
+        generator_match(held.templates[0].id, "s-p-1"),
+        generator_match(held.templates[2].id, "s-p-2"),
+    ]
+
+    resolved = ladder(held, problems, solutions, matches, [])
+
+    assert [(one.problem.id, one.required) for one in resolved.rungs] == [
+        ("p-1", True),
+        ("p-2", False),
+    ]
+
+
+def test_a_rung_covering_both_is_required_and_offers_the_alternative(database):
+    """One problem two forms solve is one rung, required for the core form,
+    with the optional form offered as the other approach."""
+    held = a_card(database, size=1, optional=True)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    matches = [generator_match(one.id, "s-p-1") for one in (held.templates[0], held.templates[2])]
+
+    resolved = ladder(held, problems, [canonical("p-1")], matches, [])
+
+    (rung,) = resolved.rungs
+    assert rung.required
+    assert rung.templates == [held.templates[0].id, held.templates[2].id]
+
+
+def test_a_fill_rung_is_optional(database):
+    """The selector's fill exercises the technique and teaches no form of it,
+    so nothing on the card requires it."""
+    held = a_card(database, size=2)
+    problems = [problem("p-1", techniques=[TECHNIQUE]), problem("p-2", techniques=[TECHNIQUE])]
+    matches = [generator_match(held.templates[0].id, "s-p-1")]
+
+    resolved = ladder(held, problems, [canonical("p-1")], matches, [])
+
+    assert [(one.problem.id, one.required) for one in resolved.rungs] == [
+        ("p-1", True),
+        ("p-2", False),
+    ]
+
+
+def test_the_optional_template_is_no_gap(database):
+    """The gap report skips it: a card is covered without it, and no
+    generation run is aimed at it."""
+    held = a_card(database, size=1, optional=True)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    matches = [generator_match(one.id, "s-p-1") for one in held.templates[:2]]
+
+    resolved = ladder(held, problems, [canonical("p-1")], matches, [])
+
+    assert resolved.gaps == []
+
+
+BEGAN = datetime.fromisoformat("2026-06-01T00:00:00Z")
+BEFORE = datetime.fromisoformat("2026-05-01T00:00:00Z")
+AFTER = datetime.fromisoformat("2026-07-01T00:00:00Z")
+
+
+def test_a_rung_is_solved_by_an_attempt_since_the_run_began(database):
+    """Ladder progress is a fold over the attempts, which is why no mark is
+    written on a rung."""
+    held = a_card(database, size=2)
+    problems = [problem("p-1", techniques=[TECHNIQUE]), problem("p-2", techniques=[TECHNIQUE])]
+    matches = [generator_match(held.templates[0].id, "s-p-1")]
+
+    resolved = ladder(
+        held, problems, [canonical("p-1")], matches, [attempted("p-1", at=AFTER)], since=BEGAN
+    )
+
+    assert [(one.problem.id, one.solved) for one in resolved.rungs] == [
+        ("p-1", True),
+        ("p-2", False),
+    ]
+
+
+def test_a_restored_solve_solves_no_rung(database):
+    """A solve typed over a restored one is not having solved the rung."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    restored = attempted("p-1", at=AFTER).model_copy(update={"restored": True})
+
+    resolved = ladder(held, problems, [], [], [restored], since=BEGAN)
+
+    assert [one.solved for one in resolved.rungs] == [False]
+
+
+def test_an_attempt_before_the_run_began_solves_no_rung(database):
+    """Having solved the problem once is not having studied the form, and the
+    run is minted to draw that line."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+
+    resolved = ladder(held, problems, [], [], [attempted("p-1", at=BEFORE)], since=BEGAN)
+
+    assert [one.solved for one in resolved.rungs] == [False]
+
+
+def test_a_failed_attempt_solves_no_rung(database):
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    failed = attempted("p-1", at=AFTER).model_copy(update={"solved": False})
+
+    resolved = ladder(held, problems, [], [], [failed], since=BEGAN)
+
+    assert [one.solved for one in resolved.rungs] == [False]
+
+
+def test_a_card_with_no_run_measures_no_progress(database):
+    """The ladder is measured from the start, so an attempt outside a run
+    counts toward nothing."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+
+    resolved = ladder(held, problems, [], [], [attempted("p-1", at=AFTER)])
+
+    assert [one.solved for one in resolved.rungs] == [False]
+
+
+def test_a_solved_rung_stays_solved_when_the_corpus_moves(database):
+    """The ladder re-derives under a corpus that grew, and the fold reports
+    the same attempt whatever rung the problem now fills."""
+    held = a_card(database, size=2, optional=True)
+    problems = [problem("p-1", techniques=[TECHNIQUE]), problem("p-2", techniques=[TECHNIQUE])]
+    solutions = [canonical("p-1"), canonical("p-2")]
+    attempts = [attempted("p-1", at=AFTER)]
+    before = ladder(
+        held,
+        problems,
+        solutions,
+        [generator_match(held.templates[0].id, "s-p-1")],
+        attempts,
+        since=BEGAN,
+    )
+
+    # a second form lands on the same problem, so the rung now covers two
+    after = ladder(
+        held,
+        problems,
+        solutions,
+        [generator_match(one.id, "s-p-1") for one in (held.templates[0], held.templates[2])],
+        attempts,
+        since=BEGAN,
+    )
+
+    assert [one.templates for one in before.rungs][0] == [held.templates[0].id]
+    assert [one.templates for one in after.rungs][0] == [
+        held.templates[0].id,
+        held.templates[2].id,
+    ]
+    assert before.rungs[0].solved and after.rungs[0].solved
+
+
+def test_a_retired_problem_leaves_the_ladder_and_the_rest_keeps_its_progress(database):
+    """Re-deriving removes the retired problem, which is the other reason a
+    started card is re-derived."""
+    held = a_card(database, size=2)
+    live = problem("p-live", techniques=[TECHNIQUE])
+    gone = problem("p-gone", techniques=[TECHNIQUE])
+    attempts = [attempted("p-live", at=AFTER), attempted("p-gone", at=AFTER)]
+    solutions = [canonical("p-live"), canonical("p-gone")]
+
+    retired = gone.model_copy(
+        update={"status": ProblemStatus.RETIRED, "retired_reason": RetirementReason.DEFECTIVE}
+    )
+    resolved = ladder(held, [live, retired], solutions, [], attempts, since=BEGAN)
+
+    assert [(one.problem.id, one.solved) for one in resolved.rungs] == [("p-live", True)]
+
+
+def test_a_gap_names_the_template_the_card_named(database):
+    """The card page reports the form it claims to teach, and a slug alone
+    reads as an id to whoever has not authored the card."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE])]
+    matches = [generator_match(held.templates[0].id, "s-p-1")]
+
+    resolved = ladder(held, problems, [canonical("p-1")], matches, [])
+
+    assert [(one.slug, one.title) for one in resolved.gaps] == [("fixed-window", "fixed-window")]
+    assert resolved.gaps[0].template_id == held.templates[1].id
+
+
+def test_a_gap_leaves_the_ladder_its_length(database):
+    """The fill reaches `size` whether or not a form is covered, so a gap is
+    read from the report rather than from a ladder that came up short."""
+    held = a_card(database, size=3)
+    problems = [problem(f"p-{one}", techniques=[TECHNIQUE]) for one in range(4)]
+    matches = [generator_match(held.templates[0].id, "s-p-0")]
+
+    resolved = ladder(held, problems, [canonical("p-0")], matches, [])
+
+    assert len(resolved.rungs) == 3
+    assert [one.slug for one in resolved.gaps] == ["fixed-window"]
+
+
+def drawn(held, problems, attempts=(), *, count=1, solutions=(), matches=()):
+    """The probes a start would offer, over the ladder those inputs resolve."""
+    resolved = ladder(held, problems, solutions, matches, attempts)
+    return probes(held, resolved, problems, attempts, count=count)
+
+
+def test_a_probe_is_unseen_before_it_is_stale(database):
+    """A problem the user has never opened tests recognition, where one they
+    attempted a year ago tests memory of that attempt."""
+    held = a_card(database, size=1)
+    problems = [
+        problem("p-seen", techniques=[TECHNIQUE]),
+        problem("p-unseen", techniques=[TECHNIQUE]),
+    ]
+    attempts = [attempted("p-seen", at=BEFORE)]
+
+    # the ladder takes the stalest, so the draw chooses between what is left
+    assert drawn(held, problems + [problem("p-rung", techniques=[TECHNIQUE])], attempts) == [
+        "p-unseen"
+    ]
+
+
+def test_a_seen_probe_is_least_recently_attempted_first(database):
+    """The same order a technique's candidates take, since the draw reads that
+    list."""
+    held = a_card(database, size=1)
+    problems = [
+        problem("p-rung", techniques=[TECHNIQUE]),
+        problem("p-old", techniques=[TECHNIQUE]),
+        problem("p-new", techniques=[TECHNIQUE]),
+    ]
+    attempts = [
+        # the stalest, so the ladder takes it and the draw reads the rest
+        attempted("p-rung", at=datetime.fromisoformat("2026-01-01T00:00:00Z"), id="a-1"),
+        attempted("p-old", at=datetime.fromisoformat("2026-02-01T00:00:00Z"), id="a-2"),
+        attempted("p-new", at=datetime.fromisoformat("2026-08-01T00:00:00Z"), id="a-3"),
+    ]
+
+    assert drawn(held, problems, attempts, count=2) == ["p-old", "p-new"]
+
+
+def test_a_probe_is_never_one_the_ladder_holds(database):
+    """The ladder teaches the form, and a probe tests whether the form is
+    recognised unprompted."""
+    held = a_card(database, size=2)
+    problems = [problem(f"p-{one}", techniques=[TECHNIQUE]) for one in range(3)]
+
+    assert drawn(held, problems) == ["p-2"]
+
+
+def test_another_technique_s_problem_is_no_probe(database):
+    """A probe asks whether this technique is recognised, so it is drawn from
+    the problems that technique carries."""
+    held = a_card(database, size=1)
+    problems = [problem("p-1", techniques=[TECHNIQUE]), problem("p-other", techniques=["greedy"])]
+
+    assert drawn(held, problems) == []
+
+
+def test_a_retired_problem_is_no_probe(database):
+    """A defective problem was never a fair test, here as on the ladder."""
+    held = a_card(database, size=1)
+    retired = problem("p-retired", techniques=[TECHNIQUE]).model_copy(
+        update={"status": ProblemStatus.RETIRED, "retired_reason": RetirementReason.DEFECTIVE}
+    )
+
+    assert drawn(held, [problem("p-1", techniques=[TECHNIQUE]), retired]) == []
+
+
+def test_the_selector_s_difficulty_does_not_narrow_the_draw(database):
+    """The filter narrows what the ladder teaches. A probe asks whether the
+    technique is recognised at all, so the whole technique is drawn from."""
+    held = a_card(database, size=1, selector={"difficulty": [ProblemDifficulty.HARD.value]})
+    problems = [
+        problem("p-hard", techniques=[TECHNIQUE]).model_copy(update={"difficulty": "hard"}),
+        problem("p-easy", techniques=[TECHNIQUE]).model_copy(update={"difficulty": "easy"}),
+    ]
+
+    # the ladder takes the hard one, and the easy one is still a probe
+    assert drawn(held, problems) == ["p-easy"]

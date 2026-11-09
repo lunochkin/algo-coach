@@ -29,6 +29,19 @@
     }
   },
   "properties": {
+    "clock_started_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Clock Started At"
+    },
     "ended_at": {
       "anyOf": [
         {
@@ -45,6 +58,19 @@
     "id": {
       "title": "Id",
       "type": "string"
+    },
+    "last_active_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Last Active At"
     },
     "pauses": {
       "items": {

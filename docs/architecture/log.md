@@ -1,7 +1,8 @@
 # The log
 
 The user's private record: what was attempted, what it used, why it went the
-way it did, and the study a card run tracks. Part of the architecture.
+way it did, the study a card run tracks, and the mastery derived from all of
+it. Part of the architecture.
 `README.md` is the map.
 
 Every record here is append-only apart from the sitting, which is revised
@@ -46,8 +47,8 @@ how an account signing in is linked to a user.
 
 ## Sittings
 
-One timed session on one problem: when it began, when it ended, and every pause
-between.
+One session on one problem: when it began, when its clock started, when it
+ended, and every pause between.
 
 - **The engine mints the sitting id as it serves the statement**, and every
   attempt of that sitting carries the id. The log is append-only, so an attempt
@@ -68,24 +69,66 @@ between.
 - **The record is kept after the sitting ends**, and `ended_at` closes it. How
   often practice is interrupted, how many sittings a day holds, and which
   problems were opened and abandoned are readable in the sitting store alone.
-- **A sitting is paused and resumed, and the clock stops for a pause.** The
-  user steps away from the problem, and a duration counting the hours away says
-  nothing about solving it.
+- **A sitting records when its clock started**, as `clock_started_at`. The
+  sitting begins when the statement is served, and the clock begins on the
+  user's press or by the clock preference `flows.md` gives. Reading done before
+  the press is not counted.
+- **A sitting whose clock never started is untimed.** `clock_started_at` stays
+  absent, and the sitting's attempts carry no `time_to_solve_sec`. Untimed
+  practice is legitimate, and a time reconstructed afterwards would be a guess.
+- **A running clock is paused and resumed, and the clock stops for a pause.**
+  The user steps away from the problem, and a duration counting the hours away
+  says nothing about solving it. A clock that never started has nothing to
+  pause, so every pause falls after `clock_started_at`.
 - **A pause is stored as its own interval**, `at` and `until`. A total of the
   time paused says how long and never how often, and a sitting paused once for
   two hours is different practice from a sitting paused nine times.
 - **Only the last pause is open, and a sitting ends with none open.** An
   ended sitting holding an open pause would report an elapsed time that moved
   with the moment it was read.
-- **The elapsed time excludes every pause**, and the attempt carries it as
-  `time_to_solve_sec`.
+- **The elapsed time runs from `clock_started_at` and excludes every pause**,
+  and the attempt carries it as `time_to_solve_sec`.
+- **A solving submission ends the sitting.** A user who solved and left the page
+  then has nothing left open, and the next opening of the problem mints a new
+  sitting.
 - **The loop decides what starts and ends a pause**, not the record. A button,
   a hidden tab and an idle timer each leave the same interval.
+- **A sitting records when it was last touched**, as `last_active_at`. Serving
+  the sitting, a submission, a pause and a resume each set it. The record then
+  says when practice stopped, without a reader joining the attempt log to it.
+- **A sitting idle longer than 45 minutes is ended at its `last_active_at`.**
+  Two of the first seven sittings were left running, and serving that problem
+  again reached the old clock, which reports the hours away as time to solve.
+  An open pause is closed at the same moment, so an ended sitting holds no open
+  pause.
+- **The ending happens where the sitting is next read**, and nothing runs in
+  the background. An abandoned sitting therefore stays running in the store
+  until the loop serves or reads it. The elapsed time it reports is the
+  same whenever that happens, since the end is `last_active_at` rather than
+  the moment of reading.
+- **Serving the problem again mints a new sitting** once the idle one is
+  ended, so the clock the solver sees starts at zero.
+- **A submission to a sitting idle past the bound ends it and is refused.**
+  The elapsed time that attempt would carry counts the hours the user was
+  away, and no attempt is worth more than the time it reports.
+- **Pressing End does not touch `last_active_at`.** A sitting the user ended
+  therefore carries an `ended_at` later than its last activity, and one the
+  bound ended carries the two equal. No field states which happened, and the
+  two timestamps say it.
+- **The bound counts idleness, not elapsed time.** A solver thinking for an
+  hour with the page open is practising, and the loop keeps that sitting
+  touched. `flows.md` gives the loop's own steps, a hidden page among them.
 
 ## Attempts
 
 - **The drill loop is the only source.** The engine served the problem and
   watched the sitting, so nothing else is in a position to assert an attempt.
+- **An attempt records whether its sitting restored an earlier solve**, as
+  `restored`. The page sends it with the submission, and the engine does not
+  check it, for the reason `README.md` gives about guarding a verdict. Absent
+  on every attempt written before the field, and absent means no restore.
+- **A restored attempt is not counted as a solve by mastery.** Its verdict
+  stands, and its sitting counts as a failure to solve independently.
 - **The verification is its own record**, an `AttemptVerification` keyed by
   `attempt_id`, as a canonical's verification is keyed by `solution_id`.
   `solved` is the projection over the verification's results, and the raw
@@ -243,6 +286,71 @@ attempt, for the same reason a claim is.
   compile error. A label recalled that late is either invention or the
   classifier's own input handed back as evidence against it.
 
+### What each mode selects
+
+`FailureMode` is the vocabulary a self-label and a diagnosis both name a mode
+from. A mode says why the attempt went the way it did.
+
+- **`speed` is the time the solver took, and never the solution's
+  complexity.** The solver reached the answer, and reached it more slowly than
+  they judge they should have. No record holds the bar that judgement is made
+  against, so the loop asks the solver for it.
+- **A timeout is not labelled `speed`.** The attempt's verification stores
+  `timed out` on each case the submission exceeded the cap on, so a label
+  repeating that outcome answers a question the record already settled. A
+  timeout is labelled by its cause, as any other failure is.
+- **A diagnosis never names `speed`.** The machine reads the record, and the
+  record holds no bar to read a solver's own judgement from.
+- **`gap` is a form the solver did not hold.** Reading the card would have
+  supplied the form, and the solver had not read it or had not kept it.
+- **`rust` is a form the solver held and did not reach.** The trigger went
+  unrecognised, or the form came back in pieces. A solver who recognises the
+  approach the moment they read a solution held the form.
+- **The solver reports which of the two, and no record decides it.** The log
+  holds the attempts made since the log began, and a solver learned techniques
+  before that. A first sitting on a technique is therefore the same record
+  whether the solver has practised the technique for years or has never met it.
+- **The two modes name different remedies.** A solver who does not hold the
+  form reads the card and solves its ladder. A solver who holds the form and
+  did not reach it runs the recall trainer. One mode over both would leave the
+  scheduler two remedies and no way to pick between them.
+- **A diagnosis names either of the two.** The machine reads the code and the
+  log, so it can propose which one the attempt shows, and the eval scores that
+  proposal against the solver's own label.
+- **`syntax` is a slip in code the solver could have written correctly.** The
+  form came and the approach was right, and the submission failed on how the
+  code was typed: a name misspelled, a bound written the wrong way round, a
+  method called with its arguments swapped.
+- **A slip inside the form is `rust`.** A binary search whose bound moves the
+  wrong way is the form coming back in pieces, where the same mistake in a loop
+  the solver wrote from scratch is a slip. The solver reports which of the two
+  the mistake sat in.
+- **`none` is an attempt that went the way it should.** The form came, the code
+  ran, and the solver reached the answer in the time they expected. `none` is a
+  verdict the solver states rather than an absence of one.
+- **A solved attempt takes `speed` or `none`, and an unsolved attempt takes
+  `gap`, `rust` or `syntax`.** An attempt that returned no answer failed for a
+  reason, and how long the solver took is not that reason. A submission that
+  passed reached the form and carries no slip.
+- **An attempt that crashed on every case is asked for no label.** The code
+  reached no answer, so no mode is more than a guess, and the traceback each
+  case result carries already names what raised. The loop asks about that
+  attempt's claim and offers no mode.
+- **A skipped label writes no record.** The solver who skips the question
+  asserts nothing, so the attempt stays unlabelled and the board counts it
+  under no mode.
+- **A skip is never stored as `none`.** `none` asserts that the attempt went
+  the way it should, and a board counting a skipped attempt under `none` would
+  report a clean pass the solver never claimed.
+- **A self-label needs no `declined`, where a claim carries one.** A claim
+  declines against a list of candidate techniques, and that decline asserts
+  that no candidate on the list applies. A mode names why the attempt went the
+  way it did, and `none` already carries the verdict that nothing went wrong.
+- **An attempt asked and skipped reads as an attempt the loop never asked**,
+  and that cost is accepted. Every attempt written before Phase 12 carries no
+  label, so a reader counting labels reads a denominator of labelled attempts
+  rather than a rate of answers.
+
 ## Diagnoses
 
 Why an attempt failed, inferred rather than reported. Keyed to an attempt and
@@ -277,9 +385,60 @@ Studying a card is an explicit act, not a state the system infers.
   it was given. Later probes append rather than replacing the set, so what was
   offered and when stays readable.
 - **Derived from the run, never stored**: ladder progress, recall state per
-  template, and whether the card is done. "Done" is only a view for now.
-  Graduation becomes a process later, once there are numbers to set its box and
-  its probe count from.
+  template, and the card state `## Card states` gives.
+
+## Card states
+
+A card state says how far one user's study of one card has gone. Each card
+stands in one of five: not started, acquiring, consolidating, graduated or
+lapsed.
+
+- **A card state is one user's.** The card is global and the log is private,
+  so two users studying one card read two card states.
+- **A card state is derived on every read and never stored.** The card run
+  holds only the start and the probes, and ladder progress and recall state are
+  folds already. A stored card state would copy those folds, and the copy
+  drifts once the corpus moves under the ladder.
+- **Not started: the user holds no card run for the card.** Reading a card
+  mints nothing, as `flows.md` gives, so a card read and never started stays
+  not started.
+- **Acquiring: a run is open, and some required rung has no solve since the run
+  began.** The ladder teaches the form with the card in view, and a solve from
+  before the run counts for nothing, as `## Card runs` gives.
+- **Consolidating: every required rung is solved since the run began, and the
+  card has not graduated.** A solved ladder shows the form was reached with the
+  card in view. It does not show the form is kept, so the card waits for a
+  check spaced after the ladder.
+- **The solve of the last required rung opens consolidating.** The spacing gap
+  graduation waits for counts from that solve, the last sitting the ladder
+  asked for.
+- **Graduated: the graduation rule held, and the card has not lapsed since.**
+  The rule reads the solved ladder, a clean recall after the spacing gap of
+  every template that carries cases, and a probe solved unprompted. A card is
+  done once it graduates.
+- **Lapsed: a graduated card one of whose templates has failed a review since
+  graduation.** A form can be lost after the card graduated, and a card left
+  graduated on a lost form is never offered again.
+- **Before graduation, a card state reads the ladder as it stands now.** A
+  re-derived ladder holding a required rung the user has not solved returns a
+  consolidating card to acquiring. The ladder is the truth the card state is
+  folded from, so the card state follows the ladder.
+- **A graduated card no longer reads the ladder.** Graduation asserts that the
+  forms are kept, and a later generation run adds problems to a ladder rather
+  than forms. Only a lapse moves a graduated card.
+- **A card state is not mastery.** Mastery is per technique and counts
+  sittings and drills, as `## Mastery` gives. A graduated card raises no
+  technique's reading, since `content.md` keeps cards and mastery apart.
+
+Deferred, since only use answers each:
+
+- The graduation rule in full: the spacing gap, what a clean recall is, and
+  which probe counts.
+- Which failed review lapses a card, and what a lapsed card needs to graduate
+  again.
+- The card state of a started card whose ladder holds no required rung, every
+  core template being a gap.
+- A core template added by a re-seed to a card that already graduated.
 
 ## Recall attempts
 
@@ -298,3 +457,73 @@ One template reproduced from memory, and how it went.
   recognising it unprompted, so recall fluency never stands in for mastery. The
   gap between recall fluency and solving fluency is the false fluency that
   blocked practice trains.
+
+## Mastery
+
+How well a user knows one technique. The engine computes mastery from the log
+each time it is asked, and never stores it. So the rules below are the whole
+model of mastery.
+
+- **Mastery has two parts per technique: recognition and execution.**
+  Recognition means the user sees that a problem needs the technique when
+  nobody told them. Execution means the user writes a correct solution once
+  they know the technique.
+- **The two parts are kept separate.** A user who misses the technique needs
+  recognition drills. A user who sees it and cannot write it needs the card's
+  ladder and the recall trainer. A single score would hide which of the two
+  the user needs.
+- **Execution is counted per sitting.** One sitting can hold several
+  attempts, one per submission. Counting attempts would punish a user who
+  submits often, though they solved the same problem.
+- **A sitting with no submission counts for nothing.** Opening a problem
+  serves it, so such a sitting records that the user looked at the problem,
+  not that they tried it.
+- **An untimed sitting counts by its verdict alone.** It says whether the user
+  solved the problem and nothing about how long the solve took, so any reading
+  of speed comes from timed sittings.
+- **A sitting counts for every technique its attempts used.** Those
+  techniques come from the standing attempt claim, or from the problem's own
+  techniques when no claim stands. `## Attempt claims` gives that rule.
+- **A sitting solved on the first submission counts more than one solved
+  later.** After a failed submission the user sees the failing case, which
+  helps them debug. The order of the attempts shows which submission passed.
+- **The self-label on the sitting's last attempt adjusts the count.** `speed`
+  marks a solve that took too long. `syntax` counts less as a failure, since
+  the user knew the form. `gap` and `rust` mean the user did not write the
+  form. An attempt without a label counts by its verdict alone.
+- **Recognition is counted only from recognition drills.** The problem page
+  lists the problem's techniques before the statement is served. So every
+  sitting tells the user the technique, and no sitting tests recognition.
+  Until the recognition drill is built, recognition has no evidence and reads
+  as unknown.
+- **A recognition drill counts for the techniques its problem carries.** The
+  user describes the approach in words. The framing judge grades the
+  description against the problem's canonicals, and that grade is the drill's
+  result.
+- **The judge's grades count only after the judge itself is tested** against
+  drills graded by hand. A judge that accepts vague answers would raise
+  recognition for exactly the techniques the user cannot spot. Grades written
+  before that test are stored and ignored.
+- **Sittings and drills on a defective problem do not count**, solved or not.
+  `corpus.md` gives the reason for sittings. A drill on such a problem was
+  graded against a statement that asks the wrong thing.
+- **Recall attempts do not count toward mastery.** Typing a form from memory
+  is neither spotting it in a problem nor solving a problem with it. The card
+  shows recall progress on its own, as `## Recall attempts` gives.
+- **Diagnoses count only after they are tested** against the user's
+  self-labels. An untested diagnosis would put a guess where the user's own
+  answer belongs.
+- **The formula is code, so changing it changes no record.** Mastery is
+  recomputed on every read, so a new formula applies to every technique at
+  once.
+- **Each pick stores the prediction the formula made before the attempt.**
+  That prediction is the only stored trace of mastery. It lets a later
+  formula be compared with what an earlier one predicted.
+
+Deferred, since only use answers each:
+
+- The formula itself: how old evidence fades, and how much less a solve after
+  a shown case counts.
+- How much evidence a technique needs before the board shows a number rather
+  than "unknown".
+- Whether a solve labelled `speed` counts as a full solve.

@@ -197,6 +197,11 @@ The test cases decide whether a solution to a generated problem is correct.
   rather than of the machine that ran it. The two solutions are within a
   constant factor when the naive solution is over the cap and the canonical
   over a tenth of it, and no count separates them.
+- **Every canonical held that margin under the sandbox.** On 2026-09-17 the
+  broker ran the 50 served problems' canonicals against all 506 of their cases
+  at the sitting's cap, under gVisor on the deployed server, and no case took
+  over a tenth of the cap. The separating sizes the local subprocess found
+  therefore stand under the clock a verdict is now read from.
 - **The separating case is chosen against the sitting's cap**, and never
   against generation's. The separating size is the size at which a submission
   that did not use the form fails, so the cap a sitting judges under decides

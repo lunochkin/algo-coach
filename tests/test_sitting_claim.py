@@ -137,14 +137,14 @@ def test_every_attempt_of_the_sitting_waits_for_its_own_claim(log):
     an_attempt(log, "a2", minute=5)
     an_attempt(log, "a3", minute=9)
 
-    assert [one.id for one in unclaimed(log, "s1", user_id=USER)] == ["a1", "a2", "a3"]
+    assert [one.attempt.id for one in unclaimed(log, "s1", user_id=USER)] == ["a1", "a2", "a3"]
 
 
 def test_a_claimed_attempt_leaves_the_queue_and_the_rest_keep_their_order(log):
     an_attempt(log, "a2", minute=5)
     claimed(log, ["sorting"])
 
-    assert [one.id for one in unclaimed(log, "s1", user_id=USER)] == ["a2"]
+    assert [one.attempt.id for one in unclaimed(log, "s1", user_id=USER)] == ["a2"]
 
 
 def test_a_decline_answers_the_question(log):
@@ -159,7 +159,7 @@ def test_a_machine_claim_answers_nothing_the_loop_asked(log):
     user's answer."""
     logged(log, classifier_claim("a1", ["sorting"], provenance=PROVENANCE))
 
-    assert [one.id for one in unclaimed(log, "s1", user_id=USER)] == ["a1"]
+    assert [one.attempt.id for one in unclaimed(log, "s1", user_id=USER)] == ["a1"]
 
 
 def test_only_this_sitting_and_this_user_are_asked_about(log):
@@ -175,4 +175,4 @@ def test_only_this_sitting_and_this_user_are_asked_about(log):
     an_attempt(log, "a2", sitting_id="s2")
     an_attempt(log, "a3", user_id="u-b71e03")
 
-    assert [one.id for one in unclaimed(log, "s1", user_id=USER)] == ["a1"]
+    assert [one.attempt.id for one in unclaimed(log, "s1", user_id=USER)] == ["a1"]

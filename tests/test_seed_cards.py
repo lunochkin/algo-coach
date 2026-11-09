@@ -32,6 +32,19 @@ def record(slug: str = "binary-search", *, technique: str = "binary-search", **o
     } | overrides
 
 
+def test_an_authored_case_reaches_the_stored_template(database):
+    """The trainer checks a recalled form against these, and the author writes
+    them beside the form."""
+    store = CardStore(database)
+    authored = template(cases=[{"args": [[1, 2, 3], 2], "expected": 1}])
+
+    seed_cards([record(templates=[authored])], store=store)
+
+    card = store.by_slug("binary-search")
+    assert card is not None
+    assert [(one.args, one.expected) for one in card.templates[0].cases] == [([[1, 2, 3], 2], 1)]
+
+
 def test_seed_mints_identity(database):
     """The author writes slugs; the engine owns every id, at both levels."""
     store = CardStore(database)
