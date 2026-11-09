@@ -464,14 +464,21 @@ How well a user knows one technique. The engine computes mastery from the log
 each time it is asked, and never stores it. So the rules below are the whole
 model of mastery.
 
-- **Mastery has two parts per technique: recognition and execution.**
-  Recognition means the user sees that a problem needs the technique when
-  nobody told them. Execution means the user writes a correct solution once
-  they know the technique.
-- **The two parts are kept separate.** A user who misses the technique needs
+- **Mastery has three parts per technique: recognition, execution and
+  knowledge.** Recognition means the user sees that a problem needs the
+  technique when nobody told them. Execution means the user writes a correct
+  solution once they know the technique. Knowledge means the user recalls the
+  facts the technique rests on.
+- **The three parts are kept separate.** A user who misses the technique needs
   recognition drills. A user who sees it and cannot write it needs the card's
-  ladder and the recall trainer. A single score would hide which of the two
-  the user needs.
+  ladder and the recall trainer. A user who cannot state its facts needs the
+  questions. A single score would hide which of the three the user needs.
+- **Knowledge is counted from answers** to the questions the technique
+  carries. `knowledge.md` gives the answer and the question state it is
+  replayed into.
+- **Knowledge never stands in for recognition.** An answer recalls a fact the
+  question named, and recognition is spotting a technique nobody named. A
+  question answered correctly therefore raises no recognition reading.
 - **Execution is counted per sitting.** One sitting can hold several
   attempts, one per submission. Counting attempts would punish a user who
   submits often, though they solved the same problem.
@@ -527,3 +534,6 @@ Deferred, since only use answers each:
 - How much evidence a technique needs before the board shows a number rather
   than "unknown".
 - Whether a solve labelled `speed` counts as a full solve.
+- How a question is tied to the technique it carries.
+- How a module outside the technique vocabulary, such as Python, enters
+  mastery. Its questions carry no technique for a reading to be kept on.

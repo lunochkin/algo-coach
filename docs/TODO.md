@@ -22,10 +22,10 @@ learn's app does, so the switch changes the backend and nothing the user sees.
       modules, questions, lessons, levels, the prerequisite graph,
       certifications, exams, the queues and the FSRS settings, with Postgres
       tables in place of learn's data repo
-- [ ] Rename in the glossary each learn term that collides with one here:
+- [x] Rename in the glossary each learn term that collides with one here:
       learn's `card` format against a Card, and its `drill` queue against the
       drill loop. One name carries one meaning
-- [ ] Write declarative knowledge into `log.md` as the third part of mastery,
+- [x] Write declarative knowledge into `log.md` as the third part of mastery,
       fed by question attempts, with its formula deferred as the other two are
 - [ ] Write the seed's two rules into `knowledge.md`: a question with attempts
       is retired, never deleted, and a question asking something new takes a

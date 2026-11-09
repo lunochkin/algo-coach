@@ -254,17 +254,20 @@ without redefining them. Grouped by the file that specifies the record.
   since failed a review.
 - **Recall attempt**: one template reproduced from memory, with the hints
   taken.
-- **Review**: one check that a user still holds a template's form. Which
+- **Review**: one check that a user still holds a template's form or a
+  question's fact. An answer to a seen question is a review of it. Which
   recall attempts and sittings count as a review is deferred to the schedule.
 - **Board**: the per-technique view of progress, derived from attempts and
   claims. Never stored.
-- **Mastery**: how well a user knows one technique, in two parts:
-  recognition and execution. Computed from the log on every read, never
-  stored.
+- **Mastery**: how well a user knows one technique, in three parts:
+  recognition, execution and knowledge. Computed from the log on every read,
+  never stored.
 - **Recognition**: seeing that a problem needs a technique when nobody named
   it. Counted from recognition drills alone.
 - **Execution**: writing a correct solution once the technique is known.
   Counted from sittings.
+- **Knowledge**: recalling the facts a technique rests on. Counted from
+  answers to the questions the technique carries.
 - **Recognition drill**: a problem shown without its technique, where the user
   describes the approach in words and runs no code.
 - **Framing judge**: the model call grading a recognition drill's description
@@ -273,6 +276,46 @@ without redefining them. Grouped by the file that specifies the record.
   scored against.
 - **Adjudication**: resolving each divergence between the user's blind claims
   and a frontier model's claims, by editing the criterion or the claim.
+
+### Knowledge
+
+- **Module**: one subject of declarative knowledge, such as Python or system
+  design. A module holds topics, and a topic holds subtopics.
+- **Rank**: how deep a question goes, one of four: 0 Foundation, 1 Associate,
+  2 Professional and 3 Expert. A problem's difficulty is a different field.
+- **Group**: one subtopic at one rank, the unit gating and coverage count.
+- **Question**: one fact asked about, in one of three formats: `choice`,
+  `short` or `open`.
+- **Open question**: a question the user answers in their own head, then
+  grades by ticking the points of its key they recalled.
+- **Key**: the two to six points an open question's answer has to contain.
+- **Trap**: a known wrong claim, listed on an open question.
+- **Answer**: one reply to a question, by one user. Distinct from an attempt,
+  which is a user's solution to a problem.
+- **Question state**: unseen, weak, due, learning or retained, replayed from
+  the user's answers on every read.
+- **Retained**: the question state once FSRS stability reaches 21 days.
+  Distinct from mastery, which is per technique.
+- **Servable**: a question a queue may serve now: unseen, or past its due
+  time.
+- **Gating**: the rule opening a group's new questions once the lower ranks
+  and the prerequisite subtopics are done.
+- **Frontier**: the open groups that are not done, where new questions come
+  from.
+- **Lesson**: a short text teaching one or more groups, read before their new
+  questions.
+- **Pretest**: how many of a lesson's questions a user may meet before reading
+  the lesson.
+- **Queue**: a sequence of questions picked one at a time from what is servable:
+  the next queue, the review queue or the filtered queue.
+- **Filtered queue**: the queue serving questions the user chose by topic,
+  subtopic, rank or kind, locked or not.
+- **Stint**: the record of one queue or one exam, stored when it stops.
+- **Focus**: the module, topic, subtopic or certification the next queue is
+  aimed at.
+- **Module status**: active, paused or archived, set by the user.
+- **Certification**: one scope, a topic or a whole module, at one rank. Earned
+  on coverage, retention, an exam and its prerequisites.
 
 ### The pages
 
