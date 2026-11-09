@@ -3,10 +3,10 @@ The graph and the certification settings are stored as authored: a client
 ignores a graph that fails its own check, as `knowledge.md` gives."""
 
 import re
+from collections.abc import Mapping
 from typing import Any
 
 from pydantic import ValidationError
-from pydantic_core import ErrorDetails
 
 from algo_coach.knowledge.files import ModuleSource
 from algo_coach.schema import BODIES, CertificationSettings, GraphSettings, QuestionFormat
@@ -92,7 +92,7 @@ def _anchors(markdown: str) -> set[str]:
     return found
 
 
-def _message(error: ErrorDetails) -> str:
+def _message(error: Mapping[str, Any]) -> str:
     where = ".".join(str(part) for part in error["loc"])
     text = error["msg"].removeprefix("Value error, ")
     return f"{where}: {text}" if where else text
