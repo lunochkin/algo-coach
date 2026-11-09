@@ -18,7 +18,7 @@ from algo_coach.schema import (
 
 
 class Coverage(BaseModel):
-    """One core template and the canonicals a standing verdict says display it.
+    """One template and the canonicals a standing verdict says display it.
 
     Carries the slugs rather than the ids alone: a report names the template a
     generation run is aimed at, and an id means nothing in another store.
@@ -27,11 +27,12 @@ class Coverage(BaseModel):
     card_slug: str
     template_id: str
     template_slug: str
+    optional: bool  # a card is covered without it, so nothing displaying it is no gap
     solution_ids: list[str]
 
     @property
     def gap(self) -> bool:
-        return not self.solution_ids
+        return not self.solution_ids and not self.optional
 
 
 def core(card: Card) -> list[Template]:
@@ -46,9 +47,9 @@ def coverage(
     solutions: Iterable[Solution],
     matches: Iterable[TemplateMatch],
 ) -> list[Coverage]:
-    """Every core template, in the order its card authored it, with what
-    displays it. A retired problem's canonicals count for nothing: they fill no
-    rung, so a form only they display is still a gap."""
+    """Every template a match can be keyed to, in the order its card authored
+    it, with what displays it. A retired problem's canonicals count for
+    nothing: they fill no rung, so a form only they display is still a gap."""
     served = {problem.id for problem in problems if problem.served}
     displaying = {
         solution.id
@@ -64,10 +65,11 @@ def coverage(
             card_slug=card.slug,
             template_id=template.id,
             template_slug=template.slug,
+            optional=template.optional,
             solution_ids=sorted(found.get(template.id, [])),
         )
         for card in cards
-        for template in core(card)
+        for template in candidates(card)
     ]
 
 

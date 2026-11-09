@@ -1,37 +1,26 @@
 import { useState } from 'react'
 
-import type { Failure, Submitted } from '@/api/client'
+import type { CaseResult, Failure, Submitted } from '@/api/client'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-
-const OUTCOME = {
-  passed: { label: 'passed', tone: 'bg-emerald-500' },
-  wrong: { label: 'wrong answer', tone: 'bg-red-500' },
-  timeout: { label: 'timed out', tone: 'bg-amber-500' },
-  crashed: { label: 'crashed', tone: 'bg-fuchsia-600' },
-} as const
+import { OUTCOME, failures, severest } from '@/lib/verdicts'
 
 export function Verdict({ submitted }: { submitted: Submitted }) {
   const results = submitted.verification.results ?? []
   const passed = results.filter((one) => one.outcome === 'passed').length
+  // the run reads as its severest case, so the line and the strip agree
+  const overall = severest(results)
+  // the mix of failures in words, since the strip carries it in colour alone
+  const mix = failures(results)
 
   return (
-    <div className="space-y-3">
-      <p className={cn('font-medium', submitted.attempt.solved ? 'text-emerald-600' : 'text-red-600')}>
+    <div className="space-y-stack">
+      <p className={cn('font-medium', overall && OUTCOME[overall].text)}>
         {submitted.attempt.solved ? 'Solved' : 'Not solved'}: {passed} of {results.length} cases
         passed
       </p>
-      <ol className="flex flex-wrap gap-1" aria-label="Cases, in order">
-        {results.map((one, index) => (
-          <li
-            key={one.case_id}
-            title={`case ${index + 1}: ${OUTCOME[one.outcome].label}${
-              one.elapsed_ms == null ? '' : `, ${one.elapsed_ms} ms`
-            }`}
-            className={cn('size-3 rounded-sm', OUTCOME[one.outcome].tone)}
-          />
-        ))}
-      </ol>
+      {mix.length > 0 && <p className="text-meta text-muted-foreground">{mix.join(' · ')}</p>}
+      <CaseStrip results={results} />
       {submitted.failure && (
         <FailureView failure={submitted.failure} index={indexOf(submitted)} />
       )}
@@ -39,10 +28,27 @@ export function Verdict({ submitted }: { submitted: Submitted }) {
   )
 }
 
+// one mark per case, in the order the problem carries them
+export function CaseStrip({ results }: { results: CaseResult[] }) {
+  return (
+    <ol className="flex flex-wrap gap-1" aria-label="Cases, in order">
+      {results.map((one, index) => (
+        <li
+          key={one.case_id}
+          title={`case ${index + 1}: ${OUTCOME[one.outcome].label}${
+            one.elapsed_ms == null ? '' : `, ${one.elapsed_ms} ms`
+          }`}
+          className={cn('size-3 rounded-sm', OUTCOME[one.outcome].mark)}
+        />
+      ))}
+    </ol>
+  )
+}
+
 function FailureView({ failure, index }: { failure: Failure; index: number }) {
   return (
-    <div className="space-y-2 rounded-md border p-3 text-sm">
-      <p className="font-medium">
+    <div className="space-y-2 rounded-md border p-3 text-meta">
+      <p className={cn('font-medium', OUTCOME[failure.outcome].text)}>
         Case {index + 1}: {OUTCOME[failure.outcome].label}
       </p>
       <Value label="Arguments" value={failure.args} />
@@ -77,7 +83,9 @@ function Value({ label, value, text }: { label: string; value?: unknown; text?: 
           </>
         )}
       </div>
-      <pre className="max-h-64 overflow-auto rounded bg-muted p-2 font-mono text-xs whitespace-pre-wrap break-all">
+      {/* a word breaks only where it alone overflows the line: a traceback keeps
+          its words, and a long value without spaces still wraps */}
+      <pre className="max-h-64 overflow-auto rounded bg-muted p-2 font-mono text-code whitespace-pre-wrap break-words">
         {cut ? `${full.slice(0, SHOWN)}…` : full}
       </pre>
     </div>

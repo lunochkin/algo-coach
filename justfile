@@ -3,6 +3,8 @@
 #
 #     brew install just
 
+set dotenv-load
+
 # What is here.
 default:
     @just --list --unsorted
@@ -98,6 +100,12 @@ migrate:
 # is committed. A new enum type or value is written by hand.
 migration name:
     uv run alembic revision --autogenerate -m "{{ name }}"
+
+# PROD_DATABASE_URL in `.env` names the local end of the tunnel the deployment
+# repo's `just tunnel` holds open.
+# Any algo-coach command against the deployed database.
+prod *args:
+    DATABASE_URL="${PROD_DATABASE_URL:?PROD_DATABASE_URL is not set in .env}" uv run algo-coach {{ args }}
 
 # Per-technique progress.
 board *args:

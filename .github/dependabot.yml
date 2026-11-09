@@ -4,11 +4,19 @@ updates:
     directory: /
     schedule:
       interval: weekly
+  # minor and patch in one PR; a major stays its own, so one breaking bump
+  # cannot hold back the rest
   - package-ecosystem: uv
     directory: /
     schedule:
       interval: weekly
+    groups:
+      uv:
+        update-types: [minor, patch]
   - package-ecosystem: npm
     directory: /web
     schedule:
       interval: weekly
+    groups:
+      npm:
+        update-types: [minor, patch]

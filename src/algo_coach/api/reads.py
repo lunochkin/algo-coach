@@ -1,5 +1,6 @@
-"""The routes the drill loop reads: the board, the cards, a technique's
-candidates, and a sitting's statement."""
+"""The routes the drill loop reads: the board, the cards, one card as its page
+studies it, a technique's candidates, one picked problem, and a sitting's
+statement."""
 
 from datetime import datetime
 
@@ -11,17 +12,43 @@ from algo_coach.attempt_claims import standing_attempt_claims
 from algo_coach.board import (
     TechniqueRow,
     candidates,
+    every,
     excluded,
     per_technique,
+    problem_row,
     stalest_first,
     ungrouped,
 )
 from algo_coach.cards import CardStore
-from algo_coach.log import AttemptLog, SittingStore, latest_by_attempt
+from algo_coach.ladder import Gap, Rung, ladder
+from algo_coach.log import (
+    AttemptLog,
+    CardRunLog,
+    RecallLog,
+    SittingStore,
+    latest_by_attempt,
+    latest_recalls,
+)
+from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Card, ProblemDifficulty
-from algo_coach.sitting import Served, get, serve
-from algo_coach.solution_claims import load_problems
+from algo_coach.recall import drawn, reveal, signature
+from algo_coach.schema import (
+    Attempt,
+    Card,
+    CardRun,
+    Hint,
+    Problem,
+    ProblemDifficulty,
+    RecallAttempt,
+    Solution,
+    Template,
+    TemplateMatch,
+)
+from algo_coach.sitting import Carry, Served, carry, get, serve
+from algo_coach.solution_claims import load_problem, load_problems
+from algo_coach.solutions import SolutionLog
+from algo_coach.storage import Database
+from algo_coach.techniques import family, with_ancestors
 
 router = APIRouter()
 
@@ -44,6 +71,65 @@ class Candidate(BaseModel):
     last_attempt_at: datetime | None
 
 
+class Listed(BaseModel):
+    """One problem on the listing of every served problem. It carries the
+    problem's techniques, which the page filters by, and no statement."""
+
+    problem_id: str
+    title: str
+    difficulty: ProblemDifficulty | None
+    techniques: list[str]
+    attempt_count: int
+    solved_count: int
+    last_attempt_at: datetime | None
+
+
+class Picked(BaseModel):
+    """The problem a user picked, before its statement is served. The statement
+    is left out, as a candidate's is."""
+
+    problem_id: str
+    title: str
+    difficulty: ProblemDifficulty | None
+    techniques: list[str]
+    attempt_count: int
+    solved_count: int
+    last_attempt_at: datetime | None
+    retired: bool = False  # the listing names no retired problem, and its URL answers
+
+
+class Recalled(BaseModel):
+    """One template's recall state: the last reproduction of it, and nothing
+    of the ones before, which stay in the log."""
+
+    template_id: str
+    last_at: datetime | None  # absent where the form was never recalled
+    hints: list[Hint]
+    verified: bool
+
+
+class Probed(BaseModel):
+    """One probe the start drew, named as the page shows it. A probe tests
+    whether the form is recognised unprompted, so the page names the problem
+    and says nothing of the technique behind it."""
+
+    problem: Problem
+    assigned_at: datetime
+    attempted: bool
+
+
+class Studied(BaseModel):
+    """A card as its page reads it. The ladder, the progress and the recall
+    state are folds, and `content.md` gives why none of them is stored."""
+
+    card: Card
+    run: CardRun | None  # absent until the card is started
+    rungs: list[Rung]
+    gaps: list[Gap]
+    recall: list[Recalled]
+    probes: list[Probed]
+
+
 @router.get("/board")
 def board(root: Root, user_id: UserId) -> Board:
     log = AttemptLog(root)
@@ -58,15 +144,232 @@ def board(root: Root, user_id: UserId) -> Board:
     )
 
 
+class CardStatus(BaseModel):
+    """Where the user stands on a card, as the cards list reads it. Folded on
+    every read, as the card's own page folds it."""
+
+    started_at: datetime | None  # absent until the card is started
+    rungs: int
+    solved: int  # since the run began, as the card's page counts a rung
+    required: int
+    required_solved: int
+    gaps: int
+    recall: list[Recalled]
+    # the latest of the run's start, a recall, and an attempt on a rung since
+    # the run began
+    last_at: datetime | None
+
+
+class ListedCard(Card):
+    family: str  # the technique the cards list groups this card under
+    status: CardStatus
+
+
 @router.get("/cards")
-def every_card(root: Root) -> list[Card]:
-    return sorted(CardStore(root).all(), key=lambda one: (one.technique, one.slug))
+def every_card(root: Root, user_id: UserId) -> list[ListedCard]:
+    problems = load_problems(root)
+    attempts = AttemptLog(root).attempts(user_id)
+    solutions = SolutionLog(root).solutions()
+    matches = MatchLog(root).matches()
+    runs = CardRunLog(root)
+    recalls = RecallLog(root)
+    listed = [
+        ListedCard(
+            **card.model_dump(),
+            family=family(card.technique),
+            status=_status(
+                card,
+                runs.started(user_id, card.id),
+                problems,
+                solutions,
+                matches,
+                attempts,
+                recalls.for_card(user_id, card.id),
+            ),
+        )
+        for card in CardStore(root).all()
+    ]
+    # a family's own cards first, then its narrower techniques'
+    return sorted(
+        listed, key=lambda one: (one.family, one.technique != one.family, one.technique, one.slug)
+    )
 
 
 # by slug: a re-seed keeps the slug and the URL a page links to, where the id
 # is minted per store
 @router.get("/cards/{slug}")
-def card(root: Root, slug: str) -> Card:
+def card(root: Root, user_id: UserId, slug: str) -> Studied:
+    found = _card(root, slug)
+    run = CardRunLog(root).started(user_id, found.id)
+    problems = load_problems(root)
+    attempts = AttemptLog(root).attempts(user_id)
+    resolved = ladder(
+        found,
+        problems,
+        SolutionLog(root).solutions(),
+        MatchLog(root).matches(),
+        attempts,
+        since=run.started_at if run else None,
+    )
+    return Studied(
+        card=found,
+        run=run,
+        rungs=resolved.rungs,
+        gaps=resolved.gaps,
+        recall=_recall(found, RecallLog(root).for_card(user_id, found.id)),
+        probes=_probes(run, problems, attempts),
+    )
+
+
+def _status(
+    card: Card,
+    run: CardRun | None,
+    problems: list[Problem],
+    solutions: list[Solution],
+    matches: list[TemplateMatch],
+    attempts: list[Attempt],
+    recalls: list[RecallAttempt],
+) -> CardStatus:
+    since = run.started_at if run else None
+    resolved = ladder(card, problems, solutions, matches, attempts, since=since)
+    recall = _recall(card, recalls)
+    taught = {rung.problem.id for rung in resolved.rungs}
+    touched = [
+        *([since] if since else []),
+        *(one.last_at for one in recall if one.last_at),
+        *(
+            one.finished_at
+            for one in attempts
+            if since and one.problem_id in taught and one.finished_at >= since
+        ),
+    ]
+    return CardStatus(
+        started_at=since,
+        rungs=len(resolved.rungs),
+        solved=sum(rung.solved for rung in resolved.rungs),
+        required=sum(rung.required for rung in resolved.rungs),
+        required_solved=sum(rung.required and rung.solved for rung in resolved.rungs),
+        gaps=len(resolved.gaps),
+        recall=recall,
+        last_at=max(touched, default=None),
+    )
+
+
+def _probes(run: CardRun | None, problems: list[Problem], attempts: list[Attempt]) -> list[Probed]:
+    # the problem rather than its id, since the page names what it offers
+    if run is None:
+        return []
+    by_id = {problem.id: problem for problem in problems}
+    tried = {attempt.problem_id for attempt in attempts}
+    return [
+        Probed(
+            problem=by_id[one.problem_id],
+            assigned_at=one.assigned_at,
+            attempted=one.problem_id in tried,
+        )
+        for one in run.probes
+        if one.problem_id in by_id
+    ]
+
+
+def _recall(card: Card, attempts: list[RecallAttempt]) -> list[Recalled]:
+    # a row per template, in the order the card authored them, so a form never
+    # recalled reads beside the ones that were
+    latest = latest_recalls(attempts)
+    return [
+        Recalled(
+            template_id=template.id,
+            last_at=one.created_at if one else None,
+            hints=one.hints if one else [],
+            verified=bool(one and one.verified),
+        )
+        for template in card.templates
+        for one in [latest.get(template.id)]
+    ]
+
+
+class Named(BaseModel):
+    """One template of the card, as the trainer lists it: what it is called,
+    whether it is optional, and whether a case can check a reproduction of
+    it."""
+
+    slug: str
+    title: str
+    optional: bool
+    recallable: bool
+
+
+class Prompted(BaseModel):
+    """What the trainer shows: the template it asks for, its trigger, the
+    signature its cases call and the card's templates to switch between. The
+    form is withheld, and typing it from memory is the recall being
+    measured."""
+
+    template_slug: str
+    title: str
+    trigger: str
+    signature: str
+    templates: list[Named]
+
+
+class Hinted(BaseModel):
+    hint: Hint
+    text: str
+
+
+# drawn rather than chosen: never recalled first, then least recently recalled
+@router.get("/cards/{slug}/recall")
+def prompt(root: Root, user_id: UserId, slug: str) -> Prompted:
+    card = _card(root, slug)
+    template = drawn(card, RecallLog(root).for_card(user_id, card.id))
+    if template is None:
+        raise HTTPException(status_code=404, detail=f"no template of {slug} carries a case")
+    return _prompted(card, template)
+
+
+# by slug, as the page's own path is: the trainer names the template it asks
+# for, and withholds the form alone
+@router.get("/cards/{slug}/recall/{template_slug}")
+def asked(root: Root, slug: str, template_slug: str) -> Prompted:
+    card = _card(root, slug)
+    return _prompted(card, _template(card, template_slug))
+
+
+# one hint per request, so the page holds nothing it has not been given
+@router.get("/cards/{slug}/recall/{template_slug}/hints/{hint}")
+def hinted(root: Root, slug: str, template_slug: str, hint: Hint) -> Hinted:
+    template = _template(_card(root, slug), template_slug)
+    return Hinted(hint=hint, text=reveal(template, hint))
+
+
+def _prompted(card: Card, template: Template) -> Prompted:
+    return Prompted(
+        template_slug=template.slug,
+        title=template.title,
+        trigger=template.trigger,
+        signature=signature(template),
+        # the card's own order, and no form among them: a user practising one
+        # form switches to another without reading the card again
+        templates=[
+            Named(
+                slug=one.slug,
+                title=one.title,
+                optional=one.optional,
+                recallable=bool(one.cases),
+            )
+            for one in card.templates
+        ],
+    )
+
+
+def _template(card: Card, template_slug: str) -> Template:
+    found = [one for one in card.templates if one.slug == template_slug]
+    if not found:
+        raise HTTPException(status_code=404, detail=f"no template {template_slug}")
+    return found[0]
+
+
+def _card(root: Database, slug: str) -> Card:
     found = CardStore(root).by_slug(slug)
     if found is None:
         raise HTTPException(status_code=404, detail=f"no card {slug}")
@@ -75,7 +378,10 @@ def card(root: Root, slug: str) -> Card:
 
 @router.get("/techniques/{technique}/cards")
 def cards(root: Root, technique: str) -> list[Card]:
-    return CardStore(root).for_technique(technique)
+    taught = [
+        card for card in CardStore(root).all() if technique in with_ancestors([card.technique])
+    ]
+    return sorted(taught, key=lambda one: one.slug)
 
 
 @router.get("/techniques/{technique}/candidates")
@@ -94,6 +400,50 @@ def offered(root: Root, user_id: UserId, technique: str) -> list[Candidate]:
     ]
 
 
+# every served problem at once, where the candidates are one technique's. The
+# page filters by the techniques a problem carries, so the route sends them
+@router.get("/problems")
+def every_problem(root: Root, user_id: UserId) -> list[Listed]:
+    rows = every(load_problems(root), AttemptLog(root).attempts(user_id))
+    return [
+        Listed(
+            problem_id=row.problem.id,
+            title=row.problem.title,
+            difficulty=row.problem.difficulty,
+            techniques=row.problem.techniques,
+            attempt_count=row.attempt_count,
+            solved_count=row.solved_count,
+            last_attempt_at=row.last_attempt_at,
+        )
+        for row in rows
+    ]
+
+
+# by id alone: a rung of a card's ladder reaches the same problem, and no path
+# under a technique names that
+@router.get("/problems/{problem_id}")
+def picked(root: Root, user_id: UserId, problem_id: str) -> Picked:
+    problem = load_problem(root, problem_id)
+    if problem is None:
+        raise HTTPException(status_code=404, detail=f"no problem {problem_id}")
+    attempts = [
+        attempt
+        for attempt in AttemptLog(root).attempts(user_id)
+        if attempt.problem_id == problem_id
+    ]
+    row = problem_row(problem, attempts)
+    return Picked(
+        problem_id=problem.id,
+        title=problem.title,
+        difficulty=problem.difficulty,
+        techniques=problem.techniques,
+        attempt_count=row.attempt_count,
+        solved_count=row.solved_count,
+        last_attempt_at=row.last_attempt_at,
+        retired=not problem.served,
+    )
+
+
 # a write, though the loop reads the statement through it: serving mints the
 # sitting whose clock starts here
 @router.post("/problems/{problem_id}/sittings")
@@ -104,3 +454,12 @@ def statement(root: Root, user_id: UserId, problem_id: str) -> Served:
 @router.get("/sittings/{sitting_id}")
 def sitting(root: Root, user_id: UserId, sitting_id: str) -> Served:
     return get(ProblemStore(root), SittingStore(root), sitting_id, user_id=user_id)
+
+
+# `card` names the card the problem was opened from: its open run bounds what
+# is carried
+@router.get("/problems/{problem_id}/carry")
+def carried(root: Root, user_id: UserId, problem_id: str, card: str | None = None) -> Carry:
+    attempts = [one for one in AttemptLog(root).attempts(user_id) if one.problem_id == problem_id]
+    run = CardRunLog(root).started(user_id, _card(root, card).id) if card else None
+    return carry(attempts, run_started_at=run.started_at if run else None)

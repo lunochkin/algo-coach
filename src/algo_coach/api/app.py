@@ -10,7 +10,7 @@ from algo_coach.api.pages import Pages
 from algo_coach.api.reads import router as reads
 from algo_coach.api.signin import SignIn, install
 from algo_coach.api.writes import router as writes
-from algo_coach.sitting import Missing, Refused
+from algo_coach.sitting import Missing, Refused, TooOften
 from algo_coach.storage import Database
 
 # the path whatever serves the pages routes to the API, on the pages' origin
@@ -65,5 +65,9 @@ async def _json_writes(
 async def _refused(_: Request, error: Exception) -> JSONResponse:
     # only a refusal: a bare `ValueError` is also a defect the engine raised,
     # and stays a 500
+    # 429 for the cap: the request is sound, and the same one stands a minute
+    # later
+    if isinstance(error, TooOften):
+        return JSONResponse({"detail": str(error)}, status_code=429)
     status = 404 if isinstance(error, Missing) else 409
     return JSONResponse({"detail": str(error)}, status_code=status)

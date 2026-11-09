@@ -1,28 +1,51 @@
 import { Link, useLocation } from 'react-router'
 
-import { api, LOGIN } from '@/api/client'
+import { AccountMenu } from '@/components/AccountMenu'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
-// a technique and a picked problem are steps down from the board, so the board
-// stays marked while the user is on them
+// the three the navigation names. A technique, a picked problem and a sitting
+// are steps down from the board, so Practice stays marked on them
 const SECTIONS = [
-  { label: 'Board', to: '/', owns: (path: string) => path === '/' || path.startsWith('/techniques/') },
+  {
+    label: 'Practice',
+    to: '/',
+    owns: (path: string) =>
+      path === '/' ||
+      path.startsWith('/techniques/') ||
+      path.startsWith('/problems/') ||
+      path.startsWith('/sittings/'),
+  },
+  // the listing alone: a picked problem is a step down from the board, from a
+  // technique or from a card, and the section it sits under cannot say which
+  { label: 'Problems', to: '/problems', owns: (path: string) => path === '/problems' },
   { label: 'Cards', to: '/cards', owns: (path: string) => path.startsWith('/cards') },
 ]
 
-// revoked on the server, not only dropped from the browser, then to the login
-async function signOut() {
-  await api.DELETE('/api/session')
-  window.location.assign(LOGIN)
-}
-
-export function NavMenu() {
+export function NavMenu({ wide }: { wide: boolean }) {
   const { pathname } = useLocation()
 
   return (
     <header className="border-b">
-      <nav className="mx-auto flex max-w-4xl items-center gap-1 px-6 py-2">
-        <span className="mr-4 font-semibold">algo-coach</span>
+      <nav
+        className={cn(
+          'mx-auto flex items-center gap-1 px-gutter py-2',
+          wide ? 'max-w-wide' : 'max-w-reading',
+        )}
+      >
+        {/* the wordmark reaches the board, as a site's own name does */}
+        <Link
+          to="/"
+          className={cn(
+            'mr-1 flex shrink-0 items-center gap-2 whitespace-nowrap sm:mr-4',
+            'font-semibold underline-offset-4 hover:underline',
+          )}
+        >
+          {/* the flame dot the site's wordmark carries */}
+          <span aria-hidden className="size-2.5 rounded-full bg-brand" />
+          algo-coach
+        </Link>
         {SECTIONS.map(({ label, to, owns }) => {
           const current = owns(pathname)
           return (
@@ -33,9 +56,10 @@ export function NavMenu() {
             </Button>
           )
         })}
-        <Button variant="ghost" size="sm" className="ml-auto" onClick={signOut}>
-          Sign out
-        </Button>
+        <div className="ml-auto flex items-center gap-1">
+          <ThemeToggle />
+          <AccountMenu />
+        </div>
       </nav>
     </header>
   )

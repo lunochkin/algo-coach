@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
+from algo_coach import mint
 from algo_coach.mint import sitting
 from algo_coach.schema import Sitting
 
@@ -11,6 +12,7 @@ CONTENT = {
     "user_id": "u-4f9c2a",
     "problem_id": "p1",
     "started_at": "2026-09-10T08:00:00Z",
+    "clock_started_at": "2026-09-10T08:00:00Z",
 }
 AT_NINE = "2026-09-10T09:00:00Z"
 AT_TEN = "2026-09-10T10:00:00Z"
@@ -116,3 +118,55 @@ def test_an_open_pause_stops_the_clock_at_the_moment_it_is_read():
 def test_a_running_sitting_counts_to_now():
     """A sitting with no pause and no end elapsed everything since it began."""
     assert Sitting.model_validate(CONTENT).elapsed(NOW) == 4 * 3600.0
+
+
+def test_an_untimed_sitting_reports_no_elapsed_time():
+    """A clock that never ran measured nothing, and a number reconstructed
+    after the fact would be a guess."""
+    one = Sitting.model_validate(CONTENT | {"clock_started_at": None})
+
+    assert one.elapsed(datetime(2026, 9, 10, 9, tzinfo=UTC)) is None
+
+
+def test_the_elapsed_time_runs_from_the_clock_s_start():
+    """Reading done before the start press is not counted."""
+    one = Sitting.model_validate(CONTENT | {"clock_started_at": "2026-09-10T08:10:00Z"})
+
+    assert one.elapsed(datetime(2026, 9, 10, 9, tzinfo=UTC)) == 50 * 60
+
+
+def test_a_clock_that_never_started_has_nothing_to_pause():
+    with pytest.raises(ValidationError, match="never started"):
+        Sitting.model_validate(
+            CONTENT | {"clock_started_at": None, "pauses": [{"at": "2026-09-10T08:30:00Z"}]}
+        )
+
+
+def test_a_pause_before_the_clock_started_is_refused():
+    """The time before the start press is already uncounted, so a pause there
+    would subtract it twice."""
+    with pytest.raises(ValidationError, match="after the clock"):
+        Sitting.model_validate(
+            CONTENT
+            | {
+                "clock_started_at": "2026-09-10T08:30:00Z",
+                "pauses": [{"at": "2026-09-10T08:10:00Z", "until": "2026-09-10T08:20:00Z"}],
+            }
+        )
+
+
+def test_a_clock_starts_no_earlier_than_its_sitting():
+    with pytest.raises(ValidationError, match="no earlier than its sitting"):
+        Sitting.model_validate(CONTENT | {"clock_started_at": "2026-09-10T07:00:00Z"})
+
+
+def test_an_untimed_sitting_mints_an_untimed_attempt():
+    """The attempt carries the clock's reading, and an untimed sitting has
+    none to give."""
+    one = Sitting.model_validate(CONTENT | {"clock_started_at": None})
+
+    attempt = mint.attempt(
+        one, "pass", solved=True, finished_at=datetime(2026, 9, 10, 9, tzinfo=UTC)
+    )
+
+    assert attempt.time_to_solve_sec is None

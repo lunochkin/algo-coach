@@ -11,11 +11,11 @@ export function TechniqueCards({ technique }: { technique: string }) {
     `technique-cards:${technique}`,
   )
 
-  if (error) return <p className="text-sm text-destructive">The cards did not load: {error}</p>
+  if (error) return <p className="text-meta text-destructive">The cards did not load: {error}</p>
   if (!cards || cards.length === 0) return null
 
   return (
-    <p className="text-sm text-muted-foreground">
+    <p className="text-meta text-muted-foreground">
       {cards.length === 1 ? 'Card' : 'Cards'}:{' '}
       {cards.map((card, index) => (
         <span key={card.slug}>

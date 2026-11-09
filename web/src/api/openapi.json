@@ -34,7 +34,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Card"
+                    "$ref": "#/components/schemas/ListedCard"
                   },
                   "type": "array",
                   "title": "Response Every Card Api Cards Get"
@@ -66,7 +66,206 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Card"
+                  "$ref": "#/components/schemas/Studied"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cards/{slug}/recall": {
+      "get": {
+        "summary": "Prompt",
+        "operationId": "prompt_api_cards__slug__recall_get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prompted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cards/{slug}/recall/{template_slug}": {
+      "get": {
+        "summary": "Asked",
+        "operationId": "asked_api_cards__slug__recall__template_slug__get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          },
+          {
+            "name": "template_slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Template Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prompted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Recalled",
+        "operationId": "recalled_api_cards__slug__recall__template_slug__post",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          },
+          {
+            "name": "template_slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Template Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reproduction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecallAttempt"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cards/{slug}/recall/{template_slug}/hints/{hint}": {
+      "get": {
+        "summary": "Hinted",
+        "operationId": "hinted_api_cards__slug__recall__template_slug__hints__hint__get",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          },
+          {
+            "name": "template_slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Template Slug"
+            }
+          },
+          {
+            "name": "hint",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Hint"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hinted"
                 }
               }
             }
@@ -170,6 +369,67 @@
         }
       }
     },
+    "/api/problems": {
+      "get": {
+        "summary": "Every Problem",
+        "operationId": "every_problem_api_problems_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Listed"
+                  },
+                  "type": "array",
+                  "title": "Response Every Problem Api Problems Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/problems/{problem_id}": {
+      "get": {
+        "summary": "Picked",
+        "operationId": "picked_api_problems__problem_id__get",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Picked"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/problems/{problem_id}/sittings": {
       "post": {
         "summary": "Statement",
@@ -248,6 +508,100 @@
         }
       }
     },
+    "/api/problems/{problem_id}/carry": {
+      "get": {
+        "summary": "Carried",
+        "operationId": "carried_api_problems__problem_id__carry_get",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Problem Id"
+            }
+          },
+          {
+            "name": "card",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Card"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Carry"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cards/{slug}/runs": {
+      "post": {
+        "summary": "Started",
+        "operationId": "started_api_cards__slug__runs_post",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardRun"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/sittings/{sitting_id}/submissions": {
       "post": {
         "summary": "Submission",
@@ -280,6 +634,45 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Submitted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sittings/{sitting_id}/start": {
+      "post": {
+        "summary": "Clock Started",
+        "operationId": "clock_started_api_sittings__sitting_id__start_post",
+        "parameters": [
+          {
+            "name": "sitting_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sitting Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Timed"
                 }
               }
             }
@@ -502,6 +895,55 @@
         }
       }
     },
+    "/api/attempts/{attempt_id}/labels": {
+      "post": {
+        "summary": "Labelled",
+        "operationId": "labelled_api_attempts__attempt_id__labels_post",
+        "parameters": [
+          {
+            "name": "attempt_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Attempt Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Label"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelfLabel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/sign-in": {
       "get": {
         "summary": "Offered",
@@ -513,6 +955,24 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Offered"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/me": {
+      "get": {
+        "summary": "Me",
+        "operationId": "me_api_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
                 }
               }
             }
@@ -534,6 +994,27 @@
   },
   "components": {
     "schemas": {
+      "Asked": {
+        "properties": {
+          "attempt": {
+            "$ref": "#/components/schemas/Attempt"
+          },
+          "modes": {
+            "items": {
+              "$ref": "#/components/schemas/FailureMode"
+            },
+            "type": "array",
+            "title": "Modes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "attempt",
+          "modes"
+        ],
+        "title": "Asked",
+        "description": "One attempt the loop still asks about, and the modes its verdict leaves\nopen. No mode is offered where the record already answers why."
+      },
       "Attempt": {
         "properties": {
           "id": {
@@ -612,6 +1093,17 @@
               }
             ],
             "title": "Code"
+          },
+          "restored": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restored"
           }
         },
         "type": "object",
@@ -948,6 +1440,196 @@
         "title": "Card",
         "description": "Teaching content for one technique: forms to reproduce, and a\nselector."
       },
+      "CardRun": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "User Id"
+          },
+          "card_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Card Id"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "probes": {
+            "items": {
+              "$ref": "#/components/schemas/Probe"
+            },
+            "type": "array",
+            "title": "Probes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "card_id",
+          "started_at"
+        ],
+        "title": "CardRun"
+      },
+      "CardStatus": {
+        "properties": {
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "rungs": {
+            "type": "integer",
+            "title": "Rungs"
+          },
+          "solved": {
+            "type": "integer",
+            "title": "Solved"
+          },
+          "required": {
+            "type": "integer",
+            "title": "Required"
+          },
+          "required_solved": {
+            "type": "integer",
+            "title": "Required Solved"
+          },
+          "gaps": {
+            "type": "integer",
+            "title": "Gaps"
+          },
+          "recall": {
+            "items": {
+              "$ref": "#/components/schemas/Recalled"
+            },
+            "type": "array",
+            "title": "Recall"
+          },
+          "last_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "started_at",
+          "rungs",
+          "solved",
+          "required",
+          "required_solved",
+          "gaps",
+          "recall",
+          "last_at"
+        ],
+        "title": "CardStatus",
+        "description": "Where the user stands on a card, as the cards list reads it. Folded on\nevery read, as the card's own page folds it."
+      },
+      "Carry": {
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          },
+          "solved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Solved At"
+          },
+          "solved_sitting_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Solved Sitting Id"
+          },
+          "solved_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Solved Code"
+          },
+          "run_started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Started At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "at",
+          "solved_at",
+          "solved_sitting_id",
+          "solved_code",
+          "run_started_at"
+        ],
+        "title": "Carry",
+        "description": "What the editor may open on, which `flows.md` gives: the last attempt's\ncode where it is work in progress, and the bounds the page holds its own\ndraft to."
+      },
       "CaseOutcome": {
         "type": "string",
         "enum": [
@@ -1096,6 +1778,30 @@
         ],
         "title": "FailureMode"
       },
+      "Gap": {
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "title": "Template Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_id",
+          "slug",
+          "title"
+        ],
+        "title": "Gap",
+        "description": "A core template no solution displays, named as the card names it.\n\nThe card claims to teach the form, so the ladder reports the gap rather\nthan substituting another problem for the rung. The next generation run is\naimed at what this names."
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1108,6 +1814,224 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "Hint": {
+        "type": "string",
+        "enum": [
+          "notes",
+          "form"
+        ],
+        "title": "Hint",
+        "description": "What the trainer gives when memory fails, in the order it gives them.\nEach answers more of the question than the last."
+      },
+      "Hinted": {
+        "properties": {
+          "hint": {
+            "$ref": "#/components/schemas/Hint"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hint",
+          "text"
+        ],
+        "title": "Hinted"
+      },
+      "Label": {
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/FailureMode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "title": "Label",
+        "description": "The one mode the solver picked. A skipped label sends no request."
+      },
+      "Listed": {
+        "properties": {
+          "problem_id": {
+            "type": "string",
+            "title": "Problem Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProblemDifficulty"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "techniques": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Techniques"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "title": "Attempt Count"
+          },
+          "solved_count": {
+            "type": "integer",
+            "title": "Solved Count"
+          },
+          "last_attempt_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Attempt At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem_id",
+          "title",
+          "difficulty",
+          "techniques",
+          "attempt_count",
+          "solved_count",
+          "last_attempt_at"
+        ],
+        "title": "Listed",
+        "description": "One problem on the listing of every served problem. It carries the\nproblem's techniques, which the page filters by, and no statement."
+      },
+      "ListedCard": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Slug"
+          },
+          "technique": {
+            "type": "string",
+            "title": "Technique"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "trigger": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Trigger"
+          },
+          "brief": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Brief"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/Template"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Templates"
+          },
+          "selector": {
+            "$ref": "#/components/schemas/Selector"
+          },
+          "family": {
+            "type": "string",
+            "title": "Family"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CardStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "technique",
+          "title",
+          "trigger",
+          "brief",
+          "templates",
+          "selector",
+          "family",
+          "status"
+        ],
+        "title": "ListedCard"
+      },
+      "Me": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "email"
+        ],
+        "title": "Me",
+        "description": "Who the session signs in as. The engine mints the id, and the address is\nthe provider's, so a user reached by the dev login carries none."
+      },
+      "Named": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "optional": {
+            "type": "boolean",
+            "title": "Optional"
+          },
+          "recallable": {
+            "type": "boolean",
+            "title": "Recallable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "title",
+          "optional",
+          "recallable"
+        ],
+        "title": "Named",
+        "description": "One template of the card, as the trainer lists it: what it is called,\nwhether it is optional, and whether a case can check a reproduction of\nit."
       },
       "Offered": {
         "properties": {
@@ -1164,6 +2088,284 @@
         ],
         "title": "Pause"
       },
+      "Picked": {
+        "properties": {
+          "problem_id": {
+            "type": "string",
+            "title": "Problem Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProblemDifficulty"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "techniques": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Techniques"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "title": "Attempt Count"
+          },
+          "solved_count": {
+            "type": "integer",
+            "title": "Solved Count"
+          },
+          "last_attempt_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Attempt At"
+          },
+          "retired": {
+            "type": "boolean",
+            "title": "Retired",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem_id",
+          "title",
+          "difficulty",
+          "techniques",
+          "attempt_count",
+          "solved_count",
+          "last_attempt_at"
+        ],
+        "title": "Picked",
+        "description": "The problem a user picked, before its statement is served. The statement\nis left out, as a candidate's is."
+      },
+      "Probe": {
+        "properties": {
+          "problem_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Problem Id"
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Assigned At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem_id",
+          "assigned_at"
+        ],
+        "title": "Probe",
+        "description": "One problem a run was given, testing whether the form is recognised\nunprompted. Drawn from outside the ladder, which teaches the form."
+      },
+      "Probed": {
+        "properties": {
+          "problem": {
+            "$ref": "#/components/schemas/Problem"
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Assigned At"
+          },
+          "attempted": {
+            "type": "boolean",
+            "title": "Attempted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem",
+          "assigned_at",
+          "attempted"
+        ],
+        "title": "Probed",
+        "description": "One probe the start drew, named as the page shows it. A probe tests\nwhether the form is recognised unprompted, so the page names the problem\nand says nothing of the technique behind it."
+      },
+      "Problem": {
+        "properties": {
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "effort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effort"
+          },
+          "prompt_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Hash"
+          },
+          "call_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Id"
+          },
+          "pin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pin"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature"
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "techniques": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Techniques"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProblemDifficulty"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Statement"
+          },
+          "target_template_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Template Id"
+          },
+          "target_technique": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Technique"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProblemStatus",
+            "default": "created"
+          },
+          "retired_reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RetirementReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "statement"
+        ],
+        "title": "Problem"
+      },
       "ProblemDifficulty": {
         "type": "string",
         "enum": [
@@ -1173,6 +2375,51 @@
         ],
         "title": "ProblemDifficulty"
       },
+      "ProblemStatus": {
+        "type": "string",
+        "enum": [
+          "created",
+          "retired"
+        ],
+        "title": "ProblemStatus"
+      },
+      "Prompted": {
+        "properties": {
+          "template_slug": {
+            "type": "string",
+            "title": "Template Slug"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "trigger": {
+            "type": "string",
+            "title": "Trigger"
+          },
+          "signature": {
+            "type": "string",
+            "title": "Signature"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/Named"
+            },
+            "type": "array",
+            "title": "Templates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_slug",
+          "title",
+          "trigger",
+          "signature",
+          "templates"
+        ],
+        "title": "Prompted",
+        "description": "What the trainer shows: the template it asks for, its trigger, the\nsignature its cases call and the card's templates to switch between. The\nform is withheld, and typing it from memory is the recall being\nmeasured."
+      },
       "Provider": {
         "type": "string",
         "enum": [
@@ -1181,6 +2428,175 @@
         ],
         "title": "Provider",
         "description": "Who holds an identity and its login: `README.md`."
+      },
+      "RecallAttempt": {
+        "properties": {
+          "cap_ms": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Cap Ms"
+          },
+          "runner": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Runner"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/CaseResult"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "user_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "User Id"
+          },
+          "card_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Card Id"
+          },
+          "template_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Template Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "hints": {
+            "items": {
+              "$ref": "#/components/schemas/Hint"
+            },
+            "type": "array",
+            "title": "Hints"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cap_ms",
+          "runner",
+          "id",
+          "created_at",
+          "user_id",
+          "card_id",
+          "template_id",
+          "code"
+        ],
+        "title": "RecallAttempt",
+        "description": "A form typed into a blank file and run against the template's cases."
+      },
+      "Recalled": {
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "title": "Template Id"
+          },
+          "last_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last At"
+          },
+          "hints": {
+            "items": {
+              "$ref": "#/components/schemas/Hint"
+            },
+            "type": "array",
+            "title": "Hints"
+          },
+          "verified": {
+            "type": "boolean",
+            "title": "Verified"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_id",
+          "last_at",
+          "hints",
+          "verified"
+        ],
+        "title": "Recalled",
+        "description": "One template's recall state: the last reproduction of it, and nothing\nof the ones before, which stay in the log."
+      },
+      "Reproduction": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "hints": {
+            "items": {
+              "$ref": "#/components/schemas/Hint"
+            },
+            "type": "array",
+            "title": "Hints",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "title": "Reproduction",
+        "description": "What the trainer sends: the form as typed, and the hints taken before\nit ran."
+      },
+      "RetirementReason": {
+        "type": "string",
+        "enum": [
+          "defective"
+        ],
+        "title": "RetirementReason"
+      },
+      "Rung": {
+        "properties": {
+          "problem": {
+            "$ref": "#/components/schemas/Problem"
+          },
+          "templates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Templates"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required"
+          },
+          "solved": {
+            "type": "boolean",
+            "title": "Solved",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem",
+          "templates",
+          "required"
+        ],
+        "title": "Rung",
+        "description": "One problem on a ladder, with the templates its canonicals display.\n\nA rung the selector filled covers none. `required` is derived from what the\nrung covers rather than stored, and a rung covering the optional template\nbeside a core one offers that form as the alternative approach."
       },
       "Selector": {
         "properties": {
@@ -1209,6 +2625,35 @@
         "title": "Selector",
         "description": "What a ladder resolves from. Named fields rather than a filter map, so\na new filter is an additive optional field."
       },
+      "SelfLabel": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "attempt_id": {
+            "type": "string",
+            "title": "Attempt Id"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/FailureMode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "attempt_id",
+          "mode"
+        ],
+        "title": "SelfLabel",
+        "description": "The user's own verdict on why an attempt went the way it did."
+      },
       "Served": {
         "properties": {
           "title": {
@@ -1234,7 +2679,14 @@
             "$ref": "#/components/schemas/Sitting"
           },
           "elapsed_sec": {
-            "type": "number",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Elapsed Sec"
           }
         },
@@ -1270,6 +2722,18 @@
             "format": "date-time",
             "title": "Started At"
           },
+          "clock_started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock Started At"
+          },
           "ended_at": {
             "anyOf": [
               {
@@ -1281,6 +2745,18 @@
               }
             ],
             "title": "Ended At"
+          },
+          "last_active_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Active At"
           },
           "pauses": {
             "items": {
@@ -1299,11 +2775,72 @@
         ],
         "title": "Sitting"
       },
+      "Studied": {
+        "properties": {
+          "card": {
+            "$ref": "#/components/schemas/Card"
+          },
+          "run": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CardRun"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rungs": {
+            "items": {
+              "$ref": "#/components/schemas/Rung"
+            },
+            "type": "array",
+            "title": "Rungs"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/Gap"
+            },
+            "type": "array",
+            "title": "Gaps"
+          },
+          "recall": {
+            "items": {
+              "$ref": "#/components/schemas/Recalled"
+            },
+            "type": "array",
+            "title": "Recall"
+          },
+          "probes": {
+            "items": {
+              "$ref": "#/components/schemas/Probed"
+            },
+            "type": "array",
+            "title": "Probes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "card",
+          "run",
+          "rungs",
+          "gaps",
+          "recall",
+          "probes"
+        ],
+        "title": "Studied",
+        "description": "A card as its page reads it. The ladder, the progress and the recall\nstate are folds, and `content.md` gives why none of them is stored."
+      },
       "Submission": {
         "properties": {
           "code": {
             "type": "string",
             "title": "Code"
+          },
+          "restored": {
+            "type": "boolean",
+            "title": "Restored",
+            "default": false
           }
         },
         "type": "object",
@@ -1316,6 +2853,9 @@
         "properties": {
           "attempt": {
             "$ref": "#/components/schemas/Attempt"
+          },
+          "sitting": {
+            "$ref": "#/components/schemas/Sitting"
           },
           "verification": {
             "$ref": "#/components/schemas/AttemptVerification"
@@ -1334,11 +2874,12 @@
         "type": "object",
         "required": [
           "attempt",
+          "sitting",
           "verification",
           "failure"
         ],
         "title": "Submitted",
-        "description": "The attempt a submission minted, and the per-case verdict behind its\n`solved`."
+        "description": "The attempt a submission minted, the per-case verdict behind its\n`solved`, and the sitting as the submission left it."
       },
       "TechniqueRow": {
         "properties": {
@@ -1435,6 +2976,18 @@
           "code": {
             "type": "string",
             "title": "Code"
+          },
+          "unordered": {
+            "type": "boolean",
+            "title": "Unordered",
+            "default": false
+          },
+          "cases": {
+            "items": {
+              "$ref": "#/components/schemas/TemplateCase"
+            },
+            "type": "array",
+            "title": "Cases"
           }
         },
         "type": "object",
@@ -1447,6 +3000,24 @@
         ],
         "title": "Template",
         "description": "One form reproduced from memory. The unit of recall."
+      },
+      "TemplateCase": {
+        "properties": {
+          "args": {
+            "items": {},
+            "type": "array",
+            "title": "Args"
+          },
+          "expected": {
+            "title": "Expected"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected"
+        ],
+        "title": "TemplateCase",
+        "description": "One case a reproduced form is checked against. The arguments are\npositional, and `solve` is the function they call."
       },
       "TemplateKind": {
         "type": "string",
@@ -1462,7 +3033,14 @@
             "$ref": "#/components/schemas/Sitting"
           },
           "elapsed_sec": {
-            "type": "number",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Elapsed Sec"
           }
         },
@@ -1472,7 +3050,7 @@
           "elapsed_sec"
         ],
         "title": "Timed",
-        "description": "A sitting a pause, a resume or an end moved, with its elapsed time on the\nengine's clock."
+        "description": "A sitting a start, a pause, a resume or an end moved, with its elapsed\ntime on the engine's clock."
       },
       "Unclaimed": {
         "properties": {
@@ -1485,7 +3063,7 @@
           },
           "attempts": {
             "items": {
-              "$ref": "#/components/schemas/Attempt"
+              "$ref": "#/components/schemas/Asked"
             },
             "type": "array",
             "title": "Attempts"
@@ -1497,7 +3075,7 @@
           "attempts"
         ],
         "title": "Unclaimed",
-        "description": "The claim a sitting ends on: the attempts no claim answers yet, and the\nproblem's techniques they are answered over."
+        "description": "The claim a sitting ends on: the attempts no claim answers yet with the\nmodes each one's verdict leaves open, and the problem's techniques they are\nanswered over."
       },
       "ValidationError": {
         "properties": {

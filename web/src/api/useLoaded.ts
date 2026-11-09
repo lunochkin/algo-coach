@@ -7,6 +7,8 @@ type State<T> = { key: string; data?: T; error?: string }
 // page has moved past is never shown
 export function useLoaded<T>(load: (signal: AbortSignal) => Promise<Answer<T>>, key: string) {
   const [state, setState] = useState<State<T>>({ key })
+  // bumped by `retry`, which asks again for the same key
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -18,12 +20,17 @@ export function useLoaded<T>(load: (signal: AbortSignal) => Promise<Answer<T>>, 
         if (!controller.signal.aborted) setState({ key, error: String(reason) })
       })
     return () => controller.abort()
-    // `key` alone: `load` is a new closure on every render, and `key` names
-    // what it loads
+    // `key` and `attempt` alone: `load` is a new closure on every render, and
+    // `key` names what it loads
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key])
+  }, [key, attempt])
 
-  return state.key === key ? state : { key }
+  function retry() {
+    setState({ key })
+    setAttempt((one) => one + 1)
+  }
+
+  return { ...(state.key === key ? state : { key }), retry }
 }
 
 export function described(error: unknown): string {

@@ -95,6 +95,17 @@ def test_a_row_splits_solved_from_unsolved():
     assert (row.solved_count, row.unsolved_count) == (1, 2)
 
 
+def test_a_restored_solve_counts_as_no_solve():
+    """A solve typed over a restored one is not an independent solve. The
+    attempt still counts on the row, and its verdict stands."""
+    restored = make_attempt("a1").model_copy(update={"restored": True})
+
+    (row,) = per_technique([restored], index(GREEDY), {}, {})
+
+    assert (row.attempt_count, row.solved_count) == (1, 0)
+    assert restored.solved
+
+
 def test_recency_is_the_latest_attempt():
     """Not the latest written: attempts can land out of order."""
     attempts = [
@@ -165,6 +176,16 @@ def test_a_claim_moves_an_attempt_to_the_technique_it_claims():
     rows = per_technique([make_attempt("a1")], index(GREEDY), claims, {})
 
     assert [row.technique for row in rows] == ["two-pointers"]
+
+
+def test_a_claimed_code_counts_toward_its_parent():
+    """A user claiming knapsack alone has solved a DP problem, and the DP row
+    counts it."""
+    claims = standing_attempt_claims([make_claim(["knapsack"])])
+
+    rows = per_technique([make_attempt("a1")], index(GREEDY), claims, {})
+
+    assert [row.technique for row in rows] == ["dynamic-programming", "knapsack"]
 
 
 def test_an_attempt_resolving_to_no_technique_produces_no_row():

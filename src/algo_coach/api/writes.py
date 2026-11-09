@@ -1,29 +1,49 @@
 """The routes the rest of the drill loop takes: the submission, the pause, the
-end, and the claim asked of each attempt."""
+end, the claim and the label asked of each attempt, and the start of a card's
+run."""
 
 from collections.abc import Callable
 from datetime import UTC, datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from algo_coach.api.context import Root, UserId
+from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
-from algo_coach.log import AttemptLog, SittingStore
+from algo_coach.ladder import start
+from algo_coach.log import AttemptLog, CardRunLog, RecallLog, SittingStore
+from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, AttemptClaim, Confidence, Sitting
+from algo_coach.recall import reproduce
+from algo_coach.schema import (
+    AttemptClaim,
+    Card,
+    CardRun,
+    Confidence,
+    FailureMode,
+    Hint,
+    RecallAttempt,
+    SelfLabel,
+    Sitting,
+    Template,
+)
 from algo_coach.sitting import (
+    Asked,
     Submitted,
     claim,
     end,
     get,
+    label,
     owned_attempt,
     pause,
     resume,
+    start_clock,
     submit,
     unclaimed,
 )
 from algo_coach.solution_claims import load_problems
+from algo_coach.solutions import SolutionLog
 from algo_coach.storage import Database
 
 router = APIRouter()
@@ -31,22 +51,33 @@ router = APIRouter()
 
 class Submission(BaseModel):
     code: str
+    # the page restored an earlier solve in this sitting: `log.md`
+    restored: bool = False
+
+
+class Reproduction(BaseModel):
+    """What the trainer sends: the form as typed, and the hints taken before
+    it ran."""
+
+    code: str
+    hints: list[Hint] = []
 
 
 class Timed(BaseModel):
-    """A sitting a pause, a resume or an end moved, with its elapsed time on the
-    engine's clock."""
+    """A sitting a start, a pause, a resume or an end moved, with its elapsed
+    time on the engine's clock."""
 
     sitting: Sitting
-    elapsed_sec: float
+    elapsed_sec: float | None  # none while the clock has not run
 
 
 class Unclaimed(BaseModel):
-    """The claim a sitting ends on: the attempts no claim answers yet, and the
-    problem's techniques they are answered over."""
+    """The claim a sitting ends on: the attempts no claim answers yet with the
+    modes each one's verdict leaves open, and the problem's techniques they are
+    answered over."""
 
     techniques: list[str]
-    attempts: list[Attempt]
+    attempts: list[Asked]
 
 
 class Claim(BaseModel):
@@ -55,11 +86,77 @@ class Claim(BaseModel):
     declined: bool = False
 
 
+class Label(BaseModel):
+    """The one mode the solver picked. A skipped label sends no request."""
+
+    mode: FailureMode
+
+
+# by slug, as the card's own route is: a re-seed keeps the slug and the id is
+# minted per store
+@router.post("/cards/{slug}/runs")
+def started(root: Root, user_id: UserId, slug: str) -> CardRun:
+    card = CardStore(root).by_slug(slug)
+    if card is None:
+        raise HTTPException(status_code=404, detail=f"no card {slug}")
+    return start(
+        CardRunLog(root),
+        card,
+        load_problems(root),
+        SolutionLog(root).solutions(),
+        MatchLog(root).matches(),
+        AttemptLog(root).attempts(user_id),
+        user_id=user_id,
+    )
+
+
+# by the template's authored slug, as the page's own path is: the trainer names
+# the template it asks for and withholds the form alone
+@router.post("/cards/{slug}/recall/{template_slug}")
+def recalled(
+    root: Root, user_id: UserId, slug: str, template_slug: str, body: Reproduction
+) -> RecallAttempt:
+    card = _card(root, slug)
+    return reproduce(
+        RecallLog(root),
+        card.id,
+        _template(card, template_slug),
+        body.code,
+        body.hints,
+        user_id=user_id,
+    )
+
+
+def _card(root: Database, slug: str) -> Card:
+    found = CardStore(root).by_slug(slug)
+    if found is None:
+        raise HTTPException(status_code=404, detail=f"no card {slug}")
+    return found
+
+
+def _template(card: Card, template_slug: str) -> Template:
+    found = [one for one in card.templates if one.slug == template_slug]
+    if not found:
+        raise HTTPException(status_code=404, detail=f"no template {template_slug}")
+    return found[0]
+
+
 @router.post("/sittings/{sitting_id}/submissions")
 def submission(root: Root, user_id: UserId, sitting_id: str, body: Submission) -> Submitted:
     return submit(
-        SittingStore(root), CaseLog(root), AttemptLog(root), sitting_id, body.code, user_id=user_id
+        SittingStore(root),
+        CaseLog(root),
+        AttemptLog(root),
+        sitting_id,
+        body.code,
+        user_id=user_id,
+        restored=body.restored,
     )
+
+
+@router.post("/sittings/{sitting_id}/start")
+def clock_started(root: Root, user_id: UserId, sitting_id: str) -> Timed:
+    return _timed(start_clock, root, sitting_id, user_id)
 
 
 @router.post("/sittings/{sitting_id}/pause")
@@ -99,6 +196,11 @@ def claimed(root: Root, user_id: UserId, attempt_id: str, body: Claim) -> Attemp
         confidence=body.confidence,
         declined=body.declined,
     )
+
+
+@router.post("/attempts/{attempt_id}/labels")
+def labelled(root: Root, user_id: UserId, attempt_id: str, body: Label) -> SelfLabel:
+    return label(AttemptLog(root), attempt_id, body.mode, user_id=user_id)
 
 
 def _techniques(root: Database, problem_id: str) -> list[str]:

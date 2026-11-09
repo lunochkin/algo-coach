@@ -17,6 +17,19 @@ def named(root: Database, user_id: str) -> None:
         known(conn, user_id)
 
 
+def email_of(root: Database, user_id: str) -> str | None:
+    """The address the user signs in with, and none where no provider linked
+    one. A user reached by the dev login has no identity to carry one."""
+    query = (
+        select(identities.c.email)
+        .where(identities.c.user_id == user_id)
+        .order_by(identities.c.created_at)
+        .limit(1)
+    )
+    with root.connect() as conn:
+        return conn.execute(query).scalar_one_or_none()
+
+
 def signed_in(root: Database, provider: Provider, provider_user_id: str, email: str) -> str:
     """The engine's user an account signs in as. `email` is one the provider
     verified: an unverified one would join whoever holds that address.

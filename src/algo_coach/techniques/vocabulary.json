@@ -31,6 +31,15 @@
       "near_miss": "Arithmetic written with bit operators: `>> 1` for a midpoint, `& 1` for parity. Replace it with the ordinary arithmetic and nothing changes in either the answer or the cost."
     },
     {
+      "code": "bitmask-dp",
+      "kind": "paradigm",
+      "parents": [
+        "dynamic-programming"
+      ],
+      "earns": "The DP state includes a subset of a small set encoded as an integer mask, and transitions add or remove elements by bit operations — the travelling-salesman table over (visited set, last city), an assignment over (task mask). The mask is an index into the table, so it earns `dynamic-programming` and `bit-manipulation` beside this.",
+      "near_miss": "Bits used as flags on a state the table does not index by, and a search enumerating every mask with nothing reused across them. A mask enumerated with no table behind it is `bit-manipulation` alone, and a state without a subset in it is some other DP."
+    },
+    {
       "code": "breadth-first-search",
       "kind": "procedure",
       "earns": "The solution expands a frontier from a FIFO queue — each node entering once, expanded once, in the order it became ready — over a graph it is given or generates. Both discovery rules count: on first sight, where the order is distance in edges, and on readiness, as peeling zero-indegree vertices is, which earns `topological-sort` beside this.",
@@ -43,6 +52,15 @@
       "near_miss": "A recursion that follows no adjacency. Divide-and-conquer descends too, but over index arithmetic on a range it splits itself rather than over edges it is given."
     },
     {
+      "code": "digit-dp",
+      "kind": "paradigm",
+      "parents": [
+        "dynamic-programming"
+      ],
+      "earns": "The solution counts or sums over the integers up to a bound by walking the bound's digits, with a state of (position, whether the prefix is still tight against the bound, and whatever the property needs). It earns `dynamic-programming` beside this.",
+      "near_miss": "Arithmetic over a number's digits with no table — a digit sum, a reversal — and a count taken by formula over digit positions with no recurring state. The tight flag and the reused states are the claim."
+    },
+    {
       "code": "divide-and-conquer",
       "kind": "paradigm",
       "earns": "The solution is correct because the input splits into independent subproblems of the same shape, solved separately and combined — and the combine step is where the work is.",
@@ -52,7 +70,7 @@
       "code": "dynamic-programming",
       "kind": "paradigm",
       "earns": "The solution is correct and fast because subproblems recur and each is solved once — a memo that hits, or a table filled in dependency order. Remove the reuse and the run time changes complexity class.",
-      "near_miss": "Recursion with a cache that never hits, and a tree recursion computing one value per node: every subproblem is reached exactly once, so nothing is reused and the memo saves nothing. The overlap is the claim, not the memo."
+      "near_miss": "Recursion with a cache that never hits, and a tree recursion computing one value per node: every subproblem is reached exactly once, so nothing is reused and the memo saves nothing. The overlap is the claim, not the memo. A narrower DP code — `knapsack`, `interval-dp`, `sequence-dp`, `tree-dp`, `bitmask-dp`, `digit-dp` — is claimed beside this, never instead of it."
     },
     {
       "code": "greedy",
@@ -73,10 +91,28 @@
       "near_miss": "One-shot use over a set that never changes — heapifying to read the k largest, where sorting costs the same and expresses it directly."
     },
     {
+      "code": "interval-dp",
+      "kind": "paradigm",
+      "parents": [
+        "dynamic-programming"
+      ],
+      "earns": "The DP state is a contiguous range `[i, j]`, solved by splitting it at a point or trimming an end and combining the answers of the smaller ranges, filled by increasing length — burst balloons, matrix-chain order, a palindromic subsequence. It earns `dynamic-programming` beside this.",
+      "near_miss": "A prefix DP, where the only ranges are `[0, i]` and one index is the whole state: that is a range in name only. And a two-sequence table indexed by one position in each sequence, which is `sequence-dp` even though it is two-dimensional."
+    },
+    {
       "code": "intervals",
       "kind": "problem-class",
       "earns": "The solution's data are ranges with a start and an end, and what it computes is over their overlap — sorting by endpoint and merging, sweeping starts against ends, or selecting a non-conflicting set.",
       "near_miss": "A pair of numbers that is not a range — a two-field record, or the bounds of a window a scan maintains, which are the solution's own state rather than the problem's data, and belong to `sliding-window`."
+    },
+    {
+      "code": "knapsack",
+      "kind": "paradigm",
+      "parents": [
+        "dynamic-programming"
+      ],
+      "earns": "The solution decides take or skip per item against a numeric budget, with a table indexed by the budget (and by the item where it is not rolled away) — reach a sum, best value within a capacity, count the subsets hitting a target. Each item at most once and each item any number of times both count; the direction of the sweep is the only difference. It earns `dynamic-programming` beside this.",
+      "near_miss": "A subset choice with no numeric budget to index by, which is a search over subsets, and a budget met greedily by taking the best ratio first, which is `greedy` and is wrong whenever items are indivisible."
     },
     {
       "code": "linked-list",
@@ -109,6 +145,15 @@
       "near_miss": "Every other recursive code. Divide-and-conquer, depth-first search, backtracking, tree traversal and memoised dynamic programming are all self-calls, and each says what the self-call is for. This is the deliberate exception to claiming a code beside the narrower one that covers it: it names a language mechanism rather than an approach, so a row counting every recursive solution would name no skill. Claimed only when nothing else fits."
     },
     {
+      "code": "sequence-dp",
+      "kind": "paradigm",
+      "parents": [
+        "dynamic-programming"
+      ],
+      "earns": "The DP state is a pair of positions, one in each of two sequences, or a cell of a grid, and each cell is filled from its neighbours above, to the left and diagonally — longest common subsequence, edit distance, paths through a grid. It earns `dynamic-programming` beside this.",
+      "near_miss": "A DP over one sequence's prefixes, where a single index is the state, and a range `[i, j]` within one sequence, which is `interval-dp`. Two dimensions are not the claim: the two axes have to walk two sequences or a grid's rows and columns."
+    },
+    {
       "code": "shortest-path",
       "kind": "problem-class",
       "earns": "The solution computes a minimum cost between vertices, accumulated along the edges of a graph it is given or builds — distances relaxed until they settle, or a frontier over unweighted edges.",
@@ -137,6 +182,15 @@
       "kind": "procedure",
       "earns": "The solution computes an order over a directed graph's vertices in which every edge points forward — peeling zero-indegree vertices from a queue, which earns `breadth-first-search` beside this, or reversing a depth-first post-order, which earns `depth-first-search`. Computed, not necessarily kept: counting the peeled vertices to decide acyclicity still performs it.",
       "near_miss": "Cycle detection by colour-marking during a depth-first search, which computes no order and reports only whether one exists. And a peel keyed on undirected degree: a leaf's one neighbour is not a predecessor, so removing it orders no edge, and the layers measure distance from the centre rather than dependency depth."
+    },
+    {
+      "code": "tree-dp",
+      "kind": "paradigm",
+      "parents": [
+        "dynamic-programming"
+      ],
+      "earns": "Each node's answer is a small tuple of states computed from its children's tuples in post-order, and the choice at a node depends on the states its children chose — robbing houses on a tree, a minimum vertex cover, a maximum independent set. It earns `dynamic-programming` beside this.",
+      "near_miss": "A tree recursion returning one value per node with no choice between states, a height or a sum: each subproblem is reached once and nothing is weighed, so it is a traversal and earns `depth-first-search` alone. The tuple of alternatives per node is the claim."
     },
     {
       "code": "tree-traversal",

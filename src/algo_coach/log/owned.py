@@ -12,7 +12,11 @@ from algo_coach.log.table import (
     attempt_verification_case_results,
     attempt_verifications,
     attempts,
+    card_run_probes,
+    card_runs,
     diagnoses,
+    recall_attempt_case_results,
+    recall_attempts,
     self_labels,
     sitting_pauses,
     sittings,
@@ -72,6 +76,8 @@ def erased(root: Database, user_id: str) -> dict[str, int]:
     theirs = select(attempts.c.id).where(attempts.c.user_id == user_id)
     runs = select(attempt_verifications.c.id).where(attempt_verifications.c.attempt_id.in_(theirs))
     held = select(sittings.c.id).where(sittings.c.user_id == user_id)
+    started = select(card_runs.c.id).where(card_runs.c.user_id == user_id)
+    recalled = select(recall_attempts.c.id).where(recall_attempts.c.user_id == user_id)
     counted: dict[str, int] = {}
     with root.begin() as conn:
         # the one delete the append-only tables let through, and for this
@@ -102,6 +108,13 @@ def erased(root: Database, user_id: str) -> dict[str, int]:
             (attempts, attempts.c.user_id == user_id),
             (sitting_pauses, sitting_pauses.c.sitting_id.in_(held)),
             (sittings, sittings.c.user_id == user_id),
+            (
+                recall_attempt_case_results,
+                recall_attempt_case_results.c.recall_attempt_id.in_(recalled),
+            ),
+            (recall_attempts, recall_attempts.c.user_id == user_id),
+            (card_run_probes, card_run_probes.c.card_run_id.in_(started)),
+            (card_runs, card_runs.c.user_id == user_id),
         ):
             counted[table.name] = conn.execute(delete(table).where(where)).rowcount
         counted["calls"] = _unnamed_calls(conn, named)

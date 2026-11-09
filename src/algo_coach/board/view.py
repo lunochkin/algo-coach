@@ -50,7 +50,7 @@ def per_technique(
         TechniqueRow(
             technique=technique,
             attempt_count=len(group),
-            solved_count=sum(attempt.solved for attempt in group),
+            solved_count=sum(attempt.solved_unaided for attempt in group),
             last_attempt_at=max(attempt.finished_at for attempt in group),
             self_labels=Counter(
                 labels[attempt.id].mode for attempt in group if attempt.id in labels
