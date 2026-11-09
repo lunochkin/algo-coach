@@ -17,6 +17,7 @@ from algo_coach.cli.gaps import gaps
 from algo_coach.cli.generate import generate
 from algo_coach.cli.hand_match import hand_match
 from algo_coach.cli.invite import invitation
+from algo_coach.cli.knowledge import knowledge
 from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
 from algo_coach.cli.problem import problem
@@ -328,6 +329,13 @@ def main() -> None:
         invite_action.add_parser(name, help=help).add_argument("email")
     invite_action.add_parser("list", help="every email invited")
 
+    knowledge_parser = _command(sub, "knowledge", "the knowledge module's records")
+    kept = knowledge_parser.add_subparsers(dest="action", required=True)
+    import_parser = kept.add_parser("import", help="post learn's history through the sync")
+    import_parser.add_argument("source", help="learn's data repo, holding progress/")
+    # named every time: the history is one person's, never a default's
+    import_parser.add_argument("--user", required=True, help="whose history it is")
+
     log_parser = _command(sub, "log", "one user's whole log, read out or erased")
     action = log_parser.add_subparsers(dest="action", required=True)
     export_parser = action.add_parser("export", help="print every record of the log as JSON")
@@ -365,6 +373,7 @@ COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Datab
     "score": score,
     "movement": moved,
     "log": user_log,
+    "knowledge": knowledge,
     "invite": invitation,
 }
 
