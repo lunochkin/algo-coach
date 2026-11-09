@@ -1,0 +1,83 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "minutes": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Minutes"
+    },
+    "module_id": {
+      "title": "Module Id",
+      "type": "string"
+    },
+    "needs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Needs",
+      "type": "array"
+    },
+    "pretest": {
+      "default": 2,
+      "maximum": 5,
+      "minimum": 0,
+      "title": "Pretest",
+      "type": "integer"
+    },
+    "retired_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Retired At"
+    },
+    "slug": {
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "title": "Slug",
+      "type": "string"
+    },
+    "teaches": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Teaches",
+      "type": "array"
+    },
+    "text": {
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "slug",
+    "module_id",
+    "title",
+    "text"
+  ],
+  "title": "Lesson",
+  "type": "object"
+}

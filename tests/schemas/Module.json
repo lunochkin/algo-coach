@@ -1,0 +1,103 @@
+{
+  "properties": {
+    "certifications": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Certifications"
+    },
+    "code_kinds": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Code Kinds",
+      "type": "array"
+    },
+    "code_lang": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Code Lang"
+    },
+    "graph": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graph"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "kinds": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Kinds",
+      "type": "array"
+    },
+    "pass_ratio": {
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "title": "Pass Ratio",
+      "type": "number"
+    },
+    "position": {
+      "title": "Position",
+      "type": "integer"
+    },
+    "retired_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Retired At"
+    },
+    "slug": {
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "title": "Slug",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "slug",
+    "title",
+    "position",
+    "pass_ratio",
+    "kinds"
+  ],
+  "title": "Module",
+  "type": "object"
+}

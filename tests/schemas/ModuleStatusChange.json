@@ -1,0 +1,63 @@
+{
+  "$defs": {
+    "ModuleStatus": {
+      "enum": [
+        "active",
+        "paused",
+        "archived"
+      ],
+      "title": "ModuleStatus",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+    },
+    "client_id": {
+      "minLength": 1,
+      "title": "Client Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "device": {
+      "minLength": 1,
+      "title": "Device",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "module_id": {
+      "title": "Module Id",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/ModuleStatus"
+    },
+    "user_id": {
+      "minLength": 1,
+      "title": "User Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "client_id",
+    "user_id",
+    "device",
+    "at",
+    "created_at",
+    "module_id",
+    "status"
+  ],
+  "title": "ModuleStatusChange",
+  "type": "object"
+}

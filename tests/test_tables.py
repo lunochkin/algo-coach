@@ -32,6 +32,19 @@ from algo_coach.drafts.table import (
     draft_settled_cases,
     drafts,
 )
+from algo_coach.knowledge.table import (
+    answers,
+    certification_exams,
+    focuses,
+    lesson_marks,
+    lessons,
+    module_status_changes,
+    modules,
+    questions,
+    stints,
+    subtopics,
+    topics,
+)
 from algo_coach.log.table import (
     attempt_claims,
     attempt_verification_case_results,
@@ -54,6 +67,7 @@ from algo_coach.matches.table import template_matches
 from algo_coach.outcomes.table import site_outcomes
 from algo_coach.problems.table import problems
 from algo_coach.schema import (
+    Answer,
     Attempt,
     AttemptClaim,
     AttemptVerification,
@@ -62,14 +76,21 @@ from algo_coach.schema import (
     Card,
     CardRun,
     CaseResult,
+    CertificationExam,
     ClaimSource,
     Diagnosis,
     Draft,
     DraftCase,
+    Focus,
+    Lesson,
+    LessonMark,
     MachineProvenance,
+    Module,
+    ModuleStatusChange,
     Pause,
     Probe,
     Problem,
+    Question,
     RecallAttempt,
     SelfLabel,
     SettledCase,
@@ -77,10 +98,13 @@ from algo_coach.schema import (
     Sitting,
     Solution,
     SolutionClaim,
+    Stint,
+    Subtopic,
     Template,
     TemplateCase,
     TemplateMatch,
     TestCase,
+    Topic,
     Verification,
 )
 from algo_coach.solution_claims.table import solution_claims
@@ -159,6 +183,17 @@ STORED: list[Stored] = [
         structural=frozenset({"verification_id", "position"}),
     ),
     Stored(Solution, solutions, through_call=True, required=frozenset({"call_id"})),
+    Stored(Module, modules),
+    Stored(Topic, topics),
+    Stored(Subtopic, subtopics),
+    Stored(Question, questions),
+    Stored(Lesson, lessons),
+    Stored(Answer, answers),
+    Stored(Stint, stints),
+    Stored(ModuleStatusChange, module_status_changes),
+    Stored(Focus, focuses),
+    Stored(LessonMark, lesson_marks),
+    Stored(CertificationExam, certification_exams),
 ]
 
 
@@ -652,6 +687,12 @@ APPEND_ONLY = {
     "diagnoses",
     "card_runs",
     "recall_attempts",
+    "answers",
+    "stints",
+    "module_status_changes",
+    "focuses",
+    "lesson_marks",
+    "certification_exams",
 }
 
 

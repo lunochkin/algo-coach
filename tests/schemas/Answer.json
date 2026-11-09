@@ -1,0 +1,100 @@
+{
+  "$defs": {
+    "OpenGrade": {
+      "description": "An open question's grade, from the points ticked: `knowledge.md`.",
+      "enum": [
+        "k",
+        "p",
+        "n"
+      ],
+      "title": "OpenGrade",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+    },
+    "client_id": {
+      "minLength": 1,
+      "title": "Client Id",
+      "type": "string"
+    },
+    "correct": {
+      "title": "Correct",
+      "type": "boolean"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "device": {
+      "minLength": 1,
+      "title": "Device",
+      "type": "string"
+    },
+    "grade": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/OpenGrade"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "guess": {
+      "default": false,
+      "title": "Guess",
+      "type": "boolean"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "missed": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Missed",
+      "type": "array"
+    },
+    "question_id": {
+      "title": "Question Id",
+      "type": "string"
+    },
+    "traps": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Traps",
+      "type": "array"
+    },
+    "user_id": {
+      "minLength": 1,
+      "title": "User Id",
+      "type": "string"
+    },
+    "wrong": {
+      "default": false,
+      "title": "Wrong",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "client_id",
+    "user_id",
+    "device",
+    "at",
+    "created_at",
+    "question_id",
+    "correct"
+  ],
+  "title": "Answer",
+  "type": "object"
+}

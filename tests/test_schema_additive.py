@@ -7,23 +7,34 @@ import pytest
 from pydantic import BaseModel
 
 from algo_coach.schema import (
+    Answer,
     Attempt,
     AttemptClaim,
     AttemptVerification,
     Call,
     Card,
     CardRun,
+    CertificationExam,
     Diagnosis,
     Draft,
+    Focus,
+    Lesson,
+    LessonMark,
+    Module,
+    ModuleStatusChange,
     Problem,
+    Question,
     RecallAttempt,
     SelfLabel,
     SiteOutcome,
     Sitting,
     Solution,
     SolutionClaim,
+    Stint,
+    Subtopic,
     TemplateMatch,
     TestCase,
+    Topic,
     Verification,
 )
 
@@ -47,6 +58,17 @@ RECORDS: list[type[BaseModel]] = [
     AttemptVerification,
     CardRun,
     RecallAttempt,
+    Module,
+    Topic,
+    Subtopic,
+    Question,
+    Lesson,
+    Answer,
+    Stint,
+    ModuleStatusChange,
+    Focus,
+    LessonMark,
+    CertificationExam,
 ]
 SNAPSHOTS = Path(__file__).parent / "schemas"
 

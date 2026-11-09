@@ -39,11 +39,14 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 
 ### The server
 
-- [ ] Add the content tables and the six append-only learner tables in one
+- [x] Add the content tables and the six append-only learner tables in one
       migration, each record carrying a client-minted id and each append-only
       table its trigger
 - [ ] Seed the Python module from `content/` with `algo-coach seed knowledge`,
       refusing what learn's `learn check` refuses
+- [ ] Type a question's body as one record per format, and a module's graph
+      and certification settings as records of their own, so the seed
+      refuses a malformed row the JSONB column would store
 - [ ] Serve the content snapshot in the shape learn's app reads,
       `courses.json` format 6, so the app's loader stays as it is
 - [ ] Serve the sync API: append a user's records, ignoring an id already
@@ -52,6 +55,8 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 - [ ] Sign the native app in through the provider flow, ending in a token
       the app exchanges a one-time code for
 - [ ] List and revoke the signed-in apps from the account menu
+- [ ] Read out and erase the six knowledge tables with `algo-coach log export`
+      and `log erase`. `log.md` promises an erasure removes the whole log
 
 ### The app
 

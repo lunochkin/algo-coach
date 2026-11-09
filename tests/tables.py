@@ -104,6 +104,9 @@ def _typed(column: Column[Any], annotation: object) -> bool:
     if annotation is Any:
         # JSON of any shape: a stored `null` is a value, so NOT NULL still holds
         return isinstance(kind, JSONB)
+    if typing.get_origin(annotation) is dict:
+        # an object of any shape: a module's graph, a question's format fields
+        return isinstance(kind, JSONB)
     if typing.get_origin(annotation) is list:
         (item,) = typing.get_args(annotation)
         if item is Any:

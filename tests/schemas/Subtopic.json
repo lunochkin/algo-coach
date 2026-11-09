@@ -1,0 +1,42 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "position": {
+      "title": "Position",
+      "type": "integer"
+    },
+    "retired_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Retired At"
+    },
+    "slug": {
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "title": "Slug",
+      "type": "string"
+    },
+    "topic_id": {
+      "title": "Topic Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "slug",
+    "topic_id",
+    "position"
+  ],
+  "title": "Subtopic",
+  "type": "object"
+}

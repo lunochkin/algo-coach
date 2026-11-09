@@ -243,7 +243,7 @@ trigger, as `README.md` requires.
   and for an open question the grade, the points missed, the traps fallen
   into and the wrong flag.
 - **`stints`**: the mode, the score and the number of questions answered.
-- **`module_statuses`**: the module and its status.
+- **`module_status_changes`**: the module and its status.
 - **`focuses`**: the module, the topic, the subtopic and the certification,
   each optional, and whether the focus is strict.
 - **`lesson_marks`**: the lesson, and whether it was read or reset.

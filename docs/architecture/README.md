@@ -642,6 +642,13 @@ times. Each record class is specified in one of the files beside it.
     card's templates. A list of strings is a `text[]` column.
   - JSONB holds a value only where the value is JSON of any shape by design,
     as a test case's arguments and its expected value are.
+  - A seeded content row may also hold its authored structure as JSONB: a
+    question's format fields and detail, a module's graph and certification
+    settings. The seed validates each against a typed record before storing
+    it, and no query reads inside it.
+  - The exception covers content the seed refreshes, never the log. A log
+    record cannot be rewritten, so only its columns let the database refuse
+    a bad record.
   - A machine record's table holds its `call_id`, a foreign key to `calls`,
     and none of the configuration. `machine.md` gives why the configuration
     is stored once.
