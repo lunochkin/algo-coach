@@ -295,6 +295,7 @@ times. Each record class is specified in one of the files beside it.
 | [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, starting a card run, solving a rung, recalling a template, adjudicating the eval set |
 | [`pages.md`](pages.md) | The web app's sections and pages, a page's areas, the design system |
 | [`wireframes.md`](wireframes.md) | Each page drawn at low fidelity |
+| [`knowledge.md`](knowledge.md) | Modules, questions, lessons, the schedule, the queues, certifications, and the user's knowledge log |
 
 ## Data classes
 
@@ -302,6 +303,7 @@ times. Each record class is specified in one of the files beside it.
 |---|---|---|---|---|
 | Techniques | product | global | read-only at runtime | this repo, in git |
 | Cards | product | global | read-only at runtime | the store, seeded from `content/` |
+| Modules and questions | product | global | refreshed by the seed | the store, seeded from `content/` |
 | Drafts | product | global | revised in place | the store |
 | Problems | product | global | created once; only its status moves | the store |
 | Test cases | product | global | written with the problem | the store |
@@ -319,6 +321,7 @@ times. Each record class is specified in one of the files beside it.
 | Calls | user | private | append-only | the store |
 | Self-labels | user | private | append-only | the store |
 | Diagnoses | user | private | append-only | the store |
+| Answers, stints, module statuses, focuses, lesson marks, certification exams | user | private | append-only | the store |
 
 ## Boundaries
 
@@ -576,8 +579,9 @@ times. Each record class is specified in one of the files beside it.
     a pipeline would have to preserve the minted ids, since the attempt log
     references them.
 - **Cards are ingested from files.** They are authored in `content/` and seeded
-  into the datastore. `content/` is gitignored like `data/`. The technique
-  vocabulary is the exception: it ships with the package, in git.
+  into the datastore. `content/` is gitignored like `data/`, and is a private
+  repository of its own. The technique vocabulary is the exception: it ships
+  with the package, in git.
   - An authored card has its own shape. `CardSeed`
     (`src/algo_coach/schema/seed.py`) is the payload the stored card is built
     from, not the card, and it has no field for the identity the engine mints.

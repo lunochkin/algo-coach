@@ -15,10 +15,10 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 
 ### The design
 
-- [ ] Make `content/` a private git repository of its own, holding the cards
+- [x] Make `content/` a private git repository of its own, holding the cards
       and the knowledge modules. It is gitignored here, so the cards carry no
       history today
-- [ ] Write `docs/architecture/knowledge.md` from learn's `spec/learn.md`:
+- [x] Write `docs/architecture/knowledge.md` from learn's `spec/learn.md`:
       modules, questions, lessons, levels, the prerequisite graph,
       certifications, exams, the queues and the FSRS settings, with Postgres
       tables in place of learn's data repo

@@ -39,6 +39,7 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 @docs/architecture/machine.md
 @docs/architecture/flows.md
 @docs/architecture/pages.md
+@docs/architecture/knowledge.md
 
 ## Where knowledge lives
 

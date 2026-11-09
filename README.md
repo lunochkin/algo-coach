@@ -432,7 +432,7 @@ src/algo_coach/{log,cards,problems,cases,solutions,solution_claims,verifications
 docs/architecture/              concepts, boundaries, invariants, flows
 docs/{ROADMAP,TODO}.md          sequencing, and what is open
 .claude/skills/card-author/  the skill that authors cards
-content/cards/               the authored cards — never committed
+content/                     cards and knowledge modules — a private repo of its own
 data/old/                    the archived corpus: calibration, not a store
 ```
 
