@@ -23,6 +23,7 @@ import {
   type Group,
 } from '@/core';
 import { bySavedOrder } from '@/lib/order';
+import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
 import { BottomBar, startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
 import { FocusCard } from '@/ui/focuscard';
@@ -187,7 +188,7 @@ export default function Home() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
-        <Appbar.Content title="Algo Coach" />
+        <Appbar.Content title={APP_NAME} />
         <Appbar.Action icon="trophy-outline" onPress={() => router.push('/certs')} accessibilityLabel="Certifications" />
         <Appbar.Action icon="book-open-variant" onPress={() => router.push('/lessons')} accessibilityLabel="Lessons" />
         <Appbar.Action icon="graph-outline" onPress={() => router.push('/map')} accessibilityLabel="Map" />

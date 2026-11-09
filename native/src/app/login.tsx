@@ -5,6 +5,7 @@ import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-pape
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { signIn, type Provider } from '@/lib/auth';
+import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
 
 const ADDRESS = /^https?:\/\/[^\s/]+$/;
@@ -50,7 +51,7 @@ export default function LoginScreen() {
         paddingBottom: insets.bottom + 24,
         backgroundColor: theme.colors.background,
       }}>
-      <Text variant="displaySmall">Algo Coach</Text>
+      <Text variant="displaySmall">{APP_NAME}</Text>
       <Text variant="bodyLarge">
         {__DEV__ ? 'The dev app syncs with the local engine.' : 'Sign in to sync your practice with the engine.'}
       </Text>

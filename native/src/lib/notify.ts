@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { earliestReview, nextReminderAt, reviewCount, type Board } from '@/core';
 
 import { getMeta, setMeta } from './db';
+import { APP_NAME } from './name';
 
 const CHANNEL = 'reminders';
 
@@ -29,7 +30,7 @@ export async function scheduleReminder(b: Board, hour: number): Promise<void> {
   const n = reviewCount(b, at);
   if (n === 0 || !(await permitted())) return;
   await Notifications.scheduleNotificationAsync({
-    content: { title: 'Algo Coach', body: `${n} ${n === 1 ? 'review' : 'reviews'} due` },
+    content: { title: APP_NAME, body: `${n} ${n === 1 ? 'review' : 'reviews'} due` },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: at, channelId: CHANNEL },
   });
 }

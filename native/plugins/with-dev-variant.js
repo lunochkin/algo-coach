@@ -1,4 +1,4 @@
-// Debug builds install as a separate app (dev.lunochkin.algocoach.dev, "Algo Coach dev") next to the
+// Debug builds install as a separate app (dev.lunochkin.algocoach.dev, "Algo Dev") next to the
 // release one, so a Metro-connected dev build never replaces the daily app.
 const fs = require('fs');
 const path = require('path');
@@ -22,7 +22,7 @@ module.exports = function withDevVariant(config) {
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(
         path.join(dir, 'strings.xml'),
-        '<resources>\n  <string name="app_name">Algo Coach dev</string>\n</resources>\n',
+        '<resources>\n  <string name="app_name">Algo Dev</string>\n</resources>\n',
       );
       return cfg;
     },
