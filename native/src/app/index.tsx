@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Appbar, Button, Card, Chip, IconButton, Menu, Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import ReorderableList, {
@@ -36,13 +36,9 @@ export default function Home() {
   const insets = useSafeAreaInsets();
   const [notice, setNotice] = useState('');
   const [noticeAction, setNoticeAction] = useState<{ label: string; run: () => void } | null>(null);
-  const redirected = useRef(false);
-
   useEffect(() => {
-    if (st.ready && !st.hasToken && !redirected.current) {
-      redirected.current = true;
-      router.push('/settings');
-    }
+    // the app opens on Login until it holds a token, and returns there on sign-out
+    if (st.ready && !st.hasToken) router.replace('/login');
   }, [st.ready, st.hasToken]);
 
   const { board, filter } = st;
@@ -191,7 +187,7 @@ export default function Home() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
-        <Appbar.Content title="learn" />
+        <Appbar.Content title="Algo Coach" />
         <Appbar.Action icon="trophy-outline" onPress={() => router.push('/certs')} accessibilityLabel="Certifications" />
         <Appbar.Action icon="book-open-variant" onPress={() => router.push('/lessons')} accessibilityLabel="Lessons" />
         <Appbar.Action icon="graph-outline" onPress={() => router.push('/map')} accessibilityLabel="Map" />

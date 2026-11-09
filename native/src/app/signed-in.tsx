@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 export default function SignedIn() {
   useEffect(() => {
     if (router.canGoBack()) router.back();
-    else router.replace('/settings');
+    else router.replace('/');
   }, []);
   return null;
 }

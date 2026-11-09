@@ -5,7 +5,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Appbar, Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { signIn, signOut, type Provider } from '@/lib/auth';
+import { signOut } from '@/lib/auth';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { styles, SyncLine } from '@/ui/common';
@@ -15,7 +15,6 @@ export default function SettingsScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [signing, setSigning] = useState(false);
-  const [signError, setSignError] = useState<string | null>(null);
   const [form, setForm] = useState({
     origin: st.settings.origin,
     device: st.settings.device,
@@ -60,19 +59,6 @@ export default function SettingsScreen() {
     st.requestSync(0);
   };
 
-  const signInWith = async (provider: Provider) => {
-    setSigning(true);
-    setSignError(null);
-    try {
-      await st.updateToken(await signIn(st.settings.origin, provider, st.settings.device));
-      st.requestSync(0);
-    } catch (e) {
-      setSignError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setSigning(false);
-    }
-  };
-
   const signOutHere = async () => {
     setSigning(true);
     try {
@@ -81,6 +67,7 @@ export default function SettingsScreen() {
     } finally {
       await st.updateToken('');
       setSigning(false);
+      router.replace('/login');
     }
   };
 
@@ -112,27 +99,15 @@ export default function SettingsScreen() {
         <Text variant="titleMedium">Account</Text>
         {field('origin', 'Engine address')}
         {!originOk ? <HelperText type="error">An address such as https://example.invalid</HelperText> : null}
-        <HelperText type="info">
-          {st.hasToken ? 'Signed in on this device.' : 'Not signed in yet: save the address, then sign in.'}
-        </HelperText>
-        {signError ? <HelperText type="error">{signError}</HelperText> : null}
         <View style={styles.row}>
+          <Text variant="bodyMedium" style={{ flex: 1 }}>
+            {st.hasToken ? 'Signed in on this device.' : 'Not signed in.'}
+          </Text>
           {st.hasToken ? (
             <Button mode="outlined" icon="logout" disabled={signing} onPress={() => void signOutHere()}>
               Sign out
             </Button>
-          ) : (
-            (['google', 'github'] as const).map((provider) => (
-              <Button
-                key={provider}
-                mode="contained-tonal"
-                icon={provider}
-                disabled={signing || !originOk || form.origin.trim() !== st.settings.origin}
-                onPress={() => void signInWith(provider)}>
-                {provider === 'google' ? 'Google' : 'GitHub'}
-              </Button>
-            ))
-          )}
+          ) : null}
         </View>
         {field('device', 'Device name')}
         {!deviceOk ? <HelperText type="error">Letters, digits, - and _ only</HelperText> : null}
