@@ -990,6 +990,65 @@
           }
         }
       }
+    },
+    "/api/knowledge/snapshot": {
+      "get": {
+        "summary": "Content",
+        "description": "Every live module, in the shape learn's app reads: `knowledge.md`.",
+        "operationId": "content_api_knowledge_snapshot_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Content Api Knowledge Snapshot Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/knowledge/sync": {
+      "post": {
+        "summary": "Synced",
+        "operationId": "synced_api_knowledge_sync_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Upload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Synced"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2538,6 +2597,24 @@
         "title": "Recalled",
         "description": "One template's recall state: the last reproduction of it, and nothing\nof the ones before, which stay in the log."
       },
+      "Refusal": {
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "title": "Client Id"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_id",
+          "reason"
+        ],
+        "title": "Refusal"
+      },
       "Reproduction": {
         "properties": {
           "code": {
@@ -2881,6 +2958,47 @@
         "title": "Submitted",
         "description": "The attempt a submission minted, the per-case verdict behind its\n`solved`, and the sitting as the submission left it."
       },
+      "Synced": {
+        "properties": {
+          "stored": {
+            "type": "integer",
+            "title": "Stored",
+            "default": 0
+          },
+          "known": {
+            "type": "integer",
+            "title": "Known",
+            "default": 0
+          },
+          "refused": {
+            "items": {
+              "$ref": "#/components/schemas/Refusal"
+            },
+            "type": "array",
+            "title": "Refused",
+            "default": []
+          },
+          "records": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Records",
+            "default": []
+          },
+          "cursor": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Cursor",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "title": "Synced"
+      },
       "TechniqueRow": {
         "properties": {
           "technique": {
@@ -3076,6 +3194,37 @@
         ],
         "title": "Unclaimed",
         "description": "The claim a sitting ends on: the attempts no claim answers yet with the\nmodes each one's verdict leaves open, and the problem's techniques they are\nanswered over."
+      },
+      "Upload": {
+        "properties": {
+          "device": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Device"
+          },
+          "records": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Records"
+          },
+          "since": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Since",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "device",
+          "records"
+        ],
+        "title": "Upload"
       },
       "ValidationError": {
         "properties": {

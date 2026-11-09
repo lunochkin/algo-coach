@@ -255,3 +255,23 @@ trigger, as `README.md` requires.
 - **The content tables are refreshed by the seed.** Their columns follow the
   authoring format and may change with a migration. The six tables above are
   the part that cannot.
+
+## The app's wire
+
+The native app came from learn and still reads and writes learn's formats. The
+engine translates at its edge, so the store keeps this project's names.
+
+- **The content reaches the app as one snapshot**, learn's `courses.json` at
+  format 6. The snapshot rebuilt from Postgres equals learn's own, so the
+  app's loader stays as it was.
+- **The app syncs learn's log lines**: `attempt`, `session`, `status`,
+  `focus`, `lesson` and `cert`. Each line carries a `client_id` and names its
+  content by slug.
+- **Two names change at the edge.** learn's `card` format is stored as an
+  open question, and its `drill` queue as the filtered queue. A line read
+  back carries learn's names again.
+- **A line naming content the store does not hold is refused alone.** The
+  rest of the upload is stored, and the reply names each refused line, so the
+  app drops it rather than sending it again.
+- **A sync returns the user's records since a cursor**, one append order per
+  table. The app merges them as it merged other devices' files.

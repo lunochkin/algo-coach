@@ -430,6 +430,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/knowledge/snapshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Content
+         * @description Every live module, in the shape learn's app reads: `knowledge.md`.
+         */
+        get: operations["content_api_knowledge_snapshot_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/knowledge/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Synced */
+        post: operations["synced_api_knowledge_sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1002,6 +1039,13 @@ export interface components {
             /** Verified */
             verified: boolean;
         };
+        /** Refusal */
+        Refusal: {
+            /** Client Id */
+            client_id: string;
+            /** Reason */
+            reason: string;
+        };
         /**
          * Reproduction
          * @description What the trainer sends: the form as typed, and the hints taken before
@@ -1146,6 +1190,38 @@ export interface components {
             verification: components["schemas"]["AttemptVerification"];
             failure: components["schemas"]["Failure"] | null;
         };
+        /** Synced */
+        Synced: {
+            /**
+             * Stored
+             * @default 0
+             */
+            stored: number;
+            /**
+             * Known
+             * @default 0
+             */
+            known: number;
+            /**
+             * Refused
+             * @default []
+             */
+            refused: components["schemas"]["Refusal"][];
+            /**
+             * Records
+             * @default []
+             */
+            records: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Cursor
+             * @default {}
+             */
+            cursor: {
+                [key: string]: number;
+            };
+        };
         /**
          * TechniqueRow
          * @description One technique's progress, derived from the log on every read.
@@ -1241,6 +1317,22 @@ export interface components {
             techniques: string[];
             /** Attempts */
             attempts: components["schemas"]["Asked"][];
+        };
+        /** Upload */
+        Upload: {
+            /** Device */
+            device: string;
+            /** Records */
+            records: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Since
+             * @default {}
+             */
+            since: {
+                [key: string]: number;
+            };
         };
         /** ValidationError */
         ValidationError: {
@@ -2021,6 +2113,61 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    content_api_knowledge_snapshot_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    synced_api_knowledge_sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Upload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Synced"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };

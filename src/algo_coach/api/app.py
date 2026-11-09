@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 
 from algo_coach.api.account import router as account
 from algo_coach.api.devlogin import router as dev_login_router
+from algo_coach.api.knowledge import router as knowledge
 from algo_coach.api.pages import Pages
 from algo_coach.api.reads import router as reads
 from algo_coach.api.signin import SignIn, install
@@ -40,6 +41,7 @@ def create_app(
     app.include_router(reads, prefix=PREFIX)
     app.include_router(writes, prefix=PREFIX)
     app.include_router(account, prefix=PREFIX)
+    app.include_router(knowledge, prefix=PREFIX)
     if sign_in is not None:
         install(app, sign_in, PREFIX)
     if dev_login is not None:

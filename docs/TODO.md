@@ -47,9 +47,9 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 - [ ] Type a question's body as one record per format, and a module's graph
       and certification settings as records of their own, so the seed
       refuses a malformed row the JSONB column would store
-- [ ] Serve the content snapshot in the shape learn's app reads,
+- [x] Serve the content snapshot in the shape learn's app reads,
       `courses.json` format 6, so the app's loader stays as it is
-- [ ] Serve the sync API: append a user's records, ignoring an id already
+- [x] Serve the sync API: append a user's records, ignoring an id already
       stored, and return the records since a cursor. A retried upload then
       writes nothing twice
 - [ ] Sign the native app in through the provider flow, ending in a token
