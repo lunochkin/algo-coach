@@ -73,6 +73,10 @@ hooks:
 seed source="content/cards":
     uv run algo-coach seed cards {{ source }}
 
+# Seed one knowledge module from its authored directory, by slug.
+seed-module name="python":
+    uv run algo-coach seed knowledge content/modules/{{ name }}
+
 # --- practice ---
 
 # The drill loop: the API and the Vite dev server together, the dev server

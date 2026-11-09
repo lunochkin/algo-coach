@@ -1,10 +1,12 @@
 import argparse
 import json
+import tomllib
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
 from algo_coach.cards import CardStore, seed_cards
+from algo_coach.knowledge import read_module, seed_module
 from algo_coach.storage import Database
 
 
@@ -24,6 +26,9 @@ def read_json(source: str) -> Iterator[dict[str, Any]]:
 
 
 def seed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
+    if args.kind == "knowledge":
+        _module(args.source, parser, root)
+        return
     try:
         result = seed_cards(read_json(args.source), store=CardStore(root))
     except (BadLine, OSError) as exc:
@@ -31,4 +36,14 @@ def seed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Databa
 
     print(result.model_dump_json(indent=2))
     if result.rejected:
+        parser.exit(1)
+
+
+def _module(source: str, parser: argparse.ArgumentParser, root: Database) -> None:
+    try:
+        result = seed_module(read_module(Path(source)), root=root)
+    except (OSError, tomllib.TOMLDecodeError) as exc:
+        parser.exit(2, f"seed: {exc}\n")
+    print(result.model_dump_json(indent=2))
+    if result.refused:
         parser.exit(1)

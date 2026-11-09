@@ -126,8 +126,11 @@ def main() -> None:
     sub = parser.add_subparsers(dest="command", required=True)
 
     seed_parser = _command(sub, "seed", "seed authored content into the store")
-    seed_parser.add_argument("kind", choices=["cards"])
-    seed_parser.add_argument("source", help="path to an authored JSON file, or a directory of them")
+    seed_parser.add_argument("kind", choices=["cards", "knowledge"])
+    seed_parser.add_argument(
+        "source",
+        help="cards: a JSON file or a directory of them; knowledge: a module's directory",
+    )
 
     board_parser = _command(sub, "board", "per-technique progress, derived from the log")
     board_parser.add_argument("--json", action="store_true", help="emit rows instead of a table")
