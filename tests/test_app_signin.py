@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import select, update
 from test_api_signin import browser, google_returns
 
-from algo_coach.api.signin import APP_REDIRECT
+from algo_coach.api.apps import APP_REDIRECTS
 from algo_coach.log import Provider, hashed, invite
 from algo_coach.log.table import app_codes, app_tokens
 
@@ -37,7 +37,7 @@ def returned(database, monkeypatch, *, invited=True):
 
 def code_in(response) -> str:
     location = urlsplit(response.headers["location"])
-    assert f"{location.scheme}://{location.netloc}{location.path}" == APP_REDIRECT
+    assert f"{location.scheme}://{location.netloc}{location.path}" == APP_REDIRECTS["app"]
     return parse_qs(location.query)["code"][0]
 
 
@@ -172,3 +172,22 @@ def test_each_use_extends_the_token(database, monkeypatch):
     with database.connect() as conn:
         used = conn.execute(select(app_tokens.c.last_used_at)).scalar_one()
     assert datetime.now(UTC) - used < timedelta(minutes=1)
+
+
+def test_a_provider_returns_the_dev_app_to_its_own_scheme(database, monkeypatch):
+    invite(database, "solver@example.com")
+    client = browser(database)
+    response = client.get(f"/api/auth/{Provider.GOOGLE}?client=app-dev&code_challenge={CHALLENGE}")
+    sent = {k: v for k, (v,) in parse_qs(urlsplit(response.headers["location"]).query).items()}
+    google_returns(monkeypatch, client, nonce=sent["nonce"])
+
+    back = client.get(f"/api/auth/google/callback?code=abc&state={sent['state']}")
+
+    assert back.headers["location"].startswith(APP_REDIRECTS["app-dev"] + "?code=")
+
+
+def test_an_unknown_client_is_refused(database):
+    started = f"/api/auth/{Provider.GOOGLE}?client=web&code_challenge={CHALLENGE}"
+    response = browser(database).get(started)
+
+    assert response.status_code == 400

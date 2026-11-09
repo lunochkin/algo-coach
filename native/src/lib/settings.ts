@@ -12,8 +12,9 @@ export interface Settings {
 }
 
 export const DEFAULTS: Settings = {
-  // set at build time from native/.env, which git ignores: the repo is public
-  origin: process.env.EXPO_PUBLIC_API_ORIGIN ?? '',
+  // the dev app talks to the local engine, which `just native-dev` reaches over USB;
+  // the release app's engine comes from native/.env, which git ignores: the repo is public
+  origin: __DEV__ ? 'http://localhost:8000' : (process.env.EXPO_PUBLIC_API_ORIGIN ?? ''),
   device: __DEV__ ? 'phone-dev' : 'phone', // the dev app must not write the release app's records
   newPerDay: 10,
   examSize: 40,

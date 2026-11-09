@@ -31,6 +31,18 @@ the app exchanges the code for its token. The token is kept with expo-secure-sto
 logged. Settings holds the engine's address and signs out, which returns the
 app to Login.
 
+## The dev app
+
+`just native-dev-apk` installs "Algo Coach dev" beside the release app, with a
+scheme of its own, `algocoachdev://`. The dev app syncs with the local engine,
+never with production, so a test answer never reaches the real log.
+
+1. `just app` runs the local engine, and `just seed-module` gives it content.
+2. `just native-dev` starts Metro and forwards the phone's ports 8081 and 8000
+   to the laptop over USB.
+3. In the dev app, Login offers the dev login, which signs in as the user
+   `ALGO_COACH_DEV_LOGIN` names.
+
 ## Build and install
 
 From the repo root:

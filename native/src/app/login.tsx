@@ -8,6 +8,8 @@ import { signIn, type Provider } from '@/lib/auth';
 import { useStore } from '@/lib/store';
 
 const ADDRESS = /^https?:\/\/[^\s/]+$/;
+const LABELS = { google: 'Continue with Google', github: 'Continue with GitHub', dev: 'Continue with the dev login' };
+const ICONS = { google: 'google', github: 'github', dev: 'laptop' };
 
 /** The app's first screen until it holds a token: sign in through a provider. */
 export default function LoginScreen() {
@@ -49,7 +51,9 @@ export default function LoginScreen() {
         backgroundColor: theme.colors.background,
       }}>
       <Text variant="displaySmall">Algo Coach</Text>
-      <Text variant="bodyLarge">Sign in to sync your practice with the engine.</Text>
+      <Text variant="bodyLarge">
+        {__DEV__ ? 'The dev app syncs with the local engine.' : 'Sign in to sync your practice with the engine.'}
+      </Text>
       {!st.settings.origin ? (
         <>
           <TextInput
@@ -64,15 +68,15 @@ export default function LoginScreen() {
           {!originOk ? <HelperText type="error">An address such as https://example.invalid</HelperText> : null}
         </>
       ) : null}
-      {(['google', 'github'] as const).map((provider) => (
+      {(__DEV__ ? (['dev'] as const) : (['google', 'github'] as const)).map((provider) => (
         <Button
           key={provider}
           mode="contained"
-          icon={provider}
+          icon={ICONS[provider]}
           loading={signing}
           disabled={signing || !originOk}
           onPress={() => void signInWith(provider)}>
-          {provider === 'google' ? 'Continue with Google' : 'Continue with GitHub'}
+          {LABELS[provider]}
         </Button>
       ))}
       {error ? <HelperText type="error">{error}</HelperText> : null}

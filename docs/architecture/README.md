@@ -602,6 +602,14 @@ times. Each record class is specified in one of the files beside it.
     Signing out in the app revokes that app's token.
   - The app keeps its token in the phone's secure storage, the Keystore on
     Android and the Keychain on iOS.
+  - The dev build of the app syncs with a local engine, never with a deployed
+    one. Its test answers would otherwise land in the author's own log.
+  - The dev build has a URL scheme of its own, `algocoachdev://`. With one
+    scheme for both builds, Android could hand the dev build's code to the
+    release build on the same phone.
+  - The dev build signs in through the dev login, which issues the same
+    one-time code to the dev build's scheme. The dev login still answers on
+    loopback alone, and it issues no code to the release build.
   - An `identities` row links a provider's user id to a user id the engine
     mints at the first sign-in. The log keys on the engine's id, so adding or
     replacing a provider rewrites no record.

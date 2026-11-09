@@ -3,10 +3,13 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { call } from './engine';
 
-// the engine redirects here, a constant on both sides: `docs/architecture/README.md`
-export const REDIRECT = 'algocoach://signed-in';
+// the engine redirects here, a constant on both sides: `docs/architecture/README.md`.
+// The dev app has a scheme of its own, so the release app never receives its code
+export const REDIRECT = __DEV__ ? 'algocoachdev://signed-in' : 'algocoach://signed-in';
+const CLIENT = __DEV__ ? 'app-dev' : 'app';
 
-export type Provider = 'google' | 'github';
+// `dev` is the local engine's dev login, which signs the dev app alone in
+export type Provider = 'google' | 'github' | 'dev';
 
 const base64url = (bytes: Uint8Array) =>
   btoa(String.fromCharCode(...bytes))
@@ -23,7 +26,7 @@ export async function signIn(origin: string, provider: Provider, device: string)
   const verifier = base64url(Crypto.getRandomBytes(48));
   const digest = await Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA256, new TextEncoder().encode(verifier));
   const challenge = base64url(new Uint8Array(digest));
-  const url = `${origin}/api/auth/${provider}?client=app&code_challenge=${challenge}`;
+  const url = `${origin}/api/auth/${provider}?client=${CLIENT}&code_challenge=${challenge}`;
   const result = await WebBrowser.openAuthSessionAsync(url, REDIRECT);
   if (result.type !== 'success') throw new Error('sign-in cancelled');
   const query = new URL(result.url).searchParams;

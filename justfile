@@ -238,11 +238,13 @@ native-install:
 
 # The dev app ("algo-coach dev") beside the release one. Rebuild it only after native changes.
 native-dev-apk:
-    cd native && CI=1 ANDROID_HOME={{ android_home }} npx expo prebuild -p android --clean --no-install
+    cd native && APP_VARIANT=dev CI=1 ANDROID_HOME={{ android_home }} npx expo prebuild -p android --clean --no-install
     cd native/android && ANDROID_HOME={{ android_home }} ./gradlew assembleDebug -PreactNativeArchitectures=arm64-v8a --console=plain -q
     {{ android_home }}/platform-tools/adb install -r native/android/app/build/outputs/apk/debug/app-debug.apk
 
-# Metro with Fast Refresh for the dev app, which reaches it over USB.
+# Metro with Fast Refresh for the dev app, which reaches it and the local engine
+# (`just app`) over USB.
 native-dev:
     {{ android_home }}/platform-tools/adb reverse tcp:8081 tcp:8090
+    {{ android_home }}/platform-tools/adb reverse tcp:8000 tcp:8000
     cd native && npx expo start --localhost --port 8090
