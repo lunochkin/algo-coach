@@ -29,7 +29,7 @@ export async function scheduleReminder(b: Board, hour: number): Promise<void> {
   const n = reviewCount(b, at);
   if (n === 0 || !(await permitted())) return;
   await Notifications.scheduleNotificationAsync({
-    content: { title: 'learn', body: `${n} ${n === 1 ? 'review' : 'reviews'} due` },
+    content: { title: 'Algo Coach', body: `${n} ${n === 1 ? 'review' : 'reviews'} due` },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: at, channelId: CHANNEL },
   });
 }

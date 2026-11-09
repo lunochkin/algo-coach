@@ -1,6 +1,6 @@
 // Release builds are signed with the private key in signing/, which git ignores: an update
 // signed by another key installs only after an uninstall, which drops unsynced records. Debug
-// builds ("algo-coach dev", a separate app) keep the public React Native debug key.
+// builds ("Algo Coach dev", a separate app) keep the public React Native debug key.
 const fs = require('fs');
 const path = require('path');
 const { withAppBuildGradle, withDangerousMod } = require('expo/config-plugins');
