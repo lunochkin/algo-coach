@@ -29,7 +29,9 @@ those steps at low fidelity.
 - **The board names the cards in progress first.** A card in progress is one
   acquiring or consolidating: a study the user declared and has not finished.
   Ranking techniques by staleness alone can bury such a card. A graduated card
-  keeps its run open and is not in progress, since a graduated card is done. Each reads as its row on the cards list does, and opens the card.
+  keeps its run open and is not in progress, since a graduated card is done.
+  Each card in progress reads as its row on the cards list does, and opens the
+  card.
 - **The listing filters by two things a problem carries: its techniques and
   its difficulty.** The tags it offers are the techniques the listing itself
   holds, and the levels are the three a problem can carry.
