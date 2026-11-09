@@ -71,7 +71,7 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 - [x] Import learn's history for the author's user, and write down the record
       counts on both sides. A count that differs names records lost in the copy.
       175 read, 171 stored, and 4 statuses of dropped modules refused
-- [ ] Freeze learn the day the app syncs with the engine. Two apps writing one
+- [x] Freeze learn the day the app syncs with the engine. Two apps writing one
       schedule would each read half the history
 
 ### The engine on the server
