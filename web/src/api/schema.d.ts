@@ -439,7 +439,9 @@ export interface paths {
         };
         /**
          * Content
-         * @description Every live module, in the shape learn's app reads: `knowledge.md`.
+         * @description Every live module, in the shape learn's app reads: `knowledge.md`. The
+         *     app syncs often and the content moves only at a seed, so an unchanged
+         *     snapshot answers 304.
          */
         get: operations["content_api_knowledge_snapshot_get"];
         put?: never;
@@ -2131,9 +2133,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": unknown;
                 };
             };
         };

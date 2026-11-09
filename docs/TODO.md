@@ -60,13 +60,13 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 
 ### The app
 
-- [ ] Move learn's app into `native/` with its TypeScript core, the FSRS
+- [x] Move learn's app into `native/` with its TypeScript core, the FSRS
       parity fixtures and its USB install recipe. A store release is deferred
 - [ ] Keep the app's signing key out of git and backed up off the laptop.
       learn's app carries its debug keystore in the repo, and a sideloaded
       update signed by another key installs only after an uninstall, which
       drops unsynced attempts
-- [ ] Replace the app's GitHub sync with the sync API, its outbox and its
+- [x] Replace the app's GitHub sync with the sync API, its outbox and its
       merge rules kept
 - [ ] Tell the co-founder about the merge before the history import
 - [ ] Import learn's history for the author's user, and write down the record

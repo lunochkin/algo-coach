@@ -1,6 +1,8 @@
+import hashlib
+import json
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel, Field
 
 from algo_coach.api.context import KnowledgeUserId, Root
@@ -10,9 +12,15 @@ router = APIRouter(prefix="/knowledge")
 
 
 @router.get("/snapshot")
-def content(root: Root, _user_id: KnowledgeUserId) -> dict[str, Any]:
-    """Every live module, in the shape learn's app reads: `knowledge.md`."""
-    return snapshot(root)
+def content(request: Request, root: Root, _user_id: KnowledgeUserId) -> Response:
+    """Every live module, in the shape learn's app reads: `knowledge.md`. The
+    app syncs often and the content moves only at a seed, so an unchanged
+    snapshot answers 304."""
+    body = json.dumps(snapshot(root), separators=(",", ":"), sort_keys=True)
+    tag = f'"{hashlib.sha256(body.encode()).hexdigest()}"'
+    if request.headers.get("if-none-match") == tag:
+        return Response(status_code=304, headers={"etag": tag})
+    return Response(body, media_type="application/json", headers={"etag": tag})
 
 
 class Upload(BaseModel):

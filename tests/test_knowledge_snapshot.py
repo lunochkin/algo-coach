@@ -80,3 +80,28 @@ def test_a_retired_question_is_not_served(database, tmp_path):
 
 def test_the_snapshot_needs_a_signed_in_user(database):
     assert TestClient(create_app(database)).get("/api/knowledge/snapshot").status_code == 401
+
+
+def test_an_unchanged_snapshot_answers_304(database, tmp_path):
+    """The app syncs often, and the content moves only at a seed."""
+    seed_module(read_module(authored(tmp_path)), root=database)
+    client = browser_of(database)
+    first = client.get("/api/knowledge/snapshot")
+
+    again = client.get("/api/knowledge/snapshot", headers={"if-none-match": first.headers["etag"]})
+
+    assert again.status_code == 304
+
+
+def test_a_seed_changes_the_snapshot_s_tag(database, tmp_path):
+    seed_module(read_module(authored(tmp_path)), root=database)
+    client = browser_of(database)
+    first = client.get("/api/knowledge/snapshot").headers["etag"]
+
+    seed_module(read_module(authored(tmp_path / "again", types=CHOICE)), root=database)
+
+    assert client.get("/api/knowledge/snapshot").headers["etag"] != first
+
+
+def browser_of(database):
+    return browsing(database, USER)

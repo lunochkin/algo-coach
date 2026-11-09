@@ -1,0 +1,136 @@
+import { useState, type ReactNode } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text, useTheme } from 'react-native-paper';
+
+import { router } from 'expo-router';
+
+import { block, type Queue, type Question } from '@/core';
+import type { ExamSession, QueueSession, Session, SyncState } from '@/lib/store';
+import { syncErrorSummary } from '@/lib/syncError';
+
+/** Monospace, horizontally scrollable, never wrapped. `verbatim` keeps leading spaces (diagrams). */
+export function CodeBlock({ code, verbatim = false }: { code: string; verbatim?: boolean }) {
+  const theme = useTheme();
+  return (
+    <ScrollView
+      horizontal
+      persistentScrollbar
+      style={[styles.code, { backgroundColor: theme.colors.surfaceVariant }]}
+      contentContainerStyle={styles.codeInner}>
+      <Text selectable style={[styles.mono, { color: theme.colors.onSurfaceVariant }]}>
+        {verbatim ? code.replace(/\s+$/, '') : block(code)}
+      </Text>
+    </ScrollView>
+  );
+}
+
+export function ago(iso: string, now = Date.now()): string {
+  const s = Math.max(0, Math.round((now - Date.parse(iso)) / 1000));
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
+  return `${Math.floor(s / 86400)} d ago`;
+}
+
+/** Sync error shown where it can be read: top of the screen, tap for the full message. */
+export function SyncBanner({ sync }: { sync: SyncState }) {
+  const theme = useTheme();
+  const [open, setOpen] = useState(false);
+  if (!sync.error || sync.running) return null;
+  return (
+    <Pressable
+      onPress={() => setOpen(!open)}
+      accessibilityRole="button"
+      accessibilityLabel={`Sync error: ${syncErrorSummary(sync.error)}. Tap for details.`}
+      style={{
+        minHeight: 48,
+        justifyContent: 'center',
+        padding: 12,
+        borderRadius: 12,
+        backgroundColor: theme.colors.errorContainer,
+      }}>
+      <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer }}>
+        {syncErrorSummary(sync.error)}
+      </Text>
+      {open ? (
+        <Text variant="bodySmall" selectable style={{ marginTop: 4, color: theme.colors.onErrorContainer }}>
+          {sync.error}
+        </Text>
+      ) : null}
+    </Pressable>
+  );
+}
+
+export function SyncLine({ sync, showError = true }: { sync: SyncState; showError?: boolean }) {
+  const theme = useTheme();
+  const text = sync.running
+    ? 'Syncing…'
+    : sync.lastAt
+      ? `Synced ${ago(sync.lastAt)}`
+      : 'Not synced yet';
+  return (
+    <View>
+      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+        {text}
+      </Text>
+      {showError && sync.error && !sync.running ? (
+        <Text variant="bodySmall" style={{ color: theme.colors.error }} numberOfLines={3}>
+          {sync.error}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+export const styles = StyleSheet.create({
+  code: { borderRadius: 8, marginVertical: 8 },
+  codeInner: { padding: 12 },
+  mono: { fontFamily: 'monospace', fontSize: 14 },
+  page: { padding: 16, gap: 12 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+});
+
+type Starter = { setSession: (s: Session) => void };
+
+/** Opens the quiz on a continuous queue; `course` is the board selection its picks use. */
+export function startQueue(
+  st: Starter,
+  mode: QueueSession['mode'],
+  queue: Queue,
+  course: string | null,
+  include: string | null = null,
+) {
+  st.setSession({ mode, queue, course, include });
+  router.push('/quiz');
+}
+
+export function startExam(st: Starter, mode: string, questions: Question[], cert?: ExamSession['cert']) {
+  st.setSession({ mode, questions, cert });
+  router.push('/quiz');
+}
+
+/** Bottom action bar with an opaque background, so scrolled content never shows behind the buttons. */
+export function BottomBar({ bottom, row = false, children }: { bottom: number; row?: boolean; children: ReactNode }) {
+  const theme = useTheme();
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: bottom + 16,
+        gap: 8,
+        flexDirection: row ? 'row' : 'column',
+        backgroundColor: theme.colors.background,
+      }}>
+      {children}
+    </View>
+  );
+}
+
+/** Progress colours readable in light and dark mode: covered (done) and open (unlocked). */
+export const tones = (dark: boolean) =>
+  dark ? { done: '#81c784', open: '#ffb74d' } : { done: '#2e7d32', open: '#a15c00' };

@@ -429,6 +429,7 @@ src/algo_coach/outcomes/        what each call site left on one such writing
 src/algo_coach/mutation/        the mutants a case set has to kill
 src/algo_coach/runner/          running a solution against a problem's cases
 src/algo_coach/{log,cards,problems,cases,solutions,solution_claims,verifications}/
+native/                         the native app: the knowledge modules' queues on a phone
 docs/architecture/              concepts, boundaries, invariants, flows
 docs/{ROADMAP,TODO}.md          sequencing, and what is open
 .claude/skills/card-author/  the skill that authors cards

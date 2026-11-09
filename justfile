@@ -215,3 +215,34 @@ match-by-hand *args:
 # Match the corpus against a card's templates.
 match *args:
     uv run algo-coach match {{ args }}
+
+# --- the native app ---
+
+android_home := env_var_or_default("ANDROID_HOME", env_var("HOME") / "Library/Android/sdk")
+apk := "native/android/app/build/outputs/apk/release/app-release.apk"
+
+# The app's typecheck and tests, over the fixtures the Python side generates.
+native-test:
+    cd native && npx tsc --noEmit
+    cd native && npx vitest run
+
+# The release APK (arm64 only), signed with the key in native/signing/, which git ignores.
+native-apk:
+    cd native && CI=1 ANDROID_HOME={{ android_home }} npx expo prebuild -p android --clean --no-install
+    cd native/android && ANDROID_HOME={{ android_home }} ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a --console=plain -q
+    @ls -lh {{ apk }}
+
+# Install the release APK on the phone over USB. Set ANDROID_SERIAL with several attached.
+native-install:
+    {{ android_home }}/platform-tools/adb install -r {{ apk }}
+
+# The dev app ("algo-coach dev") beside the release one. Rebuild it only after native changes.
+native-dev-apk:
+    cd native && CI=1 ANDROID_HOME={{ android_home }} npx expo prebuild -p android --clean --no-install
+    cd native/android && ANDROID_HOME={{ android_home }} ./gradlew assembleDebug -PreactNativeArchitectures=arm64-v8a --console=plain -q
+    {{ android_home }}/platform-tools/adb install -r native/android/app/build/outputs/apk/debug/app-debug.apk
+
+# Metro with Fast Refresh for the dev app, which reaches it over USB.
+native-dev:
+    {{ android_home }}/platform-tools/adb reverse tcp:8081 tcp:8090
+    cd native && npx expo start --localhost --port 8090
