@@ -20,3 +20,17 @@ updates:
     groups:
       npm:
         update-types: [minor, patch]
+  # the sandbox image is pinned by digest in broker/container.py and stays
+  # out of reach on purpose: moving it re-times every canonical
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker-compose
+    directory: /deploy
+    schedule:
+      interval: weekly
+    ignore:
+      # a major moves the data directory's format, which a tag bump cannot
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
