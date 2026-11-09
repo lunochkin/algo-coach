@@ -202,6 +202,12 @@ The test cases decide whether a solution to a generated problem is correct.
   at the sitting's cap, under gVisor on the deployed server, and no case took
   over a tenth of the cap. The separating sizes the local subprocess found
   therefore stand under the clock a verdict is now read from.
+- **The margin held again on Python 3.15.2.** On 2026-11-09 the sandbox moved
+  to the 3.15.2 image, and the broker ran the same 506 cases on the server.
+  One separating case, 8000 calls on 512 KB, read 263 ms against the 200 ms
+  bar. The 3.15.1 and 3.15.2 images each time that case at 51 ms locally, so
+  the reading is the server's variance rather than the interpreter's. The
+  case still passes at a seventh of the cap.
 - **The separating case is chosen against the sitting's cap**, and never
   against generation's. The separating size is the size at which a submission
   that did not use the form fails, so the cap a sitting judges under decides
