@@ -381,7 +381,29 @@ Measured:
   100 writings for 72 landed problems, $0.046 per landing and $0.067 per
   problem still served. The generator's call is the largest share, at $0.015.
 
-## Phase 14 — Scheduling and mastery (current)
+## Phase 14 — The knowledge module (current)
+
+learn, a personal study app, merged into the engine, so practice happens in
+one app with one log. Ordered ahead of scheduling on 2026-11-09: the author
+already practises daily in learn, and every day spent there is log this engine
+does not hold.
+
+- **Declarative knowledge as the third part of mastery**, beside recognition
+  and execution, fed by question attempts.
+- **Modules of questions**, Python first, authored in files and seeded into
+  Postgres. A question with attempts is retired, never deleted.
+- **learn's Android app as the engine's client**, scheduling offline with its
+  TypeScript core and syncing through the engine's API, signed in by a token
+  minted from the account menu.
+- **A sync API** appending a user's records by client-minted id, and a content
+  snapshot in the shape the app already reads.
+- **learn's history imported** for the author, and learn frozen.
+- **learn's engine ported to Python**, held to the app by shared fixtures, for
+  the mastery formula and the scheduler to read on the server.
+- Exit: a week of practice in the algo-coach app alone, with learn frozen and
+  its history imported.
+
+## Phase 15 — Scheduling and mastery
 
 Per-technique skill state derived from the log, a scheduler that says what is
 due, and a comparison of that scheduler against a simpler policy.
@@ -421,7 +443,7 @@ following. The recognition drill moved to Further developments on 2026-10-02.
 - Exit: a sitting started from the scheduler's pick on the board, and
   completed to the claim, with the pick's prediction and its arm stored.
 
-## Phase 15 — The matcher, measured
+## Phase 16 — The matcher, measured
 
 How often the matcher is right, measured.
 
@@ -439,7 +461,7 @@ How often the matcher is right, measured.
 - Exit: the matcher carries a per-template score in both directions, and the
   gate carries a share with the denominator the pass covered.
 
-## Phase 16 — The diagnosis, measured
+## Phase 17 — The diagnosis, measured
 
 The machine counterpart of the self-label, and how much the program-analysis
 tools add to it.
@@ -471,7 +493,7 @@ items of each block, the smaller ones included.
   and is scored against a hand-graded set before its grades feed mastery. The
   scheduler mixes drills with full sittings and never replaces a sitting with
   one. Text first, and a spoken answer later in front of the same judge.
-- **Scheduling on the diagnosed cause.** What Phase 16 names, fed back into
+- **Scheduling on the diagnosed cause.** What Phase 17 names, fed back into
   what the board picks next. It waits on the scores that phase produces.
 - **Alternative solutions.** Every other way to solve a stored problem,
   enumerated over the corpus, each approach its own canonical judged by the
@@ -481,7 +503,7 @@ items of each block, the smaller ones included.
   from every mutant already known.
 - **Repair as diagnosis.** The smallest edit on the parsed tree that makes a
   failing attempt pass every case, searched against the problem's canonicals.
-  The edit's location and kind name the mistake, and Phase 16 can score the
+  The edit's location and kind name the mistake, and Phase 17 can score the
   repair as one more tool.
 - **Technique detection by static analysis.** Rules per template that read a
   solution's form from its parsed tree, run beside the matcher. A pair where
@@ -500,7 +522,7 @@ items of each block, the smaller ones included.
   run of concurrent code says nothing about the next run.
 - **Knowledge tracing.** A model that estimates from attempts the probability
   that a user holds a technique, fitted to the log. The model is scored on the
-  predictions Phase 14 records, against FSRS alone and the mastery state.
+  predictions Phase 15 records, against FSRS alone and the mastery state.
 - **Forgetting per technique.** The decay of the chance of passing with time
   since the last pass, fitted per technique and mode from the log. A form that
   decays differently from a recalled fact needs different review intervals.

@@ -87,7 +87,7 @@ Every page under a section carries the same two rows above its body.
   was last practised.
 - The line under the two groups counts the attempts no row holds: the attempts
   no technique resolved, and the attempts on a retired problem.
-- Phase 14 serves the scheduler's pick above both groups, and every technique
+- Phase 15 serves the scheduler's pick above both groups, and every technique
   stays on offer below it. The pick then reads the open runs, so it can name a
   card's next rung beside the cards in progress.
 
@@ -358,7 +358,7 @@ problem's path reads as its record, as "Every problem" gives.
   never recalled, and `-` a template no case checks.
 - A gap reads on the row as `n forms uncovered`, as the card's own page
   reports it.
-- The card state and a due date are absent from the row. Phase 14 adds both,
+- The card state and a due date are absent from the row. Phase 15 adds both,
   and `log.md` gives the card states.
 
 ## A card

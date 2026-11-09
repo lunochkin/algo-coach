@@ -4,7 +4,80 @@ The phases still open. A ticked item stays while its phase is open. When a
 phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 The work not yet ready for a phase waits under Further developments.
 
-## Phase 14 — scheduling and mastery (current)
+## Phase 14 — the knowledge module (current)
+
+learn, a personal study app with a native Android client, merges into the
+engine: its question bank, its FSRS schedule, its queues and its app. Practice
+then happens in one app with one log, and declarative knowledge becomes the
+third part of mastery. Content is authored in files and seeded into Postgres,
+as cards are. The app carries the knowledge modules alone in this phase, as
+learn's app does, so the switch changes the backend and nothing the user sees.
+
+### The design
+
+- [ ] Make `content/` a private git repository of its own, holding the cards
+      and the knowledge modules. It is gitignored here, so the cards carry no
+      history today
+- [ ] Write `docs/architecture/knowledge.md` from learn's `spec/learn.md`:
+      modules, questions, lessons, levels, the prerequisite graph,
+      certifications, exams, the queues and the FSRS settings, with Postgres
+      tables in place of learn's data repo
+- [ ] Rename in the glossary each learn term that collides with one here:
+      learn's `card` format against a Card, and its `drill` queue against the
+      drill loop. One name carries one meaning
+- [ ] Write declarative knowledge into `log.md` as the third part of mastery,
+      fed by question attempts, with its formula deferred as the other two are
+- [ ] Write the seed's two rules into `knowledge.md`: a question with attempts
+      is retired, never deleted, and a question asking something new takes a
+      new slug. The attempts answered the old question
+- [ ] Write the app into `README.md` as a third adapter carrying the domain in
+      TypeScript, held to the Python side by shared fixtures. The invariant
+      names two adapters and one copy of the domain
+- [ ] Write the app's sign-in into `README.md`: a token the user mints from
+      the account menu and revokes like a session. A native client cannot
+      carry the pages' cookie
+
+### The server
+
+- [ ] Add the content tables and the six append-only learner tables in one
+      migration, each record carrying a client-minted id and each append-only
+      table its trigger
+- [ ] Seed the Python module from `content/` with `algo-coach seed knowledge`,
+      refusing what learn's `learn check` refuses
+- [ ] Serve the content snapshot in the shape learn's app reads,
+      `courses.json` format 6, so the app's loader stays as it is
+- [ ] Serve the sync API: append a user's records, ignoring an id already
+      stored, and return the records since a cursor. A retried upload then
+      writes nothing twice
+- [ ] Mint, list and revoke app tokens from the account menu
+
+### The app
+
+- [ ] Move learn's app into `mobile/` with its TypeScript core, the FSRS
+      parity fixtures and its USB install recipe. A store release is deferred
+- [ ] Keep the app's signing key out of git and backed up off the laptop.
+      learn's app carries its debug keystore in the repo, and a sideloaded
+      update signed by another key installs only after an uninstall, which
+      drops unsynced attempts
+- [ ] Replace the app's GitHub sync with the sync API, its outbox and its
+      merge rules kept
+- [ ] Tell the co-founder about the merge before the history import
+- [ ] Import learn's history for the author's user, and write down the record
+      counts on both sides. A count that differs names records lost in the copy
+- [ ] Freeze learn the day the app syncs with the engine. Two apps writing one
+      schedule would each read half the history
+
+### The engine on the server
+
+- [ ] Port learn's engine into `algo_coach.knowledge`, split along its seams,
+      with the shared fixtures passing against it. The mastery formula and the
+      scheduler read the schedule on the server
+
+### Exit
+- [ ] Practise a week in the algo-coach app alone, with learn frozen and its
+      history imported
+
+## Phase 15 — scheduling and mastery
 
 - [x] Write into `docs/architecture/` what a technique's mastery is derived
       from: the attempts, their claims, their verdicts and the drills, with
@@ -94,7 +167,7 @@ the schedule.
 - [ ] Start a sitting from the scheduler's pick on the board, and complete it
       to the claim, with the pick's prediction and its arm stored
 
-## Phase 15 — the matcher, measured
+## Phase 16 — the matcher, measured
 
 The matcher says which templates a generated solution displays, and every
 ladder is built from those matches. No number says how often the matcher is
@@ -166,7 +239,7 @@ returned. Both are read off the sample the hand pass already covers.
 - [ ] The matcher carries a per-template score in both directions, and the
       gate carries a share with the denominator the pass covered
 
-## Phase 16 — the diagnosis, measured
+## Phase 17 — the diagnosis, measured
 
 The machine counterpart of the self-label, and how much the program-analysis
 tools add to it. The mutants make the eval set: a mutant carries its mistake by
@@ -206,7 +279,7 @@ the event that makes the item ready.
 ### The recognition drill
 
 A problem served without its technique, answered in words with no code run.
-Moved out of Phase 14 on 2026-10-02: hiding the technique matters less than
+Moved out of Phase 15 on 2026-10-02: hiding the technique matters less than
 the schedule, and the mastery state reads recognition as unknown until a drill
 feeds it.
 
@@ -226,7 +299,7 @@ feeds it.
 
 ### Scheduling on the diagnosed cause
 
-Waits on the scores Phase 16 produces: a cause nothing measured is a guess the
+Waits on the scores Phase 17 produces: a cause nothing measured is a guess the
 board would act on.
 
 - [ ] Have the pick read the diagnosed cause beside mastery, once the call
@@ -324,15 +397,15 @@ one form its target named.
 - [ ] Write the repair search: a failing attempt and the problem's canonicals
       in, the smallest edit on the parsed tree passing every case out. The
       search returns no edit when none is found within a stated budget.
-      Triggered when Phase 16 scores its first tool
+      Triggered when Phase 17 scores its first tool
 - [ ] Measure the repair by what it adds to the diagnosis call, the same way
-      Phase 16 measures each tool. A tool nobody measured is a guess the call
+      Phase 17 measures each tool. A tool nobody measured is a guess the call
       acts on
 
 ### Technique detection by static analysis
 
 - [ ] Write rules per core template that say from the parsed tree whether a
-      solution displays the template's form. Triggered when Phase 15 names
+      solution displays the template's form. Triggered when Phase 16 names
       templates the matcher reads badly
 - [ ] Compare the rules with the matcher per template on the hand pass, and
       send each pair where the two disagree to adjudication
@@ -369,7 +442,7 @@ one form its target named.
 
 - [ ] Fit a knowledge-tracing model to the log, and score the model on the
       predictions each pick records against FSRS alone and the mastery state.
-      Triggered when Phase 14 has recorded predictions for a few hundred picks
+      Triggered when Phase 15 has recorded predictions for a few hundred picks
 
 ### Forgetting per technique
 
@@ -393,12 +466,22 @@ one form its target named.
       retrieved. Triggered when a flow needs a similar problem that the
       technique alone cannot select
 
+### The app beyond the knowledge module
+
+Phase 14 moves learn's app over with the knowledge modules alone. The rest of
+the engine reaches the app one feature at a time, each once the move has held.
+
+- [ ] Choose which of the engine's features the app serves first, and write
+      the choice and its reason into `pages.md`. A sitting needs a keyboard
+      and a wide window, so not every page belongs on a phone. Triggered when
+      Phase 14 exits
+
 ### MCP and autonomy
 
 - [ ] Expose the corpus and the engine's commands as an MCP server.
       Triggered when an agent outside the engine needs to read the corpus
 - [ ] Run the practice loop as a scheduled agent over the MCP server, serving
-      the scheduler's pick. Triggered when Phase 14's pick is served on the
+      the scheduler's pick. Triggered when Phase 15's pick is served on the
       board
 
 ### Design simulation

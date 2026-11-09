@@ -24,7 +24,7 @@ those steps at low fidelity.
   from the board, from a technique or from a card, so Practice stays marked on
   it and the way back names where the pick came from.
 - **A signed-in user lands on the board.** Every sitting starts from a technique
-  the user picks there, and Phase 14 serves the scheduler's pick on the same
+  the user picks there, and Phase 15 serves the scheduler's pick on the same
   page.
 - **The board names the cards in progress first.** A card in progress is one
   acquiring or consolidating: a study the user declared and has not finished.
