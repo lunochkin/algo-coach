@@ -1,17 +1,455 @@
 {
+  "$defs": {
+    "CertificationEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "title": "To",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "title": "CertificationEdge",
+      "type": "object"
+    },
+    "CertificationRule": {
+      "additionalProperties": false,
+      "description": "Every field optional: a scope's rule overrides only what it names.",
+      "properties": {
+        "coverage_ratio": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Coverage Ratio"
+        },
+        "exam": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Exam"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "lapse": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lapse"
+        },
+        "levels": {
+          "anyOf": [
+            {
+              "items": {
+                "enum": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Levels"
+        },
+        "min_pool_ratio": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Pool Ratio"
+        },
+        "require_exam": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Require Exam"
+        },
+        "retention": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Retention"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "CertificationRule",
+      "type": "object"
+    },
+    "CertificationSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "defaults": {
+          "$ref": "#/$defs/CertificationRule"
+        },
+        "edge": {
+          "items": {
+            "$ref": "#/$defs/CertificationEdge"
+          },
+          "title": "Edge",
+          "type": "array"
+        },
+        "format": {
+          "const": 1,
+          "default": 1,
+          "title": "Format",
+          "type": "integer"
+        },
+        "scope": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ScopeRule"
+          },
+          "title": "Scope",
+          "type": "object"
+        },
+        "unedge": {
+          "items": {
+            "$ref": "#/$defs/CertificationEdge"
+          },
+          "title": "Unedge",
+          "type": "array"
+        }
+      },
+      "title": "CertificationSettings",
+      "type": "object"
+    },
+    "Edge": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "title": "From",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "to": {
+          "title": "To",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "title": "Edge",
+      "type": "object"
+    },
+    "Exam": {
+      "additionalProperties": false,
+      "properties": {
+        "pass": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pass"
+        },
+        "size": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size"
+        }
+      },
+      "title": "Exam",
+      "type": "object"
+    },
+    "GraphSettings": {
+      "additionalProperties": false,
+      "description": "A module's prerequisite graph. Its lessons are rows of their own.",
+      "properties": {
+        "edge": {
+          "items": {
+            "$ref": "#/$defs/Edge"
+          },
+          "title": "Edge",
+          "type": "array"
+        },
+        "format": {
+          "default": 1,
+          "enum": [
+            1,
+            2
+          ],
+          "title": "Format",
+          "type": "integer"
+        },
+        "match_up_to": {
+          "default": 1,
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Match Up To",
+          "type": "integer"
+        },
+        "needs": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Needs",
+          "type": "object"
+        }
+      },
+      "title": "GraphSettings",
+      "type": "object"
+    },
+    "Retention": {
+      "additionalProperties": false,
+      "properties": {
+        "share": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Share"
+        },
+        "stability_days": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stability Days"
+        }
+      },
+      "title": "Retention",
+      "type": "object"
+    },
+    "ScopeRule": {
+      "additionalProperties": false,
+      "description": "A scope's rule, and its rule per rank, named as learn named ranks.",
+      "properties": {
+        "associate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CertificationRule"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "coverage_ratio": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Coverage Ratio"
+        },
+        "exam": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Exam"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "expert": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CertificationRule"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "foundation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CertificationRule"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "lapse": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lapse"
+        },
+        "levels": {
+          "anyOf": [
+            {
+              "items": {
+                "enum": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Levels"
+        },
+        "min_pool_ratio": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Pool Ratio"
+        },
+        "professional": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CertificationRule"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "require_exam": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Require Exam"
+        },
+        "retention": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Retention"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "ScopeRule",
+      "type": "object"
+    }
+  },
   "properties": {
     "certifications": {
       "anyOf": [
         {
-          "additionalProperties": true,
-          "type": "object"
+          "$ref": "#/$defs/CertificationSettings"
         },
         {
           "type": "null"
         }
       ],
-      "default": null,
-      "title": "Certifications"
+      "default": null
     },
     "code_kinds": {
       "items": {
@@ -35,15 +473,13 @@
     "graph": {
       "anyOf": [
         {
-          "additionalProperties": true,
-          "type": "object"
+          "$ref": "#/$defs/GraphSettings"
         },
         {
           "type": "null"
         }
       ],
-      "default": null,
-      "title": "Graph"
+      "default": null
     },
     "id": {
       "title": "Id",

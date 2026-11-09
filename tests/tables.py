@@ -13,6 +13,7 @@ from sqlalchemy import Boolean, Column, DateTime, Enum, Float, Integer, String, 
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
 from algo_coach.schema import MachineProvenance
+from algo_coach.schema.authored import Authored
 
 # columns a table carries by convention, which no record names: a log's order
 CONVENTIONS = frozenset({"appended"})
@@ -71,7 +72,7 @@ def _expected(
         if field_name in elsewhere:
             continue
         inner, nullable = _unwrapped(info.annotation)
-        if _is_model(inner):
+        if _is_model(inner) and not _authored(inner):
             # one nested record is its own columns, prefixed by the field
             for column_name, (annotation, inner_nullable) in _expected(
                 inner, frozenset(), f"{prefix}{field_name}_"
@@ -104,8 +105,8 @@ def _typed(column: Column[Any], annotation: object) -> bool:
     if annotation is Any:
         # JSON of any shape: a stored `null` is a value, so NOT NULL still holds
         return isinstance(kind, JSONB)
-    if typing.get_origin(annotation) is dict:
-        # an object of any shape: a module's graph, a question's format fields
+    if typing.get_origin(annotation) is dict or _authored(annotation):
+        # any shape, or a seeded row's authored structure: `README.md`
         return isinstance(kind, JSONB)
     if typing.get_origin(annotation) is list:
         (item,) = typing.get_args(annotation)
@@ -127,3 +128,11 @@ def _typed(column: Column[Any], annotation: object) -> bool:
     if annotation is datetime:
         return isinstance(kind, DateTime) and kind.timezone
     return False
+
+
+def _authored(annotation: object) -> bool:
+    """Authored structure, or a union of it, stored whole as one JSON object."""
+    value = getattr(annotation, "__value__", annotation)  # a `type` alias
+    union = typing.get_origin(value) in (types.UnionType, typing.Union)
+    members = typing.get_args(value) if union else (value,)
+    return all(isinstance(one, type) and issubclass(one, Authored) for one in members)

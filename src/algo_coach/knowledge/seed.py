@@ -8,13 +8,11 @@ from pydantic import BaseModel
 from sqlalchemy import ColumnElement, Connection, Table, insert, select, update
 
 from algo_coach.ids import new_id
-from algo_coach.knowledge.check import refusals
+from algo_coach.knowledge.check import COLUMNS, refusals
 from algo_coach.knowledge.files import ModuleSource
 from algo_coach.knowledge.table import lessons, modules, questions, subtopics, topics
+from algo_coach.schema import Module, Question
 from algo_coach.storage import Database
-
-# held in a column of its own, so never repeated in the body
-COLUMNS = {"id", "kind", "level", "prompt", "lesson", "code", "format", "sub"}
 
 
 class ModuleSeedResult(BaseModel):
@@ -57,20 +55,22 @@ def seed_module(source: ModuleSource, *, root: Database) -> ModuleSeedResult:
 def _module(conn: Connection, source: ModuleSource) -> str:
     course = source.course
     graph = {key: value for key, value in (source.graph or {}).items() if key != "lesson"}
-    values = {
-        "slug": source.slug,
-        "retired_at": None,
-        "title": course["title"],
-        "position": course.get("order", 100),
-        "pass_ratio": course["pass_ratio"],
-        "kinds": course["kinds"],
-        "code_kinds": course.get("code_kinds", []),
-        "code_lang": course.get("code_lang"),
-        "graph": graph or None,
-        "certifications": source.certifications,
-    }
     found = conn.execute(select(modules.c.id).where(modules.c.slug == source.slug)).scalar()
-    return _put(conn, modules, found, values)
+    module = Module.model_validate(
+        {
+            "id": found or new_id(),
+            "slug": source.slug,
+            "title": course["title"],
+            "position": course.get("order", 100),
+            "pass_ratio": course["pass_ratio"],
+            "kinds": course["kinds"],
+            "code_kinds": course.get("code_kinds", []),
+            "code_lang": course.get("code_lang"),
+            "graph": graph or None,
+            "certifications": source.certifications,
+        }
+    )
+    return _stored(conn, modules, found, module)
 
 
 def _topics(
@@ -110,22 +110,25 @@ def _questions(
     for bank in source.banks:
         for position, raw in enumerate(bank.questions):
             form = raw.get("format", "choice")
-            values = {
-                "module_id": module_id,
-                "subtopic_id": subs[bank.sub],
-                "slug": raw["id"],
-                "retired_at": None,
-                "position": position,
-                "rank": raw["level"],
-                "kind": raw["kind"],
-                # `card` collides with a Card here: the glossary's `open`
-                "format": "open" if form == "card" else form,
-                "prompt": raw["prompt"],
-                "code": raw.get("code"),
-                "lesson": raw.get("lesson"),
-                "body": {key: value for key, value in raw.items() if key not in COLUMNS},
-            }
-            _put(conn, questions, held.pop(raw["id"], None), values)
+            found = held.pop(raw["id"], None)
+            question = Question.model_validate(
+                {
+                    "id": found or new_id(),
+                    "module_id": module_id,
+                    "subtopic_id": subs[bank.sub],
+                    "slug": raw["id"],
+                    "position": position,
+                    "rank": raw["level"],
+                    "kind": raw["kind"],
+                    # `card` collides with a Card here: the glossary's `open`
+                    "format": "open" if form == "card" else form,
+                    "prompt": raw["prompt"],
+                    "code": raw.get("code"),
+                    "lesson": raw.get("lesson"),
+                    "body": {key: value for key, value in raw.items() if key not in COLUMNS},
+                }
+            )
+            _stored(conn, questions, found, question)
             count += 1
     result.retired += _retire(conn, questions, held.values())
     return count
@@ -165,6 +168,17 @@ def _put(conn: Connection, table: Table, found: str | None, values: dict[str, An
     else:
         conn.execute(update(table).where(table.c.id == found).values(**values))
     return found
+
+
+def _stored(conn: Connection, table: Table, found: str | None, record: Module | Question) -> str:
+    """A validated record, so the JSONB columns hold what passed the model."""
+    if found is None:
+        conn.execute(insert(table).values(record.model_dump()))
+    else:
+        conn.execute(
+            update(table).where(table.c.id == found).values(record.model_dump(exclude={"id"}))
+        )
+    return record.id
 
 
 def _retire(conn: Connection, table: Table, held: Iterable[str]) -> int:

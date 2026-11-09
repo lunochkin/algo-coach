@@ -6,6 +6,7 @@ from algo_coach.schema.attempt import (
     FailureMode,
     SelfLabel,
 )
+from algo_coach.schema.authored import CertificationSettings, GraphSettings
 from algo_coach.schema.call import Call
 from algo_coach.schema.card import Card, Selector, Template, TemplateCase, TemplateKind
 from algo_coach.schema.card_run import CardRun, Probe
@@ -21,6 +22,7 @@ from algo_coach.schema.configuration import Configuration
 from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.draft import Draft, DraftCase, SettledCase, WritingState
 from algo_coach.schema.knowledge import (
+    BODIES,
     Answer,
     CertificationExam,
     Focus,
@@ -57,6 +59,7 @@ from algo_coach.schema.technique import Kind, Technique
 from algo_coach.schema.verification import AttemptVerification, Execution, Verification
 
 __all__ = [
+    "BODIES",
     "LADDER",
     "Answer",
     "Attempt",
@@ -71,6 +74,7 @@ __all__ = [
     "CaseOutcome",
     "CaseResult",
     "CertificationExam",
+    "CertificationSettings",
     "ClaimSource",
     "Confidence",
     "Configuration",
@@ -82,6 +86,7 @@ __all__ = [
     "FailureMode",
     "Focus",
     "Gate",
+    "GraphSettings",
     "Hint",
     "Json",
     "Kind",

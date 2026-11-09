@@ -1,5 +1,224 @@
 {
   "$defs": {
+    "Body": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ChoiceBody"
+        },
+        {
+          "$ref": "#/$defs/ShortBody"
+        },
+        {
+          "$ref": "#/$defs/OpenBody"
+        }
+      ]
+    },
+    "ChoiceBody": {
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Answer",
+          "type": "array"
+        },
+        "choices": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Choices",
+          "type": "array"
+        },
+        "detail": {
+          "$ref": "#/$defs/Detail"
+        },
+        "explain": {
+          "title": "Explain",
+          "type": "string"
+        },
+        "why": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Why",
+          "type": "array"
+        }
+      },
+      "required": [
+        "choices",
+        "answer",
+        "why",
+        "explain",
+        "detail"
+      ],
+      "title": "ChoiceBody",
+      "type": "object"
+    },
+    "Detail": {
+      "additionalProperties": false,
+      "description": "How a question's answer works, shown on request after an answer.",
+      "properties": {
+        "diagram": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Diagram"
+        },
+        "example": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Example"
+        },
+        "mechanism": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Mechanism",
+          "type": "string"
+        },
+        "pitfalls": {
+          "anyOf": [
+            {
+              "items": {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              "maxItems": 4,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pitfalls"
+        },
+        "versions": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Versions"
+        }
+      },
+      "required": [
+        "mechanism"
+      ],
+      "title": "Detail",
+      "type": "object"
+    },
+    "OpenBody": {
+      "additionalProperties": false,
+      "description": "learn's `card`: the points the answer has to contain, and the traps.",
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Detail"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "explain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Explain"
+        },
+        "key": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Key",
+          "type": "array"
+        },
+        "key_detail": {
+          "anyOf": [
+            {
+              "items": {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Key Detail"
+        },
+        "traps": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Traps",
+          "type": "array"
+        },
+        "traps_detail": {
+          "anyOf": [
+            {
+              "items": {
+                "minLength": 1,
+                "pattern": "\\S",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Traps Detail"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "OpenBody",
+      "type": "object"
+    },
     "QuestionFormat": {
       "enum": [
         "choice",
@@ -8,13 +227,42 @@
       ],
       "title": "QuestionFormat",
       "type": "string"
+    },
+    "ShortBody": {
+      "additionalProperties": false,
+      "properties": {
+        "accept": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Accept",
+          "type": "array"
+        },
+        "case": {
+          "default": false,
+          "title": "Case",
+          "type": "boolean"
+        },
+        "detail": {
+          "$ref": "#/$defs/Detail"
+        },
+        "explain": {
+          "title": "Explain",
+          "type": "string"
+        }
+      },
+      "required": [
+        "accept",
+        "explain",
+        "detail"
+      ],
+      "title": "ShortBody",
+      "type": "object"
     }
   },
   "properties": {
     "body": {
-      "additionalProperties": true,
-      "title": "Body",
-      "type": "object"
+      "$ref": "#/$defs/Body"
     },
     "code": {
       "anyOf": [

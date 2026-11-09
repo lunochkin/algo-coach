@@ -29,7 +29,7 @@ kind = "concept"
 level = 0
 prompt = "Which is mutable?"
 choices = ["tuple", "list", "str"]
-answer = "B"
+answer = ["B"]
 why = ["immutable", "mutable", "immutable"]
 explain = "A list changes in place."
 lesson = "names#binding"
@@ -73,12 +73,21 @@ teaches = ["types@0"]
 """
 
 
-def authored(tmp_path: Path, *, types: str = CHOICE + OPEN, flow: str = SHORT) -> Path:
+def authored(
+    tmp_path: Path,
+    *,
+    types: str = CHOICE + OPEN,
+    flow: str = SHORT,
+    graph: str = GRAPH,
+    certs: str | None = None,
+) -> Path:
     base = tmp_path / "python"
     (base / "banks" / "core").mkdir(parents=True)
     (base / "lessons").mkdir()
     (base / "course.toml").write_text(COURSE)
-    (base / "graph.toml").write_text(GRAPH)
+    (base / "graph.toml").write_text(graph)
+    if certs is not None:
+        (base / "certs.toml").write_text(certs)
     (base / "lessons" / "names.md").write_text("# Names\n\n## Binding\n\nA name points.\n")
     (base / "banks" / "core" / "types.toml").write_text(types)
     (base / "banks" / "core" / "flow.toml").write_text(flow)
@@ -117,7 +126,7 @@ def test_the_body_holds_the_format_s_fields_and_no_column(database, tmp_path):
 
     body = {row["slug"]: row["body"] for row in rows(database, questions)}["types-1"]
     assert {"id", "kind", "level", "prompt", "lesson", "code", "format"}.isdisjoint(body)
-    assert body["answer"] == "B"
+    assert body["answer"] == ["B"]
 
 
 def test_a_re_seed_keeps_every_minted_id(database, tmp_path):
@@ -173,7 +182,7 @@ def test_a_retired_slug_is_never_reused(database, tmp_path):
         (CHOICE.replace('prompt = "Which is mutable?"\n', ""), "missing ['prompt']"),
         (CHOICE + CHOICE, "duplicate id"),
         (CHOICE.replace('"concept"', '"trivia"'), "kind 'trivia' not in course kinds"),
-        (CHOICE.replace('answer = "B"', 'answer = "D"'), "bad answer 'D'"),
+        (CHOICE.replace('answer = ["B"]', 'answer = ["D"]'), "bad answer ['D']"),
         (OPEN.replace(', "the list object is shared"', ""), "key must be a list of 2-6"),
         (CHOICE.replace("names#binding", "names#nowhere"), "no section #nowhere in lesson names"),
         (CHOICE.replace("level = 0", "level = 4"), "bad level 4"),
@@ -188,7 +197,7 @@ def test_the_seed_refuses_what_learn_s_check_refused(tmp_path, types, refusal):
 def test_a_refused_module_writes_nothing(database, tmp_path):
     """A module is checked whole, as `learn check` checked a course, so a seed
     never stores half of one."""
-    broken = CHOICE.replace('answer = "B"', 'answer = "D"')
+    broken = CHOICE.replace('answer = ["B"]', 'answer = ["D"]')
 
     result = seed_module(read_module(authored(tmp_path, types=broken)), root=database)
 
@@ -208,3 +217,51 @@ def test_the_terminal_seeds_a_module(database, tmp_path, monkeypatch, capsys):
     run_cli(monkeypatch, "seed", "knowledge", str(authored(tmp_path)))
 
     assert json.loads(capsys.readouterr().out)["questions"] == 3
+
+
+def _top(line: str) -> str:
+    """A graph key above the lesson table: a key written after it joins it."""
+    return GRAPH.replace("format = 2\n", f"format = 2\n{line}\n")
+
+
+@pytest.mark.parametrize(
+    ("files", "refusal"),
+    [
+        ({"types": CHOICE.replace("[q.detail]", "colour = 1\n[q.detail]")}, "colour"),
+        ({"types": CHOICE + 'example = ""\n'}, "detail.example"),
+        ({"graph": _top('needs = { types = ["nowhere"] }')}, "unknown subtopic 'nowhere'"),
+        ({"graph": _top('needs = { types = ["types"] }')}, "types needs itself"),
+        (
+            {"graph": _top('needs = { types = ["flow"], flow = ["types"] }')},
+            "cycle: types -> flow -> types",
+        ),
+        ({"graph": _top("match_up_to = 7")}, "graph: match_up_to"),
+        ({"certs": "format = 1\n[scope.nowhere]\nlapse = false\n"}, "unknown scope 'nowhere'"),
+        ({"certs": "format = 1\n[defaults]\nexam = { size = 0 }\n"}, "certs: defaults.exam.size"),
+        (
+            {"certs": 'format = 1\n[[edge]]\nfrom = "python-core-expert"\nto = "x"\n'},
+            "edge: unknown certificate 'x'",
+        ),
+    ],
+)
+def test_the_seed_refuses_malformed_authored_structure(tmp_path, files, refusal):
+    """The JSONB column would store whatever it was given, so the record's
+    model refuses it first: `README.md`, Storage."""
+    found = refusals(read_module(authored(tmp_path, **files)))
+
+    assert any(refusal in one for one in found), found
+
+
+def test_certification_settings_seed_as_authored(database, tmp_path):
+    settings = (
+        "format = 1\n[defaults]\nexam = { size = 20, pass = 0.8 }\n"
+        "[scope.all]\nexam = { size = 40 }\n"
+    )
+    seed_module(read_module(authored(tmp_path, certs=settings)), root=database)
+
+    (module,) = rows(database, modules)
+    assert module["certifications"] == {
+        "format": 1,
+        "defaults": {"exam": {"size": 20, "pass": 0.8}},
+        "scope": {"all": {"exam": {"size": 40}}},
+    }

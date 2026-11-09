@@ -57,7 +57,7 @@ def test_a_question_reads_back_as_it_was_authored(database, tmp_path):
 
     first = course["questions"][0]
     assert first["level"] == 0
-    assert first["answer"] == "B"
+    assert first["answer"] == ["B"]
     assert first["lesson"] == "names#binding"
     assert "code" not in first
 

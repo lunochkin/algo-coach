@@ -3,14 +3,18 @@ The graph and the certification settings are stored as authored: a client
 ignores a graph that fails its own check, as `knowledge.md` gives."""
 
 import re
-from typing import Any, cast
+from typing import Any
+
+from pydantic import ValidationError
+from pydantic_core import ErrorDetails
 
 from algo_coach.knowledge.files import ModuleSource
+from algo_coach.schema import BODIES, CertificationSettings, GraphSettings, QuestionFormat
+from algo_coach.schema.authored import RANK_NAMES, RANKS
 
-LETTERS = "ABCDEFGH"
-RANKS = (0, 1, 2, 3)
 FORMATS = ("choice", "short", "card")
-DETAIL_FIELDS = ("mechanism", "example", "pitfalls", "versions", "diagram")
+# held in a column of its own, so never part of the body
+COLUMNS = {"id", "kind", "level", "prompt", "lesson", "code", "format", "sub"}
 COMMON = {"id", "kind", "prompt", "level"}
 REQUIRED = {
     "choice": COMMON | {"choices", "answer", "explain", "why", "detail"},
@@ -21,7 +25,7 @@ HEADING = re.compile(r"#{2,3}\s+(.+?)\s*#*\s*$")
 
 
 def refusals(source: ModuleSource) -> list[str]:
-    found = list(source.unread)
+    found = list(source.unread) + _settings(source)
     course = source.course
     kinds, code_kinds = course.get("kinds", []), course.get("code_kinds", [])
     with_lessons = bool((source.graph or {}).get("lesson"))
@@ -59,70 +63,11 @@ def _question(
         found.append(f"bad level {raw['level']!r}")
     if raw["kind"] in code_kinds and not raw.get("code"):
         found.append(f"{raw['kind']} without code")
-    if form == "short" and not raw["accept"]:
-        found.append("empty accept")
-    if form == "card":
-        found += _card(raw)
-    found += _detail(raw)
-    if form == "choice":
-        found += _choices(raw)
-    return found
-
-
-def _choices(raw: dict[str, Any]) -> list[str]:
-    found: list[str] = []
-    n = len(raw["choices"])
-    if not 3 <= n <= len(LETTERS):
-        found.append(f"{n} choices")
-    if len(raw["why"]) != n:
-        found.append(f"{len(raw['why'])} why for {n} choices")
-    answer = raw["answer"]
-    if not answer or len(set(answer)) != len(answer) or any(a not in LETTERS[:n] for a in answer):
-        found.append(f"bad answer {answer!r}")
-    return found
-
-
-def _card(raw: dict[str, Any]) -> list[str]:
-    found: list[str] = []
-    if not _strings(raw["key"], 2, 6):
-        found.append("key must be a list of 2-6 non-empty points")
-    if "traps" in raw and not _strings(raw["traps"], 0, 3):
-        found.append("traps must be a list of 0-3 non-empty strings")
-    return found
-
-
-def _detail(raw: dict[str, Any]) -> list[str]:
-    found: list[str] = []
-    detail: object = raw.get("detail")
-    if isinstance(detail, str):
-        found.append("detail must be a table with mechanism (a plain string is legacy)")
-    elif isinstance(detail, dict):
-        detail = cast(dict[str, Any], detail)
-        if not (isinstance(detail.get("mechanism"), str) and detail["mechanism"].strip()):
-            found.append("detail.mechanism is required")
-        for name in ("example", "versions", "diagram"):
-            if name in detail and not (isinstance(detail[name], str) and detail[name].strip()):
-                found.append(f"detail.{name} must be a non-empty string")
-        if "pitfalls" in detail and not _strings(detail["pitfalls"], 1, 4):
-            found.append("detail.pitfalls must be 1-4 non-empty strings")
-        if extra := sorted(set(detail) - set(DETAIL_FIELDS)):
-            found.append(f"detail has unknown fields {extra}")
-    elif detail is not None:
-        found.append("detail must be a table")
-    return found + _paired(raw)
-
-
-def _paired(raw: dict[str, Any]) -> list[str]:
-    """`key_detail` and `traps_detail`, one string per point or trap."""
-    found: list[str] = []
-    for name, parent in (("key_detail", "key"), ("traps_detail", "traps")):
-        if name not in raw:
-            continue
-        value, n = raw[name], len(raw.get(parent) or [])
-        if not _strings(value, n, n):
-            found.append(f"{name} must have one non-empty string per {parent} item ({n})")
-        elif any(len(one.strip().splitlines()) > 3 for one in value):
-            found.append(f"{name} items must be at most 3 lines")
+    body = {key: value for key, value in raw.items() if key not in COLUMNS}
+    try:
+        BODIES[QuestionFormat.OPEN if form == "card" else QuestionFormat(form)].model_validate(body)
+    except ValidationError as error:
+        found += [_message(one) for one in error.errors()]
     return found
 
 
@@ -147,8 +92,70 @@ def _anchors(markdown: str) -> set[str]:
     return found
 
 
-def _strings(value: object, lo: int, hi: int) -> bool:
-    if not isinstance(value, list):
-        return False
-    items = cast(list[object], value)
-    return lo <= len(items) <= hi and all(isinstance(one, str) and one.strip() for one in items)
+def _message(error: ErrorDetails) -> str:
+    where = ".".join(str(part) for part in error["loc"])
+    text = error["msg"].removeprefix("Value error, ")
+    return f"{where}: {text}" if where else text
+
+
+def _settings(source: ModuleSource) -> list[str]:
+    """The graph and the certification settings, typed, and every slug and id
+    they name resolved, as `learn check` did."""
+    topics = source.course.get("topic", [])
+    subs = {sub for topic in topics for sub in topic.get("subs", [])}
+    found: list[str] = []
+    graph: GraphSettings | None = None
+    authored = {k: v for k, v in (source.graph or {}).items() if k not in ("lesson", "exercise")}
+    try:
+        graph = GraphSettings.model_validate(authored)
+    except ValidationError as error:
+        found += [f"graph: {_message(one)}" for one in error.errors()]
+    if graph is not None:
+        for needs, to, offset in graph.edges():
+            found += [f"unknown subtopic {one!r}" for one in (needs, to) if one not in subs]
+            if needs == to:
+                found.append(f"{needs} needs itself")
+            if min(max(RANKS), graph.match_up_to) + offset > max(RANKS):
+                found.append(f"{needs} -> {to}: offset {offset} needs a level above {max(RANKS)}")
+        if cycle := _cycle(graph.edges()):
+            found.append(f"cycle: {' -> '.join(cycle)}")
+    if source.certifications is None:
+        return found
+    try:
+        settings = CertificationSettings.model_validate(source.certifications)
+    except ValidationError as error:
+        return found + [f"certs: {_message(one)}" for one in error.errors()]
+    scopes = [topic["slug"] for topic in topics] + ["all"]
+    found += [f"unknown scope {one!r}" for one in settings.scope if one not in scopes]
+    ids = {f"{source.slug}-{scope}-{rank}" for scope in scopes for rank in RANK_NAMES}
+    for name, edges in (("edge", settings.edge), ("unedge", settings.unedge)):
+        for edge in edges:
+            found += [
+                f"{name}: unknown certificate {one!r}"
+                for one in (edge.needs, edge.to)
+                if one not in ids
+            ]
+    return found
+
+
+def _cycle(edges: list[tuple[str, str, int]]) -> list[str] | None:
+    """A subtopic needing itself through others, as the path that closes it."""
+    needs: dict[str, list[str]] = {}
+    for one, to, _ in edges:
+        needs.setdefault(one, []).append(to)
+    state: dict[str, int] = {}  # 1 visiting, 2 done
+
+    def visit(node: str, path: list[str]) -> list[str] | None:
+        state[node] = 1
+        for to in needs.get(node, []):
+            if state.get(to) == 1:
+                return [*path[path.index(to) :], to] if to in path else [node, to]
+            if state.get(to) is None and (closed := visit(to, [*path, to])):
+                return closed
+        state[node] = 2
+        return None
+
+    for node in needs:
+        if state.get(node) is None and (closed := visit(node, [node])):
+            return closed
+    return None

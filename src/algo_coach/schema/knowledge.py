@@ -2,10 +2,27 @@
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, cast
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationInfo,
+    field_serializer,
+    field_validator,
+    model_validator,
+)
 
+from algo_coach.schema.authored import (
+    Authored,
+    Body,
+    CertificationSettings,
+    ChoiceBody,
+    GraphSettings,
+    OpenBody,
+    ShortBody,
+)
 from algo_coach.schema.card import Slug
 
 # 0 Foundation, 1 Associate, 2 Professional, 3 Expert
@@ -56,8 +73,12 @@ class Module(Seeded):
     code_kinds: list[str] = Field(default_factory=list[str])
     code_lang: str | None = None
     # content edited without a migration: `knowledge.md`, Gating
-    graph: dict[str, Any] | None = None
-    certifications: dict[str, Any] | None = None
+    graph: GraphSettings | None = None
+    certifications: CertificationSettings | None = None
+
+    @field_serializer("graph", "certifications")
+    def _as_authored(self, value: Authored | None) -> dict[str, Any] | None:
+        return _authored(value)
 
 
 class Topic(Seeded):
@@ -83,7 +104,34 @@ class Question(Seeded):
     code: str | None = None
     lesson: str | None = None  # a lesson slug, with `#anchor` naming a heading
     # the format's own fields and the detail, passed to the app as authored
-    body: dict[str, Any]
+    body: Body
+
+    @field_validator("body", mode="before")
+    @classmethod
+    def _body_of_its_format(cls, value: object, info: ValidationInfo) -> object:
+        form = info.data.get("format")
+        if isinstance(value, dict) and isinstance(form, QuestionFormat):
+            return BODIES[form].model_validate(cast(dict[str, Any], value))
+        # anything else is the union's to refuse
+        return cast(object, value)
+
+    @field_serializer("body")
+    def _body_as_authored(self, value: Authored) -> dict[str, Any] | None:
+        return _authored(value)
+
+
+BODIES: dict[QuestionFormat, type[Authored]] = {
+    QuestionFormat.CHOICE: ChoiceBody,
+    QuestionFormat.SHORT: ShortBody,
+    QuestionFormat.OPEN: OpenBody,
+}
+
+
+def _authored(value: Authored | None) -> dict[str, Any] | None:
+    # the fields the author wrote, under the names the author wrote them by
+    return (
+        None if value is None else value.model_dump(mode="json", by_alias=True, exclude_unset=True)
+    )
 
 
 class Lesson(Seeded):
