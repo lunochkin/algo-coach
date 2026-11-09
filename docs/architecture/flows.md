@@ -597,8 +597,10 @@ start, and the probes are drawn at it.
 - **A probe opens the problem page a rung opens**, named by the card it came
   from. "Solving a rung" gives that page.
 - **The run holds no verdict.** Ladder progress, the recall state of each
-  template, and whether the card is done are folds over the attempts, the recall
-  attempts and the corpus. `log.md` gives why none of the three is stored.
+  template, and the card state are folds over the attempts, the recall attempts
+  and the corpus. `log.md` gives why none of the three is stored.
+- **A card is done once it graduates.** `log.md` gives the five card states and
+  what each one reads.
 
 Deferred, since only use answers each:
 
@@ -606,8 +608,6 @@ Deferred, since only use answers each:
 - When a run is given a further probe, and what asks for one.
 - Whether a card can be started again, and what a second run means for a ladder
   the first run already measures.
-- The card's reading once every rung is solved and every template recalled.
-  "Done" is a view, and graduation names no threshold yet.
 
 ## Solving a rung
 

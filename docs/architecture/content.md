@@ -82,6 +82,8 @@ each technique, and a card and a mastery estimate share no data.
 - **Granularity follows teaching, not estimation.** One technique can carry
   several cards. Mastery is estimated per technique, so cards are never the
   unit of estimation, and the attempt log never references a card.
+- **A card carries no card state.** The card is global and each card state is
+  one user's, so `log.md` derives a user's card state from that user's log.
 - **A card names no problem.** It carries a selector: a technique, and the
   filters that narrow it. The ladder is derived from the corpus. Ids are minted
   per engine, so a card holding problem ids would mean nothing in another

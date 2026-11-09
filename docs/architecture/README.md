@@ -241,8 +241,21 @@ without redefining them. Grouped by the file that specifies the record.
   correctly, and `none` an attempt that went the way it should.
 - **Card run**: the record that a card was started, and the probes it was
   given.
+- **Card state**: how far one user's study of one card has gone: not started,
+  acquiring, consolidating, graduated or lapsed. Derived from the log, never
+  stored.
+- **Acquiring**: the card state of a started card with a required rung not
+  solved since the run began.
+- **Consolidating**: the card state once every required rung is solved, until
+  the card graduates.
+- **Graduated**: the card state once the graduation rule held, until a lapse.
+  A graduated card is done.
+- **Lapsed**: the card state of a graduated card one of whose templates has
+  since failed a review.
 - **Recall attempt**: one template reproduced from memory, with the hints
   taken.
+- **Review**: one check that a user still holds a template's form. Which
+  recall attempts and sittings count as a review is deferred to the schedule.
 - **Board**: the per-technique view of progress, derived from attempts and
   claims. Never stored.
 - **Mastery**: how well a user knows one technique, in two parts:
