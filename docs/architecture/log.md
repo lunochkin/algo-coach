@@ -385,9 +385,60 @@ Studying a card is an explicit act, not a state the system infers.
   it was given. Later probes append rather than replacing the set, so what was
   offered and when stays readable.
 - **Derived from the run, never stored**: ladder progress, recall state per
-  template, and whether the card is done. "Done" is only a view for now.
-  Graduation becomes a process later, once there are numbers to set its box and
-  its probe count from.
+  template, and the card state `## Card states` gives.
+
+## Card states
+
+A card state says how far one user's study of one card has gone. Each card
+stands in one of five: not started, acquiring, consolidating, graduated or
+lapsed.
+
+- **A card state is one user's.** The card is global and the log is private,
+  so two users studying one card read two card states.
+- **A card state is derived on every read and never stored.** The card run
+  holds only the start and the probes, and ladder progress and recall state are
+  folds already. A stored card state would copy those folds, and the copy
+  drifts once the corpus moves under the ladder.
+- **Not started: the user holds no card run for the card.** Reading a card
+  mints nothing, as `flows.md` gives, so a card read and never started stays
+  not started.
+- **Acquiring: a run is open, and some required rung has no solve since the run
+  began.** The ladder teaches the form with the card in view, and a solve from
+  before the run counts for nothing, as `## Card runs` gives.
+- **Consolidating: every required rung is solved since the run began, and the
+  card has not graduated.** A solved ladder shows the form was reached with the
+  card in view. It does not show the form is kept, so the card waits for a
+  check spaced after the ladder.
+- **The solve of the last required rung opens consolidating.** The spacing gap
+  graduation waits for counts from that solve, the last sitting the ladder
+  asked for.
+- **Graduated: the graduation rule held, and the card has not lapsed since.**
+  The rule reads the solved ladder, a clean recall after the spacing gap of
+  every template that carries cases, and a probe solved unprompted. A card is
+  done once it graduates.
+- **Lapsed: a graduated card one of whose templates has failed a review since
+  graduation.** A form can be lost after the card graduated, and a card left
+  graduated on a lost form is never offered again.
+- **Before graduation, a card state reads the ladder as it stands now.** A
+  re-derived ladder holding a required rung the user has not solved returns a
+  consolidating card to acquiring. The ladder is the truth the card state is
+  folded from, so the card state follows the ladder.
+- **A graduated card no longer reads the ladder.** Graduation asserts that the
+  forms are kept, and a later generation run adds problems to a ladder rather
+  than forms. Only a lapse moves a graduated card.
+- **A card state is not mastery.** Mastery is per technique and counts
+  sittings and drills, as `## Mastery` gives. A graduated card raises no
+  technique's reading, since `content.md` keeps cards and mastery apart.
+
+Deferred, since only use answers each:
+
+- The graduation rule in full: the spacing gap, what a clean recall is, and
+  which probe counts.
+- Which failed review lapses a card, and what a lapsed card needs to graduate
+  again.
+- The card state of a started card whose ladder holds no required rung, every
+  core template being a gap.
+- A core template added by a re-seed to a card that already graduated.
 
 ## Recall attempts
 
