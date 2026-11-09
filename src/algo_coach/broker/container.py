@@ -16,8 +16,8 @@ from typing import IO, Literal
 # the submission's image: an interpreter and no engine code. By digest, since a
 # tag moves under the run a stored verdict was measured by. The index's digest,
 # so each host resolves its own platform from it; the tag is only for a reader
-DIGEST = "sha256:08275f764e022331c6d3e3ca55d8cce01fa4684b02111adf0445d71806fe7941"
-IMAGE = f"python:3.15.1-slim@{DIGEST}"
+DIGEST = "sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928"
+IMAGE = f"python:3.15.2-slim@{DIGEST}"
 
 # read as a file rather than imported: importing it would load the runner's
 # package, and the process holding the socket loads no engine code
