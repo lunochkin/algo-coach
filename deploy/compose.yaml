@@ -1,7 +1,7 @@
 # What the server runs. The server extracts this file from the image it pulled
 # and starts it with `docker compose up -d`, so a deploy needs no checkout of
 # this repo. `docs/architecture/README.md` gives the shape it describes: one
-# server, the API and Postgres on it, and a sandbox the broker adds later.
+# server, the API and Postgres on it, and the broker starting a run's container.
 #
 # `.env` sits beside this file on the server and is held nowhere else. It names
 # the image to run, ALGO_COACH_IMAGE, by digest rather than by tag, so a
@@ -10,7 +10,8 @@
 # `db` service by, ALGO_COACH_ORIGIN and ALGO_COACH_SECRET, and each provider's
 # client id and secret. ALGO_COACH_DOMAIN is the host ALGO_COACH_ORIGIN names,
 # since Caddy issues the certificate for it and the sign-in callback returns
-# there.
+# there. DOCKER_GID is the id of the host's docker group, which the deployment
+# repo writes per server.
 
 name: algo-coach
 
@@ -19,6 +20,11 @@ services:
     image: postgres:18
     restart: unless-stopped
     env_file: [.env]
+    ports:
+      # the server's loopback address alone: a command run off the server
+      # reaches it through an SSH tunnel, and no open port is guarded by a
+      # password alone
+      - "127.0.0.1:5432:5432"
     volumes:
       # the path postgres 18 declares, holding the cluster under it. The
       # deployment repo backs this volume with the disk that outlives the server
@@ -47,9 +53,29 @@ services:
       # the server's loopback address alone, and whatever fronts the pages
       # routes `/api` here
       - "127.0.0.1:8000:8000"
+    # a submission runs in the broker's container rather than in this one
+    environment:
+      ALGO_COACH_BROKER: http://broker:8001
+    # default for Postgres, Caddy and the sign-in providers, and api-broker for
+    # the one service nothing else reaches
+    networks: [default, api-broker]
     depends_on:
       db: {condition: service_healthy}
       migrate: {condition: service_completed_successfully}
+
+  # the one service holding the container runtime's socket. No env_file: the
+  # process holding the socket reads no secret either
+  broker:
+    image: ${ALGO_COACH_IMAGE}
+    restart: unless-stopped
+    command: ["python", "-m", "algo_coach.broker"]
+    # the image's non-root user, in the host's docker group. The id differs
+    # between servers, and a missing one stops the deploy rather than starting
+    # a broker the socket refuses
+    group_add: ["${DOCKER_GID:?DOCKER_GID names the host's docker group}"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [api-broker]
 
   # the one service a browser reaches. `Caddyfile` sits beside this file, and
   # the server extracts both from the image
@@ -67,6 +93,13 @@ services:
       # again, and the certificate authority limits how often it issues
       - certificates:/data
     depends_on: [api]
+
+networks:
+  # joined by the API and the broker alone, so Caddy and Postgres cannot open a
+  # connection to the broker. Internal: the broker reaches the socket, not a
+  # registry or the internet
+  api-broker:
+    internal: true
 
 volumes:
   database:

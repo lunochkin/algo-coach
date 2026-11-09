@@ -7,7 +7,8 @@ from algo_coach.schema.attempt import (
     SelfLabel,
 )
 from algo_coach.schema.call import Call
-from algo_coach.schema.card import Card, Selector, Template, TemplateKind
+from algo_coach.schema.card import Card, Selector, Template, TemplateCase, TemplateKind
+from algo_coach.schema.card_run import CardRun, Probe
 from algo_coach.schema.case import (
     CaseOutcome,
     CaseResult,
@@ -28,6 +29,7 @@ from algo_coach.schema.problem import (
     RetirementReason,
 )
 from algo_coach.schema.provenance import MachineProvenance
+from algo_coach.schema.recall import LADDER, Hint, RecallAttempt
 from algo_coach.schema.record import AttemptRecord
 from algo_coach.schema.seed import CardSeed, TemplateSeed
 from algo_coach.schema.sitting import Pause, Sitting
@@ -37,6 +39,7 @@ from algo_coach.schema.technique import Kind, Technique
 from algo_coach.schema.verification import AttemptVerification, Execution, Verification
 
 __all__ = [
+    "LADDER",
     "Attempt",
     "AttemptClaim",
     "AttemptRecord",
@@ -44,6 +47,7 @@ __all__ = [
     "Call",
     "CallSite",
     "Card",
+    "CardRun",
     "CardSeed",
     "CaseOutcome",
     "CaseResult",
@@ -57,14 +61,17 @@ __all__ = [
     "ExpectedSource",
     "FailureMode",
     "Gate",
+    "Hint",
     "Json",
     "Kind",
     "MachineProvenance",
     "MatchSource",
     "Pause",
+    "Probe",
     "Problem",
     "ProblemDifficulty",
     "ProblemStatus",
+    "RecallAttempt",
     "RetirementReason",
     "Selector",
     "SelfLabel",
@@ -76,6 +83,7 @@ __all__ = [
     "SolutionRole",
     "Technique",
     "Template",
+    "TemplateCase",
     "TemplateKind",
     "TemplateMatch",
     "TemplateSeed",

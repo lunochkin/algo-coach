@@ -191,7 +191,8 @@ twice.
 - A defective problem is retired by hand in the terminal, and the board stops
   counting that problem's attempts in either direction.
 - The claim is asked of each attempt when the sitting ends. The self-label
-  waits for Phase 12, where its failure modes are settled.
+  waits for the failure-mode block, which settles `speed`, `rust` and `gap`
+  before anything writes a label under them.
 - 26 of the 74 problems the sweep landed carried no `def solve(...)` line,
   written before a statement had to end on one, and were retired `defective`.
   The board offers 14 techniques on the 48 left.
@@ -199,44 +200,230 @@ twice.
   attempts: a wrong answer, a timeout on a separating case, and a pass, each
   claimed and one declined.
 
-## Phase 9 — The engine hosted (current)
+## Phase 9 — The engine hosted — done
 
-The same loop, for people who are not the author. The stores move to Postgres,
+The same loop, for people who are not the author. The stores moved to Postgres,
 each person signs in to a log of their own, and their code runs in a sandbox.
 
-- Storage moves from JSON files to Postgres, behind the store interfaces the
-  domain already calls, with the append-only rule held by the database.
-- Sign-in is through Google and GitHub, with sessions the engine keeps and no
-  password stored, and the log keys on a user id the engine mints.
-- One person's log is separable and deletable without touching another's.
-- Access is by invitation.
-- The pages and the API are deployed on one origin, with the database backed
-  up and a restore tried.
-- Submitted code runs in a container behind the boundary `run` already
-  defines, with comparison against `expected` staying above it.
-- The separating cases are re-checked under the sandbox's limits.
-- Exit: a sitting completed on the deployed engine by an invited, signed-in
-  user, the author included.
+- Storage is one Postgres database behind the store interfaces the domain
+  already called, a column per field, with the append-only rule held by
+  triggers.
+- Sign-in is through Google and GitHub, and a session lives in Postgres for 30
+  days as a hashed token. Access is by invitation, checked at the callback
+  before any record is stored.
+- One user's log is exported and erased whole, and the dev login answers a
+  loopback request alone.
+- The pages and the API are deployed on one origin behind Caddy, from an image
+  carrying the compose file it deploys with, on a push to main. Postgres
+  listens on the server's loopback, and a command run off the server reaches it
+  through an SSH tunnel.
+- A submission runs in a container under gVisor: no network, a read-only root,
+  a non-root user, dropped capabilities, and limits on memory, processes and
+  output. The image is pinned by digest.
+- The broker holds the container runtime's socket, admits one run at a time,
+  refuses a wait past a bound, kills a run past its deadline by name, and
+  removes what a dead broker left. The API holds no socket and reaches the
+  broker on a network only the two join.
+- `runner.run` calls the broker where `ALGO_COACH_BROKER` names one, and the
+  local subprocess everywhere else. The comparison against `expected` stays
+  above that boundary.
+- A user's submissions are capped at ten a minute. A sitting nothing has
+  touched for 45 minutes ends at its last activity, where it is next read.
+- A privacy policy page opens without a session, which Google's consent screen
+  asks for.
+- Measured: the 50 served problems' canonicals ran through the broker under
+  gVisor at the drill cap, over all 506 of their cases, and none took over a
+  tenth of the cap. The separating sizes found on the local subprocess stand
+  under the clock a verdict is now read from.
+- Measured: gVisor holds a case's own address-space limit, where the
+  container's memory limit alone has the host kill the container. A container
+  process limit of 64 ended the sandbox itself, since gVisor backs each process
+  a case starts with a host process of its own. `/tmp` is writable inside the
+  container whatever the root filesystem allows.
+- The corpus moved to the hosted store as product data: 76 problems, 779 cases,
+  223 solutions, 9 cards, and the 574 calls those records name. No log record
+  was copied.
+- Left to the deployment repo, and open there: the scheduled backup with a
+  restore tried, the rebuild rehearsal, and the retention statement the privacy
+  policy already promises.
+- Exit met: a sitting on the deployed engine, signed in through a provider,
+  from the board to the claim. Its attempt was judged under
+  `container/cpython-3.14` at the drill cap. The self-label the loop is
+  specified to ask for is unbuilt, and the failure-mode block settles its
+  failure modes.
 
-## Phase 10 — The pages designed
+## Phase 10 — The pages designed — done
 
-The pages given one design, and the flows Phase 12 adds planned before they are
-built.
+The pages given one design, before Phase 11 adds its own.
 
-- A design system in code: the theme tokens in `web/src/index.css`, the
-  components the pages use, and a page showing both.
-- The pages' overall design: the navigation, the main areas and the page a
-  signed-in user lands on, written into `docs/architecture/` and applied to
-  every existing page.
-- The flows of Phase 12, card runs, the ladder and the recall trainer, written
-  as sequences with a low-fidelity wireframe each. A detail only use can
-  answer is named as deferred.
-- Exit: every existing page is built on the design system, and each Phase 12
-  flow is written and drawn.
+- A design system in the theme: a type scale named by the role a page reads a
+  size in, the spacing steps, the layout widths, one mono family, a token per
+  verdict outcome, and the editor's five syntax colours.
+- The dark set applies from the browser's colour-scheme preference, and no
+  switch stores one.
+- `/gallery`, built in development alone, shows every token and every component
+  the pages read.
+- `pages.md` and `wireframes.md`: the two sections, the pages under each, a
+  page's areas, the design system, and thirteen views drawn at low fidelity.
+- One shell: the navigation naming Practice and Cards, and one header carrying
+  the way back, the title and the line identifying what the title names.
+- Every page rebuilt on it: the board, a technique's candidates, the picked
+  problem, the cards, one card, the sitting, the login, the policy and the
+  missing page.
+- Loading, the failure with its retry, and the blank answer render through one
+  component.
+- The picked problem moved to `/problems/:problem_id`, served by a route of its
+  own, so a rung of a ladder reaches the same page.
+- A refused sign-in returns to the login page as a code, which names no address.
+- A hidden page pauses the sitting, and the page returning resumes the pause
+  hiding started.
+- Exit met: every existing page is built on the design system.
 
-## Phase 11 — The matcher, measured
+Measured:
 
-The worth of a generated corpus, measured.
+- Every verdict and code colour clears a contrast of 4.5 against its own
+  background: 4.55 to 6.99 in the light scheme, 6.12 to 11.15 in the dark one.
+  Two light values were under the bar as first chosen, and were darkened.
+- The gallery leaves the production bundle. The build folds the guard on the
+  route, and `dist/` names neither the page nor its examples.
+
+Left open:
+
+- No page was read by eye. The browser extension was not connected and the
+  frontend carries no test framework, so every page stands on the typecheck,
+  the lint and the build alone.
+
+## Phase 11 — Ladder, recall and card runs — done
+
+The pieces a card needs once there are problems to fill it.
+
+- The three flows written and drawn first: starting a card run, solving a rung,
+  and recalling a template, each a sequence with a low-fidelity wireframe.
+- A template carries the cases a reproduction of its form is checked against,
+  and `unordered` says its answer is a set, compared with its top level sorted.
+- The ladder resolved from the template matches, one rung per core template and
+  the selector filling out to `size`. A rung's requiredness is derived from what
+  it covers, and a core template nothing displays is reported as a gap.
+- Ladder progress is a fold over the attempts made since the run began, so a
+  re-derived ladder keeps what was solved and a retired problem leaves it.
+- `CardRun` and `RecallAttempt`, both append-only, with the probes and the case
+  results as child rows and the erasure reaching all four tables.
+- Starting a card mints the run and draws its probes in one act: the technique's
+  problems, unseen first, then least recently attempted, never a rung.
+- A recall runs the typed file through the runner a submission uses, at the same
+  cap and under the same per-minute bound.
+- The trainer withholds the title and the form. The API sends the trigger and
+  the signature alone, and each hint is its own request.
+- The card page on its two wireframes, the trainer, `?card=` on a problem, and
+  the sitting returning to the card it came from.
+- Exit met: a card run gone through by hand, from the start to a rung solved, a
+  template recalled cold, and a probe offered.
+
+## Phase 12 — The self-label — done
+
+The user's own verdict on why an attempt went the way it did, asked at the
+moment of solving. A label cannot be given later, so the phase came before the
+sittings that fill the log.
+
+- `speed` settled as the time the solver took, never the solution's
+  complexity. A timeout is a stored verdict, and it is labelled by its cause.
+- `rust` and `gap` landed apart: a form the solver held and did not reach
+  against a form the solver did not hold. The two name different remedies, the
+  recall trainer and the card's own ladder.
+- `FailureMode` kept all five members, and each one's meaning is written into
+  `log.md` with one glossary entry in `README.md`.
+- A skipped label writes no record, and the label carries no `declined`: a
+  claim declines against a candidate list, where a mode names a cause.
+- The claim overlay drawn and then built with the label under the claim, one
+  press storing both records per attempt.
+- `POST /attempts/{attempt_id}/labels`, refusing a mode the attempt's verdict
+  leaves closed, as the claim route refuses a technique outside the problem's.
+- The open modes served per attempt, so the split by verdict lives in the
+  engine alone. An attempt that crashed on every case is offered none.
+- Exit not met at close: the loop asks for a label, and no sitting has stored
+  one yet. The first sitting on the deployed engine settles it.
+
+## Phase 13 — The loop in use — done
+
+The author practised on the deployed engine, and what the sittings surfaced
+decided the work.
+
+- The pages reworked against real data: rows and panels in place of tables, a
+  warm paper ground, a scheme switch, prose and code bound to the tokens, and
+  the sitting fitted to a phone's width.
+- A `/problems` listing filtered by tag and level, an account menu, and a
+  recall addressed by its template's slug, with every form reachable from the
+  card.
+- Six DP codes under `dynamic-programming`, with `parents` added wherever codes
+  are grouped, and the cards listed under their technique's family.
+- The sitting unforced: opening a problem serves it, the clock starts on a
+  press or a browser-kept preference, a pause stops only the timing, a solve
+  ends the sitting, and the page stays put with a way back.
+- The editor carries work in progress into a new sitting, never a solve or code
+  from before a card run. A press restores the last solve, and an attempt made
+  after it counts as no solve.
+- `/cards` as the user's dashboard of runs, ladders and recall, the board
+  leading with the cards in progress, and a started card offering its next
+  rung.
+- The generator bounding every input in a `### Constraints` section.
+- Exit met in part at close: every item the phase opened is ticked, and the
+  sittings kept opening new ones until the phase was closed by hand.
+
+Measured:
+
+- The first sitting on the deployed engine, on 2026-10-02: three attempts, each
+  verified in the sandbox at the 2 s cap, claimed and labelled. Phase 12's exit
+  is met by it.
+- A press starting the clock before the statement was shown made opening a
+  problem a commitment, and the author avoided opening problems because of it.
+  The sitting was redesigned around that finding.
+- Generation's cost, read from the deployed call log on 2026-10-02: $3.34 over
+  100 writings for 72 landed problems, $0.046 per landing and $0.067 per
+  problem still served. The generator's call is the largest share, at $0.015.
+
+## Phase 14 — Scheduling and mastery (current)
+
+Per-technique skill state derived from the log, a scheduler that says what is
+due, and a comparison of that scheduler against a simpler policy.
+
+Ordered ahead of the matcher on 2026-09-22. What this phase is worth is read
+from attempts made after it ships, so a week earlier is a week more log to
+read it on. The matcher's score waits on work alone and loses nothing by
+following. The recognition drill moved to Further developments on 2026-10-02.
+
+- **Mastery per technique**, derived from attempts, their claims and their
+  verdicts, and never stored. Recognition and execution stay apart in the
+  state and on the board. Recognition reads as unknown until the recognition
+  drill feeds it.
+- **Reviews timed with FSRS**, whose unit is the template, never the problem.
+  A review is a recall attempt, graded by the hints taken, or a sitting on a
+  problem written for the template. A technique with no template keeps the
+  board's staleness order.
+- **A card's lifecycle**, derived from the log and never stored: not started,
+  acquiring, consolidating, graduated and lapsed. Graduation is the required
+  rungs solved, every recallable template recalled clean after a spacing gap,
+  and a probe solved unprompted. A failed FSRS review of a graduated card's
+  template lapses the card.
+- One pick served on the board, a due template and a problem written for it,
+  made from FSRS, the mastery state and the cards' states, and aimed at the
+  form a failed sitting missed. Owed spaced checks come before new cards, and
+  at most two cards are in flight. The board still offers every technique
+  beside the pick.
+- **Every pick records what it predicted before the attempt**, from FSRS alone
+  and from the mastery state. A prediction reconstructed later is fitted to
+  the outcome it is scored against.
+- **A readiness criterion per technique**, written before any data is read
+  against it: the bar, the difficulty and the time limit.
+- **Each technique assigned to the scheduler or to the strongest baseline**,
+  balanced by difficulty and stored before the first pick. The baseline is a
+  list, spacing per problem or a difficulty ladder, run over the same
+  problems.
+- Exit: a sitting started from the scheduler's pick on the board, and
+  completed to the claim, with the pick's prediction and its arm stored.
+
+## Phase 15 — The matcher, measured
+
+How often the matcher is right, measured.
 
 - The hand pass, which writes the matcher's reference and is the only reading
   of a generated problem no model produced.
@@ -245,38 +432,32 @@ The worth of a generated corpus, measured.
 - The matcher scored per pair and grouped per template, positive verdicts in
   both directions.
 - A configuration pinned before any number is quoted.
-- Exit: the matcher carries a per-template score in both directions.
+- **The corpus gate rides the same pass**: whether a statement gives its form
+  away, and whether it is a public problem the model returned, judged on the
+  sample already being read and against the rate over `data/old/`. A second
+  hand pass would pay twice for one reading.
+- Exit: the matcher carries a per-template score in both directions, and the
+  gate carries a share with the denominator the pass covered.
 
-## Phase 12 — Ladder, recall and card runs
+## Phase 16 — The diagnosis, measured
 
-The pieces a card needs once there are problems to fill it.
+The machine counterpart of the self-label, and how much the program-analysis
+tools add to it.
 
-- The ladder resolved at import from the selector and the template matches, at
-  least one rung per core template. An unfilled core template is a
-  reported gap.
-- Studying a card is an explicit act: the ladder is measured from it, and
-  probes are assigned at it.
-- A recall attempt is its own record, keyed to a card and a template. A hinted
-  pass is not a pass.
-- The trainer never prints a template: reproduced cold, run against the card's
-  own tests.
-- Status rather than verdicts: the inputs a graduation rule would read.
-- Graduation names no threshold. The numbers do not exist yet.
-- Exit: a card run gone through by hand: a card started, a rung of its ladder
-  solved, a template recalled cold against the card's tests, and a probe
-  offered.
-
-## Phase 13 — Mastery and scheduling
-
-Per-technique skill state derived from the log, and a scheduler that picks what
-the user practises next.
-
-- Mastery per technique, derived from attempts, their claims and their
-  verdicts, and never stored.
-- A scheduler picking the next sitting from that state. The board still offers
-  every technique beside the pick.
-- Exit: a sitting started from the scheduler's pick on the board, and
-  completed to the claim.
+- The diagnosis call narrowed to what the record supports, written as a
+  `Diagnosis` carrying its provenance whole.
+- **The mutants become the eval set.** A mutant carries its mistake by
+  construction, so a labelled failure exists for every one of them without
+  waiting for the log to fill. The self-labels score the call on real
+  attempts; the mutants score it on many.
+- **Each tool measured by what it adds**: the call alone, then with a
+  structural diff against the nearest passing solution, then the first case
+  where execution diverges, then how the running time grows. The runner
+  already times each case and minimises a separating input.
+- Scored per failure mode, with no overall share. A call that only ever says
+  `gap` scores well on a corpus of gaps.
+- Exit: the call carries a per-mode score, and each tool carries the
+  difference it made.
 
 ## Further developments
 
@@ -284,20 +465,49 @@ Blocks of work not ready for a phase, unnumbered and unordered. A block becomes
 a planned phase once it is clear enough to plan, and `docs/TODO.md` holds the
 items of each block, the smaller ones included.
 
-- **Failure mode.** Why an attempt failed: the self-label written once `speed`,
-  `rust` and `gap` are settled, a diagnosis call narrowed to what the record
-  supports, and a scheduler that targets the diagnosed cause.
+- **The recognition drill.** A problem served without its technique, and the
+  approach answered in words: the algorithm, why it is correct and its
+  runtime. A framing judge grades the answer against the problem's canonicals,
+  and is scored against a hand-graded set before its grades feed mastery. The
+  scheduler mixes drills with full sittings and never replaces a sitting with
+  one. Text first, and a spoken answer later in front of the same judge.
+- **Scheduling on the diagnosed cause.** What Phase 16 names, fed back into
+  what the board picks next. It waits on the scores that phase produces.
 - **Alternative solutions.** Every other way to solve a stored problem,
   enumerated over the corpus, each approach its own canonical judged by the
   problem's cases.
-- **The corpus gated.** Whether a generated statement gives its form away,
-  measured against the rate over `data/old/`, the corpus no generator wrote.
-- **Program-analysis-grounded diagnosis.** A diagnosis grounded in AST diffs
-  against the canonicals, execution traces and measured complexity.
+- **Misconception discovery.** Recurring mistakes mined from attempts, each
+  proposal written as broken code and kept only where the cases tell it apart
+  from every mutant already known.
+- **Repair as diagnosis.** The smallest edit on the parsed tree that makes a
+  failing attempt pass every case, searched against the problem's canonicals.
+  The edit's location and kind name the mistake, and Phase 16 can score the
+  repair as one more tool.
+- **Technique detection by static analysis.** Rules per template that read a
+  solution's form from its parsed tree, run beside the matcher. A pair where
+  the rules and the matcher disagree goes to adjudication.
 - **Retrieval.** Similar problems, patterns and briefs retrieved from the corpus
   and the user's own attempts.
 - **MCP and autonomy.** The corpus and tools exposed as an MCP server, and a
   scheduled agent running the practice loop.
-- **Multi-agent**, only once a real pipeline needs one.
-- **Soundness-checked synthesis.** Generation upgraded with formal constraint
-  specs, property-based cases and adversarial validation.
+- **Soundness-checked synthesis.** After the fuzz pass, a solver or a
+  coverage-guided search looks for an input killing each survivor. A survivor
+  no search kills is compared with the canonical on every input up to a bound.
+  A landed case set then carries a stated guarantee: the mutants it kills, and
+  the bound up to which the rest are equivalent.
+- **Judging concurrent code.** A concurrent submission run under many thread
+  schedules, explored systematically, with the race detector on. One passing
+  run of concurrent code says nothing about the next run.
+- **Knowledge tracing.** A model that estimates from attempts the probability
+  that a user holds a technique, fitted to the log. The model is scored on the
+  predictions Phase 14 records, against FSRS alone and the mastery state.
+- **Forgetting per technique.** The decay of the chance of passing with time
+  since the last pass, fitted per technique and mode from the log. A form that
+  decays differently from a recalled fact needs different review intervals.
+- **Difficulty calibrated from attempts.** Item response theory estimates each
+  problem's difficulty and each user's ability together from pass and fail
+  records. Generation then aims at a stated difficulty, and each landing is
+  scored by how far the estimate falls from the stated one.
+- **Design simulation.** A system design assembled from components and run as a
+  discrete-event simulation under a stated load and failure scenario. The run
+  reports latency, error rate and cost, so a design is checked by running it.

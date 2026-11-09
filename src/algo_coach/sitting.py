@@ -1,8 +1,9 @@
-"""One timed session on one problem: what the drill loop serves, judges and
-mints. `log.md` gives what the record holds and why a pause is an interval."""
+"""One session on one problem, timed or not: what the drill loop serves,
+judges and mints. `log.md` gives what the record holds and why a pause is an
+interval."""
 
 from collections.abc import Sequence
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, ValidationError
@@ -11,7 +12,7 @@ from algo_coach import mint
 from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.problems import ProblemStore
-from algo_coach.runner import RUNNER, CaseRun, judge
+from algo_coach.runner import CaseRun, judge, runner
 from algo_coach.schema import (
     Attempt,
     AttemptClaim,
@@ -21,7 +22,9 @@ from algo_coach.schema import (
     ClaimSource,
     Confidence,
     Execution,
+    FailureMode,
     Pause,
+    SelfLabel,
     Sitting,
     TestCase,
 )
@@ -30,6 +33,17 @@ from algo_coach.schema import (
 # separating size against it, and generation's own cap sits well above it
 DRILL_CAP_MS = 2_000
 
+# the submissions a user may make in a minute. Each one runs untrusted code on
+# the server, and the broker admits one run at a time, so one user's burst is
+# every other user's wait
+# the runs of one kind a user may start in a minute. The broker admits one
+# run at a time, so a burst is every other user's wait
+RUNS_PER_MINUTE = 10
+
+# how long a sitting may go untouched before the loop ends it at the moment it
+# was last touched. `log.md` gives why the ending is read-time
+IDLE_MINUTES = 45
+
 
 class Refused(ValueError):
     """A request the sitting's or the problem's state does not allow."""
@@ -37,6 +51,10 @@ class Refused(ValueError):
 
 class Missing(Refused):
     """A record the request names that the user cannot reach."""
+
+
+class TooOften(Refused):
+    """More submissions in the last minute than the cap allows."""
 
 
 class Served(BaseModel):
@@ -51,7 +69,7 @@ class Served(BaseModel):
     sitting: Sitting
     # taken on the engine's clock, so a page counting on from it shows the
     # number an attempt would carry rather than one its own clock skews
-    elapsed_sec: float
+    elapsed_sec: float | None  # none while the clock has not run
 
 
 class Failure(BaseModel):
@@ -68,14 +86,43 @@ class Failure(BaseModel):
 
 
 class Submitted(BaseModel):
-    """The attempt a submission minted, and the per-case verdict behind its
-    `solved`."""
+    """The attempt a submission minted, the per-case verdict behind its
+    `solved`, and the sitting as the submission left it."""
 
     model_config = ConfigDict(frozen=True)
 
     attempt: Attempt
+    sitting: Sitting  # ended where the submission solved the problem
     verification: AttemptVerification
     failure: Failure | None  # none on a submission that passed every case
+
+
+class Carry(BaseModel):
+    """What the editor may open on, which `flows.md` gives: the last attempt's
+    code where it is work in progress, and the bounds the page holds its own
+    draft to."""
+
+    model_config = ConfigDict(frozen=True)
+
+    code: str | None  # the last attempt's code, none where it may not be carried
+    at: datetime | None  # when that code was submitted
+    # the page carries no draft from the sitting that solved, nor one typed
+    # before that solve or before the run began
+    solved_at: datetime | None
+    solved_sitting_id: str | None
+    # the last solve's code, which the page restores only on the user's press
+    solved_code: str | None
+    run_started_at: datetime | None
+
+
+class Asked(BaseModel):
+    """One attempt the loop still asks about, and the modes its verdict leaves
+    open. No mode is offered where the record already answers why."""
+
+    model_config = ConfigDict(frozen=True)
+
+    attempt: Attempt
+    modes: list[FailureMode]
 
 
 def serve(
@@ -91,13 +138,20 @@ def serve(
         raise Missing(f"no problem {problem_id}")
     if not problem.served:
         raise Refused(f"problem {problem_id} is {problem.status}")
+    at = now or _clock()
     # a refresh or a second tab reaches the clock already running, rather than
     # starting a second one on the same problem
     one = sittings.running(user_id, problem_id)
+    if one is not None and _idle(one, at):
+        # the clock stopped where the user left, and this serve starts another
+        _ended_idle(sittings, one)
+        one = None
     if one is None:
-        one = mint.sitting(user_id, problem_id)
+        one = mint.sitting(user_id, problem_id, at)
         sittings.put(one)
-    return _served(problem.title, problem.statement, one, now or _clock())
+    else:
+        one = _stored(sittings, one, at)
+    return _served(problem.title, problem.statement, one, at)
 
 
 def get(
@@ -115,7 +169,10 @@ def get(
     problem = problems.get(one.problem_id)
     if problem is None:
         raise ValueError(f"sitting {sitting_id} names no stored problem {one.problem_id}")
-    return _served(problem.title, problem.statement, one, now or _clock())
+    at = now or _clock()
+    if one.ended_at is None:
+        one = _ended_idle(sittings, one) if _idle(one, at) else _stored(sittings, one, at)
+    return _served(problem.title, problem.statement, one, at)
 
 
 def submit(
@@ -126,24 +183,62 @@ def submit(
     code: str,
     *,
     user_id: str,
+    restored: bool = False,
     now: datetime | None = None,
 ) -> Submitted:
     # taken before the run: judging takes seconds the solver did not spend
     at = now or _clock()
+    # a paused clock stops the timing, not the practice: the attempt carries
+    # the time the clock ran, which excludes the open pause
     one = _running(sittings, sitting_id, user_id)
-    if one.paused:
-        raise Refused(f"sitting {sitting_id} is paused")
+    if _idle(one, at):
+        # the clock it would stamp counts the hours the user was away
+        _ended_idle(sittings, one)
+        raise Refused(f"sitting {sitting_id} was left idle and has ended")
+    # before the run: a submission past the cap starts no container
+    if len(log.attempts(user_id, since=at - timedelta(minutes=1))) >= RUNS_PER_MINUTE:
+        raise TooOften(f"{RUNS_PER_MINUTE} submissions a minute is the cap")
+    one = _stored(sittings, one, at)
     problem_cases = cases.for_problem(one.problem_id)
     runs = judge(code, problem_cases, cap_ms=DRILL_CAP_MS)
-    judged = Execution(cap_ms=DRILL_CAP_MS, runner=RUNNER, results=[result for result, _ in runs])
-    attempt = mint.attempt(one, code, solved=judged.verified, finished_at=at)
+    judged = Execution(cap_ms=DRILL_CAP_MS, runner=runner(), results=[result for result, _ in runs])
+    attempt = mint.attempt(one, code, solved=judged.verified, finished_at=at, restored=restored)
     verification = mint.attempt_verification(attempt.id, judged)
     log.append_attempt(attempt)
     log.append_verification(verification)
+    if attempt.solved:
+        # a user who solved and left has nothing left to close
+        one = _stored(
+            sittings, one, pauses=_closed(one.pauses, at) if one.paused else one.pauses, ended_at=at
+        )
     return Submitted(
         attempt=attempt,
+        sitting=one,
         verification=verification,
         failure=_first_failure(problem_cases, runs),
+    )
+
+
+def carry(attempts: Sequence[Attempt], *, run_started_at: datetime | None) -> Carry:
+    """The code a new sitting on a problem may open on. `attempts` are one
+    user's on one problem; `run_started_at` is the start of the card run the
+    problem was opened from, none where it was opened elsewhere."""
+    ordered = sorted(attempts, key=lambda one: one.finished_at)
+    solves = [one for one in ordered if one.solved]
+    last = ordered[-1] if ordered else None
+    carried = (
+        last is not None
+        and last.code is not None
+        and not last.solved
+        and (run_started_at is None or last.finished_at >= run_started_at)
+    )
+    return Carry(
+        code=last.code if carried and last else None,
+        at=last.finished_at if carried and last else None,
+        solved_at=solves[-1].finished_at if solves else None,
+        solved_sitting_id=solves[-1].sitting_id if solves else None,
+        solved_code=solves[-1].code if solves else None,
+        run_started_at=run_started_at,
     )
 
 
@@ -175,6 +270,36 @@ def claim(
     return written
 
 
+def modes(attempt: Attempt, run: AttemptVerification | None) -> list[FailureMode]:
+    """The failure modes an attempt's verdict leaves open, which `log.md`
+    splits by whether the attempt solved the problem. An attempt that crashed
+    on every case is asked nothing: the code reached no answer, so no mode is
+    more than a guess."""
+    if attempt.solved:
+        return [FailureMode.SPEED, FailureMode.NONE]
+    judged = run.results if run is not None else []
+    if judged and all(one.outcome is CaseOutcome.CRASHED for one in judged):
+        return []
+    return [FailureMode.GAP, FailureMode.RUST, FailureMode.SYNTAX]
+
+
+def label(log: AttemptLog, attempt_id: str, mode: FailureMode, *, user_id: str) -> SelfLabel:
+    """The user's own verdict on why the attempt went the way it did."""
+    attempt = owned_attempt(log, attempt_id, user_id=user_id)
+    if mode not in modes(attempt, _verification(log, attempt_id)):
+        # a label contradicting the verdict answers a settled question
+        raise Refused(f"{mode.value} is not open to this attempt")
+    written = mint.self_label(attempt_id, mode)
+    log.append_self_label(written)
+    return written
+
+
+def _verification(log: AttemptLog, attempt_id: str) -> AttemptVerification | None:
+    # the latest run: a submission mints one, and a re-run appends another
+    runs = [one for one in log.verifications() if one.attempt_id == attempt_id]
+    return runs[-1] if runs else None
+
+
 def owned_attempt(log: AttemptLog, attempt_id: str, *, user_id: str) -> Attempt:
     # another user's attempt reads as missing, as a sitting does
     found = next((one for one in log.attempts(user_id) if one.id == attempt_id), None)
@@ -183,24 +308,42 @@ def owned_attempt(log: AttemptLog, attempt_id: str, *, user_id: str) -> Attempt:
     return found
 
 
-def unclaimed(log: AttemptLog, sitting_id: str, *, user_id: str) -> list[Attempt]:
+def unclaimed(log: AttemptLog, sitting_id: str, *, user_id: str) -> list[Asked]:
     """The sitting's attempts the user has not claimed, in the order they were
-    submitted. A machine claim answers no question the loop asked."""
+    submitted, each with the modes its verdict leaves open. A machine claim
+    answers no question the loop asked."""
     answered = {one.attempt_id for one in log.claims(user_id) if one.source is ClaimSource.USER}
+    runs = {one.attempt_id: one for one in log.verifications(user_id)}
     return [
-        one
+        Asked(attempt=one, modes=modes(one, runs.get(one.id)))
         for one in log.attempts(user_id)
         if one.sitting_id == sitting_id and one.id not in answered
     ]
+
+
+def start_clock(
+    store: SittingStore, sitting_id: str, *, user_id: str, now: datetime | None = None
+) -> Sitting:
+    """The clock's first run, on the user's press or the clock preference.
+    A clock that ran and stopped is resumed instead, so its pauses stay
+    counted."""
+    one = _running(store, sitting_id, user_id)
+    if one.clock_started_at is not None:
+        raise Refused(f"sitting {sitting_id}'s clock has already started")
+    at = now or _clock()
+    return _stored(store, one, at, clock_started_at=at)
 
 
 def pause(
     store: SittingStore, sitting_id: str, *, user_id: str, now: datetime | None = None
 ) -> Sitting:
     one = _running(store, sitting_id, user_id)
+    if one.clock_started_at is None:
+        raise Refused(f"sitting {sitting_id}'s clock has not started")
     if one.paused:
         raise Refused(f"sitting {sitting_id} is already paused")
-    return _stored(store, one, pauses=[*one.pauses, Pause(at=now or _clock())])
+    at = now or _clock()
+    return _stored(store, one, at, pauses=[*one.pauses, Pause(at=at)])
 
 
 def resume(
@@ -209,7 +352,8 @@ def resume(
     one = _running(store, sitting_id, user_id)
     if not one.paused:
         raise Refused(f"sitting {sitting_id} is not paused")
-    return _stored(store, one, pauses=_closed(one.pauses, now or _clock()))
+    at = now or _clock()
+    return _stored(store, one, at, pauses=_closed(one.pauses, at))
 
 
 def end(
@@ -267,6 +411,24 @@ def _running(store: SittingStore, sitting_id: str, user_id: str) -> Sitting:
     return one
 
 
+def _active(one: Sitting) -> datetime:
+    # a sitting stored before the field carries none, and its start stands in
+    return one.last_active_at or one.started_at
+
+
+def _idle(one: Sitting, at: datetime) -> bool:
+    return at - _active(one) > timedelta(minutes=IDLE_MINUTES)
+
+
+def _ended_idle(store: SittingStore, one: Sitting) -> Sitting:
+    """The sitting closed where the loop last touched it, rather than where a
+    reader happened to find it."""
+    at = _active(one)
+    return _stored(
+        store, one, pauses=_closed(one.pauses, at) if one.paused else one.pauses, ended_at=at
+    )
+
+
 def _first_failure(cases: list[TestCase], runs: list[tuple[CaseResult, CaseRun]]) -> Failure | None:
     for one, (result, ran) in zip(cases, runs, strict=True):
         if result.outcome is not CaseOutcome.PASSED:
@@ -285,9 +447,13 @@ def _closed(pauses: list[Pause], at: datetime) -> list[Pause]:
     return [*pauses[:-1], Pause(at=pauses[-1].at, until=at)]
 
 
-def _stored(store: SittingStore, one: Sitting, **changes: object) -> Sitting:
+def _stored(
+    store: SittingStore, one: Sitting, touched: datetime | None = None, **changes: object
+) -> Sitting:
     # revalidated rather than copied: `model_copy` would write a record the
     # interval rules never read
+    if touched is not None:
+        changes["last_active_at"] = touched
     revised = Sitting.model_validate(one.model_dump() | changes)
     store.put(revised)
     return revised

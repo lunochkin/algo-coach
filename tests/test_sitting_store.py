@@ -15,6 +15,7 @@ CONTENT = {
     "user_id": "u-4f9c2a",
     "problem_id": "p1",
     "started_at": "2026-09-10T08:00:00Z",
+    "clock_started_at": "2026-09-10T08:00:00Z",
 }
 AT_NINE = "2026-09-10T09:00:00Z"
 AT_TEN = "2026-09-10T10:00:00Z"

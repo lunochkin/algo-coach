@@ -20,6 +20,7 @@ from algo_coach.cli.invite import invitation
 from algo_coach.cli.match import match
 from algo_coach.cli.movement import moved
 from algo_coach.cli.problem import problem
+from algo_coach.cli.retime import retime
 from algo_coach.cli.rows import Rows
 from algo_coach.cli.score import score
 from algo_coach.cli.seed import BadLine, seed
@@ -284,6 +285,10 @@ def main() -> None:
         "--all", action="store_true", help="every core template; only the gaps otherwise"
     )
 
+    _command(
+        sub, "retime", "every served canonical at the drill cap, and its cases past a tenth of it"
+    )
+
     score_parser = _command(sub, "score", "the classifier against the user's own claims")
     score_parser.add_argument(
         "--limit",
@@ -351,6 +356,7 @@ COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Datab
     )(args, parser, root),
     "problem": problem,
     "gaps": lambda args, _parser, root: gaps(args, root),
+    "retime": lambda _args, _parser, root: retime(root),
     "generate": generate,
     "match": lambda args, parser, root: (hand_match if args.by_hand else match)(args, parser, root),
     "score": score,

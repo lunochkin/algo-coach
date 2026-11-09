@@ -8,6 +8,7 @@ from algo_coach.solution_claims.standing import standing_solution_claims
 from algo_coach.solution_claims.store import SolutionClaimLog
 from algo_coach.solutions.store import SolutionLog
 from algo_coach.storage import Database
+from algo_coach.techniques import with_ancestors
 
 
 def derive(
@@ -19,7 +20,7 @@ def derive(
 
     The reference is excluded, for the reason `corpus.md` gives. A canonical
     nothing has read contributes nothing, which is not a verdict that it used
-    no technique.
+    no technique. A claimed code brings every code it is a kind of.
     """
     standing = standing_solution_claims(claims)
     derived: dict[str, set[str]] = {problem.id: set() for problem in problems}
@@ -28,7 +29,7 @@ def derive(
             continue
         claim = standing.get(solution.id)
         if claim is not None:
-            derived[solution.problem_id] |= set(claim.techniques)
+            derived[solution.problem_id] |= with_ancestors(claim.techniques)
     # sorted: a claim's prompt is rendered from these, and the prompt hash is
     # taken over that text.
     return {problem_id: sorted(codes) for problem_id, codes in derived.items()}
@@ -43,6 +44,21 @@ def with_techniques(
     problems = list(problems)
     derived = derive(problems, solutions, claims)
     return [problem.model_copy(update={"techniques": derived[problem.id]}) for problem in problems]
+
+
+def load_problem(root: Database, problem_id: str) -> Problem | None:
+    """One stored problem carrying the view, read without the rest of the
+    corpus. `None` where the store holds no such problem."""
+    problem = ProblemStore(root).get(problem_id)
+    if problem is None:
+        return None
+    solutions = SolutionLog(root).for_problem(problem_id)
+    claims = [
+        claim
+        for solution in solutions
+        for claim in SolutionClaimLog(root).for_solution(solution.id)
+    ]
+    return with_techniques([problem], solutions, claims)[0]
 
 
 def load_problems(root: Database) -> list[Problem]:

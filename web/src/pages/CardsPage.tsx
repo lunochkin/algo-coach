@@ -1,52 +1,71 @@
-import { Link } from 'react-router'
-
-import { api, type Card } from '@/api/client'
+import { api, type ListedCard } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
+import { CardPanel } from '@/components/CardPanel'
+import { Loaded } from '@/components/Loaded'
+import { PageHeader } from '@/components/PageHeader'
+import { SectionHeading } from '@/components/SectionHeading'
+import { inProgress } from '@/lib/cards'
 
 export function CardsPage() {
-  const { data: cards, error } = useLoaded((signal) => api.GET('/api/cards', { signal }), 'cards')
-
-  if (error) return <p className="text-destructive">The cards did not load: {error}</p>
-  if (!cards) return <p className="text-muted-foreground">Loading the cards…</p>
+  const cards = useLoaded((signal) => api.GET('/api/cards', { signal }), 'cards')
 
   return (
-    <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">Cards</h1>
-      {cards.length === 0 ? (
-        <p className="text-muted-foreground">No card is seeded yet.</p>
-      ) : (
-        byTechnique(cards).map(([technique, group]) => (
-          <div key={technique} className="space-y-2">
-            <h2 className="text-lg font-medium">{technique}</h2>
-            <ul className="space-y-1">
-              {group.map((card) => (
-                <li key={card.slug} className="flex items-baseline gap-2">
-                  <Link
-                    to={`/cards/${encodeURIComponent(card.slug)}`}
-                    className="font-medium underline-offset-4 hover:underline"
-                  >
-                    {card.title}
-                  </Link>
-                  <span className="text-sm text-muted-foreground">
-                    {card.templates.length} template(s)
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))
-      )}
+    <section className="space-y-section">
+      <PageHeader
+        title="Cards"
+        note="One card teaches one technique: when to reach for it, and the forms to reproduce from memory."
+      />
+      <Loaded of="the cards" state={cards} blank="No card is seeded yet.">
+        {(cards) => {
+          // the cards with a run open read first, the most recently active
+          // first: they are the ones the user is working through
+          const studying = inProgress(cards)
+          const rest = cards.filter((card) => !card.status.started_at)
+          return (
+            <div className="space-y-section">
+              {studying.length > 0 && (
+                <section className="space-y-stack">
+                  <SectionHeading title="Studying" count={studying.length} />
+                  <CardPanel technique={null} cards={studying} />
+                </section>
+              )}
+              {rest.length > 0 && (
+                <section className="space-y-stack">
+                  {studying.length > 0 && (
+                    <SectionHeading title="Not started" count={rest.length} />
+                  )}
+                  {blocks(rest).map((block) => (
+                    <CardPanel
+                      key={'technique' in block ? block.technique : block.cards[0].slug}
+                      technique={'technique' in block ? block.technique : null}
+                      cards={block.cards}
+                    />
+                  ))}
+                </section>
+              )}
+            </div>
+          )
+        }}
+      </Loaded>
     </section>
   )
 }
 
-// the API orders the cards by technique, so a group is a run of neighbours
-function byTechnique(cards: Card[]): [string, Card[]][] {
-  const groups: [string, Card[]][] = []
+type Block = { technique: string; cards: ListedCard[] } | { cards: ListedCard[] }
+
+// the API orders the cards by family, the technique a narrower one is a kind
+// of. A family with one card is a row like any other, since a heading over a
+// single row names what the row says
+function blocks(cards: ListedCard[]): Block[] {
+  const out: Block[] = []
   for (const card of cards) {
-    const last = groups.at(-1)
-    if (last && last[0] === card.technique) last[1].push(card)
-    else groups.push([card.technique, [card]])
+    const last = out.at(-1)
+    const taught = cards.filter((one) => one.family === card.family)
+    if (taught.length > 1) {
+      if (last && 'technique' in last && last.technique === card.family) last.cards.push(card)
+      else out.push({ technique: card.family, cards: [card] })
+    } else if (last && !('technique' in last)) last.cards.push(card)
+    else out.push({ cards: [card] })
   }
-  return groups
+  return out
 }

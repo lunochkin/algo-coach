@@ -140,8 +140,9 @@ def test_a_read_needs_no_content_type(client):
 
 
 def test_a_route_that_names_no_user_needs_no_session(client):
-    """The cards are product data, read by anyone the pages reach."""
-    assert client.get("/api/cards").status_code == 200
+    """A technique's cards are product data, read by anyone the pages reach.
+    The cards list reads the user's own status, so it names a user."""
+    assert client.get("/api/techniques/greedy/cards").status_code == 200
 
 
 def test_a_record_the_user_cannot_reach_answers_not_found(client):

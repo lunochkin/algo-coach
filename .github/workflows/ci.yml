@@ -13,7 +13,12 @@ concurrency:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # Ubuntu 26 ahead of 2026-10-19, the day `ubuntu-latest` migrates to it.
+    # This job installs gVisor and reloads the runner's Docker daemon, so the
+    # runner's kernel and daemon decide whether the sandbox tests run at all.
+    # Named rather than taken from `ubuntu-latest`, so the migration lands on a
+    # commit that read what the sandbox tests said
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     # the integration tests' server, on the version the engine runs against.
     # Its default user is a superuser, which creates the workers' databases and
@@ -36,7 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       # by commit, as its readme asks; the major tags stop at v7
-      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: true
       # pyright is a node program; on the path, it is not downloaded per run
@@ -50,6 +55,26 @@ jobs:
       - run: uv sync
       # the frontend's packages, which `just ci` type-checks and lints against
       - run: npm ci --prefix web
+      # gVisor, for the tests that send a run through the broker's own
+      # container. runsc runs only on Linux, so this runner is the one place
+      # those tests run. A run starts with `--pull never`, so the submission's
+      # image is pulled here, by the pin the broker names
+      - name: Install gVisor
+        run: |
+          curl -fsSL https://gvisor.dev/archive.key \
+            | sudo gpg --dearmor -o /usr/share/keyrings/gvisor-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/gvisor-archive-keyring.gpg] https://storage.googleapis.com/gvisor/releases release main" \
+            | sudo tee /etc/apt/sources.list.d/gvisor.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y runsc
+          sudo runsc install
+          # reloaded rather than restarted: a restart stops this job's own
+          # service containers, and Postgres is one of them. The daemon reads
+          # the runtimes `runsc install` wrote on a reload
+          sudo systemctl reload docker
+          # here rather than as a sandbox test that skipped
+          docker info --format '{{json .Runtimes}}' | grep -q runsc
+          docker pull "$(uv run python -c 'from algo_coach.broker.container import IMAGE; print(IMAGE)')"
       - run: just ci
       # a dependency declared and unused, or used and undeclared
       - run: uv run --with deptry deptry src

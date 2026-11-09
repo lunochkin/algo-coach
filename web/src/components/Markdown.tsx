@@ -8,7 +8,7 @@ import remarkMath from 'remark-math'
 // statement, tables and `$…$` math included
 export function Markdown({ children }: { children: string }) {
   return (
-    <div className="prose prose-neutral max-w-none dark:prose-invert">
+    <div className="prose max-w-none">
       <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
         {children}
       </ReactMarkdown>

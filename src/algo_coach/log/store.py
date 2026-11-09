@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import ColumnElement, Table, insert, select
@@ -57,10 +58,17 @@ class AttemptLog:
     def append_diagnosis(self, diagnosis: Diagnosis) -> None:
         self._diagnoses.append(diagnosis)
 
-    def attempts(self, user_id: str | None = None) -> list[Attempt]:
-        if user_id is None:
-            return self._attempts.all()
-        return self._attempts.where(attempts.c.user_id == user_id)
+    def attempts(
+        self, user_id: str | None = None, *, since: datetime | None = None
+    ) -> list[Attempt]:
+        """`since` reads the attempts finished at or after it, so a rate is
+        counted in the query rather than over the user's whole log."""
+        conditions: list[ColumnElement[bool]] = []
+        if user_id is not None:
+            conditions.append(attempts.c.user_id == user_id)
+        if since is not None:
+            conditions.append(attempts.c.finished_at >= since)
+        return self._attempts.where(*conditions)
 
     def verifications(self, user_id: str | None = None) -> list[AttemptVerification]:
         with self.root.connect() as conn:

@@ -25,7 +25,10 @@ def client(root):
 
 @pytest.fixture
 def sitting_id(client) -> str:
-    return client.post("/api/problems/p1/sittings").json()["sitting"]["id"]
+    """A sitting whose clock runs, as a press or the preference starts it."""
+    sitting_id = client.post("/api/problems/p1/sittings").json()["sitting"]["id"]
+    client.post(f"/api/sittings/{sitting_id}/start")
+    return sitting_id
 
 
 def submitted(client, sitting_id: str, code: str = DOUBLE):
@@ -76,18 +79,23 @@ def test_a_submission_without_code_is_unprocessable(client, sitting_id):
     assert client.post(f"/api/sittings/{sitting_id}/submissions", json={}).status_code == 422
 
 
-def test_a_paused_sitting_refuses_a_submission_until_resumed(client, sitting_id):
-    """A submission while paused would stamp a time the clock was not
-    counting."""
+def test_a_user_past_the_submission_cap_is_refused(client, sitting_id):
+    """429 rather than 409: the request is sound, and the same one stands a
+    minute later. Each submission runs untrusted code on the server."""
+    codes: list[int] = []
+    while len(codes) < 30 and 429 not in codes:
+        # wrong answers, since a solving one ends the sitting
+        codes.append(submitted(client, sitting_id, TRIPLE).status_code)
+
+    assert codes[0] == 200
+    assert codes[-1] == 429
+
+
+def test_a_paused_sitting_takes_a_submission(client, sitting_id):
+    """A pause stops the timing, not the practice."""
     assert (
         client.post(f"/api/sittings/{sitting_id}/pause").json()["sitting"]["pauses"][0]["until"]
         is None
-    )
-    assert submitted(client, sitting_id).status_code == 409
-
-    assert (
-        client.post(f"/api/sittings/{sitting_id}/resume").json()["sitting"]["pauses"][0]["until"]
-        is not None
     )
     assert submitted(client, sitting_id).status_code == 200
 
@@ -124,7 +132,8 @@ def test_each_attempt_of_the_sitting_is_asked_about_until_claimed(client, sittin
     first = submitted(client, sitting_id, TRIPLE).json()["attempt"]["id"]
     second = submitted(client, sitting_id).json()["attempt"]["id"]
     assert [
-        one["id"] for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
+        one["attempt"]["id"]
+        for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
     ] == [
         first,
         second,
@@ -136,7 +145,8 @@ def test_each_attempt_of_the_sitting_is_asked_about_until_claimed(client, sittin
 
     assert (written["techniques"], written["source"]) == (["sorting"], "user")
     assert [
-        one["id"] for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
+        one["attempt"]["id"]
+        for one in client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
     ] == [second]
 
 
@@ -197,3 +207,61 @@ def test_another_user_s_unclaimed_attempts_are_not_found(root, client, sitting_i
     other = browsing(root, "u-b71e03")
 
     assert other.get(f"/api/sittings/{sitting_id}/unclaimed").status_code == 404
+
+
+def test_the_label_is_stored_against_the_attempt(client, sitting_id, root):
+    """The loop asks for the label beside the claim, and one press sends
+    both."""
+    attempt_id = submitted(client, sitting_id, TRIPLE).json()["attempt"]["id"]
+
+    written = client.post(f"/api/attempts/{attempt_id}/labels", json={"mode": "rust"}).json()
+
+    assert (written["attempt_id"], written["mode"]) == (attempt_id, "rust")
+    assert [one.id for one in AttemptLog(root).self_labels(USER)] == [written["id"]]
+
+
+def test_a_label_the_verdict_leaves_closed_is_refused(client, sitting_id):
+    """A solved attempt failed at nothing, so the modes naming a failure are
+    not open to it."""
+    attempt_id = submitted(client, sitting_id).json()["attempt"]["id"]
+
+    response = client.post(f"/api/attempts/{attempt_id}/labels", json={"mode": "gap"})
+
+    assert response.status_code == 409
+    assert "gap" in response.json()["detail"]
+
+
+def test_labelling_another_user_s_attempt_is_not_found(root, client, sitting_id):
+    attempt_id = submitted(client, sitting_id).json()["attempt"]["id"]
+    other = browsing(root, "u-b71e03")
+
+    response = other.post(f"/api/attempts/{attempt_id}/labels", json={"mode": "none"})
+
+    assert response.status_code == 404
+
+
+def test_the_modes_each_attempt_leaves_open_are_served(client, sitting_id):
+    """The page offers what the route sends, so the split by verdict lives in
+    one place."""
+    submitted(client, sitting_id, TRIPLE)
+    submitted(client, sitting_id, "def solve(n):\n    raise ValueError(n)\n")
+    submitted(client, sitting_id)
+
+    asked = client.get(f"/api/sittings/{sitting_id}/unclaimed").json()["attempts"]
+
+    assert [one["modes"] for one in asked] == [
+        ["gap", "rust", "syntax"],
+        [],
+        ["speed", "none"],
+    ]
+
+
+def test_a_submission_after_a_restore_says_so(client, sitting_id):
+    """A solve typed over a restored one is not an independent solve, so the
+    attempt records the restore the page reports."""
+    restored = client.post(
+        f"/api/sittings/{sitting_id}/submissions", json={"code": TRIPLE, "restored": True}
+    ).json()["attempt"]
+    plain = submitted(client, sitting_id, TRIPLE).json()["attempt"]
+
+    assert (restored["restored"], plain["restored"]) == (True, False)

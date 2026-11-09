@@ -5,7 +5,7 @@ from sqlalchemy import select
 from algo_coach.api import create_app
 from algo_coach.api.context import SESSION_COOKIE
 from algo_coach.api.signin import Client, SignIn
-from algo_coach.log import Provider
+from algo_coach.log import Provider, signed_in
 from algo_coach.log.table import sessions
 from algo_coach.storage import Database
 
@@ -29,6 +29,26 @@ def test_the_login_page_is_offered_the_dev_login_and_its_user():
     offered = TestClient(create_app(Database(), dev_login="local")).get("/api/sign-in").json()
 
     assert offered == {"providers": [], "dev_login": "local"}
+
+
+def test_the_session_says_who_it_signs_in_as(database):
+    """The menu names the user, and a dev login carries no address to name."""
+    signed_in(database, Provider.GOOGLE, "google-7", "Solver@Example.com")
+    user_id = signed_in(database, Provider.GOOGLE, "google-7", "solver@example.com")
+
+    me = browsing(database, user_id).get("/api/me").json()
+
+    assert me == {"user_id": user_id, "email": "solver@example.com"}
+
+
+def test_a_user_no_provider_linked_carries_no_address(database):
+    me = browsing(database, USER).get("/api/me").json()
+
+    assert me == {"user_id": USER, "email": None}
+
+
+def test_who_the_session_signs_in_as_needs_a_session(database):
+    assert TestClient(create_app(database)).get("/api/me").status_code == 401
 
 
 def test_signing_out_revokes_the_session_and_clears_its_cookie(database):

@@ -34,6 +34,7 @@ def practised(database):
 def practise(database, user_id: str) -> None:
     client = browsing(database, user_id)
     sitting_id = client.post("/api/problems/p1/sittings").json()["sitting"]["id"]
+    client.post(f"/api/sittings/{sitting_id}/start")
     client.post(f"/api/sittings/{sitting_id}/pause")
     client.post(f"/api/sittings/{sitting_id}/resume")
     submitted = client.post(f"/api/sittings/{sitting_id}/submissions", json={"code": DOUBLE})
@@ -119,6 +120,11 @@ def test_erasing_counts_what_left_each_table(practised):
         "attempts": 1,
         "sitting_pauses": 1,
         "sittings": 1,
+        # the card runs and the recalls of a user who studied no card
+        "recall_attempt_case_results": 0,
+        "recall_attempts": 0,
+        "card_run_probes": 0,
+        "card_runs": 0,
         "calls": 1,
     }
 

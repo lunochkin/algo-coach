@@ -32,6 +32,19 @@ The vocabulary the append-only log references.
   Exceptions are per code and stated in the entry: `recursion` names a
   language mechanism rather than an approach, so a row counting every
   self-call would name no skill.
+- **A code may name its parents, each a code it is a kind of.** Interval DP
+  is a kind of DP, so `interval-dp` names `dynamic-programming`. A code with
+  a parent is defined as a narrowing of that parent, so the parent is part of
+  the definition rather than a judgement made pair by pair. Containment
+  between codes defined apart stays unwritten, since nothing generates it.
+- **A parent is added wherever codes are grouped**, and never written into a
+  claim. A claim keeps the codes its writer named. The board, mastery and a
+  problem's techniques count a claim naming `knapsack` toward
+  `dynamic-programming` as well.
+- **A parent means only "is a kind of".** A code that always uses another, as
+  a bitmask DP uses bit operations, does not name it as a parent. Whether one
+  code always uses another is a judgement per pair, and the classifier makes
+  it from the criteria as it makes any claim.
 - **Only incidental use disqualifies a code.** Another
   candidate covering the code does not. The near miss states that line in
   full: a sorted lookup beside a linear pass that dominates, a map standing in
@@ -60,8 +73,8 @@ The vocabulary the append-only log references.
 
 A card organises studying one technique: what to read, what to reproduce from
 memory, and what to solve. A card is not the vocabulary itself, and not an
-ability estimate. Mastery is the set of problems a user can solve, per
-technique, and a card and a mastery estimate share no data.
+ability estimate. Mastery measures how well a user recognises and executes
+each technique, and a card and a mastery estimate share no data.
 
 - **Product data, not code.** Cards live in the engine datastore, seeded from
   `content/`, which is gitignored like `data/`. One location, whatever the
@@ -69,6 +82,8 @@ technique, and a card and a mastery estimate share no data.
 - **Granularity follows teaching, not estimation.** One technique can carry
   several cards. Mastery is estimated per technique, so cards are never the
   unit of estimation, and the attempt log never references a card.
+- **A card carries no card state.** The card is global and each card state is
+  one user's, so `log.md` derives a user's card state from that user's log.
 - **A card names no problem.** It carries a selector: a technique, and the
   filters that narrow it. The ladder is derived from the corpus. Ids are minted
   per engine, so a card holding problem ids would mean nothing in another
@@ -131,6 +146,26 @@ technique, and a card and a mastery estimate share no data.
   code unasked removes that chance for every template alike. The card's
   trigger and brief stay visible, since they say when to reach for the
   technique rather than how the form is written.
+- **A template carries the cases its form is checked against.** The trainer
+  runs what the user typed rather than comparing it with the stored code. Two
+  correct reproductions of one form differ in their whitespace and in the names
+  they choose, and neither difference is a recall failure.
+- **The cases call `solve`**, as a problem's cases do. `corpus.md` gives why
+  that name is fixed: a function called `lower_bound` announces the form the
+  recall is asking for.
+- **A template whose answer is a set says so, and its cases are compared after
+  the top level is sorted.** Every subset and every permutation of an input is
+  one answer, and two correct reproductions emit that answer in different
+  orders. The sort reaches the top level alone, so two permutations of one
+  multiset stay two answers.
+- **An answer that is neither unique nor a set carries no cases.** A
+  topological order is one of many valid orders, and a sort compares multisets,
+  so it would accept an invalid order as readily as a valid one. Such a form is
+  read on the card until a case can carry a check rather than a value.
+- **A template with no cases is read and never recalled.** The cases are an
+  added field, so a card authored before it keeps working, and a template whose
+  form no case checks is study material rather than a recall subject. A
+  procedure template carries prose steps, which no case decides.
 - **The ladder is resolved at import and re-derived whenever the corpus moves
   under it.** The selector is the truth and the ladder a derived view, so
   resolving the ladder again costs nothing. A started card is re-derived too.

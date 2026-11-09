@@ -6,13 +6,15 @@ from helpers import PROVENANCE, stored_problem
 from algo_coach.cases import CaseLog
 from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.mint import case
-from algo_coach.runner import RUNNER
+from algo_coach.runner import runner
 from algo_coach.schema import CaseOutcome, Sitting
 from algo_coach.sitting import DRILL_CAP_MS, Missing, Refused, Submitted, submit
 from algo_coach.verifications import VerificationLog
 
 STARTED = datetime(2026, 9, 10, 8, tzinfo=UTC)
 NINE = datetime(2026, 9, 10, 9, tzinfo=UTC)
+# a second submission within the idle bound, which counts from the first
+NINE_THIRTY = datetime(2026, 9, 10, 9, 30, tzinfo=UTC)
 TEN = datetime(2026, 9, 10, 10, tzinfo=UTC)
 ELEVEN = datetime(2026, 9, 10, 11, tzinfo=UTC)
 
@@ -28,7 +30,17 @@ class Stores:
         stored_problem(root, "p1")
         self.sittings.put(
             Sitting.model_validate(
-                {"id": "s1", "user_id": "u-4f9c2a", "problem_id": "p1", "started_at": STARTED}
+                # touched at the last of these clocks: a sitting running for
+                # hours is one the loop kept touching, and an untouched one
+                # ends at the bound `log.md` gives
+                {
+                    "id": "s1",
+                    "user_id": "u-4f9c2a",
+                    "problem_id": "p1",
+                    "started_at": STARTED,
+                    "clock_started_at": STARTED,
+                    "last_active_at": ELEVEN,
+                }
                 | sitting
             )
         )
@@ -162,9 +174,9 @@ def test_a_second_submission_is_a_second_attempt_on_a_cumulative_clock(database)
     stores = Stores(database)
 
     first = stores.submit(TRIPLE, now=NINE)
-    second = stores.submit(DOUBLE, now=TEN)
+    second = stores.submit(DOUBLE, now=NINE_THIRTY)
 
-    assert (first.time_to_solve_sec, second.time_to_solve_sec) == (3600.0, 7200.0)
+    assert (first.time_to_solve_sec, second.time_to_solve_sec) == (3600.0, 5400.0)
     assert {one.sitting_id for one in stores.log.attempts()} == {"s1"}
 
 
@@ -176,14 +188,14 @@ def test_submitting_leaves_the_sitting_running(database):
     assert stores.sittings.get("s1").ended_at is None
 
 
-def test_a_paused_sitting_takes_no_submission(database):
-    """The clock is stopped, so the attempt would carry time the engine did not
-    count for it."""
+def test_a_paused_sitting_takes_a_submission_timed_to_the_pause(database):
+    """A pause stops the timing, not the practice, so the attempt carries the
+    time the clock ran before it."""
     stores = Stores(database, pauses=[{"at": NINE}])
 
-    with pytest.raises(Refused, match="paused"):
-        stores.submit(DOUBLE)
-    assert stores.log.attempts() == []
+    attempt = stores.submit(DOUBLE)
+
+    assert attempt.time_to_solve_sec == (NINE - STARTED).total_seconds()
 
 
 def test_an_ended_sitting_takes_no_submission(database):
@@ -224,7 +236,7 @@ def test_the_verification_names_the_cap_and_the_runner(database):
     comparable only within one runner."""
     verification = Stores(database).submitted(DOUBLE).verification
 
-    assert (verification.cap_ms, verification.runner) == (DRILL_CAP_MS, RUNNER)
+    assert (verification.cap_ms, verification.runner) == (DRILL_CAP_MS, runner())
 
 
 def test_every_case_carries_its_own_outcome(database):
@@ -246,7 +258,8 @@ def test_solved_is_the_projection_of_the_verification(database):
     """One rule decides both, so the attempt and its verdict cannot disagree."""
     stores = Stores(database)
 
-    for code in (DOUBLE, TRIPLE, "def solve(n)\n"):
+    # the solving one last: it ends the sitting
+    for code in (TRIPLE, "def solve(n)\n", DOUBLE):
         submitted = stores.submitted(code)
         assert submitted.attempt.solved is submitted.verification.verified
 
@@ -266,8 +279,34 @@ def test_the_user_s_results_never_reach_the_product_store(database):
 
 
 def test_a_refused_submission_stores_no_verification(database):
-    stores = Stores(database, pauses=[{"at": NINE}])
+    stores = Stores(database, ended_at=TEN)
 
-    with pytest.raises(Refused, match="paused"):
+    with pytest.raises(Refused, match="has ended"):
         stores.submitted(DOUBLE)
     assert stores.log.verifications() == []
+
+
+def test_a_solving_submission_ends_the_sitting(database):
+    """A user who solved and left has nothing left to close."""
+    stores = Stores(database)
+
+    submitted = stores.submitted(DOUBLE, now=NINE)
+
+    assert submitted.sitting.ended_at == NINE
+    assert stores.sittings.get("s1") == submitted.sitting
+
+
+def test_a_wrong_submission_leaves_the_sitting_open(database):
+    submitted = Stores(database).submitted(TRIPLE)
+
+    assert submitted.sitting.ended_at is None
+
+
+def test_a_solve_while_paused_closes_the_pause(database):
+    """An ended sitting holds no open pause, or its elapsed time would move
+    with the moment it is read."""
+    stores = Stores(database, pauses=[{"at": NINE}])
+
+    submitted = stores.submitted(DOUBLE, now=NINE_THIRTY)
+
+    assert not submitted.sitting.paused and submitted.sitting.ended_at == NINE_THIRTY
