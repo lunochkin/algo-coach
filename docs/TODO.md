@@ -33,9 +33,9 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 - [x] Write the app into `README.md` as a third adapter carrying the domain in
       TypeScript, held to the Python side by shared fixtures. The invariant
       names two adapters and one copy of the domain
-- [ ] Write the app's sign-in into `README.md`: a token the user mints from
-      the account menu and revokes like a session. A native client cannot
-      carry the pages' cookie
+- [x] Write the app's sign-in into `README.md`: the provider flow opened
+      inside the app, ending in a token through a one-time code and PKCE. A
+      native client cannot carry the pages' cookie
 
 ### The server
 
@@ -49,7 +49,9 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 - [ ] Serve the sync API: append a user's records, ignoring an id already
       stored, and return the records since a cursor. A retried upload then
       writes nothing twice
-- [ ] Mint, list and revoke app tokens from the account menu
+- [ ] Sign the native app in through the provider flow, ending in a token
+      the app exchanges a one-time code for
+- [ ] List and revoke the signed-in apps from the account menu
 
 ### The app
 

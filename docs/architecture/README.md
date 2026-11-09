@@ -573,6 +573,35 @@ times. Each record class is specified in one of the files beside it.
     request as JSON. A form on another site cannot send JSON, and JSON from
     another origin needs a preflight the API never answers. So the session
     cookie carries no write another site forged.
+  - The native app signs in through the same provider flow, opened in a
+    browser sheet inside the app. A native client cannot carry the pages'
+    cookie, so the flow ends in a token for the app instead.
+  - The app marks the flow as its own when it starts, and sends a PKCE
+    challenge. The callback then redirects to the app's own URL scheme with a
+    one-time code, rather than setting the cookie.
+  - The app exchanges that code and its PKCE verifier for the token. Another
+    app claiming the same URL scheme can receive the code, and without the
+    verifier it cannot redeem it.
+  - The providers see only the engine's own callback, as they do for the
+    pages. Supporting the app adds no redirect address to a provider's
+    console.
+  - The invitation gate, the email check and the linking of identities run
+    unchanged, since the app's flow passes the same callback.
+  - An app token is stored as its hash, like a session. A copy of the table
+    then signs no app in.
+  - An app token reaches the knowledge endpoints alone: the content snapshot
+    and the sync. A token taken from a lost phone reads and writes the
+    knowledge log, and nothing else of the account.
+  - An app token expires after 90 days unused, and each use extends it. The
+    app works offline for days, and a fixed lifetime would sign it out on a
+    trip.
+  - The app sends its token in the `Authorization` header, never as a cookie.
+    A browser attaches no header to a request another site forges, so the
+    token needs no guard against forgery.
+  - The account menu lists each signed-in app and revokes any one of them.
+    Signing out in the app revokes that app's token.
+  - The app keeps its token in the phone's secure storage, the Keystore on
+    Android and the Keychain on iOS.
   - An `identities` row links a provider's user id to a user id the engine
     mints at the first sign-in. The log keys on the engine's id, so adding or
     replacing a provider rewrites no record.

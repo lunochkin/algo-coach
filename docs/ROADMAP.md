@@ -393,8 +393,8 @@ does not hold.
 - **Modules of questions**, Python first, authored in files and seeded into
   Postgres. A question with attempts is retired, never deleted.
 - **learn's native app as the engine's client**, scheduling offline with its
-  TypeScript core and syncing through the engine's API, signed in by a token
-  minted from the account menu.
+  TypeScript core and syncing through the engine's API, signed in through
+  Google or GitHub from the app itself.
 - **A sync API** appending a user's records by client-minted id, and a content
   snapshot in the shape the app already reads.
 - **learn's history imported** for the author, and learn frozen.
