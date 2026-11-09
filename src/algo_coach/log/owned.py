@@ -1,10 +1,20 @@
 """One user's whole log, read out and erased as one: `log.md` gives what it
 holds, and why no other user's record is touched."""
 
+from typing import Any
+
 from pydantic import BaseModel
-from sqlalchemy import Connection, delete, select, text
+from sqlalchemy import Connection, Table, delete, select, text
 
 from algo_coach.calls.table import calls
+from algo_coach.knowledge.table import (
+    answers,
+    certification_exams,
+    focuses,
+    lesson_marks,
+    module_status_changes,
+    stints,
+)
 from algo_coach.log.sittings import SittingStore
 from algo_coach.log.store import AttemptLog
 from algo_coach.log.table import (
@@ -22,15 +32,31 @@ from algo_coach.log.table import (
     sittings,
 )
 from algo_coach.schema import (
+    Answer,
     Attempt,
     AttemptClaim,
     AttemptVerification,
     Call,
+    CertificationExam,
     Diagnosis,
+    Focus,
+    LessonMark,
+    ModuleStatusChange,
     SelfLabel,
     Sitting,
+    Stint,
 )
 from algo_coach.storage import Database
+
+# each knowledge table, by the field `UserLog` holds its records in
+KNOWLEDGE: dict[str, Table] = {
+    "answers": answers,
+    "stints": stints,
+    "module_status_changes": module_status_changes,
+    "focuses": focuses,
+    "lesson_marks": lesson_marks,
+    "certification_exams": certification_exams,
+}
 
 
 class UserLog(BaseModel):
@@ -45,6 +71,13 @@ class UserLog(BaseModel):
     self_labels: list[SelfLabel]
     diagnoses: list[Diagnosis]
     calls: list[Call]
+    # the knowledge log: `knowledge.md`, The records
+    answers: list[Answer]
+    stints: list[Stint]
+    module_status_changes: list[ModuleStatusChange]
+    focuses: list[Focus]
+    lesson_marks: list[LessonMark]
+    certification_exams: list[CertificationExam]
 
 
 def whole_log(root: Database, user_id: str) -> UserLog:
@@ -57,16 +90,26 @@ def whole_log(root: Database, user_id: str) -> UserLog:
             select(calls).where(calls.c.id.in_(named)).order_by(calls.c.appended)
         ).mappings()
         called = [Call.model_validate(dict(row)) for row in rows]
-    return UserLog(
-        user_id=user_id,
-        sittings=SittingStore(root).all(user_id),
-        attempts=log.attempts(user_id),
-        verifications=log.verifications(user_id),
-        claims=claims,
-        self_labels=log.self_labels(user_id),
-        diagnoses=diagnosed,
-        calls=called,
+    return UserLog.model_validate(
+        {
+            "user_id": user_id,
+            "sittings": SittingStore(root).all(user_id),
+            "attempts": log.attempts(user_id),
+            "verifications": log.verifications(user_id),
+            "claims": claims,
+            "self_labels": log.self_labels(user_id),
+            "diagnoses": diagnosed,
+            "calls": called,
+            # rows, each validated into the record its field names
+            **{name: _knowledge(root, table, user_id) for name, table in KNOWLEDGE.items()},
+        }
     )
+
+
+def _knowledge(root: Database, table: Table, user_id: str) -> list[dict[str, Any]]:
+    query = select(table).where(table.c.user_id == user_id).order_by(table.c.appended)
+    with root.connect() as conn:
+        return [dict(row) for row in conn.execute(query).mappings()]
 
 
 def erased(root: Database, user_id: str) -> dict[str, int]:
@@ -115,6 +158,7 @@ def erased(root: Database, user_id: str) -> dict[str, int]:
             (recall_attempts, recall_attempts.c.user_id == user_id),
             (card_run_probes, card_run_probes.c.card_run_id.in_(started)),
             (card_runs, card_runs.c.user_id == user_id),
+            *((table, table.c.user_id == user_id) for table in KNOWLEDGE.values()),
         ):
             counted[table.name] = conn.execute(delete(table).where(where)).rowcount
         counted["calls"] = _unnamed_calls(conn, named)

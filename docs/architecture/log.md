@@ -27,6 +27,10 @@ how an account signing in is linked to a user.
 - **One user's log is every sitting, attempt, attempt verification, attempt
   claim, self-label and diagnosis keyed to that user**, and the calls a model
   made about the user's code.
+- **The knowledge log is part of it**: the user's answers, stints, module
+  status changes, focuses, lesson marks and certification exams, as
+  `knowledge.md` gives them. An erasure removes them with the rest, and the
+  user's signed-in apps stay as the sign-in does.
 - **A reader given a user reads that user's records in its query.** No command
   loads every user's log to filter it, so the author's log, which every eval
   reads, never mixes with another user's.

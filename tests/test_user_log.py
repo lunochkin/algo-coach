@@ -6,11 +6,14 @@ from commands import connected, run_cli
 from helpers import PROVENANCE, PROVENANCE_FIELDS, T0, browsing, logged, machine_claim, seed_problem
 from sqlalchemy import select, text
 from sqlalchemy.exc import ProgrammingError
+from test_seed_knowledge import authored
 
 from algo_coach import mint
 from algo_coach.calls.table import calls
 from algo_coach.cases import CaseLog
+from algo_coach.knowledge import read_module, seed_module, sync
 from algo_coach.log import AttemptLog, SittingStore, erased, whole_log
+from algo_coach.log.owned import KNOWLEDGE
 from algo_coach.log.table import attempts, sessions, users
 from algo_coach.schema import Diagnosis, FailureMode
 
@@ -20,15 +23,33 @@ DOUBLE = "def solve(n):\n    return n * 2\n"
 
 
 @pytest.fixture
-def practised(database):
+def practised(database, tmp_path):
     """Both users' logs, each written as the drill loop writes one, with a
-    machine claim and a diagnosis beside the loop's own records."""
+    machine claim and a diagnosis beside the loop's own records, and each with
+    a knowledge log the app synced."""
     seed_problem(database, id="p1", techniques=["greedy", "sorting"])
     for args, expected in (([1], 2), ([3], 6)):
         CaseLog(database).append(mint.case("p1", args, expected, provenance=PROVENANCE))
+    seed_module(read_module(authored(tmp_path)), root=database)
     for user_id in (AUTHOR, OTHER):
         practise(database, user_id)
+        sync(database, user_id, "phone", KNOWLEDGE_LINES, {})
     return database
+
+
+T1 = "2026-11-09T10:00:00+00:00"
+# one record of each kind the app syncs
+KNOWLEDGE_LINES = [
+    {"kind": "attempt", "client_id": "k1", "t": T1, "course": "python", "id": "types-1",
+     "ok": True},
+    {"kind": "session", "client_id": "k2", "t": T1, "mode": "next", "score": 1, "n": 1},
+    {"kind": "status", "client_id": "k3", "t": T1, "course": "python", "status": "paused"},
+    {"kind": "focus", "client_id": "k4", "t": T1, "course": "python", "topic": "core", "sub": None},
+    {"kind": "lesson", "client_id": "k5", "t": T1, "course": "python", "lesson": "names",
+     "status": "done"},
+    {"kind": "cert", "client_id": "k6", "t": T1, "course": "python", "cert": "python-all-expert",
+     "score": 2, "n": 3, "passed": False},
+]  # fmt: skip
 
 
 def practise(database, user_id: str) -> None:
@@ -105,6 +126,12 @@ def test_erasing_a_log_leaves_another_user_s_log_whole(practised):
         "self_labels": [],
         "diagnoses": [],
         "calls": [],
+        "answers": [],
+        "stints": [],
+        "module_status_changes": [],
+        "focuses": [],
+        "lesson_marks": [],
+        "certification_exams": [],
     }
 
 
@@ -125,6 +152,12 @@ def test_erasing_counts_what_left_each_table(practised):
         "recall_attempts": 0,
         "card_run_probes": 0,
         "card_runs": 0,
+        "answers": 1,
+        "stints": 1,
+        "module_status_changes": 1,
+        "focuses": 1,
+        "lesson_marks": 1,
+        "certification_exams": 1,
         "calls": 1,
     }
 
@@ -203,3 +236,12 @@ def test_erasing_names_its_user_every_time(monkeypatch):
         run_cli(monkeypatch, "log", "erase")
 
     assert exit_info.value.code == 2
+
+
+def test_the_export_carries_the_knowledge_log(practised):
+    """`log.md`: one user's whole log is every record keyed to that user, the
+    app's included."""
+    exported = whole_log(practised, AUTHOR)
+
+    assert [answer.client_id for answer in exported.answers] == ["k1"]
+    assert [len(getattr(exported, name)) for name in KNOWLEDGE] == [1] * 6

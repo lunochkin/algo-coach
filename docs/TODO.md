@@ -55,7 +55,7 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 - [x] Sign the native app in through the provider flow, ending in a token
       the app exchanges a one-time code for
 - [ ] List and revoke the signed-in apps from the account menu
-- [ ] Read out and erase the six knowledge tables with `algo-coach log export`
+- [x] Read out and erase the six knowledge tables with `algo-coach log export`
       and `log erase`. `log.md` promises an erasure removes the whole log
 
 ### The app
