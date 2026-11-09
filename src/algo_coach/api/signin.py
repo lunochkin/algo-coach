@@ -3,6 +3,7 @@ no password. Authlib runs the round trip and checks the state, the nonce and
 PKCE; this module reads who signed in."""
 
 import logging
+import re
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
 from enum import StrEnum
@@ -14,14 +15,31 @@ from fastapi import APIRouter, FastAPI, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import RedirectResponse
 from joserfc.errors import JoseError
+from pydantic import BaseModel, Field
 from starlette.middleware.sessions import SessionMiddleware
 
 from algo_coach.api.context import SESSION_COOKIE, Root
-from algo_coach.log import LIFETIME, Provider, invited, opened, signed_in
+from algo_coach.log import (
+    LIFETIME,
+    Provider,
+    app_revoked,
+    exchanged,
+    invited,
+    issued,
+    opened,
+    signed_in,
+)
 
 LOGGER = logging.getLogger(__name__)
 # the page the frontend routes a refusal to
 LOGIN_PAGE = "/login"
+# where an app's sign-in returns to. A constant, so no request can name a
+# redirect of its own
+APP_REDIRECT = "algocoach://signed-in"
+# where the round trip remembers that the app started it, and its challenge
+APP_CHALLENGE = "app_challenge"
+# a PKCE S256 challenge: 43 characters of unpadded base64url
+CHALLENGE = re.compile(r"[A-Za-z0-9_-]{43}")
 
 
 class Refusal(StrEnum):
@@ -136,13 +154,22 @@ router = APIRouter(prefix="/auth", include_in_schema=False)
 
 
 @router.get("/{provider}")
-async def redirect(provider: Provider, request: Request) -> RedirectResponse:
+async def redirect(
+    provider: Provider, request: Request, client: str | None = None, code_challenge: str = ""
+) -> RedirectResponse:
+    request.session.pop(APP_CHALLENGE, None)
+    if client == "app":
+        if not CHALLENGE.fullmatch(code_challenge):
+            raise HTTPException(400, "an app's sign-in sends a PKCE S256 challenge")
+        request.session[APP_CHALLENGE] = code_challenge
     back = f"{request.app.state.origin}{request.url.path}/callback"
     return await _client(request, provider).authorize_redirect(request, back)
 
 
 @router.get("/{provider}/callback")
 async def callback(provider: Provider, request: Request, root: Root) -> RedirectResponse:
+    challenge = request.session.pop(APP_CHALLENGE, None)
+    refused = _refused_in_app if challenge else _refused_on_page
     try:
         account = await ACCOUNTS[provider](_client(request, provider), request)
     # a refused consent, a state no redirect stored, or an ID token another
@@ -160,15 +187,47 @@ async def callback(provider: Provider, request: Request, root: Root) -> Redirect
     user_id = await run_in_threadpool(
         signed_in, root, provider, account.provider_user_id, account.email
     )
+    if challenge:
+        code = await run_in_threadpool(issued, root, user_id, challenge)
+        return RedirectResponse(f"{APP_REDIRECT}?code={code}", status_code=303)
     token = await run_in_threadpool(opened, root, user_id)
     return session_redirect(token, secure=request.app.state.origin.startswith("https://"))
 
 
 # the callback is a navigation from the provider's site, so a refusal answers
 # with the page that explains it rather than a record of it
-def refused(reason: Refusal) -> RedirectResponse:
+def _refused_on_page(reason: Refusal) -> RedirectResponse:
     """Back to the login page, which says what the code means."""
     return RedirectResponse(f"{LOGIN_PAGE}?refused={reason}", status_code=303)
+
+
+def _refused_in_app(reason: Refusal) -> RedirectResponse:
+    return RedirectResponse(f"{APP_REDIRECT}?refused={reason}", status_code=303)
+
+
+class Exchange(BaseModel):
+    code: str = Field(min_length=1)
+    verifier: str = Field(min_length=43, max_length=128)
+    device: str = Field(min_length=1)
+
+
+class Issued(BaseModel):
+    token: str
+
+
+@router.post("/app/token")
+def token(exchange: Exchange, root: Root) -> Issued:
+    found = exchanged(root, exchange.code, exchange.verifier, exchange.device)
+    if found is None:
+        raise HTTPException(400, "the code is spent, expired, or not this app's")
+    return Issued(token=found)
+
+
+@router.post("/app/signout", status_code=204)
+def signout(request: Request, root: Root) -> None:
+    scheme, _, bearer = request.headers.get("authorization", "").partition(" ")
+    if scheme.lower() == "bearer" and bearer:
+        app_revoked(root, bearer)
 
 
 def session_redirect(token: str, *, secure: bool) -> RedirectResponse:

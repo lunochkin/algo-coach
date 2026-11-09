@@ -77,6 +77,36 @@ sessions = Table(
     CheckConstraint("revoked_at >= created_at", name="revoked_after_it_starts"),
 )
 
+# a one-time code the native app exchanges for its token, bound to the app's
+# PKCE challenge. Keyed by the code's hash, as a session is: `README.md`
+app_codes = Table(
+    "app_codes",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False),
+    Column("challenge", Text, nullable=False),
+    Column("created_at", timestamp(), nullable=False),
+    Column("expires_at", timestamp(), nullable=False),
+    # set by the exchange: a code is exchanged once
+    Column("used_at", timestamp()),
+    CheckConstraint("expires_at > created_at", name="expires_after_it_starts"),
+)
+
+# a signed-in native app. Keyed by its token's hash, and alive while used: the
+# token expires once unused for the bound `README.md` gives
+app_tokens = Table(
+    "app_tokens",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    Column("device", Text, nullable=False),
+    Column("created_at", timestamp(), nullable=False),
+    Column("last_used_at", timestamp(), nullable=False),
+    Column("revoked_at", timestamp()),
+    CheckConstraint("device <> ''", name="device_named"),
+    CheckConstraint("revoked_at >= created_at", name="revoked_after_it_starts"),
+)
+
 attempts = Table(
     "attempts",
     metadata,

@@ -1,3 +1,4 @@
+from algo_coach.log.apps import app_revoked, app_user_of, exchanged, issued
 from algo_coach.log.invitations import invitations_held, invite, invited, withdraw
 from algo_coach.log.latest import latest_by_attempt
 from algo_coach.log.owned import erased, whole_log
@@ -16,12 +17,16 @@ __all__ = [
     "Provider",
     "RecallLog",
     "SittingStore",
+    "app_revoked",
+    "app_user_of",
     "email_of",
     "erased",
+    "exchanged",
     "hashed",
     "invitations_held",
     "invite",
     "invited",
+    "issued",
     "latest_by_attempt",
     "latest_recalls",
     "named",

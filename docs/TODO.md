@@ -52,7 +52,7 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 - [x] Serve the sync API: append a user's records, ignoring an id already
       stored, and return the records since a cursor. A retried upload then
       writes nothing twice
-- [ ] Sign the native app in through the provider flow, ending in a token
+- [x] Sign the native app in through the provider flow, ending in a token
       the app exchanges a one-time code for
 - [ ] List and revoke the signed-in apps from the account menu
 - [ ] Read out and erase the six knowledge tables with `algo-coach log export`

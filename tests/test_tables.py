@@ -207,7 +207,7 @@ def test_a_table_holds_exactly_its_record_s_fields(stored):
 # the tables no record is stored in whole: the user is an id the records
 # reference, an identity links an account to it, a session signs it in, and an
 # invitation lets its email sign in at all
-WITHOUT_A_RECORD = {"identities", "invitations", "sessions", "users"}
+WITHOUT_A_RECORD = {"app_codes", "app_tokens", "identities", "invitations", "sessions", "users"}
 
 
 def test_every_stored_record_has_a_table():
