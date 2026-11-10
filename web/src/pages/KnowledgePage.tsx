@@ -30,7 +30,7 @@ import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
 import { loadedFrom, useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
-import { CERTIFICATIONS, LESSONS, lessonPath } from '@/knowledge/paths'
+import { CERTIFICATIONS, EXAM, LESSONS, lessonPath } from '@/knowledge/paths'
 
 // the focus bar reads in the flame, as progress does, from what is held to
 // what is not yet met
@@ -172,9 +172,15 @@ export function KnowledgePage() {
             )}
 
             <div className="space-y-1">
-              <Button disabled={!counts} onClick={() => counts && start(counts)}>
-                Continue
-              </Button>
+              <div className="flex gap-stack">
+                <Button disabled={!counts} onClick={() => counts && start(counts)}>
+                  Continue
+                </Button>
+                {/* the second way in, at a lower weight: `pages.md`, The knowledge pages */}
+                <Button variant="outline" asChild>
+                  <Link to={EXAM}>Exam</Link>
+                </Button>
+              </div>
               {counts && (
                 <p className="text-meta text-muted-foreground">
                   {continueLine(counts, !!focus?.strict)}

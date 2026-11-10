@@ -118,7 +118,7 @@ those steps at low fidelity.
 | `/knowledge` | continues the next queue, or picks another way in | Knowledge |
 | `/knowledge/modules/:module` | reads where each group stands, aims the focus, and starts a filtered queue | Knowledge |
 | `/knowledge/queue` | answers one question at a time | Knowledge |
-| `/knowledge/exam` | picks a level exam | Knowledge |
+| `/knowledge/exam` | picks a level exam or a certification's, and takes it | Knowledge |
 | `/knowledge/lessons` | picks a lesson | Knowledge |
 | `/knowledge/lessons/:module/:lesson` | reads a lesson and marks it read | Knowledge |
 | `/knowledge/certifications` | reads where each certification stands | Knowledge |
@@ -231,7 +231,7 @@ platforms.
   focus is a record of the log, so a focus aimed on the phone opens the same
   exam on the web.
 - **The queue's path is `/knowledge/queue`, and `?mode=` names the queue**:
-  next, review, filtered or exam. A filtered queue's URL carries the sheet's
+  next, review or filtered. A filtered queue's URL carries the sheet's
   choices too: `?module=`, `&topic=`, `&sub=`, `&level=`, `&kind=` and
   `&due=`.
 - **A reload starts a queue of the same mode again**, a filtered queue on the
@@ -274,6 +274,10 @@ platforms.
 - **Stop ends the queue and stores its stint**, and the page reads a summary
   of the answers given. Leaving the queue through the navigation stops it the
   same way. A closed tab stores no stint, and the answers given stay.
+- **An exam runs on the exam's page**, after its choices: a level exam's
+  module, level and size, or a certification's rule, with `?cert=` naming
+  the certification. The sample is drawn at the start and held by the page
+  alone, so a reload returns to the choices.
 - **An exam stores its answers together at its end**, as the phone does. An
   exam stopped before its last question is stored as not passed. An exam in a
   closed tab leaves no record.
@@ -377,7 +381,7 @@ what it offers. The inventory is the list both clients build to.
 | A queue | `/knowledge/queue` | the quiz screen | same |
 | A lesson a queue offers | a stop opening the lesson page | a stop opening the lesson screen | by platform |
 | A level exam's choices | `/knowledge/exam` | Exam | same |
-| An exam and its results | `/knowledge/queue?mode=exam` | the quiz screen | same |
+| An exam and its results | `/knowledge/exam` | the quiz screen | by platform |
 | The lessons | `/knowledge/lessons` | Lessons | same |
 | A lesson | `/knowledge/lessons/:module/:lesson` | Lesson | same |
 | The certifications | `/knowledge/certifications` | Certifications | same |
@@ -431,6 +435,10 @@ what it offers. The inventory is the list both clients build to.
 - **The privacy policy and the gallery are web only.** The providers' consent
   screens link the policy by its URL, and the gallery is a tool for whoever
   styles the web.
+- **An exam runs on its own page on the web and on the quiz screen on the
+  phone.** The web's exam page holds its sample in memory, so a reload
+  returns to its choices without discarding a record. The phone has no
+  reload, and its quiz screen runs every queue and exam.
 - **A lesson a queue offers differs by platform alone.** Each client stops
   on the lesson and opens its page on Read. The web's page holds one route at a
   time, so Read ends the queue and the way back starts it again. The phone

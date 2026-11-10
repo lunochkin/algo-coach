@@ -35,11 +35,13 @@ type Props = {
   head: string // the line naming where the question sits and why it is served
   onAnswered: (r: Result) => void
   onNext: () => void
+  // an exam shows no verdict until its end: the answer moves on at once
+  exam?: { last: boolean }
 }
 
 // one question, one act at a time: the answer, then the verdict and Next.
 // `pages.md`, The knowledge pages
-export function Ask({ q, course, head, onAnswered, onNext }: Props) {
+export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
   // shuffled on each display, so a position carries no answer
   const order = useMemo(() => choiceOrder(q.choices.length), [q])
   const [picked, setPicked] = useState<number[]>([])
@@ -56,7 +58,8 @@ export function Ask({ q, course, head, onAnswered, onNext }: Props) {
 
   function answer(r: Result) {
     onAnswered(r)
-    setResult(r)
+    if (exam) onNext()
+    else setResult(r)
   }
 
   function submit() {
@@ -195,7 +198,7 @@ export function Ask({ q, course, head, onAnswered, onNext }: Props) {
           )
         ) : (
           <Button disabled={!canSubmit} onClick={submit}>
-            Submit
+            {exam ? (exam.last ? 'Submit and finish' : 'Next') : 'Submit'}
           </Button>
         )}
       </div>
@@ -222,7 +225,7 @@ function Tick(props: { label: string; hint?: string; on: boolean; disabled: bool
   )
 }
 
-function Verdict({ r }: { r: Result }) {
+export function Verdict({ r }: { r: Result }) {
   const { head, explain, note } = verdictView(r)
   return (
     <div className="space-y-1">
@@ -235,7 +238,7 @@ function Verdict({ r }: { r: Result }) {
   )
 }
 
-function Details({ r, course }: { r: Result; course: Course | undefined }) {
+export function Details({ r, course }: { r: Result; course: Course | undefined }) {
   const answer = yourAnswer(r)
   const sections = detailSections(r.q)
   const lessons = taughtBy(r.q, course)

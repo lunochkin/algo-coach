@@ -1,6 +1,6 @@
 import { FileX, Lock, RefreshCw, Target, Trophy } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import {
   bySavedOrder,
@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { loadedFrom, useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
-import { KNOWLEDGE } from '@/knowledge/paths'
+import { EXAM, KNOWLEDGE } from '@/knowledge/paths'
 import { StartSheet, type Scope } from '@/knowledge/StartSheet'
 import { cn } from '@/lib/utils'
 
@@ -114,6 +114,14 @@ export function CertificationsPage() {
                 <p className="text-muted-foreground">{v.scope}</p>
               </div>
               <DialogFooter>
+                {v.offersExam && (
+                  <Button asChild>
+                    <Link to={`${EXAM}?${new URLSearchParams({ cert: picked.id })}`}>
+                      <Trophy />
+                      Take exam
+                    </Link>
+                  </Button>
+                )}
                 {v.offersTarget &&
                   (v.targeted ? (
                     <Button variant="outline" onClick={() => void k.add('focus', focusLine(null))}>

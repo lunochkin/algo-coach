@@ -3,6 +3,7 @@
 export const KNOWLEDGE = '/knowledge'
 export const LESSONS = '/knowledge/lessons'
 export const CERTIFICATIONS = '/knowledge/certifications'
+export const EXAM = '/knowledge/exam'
 
 /** A lesson's page, at one of its sections where `part` names one. `back` is the page to return to. */
 export function lessonPath(module: string, slug: string, part = '', back?: string): string {
