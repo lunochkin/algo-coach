@@ -433,8 +433,8 @@ what it offers. The inventory is the list both clients build to.
   so each reaches the phone with the sitting's trigger.
 - **The board, the cards and a card are web for now.** Each reads where the
   user's practice stands without writing code. The trigger is the phone's
-  Practice and Cards tabs, which wait on an app token reaching the board's
-  and the cards' endpoints.
+  Cards tab, then its Practice tab, whose techniques open their cards on
+  the phone. A technique's problems stay with the sitting.
 - **The privacy policy and the gallery are web only.** The providers' consent
   screens link the policy by its URL, and the gallery is a tool for whoever
   styles the web.
