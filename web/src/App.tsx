@@ -11,6 +11,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProblemPage } from '@/pages/ProblemPage'
 import { ProblemsPage } from '@/pages/ProblemsPage'
+import { SettingsPage } from '@/pages/SettingsPage'
 import { TechniquePage } from '@/pages/TechniquePage'
 
 // loaded when first opened: the editor and the markdown with its math are most
@@ -63,6 +64,7 @@ function App() {
             <Route path="problems/:problemId" element={<ProblemPage />} />
             <Route path="sittings/:sittingId" element={<SittingPage />} />
             <Route path="knowledge" element={<KnowledgePage />} />
+            <Route path="settings" element={<SettingsPage />} />
             <Route path={LOGIN} element={<LoginPage />} />
             <Route path={PRIVACY} element={<PrivacyPage />} />
             {GalleryPage && <Route path="gallery" element={<GalleryPage />} />}

@@ -747,16 +747,17 @@ problem's path reads as its record, as "Every problem" gives.
 | algo-coach   Practice  Problems  Cards  Knowledge               ☀  ≡   |
 +------------------------------------------------------------------------+
 | Settings                                                               |
+| The study settings hold on every device you sign in on.                |
 |                                                                        |
 | Account                                                                |
-| you@example.invalid . u-4f9c2a                 ( Sign out )         |
-| Signed-in apps: 1                                 ( Manage )           |
+| you@example.invalid                 ( Signed-in apps ) ( Sign out )    |
+| u-4f9c2a                                                               |
 |                                                                        |
 | Study                                                                  |
-| New questions per day  [ 10 ]                                          |
-| Exam size              [ 40 ]                                          |
+| New questions per day                           [ 10 ]  0 to 200       |
+| Exam size                                       [ 40 ]  1 to 500       |
 |                                                                        |
-|                     [ Save ]                                           |
+| [ Save ]  Saved.                                                       |
 +------------------------------------------------------------------------+
 ```
 
@@ -766,7 +767,8 @@ problem's path reads as its record, as "Every problem" gives.
   The phone adds the engine's address, the device name and the reminder hour,
   which are about one phone.
 - The daily limit and the exam size are settings of the log, so a value
-  saved here stands on the phone.
+  saved here stands on the phone. Each field names its range, and Save waits
+  until both fields hold a value in range and one of them changed.
 
 ## The login
 

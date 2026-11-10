@@ -50,7 +50,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       `queue_filters`: the focus already holds the choices both clients share
 - [x] Drop Pick questions as a screen, and start a filtered queue from a
       sheet on the module's page. Starting a queue there moves no focus
-- [ ] Add the `/settings` page to the web, with the daily limit and the exam
+- [x] Add the `/settings` page to the web, with the daily limit and the exam
       size, linked from the account menu
 - [ ] Serve the next queue, the review queue and practice on the web from
       `packages/core`

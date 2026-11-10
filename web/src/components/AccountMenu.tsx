@@ -1,7 +1,9 @@
-import { LogOut, Menu, Smartphone } from 'lucide-react'
+import { LogOut, Menu, Settings, Smartphone } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router'
 
-import { api, LOGIN, type Me } from '@/api/client'
+import { named, signOut } from '@/api/account'
+import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { SignedInApps } from '@/components/SignedInApps'
 import { Button } from '@/components/ui/button'
@@ -14,13 +16,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-// revoked on the server, not only dropped from the browser, then to the login
-async function signOut() {
-  await api.DELETE('/api/session')
-  window.location.assign(LOGIN)
-}
-
-// who the session signs in as, the apps signed in as it, and the sign-out.
+// who the session signs in as, the settings, the apps signed in as it, and
+// the sign-out.
 // The menu holds them rather than the navigation, which names where a page is
 export function AccountMenu() {
   const me = useLoaded((signal) => api.GET('/api/me', { signal }), 'me')
@@ -50,6 +47,12 @@ export function AccountMenu() {
             </p>
           </div>
           <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link to="/settings">
+              <Settings />
+              Settings
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setApps(true)}>
             <Smartphone />
             Signed-in apps
@@ -63,11 +66,4 @@ export function AccountMenu() {
       <SignedInApps open={apps} onOpenChange={setApps} />
     </>
   )
-}
-
-// the address the provider verified, and the engine's own id where no
-// provider linked one
-function named(me: Me | undefined): string {
-  if (me === undefined) return 'Signed in'
-  return me.email ?? me.user_id
 }

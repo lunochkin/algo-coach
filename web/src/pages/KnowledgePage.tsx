@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { bySavedOrder, moduleOrder, moved, type OrderRecord } from '@algo-coach/core/order'
 
 import { api } from '@/api/client'
+import { linesOf, readLog, sendLines, type Cursor } from '@/api/log'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
@@ -15,25 +16,17 @@ import { Button } from '@/components/ui/button'
 type Course = { slug: string; definition: { title: string }; questions: unknown[] }
 type Snapshot = { courses: Course[] }
 
-// a browser carries no stable device name: `knowledge.md`, A client's store
-const DEVICE = 'web'
-
-// until the client's store keeps a copy, the page reads the whole log once
 async function load(signal: AbortSignal) {
   const [snapshot, log] = await Promise.all([
     api.GET('/api/knowledge/snapshot', { signal }),
-    api.POST('/api/knowledge/sync', { body: { device: DEVICE, records: [], since: {} }, signal }),
+    readLog(signal),
   ])
-  if (snapshot.error !== undefined || log.error !== undefined) {
+  if (snapshot.data === undefined || log.data === undefined) {
     return { error: snapshot.error ?? log.error }
   }
-  const orders = log.data.records.filter((one) => one.kind === 'order') as unknown as OrderRecord[]
+  const order = moduleOrder(linesOf<OrderRecord>(log.data.records, 'order'))
   const courses = (snapshot.data as Snapshot).courses
-  return { data: { courses, order: moduleOrder(orders), cursor: log.data.cursor } }
-}
-
-function orderLine(courses: string[]) {
-  return { kind: 'order', client_id: crypto.randomUUID(), t: new Date().toISOString(), courses }
+  return { data: { courses, order, cursor: log.data.cursor } }
 }
 
 export function KnowledgePage() {
@@ -54,7 +47,7 @@ export function KnowledgePage() {
   )
 }
 
-type Shown = { courses: Course[]; saved: string[]; cursor: Record<string, number> }
+type Shown = { courses: Course[]; saved: string[]; cursor: Cursor }
 
 function Modules({ courses, saved, cursor }: Shown) {
   const [order, setOrder] = useState(saved)
@@ -70,11 +63,9 @@ function Modules({ courses, saved, cursor }: Shown) {
       to,
     )
     setOrder(next)
-    const { data, error } = await api.POST('/api/knowledge/sync', {
-      body: { device: DEVICE, records: [orderLine(next)], since },
-    })
-    if (error !== undefined) setOrder(before)
-    else setSince(data.cursor)
+    const cursor = await sendLines([{ kind: 'order', courses: next }], since)
+    if (cursor === null) setOrder(before)
+    else setSince(cursor)
   }
 
   return (
