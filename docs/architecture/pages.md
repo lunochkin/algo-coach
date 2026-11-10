@@ -306,7 +306,7 @@ Knowledge     the home
                 a queue, an exam
                 the lessons, a lesson
                 the certifications, a certification's conditions
-Account       the settings, the sign-out, the signed-in apps on the web
+Account       the settings, the signed-in apps, the sign-out
 ```
 
 - **The four sections are the destinations both clients name.** The web
@@ -315,8 +315,8 @@ Account       the settings, the sign-out, the signed-in apps on the web
   the tree rather than a tree of its own.
 - **Account sits apart from the sections on both clients.** The web opens it
   from the account menu, and the phone from its top bar. Account holds the
-  settings, the sign-out and, on the web, the signed-in apps, since none of
-  the three is a place to practise.
+  settings, the signed-in apps and the sign-out, since none of the three is
+  a place to practise.
 - **A section's root is the only page the navigation reaches.** Every other
   page is a step down with one way back, as `## Sections` gives. A shortcut
   from the navigation to a page deeper in the tree would give that page two
@@ -387,7 +387,7 @@ what it offers. The inventory is the list both clients build to.
 | The certifications | `/knowledge/certifications` | Certifications | same |
 | A certification's conditions | a dialog on the certifications and the map | a sheet on Certifications and Map | same |
 | The settings | `/settings` | Settings | same |
-| The signed-in apps | a dialog from the account menu | none | web only |
+| The signed-in apps | a dialog from the account menu | none | to fix |
 | The login | `/login` | Login | same |
 | The privacy policy | `/privacy` | none | web only |
 | The gallery | `/gallery`, in development | none | web only |
@@ -416,7 +416,7 @@ what it offers. The inventory is the list both clients build to.
 | Set the exam size for one exam | the exam page | Exam | same |
 | Read the sync's state, and sync now | the settings page | Settings, and Home's footer | same |
 | Sign out, naming unsent records | the account menu and the settings page | the account menu and Settings | same |
-| Revoke a signed-in app | the signed-in apps | none | web only |
+| Revoke a signed-in app | the signed-in apps | none | to fix |
 | Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
 
 - **A sitting and a recall are web for now.** Each needs a keyboard and a
@@ -427,12 +427,8 @@ what it offers. The inventory is the list both clients build to.
   so each reaches the phone with the sitting's trigger.
 - **The board, the cards and a card are web for now.** Each reads where the
   user's practice stands without writing code. The trigger is the phone's
-  Practice and Cards tabs, which wait on whether an app token may read the
-  board's and the cards' endpoints.
-- **The signed-in apps are web only.** An app token reaches the knowledge
-  endpoints alone, as `README.md` gives, so a phone cannot list or revoke
-  apps. A lost phone is cut off from the web, where its own token cannot
-  reach.
+  Practice and Cards tabs, which wait on an app token reaching the board's
+  and the cards' endpoints.
 - **The privacy policy and the gallery are web only.** The providers' consent
   screens link the policy by its URL, and the gallery is a tool for whoever
   styles the web.
@@ -452,8 +448,9 @@ what it offers. The inventory is the list both clients build to.
 
 ### To fix
 
-No difference is open. A row a later change marks `to fix` is listed here
-with what holds now and the change it needs.
+- **The signed-in apps.** The web lists and revokes them from the account
+  menu. The phone gains the same list under its account menu, once an app
+  token reaches the account's endpoints.
 ## A page's areas
 
 - **A page carries a header and a body.** The header holds the way back, the

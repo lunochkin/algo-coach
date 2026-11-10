@@ -571,8 +571,10 @@ times. Each record class is specified in one of the files beside it.
     rule changed in one copy fails the other copy's tests.
   - A rule changes in `knowledge.md` first, then in both copies. The doc is
     the contract the fixtures are generated against.
-  - The app serves the knowledge modules alone. Every other page of the engine
-    stays in the web app until a feature is chosen for the phone.
+  - The app serves the knowledge modules first, and the rest of the engine
+    follows feature by feature. Every other page stays in the web app until
+    a feature is chosen for the phone, and `pages.md` lists what each client
+    holds.
   - The app runs on Android first, and iOS follows from the same code. It is
     installed directly from a build signed by a key kept out of git. A store
     release is deferred until someone other than the author installs it.
@@ -621,17 +623,24 @@ times. Each record class is specified in one of the files beside it.
     unchanged, since the app's flow passes the same callback.
   - An app token is stored as its hash, like a session. A copy of the table
     then signs no app in.
-  - An app token reaches the knowledge endpoints alone: the content snapshot
-    and the sync. A token taken from a lost phone reads and writes the
-    knowledge log, and nothing else of the account.
+  - An app token reaches every endpoint a session reaches, the account's
+    included. The engine is meant to work from the phone alone, with no web
+    at all, so the app needs everything the pages need.
+  - A token taken from a lost phone then reaches the whole account until it
+    is revoked, and that is accepted. The engine holds a user's practice
+    records, and no money and no credential.
+  - Scoping a token to some endpoints is deferred until the engine holds
+    data worth scoping it for, such as a payment or access beyond
+    invitations. A scope is then one field on the token, checked where the
+    token is read.
   - An app token expires after 90 days unused, and each use extends it. The
     app works offline for days, and a fixed lifetime would sign it out on a
     trip.
   - The app sends its token in the `Authorization` header, never as a cookie.
     A browser attaches no header to a request another site forges, so the
     token needs no guard against forgery.
-  - The account menu lists each signed-in app and revokes any one of them.
-    Signing out in the app revokes that app's token.
+  - The account menu lists each signed-in app and revokes any one of them,
+    on either client. Signing out in the app revokes that app's token.
   - The app keeps its token in the phone's secure storage, the Keystore on
     Android and the Keychain on iOS.
   - The dev build of the app syncs with a local engine, never with a deployed

@@ -115,9 +115,12 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       map, with the focus, the status and the start sheet on its four
       scopes. Stats, the row menu and the course chips go
 - [x] List the phone's lessons by module, as the web does
-- [ ] Decide whether an app token may read the board's and the cards'
+- [x] Decide whether an app token may read the board's and the cards'
       endpoints, and write the choice into `README.md`. The phone's board
       and cards wait on it
+- [ ] Let an app token reach every endpoint a session reaches, with a test
+      per route group. The token reaches the knowledge sync alone today
+- [ ] Add the signed-in apps to the phone's account menu
 - [ ] Serve the board on the phone as a Practice tab: the cards in progress
       and the techniques by staleness, read alone, since a sitting stays on
       the web
