@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { Board, focusLabel, groupCell, levelCounts, loadSnapshot, startPreview } from './index';
+import { Board, focusLabel, focusLine, groupCell, levelCounts, loadSnapshot, startPreview } from './index';
 
 const mk = (id: string, sub: string, level: number) => ({
   id, topic: 't', sub, level, kind: 'concept', prompt: id, format: 'choice' as const,
@@ -72,5 +72,17 @@ describe('the start sheet', () => {
 describe('the focus label', () => {
   it('names the topic and the subtopic by their titles', () => {
     expect(focusLabel({ course: 'c', topic: 't', sub: 's1' }, catalog)).toBe('C › Types › Ints');
+  });
+});
+
+describe('the focus record', () => {
+  it('clears the focus where none is given', () => {
+    expect(focusLine(null)).toEqual({ course: null, topic: null, sub: null, strict: false });
+  });
+
+  it('names a certification only on a certification focus', () => {
+    expect(focusLine({ course: 'c', topic: 't', sub: null, strict: true, cert: 'c-t-associate' })).toEqual({
+      course: 'c', topic: 't', sub: null, strict: true, cert: 'c-t-associate',
+    });
   });
 });

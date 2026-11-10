@@ -21,6 +21,12 @@ export interface FocusRecord {
   cert?: string | null; // absent: not a certificate focus
 }
 
+/** The record a focus is stored as; no focus clears it. */
+export function focusLine(f: Focus | null): Omit<FocusRecord, 't'> {
+  const line = { course: f?.course ?? null, topic: f?.topic ?? null, sub: f?.sub ?? null, strict: !!f?.strict };
+  return f?.cert ? { ...line, cert: f.cert } : line;
+}
+
 /** Newest record (stable by `t`, file order breaks ties), degraded to what still exists. */
 export function currentFocus(records: FocusRecord[], cat: Catalog): Focus | null {
   const last = [...records].sort((a, b) => cmp(a.t, b.t)).at(-1);

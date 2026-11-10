@@ -10,6 +10,7 @@ import {
   emptyContinue,
   type EmptyContinue,
   focusLabel,
+  focusLine,
   focusView,
   moduleRows,
   moved,
@@ -55,8 +56,7 @@ export function KnowledgePage() {
   }, [catalog, board, focus, newLimit, order, certExams, now])
 
   function setFocus(f: Focus | null) {
-    const line = { course: f?.course ?? null, topic: f?.topic ?? null, sub: f?.sub ?? null, strict: !!f?.strict }
-    void k.add('focus', f?.cert ? { ...line, cert: f.cert } : line)
+    void k.add('focus', focusLine(f))
   }
 
   // Continue starts the next queue, or says why nothing is ready and offers the one act that changes that
@@ -175,14 +175,15 @@ export function KnowledgePage() {
               <ul className="divide-y rounded-xl border bg-card">
                 {rows.map((row, i) => (
                   <li key={row.c.slug} className="flex items-center gap-4 px-4 py-3">
-                    <div className="flex-1 space-y-0.5">
-                      <p>
+                    {/* the row opens the module's page; the order presses sit beside it */}
+                    <Link to={`/knowledge/modules/${row.c.slug}`} className="group flex-1 space-y-0.5">
+                      <p className="group-hover:underline">
                         {row.c.title}
                         {row.c.paused && <span className="text-meta text-muted-foreground"> · paused</span>}
                       </p>
                       <p className="text-meta">{row.view.title}</p>
                       {row.view.detail && <p className="text-meta text-muted-foreground">{row.view.detail}</p>}
-                    </div>
+                    </Link>
                     <span className="text-meta text-muted-foreground tabular-nums">
                       {row.toReview} due · {row.total} questions
                     </span>

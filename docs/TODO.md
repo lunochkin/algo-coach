@@ -71,7 +71,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Move what the module's screens compute into `packages/core`: a
       group cell's state and count, the counts per level, and the start
       sheet's counts and label. The web's page would otherwise compute them
-- [ ] Add `/knowledge/modules/:module` to the web: a panel of group cells
+- [x] Add `/knowledge/modules/:module` to the web: a panel of group cells
       per topic, the counts per level, the focus and status presses, and the
       home's rows opening it
 - [ ] Serve the filtered queue from the module page's start sheet, at

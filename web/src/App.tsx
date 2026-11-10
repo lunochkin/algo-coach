@@ -9,6 +9,7 @@ import { BoardPage } from '@/pages/BoardPage'
 import { CardsPage } from '@/pages/CardsPage'
 import { KnowledgePage } from '@/pages/KnowledgePage'
 import { LoginPage } from '@/pages/LoginPage'
+import { ModulePage } from '@/pages/ModulePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProblemPage } from '@/pages/ProblemPage'
 import { ProblemsPage } from '@/pages/ProblemsPage'
@@ -71,6 +72,7 @@ function App() {
             <Route path="sittings/:sittingId" element={<SittingPage />} />
             <Route path="knowledge" element={<KnowledgePage />} />
             <Route path="knowledge/queue" element={<QueuePage />} />
+            <Route path="knowledge/modules/:module" element={<ModulePage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path={LOGIN} element={<LoginPage />} />
             <Route path={PRIVACY} element={<PrivacyPage />} />

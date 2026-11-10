@@ -9,6 +9,7 @@ import {
   sessionPath,
   statusPath,
   currentFocus,
+  focusLine,
   focusPath,
   type Focus,
   type FocusRecord,
@@ -354,14 +355,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const setFocus = useCallback(
     async (f: Focus | null) => {
-      const rec: FocusRecord = {
-        t: isoNow(),
-        course: f?.course ?? null,
-        topic: f?.topic ?? null,
-        sub: f?.sub ?? null,
-        strict: !!f?.strict,
-        ...(f?.cert ? { cert: f.cert } : {}),
-      };
+      const rec: FocusRecord = { t: isoNow(), ...focusLine(f) };
       await DB.addLocal('focus', focusPath(settingsRef.current.device, rec.t), rec);
       setFocusRecords((xs) => [...xs, rec]);
       // Quick toggles collapse into one upload; back-to-back writes of one file conflict on GitHub.
