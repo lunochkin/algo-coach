@@ -32,6 +32,7 @@ import { useStore } from '@/lib/store';
 import { BottomBar, startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
 import { FocusCard } from '@/ui/focuscard';
 import { useArchive, usePauseToggle } from '@/ui/pause';
+import { AccountMenu } from '@/ui/account';
 
 export default function Home() {
   const st = useStore();
@@ -162,6 +163,15 @@ export default function Home() {
   const header = (
     <View style={{ gap: 12 }}>
       <SyncBanner sync={st.sync} />
+      {/* the lessons and the certifications are steps down from the home: `pages.md`, The structure */}
+      <View style={styles.row}>
+        <Button compact icon="book-open-variant" onPress={() => router.push('/lessons')}>
+          Lessons
+        </Button>
+        <Button compact icon="trophy-outline" onPress={() => router.push('/certs')}>
+          Certifications
+        </Button>
+      </View>
       {body}
     </View>
   );
@@ -170,11 +180,7 @@ export default function Home() {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.Content title={APP_NAME} />
-        <Appbar.Action icon="trophy-outline" onPress={() => router.push('/certs')} accessibilityLabel="Certifications" />
-        <Appbar.Action icon="book-open-variant" onPress={() => router.push('/lessons')} accessibilityLabel="Lessons" />
-        <Appbar.Action icon="graph-outline" onPress={() => router.push('/map')} accessibilityLabel="Map" />
-        <Appbar.Action icon="chart-box-outline" onPress={() => router.push('/stats')} accessibilityLabel="Stats" />
-        <Appbar.Action icon="cog-outline" onPress={() => router.push('/settings')} />
+        <AccountMenu />
       </Appbar.Header>
       <ReorderableList
         data={rows}

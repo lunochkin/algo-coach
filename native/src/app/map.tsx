@@ -63,6 +63,8 @@ export default function MapScreen() {
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="Map" />
+        {/* Stats keeps a way in until the module screen holds the groups */}
+        <Appbar.Action icon="chart-box-outline" onPress={() => router.push('/stats')} accessibilityLabel="Stats" />
       </Appbar.Header>
       {courses.length > 1 ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }}>

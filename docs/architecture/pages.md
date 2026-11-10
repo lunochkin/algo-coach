@@ -365,7 +365,7 @@ what it offers. The inventory is the list both clients build to.
 | The cards | `/cards` | none | web for now |
 | A card | `/cards/:slug` | none | web for now |
 | A recall | `/cards/:slug/recall/:template` | none | web for now |
-| The knowledge home | `/knowledge` | Home | to fix |
+| The knowledge home | `/knowledge` | Home | same |
 | A module | `/knowledge/modules/:module` | Map and Stats | to fix |
 | The start sheet | a dialog on the module page | a dialog on Map and Stats | to fix |
 | A queue | `/knowledge/queue` | the quiz screen | same |
@@ -433,13 +433,10 @@ what it offers. The inventory is the list both clients build to.
 `## The structure` settles most of these. Each names what holds now, then
 the change.
 
-- **The phone's navigation.** The phone opens Lessons, Certifications, Map,
-  Stats and Settings from its top bar. It moves to bottom tabs for its
-  sections and an account menu for Settings, with Lessons and Certifications
-  linked from the Knowledge home.
 - **A module.** The web shows one page per module. The phone shows Map, one
   module's graph, and Stats, every module's cells together. The phone moves
-  to one module screen holding the groups and the map, and Stats goes.
+  to one module screen holding the groups and the map, and Stats goes. Until
+  then the Map's top bar opens Stats.
 - **A module's focus and status.** The phone aims a module's focus and sets
   its status from the home row's menu, and cannot aim at a topic. The focus
   and the status move to the phone's module screen, as on the web.
