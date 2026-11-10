@@ -18,7 +18,7 @@ from algo_coach.storage import appended_column, enumerated, metadata, timestamp
 
 # a slug as `Slug` spells it
 SLUG = "'^[a-z0-9][a-z0-9-]*$'"
-RANK = "BETWEEN 0 AND 3"
+LEVEL = "BETWEEN 0 AND 3"
 
 
 # content: refreshed by the seed, matched by slug, retired rather than deleted
@@ -78,7 +78,7 @@ questions = Table(
     Column("slug", Text, nullable=False),
     Column("retired_at", timestamp()),
     Column("position", Integer, nullable=False),
-    Column("rank", Integer, nullable=False),
+    Column("level", Integer, nullable=False),
     Column("kind", Text, nullable=False),
     Column("format", enumerated(QuestionFormat), nullable=False),
     Column("prompt", Text, nullable=False),
@@ -88,7 +88,7 @@ questions = Table(
     # a slug names one question for good, retired or not
     UniqueConstraint("module_id", "slug"),
     CheckConstraint(f"slug ~ {SLUG}", name="slug_spelled"),
-    CheckConstraint(f"rank {RANK}", name="rank_ranked"),
+    CheckConstraint(f"level {LEVEL}", name="level_in_range"),
     CheckConstraint("prompt <> ''", name="prompt_written"),
 )
 
@@ -150,11 +150,11 @@ answers = _logged(
 stints = _logged(
     "stints",
     Column("mode", enumerated(StintMode), nullable=False),
-    Column("rank", Integer),
+    Column("level", Integer),
     Column("score", Integer, nullable=False),
     Column("answered", Integer, nullable=False),
-    CheckConstraint("(mode = 'exam') = (rank IS NOT NULL)", name="an_exam_names_its_rank"),
-    CheckConstraint(f"rank {RANK}", name="rank_ranked"),
+    CheckConstraint("(mode = 'exam') = (level IS NOT NULL)", name="an_exam_names_its_level"),
+    CheckConstraint(f"level {LEVEL}", name="level_in_range"),
     CheckConstraint("score BETWEEN 0 AND answered", name="scored"),
 )
 
@@ -169,15 +169,15 @@ focuses = _logged(
     Column("module_id", Text, ForeignKey("modules.id")),
     Column("topic_id", Text, ForeignKey("topics.id")),
     Column("subtopic_id", Text, ForeignKey("subtopics.id")),
-    Column("certification_rank", Integer),
+    Column("certification_level", Integer),
     Column("strict", Boolean, nullable=False),
     CheckConstraint("topic_id IS NULL OR module_id IS NOT NULL", name="topic_within_module"),
     CheckConstraint("subtopic_id IS NULL OR topic_id IS NOT NULL", name="subtopic_within_topic"),
     CheckConstraint(
-        "certification_rank IS NULL OR (module_id IS NOT NULL AND subtopic_id IS NULL)",
+        "certification_level IS NULL OR (module_id IS NOT NULL AND subtopic_id IS NULL)",
         name="certification_a_module_or_topic",
     ),
-    CheckConstraint(f"certification_rank {RANK}", name="rank_ranked"),
+    CheckConstraint(f"certification_level {LEVEL}", name="level_in_range"),
 )
 
 lesson_marks = _logged(
@@ -190,10 +190,10 @@ certification_exams = _logged(
     "certification_exams",
     Column("module_id", Text, ForeignKey("modules.id"), nullable=False),
     Column("topic_id", Text, ForeignKey("topics.id")),
-    Column("rank", Integer, nullable=False),
+    Column("level", Integer, nullable=False),
     Column("score", Integer, nullable=False),
     Column("answered", Integer, nullable=False),
     Column("passed", Boolean, nullable=False),
-    CheckConstraint(f"rank {RANK}", name="rank_ranked"),
+    CheckConstraint(f"level {LEVEL}", name="level_in_range"),
     CheckConstraint("score BETWEEN 0 AND answered", name="scored"),
 )

@@ -10,7 +10,7 @@ from pydantic import ValidationError
 
 from algo_coach.knowledge.files import ModuleSource
 from algo_coach.schema import BODIES, CertificationSettings, GraphSettings, QuestionFormat
-from algo_coach.schema.authored import RANK_NAMES, RANKS
+from algo_coach.schema.authored import LEVEL_NAMES, LEVELS
 
 FORMATS = ("choice", "short", "card")
 # held in a column of its own, so never part of the body
@@ -59,7 +59,7 @@ def _question(
     seen[raw["id"]] = where
     if raw["kind"] not in kinds:
         found.append(f"kind {raw['kind']!r} not in course kinds")
-    if raw["level"] not in RANKS:
+    if raw["level"] not in LEVELS:
         found.append(f"bad level {raw['level']!r}")
     if raw["kind"] in code_kinds and not raw.get("code"):
         found.append(f"{raw['kind']} without code")
@@ -115,8 +115,8 @@ def _settings(source: ModuleSource) -> list[str]:
             found += [f"unknown subtopic {one!r}" for one in (needs, to) if one not in subs]
             if needs == to:
                 found.append(f"{needs} needs itself")
-            if min(max(RANKS), graph.match_up_to) + offset > max(RANKS):
-                found.append(f"{needs} -> {to}: offset {offset} needs a level above {max(RANKS)}")
+            if min(max(LEVELS), graph.match_up_to) + offset > max(LEVELS):
+                found.append(f"{needs} -> {to}: offset {offset} needs a level above {max(LEVELS)}")
         if cycle := _cycle(graph.edges()):
             found.append(f"cycle: {' -> '.join(cycle)}")
     if source.certifications is None:
@@ -127,7 +127,7 @@ def _settings(source: ModuleSource) -> list[str]:
         return found + [f"certs: {_message(one)}" for one in error.errors()]
     scopes = [topic["slug"] for topic in topics] + ["all"]
     found += [f"unknown scope {one!r}" for one in settings.scope if one not in scopes]
-    ids = {f"{source.slug}-{scope}-{rank}" for scope in scopes for rank in RANK_NAMES}
+    ids = {f"{source.slug}-{scope}-{level}" for scope in scopes for level in LEVEL_NAMES}
     for name, edges in (("edge", settings.edge), ("unedge", settings.unedge)):
         for edge in edges:
             found += [

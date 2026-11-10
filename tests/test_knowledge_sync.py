@@ -62,7 +62,7 @@ def test_learn_s_drill_and_level_exam_map_to_their_names_here(database, tmp_path
     assert [one["mode"] for one in back] == ["drill", "exam-L2"]
 
 
-def test_a_certification_focus_names_its_topic_and_rank(database, tmp_path):
+def test_a_certification_focus_names_its_topic_and_level(database, tmp_path):
     focus = {"kind": "focus", "client_id": "f1", "t": T, "course": "python", "topic": "core",
              "sub": None, "strict": True, "cert": "python-core-associate"}  # fmt: skip
 

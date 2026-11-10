@@ -300,6 +300,12 @@
       "default": null,
       "title": "Lesson"
     },
+    "level": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Level",
+      "type": "integer"
+    },
     "module_id": {
       "title": "Module Id",
       "type": "string"
@@ -312,12 +318,6 @@
       "minLength": 1,
       "title": "Prompt",
       "type": "string"
-    },
-    "rank": {
-      "maximum": 3,
-      "minimum": 0,
-      "title": "Rank",
-      "type": "integer"
     },
     "retired_at": {
       "anyOf": [
@@ -348,7 +348,7 @@
     "module_id",
     "subtopic_id",
     "position",
-    "rank",
+    "level",
     "kind",
     "format",
     "prompt",

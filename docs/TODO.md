@@ -28,7 +28,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       the limit and the raise on the device
 - [ ] Move the day boundary in `packages/core` from 04:00 local time to
       00:00 UTC, with the fixture's `new_today` cases rewritten to match
-- [ ] Rename the knowledge store's `rank` to `level`, in the migration, the
+- [x] Rename the knowledge store's `rank` to `level`, in the migration, the
       tables and the server code. The docs, the wire and `packages/core` say
       `level` already
 - [ ] Rename the problems' `levels` to `difficulty` in `pages.md` and the

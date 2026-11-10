@@ -118,7 +118,7 @@ def _questions(
 
 
 def _question(row: dict[str, Any], topic: str, sub: str) -> dict[str, Any]:
-    raw = {**row["body"], "id": row["slug"], "kind": row["kind"], "level": row["rank"]}
+    raw = {**row["body"], "id": row["slug"], "kind": row["kind"], "level": row["level"]}
     raw |= {"prompt": row["prompt"], "topic": topic, "sub": sub}
     if row["format"] != "choice":
         # learn's app still reads `card` for the glossary's open question

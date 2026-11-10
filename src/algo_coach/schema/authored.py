@@ -7,8 +7,8 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 LETTERS = "ABCDEFGH"
-RANKS = (0, 1, 2, 3)
-RANK_NAMES = ("foundation", "associate", "professional", "expert")
+LEVELS = (0, 1, 2, 3)
+LEVEL_NAMES = ("foundation", "associate", "professional", "expert")
 
 Text = Annotated[str, StringConstraints(strip_whitespace=False, min_length=1, pattern=r"\S")]
 
@@ -140,7 +140,7 @@ class CertificationRule(Authored):
 
 
 class ScopeRule(CertificationRule):
-    """A scope's rule, and its rule per rank, named as learn named ranks."""
+    """A scope's rule, and its rule per level, named as learn named levels."""
 
     foundation: CertificationRule | None = None
     associate: CertificationRule | None = None

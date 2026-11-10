@@ -41,10 +41,7 @@
       "title": "Id",
       "type": "string"
     },
-    "mode": {
-      "$ref": "#/$defs/StintMode"
-    },
-    "rank": {
+    "level": {
       "anyOf": [
         {
           "maximum": 3,
@@ -56,7 +53,10 @@
         }
       ],
       "default": null,
-      "title": "Rank"
+      "title": "Level"
+    },
+    "mode": {
+      "$ref": "#/$defs/StintMode"
     },
     "score": {
       "minimum": 0,

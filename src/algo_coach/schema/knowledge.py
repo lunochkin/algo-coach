@@ -26,7 +26,7 @@ from algo_coach.schema.authored import (
 from algo_coach.schema.card import Slug
 
 # 0 Foundation, 1 Associate, 2 Professional, 3 Expert
-RANKS = range(4)
+LEVELS = range(4)
 
 
 class QuestionFormat(StrEnum):
@@ -98,7 +98,7 @@ class Question(Seeded):
     module_id: str
     subtopic_id: str
     position: int
-    rank: int = Field(ge=0, le=3)
+    level: int = Field(ge=0, le=3)
     kind: str = Field(min_length=1)
     format: QuestionFormat
     prompt: str = Field(min_length=1)
@@ -181,14 +181,14 @@ class Answer(KnowledgeRecord):
 
 class Stint(KnowledgeRecord):
     mode: StintMode
-    rank: int | None = Field(default=None, ge=0, le=3)  # an exam's alone
+    level: int | None = Field(default=None, ge=0, le=3)  # an exam's alone
     score: int = Field(ge=0)  # the answers that were correct
     answered: int = Field(ge=0)
 
     @model_validator(mode="after")
-    def _an_exam_names_its_rank(self) -> Stint:
-        if (self.mode is StintMode.EXAM) != (self.rank is not None):
-            raise ValueError("an exam names its rank, and no queue does")
+    def _an_exam_names_its_level(self) -> Stint:
+        if (self.mode is StintMode.EXAM) != (self.level is not None):
+            raise ValueError("an exam names its level, and no queue does")
         return self
 
 
@@ -199,12 +199,12 @@ class ModuleStatusChange(KnowledgeRecord):
 
 class Focus(KnowledgeRecord):
     """No module clears the focus. A certification is its module, its topic
-    or none for the whole module, and its rank."""
+    or none for the whole module, and its level."""
 
     module_id: str | None = None
     topic_id: str | None = None
     subtopic_id: str | None = None
-    certification_rank: int | None = Field(default=None, ge=0, le=3)
+    certification_level: int | None = Field(default=None, ge=0, le=3)
     strict: bool = False
 
     @model_validator(mode="after")
@@ -213,10 +213,10 @@ class Focus(KnowledgeRecord):
             raise ValueError("a topic is focused within its module")
         if self.subtopic_id is not None and self.topic_id is None:
             raise ValueError("a subtopic is focused within its topic")
-        if self.certification_rank is not None and (
+        if self.certification_level is not None and (
             self.module_id is None or self.subtopic_id is not None
         ):
-            raise ValueError("a certification is a module or a topic at a rank")
+            raise ValueError("a certification is a module or a topic at a level")
         return self
 
 
@@ -228,7 +228,7 @@ class LessonMark(KnowledgeRecord):
 class CertificationExam(KnowledgeRecord):
     module_id: str
     topic_id: str | None = None  # none for the whole module
-    rank: int = Field(ge=0, le=3)
+    level: int = Field(ge=0, le=3)
     score: int = Field(ge=0)  # the answers that were correct
     answered: int = Field(ge=0)
     passed: bool

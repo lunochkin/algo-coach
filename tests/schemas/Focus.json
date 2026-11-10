@@ -1,12 +1,12 @@
 {
-  "description": "No module clears the focus. A certification is its module, its topic\nor none for the whole module, and its rank.",
+  "description": "No module clears the focus. A certification is its module, its topic\nor none for the whole module, and its level.",
   "properties": {
     "at": {
       "format": "date-time",
       "title": "At",
       "type": "string"
     },
-    "certification_rank": {
+    "certification_level": {
       "anyOf": [
         {
           "maximum": 3,
@@ -18,7 +18,7 @@
         }
       ],
       "default": null,
-      "title": "Certification Rank"
+      "title": "Certification Level"
     },
     "client_id": {
       "minLength": 1,

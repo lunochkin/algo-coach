@@ -294,7 +294,7 @@
     },
     "ScopeRule": {
       "additionalProperties": false,
-      "description": "A scope's rule, and its rule per rank, named as learn named ranks.",
+      "description": "A scope's rule, and its rule per level, named as learn named levels.",
       "properties": {
         "associate": {
           "anyOf": [

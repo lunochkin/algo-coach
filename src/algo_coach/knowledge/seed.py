@@ -120,7 +120,7 @@ def _questions(
                     "subtopic_id": subs[bank.sub],
                     "slug": raw["id"],
                     "position": position,
-                    "rank": raw["level"],
+                    "level": raw["level"],
                     "kind": raw["kind"],
                     # `card` collides with a Card here: the glossary's `open`
                     "format": "open" if form == "card" else form,

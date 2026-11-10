@@ -40,11 +40,11 @@ def test_an_open_answer_carries_its_ticks():
     assert (answer.missed, answer.traps) == ([1], [0])
 
 
-@pytest.mark.parametrize(("mode", "rank"), [(StintMode.EXAM, None), (StintMode.NEXT, 1)])
-def test_an_exam_and_only_an_exam_names_its_rank(mode, rank):
-    """A level exam samples one rank, and a queue serves every rank."""
-    with pytest.raises(ValidationError, match="rank"):
-        Stint(**BASE, mode=mode, rank=rank, score=2, answered=4)
+@pytest.mark.parametrize(("mode", "level"), [(StintMode.EXAM, None), (StintMode.NEXT, 1)])
+def test_an_exam_and_only_an_exam_names_its_level(mode, level):
+    """A level exam samples one level, and a queue serves every level."""
+    with pytest.raises(ValidationError, match="level"):
+        Stint(**BASE, mode=mode, level=level, score=2, answered=4)
 
 
 @pytest.mark.parametrize(
@@ -52,8 +52,8 @@ def test_an_exam_and_only_an_exam_names_its_rank(mode, rank):
     [
         {"topic_id": "t1"},
         {"module_id": "m1", "subtopic_id": "s1"},
-        {"certification_rank": 1},
-        {"module_id": "m1", "topic_id": "t1", "subtopic_id": "s1", "certification_rank": 1},
+        {"certification_level": 1},
+        {"module_id": "m1", "topic_id": "t1", "subtopic_id": "s1", "certification_level": 1},
     ],
 )
 def test_a_focus_narrows_only_within_what_it_names(narrowed):
@@ -83,7 +83,7 @@ def _one_question(conn) -> None:
     conn.execute(insert(subtopics).values(id="s1", topic_id="t1", slug="types", position=0))
     conn.execute(
         insert(questions).values(
-            id="q1", module_id="m1", subtopic_id="s1", slug="types-1", position=0, rank=1,
+            id="q1", module_id="m1", subtopic_id="s1", slug="types-1", position=0, level=1,
             kind="concept", format="choice", prompt="?", body={},
         )
     )  # fmt: skip
@@ -114,5 +114,5 @@ def test_the_table_refuses_ticks_without_a_grade(database):
 def test_the_table_refuses_an_exam_without_its_rank(database):
     with database.begin() as conn:
         conn.execute(insert(users).values(id=USER, created_at=T0))
-    with pytest.raises(IntegrityError, match="an_exam_names_its_rank"), database.begin() as conn:
+    with pytest.raises(IntegrityError, match="an_exam_names_its_level"), database.begin() as conn:
         conn.execute(insert(stints).values(**BASE, mode="exam", score=3, answered=3))

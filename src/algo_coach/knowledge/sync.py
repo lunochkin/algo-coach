@@ -137,8 +137,8 @@ def _record(names: _Names, line: dict[str, Any]) -> tuple[Table, dict[str, Any]]
         raise Unknown(f"unknown kind {kind}")
     table = KINDS[kind][0]
     if kind == "session":
-        mode, rank = mode_in(line["mode"])
-        return table, {"mode": mode, "rank": rank, "score": line["score"], "answered": line["n"]}
+        mode, level = mode_in(line["mode"])
+        return table, {"mode": mode, "level": level, "score": line["score"], "answered": line["n"]}
     if kind == "focus":
         return table, _focus(names, line)
     module = line["course"]
@@ -158,11 +158,11 @@ def _record(names: _Names, line: dict[str, Any]) -> tuple[Table, dict[str, Any]]
         if lesson is None:
             raise Unknown(f"unknown lesson {module}/{line['lesson']}")
         return table, {"lesson_id": lesson, "read": line["status"] == "done"}
-    topic, rank = certification_in(module, line["cert"])
+    topic, level = certification_in(module, line["cert"])
     return table, {
         "module_id": module_id,
         "topic_id": _topic(names, module_id, topic),
-        "rank": rank,
+        "level": level,
         "score": line["score"],
         "answered": line["n"],
         "passed": line["passed"],
@@ -179,9 +179,9 @@ def _focus(names: _Names, line: dict[str, Any]) -> dict[str, Any]:
     sub = names.subtopics.get((module_id, line.get("sub") or "")) if topic else None
     values: dict[str, Any] = {"module_id": module_id, "topic_id": topic, "subtopic_id": sub}
     if certification := line.get("cert"):
-        scope, rank = certification_in(line["course"], certification)
+        scope, level = certification_in(line["course"], certification)
         values |= {"topic_id": _topic(names, module_id, scope), "subtopic_id": None}
-        values["certification_rank"] = rank
+        values["certification_level"] = level
     return values | {"strict": bool(line.get("strict"))}
 
 
@@ -205,7 +205,7 @@ def _line(kind: str, row: dict[str, Any], names: _Names) -> dict[str, Any]:
         module, question = names.owned[row["question_id"]]
         return line | answer_out({**row, "module": module, "question": question})
     if kind == "session":
-        mode = mode_out(row["mode"], row["rank"])
+        mode = mode_out(row["mode"], row["level"])
         return line | {"mode": mode, "score": row["score"], "n": row["answered"]}
     if kind == "lesson":
         module, lesson = names.owned[row["lesson_id"]]
@@ -218,10 +218,10 @@ def _line(kind: str, row: dict[str, Any], names: _Names) -> dict[str, Any]:
     if kind == "focus":
         sub = names.slug.get(row["subtopic_id"] or "")
         line |= {"course": module, "topic": topic, "sub": sub, "strict": row["strict"]}
-        if row["certification_rank"] is not None:
-            line["cert"] = certification_out(module or "", topic, row["certification_rank"])
+        if row["certification_level"] is not None:
+            line["cert"] = certification_out(module or "", topic, row["certification_level"])
         return line
-    certification = certification_out(module or "", topic, row["rank"])
+    certification = certification_out(module or "", topic, row["level"])
     return (
         line
         | {"course": module, "cert": certification, "score": row["score"]}

@@ -4,7 +4,8 @@ the store."""
 
 from typing import Any
 
-LEVELS = ("foundation", "associate", "professional", "expert")
+from algo_coach.schema.authored import LEVEL_NAMES
+
 # a certification whose scope is the whole module, in learn's id
 WHOLE = "all"
 # learn's queue modes against this project's: `knowledge.md`, Queues
@@ -23,21 +24,21 @@ def mode_in(mode: str) -> tuple[str, int | None]:
     return LEARN_MODES.get(mode, mode), None
 
 
-def mode_out(mode: str, rank: int | None) -> str:
-    return f"{EXAM}{rank}" if mode == "exam" else OUR_MODES.get(mode, mode)
+def mode_out(mode: str, level: int | None) -> str:
+    return f"{EXAM}{level}" if mode == "exam" else OUR_MODES.get(mode, mode)
 
 
 def certification_in(module: str, certification: str) -> tuple[str | None, int]:
-    """learn's `<module>-<scope>-<rank name>`, as a topic slug or none for the
-    whole module, and a rank."""
-    scope, _, rank = certification.removeprefix(f"{module}-").rpartition("-")
-    if rank not in LEVELS or not scope:
+    """learn's `<module>-<scope>-<level name>`, as a topic slug or none for the
+    whole module, and a level."""
+    scope, _, level = certification.removeprefix(f"{module}-").rpartition("-")
+    if level not in LEVEL_NAMES or not scope:
         raise Unknown(f"unknown certification {certification}")
-    return (None if scope == WHOLE else scope), LEVELS.index(rank)
+    return (None if scope == WHOLE else scope), LEVEL_NAMES.index(level)
 
 
-def certification_out(module: str, topic: str | None, rank: int) -> str:
-    return f"{module}-{topic or WHOLE}-{LEVELS[rank]}"
+def certification_out(module: str, topic: str | None, level: int) -> str:
+    return f"{module}-{topic or WHOLE}-{LEVEL_NAMES[level]}"
 
 
 def answer_out(row: dict[str, Any]) -> dict[str, Any]:
