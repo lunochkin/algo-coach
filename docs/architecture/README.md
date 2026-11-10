@@ -639,8 +639,12 @@ times. Each record class is specified in one of the files beside it.
   - The app sends its token in the `Authorization` header, never as a cookie.
     A browser attaches no header to a request another site forges, so the
     token needs no guard against forgery.
-  - The account menu lists each signed-in app and revokes any one of them,
-    on either client. Signing out in the app revokes that app's token.
+  - The account menu lists every signed-in device, each browser's session
+    and each app's token, and revokes any one of them, on either client.
+    Signing out in the app revokes that app's token.
+  - A session records when it last signed a request in and the user agent it
+    was opened by, as an app's token records its device. Two browsers on one
+    account then read apart in the list.
   - The app keeps its token in the phone's secure storage, the Keystore on
     Android and the Keychain on iOS.
   - The dev build of the app syncs with a local engine, never with a deployed

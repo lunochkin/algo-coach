@@ -34,5 +34,5 @@ async def dev_login(
         challenge = challenge_of(client, code_challenge)
         code = await run_in_threadpool(issued, root, user_id, challenge)
         return RedirectResponse(f"{APP_REDIRECTS[client]}?code={code}", status_code=303)
-    token = await run_in_threadpool(opened, root, user_id)
+    token = await run_in_threadpool(opened, root, user_id, request.headers.get("user-agent"))
     return session_redirect(token, secure=False)

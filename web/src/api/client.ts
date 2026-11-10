@@ -48,7 +48,7 @@ export type Listed = components['schemas']['Listed']
 export type Picked = components['schemas']['Picked']
 export type Provider = components['schemas']['Provider']
 export type Me = components['schemas']['Me']
-export type SignedInApp = components['schemas']['SignedInApp']
+export type SignedInDevice = components['schemas']['SignedInDevice']
 
 export function candidates(technique: string, signal: AbortSignal) {
   return api.GET('/api/techniques/{technique}/candidates', {

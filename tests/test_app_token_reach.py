@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from helpers import PROVENANCE, seed_problem
-from test_signed_in_apps import app_for
+from test_signed_in_devices import app_for
 
 from algo_coach.api.app import create_app
 from algo_coach.api.context import SESSION_COOKIE

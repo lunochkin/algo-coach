@@ -5,7 +5,7 @@ import { Link } from 'react-router'
 import { named } from '@/api/account'
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
-import { SignedInApps } from '@/components/SignedInApps'
+import { SignedInDevices } from '@/components/SignedInDevices'
 import { SignOut } from '@/components/SignOut'
 import { Button } from '@/components/ui/button'
 import {
@@ -59,7 +59,7 @@ export function AccountMenu() {
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setApps(true)}>
             <Smartphone />
-            Signed-in apps
+            Signed-in devices
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={start}>
             <LogOut />
@@ -67,7 +67,7 @@ export function AccountMenu() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <SignedInApps open={apps} onOpenChange={setApps} />
+      <SignedInDevices open={apps} onOpenChange={setApps} />
     </>
       )}
     </SignOut>

@@ -24,16 +24,19 @@ those steps at low fidelity.
   holds beside the switch and the menu. The row scrolls to the marked
   section, so the reader always sees where they are.
 - **The account menu names who the session signs in as**, and holds the
-  link to the settings, the signed-in apps and the sign-out. The address the
+  link to the settings, the signed-in devices and the sign-out. The address the
   provider verified names the user, with the engine's own id under it. A user
   no provider linked is named by that id instead, since the dev login mints
   no identity to carry an address.
-- **Signed-in apps open a dialog from the account menu**, listing each native
-  app by its device and when it was last used, with a press to revoke it. A
-  lost phone is cut off there, where its own sign-out cannot reach.
-- **On the phone, the list names the phone it is read on**, and that row
+- **Signed-in devices open a dialog from the account menu**, listing every
+  browser and app signed in as the account, by its name and when it was last
+  used, with a press to revoke it. A lost phone or a browser left signed in
+  elsewhere is cut off there, where its own sign-out cannot reach.
+- **The list names the device it is read on**, on both clients, and that row
   signs out rather than revoking. Signing out sends the outbox first, and a
   bare revoke would leave the outbox unsent.
+- **A browser is named by its agent's browser and system**, such as Chrome
+  on macOS. An app is named by the device name it signed in with.
 - **The settings are a page of their own, `/settings`, as on the phone.** The
   page reads as the phone's Settings screen does: the account first, then
   the Study settings, the daily limit on new questions and the exam size.
@@ -309,7 +312,7 @@ Knowledge     the home
                 a queue, an exam
                 the lessons, a lesson
                 the certifications, a certification's conditions
-Account       the settings, the signed-in apps, the sign-out
+Account       the settings, the signed-in devices, the sign-out
 ```
 
 - **The four sections are the destinations both clients name.** The web
@@ -318,7 +321,7 @@ Account       the settings, the signed-in apps, the sign-out
   the tree rather than a tree of its own.
 - **Account sits apart from the sections on both clients.** The web opens it
   from the account menu, and the phone from its top bar. Account holds the
-  settings, the signed-in apps and the sign-out, since none of the three is
+  settings, the signed-in devices and the sign-out, since none of the three is
   a place to practise.
 - **A section's root is the only page the navigation reaches.** Every other
   page is a step down with one way back, as `## Sections` gives. A shortcut
@@ -390,7 +393,7 @@ what it offers. The inventory is the list both clients build to.
 | The certifications | `/knowledge/certifications` | Certifications | same |
 | A certification's conditions | a dialog on the certifications and the map | a sheet on Certifications and Map | same |
 | The settings | `/settings` | Settings | same |
-| The signed-in apps | a dialog from the account menu | a screen from the account menu | to fix |
+| The signed-in devices | a dialog from the account menu | a screen from the account menu | same |
 | The login | `/login` | Login | same |
 | The privacy policy | `/privacy` | none | web only |
 | The gallery | `/gallery`, in development | none | web only |
@@ -419,7 +422,7 @@ what it offers. The inventory is the list both clients build to.
 | Set the exam size for one exam | the exam page | Exam | same |
 | Read the sync's state, and sync now | the settings page | Settings, and Home's footer | same |
 | Sign out, naming unsent records | the account menu and the settings page | the account menu and Settings | same |
-| Revoke a signed-in app | the signed-in apps | the signed-in apps | same |
+| Revoke a signed-in device | the signed-in devices | the signed-in devices | same |
 | Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
 
 - **A sitting and a recall are web for now.** Each needs a keyboard and a
@@ -451,10 +454,8 @@ what it offers. The inventory is the list both clients build to.
 
 ### To fix
 
-- **The signed-in apps.** The phone's list names the phone it is read on,
-  and the web's names no browser, its own included. Each client moves to
-  one list of every signed-in device, browser sessions with the apps, each
-  revocable and the one read on marked.
+No difference is open. A row a later change marks `to fix` is listed here
+with what holds now and the change it needs.
 ## A page's areas
 
 - **A page carries a header and a body.** The header holds the way back, the

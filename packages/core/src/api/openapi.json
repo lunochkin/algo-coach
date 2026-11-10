@@ -991,10 +991,11 @@
         }
       }
     },
-    "/api/apps": {
+    "/api/devices": {
       "get": {
-        "summary": "Apps",
-        "operationId": "apps_api_apps_get",
+        "summary": "Devices",
+        "description": "Every browser and app signed in as the user, the one asking marked.",
+        "operationId": "devices_api_devices_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1002,10 +1003,10 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/SignedInApp"
+                    "$ref": "#/components/schemas/SignedInDevice"
                   },
                   "type": "array",
-                  "title": "Response Apps Api Apps Get"
+                  "title": "Response Devices Api Devices Get"
                 }
               }
             }
@@ -1013,18 +1014,26 @@
         }
       }
     },
-    "/api/apps/{app_id}": {
+    "/api/devices/{kind}/{device_id}": {
       "delete": {
-        "summary": "Revoke App",
-        "operationId": "revoke_app_api_apps__app_id__delete",
+        "summary": "Revoke Device",
+        "operationId": "revoke_device_api_devices__kind___device_id__delete",
         "parameters": [
           {
-            "name": "app_id",
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DeviceKind"
+            }
+          },
+          {
+            "name": "device_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "App Id"
+              "title": "Device Id"
             }
           }
         ],
@@ -1831,6 +1840,14 @@
           "sure"
         ],
         "title": "Confidence"
+      },
+      "DeviceKind": {
+        "type": "string",
+        "enum": [
+          "browser",
+          "app"
+        ],
+        "title": "DeviceKind"
       },
       "Failure": {
         "properties": {
@@ -2828,15 +2845,25 @@
         "title": "Served",
         "description": "What a solver is handed: the statement and the clock, and nothing the\nproblem was written from."
       },
-      "SignedInApp": {
+      "SignedInDevice": {
         "properties": {
           "id": {
             "type": "string",
             "title": "Id"
           },
-          "device": {
-            "type": "string",
-            "title": "Device"
+          "kind": {
+            "$ref": "#/components/schemas/DeviceKind"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
           },
           "created_at": {
             "type": "string",
@@ -2850,19 +2877,20 @@
           },
           "current": {
             "type": "boolean",
-            "title": "Current",
-            "default": false
+            "title": "Current"
           }
         },
         "type": "object",
         "required": [
           "id",
-          "device",
+          "kind",
+          "name",
           "created_at",
-          "last_used_at"
+          "last_used_at",
+          "current"
         ],
-        "title": "SignedInApp",
-        "description": "A live app token as its owner sees it. The id is the token's hash, which\nsigns nothing in."
+        "title": "SignedInDevice",
+        "description": "A live session or app token as its owner sees it. The id is the token's\nhash, which signs nothing in."
       },
       "Sitting": {
         "properties": {

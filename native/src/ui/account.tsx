@@ -25,10 +25,10 @@ export function AccountMenu() {
         />
         <Menu.Item
           leadingIcon="cellphone-link"
-          title="Signed-in apps"
+          title="Signed-in devices"
           onPress={() => {
             setOpen(false);
-            router.push('/apps');
+            router.push('/devices');
           }}
         />
         <Menu.Item

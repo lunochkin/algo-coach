@@ -7,12 +7,13 @@ from pydantic import BaseModel
 
 from algo_coach.api.context import SESSION_COOKIE, Root, UserId, bearer_of
 from algo_coach.log import (
+    DeviceKind,
     Provider,
-    SignedInApp,
-    app_revoked_by_id,
+    SignedInDevice,
+    device_revoked,
     email_of,
     revoked,
-    signed_in_apps,
+    signed_in_devices,
 )
 
 router = APIRouter()
@@ -55,14 +56,20 @@ def signed_out(request: Request, root: Root) -> Response:
     return response
 
 
-@router.get("/apps")
-def apps(request: Request, root: Root, user_id: UserId) -> list[SignedInApp]:
-    return signed_in_apps(root, user_id, bearer_of(request))
+@router.get("/devices")
+def devices(request: Request, root: Root, user_id: UserId) -> list[SignedInDevice]:
+    """Every browser and app signed in as the user, the one asking marked."""
+    return signed_in_devices(
+        root,
+        user_id,
+        app_token=bearer_of(request),
+        session_token=request.cookies.get(SESSION_COOKIE),
+    )
 
 
-@router.delete("/apps/{app_id}", status_code=204)
-def revoke_app(app_id: str, root: Root, user_id: UserId) -> Response:
-    # a lost phone is cut off here, from any other signed-in client
-    if not app_revoked_by_id(root, user_id, app_id):
-        raise HTTPException(404, "no app of yours carries this id")
+@router.delete("/devices/{kind}/{device_id}", status_code=204)
+def revoke_device(kind: DeviceKind, device_id: str, root: Root, user_id: UserId) -> Response:
+    # a lost phone or a forgotten browser is cut off here, from any other client
+    if not device_revoked(root, user_id, kind, device_id):
+        raise HTTPException(404, "no device of yours carries this id")
     return Response(status_code=204)

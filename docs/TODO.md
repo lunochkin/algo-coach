@@ -121,7 +121,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Let an app token reach every endpoint a session reaches, with a test
       per route group. The token reaches the knowledge sync alone today
 - [x] Add the signed-in apps to the phone's account menu
-- [ ] List every signed-in device on both clients, browser sessions with
+- [x] List every signed-in device on both clients, browser sessions with
       the apps, each one revocable and the one read on marked. A session
       gains `last_used_at`, and a browser is invisible on both today
 - [ ] Serve the board on the phone as a Practice tab: the cards in progress

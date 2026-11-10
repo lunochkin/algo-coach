@@ -17,7 +17,7 @@ import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel } from '@/components/Panel'
-import { SignedInApps } from '@/components/SignedInApps'
+import { SignedInDevices } from '@/components/SignedInDevices'
 import { SignOut } from '@/components/SignOut'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -130,7 +130,7 @@ function Account() {
           </div>
           <Button variant="outline" onClick={() => setApps(true)}>
             <Smartphone />
-            Signed-in apps
+            Signed-in devices
           </Button>
           <SignOut>
             {(start) => (
@@ -142,7 +142,7 @@ function Account() {
           </SignOut>
         </div>
       </Panel>
-      <SignedInApps open={apps} onOpenChange={setApps} />
+      <SignedInDevices open={apps} onOpenChange={setApps} />
     </section>
   )
 }

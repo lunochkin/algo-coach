@@ -73,6 +73,10 @@ sessions = Table(
     Column("expires_at", timestamp(), nullable=False),
     # set at logout: a stored session ends when revoked, before it expires
     Column("revoked_at", timestamp()),
+    # when the session last signed a request in, as the devices list shows it
+    Column("last_used_at", timestamp(), nullable=False),
+    # the browser's own name for itself, which a list of devices tells apart by
+    Column("user_agent", Text),
     CheckConstraint("expires_at > created_at", name="expires_after_it_starts"),
     CheckConstraint("revoked_at >= created_at", name="revoked_after_it_starts"),
 )

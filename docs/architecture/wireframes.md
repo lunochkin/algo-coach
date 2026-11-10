@@ -40,7 +40,7 @@ Every page under a section carries the same two rows above its body.
   verified, and the engine's own id under it. A user no provider linked is
   named by that id, and the menu says so.
 - Signing out is in that menu, since it is an act on the account rather than a
-  place the navigation names. The settings and the signed-in apps open a
+  place the navigation names. The settings and the signed-in devices open a
   dialog each from the same menu.
 - The header carries the way back, the title, and the one line identifying what
   the title names.
@@ -751,7 +751,7 @@ problem's path reads as its record, as "Every problem" gives.
 | The study settings hold on every device you sign in on.                |
 |                                                                        |
 | Account                                                                |
-| you@example.invalid                 ( Signed-in apps ) ( Sign out )    |
+| you@example.invalid              ( Signed-in devices ) ( Sign out )    |
 | u-4f9c2a                                                               |
 |                                                                        |
 | Study                                                                  |

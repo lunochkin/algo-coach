@@ -430,15 +430,18 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/apps": {
+    "/api/devices": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Apps */
-        get: operations["apps_api_apps_get"];
+        /**
+         * Devices
+         * @description Every browser and app signed in as the user, the one asking marked.
+         */
+        get: operations["devices_api_devices_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -447,7 +450,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/apps/{app_id}": {
+    "/api/devices/{kind}/{device_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -457,8 +460,8 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Revoke App */
-        delete: operations["revoke_app_api_apps__app_id__delete"];
+        /** Revoke Device */
+        delete: operations["revoke_device_api_devices__kind___device_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -755,6 +758,11 @@ export interface components {
          * @enum {string}
          */
         Confidence: "guess" | "leaning" | "sure";
+        /**
+         * DeviceKind
+         * @enum {string}
+         */
+        DeviceKind: "browser" | "app";
         /**
          * Failure
          * @description The first case a submission failed, shown whole: `flows.md`.
@@ -1167,15 +1175,16 @@ export interface components {
             elapsed_sec: number | null;
         };
         /**
-         * SignedInApp
-         * @description A live app token as its owner sees it. The id is the token's hash, which
-         *     signs nothing in.
+         * SignedInDevice
+         * @description A live session or app token as its owner sees it. The id is the token's
+         *     hash, which signs nothing in.
          */
-        SignedInApp: {
+        SignedInDevice: {
             /** Id */
             id: string;
-            /** Device */
-            device: string;
+            kind: components["schemas"]["DeviceKind"];
+            /** Name */
+            name: string | null;
             /**
              * Created At
              * Format: date-time
@@ -1186,10 +1195,7 @@ export interface components {
              * Format: date-time
              */
             last_used_at: string;
-            /**
-             * Current
-             * @default false
-             */
+            /** Current */
             current: boolean;
         };
         /** Sitting */
@@ -2180,7 +2186,7 @@ export interface operations {
             };
         };
     };
-    apps_api_apps_get: {
+    devices_api_devices_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -2195,17 +2201,18 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SignedInApp"][];
+                    "application/json": components["schemas"]["SignedInDevice"][];
                 };
             };
         };
     };
-    revoke_app_api_apps__app_id__delete: {
+    revoke_device_api_devices__kind___device_id__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                app_id: string;
+                kind: components["schemas"]["DeviceKind"];
+                device_id: string;
             };
             cookie?: never;
         };

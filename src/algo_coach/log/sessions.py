@@ -2,7 +2,7 @@ import hashlib
 import secrets
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, update
 
 from algo_coach.log.table import sessions
 from algo_coach.storage import Database
@@ -11,7 +11,11 @@ from algo_coach.storage import Database
 LIFETIME = timedelta(days=30)
 
 
-def opened(root: Database, user_id: str) -> str:
+# a user agent is a label, so a long one is cut rather than stored whole
+AGENT_LENGTH = 300
+
+
+def opened(root: Database, user_id: str, user_agent: str | None = None) -> str:
     """A session for the user, returning the token its cookie carries. The
     table holds the token's hash alone."""
     token = secrets.token_urlsafe(32)
@@ -19,7 +23,12 @@ def opened(root: Database, user_id: str) -> str:
     with root.begin() as conn:
         conn.execute(
             insert(sessions).values(
-                id=hashed(token), user_id=user_id, created_at=now, expires_at=now + LIFETIME
+                id=hashed(token),
+                user_id=user_id,
+                created_at=now,
+                expires_at=now + LIFETIME,
+                last_used_at=now,
+                user_agent=user_agent[:AGENT_LENGTH] if user_agent else None,
             )
         )
     return token
@@ -36,15 +45,19 @@ def revoked(root: Database, token: str) -> None:
 
 
 def user_of(root: Database, token: str) -> str | None:
-    """The user a token signs in as. `None` where no session carries the token,
-    or its session expired or was revoked."""
-    with root.connect() as conn:
+    """The user a token signs in as, marking the session used. `None` where no
+    session carries the token, or its session expired or was revoked."""
+    now = datetime.now(UTC)
+    with root.begin() as conn:
         return conn.execute(
-            select(sessions.c.user_id).where(
+            update(sessions)
+            .where(
                 sessions.c.id == hashed(token),
-                sessions.c.expires_at > datetime.now(UTC),
+                sessions.c.expires_at > now,
                 sessions.c.revoked_at.is_(None),
             )
+            .values(last_used_at=now)
+            .returning(sessions.c.user_id)
         ).scalar_one_or_none()
 
 
