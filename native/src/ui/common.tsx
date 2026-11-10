@@ -4,7 +4,11 @@ import { Text, useTheme } from 'react-native-paper';
 
 import { router } from 'expo-router';
 
-import { block, type Queue, type Question } from '@algo-coach/core';
+import {
+  block,
+  type ExamPlan,
+  type Queue,
+} from '@algo-coach/core';
 import type { ExamSession, QueueSession, Session, SyncState } from '@/lib/store';
 import { syncErrorSummary } from '@/lib/syncError';
 
@@ -104,8 +108,8 @@ export function startQueue(
   router.push('/quiz');
 }
 
-export function startExam(st: Starter, mode: string, questions: Question[], cert?: ExamSession['cert']) {
-  st.setSession({ mode, questions, cert });
+export function startExam(st: Starter, plan: ExamPlan) {
+  st.setSession(plan);
   router.push('/quiz');
 }
 

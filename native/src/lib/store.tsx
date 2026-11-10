@@ -3,43 +3,43 @@ import { AppState } from 'react-native';
 
 import {
   attemptPath,
+  type AttemptRecord,
   Board,
-  isoNow,
-  learnerCatalog,
-  sessionPath,
-  statusPath,
-  currentFocus,
-  focusLine,
-  focusPath,
-  type Focus,
-  type FocusRecord,
-  type LessonRecord,
-  lessonPath,
+  type Catalog,
   certPath,
   type CertRecord,
-  visibleCatalog,
   type Course,
-  withStatuses,
   type CourseStatus,
-  type StatusRecord,
-  type AttemptRecord,
-  type Catalog,
-  type Question,
-  type Queue,
-  type SessionRecord,
+  currentFocus,
+  type ExamPlan,
+  type Focus,
+  focusLine,
+  focusPath,
+  type FocusRecord,
+  isoNow,
+  learnerCatalog,
+  lessonPath,
+  type LessonRecord,
   moduleOrder,
-  orderPath,
-  type OrderRecord,
   NEW_STEP,
   newPerDay,
-  setting,
-  SETTING_DEFAULT,
-  settingPath,
-  type SettingName,
-  type SettingRecord,
+  orderPath,
+  type OrderRecord,
+  type Queue,
   raisePath,
   type RaiseRecord,
+  sessionPath,
+  type SessionRecord,
+  setting,
+  SETTING_DEFAULT,
+  type SettingName,
+  settingPath,
+  type SettingRecord,
+  statusPath,
+  type StatusRecord,
   todayLimit,
+  visibleCatalog,
+  withStatuses,
 } from '@algo-coach/core';
 
 import { readCatalog } from './courses-cache';
@@ -65,11 +65,7 @@ export interface QueueSession {
 }
 
 /** An exam: a fixed sample, feedback at the end. */
-export interface ExamSession {
-  mode: string; // exam-L<level>, or cert-<id>
-  questions: Question[];
-  cert?: { course: string; id: string; passShare: number }; // a certificate exam
-}
+export type ExamSession = ExamPlan;
 
 export type Session = QueueSession | ExamSession;
 

@@ -17,6 +17,8 @@ import {
   choiceOrder,
   DEFAULT_RULES,
   detailSections,
+  examOutcome,
+  examTitle,
   gradeChoice,
   hasAnswer,
   isLessonItem,
@@ -252,18 +254,11 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
   const end = useCallback(async () => {
     if (ended.current) return;
     ended.current = true;
-    const rs = results.current;
-    // Exam attempts are recorded together at the end, as in the CLI.
-    const t = isoNow();
-    for (const r of rs) await st.record(makeAttempt(t, r.q.course, r.q.id, r.correct, r.guess));
-    const score = rs.filter((r) => r.correct).length;
-    await st.finishSession(score, rs.length);
-    if (s?.cert && rs.length) {
-      // A certificate exam passes only when every question was answered and the score reaches the bar.
-      const n = s.questions.length;
-      const passed = rs.length === n && score >= s.cert.passShare * n;
-      await st.recordCertExam({ course: s.cert.course, cert: s.cert.id, score, n, passed });
-    }
+    if (!s) return;
+    const out = examOutcome(s, results.current, isoNow(), st.catalog?.courses ?? []);
+    for (const a of out.attempts) await st.record(a);
+    await st.finishSession(out.score, out.n);
+    if (out.cert) await st.recordCertExam(out.cert);
     setPhase('done');
   }, [st]);
 
@@ -299,8 +294,8 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
 
   const total = s.questions.length;
   const rs = results.current;
-  const score = rs.filter((r) => r.correct).length;
-  const missed = rs.filter((r) => !r.correct);
+  const out = examOutcome(s, rs, '', st.catalog?.courses ?? []);
+  const { score, missed } = out;
 
   const onAnswered = (r: Result) => {
     results.current = [...results.current, r];
@@ -308,12 +303,7 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
   };
   const next = () => (index + 1 < total ? setIndex(index + 1) : void end());
 
-  const title =
-    phase === 'ask'
-      ? `Exam · ${index + 1} / ${total}`
-      : phase === 'review'
-        ? `Missed ${reviewAt + 1} / ${missed.length}`
-        : 'Done';
+  const title = examTitle(phase, index, total, reviewAt, missed.length);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -347,14 +337,12 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
         <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
           <View style={{ alignItems: 'center', paddingVertical: 24 }}>
             <Text variant="displayMedium">{`${score}/${rs.length}`}</Text>
-            <Text variant="titleMedium">
-              {`${rs.length ? Math.round((100 * score) / rs.length) : 0}%`}
-            </Text>
+            <Text variant="titleMedium">{`${out.percent}%`}</Text>
           </View>
-          {byTopic(rs).map((t) => (
+          {out.byTopic.map((t) => (
             <View key={t.topic} style={styles.row}>
               <Text variant="bodyLarge" style={{ flex: 1 }}>
-                {t.topic}
+                {t.title}
               </Text>
               <Text variant="bodyLarge">{`${t.score}/${t.n}`}</Text>
             </View>

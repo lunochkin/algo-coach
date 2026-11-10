@@ -5,7 +5,15 @@ import { Appbar, Button, Chip, SegmentedButtons, Text, TextInput, useTheme } fro
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { examOpening, examPool, levelName, levels, selectExam, validSetting } from '@algo-coach/core';
+import {
+  examOpening,
+  examPool,
+  levelExam,
+  levelExamLabel,
+  levelName,
+  levels,
+  validSetting,
+} from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
 import { BottomBar, startExam, styles } from '@/ui/common';
@@ -24,13 +32,12 @@ export default function Exam() {
   const b = useMemo(() => board(course), [board, course]);
   const pool = useMemo(() => (b ? examPool(b, level) : []), [b, level]);
   const n = Number(size);
-  const sizeOk = validSetting('exam_size', n);
-  const count = sizeOk ? Math.min(n, pool.length) : 0;
+  const count = validSetting('exam_size', n) ? Math.min(n, pool.length) : 0;
   const lv = st.catalog ? levels(st.catalog.rules) : [0, 1, 2, 3];
 
   const start = () => {
     if (!b || !count) return;
-    startExam(st, `exam-L${level}`, selectExam(b, level, n));
+    startExam(st, levelExam(b, level, n));
   };
 
   return (
@@ -88,9 +95,7 @@ export default function Exam() {
           disabled={!count}
           onPress={start}
           contentStyle={{ paddingVertical: 8 }}>
-          {pool.length
-            ? `Start (${count} of ${pool.length})`
-            : `No unlocked ${st.catalog ? levelName(st.catalog.rules, level) : `L${level}`} questions`}
+          {st.catalog ? levelExamLabel(st.catalog.rules, level, pool.length, count) : ''}
         </Button>
       </BottomBar>
     </KeyboardAvoidingView>

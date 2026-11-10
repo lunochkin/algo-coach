@@ -6,12 +6,11 @@ import Svg, { Circle } from 'react-native-svg';
 import {
   type Board,
   certConditions,
+  certExam,
   certFocus,
-  certQuestions,
   type CertState,
   type CertStatus,
   type Course,
-  shuffle,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import type { Scope } from '@/ui/start';
@@ -80,10 +79,9 @@ export function CertSheet(props: {
   const v = certConditions(b, c, id, states, st.focus);
   if (!x || !status || !v) return null;
   const take = () => {
-    const pool = certQuestions(b, c, x).filter((q) => q.format !== 'card');
-    const qs = shuffle(pool).slice(0, x.rule.size);
+    const plan = certExam(b, c, id);
     onClose();
-    startExam(st, `cert-${id}`, qs, { course: c.slug, id, passShare: x.rule.passShare });
+    if (plan) startExam(st, plan);
   };
   const check = (ok: boolean, text: string) => (
     <Text variant="bodyMedium" key={text}>

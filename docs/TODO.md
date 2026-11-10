@@ -90,7 +90,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Add the certifications to the web: the grid, a certification's
       conditions with its exam and its focus press, and the home's
       ready-certification link
-- [ ] Move what the phone's exam screens compute into `packages/core`: the
+- [x] Move what the phone's exam screens compute into `packages/core`: the
       sample, the results by topic and the missed answers
 - [ ] Serve exams on the web: the level exam's page, the exam at
       `?mode=exam` with its results, a certification's Take exam, and the
