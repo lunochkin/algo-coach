@@ -7,7 +7,7 @@ import type { Course, Question, Status } from './types';
 
 const DAY = 86_400_000;
 export const NEW_PER_DAY = 10;
-export const NEW_STEP = 5; // "+5 new" in a drill queue
+export const NEW_STEP = 5; // "+5 new": a raise of today's limit, from Home or a queue
 const ROLLOVER_HOUR = 4; // local time, as Anki
 const LEARN_AHEAD = 20 * 60_000;
 
@@ -18,6 +18,23 @@ export function dayStart(now: number, offsetMinutes = -new Date(now).getTimezone
   const start =
     Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate(), ROLLOVER_HOUR) - off;
   return now >= start ? start : start - DAY;
+}
+
+/** Today's raise of the new-question limit, kept per device until the rollover. */
+export interface Raise {
+  day: number; // the dayStart it was made in
+  extra: number;
+}
+
+/** The new-question limit today: the daily setting plus today's raise, if any. */
+export function todayLimit(base: number, raise: Raise | null, now: number, offsetMinutes?: number): number {
+  return base + (raise && raise.day === dayStart(now, offsetMinutes) ? raise.extra : 0);
+}
+
+/** Today's raise after one more step. A raise from an earlier day counts for nothing. */
+export function raised(raise: Raise | null, now: number, offsetMinutes?: number): Raise {
+  const day = dayStart(now, offsetMinutes);
+  return { day, extra: (raise?.day === day ? raise.extra : 0) + NEW_STEP };
 }
 
 /** Questions whose first-ever attempt, on any device, falls in today. */

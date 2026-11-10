@@ -40,7 +40,7 @@ export default function Stats() {
                   {`${sum.due} due · ${sum.weak} weak · ${sum.soon} more due within 7 days`}
                 </Text>
                 <Text variant="bodyMedium">
-                  {`new today: ${newToday(b, Date.now())}/${st.settings.newPerDay}`}
+                  {`new today: ${newToday(b, Date.now())}/${st.newLimit}`}
                 </Text>
                 <View style={[styles.row, { marginTop: 4 }]}>
                   <Legend color={done} label="done" />

@@ -7,6 +7,7 @@ import {
   certStates,
   focusScope,
   levelName,
+  NEW_STEP,
   type Board,
   type CertRecord,
   type Focus,
@@ -17,6 +18,7 @@ import { STATE_LABEL } from './certs';
 import { styles, tones } from './common';
 
 interface Props {
+  onMoreNew: () => void; // raises today's new-question limit by NEW_STEP
   label: string;
   focus: Focus;
   b: Board; // built with the focus course included, as the focus queue uses
@@ -112,6 +114,13 @@ export function FocusCard(props: Props) {
         <View style={[styles.row, { gap: 16 }]}>
           <Stat icon="refresh" value={info.due} label="to review now" />
           <Stat icon="plus-circle-outline" value={info.newLeft} label="new left today" />
+          <Chip
+            compact
+            icon="plus"
+            onPress={props.onMoreNew}
+            accessibilityLabel={`Allow ${NEW_STEP} more new questions today`}>
+            {`${NEW_STEP}`}
+          </Chip>
         </View>
 
         {info.next ? (

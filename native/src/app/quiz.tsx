@@ -167,6 +167,8 @@ function QueueQuiz({ s }: { s: QueueSession }) {
   };
   const moreNew = () => {
     queue.limit += NEW_STEP;
+    // today's limit, so Home and the next queue count the raise too
+    void st.raiseNew();
     if (!current) {
       const p = pickOne();
       if (p) {
@@ -198,7 +200,7 @@ function QueueQuiz({ s }: { s: QueueSession }) {
         <Text variant="labelMedium" style={{ flex: 1, color: theme.colors.onSurfaceVariant }}>
           {left}
         </Text>
-        {s.mode === 'drill' && newLeft === 0 && unseenLeft ? (
+        {s.mode !== 'review' && newLeft === 0 && unseenLeft ? (
           <Button compact mode="text" onPress={moreNew} accessibilityLabel={`Allow ${NEW_STEP} more new questions`}>
             {`+${NEW_STEP} new`}
           </Button>

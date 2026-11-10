@@ -167,6 +167,11 @@ left to serve.
 - **New questions are limited per day, and reviews never are.** The limit
   counts questions first answered today across every device, ten by default.
   The day starts at 04:00 local time.
+- **The user can raise today's limit, five at a time**, from Home or inside the
+  next and filtered queues. The raise ends at the 04:00 rollover, and the
+  daily setting stands again the next day.
+- **The raise is kept on the device**, as the daily setting is. It changes
+  which questions a queue offers, and the log records only the answers.
 - **The next queue serves the reviews, then the frontier's new questions.**
   Over every active module, the modules take turns.
 - **The review queue serves the weak and due questions alone**, at every rank,

@@ -27,6 +27,9 @@ import {
   type Question,
   type Queue,
   type SessionRecord,
+  raised,
+  todayLimit,
+  type Raise,
 } from '@/core';
 
 import { readCatalog } from './courses-cache';
@@ -65,6 +68,9 @@ interface Store {
   attempts: AttemptRecord[];
   sessions: SessionRecord[];
   settings: Settings;
+  // today's new-question limit: the setting plus today's raise, until the 04:00 rollover
+  newLimit: number;
+  raiseNew: () => Promise<void>;
   hasToken: boolean;
   sync: SyncState;
   filter: string | null;
@@ -118,6 +124,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [attempts, setAttempts] = useState<AttemptRecord[]>([]);
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
+  const [raise, setRaise] = useState<Raise | null>(null);
   const [hasToken, setHasToken] = useState(false);
   const [sync, setSync] = useState<SyncState>({ running: false, lastAt: null, error: null });
   const [filter, setFilter] = useState<string | null>(null);
@@ -230,6 +237,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const s = await loadSettings();
       setSettings(s);
       settingsRef.current = s;
+      const kept = await DB.getMeta('new_raise');
+      setRaise(kept ? (JSON.parse(kept) as Raise) : null);
       setHasToken(!!(await getToken()));
       const lastAt = await DB.getMeta('last_sync');
       const error = (await DB.getMeta('last_error')) || null;
@@ -336,6 +345,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [session, requestSync, remind],
   );
 
+  // read on each render, so a raise ends at the rollover without a timer
+  const newLimit = todayLimit(settings.newPerDay, raise, Date.now());
+  const raiseNew = useCallback(async () => {
+    const next = raised(raise, Date.now());
+    await DB.setMeta('new_raise', JSON.stringify(next));
+    setRaise(next);
+  }, [raise]);
+
   const value = useMemo<Store>(
     () => ({
       ready,
@@ -343,6 +360,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       attempts,
       sessions,
       settings,
+      newLimit,
+      raiseNew,
       hasToken,
       sync,
       filter,
@@ -362,7 +381,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       archived,
       recordCertExam,
     }),
-    [ready, catalog, attempts, sessions, settings, hasToken, sync, filter, board, requestSync,
+    [ready, catalog, attempts, sessions, settings, newLimit, raiseNew, hasToken, sync, filter, board, requestSync,
       updateSettings, updateToken, record, session, finishSession, setCourseStatus, focus, setFocus, setLessonState, archived, recordCertExam],
   );
 

@@ -58,7 +58,7 @@ export default function Practice() {
   const { board } = st;
   const b = useMemo(() => board(null), [board]);
   const c = courses.find((x) => x.slug === course);
-  const limit = st.settings.newPerDay;
+  const limit = st.newLimit;
   // What Start would open: counts of ready reviews and new left today in this scope.
   const preview = useMemo(() => {
     if (!b || !course) return null;

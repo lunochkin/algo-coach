@@ -60,7 +60,7 @@ export default function Home() {
   // A course chip is an explicit selection, like `learn next --course`, so it sets the focus aside.
   const { focus } = st;
   const focused = !filter && focus ? focus : null;
-  const limit = st.settings.newPerDay;
+  const limit = st.newLimit;
   // The queue Continue would open, and the board its picks use.
   const cont = useMemo(() => {
     if (focused) {
@@ -231,6 +231,7 @@ export default function Home() {
             onOpen={() => router.push('/practice')}
             onClear={() => void st.setFocus(null)}
             onStrict={() => void st.setFocus({ ...focused, strict: !focused.strict })}
+            onMoreNew={() => void st.raiseNew()}
           />
         ) : (
           <FocusLine
