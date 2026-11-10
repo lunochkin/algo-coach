@@ -1,10 +1,11 @@
 import { X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
+import { Navigate, useNavigate, useSearchParams } from 'react-router'
 
 import {
   Board,
   continuePlan,
+  drillQueue,
   isLessonItem,
   makeAttempt,
   NEW_STEP,
@@ -16,6 +17,7 @@ import {
   reviewQueue,
   type AttemptRecord,
   type Catalog,
+  type DrillScope,
   type LessonItem,
   type Queue,
   type Question,
@@ -28,9 +30,11 @@ import { Panel } from '@/components/Panel'
 import { Button } from '@/components/ui/button'
 import { Ask } from '@/knowledge/Ask'
 import { linesOf, useKnowledge } from '@/knowledge/context'
+import { filteredScope } from '@/knowledge/filtered'
 import { useLearner } from '@/knowledge/learner'
 
-type Mode = 'next' | 'review'
+// learn's names, which a stint stores: the filtered queue is `drill` on the wire
+type Mode = 'next' | 'review' | 'drill'
 type Current = { q: Question; tag: Status; fresh: boolean; early: boolean } | { lesson: LessonItem }
 
 const HOME = '/knowledge'
@@ -39,19 +43,30 @@ const HOME = '/knowledge'
 // `pages.md`, The knowledge pages
 export function QueuePage() {
   const [params] = useSearchParams()
-  const mode: Mode = params.get('mode') === 'review' ? 'review' : 'next'
+  const named = params.get('mode')
+  const mode: Mode = named === 'review' ? 'review' : named === 'filtered' ? 'drill' : 'next'
   const learner = useLearner()
   if (!learner.ready || !learner.catalog) return <p className="text-meta text-muted-foreground">Loading the queue…</p>
-  return <Running key={mode} mode={mode} catalog={learner.catalog} learner={learner} />
+  const scope = mode === 'drill' ? filteredScope(params, learner.catalog) : null
+  // a module the user no longer reads leaves nothing to filter
+  if (mode === 'drill' && !scope) return <Navigate to={HOME} replace />
+  return <Running key={params.toString()} mode={mode} scope={scope} catalog={learner.catalog} learner={learner} />
 }
 
 type Learner = ReturnType<typeof useLearner>
 
-function Running({ mode, catalog, learner }: { mode: Mode; catalog: Catalog; learner: Learner }) {
+type RunningProps = { mode: Mode; scope: DrillScope | null; catalog: Catalog; learner: Learner }
+
+function Running({ mode, scope, catalog, learner }: RunningProps) {
   const k = useKnowledge()
   const navigate = useNavigate()
   // fixed when the queue starts: a raise moves its limit, and the picks read the log as it grows
   const [start] = useState(() => {
+    if (scope) {
+      // named explicitly, so a paused module serves too
+      const b = learner.board(scope.course)
+      return b ? { queue: drillQueue(b, scope, learner.newLimit), course: scope.course, include: null } : null
+    }
     if (mode === 'review') {
       const all = learner.board(null)
       return all ? { queue: reviewQueue(all, ['weak', 'due']), course: null, include: null } : null
@@ -203,7 +218,8 @@ function Running({ mode, catalog, learner }: { mode: Mode; catalog: Catalog; lea
           introduced={introduced}
           stopped={!!current}
           left={queueLine(counts)}
-          onDone={() => navigate(HOME)}
+          // the way back is the page the queue came from: a filtered queue's module
+          onDone={() => navigate(scope ? `/knowledge/modules/${scope.course}` : HOME)}
         />
       )}
     </section>

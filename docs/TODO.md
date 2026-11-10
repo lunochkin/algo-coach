@@ -74,7 +74,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Add `/knowledge/modules/:module` to the web: a panel of group cells
       per topic, the counts per level, the focus and status presses, and the
       home's rows opening it
-- [ ] Open the start sheet from the module page: a group's cell, a
+- [x] Open the start sheet from the module page: a group's cell, a
       subtopic's name, and Start beside a topic and the module. Serve its
       queue at `?mode=filtered` with the choices in the query. Starting moves
       no focus
