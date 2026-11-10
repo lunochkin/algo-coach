@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import {
+  answerResult,
   block,
-  cardFields,
+  canSubmit,
   cardLabel,
   choiceOrder,
   detailSections,
-  gradeChoice,
-  hasAnswer,
+  flipped,
+  gradeResult,
   LETTERS,
-  matchShort,
-  splitGuess,
+  togglePick,
   taughtBy,
   verdictView,
   yourAnswer,
@@ -70,7 +70,8 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
   const [result, setResult] = useState<Result | null>(null)
   const [details, setDetails] = useState(false)
   const multi = q.answer.length > 1
-  const canSubmit = q.format === 'short' ? hasAnswer(text) : picked.length > 0
+  const reply = { text, picked, guessing }
+  const ready = canSubmit(q, reply)
 
   function answer(r: Result) {
     onAnswered(r)
@@ -78,47 +79,9 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
     else setResult(r)
   }
 
-  function submit() {
-    if (q.format === 'short') {
-      const [reply, suffix] = splitGuess(text)
-      answer({
-        q,
-        correct: matchShort(reply, q),
-        guess: guessing || suffix,
-        order,
-        picked: [],
-        reply,
-      })
-    } else {
-      answer({
-        q,
-        correct: gradeChoice(q, order, picked),
-        guess: guessing,
-        order,
-        picked,
-        reply: '',
-      })
-    }
-  }
-
-  function grade() {
-    const card = cardFields(q.key.length, recalled, fell, wrong)
-    answer({
-      q,
-      correct: card.grade === 'k',
-      guess: false,
-      order,
-      picked: [],
-      reply: '',
-      grade: card.grade,
-      card,
-    })
-  }
-
-  function toggle(pos: number) {
-    if (!multi) setPicked([pos])
-    else setPicked(picked.includes(pos) ? picked.filter((p) => p !== pos) : [...picked, pos])
-  }
+  const submit = () => answer(answerResult(q, order, reply))
+  const grade = () => answer(gradeResult(q, order, recalled, fell, wrong))
+  const toggle = (pos: number) => setPicked(togglePick(picked, pos, multi))
 
   // a digit picks an option, and Enter submits or moves on: a reader at a
   // keyboard answers faster than by pointer
@@ -141,7 +104,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
         else if (q.format === 'card') {
           if (revealed) grade()
           else setRevealed(true)
-        } else if (canSubmit) submit()
+        } else if (ready) submit()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -185,7 +148,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
         <form
           onSubmit={(event) => {
             event.preventDefault()
-            if (canSubmit && !result) submit()
+            if (ready && !result) submit()
           }}
         >
           <Input
@@ -221,7 +184,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
               label={`${i + 1}. ${block(point)}`}
               on={recalled.has(i)}
               disabled={!!result}
-              onFlip={() => setRecalled(flip(recalled, i))}
+              onFlip={() => setRecalled(flipped(recalled, i))}
             />
           ))}
           {q.traps.length > 0 && <p className="pt-2 font-medium">{ASK_TRAPS}</p>}
@@ -232,7 +195,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
               hint={ASK_SAID_TRAP}
               on={fell.has(i)}
               disabled={!!result}
-              onFlip={() => setFell(flip(fell, i))}
+              onFlip={() => setFell(flipped(fell, i))}
             />
           ))}
           <Tick
@@ -269,20 +232,13 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
             <Button onClick={() => setRevealed(true)}>{ASK_REVEAL}</Button>
           )
         ) : (
-          <Button disabled={!canSubmit} onClick={submit}>
+          <Button disabled={!ready} onClick={submit}>
             {askSubmit(!!exam, !!exam?.last)}
           </Button>
         )}
       </div>
     </div>
   )
-}
-
-function flip(s: Set<number>, i: number): Set<number> {
-  const next = new Set(s)
-  if (next.has(i)) next.delete(i)
-  else next.add(i)
-  return next
 }
 
 function Tick(props: {

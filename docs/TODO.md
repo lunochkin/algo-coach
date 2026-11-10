@@ -165,7 +165,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       certification exam's rules, the start sheet's preview, the load wording
 - [x] Move the sync into core: the scheduler, one pass and each record line,
       behind a store each client implements. Two copies have drifted once
-- [ ] Move the queue run, the exam run and one question's answer into core,
+- [x] Move the queue run, the exam run and one question's answer into core,
       each a state the clients draw. Both hold the same flow twice today
 - [ ] Open the lesson a web queue offers over the running queue, as the phone
       does, so Read no longer ends the queue

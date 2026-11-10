@@ -85,7 +85,7 @@ interface Store {
   // the user's module order, a record of the log, so every device lists the modules alike
   courseOrder: string[];
   setCourseOrder: (slugs: string[]) => Promise<void>;
-  raiseNew: () => Promise<void>;
+  raiseNew: (rec?: RaiseRecord) => Promise<void>;
   hasToken: boolean;
   sync: SyncState;
   board: (only?: string | null, include?: string | null) => Board | null;
@@ -98,12 +98,13 @@ interface Store {
   record: (rec: AttemptRecord) => Promise<void>;
   session: Session | null;
   setSession: (s: Session | null) => void;
-  finishSession: (score: number, answered: number) => Promise<void>;
+  // the stint a run returned; none where nothing was answered
+  finishSession: (rec: SessionRecord | null) => Promise<void>;
   setCourseStatus: (course: string, status: CourseStatus) => Promise<void>;
   focus: Focus | null;
   setFocus: (f: Focus | null) => Promise<void>;
   setLessonState: (course: string, lesson: string, status: LessonRecord['status']) => Promise<void>;
-  recordCertExam: (rec: Omit<CertRecord, 't'>) => Promise<void>;
+  recordCertExam: (rec: CertRecord) => Promise<void>;
 }
 
 const Ctx = createContext<Store | null>(null);
@@ -347,21 +348,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   );
 
   const recordCertExam = useCallback(
-    async (rec: Omit<CertRecord, 't'>) => {
-      const full = newRecord.cert(rec);
-      await DB.addLocal('certs', certPath(settingsRef.current.device, full.t), full);
-      setCertRecords((xs) => [...xs, full]);
+    async (rec: CertRecord) => {
+      await DB.addLocal('certs', certPath(settingsRef.current.device, rec.t), rec);
+      setCertRecords((xs) => [...xs, rec]);
       requestSync(0);
     },
     [requestSync],
   );
 
   const finishSession = useCallback(
-    async (score: number, answered: number) => {
-      const s = session;
+    async (rec: SessionRecord | null) => {
       setSession(null);
-      if (s && answered > 0) {
-        const rec = newRecord.session(s.mode, score, answered);
+      if (rec) {
         await DB.addLocal('sessions', sessionPath(settingsRef.current.device, rec.t), rec);
         setSessions((xs) => [...xs, rec]);
       }
@@ -369,17 +367,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const a = await DB.allAttempts();
       await remind(catalogRef.current, a);
     },
-    [session, requestSync, remind],
+    [requestSync, remind],
   );
 
   // read on each render, so a raise ends at the rollover without a timer
   const newLimit = todayLimit(settingRecords, raises, Date.now());
-  const raiseNew = useCallback(async () => {
-    const rec = newRecord.raise();
-    await DB.addLocal('raises', raisePath(settingsRef.current.device, rec.t), rec);
-    setRaises((xs) => [...xs, rec]);
-    requestSync(0);
-  }, [requestSync]);
+  const raiseNew = useCallback(
+    async (rec: RaiseRecord = newRecord.raise()) => {
+      await DB.addLocal('raises', raisePath(settingsRef.current.device, rec.t), rec);
+      setRaises((xs) => [...xs, rec]);
+      requestSync(0);
+    },
+    [requestSync],
+  );
   const setSetting = useCallback(
     async (name: SettingName, n: number) => {
       const rec = newRecord.setting(name, n);

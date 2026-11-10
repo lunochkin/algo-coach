@@ -1,5 +1,5 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { BackHandler, Pressable, ScrollView, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Appbar, Button, Divider, Switch, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper';
@@ -8,36 +8,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   type AnswerRow,
-  type AttemptRecord,
   block,
-  Board,
   byTopic,
-  cardFields,
   cardLabel,
   choiceOrder,
   DEFAULT_RULES,
   detailSections,
-  examOutcome,
-  examTitle,
-  gradeChoice,
-  hasAnswer,
-  isLessonItem,
-  isoNow,
   type LessonItem,
   lessonStopNote,
   LETTERS,
-  makeAttempt,
-  matchShort,
-  NEW_STEP,
-  offersRaise,
   type Question,
   questionHead,
-  queueLine,
   queueSummary,
   queueTitle,
   type Result,
-  splitGuess,
-  type Status,
   taughtBy,
   verdictView,
   youLine,
@@ -69,11 +53,19 @@ import {
   QUEUE_RAISE,
   QUEUE_STOP,
   queueLeft,
+  answerResult,
+  canSubmit,
+  ExamRun,
+  type ExamRecords,
+  flipped,
+  gradeResult,
+  QueueRun,
+  type QueueSource,
+  togglePick,
+  NEW_STEP,
 } from '@algo-coach/core';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
-
-type Phase = 'ask' | 'done' | 'review';
 
 export default function Quiz() {
   const st = useStore();
@@ -81,8 +73,6 @@ export default function Quiz() {
   if (s && 'queue' in s) return <QueueQuiz s={s} />;
   return <ExamQuiz s={s} />;
 }
-
-type Current = { q: Question; tag: Status; fresh: boolean; early: boolean } | { lesson: LessonItem };
 
 /** A lesson served in the queue: read it, and its way back returns here, or go on without it. */
 function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number; onNext: () => void }) {
@@ -126,43 +116,23 @@ function QueueQuiz({ s }: { s: QueueSession }) {
   const st = useStore();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const queue = s.queue;
-  // Answers of this queue, so a pick never waits for the store to catch up.
-  const mine = useRef<AttemptRecord[]>([]);
-  const board = useCallback(() => {
-    if (!st.catalog) return null;
-    const known = new Set(st.attempts);
-    const extra = mine.current.filter((r) => !known.has(r));
-    return Board.build(st.catalog, [...st.attempts, ...extra], s.course, s.include ?? null);
-  }, [st.catalog, st.attempts, s.course, s.include]);
-  const pickOne = useCallback((): Current | null => {
-    const b = board();
-    const q = b ? queue.pick(b, Date.now()) : null;
-    if (!q || !b) return null;
-    if (isLessonItem(q)) return { lesson: q };
-    const now = Date.now();
-    return { q, tag: b.status(q, now), fresh: !b.attempts(q).length, early: queue.early(b, q, now) };
-  }, [board, queue]);
-  const [current, setCurrent] = useState(() => pickOne());
-  const [count, setCount] = useState(0); // keys Ask, so each pick starts clean
-  const [done, setDone] = useState(!current);
-  const results = useRef<Result[]>([]);
-  const introduced = useRef(0);
-  const ended = useRef(false);
+  const held = (): QueueSource => ({ catalog: st.catalog, attempts: st.attempts });
+  const [run] = useState(() => new QueueRun(s.queue, s.mode, s.course, s.include ?? null, held()));
+  const [, rerender] = useState(0);
+  const changed = () => rerender((x) => x + 1);
+  const done = run.done;
 
   const end = useCallback(async () => {
-    if (ended.current) return;
-    ended.current = true;
-    const rs = results.current;
-    await st.finishSession(rs.filter((r) => r.correct).length, rs.length);
-    setDone(true);
-  }, [st]);
+    await st.finishSession(run.end());
+  }, [st, run]);
 
   // Stop reads the summary, a queue with nothing answered included; a second press leaves
   const quit = useCallback(async () => {
-    if (done) router.back();
-    else await end();
-  }, [done, end]);
+    if (done) return router.back();
+    run.stop();
+    changed();
+    await end();
+  }, [done, run, end]);
 
   useFocusEffect(
     useCallback(() => {
@@ -175,48 +145,26 @@ function QueueQuiz({ s }: { s: QueueSession }) {
   );
 
   const onAnswered = (r: Result) => {
-    const rec = makeAttempt(isoNow(), r.q.course, r.q.id, r.correct, r.guess, r.grade, r.card);
-    mine.current.push(rec);
-    void st.record(rec);
-    results.current = [...results.current, r];
-    if (current && 'q' in current && current.fresh) introduced.current++;
+    void st.record(run.answer(r));
+    changed();
   };
   const next = () => {
-    const p = pickOne();
-    setCurrent(p);
-    setCount((x) => x + 1);
-    if (!p) void end();
+    run.next(held());
+    changed();
+    if (run.done) void end();
   };
   const moreNew = () => {
-    queue.raise(NEW_STEP);
     // today's limit, so Home and the next queue count the raise too
-    void st.raiseNew();
-    if (!current) {
-      const p = pickOne();
-      if (p) {
-        ended.current = false;
-        setDone(false);
-        setCurrent(p);
-        setCount((x) => x + 1);
-      }
-    } else setCount((x) => x);
+    void st.raiseNew(run.raise(held()));
+    changed();
   };
 
-  const b = board();
-  const now = Date.now();
-  const due = b ? queue.reviews(b, now).length : 0;
-  const newLeft = b ? queue.newLeft(b, now) : 0;
-  const stepping = b ? queue.stepping(b, now).count : 0;
-  const left = queueLine({ reviews: due, learning: stepping, newLeft });
-  const unseenLeft = !!b && queue.scope.some((q) => !b.attempts(q).length);
-  const rs = results.current;
-  const score = rs.filter((r) => r.correct).length;
-  const summary = queueSummary({
-    answered: rs.length,
-    correct: score,
-    introduced: introduced.current,
-    stopped: !!current,
-  });
+  const reading = run.reading(held(), Date.now());
+  const { left } = reading;
+  const current = run.current;
+  const rs = run.results;
+  const score = run.score;
+  const summary = queueSummary(reading.summary);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -229,7 +177,7 @@ function QueueQuiz({ s }: { s: QueueSession }) {
         <Text variant="labelMedium" style={{ flex: 1, color: theme.colors.onSurfaceVariant }}>
           {left}
         </Text>
-        {offersRaise(s.mode, newLeft, unseenLeft) ? (
+        {reading.raise ? (
           <Button compact mode="text" onPress={moreNew} accessibilityLabel={`Allow ${NEW_STEP} more new questions`}>
             {QUEUE_RAISE}
           </Button>
@@ -239,7 +187,7 @@ function QueueQuiz({ s }: { s: QueueSession }) {
         <LessonStop item={current.lesson} bottom={insets.bottom} onNext={next} />
       ) : !done && current && 'q' in current ? (
         <Ask
-          key={count}
+          key={run.shown}
           q={current.q}
           tag={current.tag}
           early={current.early}
@@ -273,32 +221,35 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
   const st = useStore();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const exam = true;
-  const [index, setIndex] = useState(0);
-  const [phase, setPhase] = useState<Phase>('ask');
-  const [reviewAt, setReviewAt] = useState(0);
-  const results = useRef<Result[]>([]);
-  const ended = useRef(false);
+  const [run] = useState(() => (s ? new ExamRun(s, st.catalog?.courses ?? []) : null));
   const [, rerender] = useState(0);
+  const changed = () => rerender((x) => x + 1);
+  const phase = run?.phase;
 
-  const end = useCallback(async () => {
-    if (ended.current) return;
-    ended.current = true;
-    if (!s) return;
-    // an exam stopped with nothing answered stores nothing, and still reads its summary
-    if (!results.current.length) return setPhase('done');
-    const out = examOutcome(s, results.current, isoNow(), st.catalog?.courses ?? []);
-    for (const a of out.attempts) await st.record(a);
-    await st.finishSession(out.score, out.n);
-    if (out.cert) await st.recordCertExam(out.cert);
-    setPhase('done');
-  }, [st]);
+  // the answers, the stint and a certification's record are stored together at the end
+  const store = useCallback(
+    async (records: ExamRecords | null) => {
+      if (!records) return;
+      for (const a of records.attempts) await st.record(a);
+      await st.finishSession(records.session);
+      if (records.cert) await st.recordCertExam(records.cert);
+    },
+    [st],
+  );
 
   const quit = useCallback(async () => {
-    if (phase === 'review') return setPhase('done');
-    if (phase === 'ask') return end();
+    if (!run) return router.back();
+    if (phase === 'review') {
+      run.closeReview();
+      return changed();
+    }
+    if (phase === 'ask') {
+      const records = run.stop();
+      changed();
+      return store(records);
+    }
     router.back();
-  }, [phase, end]);
+  }, [run, phase, store]);
 
   useFocusEffect(
     useCallback(() => {
@@ -310,7 +261,7 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
     }, [quit]),
   );
 
-  if (!s) {
+  if (!run) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <Appbar.Header>
@@ -321,51 +272,54 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
     );
   }
 
-  const total = s.questions.length;
-  const rs = results.current;
-  const out = examOutcome(s, rs, '', st.catalog?.courses ?? []);
+  const out = run.outcome;
   const { score, missed } = out;
+  const q = run.question;
+  const reviewed = run.reviewed;
 
   const onAnswered = (r: Result) => {
-    results.current = [...results.current, r];
-    rerender((x) => x + 1);
+    run.answer(r);
+    changed();
   };
-  const next = () => (index + 1 < total ? setIndex(index + 1) : void end());
-
-  const title = examTitle(phase, index, total, reviewAt, missed.length);
+  const next = () => {
+    const records = run.next();
+    changed();
+    void store(records);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.Action icon="close" onPress={quit} accessibilityLabel={QUEUE_STOP} />
-        <Appbar.Content title={title} />
-        {phase !== 'ask' ? (
-          <Text variant="labelLarge" style={{ marginRight: 16 }}>{`${score}/${rs.length}`}</Text>
-        ) : null}
+        <Appbar.Content title={run.title} />
+        {phase !== 'ask' ? <Text variant="labelLarge" style={{ marginRight: 16 }}>{`${score}/${out.n}`}</Text> : null}
       </Appbar.Header>
-      {phase === 'ask' ? (
+      {q ? (
         <Ask
-          key={index}
-          q={s.questions[index]}
+          key={run.index}
+          q={q}
           tag=""
-          exam={exam}
+          exam
           bottom={insets.bottom}
           onAnswered={onAnswered}
           onNext={next}
-          last={index + 1 === total}
+          last={run.last}
         />
-      ) : phase === 'review' ? (
+      ) : reviewed ? (
         <Reviewed
-          key={reviewAt}
-          r={missed[reviewAt]}
+          key={run.reviewAt}
+          r={reviewed}
           bottom={insets.bottom}
-          last={reviewAt + 1 === missed.length}
-          onNext={() => (reviewAt + 1 < missed.length ? setReviewAt(reviewAt + 1) : setPhase('done'))}
+          last={run.reviewLast}
+          onNext={() => {
+            run.nextMissed();
+            changed();
+          }}
         />
       ) : (
         <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
           <View style={{ alignItems: 'center', paddingVertical: 24 }}>
-            <Text variant="displayMedium">{`${score}/${rs.length}`}</Text>
+            <Text variant="displayMedium">{`${score}/${out.n}`}</Text>
             <Text variant="titleMedium">{`${out.percent}%`}</Text>
           </View>
           {out.byTopic.map((t) => (
@@ -382,8 +336,8 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
               icon="eye-outline"
               style={{ marginTop: 16 }}
               onPress={() => {
-                setReviewAt(0);
-                setPhase('review');
+                run.review();
+                changed();
               }}
             >
               {examReviewMissed(missed.length)}
@@ -478,6 +432,8 @@ function Ask(props: {
   const [result, setResult] = useState<Result | null>(null);
   const [details, setDetails] = useState(false);
   const multi = q.answer.length > 1;
+  const reply = { text, picked, guessing };
+  const ready = canSubmit(q, reply);
 
   const answer = (r: Result) => {
     onAnswered(r);
@@ -485,27 +441,9 @@ function Ask(props: {
     if (exam) onNext();
     else setResult(r);
   };
-
-  const submit = () => {
-    if (q.format === 'short') {
-      const [reply, suffix] = splitGuess(text);
-      answer({ q, correct: matchShort(reply, q), guess: guessing || suffix, order, picked: [], reply });
-    } else {
-      answer({ q, correct: gradeChoice(q, order, picked), guess: guessing, order, picked, reply: '' });
-    }
-  };
-
-  const gradeCardNow = () => {
-    const card = cardFields(q.key.length, recalled, fell, wrong);
-    answer({ q, correct: card.grade === 'k', guess: false, order, picked: [], reply: '', grade: card.grade, card });
-  };
-
-  const toggle = (pos: number) => {
-    if (!multi) setPicked([pos]);
-    else setPicked(picked.includes(pos) ? picked.filter((p) => p !== pos) : [...picked, pos]);
-  };
-
-  const canSubmit = q.format === 'short' ? hasAnswer(text) : picked.length > 0;
+  const submit = () => answer(answerResult(q, order, reply));
+  const gradeCardNow = () => answer(gradeResult(q, order, recalled, fell, wrong));
+  const toggle = (pos: number) => setPicked(togglePick(picked, pos, multi));
 
   return (
     // Edge-to-edge Android no longer resizes the window for the keyboard; this keeps the input and bottom bar above it.
@@ -529,7 +467,7 @@ function Ask(props: {
             autoCorrect={false}
             spellCheck={false}
             style={{ fontFamily: 'monospace' }}
-            onSubmitEditing={() => canSubmit && !result && submit()}
+            onSubmitEditing={() => ready && !result && submit()}
           />
         ) : null}
         {q.format !== 'card' && !result ? (
@@ -549,7 +487,7 @@ function Ask(props: {
                 label={`${i + 1}. ${block(point)}`}
                 on={recalled.has(i)}
                 disabled={!!result}
-                onPress={() => setRecalled(flip(recalled, i))}
+                onPress={() => setRecalled(flipped(recalled, i))}
               />
             ))}
             {q.traps.length ? (
@@ -564,7 +502,7 @@ function Ask(props: {
                     hint={ASK_SAID_TRAP}
                     on={fell.has(i)}
                     disabled={!!result}
-                    onPress={() => setFell(flip(fell, i))}
+                    onPress={() => setFell(flipped(fell, i))}
                   />
                 ))}
               </>
@@ -597,7 +535,7 @@ function Ask(props: {
             </Button>
           )
         ) : (
-          <Button mode="contained" style={{ flex: 1 }} disabled={!canSubmit} onPress={submit}>
+          <Button mode="contained" style={{ flex: 1 }} disabled={!ready} onPress={submit}>
             {askSubmit(exam, last)}
           </Button>
         )}
@@ -766,13 +704,6 @@ function Details({ r }: { r: Result }) {
       ))}
     </View>
   );
-}
-
-function flip(s: Set<number>, i: number): Set<number> {
-  const next = new Set(s);
-  if (next.has(i)) next.delete(i);
-  else next.add(i);
-  return next;
 }
 
 function Tick(props: { label: string; hint?: string; on: boolean; disabled: boolean; onPress: () => void }) {

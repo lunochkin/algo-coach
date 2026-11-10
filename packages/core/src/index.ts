@@ -26,6 +26,8 @@ export * from './mapview';
 export * from './lessons';
 export * from './certview';
 export * from './exam';
+export * from './answer';
+export * from './run';
 export * from './syncstate';
 export * from './account';
 // the engine's API, generated from its OpenAPI schema by `just types`

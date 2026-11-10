@@ -3,13 +3,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 
 import {
+  block,
   type Catalog,
+  ExamRun,
+  type ExamRecords,
   certExam,
   examOpening,
-  examOutcome,
   type ExamPlan,
   examPool,
-  examTitle,
   LETTERS,
   levelExam,
   levelExamLabel,
@@ -32,11 +33,10 @@ import {
   examReviewNext,
   QUEUE_STOP,
   examModuleChoice,
-  isoNow,
+  newRecord,
   certExamRule,
   CERT_EXAM_MISSING,
   CERT_EXAM_START,
-  newRecord,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -47,7 +47,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Ask, Details, Verdict } from '@/knowledge/Ask'
-import { linesOf, loadedFrom, useKnowledge } from '@/knowledge/context'
+import { linesOf, loadedFrom, useKnowledge, type Knowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
 import { CERTIFICATIONS, KNOWLEDGE } from '@/knowledge/paths'
 import { cn } from '@/lib/utils'
@@ -219,89 +219,62 @@ function Choice({ label, children }: { label: string; children: React.ReactNode 
   )
 }
 
-type Phase = 'ask' | 'review' | 'done'
-
 function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; back: string }) {
   const k = useKnowledge()
-  const [index, setIndex] = useState(0)
-  const [phase, setPhase] = useState<Phase>('ask')
-  const [reviewAt, setReviewAt] = useState(0)
-  const [results, setResults] = useState<Result[]>([])
-  const answered = useRef<Result[]>([])
-  const ended = useRef(false)
-  const total = plan.questions.length
-  const out = examOutcome(plan, results, '', catalog.courses)
+  const [run] = useState(() => new ExamRun(plan, catalog.courses))
+  const [, rerender] = useState(0)
+  const out = run.outcome
 
-  // the answers, the stint and a certification's record are stored together at the end
-  function end() {
-    if (ended.current) return
-    ended.current = true
-    const rs = answered.current
-    if (!rs.length) return
-    const done = examOutcome(plan, rs, isoNow(), catalog.courses)
-    for (const a of done.attempts) void k.add('attempt', a)
-    void k.add('session', newRecord.session(plan.mode, done.score, done.n))
-    if (done.cert) void k.add('cert', newRecord.cert(done.cert))
-  }
-
-  // leaving through the navigation ends the exam the same way; a closed tab leaves no record
-  const leave = useRef(end)
+  // leaving through the navigation ends the exam the same way; a closed tab
+  // leaves no record. The cleanup reads the latest `add`
+  const latest = useRef(k)
   useEffect(() => {
-    leave.current = end
+    latest.current = k
   })
-  useEffect(() => {
-    ended.current = false
-    return () => leave.current()
-  }, [])
+  useEffect(() => () => store(latest.current.add, run.end()), [run])
 
-  function finish() {
-    end()
-    setPhase('done')
+  function act(step: () => ExamRecords | null | void) {
+    store(k.add, step() ?? null)
+    rerender((n) => n + 1)
   }
 
-  const q = plan.questions[index]
+  const q = run.question
   const course = q ? catalog.courses.find((c) => c.slug === q.course) : undefined
+  const reviewed = run.reviewed
 
   return (
     <section className="space-y-section">
       <header className="flex items-center gap-stack">
-        <h1 className="flex-1 text-title font-semibold">
-          {examTitle(phase, index, total, reviewAt, out.missed.length)}
-        </h1>
-        {phase !== 'ask' && (
+        <h1 className="flex-1 text-title font-semibold">{run.title}</h1>
+        {run.phase !== 'ask' && (
           <span className="text-meta tabular-nums">
             {out.score}/{out.n}
           </span>
         )}
-        {phase === 'ask' && (
-          <Button variant="outline" size="sm" onClick={finish}>
+        {run.phase === 'ask' && (
+          <Button variant="outline" size="sm" onClick={() => act(() => run.stop())}>
             <X />
             {QUEUE_STOP}
           </Button>
         )}
       </header>
 
-      {phase === 'ask' && q ? (
+      {q ? (
         <Ask
-          key={index}
+          key={run.index}
           q={q}
           course={course}
           head={questionHead(course, catalog.rules, q, '', false)}
-          exam={{ last: index + 1 === total }}
-          onAnswered={(r) => {
-            answered.current = [...answered.current, r]
-            setResults(answered.current)
-          }}
-          onNext={() => (index + 1 < total ? setIndex(index + 1) : finish())}
+          exam={{ last: run.last }}
+          onAnswered={(r) => act(() => run.answer(r))}
+          onNext={() => act(() => run.next())}
         />
-      ) : phase === 'review' && out.missed[reviewAt] ? (
+      ) : reviewed ? (
         <Reviewed
-          r={out.missed[reviewAt]}
+          r={reviewed}
           catalog={catalog}
-          last={reviewAt + 1 === out.missed.length}
-          onNext={() =>
-            reviewAt + 1 < out.missed.length ? setReviewAt(reviewAt + 1) : setPhase('done')
-          }
+          last={run.reviewLast}
+          onNext={() => act(() => run.nextMissed())}
         />
       ) : (
         <Panel>
@@ -323,13 +296,7 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
           </ul>
           <div className="flex gap-stack">
             {out.missed.length > 0 && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setReviewAt(0)
-                  setPhase('review')
-                }}
-              >
+              <Button variant="outline" onClick={() => act(() => run.review())}>
                 {examReviewMissed(out.missed.length)}
               </Button>
             )}
@@ -341,6 +308,14 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
       )}
     </section>
   )
+}
+
+// the answers, the stint and a certification's record are stored together at the end
+function store(add: Knowledge['add'], records: ExamRecords | null) {
+  if (!records) return
+  for (const a of records.attempts) void add('attempt', a)
+  void add('session', records.session)
+  if (records.cert) void add('cert', records.cert)
 }
 
 // a missed question, read back: the learner's reply, the key and the detail
@@ -361,7 +336,7 @@ function Reviewed({
       <p className="text-meta text-muted-foreground">
         {questionHead(course, catalog.rules, r.q, '', false)}
       </p>
-      <p className="text-heading whitespace-pre-wrap">{r.q.prompt}</p>
+      <p className="text-heading whitespace-pre-wrap">{block(r.q.prompt)}</p>
       {r.q.format === 'choice' && (
         <ul className="space-y-2">
           {r.order.map((i, pos) => (
