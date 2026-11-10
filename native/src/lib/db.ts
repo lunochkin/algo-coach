@@ -14,8 +14,19 @@ import {
   type StatusRecord,
 } from '@algo-coach/core';
 
-export type Table = 'attempts' | 'sessions' | 'statuses' | 'focus' | 'lessons' | 'certs' | 'setting_changes' | 'raises' | 'orders';
-export const TABLES: Table[] = ['attempts', 'sessions', 'statuses', 'focus', 'lessons', 'certs', 'setting_changes', 'raises', 'orders'];
+export type Table =
+  'attempts' | 'sessions' | 'statuses' | 'focus' | 'lessons' | 'certs' | 'setting_changes' | 'raises' | 'orders';
+export const TABLES: Table[] = [
+  'attempts',
+  'sessions',
+  'statuses',
+  'focus',
+  'lessons',
+  'certs',
+  'setting_changes',
+  'raises',
+  'orders',
+];
 
 let opened: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -97,7 +108,16 @@ export const cursorKey = (user: string | null) => (user ? `sync_cursor:${user}` 
 export async function addLocal(
   table: Table,
   path: string,
-  rec: AttemptRecord | SessionRecord | StatusRecord | FocusRecord | LessonRecord | CertRecord | SettingRecord | RaiseRecord | OrderRecord,
+  rec:
+    | AttemptRecord
+    | SessionRecord
+    | StatusRecord
+    | FocusRecord
+    | LessonRecord
+    | CertRecord
+    | SettingRecord
+    | RaiseRecord
+    | OrderRecord,
 ) {
   // minted once, here, so a retried upload is recognised by the engine
   await (
@@ -122,7 +142,10 @@ export async function pending(): Promise<Pending[]> {
   const d = await db();
   const found: Pending[] = [];
   for (const table of TABLES) {
-    const rows = await d.getAllAsync<Row>(`SELECT client_id, line FROM ${table} WHERE pending = 1 AND owner IS ? ORDER BY id`, owner);
+    const rows = await d.getAllAsync<Row>(
+      `SELECT client_id, line FROM ${table} WHERE pending = 1 AND owner IS ? ORDER BY id`,
+      owner,
+    );
     found.push(...rows.map((r) => ({ table, client_id: r.client_id, line: r.line })));
   }
   return found;
@@ -152,9 +175,7 @@ export async function merged(table: Table, clientId: string, device: string, lin
 }
 
 export async function getMeta(key: string): Promise<string | null> {
-  const row = await (
-    await db()
-  ).getFirstAsync<{ value: string }>('SELECT value FROM meta WHERE key = ?', key);
+  const row = await (await db()).getFirstAsync<{ value: string }>('SELECT value FROM meta WHERE key = ?', key);
   return row?.value ?? null;
 }
 

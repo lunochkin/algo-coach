@@ -115,7 +115,6 @@ export function ProblemsPage() {
                     </button>
                   ))}
                 </div>
-
               </section>
 
               <section className="space-y-stack">
@@ -195,9 +194,7 @@ function ProblemRow({ listed, drilled }: { listed: Listed; drilled: string | nul
       className="group -mx-3 block rounded-lg px-3 py-3 transition-colors hover:bg-accent"
     >
       <div className="flex items-baseline gap-3">
-        <span className="font-medium underline-offset-4 group-hover:underline">
-          {listed.title}
-        </span>
+        <span className="font-medium underline-offset-4 group-hover:underline">{listed.title}</span>
         {listed.difficulty && (
           <Badge variant="outline" className="font-normal">
             {listed.difficulty}
@@ -205,12 +202,12 @@ function ProblemRow({ listed, drilled }: { listed: Listed; drilled: string | nul
         )}
         <span className="ml-auto shrink-0 text-meta text-muted-foreground tabular-nums">
           {listed.attempt_count === 0
-            ? "never attempted"
+            ? 'never attempted'
             : `${listed.attempt_count} attempts · ${share(listed.solved_count, listed.attempt_count)} solved · ${lastAt(listed.last_attempt_at)}`}
         </span>
       </div>
       <p className="mt-1 font-mono text-meta text-muted-foreground">
-        {listed.techniques.join(" · ")}
+        {listed.techniques.join(' · ')}
       </p>
     </Link>
   )

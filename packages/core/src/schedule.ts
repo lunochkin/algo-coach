@@ -91,21 +91,14 @@ export class Board {
     }
   }
 
-  static build(
-    catalog: Catalog,
-    records: AttemptRecord[],
-    only?: string | null,
-    include: string | null = null,
-  ): Board {
+  static build(catalog: Catalog, records: AttemptRecord[], only?: string | null, include: string | null = null): Board {
     const courses = only ? catalog.courses.filter((c) => c.slug === only) : catalog.courses;
     return new Board(catalog, courses, buildHistory(records), !!only, include);
   }
 
   /** Courses served by `next` and `exam`: paused ones only when selected explicitly. */
   get served(): Course[] {
-    return this.explicit
-      ? this.courses
-      : this.courses.filter((c) => !c.paused || c.slug === this.include);
+    return this.explicit ? this.courses : this.courses.filter((c) => !c.paused || c.slug === this.include);
   }
 
   /** Groups of served courses, in board order. */
@@ -208,12 +201,18 @@ export class Board {
       (g) => this.groupQuestions(g).length > 0 && this.unlocked(g) && !this.done(g) && !this.groupGate(g),
     );
     const depth = (g: Group) => c.graph?.depth(g.sub) ?? 0;
-    return open.map((g, i) => ({ g, i, d: depth(g) })).sort((a, b) => a.d - b.d || a.i - b.i).map((x) => x.g);
+    return open
+      .map((g, i) => ({ g, i, d: depth(g) }))
+      .sort((a, b) => a.d - b.d || a.i - b.i)
+      .map((x) => x.g);
   }
 
   /** The first frontier group with a new question to serve: where Continue introduces next. */
   nextNew(c: Course): Group | null {
-    return this.frontier(c).find((g) => this.groupQuestions(g).some((q) => !this.attempts(q).length && !this.held(q))) ?? null;
+    return (
+      this.frontier(c).find((g) => this.groupQuestions(g).some((q) => !this.attempts(q).length && !this.held(q))) ??
+      null
+    );
   }
 
   /**

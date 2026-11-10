@@ -4,13 +4,7 @@ import { Button, Text, useTheme } from 'react-native-paper';
 
 import { router } from 'expo-router';
 
-import {
-  block,
-  type ExamPlan,
-  type Queue,
-  syncErrorSummary,
-  syncLine,
-} from '@algo-coach/core';
+import { block, type ExamPlan, type Queue, syncErrorSummary, syncLine } from '@algo-coach/core';
 import type { ExamSession, QueueSession, Session, SyncState } from '@/lib/store';
 
 /** Monospace, horizontally scrollable, never wrapped. `verbatim` keeps leading spaces (diagrams). */
@@ -21,14 +15,14 @@ export function CodeBlock({ code, verbatim = false }: { code: string; verbatim?:
       horizontal
       persistentScrollbar
       style={[styles.code, { backgroundColor: theme.colors.surfaceVariant }]}
-      contentContainerStyle={styles.codeInner}>
+      contentContainerStyle={styles.codeInner}
+    >
       <Text selectable style={[styles.mono, { color: theme.colors.onSurfaceVariant }]}>
         {verbatim ? code.replace(/\s+$/, '') : block(code)}
       </Text>
     </ScrollView>
   );
 }
-
 
 /** Sync error shown where it can be read: top of the screen, tap for the full message. */
 export function SyncBanner({ sync }: { sync: SyncState }) {
@@ -46,7 +40,8 @@ export function SyncBanner({ sync }: { sync: SyncState }) {
         padding: 12,
         borderRadius: 12,
         backgroundColor: theme.colors.errorContainer,
-      }}>
+      }}
+    >
       <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer }}>
         {syncErrorSummary(sync.error)}
       </Text>
@@ -119,7 +114,8 @@ export function BottomBar({ bottom, row = false, children }: { bottom: number; r
         gap: 8,
         flexDirection: row ? 'row' : 'column',
         backgroundColor: theme.colors.background,
-      }}>
+      }}
+    >
       {children}
     </View>
   );

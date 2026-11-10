@@ -86,18 +86,30 @@ describe('reminder', () => {
 
 describe('modes', () => {
   const mk = (id: string, topic: string, level = 1, format: 'choice' | 'card' = 'choice') => ({
-    id, topic, sub: 's', level, kind: 'k', prompt: id, format,
-    choices: ['a', 'b', 'c'], answer: ['A'],
+    id,
+    topic,
+    sub: 's',
+    level,
+    kind: 'k',
+    prompt: id,
+    format,
+    choices: ['a', 'b', 'c'],
+    answer: ['A'],
   });
   const cat = loadSnapshot({
     format: 2,
     courses: [
       {
         slug: 'c',
-        definition: { title: 'C', pass_ratio: 1, kinds: ['k'], topic: [
-          { slug: 't', tier: 1, title: 'T', subs: ['s'] },
-          { slug: 'u', tier: 1, title: 'U', subs: ['s'] },
-        ] },
+        definition: {
+          title: 'C',
+          pass_ratio: 1,
+          kinds: ['k'],
+          topic: [
+            { slug: 't', tier: 1, title: 'T', subs: ['s'] },
+            { slug: 'u', tier: 1, title: 'U', subs: ['s'] },
+          ],
+        },
         questions: [mk('a', 't'), mk('b', 't'), mk('c', 't'), mk('d', 'u'), mk('e', 'u', 1, 'card')],
       },
     ],
@@ -113,7 +125,13 @@ describe('modes', () => {
   it('drill picks from its scope and scores per topic in first-seen order', () => {
     expect((drillQueue(b, { course: 'c', topic: 't' }, 10).pick(b, 0) as Question).topic).toBe('t');
     const [a, , , d] = cat.questions;
-    expect(byTopic([{ q: d, correct: true }, { q: a, correct: false }, { q: d, correct: false }])).toEqual([
+    expect(
+      byTopic([
+        { q: d, correct: true },
+        { q: a, correct: false },
+        { q: d, correct: false },
+      ]),
+    ).toEqual([
       { topic: 'c/u', score: 1, n: 2 },
       { topic: 'c/t', score: 0, n: 1 },
     ]);

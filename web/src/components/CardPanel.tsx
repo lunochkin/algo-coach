@@ -57,7 +57,11 @@ function CardRow({ card, heading }: { card: ListedCard; heading: string | null }
       )}
       {row.progress && (
         <div className="mt-2 max-w-xs">
-          <ProgressBar value={row.progress.solved} total={row.progress.rungs} label="Rungs solved" />
+          <ProgressBar
+            value={row.progress.solved}
+            total={row.progress.rungs}
+            label="Rungs solved"
+          />
         </div>
       )}
       {row.trigger !== null && (

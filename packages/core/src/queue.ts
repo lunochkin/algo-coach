@@ -16,8 +16,7 @@ const LEARN_AHEAD = 20 * 60_000;
 export function dayStart(now: number, offsetMinutes = -new Date(now).getTimezoneOffset()): number {
   const off = offsetMinutes * 60_000;
   const local = new Date(now + off);
-  const start =
-    Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate(), ROLLOVER_HOUR) - off;
+  const start = Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate(), ROLLOVER_HOUR) - off;
   return now >= start ? start : start - DAY;
 }
 
@@ -27,7 +26,12 @@ export function newPerDay(settings: readonly SettingRecord[]): number {
 }
 
 /** The new-question limit today: the daily limit plus every raise given since the day began. */
-export function todayLimit(settings: readonly SettingRecord[], raises: RaiseRecord[], now: number, offsetMinutes?: number): number {
+export function todayLimit(
+  settings: readonly SettingRecord[],
+  raises: RaiseRecord[],
+  now: number,
+  offsetMinutes?: number,
+): number {
   const start = dayStart(now, offsetMinutes);
   let added = 0;
   for (const r of raises) {
@@ -251,13 +255,19 @@ export function focusQueue(b: Board, f: Focus, limit: number): Queue {
   if (f.strict) return new Queue('focus', mine, null, limit, mine);
   const keys = new Set(mine.map(qkey));
   // Reviews come from every group, locked or not; only new questions follow the ladder.
-  const all = b.servedGroups().flat().filter((q) => !keys.has(qkey(q)));
+  const all = b
+    .servedGroups()
+    .flat()
+    .filter((q) => !keys.has(qkey(q)));
   return new Queue('focus', [...mine, ...all], null, limit, mine);
 }
 
 /** Ready reviews outside a strict focus, which a plain review queue would serve. */
 export function outsideFocus(b: Board, f: Focus, now: number): number {
-  return b.servedGroups().flat().filter((q) => !inFocus(q, f) && b.toReview(q, now)).length;
+  return b
+    .servedGroups()
+    .flat()
+    .filter((q) => !inFocus(q, f) && b.toReview(q, now)).length;
 }
 
 export function reviewQueue(b: Board, want: Status[]): Queue {
@@ -275,14 +285,16 @@ export interface DrillScope {
 }
 
 export function drillQueue(b: Board, f: DrillScope, limit: number): Queue {
-  const scope = b.questions().filter(
-    (q) =>
-      q.course === f.course &&
-      (f.topic == null || q.topic === f.topic) &&
-      (f.sub == null || q.sub === f.sub) &&
-      (f.level == null || q.level === f.level) &&
-      (f.kind == null || q.kind === f.kind),
-  );
+  const scope = b
+    .questions()
+    .filter(
+      (q) =>
+        q.course === f.course &&
+        (f.topic == null || q.topic === f.topic) &&
+        (f.sub == null || q.sub === f.sub) &&
+        (f.level == null || q.level === f.level) &&
+        (f.kind == null || q.kind === f.kind),
+    );
   const want: Status[] | null = f.weak ? ['weak'] : f.due ? ['weak', 'due'] : null;
   return new Queue('drill', scope, want, limit);
 }

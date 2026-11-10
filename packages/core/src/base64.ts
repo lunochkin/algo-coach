@@ -8,13 +8,7 @@ export function utf8Encode(s: string): number[] {
     if (c < 0x80) out.push(c);
     else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 63));
     else if (c < 0x10000) out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
-    else
-      out.push(
-        0xf0 | (c >> 18),
-        0x80 | ((c >> 12) & 63),
-        0x80 | ((c >> 6) & 63),
-        0x80 | (c & 63),
-      );
+    else out.push(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
   }
   return out;
 }
@@ -22,15 +16,13 @@ export function utf8Encode(s: string): number[] {
 export function utf8Decode(b: Uint8Array): string {
   const parts: string[] = [];
   let chunk: number[] = [];
-  for (let i = 0; i < b.length; ) {
+  for (let i = 0; i < b.length;) {
     const x = b[i];
     let c: number;
-    if (x < 0x80) (c = x), (i += 1);
-    else if (x < 0xe0) (c = ((x & 31) << 6) | (b[i + 1] & 63)), (i += 2);
-    else if (x < 0xf0) (c = ((x & 15) << 12) | ((b[i + 1] & 63) << 6) | (b[i + 2] & 63)), (i += 3);
-    else
-      (c = ((x & 7) << 18) | ((b[i + 1] & 63) << 12) | ((b[i + 2] & 63) << 6) | (b[i + 3] & 63)),
-        (i += 4);
+    if (x < 0x80) ((c = x), (i += 1));
+    else if (x < 0xe0) ((c = ((x & 31) << 6) | (b[i + 1] & 63)), (i += 2));
+    else if (x < 0xf0) ((c = ((x & 15) << 12) | ((b[i + 1] & 63) << 6) | (b[i + 2] & 63)), (i += 3));
+    else ((c = ((x & 7) << 18) | ((b[i + 1] & 63) << 12) | ((b[i + 2] & 63) << 6) | (b[i + 3] & 63)), (i += 4));
     if (c >= 0x10000) {
       c -= 0x10000;
       chunk.push(0xd800 + (c >> 10), 0xdc00 + (c & 1023));

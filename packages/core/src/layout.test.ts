@@ -2,7 +2,16 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { crossings, layoutClusters, layoutDag, layoutGraph, lineage, parseGraph, type Course, type RawGraph } from './index';
+import {
+  crossings,
+  layoutClusters,
+  layoutDag,
+  layoutGraph,
+  lineage,
+  parseGraph,
+  type Course,
+  type RawGraph,
+} from './index';
 
 /** Just enough TOML for course.toml subs and graph.toml (`needs` lists, `[[edge]]` tables). */
 function readPython(): { course: Course; raw: RawGraph } | null {
@@ -19,7 +28,10 @@ function readPython(): { course: Course; raw: RawGraph } | null {
   const g = strip(readFileSync(`${base}/graph.toml`, 'utf8'));
   const needsBlock = g.split('[needs]')[1]?.split('[[edge]]')[0] ?? '';
   const needs = Object.fromEntries(
-    [...needsBlock.matchAll(/"([^"]+)"\s*=\s*\[([^\]]*)\]/g)].map((m) => [m[1], [...m[2].matchAll(/"([^"]+)"/g)].map((x) => x[1])]),
+    [...needsBlock.matchAll(/"([^"]+)"\s*=\s*\[([^\]]*)\]/g)].map((m) => [
+      m[1],
+      [...m[2].matchAll(/"([^"]+)"/g)].map((x) => x[1]),
+    ]),
   );
   const edge = g
     .split('[[edge]]')
@@ -37,7 +49,10 @@ const tiny = {
   slug: 'c',
   topics: [{ slug: 't', tier: 1, title: 'T', subs: ['d', 'a', 'c', 'b', 'e'] }],
 } as unknown as Course;
-const tinyGraph = parseGraph({ needs: { c: ['a'], d: ['b', 'a'], e: ['c', 'd'] } }, new Set(['a', 'b', 'c', 'd', 'e'])).graph!;
+const tinyGraph = parseGraph(
+  { needs: { c: ['a'], d: ['b', 'a'], e: ['c', 'd'] } },
+  new Set(['a', 'b', 'c', 'd', 'e']),
+).graph!;
 
 describe('graph layout', () => {
   it('puts every prerequisite in an earlier layer', () => {
@@ -117,7 +132,12 @@ describe('cluster layout', () => {
 
   it('keeps cross-topic edges out of clusters and summarises them through certificate nodes', () => {
     const l = layoutClusters(two, g, DIMS);
-    expect(l.edges.filter((e) => e.kind === 'prereq').map((e) => `${e.from}>${e.to}`).sort()).toEqual(['a>b', 'x>y']);
+    expect(
+      l.edges
+        .filter((e) => e.kind === 'prereq')
+        .map((e) => `${e.from}>${e.to}`)
+        .sort(),
+    ).toEqual(['a>b', 'x>y']);
     expect(l.edges.filter((e) => e.kind === 'needs').map((e) => `${e.from}>${e.to}`)).toEqual([
       'cert:base>cluster:top',
       'cert:top>cert:all',

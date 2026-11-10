@@ -5,7 +5,9 @@ import { describe, expect, it } from 'vitest';
 import { Board, certConditions, certFocus, certStates, loadSnapshot, readyCert, type Snapshot } from './index';
 
 // the shared fixtures, which the Python side generates: `README.md`, Boundaries
-const fixtures = JSON.parse(readFileSync(resolve(__dirname, '../../../tests/fixtures/knowledge/scheduling.json'), 'utf8'));
+const fixtures = JSON.parse(
+  readFileSync(resolve(__dirname, '../../../tests/fixtures/knowledge/scheduling.json'), 'utf8'),
+);
 const named = (name: string) => {
   const f = fixtures.cert_states.find((x: { name: string }) => x.name === name);
   const cat = loadSnapshot({ format: 6, courses: f.courses } as Snapshot);
@@ -19,7 +21,9 @@ describe("a certification's conditions", () => {
     const [id] = [...states].find(([, s]) => s.state === 'ready')!;
     const v = certConditions(b, c, id, states, null)!;
     expect([v.label, v.offersExam, v.offersTarget]).toEqual(['Ready for exam', true, true]);
-    expect(v.checks.filter((x) => x.text.startsWith('Coverage') || x.text.startsWith('Retention')).every((x) => x.ok)).toBe(true);
+    expect(
+      v.checks.filter((x) => x.text.startsWith('Coverage') || x.text.startsWith('Retention')).every((x) => x.ok),
+    ).toBe(true);
   });
 
   it('names the groups still below coverage, before the exam is offered', () => {

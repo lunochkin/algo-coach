@@ -59,10 +59,7 @@ export interface AnswerRow {
   yours: boolean; // the learner picked it, or fell into it
 }
 
-export type YourAnswer =
-  | { kind: 'rows'; rows: AnswerRow[] }
-  | { kind: 'short'; you: string; accepted: string }
-  | null;
+export type YourAnswer = { kind: 'rows'; rows: AnswerRow[] } | { kind: 'short'; you: string; accepted: string } | null;
 
 /** The "Your answer" section: each option's why, a typed reply, or an open question's ticks. */
 export function yourAnswer(r: Result): YourAnswer {
@@ -90,7 +87,14 @@ export function yourAnswer(r: Result): YourAnswer {
     const traps = [...q.traps.keys()]
       .sort((a, b) => Number(fell.has(b)) - Number(fell.has(a)))
       .map((i) =>
-        row(`t${i}`, !fell.has(i), `${'abc'[i]}) ${block(q.traps[i])}`, q.trapsDetail[i], fell.has(i), fell.has(i) ? '✗' : '·'),
+        row(
+          `t${i}`,
+          !fell.has(i),
+          `${'abc'[i]}) ${block(q.traps[i])}`,
+          q.trapsDetail[i],
+          fell.has(i),
+          fell.has(i) ? '✗' : '·',
+        ),
       );
     return { kind: 'rows', rows: [...points, ...traps] };
   }
@@ -134,7 +138,11 @@ export function taughtBy(q: Question, c: Course | undefined): LessonLink[] {
   const own = q.lesson ? graph.lesson(slug) : undefined;
   if (own) {
     const part = anchor ? headings(c.lessonBodies[slug] ?? '')[anchor] : undefined;
-    return [{ course: q.course, slug: own.slug, anchor, label: `📖 Learn this: ${own.title}${part ? ` › ${part}` : ''}` }];
+    return [
+      { course: q.course, slug: own.slug, anchor, label: `📖 Learn this: ${own.title}${part ? ` › ${part}` : ''}` },
+    ];
   }
-  return graph.teaching(q.sub, q.level).map((x) => ({ course: q.course, slug: x.slug, anchor: '', label: `From lesson: ${x.title}` }));
+  return graph
+    .teaching(q.sub, q.level)
+    .map((x) => ({ course: q.course, slug: x.slug, anchor: '', label: `From lesson: ${x.title}` }));
 }

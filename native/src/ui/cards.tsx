@@ -49,7 +49,8 @@ export function CardPanel({ technique, cards }: { technique: string | null; card
               <TouchableRipple
                 onPress={() => router.push({ pathname: '/card', params: { slug: card.slug } })}
                 accessibilityRole="link"
-                accessibilityLabel={row.title}>
+                accessibilityLabel={row.title}
+              >
                 <View style={{ paddingHorizontal: 16, paddingVertical: 12, gap: 4 }}>
                   {/* the title alone on its line: a phone is too narrow for the aside beside it */}
                   <Text variant="titleMedium">{row.title}</Text>
@@ -88,12 +89,17 @@ export function CardPanel({ technique, cards }: { technique: string | null; card
 function Marks({ marks }: { marks: RecallMark[] }) {
   const theme = useTheme();
   const tone = (one: RecallMark) =>
-    one.tone === 'passed' ? tones(theme.dark).done : one.tone === 'wrong' ? theme.colors.error : theme.colors.onSurfaceVariant;
+    one.tone === 'passed'
+      ? tones(theme.dark).done
+      : one.tone === 'wrong'
+        ? theme.colors.error
+        : theme.colors.onSurfaceVariant;
   return (
     <Text
       variant="bodySmall"
       style={{ color: theme.colors.onSurfaceVariant }}
-      accessibilityLabel={`recall: ${marks.map((one) => `${one.title}, ${one.reading}`).join('; ')}`}>
+      accessibilityLabel={`recall: ${marks.map((one) => `${one.title}, ${one.reading}`).join('; ')}`}
+    >
       recall
       {marks.map((one) => (
         <Text key={one.templateId}>

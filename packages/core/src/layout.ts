@@ -245,7 +245,10 @@ export function layoutClusters(course: Course, graph: Graph, d: ClusterDims, wit
     return v;
   };
   topics.forEach((t) => depthOf(t.slug));
-  const reduced = reduceTopicEdges(topics.map((t) => t.slug), needsTopic);
+  const reduced = reduceTopicEdges(
+    topics.map((t) => t.slug),
+    needsTopic,
+  );
 
   // Each cluster's inner layout, relative to its box.
   const inner = new Map<string, { nodes: PlacedNode[]; w: number; h: number }>();
@@ -284,7 +287,11 @@ export function layoutClusters(course: Course, graph: Graph, d: ClusterDims, wit
       const used = [...new Set(local.values())].sort((a, b) => a - b);
       for (const [k, v] of local) local.set(k, used.indexOf(v));
     }
-    const lay = arrange(listed, local, allEdges.filter((e) => local.has(e.from) && local.has(e.to)));
+    const lay = arrange(
+      listed,
+      local,
+      allEdges.filter((e) => local.has(e.from) && local.has(e.to)),
+    );
     intra.push(...allEdges.filter((e) => e.kind !== 'prereq' && local.has(e.from)));
     const certX = lay.layers * d.col;
     const rowsH = (lay.rows - 1) * d.row + d.nodeH;
@@ -299,7 +306,13 @@ export function layoutClusters(course: Course, graph: Graph, d: ClusterDims, wit
         y: d.header + d.pad + (n.index + (lay.rows - inCol) / 2) * d.row,
       };
     });
-    nodes.push({ sub: `cert:${t.slug}`, kind: 'cert', topic: t.slug, x: d.pad + certX, y: d.header + d.pad + (rowsH - d.nodeH) / 2 });
+    nodes.push({
+      sub: `cert:${t.slug}`,
+      kind: 'cert',
+      topic: t.slug,
+      x: d.pad + certX,
+      y: d.header + d.pad + (rowsH - d.nodeH) / 2,
+    });
     inner.set(t.slug, { nodes, w: d.pad * 2 + certX + d.nodeW, h });
   }
 

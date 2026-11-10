@@ -3,8 +3,15 @@ import { describe, expect, it } from 'vitest';
 import { alsoNeeds, Board, layoutClusters, levelDots, loadSnapshot, MAP_DIMS, mapLit, reach } from './index';
 
 const mk = (id: string, sub: string, level: number) => ({
-  id, topic: sub === 'x' ? 'u' : 't', sub, level, kind: 'concept', prompt: id, format: 'choice' as const,
-  choices: ['a', 'b', 'c'], answer: ['A'],
+  id,
+  topic: sub === 'x' ? 'u' : 't',
+  sub,
+  level,
+  kind: 'concept',
+  prompt: id,
+  format: 'choice' as const,
+  choices: ['a', 'b', 'c'],
+  answer: ['A'],
 });
 // a needs nothing, b needs a, c needs b; x sits in another topic and needs c
 const catalog = loadSnapshot({
@@ -13,7 +20,9 @@ const catalog = loadSnapshot({
     {
       slug: 'm',
       definition: {
-        title: 'M', pass_ratio: 1, kinds: ['concept'],
+        title: 'M',
+        pass_ratio: 1,
+        kinds: ['concept'],
         topic: [
           { slug: 't', tier: 1, title: 'T', subs: ['a', 'b', 'c'] },
           { slug: 'u', tier: 2, title: 'U', subs: ['x'] },
@@ -27,7 +36,7 @@ const catalog = loadSnapshot({
 const [c] = catalog.courses;
 
 describe('the map', () => {
-  it('reaches a subtopic\'s prerequisites upstream and its dependents downstream', () => {
+  it("reaches a subtopic's prerequisites upstream and its dependents downstream", () => {
     expect([...reach(c, ['b'], true)].sort()).toEqual(['a', 'b']);
     expect([...reach(c, ['b'], false)].sort()).toEqual(['b', 'c', 'x']);
   });

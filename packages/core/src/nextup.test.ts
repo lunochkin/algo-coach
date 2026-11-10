@@ -3,8 +3,15 @@ import { describe, expect, it } from 'vitest';
 import { Board, loadSnapshot, nextQueue } from './index';
 
 const mk = (id: string, sub: string) => ({
-  id, topic: 't', sub, level: 0, kind: 'k', prompt: id, format: 'choice' as const,
-  choices: ['a', 'b', 'c'], answer: ['A'],
+  id,
+  topic: 't',
+  sub,
+  level: 0,
+  kind: 'k',
+  prompt: id,
+  format: 'choice' as const,
+  choices: ['a', 'b', 'c'],
+  answer: ['A'],
 });
 const course = (extra: object = {}) =>
   loadSnapshot({
@@ -12,7 +19,12 @@ const course = (extra: object = {}) =>
     courses: [
       {
         slug: 'c',
-        definition: { title: 'C', pass_ratio: 1, kinds: ['k'], topic: [{ slug: 't', tier: 1, title: 'T', subs: ['s1', 's2'] }] },
+        definition: {
+          title: 'C',
+          pass_ratio: 1,
+          kinds: ['k'],
+          topic: [{ slug: 't', tier: 1, title: 'T', subs: ['s1', 's2'] }],
+        },
         questions: [mk('a', 's1'), mk('b', 's2')],
         ...extra,
       },
@@ -39,7 +51,10 @@ describe('next up', () => {
 
   it('names the lesson where every open group waits for one', () => {
     const lesson = { title: 'Names', file: 'lessons/names.md', teaches: ['s1@0', 's2@0'], needs: [], pretest: 0 };
-    const b = Board.build(course({ graph: { format: 2, lesson: { names: lesson } }, lesson_bodies: { names: '# Names' } }), []);
+    const b = Board.build(
+      course({ graph: { format: 2, lesson: { names: lesson } }, lesson_bodies: { names: '# Names' } }),
+      [],
+    );
     expect(b.nextUp(b.courses[0])).toMatchObject({ lesson: { slug: 'names' } });
   });
 

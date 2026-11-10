@@ -21,7 +21,9 @@ import {
   EXAM_MODULE,
   EXAM_NOTE,
   EXAM_SIZE,
-  EXAM_TITLE, examModuleChoice } from '@algo-coach/core';
+  EXAM_TITLE,
+  examModuleChoice,
+} from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
 import { BottomBar, Failed, startExam, styles } from '@/ui/common';
@@ -84,7 +86,8 @@ function Choices({ catalog }: { catalog: Catalog }) {
       <Header />
       <ScrollView
         contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 96 }]}
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+      >
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
           {EXAM_NOTE}
         </Text>
@@ -94,11 +97,7 @@ function Choices({ catalog }: { catalog: Catalog }) {
             {EXAM_ALL}
           </Chip>
           {courses.map((c) => (
-            <Chip
-              key={c.slug}
-              selected={course === c.slug}
-              showSelectedCheck
-              onPress={() => setCourse(c.slug)}>
+            <Chip key={c.slug} selected={course === c.slug} showSelectedCheck onPress={() => setCourse(c.slug)}>
               {examModuleChoice(c)}
             </Chip>
           ))}
@@ -115,21 +114,10 @@ function Choices({ catalog }: { catalog: Catalog }) {
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {catalog.rules.levels[level] ?? ''}
         </Text>
-        <TextInput
-          mode="outlined"
-          label={EXAM_SIZE}
-          value={size}
-          onChangeText={setSize}
-          keyboardType="number-pad"
-        />
+        <TextInput mode="outlined" label={EXAM_SIZE} value={size} onChangeText={setSize} keyboardType="number-pad" />
       </ScrollView>
       <BottomBar bottom={insets.bottom}>
-        <Button
-          mode="contained"
-          icon="play"
-          disabled={!count}
-          onPress={start}
-          contentStyle={{ paddingVertical: 8 }}>
+        <Button mode="contained" icon="play" disabled={!count} onPress={start} contentStyle={{ paddingVertical: 8 }}>
           {levelExamLabel(catalog.rules, level, pool.length, count)}
         </Button>
       </BottomBar>

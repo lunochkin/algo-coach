@@ -13,9 +13,7 @@ const SECTIONS = [
     label: 'Practice',
     to: '/',
     owns: (path: string) =>
-      path === '/' ||
-      path.startsWith('/techniques/') ||
-      path.startsWith('/problems/'),
+      path === '/' || path.startsWith('/techniques/') || path.startsWith('/problems/'),
   },
   // the listing alone: a picked problem is a step down from the board, from a
   // technique or from a card, and the section it sits under cannot say which

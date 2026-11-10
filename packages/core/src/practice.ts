@@ -158,7 +158,8 @@ export function recallMarks(card: ListedCard): RecallMark[] {
 /** A started card's line: when it began, the ladder, and the forms no rung covers. */
 export function cardStateLine(status: ListedCard['status']): string {
   const started = status.started_at ? new Date(status.started_at).toLocaleDateString() : '';
-  const gaps = status.gaps === 0 ? '' : ` · ${status.gaps === 1 ? '1 form uncovered' : `${status.gaps} forms uncovered`}`;
+  const gaps =
+    status.gaps === 0 ? '' : ` · ${status.gaps === 1 ? '1 form uncovered' : `${status.gaps} forms uncovered`}`;
   return `started ${started} · ladder ${status.solved}/${status.rungs}, required ${status.required_solved}/${status.required}${gaps}`;
 }
 

@@ -211,7 +211,12 @@ function QueueQuiz({ s }: { s: QueueSession }) {
   const unseenLeft = !!b && queue.scope.some((q) => !b.attempts(q).length);
   const rs = results.current;
   const score = rs.filter((r) => r.correct).length;
-  const summary = queueSummary({ answered: rs.length, correct: score, introduced: introduced.current, stopped: !!current });
+  const summary = queueSummary({
+    answered: rs.length,
+    correct: score,
+    introduced: introduced.current,
+    stopped: !!current,
+  });
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -380,7 +385,8 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
               onPress={() => {
                 setReviewAt(0);
                 setPhase('review');
-              }}>
+              }}
+            >
               {examReviewMissed(missed.length)}
             </Button>
           ) : null}
@@ -410,12 +416,7 @@ function Head({ q, tag, early = false }: { q: Question; tag: string; early?: boo
   );
 }
 
-function Choices(props: {
-  q: Question;
-  order: number[];
-  picked: number[];
-  onToggle?: (pos: number) => void;
-}) {
+function Choices(props: { q: Question; order: number[]; picked: number[]; onToggle?: (pos: number) => void }) {
   const { q, order, picked, onToggle } = props;
   const theme = useTheme();
   const multi = q.answer.length > 1;
@@ -442,7 +443,8 @@ function Choices(props: {
               borderWidth: 1,
               borderColor: on ? theme.colors.primary : theme.colors.outlineVariant,
               backgroundColor: on ? theme.colors.secondaryContainer : 'transparent',
-            }}>
+            }}
+          >
             <Text variant="titleSmall">{LETTERS[pos]}</Text>
             <Text variant="bodyLarge" style={{ flex: 1 }}>
               {q.choices[i]}
@@ -511,7 +513,8 @@ function Ask(props: {
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
       <ScrollView
         contentContainerStyle={[styles.page, { paddingBottom: bottom + 96 }]}
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+      >
         <Head q={q} tag={tag} early={early} />
         {q.format === 'choice' ? (
           <Choices q={q} order={order} picked={picked} onToggle={result ? undefined : toggle} />
@@ -567,12 +570,7 @@ function Ask(props: {
                 ))}
               </>
             ) : null}
-            <Tick
-              label={ASK_SAID_ELSE}
-              on={wrong}
-              disabled={!!result}
-              onPress={() => setWrong(!wrong)}
-            />
+            <Tick label={ASK_SAID_ELSE} on={wrong} disabled={!!result} onPress={() => setWrong(!wrong)} />
           </View>
         ) : null}
         {result ? <Verdict r={result} /> : null}
@@ -590,7 +588,8 @@ function Ask(props: {
               mode="contained"
               style={{ flex: 1 }}
               accessibilityLabel={`Grade: ${cardLabel(q.key.length, recalled, fell, wrong)}`}
-              onPress={gradeCardNow}>
+              onPress={gradeCardNow}
+            >
               {cardLabel(q.key.length, recalled, fell, wrong)}
             </Button>
           ) : (
@@ -664,7 +663,8 @@ function DetailsToggle({ r, open, onToggle }: { r: Result; open: boolean; onTogg
         mode="text"
         icon={open ? 'chevron-up' : 'chevron-down'}
         onPress={onToggle}
-        style={{ alignSelf: 'flex-start' }}>
+        style={{ alignSelf: 'flex-start' }}
+      >
         {detailsToggle(open)}
       </Button>
       {open ? <Details r={r} /> : null}
@@ -693,7 +693,8 @@ function Row({ row }: { row: AnswerRow }) {
         borderRadius: 8,
         padding: 6,
         backgroundColor: row.yours ? theme.colors.secondaryContainer : 'transparent',
-      }}>
+      }}
+    >
       <Text variant="bodyMedium" selectable>
         <Text style={{ color: row.ok ? theme.colors.primary : theme.colors.error }}>{`${row.mark} `}</Text>
         {row.label}
@@ -756,8 +757,11 @@ function Details({ r }: { r: Result }) {
           key={x.slug}
           variant="labelLarge"
           accessibilityRole="link"
-          onPress={() => router.push({ pathname: '/lesson', params: { course: x.course, slug: x.slug, anchor: x.anchor } })}
-          style={{ color: theme.colors.primary, paddingVertical: 8 }}>
+          onPress={() =>
+            router.push({ pathname: '/lesson', params: { course: x.course, slug: x.slug, anchor: x.anchor } })
+          }
+          style={{ color: theme.colors.primary, paddingVertical: 8 }}
+        >
           {x.label}
         </Text>
       ))}
@@ -790,7 +794,8 @@ function Tick(props: { label: string; hint?: string; on: boolean; disabled: bool
         paddingVertical: 8,
         justifyContent: 'center',
         backgroundColor: on ? theme.colors.secondaryContainer : theme.colors.surfaceVariant,
-      }}>
+      }}
+    >
       <View style={styles.row}>
         <MaterialCommunityIcons
           name={on ? 'checkbox-marked' : 'checkbox-blank-outline'}

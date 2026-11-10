@@ -55,7 +55,6 @@ import {
 const FIXTURE = resolve(__dirname, '../../../tests/fixtures/knowledge/scheduling.json');
 const data = JSON.parse(readFileSync(FIXTURE, 'utf8'));
 
-
 const close = (got: number | null, want: number | null, rel: number) =>
   want === null ? got === null : got !== null && Math.abs(got - want) <= rel * Math.abs(want);
 
@@ -114,15 +113,15 @@ describe('gating', () => {
           lesson_gate: b.groupGate(g)?.slug ?? null,
         })),
       );
-      const frontier = Object.fromEntries(
-        b.courses.map((course) => [course.slug, b.frontier(course).map(groupKey)]),
-      );
+      const frontier = Object.fromEntries(b.courses.map((course) => [course.slug, b.frontier(course).map(groupKey)]));
       const lessons = Object.fromEntries(
         b.courses.flatMap((course) =>
-          b.lessons(course).map((x) => [
-            x.slug,
-            { state: b.lessonState(course, x), tried: b.tried(course, x), ready: b.lessonReady(course, x) },
-          ]),
+          b
+            .lessons(course)
+            .map((x) => [
+              x.slug,
+              { state: b.lessonState(course, x), tried: b.tried(course, x), ready: b.lessonReady(course, x) },
+            ]),
         ),
       );
       const held = b
@@ -135,7 +134,6 @@ describe('gating', () => {
   }
 });
 
-
 function mulberry(seed: number): () => number {
   return () => {
     seed = (seed + 0x6d2b79f5) | 0;
@@ -144,7 +142,6 @@ function mulberry(seed: number): () => number {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-
 
 describe('exam', () => {
   for (const c of data.exam) {
@@ -158,7 +155,6 @@ describe('exam', () => {
     });
   }
 });
-
 
 describe('course status', () => {
   for (const c of data.status) {
@@ -183,7 +179,9 @@ describe('card grade', () => {
 describe('focus', () => {
   for (const c of data.focus) {
     it(c.name, () => {
-      const cat = visibleCatalog(withStatuses(loadSnapshot({ format: 2, courses: c.courses } as Snapshot), c.statuses ?? []));
+      const cat = visibleCatalog(
+        withStatuses(loadSnapshot({ format: 2, courses: c.courses } as Snapshot), c.statuses ?? []),
+      );
       const f = currentFocus(c.focus, cat);
       const out: Record<string, unknown> = { focus: f ? [f.course, f.topic, f.sub] : null };
       if (f?.cert) Object.assign(out, { cert: f.cert, scope: [...(f.scope ?? [])].sort() });
@@ -191,7 +189,6 @@ describe('focus', () => {
     });
   }
 });
-
 
 type Recs = AttemptRecord[];
 
@@ -201,7 +198,9 @@ function drain(
   make: (cat: Catalog, recs: Recs) => { board: (recs: Recs) => Board; queue: Queue } | null,
   seed: number,
 ): string[] {
-  const cat = visibleCatalog(withStatuses(loadSnapshot({ format: 3, courses: c.courses } as Snapshot), c.statuses ?? []));
+  const cat = visibleCatalog(
+    withStatuses(loadSnapshot({ format: 3, courses: c.courses } as Snapshot), c.statuses ?? []),
+  );
   const recs = [...c.records];
   const start = parseTime(c.now);
   const made = make(cat, recs);
@@ -228,10 +227,14 @@ describe('next queue', () => {
   for (const c of data.next) {
     it(c.name, () => {
       for (const seed of seeds) {
-        const got = drain(c, (cat) => {
-          const board = (r: Recs) => Board.build(cat, r, c.course);
-          return { board, queue: nextQueue(board(c.records), c.limit ?? 10) };
-        }, seed);
+        const got = drain(
+          c,
+          (cat) => {
+            const board = (r: Recs) => Board.build(cat, r, c.course);
+            return { board, queue: nextQueue(board(c.records), c.limit ?? 10) };
+          },
+          seed,
+        );
         expect({ picked: [...new Set(got)].sort() }).toEqual(c.expected);
       }
     });
@@ -242,12 +245,16 @@ describe('focused next queue', () => {
   for (const c of data.focused_next) {
     it(c.name, () => {
       for (const seed of seeds) {
-        const got = drain(c, (cat) => {
-          const f = currentFocus(c.focus, cat);
-          if (!f) return null;
-          const board = (r: Recs) => Board.build(cat, r, null, f.course);
-          return { board, queue: focusQueue(board(c.records), f, c.limit ?? 10) };
-        }, seed);
+        const got = drain(
+          c,
+          (cat) => {
+            const f = currentFocus(c.focus, cat);
+            if (!f) return null;
+            const board = (r: Recs) => Board.build(cat, r, null, f.course);
+            return { board, queue: focusQueue(board(c.records), f, c.limit ?? 10) };
+          },
+          seed,
+        );
         const ordered = c.ordered ?? true;
         expect({ picked: ordered ? got : [...new Set(got)].sort() }).toEqual(c.expected);
       }
@@ -261,10 +268,14 @@ describe('review queue', () => {
       const f = c.filters;
       const want: Status[] = f.weak ? ['weak'] : f.due ? ['due'] : ['weak', 'due'];
       for (const seed of seeds) {
-        const got = drain(c, (cat) => {
-          const board = (r: Recs) => Board.build(cat, r, f.course);
-          return { board, queue: reviewQueue(board(c.records), want) };
-        }, seed);
+        const got = drain(
+          c,
+          (cat) => {
+            const board = (r: Recs) => Board.build(cat, r, f.course);
+            return { board, queue: reviewQueue(board(c.records), want) };
+          },
+          seed,
+        );
         expect({ picked: [...new Set(got)].sort() }).toEqual(c.expected);
       }
     });
@@ -275,10 +286,14 @@ describe('drill queue', () => {
   for (const c of data.drill) {
     it(c.name, () => {
       for (const seed of seeds) {
-        const got = drain(c, (cat) => {
-          const board = (r: Recs) => Board.build(cat, r, c.filters.course);
-          return { board, queue: drillQueue(board(c.records), c.filters, c.limit ?? 10) };
-        }, seed);
+        const got = drain(
+          c,
+          (cat) => {
+            const board = (r: Recs) => Board.build(cat, r, c.filters.course);
+            return { board, queue: drillQueue(board(c.records), c.filters, c.limit ?? 10) };
+          },
+          seed,
+        );
         expect({ picked: [...new Set(got)].sort() }).toEqual(c.expected);
       }
     });
@@ -366,7 +381,9 @@ describe('lesson text', () => {
       const mins: Record<string, number> = c.minutes ?? {};
       expect({
         headings: Object.fromEntries(Object.entries(bodies).map(([k, v]) => [k, headings(v)])),
-        minutes: Object.fromEntries(Object.entries(bodies).map(([k, v]) => [k, minutesOf({ minutes: mins[k] ?? null }, v)])),
+        minutes: Object.fromEntries(
+          Object.entries(bodies).map(([k, v]) => [k, minutesOf({ minutes: mins[k] ?? null }, v)]),
+        ),
         refs: Object.fromEntries((c.refs as string[]).map((r) => [r, lessonRefError(r, bodies)])),
         links: Object.values(bodies).flatMap((v) => lessonLinks(v)),
       }).toEqual(c.expected);
@@ -395,7 +412,9 @@ describe('certificate states', () => {
       const st = certStates(b, cat.courses[0], c.exams ?? []);
       const round = (x: number) => Math.round(x * 1e6) / 1e6;
       expect({
-        states: Object.fromEntries([...st].map(([k, v]) => [k, [v.state, round(v.coverage), round(v.retention), v.pool]])),
+        states: Object.fromEntries(
+          [...st].map(([k, v]) => [k, [v.state, round(v.coverage), round(v.retention), v.pool]]),
+        ),
       }).toEqual(c.expected);
     });
   }

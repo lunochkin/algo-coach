@@ -101,12 +101,7 @@ export function gradeCard(points: number, recalled: Set<number>, traps: Set<numb
 }
 
 /** The card part of an attempt record; empty lists and false are omitted. */
-export function cardFields(
-  points: number,
-  recalled: Set<number>,
-  traps: Set<number>,
-  wrong: boolean,
-): CardFields {
+export function cardFields(points: number, recalled: Set<number>, traps: Set<number>, wrong: boolean): CardFields {
   const out: CardFields = { grade: gradeCard(points, recalled, traps, wrong) };
   const missed = Array.from({ length: points }, (_, i) => i).filter((i) => !recalled.has(i));
   if (missed.length) out.missed = missed;
@@ -130,10 +125,7 @@ export function pyJson(rec: object): string {
 
 function asciiJson(v: unknown): string {
   if (Array.isArray(v)) return `[${v.map(asciiJson).join(', ')}]`;
-  return JSON.stringify(v).replace(
-    /[\u007f-￿]/g,
-    (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`,
-  );
+  return JSON.stringify(v).replace(/[\u007f-￿]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
 }
 
 export function parseLines<T>(text: string): T[] {

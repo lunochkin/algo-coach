@@ -10,7 +10,9 @@ const catalog = loadSnapshot({
     {
       slug: 'python',
       definition: {
-        title: 'Python', pass_ratio: 1, kinds: ['concept', 'output'],
+        title: 'Python',
+        pass_ratio: 1,
+        kinds: ['concept', 'output'],
         topic: [{ slug: 'core', tier: 1, title: 'Core', subs: ['names', 'types'] }],
       },
       questions: [],
@@ -22,7 +24,14 @@ const read = (url: string) => filteredScope(new URL(url, 'http://x').searchParam
 
 describe("a filtered queue's URL", () => {
   it('carries every choice the sheet made, and reads them back', () => {
-    const scope = { course: 'python', topic: 'core', sub: 'names', level: 1, kind: 'output', due: true }
+    const scope = {
+      course: 'python',
+      topic: 'core',
+      sub: 'names',
+      level: 1,
+      kind: 'output',
+      due: true,
+    }
     expect(read(filteredQuery(scope))).toEqual(scope)
   })
 
@@ -31,20 +40,26 @@ describe("a filtered queue's URL", () => {
   })
 
   it('keeps the module where the topic is gone, as a focus degrades', () => {
-    expect(read('/knowledge/queue?mode=filtered&module=python&topic=gone&sub=names')).toMatchObject({
-      course: 'python', topic: null, sub: null,
-    })
+    expect(read('/knowledge/queue?mode=filtered&module=python&topic=gone&sub=names')).toMatchObject(
+      {
+        course: 'python',
+        topic: null,
+        sub: null,
+      },
+    )
   })
 
   it('keeps the topic where the subtopic is gone', () => {
     expect(read('/knowledge/queue?mode=filtered&module=python&topic=core&sub=gone')).toMatchObject({
-      topic: 'core', sub: null,
+      topic: 'core',
+      sub: null,
     })
   })
 
   it('drops a level or a kind the module does not hold', () => {
     expect(read('/knowledge/queue?mode=filtered&module=python&level=9&kind=debug')).toMatchObject({
-      level: null, kind: null,
+      level: null,
+      kind: null,
     })
   })
 

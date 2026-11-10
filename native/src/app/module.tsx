@@ -130,7 +130,12 @@ export default function ModuleScreen() {
           {moduleSummary(sum)}
         </Text>
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
-          <Button mode="contained" compact icon="play" onPress={() => starter.open({ course: c.slug, topic: null, sub: null, level: null })}>
+          <Button
+            mode="contained"
+            compact
+            icon="play"
+            onPress={() => starter.open({ course: c.slug, topic: null, sub: null, level: null })}
+          >
             {MODULE_START}
           </Button>
           <Button
@@ -138,14 +143,16 @@ export default function ModuleScreen() {
             compact
             icon="crosshairs-gps"
             disabled={aimed}
-            onPress={() => void st.setFocus({ course: c.slug, topic: null, sub: null, strict: !!st.focus?.strict })}>
+            onPress={() => void st.setFocus({ course: c.slug, topic: null, sub: null, strict: !!st.focus?.strict })}
+          >
             {aimed ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
           </Button>
           <Button
             mode="outlined"
             compact
             icon={c.paused ? 'play' : 'pause'}
-            onPress={() => void st.setCourseStatus(c.slug, c.paused ? 'active' : 'paused')}>
+            onPress={() => void st.setCourseStatus(c.slug, c.paused ? 'active' : 'paused')}
+          >
             {c.paused ? MODULE_RESUME : MODULE_PAUSE}
           </Button>
           {c.paused ? (
@@ -175,15 +182,14 @@ export default function ModuleScreen() {
                 icon={lessonsOn ? 'check' : 'book-open-variant'}
                 selected={lessonsOn}
                 onPress={() => setLessonsOn(!lessonsOn)}
-                accessibilityLabel={lessonsOn ? 'Hide lessons' : 'Show lessons'}>
+                accessibilityLabel={lessonsOn ? 'Hide lessons' : 'Show lessons'}
+              >
                 {MAP_LESSONS}
               </Chip>
             </View>
           ) : null}
           {!c.graph ? (
-            <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>
-              {noGraph(c)}
-            </Text>
+            <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>{noGraph(c)}</Text>
           ) : (
             <CourseMap key={`${c.slug}:${withLessons}`} c={c} b={b} bottom={insets.bottom} withLessons={withLessons} />
           )}
@@ -218,7 +224,10 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
   const pips = useMemo(() => {
     const out = new Map<string, CertPip[]>();
     for (const [sub, xs] of certPips(c, certState, nodes)) {
-      out.set(sub, xs.map((x) => ({ letter: x.letter, color: stateColor(x.state, theme), filled: x.filled })));
+      out.set(
+        sub,
+        xs.map((x) => ({ letter: x.letter, color: stateColor(x.state, theme), filled: x.filled })),
+      );
     }
     return out;
   }, [c, certState, nodes, theme]);
@@ -354,7 +363,11 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
   const dots = useMemo(() => {
     const color = { covered: tone.done, open: tone.open, locked: theme.colors.onSurfaceDisabled, empty: null };
     const out = new Map<string, (string | null)[]>();
-    for (const [sub, xs] of levelDots(b, c, nodes)) out.set(sub, xs.map((x) => (x ? color[x] : null)));
+    for (const [sub, xs] of levelDots(b, c, nodes))
+      out.set(
+        sub,
+        xs.map((x) => (x ? color[x] : null)),
+      );
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes, b, c, theme.dark]);
@@ -477,13 +490,15 @@ function NodePanel(props: {
         <Button
           icon="crosshairs-gps"
           disabled={aimed}
-          onPress={() => void st.setFocus({ course: c.slug, topic, sub, strict: !!st.focus?.strict })}>
+          onPress={() => void st.setFocus({ course: c.slug, topic, sub, strict: !!st.focus?.strict })}
+        >
           {aimed ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
         </Button>
         <Button
           mode="contained-tonal"
           icon="play"
-          onPress={() => onPractice({ course: c.slug, topic, sub, level: null })}>
+          onPress={() => onPractice({ course: c.slug, topic, sub, level: null })}
+        >
           {MODULE_START}
         </Button>
       </Card.Actions>
@@ -515,7 +530,8 @@ function LessonPanel(props: { c: Course; b: Board; slug: string; bottom: number 
         <Button
           mode="contained-tonal"
           icon="book-open-variant"
-          onPress={() => router.push({ pathname: '/lesson', params: { course: c.slug, slug } })}>
+          onPress={() => router.push({ pathname: '/lesson', params: { course: c.slug, slug } })}
+        >
           {MAP_READ}
         </Button>
       </Card.Actions>

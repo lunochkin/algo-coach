@@ -61,7 +61,14 @@ export function AccountMenu() {
       <Menu
         visible={open}
         onDismiss={() => setOpen(false)}
-        anchor={<Appbar.Action icon="account-circle-outline" onPress={() => setOpen(true)} accessibilityLabel={YOUR_ACCOUNT} />}>
+        anchor={
+          <Appbar.Action
+            icon="account-circle-outline"
+            onPress={() => setOpen(true)}
+            accessibilityLabel={YOUR_ACCOUNT}
+          />
+        }
+      >
         {/* text rather than items: a menu item holds one line, and the id runs longer */}
         <View style={{ paddingHorizontal: 16, paddingVertical: 8, maxWidth: 200, gap: 2 }}>
           <Text variant="titleSmall">{named(me)}</Text>

@@ -17,8 +17,15 @@ import {
 } from './index';
 
 const mk = (id: string, sub: string) => ({
-  id, topic: 't', sub, level: 0, kind: 'concept', prompt: id, format: 'choice' as const,
-  choices: ['a', 'b', 'c'], answer: ['A'],
+  id,
+  topic: 't',
+  sub,
+  level: 0,
+  kind: 'concept',
+  prompt: id,
+  format: 'choice' as const,
+  choices: ['a', 'b', 'c'],
+  answer: ['A'],
 });
 const course = (extra: object = {}) =>
   loadSnapshot({
@@ -27,7 +34,9 @@ const course = (extra: object = {}) =>
       {
         slug: 'c',
         definition: {
-          title: 'C', pass_ratio: 1, kinds: ['concept'],
+          title: 'C',
+          pass_ratio: 1,
+          kinds: ['concept'],
           topic: [{ slug: 't', tier: 1, title: 'Types', subs: ['s1', 's2'], sub_titles: { s1: 'Ints' } }],
         },
         questions: [mk('a', 's1'), mk('b', 's2')],
@@ -76,7 +85,10 @@ describe('next up', () => {
 
   it('names the lesson every open group waits for', () => {
     const lesson = { title: 'Names', file: 'lessons/names.md', teaches: ['s1@0', 's2@0'], needs: [], pretest: 0 };
-    const b = Board.build(course({ graph: { format: 2, lesson: { names: lesson } }, lesson_bodies: { names: '# Names' } }), []);
+    const b = Board.build(
+      course({ graph: { format: 2, lesson: { names: lesson } }, lesson_bodies: { names: '# Names' } }),
+      [],
+    );
     expect(nextUpView(b, b.courses[0]).title).toBe('Next up: read “Names”');
   });
 
@@ -122,7 +134,9 @@ describe('empty Continue', () => {
   });
 
   it('sends a certificate focus to the certificates', () => {
-    expect(emptyContinue({ blocked: false, newLimit: 10, focus: { ...focus, cert: 'all@0' } }).action?.kind).toBe('certs');
+    expect(emptyContinue({ blocked: false, newLimit: 10, focus: { ...focus, cert: 'all@0' } }).action?.kind).toBe(
+      'certs',
+    );
   });
 
   it('offers to clear any other focus', () => {

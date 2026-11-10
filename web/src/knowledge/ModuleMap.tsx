@@ -87,11 +87,17 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const layout = useMemo(() => layoutClusters(c, c.graph!, MAP_DIMS, withLessons), [c, withLessons])
   const at = useMemo(() => new Map(layout.nodes.map((n) => [n.sub, n])), [layout])
-  const states = useMemo(() => (c.certs ? certStates(b, c, certExams) : new Map()), [b, c, certExams])
+  const states = useMemo(
+    () => (c.certs ? certStates(b, c, certExams) : new Map()),
+    [b, c, certExams],
+  )
   const dots = useMemo(() => levelDots(b, c, layout.nodes), [b, c, layout])
   const pips = useMemo(() => certPips(c, states, layout.nodes), [c, states, layout])
   const lit = useMemo(() => mapLit(c, layout, picked, focus), [c, layout, picked, focus])
-  const titles = useMemo(() => new Map([...c.topics.map((t) => [t.slug, t.title] as const), ['all', c.title] as const]), [c])
+  const titles = useMemo(
+    () => new Map([...c.topics.map((t) => [t.slug, t.title] as const), ['all', c.title] as const]),
+    [c],
+  )
   const scale = ZOOMS[zoom]
 
   // opens on the first group with new work, as the phone's map does
@@ -118,14 +124,31 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
         <Legend tone={DOT.empty} label={MAP_LEGEND.empty} />
         <span className="flex-1" />
         {(c.graph?.lessons.length ?? 0) > 0 && (
-          <Toggle size="sm" variant="outline" pressed={withLessons} onPressedChange={setWithLessons}>
+          <Toggle
+            size="sm"
+            variant="outline"
+            pressed={withLessons}
+            onPressedChange={setWithLessons}
+          >
             {MAP_LESSONS}
           </Toggle>
         )}
-        <Button variant="ghost" size="icon-sm" aria-label="Zoom out" disabled={zoom === 0} onClick={() => setZoom(zoom - 1)}>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Zoom out"
+          disabled={zoom === 0}
+          onClick={() => setZoom(zoom - 1)}
+        >
           <Minus />
         </Button>
-        <Button variant="ghost" size="icon-sm" aria-label="Zoom in" disabled={zoom === ZOOMS.length - 1} onClick={() => setZoom(zoom + 1)}>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Zoom in"
+          disabled={zoom === ZOOMS.length - 1}
+          onClick={() => setZoom(zoom + 1)}
+        >
           <Plus />
         </Button>
         <Button variant="ghost" size="icon-sm" aria-label={MAP_FIT} onClick={() => setZoom(0)}>
@@ -144,7 +167,14 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
         >
           {layout.clusters.map((k) => (
             <g key={k.topic} opacity={on(`cluster:${k.topic}`) ? 1 : 0.35}>
-              <rect x={k.x} y={k.y} width={k.w} height={k.h} rx={18} className="fill-card stroke-border" />
+              <rect
+                x={k.x}
+                y={k.y}
+                width={k.w}
+                height={k.h}
+                rx={18}
+                className="fill-card stroke-border"
+              />
               <text x={k.x + 16} y={k.y + 22} className="fill-brand-deep text-[14px]">
                 {titles.get(k.topic) ?? k.topic}
               </text>
@@ -152,13 +182,20 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
           ))}
           {layout.edges.map((e) => {
             const a = at.get(e.from)
-            const into = e.to.startsWith('cluster:') ? layout.clusters.find((k) => k.topic === e.to.slice(8)) : undefined
+            const into = e.to.startsWith('cluster:')
+              ? layout.clusters.find((k) => k.topic === e.to.slice(8))
+              : undefined
             const z = into ? { x: into.x, y: into.y + into.h / 2 - H / 2 } : at.get(e.to)
             if (!a || !z) return null
             const [x1, y1, x2, y2] = [a.x + W, a.y + H / 2, z.x, z.y + H / 2]
             const mid = (x1 + x2) / 2
             const shown = on(e.from) && on(e.to)
-            const dashed = e.kind === 'teaches' ? '2 3' : e.offset || e.from.startsWith('cert:') ? '6 4' : undefined
+            const dashed =
+              e.kind === 'teaches'
+                ? '2 3'
+                : e.offset || e.from.startsWith('cert:')
+                  ? '6 4'
+                  : undefined
             return (
               <path
                 key={`${e.from}>${e.to}`}
@@ -167,7 +204,13 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
                 strokeDasharray={dashed}
                 strokeWidth={shown && lit ? 2 : 1.2}
                 opacity={shown ? 0.9 : 0.12}
-                className={shown && lit ? 'stroke-brand-deep' : e.kind === 'teaches' ? 'stroke-brand' : 'stroke-muted-foreground'}
+                className={
+                  shown && lit
+                    ? 'stroke-brand-deep'
+                    : e.kind === 'teaches'
+                      ? 'stroke-brand'
+                      : 'stroke-muted-foreground'
+                }
               />
             )
           })}
@@ -248,14 +291,33 @@ function Node(props: {
     >
       {n.kind === 'cert' ? (
         <>
-          <rect x={n.x} y={n.y} width={W} height={H} rx={H / 2} className={cn('fill-brand-wash/50', ring)} strokeWidth={picked ? 2.5 : 1.5} />
+          <rect
+            x={n.x}
+            y={n.y}
+            width={W}
+            height={H}
+            rx={H / 2}
+            className={cn('fill-brand-wash/50', ring)}
+            strokeWidth={picked ? 2.5 : 1.5}
+          />
           <text x={n.x + 18} y={n.y + 22} className="fill-foreground text-[13px]">
             {cut(props.title, 20)}
           </text>
           {props.pips.map((p, i) => (
             <g key={p.letter}>
-              <circle cx={n.x + 26 + i * 26} cy={n.y + H - 15} r={9} className={PIP[p.state]} strokeWidth={1.2} opacity={p.filled ? 1 : 0.6} />
-              <text x={n.x + 22.5 + i * 26} y={n.y + H - 11} className="fill-foreground text-[10px]">
+              <circle
+                cx={n.x + 26 + i * 26}
+                cy={n.y + H - 15}
+                r={9}
+                className={PIP[p.state]}
+                strokeWidth={1.2}
+                opacity={p.filled ? 1 : 0.6}
+              />
+              <text
+                x={n.x + 22.5 + i * 26}
+                y={n.y + H - 11}
+                className="fill-foreground text-[10px]"
+              >
                 {p.letter}
               </text>
             </g>
@@ -263,7 +325,15 @@ function Node(props: {
         </>
       ) : n.kind === 'lesson' ? (
         <>
-          <rect x={n.x} y={n.y} width={W} height={H} rx={4} className={cn('fill-brand-wash', ring)} strokeWidth={picked ? 2.5 : 2} />
+          <rect
+            x={n.x}
+            y={n.y}
+            width={W}
+            height={H}
+            rx={4}
+            className={cn('fill-brand-wash', ring)}
+            strokeWidth={picked ? 2.5 : 2}
+          />
           <text x={n.x + 20} y={n.y + 22} className="fill-muted-foreground text-[12px]">
             {lesson ? lessonNode(props.b.lessonState(props.c, lesson)) : 'lesson'}
           </text>
@@ -273,16 +343,36 @@ function Node(props: {
         </>
       ) : (
         <>
-          <rect x={n.x} y={n.y} width={W} height={H} rx={12} className={cn(picked ? 'fill-brand-wash' : 'fill-muted', ring)} strokeWidth={picked ? 2 : 1} />
+          <rect
+            x={n.x}
+            y={n.y}
+            width={W}
+            height={H}
+            rx={12}
+            className={cn(picked ? 'fill-brand-wash' : 'fill-muted', ring)}
+            strokeWidth={picked ? 2 : 1}
+          />
           <text x={n.x + 12} y={n.y + 22} className="fill-foreground text-[13px]">
             {cut(props.title, 21)}
           </text>
           {/* the subtopic also needs subtopics of other topics, through its cluster's edge */}
           {props.entry && (
-            <path d={`M${n.x - 6},${n.y + H / 2 - 5} L${n.x},${n.y + H / 2} L${n.x - 6},${n.y + H / 2 + 5}`} fill="none" strokeWidth={2} className="stroke-muted-foreground" />
+            <path
+              d={`M${n.x - 6},${n.y + H / 2 - 5} L${n.x},${n.y + H / 2} L${n.x - 6},${n.y + H / 2 + 5}`}
+              fill="none"
+              strokeWidth={2}
+              className="stroke-muted-foreground"
+            />
           )}
           {props.dots.map((state, i) => (
-            <circle key={i} cx={n.x + 18 + i * 16} cy={n.y + H - 14} r={5} strokeWidth={1.2} className={DOT[state ?? 'empty']} />
+            <circle
+              key={i}
+              cx={n.x + 18 + i * 16}
+              cy={n.y + H - 14}
+              r={5}
+              strokeWidth={1.2}
+              className={DOT[state ?? 'empty']}
+            />
           ))}
         </>
       )}
@@ -330,17 +420,28 @@ function Picked(props: {
       <div className="space-y-0.5 text-meta">
         {levels(b.rules).map((level) => (
           <p key={level}>
-            {levelLine(levelName(b.rules, level), groupCell(b, { course: c.slug, topic: n.topic, sub: n.sub, level }).line)}
+            {levelLine(
+              levelName(b.rules, level),
+              groupCell(b, { course: c.slug, topic: n.topic, sub: n.sub, level }).line,
+            )}
           </p>
         ))}
         {outside.length > 0 && <p className="text-muted-foreground">{alsoNeedsLine(outside)}</p>}
         {unlocks && <p className="text-muted-foreground">{unlocks}</p>}
       </div>
       <div className="flex gap-stack">
-        <Button size="sm" onClick={() => props.onStart({ course: c.slug, topic: n.topic, sub: n.sub, level: null })}>
+        <Button
+          size="sm"
+          onClick={() => props.onStart({ course: c.slug, topic: n.topic, sub: n.sub, level: null })}
+        >
           {MODULE_START}
         </Button>
-        <Button variant="outline" size="sm" disabled={aimed} onClick={() => props.onAim(n.topic, n.sub)}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={aimed}
+          onClick={() => props.onAim(n.topic, n.sub)}
+        >
           {aimed ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
         </Button>
       </div>

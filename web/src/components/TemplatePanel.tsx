@@ -75,7 +75,12 @@ export function TemplatePanel({
             </span>
           )}
           {revealed && (
-            <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setRevealed(false)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto"
+              onClick={() => setRevealed(false)}
+            >
               Hide the form
             </Button>
           )}

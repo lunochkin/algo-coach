@@ -45,7 +45,15 @@ export default function LessonsScreen() {
       modules.flatMap(({ c, b }) =>
         lessonGroups(b, c).map((g, i) => {
           const key = `${c.slug}:${g.key}`;
-          return { key, c, b, module: i === 0 ? c.title : null, title: g.title, total: g.lessons.length, data: isOpen(key) ? g.lessons : [] };
+          return {
+            key,
+            c,
+            b,
+            module: i === 0 ? c.title : null,
+            title: g.title,
+            total: g.lessons.length,
+            data: isOpen(key) ? g.lessons : [],
+          };
         }),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,11 +86,16 @@ export default function LessonsScreen() {
                   onPress={() => setOpen((o) => ({ ...o, [section.key]: !expanded }))}
                   style={[styles.row, { justifyContent: 'space-between', paddingVertical: 8 }]}
                   accessibilityRole="button"
-                  accessibilityState={{ expanded }}>
+                  accessibilityState={{ expanded }}
+                >
                   <Text variant="titleSmall" style={{ color: theme.colors.primary }}>
                     {`${section.title} · ${section.total}`}
                   </Text>
-                  <MaterialCommunityIcons name={expanded ? 'chevron-up' : 'chevron-down'} size={22} color={theme.colors.primary} />
+                  <MaterialCommunityIcons
+                    name={expanded ? 'chevron-up' : 'chevron-down'}
+                    size={22}
+                    color={theme.colors.primary}
+                  />
                 </Pressable>
               </View>
             );
@@ -103,13 +116,18 @@ const LessonCard = memo(function LessonCard({ x, c, b }: { x: Lesson; c: Course;
   const theme = useTheme();
   const { state, minutes, teaches, status } = lessonRow(b, c, x);
   const tint =
-    state === 'locked' ? theme.colors.surfaceVariant : state === 'done' ? theme.colors.secondaryContainer : theme.colors.tertiaryContainer;
+    state === 'locked'
+      ? theme.colors.surfaceVariant
+      : state === 'done'
+        ? theme.colors.secondaryContainer
+        : theme.colors.tertiaryContainer;
   return (
     <Card
       mode="contained"
       style={{ backgroundColor: tint, opacity: state === 'locked' ? 0.7 : 1 }}
       onPress={() => router.push({ pathname: '/lesson', params: { course: c.slug, slug: x.slug } })}
-      accessibilityLabel={`${x.title}, ${status}`}>
+      accessibilityLabel={`${x.title}, ${status}`}
+    >
       <Card.Content style={[styles.row, { gap: 12 }]}>
         <MaterialCommunityIcons
           name={state === 'done' ? 'book-check-outline' : 'book-open-variant'}
@@ -121,7 +139,10 @@ const LessonCard = memo(function LessonCard({ x, c, b }: { x: Lesson; c: Course;
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             {lessonRowLine(minutes, teaches)}
           </Text>
-          <Text variant="labelMedium" style={{ color: state === 'available' ? theme.colors.primary : theme.colors.onSurfaceVariant }}>
+          <Text
+            variant="labelMedium"
+            style={{ color: state === 'available' ? theme.colors.primary : theme.colors.onSurfaceVariant }}
+          >
             {status}
           </Text>
         </View>

@@ -2,7 +2,6 @@ import { type Board } from './schedule';
 import { shuffle, type Rng } from './select';
 import type { Question } from './types';
 
-
 /** Exam pool: level L in unlocked groups, no cards. */
 export function examPool(b: Board, level: number): Question[] {
   const out: Question[] = [];

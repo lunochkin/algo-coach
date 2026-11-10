@@ -4,2356 +4,2356 @@
  */
 
 export interface paths {
-    "/api/board": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Board */
-        get: operations["board_api_board_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/api/board': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/cards": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Every Card */
-        get: operations["every_card_api_cards_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Board */
+    get: operations['board_api_board_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/cards': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/cards/{slug}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Card */
-        get: operations["card_api_cards__slug__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Every Card */
+    get: operations['every_card_api_cards_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/cards/{slug}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/cards/{slug}/recall": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Prompt */
-        get: operations["prompt_api_cards__slug__recall_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Card */
+    get: operations['card_api_cards__slug__get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/cards/{slug}/recall': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/cards/{slug}/recall/{template_slug}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Asked */
-        get: operations["asked_api_cards__slug__recall__template_slug__get"];
-        put?: never;
-        /** Recalled */
-        post: operations["recalled_api_cards__slug__recall__template_slug__post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Prompt */
+    get: operations['prompt_api_cards__slug__recall_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/cards/{slug}/recall/{template_slug}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/cards/{slug}/recall/{template_slug}/hints/{hint}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Hinted */
-        get: operations["hinted_api_cards__slug__recall__template_slug__hints__hint__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Asked */
+    get: operations['asked_api_cards__slug__recall__template_slug__get'];
+    put?: never;
+    /** Recalled */
+    post: operations['recalled_api_cards__slug__recall__template_slug__post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/cards/{slug}/recall/{template_slug}/hints/{hint}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/techniques/{technique}/cards": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Cards */
-        get: operations["cards_api_techniques__technique__cards_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Hinted */
+    get: operations['hinted_api_cards__slug__recall__template_slug__hints__hint__get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/techniques/{technique}/cards': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/techniques/{technique}/candidates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Offered */
-        get: operations["offered_api_techniques__technique__candidates_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Cards */
+    get: operations['cards_api_techniques__technique__cards_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/techniques/{technique}/candidates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/problems": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Every Problem */
-        get: operations["every_problem_api_problems_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Offered */
+    get: operations['offered_api_techniques__technique__candidates_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/problems': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/problems/{problem_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Picked */
-        get: operations["picked_api_problems__problem_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Every Problem */
+    get: operations['every_problem_api_problems_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/problems/{problem_id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/problems/{problem_id}/statement": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Statement */
-        get: operations["statement_api_problems__problem_id__statement_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Picked */
+    get: operations['picked_api_problems__problem_id__get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/problems/{problem_id}/statement': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/sittings/{sitting_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Sitting */
-        get: operations["sitting_api_sittings__sitting_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Statement */
+    get: operations['statement_api_problems__problem_id__statement_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/sittings/{sitting_id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/problems/{problem_id}/carry": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Carried */
-        get: operations["carried_api_problems__problem_id__carry_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Sitting */
+    get: operations['sitting_api_sittings__sitting_id__get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/problems/{problem_id}/carry': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/cards/{slug}/runs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Started */
-        post: operations["started_api_cards__slug__runs_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Carried */
+    get: operations['carried_api_problems__problem_id__carry_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/cards/{slug}/runs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/problems/{problem_id}/sittings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Begun */
-        post: operations["begun_api_problems__problem_id__sittings_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Started */
+    post: operations['started_api_cards__slug__runs_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/problems/{problem_id}/sittings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/sittings/{sitting_id}/submissions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Submission */
-        post: operations["submission_api_sittings__sitting_id__submissions_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Begun */
+    post: operations['begun_api_problems__problem_id__sittings_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/sittings/{sitting_id}/submissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/sittings/{sitting_id}/start": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Clock Started */
-        post: operations["clock_started_api_sittings__sitting_id__start_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Submission */
+    post: operations['submission_api_sittings__sitting_id__submissions_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/sittings/{sitting_id}/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/sittings/{sitting_id}/pause": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Paused */
-        post: operations["paused_api_sittings__sitting_id__pause_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Clock Started */
+    post: operations['clock_started_api_sittings__sitting_id__start_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/sittings/{sitting_id}/pause': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/sittings/{sitting_id}/resume": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Resumed */
-        post: operations["resumed_api_sittings__sitting_id__resume_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Paused */
+    post: operations['paused_api_sittings__sitting_id__pause_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/sittings/{sitting_id}/resume': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/sittings/{sitting_id}/end": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Ended */
-        post: operations["ended_api_sittings__sitting_id__end_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Resumed */
+    post: operations['resumed_api_sittings__sitting_id__resume_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/sittings/{sitting_id}/end': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/sittings/{sitting_id}/unclaimed": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Unanswered */
-        get: operations["unanswered_api_sittings__sitting_id__unclaimed_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Ended */
+    post: operations['ended_api_sittings__sitting_id__end_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/sittings/{sitting_id}/unclaimed': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/attempts/{attempt_id}/claims": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Claimed */
-        post: operations["claimed_api_attempts__attempt_id__claims_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Unanswered */
+    get: operations['unanswered_api_sittings__sitting_id__unclaimed_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/attempts/{attempt_id}/claims': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/attempts/{attempt_id}/labels": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Labelled */
-        post: operations["labelled_api_attempts__attempt_id__labels_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Claimed */
+    post: operations['claimed_api_attempts__attempt_id__claims_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/attempts/{attempt_id}/labels': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/sign-in": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Offered */
-        get: operations["offered_api_sign_in_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Labelled */
+    post: operations['labelled_api_attempts__attempt_id__labels_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/sign-in': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Me */
-        get: operations["me_api_me_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Offered */
+    get: operations['offered_api_sign_in_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Signed Out */
-        delete: operations["signed_out_api_session_delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Me */
+    get: operations['me_api_me_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/session': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/devices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Devices
-         * @description Every browser and app signed in as the user, the one asking marked.
-         */
-        get: operations["devices_api_devices_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Signed Out */
+    delete: operations['signed_out_api_session_delete'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/devices': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/devices/{kind}/{device_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Revoke Device */
-        delete: operations["revoke_device_api_devices__kind___device_id__delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Devices
+     * @description Every browser and app signed in as the user, the one asking marked.
+     */
+    get: operations['devices_api_devices_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/devices/{kind}/{device_id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/knowledge/snapshot": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Content
-         * @description Every live module, in the shape learn's app reads: `knowledge.md`. The
-         *     app syncs often and the content moves only at a seed, so an unchanged
-         *     snapshot answers 304.
-         */
-        get: operations["content_api_knowledge_snapshot_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Revoke Device */
+    delete: operations['revoke_device_api_devices__kind___device_id__delete'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/knowledge/snapshot': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/knowledge/sync": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Synced */
-        post: operations["synced_api_knowledge_sync_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Content
+     * @description Every live module, in the shape learn's app reads: `knowledge.md`. The
+     *     app syncs often and the content moves only at a seed, so an unchanged
+     *     snapshot answers 304.
+     */
+    get: operations['content_api_knowledge_snapshot_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/knowledge/sync': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get?: never;
+    put?: never;
+    /** Synced */
+    post: operations['synced_api_knowledge_sync_post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /**
-         * Asked
-         * @description One attempt the loop still asks about, and the modes its verdict leaves
-         *     open. No mode is offered where the record already answers why.
-         */
-        Asked: {
-            attempt: components["schemas"]["Attempt"];
-            /** Modes */
-            modes: components["schemas"]["FailureMode"][];
-        };
-        /** Attempt */
-        Attempt: {
-            /** Id */
-            id: string;
-            /** User Id */
-            user_id: string;
-            /** Problem Id */
-            problem_id: string;
-            /** Sitting Id */
-            sitting_id?: string | null;
-            /** Started At */
-            started_at?: string | null;
-            /**
-             * Finished At
-             * Format: date-time
-             */
-            finished_at: string;
-            /** Language */
-            language?: string | null;
-            /** Time To Solve Sec */
-            time_to_solve_sec?: number | null;
-            /** Solved */
-            solved: boolean;
-            /** Code */
-            code?: string | null;
-            /** Restored */
-            restored?: boolean | null;
-        };
-        /**
-         * AttemptClaim
-         * @description Which techniques an attempt used, as one writer claimed them.
-         */
-        AttemptClaim: {
-            /** Model */
-            model?: string | null;
-            /** Effort */
-            effort?: string | null;
-            /** Prompt Hash */
-            prompt_hash?: string | null;
-            /** Call Id */
-            call_id?: string | null;
-            /** Pin */
-            pin?: string | null;
-            /** Provider */
-            provider?: string | null;
-            /** Temperature */
-            temperature?: number | null;
-            /** Cost */
-            cost?: number | null;
-            /** Id */
-            id: string;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Attempt Id */
-            attempt_id: string;
-            /** Techniques */
-            techniques?: string[];
-            /**
-             * Declined
-             * @default false
-             */
-            declined: boolean;
-            source: components["schemas"]["ClaimSource"];
-            /** Informed By */
-            informed_by?: string[];
-            confidence?: components["schemas"]["Confidence"] | null;
-        };
-        /**
-         * AttemptVerification
-         * @description Private to the user, where a solution's run is product data: `log.md`.
-         */
-        AttemptVerification: {
-            /** Cap Ms */
-            cap_ms: number;
-            /** Runner */
-            runner: string;
-            /** Results */
-            results?: components["schemas"]["CaseResult"][];
-            /** Id */
-            id: string;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Attempt Id */
-            attempt_id: string;
-        };
-        /** Board */
-        Board: {
-            /** Rows */
-            rows: components["schemas"]["TechniqueRow"][];
-            /** Ungrouped */
-            ungrouped: number;
-            /** Excluded */
-            excluded: number;
-        };
-        /**
-         * Candidate
-         * @description A problem offered for a drill. The statement is left out: the clock
-         *     starts when it is served.
-         */
-        Candidate: {
-            /** Problem Id */
-            problem_id: string;
-            /** Title */
-            title: string;
-            difficulty: components["schemas"]["ProblemDifficulty"] | null;
-            /** Attempt Count */
-            attempt_count: number;
-            /** Solved Count */
-            solved_count: number;
-            /** Last Attempt At */
-            last_attempt_at: string | null;
-        };
-        /**
-         * Card
-         * @description Teaching content for one technique: forms to reproduce, and a
-         *     selector.
-         */
-        Card: {
-            /** Id */
-            id: string;
-            /** Slug */
-            slug: string;
-            /** Technique */
-            technique: string;
-            /** Title */
-            title: string;
-            /** Trigger */
-            trigger: string;
-            /** Brief */
-            brief: string;
-            /** Templates */
-            templates: components["schemas"]["Template"][];
-            selector: components["schemas"]["Selector"];
-        };
-        /** CardRun */
-        CardRun: {
-            /** Id */
-            id: string;
-            /** User Id */
-            user_id: string;
-            /** Card Id */
-            card_id: string;
-            /**
-             * Started At
-             * Format: date-time
-             */
-            started_at: string;
-            /** Probes */
-            probes?: components["schemas"]["Probe"][];
-        };
-        /**
-         * CardState
-         * @description How far one user's study of one card has gone, derived on every read:
-         *     `log.md`, Card states.
-         * @enum {string}
-         */
-        CardState: "not_started" | "acquiring" | "consolidating" | "graduated" | "lapsed";
-        /**
-         * CardStatus
-         * @description Where the user stands on a card, as the cards list reads it. Folded on
-         *     every read, as the card's own page folds it.
-         */
-        CardStatus: {
-            /** Started At */
-            started_at: string | null;
-            state: components["schemas"]["CardState"];
-            /** Rungs */
-            rungs: number;
-            /** Solved */
-            solved: number;
-            /** Required */
-            required: number;
-            /** Required Solved */
-            required_solved: number;
-            /** Gaps */
-            gaps: number;
-            /** Recall */
-            recall: components["schemas"]["Recalled"][];
-            /** Last At */
-            last_at: string | null;
-        };
-        /**
-         * Carry
-         * @description What the editor may open on, which `flows.md` gives: the last attempt's
-         *     code where it is work in progress, and the bounds the page holds its own
-         *     draft to.
-         */
-        Carry: {
-            /** Code */
-            code: string | null;
-            /** At */
-            at: string | null;
-            /** Solved At */
-            solved_at: string | null;
-            /** Solved Sitting Id */
-            solved_sitting_id: string | null;
-            /** Solved Code */
-            solved_code: string | null;
-            /** Run Started At */
-            run_started_at: string | null;
-        };
-        /**
-         * CaseOutcome
-         * @enum {string}
-         */
-        CaseOutcome: "passed" | "wrong" | "timeout" | "crashed";
-        /** CaseResult */
-        CaseResult: {
-            /** Case Id */
-            case_id: string;
-            outcome: components["schemas"]["CaseOutcome"];
-            /** Elapsed Ms */
-            elapsed_ms?: number | null;
-            /** Error */
-            error?: string | null;
-        };
-        /** Claim */
-        Claim: {
-            /**
-             * Techniques
-             * @default []
-             */
-            techniques: string[];
-            confidence: components["schemas"]["Confidence"];
-            /**
-             * Declined
-             * @default false
-             */
-            declined: boolean;
-        };
-        /**
-         * ClaimSource
-         * @enum {string}
-         */
-        ClaimSource: "user" | "classifier";
-        /**
-         * Confidence
-         * @enum {string}
-         */
-        Confidence: "guess" | "leaning" | "sure";
-        /**
-         * DeviceKind
-         * @enum {string}
-         */
-        DeviceKind: "browser" | "app";
-        /**
-         * Failure
-         * @description The first case a submission failed, shown whole: `flows.md`.
-         */
-        Failure: {
-            /** Case Id */
-            case_id: string;
-            outcome: components["schemas"]["CaseOutcome"];
-            /** Args */
-            args: unknown[];
-            /** Expected */
-            expected: unknown;
-            /** Returned */
-            returned: unknown;
-            /** Error */
-            error: string | null;
-        };
-        /**
-         * FailureMode
-         * @enum {string}
-         */
-        FailureMode: "speed" | "rust" | "gap" | "syntax" | "none";
-        /**
-         * Gap
-         * @description A core template no solution displays, named as the card names it.
-         *
-         *     The card claims to teach the form, so the ladder reports the gap rather
-         *     than substituting another problem for the rung. The next generation run is
-         *     aimed at what this names.
-         */
-        Gap: {
-            /** Template Id */
-            template_id: string;
-            /** Slug */
-            slug: string;
-            /** Title */
-            title: string;
-        };
-        /** HTTPValidationError */
-        HTTPValidationError: {
-            /** Detail */
-            detail?: components["schemas"]["ValidationError"][];
-        };
-        /**
-         * Hint
-         * @description What the trainer gives when memory fails, in the order it gives them.
-         *     Each answers more of the question than the last.
-         * @enum {string}
-         */
-        Hint: "notes" | "form";
-        /** Hinted */
-        Hinted: {
-            hint: components["schemas"]["Hint"];
-            /** Text */
-            text: string;
-        };
-        /**
-         * Label
-         * @description The one mode the solver picked. A skipped label sends no request.
-         */
-        Label: {
-            mode: components["schemas"]["FailureMode"];
-        };
-        /**
-         * Listed
-         * @description One problem on the listing of every served problem. It carries the
-         *     problem's techniques, which the page filters by, and no statement.
-         */
-        Listed: {
-            /** Problem Id */
-            problem_id: string;
-            /** Title */
-            title: string;
-            difficulty: components["schemas"]["ProblemDifficulty"] | null;
-            /** Techniques */
-            techniques: string[];
-            /** Attempt Count */
-            attempt_count: number;
-            /** Solved Count */
-            solved_count: number;
-            /** Last Attempt At */
-            last_attempt_at: string | null;
-        };
-        /** ListedCard */
-        ListedCard: {
-            /** Id */
-            id: string;
-            /** Slug */
-            slug: string;
-            /** Technique */
-            technique: string;
-            /** Title */
-            title: string;
-            /** Trigger */
-            trigger: string;
-            /** Brief */
-            brief: string;
-            /** Templates */
-            templates: components["schemas"]["Template"][];
-            selector: components["schemas"]["Selector"];
-            /** Family */
-            family: string;
-            status: components["schemas"]["CardStatus"];
-        };
-        /**
-         * Me
-         * @description Who the session signs in as. The engine mints the id, and the address is
-         *     the provider's, so a user reached by the dev login carries none.
-         */
-        Me: {
-            /** User Id */
-            user_id: string;
-            /** Email */
-            email: string | null;
-        };
-        /**
-         * Named
-         * @description One template of the card, as the trainer lists it: what it is called,
-         *     whether it is optional, and whether a case can check a reproduction of
-         *     it.
-         */
-        Named: {
-            /** Slug */
-            slug: string;
-            /** Title */
-            title: string;
-            /** Optional */
-            optional: boolean;
-            /** Recallable */
-            recallable: boolean;
-        };
-        /**
-         * Offered
-         * @description What the login page offers.
-         */
-        Offered: {
-            /** Providers */
-            providers: components["schemas"]["Provider"][];
-            /** Dev Login */
-            dev_login: string | null;
-        };
-        /** Pause */
-        Pause: {
-            /**
-             * At
-             * Format: date-time
-             */
-            at: string;
-            /** Until */
-            until?: string | null;
-        };
-        /**
-         * Picked
-         * @description The problem a user picked, before its statement is served. The statement
-         *     is left out, as a candidate's is.
-         */
-        Picked: {
-            /** Problem Id */
-            problem_id: string;
-            /** Title */
-            title: string;
-            difficulty: components["schemas"]["ProblemDifficulty"] | null;
-            /** Techniques */
-            techniques: string[];
-            /** Attempt Count */
-            attempt_count: number;
-            /** Solved Count */
-            solved_count: number;
-            /** Last Attempt At */
-            last_attempt_at: string | null;
-            /**
-             * Retired
-             * @default false
-             */
-            retired: boolean;
-        };
-        /**
-         * Probe
-         * @description One problem a run was given, testing whether the form is recognised
-         *     unprompted. Drawn from outside the ladder, which teaches the form.
-         */
-        Probe: {
-            /** Problem Id */
-            problem_id: string;
-            /**
-             * Assigned At
-             * Format: date-time
-             */
-            assigned_at: string;
-        };
-        /**
-         * Probed
-         * @description One probe the start drew, named as the page shows it. A probe tests
-         *     whether the form is recognised unprompted, so the page names the problem
-         *     and says nothing of the technique behind it.
-         */
-        Probed: {
-            problem: components["schemas"]["Problem"];
-            /**
-             * Assigned At
-             * Format: date-time
-             */
-            assigned_at: string;
-            /** Attempted */
-            attempted: boolean;
-        };
-        /** Problem */
-        Problem: {
-            /** Model */
-            model?: string | null;
-            /** Effort */
-            effort?: string | null;
-            /** Prompt Hash */
-            prompt_hash?: string | null;
-            /** Call Id */
-            call_id?: string | null;
-            /** Pin */
-            pin?: string | null;
-            /** Provider */
-            provider?: string | null;
-            /** Temperature */
-            temperature?: number | null;
-            /** Cost */
-            cost?: number | null;
-            /** Id */
-            id: string;
-            /** Title */
-            title: string;
-            /** Techniques */
-            techniques?: string[];
-            difficulty?: components["schemas"]["ProblemDifficulty"] | null;
-            /** Statement */
-            statement: string;
-            /** Target Template Id */
-            target_template_id?: string | null;
-            /** Target Technique */
-            target_technique?: string | null;
-            /** @default created */
-            status: components["schemas"]["ProblemStatus"];
-            retired_reason?: components["schemas"]["RetirementReason"] | null;
-        };
-        /**
-         * ProblemDifficulty
-         * @enum {string}
-         */
-        ProblemDifficulty: "easy" | "medium" | "hard";
-        /**
-         * ProblemStatus
-         * @enum {string}
-         */
-        ProblemStatus: "created" | "retired";
-        /**
-         * Prompted
-         * @description What the trainer shows: the template it asks for, its trigger, the
-         *     signature its cases call and the card's templates to switch between. The
-         *     form is withheld, and typing it from memory is the recall being
-         *     measured.
-         */
-        Prompted: {
-            /** Template Slug */
-            template_slug: string;
-            /** Title */
-            title: string;
-            /** Trigger */
-            trigger: string;
-            /** Signature */
-            signature: string;
-            /** Templates */
-            templates: components["schemas"]["Named"][];
-        };
-        /**
-         * Provider
-         * @description Who holds an identity and its login: `README.md`.
-         * @enum {string}
-         */
-        Provider: "google" | "github";
-        /**
-         * RecallAttempt
-         * @description A form typed into a blank file and run against the template's cases.
-         */
-        RecallAttempt: {
-            /** Cap Ms */
-            cap_ms: number;
-            /** Runner */
-            runner: string;
-            /** Results */
-            results?: components["schemas"]["CaseResult"][];
-            /** Id */
-            id: string;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** User Id */
-            user_id: string;
-            /** Card Id */
-            card_id: string;
-            /** Template Id */
-            template_id: string;
-            /** Code */
-            code: string;
-            /** Hints */
-            hints?: components["schemas"]["Hint"][];
-        };
-        /**
-         * Recalled
-         * @description One template's recall state: the last reproduction of it, and nothing
-         *     of the ones before, which stay in the log.
-         */
-        Recalled: {
-            /** Template Id */
-            template_id: string;
-            /** Last At */
-            last_at: string | null;
-            /** Hints */
-            hints: components["schemas"]["Hint"][];
-            /** Verified */
-            verified: boolean;
-        };
-        /** Refusal */
-        Refusal: {
-            /** Client Id */
-            client_id: string;
-            /** Reason */
-            reason: string;
-        };
-        /**
-         * Reproduction
-         * @description What the trainer sends: the form as typed, and the hints taken before
-         *     it ran.
-         */
-        Reproduction: {
-            /** Code */
-            code: string;
-            /**
-             * Hints
-             * @default []
-             */
-            hints: components["schemas"]["Hint"][];
-        };
-        /**
-         * RetirementReason
-         * @enum {string}
-         */
-        RetirementReason: "defective";
-        /**
-         * Rung
-         * @description One problem on a ladder, with the templates its canonicals display.
-         *
-         *     A rung the selector filled covers none. `required` is derived from what the
-         *     rung covers rather than stored, and a rung covering the optional template
-         *     beside a core one offers that form as the alternative approach.
-         */
-        Rung: {
-            problem: components["schemas"]["Problem"];
-            /** Templates */
-            templates: string[];
-            /** Required */
-            required: boolean;
-            /**
-             * Solved
-             * @default false
-             */
-            solved: boolean;
-        };
-        /**
-         * Seated
-         * @description A sitting read by its id, with its problem's statement.
-         */
-        Seated: {
-            /** Title */
-            title: string;
-            /** Statement */
-            statement: string;
-            /** Signature */
-            signature: string | null;
-            /** Elapsed Sec */
-            elapsed_sec: number | null;
-            sitting: components["schemas"]["Sitting"];
-        };
-        /**
-         * Selector
-         * @description What a ladder resolves from. Named fields rather than a filter map, so
-         *     a new filter is an additive optional field.
-         */
-        Selector: {
-            /** Technique */
-            technique: string;
-            /** Difficulty */
-            difficulty?: components["schemas"]["ProblemDifficulty"][];
-            /** Size */
-            size: number;
-        };
-        /**
-         * SelfLabel
-         * @description The user's own verdict on why an attempt went the way it did.
-         */
-        SelfLabel: {
-            /** Id */
-            id: string;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Attempt Id */
-            attempt_id: string;
-            mode: components["schemas"]["FailureMode"];
-        };
-        /** Served */
-        Served: {
-            /** Title */
-            title: string;
-            /** Statement */
-            statement: string;
-            /** Signature */
-            signature: string | null;
-            /** Elapsed Sec */
-            elapsed_sec: number | null;
-            sitting: components["schemas"]["Sitting"] | null;
-        };
-        /**
-         * SignedInDevice
-         * @description A live session or app token as its owner sees it. The id is the token's
-         *     hash, which signs nothing in.
-         */
-        SignedInDevice: {
-            /** Id */
-            id: string;
-            kind: components["schemas"]["DeviceKind"];
-            /** Name */
-            name: string | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /**
-             * Last Used At
-             * Format: date-time
-             */
-            last_used_at: string;
-            /** Current */
-            current: boolean;
-        };
-        /** Sitting */
-        Sitting: {
-            /** Id */
-            id: string;
-            /** User Id */
-            user_id: string;
-            /** Problem Id */
-            problem_id: string;
-            /**
-             * Started At
-             * Format: date-time
-             */
-            started_at: string;
-            /** Clock Started At */
-            clock_started_at?: string | null;
-            /** Ended At */
-            ended_at?: string | null;
-            /** Last Active At */
-            last_active_at?: string | null;
-            /** Pauses */
-            pauses?: components["schemas"]["Pause"][];
-        };
-        /**
-         * Studied
-         * @description A card as its page reads it. The ladder, the progress and the recall
-         *     state are folds, and `content.md` gives why none of them is stored.
-         */
-        Studied: {
-            card: components["schemas"]["Card"];
-            run: components["schemas"]["CardRun"] | null;
-            /** Rungs */
-            rungs: components["schemas"]["Rung"][];
-            /** Gaps */
-            gaps: components["schemas"]["Gap"][];
-            /** Recall */
-            recall: components["schemas"]["Recalled"][];
-            /** Probes */
-            probes: components["schemas"]["Probed"][];
-        };
-        /** Submission */
-        Submission: {
-            /** Code */
-            code: string;
-            /**
-             * Restored
-             * @default false
-             */
-            restored: boolean;
-        };
-        /**
-         * Submitted
-         * @description The attempt a submission minted, the per-case verdict behind its
-         *     `solved`, and the sitting as the submission left it.
-         */
-        Submitted: {
-            attempt: components["schemas"]["Attempt"];
-            sitting: components["schemas"]["Sitting"];
-            verification: components["schemas"]["AttemptVerification"];
-            failure: components["schemas"]["Failure"] | null;
-        };
-        /** Synced */
-        Synced: {
-            /** User Id */
-            user_id: string;
-            /**
-             * Stored
-             * @default 0
-             */
-            stored: number;
-            /**
-             * Known
-             * @default 0
-             */
-            known: number;
-            /**
-             * Refused
-             * @default []
-             */
-            refused: components["schemas"]["Refusal"][];
-            /**
-             * Records
-             * @default []
-             */
-            records: {
-                [key: string]: unknown;
-            }[];
-            /**
-             * Cursor
-             * @default {}
-             */
-            cursor: {
-                [key: string]: number;
-            };
-        };
-        /**
-         * TechniqueRow
-         * @description One technique's progress, derived from the log on every read.
-         */
-        TechniqueRow: {
-            /** Technique */
-            technique: string;
-            /** Attempt Count */
-            attempt_count: number;
-            /** Solved Count */
-            solved_count: number;
-            /** Last Attempt At */
-            last_attempt_at?: string | null;
-            /**
-             * Self Labels
-             * @default {}
-             */
-            self_labels: {
-                [key: string]: number;
-            };
-        };
-        /**
-         * Template
-         * @description One form reproduced from memory. The unit of recall.
-         */
-        Template: {
-            /** Id */
-            id: string;
-            /** Slug */
-            slug: string;
-            /** Title */
-            title: string;
-            /** Trigger */
-            trigger: string;
-            /** Notes */
-            notes?: string | null;
-            /**
-             * Optional
-             * @default false
-             */
-            optional: boolean;
-            /**
-             * Speedup
-             * @default true
-             */
-            speedup: boolean;
-            /** @default code */
-            kind: components["schemas"]["TemplateKind"];
-            /** Code */
-            code: string;
-            /**
-             * Unordered
-             * @default false
-             */
-            unordered: boolean;
-            /** Cases */
-            cases?: components["schemas"]["TemplateCase"][];
-        };
-        /**
-         * TemplateCase
-         * @description One case a reproduced form is checked against. The arguments are
-         *     positional, and `solve` is the function they call.
-         */
-        TemplateCase: {
-            /** Args */
-            args?: unknown[];
-            /** Expected */
-            expected: unknown;
-        };
-        /**
-         * TemplateKind
-         * @enum {string}
-         */
-        TemplateKind: "code" | "procedure";
-        /**
-         * Timed
-         * @description A sitting a begin, a start, a pause, a resume or an end moved, with its
-         *     elapsed time on the engine's clock.
-         */
-        Timed: {
-            sitting: components["schemas"]["Sitting"];
-            /** Elapsed Sec */
-            elapsed_sec: number | null;
-        };
-        /**
-         * Unclaimed
-         * @description The claim a sitting ends on: the attempts no claim answers yet with the
-         *     modes each one's verdict leaves open, and the problem's techniques they are
-         *     answered over.
-         */
-        Unclaimed: {
-            /** Techniques */
-            techniques: string[];
-            /** Attempts */
-            attempts: components["schemas"]["Asked"][];
-        };
-        /** Upload */
-        Upload: {
-            /** Device */
-            device: string;
-            /** Records */
-            records: {
-                [key: string]: unknown;
-            }[];
-            /**
-             * Since
-             * @default {}
-             */
-            since: {
-                [key: string]: number;
-            };
-        };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
-            /** Input */
-            input?: unknown;
-            /** Context */
-            ctx?: Record<string, never>;
-        };
+  schemas: {
+    /**
+     * Asked
+     * @description One attempt the loop still asks about, and the modes its verdict leaves
+     *     open. No mode is offered where the record already answers why.
+     */
+    Asked: {
+      attempt: components['schemas']['Attempt'];
+      /** Modes */
+      modes: components['schemas']['FailureMode'][];
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    /** Attempt */
+    Attempt: {
+      /** Id */
+      id: string;
+      /** User Id */
+      user_id: string;
+      /** Problem Id */
+      problem_id: string;
+      /** Sitting Id */
+      sitting_id?: string | null;
+      /** Started At */
+      started_at?: string | null;
+      /**
+       * Finished At
+       * Format: date-time
+       */
+      finished_at: string;
+      /** Language */
+      language?: string | null;
+      /** Time To Solve Sec */
+      time_to_solve_sec?: number | null;
+      /** Solved */
+      solved: boolean;
+      /** Code */
+      code?: string | null;
+      /** Restored */
+      restored?: boolean | null;
+    };
+    /**
+     * AttemptClaim
+     * @description Which techniques an attempt used, as one writer claimed them.
+     */
+    AttemptClaim: {
+      /** Model */
+      model?: string | null;
+      /** Effort */
+      effort?: string | null;
+      /** Prompt Hash */
+      prompt_hash?: string | null;
+      /** Call Id */
+      call_id?: string | null;
+      /** Pin */
+      pin?: string | null;
+      /** Provider */
+      provider?: string | null;
+      /** Temperature */
+      temperature?: number | null;
+      /** Cost */
+      cost?: number | null;
+      /** Id */
+      id: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /** Attempt Id */
+      attempt_id: string;
+      /** Techniques */
+      techniques?: string[];
+      /**
+       * Declined
+       * @default false
+       */
+      declined: boolean;
+      source: components['schemas']['ClaimSource'];
+      /** Informed By */
+      informed_by?: string[];
+      confidence?: components['schemas']['Confidence'] | null;
+    };
+    /**
+     * AttemptVerification
+     * @description Private to the user, where a solution's run is product data: `log.md`.
+     */
+    AttemptVerification: {
+      /** Cap Ms */
+      cap_ms: number;
+      /** Runner */
+      runner: string;
+      /** Results */
+      results?: components['schemas']['CaseResult'][];
+      /** Id */
+      id: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /** Attempt Id */
+      attempt_id: string;
+    };
+    /** Board */
+    Board: {
+      /** Rows */
+      rows: components['schemas']['TechniqueRow'][];
+      /** Ungrouped */
+      ungrouped: number;
+      /** Excluded */
+      excluded: number;
+    };
+    /**
+     * Candidate
+     * @description A problem offered for a drill. The statement is left out: the clock
+     *     starts when it is served.
+     */
+    Candidate: {
+      /** Problem Id */
+      problem_id: string;
+      /** Title */
+      title: string;
+      difficulty: components['schemas']['ProblemDifficulty'] | null;
+      /** Attempt Count */
+      attempt_count: number;
+      /** Solved Count */
+      solved_count: number;
+      /** Last Attempt At */
+      last_attempt_at: string | null;
+    };
+    /**
+     * Card
+     * @description Teaching content for one technique: forms to reproduce, and a
+     *     selector.
+     */
+    Card: {
+      /** Id */
+      id: string;
+      /** Slug */
+      slug: string;
+      /** Technique */
+      technique: string;
+      /** Title */
+      title: string;
+      /** Trigger */
+      trigger: string;
+      /** Brief */
+      brief: string;
+      /** Templates */
+      templates: components['schemas']['Template'][];
+      selector: components['schemas']['Selector'];
+    };
+    /** CardRun */
+    CardRun: {
+      /** Id */
+      id: string;
+      /** User Id */
+      user_id: string;
+      /** Card Id */
+      card_id: string;
+      /**
+       * Started At
+       * Format: date-time
+       */
+      started_at: string;
+      /** Probes */
+      probes?: components['schemas']['Probe'][];
+    };
+    /**
+     * CardState
+     * @description How far one user's study of one card has gone, derived on every read:
+     *     `log.md`, Card states.
+     * @enum {string}
+     */
+    CardState: 'not_started' | 'acquiring' | 'consolidating' | 'graduated' | 'lapsed';
+    /**
+     * CardStatus
+     * @description Where the user stands on a card, as the cards list reads it. Folded on
+     *     every read, as the card's own page folds it.
+     */
+    CardStatus: {
+      /** Started At */
+      started_at: string | null;
+      state: components['schemas']['CardState'];
+      /** Rungs */
+      rungs: number;
+      /** Solved */
+      solved: number;
+      /** Required */
+      required: number;
+      /** Required Solved */
+      required_solved: number;
+      /** Gaps */
+      gaps: number;
+      /** Recall */
+      recall: components['schemas']['Recalled'][];
+      /** Last At */
+      last_at: string | null;
+    };
+    /**
+     * Carry
+     * @description What the editor may open on, which `flows.md` gives: the last attempt's
+     *     code where it is work in progress, and the bounds the page holds its own
+     *     draft to.
+     */
+    Carry: {
+      /** Code */
+      code: string | null;
+      /** At */
+      at: string | null;
+      /** Solved At */
+      solved_at: string | null;
+      /** Solved Sitting Id */
+      solved_sitting_id: string | null;
+      /** Solved Code */
+      solved_code: string | null;
+      /** Run Started At */
+      run_started_at: string | null;
+    };
+    /**
+     * CaseOutcome
+     * @enum {string}
+     */
+    CaseOutcome: 'passed' | 'wrong' | 'timeout' | 'crashed';
+    /** CaseResult */
+    CaseResult: {
+      /** Case Id */
+      case_id: string;
+      outcome: components['schemas']['CaseOutcome'];
+      /** Elapsed Ms */
+      elapsed_ms?: number | null;
+      /** Error */
+      error?: string | null;
+    };
+    /** Claim */
+    Claim: {
+      /**
+       * Techniques
+       * @default []
+       */
+      techniques: string[];
+      confidence: components['schemas']['Confidence'];
+      /**
+       * Declined
+       * @default false
+       */
+      declined: boolean;
+    };
+    /**
+     * ClaimSource
+     * @enum {string}
+     */
+    ClaimSource: 'user' | 'classifier';
+    /**
+     * Confidence
+     * @enum {string}
+     */
+    Confidence: 'guess' | 'leaning' | 'sure';
+    /**
+     * DeviceKind
+     * @enum {string}
+     */
+    DeviceKind: 'browser' | 'app';
+    /**
+     * Failure
+     * @description The first case a submission failed, shown whole: `flows.md`.
+     */
+    Failure: {
+      /** Case Id */
+      case_id: string;
+      outcome: components['schemas']['CaseOutcome'];
+      /** Args */
+      args: unknown[];
+      /** Expected */
+      expected: unknown;
+      /** Returned */
+      returned: unknown;
+      /** Error */
+      error: string | null;
+    };
+    /**
+     * FailureMode
+     * @enum {string}
+     */
+    FailureMode: 'speed' | 'rust' | 'gap' | 'syntax' | 'none';
+    /**
+     * Gap
+     * @description A core template no solution displays, named as the card names it.
+     *
+     *     The card claims to teach the form, so the ladder reports the gap rather
+     *     than substituting another problem for the rung. The next generation run is
+     *     aimed at what this names.
+     */
+    Gap: {
+      /** Template Id */
+      template_id: string;
+      /** Slug */
+      slug: string;
+      /** Title */
+      title: string;
+    };
+    /** HTTPValidationError */
+    HTTPValidationError: {
+      /** Detail */
+      detail?: components['schemas']['ValidationError'][];
+    };
+    /**
+     * Hint
+     * @description What the trainer gives when memory fails, in the order it gives them.
+     *     Each answers more of the question than the last.
+     * @enum {string}
+     */
+    Hint: 'notes' | 'form';
+    /** Hinted */
+    Hinted: {
+      hint: components['schemas']['Hint'];
+      /** Text */
+      text: string;
+    };
+    /**
+     * Label
+     * @description The one mode the solver picked. A skipped label sends no request.
+     */
+    Label: {
+      mode: components['schemas']['FailureMode'];
+    };
+    /**
+     * Listed
+     * @description One problem on the listing of every served problem. It carries the
+     *     problem's techniques, which the page filters by, and no statement.
+     */
+    Listed: {
+      /** Problem Id */
+      problem_id: string;
+      /** Title */
+      title: string;
+      difficulty: components['schemas']['ProblemDifficulty'] | null;
+      /** Techniques */
+      techniques: string[];
+      /** Attempt Count */
+      attempt_count: number;
+      /** Solved Count */
+      solved_count: number;
+      /** Last Attempt At */
+      last_attempt_at: string | null;
+    };
+    /** ListedCard */
+    ListedCard: {
+      /** Id */
+      id: string;
+      /** Slug */
+      slug: string;
+      /** Technique */
+      technique: string;
+      /** Title */
+      title: string;
+      /** Trigger */
+      trigger: string;
+      /** Brief */
+      brief: string;
+      /** Templates */
+      templates: components['schemas']['Template'][];
+      selector: components['schemas']['Selector'];
+      /** Family */
+      family: string;
+      status: components['schemas']['CardStatus'];
+    };
+    /**
+     * Me
+     * @description Who the session signs in as. The engine mints the id, and the address is
+     *     the provider's, so a user reached by the dev login carries none.
+     */
+    Me: {
+      /** User Id */
+      user_id: string;
+      /** Email */
+      email: string | null;
+    };
+    /**
+     * Named
+     * @description One template of the card, as the trainer lists it: what it is called,
+     *     whether it is optional, and whether a case can check a reproduction of
+     *     it.
+     */
+    Named: {
+      /** Slug */
+      slug: string;
+      /** Title */
+      title: string;
+      /** Optional */
+      optional: boolean;
+      /** Recallable */
+      recallable: boolean;
+    };
+    /**
+     * Offered
+     * @description What the login page offers.
+     */
+    Offered: {
+      /** Providers */
+      providers: components['schemas']['Provider'][];
+      /** Dev Login */
+      dev_login: string | null;
+    };
+    /** Pause */
+    Pause: {
+      /**
+       * At
+       * Format: date-time
+       */
+      at: string;
+      /** Until */
+      until?: string | null;
+    };
+    /**
+     * Picked
+     * @description The problem a user picked, before its statement is served. The statement
+     *     is left out, as a candidate's is.
+     */
+    Picked: {
+      /** Problem Id */
+      problem_id: string;
+      /** Title */
+      title: string;
+      difficulty: components['schemas']['ProblemDifficulty'] | null;
+      /** Techniques */
+      techniques: string[];
+      /** Attempt Count */
+      attempt_count: number;
+      /** Solved Count */
+      solved_count: number;
+      /** Last Attempt At */
+      last_attempt_at: string | null;
+      /**
+       * Retired
+       * @default false
+       */
+      retired: boolean;
+    };
+    /**
+     * Probe
+     * @description One problem a run was given, testing whether the form is recognised
+     *     unprompted. Drawn from outside the ladder, which teaches the form.
+     */
+    Probe: {
+      /** Problem Id */
+      problem_id: string;
+      /**
+       * Assigned At
+       * Format: date-time
+       */
+      assigned_at: string;
+    };
+    /**
+     * Probed
+     * @description One probe the start drew, named as the page shows it. A probe tests
+     *     whether the form is recognised unprompted, so the page names the problem
+     *     and says nothing of the technique behind it.
+     */
+    Probed: {
+      problem: components['schemas']['Problem'];
+      /**
+       * Assigned At
+       * Format: date-time
+       */
+      assigned_at: string;
+      /** Attempted */
+      attempted: boolean;
+    };
+    /** Problem */
+    Problem: {
+      /** Model */
+      model?: string | null;
+      /** Effort */
+      effort?: string | null;
+      /** Prompt Hash */
+      prompt_hash?: string | null;
+      /** Call Id */
+      call_id?: string | null;
+      /** Pin */
+      pin?: string | null;
+      /** Provider */
+      provider?: string | null;
+      /** Temperature */
+      temperature?: number | null;
+      /** Cost */
+      cost?: number | null;
+      /** Id */
+      id: string;
+      /** Title */
+      title: string;
+      /** Techniques */
+      techniques?: string[];
+      difficulty?: components['schemas']['ProblemDifficulty'] | null;
+      /** Statement */
+      statement: string;
+      /** Target Template Id */
+      target_template_id?: string | null;
+      /** Target Technique */
+      target_technique?: string | null;
+      /** @default created */
+      status: components['schemas']['ProblemStatus'];
+      retired_reason?: components['schemas']['RetirementReason'] | null;
+    };
+    /**
+     * ProblemDifficulty
+     * @enum {string}
+     */
+    ProblemDifficulty: 'easy' | 'medium' | 'hard';
+    /**
+     * ProblemStatus
+     * @enum {string}
+     */
+    ProblemStatus: 'created' | 'retired';
+    /**
+     * Prompted
+     * @description What the trainer shows: the template it asks for, its trigger, the
+     *     signature its cases call and the card's templates to switch between. The
+     *     form is withheld, and typing it from memory is the recall being
+     *     measured.
+     */
+    Prompted: {
+      /** Template Slug */
+      template_slug: string;
+      /** Title */
+      title: string;
+      /** Trigger */
+      trigger: string;
+      /** Signature */
+      signature: string;
+      /** Templates */
+      templates: components['schemas']['Named'][];
+    };
+    /**
+     * Provider
+     * @description Who holds an identity and its login: `README.md`.
+     * @enum {string}
+     */
+    Provider: 'google' | 'github';
+    /**
+     * RecallAttempt
+     * @description A form typed into a blank file and run against the template's cases.
+     */
+    RecallAttempt: {
+      /** Cap Ms */
+      cap_ms: number;
+      /** Runner */
+      runner: string;
+      /** Results */
+      results?: components['schemas']['CaseResult'][];
+      /** Id */
+      id: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /** User Id */
+      user_id: string;
+      /** Card Id */
+      card_id: string;
+      /** Template Id */
+      template_id: string;
+      /** Code */
+      code: string;
+      /** Hints */
+      hints?: components['schemas']['Hint'][];
+    };
+    /**
+     * Recalled
+     * @description One template's recall state: the last reproduction of it, and nothing
+     *     of the ones before, which stay in the log.
+     */
+    Recalled: {
+      /** Template Id */
+      template_id: string;
+      /** Last At */
+      last_at: string | null;
+      /** Hints */
+      hints: components['schemas']['Hint'][];
+      /** Verified */
+      verified: boolean;
+    };
+    /** Refusal */
+    Refusal: {
+      /** Client Id */
+      client_id: string;
+      /** Reason */
+      reason: string;
+    };
+    /**
+     * Reproduction
+     * @description What the trainer sends: the form as typed, and the hints taken before
+     *     it ran.
+     */
+    Reproduction: {
+      /** Code */
+      code: string;
+      /**
+       * Hints
+       * @default []
+       */
+      hints: components['schemas']['Hint'][];
+    };
+    /**
+     * RetirementReason
+     * @enum {string}
+     */
+    RetirementReason: 'defective';
+    /**
+     * Rung
+     * @description One problem on a ladder, with the templates its canonicals display.
+     *
+     *     A rung the selector filled covers none. `required` is derived from what the
+     *     rung covers rather than stored, and a rung covering the optional template
+     *     beside a core one offers that form as the alternative approach.
+     */
+    Rung: {
+      problem: components['schemas']['Problem'];
+      /** Templates */
+      templates: string[];
+      /** Required */
+      required: boolean;
+      /**
+       * Solved
+       * @default false
+       */
+      solved: boolean;
+    };
+    /**
+     * Seated
+     * @description A sitting read by its id, with its problem's statement.
+     */
+    Seated: {
+      /** Title */
+      title: string;
+      /** Statement */
+      statement: string;
+      /** Signature */
+      signature: string | null;
+      /** Elapsed Sec */
+      elapsed_sec: number | null;
+      sitting: components['schemas']['Sitting'];
+    };
+    /**
+     * Selector
+     * @description What a ladder resolves from. Named fields rather than a filter map, so
+     *     a new filter is an additive optional field.
+     */
+    Selector: {
+      /** Technique */
+      technique: string;
+      /** Difficulty */
+      difficulty?: components['schemas']['ProblemDifficulty'][];
+      /** Size */
+      size: number;
+    };
+    /**
+     * SelfLabel
+     * @description The user's own verdict on why an attempt went the way it did.
+     */
+    SelfLabel: {
+      /** Id */
+      id: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /** Attempt Id */
+      attempt_id: string;
+      mode: components['schemas']['FailureMode'];
+    };
+    /** Served */
+    Served: {
+      /** Title */
+      title: string;
+      /** Statement */
+      statement: string;
+      /** Signature */
+      signature: string | null;
+      /** Elapsed Sec */
+      elapsed_sec: number | null;
+      sitting: components['schemas']['Sitting'] | null;
+    };
+    /**
+     * SignedInDevice
+     * @description A live session or app token as its owner sees it. The id is the token's
+     *     hash, which signs nothing in.
+     */
+    SignedInDevice: {
+      /** Id */
+      id: string;
+      kind: components['schemas']['DeviceKind'];
+      /** Name */
+      name: string | null;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Last Used At
+       * Format: date-time
+       */
+      last_used_at: string;
+      /** Current */
+      current: boolean;
+    };
+    /** Sitting */
+    Sitting: {
+      /** Id */
+      id: string;
+      /** User Id */
+      user_id: string;
+      /** Problem Id */
+      problem_id: string;
+      /**
+       * Started At
+       * Format: date-time
+       */
+      started_at: string;
+      /** Clock Started At */
+      clock_started_at?: string | null;
+      /** Ended At */
+      ended_at?: string | null;
+      /** Last Active At */
+      last_active_at?: string | null;
+      /** Pauses */
+      pauses?: components['schemas']['Pause'][];
+    };
+    /**
+     * Studied
+     * @description A card as its page reads it. The ladder, the progress and the recall
+     *     state are folds, and `content.md` gives why none of them is stored.
+     */
+    Studied: {
+      card: components['schemas']['Card'];
+      run: components['schemas']['CardRun'] | null;
+      /** Rungs */
+      rungs: components['schemas']['Rung'][];
+      /** Gaps */
+      gaps: components['schemas']['Gap'][];
+      /** Recall */
+      recall: components['schemas']['Recalled'][];
+      /** Probes */
+      probes: components['schemas']['Probed'][];
+    };
+    /** Submission */
+    Submission: {
+      /** Code */
+      code: string;
+      /**
+       * Restored
+       * @default false
+       */
+      restored: boolean;
+    };
+    /**
+     * Submitted
+     * @description The attempt a submission minted, the per-case verdict behind its
+     *     `solved`, and the sitting as the submission left it.
+     */
+    Submitted: {
+      attempt: components['schemas']['Attempt'];
+      sitting: components['schemas']['Sitting'];
+      verification: components['schemas']['AttemptVerification'];
+      failure: components['schemas']['Failure'] | null;
+    };
+    /** Synced */
+    Synced: {
+      /** User Id */
+      user_id: string;
+      /**
+       * Stored
+       * @default 0
+       */
+      stored: number;
+      /**
+       * Known
+       * @default 0
+       */
+      known: number;
+      /**
+       * Refused
+       * @default []
+       */
+      refused: components['schemas']['Refusal'][];
+      /**
+       * Records
+       * @default []
+       */
+      records: {
+        [key: string]: unknown;
+      }[];
+      /**
+       * Cursor
+       * @default {}
+       */
+      cursor: {
+        [key: string]: number;
+      };
+    };
+    /**
+     * TechniqueRow
+     * @description One technique's progress, derived from the log on every read.
+     */
+    TechniqueRow: {
+      /** Technique */
+      technique: string;
+      /** Attempt Count */
+      attempt_count: number;
+      /** Solved Count */
+      solved_count: number;
+      /** Last Attempt At */
+      last_attempt_at?: string | null;
+      /**
+       * Self Labels
+       * @default {}
+       */
+      self_labels: {
+        [key: string]: number;
+      };
+    };
+    /**
+     * Template
+     * @description One form reproduced from memory. The unit of recall.
+     */
+    Template: {
+      /** Id */
+      id: string;
+      /** Slug */
+      slug: string;
+      /** Title */
+      title: string;
+      /** Trigger */
+      trigger: string;
+      /** Notes */
+      notes?: string | null;
+      /**
+       * Optional
+       * @default false
+       */
+      optional: boolean;
+      /**
+       * Speedup
+       * @default true
+       */
+      speedup: boolean;
+      /** @default code */
+      kind: components['schemas']['TemplateKind'];
+      /** Code */
+      code: string;
+      /**
+       * Unordered
+       * @default false
+       */
+      unordered: boolean;
+      /** Cases */
+      cases?: components['schemas']['TemplateCase'][];
+    };
+    /**
+     * TemplateCase
+     * @description One case a reproduced form is checked against. The arguments are
+     *     positional, and `solve` is the function they call.
+     */
+    TemplateCase: {
+      /** Args */
+      args?: unknown[];
+      /** Expected */
+      expected: unknown;
+    };
+    /**
+     * TemplateKind
+     * @enum {string}
+     */
+    TemplateKind: 'code' | 'procedure';
+    /**
+     * Timed
+     * @description A sitting a begin, a start, a pause, a resume or an end moved, with its
+     *     elapsed time on the engine's clock.
+     */
+    Timed: {
+      sitting: components['schemas']['Sitting'];
+      /** Elapsed Sec */
+      elapsed_sec: number | null;
+    };
+    /**
+     * Unclaimed
+     * @description The claim a sitting ends on: the attempts no claim answers yet with the
+     *     modes each one's verdict leaves open, and the problem's techniques they are
+     *     answered over.
+     */
+    Unclaimed: {
+      /** Techniques */
+      techniques: string[];
+      /** Attempts */
+      attempts: components['schemas']['Asked'][];
+    };
+    /** Upload */
+    Upload: {
+      /** Device */
+      device: string;
+      /** Records */
+      records: {
+        [key: string]: unknown;
+      }[];
+      /**
+       * Since
+       * @default {}
+       */
+      since: {
+        [key: string]: number;
+      };
+    };
+    /** ValidationError */
+    ValidationError: {
+      /** Location */
+      loc: (string | number)[];
+      /** Message */
+      msg: string;
+      /** Error Type */
+      type: string;
+      /** Input */
+      input?: unknown;
+      /** Context */
+      ctx?: Record<string, never>;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    board_api_board_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Board"];
-                };
-            };
-        };
+  board_api_board_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    every_card_api_cards_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListedCard"][];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Board'];
         };
+      };
     };
-    card_api_cards__slug__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Studied"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  every_card_api_cards_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    prompt_api_cards__slug__recall_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Prompted"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['ListedCard'][];
         };
+      };
     };
-    asked_api_cards__slug__recall__template_slug__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-                template_slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Prompted"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  card_api_cards__slug__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
     };
-    recalled_api_cards__slug__recall__template_slug__post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-                template_slug: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Reproduction"];
-            };
+        content: {
+          'application/json': components['schemas']['Studied'];
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecallAttempt"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    hinted_api_cards__slug__recall__template_slug__hints__hint__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-                template_slug: string;
-                hint: components["schemas"]["Hint"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Hinted"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  prompt_api_cards__slug__recall_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
     };
-    cards_api_techniques__technique__cards_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                technique: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Card"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Prompted'];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    offered_api_techniques__technique__candidates_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                technique: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Candidate"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  asked_api_cards__slug__recall__template_slug__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+        template_slug: string;
+      };
+      cookie?: never;
     };
-    every_problem_api_problems_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Listed"][];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Prompted'];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    picked_api_problems__problem_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                problem_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Picked"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  recalled_api_cards__slug__recall__template_slug__post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+        template_slug: string;
+      };
+      cookie?: never;
     };
-    statement_api_problems__problem_id__statement_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                problem_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Served"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Reproduction'];
+      };
     };
-    sitting_api_sittings__sitting_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                sitting_id: string;
-            };
-            cookie?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Seated"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['RecallAttempt'];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    carried_api_problems__problem_id__carry_get: {
-        parameters: {
-            query?: {
-                card?: string | null;
-            };
-            header?: never;
-            path: {
-                problem_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Carry"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  hinted_api_cards__slug__recall__template_slug__hints__hint__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+        template_slug: string;
+        hint: components['schemas']['Hint'];
+      };
+      cookie?: never;
     };
-    started_api_cards__slug__runs_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CardRun"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Hinted'];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    begun_api_problems__problem_id__sittings_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                problem_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Timed"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  cards_api_techniques__technique__cards_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        technique: string;
+      };
+      cookie?: never;
     };
-    submission_api_sittings__sitting_id__submissions_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                sitting_id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Submission"];
-            };
+        content: {
+          'application/json': components['schemas']['Card'][];
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Submitted"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    clock_started_api_sittings__sitting_id__start_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                sitting_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Timed"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  offered_api_techniques__technique__candidates_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        technique: string;
+      };
+      cookie?: never;
     };
-    paused_api_sittings__sitting_id__pause_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                sitting_id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Timed"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Candidate'][];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    resumed_api_sittings__sitting_id__resume_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                sitting_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Timed"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  every_problem_api_problems_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    ended_api_sittings__sitting_id__end_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                sitting_id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Timed"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Listed'][];
         };
+      };
     };
-    unanswered_api_sittings__sitting_id__unclaimed_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                sitting_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Unclaimed"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  picked_api_problems__problem_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        problem_id: string;
+      };
+      cookie?: never;
     };
-    claimed_api_attempts__attempt_id__claims_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                attempt_id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Claim"];
-            };
+        content: {
+          'application/json': components['schemas']['Picked'];
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AttemptClaim"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    labelled_api_attempts__attempt_id__labels_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                attempt_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Label"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SelfLabel"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
+  };
+  statement_api_problems__problem_id__statement_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        problem_id: string;
+      };
+      cookie?: never;
     };
-    offered_api_sign_in_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Offered"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Served'];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    me_api_me_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Me"];
-                };
-            };
-        };
+  };
+  sitting_api_sittings__sitting_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sitting_id: string;
+      };
+      cookie?: never;
     };
-    signed_out_api_session_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': components['schemas']['Seated'];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    devices_api_devices_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SignedInDevice"][];
-                };
-            };
-        };
+  };
+  carried_api_problems__problem_id__carry_get: {
+    parameters: {
+      query?: {
+        card?: string | null;
+      };
+      header?: never;
+      path: {
+        problem_id: string;
+      };
+      cookie?: never;
     };
-    revoke_device_api_devices__kind___device_id__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                kind: components["schemas"]["DeviceKind"];
-                device_id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Carry'];
         };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
-    content_api_knowledge_snapshot_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-        };
+  };
+  started_api_cards__slug__runs_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
     };
-    synced_api_knowledge_sync_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Upload"];
-            };
+        content: {
+          'application/json': components['schemas']['CardRun'];
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Synced"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
     };
+  };
+  begun_api_problems__problem_id__sittings_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        problem_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Timed'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  submission_api_sittings__sitting_id__submissions_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sitting_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Submission'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Submitted'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  clock_started_api_sittings__sitting_id__start_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sitting_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Timed'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  paused_api_sittings__sitting_id__pause_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sitting_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Timed'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  resumed_api_sittings__sitting_id__resume_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sitting_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Timed'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  ended_api_sittings__sitting_id__end_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sitting_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Timed'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  unanswered_api_sittings__sitting_id__unclaimed_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sitting_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Unclaimed'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  claimed_api_attempts__attempt_id__claims_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        attempt_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Claim'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AttemptClaim'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  labelled_api_attempts__attempt_id__labels_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        attempt_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Label'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SelfLabel'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  offered_api_sign_in_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Offered'];
+        };
+      };
+    };
+  };
+  me_api_me_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Me'];
+        };
+      };
+    };
+  };
+  signed_out_api_session_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  devices_api_devices_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SignedInDevice'][];
+        };
+      };
+    };
+  };
+  revoke_device_api_devices__kind___device_id__delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        kind: components['schemas']['DeviceKind'];
+        device_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  content_api_knowledge_snapshot_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': unknown;
+        };
+      };
+    };
+  };
+  synced_api_knowledge_sync_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Upload'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Synced'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
 }

@@ -16,7 +16,13 @@ import {
 } from '@algo-coach/core'
 
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
 import { EXAM } from '@/knowledge/paths'
@@ -26,12 +32,20 @@ export type OpenCert = { c: Course; b: Board; states: Map<string, CertStatus>; i
 
 // a certification's conditions, its exam and its focus press, opened from
 // the certifications' grid and from the map: `pages.md`, The two clients
-export function CertDialog({ open, onClose, onStart }: { open: OpenCert | null; onClose: () => void; onStart: (s: Scope) => void }) {
+export function CertDialog({
+  open,
+  onClose,
+  onStart,
+}: {
+  open: OpenCert | null
+  onClose: () => void
+  onStart: (s: Scope) => void
+}) {
   const k = useKnowledge()
   const { focus } = useLearner()
   const v = open ? certConditions(open.b, open.c, open.id, open.states, focus) : null
   return (
-  <Dialog open={!!v} onOpenChange={(o) => !o && onClose()}>
+    <Dialog open={!!v} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
         {v && open && (
           <>
@@ -45,7 +59,9 @@ export function CertDialog({ open, onClose, onStart }: { open: OpenCert | null; 
               <ul className="space-y-1">
                 {v.checks.map((x) => (
                   <li key={x.text}>
-                    <span className={x.ok ? 'text-verdict-passed' : 'text-verdict-wrong'}>{x.ok ? '✓' : '✗'} </span>
+                    <span className={x.ok ? 'text-verdict-passed' : 'text-verdict-wrong'}>
+                      {x.ok ? '✓' : '✗'}{' '}
+                    </span>
                     {x.text}
                   </li>
                 ))}

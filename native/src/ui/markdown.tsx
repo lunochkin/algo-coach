@@ -54,7 +54,9 @@ export class CodeRenderer extends Renderer {
   heading(children: string | ReactNode[], style?: TextStyle): ReactNode {
     const size = CODE_SCALE * (style?.fontSize ?? 16);
     const scaled = Array.isArray(children)
-      ? children.map((x) => (isValidElement(x) && x.type === InlineCode ? cloneElement(x as ReactElement<InlineCodeProps>, { size }) : x))
+      ? children.map((x) =>
+          isValidElement(x) && x.type === InlineCode ? cloneElement(x as ReactElement<InlineCodeProps>, { size }) : x,
+        )
       : children;
     return super.heading(scaled, style);
   }

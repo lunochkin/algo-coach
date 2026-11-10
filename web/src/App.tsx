@@ -21,15 +21,15 @@ import { TechniquePage } from '@/pages/TechniquePage'
 const CardPage = lazy(() => import('@/pages/CardPage').then((m) => ({ default: m.CardPage })))
 // lazy, as the card is: a lesson the queue offers reads through the Markdown renderer
 const QueuePage = lazy(() => import('@/pages/QueuePage').then((m) => ({ default: m.QueuePage })))
-const LessonsPage = lazy(() => import('@/pages/LessonsPage').then((m) => ({ default: m.LessonsPage })))
+const LessonsPage = lazy(() =>
+  import('@/pages/LessonsPage').then((m) => ({ default: m.LessonsPage })),
+)
 const LessonPage = lazy(() => import('@/pages/LessonPage').then((m) => ({ default: m.LessonPage })))
 const ExamPage = lazy(() => import('@/pages/ExamPage').then((m) => ({ default: m.ExamPage })))
 const CertificationsPage = lazy(() =>
   import('@/pages/CertificationsPage').then((m) => ({ default: m.CertificationsPage })),
 )
-const RecallPage = lazy(() =>
-  import('@/pages/RecallPage').then((m) => ({ default: m.RecallPage })),
-)
+const RecallPage = lazy(() => import('@/pages/RecallPage').then((m) => ({ default: m.RecallPage })))
 const DrawnRecallPage = lazy(() =>
   import('@/pages/RecallPage').then((m) => ({ default: m.DrawnRecallPage })),
 )

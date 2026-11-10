@@ -53,7 +53,11 @@ export function FocusCard(props: Props) {
     <View style={{ borderRadius: 16, backgroundColor: theme.colors.elevation.level2, padding: 12 }}>
       <View style={{ gap: 8 }}>
         <View style={[styles.row, { gap: 4 }]}>
-          <MaterialCommunityIcons name={focus.cert ? 'target' : 'crosshairs-gps'} size={20} color={theme.colors.primary} />
+          <MaterialCommunityIcons
+            name={focus.cert ? 'target' : 'crosshairs-gps'}
+            size={20}
+            color={theme.colors.primary}
+          />
           <Text variant="titleSmall" numberOfLines={2} style={{ flex: 1 }}>
             {props.label}
           </Text>
@@ -62,15 +66,32 @@ export function FocusCard(props: Props) {
             selected={!!focus.strict}
             showSelectedCheck
             onPress={props.onStrict}
-            accessibilityLabel={strictLabel(!!focus.strict)}>
+            accessibilityLabel={strictLabel(!!focus.strict)}
+          >
             {STRICT}
           </Chip>
-          <IconButton icon="close" size={20} onPress={props.onClear} accessibilityLabel={CLEAR_FOCUS} style={{ margin: 0 }} />
+          <IconButton
+            icon="close"
+            size={20}
+            onPress={props.onClear}
+            accessibilityLabel={CLEAR_FOCUS}
+            style={{ margin: 0 }}
+          />
         </View>
 
         {info.total ? (
-          <View style={{ flexDirection: 'row', height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: theme.colors.surfaceVariant }}>
-            {info.parts.map((p) => (p.v ? <View key={p.k} style={{ flex: p.v, backgroundColor: color[p.k] }} /> : null))}
+          <View
+            style={{
+              flexDirection: 'row',
+              height: 8,
+              borderRadius: 4,
+              overflow: 'hidden',
+              backgroundColor: theme.colors.surfaceVariant,
+            }}
+          >
+            {info.parts.map((p) =>
+              p.v ? <View key={p.k} style={{ flex: p.v, backgroundColor: color[p.k] }} /> : null,
+            )}
           </View>
         ) : null}
         <Text variant="bodySmall" style={muted}>
@@ -82,10 +103,7 @@ export function FocusCard(props: Props) {
           <Stat icon="refresh" value={info.due} label={DUE_NOW} />
           {info.learning ? <Stat icon="timer-sand" value={info.learning} label={LEARNING} /> : null}
           <Stat icon="plus-circle-outline" value={info.newLeft} label={NEW_LEFT} />
-          <Chip
-            compact
-            icon="plus"
-            onPress={props.onMoreNew}>
+          <Chip compact icon="plus" onPress={props.onMoreNew}>
             {RAISE_TODAY}
           </Chip>
         </View>

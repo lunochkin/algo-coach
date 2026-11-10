@@ -11,7 +11,9 @@ const cat = loadSnapshot({
         title: 'C',
         pass_ratio: 1,
         kinds: ['k'],
-        topic: [{ slug: 't', tier: 1, title: 'T', subs: ['types', 'flow'], sub_titles: { types: 'Mutability and identity' } }],
+        topic: [
+          { slug: 't', tier: 1, title: 'T', subs: ['types', 'flow'], sub_titles: { types: 'Mutability and identity' } },
+        ],
       },
       questions: [],
     },

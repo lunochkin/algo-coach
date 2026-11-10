@@ -33,7 +33,6 @@ const TABLE = Object.fromEntries(Object.entries(KIND).map(([table, kind]) => [ki
 type Upload = components['schemas']['Upload'];
 type Synced = components['schemas']['Synced'];
 
-
 /**
  * Fetches the content when it changed, sends this device's pending records, and
  * keeps every record the engine returns that this device does not hold yet.

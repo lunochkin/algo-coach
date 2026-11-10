@@ -72,7 +72,8 @@ export default function ProblemScreen() {
                   <TouchableRipple
                     key={card.slug}
                     accessibilityRole="link"
-                    onPress={() => router.push({ pathname: '/card', params: { slug: card.slug } })}>
+                    onPress={() => router.push({ pathname: '/card', params: { slug: card.slug } })}
+                  >
                     <Text variant="bodySmall" style={{ color: theme.colors.primary }}>
                       {card.title}
                     </Text>

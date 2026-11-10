@@ -69,7 +69,9 @@ export default function TechniqueScreen() {
                     title={row.title}
                     badge={row.difficulty}
                     stats={techniqueStats(row, now)}
-                    onPress={() => router.push({ pathname: '/problem', params: { problem: row.problem_id, technique } })}
+                    onPress={() =>
+                      router.push({ pathname: '/problem', params: { problem: row.problem_id, technique } })
+                    }
                   />
                 ))}
               </PickPanel>

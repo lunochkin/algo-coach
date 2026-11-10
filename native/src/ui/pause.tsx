@@ -24,7 +24,8 @@ export function useArchive(onArchived: () => void): { ask: (c: Course) => void; 
               void st.setCourseStatus(target.slug, 'archived');
               close();
               onArchived();
-            }}>
+            }}
+          >
             {MODULE_ARCHIVE}
           </Button>
         </Dialog.Actions>

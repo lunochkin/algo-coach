@@ -21,7 +21,8 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: SECTIONS.length > 1 ? undefined : { display: 'none' },
-      }}>
+      }}
+    >
       {SECTIONS.map((s) => (
         <Tabs.Screen
           key={s.name}

@@ -17,7 +17,9 @@ export function checkDetail(raw: RawQuestion & Record<string, unknown>): string[
     for (const f of ['example', 'versions', 'diagram'])
       if (f in t && !nonEmpty(t[f])) errors.push(`detail.${f} must be a non-empty string`);
     if ('pitfalls' in t && !strings(t.pitfalls, 1, 4)) errors.push('detail.pitfalls must be 1-4 non-empty strings');
-    const extra = Object.keys(t).filter((k) => !FIELDS.includes(k)).sort();
+    const extra = Object.keys(t)
+      .filter((k) => !FIELDS.includes(k))
+      .sort();
     if (extra.length) errors.push(`detail has unknown fields [${extra.map((k) => `'${k}'`).join(', ')}]`);
   } else if (d !== undefined && d !== null) errors.push('detail must be a table');
   for (const [name, parent] of [

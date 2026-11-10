@@ -1,10 +1,28 @@
 import { describe, expect, it } from 'vitest';
 
-import { Board, DEFAULT_RULES, examOpening, examOutcome, examTitle, levelExam, levelExamLabel, loadSnapshot, type Result } from './index';
+import {
+  Board,
+  DEFAULT_RULES,
+  examOpening,
+  examOutcome,
+  examTitle,
+  levelExam,
+  levelExamLabel,
+  loadSnapshot,
+  type Result,
+} from './index';
 
 const mk = (id: string, topic: string, level: number, format = 'choice') => ({
-  id, topic, sub: `${topic}1`, level, kind: 'concept', prompt: id, format,
-  choices: ['a', 'b', 'c'], answer: ['A'], key: ['k'],
+  id,
+  topic,
+  sub: `${topic}1`,
+  level,
+  kind: 'concept',
+  prompt: id,
+  format,
+  choices: ['a', 'b', 'c'],
+  answer: ['A'],
+  key: ['k'],
 });
 const catalog = loadSnapshot({
   format: 6,
@@ -12,7 +30,9 @@ const catalog = loadSnapshot({
     {
       slug: 'm',
       definition: {
-        title: 'M', pass_ratio: 1, kinds: ['concept'],
+        title: 'M',
+        pass_ratio: 1,
+        kinds: ['concept'],
         topic: [
           { slug: 't', tier: 1, title: 'Types', subs: ['t1'] },
           { slug: 'u', tier: 1, title: 'Units', subs: ['u1'] },
@@ -23,11 +43,22 @@ const catalog = loadSnapshot({
   ],
 } as never);
 const b = Board.build(catalog, []);
-const result = (q: Result['q'], correct: boolean): Result => ({ q, correct, guess: false, order: [0, 1, 2], picked: [], reply: '' });
+const result = (q: Result['q'], correct: boolean): Result => ({
+  q,
+  correct,
+  guess: false,
+  order: [0, 1, 2],
+  picked: [],
+  reply: '',
+});
 
 describe('a level exam', () => {
   it('samples every open group at its level, and leaves open questions out', () => {
-    expect(levelExam(b, 0, 10).questions.map((q) => q.id).sort()).toEqual(['a', 'b', 'c']);
+    expect(
+      levelExam(b, 0, 10)
+        .questions.map((q) => q.id)
+        .sort(),
+    ).toEqual(['a', 'b', 'c']);
   });
 
   it('names how many it asks of how many the level holds', () => {
@@ -39,7 +70,12 @@ describe('a level exam', () => {
 describe("an exam's outcome", () => {
   const plan = levelExam(b, 0, 10, () => 0.5);
   const [qa, qb, qc] = ['a', 'b', 'c'].map((id) => catalog.questions.find((q) => q.id === id)!);
-  const outcome = examOutcome(plan, [result(qa, true), result(qb, false), result(qc, true)], '2026-11-10T10:00:00Z', catalog.courses);
+  const outcome = examOutcome(
+    plan,
+    [result(qa, true), result(qb, false), result(qc, true)],
+    '2026-11-10T10:00:00Z',
+    catalog.courses,
+  );
 
   it('scores it by topic, named by its title', () => {
     expect(outcome.byTopic).toEqual([
@@ -63,7 +99,12 @@ describe("an exam's outcome", () => {
 
   it("passes a certification's exam only where every question was answered", () => {
     const certPlan = { ...plan, cert: { course: 'm', id: 'm-t-foundation', passShare: 0.5 } };
-    const stopped = examOutcome(certPlan, [result(qa, true), result(qb, true)], '2026-11-10T10:00:00Z', catalog.courses);
+    const stopped = examOutcome(
+      certPlan,
+      [result(qa, true), result(qb, true)],
+      '2026-11-10T10:00:00Z',
+      catalog.courses,
+    );
     expect(stopped.cert).toMatchObject({ score: 2, n: 3, passed: false });
   });
 });

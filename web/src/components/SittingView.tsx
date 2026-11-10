@@ -232,11 +232,19 @@ export function SittingView({ problemId, drilled, card }: Props) {
 
   // the three readings; the page starts once the statement has loaded
   if (loaded.data === undefined)
-    return <Loaded of="the problem" state={loaded}>{() => null}</Loaded>
+    return (
+      <Loaded of="the problem" state={loaded}>
+        {() => null}
+      </Loaded>
+    )
   // the editor seeds once, so it waits for the carry. A carry that failed
   // opens the editor on the signature rather than holding the sitting
   if (carried.data === undefined && carried.error === undefined)
-    return <Loaded of="the problem" state={{ ...carried, data: undefined }}>{() => null}</Loaded>
+    return (
+      <Loaded of="the problem" state={{ ...carried, data: undefined }}>
+        {() => null}
+      </Loaded>
+    )
 
   const served = loaded.data
   const clock = moved ?? { elapsedSec: served.elapsed_sec, at: served.receivedAt }
@@ -360,8 +368,8 @@ export function SittingView({ problemId, drilled, card }: Props) {
                     <AlertDialogHeader>
                       <AlertDialogTitle>End the sitting?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        The clock stops for good, and no more submissions are taken. Each attempt
-                        is then asked about in turn.
+                        The clock stops for good, and no more submissions are taken. Each attempt is
+                        then asked about in turn.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -437,11 +445,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
             </DialogDescription>
           </DialogHeader>
           {ended && sittingId !== null && (
-            <ClaimPrompt
-              sittingId={sittingId}
-              drilled={drilled}
-              onDone={() => setAnswered(true)}
-            />
+            <ClaimPrompt sittingId={sittingId} drilled={drilled} onDone={() => setAnswered(true)} />
           )}
         </DialogContent>
       </Dialog>

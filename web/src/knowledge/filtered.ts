@@ -23,7 +23,8 @@ export function filteredScope(q: URLSearchParams, catalog: Catalog): DrillScope 
   const t = c.topics.find((x) => x.slug === q.get('topic'))
   const sub = t && t.subs.includes(q.get('sub') ?? '') ? q.get('sub') : null
   const level = Number(q.get('level'))
-  const known = q.get('level') !== null && Number.isInteger(level) && levels(catalog.rules).includes(level)
+  const known =
+    q.get('level') !== null && Number.isInteger(level) && levels(catalog.rules).includes(level)
   const kind = q.get('kind')
   return {
     course: c.slug,

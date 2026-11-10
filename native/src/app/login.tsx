@@ -60,7 +60,9 @@ export default function LoginScreen() {
     };
   }, [origin, attempt]);
 
-  const providers: Provider[] = offer ? [...offer.providers, ...(offer.dev_login === null ? [] : ['dev' as const])] : [];
+  const providers: Provider[] = offer
+    ? [...offer.providers, ...(offer.dev_login === null ? [] : ['dev' as const])]
+    : [];
   const label = (p: Provider) => (p === 'dev' ? devLoginAs(offer?.dev_login ?? '') : continueWith(p));
 
   const signInWith = async (provider: Provider) => {
@@ -91,11 +93,10 @@ export default function LoginScreen() {
         paddingTop: insets.top + 24,
         paddingBottom: insets.bottom + 24,
         backgroundColor: theme.colors.background,
-      }}>
+      }}
+    >
       <Text variant="displaySmall">{APP_NAME}</Text>
-      <Text variant="bodyLarge">
-        {__DEV__ ? 'The dev app syncs with the local engine.' : LOGIN_INTRO}
-      </Text>
+      <Text variant="bodyLarge">{__DEV__ ? 'The dev app syncs with the local engine.' : LOGIN_INTRO}</Text>
       {!st.settings.origin ? (
         <>
           <TextInput
@@ -124,7 +125,8 @@ export default function LoginScreen() {
             icon={ICONS[provider]}
             loading={signing}
             disabled={signing}
-            onPress={() => void signInWith(provider)}>
+            onPress={() => void signInWith(provider)}
+          >
             {label(provider)}
           </Button>
         ))

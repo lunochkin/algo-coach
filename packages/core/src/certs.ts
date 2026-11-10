@@ -126,7 +126,12 @@ export function reduceEdges(nodes: string[], edges: [string, string][]): [string
     }
     return seen;
   };
-  return nodes.flatMap((f) => out.get(f)!.filter((t) => !reach(f, t).has(t)).map((t) => [f, t] as [string, string]));
+  return nodes.flatMap((f) =>
+    out
+      .get(f)!
+      .filter((t) => !reach(f, t).has(t))
+      .map((t) => [f, t] as [string, string]),
+  );
 }
 
 export function dagCycle(nodes: string[], edges: [string, string][]): string[] | null {
@@ -200,14 +205,17 @@ export function parseCerts(raw: RawCerts, c: Pick<Course, 'slug' | 'title' | 'to
       if (s === COURSE_SCOPE) edges.push(...c.topics.map((t) => [me, certId(c.slug, t.slug, lv)] as [string, string]));
       else
         edges.push(
-          ...[...topicNeeds.get(s)!].sort().map((b) => [me, certId(c.slug, b, Math.min(lv, match))] as [string, string]),
+          ...[...topicNeeds.get(s)!]
+            .sort()
+            .map((b) => [me, certId(c.slug, b, Math.min(lv, match))] as [string, string]),
         );
     }
   }
   // Uncertified levels are not part of the DAG: their edges go, nothing needs them.
   edges = edges.filter(([f, t]) => certified.has(f) && certified.has(t));
   const derivedCycle = dagCycle(ids, edges);
-  if (derivedCycle) return { certs: null, errors: [...errors, `derived certificate cycle: ${derivedCycle.join(' -> ')}`] };
+  if (derivedCycle)
+    return { certs: null, errors: [...errors, `derived certificate cycle: ${derivedCycle.join(' -> ')}`] };
   edges = reduceEdges(ids, edges);
   for (const [key, add] of [
     ['edge', true],
@@ -230,14 +238,7 @@ export function parseCerts(raw: RawCerts, c: Pick<Course, 'slug' | 'title' | 'to
 }
 
 export type CertState =
-  | 'not_certified'
-  | 'empty'
-  | 'insufficient_pool'
-  | 'locked'
-  | 'in_progress'
-  | 'ready'
-  | 'earned'
-  | 'needs_refresh';
+  'not_certified' | 'empty' | 'insufficient_pool' | 'locked' | 'in_progress' | 'ready' | 'earned' | 'needs_refresh';
 
 /** A certification's state, as either client names it. */
 export const STATE_LABEL: Record<CertState, string> = {
@@ -335,9 +336,13 @@ export function certStates(b: Board, c: Course, exams: CertRecord[]): Map<string
     const blockers = [...prereqs].filter(([, s]) => !EARNED.includes(s)).map(([p, s]) => `needs ${p} (${s})`);
     blockers.push(...short.map((g) => `${g.sub}: ${g.passed}/${g.total} passed, needs ${Math.round(ratio * 100)}%`));
     if (!retained)
-      blockers.push(`retention ${Math.round(retention * 100)}%, needs ${Math.round(x.rule.share * 100)}% at ${x.rule.stabilityDays} days`);
+      blockers.push(
+        `retention ${Math.round(retention * 100)}%, needs ${Math.round(x.rule.share * 100)}% at ${x.rule.stabilityDays} days`,
+      );
     if (st === 'insufficient_pool')
-      blockers.unshift(`not enough questions yet: ${pool} of ${Math.ceil(x.rule.minPoolRatio * x.rule.size)} for the exam pool`);
+      blockers.unshift(
+        `not enough questions yet: ${pool} of ${Math.ceil(x.rule.minPoolRatio * x.rule.size)} for the exam pool`,
+      );
     const status: CertStatus = {
       state: st,
       coverage,

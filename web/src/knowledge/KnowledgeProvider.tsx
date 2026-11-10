@@ -23,7 +23,11 @@ export function KnowledgeProvider({ children }: { children: ReactNode }) {
   const [failedAt, setFailedAt] = useState<number | null>(null)
 
   const reread = useCallback(async (one: Copy) => {
-    const [snapshot, held, pending] = await Promise.all([one.snapshot(), one.records(), one.outbox()])
+    const [snapshot, held, pending] = await Promise.all([
+      one.snapshot(),
+      one.records(),
+      one.outbox(),
+    ])
     setText(snapshot)
     setRecords(held)
     setOutbox(pending)

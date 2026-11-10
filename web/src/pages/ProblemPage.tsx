@@ -95,8 +95,8 @@ export function ProblemPage() {
                 ))}
               </Stats>
               <p className="text-meta text-muted-foreground">
-                This problem was retired: its statement asked for something its cases do not
-                decide. It is served to nobody, and the attempts above stay in your log.
+                This problem was retired: its statement asked for something its cases do not decide.
+                It is served to nobody, and the attempts above stay in your log.
               </p>
             </Panel>
           ) : (

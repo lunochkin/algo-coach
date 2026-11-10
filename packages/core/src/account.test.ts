@@ -25,9 +25,12 @@ describe("a signed-in device's name", () => {
   });
 
   it("names a browser by its agent's browser and system", () => {
-    const chrome = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0 Safari/537.36';
+    const chrome =
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0 Safari/537.36';
     expect(deviceName({ kind: 'browser', name: chrome })).toBe('Chrome on macOS');
-    expect(deviceName({ kind: 'browser', name: 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/150.0' })).toBe('Firefox on Linux');
+    expect(deviceName({ kind: 'browser', name: 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/150.0' })).toBe(
+      'Firefox on Linux',
+    );
   });
 
   it('names a browser it cannot read plainly', () => {

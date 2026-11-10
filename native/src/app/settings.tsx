@@ -94,7 +94,6 @@ export default function SettingsScreen() {
     st.requestSync(0);
   };
 
-
   const field = (key: keyof typeof form, label: string, numeric = false) => (
     <TextInput
       mode="outlined"
@@ -119,7 +118,8 @@ export default function SettingsScreen() {
       <KeyboardAwareScrollView
         bottomOffset={24}
         contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+      >
         <Text variant="titleMedium">{ACCOUNT}</Text>
         {field('origin', 'Engine address')}
         {!originOk ? <HelperText type="error">An address such as https://example.invalid</HelperText> : null}
@@ -129,7 +129,8 @@ export default function SettingsScreen() {
               <Text variant="bodyLarge">{named(me)}</Text>
               <Text
                 variant="bodySmall"
-                style={{ color: theme.colors.onSurfaceVariant, fontFamily: me?.email ? 'monospace' : undefined }}>
+                style={{ color: theme.colors.onSurfaceVariant, fontFamily: me?.email ? 'monospace' : undefined }}
+              >
                 {meLine(me)}
               </Text>
             </View>
@@ -182,7 +183,8 @@ export default function SettingsScreen() {
                   mode="outlined"
                   icon="archive-arrow-up-outline"
                   accessibilityLabel={`Restore ${c.title}`}
-                  onPress={() => void st.setCourseStatus(c.slug, 'active')}>
+                  onPress={() => void st.setCourseStatus(c.slug, 'active')}
+                >
                   {RESTORE}
                 </Button>
               </View>

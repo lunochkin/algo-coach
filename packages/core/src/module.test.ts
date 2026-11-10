@@ -3,8 +3,15 @@ import { describe, expect, it } from 'vitest';
 import { Board, focusLabel, focusLine, groupCell, levelCounts, loadSnapshot, startPreview } from './index';
 
 const mk = (id: string, sub: string, level: number) => ({
-  id, topic: 't', sub, level, kind: 'concept', prompt: id, format: 'choice' as const,
-  choices: ['a', 'b', 'c'], answer: ['A'],
+  id,
+  topic: 't',
+  sub,
+  level,
+  kind: 'concept',
+  prompt: id,
+  format: 'choice' as const,
+  choices: ['a', 'b', 'c'],
+  answer: ['A'],
 });
 const catalog = loadSnapshot({
   format: 6,
@@ -12,7 +19,9 @@ const catalog = loadSnapshot({
     {
       slug: 'c',
       definition: {
-        title: 'C', pass_ratio: 1, kinds: ['concept'],
+        title: 'C',
+        pass_ratio: 1,
+        kinds: ['concept'],
         topic: [{ slug: 't', tier: 1, title: 'Types', subs: ['s1', 's2'], sub_titles: { s1: 'Ints' } }],
       },
       questions: [mk('a', 's1', 0), mk('b', 's1', 0), mk('c', 's1', 1), mk('d', 's2', 0)],
@@ -59,7 +68,10 @@ describe('the start sheet', () => {
   it('counts what its choices leave, and names the press', () => {
     const b = Board.build(catalog, []);
     expect(startPreview(b, { course: 'c', topic: 't', sub: 's1', level: 0 }, 10, NOW)).toMatchObject({
-      reviews: 0, newLeft: 10, empty: false, label: 'Start · 0 reviews · 10 new',
+      reviews: 0,
+      newLeft: 10,
+      empty: false,
+      label: 'Start · 0 reviews · 10 new',
     });
   });
 
@@ -82,7 +94,11 @@ describe('the focus record', () => {
 
   it('names a certification only on a certification focus', () => {
     expect(focusLine({ course: 'c', topic: 't', sub: null, strict: true, cert: 'c-t-associate' })).toEqual({
-      course: 'c', topic: 't', sub: null, strict: true, cert: 'c-t-associate',
+      course: 'c',
+      topic: 't',
+      sub: null,
+      strict: true,
+      cert: 'c-t-associate',
     });
   });
 });

@@ -24,7 +24,10 @@ export interface Held {
 export interface Transport {
   // null where the snapshot the copy holds still stands
   snapshot(etag: string | null): Promise<{ text: string; etag: string } | null>
-  sync(records: Line[], since: Cursor): Promise<{ user_id: string; records: Line[]; cursor: Cursor }>
+  sync(
+    records: Line[],
+    since: Cursor,
+  ): Promise<{ user_id: string; records: Line[]; cursor: Cursor }>
 }
 
 interface Schema extends DBSchema {
@@ -82,7 +85,14 @@ export class Copy {
   /** Keeps a record the user made here, in the outbox until the engine has it. */
   async add(kind: string, line: Line): Promise<Held> {
     const t = typeof line.t === 'string' ? line.t : new Date().toISOString()
-    const held: Held = { client_id: crypto.randomUUID(), kind, device: DEVICE, t, line: { ...line, t }, pending: 1 }
+    const held: Held = {
+      client_id: crypto.randomUUID(),
+      kind,
+      device: DEVICE,
+      t,
+      line: { ...line, t },
+      pending: 1,
+    }
     await this.db.put('records', held)
     return held
   }
@@ -96,7 +106,11 @@ export class Copy {
     const content = await this.transport.snapshot((await this.db.get('meta', 'etag')) ?? null)
     if (content) {
       const tx = this.db.transaction('meta', 'readwrite')
-      await Promise.all([tx.store.put(content.text, 'snapshot'), tx.store.put(content.etag, 'etag'), tx.done])
+      await Promise.all([
+        tx.store.put(content.text, 'snapshot'),
+        tx.store.put(content.etag, 'etag'),
+        tx.done,
+      ])
       result.contentChanged = true
     }
 
@@ -105,7 +119,8 @@ export class Copy {
     const lines = sending.map((one) => ({ ...one.line, kind: one.kind, client_id: one.client_id }))
     const answer = await this.transport.sync(lines, since)
     // the database is named by the user, so a reply for another one is a bug
-    if (answer.user_id !== this.user) throw new Error('the session names another user than this copy')
+    if (answer.user_id !== this.user)
+      throw new Error('the session names another user than this copy')
 
     const tx = this.db.transaction(['records', 'meta'], 'readwrite')
     const records = tx.objectStore('records')
@@ -114,7 +129,14 @@ export class Copy {
     for (const record of answer.records) {
       const one = syncedLine(record)
       if (!one || (await records.get(one.client_id))) continue
-      await records.put({ client_id: one.client_id, kind: one.kind, device: one.device, t: one.t, line: one.rest, pending: 0 })
+      await records.put({
+        client_id: one.client_id,
+        kind: one.kind,
+        device: one.device,
+        t: one.t,
+        line: one.rest,
+        pending: 0,
+      })
       result.logChanged = true
     }
     await tx.objectStore('meta').put(JSON.stringify(answer.cursor), 'cursor')

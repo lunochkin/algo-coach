@@ -33,7 +33,12 @@ export function reach(c: Course, start: string[], up: boolean): Set<string> {
  * clusters and certificate nodes it passes through. With nothing picked, a
  * certification focus lights its scope. Null lights everything.
  */
-export function mapLit(c: Course, layout: ClusterLayout, picked: string | null, focus: Focus | null): Set<string> | null {
+export function mapLit(
+  c: Course,
+  layout: ClusterLayout,
+  picked: string | null,
+  focus: Focus | null,
+): Set<string> | null {
   const around = (subs: Set<string>, extra: string[]) => {
     const out = new Set<string>([...subs, ...extra]);
     for (const s of subs) {
@@ -50,7 +55,9 @@ export function mapLit(c: Course, layout: ClusterLayout, picked: string | null, 
   }
   if (picked) return around(new Set([...reach(c, [picked], true), ...reach(c, [picked], false)]), []);
   if (focus?.cert && focus.course === c.slug && focus.scope) {
-    return around(new Set([...focus.scope].map((g) => g.slice(0, g.lastIndexOf('@')))), [`cert:${focus.topic ?? 'all'}`]);
+    return around(new Set([...focus.scope].map((g) => g.slice(0, g.lastIndexOf('@')))), [
+      `cert:${focus.topic ?? 'all'}`,
+    ]);
   }
   return null;
 }
@@ -129,7 +136,9 @@ export function lessonView(b: Board, c: Course, slug: string): LessonView | null
     const at = ref.lastIndexOf('@');
     return `${ref.slice(0, at)} · ${levelName(b.rules, Number(ref.slice(at + 1)))}`;
   };
-  const needs = x.needs.map((r) => (r.startsWith('lesson:') ? `lesson ${c.graph?.lesson(r.slice(7))?.title ?? r}` : levelOf(r)));
+  const needs = x.needs.map((r) =>
+    r.startsWith('lesson:') ? `lesson ${c.graph?.lesson(r.slice(7))?.title ?? r}` : levelOf(r),
+  );
   return {
     title: x.title,
     state,

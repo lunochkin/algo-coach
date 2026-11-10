@@ -202,10 +202,9 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
   // one hint per request, so the page holds nothing it was not given
   async function hint() {
     if (next === undefined) return
-    const { data, error } = await api.GET(
-      '/api/cards/{slug}/recall/{template_slug}/hints/{hint}',
-      { params: { path: { slug, template_slug: templateSlug, hint: next } } },
-    )
+    const { data, error } = await api.GET('/api/cards/{slug}/recall/{template_slug}/hints/{hint}', {
+      params: { path: { slug, template_slug: templateSlug, hint: next } },
+    })
     if (data) setTaken([...taken, { hint: data.hint, text: data.text }])
     else setRefused(described(error))
   }
@@ -274,7 +273,10 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
               it: each one answers more of the question than the last */}
           <span className="ml-auto flex items-center gap-2 text-meta text-muted-foreground">
             {LADDER.map((one) => (
-              <span key={one} className={cn(taken.some((each) => each.hint === one) && 'line-through')}>
+              <span
+                key={one}
+                className={cn(taken.some((each) => each.hint === one) && 'line-through')}
+              >
                 {NAMES[one]}
               </span>
             ))}
@@ -319,7 +321,10 @@ function Ran({
     <div className="space-y-section">
       <Panel>
         <p
-          className={cn('font-medium', verified(ran) ? 'text-verdict-passed' : 'text-verdict-wrong')}
+          className={cn(
+            'font-medium',
+            verified(ran) ? 'text-verdict-passed' : 'text-verdict-wrong',
+          )}
         >
           {verified(ran) ? 'Recalled' : 'Not recalled'}: {passed(ran)} of {results.length} cases
           passed

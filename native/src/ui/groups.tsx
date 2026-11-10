@@ -50,7 +50,11 @@ export function ModuleGroups({ c, b, onStart }: { c: Course; b: Board; onStart: 
             <Text variant="titleSmall" style={{ flex: 1 }}>
               {t.title}
             </Text>
-            <Button compact icon="play" onPress={() => onStart({ course: c.slug, topic: t.slug, sub: null, level: null })}>
+            <Button
+              compact
+              icon="play"
+              onPress={() => onStart({ course: c.slug, topic: t.slug, sub: null, level: null })}
+            >
               {MODULE_START}
             </Button>
             <Button compact disabled={aimed(t.slug, null)} onPress={() => aim(t.slug, null)}>
@@ -72,8 +76,13 @@ export function ModuleGroups({ c, b, onStart }: { c: Course; b: Board; onStart: 
                 style={{ flex: 1, minHeight: 40, justifyContent: 'center' }}
                 accessibilityRole="button"
                 accessibilityLabel={`Start ${subTitle(c, sub)}`}
-                onPress={() => onStart({ course: c.slug, topic: t.slug, sub, level: null })}>
-                <Text variant="bodyMedium" numberOfLines={1} style={aimed(t.slug, sub) ? { color: theme.colors.primary } : null}>
+                onPress={() => onStart({ course: c.slug, topic: t.slug, sub, level: null })}
+              >
+                <Text
+                  variant="bodyMedium"
+                  numberOfLines={1}
+                  style={aimed(t.slug, sub) ? { color: theme.colors.primary } : null}
+                >
                   {subTitle(c, sub)}
                 </Text>
               </Pressable>
@@ -95,7 +104,15 @@ export function ModuleGroups({ c, b, onStart }: { c: Course; b: Board; onStart: 
                     disabled={cell.state === 'empty'}
                     accessibilityLabel={startGroup(subTitle(c, sub), levelName(b.rules, level), cell.line)}
                     onPress={() => onStart({ course: c.slug, topic: t.slug, sub, level })}
-                    style={{ width: 48, minHeight: 40, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 2 }}>
+                    style={{
+                      width: 48,
+                      minHeight: 40,
+                      flexDirection: 'row',
+                      justifyContent: 'flex-end',
+                      alignItems: 'center',
+                      gap: 2,
+                    }}
+                  >
                     {cell.state === 'locked' ? (
                       <MaterialCommunityIcons name="lock-outline" size={12} color={theme.colors.onSurfaceDisabled} />
                     ) : null}

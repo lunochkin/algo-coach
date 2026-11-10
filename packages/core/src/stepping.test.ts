@@ -3,8 +3,15 @@ import { describe, expect, it } from 'vitest';
 import { Board, loadSnapshot, nextQueue } from './index';
 
 const mk = (id: string) => ({
-  id, topic: 't', sub: 's', level: 0, kind: 'k', prompt: id, format: 'choice' as const,
-  choices: ['a', 'b', 'c'], answer: ['A'],
+  id,
+  topic: 't',
+  sub: 's',
+  level: 0,
+  kind: 'k',
+  prompt: id,
+  format: 'choice' as const,
+  choices: ['a', 'b', 'c'],
+  answer: ['A'],
 });
 const cat = loadSnapshot({
   format: 2,

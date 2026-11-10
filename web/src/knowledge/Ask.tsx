@@ -81,15 +81,38 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
   function submit() {
     if (q.format === 'short') {
       const [reply, suffix] = splitGuess(text)
-      answer({ q, correct: matchShort(reply, q), guess: guessing || suffix, order, picked: [], reply })
+      answer({
+        q,
+        correct: matchShort(reply, q),
+        guess: guessing || suffix,
+        order,
+        picked: [],
+        reply,
+      })
     } else {
-      answer({ q, correct: gradeChoice(q, order, picked), guess: guessing, order, picked, reply: '' })
+      answer({
+        q,
+        correct: gradeChoice(q, order, picked),
+        guess: guessing,
+        order,
+        picked,
+        reply: '',
+      })
     }
   }
 
   function grade() {
     const card = cardFields(q.key.length, recalled, fell, wrong)
-    answer({ q, correct: card.grade === 'k', guess: false, order, picked: [], reply: '', grade: card.grade, card })
+    answer({
+      q,
+      correct: card.grade === 'k',
+      guess: false,
+      order,
+      picked: [],
+      reply: '',
+      grade: card.grade,
+      card,
+    })
   }
 
   function toggle(pos: number) {
@@ -101,7 +124,13 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
   // keyboard answers faster than by pointer
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
-      if (event.target instanceof HTMLInputElement || event.metaKey || event.ctrlKey || event.altKey) return
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey
+      )
+        return
       const pos = Number(event.key) - 1
       if (!result && q.format === 'choice' && pos >= 0 && pos < order.length) {
         event.preventDefault()
@@ -174,7 +203,11 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
 
       {q.format !== 'card' && !result && (
         <div className="flex items-center gap-2">
-          <Checkbox id="guessing" checked={guessing} onCheckedChange={(on) => setGuessing(on === true)} />
+          <Checkbox
+            id="guessing"
+            checked={guessing}
+            onCheckedChange={(on) => setGuessing(on === true)}
+          />
           <Label htmlFor="guessing">{ASK_GUESSING}</Label>
         </div>
       )}
@@ -183,20 +216,43 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
         <div className="space-y-2">
           <p className="font-medium">{ASK_TICK_RECALLED}</p>
           {q.key.map((point, i) => (
-            <Tick key={i} label={`${i + 1}. ${block(point)}`} on={recalled.has(i)} disabled={!!result} onFlip={() => setRecalled(flip(recalled, i))} />
+            <Tick
+              key={i}
+              label={`${i + 1}. ${block(point)}`}
+              on={recalled.has(i)}
+              disabled={!!result}
+              onFlip={() => setRecalled(flip(recalled, i))}
+            />
           ))}
           {q.traps.length > 0 && <p className="pt-2 font-medium">{ASK_TRAPS}</p>}
           {q.traps.map((trap, i) => (
-            <Tick key={i} label={block(trap)} hint={ASK_SAID_TRAP} on={fell.has(i)} disabled={!!result} onFlip={() => setFell(flip(fell, i))} />
+            <Tick
+              key={i}
+              label={block(trap)}
+              hint={ASK_SAID_TRAP}
+              on={fell.has(i)}
+              disabled={!!result}
+              onFlip={() => setFell(flip(fell, i))}
+            />
           ))}
-          <Tick label={ASK_SAID_ELSE} on={wrong} disabled={!!result} onFlip={() => setWrong(!wrong)} />
+          <Tick
+            label={ASK_SAID_ELSE}
+            on={wrong}
+            disabled={!!result}
+            onFlip={() => setWrong(!wrong)}
+          />
         </div>
       )}
 
       {result && <Verdict r={result} />}
       {result && (
         <div className="space-y-stack">
-          <Button variant="ghost" size="sm" onClick={() => setDetails(!details)} aria-expanded={details}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDetails(!details)}
+            aria-expanded={details}
+          >
             {detailsToggle(details)}
           </Button>
           {details && <Details r={result} course={course} />}
@@ -229,10 +285,23 @@ function flip(s: Set<number>, i: number): Set<number> {
   return next
 }
 
-function Tick(props: { label: string; hint?: string; on: boolean; disabled: boolean; onFlip: () => void }) {
+function Tick(props: {
+  label: string
+  hint?: string
+  on: boolean
+  disabled: boolean
+  onFlip: () => void
+}) {
   return (
-    <label className={cn('flex items-start gap-3 rounded-xl border px-4 py-2.5', props.on && 'bg-muted')}>
-      <Checkbox checked={props.on} disabled={props.disabled} onCheckedChange={props.onFlip} className="mt-1" />
+    <label
+      className={cn('flex items-start gap-3 rounded-xl border px-4 py-2.5', props.on && 'bg-muted')}
+    >
+      <Checkbox
+        checked={props.on}
+        disabled={props.disabled}
+        onCheckedChange={props.onFlip}
+        className="mt-1"
+      />
       <span className="flex-1">
         <span className="whitespace-pre-wrap">{props.label}</span>
         {props.hint && <span className="block text-meta text-muted-foreground">{props.hint}</span>}
@@ -246,7 +315,11 @@ export function Verdict({ r }: { r: Result }) {
   return (
     <div className="space-y-1">
       {head && (
-        <p className={cn('font-medium', head.correct ? 'text-verdict-passed' : 'text-verdict-wrong')}>{head.text}</p>
+        <p
+          className={cn('font-medium', head.correct ? 'text-verdict-passed' : 'text-verdict-wrong')}
+        >
+          {head.text}
+        </p>
       )}
       {explain && <p className="whitespace-pre-wrap">{explain}</p>}
       {note && <p className="text-meta text-muted-foreground">{note}</p>}
@@ -266,11 +339,17 @@ export function Details({ r, course }: { r: Result; course: Course | undefined }
             answer.rows.map((row) => (
               <div key={row.key} className={cn('rounded-md px-2 py-1', row.yours && 'bg-muted')}>
                 <p className="whitespace-pre-wrap">
-                  <span className={row.ok ? 'text-verdict-passed' : 'text-verdict-wrong'}>{row.mark} </span>
+                  <span className={row.ok ? 'text-verdict-passed' : 'text-verdict-wrong'}>
+                    {row.mark}{' '}
+                  </span>
                   {row.label}
                   {row.yours && <span className="text-muted-foreground">{DETAIL_YOURS}</span>}
                 </p>
-                {row.note && <p className="pl-4 text-meta whitespace-pre-wrap text-muted-foreground">{row.note}</p>}
+                {row.note && (
+                  <p className="pl-4 text-meta whitespace-pre-wrap text-muted-foreground">
+                    {row.note}
+                  </p>
+                )}
               </div>
             ))
           ) : (
@@ -284,7 +363,9 @@ export function Details({ r, course }: { r: Result; course: Course | undefined }
       {sections.map((x) => (
         <Section key={x.title} title={x.title}>
           {'code' in x ? (
-            <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">{x.code}</pre>
+            <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">
+              {x.code}
+            </pre>
           ) : 'items' in x ? (
             <ul className="list-disc space-y-1 pl-5">
               {x.items.map((item, i) => (
@@ -303,7 +384,10 @@ export function Details({ r, course }: { r: Result; course: Course | undefined }
       )}
       {lessons.map((x) => (
         <p key={x.slug} className="text-meta">
-          <Link to={lessonPath(x.course, x.slug, x.anchor)} className="underline underline-offset-2">
+          <Link
+            to={lessonPath(x.course, x.slug, x.anchor)}
+            className="underline underline-offset-2"
+          >
             {x.label}
           </Link>
         </p>

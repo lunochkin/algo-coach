@@ -36,13 +36,29 @@ export function stateColor(state: CertState, theme: MD3Theme): string {
 }
 
 /** Two arcs: coverage outside, retention inside, in the state's colour. */
-export function CertRing({ status, size = 36, color: override }: { status: CertStatus; size?: number; color?: string }) {
+export function CertRing({
+  status,
+  size = 36,
+  color: override,
+}: {
+  status: CertStatus;
+  size?: number;
+  color?: string;
+}) {
   const theme = useTheme();
   const color = override ?? stateColor(status.state, theme);
   const arc = (r: number, share: number, w: number, key: string) => {
     const len = 2 * Math.PI * r;
     return [
-      <Circle key={`${key}b`} cx={size / 2} cy={size / 2} r={r} stroke={theme.colors.outlineVariant} strokeWidth={w} fill="none" />,
+      <Circle
+        key={`${key}b`}
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        stroke={theme.colors.outlineVariant}
+        strokeWidth={w}
+        fill="none"
+      />,
       <Circle
         key={key}
         cx={size / 2}
@@ -117,13 +133,16 @@ export function CertSheet(props: {
             ) : null}
             {v.short.map((g) => (
               <View key={g.sub} style={styles.row}>
-                <Text variant="bodyMedium" style={{ flex: 1 }}>{g.line}</Text>
+                <Text variant="bodyMedium" style={{ flex: 1 }}>
+                  {g.line}
+                </Text>
                 <Button
                   compact
                   onPress={() => {
                     onClose();
                     onPractice({ course: c.slug, topic: g.topic, sub: g.sub, level: x.level });
-                  }}>
+                  }}
+                >
                   {CERT_START}
                 </Button>
               </View>
@@ -148,7 +167,8 @@ export function CertSheet(props: {
                   const f = certFocus(c, x.id, !!st.focus?.strict);
                   if (f) void st.setFocus(f);
                   onClose();
-                }}>
+                }}
+              >
                 {CERT_TARGET}
               </Button>
             )

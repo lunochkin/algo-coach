@@ -1,13 +1,33 @@
 import { describe, expect, it } from 'vitest';
 
-import { Board, lessonGroups, lessonRow, lessonsAround, lessonStopNote, loadSnapshot, readyLesson, withLessons } from './index';
+import {
+  Board,
+  lessonGroups,
+  lessonRow,
+  lessonsAround,
+  lessonStopNote,
+  loadSnapshot,
+  readyLesson,
+  withLessons,
+} from './index';
 
 const mk = (id: string, sub: string, level: number) => ({
-  id, topic: 't', sub, level, kind: 'concept', prompt: id, format: 'choice' as const,
-  choices: ['a', 'b', 'c'], answer: ['A'],
+  id,
+  topic: 't',
+  sub,
+  level,
+  kind: 'concept',
+  prompt: id,
+  format: 'choice' as const,
+  choices: ['a', 'b', 'c'],
+  answer: ['A'],
 });
 const lesson = (title: string, teaches: string[], needs: string[] = [], pretest = 0) => ({
-  title, file: `lessons/${title}.md`, teaches, needs, pretest,
+  title,
+  file: `lessons/${title}.md`,
+  teaches,
+  needs,
+  pretest,
 });
 const catalog = loadSnapshot({
   format: 6,
@@ -15,7 +35,9 @@ const catalog = loadSnapshot({
     {
       slug: 'm',
       definition: {
-        title: 'M', pass_ratio: 1, kinds: ['concept'],
+        title: 'M',
+        pass_ratio: 1,
+        kinds: ['concept'],
         topic: [{ slug: 't', tier: 1, title: 'T', subs: ['a', 'b'], sub_titles: { a: 'Ints' } }],
       },
       questions: [mk('q1', 'a', 0), mk('q2', 'b', 0)],
@@ -43,7 +65,10 @@ describe('the lessons', () => {
   it("names a lesson's minutes, what it teaches and what it waits for", () => {
     const b = Board.build(catalog, []);
     expect(lessonRow(b, c, c.graph!.lesson('first')!)).toMatchObject({
-      state: 'available', minutes: 3, teaches: 'Teaches Ints · Foundation', status: 'Ready to read',
+      state: 'available',
+      minutes: 3,
+      teaches: 'Teaches Ints · Foundation',
+      status: 'Ready to read',
     });
     // the lesson waits for the lesson it needs, and for the group its own group needs done
     expect(lessonRow(b, c, c.graph!.lesson('second')!).status).toBe('Needs first, a · Foundation');

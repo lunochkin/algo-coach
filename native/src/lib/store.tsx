@@ -122,16 +122,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [certRecords, setCertRecords] = useState<CertRecord[]>([]);
   // Pause state is learner data from status records, applied over the course snapshot.
   const learner = useMemo(
-    () =>
-      rawCatalog ? learnerCatalog(rawCatalog, { statuses, lessons: lessonRecords, certs: certRecords }) : null,
+    () => (rawCatalog ? learnerCatalog(rawCatalog, { statuses, lessons: lessonRecords, certs: certRecords }) : null),
     [rawCatalog, statuses, lessonRecords, certRecords],
   );
   const archived = useMemo(() => learner?.archived ?? [], [learner]);
   const catalog = learner?.catalog ?? null;
-  const focus = useMemo(
-    () => (catalog ? currentFocus(focusRecords, catalog) : null),
-    [catalog, focusRecords],
-  );
+  const focus = useMemo(() => (catalog ? currentFocus(focusRecords, catalog) : null), [catalog, focusRecords]);
   const [attempts, setAttempts] = useState<AttemptRecord[]>([]);
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
@@ -379,16 +375,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const finishSession = useCallback(
     async (score: number, answered: number) => {
-    const s = session;
-    setSession(null);
-    if (s && answered > 0) {
-      const rec: SessionRecord = { t: isoNow(), mode: s.mode, score, n: answered };
-      await DB.addLocal('sessions', sessionPath(settingsRef.current.device, rec.t), rec);
-      setSessions((xs) => [...xs, rec]);
-    }
-    requestSync(0);
-    const a = await DB.allAttempts();
-    await remind(catalogRef.current, a);
+      const s = session;
+      setSession(null);
+      if (s && answered > 0) {
+        const rec: SessionRecord = { t: isoNow(), mode: s.mode, score, n: answered };
+        await DB.addLocal('sessions', sessionPath(settingsRef.current.device, rec.t), rec);
+        setSessions((xs) => [...xs, rec]);
+      }
+      requestSync(0);
+      const a = await DB.allAttempts();
+      await remind(catalogRef.current, a);
     },
     [session, requestSync, remind],
   );
@@ -453,8 +449,35 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       archived,
       recordCertExam,
     }),
-    [ready, catalog, attempts, sessions, settings, settingRecords, setSetting, newLimit, raiseNew, courseOrder, setCourseOrder, hasToken, sync, board, requestSync,
-      updateSettings, signedIn, signOut, record, session, finishSession, setCourseStatus, focus, setFocus, setLessonState, archived, recordCertExam],
+    [
+      ready,
+      catalog,
+      attempts,
+      sessions,
+      settings,
+      settingRecords,
+      setSetting,
+      newLimit,
+      raiseNew,
+      courseOrder,
+      setCourseOrder,
+      hasToken,
+      sync,
+      board,
+      requestSync,
+      updateSettings,
+      signedIn,
+      signOut,
+      record,
+      session,
+      finishSession,
+      setCourseStatus,
+      focus,
+      setFocus,
+      setLessonState,
+      archived,
+      recordCertExam,
+    ],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -465,7 +488,10 @@ async function movedSettings(s: Settings): Promise<void> {
   const { newPerDay: kept, examSize: size, courseOrder: order } = await legacySettings();
   if (kept === undefined && size === undefined && order === undefined) return;
   const held = await DB.allSettings();
-  const moved: [SettingName, number | undefined][] = [['new_per_day', kept], ['exam_size', size]];
+  const moved: [SettingName, number | undefined][] = [
+    ['new_per_day', kept],
+    ['exam_size', size],
+  ];
   for (const [name, n] of moved) {
     if (typeof n !== 'number' || n === SETTING_DEFAULT[name] || held.some((r) => r.name === name)) continue;
     const rec: SettingRecord = { t: isoNow(), name, n };

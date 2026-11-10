@@ -57,11 +57,7 @@ export function sameFocus(a: Focus | null, b: Focus | null): boolean {
 
 export function inFocus(q: Question, f: Focus): boolean {
   if (f.scope) return q.course === f.course && f.scope.has(`${q.sub}@${q.level}`);
-  return (
-    q.course === f.course &&
-    (f.topic === null || q.topic === f.topic) &&
-    (f.sub === null || q.sub === f.sub)
-  );
+  return q.course === f.course && (f.topic === null || q.topic === f.topic) && (f.sub === null || q.sub === f.sub);
 }
 
 /** "Python › concurrency › asyncio-core", or "all modules". */

@@ -49,9 +49,15 @@ export function certConditions(
   const checks: CertCheck[] = (c.certs?.needs(id) ?? []).map((p) => {
     const s = states.get(p)?.state;
     const ok = held(s);
-    return { ok, text: `Prerequisite: ${c.certs?.get(p)?.title ?? p}${ok ? '' : ` (${STATE_LABEL[s ?? 'locked'].toLowerCase()})`}` };
+    return {
+      ok,
+      text: `Prerequisite: ${c.certs?.get(p)?.title ?? p}${ok ? '' : ` (${STATE_LABEL[s ?? 'locked'].toLowerCase()})`}`,
+    };
   });
-  checks.push({ ok: status.short.length === 0, text: `Coverage: ${pct(status.coverage)} of ${counted(status.questions, 'question')} passed` });
+  checks.push({
+    ok: status.short.length === 0,
+    text: `Coverage: ${pct(status.coverage)} of ${counted(status.questions, 'question')} passed`,
+  });
   checks.push({
     ok: status.retention >= x.rule.share,
     text: `Retention: ${pct(status.retention)} stable ≥ ${x.rule.stabilityDays} days (needs ${pct(x.rule.share)})`,
@@ -72,7 +78,11 @@ export function certConditions(
     note,
     progressNote: status.state === 'locked' ? 'Progress so far (counts once unlocked)' : null,
     checks,
-    short: status.short.map((g) => ({ sub: g.sub, topic: g.topic, line: `${subTitle(c, g.sub)}: ${g.passed}/${g.total}` })),
+    short: status.short.map((g) => ({
+      sub: g.sub,
+      topic: g.topic,
+      line: `${subTitle(c, g.sub)}: ${g.passed}/${g.total}`,
+    })),
     scope: `${levelName(b.rules, x.level)} · ${x.scope === COURSE_SCOPE ? 'whole module' : x.scope}`,
     targeted: focus?.cert === id,
     offersTarget: status.state !== 'earned' && status.state !== 'empty',
@@ -88,7 +98,11 @@ export function certFocus(c: Course, id: string, strict: boolean): Focus | null 
 }
 
 /** The first certification ready for its exam, in the user's module order, and the home's line naming it. */
-export function readyCert(b: Board, order: string[], exams: CertRecord[]): { c: Course; id: string; line: string } | null {
+export function readyCert(
+  b: Board,
+  order: string[],
+  exams: CertRecord[],
+): { c: Course; id: string; line: string } | null {
   for (const c of bySavedOrder(b.courses, (x) => x.slug, order)) {
     if (!c.certs) continue;
     for (const [id, s] of certStates(b, c, exams)) {

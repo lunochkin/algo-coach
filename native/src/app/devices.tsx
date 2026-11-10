@@ -84,7 +84,9 @@ export default function DevicesScreen() {
             <Card key={device.id} mode="outlined">
               <Card.Content style={[styles.row, { gap: 12 }]}>
                 <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="titleMedium">{device.current ? `${deviceName(device)} · ${thisDevice('phone')}` : deviceName(device)}</Text>
+                  <Text variant="titleMedium">
+                    {device.current ? `${deviceName(device)} · ${thisDevice('phone')}` : deviceName(device)}
+                  </Text>
                   <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
                     {deviceLine(device, now)}
                   </Text>
@@ -94,7 +96,11 @@ export default function DevicesScreen() {
                     {SIGN_OUT}
                   </Button>
                 ) : (
-                  <Button mode="outlined" onPress={() => void revoke(device)} accessibilityLabel={`Revoke ${deviceName(device)}`}>
+                  <Button
+                    mode="outlined"
+                    onPress={() => void revoke(device)}
+                    accessibilityLabel={`Revoke ${deviceName(device)}`}
+                  >
                     {REVOKE}
                   </Button>
                 )}

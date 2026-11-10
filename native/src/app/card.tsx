@@ -57,7 +57,15 @@ export default function CardScreen() {
   );
 }
 
-function TemplateCard({ template, recalled, now }: { template: Template; recalled: Recalled | undefined; now: number }) {
+function TemplateCard({
+  template,
+  recalled,
+  now,
+}: {
+  template: Template;
+  recalled: Recalled | undefined;
+  now: number;
+}) {
   const theme = useTheme();
   const [revealed, setRevealed] = useState(false);
   // a template no case checks is read on the card and never recalled
@@ -71,7 +79,11 @@ function TemplateCard({ template, recalled, now }: { template: Template; recalle
             {template.title}
           </Text>
           {template.optional ? <Chip compact>optional</Chip> : null}
-          {template.kind === 'procedure' ? <Chip compact mode="outlined">procedure</Chip> : null}
+          {template.kind === 'procedure' ? (
+            <Chip compact mode="outlined">
+              procedure
+            </Chip>
+          ) : null}
         </View>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {recallable ? recallLine(recalled, now) : 'No case checks this form'}
@@ -86,7 +98,12 @@ function TemplateCard({ template, recalled, now }: { template: Template; recalle
             </Button>
           </>
         ) : (
-          <Button mode="outlined" icon="eye-outline" onPress={() => setRevealed(true)} style={{ alignSelf: 'flex-start' }}>
+          <Button
+            mode="outlined"
+            icon="eye-outline"
+            onPress={() => setRevealed(true)}
+            style={{ alignSelf: 'flex-start' }}
+          >
             {revealLabel(template.code)}
           </Button>
         )}

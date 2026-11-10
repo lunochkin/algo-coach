@@ -114,8 +114,7 @@ function parseLessons(raw: RawGraph, subs: Set<string>, errors: string[]): Lesso
     if (!teaches.length) errors.push(`${at}: teaches nothing`);
     const needs: string[] = [];
     for (const r of t.needs ?? []) {
-      const ok =
-        typeof r === 'string' && r.startsWith('lesson:') ? r.slice(7) in table : parseRef(r, subs) !== null;
+      const ok = typeof r === 'string' && r.startsWith('lesson:') ? r.slice(7) in table : parseRef(r, subs) !== null;
       if (ok) needs.push(r);
       else errors.push(`${at}: bad ref ${repr(r)}`);
     }
@@ -205,7 +204,8 @@ export function parseGraph(
     for (const s of [f, to]) if (!subs.has(s)) errors.push(`unknown subtopic ${repr(s)}`);
     if (f === to) errors.push(`${f} needs itself`);
     if (!isInt(k) || k < 0) errors.push(`${f} -> ${to}: offset must be a whole number >= 0`);
-    else if (Math.min(MAX_LEVEL, match) + k > MAX_LEVEL) errors.push(`${f} -> ${to}: offset ${k} needs a level above ${MAX_LEVEL}`);
+    else if (Math.min(MAX_LEVEL, match) + k > MAX_LEVEL)
+      errors.push(`${f} -> ${to}: offset ${k} needs a level above ${MAX_LEVEL}`);
   }
   const lessons = parseLessons(raw, subs, errors);
   const graph = new Graph(match, edges, lessons);

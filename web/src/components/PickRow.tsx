@@ -26,9 +26,7 @@ export function PickRow({ to, title, badge, stats, inPanel = false }: Props) {
         inPanel ? 'px-4' : '-mx-3 rounded-lg px-3',
       )}
     >
-      <span className="min-w-0 font-medium underline-offset-4 group-hover:underline">
-        {title}
-      </span>
+      <span className="min-w-0 font-medium underline-offset-4 group-hover:underline">{title}</span>
       {badge}
       <span className="ml-auto flex shrink-0 items-center gap-5 text-meta text-muted-foreground">
         {stats.map((stat) => (

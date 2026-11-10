@@ -14,8 +14,7 @@ export default function RootLayout() {
   const dark = useColorScheme() === 'dark';
   const { theme: m3 } = useMaterial3Theme();
   const paper = useMemo(
-    () =>
-      dark ? { ...MD3DarkTheme, colors: m3.dark } : { ...MD3LightTheme, colors: m3.light },
+    () => (dark ? { ...MD3DarkTheme, colors: m3.dark } : { ...MD3LightTheme, colors: m3.light }),
     [dark, m3],
   );
   const nav = useMemo(() => {
@@ -37,19 +36,19 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-    <SafeAreaProvider>
-      <KeyboardProvider>
-      <PaperProvider theme={paper}>
-        <ThemeProvider value={nav}>
-          <StoreProvider>
-            <StatusBar style="auto" />
-            <Stack screenOptions={{ headerShown: false }} />
-            <NavigationScrim />
-          </StoreProvider>
-        </ThemeProvider>
-      </PaperProvider>
-      </KeyboardProvider>
-    </SafeAreaProvider>
+      <SafeAreaProvider>
+        <KeyboardProvider>
+          <PaperProvider theme={paper}>
+            <ThemeProvider value={nav}>
+              <StoreProvider>
+                <StatusBar style="auto" />
+                <Stack screenOptions={{ headerShown: false }} />
+                <NavigationScrim />
+              </StoreProvider>
+            </ThemeProvider>
+          </PaperProvider>
+        </KeyboardProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
@@ -64,7 +63,14 @@ function NavigationScrim() {
   return (
     <View
       pointerEvents="none"
-      style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: bottom, backgroundColor: theme.colors.background }}
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: bottom,
+        backgroundColor: theme.colors.background,
+      }}
     />
   );
 }

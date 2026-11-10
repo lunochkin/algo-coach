@@ -5,7 +5,20 @@ import { useMarkdown } from 'react-native-marked';
 import { Appbar, Button, Chip, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { lessonsAround, minutesOf, sections, type Course, type Lesson, lessonNote, LESSON_MARK_READ, LESSON_MARK_UNREAD, LESSON_MISSING, LESSON_NEXT, LESSON_NO_TEXT, LESSON_RELATED } from '@algo-coach/core';
+import {
+  lessonsAround,
+  minutesOf,
+  sections,
+  type Course,
+  type Lesson,
+  lessonNote,
+  LESSON_MARK_READ,
+  LESSON_MARK_UNREAD,
+  LESSON_MISSING,
+  LESSON_NEXT,
+  LESSON_NO_TEXT,
+  LESSON_RELATED,
+} from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { BottomBar, styles } from '@/ui/common';
 import { CodeRenderer, markdownOptions } from '@/ui/markdown';
@@ -25,7 +38,8 @@ class LessonRenderer extends CodeRenderer {
       <Text
         accessibilityRole="link"
         onPress={() => this.onLesson(href.slice('lesson:'.length))}
-        style={[style, { color: this.linkColor, textDecorationLine: 'underline' }]}>
+        style={[style, { color: this.linkColor, textDecorationLine: 'underline' }]}
+      >
         {children}
       </Text>
     );
@@ -84,7 +98,10 @@ export default function LessonScreen() {
         <Appbar.Content title={lesson?.title ?? 'Lesson'} />
       </Appbar.Header>
       {lesson && c ? (
-        <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, paddingHorizontal: 16, paddingBottom: 8 }}>
+        <Text
+          variant="labelMedium"
+          style={{ color: theme.colors.onSurfaceVariant, paddingHorizontal: 16, paddingBottom: 8 }}
+        >
           {lessonNote(c.title, body ? minutesOf(lesson, body) : null, done)}
         </Text>
       ) : null}
@@ -111,9 +128,7 @@ export default function LessonScreen() {
           <Footer c={c} slug={slug ?? ''} />
         </ScrollView>
       ) : (
-        <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>
-          {LESSON_NO_TEXT}
-        </Text>
+        <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>{LESSON_NO_TEXT}</Text>
       )}
       {lesson ? (
         <BottomBar bottom={insets.bottom}>
@@ -121,7 +136,8 @@ export default function LessonScreen() {
             mode={done ? 'outlined' : 'contained'}
             icon={done ? 'book-remove-outline' : 'book-check-outline'}
             onPress={() => void mark(done ? 'undone' : 'done')}
-            contentStyle={{ paddingVertical: 8 }}>
+            contentStyle={{ paddingVertical: 8 }}
+          >
             {done ? LESSON_MARK_UNREAD : LESSON_MARK_READ}
           </Button>
         </BottomBar>
@@ -145,7 +161,8 @@ function Footer({ c, slug }: { c: Course; slug: string }) {
             <Chip
               key={x.slug}
               icon="book-open-variant"
-              onPress={() => router.push({ pathname: '/lesson', params: { course: c.slug, slug: x.slug } })}>
+              onPress={() => router.push({ pathname: '/lesson', params: { course: c.slug, slug: x.slug } })}
+            >
               {x.title}
             </Chip>
           ))}

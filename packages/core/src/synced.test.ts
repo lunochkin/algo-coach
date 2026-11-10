@@ -6,7 +6,15 @@ const T = '2026-11-10T10:00:00+00:00';
 
 describe('a record the sync returned', () => {
   it("splits into the merge's fields and learn's line", () => {
-    const line = syncedLine({ kind: 'attempt', client_id: 'c1', device: 'phone', t: T, course: 'python', id: 'q', ok: true });
+    const line = syncedLine({
+      kind: 'attempt',
+      client_id: 'c1',
+      device: 'phone',
+      t: T,
+      course: 'python',
+      id: 'q',
+      ok: true,
+    });
     expect(line).toEqual({
       kind: 'attempt',
       client_id: 'c1',

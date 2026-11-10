@@ -34,7 +34,12 @@ export interface ContinuePlan {
 }
 
 /** A module picked on the home sets the focus aside, as `learn next --course` does. */
-export function continuePlan(board: BoardOf, focus: Focus | null, only: string | null, limit: number): ContinuePlan | null {
+export function continuePlan(
+  board: BoardOf,
+  focus: Focus | null,
+  only: string | null,
+  limit: number,
+): ContinuePlan | null {
   if (!only && focus) {
     const b = board(null, focus.course);
     return b ? { b, queue: focusQueue(b, focus, limit), course: null, include: focus.course } : null;
@@ -124,7 +129,10 @@ export function focusView(b: Board, focus: Focus, queue: Queue, exams: CertRecor
     learning: queue.stepping(b, now).count,
     newLeft: queue.newLeft(b, now),
     // a topic focus names its topic already
-    next: c && group ? `${groupLabel(c, b.rules, group, !focus.topic)} · ${b.nPassed(group)}/${b.groupQuestions(group).length}` : null,
+    next:
+      c && group
+        ? `${groupLabel(c, b.rules, group, !focus.topic)} · ${b.nPassed(group)}/${b.groupQuestions(group).length}`
+        : null,
     cert: cert
       ? `${STATE_LABEL[cert.state]} · coverage ${pct(cert.coverage)} · retention ${pct(cert.retention)}`
       : null,

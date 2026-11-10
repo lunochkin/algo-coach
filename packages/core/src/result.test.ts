@@ -1,24 +1,56 @@
 import { describe, expect, it } from 'vitest';
 
-import { detailSections, loadSnapshot, parseQuestion, taughtBy, verdictView, youLine, yourAnswer, type Result } from './index';
+import {
+  detailSections,
+  loadSnapshot,
+  parseQuestion,
+  taughtBy,
+  verdictView,
+  youLine,
+  yourAnswer,
+  type Result,
+} from './index';
 
 const choice = parseQuestion(
   {
-    id: 'x', topic: 't', sub: 's1', kind: 'concept', prompt: 'p',
-    choices: ['a', 'b', 'c'], answer: ['A', 'C'], why: ['wa', 'wb', 'wc'], explain: 'because',
+    id: 'x',
+    topic: 't',
+    sub: 's1',
+    kind: 'concept',
+    prompt: 'p',
+    choices: ['a', 'b', 'c'],
+    answer: ['A', 'C'],
+    why: ['wa', 'wb', 'wc'],
+    explain: 'because',
   },
   'c',
 );
-const short = parseQuestion({ id: 'y', topic: 't', sub: 's1', kind: 'output', prompt: 'p', format: 'short', accept: ['3', 'three'] }, 'c');
+const short = parseQuestion(
+  { id: 'y', topic: 't', sub: 's1', kind: 'output', prompt: 'p', format: 'short', accept: ['3', 'three'] },
+  'c',
+);
 const open = parseQuestion(
   {
-    id: 'z', topic: 't', sub: 's1', kind: 'concept', prompt: 'p', format: 'card',
-    key: ['one', 'two'], key_detail: ['why one'], traps: ['t0', 't1'],
+    id: 'z',
+    topic: 't',
+    sub: 's1',
+    kind: 'concept',
+    prompt: 'p',
+    format: 'card',
+    key: ['one', 'two'],
+    key_detail: ['why one'],
+    traps: ['t0', 't1'],
   },
   'c',
 );
 const result = (extra: Partial<Result>): Result => ({
-  q: choice, correct: true, guess: false, order: [2, 0, 1], picked: [], reply: '', ...extra,
+  q: choice,
+  correct: true,
+  guess: false,
+  order: [2, 0, 1],
+  picked: [],
+  reply: '',
+  ...extra,
 });
 
 describe('the verdict', () => {
@@ -87,7 +119,12 @@ describe('the lessons a question links to', () => {
     courses: [
       {
         slug: 'c',
-        definition: { title: 'C', pass_ratio: 1, kinds: ['concept'], topic: [{ slug: 't', tier: 1, title: 'T', subs: ['s1'] }] },
+        definition: {
+          title: 'C',
+          pass_ratio: 1,
+          kinds: ['concept'],
+          topic: [{ slug: 't', tier: 1, title: 'T', subs: ['s1'] }],
+        },
         questions: [],
         graph: { format: 2, lesson: { names: lesson } },
         lesson_bodies: { names: '# Names\n\n## Name binding\n' },

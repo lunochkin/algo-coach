@@ -21,7 +21,12 @@ const TOKEN = 'app_token';
 
 export async function loadSettings(): Promise<Settings> {
   const raw = await getMeta('settings');
-  const { newPerDay: _, examSize: __, courseOrder: ___, ...saved } = raw ? (JSON.parse(raw) as Partial<Settings> & Legacy) : {};
+  const {
+    newPerDay: _,
+    examSize: __,
+    courseOrder: ___,
+    ...saved
+  } = raw ? (JSON.parse(raw) as Partial<Settings> & Legacy) : {};
   return { ...DEFAULTS, ...saved, origin: saved.origin || DEFAULTS.origin };
 }
 

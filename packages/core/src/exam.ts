@@ -37,7 +37,13 @@ export function levelExamLabel(rules: Rules, level: number, pool: number, n: num
 }
 
 /** An exam's title while it runs, while its misses are reviewed, and once it is done. */
-export function examTitle(phase: 'ask' | 'review' | 'done', index: number, total: number, reviewAt: number, missed: number): string {
+export function examTitle(
+  phase: 'ask' | 'review' | 'done',
+  index: number,
+  total: number,
+  reviewAt: number,
+  missed: number,
+): string {
   if (phase === 'ask') return `Exam · ${index + 1} / ${total}`;
   if (phase === 'review') return `Missed ${reviewAt + 1} / ${missed}`;
   return 'Done';

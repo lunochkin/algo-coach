@@ -13,13 +13,22 @@ import {
 } from './index';
 
 const mk = (id: string, sub: string) => ({
-  id, topic: 't', sub, level: 0, kind: 'concept', prompt: id, format: 'choice' as const,
-  choices: ['a', 'b', 'c'], answer: ['A'],
+  id,
+  topic: 't',
+  sub,
+  level: 0,
+  kind: 'concept',
+  prompt: id,
+  format: 'choice' as const,
+  choices: ['a', 'b', 'c'],
+  answer: ['A'],
 });
 const module = (slug: string) => ({
   slug,
   definition: {
-    title: slug.toUpperCase(), pass_ratio: 1, kinds: ['concept'],
+    title: slug.toUpperCase(),
+    pass_ratio: 1,
+    kinds: ['concept'],
     topic: [{ slug: 't', tier: 1, title: 'Types', subs: ['s1', 's2'], sub_titles: { s1: 'Ints' } }],
   },
   questions: [mk(`${slug}1`, 's1'), mk(`${slug}2`, 's1'), mk(`${slug}3`, 's2')],
@@ -28,8 +37,10 @@ const snapshot = loadSnapshot({ format: 6, courses: [module('a'), module('b')] }
 const T = '2026-11-10T08:00:00.000Z';
 const NOW = Date.parse('2026-11-10T12:00:00.000Z');
 const none = { statuses: [], lessons: [], certs: [] };
-const boardOf = (cat: Catalog, attempts: AttemptRecord[] = []) => (only: string | null, include?: string | null) =>
-  Board.build(cat, attempts, only, include ?? null);
+const boardOf =
+  (cat: Catalog, attempts: AttemptRecord[] = []) =>
+  (only: string | null, include?: string | null) =>
+    Board.build(cat, attempts, only, include ?? null);
 
 describe("the learner's catalog", () => {
   it('hides an archived module, and lists it for restoring', () => {

@@ -8,7 +8,10 @@ import policy from '@/pages/privacy.md?raw'
 // twice
 const TITLE = /^#\s+(.+)$/m.exec(policy)?.[1] ?? 'Privacy policy'
 const UPDATED = /^Last updated:\s*(.+)$/m.exec(policy)?.[1] ?? null
-const BODY = policy.replace(/^#\s+.+$/m, '').replace(/^Last updated:.*$/m, '').trimStart()
+const BODY = policy
+  .replace(/^#\s+.+$/m, '')
+  .replace(/^Last updated:.*$/m, '')
+  .trimStart()
 
 export function PrivacyPage() {
   return (

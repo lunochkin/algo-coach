@@ -110,9 +110,7 @@ export default function Home() {
   const body = !st.catalog ? (
     <Card mode="contained">
       <Card.Content>
-        <Text variant="bodyLarge">
-          {st.ready ? NO_MODULES : MODULES_LOADING}
-        </Text>
+        <Text variant="bodyLarge">{st.ready ? NO_MODULES : MODULES_LOADING}</Text>
       </Card.Content>
     </Card>
   ) : null;
@@ -131,99 +129,104 @@ export default function Home() {
       {/* one scroll, in the web's order: the next steps and the focus, the acts,
           then the modules. A bar pinned over the list left the modules a sliver */}
       <View style={{ gap: 8 }}>
-      {certToTake ? (
-        <TouchableRipple
-          onPress={() => router.push({ pathname: '/certs', params: { open: certToTake.id } })}
-          accessibilityRole="button"
-          accessibilityLabel={certToTake.line}
-          borderless
-          style={{
-            minHeight: 48,
-            borderRadius: 12,
-            paddingHorizontal: 12,
-            justifyContent: 'center',
-            backgroundColor: theme.colors.primaryContainer,
-          }}>
-          <View style={styles.row}>
-            <MaterialCommunityIcons name="trophy-outline" size={20} color={theme.colors.onPrimaryContainer} />
-            <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onPrimaryContainer }}>
-              {certToTake.line}
-            </Text>
-          </View>
-        </TouchableRipple>
-      ) : null}
-      {toRead ? (
-        <TouchableRipple
-          onPress={() =>
-            router.push({ pathname: '/lesson', params: { course: toRead.c.slug, slug: toRead.lesson.slug } })
-          }
-          accessibilityRole="button"
-          accessibilityLabel={toRead.line}
-          borderless
-          style={{
-            minHeight: 48,
-            borderRadius: 12,
-            paddingHorizontal: 12,
-            justifyContent: 'center',
-            backgroundColor: theme.colors.tertiaryContainer,
-          }}>
-          <View style={styles.row}>
-            <MaterialCommunityIcons name="book-open-variant" size={20} color={theme.colors.onTertiaryContainer} />
-            <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onTertiaryContainer }}>
-              {toRead.line}
-            </Text>
-          </View>
-        </TouchableRipple>
-      ) : null}
-      {focused && cont ? (
-        <FocusCard
-          label={focusLabel(focused, st.catalog)}
-          focus={focused}
-          b={cont.b}
-          queue={cont.queue}
-          exams={st.catalog?.certExams ?? []}
-          onClear={() => void st.setFocus(null)}
-          onStrict={() => void st.setFocus({ ...focused, strict: !focused.strict })}
-          onMoreNew={() => void st.raiseNew()}
-        />
-      ) : null}
-      <Button
-        mode="contained"
-        icon="play"
-        disabled={!st.catalog}
-        onPress={start}
-        contentStyle={{ paddingVertical: 8 }}>
-        {CONTINUE}
-      </Button>
-      {counts ? (
-        <View style={[styles.row, { justifyContent: 'center', flexWrap: 'wrap', minHeight: 24 }]}>
-          <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            {continueLine(counts, !!focused?.strict)}
-          </Text>
-          {focused?.strict && counts.outside ? (
-            <TouchableRipple
-              onPress={reviewOutside}
-              borderless
-              accessibilityRole="link"
-              accessibilityLabel={waitingOutside(counts.outside)}
-              style={{ minHeight: 48, justifyContent: 'center', paddingHorizontal: 4, borderRadius: 8 }}>
-              <Text variant="labelMedium" style={{ color: theme.colors.primary, textDecorationLine: 'underline' }}>
-                {` · ${waitingOutside(counts.outside)}`}
+        {certToTake ? (
+          <TouchableRipple
+            onPress={() => router.push({ pathname: '/certs', params: { open: certToTake.id } })}
+            accessibilityRole="button"
+            accessibilityLabel={certToTake.line}
+            borderless
+            style={{
+              minHeight: 48,
+              borderRadius: 12,
+              paddingHorizontal: 12,
+              justifyContent: 'center',
+              backgroundColor: theme.colors.primaryContainer,
+            }}
+          >
+            <View style={styles.row}>
+              <MaterialCommunityIcons name="trophy-outline" size={20} color={theme.colors.onPrimaryContainer} />
+              <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onPrimaryContainer }}>
+                {certToTake.line}
               </Text>
-            </TouchableRipple>
-          ) : null}
-        </View>
-      ) : null}
-      <View style={styles.row}>
+            </View>
+          </TouchableRipple>
+        ) : null}
+        {toRead ? (
+          <TouchableRipple
+            onPress={() =>
+              router.push({ pathname: '/lesson', params: { course: toRead.c.slug, slug: toRead.lesson.slug } })
+            }
+            accessibilityRole="button"
+            accessibilityLabel={toRead.line}
+            borderless
+            style={{
+              minHeight: 48,
+              borderRadius: 12,
+              paddingHorizontal: 12,
+              justifyContent: 'center',
+              backgroundColor: theme.colors.tertiaryContainer,
+            }}
+          >
+            <View style={styles.row}>
+              <MaterialCommunityIcons name="book-open-variant" size={20} color={theme.colors.onTertiaryContainer} />
+              <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onTertiaryContainer }}>
+                {toRead.line}
+              </Text>
+            </View>
+          </TouchableRipple>
+        ) : null}
+        {focused && cont ? (
+          <FocusCard
+            label={focusLabel(focused, st.catalog)}
+            focus={focused}
+            b={cont.b}
+            queue={cont.queue}
+            exams={st.catalog?.certExams ?? []}
+            onClear={() => void st.setFocus(null)}
+            onStrict={() => void st.setFocus({ ...focused, strict: !focused.strict })}
+            onMoreNew={() => void st.raiseNew()}
+          />
+        ) : null}
         <Button
-          mode="contained-tonal"
-          icon="clipboard-check-outline"
-          style={{ flex: 1 }}
+          mode="contained"
+          icon="play"
           disabled={!st.catalog}
-          onPress={() => router.push('/exam')}>
-          {EXAM_LINK}
+          onPress={start}
+          contentStyle={{ paddingVertical: 8 }}
+        >
+          {CONTINUE}
         </Button>
-      </View>
+        {counts ? (
+          <View style={[styles.row, { justifyContent: 'center', flexWrap: 'wrap', minHeight: 24 }]}>
+            <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+              {continueLine(counts, !!focused?.strict)}
+            </Text>
+            {focused?.strict && counts.outside ? (
+              <TouchableRipple
+                onPress={reviewOutside}
+                borderless
+                accessibilityRole="link"
+                accessibilityLabel={waitingOutside(counts.outside)}
+                style={{ minHeight: 48, justifyContent: 'center', paddingHorizontal: 4, borderRadius: 8 }}
+              >
+                <Text variant="labelMedium" style={{ color: theme.colors.primary, textDecorationLine: 'underline' }}>
+                  {` · ${waitingOutside(counts.outside)}`}
+                </Text>
+              </TouchableRipple>
+            ) : null}
+          </View>
+        ) : null}
+        <View style={styles.row}>
+          <Button
+            mode="contained-tonal"
+            icon="clipboard-check-outline"
+            style={{ flex: 1 }}
+            disabled={!st.catalog}
+            onPress={() => router.push('/exam')}
+          >
+            {EXAM_LINK}
+          </Button>
+        </View>
       </View>
       {body}
     </View>
@@ -248,12 +251,7 @@ export default function Home() {
         }
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => (
-          <CourseCard
-            c={item.c}
-            view={item.view}
-            total={item.total}
-            toReview={item.toReview}
-          />
+          <CourseCard c={item.c} view={item.view} total={item.total} toReview={item.toReview} />
         )}
       />
       <Snackbar
@@ -264,7 +262,8 @@ export default function Home() {
         }}
         duration={noticeAction ? 6000 : 2500}
         action={noticeAction ? { label: noticeAction.label, onPress: noticeAction.run } : undefined}
-        wrapperStyle={{ bottom: 16 }}>
+        wrapperStyle={{ bottom: 16 }}
+      >
         {notice}
       </Snackbar>
     </View>
@@ -281,7 +280,8 @@ function CourseCard({ c, view, total, toReview }: { c: Course; view: NextUpView;
       onPress={() => router.push({ pathname: '/module', params: { course: c.slug } })}
       onLongPress={drag}
       accessibilityLabel={`Open ${c.title}`}
-      accessibilityHint="Opens the module. Long-press to reorder.">
+      accessibilityHint="Opens the module. Long-press to reorder."
+    >
       <Card.Title
         title={c.title}
         subtitle={`${moduleCounts(toReview, total)}${c.paused ? ` · ${PAUSED}` : ''}`}

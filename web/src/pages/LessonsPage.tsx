@@ -1,7 +1,14 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router'
 
-import { bySavedOrder, lessonGroups, lessonRow, LESSONS_NONE, LESSONS_TITLE, lessonRowLine } from '@algo-coach/core'
+import {
+  bySavedOrder,
+  lessonGroups,
+  lessonRow,
+  LESSONS_NONE,
+  LESSONS_TITLE,
+  lessonRowLine,
+} from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
@@ -43,13 +50,23 @@ export function LessonsPage() {
                           <li key={x.slug}>
                             <Link
                               to={lessonPath(c.slug, x.slug)}
-                              className={cn('block space-y-0.5 px-4 py-3 hover:bg-muted/50', row.state === 'locked' && 'opacity-70')}
+                              className={cn(
+                                'block space-y-0.5 px-4 py-3 hover:bg-muted/50',
+                                row.state === 'locked' && 'opacity-70',
+                              )}
                             >
                               <p className="font-medium">{x.title}</p>
                               <p className="text-meta text-muted-foreground">
                                 {lessonRowLine(row.minutes, row.teaches)}
                               </p>
-                              <p className={cn('text-meta', row.state === 'available' ? 'text-brand-deep' : 'text-muted-foreground')}>
+                              <p
+                                className={cn(
+                                  'text-meta',
+                                  row.state === 'available'
+                                    ? 'text-brand-deep'
+                                    : 'text-muted-foreground',
+                                )}
+                              >
                                 {row.status}
                               </p>
                             </Link>

@@ -9,7 +9,12 @@ import type { Course, Group, Question, Rules } from './types';
 type NextUp = NonNullable<ReturnType<Board['nextUp']>>;
 
 /** "Topic › Sub · Level", or "Sub · Level" where the topic is named already. */
-export function groupLabel(c: Course | undefined, rules: Rules, g: Pick<Group, 'topic' | 'sub' | 'level'>, withTopic = true): string {
+export function groupLabel(
+  c: Course | undefined,
+  rules: Rules,
+  g: Pick<Group, 'topic' | 'sub' | 'level'>,
+  withTopic = true,
+): string {
   const where = withTopic ? `${topicTitle(c, g.topic)} › ${subTitle(c, g.sub)}` : subTitle(c, g.sub);
   return `${where} · ${levelName(rules, g.level)}`;
 }
@@ -30,12 +35,23 @@ export interface NextUpView {
 /** A module's next step on Home: the group or lesson, its progress, and how many others are open. */
 export function nextUpView(b: Board, c: Course): NextUpView {
   const next = b.nextUp(c);
-  if (!next) return { title: 'All unlocked groups done', detail: null, accessibilityLabel: 'All unlocked groups done', next: null };
+  if (!next)
+    return {
+      title: 'All unlocked groups done',
+      detail: null,
+      accessibilityLabel: 'All unlocked groups done',
+      next: null,
+    };
   const g = next.group;
   const open = b.frontier(c).length;
   const detail = `${topicTitle(c, g.topic)} · ${b.nPassed(g)}/${b.groupQuestions(g).length} passed${open > 1 ? ` · ${open - 1} more open` : ''}`;
   if (next.lesson) {
-    return { title: `Next up: read “${next.lesson.title}”`, detail, accessibilityLabel: `Next up: read the lesson ${next.lesson.title}`, next };
+    return {
+      title: `Next up: read “${next.lesson.title}”`,
+      detail,
+      accessibilityLabel: `Next up: read the lesson ${next.lesson.title}`,
+      next,
+    };
   }
   const level = levelName(b.rules, g.level);
   return {
@@ -98,7 +114,8 @@ export function emptyContinue(o: { blocked: boolean; newLimit: number; focus: Fo
       action: { kind: 'certs', label: 'Certificates' },
     };
   }
-  if (o.focus) return { notice: 'Nothing weak, due or new in the focus.', action: { kind: 'clear-focus', label: 'Clear focus' } };
+  if (o.focus)
+    return { notice: 'Nothing weak, due or new in the focus.', action: { kind: 'clear-focus', label: 'Clear focus' } };
   return { notice: 'Nothing due and nothing new unlocked. Open a module to start a queue there.', action: null };
 }
 

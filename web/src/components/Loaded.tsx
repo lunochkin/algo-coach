@@ -29,7 +29,8 @@ export function Loaded<T>({ of, state, blank, blankWhen, children }: Props<T>) {
         </Button>
       </div>
     )
-  if (state.data === undefined) return <p className="text-meta text-muted-foreground">Loading {of}…</p>
+  if (state.data === undefined)
+    return <p className="text-meta text-muted-foreground">Loading {of}…</p>
   if (blank !== undefined && (blankWhen ?? isEmpty)(state.data))
     return <p className="text-meta text-muted-foreground">{blank}</p>
   return <>{children(state.data)}</>

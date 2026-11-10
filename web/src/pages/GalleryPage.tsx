@@ -36,7 +36,14 @@ const SURFACES = [
 ]
 const BRAND = ['brand', 'brand-deep', 'brand-wash', 'clock-running']
 const VERDICTS = ['verdict-passed', 'verdict-wrong', 'verdict-timeout', 'verdict-crashed']
-const CODE = ['code-keyword', 'code-name', 'code-string', 'code-number', 'code-comment', 'code-selection']
+const CODE = [
+  'code-keyword',
+  'code-name',
+  'code-string',
+  'code-number',
+  'code-comment',
+  'code-selection',
+]
 const ROLES = [
   ['title', 'text-title'],
   ['heading', 'text-heading'],

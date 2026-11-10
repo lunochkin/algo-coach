@@ -16,7 +16,13 @@ import {
 
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { filteredQuery } from '@/knowledge/filtered'
@@ -30,7 +36,9 @@ export type Scope = Pick<DrillScope, 'course' | 'topic' | 'sub' | 'level'>
 export function StartSheet({ scope, onClose }: { scope: Scope | null; onClose: () => void }) {
   return (
     <Dialog open={scope !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>{scope && <Choices key={JSON.stringify(scope)} scope={scope} />}</DialogContent>
+      <DialogContent>
+        {scope && <Choices key={JSON.stringify(scope)} scope={scope} />}
+      </DialogContent>
     </Dialog>
   )
 }
@@ -99,7 +107,10 @@ function Choices({ scope }: { scope: Scope }) {
         </div>
       </div>
       <DialogFooter>
-        <Button disabled={!preview || preview.empty} onClick={() => navigate(filteredQuery(choices))}>
+        <Button
+          disabled={!preview || preview.empty}
+          onClick={() => navigate(filteredQuery(choices))}
+        >
           {preview?.label ?? START_NOTHING}
         </Button>
       </DialogFooter>

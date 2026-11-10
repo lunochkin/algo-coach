@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { askSubmit, detailsToggle, examFailed, examModuleChoice, examReviewNext, lessonNote, lessonRowLine } from '../index';
+import {
+  askSubmit,
+  detailsToggle,
+  examFailed,
+  examModuleChoice,
+  examReviewNext,
+  lessonNote,
+  lessonRowLine,
+} from '../index';
 
 describe('queue words', () => {
   it('names the answer press by whether an exam runs and ends', () => {

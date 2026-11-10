@@ -53,7 +53,11 @@ export function ClaimPrompt({ sittingId, drilled, onDone }: Props) {
   }, [finished, onDone])
 
   if (data === undefined || finished)
-    return <Loaded of="the claim" state={loaded}>{() => null}</Loaded>
+    return (
+      <Loaded of="the claim" state={loaded}>
+        {() => null}
+      </Loaded>
+    )
 
   const asked = attempts[answered]
   return (

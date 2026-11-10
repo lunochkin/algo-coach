@@ -22,32 +22,71 @@ type Template = components['schemas']['Template'];
 const NOW = Date.parse('2026-11-10T12:00:00Z');
 
 const template = (id: string, extra: Partial<Template> = {}): Template =>
-  ({ id, slug: id, title: id, trigger: '', optional: false, speedup: false, kind: 'code', code: '', unordered: false, cases: [{}], ...extra }) as Template;
+  ({
+    id,
+    slug: id,
+    title: id,
+    trigger: '',
+    optional: false,
+    speedup: false,
+    kind: 'code',
+    code: '',
+    unordered: false,
+    cases: [{}],
+    ...extra,
+  }) as Template;
 
 const card = (slug: string, extra: Partial<ListedCard> = {}, status: Partial<ListedCard['status']> = {}): ListedCard =>
   ({
-    id: slug, slug, technique: slug, title: slug, trigger: 'When **sorted**', brief: '', family: slug,
-    templates: [template(`${slug}-a`)], selector: {},
+    id: slug,
+    slug,
+    technique: slug,
+    title: slug,
+    trigger: 'When **sorted**',
+    brief: '',
+    family: slug,
+    templates: [template(`${slug}-a`)],
+    selector: {},
     ...extra,
-    status: { started_at: null, state: 'not_started', rungs: 0, solved: 0, required: 0, required_solved: 0, gaps: 0, recall: [], last_at: null, ...status },
+    status: {
+      started_at: null,
+      state: 'not_started',
+      rungs: 0,
+      solved: 0,
+      required: 0,
+      required_solved: 0,
+      gaps: 0,
+      recall: [],
+      last_at: null,
+      ...status,
+    },
   }) as ListedCard;
 
 describe("a technique's row", () => {
   it('reads an untouched technique as never', () => {
-    expect(techniqueStats({ attempt_count: 0, solved_count: 0 }, NOW)).toEqual([{ label: 'attempted', value: 'never' }]);
+    expect(techniqueStats({ attempt_count: 0, solved_count: 0 }, NOW)).toEqual([
+      { label: 'attempted', value: 'never' },
+    ]);
   });
 
   it('counts attempts, the solved share and the last attempt', () => {
-    expect(techniqueStats({ attempt_count: 1, solved_count: 1, last_attempt_at: '2026-11-09T12:00:00Z' }, NOW)).toEqual([
-      { label: 'attempt', value: 1 },
-      { label: 'solved', value: '1/1' },
-      { label: '', value: 'yesterday' },
-    ]);
+    expect(techniqueStats({ attempt_count: 1, solved_count: 1, last_attempt_at: '2026-11-09T12:00:00Z' }, NOW)).toEqual(
+      [
+        { label: 'attempt', value: 1 },
+        { label: 'solved', value: '1/1' },
+        { label: '', value: 'yesterday' },
+      ],
+    );
   });
 });
 
 describe('the board', () => {
-  const row = (technique: string, attempt_count: number) => ({ technique, attempt_count, solved_count: 0, self_labels: {} });
+  const row = (technique: string, attempt_count: number) => ({
+    technique,
+    attempt_count,
+    solved_count: 0,
+    self_labels: {},
+  });
 
   it('splits the techniques never practised from the rest', () => {
     const view = boardView({ rows: [row('a', 0), row('b', 2)], ungrouped: 0, excluded: 0 });
@@ -57,7 +96,9 @@ describe('the board', () => {
   });
 
   it('names the attempts no row holds in one line', () => {
-    expect(boardView({ rows: [], ungrouped: 1, excluded: 3 }).foot).toBe('1 attempt grouped nowhere · 3 on a defective problem');
+    expect(boardView({ rows: [], ungrouped: 1, excluded: 3 }).foot).toBe(
+      '1 attempt grouped nowhere · 3 on a defective problem',
+    );
   });
 });
 
@@ -122,7 +163,13 @@ describe("the cards list's blocks", () => {
 describe("a card's row", () => {
   it('reads an unstarted card by its trigger and its templates', () => {
     const row = cardRow(card('a', { templates: [template('x'), template('y', { optional: true })] }), null, NOW);
-    expect(row).toMatchObject({ technique: 'a', aside: '2 templates, 1 optional', trigger: 'When sorted', state: null, progress: null });
+    expect(row).toMatchObject({
+      technique: 'a',
+      aside: '2 templates, 1 optional',
+      trigger: 'When sorted',
+      state: null,
+      progress: null,
+    });
   });
 
   it('leaves the technique off a row its heading names', () => {
@@ -130,7 +177,19 @@ describe("a card's row", () => {
   });
 
   it('reads a started card by its ladder and the forms it leaves uncovered', () => {
-    const started = card('a', {}, { started_at: '2026-11-01T00:00:00Z', last_at: '2026-11-10T08:00:00Z', rungs: 4, solved: 2, required: 3, required_solved: 1, gaps: 1 });
+    const started = card(
+      'a',
+      {},
+      {
+        started_at: '2026-11-01T00:00:00Z',
+        last_at: '2026-11-10T08:00:00Z',
+        rungs: 4,
+        solved: 2,
+        required: 3,
+        required_solved: 1,
+        gaps: 1,
+      },
+    );
     const row = cardRow(started, null, NOW);
     expect(row.aside).toBe('today');
     expect(row.trigger).toBeNull();
@@ -141,7 +200,15 @@ describe("a card's row", () => {
   it('marks each template by its last recall', () => {
     const recalled = card(
       'a',
-      { templates: [template('read', { cases: [] }), template('never'), template('failed'), template('hinted'), template('clean')] },
+      {
+        templates: [
+          template('read', { cases: [] }),
+          template('never'),
+          template('failed'),
+          template('hinted'),
+          template('clean'),
+        ],
+      },
       {
         recall: [
           { template_id: 'failed', last_at: '2026-11-01T00:00:00Z', hints: [], verified: false },
@@ -163,9 +230,9 @@ describe("a card's row", () => {
 describe("a card's templates", () => {
   it('reads a recall with its hints', () => {
     expect(recallLine(undefined, NOW)).toBe('Never recalled');
-    expect(recallLine({ template_id: 'x', last_at: '2026-11-10T08:00:00Z', hints: ['notes'], verified: true }, NOW)).toBe(
-      'Recalled today · passed · 1 hint',
-    );
+    expect(
+      recallLine({ template_id: 'x', last_at: '2026-11-10T08:00:00Z', hints: ['notes'], verified: true }, NOW),
+    ).toBe('Recalled today · passed · 1 hint');
   });
 
   it('covers a form with its length alone', () => {

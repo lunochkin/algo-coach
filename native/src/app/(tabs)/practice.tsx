@@ -78,7 +78,8 @@ function BoardBody({ board, cards }: { board: Board; cards: ListedCard[] }) {
                   variant="bodyLarge"
                   accessibilityRole="link"
                   onPress={() => open(row.technique)}
-                  style={{ color: theme.colors.primary }}>
+                  style={{ color: theme.colors.primary }}
+                >
                   {row.technique}
                 </Text>
               ))}
@@ -91,7 +92,12 @@ function BoardBody({ board, cards }: { board: Board; cards: ListedCard[] }) {
           <Heading title="Techniques practised" count={practised.length} />
           <PickPanel>
             {practised.map((row) => (
-              <PickRow key={row.technique} title={row.technique} stats={techniqueStats(row, now)} onPress={() => open(row.technique)} />
+              <PickRow
+                key={row.technique}
+                title={row.technique}
+                stats={techniqueStats(row, now)}
+                onPress={() => open(row.technique)}
+              />
             ))}
           </PickPanel>
         </>

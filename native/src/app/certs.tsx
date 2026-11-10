@@ -17,7 +17,11 @@ import {
   levels,
   practiceShare,
   type CertStatus,
-  type Course, coverageShare, PRACTICE, practiceLevel } from '@algo-coach/core';
+  type Course,
+  coverageShare,
+  PRACTICE,
+  practiceLevel,
+} from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -63,12 +67,17 @@ export default function CertsScreen() {
         <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>{CERTS_NONE}</Text>
       ) : (
         <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
-            <Legend />
+          <Legend />
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             {CERTS_NOTE}
           </Text>
           {courses.map((c) => (
-            <Matrix key={c.slug} c={c} states={states.get(c.slug)!} onPick={(id) => setPicked({ course: c.slug, id })} />
+            <Matrix
+              key={c.slug}
+              c={c}
+              states={states.get(c.slug)!}
+              onPick={(id) => setPicked({ course: c.slug, id })}
+            />
           ))}
         </ScrollView>
       )}
@@ -98,7 +107,8 @@ function Cell(props: { status: CertStatus; title: string; onPress: () => void })
         onPress={onPress}
         accessibilityRole="button"
         accessibilityLabel={certCell(title, s)}
-        style={{ width: CELL, minHeight: 52, alignItems: 'center', justifyContent: 'center', opacity: 0.6 }}>
+        style={{ width: CELL, minHeight: 52, alignItems: 'center', justifyContent: 'center', opacity: 0.6 }}
+      >
         <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {practiceShare(s)}
         </Text>
@@ -149,7 +159,8 @@ function Cell(props: { status: CertStatus; title: string; onPress: () => void })
         justifyContent: 'center',
         borderRadius: 12,
         backgroundColor: s.state === 'ready' ? theme.colors.primaryContainer : 'transparent',
-      }}>
+      }}
+    >
       {body}
     </Pressable>
   );
@@ -200,7 +211,13 @@ function Matrix(props: { c: Course; states: Map<string, CertStatus>; onPick: (id
               <Text
                 key={l}
                 variant="labelSmall"
-                style={{ width: CELL, textAlign: 'center', color: theme.colors.onSurfaceVariant, opacity: practice ? 0.6 : 1 }}>
+                style={{
+                  width: CELL,
+                  textAlign: 'center',
+                  color: theme.colors.onSurfaceVariant,
+                  opacity: practice ? 0.6 : 1,
+                }}
+              >
                 {practice ? `${levelName(rules, l, true)}\n${PRACTICE}` : levelName(rules, l, true)}
               </Text>
             );
@@ -213,7 +230,8 @@ function Matrix(props: { c: Course; states: Map<string, CertStatus>; onPick: (id
               style={{ flex: 1 }}
               numberOfLines={1}
               adjustsFontSizeToFit
-              minimumFontScale={0.7}>
+              minimumFontScale={0.7}
+            >
               {r.label}
             </Text>
             {lv.map((l) => {

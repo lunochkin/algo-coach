@@ -27,10 +27,7 @@ export function TechniquePage() {
 
   return (
     <section className="space-y-section">
-      <PageHeader
-        back={{ to: '/', label: 'Board' }}
-        title={technique}
-      />
+      <PageHeader back={{ to: '/', label: 'Board' }} title={technique} />
       {cards.length > 0 && (
         <section className="space-y-stack">
           <SectionHeading title="Cards" count={cards.length} />

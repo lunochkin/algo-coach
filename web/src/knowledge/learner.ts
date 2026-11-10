@@ -24,7 +24,10 @@ import { linesOf, useKnowledge } from '@/knowledge/context'
 export function useLearner() {
   const k = useKnowledge()
   const now = useNow()
-  const raw = useMemo(() => (k.snapshot ? loadSnapshot(k.snapshot as Snapshot) : null), [k.snapshot])
+  const raw = useMemo(
+    () => (k.snapshot ? loadSnapshot(k.snapshot as Snapshot) : null),
+    [k.snapshot],
+  )
   const { records } = k
   const log = useMemo(
     () => ({

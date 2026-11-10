@@ -9,7 +9,10 @@ import type { Course } from './types';
 export function inGraphOrder(c: Course, lessons: Lesson[]): Lesson[] {
   const key = (x: Lesson) =>
     Math.min(...x.teaches.map(([s, l]) => (c.graph?.depth(s) ?? 0) * 10 + l), Number.MAX_SAFE_INTEGER);
-  return lessons.map((x, i) => ({ x, i, k: key(x) })).sort((a, b) => a.k - b.k || a.i - b.i).map((e) => e.x);
+  return lessons
+    .map((x, i) => ({ x, i, k: key(x) }))
+    .sort((a, b) => a.k - b.k || a.i - b.i)
+    .map((e) => e.x);
 }
 
 export type LessonGroup = 'toRead' | 'read' | 'locked';

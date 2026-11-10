@@ -42,7 +42,8 @@ export function Badge({ label }: { label: string }) {
         borderRadius: 6,
         paddingHorizontal: 6,
         paddingVertical: 1,
-      }}>
+      }}
+    >
       <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
         {label}
       </Text>

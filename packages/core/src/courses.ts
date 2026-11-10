@@ -1,7 +1,19 @@
 import { DEFAULT_FSRS } from './fsrs';
 import { parseCerts, type CertRecord } from './certs';
 import { parseGraph, type Graph, type RawGraph } from './graph';
-import type { Course, Detail, Group, LessonRecord, Topic, Question, RawDetail, RawQuestion, Rules, Snapshot, StatusRecord } from './types';
+import type {
+  Course,
+  Detail,
+  Group,
+  LessonRecord,
+  Topic,
+  Question,
+  RawDetail,
+  RawQuestion,
+  Rules,
+  Snapshot,
+  StatusRecord,
+} from './types';
 
 export const LETTERS = 'ABCDEFGH';
 
@@ -88,7 +100,13 @@ export function loadSnapshot(snap: Snapshot): Catalog {
       // Array.prototype.sort is stable, so equal tiers keep their listed order.
       const topics = [...d.topic]
         .sort((a, b) => a.tier - b.tier)
-        .map((t) => ({ slug: t.slug, tier: t.tier, title: t.title, subs: [...t.subs], subTitles: { ...t.sub_titles } }));
+        .map((t) => ({
+          slug: t.slug,
+          tier: t.tier,
+          title: t.title,
+          subs: [...t.subs],
+          subTitles: { ...t.sub_titles },
+        }));
       const course: Course = {
         slug: c.slug,
         title: d.title,
@@ -117,9 +135,7 @@ export function loadSnapshot(snap: Snapshot): Catalog {
       return { course, raws: c.questions };
     })
     .sort((a, b) =>
-      a.course.order !== b.course.order
-        ? a.course.order - b.course.order
-        : cmp(a.course.slug, b.course.slug),
+      a.course.order !== b.course.order ? a.course.order - b.course.order : cmp(a.course.slug, b.course.slug),
     );
   const questions: Question[] = [];
   for (const { course, raws } of entries) {
@@ -189,7 +205,10 @@ export function topicOf(c: Course, sub: string): string | null {
 /** A topic's subtopics, shallow prerequisites first, listing order otherwise. */
 export function subsByDepth(c: Course, t: Topic): string[] {
   const d = (s: string) => c.graph?.depth(s) ?? 0;
-  return t.subs.map((s, i) => ({ s, i })).sort((a, b) => d(a.s) - d(b.s) || a.i - b.i).map((x) => x.s);
+  return t.subs
+    .map((s, i) => ({ s, i }))
+    .sort((a, b) => d(a.s) - d(b.s) || a.i - b.i)
+    .map((x) => x.s);
 }
 
 /** "unlocks generators, decorators" for a subtopic others list as a prerequisite, else "". */

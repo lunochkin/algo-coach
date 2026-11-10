@@ -19,7 +19,15 @@ import { Platform, StyleSheet } from 'react-native';
 import { useTheme, type MD3Theme } from 'react-native-paper';
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 
-import { lessonNode, MAP_DIMS, subTitle, type Board, type ClusterBox, type Course, type MapEdge } from '@algo-coach/core';
+import {
+  lessonNode,
+  MAP_DIMS,
+  subTitle,
+  type Board,
+  type ClusterBox,
+  type Course,
+  type MapEdge,
+} from '@algo-coach/core';
 
 import { tones } from './common';
 
@@ -111,7 +119,13 @@ export function MapCanvas(props: Props) {
                 strokeWidth={1}
                 color={theme.colors.outlineVariant}
               />
-              <SkText x={k.x + 16} y={k.y + 22} text={props.titles.get(k.topic) ?? k.topic} font={font(14)} color={theme.colors.primary} />
+              <SkText
+                x={k.x + 16}
+                y={k.y + 22}
+                text={props.titles.get(k.topic) ?? k.topic}
+                font={font(14)}
+                color={theme.colors.primary}
+              />
             </Group>
           );
         })}
@@ -124,8 +138,17 @@ export function MapCanvas(props: Props) {
               path={p}
               style="stroke"
               strokeWidth={hi ? 2 : 1.2}
-              color={hi ? theme.colors.primary : e.kind === 'teaches' ? theme.colors.tertiary : e.from.startsWith('cert:') ? theme.colors.secondary : theme.colors.outline}
-              opacity={on ? 0.9 : 0.12}>
+              color={
+                hi
+                  ? theme.colors.primary
+                  : e.kind === 'teaches'
+                    ? theme.colors.tertiary
+                    : e.from.startsWith('cert:')
+                      ? theme.colors.secondary
+                      : theme.colors.outline
+              }
+              opacity={on ? 0.9 : 0.12}
+            >
               {e.kind === 'teaches' ? (
                 <DashPathEffect intervals={[2, 3]} />
               ) : e.offset || e.from.startsWith('cert:') ? (
@@ -179,7 +202,14 @@ const QuizNode = memo(function QuizNode(props: {
   const { n, picked, theme } = props;
   return (
     <Group opacity={props.opacity}>
-      <RoundedRect x={n.x} y={n.y} width={NODE_W} height={NODE_H} r={12} color={picked ? theme.colors.secondaryContainer : theme.colors.surfaceVariant} />
+      <RoundedRect
+        x={n.x}
+        y={n.y}
+        width={NODE_W}
+        height={NODE_H}
+        r={12}
+        color={picked ? theme.colors.secondaryContainer : theme.colors.surfaceVariant}
+      />
       <RoundedRect
         x={n.x}
         y={n.y}
@@ -217,7 +247,14 @@ const QuizNode = memo(function QuizNode(props: {
   );
 });
 
-const LessonNode = memo(function LessonNode(props: { theme: MD3Theme; n: Placed; c: Course; b: Board; picked: boolean; opacity: number }) {
+const LessonNode = memo(function LessonNode(props: {
+  theme: MD3Theme;
+  n: Placed;
+  c: Course;
+  b: Board;
+  picked: boolean;
+  opacity: number;
+}) {
   const { n, c, b, picked, theme } = props;
   const tone = tones(theme.dark);
   const x = c.graph?.lesson(n.sub.slice(7));
@@ -271,7 +308,15 @@ const CertNode = memo(function CertNode(props: {
   const accent = theme.colors.secondary;
   return (
     <Group opacity={props.opacity}>
-      <RoundedRect x={n.x} y={n.y} width={NODE_W} height={NODE_H} r={NODE_H / 2} color={theme.colors.secondaryContainer} opacity={0.5} />
+      <RoundedRect
+        x={n.x}
+        y={n.y}
+        width={NODE_W}
+        height={NODE_H}
+        r={NODE_H / 2}
+        color={theme.colors.secondaryContainer}
+        opacity={0.5}
+      />
       <RoundedRect
         x={n.x}
         y={n.y}
@@ -290,7 +335,13 @@ const CertNode = memo(function CertNode(props: {
           <Group key={p.letter}>
             <Circle cx={cx} cy={cy} r={9} color={p.color} opacity={p.filled ? 1 : 0.18} />
             <Circle cx={cx} cy={cy} r={9} style="stroke" strokeWidth={1.2} color={p.color} />
-            <SkText x={cx - 3.5} y={cy + 4} text={p.letter} font={font(10)} color={p.filled ? theme.colors.surface : theme.colors.onSurface} />
+            <SkText
+              x={cx - 3.5}
+              y={cy + 4}
+              text={p.letter}
+              font={font(10)}
+              color={p.filled ? theme.colors.surface : theme.colors.onSurface}
+            />
           </Group>
         );
       })}

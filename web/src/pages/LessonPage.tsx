@@ -2,7 +2,17 @@ import { BookCheck, BookX } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router'
 
-import { lessonsAround, minutesOf, LESSON_MARK_READ, LESSON_MARK_UNREAD, LESSON_MISSING, LESSON_NEXT, LESSON_NO_TEXT, LESSON_RELATED, lessonNote } from '@algo-coach/core'
+import {
+  lessonsAround,
+  minutesOf,
+  LESSON_MARK_READ,
+  LESSON_MARK_UNREAD,
+  LESSON_MISSING,
+  LESSON_NEXT,
+  LESSON_NO_TEXT,
+  LESSON_RELATED,
+  lessonNote,
+} from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
@@ -33,14 +43,21 @@ export function LessonPage() {
 
   const page = catalog ? { c: c ?? null, x: x ?? null } : undefined
   return (
-    <Loaded of="the lesson" state={loadedFrom(k, page)} blank={LESSON_MISSING} blankWhen={(p) => !p.x}>
+    <Loaded
+      of="the lesson"
+      state={loadedFrom(k, page)}
+      blank={LESSON_MISSING}
+      blankWhen={(p) => !p.x}
+    >
       {({ c, x }) => {
         if (!c || !x) return null
         const { next, related } = lessonsAround(c, x.slug)
         return (
           <article className="space-y-section">
             <PageHeader
-              back={back ? { to: back, label: 'Back to the queue' } : { to: LESSONS, label: 'Lessons' }}
+              back={
+                back ? { to: back, label: 'Back to the queue' } : { to: LESSONS, label: 'Lessons' }
+              }
               title={x.title}
               note={lessonNote(c.title, body ? minutesOf(x, body) : null, read)}
             />
@@ -58,7 +75,11 @@ export function LessonPage() {
                   <h2 className="text-meta font-medium text-brand-deep">{title as string}</h2>
                   <p className="flex flex-wrap gap-x-4">
                     {(items as typeof next).map((y) => (
-                      <Link key={y.slug} to={lessonPath(c.slug, y.slug)} className="underline underline-offset-2">
+                      <Link
+                        key={y.slug}
+                        to={lessonPath(c.slug, y.slug)}
+                        className="underline underline-offset-2"
+                      >
                         {y.title}
                       </Link>
                     ))}
@@ -68,12 +89,21 @@ export function LessonPage() {
             )}
             <div>
               {read ? (
-                <Button variant="outline" onClick={() => void k.add('lesson', { course: c.slug, lesson: x.slug, status: 'undone' })}>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    void k.add('lesson', { course: c.slug, lesson: x.slug, status: 'undone' })
+                  }
+                >
                   <BookX />
                   {LESSON_MARK_UNREAD}
                 </Button>
               ) : (
-                <Button onClick={() => void k.add('lesson', { course: c.slug, lesson: x.slug, status: 'done' })}>
+                <Button
+                  onClick={() =>
+                    void k.add('lesson', { course: c.slug, lesson: x.slug, status: 'done' })
+                  }
+                >
                   <BookCheck />
                   {LESSON_MARK_READ}
                 </Button>

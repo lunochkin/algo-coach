@@ -21,9 +21,7 @@ export function Verdict({ submitted }: { submitted: Submitted }) {
       </p>
       {mix.length > 0 && <p className="text-meta text-muted-foreground">{mix.join(' · ')}</p>}
       <CaseStrip results={results} />
-      {submitted.failure && (
-        <FailureView failure={submitted.failure} index={indexOf(submitted)} />
-      )}
+      {submitted.failure && <FailureView failure={submitted.failure} index={indexOf(submitted)} />}
     </div>
   )
 }

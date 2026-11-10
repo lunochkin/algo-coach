@@ -3,9 +3,7 @@ import type { ReactNode } from 'react'
 // a bordered block on the card surface: what a page holds beside its reading,
 // as the run's counts on a card and the press that starts a sitting
 export function Panel({ children }: { children: ReactNode }) {
-  return (
-    <div className="space-y-stack rounded-xl border bg-card px-4 py-3">{children}</div>
-  )
+  return <div className="space-y-stack rounded-xl border bg-card px-4 py-3">{children}</div>
 }
 
 // one count and what it counts, read as a pair

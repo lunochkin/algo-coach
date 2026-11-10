@@ -57,7 +57,14 @@ describe('the copy', () => {
 
   it('takes the records another device wrote, once', async () => {
     const engine = fakeEngine()
-    engine.log.push({ kind: 'setting', client_id: 'p1', device: 'phone', t: T, name: 'exam_size', n: 25 })
+    engine.log.push({
+      kind: 'setting',
+      client_id: 'p1',
+      device: 'phone',
+      t: T,
+      name: 'exam_size',
+      n: 25,
+    })
     const copy = await open(engine.transport)
 
     expect((await copy.sync()).logChanged).toBe(true)

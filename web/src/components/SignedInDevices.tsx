@@ -65,7 +65,12 @@ export function SignedInDevices({
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">
                     {deviceName(device)}
-                    {device.current && <span className="font-normal text-muted-foreground"> · {thisDevice('browser')}</span>}
+                    {device.current && (
+                      <span className="font-normal text-muted-foreground">
+                        {' '}
+                        · {thisDevice('browser')}
+                      </span>
+                    )}
                   </p>
                   <p className="text-meta text-muted-foreground">{deviceLine(device, now)}</p>
                 </div>

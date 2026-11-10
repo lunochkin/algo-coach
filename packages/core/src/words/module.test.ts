@@ -2,7 +2,17 @@ import { describe, expect, it } from 'vitest';
 
 import type { CertStatus } from '../certs';
 import type { Course } from '../types';
-import { certCell, moduleFailed, moduleMeta, noGraph, practiceShare, startTitle, moduleSummary, practiceLevel, coverageShare } from './module';
+import {
+  certCell,
+  moduleFailed,
+  moduleMeta,
+  noGraph,
+  practiceShare,
+  startTitle,
+  moduleSummary,
+  practiceLevel,
+  coverageShare,
+} from './module';
 
 describe('module words', () => {
   it('counts topics in the singular for one', () => {
@@ -30,7 +40,10 @@ describe('module words', () => {
   });
 
   it('titles the start sheet by its narrowest scope', () => {
-    const c = { title: 'Python', topics: [{ slug: 'core', title: 'Core', subs: ['loops'], subTitles: { loops: 'Loops' } }] } as unknown as Course;
+    const c = {
+      title: 'Python',
+      topics: [{ slug: 'core', title: 'Core', subs: ['loops'], subTitles: { loops: 'Loops' } }],
+    } as unknown as Course;
     expect(startTitle(c, { topic: null, sub: null })).toBe('Python');
     expect(startTitle(c, { topic: 'core', sub: null })).toBe('Core');
     expect(startTitle(c, { topic: 'core', sub: 'loops' })).toBe('Loops');
@@ -45,7 +58,14 @@ describe("a module's summary", () => {
 
 describe('a certification column', () => {
   it('reads a level no scope certifies as practice', () => {
-    const c = { certs: { certs: [{ level: 0, certified: false }, { level: 1, certified: true }] } } as unknown as Course;
+    const c = {
+      certs: {
+        certs: [
+          { level: 0, certified: false },
+          { level: 1, certified: true },
+        ],
+      },
+    } as unknown as Course;
     expect(practiceLevel(c, 0)).toBe(true);
     expect(practiceLevel(c, 1)).toBe(false);
     expect(coverageShare(0.374)).toBe('37%');
