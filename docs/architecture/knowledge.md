@@ -208,14 +208,16 @@ left to serve.
   asked.
 - **Stopping a queue stores a stint**: the queue's mode, how many questions
   were answered, and the score.
-- **The filtered queue's choices open on the focus**: its module, topic and
-  subtopic. The focus is a record of the log, so the phone and the web open
-  on the same choices. A second record of the same three would disagree with
-  the focus about where the user practises.
+- **A filtered queue starts from a press on the module's groups.** The press
+  names the module, the topic, the subtopic or one group, and the user adds
+  the level, the kind and the due flag for that queue alone.
+- **Starting a filtered queue moves no focus.** The focus aims the next
+  queue, and one drill on a subtopic would otherwise retarget it.
+- **A filtered queue's choices are stored nowhere.** Each narrows one queue,
+  and a record of them would change at most starts.
 - **A level exam opens on the focus's module**, and on a certification
-  focus's level. Associate stands where no focus names a level.
-- **The level, the kind and the due flag start unset on every open.** Each
-  narrows one queue, and a record of them would change at most starts.
+  focus's level. Associate stands where no focus names a level. The focus
+  is a record of the log, so the phone and the web open the same exam.
 - **The exam size is a setting**, as `## Settings` gives.
 
 ## Settings

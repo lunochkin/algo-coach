@@ -48,7 +48,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       `setting` sync line, and have the phone write the exam size there too
 - [x] Open the phone's Exam screen on the focus, as Practice opens, and drop
       `queue_filters`: the focus already holds the choices both clients share
-- [ ] Drop Pick questions as a screen, and start a filtered queue from a
+- [x] Drop Pick questions as a screen, and start a filtered queue from a
       sheet on the module's page. Starting a queue there moves no focus
 - [ ] Add the `/settings` page to the web, with the daily limit and the exam
       size, linked from the account menu

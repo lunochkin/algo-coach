@@ -9,6 +9,7 @@ import { useStore } from '@/lib/store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { CertRing, CertSheet, STATE_LABEL } from '@/ui/certs';
+import { useStartSheet } from '@/ui/start';
 import { styles, tones } from '@/ui/common';
 
 const CELL = 54;
@@ -16,6 +17,7 @@ const CELL = 54;
 /** Rows: a course's topics, then the course itself; columns: Foundation to Expert. */
 export default function CertsScreen() {
   const st = useStore();
+  const starter = useStartSheet();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { open } = useLocalSearchParams<{ open?: string }>();
@@ -64,8 +66,10 @@ export default function CertsScreen() {
           id={picked.id}
           states={states.get(pickedCourse.slug)!}
           onClose={() => setPicked(null)}
+          onPractice={starter.open}
         />
       ) : null}
+      {starter.sheet}
     </View>
   );
 }

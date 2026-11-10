@@ -14,6 +14,7 @@ import {
   subTitle,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
+import type { Scope } from '@/ui/start';
 import { startExam, styles, tones } from './common';
 
 export const STATE_LABEL: Record<CertState, string> = {
@@ -80,8 +81,9 @@ export function CertSheet(props: {
   id: string;
   states: Map<string, CertStatus>;
   onClose: () => void;
+  onPractice: (s: Scope) => void;
 }) {
-  const { c, b, id, states, onClose } = props;
+  const { c, b, id, states, onClose, onPractice } = props;
   const status = states.get(id);
   const st = useStore();
   const theme = useTheme();
@@ -153,12 +155,9 @@ export function CertSheet(props: {
                   compact
                   onPress={() => {
                     onClose();
-                    router.push({
-                      pathname: '/practice',
-                      params: { course: c.slug, topic: g.topic, sub: g.sub, level: String(x.level) },
-                    });
+                    onPractice({ course: c.slug, topic: g.topic, sub: g.sub, level: x.level });
                   }}>
-                  Practice
+                  Start
                 </Button>
               </View>
             ))}

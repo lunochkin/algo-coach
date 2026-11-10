@@ -16,6 +16,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles, tones } from '@/ui/common';
+import { useStartSheet, type Scope } from '@/ui/start';
 
 
 export default function Stats() {
@@ -27,6 +28,7 @@ export default function Stats() {
   const sum = useMemo(() => (b ? summary(b, Date.now()) : null), [b]);
   const recent = sessions.slice(-8);
   const { done, open } = tones(theme.dark);
+  const starter = useStartSheet();
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -58,7 +60,7 @@ export default function Stats() {
                 </View>
                 <View style={styles.row}>
                   <Text variant="bodySmall" style={{ flex: 1, color: theme.colors.onSurfaceVariant }}>
-                    Tap a cell to practice it.
+                    Tap a cell to start a queue on it.
                   </Text>
                   <Button compact icon="graph-outline" onPress={() => router.push('/map')}>
                     Map
@@ -70,7 +72,7 @@ export default function Stats() {
               </Card.Content>
             </Card>
             {b.courses.map((c) => (
-              <CourseCard key={c.slug} b={b} c={c} />
+              <CourseCard key={c.slug} b={b} c={c} onPractice={starter.open} />
             ))}
             {recent.length ? (
               <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -81,6 +83,7 @@ export default function Stats() {
           </>
         )}
       </ScrollView>
+      {starter.sheet}
     </View>
   );
 }
@@ -93,7 +96,7 @@ function Legend({ color, label }: { color: string; label: string }) {
   );
 }
 
-function CourseCard({ b, c }: { b: Board; c: Course }) {
+function CourseCard({ b, c, onPractice }: { b: Board; c: Course; onPractice: (s: Scope) => void }) {
   const theme = useTheme();
   const lv = levels(b.rules);
   const front = b.frontier(c)[0];
@@ -148,13 +151,8 @@ function CourseCard({ b, c }: { b: Board; c: Course }) {
                     <Pressable
                       key={level}
                       disabled={!n}
-                      accessibilityLabel={`Practice ${sub} ${levelName(b.rules, level)}`}
-                      onPress={() =>
-                        router.push({
-                          pathname: '/practice',
-                          params: { course: c.slug, topic: t.slug, sub, level: String(level) },
-                        })
-                      }>
+                      accessibilityLabel={`Start ${sub} ${levelName(b.rules, level)}`}
+                      onPress={() => onPractice({ course: c.slug, topic: t.slug, sub, level })}>
                       <Text variant="bodyMedium" style={[cell, { color }]}>
                         {n ? `${b.nPassed(g)}/${n}` : '·'}
                       </Text>

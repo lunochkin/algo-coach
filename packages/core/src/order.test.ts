@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { bySavedOrder, moduleOrder, moved, withFirst } from './order';
+import { bySavedOrder, moduleOrder, moved } from './order';
 
 const slug = (s: string) => s;
 
@@ -16,15 +16,6 @@ describe('bySavedOrder', () => {
   });
   it('keeps the original order without a saved order', () => {
     expect(bySavedOrder(['b', 'a'], slug, [])).toEqual(['b', 'a']);
-  });
-});
-
-describe('withFirst', () => {
-  it('moves the opened course to the front and keeps the saved order for the rest', () => {
-    expect(withFirst(bySavedOrder(['a', 'b', 'c'], slug, ['c', 'a', 'b']), slug, 'b')).toEqual(['b', 'c', 'a']);
-  });
-  it('leaves the order unchanged when the slug is absent', () => {
-    expect(withFirst(['a', 'b'], slug, 'x')).toEqual(['a', 'b']);
   });
 });
 

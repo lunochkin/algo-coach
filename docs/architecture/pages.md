@@ -115,8 +115,7 @@ those steps at low fidelity.
 | `/cards/:slug/recall` | opens the recall of the template the trainer draws | Cards |
 | `/cards/:slug/recall/:template` | reproduces one template from memory | Cards |
 | `/knowledge` | continues the next queue, or picks another way in | Knowledge |
-| `/knowledge/modules/:module` | reads where each group stands, and aims the focus | Knowledge |
-| `/knowledge/questions` | picks the questions a filtered queue serves | Knowledge |
+| `/knowledge/modules/:module` | reads where each group stands, aims the focus, and starts a filtered queue | Knowledge |
 | `/knowledge/queue` | answers one question at a time | Knowledge |
 | `/knowledge/exam` | picks a level exam | Knowledge |
 | `/knowledge/lessons` | picks a lesson | Knowledge |
@@ -181,15 +180,12 @@ platforms.
 - **The knowledge home asks for one act: Continue.** Continue starts the next
   queue. The line under the press counts the reviews due and the new
   questions left today, in the words the phone shows.
-- **The home offers two other ways in, at a lower weight: Pick questions and
-  Exam.** Pick questions opens the filtered queue's choices, and Exam opens a
-  level exam's.
+- **The home offers Exam as a second way in, at a lower weight.** A filtered
+  queue starts from a module's page instead, where the groups it can serve
+  are already drawn.
 - **The home's header links the lessons and the certifications.** The two
   pages are destinations rather than acts, so each reads as a link, and the
   phone reaches them from its top bar.
-- **The filtered queue is named Pick questions on both clients.** The phone
-  names it Practice today. On the web Practice names the board's section, and
-  one word naming two places would send a reader to the wrong one.
 - **The home names the focus above Continue, with three presses**: clear the
   focus, switch it between strict and relaxed, and raise today's limit. A
   strict focus names the reviews waiting outside it, and a press serves them
@@ -207,25 +203,36 @@ platforms.
   down on a press.** The phone drags a row instead. `knowledge.md` gives why
   one order holds on every device.
 - **A module's page reads each topic as a panel of subtopics by level.** Each
-  group reads as covered, open, locked or holding no questions. A press on a
-  group starts a filtered queue over that subtopic.
+  group reads as covered, open, locked or holding no questions.
+- **A press on a group, a topic or the module opens the start sheet.** The
+  press names the scope, and a group also names its level. The sheet adds
+  the kind and the due flag, and Start counts what the choices leave.
+- **The start sheet replaces a screen of choices.** A screen of its own drew
+  the module's groups a second time, beside the Map and Stats that draw them
+  already.
+- **The press that opens the sheet reads Start.** Practice names the board's
+  section on the web, and one word naming two places would send a reader to
+  the wrong one.
 - **The module's page joins the phone's Map and Stats.** A wide window holds
   the groups and the counts per level together. The two clients read the same
   numbers from `packages/core`, so the difference is the layout alone.
 - **The module's page aims the focus and sets the module's status.** The focus
-  is aimed at the module, a topic or a subtopic. The status is active, paused
-  or archived. A status press asks before it archives, since an archived
-  module leaves the home.
-- **Pick questions and Exam open on the focus**, on either client, as
-  `knowledge.md` gives. The focus is a record of the log, so a focus aimed
-  on the phone opens the same choices on the web.
+  is aimed at the module, a topic or a subtopic, by a press of its own.
+  Starting a queue from the sheet moves no focus, so one drill does not
+  retarget Continue. The status is active, paused or archived. A status
+  press asks before it archives, since an archived module leaves the home.
+- **Exam opens on the focus**, on either client, as `knowledge.md` gives. The
+  focus is a record of the log, so a focus aimed on the phone opens the same
+  exam on the web.
 - **The queue's path is `/knowledge/queue`, and `?mode=` names the queue**:
-  next, review, filtered or exam. The URL carries the mode alone, as the
-  phone's route does.
-- **A reload starts a queue of the same mode again.** The answers given
-  before the reload are in the log already, so the next pick reads them. A
-  filtered queue or an exam restarts on the focus, with the level, the kind
-  and the due flag unset.
+  next, review, filtered or exam. A filtered queue's URL names its module
+  too, as `?module=`, so the queue knows its way back.
+- **A reload starts a next queue or a review queue again.** The answers given
+  before the reload are in the log already, so the next pick reads them.
+- **A reload of a filtered queue returns to its module's page.** The sheet's
+  choices narrow one queue and are stored nowhere, and the phone keeps none
+  of them either. A reload of an exam returns to the exam's page, which opens
+  on the focus.
 - **A reload loses the count and the score of the queue it ended.** The phone
   holds a running queue in memory alone, so a killed app loses the same. A
   copy of the running queue kept in the browser would make one client keep

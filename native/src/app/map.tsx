@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { ScrollView, View, type LayoutChangeEvent } from 'react-native';
 import {
@@ -30,6 +30,7 @@ import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
 import { styles, tones } from '@/ui/common';
 import { MapCanvas, NODE_H, NODE_W, type CertPip } from '@/ui/mapcanvas';
+import { useStartSheet, type Scope } from '@/ui/start';
 
 const COL = 200;
 const ROW = 74;
@@ -45,8 +46,10 @@ export default function MapScreen() {
     () => bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.courseOrder),
     [st.catalog, st.courseOrder],
   );
+  const p = useLocalSearchParams<{ course?: string }>();
+  // a module row names its module, and otherwise the map opens on the focus
   const [course, setCourse] = useState(
-    () => courses.find((c) => c.slug === st.focus?.course)?.slug ?? courses[0]?.slug ?? '',
+    () => courses.find((c) => c.slug === (p.course ?? st.focus?.course))?.slug ?? courses[0]?.slug ?? '',
   );
   const c = courses.find((x) => x.slug === course);
   const [lessonsOn, setLessonsOn] = useState(false); // ~190 lesson nodes clutter the map; opt in
@@ -131,6 +134,7 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
   const at = useMemo(() => new Map(nodes.map((n) => [n.sub, n])), [nodes]);
   const lv = levels(b.rules);
   const [picked, setPicked] = useState<string | null>(null);
+  const starter = useStartSheet();
   const titles = useMemo(
     () => new Map([...c.topics.map((t) => [t.slug, t.title] as const), ['all', c.title] as const]),
     [c],
@@ -363,12 +367,20 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
         </View>
       </GestureDetector>
       {sel?.kind === 'cert' && certToOpen(sel.topic) ? (
-        <CertSheet c={c} b={b} id={certToOpen(sel.topic)!} states={certState} onClose={() => setPicked(null)} />
+        <CertSheet
+          c={c}
+          b={b}
+          id={certToOpen(sel.topic)!}
+          states={certState}
+          onClose={() => setPicked(null)}
+          onPractice={starter.open}
+        />
       ) : sel?.kind === 'lesson' ? (
         <LessonPanel c={c} b={b} slug={sel.sub.slice(7)} bottom={bottom} />
       ) : sel ? (
-        <NodePanel c={c} b={b} sub={sel.sub} topic={sel.topic} bottom={bottom} />
+        <NodePanel c={c} b={b} sub={sel.sub} topic={sel.topic} bottom={bottom} onPractice={starter.open} />
       ) : null}
+      {starter.sheet}
     </View>
   );
 }
@@ -392,10 +404,19 @@ function Legend({ color, label }: { color: string | null; label: string }) {
   );
 }
 
-/** Per-level progress with what blocks it, what the subtopic unlocks, and a way into Practice. */
+/** Per-level progress with what blocks it, what the subtopic unlocks, and the start sheet. */
 
-function NodePanel(props: { c: Course; b: Board; sub: string; topic: string; bottom: number }) {
-  const { c, b, sub, topic, bottom } = props;
+function NodePanel(props: {
+  c: Course;
+  b: Board;
+  sub: string;
+  topic: string;
+  bottom: number;
+  onPractice: (s: Scope) => void;
+}) {
+  const { c, b, sub, topic, bottom, onPractice } = props;
+  const st = useStore();
+  const aimed = st.focus?.course === c.slug && st.focus.sub === sub && !st.focus.cert;
   const theme = useTheme();
   const unlocks = unlocksLabel(c, sub);
   // Prerequisites in other topics: the map draws them only as the certificate edge into the cluster.
@@ -437,10 +458,16 @@ function NodePanel(props: { c: Course; b: Board; sub: string; topic: string; bot
       </Card.Content>
       <Card.Actions>
         <Button
+          icon="crosshairs-gps"
+          disabled={aimed}
+          onPress={() => void st.setFocus({ course: c.slug, topic, sub, strict: !!st.focus?.strict })}>
+          {aimed ? 'Focused' : 'Focus here'}
+        </Button>
+        <Button
           mode="contained-tonal"
-          icon="target"
-          onPress={() => router.push({ pathname: '/practice', params: { course: c.slug, topic, sub } })}>
-          Practice
+          icon="play"
+          onPress={() => onPractice({ course: c.slug, topic, sub, level: null })}>
+          Start
         </Button>
       </Card.Actions>
     </Card>

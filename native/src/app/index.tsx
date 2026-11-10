@@ -226,6 +226,7 @@ export default function Home() {
             onFrontier={drillGroup}
             onTogglePause={pause.ask}
             onArchive={archive.ask}
+            onFocus={(c) => void st.setFocus({ course: c.slug, topic: null, sub: null, strict: !!st.focus?.strict })}
           />
         )}
       />
@@ -237,7 +238,7 @@ export default function Home() {
             b={cont.b}
             queue={cont.queue}
             exams={st.catalog?.certExams ?? []}
-            onOpen={() => router.push('/practice')}
+            onOpen={() => router.push({ pathname: '/map', params: { course: focused.course } })}
             onClear={() => void st.setFocus(null)}
             onStrict={() => void st.setFocus({ ...focused, strict: !focused.strict })}
             onMoreNew={() => void st.raiseNew()}
@@ -247,7 +248,7 @@ export default function Home() {
             label={focusLabel(focus, st.catalog)}
             set={!!focus}
             setAside={!!filter && !!focus}
-            onOpen={() => router.push('/practice')}
+            onOpen={() => router.push({ pathname: '/map', params: focus ? { course: focus.course } : {} })}
             onClear={() => void st.setFocus(null)}
             strict={!!focus?.strict}
             onStrict={() => focus && void st.setFocus({ ...focus, strict: !focus.strict })}
@@ -327,14 +328,6 @@ export default function Home() {
         <View style={styles.row}>
           <Button
             mode="contained-tonal"
-            icon="target"
-            style={{ flex: 1 }}
-            disabled={!st.catalog}
-            onPress={() => router.push({ pathname: '/practice', params: st.filter ? { course: st.filter } : {} })}>
-            Practice
-          </Button>
-          <Button
-            mode="contained-tonal"
             icon="clipboard-check-outline"
             style={{ flex: 1 }}
             disabled={!st.catalog}
@@ -410,7 +403,7 @@ function FocusLine(props: {
   );
 }
 
-/** A course row: tap opens Practice, long-press or the handle drags it to reorder. */
+/** A course row: tap opens its map, long-press or the handle drags it to reorder. */
 function CourseCard({
   c,
   view,
@@ -419,6 +412,7 @@ function CourseCard({
   onFrontier,
   onTogglePause,
   onArchive,
+  onFocus,
 }: {
   c: Course;
   view: NextUpView;
@@ -427,6 +421,7 @@ function CourseCard({
   onFrontier: (g: Group) => void;
   onTogglePause: (c: Course) => void;
   onArchive: (c: Course) => void;
+  onFocus: (c: Course) => void;
 }) {
   const theme = useTheme();
   const drag = useReorderableDrag();
@@ -434,10 +429,10 @@ function CourseCard({
   return (
     <Card
       mode="outlined"
-      onPress={() => router.push({ pathname: '/practice', params: { course: c.slug } })}
+      onPress={() => router.push({ pathname: '/map', params: { course: c.slug } })}
       onLongPress={drag}
-      accessibilityLabel={`Practice ${c.title}`}
-      accessibilityHint="Opens Practice for this course. Long-press to reorder.">
+      accessibilityLabel={`Open ${c.title}`}
+      accessibilityHint="Opens the map of this course. Long-press to reorder.">
       <Card.Title
         title={c.title}
         subtitle={`${total} questions · ${toReview} to review${c.paused ? ' · paused' : ''}`}
@@ -453,6 +448,15 @@ function CourseCard({
                   accessibilityLabel={`More actions for ${c.title}`}
                 />
               }>
+              <Menu.Item
+                leadingIcon="crosshairs-gps"
+                title="Focus on course"
+                accessibilityLabel={`Focus on ${c.title}`}
+                onPress={() => {
+                  setMenu(false);
+                  onFocus(c);
+                }}
+              />
               <Menu.Item
                 leadingIcon={c.paused ? 'play' : 'pause'}
                 title={c.paused ? 'Resume course' : 'Pause course'}

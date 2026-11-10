@@ -435,7 +435,7 @@ problem's path reads as its record, as "Every problem" gives.
 |             [ Continue ]                                               |
 |    12 reviews . 7 new left today . 2 waiting outside                   |
 |                                                                        |
-|   ( Pick questions )   ( Exam )                                        |
+|   ( Exam )                                                             |
 |                                                                        |
 | Modules  2                                                             |
 | +--------------------------------------------------------+             |
@@ -451,8 +451,8 @@ problem's path reads as its record, as "Every problem" gives.
 - The home is the section's root, so it carries no way back.
 - The line under the note links the lessons page and the certifications
   page. Each is a destination, so each reads as a link.
-- Continue is the page's act, an ink pill. Pick questions and Exam are
-  outlined presses below it, at a lower weight.
+- Continue is the page's act, an ink pill. Exam is an outlined press below
+  it, at a lower weight. A filtered queue starts from a module's page.
 - The line under Continue counts the reviews due and the new questions left
   today. "waiting outside" reads only under a strict focus, and a press on it
   serves those reviews.
@@ -473,11 +473,11 @@ problem's path reads as its record, as "Every problem" gives.
 +------------------------------------------------------------------------+
 | < Knowledge                                                            |
 | Python                                                                 |
-| 4 topics . 12 due . active             ( Focus here ) ( Pause )        |
+| 4 topics . 12 due . active     ( Start ) ( Focus here ) ( Pause )      |
 |                                                                        |
 | Foundation 18/20   Associate 9/24   Professional 0/30   Expert 0/12    |
 |                                                                        |
-| Core  3 subtopics                                       ( Focus )      |
+| Core  3 subtopics                             ( Start ) ( Focus )      |
 | +--------------------------------------------------------+             |
 | |                  L0        L1        L2        L3      |             |
 | | Names            covered   open      locked    locked  |             |
@@ -485,7 +485,7 @@ problem's path reads as its record, as "Every problem" gives.
 | | Mutability       open      locked    locked    -       |             |
 | +--------------------------------------------------------+             |
 |                                                                        |
-| Functions  2 subtopics                                  ( Focus )      |
+| Functions  2 subtopics                        ( Start ) ( Focus )      |
 | +--------------------------------------------------------+             |
 | | ...                                                    |             |
 | +--------------------------------------------------------+             |
@@ -499,39 +499,39 @@ problem's path reads as its record, as "Every problem" gives.
   each level over the questions the level holds.
 - Each topic is a section with its heading and a panel of its subtopics. A
   cell is one group, and `-` is a group holding no questions.
-- A press on an open or covered cell starts a filtered queue over that
-  subtopic. A locked cell opens the same queue, since locks do not apply to
-  the filtered queue.
+- A press on a cell opens the start sheet on that group: the subtopic at
+  the cell's level. A locked cell opens it too, since locks do not apply to
+  the filtered queue. Start beside the module or a topic opens the sheet on
+  that scope at every level.
 - A subtopic's name aims the focus at the subtopic, on a press. The focus
   press beside a topic's heading aims at the topic.
 
-## Pick questions
+## A module, starting a filtered queue
 
 ```
-+- /knowledge/questions -------------------------------------------------+
++- /knowledge/modules/python --------------------------------------------+
 | algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
-| < Knowledge                                                            |
-| Pick questions                                                         |
-| Locks do not apply here.                                               |
-|                                                                        |
-| Module   [ Python ]  ( System design )                                 |
-| Topic    ( any )  [ Core ]  ( Functions )  ( Classes )                 |
-| Subtopic [ any ]  ( Names )  ( Types )  ( Mutability )                 |
-| Level    [ any ]  ( Foundation )  ( Associate )  ( Professional ) ...  |
-| Kind     [ any ]  ( concept )  ( output )  ( debug )                   |
-| Only     ( weak and due )                                              |
-|                                                                        |
-|             [ Start . 6 reviews . 14 new ]                             |
+| Python                                                                 |
+|   +-----------------------------------------------------+              |
+|   | Core . Types                                         |             |
+|   |                                                     |              |
+|   | Level  ( all )  ( Foundation )  [ Associate ] ...    |             |
+|   | Kind   [ all ]  ( concept )  ( output )  ( debug )   |             |
+|   | ( ) Only reviews                                     |             |
+|   |                                                     |              |
+|   |        ( Cancel )  [ Start . 6 reviews . 4 new ]    |              |
+|   +-----------------------------------------------------+              |
 +------------------------------------------------------------------------+
 ```
 
-- The chips are controls, each a toggle within its row, and one pick per row.
-  A row narrows the rows below it.
-- The chips open on the focus: its module, topic and subtopic. Level, kind
-  and the due flag start unset.
-- Start is the act, and its label counts what the picks leave, as the phone's
-  does.
+- The sheet opens over the module's page on a cell or a Start press. The
+  press names the scope, and a cell also picks its level.
+- The level, the kind and the due switch narrow this one queue. Each opening
+  starts them over, and nothing stores them.
+- Start is the act, and its label counts what the choices leave, as the
+  phone's does. Starting moves no focus. The page's Focus presses aim it.
+- The phone opens the same sheet from a Map node and a Stats cell.
 
 ## A queue, asking
 
