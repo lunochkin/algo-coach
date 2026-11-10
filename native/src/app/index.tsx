@@ -11,22 +11,21 @@ import ReorderableList, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
+  bySavedOrder,
   certStates,
+  continueCounts,
   continueLine,
+  continuePlan,
   type Course,
-  emptyContinue,
   drillQueue,
+  emptyContinue,
   focusLabel,
-  focusQueue,
   type Group,
   minutesOf,
+  moduleRows,
   NEW_STEP,
-  nextQueue,
   type NextUpView,
-  nextUpView,
-  outsideFocus,
   reviewQueue,
-  bySavedOrder,
 } from '@algo-coach/core';
 import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
@@ -49,43 +48,15 @@ export default function Home() {
 
   const { board, filter } = st;
   const b = useMemo(() => board(filter), [board, filter]);
-  const info = useMemo(() => {
-    if (!b) return null;
-    const now = Date.now();
-    const all = b.questions();
-    const courses = b.courses.map((c) => {
-      const qs = all.filter((q) => q.course === c.slug);
-      // Same count as `learn courses`: ready weak plus due, anywhere in the course.
-      const toReview = qs.filter((q) => b.toReview(q, now)).length;
-      return { c, view: nextUpView(b, c), total: qs.length, toReview };
-    });
-    return { courses };
-  }, [b]);
+  const info = useMemo(() => (b ? { courses: moduleRows(b, Date.now()) } : null), [b]);
 
   // A course chip is an explicit selection, like `learn next --course`, so it sets the focus aside.
   const { focus } = st;
   const focused = !filter && focus ? focus : null;
   const limit = st.newLimit;
   // The queue Continue would open, and the board its picks use.
-  const cont = useMemo(() => {
-    if (focused) {
-      const fb = board(null, focused.course);
-      return fb ? { b: fb, queue: focusQueue(fb, focused, limit), course: null, include: focused.course } : null;
-    }
-    return b ? { b, queue: nextQueue(b, limit), course: filter, include: null } : null;
-  }, [b, board, focused, filter, limit]);
-  const counts = useMemo(() => {
-    if (!cont) return null;
-    const now = Date.now();
-    return {
-      reviews: cont.queue.reviews(cont.b, now).length,
-      learning: cont.queue.stepping(cont.b, now).count,
-      newLeft: cont.queue.newLeft(cont.b, now),
-      outside: focused?.strict ? outsideFocus(cont.b, focused, now) : 0,
-      empty: cont.queue.isEmpty(cont.b, now),
-      blocked: cont.queue.blockedByLimit(cont.b, now),
-    };
-  }, [cont, focused]);
+  const cont = useMemo(() => continuePlan(board, focus, filter, limit), [board, focus, filter, limit]);
+  const counts = useMemo(() => (cont ? continueCounts(cont, focused, Date.now()) : null), [cont, focused]);
 
   // The first certificate whose requirements are met but its exam (shown above Continue).
   const readyCert = useMemo(() => {

@@ -5,6 +5,7 @@ import {
   attemptPath,
   Board,
   isoNow,
+  learnerCatalog,
   sessionPath,
   statusPath,
   currentFocus,
@@ -13,8 +14,6 @@ import {
   type FocusRecord,
   type LessonRecord,
   lessonPath,
-  withLessons,
-  withCertExams,
   certPath,
   type CertRecord,
   visibleCatalog,
@@ -127,17 +126,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [lessonRecords, setLessonRecords] = useState<LessonRecord[]>([]);
   const [certRecords, setCertRecords] = useState<CertRecord[]>([]);
   // Pause state is learner data from status records, applied over the course snapshot.
-  const full = useMemo(
-    // Lesson progress is learner state too: newest record per lesson across devices.
+  const learner = useMemo(
     () =>
-      rawCatalog
-        ? withCertExams(withLessons(withStatuses(rawCatalog, statuses), lessonRecords), certRecords)
-        : null,
+      rawCatalog ? learnerCatalog(rawCatalog, { statuses, lessons: lessonRecords, certs: certRecords }) : null,
     [rawCatalog, statuses, lessonRecords, certRecords],
   );
-  // Archived courses are hidden everywhere except Settings, where they can be restored.
-  const archived = useMemo(() => full?.courses.filter((c) => c.archived) ?? [], [full]);
-  const catalog = useMemo(() => (full ? visibleCatalog(full) : null), [full]);
+  const archived = useMemo(() => learner?.archived ?? [], [learner]);
+  const catalog = learner?.catalog ?? null;
   const focus = useMemo(
     () => (catalog ? currentFocus(focusRecords, catalog) : null),
     [catalog, focusRecords],

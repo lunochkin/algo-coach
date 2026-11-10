@@ -4,11 +4,11 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { Appbar, Card, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { bySavedOrder, certId, certStates, COURSE_SCOPE, levelName, levels, type CertStatus, type Course } from '@algo-coach/core';
+import { bySavedOrder, certId, certStates, COURSE_SCOPE, levelName, levels, type CertStatus, type Course, STATE_LABEL } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import { CertRing, CertSheet, STATE_LABEL } from '@/ui/certs';
+import { CertRing, CertSheet } from '@/ui/certs';
 import { useStartSheet } from '@/ui/start';
 import { styles, tones } from '@/ui/common';
 

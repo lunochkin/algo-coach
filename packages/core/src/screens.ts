@@ -94,5 +94,5 @@ export function emptyContinue(o: { blocked: boolean; newLimit: number; focus: Fo
     };
   }
   if (o.focus) return { notice: 'Nothing weak, due or new in the focus.', action: { kind: 'clear-focus', label: 'Clear focus' } };
-  return { notice: 'Nothing due and nothing new unlocked. Try Practice or see Stats.', action: null };
+  return { notice: 'Nothing due and nothing new unlocked. Open a module to start a queue there.', action: null };
 }

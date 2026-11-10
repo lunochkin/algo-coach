@@ -239,6 +239,18 @@ export type CertState =
   | 'earned'
   | 'needs_refresh';
 
+/** A certification's state, as either client names it. */
+export const STATE_LABEL: Record<CertState, string> = {
+  earned: 'Earned',
+  needs_refresh: 'Needs refresh',
+  ready: 'Ready for exam',
+  in_progress: 'In progress',
+  locked: 'Locked',
+  empty: 'No questions',
+  not_certified: 'Practice only',
+  insufficient_pool: 'Not enough questions yet',
+};
+
 export interface CertStatus {
   state: CertState;
   coverage: number; // passed share of the level's questions

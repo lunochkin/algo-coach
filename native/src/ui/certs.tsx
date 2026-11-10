@@ -12,21 +12,11 @@ import {
   levelName,
   shuffle,
   subTitle,
+  STATE_LABEL,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import type { Scope } from '@/ui/start';
 import { startExam, styles, tones } from './common';
-
-export const STATE_LABEL: Record<CertState, string> = {
-  earned: 'Earned',
-  needs_refresh: 'Needs refresh',
-  ready: 'Ready for exam',
-  in_progress: 'In progress',
-  locked: 'Locked',
-  empty: 'No questions',
-  not_certified: 'Practice only',
-  insufficient_pool: 'Not enough questions yet',
-};
 
 export function stateColor(state: CertState, theme: MD3Theme): string {
   const tone = tones(theme.dark);

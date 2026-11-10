@@ -58,7 +58,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Move what the phone's queue screen computes for display into
       `packages/core`: a result's verdict rows, its marks and its detail
       sections. The web's queue would otherwise compute them again
-- [ ] Move what the phone's home computes into `packages/core`: the
+- [x] Move what the phone's home computes into `packages/core`: the
       catalog a client's records build, Continue's counts and the focus
       card's counts. The web's home would otherwise compute them again
 - [ ] Read the web's knowledge home from the copy: the counts line under

@@ -20,6 +20,7 @@ export * from './synced';
 export * from './order';
 export * from './settings';
 export * from './result';
+export * from './home';
 // the engine's API, generated from its OpenAPI schema by `just types`
 export type { components, paths } from './api/schema';
 export * from './screens';
