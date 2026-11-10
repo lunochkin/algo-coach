@@ -346,7 +346,7 @@ times. Each record class is specified in one of the files beside it.
 | [`log.md`](log.md) | Sittings, attempts, attempt verifications, claims, self-labels, diagnoses, card runs, recall attempts, and the mastery derived from them |
 | [`machine.md`](machine.md) | What a model-written record carries, what a generation run's call sites leave, and the call log |
 | [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, starting a card run, solving a rung, recalling a template, adjudicating the eval set |
-| [`pages.md`](pages.md) | The web app's sections and pages, a page's areas, the design system |
+| [`pages.md`](pages.md) | The web app's sections and pages, every screen of both clients and how the two differ, a page's areas, the design system |
 | [`wireframes.md`](wireframes.md) | Each page drawn at low fidelity |
 | [`knowledge.md`](knowledge.md) | Modules, questions, lessons, the schedule, the queues, certifications, and the user's knowledge log |
 
@@ -551,7 +551,9 @@ times. Each record class is specified in one of the files beside it.
     while the app is closed. FSRS replay and the question states therefore
     exist in TypeScript and in Python, held together by the shared fixtures.
   - A sitting and a recall need a keyboard and a wide window, so they stay on
-    the web. Reading code and answering questions suit the phone.
+    the web until a phone layout for writing code exists. Reading code and
+    answering questions suit the phone. `pages.md` lists what each client
+    holds.
   - The web app wrapped in a WebView, as Capacitor ships one, was rejected.
     Code-adjacent work on the phone needs a native keyboard and native
     scrolling, which a WebView does least well.

@@ -269,6 +269,133 @@ platforms.
   opens the certification's four conditions, and offers the exam once the
   other three hold.
 
+## The two clients
+
+Every screen either client holds, in one inventory. `README.md` gives the
+rule: a platform may change how a thing looks and how it is used, and never
+what it offers. The inventory is the list both clients build to.
+
+- **Each row is one screen or one act**, with where it lives on the web and
+  on the phone. `none` marks a client that does not hold it.
+- **A row's status is one of six.**
+  - `same`: both clients offer it.
+  - `by platform`: both offer it, and the interaction differs. The row
+    gives its reason.
+  - `web for now`: held on the web alone until a named trigger moves it to
+    the phone too. The list under the tables names each trigger.
+  - `web only` and `phone only`: held on one client for good, for a reason
+    the list gives.
+  - `to fix`: the clients offer different things, and the list under the
+    tables names the change.
+- **A planned screen counts as held.** A screen `pages.md` gives and the web
+  does not serve yet is listed on the web, so the phone is compared with what
+  the web will offer.
+
+### Screens
+
+| Screen | Web | Phone | Status |
+|---|---|---|---|
+| The board | `/` | none | web for now |
+| A technique's problems | `/techniques/:technique` | none | web for now |
+| The problem listing | `/problems` | none | web for now |
+| A picked problem | `/problems/:problem_id` | none | web for now |
+| A sitting | `/sittings/:sitting_id` | none | web for now |
+| The cards | `/cards` | none | web for now |
+| A card | `/cards/:slug` | none | web for now |
+| A recall | `/cards/:slug/recall/:template` | none | web for now |
+| The knowledge home | `/knowledge` | Home | to fix |
+| A module | `/knowledge/modules/:module` | Map and Stats | to fix |
+| The start sheet | a dialog on the module page | a dialog on Map and Stats | to fix |
+| A queue | `/knowledge/queue` | the quiz screen | same |
+| A lesson a queue offers | read inside the queue | a stop opening the lesson screen | to fix |
+| A level exam's choices | `/knowledge/exam` | Exam | same |
+| An exam and its results | `/knowledge/queue?mode=exam` | the quiz screen | same |
+| The lessons | `/knowledge/lessons` | Lessons | to fix |
+| A lesson | `/knowledge/lessons/:module/:lesson` | Lesson | same |
+| The certifications | `/knowledge/certifications` | Certifications | same |
+| A certification's conditions | a dialog on the certifications | a sheet on Certifications and Map | same |
+| The settings | `/settings` | Settings | to fix |
+| The signed-in apps | a dialog from the account menu | none | to fix |
+| The login | `/login` | Login | same |
+| The privacy policy | `/privacy` | none | web only |
+| The gallery | `/gallery`, in development | none | web only |
+
+### Acts
+
+| Act | Web | Phone | Status |
+|---|---|---|---|
+| Continue | the home | Home | same |
+| Review what a strict focus leaves out | the home's counts line | Home's counts line | same |
+| Raise today's limit | the focus panel and a queue | the focus card and a queue | same |
+| Clear the focus, or make it strict | the focus panel | the focus card | same |
+| Aim the focus at a module | the module page | a module row's menu | to fix |
+| Aim the focus at a topic | the module page | none | to fix |
+| Aim the focus at a subtopic | the module page | a Map node | same |
+| Aim the focus at a certification | a certification's conditions | a certification's sheet | same |
+| Start a filtered queue on a group | a module page cell | a Stats cell | same |
+| Start a filtered queue on a subtopic | the module page | a Map node | to fix |
+| Start a filtered queue on a topic or a module | the module page | none | to fix |
+| Pick a module on the home | none | the course chips | to fix |
+| Order the modules | up and down presses | a drag | by platform |
+| Pause, resume or archive a module | the module page | a module row's menu | to fix |
+| Restore an archived module | none | Settings | to fix |
+| Open a lesson ready to read, or a certification ready for its exam | the home | Home | same |
+| Mark a lesson read or unread | the lesson page | Lesson | same |
+| Set the daily limit and the exam size | the settings page | Settings | same |
+| Set the exam size for one exam | the exam page | Exam | same |
+| Read the sync's state, and sync now | none | Home's footer and Settings | to fix |
+| Sign out, naming unsent records | the account menu and the settings page | Settings | same |
+| Revoke a signed-in app | the signed-in apps | none | to fix |
+| Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
+
+- **A sitting and a recall are web for now.** Each needs a keyboard and a
+  wide window, as `README.md` gives. A phone layout for writing code is the
+  trigger, and none is planned.
+- **A technique's problems, the problem listing and a picked problem follow
+  the sitting.** Each exists to pick a problem, and a pick opens a sitting,
+  so each reaches the phone with the sitting's trigger.
+- **The board, the cards and a card are web for now.** Each reads where the
+  user's practice stands without writing code. The item serving the board and
+  the cards in the native app is the trigger.
+- **The privacy policy and the gallery are web only.** The providers' consent
+  screens link the policy by its URL, and the gallery is a tool for whoever
+  styles the web.
+- **Ordering by drag is the phone's, and up and down presses are the
+  web's.** A drag needs a long press, which a pointer does not hold well.
+- **The engine's address, the device name and the reminder hour are
+  phone only.** Each one is about one phone, and the web reaches the engine
+  it was served from.
+
+### To fix
+
+- **The knowledge home.** The phone's top bar opens Map and Stats besides
+  Lessons, Certifications and Settings. The web's home links Lessons and
+  Certifications alone, and a module row opens the module. The two homes
+  then reach the same screens by different routes.
+- **A module.** The web shows one page per module. The phone shows Map, one
+  module's graph, and Stats, every module's cells together. Stats is the only
+  screen on either client showing every module's groups at once.
+- **The start sheet.** The web opens it on a group, a subtopic, a topic and
+  the whole module. The phone opens it on a group and a subtopic, and on a
+  certification's short group.
+- **A lesson a queue offers.** The web reads the lesson inside the queue. The
+  phone stops the queue on the lesson's title and opens the lesson screen on
+  Read.
+- **The lessons.** The web lists every module's lessons by module. The phone
+  shows one module's lessons, picked by a chip.
+- **The settings.** The phone's Settings also restores an archived module and
+  syncs on a press. The web's settings page does neither.
+- **The signed-in apps.** The web lists and revokes them. The phone has no way
+  to cut off another phone.
+- **Aiming the focus.** The phone aims at a module from a row's menu, and
+  cannot aim at a topic. The web aims at both from the module page.
+- **Picking a module on the home.** The phone's course chips narrow Continue
+  to one module and set the focus aside. The web has no such pick.
+- **A module's status.** The web sets it on the module page. The phone sets
+  it from a module row's menu.
+- **The sync's state.** The phone names the last sync and its error, and
+  syncs on a press. The web syncs on load and on return, and names neither.
+
 ## A page's areas
 
 - **A page carries a header and a body.** The header holds the way back, the

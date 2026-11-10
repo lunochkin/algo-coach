@@ -81,7 +81,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 
 ### The engine on the phone
 
-- [ ] Write the native app's screens into `pages.md` as a section of their
+- [x] Write the native app's screens into `pages.md` as a section of their
       own, beside the web's
 - [ ] Add tabs to the native app, once it holds more than the knowledge
       modules
