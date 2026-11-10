@@ -1,0 +1,330 @@
+import { Maximize, Minus, Plus } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+
+import {
+  alsoNeeds,
+  certPips,
+  certStates,
+  groupCell,
+  layoutClusters,
+  lessonView,
+  levelDots,
+  levelName,
+  levels,
+  MAP_DIMS,
+  mapLit,
+  STATE_LABEL,
+  subTitle,
+  topicTitle,
+  unlocksLabel,
+  type Board,
+  type CellState,
+  type CertState,
+  type Course,
+  type Focus,
+  type PlacedNode,
+} from '@algo-coach/core'
+
+import { Panel } from '@/components/Panel'
+import { Button } from '@/components/ui/button'
+import { Toggle } from '@/components/ui/toggle'
+import { cn } from '@/lib/utils'
+
+const W = MAP_DIMS.nodeW
+const H = MAP_DIMS.nodeH
+const ZOOMS = [0.5, 0.75, 1, 1.25]
+
+// progress reads in the flame, as the groups table reads it; what cannot serve
+// reads muted
+const DOT: Record<CellState, string> = {
+  covered: 'fill-brand stroke-brand',
+  open: 'fill-foreground stroke-foreground',
+  locked: 'fill-muted-foreground/30 stroke-muted-foreground/50',
+  empty: 'fill-none stroke-border',
+}
+const PIP: Record<CertState, string> = {
+  earned: 'fill-brand stroke-brand',
+  needs_refresh: 'fill-brand-wash stroke-brand',
+  ready: 'fill-brand-deep stroke-brand-deep',
+  in_progress: 'fill-foreground/60 stroke-foreground',
+  locked: 'fill-muted stroke-muted-foreground/50',
+  empty: 'fill-none stroke-border',
+  not_certified: 'fill-none stroke-muted-foreground',
+  insufficient_pool: 'fill-brand-wash stroke-brand',
+}
+
+type Props = {
+  c: Course
+  b: Board
+  focus: Focus | null
+  certExams: Parameters<typeof certStates>[2]
+  onStart: (topic: string, sub: string) => void
+  onAim: (topic: string, sub: string) => void
+}
+
+// a module's prerequisite graph, laid out by the core as the phone lays it out:
+// `pages.md`, The structure
+export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
+  const [withLessons, setWithLessons] = useState(false)
+  const [zoom, setZoom] = useState(2)
+  const [picked, setPicked] = useState<string | null>(null)
+  const box = useRef<HTMLDivElement>(null)
+  const layout = useMemo(() => layoutClusters(c, c.graph!, MAP_DIMS, withLessons), [c, withLessons])
+  const at = useMemo(() => new Map(layout.nodes.map((n) => [n.sub, n])), [layout])
+  const states = useMemo(() => (c.certs ? certStates(b, c, certExams) : new Map()), [b, c, certExams])
+  const dots = useMemo(() => levelDots(b, c, layout.nodes), [b, c, layout])
+  const pips = useMemo(() => certPips(c, states, layout.nodes), [c, states, layout])
+  const lit = useMemo(() => mapLit(c, layout, picked, focus), [c, layout, picked, focus])
+  const titles = useMemo(() => new Map([...c.topics.map((t) => [t.slug, t.title] as const), ['all', c.title] as const]), [c])
+  const scale = ZOOMS[zoom]
+
+  // opens on the first group with new work, as the phone's map does
+  useEffect(() => {
+    const first = b.frontier(c)[0]
+    const n = first ? at.get(first.sub) : undefined
+    const el = box.current
+    if (!n || !el) return
+    el.scrollLeft = (n.x + W / 2) * scale - el.clientWidth / 2
+    el.scrollTop = (n.y + H / 2) * scale - el.clientHeight / 3
+    // the first frame alone: a later zoom keeps the reader's place
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const on = (k: string) => !lit || lit.has(k)
+  const sel = picked ? at.get(picked) : undefined
+
+  return (
+    <div className="space-y-stack">
+      <div className="flex flex-wrap items-center gap-stack text-meta">
+        <Legend tone={DOT.covered} label="covered" />
+        <Legend tone={DOT.open} label="open" />
+        <Legend tone={DOT.locked} label="locked" />
+        <Legend tone={DOT.empty} label="no questions" />
+        <span className="flex-1" />
+        {(c.graph?.lessons.length ?? 0) > 0 && (
+          <Toggle size="sm" variant="outline" pressed={withLessons} onPressedChange={setWithLessons}>
+            Lessons
+          </Toggle>
+        )}
+        <Button variant="ghost" size="icon-sm" aria-label="Zoom out" disabled={zoom === 0} onClick={() => setZoom(zoom - 1)}>
+          <Minus />
+        </Button>
+        <Button variant="ghost" size="icon-sm" aria-label="Zoom in" disabled={zoom === ZOOMS.length - 1} onClick={() => setZoom(zoom + 1)}>
+          <Plus />
+        </Button>
+        <Button variant="ghost" size="icon-sm" aria-label="Fit the map" onClick={() => setZoom(0)}>
+          <Maximize />
+        </Button>
+      </div>
+
+      <div ref={box} className="h-[60vh] overflow-auto rounded-xl border bg-background">
+        <svg
+          width={layout.width * scale}
+          height={layout.height * scale}
+          viewBox={`0 0 ${layout.width} ${layout.height}`}
+          onClick={() => setPicked(null)}
+          role="img"
+          aria-label={`The prerequisite map of ${c.title}`}
+        >
+          {layout.clusters.map((k) => (
+            <g key={k.topic} opacity={on(`cluster:${k.topic}`) ? 1 : 0.35}>
+              <rect x={k.x} y={k.y} width={k.w} height={k.h} rx={18} className="fill-card stroke-border" />
+              <text x={k.x + 16} y={k.y + 22} className="fill-brand-deep text-[14px]">
+                {titles.get(k.topic) ?? k.topic}
+              </text>
+            </g>
+          ))}
+          {layout.edges.map((e) => {
+            const a = at.get(e.from)
+            const into = e.to.startsWith('cluster:') ? layout.clusters.find((k) => k.topic === e.to.slice(8)) : undefined
+            const z = into ? { x: into.x, y: into.y + into.h / 2 - H / 2 } : at.get(e.to)
+            if (!a || !z) return null
+            const [x1, y1, x2, y2] = [a.x + W, a.y + H / 2, z.x, z.y + H / 2]
+            const mid = (x1 + x2) / 2
+            const shown = on(e.from) && on(e.to)
+            const dashed = e.kind === 'teaches' ? '2 3' : e.offset || e.from.startsWith('cert:') ? '6 4' : undefined
+            return (
+              <path
+                key={`${e.from}>${e.to}`}
+                d={`M${x1},${y1} C${mid},${y1} ${mid},${y2} ${x2},${y2}`}
+                fill="none"
+                strokeDasharray={dashed}
+                strokeWidth={shown && lit ? 2 : 1.2}
+                opacity={shown ? 0.9 : 0.12}
+                className={shown && lit ? 'stroke-brand-deep' : e.kind === 'teaches' ? 'stroke-brand' : 'stroke-muted-foreground'}
+              />
+            )
+          })}
+          {layout.nodes.map((n) => (
+            <Node
+              key={n.sub}
+              n={n}
+              c={c}
+              b={b}
+              title={n.kind === 'cert' ? (titles.get(n.topic) ?? n.topic) : subTitle(c, n.sub)}
+              dots={dots.get(n.sub) ?? []}
+              pips={pips.get(n.sub) ?? []}
+              entry={layout.outside.has(n.sub)}
+              picked={n.sub === picked}
+              dim={!on(n.sub)}
+              onPick={() => setPicked(n.sub === picked ? null : n.sub)}
+            />
+          ))}
+        </svg>
+      </div>
+
+      {sel && <Picked n={sel} c={c} b={b} states={states} focus={focus} onStart={onStart} onAim={onAim} />}
+    </div>
+  )
+}
+
+function Legend({ tone, label }: { tone: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1">
+      <svg width={10} height={10} aria-hidden>
+        <circle cx={5} cy={5} r={4} className={tone} strokeWidth={1.2} />
+      </svg>
+      {label}
+    </span>
+  )
+}
+
+const cut = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s)
+
+function Node(props: {
+  n: PlacedNode
+  c: Course
+  b: Board
+  title: string
+  dots: (CellState | null)[]
+  pips: { letter: string; state: CertState; filled: boolean }[]
+  entry: boolean
+  picked: boolean
+  dim: boolean
+  onPick: () => void
+}) {
+  const { n, picked } = props
+  const ring = picked ? 'stroke-brand-deep' : 'stroke-border'
+  const select = (event: React.MouseEvent) => {
+    event.stopPropagation()
+    props.onPick()
+  }
+  const lesson = n.kind === 'lesson' ? props.c.graph?.lesson(n.sub.slice(7)) : undefined
+  return (
+    <g
+      opacity={props.dim ? 0.2 : 1}
+      onClick={select}
+      className="cursor-pointer"
+      role="button"
+      aria-label={n.kind === 'lesson' ? `Lesson: ${lesson?.title ?? n.sub}` : props.title}
+    >
+      {n.kind === 'cert' ? (
+        <>
+          <rect x={n.x} y={n.y} width={W} height={H} rx={H / 2} className={cn('fill-brand-wash/50', ring)} strokeWidth={picked ? 2.5 : 1.5} />
+          <text x={n.x + 18} y={n.y + 22} className="fill-foreground text-[13px]">
+            {cut(props.title, 20)}
+          </text>
+          {props.pips.map((p, i) => (
+            <g key={p.letter}>
+              <circle cx={n.x + 26 + i * 26} cy={n.y + H - 15} r={9} className={PIP[p.state]} strokeWidth={1.2} opacity={p.filled ? 1 : 0.6} />
+              <text x={n.x + 22.5 + i * 26} y={n.y + H - 11} className="fill-foreground text-[10px]">
+                {p.letter}
+              </text>
+            </g>
+          ))}
+        </>
+      ) : n.kind === 'lesson' ? (
+        <>
+          <rect x={n.x} y={n.y} width={W} height={H} rx={4} className={cn('fill-brand-wash', ring)} strokeWidth={picked ? 2.5 : 2} />
+          <text x={n.x + 20} y={n.y + 22} className="fill-muted-foreground text-[12px]">
+            {lesson ? `lesson · ${props.b.lessonState(props.c, lesson)}` : 'lesson'}
+          </text>
+          <text x={n.x + 20} y={n.y + 40} className="fill-foreground text-[13px]">
+            {cut(lesson?.title ?? n.sub, 19)}
+          </text>
+        </>
+      ) : (
+        <>
+          <rect x={n.x} y={n.y} width={W} height={H} rx={12} className={cn(picked ? 'fill-brand-wash' : 'fill-muted', ring)} strokeWidth={picked ? 2 : 1} />
+          <text x={n.x + 12} y={n.y + 22} className="fill-foreground text-[13px]">
+            {cut(props.title, 21)}
+          </text>
+          {/* the subtopic also needs subtopics of other topics, through its cluster's edge */}
+          {props.entry && (
+            <path d={`M${n.x - 6},${n.y + H / 2 - 5} L${n.x},${n.y + H / 2} L${n.x - 6},${n.y + H / 2 + 5}`} fill="none" strokeWidth={2} className="stroke-muted-foreground" />
+          )}
+          {props.dots.map((state, i) => (
+            <circle key={i} cx={n.x + 18 + i * 16} cy={n.y + H - 14} r={5} strokeWidth={1.2} className={DOT[state ?? 'empty']} />
+          ))}
+        </>
+      )}
+    </g>
+  )
+}
+
+// what the picked node offers, as the phone's node card does
+function Picked(props: {
+  n: PlacedNode
+  c: Course
+  b: Board
+  states: Map<string, { state: CertState }>
+  focus: Focus | null
+  onStart: (topic: string, sub: string) => void
+  onAim: (topic: string, sub: string) => void
+}) {
+  const { n, c, b } = props
+  if (n.kind === 'lesson') {
+    const v = lessonView(b, c, n.sub.slice(7))
+    if (!v) return null
+    return (
+      <Panel>
+        <p className="font-medium">{v.title}</p>
+        <p className="text-meta text-muted-foreground">Lesson · {v.state}</p>
+        <p className="text-meta">{v.teaches}</p>
+        {v.needs && <p className="text-meta">{v.needs}</p>}
+        {v.pretest && <p className="text-meta text-muted-foreground">{v.pretest}</p>}
+      </Panel>
+    )
+  }
+  if (n.kind === 'cert') {
+    const certs = (c.certs?.certs ?? []).filter((x) => x.scope === n.topic && x.certified)
+    return (
+      <Panel>
+        <p className="font-medium">{n.topic === 'all' ? c.title : topicTitle(c, n.topic)}</p>
+        {certs.map((x) => (
+          <p key={x.id} className="text-meta">
+            {levelName(b.rules, x.level)}: {STATE_LABEL[props.states.get(x.id)?.state ?? 'locked']}
+          </p>
+        ))}
+      </Panel>
+    )
+  }
+  const aimed = props.focus?.course === c.slug && !props.focus.cert && props.focus.sub === n.sub
+  const outside = alsoNeeds(c, n.sub, n.topic)
+  const unlocks = unlocksLabel(c, n.sub)
+  return (
+    <Panel>
+      <div>
+        <p className="font-medium">{subTitle(c, n.sub)}</p>
+        <p className="text-meta text-muted-foreground">{topicTitle(c, n.topic)}</p>
+      </div>
+      <div className="space-y-0.5 text-meta">
+        {levels(b.rules).map((level) => (
+          <p key={level}>
+            {levelName(b.rules, level)}: {groupCell(b, { course: c.slug, topic: n.topic, sub: n.sub, level }).line}
+          </p>
+        ))}
+        {outside.length > 0 && <p className="text-muted-foreground">Also needs: {outside.join(', ')}</p>}
+        {unlocks && <p className="text-muted-foreground">{unlocks}</p>}
+      </div>
+      <div className="flex gap-stack">
+        <Button size="sm" onClick={() => props.onStart(n.topic, n.sub)}>
+          Start
+        </Button>
+        <Button variant="outline" size="sm" disabled={aimed} onClick={() => props.onAim(n.topic, n.sub)}>
+          {aimed ? 'Focused' : 'Focus here'}
+        </Button>
+      </div>
+    </Panel>
+  )
+}

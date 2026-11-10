@@ -13,16 +13,23 @@ import { cancelAnimation, useSharedValue, withDecay } from 'react-native-reanima
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
+  alsoNeeds,
   type Board,
+  certPips,
   certStates,
   type CertStatus,
+  certToOpen as openedCert,
   type Course,
   groupCell,
   layoutClusters,
+  lessonView,
   levelCounts,
+  levelDots,
   levelName,
   levels,
   lineage,
+  MAP_DIMS,
+  mapLit,
   subTitle,
   summary,
   topicTitle,
@@ -36,8 +43,6 @@ import { ModuleGroups } from '@/ui/groups';
 import { useArchive, usePauseToggle } from '@/ui/pause';
 import { useStartSheet, type Scope } from '@/ui/start';
 
-const COL = 200;
-const ROW = 74;
 const MIN_SCALE = 0.25;
 const MAX_SCALE = 2.5;
 const MAX_FLING = 6000; // pt/s
@@ -158,26 +163,6 @@ export default function ModuleScreen() {
   );
 }
 
-const DIMS = { nodeW: NODE_W, nodeH: NODE_H, col: COL, row: ROW, pad: 16, header: 32, gapX: 96, gapY: 40 };
-const LETTERS = ['F', 'A', 'P', 'E'];
-
-/** Subtopics upstream (`up`) or downstream of `start` in the real prerequisite graph. */
-function reach(c: Course, start: string[], up: boolean): Set<string> {
-  const out = new Set(start);
-  const stack = [...start];
-  while (stack.length) {
-    const s = stack.pop()!;
-    for (const [f, t] of c.graph?.edges ?? []) {
-      const next = up ? (f === s ? t : null) : t === s ? f : null;
-      if (next && !out.has(next)) {
-        out.add(next);
-        stack.push(next);
-      }
-    }
-  }
-  return out;
-}
-
 function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: boolean }) {
   const { c, b, bottom, withLessons } = props;
   const st = useStore();
@@ -187,7 +172,7 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
   );
   const theme = useTheme();
   const tone = tones(theme.dark);
-  const layout = useMemo(() => layoutClusters(c, c.graph!, DIMS, withLessons), [c, withLessons]);
+  const layout = useMemo(() => layoutClusters(c, c.graph!, MAP_DIMS, withLessons), [c, withLessons]);
   const { nodes, width, height } = layout;
   const at = useMemo(() => new Map(nodes.map((n) => [n.sub, n])), [nodes]);
   const lv = levels(b.rules);
@@ -197,54 +182,16 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
     () => new Map([...c.topics.map((t) => [t.slug, t.title] as const), ['all', c.title] as const]),
     [c],
   );
-  // A certificate node stands for its scope's certified levels; a tap opens the next one to earn.
-  const scopeCerts = useCallback(
-    (scope: string) => (c.certs?.certs ?? []).filter((x) => x.scope === scope && x.certified),
-    [c],
-  );
+  // a certificate node stands for its scope's certified levels; a tap opens the next one to earn
   const pips = useMemo(() => {
     const out = new Map<string, CertPip[]>();
-    for (const n of nodes) {
-      if (n.kind !== 'cert') continue;
-      out.set(
-        n.sub,
-        scopeCerts(n.topic).map((x) => {
-          const state = certState.get(x.id)?.state ?? 'locked';
-          return { letter: LETTERS[x.level], color: stateColor(state, theme), filled: state === 'earned' };
-        }),
-      );
+    for (const [sub, xs] of certPips(c, certState, nodes)) {
+      out.set(sub, xs.map((x) => ({ letter: x.letter, color: stateColor(x.state, theme), filled: x.filled })));
     }
     return out;
-  }, [nodes, scopeCerts, certState, theme]);
-  const certToOpen = (scope: string): string | null => {
-    const xs = scopeCerts(scope);
-    const next = xs.find((x) => !['earned', 'empty'].includes(certState.get(x.id)?.state ?? ''));
-    return (next ?? xs.at(-1))?.id ?? null;
-  };
-  // Lit: the picked node's real lineage across clusters, with the clusters and certificate nodes
-  // it passes through; with nothing picked, a targeted certificate's scope.
-  const lit = useMemo(() => {
-    const around = (subs: Set<string>, extra: string[]) => {
-      const out = new Set<string>([...subs, ...extra]);
-      for (const s of subs) {
-        const t = c.topics.find((x) => x.subs.includes(s))?.slug;
-        if (t) out.add(`cluster:${t}`).add(`cert:${t}`);
-      }
-      return out;
-    };
-    if (picked?.startsWith('lesson:')) return lineage(layout.edges, picked);
-    if (picked === 'cert:all') return null;
-    if (picked?.startsWith('cert:')) {
-      const own = c.topics.find((t) => t.slug === picked.slice(5))?.subs ?? [];
-      return around(reach(c, own, true), [picked]);
-    }
-    if (picked) return around(new Set([...reach(c, [picked], true), ...reach(c, [picked], false)]), []);
-    const f = st.focus;
-    if (f?.cert && f.course === c.slug && f.scope) {
-      return around(new Set([...f.scope].map((g) => g.slice(0, g.lastIndexOf('@')))), [`cert:${f.topic ?? 'all'}`]);
-    }
-    return null;
-  }, [picked, layout, c, st.focus]);
+  }, [c, certState, nodes, theme]);
+  const certToOpen = (scope: string) => openedCert(c, certState, scope);
+  const lit = useMemo(() => mapLit(c, layout, picked, st.focus), [c, layout, picked, st.focus]);
 
   const tx = useSharedValue(0);
   const ty = useSharedValue(0);
@@ -372,23 +319,14 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
   });
   const gestures = useSimultaneousGestures(pan, pinch, tap);
 
-  // Level dots need scheduling queries: compute them once per board, not on every selection.
+  // level dots need scheduling queries: computed once per board, not on every selection
   const dots = useMemo(() => {
+    const color = { covered: tone.done, open: tone.open, locked: theme.colors.onSurfaceDisabled, empty: null };
     const out = new Map<string, (string | null)[]>();
-    for (const n of nodes) {
-      if (n.kind !== 'quiz') continue;
-      out.set(
-        n.sub,
-        lv.map((level) => {
-          const g = { course: c.slug, topic: n.topic, sub: n.sub, level };
-          if (!b.groupQuestions(g).length) return null;
-          return b.done(g) ? tone.done : b.unlocked(g) ? tone.open : theme.colors.onSurfaceDisabled;
-        }),
-      );
-    }
+    for (const [sub, xs] of levelDots(b, c, nodes)) out.set(sub, xs.map((x) => (x ? color[x] : null)));
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodes, b, c.slug, theme.dark]);
+  }, [nodes, b, c, theme.dark]);
   const sel = picked ? at.get(picked) : undefined;
 
   return (
@@ -477,11 +415,7 @@ function NodePanel(props: {
   const aimed = st.focus?.course === c.slug && st.focus.sub === sub && !st.focus.cert;
   const theme = useTheme();
   const unlocks = unlocksLabel(c, sub);
-  // Prerequisites in other topics: the map draws them only as the certificate edge into the cluster.
-  const outside = (c.graph?.needs(sub) ?? [])
-    .map(([to]) => [to, c.topics.find((t) => t.subs.includes(to))?.slug] as const)
-    .filter(([, t]) => t && t !== topic)
-    .map(([to, t]) => `${to} (${t})`);
+  const outside = alsoNeeds(c, sub, topic);
   return (
     <Card mode="elevated" style={{ margin: 12, marginBottom: bottom + 12 }}>
       <Card.Title title={subTitle(c, sub)} subtitle={topicTitle(c, topic)} />
@@ -530,23 +464,17 @@ function NodePanel(props: {
 function LessonPanel(props: { c: Course; b: Board; slug: string; bottom: number }) {
   const { c, b, slug, bottom } = props;
   const theme = useTheme();
-  const x = c.graph?.lesson(slug);
-  if (!x) return null;
-  const state = b.lessonState(c, x);
-  const levelOf = (ref: string) => {
-    const at = ref.lastIndexOf('@');
-    return `${ref.slice(0, at)} · ${levelName(b.rules, Number(ref.slice(at + 1)))}`;
-  };
-  const needs = x.needs.map((r) => (r.startsWith('lesson:') ? `lesson ${c.graph?.lesson(r.slice(7))?.title ?? r}` : levelOf(r)));
+  const v = lessonView(b, c, slug);
+  if (!v) return null;
   return (
     <Card mode="elevated" style={{ margin: 12, marginBottom: bottom + 12 }}>
-      <Card.Title title={x.title} subtitle={`Lesson · ${state}`} />
+      <Card.Title title={v.title} subtitle={`Lesson · ${v.state}`} />
       <Card.Content style={{ gap: 2 }}>
-        <Text variant="bodySmall">{`Teaches: ${x.teaches.map(([s, l]) => `${s} · ${levelName(b.rules, l)}`).join(', ')}`}</Text>
-        {needs.length ? <Text variant="bodySmall">{`Needs: ${needs.join(', ')}`}</Text> : null}
-        {state !== 'done' ? (
+        <Text variant="bodySmall">{v.teaches}</Text>
+        {v.needs ? <Text variant="bodySmall">{v.needs}</Text> : null}
+        {v.pretest ? (
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            {`Pretest: ${Math.min(b.tried(c, x), x.pretest)}/${x.pretest} questions tried`}
+            {v.pretest}
           </Text>
         ) : null}
       </Card.Content>

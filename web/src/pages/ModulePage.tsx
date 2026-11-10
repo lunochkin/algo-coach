@@ -18,6 +18,7 @@ import {
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +31,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { loadedFrom, useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
+import { ModuleMap } from '@/knowledge/ModuleMap'
 import { StartSheet, type Scope } from '@/knowledge/StartSheet'
 import { cn } from '@/lib/utils'
 
@@ -49,7 +51,8 @@ export function ModulePage() {
   const { module = '' } = useParams()
   const k = useKnowledge()
   const navigate = useNavigate()
-  const { catalog, focus, board, now } = useLearner()
+  const { catalog, focus, board, now, certExams } = useLearner()
+  const [tab, setTab] = useState<'groups' | 'map'>('groups')
   const [archiving, setArchiving] = useState(false)
   const [starting, setStarting] = useState<Scope | null>(null)
 
@@ -128,7 +131,37 @@ export function ModulePage() {
               )}
             </p>
 
-            {c.topics.map((t) => (
+            {/* the groups and the map are two tabs of one page: `pages.md`, The structure */}
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              value={tab}
+              onValueChange={(v) => v && setTab(v as 'groups' | 'map')}
+            >
+              <ToggleGroupItem value="groups">Groups</ToggleGroupItem>
+              <ToggleGroupItem value="map">Map</ToggleGroupItem>
+            </ToggleGroup>
+
+            {tab === 'map' &&
+              (c.graph ? (
+                <ModuleMap
+                  c={c}
+                  b={b}
+                  focus={focus}
+                  certExams={certExams}
+                  onStart={(topic, sub) => setStarting({ course: module, topic, sub, level: null })}
+                  onAim={(topic, sub) => aim({ course: module, topic, sub })}
+                />
+              ) : (
+                <p className="text-meta text-muted-foreground">
+                  {c.graphErrors.length
+                    ? `The prerequisite graph of ${c.title} is invalid and ignored: ${c.graphErrors[0]}`
+                    : `${c.title} has no prerequisite graph.`}
+                </p>
+              ))}
+
+            {tab === 'groups' && c.topics.map((t) => (
               <section key={t.slug} className="space-y-stack">
                 <div className="flex items-baseline gap-stack">
                   <h2 className="flex-1 text-heading font-medium">

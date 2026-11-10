@@ -78,7 +78,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       subtopic's name, and Start beside a topic and the module. Serve its
       queue at `?mode=filtered` with the choices in the query. Starting moves
       no focus
-- [ ] Add the map to the web's module page beside its groups, from the
+- [x] Add the map to the web's module page beside its groups, from the
       layout `packages/core` computes for the phone
 - [ ] Add the sync's state, a sync press and the archived modules' restore
       to the web's settings page, as the phone's Settings holds them

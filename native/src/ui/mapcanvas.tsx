@@ -19,12 +19,13 @@ import { Platform, StyleSheet } from 'react-native';
 import { useTheme, type MD3Theme } from 'react-native-paper';
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 
-import { subTitle, type Board, type ClusterBox, type Course, type MapEdge } from '@algo-coach/core';
+import { MAP_DIMS, subTitle, type Board, type ClusterBox, type Course, type MapEdge } from '@algo-coach/core';
 
 import { tones } from './common';
 
-export const NODE_W = 164;
-export const NODE_H = 56;
+// the sizes the core lays the map out at
+export const NODE_W = MAP_DIMS.nodeW;
+export const NODE_H = MAP_DIMS.nodeH;
 
 export interface Placed {
   sub: string; // subtopic slug, "lesson:<slug>" or a certificate id

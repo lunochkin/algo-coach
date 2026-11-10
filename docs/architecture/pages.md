@@ -315,9 +315,9 @@ Account       the settings, the signed-in apps, the sign-out
   module row opens the module. The lessons, the certifications and every
   module are then steps down from the home on each client.
 - **A module's page holds its groups and its map.** The groups read as a
-  table of subtopics by level, and the map draws the prerequisite graph. A
-  wide window can show the two side by side, and a narrow one shows them as
-  two tabs of the page.
+  table of subtopics by level, and the map draws the prerequisite graph. The
+  two are tabs of the page on both clients, since the map wants the page's
+  whole width.
 - **A module's focus, status and start sheet sit on the module's page.** The
   home's module row opens the module, and offers nothing else.
 - **No page shows every module's groups at once.** The home names each
@@ -366,7 +366,7 @@ what it offers. The inventory is the list both clients build to.
 | A card | `/cards/:slug` | none | web for now |
 | A recall | `/cards/:slug/recall/:template` | none | web for now |
 | The knowledge home | `/knowledge` | Home | same |
-| A module | `/knowledge/modules/:module` | Module | to fix |
+| A module | `/knowledge/modules/:module` | Module | same |
 | The start sheet | a dialog on the module page | a dialog on Module | same |
 | A queue | `/knowledge/queue` | the quiz screen | same |
 | A lesson a queue offers | read inside the queue | a stop opening the lesson screen | to fix |
@@ -432,9 +432,6 @@ what it offers. The inventory is the list both clients build to.
 `## The structure` settles most of these. Each names what holds now, then
 the change.
 
-- **A module's map.** The phone's module screen holds the groups and the
-  map, as two tabs. The web's module page holds the groups alone, and gains
-  the map beside them.
 - **The lessons.** The web lists every module's lessons by module. The phone
   shows one module's lessons, picked by a chip. The phone moves to the web's
   list.
