@@ -256,9 +256,11 @@ platforms.
 - **An answered question offers its detail on a press**: how it works, the
   example, the pitfalls, the version notes and the diagram, each where the
   question carries one.
-- **A lesson the queue offers reads inside the queue**, with Mark read and
-  Later as its presses. The reader then meets the lesson where the queue
-  holds back its new questions, without leaving the queue to find it.
+- **A lesson the queue offers is a stop in the queue**, on both clients: the
+  lesson's title, why it is offered, and Read and Later as its presses. Read
+  opens the lesson's page, and its way back returns to the queue. The lesson
+  page is the one place a lesson is read, with its minutes, Mark read and
+  its links to other lessons.
 - **An open question reveals its key on a press.** The user then ticks the
   points recalled, the traps fallen into, and whether they said anything else
   wrong. `knowledge.md` gives the grade the ticks make.
@@ -296,7 +298,7 @@ Knowledge     the home
                 a queue, an exam
                 the lessons, a lesson
                 the certifications, a certification's conditions
-Account       the settings, the signed-in apps, the sign-out
+Account       the settings, the sign-out, the signed-in apps on the web
 ```
 
 - **The four sections are the destinations both clients name.** The web
@@ -305,8 +307,8 @@ Account       the settings, the signed-in apps, the sign-out
   the tree rather than a tree of its own.
 - **Account sits apart from the sections on both clients.** The web opens it
   from the account menu, and the phone from its top bar. Account holds the
-  settings, the signed-in apps and the sign-out, since none of the three is a
-  place to practise.
+  settings, the sign-out and, on the web, the signed-in apps, since none of
+  the three is a place to practise.
 - **A section's root is the only page the navigation reaches.** Every other
   page is a step down with one way back, as `## Sections` gives. A shortcut
   from the navigation to a page deeper in the tree would give that page two
@@ -377,7 +379,7 @@ what it offers. The inventory is the list both clients build to.
 | The certifications | `/knowledge/certifications` | Certifications | same |
 | A certification's conditions | a dialog on the certifications | a sheet on Certifications and Map | same |
 | The settings | `/settings` | Settings | to fix |
-| The signed-in apps | a dialog from the account menu | none | to fix |
+| The signed-in apps | a dialog from the account menu | none | web only |
 | The login | `/login` | Login | same |
 | The privacy policy | `/privacy` | none | web only |
 | The gallery | `/gallery`, in development | none | web only |
@@ -406,7 +408,7 @@ what it offers. The inventory is the list both clients build to.
 | Set the exam size for one exam | the exam page | Exam | same |
 | Read the sync's state, and sync now | none | Home's footer and Settings | to fix |
 | Sign out, naming unsent records | the account menu and the settings page | Settings | same |
-| Revoke a signed-in app | the signed-in apps | none | to fix |
+| Revoke a signed-in app | the signed-in apps | none | web only |
 | Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
 
 - **A sitting and a recall are web for now.** Each needs a keyboard and a
@@ -418,6 +420,10 @@ what it offers. The inventory is the list both clients build to.
 - **The board, the cards and a card are web for now.** Each reads where the
   user's practice stands without writing code. The item serving the board and
   the cards in the native app is the trigger.
+- **The signed-in apps are web only.** An app token reaches the knowledge
+  endpoints alone, as `README.md` gives, so a phone cannot list or revoke
+  apps. A lost phone is cut off from the web, where its own token cannot
+  reach.
 - **The privacy policy and the gallery are web only.** The providers' consent
   screens link the policy by its URL, and the gallery is a tool for whoever
   styles the web.
@@ -438,11 +444,9 @@ the change.
 - **The settings.** The phone's Settings restores an archived module, names
   the sync's state and syncs on a press. The web's settings page gains all
   three.
-- **The signed-in apps.** The web lists and revokes them. The phone gains the
-  same list under its account menu.
 - **A lesson a queue offers.** The web reads the lesson inside the queue. The
-  phone stops the queue on the lesson's title and opens the lesson screen on
-  Read. Which of the two both clients do is decided apart from the structure.
+  phone stops on the lesson's title and opens the lesson screen on Read. The
+  web moves to the phone's stop once its lesson page exists.
 
 ## A page's areas
 

@@ -80,9 +80,24 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       no focus
 - [x] Add the map to the web's module page beside its groups, from the
       layout `packages/core` computes for the phone
+- [x] Mark the signed-in apps web only in `pages.md`: an app token reaches
+      the knowledge endpoints alone, so a phone cannot list or revoke apps
+- [x] Decide how a queue offers a lesson on both clients, and write it into
+      `pages.md`
+- [ ] Add the lessons to the web: `/knowledge/lessons` by module, the lesson
+      page with Mark read and unread, the home's ready-lesson link, and the
+      queue's lesson stop opening the page
+- [ ] Add the certifications to the web: the grid, a certification's
+      conditions with its exam and its focus press, and the home's
+      ready-certification link
+- [ ] Move what the phone's exam screens compute into `packages/core`: the
+      sample, the results by topic and the missed answers
+- [ ] Serve exams on the web: the level exam's page, the exam at
+      `?mode=exam` with its results, and the home's Exam press
 - [ ] Add the sync's state, a sync press and the archived modules' restore
       to the web's settings page, as the phone's Settings holds them
-- [ ] Serve lessons, certifications and exams on the web
+- [ ] Name one review and one new question in the singular in the core's
+      count lines. Both clients read "1 reviews" today
 
 ### The engine on the phone
 
@@ -95,7 +110,6 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       map, with the focus, the status and the start sheet on its four
       scopes. Stats, the row menu and the course chips go
 - [ ] List the phone's lessons by module, as the web does
-- [ ] Add the signed-in apps to the phone's account menu
 - [ ] Serve the board and the cards in the native app
 
 ### Exit
