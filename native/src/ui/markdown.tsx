@@ -34,6 +34,12 @@ export class CodeRenderer extends Renderer {
     return <InlineCode key={this.getKey()} text={text} style={rest} size={CODE_SCALE * 16} />;
   }
 
+  // a newline inside a paragraph is a soft break, which markdown reads as a
+  // space: a hard break reaches `br` instead
+  text(text: string | ReactNode[], style?: TextStyle): ReactNode {
+    return super.text(typeof text === 'string' ? text.replace(/\n/g, ' ') : text, style);
+  }
+
   heading(children: string | ReactNode[], style?: TextStyle): ReactNode {
     const size = CODE_SCALE * (style?.fontSize ?? 16);
     const scaled = Array.isArray(children)
