@@ -213,7 +213,7 @@ platforms.
   and never widens one, so a scope no press opens is a drill nobody can
   start.
 - **The start sheet replaces a screen of choices.** A screen of its own drew
-  the module's groups a second time, beside the Map and Stats that draw them
+  the module's groups a second time, beside the module's page that draws them
   already.
 - **The press that opens the sheet reads Start.** Practice names the board's
   section on the web, and one word naming two places would send a reader to
@@ -366,8 +366,8 @@ what it offers. The inventory is the list both clients build to.
 | A card | `/cards/:slug` | none | web for now |
 | A recall | `/cards/:slug/recall/:template` | none | web for now |
 | The knowledge home | `/knowledge` | Home | same |
-| A module | `/knowledge/modules/:module` | Map and Stats | to fix |
-| The start sheet | a dialog on the module page | a dialog on Map and Stats | to fix |
+| A module | `/knowledge/modules/:module` | Module | to fix |
+| The start sheet | a dialog on the module page | a dialog on Module | same |
 | A queue | `/knowledge/queue` | the quiz screen | same |
 | A lesson a queue offers | read inside the queue | a stop opening the lesson screen | to fix |
 | A level exam's choices | `/knowledge/exam` | Exam | same |
@@ -390,16 +390,15 @@ what it offers. The inventory is the list both clients build to.
 | Review what a strict focus leaves out | the home's counts line | Home's counts line | same |
 | Raise today's limit | the focus panel and a queue | the focus card and a queue | same |
 | Clear the focus, or make it strict | the focus panel | the focus card | same |
-| Aim the focus at a module | the module page | a module row's menu | to fix |
-| Aim the focus at a topic | the module page | none | to fix |
-| Aim the focus at a subtopic | the module page | a Map node | same |
+| Aim the focus at a module | the module page | Module | same |
+| Aim the focus at a topic | the module page | Module | same |
+| Aim the focus at a subtopic | the module page | Module, its groups and its map | same |
 | Aim the focus at a certification | a certification's conditions | a certification's sheet | same |
-| Start a filtered queue on a group | a module page cell | a Stats cell | same |
-| Start a filtered queue on a subtopic | the module page | a Map node | to fix |
-| Start a filtered queue on a topic or a module | the module page | none | to fix |
-| Pick a module on the home | none | the course chips | to fix |
+| Start a filtered queue on a group | a module page cell | a Module cell | same |
+| Start a filtered queue on a subtopic | the module page | Module, its groups and its map | same |
+| Start a filtered queue on a topic or a module | the module page | Module | same |
 | Order the modules | up and down presses | a drag | by platform |
-| Pause, resume or archive a module | the module page | a module row's menu | to fix |
+| Pause, resume or archive a module | the module page | Module | same |
 | Restore an archived module | none | Settings | to fix |
 | Open a lesson ready to read, or a certification ready for its exam | the home | Home | same |
 | Mark a lesson read or unread | the lesson page | Lesson | same |
@@ -433,16 +432,9 @@ what it offers. The inventory is the list both clients build to.
 `## The structure` settles most of these. Each names what holds now, then
 the change.
 
-- **A module.** The web shows one page per module. The phone shows Map, one
-  module's graph, and Stats, every module's cells together. The phone moves
-  to one module screen holding the groups and the map, and Stats goes. Until
-  then the Map's top bar opens Stats.
-- **A module's focus and status.** The phone aims a module's focus and sets
-  its status from the home row's menu, and cannot aim at a topic. The focus
-  and the status move to the phone's module screen, as on the web.
-- **Picking a module on the home.** The phone's course chips narrow Continue
-  to one module and set the focus aside. They go: opening the module is the
-  pick.
+- **A module's map.** The phone's module screen holds the groups and the
+  map, as two tabs. The web's module page holds the groups alone, and gains
+  the map beside them.
 - **The lessons.** The web lists every module's lessons by module. The phone
   shows one module's lessons, picked by a chip. The phone moves to the web's
   list.
@@ -451,10 +443,6 @@ the change.
   three.
 - **The signed-in apps.** The web lists and revokes them. The phone gains the
   same list under its account menu.
-- **The start sheet.** The web opens it on a group, a subtopic, a topic and
-  the whole module. The phone opens it on a group and a subtopic, and on a
-  certification's short group. The phone gains the topic and the module
-  scopes on its module screen.
 - **A lesson a queue offers.** The web reads the lesson inside the queue. The
   phone stops the queue on the lesson's title and opens the lesson screen on
   Read. Which of the two both clients do is decided apart from the structure.

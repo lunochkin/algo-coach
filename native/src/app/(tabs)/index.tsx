@@ -1,8 +1,8 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
-import { Appbar, Button, Card, Chip, IconButton, Menu, Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Pressable, View } from 'react-native';
+import { Appbar, Button, Card, Chip, IconButton, Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import ReorderableList, {
   reorderItems,
   useReorderableDrag,
@@ -31,13 +31,10 @@ import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
 import { BottomBar, startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
 import { FocusCard } from '@/ui/focuscard';
-import { useArchive, usePauseToggle } from '@/ui/pause';
 import { AccountMenu } from '@/ui/account';
 
 export default function Home() {
   const st = useStore();
-  const pause = usePauseToggle();
-  const archive = useArchive();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [notice, setNotice] = useState('');
@@ -47,16 +44,16 @@ export default function Home() {
     if (st.ready && !st.hasToken) router.replace('/login');
   }, [st.ready, st.hasToken]);
 
-  const { board, filter } = st;
-  const b = useMemo(() => board(filter), [board, filter]);
+  const { board } = st;
+  const b = useMemo(() => board(null), [board]);
   const info = useMemo(() => (b ? { courses: moduleRows(b, Date.now()) } : null), [b]);
 
-  // A course chip is an explicit selection, like `learn next --course`, so it sets the focus aside.
+  // opening a module is the pick of one module: `pages.md`, The structure
   const { focus } = st;
-  const focused = !filter && focus ? focus : null;
+  const focused = focus;
   const limit = st.newLimit;
   // The queue Continue would open, and the board its picks use.
-  const cont = useMemo(() => continuePlan(board, focus, filter, limit), [board, focus, filter, limit]);
+  const cont = useMemo(() => continuePlan(board, focus, null, limit), [board, focus, limit]);
   const counts = useMemo(() => (cont ? continueCounts(cont, focused, Date.now()) : null), [cont, focused]);
 
   // The first certificate whose requirements are met but its exam (shown above Continue).
@@ -122,11 +119,6 @@ export default function Home() {
 
   const order = st.courseOrder;
   const rows = useMemo(() => bySavedOrder(info?.courses ?? [], (r) => r.c.slug, order), [info, order]);
-  const chips = useMemo(
-    () => bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, order),
-    [st.catalog, order],
-  );
-
   const onReorder = ({ from, to }: ReorderableListReorderEvent) => {
     const slugs = reorderItems(rows, from, to).map((r) => r.c.slug);
     void st.setCourseOrder(slugs);
@@ -140,26 +132,7 @@ export default function Home() {
         </Text>
       </Card.Content>
     </Card>
-  ) : (
-    <View style={{ gap: 12, marginBottom: 12 }}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={styles.row}>
-          <Chip selected={!st.filter} showSelectedCheck onPress={() => st.setFilter(null)}>
-            All
-          </Chip>
-          {chips.map((c) => (
-            <Chip
-              key={c.slug}
-              selected={st.filter === c.slug}
-              showSelectedCheck
-              onPress={() => st.setFilter(st.filter === c.slug ? null : c.slug)}>
-              {c.paused ? `${c.title} (paused)` : c.title}
-            </Chip>
-          ))}
-        </View>
-      </ScrollView>
-    </View>
-  );
+  ) : null;
   const header = (
     <View style={{ gap: 12 }}>
       <SyncBanner sync={st.sync} />
@@ -201,9 +174,6 @@ export default function Home() {
             total={item.total}
             toReview={item.toReview}
             onFrontier={drillGroup}
-            onTogglePause={pause.ask}
-            onArchive={archive.ask}
-            onFocus={(c) => void st.setFocus({ course: c.slug, topic: null, sub: null, strict: !!st.focus?.strict })}
           />
         )}
       />
@@ -215,7 +185,7 @@ export default function Home() {
             b={cont.b}
             queue={cont.queue}
             exams={st.catalog?.certExams ?? []}
-            onOpen={() => router.push({ pathname: '/map', params: { course: focused.course } })}
+            onOpen={() => router.push({ pathname: '/module', params: { course: focused.course } })}
             onClear={() => void st.setFocus(null)}
             onStrict={() => void st.setFocus({ ...focused, strict: !focused.strict })}
             onMoreNew={() => void st.raiseNew()}
@@ -224,8 +194,8 @@ export default function Home() {
           <FocusLine
             label={focusLabel(focus, st.catalog)}
             set={!!focus}
-            setAside={!!filter && !!focus}
-            onOpen={() => router.push({ pathname: '/map', params: focus ? { course: focus.course } : {} })}
+            setAside={false}
+            onOpen={() => focus && router.push({ pathname: '/module', params: { course: focus.course } })}
             onClear={() => void st.setFocus(null)}
             strict={!!focus?.strict}
             onStrict={() => focus && void st.setFocus({ ...focus, strict: !focus.strict })}
@@ -313,8 +283,6 @@ export default function Home() {
           </Button>
         </View>
       </BottomBar>
-      {pause.dialog}
-      {archive.dialog}
       <Snackbar
         visible={!!notice}
         onDismiss={() => {
@@ -387,72 +355,27 @@ function CourseCard({
   total,
   toReview,
   onFrontier,
-  onTogglePause,
-  onArchive,
-  onFocus,
 }: {
   c: Course;
   view: NextUpView;
   total: number;
   toReview: number;
   onFrontier: (g: Group) => void;
-  onTogglePause: (c: Course) => void;
-  onArchive: (c: Course) => void;
-  onFocus: (c: Course) => void;
 }) {
   const theme = useTheme();
   const drag = useReorderableDrag();
-  const [menu, setMenu] = useState(false);
   return (
     <Card
       mode="outlined"
-      onPress={() => router.push({ pathname: '/map', params: { course: c.slug } })}
+      onPress={() => router.push({ pathname: '/module', params: { course: c.slug } })}
       onLongPress={drag}
       accessibilityLabel={`Open ${c.title}`}
-      accessibilityHint="Opens the map of this course. Long-press to reorder.">
+      accessibilityHint="Opens the module. Long-press to reorder.">
       <Card.Title
         title={c.title}
         subtitle={`${total} questions · ${toReview} to review${c.paused ? ' · paused' : ''}`}
         right={() => (
           <View style={{ flexDirection: 'row' }}>
-            <Menu
-              visible={menu}
-              onDismiss={() => setMenu(false)}
-              anchor={
-                <IconButton
-                  icon="dots-vertical"
-                  onPress={() => setMenu(true)}
-                  accessibilityLabel={`More actions for ${c.title}`}
-                />
-              }>
-              <Menu.Item
-                leadingIcon="crosshairs-gps"
-                title="Focus on course"
-                accessibilityLabel={`Focus on ${c.title}`}
-                onPress={() => {
-                  setMenu(false);
-                  onFocus(c);
-                }}
-              />
-              <Menu.Item
-                leadingIcon={c.paused ? 'play' : 'pause'}
-                title={c.paused ? 'Resume course' : 'Pause course'}
-                accessibilityLabel={`${c.paused ? 'Resume' : 'Pause'} ${c.title}`}
-                onPress={() => {
-                  setMenu(false);
-                  onTogglePause(c);
-                }}
-              />
-              <Menu.Item
-                leadingIcon="archive-outline"
-                title="Archive course"
-                accessibilityLabel={`Archive ${c.title}`}
-                onPress={() => {
-                  setMenu(false);
-                  onArchive(c);
-                }}
-              />
-            </Menu>
             <IconButton icon="drag" onPressIn={drag} accessibilityLabel={`Reorder ${c.title}`} />
           </View>
         )}

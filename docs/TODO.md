@@ -91,7 +91,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Move the phone to the shared structure: bottom tabs for the sections
       it holds, an account menu for Settings, and the Knowledge home linking
       Lessons and Certifications. The top bar's shortcuts go
-- [ ] Join the phone's Map and Stats into one module screen of groups and
+- [x] Join the phone's Map and Stats into one module screen of groups and
       map, with the focus, the status and the start sheet on its four
       scopes. Stats, the row menu and the course chips go
 - [ ] List the phone's lessons by module, as the web does

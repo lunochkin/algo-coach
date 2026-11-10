@@ -24,7 +24,7 @@ export function usePauseToggle(): { ask: (c: Course) => void; dialog: ReactNode 
         <Dialog.Content>
           <Text variant="bodyMedium">
             {pausing
-              ? `It will be left out of ${SCOPE}. It stays available in Practice.`
+              ? `It will be left out of ${SCOPE}. Its module screen still starts a filtered queue on it.`
               : `It will be back in ${SCOPE}.`}
           </Text>
         </Dialog.Content>

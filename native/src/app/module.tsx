@@ -8,22 +8,23 @@ import {
   useSimultaneousGestures,
   useTapGesture,
 } from 'react-native-gesture-handler';
-import { Appbar, Button, Card, Chip, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Card, Chip, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 import { cancelAnimation, useSharedValue, withDecay } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   type Board,
-  bySavedOrder,
   certStates,
   type CertStatus,
   type Course,
   groupCell,
   layoutClusters,
+  levelCounts,
   levelName,
   levels,
   lineage,
   subTitle,
+  summary,
   topicTitle,
   unlocksLabel,
 } from '@algo-coach/core';
@@ -31,6 +32,8 @@ import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
 import { styles, tones } from '@/ui/common';
 import { MapCanvas, NODE_H, NODE_W, type CertPip } from '@/ui/mapcanvas';
+import { ModuleGroups } from '@/ui/groups';
+import { useArchive, usePauseToggle } from '@/ui/pause';
 import { useStartSheet, type Scope } from '@/ui/start';
 
 const COL = 200;
@@ -39,66 +42,118 @@ const MIN_SCALE = 0.25;
 const MAX_SCALE = 2.5;
 const MAX_FLING = 6000; // pt/s
 
-export default function MapScreen() {
+export default function ModuleScreen() {
   const st = useStore();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const courses = useMemo(
-    () => bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.courseOrder),
-    [st.catalog, st.courseOrder],
-  );
   const p = useLocalSearchParams<{ course?: string }>();
-  // a module row names its module, and otherwise the map opens on the focus
-  const [course, setCourse] = useState(
-    () => courses.find((c) => c.slug === (p.course ?? st.focus?.course))?.slug ?? courses[0]?.slug ?? '',
-  );
-  const c = courses.find((x) => x.slug === course);
+  const c = st.catalog?.courses.find((x) => x.slug === p.course);
+  const [tab, setTab] = useState<'groups' | 'map'>('groups');
   const [lessonsOn, setLessonsOn] = useState(false); // ~190 lesson nodes clutter the map; opt in
   const withLessons = lessonsOn && !!c?.graph?.lessons.length;
   const { board } = st;
-  const b = useMemo(() => board(null), [board]);
+  // named explicitly, so a paused module reads and serves too
+  const b = useMemo(() => (c ? board(c.slug) : null), [board, c]);
+  const starter = useStartSheet();
+  const pause = usePauseToggle();
+  const archive = useArchive();
+  const now = Date.now();
+  const sum = useMemo(() => (b ? summary(b, now) : null), [b, now]);
+
+  if (!c || !b || !sum) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+        <Appbar.Header>
+          <Appbar.BackAction onPress={() => router.back()} />
+          <Appbar.Content title="Module" />
+        </Appbar.Header>
+        <Text style={{ padding: 16 }}>No module of that name is open: it may be archived.</Text>
+      </View>
+    );
+  }
+  const aimed = st.focus?.course === c.slug && !st.focus.cert && !st.focus.topic;
+  const due = b.questions().filter((q) => b.toReview(q, now)).length;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Map" />
-        {/* Stats keeps a way in until the module screen holds the groups */}
-        <Appbar.Action icon="chart-box-outline" onPress={() => router.push('/stats')} accessibilityLabel="Stats" />
+        <Appbar.Content title={c.title} />
       </Appbar.Header>
-      {courses.length > 1 ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }}>
-          <View style={[styles.row, { paddingHorizontal: 16, paddingBottom: 8 }]}>
-            {courses.map((x) => (
-              <Chip key={x.slug} selected={x.slug === course} showSelectedCheck onPress={() => setCourse(x.slug)}>
-                {x.title}
-              </Chip>
-            ))}
-          </View>
-        </ScrollView>
-      ) : null}
-      {c?.graph?.lessons.length ? (
-        <View style={[styles.row, { paddingHorizontal: 16, paddingBottom: 4 }]}>
-          <Chip
-            icon={lessonsOn ? 'check' : 'book-open-variant'}
-            selected={lessonsOn}
-            onPress={() => setLessonsOn(!lessonsOn)}
-            accessibilityLabel={lessonsOn ? 'Hide lessons' : 'Show lessons'}>
-            Lessons
-          </Chip>
-        </View>
-      ) : null}
-      {!c || !b ? (
-        <Text style={{ padding: 16 }}>No courses yet.</Text>
-      ) : !c.graph ? (
-        <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>
-          {c.graphErrors.length
-            ? `The prerequisite graph of ${c.title} is invalid and ignored: ${c.graphErrors[0]}`
-            : `${c.title} has no prerequisite graph.`}
+      <View style={{ paddingHorizontal: 16, gap: 8, paddingBottom: 8 }}>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          {`${c.topics.length} topics · ${due} due · ${c.paused ? 'paused' : 'active'}`}
         </Text>
+        <Text variant="bodySmall">
+          {levelCounts(b, c)
+            .filter((x) => x.total)
+            .map((x) => `${x.name} ${x.passed}/${x.total}`)
+            .join(' · ')}
+        </Text>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          {`${sum.mastered} mastered · ${sum.weak} weak · ${sum.soon} more due within 7 days`}
+        </Text>
+        <View style={[styles.row, { flexWrap: 'wrap' }]}>
+          <Button mode="contained" compact icon="play" onPress={() => starter.open({ course: c.slug, topic: null, sub: null, level: null })}>
+            Start
+          </Button>
+          <Button
+            mode="outlined"
+            compact
+            icon="crosshairs-gps"
+            disabled={aimed}
+            onPress={() => void st.setFocus({ course: c.slug, topic: null, sub: null, strict: !!st.focus?.strict })}>
+            {aimed ? 'Focused' : 'Focus here'}
+          </Button>
+          <Button mode="outlined" compact icon={c.paused ? 'play' : 'pause'} onPress={() => pause.ask(c)}>
+            {c.paused ? 'Resume' : 'Pause'}
+          </Button>
+          {c.paused ? (
+            <Button mode="outlined" compact icon="archive-outline" onPress={() => archive.ask(c)}>
+              Archive
+            </Button>
+          ) : null}
+        </View>
+        <SegmentedButtons
+          value={tab}
+          onValueChange={(v) => setTab(v as 'groups' | 'map')}
+          buttons={[
+            { value: 'groups', label: 'Groups', icon: 'table' },
+            { value: 'map', label: 'Map', icon: 'graph-outline' },
+          ]}
+        />
+      </View>
+      {tab === 'groups' ? (
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24 }}>
+          <ModuleGroups c={c} b={b} onStart={starter.open} />
+        </ScrollView>
       ) : (
-        <CourseMap key={`${c.slug}:${withLessons}`} c={c} b={b} bottom={insets.bottom} withLessons={withLessons} />
+        <>
+          {c.graph?.lessons.length ? (
+            <View style={[styles.row, { paddingHorizontal: 16, paddingBottom: 4 }]}>
+              <Chip
+                icon={lessonsOn ? 'check' : 'book-open-variant'}
+                selected={lessonsOn}
+                onPress={() => setLessonsOn(!lessonsOn)}
+                accessibilityLabel={lessonsOn ? 'Hide lessons' : 'Show lessons'}>
+                Lessons
+              </Chip>
+            </View>
+          ) : null}
+          {!c.graph ? (
+            <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>
+              {c.graphErrors.length
+                ? `The prerequisite graph of ${c.title} is invalid and ignored: ${c.graphErrors[0]}`
+                : `${c.title} has no prerequisite graph.`}
+            </Text>
+          ) : (
+            <CourseMap key={`${c.slug}:${withLessons}`} c={c} b={b} bottom={insets.bottom} withLessons={withLessons} />
+          )}
+        </>
       )}
+      {starter.sheet}
+      {pause.dialog}
+      {archive.dialog}
     </View>
   );
 }

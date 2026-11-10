@@ -91,8 +91,6 @@ interface Store {
   raiseNew: () => Promise<void>;
   hasToken: boolean;
   sync: SyncState;
-  filter: string | null;
-  setFilter: (slug: string | null) => void;
   board: (only?: string | null, include?: string | null) => Board | null;
   requestSync: (delayMs?: number) => void;
   updateSettings: (s: Settings) => Promise<void>;
@@ -146,7 +144,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [hasToken, setHasToken] = useState(false);
   const [sync, setSync] = useState<SyncState>({ running: false, lastAt: null, error: null });
-  const [filter, setFilter] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
 
   const settingsRef = useRef(settings);
@@ -444,8 +441,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setCourseOrder,
       hasToken,
       sync,
-      filter,
-      setFilter,
       board,
       requestSync,
       updateSettings,
@@ -462,7 +457,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       archived,
       recordCertExam,
     }),
-    [ready, catalog, attempts, sessions, settings, settingRecords, setSetting, newLimit, raiseNew, courseOrder, setCourseOrder, hasToken, sync, filter, board, requestSync,
+    [ready, catalog, attempts, sessions, settings, settingRecords, setSetting, newLimit, raiseNew, courseOrder, setCourseOrder, hasToken, sync, board, requestSync,
       updateSettings, signedIn, signOut, record, session, finishSession, setCourseStatus, focus, setFocus, setLessonState, archived, recordCertExam],
   );
 
