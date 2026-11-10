@@ -4,7 +4,7 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Card, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { boardView, inProgress, readFailure, techniqueStats, type components } from '@algo-coach/core';
+import { boardView, inProgress, readFailure, techniqueStats, type components, loadingLine } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { CardPanel, Heading } from '@/ui/cards';
@@ -43,7 +43,7 @@ export default function PracticeScreen() {
             }}
           />
         ) : board.data === null || cards.data === null ? (
-          <Text variant="bodyMedium">Reading the board…</Text>
+          <Text variant="bodyMedium">{loadingLine('the board')}</Text>
         ) : board.data.rows.length === 0 ? (
           <Text variant="bodyMedium">No served problem carries a technique yet.</Text>
         ) : (

@@ -4,7 +4,7 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { problemCards, problemTried, readFailure, type components } from '@algo-coach/core';
+import { problemCards, problemTried, readFailure, type components, loadingLine } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { Failed, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
@@ -51,7 +51,7 @@ export default function ProblemScreen() {
             }}
           />
         ) : !record || listed.data === null || (!record.retired && served.data === null) ? (
-          <Text variant="bodyMedium">Reading the problem…</Text>
+          <Text variant="bodyMedium">{loadingLine('the problem')}</Text>
         ) : (
           <>
             <View style={[styles.row, { flexWrap: 'wrap' }]}>

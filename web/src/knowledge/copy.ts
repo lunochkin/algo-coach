@@ -1,4 +1,4 @@
-import { syncedLine } from '@algo-coach/core'
+import { syncedLine, isoNow } from '@algo-coach/core'
 import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from 'idb'
 
 // the browser's copy of the content and of one user's log: `knowledge.md`,
@@ -84,7 +84,7 @@ export class Copy {
 
   /** Keeps a record the user made here, in the outbox until the engine has it. */
   async add(kind: string, line: Line): Promise<Held> {
-    const t = typeof line.t === 'string' ? line.t : new Date().toISOString()
+    const t = typeof line.t === 'string' ? line.t : isoNow()
     const held: Held = {
       client_id: crypto.randomUUID(),
       kind,

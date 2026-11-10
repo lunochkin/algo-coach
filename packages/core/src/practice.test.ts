@@ -243,7 +243,7 @@ describe("a card's templates", () => {
 describe('a failed read', () => {
   it('says the device holds no copy when the network is down', () => {
     expect(readFailure('the cards', 'TypeError: Network request failed')).toBe(
-      'No connection. The cards are read from the engine, and this device holds no copy.',
+      'No connection, and this device holds no copy of the cards.',
     );
     expect(readFailure('the card', '/cards/x 404: gone')).toBe('The card did not load: /cards/x 404: gone');
   });

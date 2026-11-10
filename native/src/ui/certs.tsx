@@ -11,7 +11,6 @@ import {
   CERT_TO_COVER,
   CERT_UNTARGET,
   certConditions,
-  certExam,
   certFocus,
   type CertState,
   type CertStatus,
@@ -19,7 +18,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import type { Scope } from '@/ui/start';
-import { startExam, styles, tones } from './common';
+import { styles, tones } from './common';
 
 export function stateColor(state: CertState, theme: MD3Theme): string {
   const tone = tones(theme.dark);
@@ -99,10 +98,10 @@ export function CertSheet(props: {
   const x = c.certs?.get(id);
   const v = certConditions(b, c, id, states, st.focus);
   if (!x || !status || !v) return null;
+  // the rule reads first, as on the web: `pages.md`, The knowledge pages
   const take = () => {
-    const plan = certExam(b, c, id);
     onClose();
-    if (plan) startExam(st, plan);
+    router.push({ pathname: '/exam', params: { cert: id } });
   };
   const check = (ok: boolean, text: string) => (
     <Text variant="bodyMedium" key={text}>

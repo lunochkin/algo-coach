@@ -33,6 +33,7 @@ import {
   QUEUE_RAISE,
   QUEUE_STOP,
   queueLeft,
+  isoNow,
 } from '@algo-coach/core'
 
 import { Panel } from '@/components/Panel'
@@ -171,15 +172,7 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
   }, [])
 
   function onAnswered(r: Result) {
-    const rec = makeAttempt(
-      new Date().toISOString(),
-      r.q.course,
-      r.q.id,
-      r.correct,
-      r.guess,
-      r.grade,
-      r.card,
-    )
+    const rec = makeAttempt(isoNow(), r.q.course, r.q.id, r.correct, r.guess, r.grade, r.card)
     setMine((xs) => [...xs, rec])
     void k.add('attempt', { ...rec })
     answered.current = [...answered.current, r]

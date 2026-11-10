@@ -5,7 +5,6 @@ import { Link, useSearchParams } from 'react-router'
 import {
   type Catalog,
   certExam,
-  counted,
   examOpening,
   examOutcome,
   type ExamPlan,
@@ -33,6 +32,10 @@ import {
   examReviewNext,
   QUEUE_STOP,
   examModuleChoice,
+  isoNow,
+  certExamRule,
+  CERT_EXAM_MISSING,
+  CERT_EXAM_START,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -187,10 +190,7 @@ function CertChoice({
       />
       {c && x && b ? (
         <Panel>
-          <p>
-            {counted(x.rule.size, 'question')}, pass {Math.round(x.rule.passShare * 100)}%. Stopping
-            before the last question stores the exam as not passed.
-          </p>
+          <p>{certExamRule(x.rule.size, x.rule.passShare)}</p>
           <div>
             <Button
               onClick={() => {
@@ -198,12 +198,12 @@ function CertChoice({
                 if (p) onStart(p)
               }}
             >
-              Start the exam
+              {CERT_EXAM_START}
             </Button>
           </div>
         </Panel>
       ) : (
-        <p className="text-meta text-muted-foreground">No certification of that name is open.</p>
+        <p className="text-meta text-muted-foreground">{CERT_EXAM_MISSING}</p>
       )}
     </section>
   )
@@ -237,7 +237,7 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
     ended.current = true
     const rs = answered.current
     if (!rs.length) return
-    const done = examOutcome(plan, rs, new Date().toISOString(), catalog.courses)
+    const done = examOutcome(plan, rs, isoNow(), catalog.courses)
     for (const a of done.attempts) void k.add('attempt', { ...a })
     void k.add('session', { mode: plan.mode, score: done.score, n: done.n })
     if (done.cert) void k.add('cert', done.cert)

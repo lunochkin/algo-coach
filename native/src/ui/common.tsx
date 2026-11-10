@@ -4,7 +4,7 @@ import { Button, Text, useTheme } from 'react-native-paper';
 
 import { router } from 'expo-router';
 
-import { block, type ExamPlan, type Queue, syncErrorSummary, syncLine } from '@algo-coach/core';
+import { block, type ExamPlan, type Queue, syncErrorSummary, syncLine, RETRY } from '@algo-coach/core';
 import type { ExamSession, QueueSession, Session, SyncState } from '@/lib/store';
 
 /** Monospace, horizontally scrollable, never wrapped. `verbatim` keeps leading spaces (diagrams). */
@@ -134,7 +134,7 @@ export function Failed({ message, onRetry }: { message: string; onRetry: () => v
         {message}
       </Text>
       <Button mode="outlined" onPress={onRetry}>
-        Try again
+        {RETRY}
       </Button>
     </View>
   );

@@ -285,6 +285,8 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
     if (ended.current) return;
     ended.current = true;
     if (!s) return;
+    // an exam stopped with nothing answered stores nothing, and still reads its summary
+    if (!results.current.length) return setPhase('done');
     const out = examOutcome(s, results.current, isoNow(), st.catalog?.courses ?? []);
     for (const a of out.attempts) await st.record(a);
     await st.finishSession(out.score, out.n);
@@ -294,10 +296,7 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
 
   const quit = useCallback(async () => {
     if (phase === 'review') return setPhase('done');
-    if (phase === 'ask') {
-      await end();
-      if (results.current.length) return;
-    }
+    if (phase === 'ask') return end();
     router.back();
   }, [phase, end]);
 

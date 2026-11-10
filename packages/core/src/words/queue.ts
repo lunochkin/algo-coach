@@ -1,5 +1,6 @@
 // what the knowledge screens say about the queue, for every platform: a
 // platform changes the look alone, and reads each sentence from here
+import { counted } from '../screens';
 import { NEW_STEP } from '../queue';
 
 // a running queue, and its summary
@@ -78,3 +79,10 @@ export const LESSON_MARK_UNREAD = 'Mark unread';
 // a paused module leaves exams unless the user names it, so its choice says so
 export const examModuleChoice = (c: { title: string; paused?: boolean }) =>
   c.paused ? `${c.title} (paused)` : c.title;
+
+// a certification exam's choices: its rule, before the sample is drawn
+export function certExamRule(size: number, passShare: number): string {
+  return `${counted(size, 'question')}, pass ${Math.round(passShare * 100)}%. Stopping before the last question stores the exam as not passed.`;
+}
+export const CERT_EXAM_START = 'Start the exam';
+export const CERT_EXAM_MISSING = 'No certification of that name is open.';

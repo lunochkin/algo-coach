@@ -212,10 +212,14 @@ export function revealLabel(code: string): string {
   return `Reveal the form · ${lines === 1 ? '1 line' : `${lines} lines`}`;
 }
 
-/** Why a read from the engine failed, where the device holds no copy of `what`. */
+/** Why a read of `what` failed. With no connection, the device holds no copy to show instead. */
 export function readFailure(what: string, error: string): string {
   if (/network request failed|failed to fetch|timed? ?out|offline/i.test(error)) {
-    return `No connection. ${what[0].toUpperCase()}${what.slice(1)} are read from the engine, and this device holds no copy.`;
+    return `No connection, and this device holds no copy of ${what}.`;
   }
   return `${what[0].toUpperCase()}${what.slice(1)} did not load: ${error}`;
 }
+
+// a page's reading before its content, the same on both clients
+export const loadingLine = (what: string) => `Loading ${what}…`;
+export const RETRY = 'Retry';

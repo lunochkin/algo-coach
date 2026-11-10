@@ -8,6 +8,7 @@ import {
   examReviewNext,
   lessonNote,
   lessonRowLine,
+  certExamRule,
 } from '../index';
 
 describe('queue words', () => {
@@ -40,5 +41,13 @@ describe("an exam's module choice", () => {
   it('marks a paused module', () => {
     expect(examModuleChoice({ title: 'Python', paused: true })).toBe('Python (paused)');
     expect(examModuleChoice({ title: 'Python' })).toBe('Python');
+  });
+});
+
+describe("a certification exam's rule", () => {
+  it('names the size and the pass mark before the start', () => {
+    expect(certExamRule(20, 0.8)).toBe(
+      '20 questions, pass 80%. Stopping before the last question stores the exam as not passed.',
+    );
   });
 });

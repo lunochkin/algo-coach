@@ -160,7 +160,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       paused mark on an exam's module, the raise after a queue ends, a failed
       sync on the home, the certifications' coverage, and the exam size saved
       at the start
-- [ ] Fix where the two clients behave apart: the phone's 2 s focus delay, the
+- [x] Fix where the two clients behave apart: the phone's 2 s focus delay, the
       web's timestamp format, forced sign-out, an exam stopped unanswered, the
       certification exam's rules, the start sheet's preview, the load wording
 - [ ] Move the sync into core: the scheduler, one pass and each record line,

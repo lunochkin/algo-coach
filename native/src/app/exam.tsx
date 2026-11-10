@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Appbar, Button, Chip, SegmentedButtons, Text, TextInput, useTheme } from 'react-native-paper';
@@ -7,6 +7,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   type Catalog,
+  certExam,
+  certExamRule,
+  CERT_EXAM_MISSING,
+  CERT_EXAM_START,
   examFailed,
   examOpening,
   examPool,
@@ -32,7 +36,9 @@ import { BottomBar, Failed, startExam, styles } from '@/ui/common';
 export default function Exam() {
   const st = useStore();
   const theme = useTheme();
+  const { cert } = useLocalSearchParams<{ cert?: string }>();
   const catalog = st.ready ? st.catalog : null;
+  if (catalog && cert) return <CertChoice id={cert} catalog={catalog} />;
   if (catalog) return <Choices catalog={catalog} />;
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -50,12 +56,47 @@ export default function Exam() {
   );
 }
 
-function Header() {
+function Header({ title = EXAM_TITLE }: { title?: string }) {
   return (
     <Appbar.Header>
       <Appbar.BackAction onPress={() => router.back()} />
-      <Appbar.Content title={EXAM_TITLE} />
+      <Appbar.Content title={title} />
     </Appbar.Header>
+  );
+}
+
+// a certification exam's choices are its rule alone, read before the sample is drawn
+function CertChoice({ id, catalog }: { id: string; catalog: Catalog }) {
+  const st = useStore();
+  const theme = useTheme();
+  const c = catalog.courses.find((x) => x.certs?.get(id));
+  const x = c?.certs?.get(id);
+  const b = c ? st.board(c.slug) : null;
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <Header title={x?.title ?? EXAM_TITLE} />
+      <View style={styles.page}>
+        {c && x && b ? (
+          <>
+            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+              {EXAM_NOTE}
+            </Text>
+            <Text variant="bodyLarge">{certExamRule(x.rule.size, x.rule.passShare)}</Text>
+            <Button
+              mode="contained"
+              onPress={() => {
+                const plan = certExam(b, c, id);
+                if (plan) startExam(st, plan);
+              }}
+            >
+              {CERT_EXAM_START}
+            </Button>
+          </>
+        ) : (
+          <Text variant="bodyMedium">{CERT_EXAM_MISSING}</Text>
+        )}
+      </View>
+    </View>
   );
 }
 

@@ -1,3 +1,4 @@
+import { loadingLine, readFailure, RETRY } from '@algo-coach/core'
 import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -21,16 +22,14 @@ export function Loaded<T>({ of, state, blank, blankWhen, children }: Props<T>) {
   if (state.error !== undefined)
     return (
       <div className="flex items-center gap-stack text-meta">
-        <p className="text-destructive">
-          {capitalised(of)} did not load: {state.error}
-        </p>
+        <p className="text-destructive">{readFailure(of, state.error)}</p>
         <Button variant="outline" size="sm" onClick={state.retry}>
-          Retry
+          {RETRY}
         </Button>
       </div>
     )
   if (state.data === undefined)
-    return <p className="text-meta text-muted-foreground">Loading {of}…</p>
+    return <p className="text-meta text-muted-foreground">{loadingLine(of)}</p>
   if (blank !== undefined && (blankWhen ?? isEmpty)(state.data))
     return <p className="text-meta text-muted-foreground">{blank}</p>
   return <>{children(state.data)}</>
@@ -38,8 +37,4 @@ export function Loaded<T>({ of, state, blank, blankWhen, children }: Props<T>) {
 
 function isEmpty(data: unknown): boolean {
   return Array.isArray(data) && data.length === 0
-}
-
-function capitalised(of: string): string {
-  return of.charAt(0).toUpperCase() + of.slice(1)
 }

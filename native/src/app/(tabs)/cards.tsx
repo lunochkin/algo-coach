@@ -2,7 +2,7 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { cardBlocks, inProgress, notInProgress, readFailure, type components } from '@algo-coach/core';
+import { cardBlocks, inProgress, notInProgress, readFailure, type components, loadingLine } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { CardPanel, Heading } from '@/ui/cards';
@@ -29,7 +29,7 @@ export default function CardsScreen() {
         {cards.error ? (
           <Failed message={readFailure('the cards', cards.error)} onRetry={cards.reload} />
         ) : cards.data === null ? (
-          <Text variant="bodyMedium">Reading the cards…</Text>
+          <Text variant="bodyMedium">{loadingLine('the cards')}</Text>
         ) : cards.data.length === 0 ? (
           <Text variant="bodyMedium">No card is seeded yet.</Text>
         ) : (

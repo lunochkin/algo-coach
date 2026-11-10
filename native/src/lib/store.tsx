@@ -240,11 +240,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [reload, remind]);
 
+  // the earliest deadline asked for stands: a later request never pushes a sync
+  // already due sooner, so an answer every few seconds still syncs within ten
+  const dueAt = useRef<number | null>(null);
   const requestSync = useCallback(
     (delayMs = 0) => {
+      const at = Date.now() + delayMs;
+      if (timer.current && dueAt.current !== null && dueAt.current <= at) return;
       if (timer.current) clearTimeout(timer.current);
+      dueAt.current = at;
       timer.current = setTimeout(() => {
         timer.current = null;
+        dueAt.current = null;
         void runSync();
       }, delayMs);
     },
@@ -347,8 +354,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const rec: FocusRecord = { t: isoNow(), ...focusLine(f) };
       await DB.addLocal('focus', focusPath(settingsRef.current.device, rec.t), rec);
       setFocusRecords((xs) => [...xs, rec]);
-      // Quick toggles collapse into one upload; back-to-back writes of one file conflict on GitHub.
-      requestSync(2000);
+      // a focus changes what another device serves, so it is sent at once
+      requestSync(0);
     },
     [requestSync],
   );

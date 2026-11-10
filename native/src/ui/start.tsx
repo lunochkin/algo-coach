@@ -38,7 +38,8 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
   const [kind, setKind] = useState<string | null>(null);
   const [due, setDue] = useState(false);
   const { board } = st;
-  const b = useMemo(() => board(null), [board]);
+  // named explicitly, so a paused module serves too, as on the web
+  const b = useMemo(() => board(scope.course), [board, scope.course]);
   const c = st.catalog?.courses.find((x) => x.slug === scope.course);
   const limit = st.newLimit;
   const preview = useMemo(

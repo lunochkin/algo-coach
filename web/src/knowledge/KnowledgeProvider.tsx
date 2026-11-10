@@ -123,9 +123,12 @@ export function KnowledgeProvider({ children }: { children: ReactNode }) {
     async (force: boolean) => {
       const one = copy.current
       if (one) {
-        await runSync().catch(() => undefined)
-        const unsent = await one.outbox()
-        if (unsent && !force) return unsent
+        // a forced sign-out follows the warning that the sync failed, so it tries none again
+        if (!force) {
+          await runSync().catch(() => undefined)
+          const unsent = await one.outbox()
+          if (unsent) return unsent
+        }
         one.close()
         copy.current = null
         await eraseCopy(one.user)

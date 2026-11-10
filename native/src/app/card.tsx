@@ -4,7 +4,7 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Button, Card, Chip, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { readFailure, recallLine, revealLabel, type components } from '@algo-coach/core';
+import { readFailure, recallLine, revealLabel, type components, loadingLine } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { CodeBlock, Failed, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
@@ -37,7 +37,7 @@ export default function CardScreen() {
         {studied.error ? (
           <Failed message={readFailure('the card', studied.error)} onRetry={studied.reload} />
         ) : !card ? (
-          <Text variant="bodyMedium">Reading the card…</Text>
+          <Text variant="bodyMedium">{loadingLine('the card')}</Text>
         ) : (
           <>
             <Text variant="titleMedium">When to reach for it</Text>

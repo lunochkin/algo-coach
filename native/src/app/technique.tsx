@@ -4,7 +4,7 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { readFailure, techniqueCards, techniqueStats, type components } from '@algo-coach/core';
+import { readFailure, techniqueCards, techniqueStats, type components, loadingLine } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { CardPanel, Heading } from '@/ui/cards';
 import { Failed, styles } from '@/ui/common';
@@ -49,7 +49,7 @@ export default function TechniqueScreen() {
             }}
           />
         ) : problems.data === null || taught.data === null || listed.data === null ? (
-          <Text variant="bodyMedium">Reading the technique…</Text>
+          <Text variant="bodyMedium">{loadingLine('the technique')}</Text>
         ) : (
           <>
             {cards.length > 0 ? (
