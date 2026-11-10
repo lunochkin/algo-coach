@@ -160,6 +160,17 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       paused mark on an exam's module, the raise after a queue ends, a failed
       sync on the home, the certifications' coverage, and the exam size saved
       at the start
+- [ ] Fix where the two clients behave apart: the phone's 2 s focus delay, the
+      web's timestamp format, forced sign-out, an exam stopped unanswered, the
+      certification exam's rules, the start sheet's preview, the load wording
+- [ ] Move the sync into core: the scheduler, one pass and each record line,
+      behind a store each client implements. Two copies have drifted once
+- [ ] Move the queue run, the exam run and one question's answer into core,
+      each a state the clients draw. Both hold the same flow twice today
+- [ ] Open the lesson a web queue offers over the running queue, as the phone
+      does, so Read no longer ends the queue
+- [ ] Move the map's edges and node panel, the learner, one typed engine
+      client and the small focus, order and certification helpers into core
 - [ ] Add a test that every web route and every native screen file has an
       inventory row, so a new screen cannot ship unlisted
 - [ ] Serve the problem listing on the phone as a Problems tab: the technique
@@ -168,8 +179,6 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       Problem screen. A rung reads, and the sitting it opens stays on the web
 - [ ] Add the press starting a card run to the phone's card. Starting declares
       the study, and the sittings it measures are still sat on the web
-- [ ] Open the lesson a web queue offers over the running queue, as the phone
-      does, so Read no longer ends the queue
 - [ ] Link the privacy policy from the phone's Login and Settings, by its URL
 
 ### Exit
