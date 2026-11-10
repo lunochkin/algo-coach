@@ -446,8 +446,8 @@ what it offers. The inventory is the list both clients build to.
   problems before any card teaches it.
 - **A problem's row on the Technique screen opens the phone's Problem
   screen.** The screen reads the problem's record: its title, difficulty,
-  techniques, the counts the user reached on it, and its cards. The record is
-  what `GET /api/problems/:problem_id` returns, and the read serves nothing.
+  techniques, the counts the user reached on it, and its cards. `GET
+  /api/problems/:problem_id` returns the record, and that read serves nothing.
 - **The Problem screen serves no statement and mints no sitting.** Serving the
   statement mints a sitting, and the sitting stays on the web. The screen says
   the problem is sat on the web. A phone layout for writing code is the
