@@ -57,7 +57,9 @@ export function ProblemPage() {
     )
 
   return (
-    <section className="space-y-section">
+    // the layout is wide on this path, which holds the sitting; the record and
+    // the loading header read in the reading column every other page reads in
+    <section className="mx-auto max-w-reading space-y-section">
       <PageHeader
         back={
           slug !== null
