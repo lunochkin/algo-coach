@@ -1,6 +1,6 @@
 import { ChevronLeft } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import { api, type Sitting, type Submitted } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
@@ -36,12 +36,22 @@ import { draftOf, keepDraft, opening } from '@/lib/draft'
 
 type Moved = { sitting: Sitting; elapsedSec: number | null; at: number }
 
-export function SittingPage() {
-  const { sittingId = '' } = useParams()
-  const [search] = useSearchParams()
+type Props = {
+  problemId: string
+  // the technique the claim answers for: the card's own, or the pick's
+  drilled: string | null
+  card: string | null
+}
+
+// the problem's page once its statement is served. No sitting exists until the
+// first clock press or submission mints one, and `?sitting=` then names it, so
+// a reload reads that sitting, ended or not: `pages.md`
+export function SittingView({ problemId, drilled, card }: Props) {
+  const [search, setSearch] = useSearchParams()
+  // read once: the page names the sitting it minted without reading it again
+  const [named] = useState(() => search.get('sitting'))
   // the way back: the card the problem came from, where the next rung is, or
   // the board. An ended sitting stays on the page, so the solve reads back
-  const card = search.get('card')
   const back =
     card === null
       ? { to: '/', label: 'Back to the board' }
@@ -51,28 +61,33 @@ export function SittingPage() {
   const [answered, setAnswered] = useState(false)
   const loaded = useLoaded(
     async (signal) => {
-      const answer = await api.GET('/api/sittings/{sitting_id}', {
-        params: { path: { sitting_id: sittingId } },
-        signal,
-      })
+      // without `?sitting=` the statement comes with the sitting running on
+      // the problem, where one runs
+      const answer =
+        named === null
+          ? await api.GET('/api/problems/{problem_id}/statement', {
+              params: { path: { problem_id: problemId } },
+              signal,
+            })
+          : await api.GET('/api/sittings/{sitting_id}', {
+              params: { path: { sitting_id: named } },
+              signal,
+            })
       // stamped on arrival: the clock counts on from the moment this reading
       // reached the page
       return { ...answer, data: answer.data && { ...answer.data, receivedAt: performance.now() } }
     },
-    `sitting:${sittingId}`,
+    `statement:${problemId}:${named ?? ''}`,
   )
   // what a new sitting on the problem may open on, bounded by the card's run
   // where the problem came from a card
-  const problemOf = loaded.data?.sitting.problem_id
   const carried = useLoaded(
     (signal) =>
-      problemOf === undefined
-        ? Promise.resolve({ data: null })
-        : api.GET('/api/problems/{problem_id}/carry', {
-            params: { path: { problem_id: problemOf }, query: { card } },
-            signal,
-          }),
-    `carry:${problemOf ?? ''}:${card ?? ''}`,
+      api.GET('/api/problems/{problem_id}/carry', {
+        params: { path: { problem_id: problemId }, query: { card } },
+        signal,
+      }),
+    `carry:${problemId}:${card ?? ''}`,
   )
   const code = useRef<string | null>(null)
   const editor = useRef<EditorHandle>(null)
@@ -89,11 +104,32 @@ export function SittingPage() {
   // is not resumed on return
   const byHiding = useRef(false)
 
+  const current = moved?.sitting ?? loaded.data?.sitting ?? null
+  const sittingId = current?.id ?? null
+  const paused = current?.pauses?.at(-1)?.until === null
+  const ended = current?.ended_at != null
+  const unstarted = current === null || current.clock_started_at == null
+
+  // the address names the sitting once one exists, replacing itself so the
+  // way back leaves the problem rather than returning to it
+  useEffect(() => {
+    if (sittingId === null || search.get('sitting') === sittingId) return
+    setSearch(
+      (was) => {
+        const next = new URLSearchParams(was)
+        next.set('sitting', sittingId)
+        return next
+      },
+      { replace: true },
+    )
+  }, [sittingId, search, setSearch])
+
   // the engine ends a sitting nothing has touched, and a solver thinking is
   // practising, so a visible page reads the sitting again and that read
   // touches it. A hidden page touches nothing, and the bound then ends the
   // sitting where the page was left
   useEffect(() => {
+    if (sittingId === null) return
     const tick = setInterval(
       () => {
         if (document.hidden) return
@@ -115,10 +151,19 @@ export function SittingPage() {
     return () => clearInterval(tick)
   }, [sittingId])
 
-  const current = moved?.sitting ?? loaded.data?.sitting
-  const paused = current?.pauses?.at(-1)?.until === null
-  const ended = current?.ended_at != null
-  const unstarted = current !== undefined && current.clock_started_at == null
+  // the first clock press or submission mints the sitting it runs in
+  async function begun(quiet: boolean): Promise<string | null> {
+    if (sittingId !== null) return sittingId
+    const { data, error } = await api.POST('/api/problems/{problem_id}/sittings', {
+      params: { path: { problem_id: problemId } },
+    })
+    if (!data) {
+      if (!quiet) setRefused(described(error))
+      return null
+    }
+    setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() })
+    return data.sitting.id
+  }
 
   // a move the page took by itself says nothing to the user, so it reports no
   // refusal: the next reading of the sitting carries whatever happened
@@ -126,7 +171,9 @@ export function SittingPage() {
     setMoving(true)
     if (!quiet) setRefused(null)
     try {
-      const params = { params: { path: { sitting_id: sittingId } } }
+      const id = to === 'start' ? await begun(quiet) : sittingId
+      if (id === null) return
+      const params = { params: { path: { sitting_id: id } } }
       const { data, error } =
         to === 'start'
           ? await api.POST('/api/sittings/{sitting_id}/start', params)
@@ -153,13 +200,14 @@ export function SittingPage() {
 
   // the preference starts a clock the user has not, once per page
   const autoStarted = useRef(false)
+  const statementIn = loaded.data !== undefined
   useEffect(() => {
-    if (!unstarted || ended || autoStarted.current || !autoStarts()) return
+    if (!statementIn || !unstarted || ended || autoStarted.current || !autoStarts()) return
     autoStarted.current = true
     void move('start', { quiet: true })
     // `move` is a new closure on every render, and it reads `sittingId` alone
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unstarted, ended])
+  }, [statementIn, unstarted, ended])
 
   // the clock counts the time on the problem, and a hidden page is time away
   // from it. A sitting the user paused is left alone: returning resumes what
@@ -167,7 +215,7 @@ export function SittingPage() {
   useEffect(() => {
     function hid() {
       // nothing to move before the sitting has been read
-      if (current === undefined || ended || unstarted) return
+      if (current === null || ended || unstarted) return
       if (document.hidden && !paused) {
         byHiding.current = true
         void move('pause', { quiet: true })
@@ -182,24 +230,23 @@ export function SittingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, paused, ended, unstarted, sittingId])
 
-  // the three readings; the sitting's own page starts once one has loaded
+  // the three readings; the page starts once the statement has loaded
   if (loaded.data === undefined)
-    return <Loaded of="the sitting" state={loaded}>{() => null}</Loaded>
+    return <Loaded of="the problem" state={loaded}>{() => null}</Loaded>
   // the editor seeds once, so it waits for the carry. A carry that failed
   // opens the editor on the signature rather than holding the sitting
   if (carried.data === undefined && carried.error === undefined)
-    return <Loaded of="the sitting" state={{ ...carried, data: undefined }}>{() => null}</Loaded>
+    return <Loaded of="the problem" state={{ ...carried, data: undefined }}>{() => null}</Loaded>
 
   const served = loaded.data
   const clock = moved ?? { elapsedSec: served.elapsed_sec, at: served.receivedAt }
-  const problemId = served.sitting.problem_id
   // a reload during the sitting restores what was typed in it, and a new
   // sitting opens on the work in progress `flows.md` carries
   const kept = draftOf(problemId)
   const blank = served.signature ? `${served.signature}\n    ` : ''
-  const initial =
-    kept?.sitting === sittingId ? kept.code : (opening(kept, carried.data ?? null) ?? blank)
-  const keptRestored = kept?.sitting === sittingId && kept.restored === true
+  const own = kept !== null && sittingId !== null && kept.sitting === sittingId
+  const initial = own ? kept.code : (opening(kept, carried.data ?? null) ?? blank)
+  const keptRestored = own && kept.restored === true
   const solve = carried.data?.solved_code ?? null
 
   // the user's own act: the solve is never carried, so it returns only here
@@ -214,8 +261,10 @@ export function SittingPage() {
     setRunning(true)
     setRefused(null)
     try {
+      const id = await begun(false)
+      if (id === null) return
       const { data, error } = await api.POST('/api/sittings/{sitting_id}/submissions', {
-        params: { path: { sitting_id: sittingId } },
+        params: { path: { sitting_id: id } },
         body: { code: code.current ?? initial, restored: restored.current ?? keptRestored },
       })
       if (data) {
@@ -333,10 +382,7 @@ export function SittingPage() {
           and a narrow window then scrolls sideways */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <section className="space-y-stack">
-          <ProblemFacts
-            problemId={served.sitting.problem_id}
-            technique={search.get('technique')}
-          />
+          <ProblemFacts problemId={problemId} technique={drilled} />
           <Markdown>{served.statement}</Markdown>
         </section>
         {/* the verdict sits under the editor: one page is the whole sitting */}
@@ -390,10 +436,10 @@ export function SittingPage() {
               Asked of each attempt now, while the code is minutes old.
             </DialogDescription>
           </DialogHeader>
-          {ended && (
+          {ended && sittingId !== null && (
             <ClaimPrompt
               sittingId={sittingId}
-              drilled={search.get('technique')}
+              drilled={drilled}
               onDone={() => setAnswered(true)}
             />
           )}

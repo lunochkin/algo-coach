@@ -10,11 +10,11 @@ from algo_coach.problems import ProblemStore
 from algo_coach.schema import Confidence
 from algo_coach.sitting import (
     Refused,
+    begin,
     claim,
     end,
     pause,
     resume,
-    serve,
     start_clock,
     submit,
     unclaimed,
@@ -33,7 +33,7 @@ def root(database):
     return database
 
 
-def test_one_sitting_runs_from_serve_to_end(root):
+def test_one_sitting_runs_from_begin_to_end(root):
     """Every store reads from one root, as the adapter will open them, so a
     call that wrote where the next one does not read fails here and nowhere
     else."""
@@ -44,8 +44,8 @@ def test_one_sitting_runs_from_serve_to_end(root):
         AttemptLog(root),
     )
 
-    served = serve(problems, sittings, "p1", user_id=USER)
-    sitting_id, began = served.sitting.id, served.sitting.started_at
+    begun = begin(problems, sittings, "p1", user_id=USER)
+    sitting_id, began = begun.id, begun.started_at
 
     start_clock(sittings, sitting_id, user_id=USER, now=began)
     pause(sittings, sitting_id, user_id=USER, now=began + timedelta(minutes=5))
@@ -82,14 +82,14 @@ def test_one_sitting_runs_from_serve_to_end(root):
     assert ended.ended_at is not None and not ended.paused
 
 
-def test_a_serve_after_the_end_starts_a_new_sitting(root):
-    """The ended sitting's clock is settled, so the next visit to the problem
+def test_a_begin_after_the_end_starts_a_new_sitting(root):
+    """The ended sitting's clock is settled, so the next press on the problem
     is timed on its own."""
     problems, sittings = ProblemStore(root), SittingStore(root)
-    first = serve(problems, sittings, "p1", user_id=USER).sitting
+    first = begin(problems, sittings, "p1", user_id=USER)
     end(sittings, first.id, user_id=USER, now=first.started_at + timedelta(minutes=1))
 
-    second = serve(problems, sittings, "p1", user_id=USER).sitting
+    second = begin(problems, sittings, "p1", user_id=USER)
 
     assert second.id != first.id
     with pytest.raises(Refused, match="has ended"):

@@ -430,10 +430,10 @@
         }
       }
     },
-    "/api/problems/{problem_id}/sittings": {
-      "post": {
+    "/api/problems/{problem_id}/statement": {
+      "get": {
         "summary": "Statement",
-        "operationId": "statement_api_problems__problem_id__sittings_post",
+        "operationId": "statement_api_problems__problem_id__statement_get",
         "parameters": [
           {
             "name": "problem_id",
@@ -490,7 +490,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Served"
+                  "$ref": "#/components/schemas/Seated"
                 }
               }
             }
@@ -585,6 +585,45 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CardRun"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/problems/{problem_id}/sittings": {
+      "post": {
+        "summary": "Begun",
+        "operationId": "begun_api_problems__problem_id__sittings_post",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Timed"
                 }
               }
             }
@@ -2758,6 +2797,53 @@
         "title": "Rung",
         "description": "One problem on a ladder, with the templates its canonicals display.\n\nA rung the selector filled covers none. `required` is derived from what the\nrung covers rather than stored, and a rung covering the optional template\nbeside a core one offers that form as the alternative approach."
       },
+      "Seated": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "statement": {
+            "type": "string",
+            "title": "Statement"
+          },
+          "signature": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signature"
+          },
+          "elapsed_sec": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Sec"
+          },
+          "sitting": {
+            "$ref": "#/components/schemas/Sitting"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "statement",
+          "signature",
+          "elapsed_sec",
+          "sitting"
+        ],
+        "title": "Seated",
+        "description": "A sitting read by its id, with its problem's statement."
+      },
       "Selector": {
         "properties": {
           "technique": {
@@ -2835,9 +2921,6 @@
             ],
             "title": "Signature"
           },
-          "sitting": {
-            "$ref": "#/components/schemas/Sitting"
-          },
           "elapsed_sec": {
             "anyOf": [
               {
@@ -2848,6 +2931,16 @@
               }
             ],
             "title": "Elapsed Sec"
+          },
+          "sitting": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Sitting"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -2855,11 +2948,10 @@
           "title",
           "statement",
           "signature",
-          "sitting",
-          "elapsed_sec"
+          "elapsed_sec",
+          "sitting"
         ],
-        "title": "Served",
-        "description": "What a solver is handed: the statement and the clock, and nothing the\nproblem was written from."
+        "title": "Served"
       },
       "SignedInDevice": {
         "properties": {
@@ -3305,7 +3397,7 @@
           "elapsed_sec"
         ],
         "title": "Timed",
-        "description": "A sitting a start, a pause, a resume or an end moved, with its elapsed\ntime on the engine's clock."
+        "description": "A sitting a begin, a start, a pause, a resume or an end moved, with its\nelapsed time on the engine's clock."
       },
       "Unclaimed": {
         "properties": {

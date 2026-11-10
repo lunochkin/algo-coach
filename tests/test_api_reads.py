@@ -51,8 +51,8 @@ def test_the_board_counts_the_user_s_own_attempts_alone(client, database):
 
 
 def test_a_sitting_with_no_submission_counts_for_nothing(client):
-    """Opening a problem serves it, so a sitting nobody submitted to records
-    that the user looked, not that they tried."""
+    """A clock started and never submitted against records that the user
+    worked on the problem, not that they tried a solution."""
     client.post("/api/problems/p-sorting/sittings")
 
     rows = client.get("/api/board").json()["rows"]
@@ -285,30 +285,45 @@ def test_a_retired_problem_is_read_at_its_own_url(client, database):
     assert picked.json()["retired"] is True
 
 
-def test_serving_the_statement_stores_the_sitting_for_the_user(client):
-    """Serving writes the sitting, so the route is a POST though the loop reads
-    the statement through it."""
-    served = client.post("/api/problems/p-sorting/sittings").json()
+def test_serving_the_statement_stores_no_sitting(client):
+    """Opening a problem records nothing, so reading the statement is a GET."""
+    served = client.get("/api/problems/p-sorting/statement").json()
 
     assert served["statement"] == "Given an array, return ..."
-    assert (served["sitting"]["user_id"], served["sitting"]["problem_id"]) == (USER, "p-sorting")
+    assert served["sitting"] is None
+
+
+def test_beginning_stores_the_sitting_for_the_user(client):
+    """The first clock press or submission mints the sitting, and a second
+    tab's press reaches the same one."""
+    begun = client.post("/api/problems/p-sorting/sittings").json()
+
+    assert (begun["sitting"]["user_id"], begun["sitting"]["problem_id"]) == (USER, "p-sorting")
     again = client.post("/api/problems/p-sorting/sittings").json()
-    assert again["sitting"]["id"] == served["sitting"]["id"]
+    assert again["sitting"]["id"] == begun["sitting"]["id"]
+    served = client.get("/api/problems/p-sorting/statement").json()
+    assert served["sitting"]["id"] == begun["sitting"]["id"]
 
 
-def test_serving_an_unknown_problem_is_not_found(client):
-    assert client.post("/api/problems/nope/sittings").status_code == 404
+@pytest.mark.parametrize("opened", ["get statement", "post sittings"])
+def test_serving_an_unknown_problem_is_not_found(client, opened):
+    method, last = opened.split()
+    assert client.request(method.upper(), f"/api/problems/nope/{last}").status_code == 404
 
 
-def test_serving_a_retired_problem_is_refused(client, database):
+@pytest.mark.parametrize("opened", ["get statement", "post sittings"])
+def test_serving_a_retired_problem_is_refused(client, database, opened):
     ProblemStore(database).retire("p-sorting", RetirementReason.DEFECTIVE)
 
-    assert client.post("/api/problems/p-sorting/sittings").status_code == 409
+    method, last = opened.split()
+    assert client.request(method.upper(), f"/api/problems/p-sorting/{last}").status_code == 409
 
 
-def test_a_served_sitting_is_read_back_by_its_id(client):
-    """A reload of the sitting's page reaches the same statement and clock."""
-    served = client.post("/api/problems/p-sorting/sittings").json()
+def test_a_begun_sitting_is_read_back_by_its_id(client):
+    """A reload of the page naming `?sitting=` reaches the same statement and
+    clock."""
+    client.post("/api/problems/p-sorting/sittings")
+    served = client.get("/api/problems/p-sorting/statement").json()
     again = client.get(f"/api/sittings/{served['sitting']['id']}").json()
 
     # no clock runs until the user starts it, and the reload touched the

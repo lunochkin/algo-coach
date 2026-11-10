@@ -36,20 +36,20 @@ def test_one_sitting_runs_through_the_api_as_the_page_calls_it(client):
     assert (candidate["problem_id"], candidate["title"]) == ("p1", "Double")
     assert "statement" not in candidate
 
-    # the press on the picked problem serves it, and a reload reads it back
-    served = ok(client.post("/api/problems/p1/sittings"))
-    sitting_id = served["sitting"]["id"]
-    assert (served["statement"], served["signature"]) == (
+    # opening the picked problem serves it and mints nothing
+    served = ok(client.get("/api/problems/p1/statement"))
+    assert (served["statement"], served["signature"], served["sitting"]) == (
         "Double `n`.",
         "def solve(n: int) -> int:",
+        None,
     )
+    # the first press mints the sitting, and a reload reads it back
+    begun = ok(client.post("/api/problems/p1/sittings"))["sitting"]
+    sitting_id = begun["id"]
     reloaded = ok(client.get(f"/api/sittings/{sitting_id}"))["sitting"]
-    assert (reloaded["id"], reloaded["started_at"]) == (
-        sitting_id,
-        served["sitting"]["started_at"],
-    )
+    assert (reloaded["id"], reloaded["started_at"]) == (sitting_id, begun["started_at"])
     # the reload is the loop acting, so the bound counts from it
-    assert reloaded["last_active_at"] >= served["sitting"]["last_active_at"]
+    assert reloaded["last_active_at"] >= begun["last_active_at"]
 
     # the clock runs once the user starts it, and pausing and resuming it
     # leaves the sitting open to submissions throughout

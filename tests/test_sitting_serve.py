@@ -6,7 +6,7 @@ from helpers import make_problem
 from algo_coach.log import SittingStore
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import RetirementReason, Sitting
-from algo_coach.sitting import Missing, Refused, Served, get, serve
+from algo_coach.sitting import Missing, Refused, Served, begin, get, serve
 
 BEGAN = datetime.now(UTC) - timedelta(hours=1)
 
@@ -34,15 +34,26 @@ def a_sitting(**overrides) -> Sitting:
     )
 
 
-def test_serving_stores_the_sitting_it_returns(stores):
-    """The clock is on disk before the statement leaves, so a restart between
-    serve and submit loses no start."""
+def test_serving_mints_no_sitting(stores):
+    """Opening a problem records nothing: `log.md` waits for the first clock
+    press or submission."""
     problems, sittings = stores
 
     served = serve(problems, sittings, "p1", user_id="u-4f9c2a")
 
-    assert sittings.get(served.sitting.id) == served.sitting
-    assert served.sitting.started_at > BEGAN
+    assert served.sitting is None and served.elapsed_sec is None
+    assert sittings.all() == []
+
+
+def test_beginning_stores_the_sitting_it_returns(stores):
+    """The sitting is on disk before the clock press returns, so a restart
+    between the press and the submission loses no start."""
+    problems, sittings = stores
+
+    one = begin(problems, sittings, "p1", user_id="u-4f9c2a")
+
+    assert sittings.get(one.id) == one
+    assert one.started_at > BEGAN and one.clock_started_at is None
 
 
 def test_the_statement_and_title_come_through(stores):
@@ -96,15 +107,26 @@ def test_nothing_the_problem_was_written_from_is_served():
     assert set(Served.model_fields) == {"title", "statement", "signature", "sitting", "elapsed_sec"}
 
 
-def test_a_second_serve_returns_the_running_sitting(stores):
-    """A refresh or a second tab reaches the clock already running, rather than
-    starting another on the same problem."""
+def test_a_second_begin_returns_the_running_sitting(stores):
+    """A second tab reaches the clock already running, rather than starting
+    another on the same problem."""
     problems, sittings = stores
 
-    first = serve(problems, sittings, "p1", user_id="u-4f9c2a")
-    second = serve(problems, sittings, "p1", user_id="u-4f9c2a")
+    first = begin(problems, sittings, "p1", user_id="u-4f9c2a")
+    second = begin(problems, sittings, "p1", user_id="u-4f9c2a")
 
-    assert second.sitting.id == first.sitting.id
+    assert second.id == first.id
+    assert len(sittings.all()) == 1
+
+
+def test_serving_returns_the_running_sitting(stores):
+    """A reload of the problem's page finds the clock it left running."""
+    problems, sittings = stores
+    sittings.put(a_sitting())
+
+    served = serve(problems, sittings, "p1", user_id="u-4f9c2a")
+
+    assert served.sitting is not None and served.sitting.id == "s0"
     assert len(sittings.all()) == 1
 
 
@@ -114,18 +136,19 @@ def test_a_paused_sitting_is_returned_paused(stores):
     problems, sittings = stores
     sittings.put(a_sitting(pauses=[{"at": BEGAN + timedelta(minutes=5)}]))
 
-    assert serve(problems, sittings, "p1", user_id="u-4f9c2a").sitting.paused
+    served = serve(problems, sittings, "p1", user_id="u-4f9c2a")
+
+    assert served.sitting is not None and served.sitting.paused
 
 
 def test_an_ended_sitting_is_not_reused(stores):
-    """Its elapsed time is settled, so a new visit to the problem is a new
+    """Its elapsed time is settled, so a new press on the problem is a new
     sitting."""
     problems, sittings = stores
     sittings.put(a_sitting(ended_at=BEGAN + timedelta(minutes=30)))
 
-    served = serve(problems, sittings, "p1", user_id="u-4f9c2a")
-
-    assert served.sitting.id != "s0"
+    assert serve(problems, sittings, "p1", user_id="u-4f9c2a").sitting is None
+    assert begin(problems, sittings, "p1", user_id="u-4f9c2a").id != "s0"
     assert len(sittings.all()) == 2
 
 
@@ -133,9 +156,9 @@ def test_another_user_s_sitting_is_not_reused(stores):
     problems, sittings = stores
     sittings.put(a_sitting(user_id="u-b71e03"))
 
-    served = serve(problems, sittings, "p1", user_id="u-4f9c2a")
+    one = begin(problems, sittings, "p1", user_id="u-4f9c2a")
 
-    assert served.sitting.user_id == "u-4f9c2a" and served.sitting.id != "s0"
+    assert one.user_id == "u-4f9c2a" and one.id != "s0"
 
 
 def test_an_unknown_problem_is_refused(database):
@@ -143,23 +166,29 @@ def test_an_unknown_problem_is_refused(database):
         serve(ProblemStore(database), SittingStore(database), "nope", user_id="u-4f9c2a")
 
 
-def test_a_retired_problem_is_refused(database):
+@pytest.mark.parametrize("opened", [serve, begin])
+def test_a_retired_problem_is_refused(database, opened):
     """A defective problem was never a fair test, so no clock starts on one."""
     problems = ProblemStore(database)
     problems.put(make_problem("p1", status="retired", retired_reason="defective"))
 
     with pytest.raises(Refused, match="retired"):
-        serve(problems, SittingStore(database), "p1", user_id="u-4f9c2a")
+        opened(problems, SittingStore(database), "p1", user_id="u-4f9c2a")
 
 
 def test_a_sitting_is_read_back_as_it_was_served(stores):
-    """The sitting's page has its own URL, and a reload there needs the
-    statement without starting a clock."""
+    """The problem's page names its sitting as `?sitting=`, and a reload there
+    needs the statement without starting a clock."""
     problems, sittings = stores
     at = datetime.now(UTC)
-    served = serve(problems, sittings, "p1", user_id="u-4f9c2a", now=at)
+    one = begin(problems, sittings, "p1", user_id="u-4f9c2a", now=at)
 
-    assert get(problems, sittings, served.sitting.id, user_id="u-4f9c2a", now=at) == served
+    read = get(problems, sittings, one.id, user_id="u-4f9c2a", now=at)
+
+    assert (
+        read.model_dump()
+        == serve(problems, sittings, "p1", user_id="u-4f9c2a", now=at).model_dump()
+    )
     assert len(sittings.all()) == 1
 
 

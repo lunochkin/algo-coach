@@ -1,16 +1,21 @@
-import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router'
+import { lazy } from 'react'
+import { useParams, useSearchParams } from 'react-router'
 
 import { api, type Picked } from '@/api/client'
-import { described, useLoaded } from '@/api/useLoaded'
+import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel, Stat, Stats } from '@/components/Panel'
 import { Badge } from '@/components/ui/badge'
 import { lastAt, share } from '@/lib/format'
 
-// opening a problem serves it: the path is replaced by the sitting's, so no
-// press stands between the pick and the statement. A retired problem serves
+// the editor is the bulk of the bundle, and a retired problem needs none
+const SittingView = lazy(() =>
+  import('@/components/SittingView').then((m) => ({ default: m.SittingView })),
+)
+
+// opening a problem serves its statement and mints nothing, so no press
+// stands between the pick and the statement. A retired problem serves
 // nothing and reads as its record. `?technique=` or `?card=` names the page
 // the pick came from
 export function ProblemPage() {
@@ -21,7 +26,6 @@ export function ProblemPage() {
   // the listing is the third page a pick comes from, beside a technique and a
   // card, and it names no record of its own
   const listing = search.get('from') === 'problems'
-  const navigate = useNavigate()
   // read only where the pick came from a card: the sitting returns to it, and
   // the claim answers for that card's technique
   const card = useLoaded(
@@ -39,36 +43,18 @@ export function ProblemPage() {
       }),
     `problem:${problemId}`,
   )
-  const [refused, setRefused] = useState<string | null>(null)
-  // a second mount in development serves again; the engine returns the sitting
-  // already running, and this keeps the page from asking twice
-  const serving = useRef(false)
 
   const served = picked.data !== undefined && !picked.data.retired
   const carded = slug === null || card.data !== undefined
-  useEffect(() => {
-    if (!served || !carded || serving.current) return
-    serving.current = true
-    void (async () => {
-      try {
-        const { data, error } = await api.POST('/api/problems/{problem_id}/sittings', {
-          params: { path: { problem_id: problemId } },
-        })
-        if (data)
-          navigate(
-            sittingPath(data.sitting.id, {
-              technique: card.data?.card.technique ?? technique,
-              card: slug,
-            }),
-            // a reload reaches the sitting rather than serving the problem again
-            { replace: true },
-          )
-        else setRefused(described(error))
-      } catch (reason) {
-        setRefused(String(reason))
-      }
-    })()
-  }, [served, carded, problemId, navigate, card.data, technique, slug])
+  // the claim answers for the card's own technique where a card offered it
+  if (served && carded)
+    return (
+      <SittingView
+        problemId={problemId}
+        drilled={card.data?.card.technique ?? technique}
+        card={slug}
+      />
+    )
 
   return (
     <section className="space-y-section">
@@ -111,8 +97,6 @@ export function ProblemPage() {
                 decide. It is served to nobody, and the attempts above stay in your log.
               </p>
             </Panel>
-          ) : refused ? (
-            <p className="text-meta text-destructive">The problem did not open: {refused}</p>
           ) : (
             <p className="text-meta text-muted-foreground">Opening the problem…</p>
           )
@@ -120,19 +104,6 @@ export function ProblemPage() {
       </Loaded>
     </section>
   )
-}
-
-// the sitting carries both on: the claim answers for the technique, and the
-// sitting returns to the card it came from
-function sittingPath(
-  sittingId: string,
-  from: { technique: string | null; card: string | null },
-): string {
-  const query = new URLSearchParams()
-  if (from.technique !== null) query.set('technique', from.technique)
-  if (from.card !== null) query.set('card', from.card)
-  const asked = query.toString()
-  return `/sittings/${encodeURIComponent(sittingId)}${asked ? `?${asked}` : ''}`
 }
 
 // what the user has done on this problem, as counts rather than a sentence

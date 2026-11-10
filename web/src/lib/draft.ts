@@ -6,7 +6,7 @@ import type { Carry } from '@/api/client'
 // typed, so a reload finds its own draft whatever the browser's clock says
 // `restored` says the sitting restored an earlier solve, which its attempts
 // then report
-export type Draft = { code: string; at: string; sitting: string; restored?: boolean }
+export type Draft = { code: string; at: string; sitting: string | null; restored?: boolean }
 
 const key = (problemId: string) => `algo-coach:problem:${problemId}:draft`
 
@@ -23,7 +23,7 @@ export function draftOf(problemId: string): Draft | null {
 
 export function keepDraft(
   problemId: string,
-  sittingId: string,
+  sittingId: string | null,
   code: string,
   restored = false,
 ): void {
@@ -42,7 +42,7 @@ export function keepDraft(
 export function opening(draft: Draft | null, carry: Carry | null): string | null {
   const drafted =
     draft !== null &&
-    draft.sitting !== carry?.solved_sitting_id &&
+    (draft.sitting === null || draft.sitting !== carry?.solved_sitting_id) &&
     (!carry?.solved_at || Date.parse(draft.at) > Date.parse(carry.solved_at)) &&
     (!carry?.run_started_at || Date.parse(draft.at) >= Date.parse(carry.run_started_at))
   const submitted =
@@ -58,6 +58,6 @@ function isDraft(value: unknown): value is Draft {
     value !== null &&
     typeof (value as Draft).code === 'string' &&
     typeof (value as Draft).at === 'string' &&
-    typeof (value as Draft).sitting === 'string'
+    (typeof (value as Draft).sitting === 'string' || (value as Draft).sitting === null)
   )
 }

@@ -175,17 +175,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/problems/{problem_id}/sittings": {
+    "/api/problems/{problem_id}/statement": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
         /** Statement */
-        post: operations["statement_api_problems__problem_id__sittings_post"];
+        get: operations["statement_api_problems__problem_id__statement_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -237,6 +237,23 @@ export interface paths {
         put?: never;
         /** Started */
         post: operations["started_api_cards__slug__runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/problems/{problem_id}/sittings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Begun */
+        post: operations["begun_api_problems__problem_id__sittings_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1138,6 +1155,21 @@ export interface components {
             solved: boolean;
         };
         /**
+         * Seated
+         * @description A sitting read by its id, with its problem's statement.
+         */
+        Seated: {
+            /** Title */
+            title: string;
+            /** Statement */
+            statement: string;
+            /** Signature */
+            signature: string | null;
+            /** Elapsed Sec */
+            elapsed_sec: number | null;
+            sitting: components["schemas"]["Sitting"];
+        };
+        /**
          * Selector
          * @description What a ladder resolves from. Named fields rather than a filter map, so
          *     a new filter is an additive optional field.
@@ -1166,11 +1198,7 @@ export interface components {
             attempt_id: string;
             mode: components["schemas"]["FailureMode"];
         };
-        /**
-         * Served
-         * @description What a solver is handed: the statement and the clock, and nothing the
-         *     problem was written from.
-         */
+        /** Served */
         Served: {
             /** Title */
             title: string;
@@ -1178,9 +1206,9 @@ export interface components {
             statement: string;
             /** Signature */
             signature: string | null;
-            sitting: components["schemas"]["Sitting"];
             /** Elapsed Sec */
             elapsed_sec: number | null;
+            sitting: components["schemas"]["Sitting"] | null;
         };
         /**
          * SignedInDevice
@@ -1376,8 +1404,8 @@ export interface components {
         TemplateKind: "code" | "procedure";
         /**
          * Timed
-         * @description A sitting a start, a pause, a resume or an end moved, with its elapsed
-         *     time on the engine's clock.
+         * @description A sitting a begin, a start, a pause, a resume or an end moved, with its
+         *     elapsed time on the engine's clock.
          */
         Timed: {
             sitting: components["schemas"]["Sitting"];
@@ -1750,7 +1778,7 @@ export interface operations {
             };
         };
     };
-    statement_api_problems__problem_id__sittings_post: {
+    statement_api_problems__problem_id__statement_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1798,7 +1826,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Served"];
+                    "application/json": components["schemas"]["Seated"];
                 };
             };
             /** @description Validation Error */
@@ -1863,6 +1891,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CardRun"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    begun_api_problems__problem_id__sittings_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                problem_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Timed"];
                 };
             };
             /** @description Validation Error */

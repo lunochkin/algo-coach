@@ -24,6 +24,7 @@ from algo_coach.schema import (
     Execution,
     FailureMode,
     Pause,
+    Problem,
     SelfLabel,
     Sitting,
     TestCase,
@@ -57,7 +58,7 @@ class TooOften(Refused):
     """More submissions in the last minute than the cap allows."""
 
 
-class Served(BaseModel):
+class _Statement(BaseModel):
     """What a solver is handed: the statement and the clock, and nothing the
     problem was written from."""
 
@@ -66,10 +67,19 @@ class Served(BaseModel):
     title: str
     statement: str  # the prose, without the signature it ends on
     signature: str | None  # the `def solve(...)` line; none where a statement ends on prose
-    sitting: Sitting
     # taken on the engine's clock, so a page counting on from it shows the
     # number an attempt would carry rather than one its own clock skews
-    elapsed_sec: float | None  # none while the clock has not run
+    elapsed_sec: float | None  # none while no clock has run
+
+
+class Served(_Statement):
+    sitting: Sitting | None  # none until a clock press or a submission mints one
+
+
+class Seated(_Statement):
+    """A sitting read by its id, with its problem's statement."""
+
+    sitting: Sitting
 
 
 class Failure(BaseModel):
@@ -133,25 +143,60 @@ def serve(
     user_id: str,
     now: datetime | None = None,
 ) -> Served:
+    """The statement, and the sitting running on the problem where one runs.
+    Serving mints nothing: `log.md` waits for the first press or submission."""
+    problem = _servable(problems, problem_id)
+    at = now or _clock()
+    one = _live(sittings, user_id, problem_id, at)
+    prose, signature = _signed(problem.statement)
+    return Served(
+        title=problem.title,
+        statement=prose,
+        signature=signature,
+        sitting=one,
+        elapsed_sec=one.elapsed(at) if one else None,
+    )
+
+
+def begin(
+    problems: ProblemStore,
+    sittings: SittingStore,
+    problem_id: str,
+    *,
+    user_id: str,
+    now: datetime | None = None,
+) -> Sitting:
+    """The sitting a clock press or a submission runs in: the one running on
+    the problem, or a new one."""
+    _servable(problems, problem_id)
+    at = now or _clock()
+    one = _live(sittings, user_id, problem_id, at)
+    if one is None:
+        one = mint.sitting(user_id, problem_id, at)
+        sittings.put(one)
+    return one
+
+
+def _servable(problems: ProblemStore, problem_id: str) -> Problem:
     problem = problems.get(problem_id)
     if problem is None:
         raise Missing(f"no problem {problem_id}")
     if not problem.served:
         raise Refused(f"problem {problem_id} is {problem.status}")
-    at = now or _clock()
+    return problem
+
+
+def _live(sittings: SittingStore, user_id: str, problem_id: str, at: datetime) -> Sitting | None:
     # a refresh or a second tab reaches the clock already running, rather than
     # starting a second one on the same problem
     one = sittings.running(user_id, problem_id)
-    if one is not None and _idle(one, at):
-        # the clock stopped where the user left, and this serve starts another
-        _ended_idle(sittings, one)
-        one = None
     if one is None:
-        one = mint.sitting(user_id, problem_id, at)
-        sittings.put(one)
-    else:
-        one = _stored(sittings, one, at)
-    return _served(problem.title, problem.statement, one, at)
+        return None
+    if _idle(one, at):
+        # the clock stopped where the user left; the next press mints another
+        _ended_idle(sittings, one)
+        return None
+    return _stored(sittings, one, at)
 
 
 def get(
@@ -161,9 +206,9 @@ def get(
     *,
     user_id: str,
     now: datetime | None = None,
-) -> Served:
-    """What `serve` returned for one of the user's sittings, ended or not. A
-    reload of the sitting's page starts no clock."""
+) -> Seated:
+    """One of the user's sittings, ended or not, with its problem's statement.
+    A reload of the page naming the sitting starts no clock."""
     one = _owned(sittings, sitting_id, user_id)
     # the problem as stored, retired or not: the sitting was served before
     problem = problems.get(one.problem_id)
@@ -172,7 +217,14 @@ def get(
     at = now or _clock()
     if one.ended_at is None:
         one = _ended_idle(sittings, one) if _idle(one, at) else _stored(sittings, one, at)
-    return _served(problem.title, problem.statement, one, at)
+    prose, signature = _signed(problem.statement)
+    return Seated(
+        title=problem.title,
+        statement=prose,
+        signature=signature,
+        sitting=one,
+        elapsed_sec=one.elapsed(at),
+    )
 
 
 def submit(
@@ -365,17 +417,6 @@ def end(
     # is what leaves the sitting ended with none open
     return _stored(
         store, one, pauses=_closed(one.pauses, at) if one.paused else one.pauses, ended_at=at
-    )
-
-
-def _served(title: str, statement: str, one: Sitting, now: datetime) -> Served:
-    prose, signature = _signed(statement)
-    return Served(
-        title=title,
-        statement=prose,
-        signature=signature,
-        sitting=one,
-        elapsed_sec=one.elapsed(now),
     )
 
 

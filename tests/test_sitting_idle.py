@@ -56,7 +56,7 @@ def test_serving_again_within_the_bound_reaches_the_running_clock(database):
 
     served = stores.served(SOON)
 
-    assert served.sitting.id == "s1"
+    assert served.sitting is not None and served.sitting.id == "s1"
     assert served.sitting.last_active_at == SOON
     assert served.elapsed_sec == 300
 
@@ -71,8 +71,7 @@ def test_serving_after_the_bound_ends_the_idle_sitting_where_it_was_left(databas
     left = stores.sittings.get("s1")
     assert left is not None
     assert left.ended_at == STARTED
-    assert served.sitting.id != "s1"
-    assert served.elapsed_sec is None
+    assert served.sitting is None and served.elapsed_sec is None
 
 
 def test_reading_an_idle_sitting_ends_it_at_its_last_activity(database):

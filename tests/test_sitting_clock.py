@@ -8,7 +8,7 @@ from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.mint import case
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Sitting
-from algo_coach.sitting import Missing, Refused, end, pause, resume, serve, start_clock, submit
+from algo_coach.sitting import Missing, Refused, begin, end, pause, resume, start_clock, submit
 
 
 @pytest.fixture(autouse=True)
@@ -141,12 +141,12 @@ def test_another_user_s_sitting_reads_as_missing(database, call):
         call(a_store(database), "s1", user_id="u-b71e03", now=NINE)
 
 
-def test_a_served_sitting_runs_no_clock(database):
-    """Opening a problem serves it, and the clock waits for the user's press
-    or the preference."""
-    one = serve(ProblemStore(database), SittingStore(database), "p1", user_id="u-4f9c2a")
+def test_a_begun_sitting_runs_no_clock(database):
+    """A sitting a submission mints stays untimed, and the clock waits for the
+    user's press or the preference."""
+    one = begin(ProblemStore(database), SittingStore(database), "p1", user_id="u-4f9c2a")
 
-    assert one.sitting.clock_started_at is None and one.elapsed_sec is None
+    assert one.clock_started_at is None and one.elapsed(one.started_at) is None
 
 
 def test_a_start_runs_the_clock_from_the_press(database):
@@ -186,7 +186,7 @@ def test_an_untimed_sitting_still_takes_a_submission(database):
         "s1",
         "def solve(n):\n    return n * 2\n",
         user_id="u-4f9c2a",
-        # inside the idle bound, which counts from the serve
+        # inside the idle bound, which counts from the begin
         now=STARTED + timedelta(minutes=10),
     )
 

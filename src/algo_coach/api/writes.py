@@ -31,6 +31,7 @@ from algo_coach.schema import (
 from algo_coach.sitting import (
     Asked,
     Submitted,
+    begin,
     claim,
     end,
     get,
@@ -64,8 +65,8 @@ class Reproduction(BaseModel):
 
 
 class Timed(BaseModel):
-    """A sitting a start, a pause, a resume or an end moved, with its elapsed
-    time on the engine's clock."""
+    """A sitting a begin, a start, a pause, a resume or an end moved, with its
+    elapsed time on the engine's clock."""
 
     sitting: Sitting
     elapsed_sec: float | None  # none while the clock has not run
@@ -139,6 +140,15 @@ def _template(card: Card, template_slug: str) -> Template:
     if not found:
         raise HTTPException(status_code=404, detail=f"no template {template_slug}")
     return found[0]
+
+
+# the first clock press or submission on a problem: the running sitting, or a
+# new one
+@router.post("/problems/{problem_id}/sittings")
+def begun(root: Root, user_id: UserId, problem_id: str) -> Timed:
+    at = datetime.now(UTC)
+    one = begin(ProblemStore(root), SittingStore(root), problem_id, user_id=user_id, now=at)
+    return Timed(sitting=one, elapsed_sec=one.elapsed(at))
 
 
 @router.post("/sittings/{sitting_id}/submissions")

@@ -33,9 +33,6 @@ const RecallPage = lazy(() =>
 const DrawnRecallPage = lazy(() =>
   import('@/pages/RecallPage').then((m) => ({ default: m.DrawnRecallPage })),
 )
-const SittingPage = lazy(() =>
-  import('@/pages/SittingPage').then((m) => ({ default: m.SittingPage })),
-)
 const PrivacyPage = lazy(() =>
   import('@/pages/PrivacyPage').then((m) => ({ default: m.PrivacyPage })),
 )
@@ -47,8 +44,8 @@ const GalleryPage = import.meta.env.DEV
 
 function App() {
   // the statement and the editor sit side by side, which a reading column is
-  // too narrow for
-  const wide = useMatch('/sittings/:sittingId') !== null
+  // too narrow for. The problem's page holds them
+  const wide = useMatch('/problems/:problemId') !== null
   // nothing in the menu is reachable before signing in, and both pages open
   // without a session
   const signingIn = useMatch(LOGIN) !== null
@@ -75,7 +72,6 @@ function App() {
             {/* the path names the problem, and `?technique=` names where the
                 pick came from: Phase 11 opens the same page from a ladder */}
             <Route path="problems/:problemId" element={<ProblemPage />} />
-            <Route path="sittings/:sittingId" element={<SittingPage />} />
             <Route path="knowledge" element={<KnowledgePage />} />
             <Route path="knowledge/queue" element={<QueuePage />} />
             <Route path="knowledge/modules/:module" element={<ModulePage />} />

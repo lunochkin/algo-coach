@@ -44,7 +44,7 @@ from algo_coach.schema import (
     Template,
     TemplateMatch,
 )
-from algo_coach.sitting import Carry, Served, carry, get, serve
+from algo_coach.sitting import Carry, Seated, Served, carry, get, serve
 from algo_coach.solution_claims import load_problem, load_problems
 from algo_coach.solutions import SolutionLog
 from algo_coach.storage import Database
@@ -446,15 +446,15 @@ def picked(root: Root, user_id: UserId, problem_id: str) -> Picked:
     )
 
 
-# a write, though the loop reads the statement through it: serving mints the
-# sitting whose clock starts here
-@router.post("/problems/{problem_id}/sittings")
+# mints nothing: a reading touches the sitting running on the problem, and a
+# clock press or a submission mints one
+@router.get("/problems/{problem_id}/statement")
 def statement(root: Root, user_id: UserId, problem_id: str) -> Served:
     return serve(ProblemStore(root), SittingStore(root), problem_id, user_id=user_id)
 
 
 @router.get("/sittings/{sitting_id}")
-def sitting(root: Root, user_id: UserId, sitting_id: str) -> Served:
+def sitting(root: Root, user_id: UserId, sitting_id: str) -> Seated:
     return get(ProblemStore(root), SittingStore(root), sitting_id, user_id=user_id)
 
 
