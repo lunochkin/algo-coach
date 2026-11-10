@@ -183,11 +183,12 @@ left to serve.
   that keeps serving questions.
 - **New questions are limited per day, and reviews never are.** The limit
   counts questions first answered today across every device, ten by default.
-  The day starts at 00:00 UTC, on every device.
-- **The day is UTC rather than local time.** Two devices in different time
-  zones would otherwise count today's new questions and raises over different
-  windows. A local rollover is deferred until a user practises across time
-  zones or finds midnight UTC falling inside a practice session.
+  The day starts at 04:00 local time, when almost every user is asleep.
+- **Each device reads the day in its own time zone.** Midnight UTC falls in a
+  US evening, the hours a user practises in. Two devices in different time
+  zones disagree on today's new questions and raises for a few hours, and
+  that is accepted. A user's time zone as a record of the log is deferred
+  until a user practises across time zones.
 - **The user can raise today's limit, five at a time**, from Home or inside the
   next and filtered queues. The raise ends when the day does, and the daily
   setting stands again the next day.
