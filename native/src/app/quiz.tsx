@@ -55,7 +55,7 @@ export default function Quiz() {
   return <ExamQuiz s={s} />;
 }
 
-type Current = { q: Question; tag: Status; fresh: boolean } | { lesson: LessonItem };
+type Current = { q: Question; tag: Status; fresh: boolean; early: boolean } | { lesson: LessonItem };
 
 /** A lesson served in the queue: read it (the reader records Done), or go on without it. */
 function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number; onNext: () => void }) {
@@ -117,7 +117,8 @@ function QueueQuiz({ s }: { s: QueueSession }) {
     const q = b ? queue.pick(b, Date.now()) : null;
     if (!q || !b) return null;
     if (isLessonItem(q)) return { lesson: q };
-    return { q, tag: b.status(q, Date.now()), fresh: !b.attempts(q).length };
+    const now = Date.now();
+    return { q, tag: b.status(q, now), fresh: !b.attempts(q).length, early: queue.early(b, q, now) };
   }, [board, queue]);
   const [current, setCurrent] = useState(() => pickOne());
   const [count, setCount] = useState(0); // keys Ask, so each pick starts clean
@@ -184,7 +185,8 @@ function QueueQuiz({ s }: { s: QueueSession }) {
   const now = Date.now();
   const due = b ? queue.reviews(b, now).length : 0;
   const newLeft = b ? queue.newLeft(b, now) : 0;
-  const left = `${due} due · ${newLeft} new left today`;
+  const stepping = b ? queue.stepping(b, now).count : 0;
+  const left = `${due} due · ${stepping ? `${stepping} learning · ` : ''}${newLeft} new left today`;
   const unseenLeft = !!b && queue.scope.some((q) => !b.attempts(q).length);
   const rs = results.current;
   const score = rs.filter((r) => r.correct).length;
@@ -212,7 +214,7 @@ function QueueQuiz({ s }: { s: QueueSession }) {
         <Ask
           key={count}
           q={current.q}
-          tag={current.tag}
+          tag={current.early ? `${current.tag} · learning step, early` : current.tag}
           exam={false}
           bottom={insets.bottom}
           onAnswered={onAnswered}

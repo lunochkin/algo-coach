@@ -87,6 +87,28 @@ export class Queue {
     return this.scope.filter((q) => b.toReview(q, now) && this.wanted(b, q, now));
   }
 
+  /**
+   * Questions in a (re)learning step that is not due yet. `reviews` leaves them out, and
+   * learn ahead serves them when nothing else is ready, so a count shows them apart.
+   */
+  stepping(b: Board, now: number): { count: number; nextAt: number | null } {
+    let count = 0;
+    let nextAt = Infinity;
+    for (const q of this.scope) {
+      if (this.early(b, q, now) && this.wanted(b, q, now)) {
+        count++;
+        nextAt = Math.min(nextAt, b.memory(q)!.due);
+      }
+    }
+    return { count, nextAt: count ? nextAt : null };
+  }
+
+  /** Whether `q` would be served before its step is due: learn ahead. */
+  early(b: Board, q: Question, now: number): boolean {
+    const m = b.memory(q);
+    return !!m?.learning && m.due > now;
+  }
+
   /** The next unseen question, if today's limit allows one. */
   private fresh(b: Board, now: number, rng: Rng, take: boolean): Question | null {
     if (this.kind === 'review' || this.want || !this.newLeft(b, now)) return null;

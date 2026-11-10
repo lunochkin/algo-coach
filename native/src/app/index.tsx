@@ -74,6 +74,7 @@ export default function Home() {
     const now = Date.now();
     return {
       reviews: cont.queue.reviews(cont.b, now).length,
+      learning: cont.queue.stepping(cont.b, now).count,
       newLeft: cont.queue.newLeft(cont.b, now),
       outside: focused?.strict ? outsideFocus(cont.b, focused, now) : 0,
       empty: cont.queue.isEmpty(cont.b, now),
@@ -300,8 +301,8 @@ export default function Home() {
           <View style={[styles.row, { justifyContent: 'center', flexWrap: 'wrap', minHeight: 24 }]}>
             <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
               {focused?.strict
-                ? `Strict focus · ${counts.reviews} reviews · ${counts.newLeft} new left`
-                : `${counts.reviews} reviews · ${counts.newLeft} new left today`}
+                ? `Strict focus · ${counts.reviews} reviews · ${learningPart(counts.learning)}${counts.newLeft} new left`
+                : `${counts.reviews} reviews · ${learningPart(counts.learning)}${counts.newLeft} new left today`}
             </Text>
             {focused?.strict && counts.outside ? (
               <TouchableRipple
@@ -495,3 +496,6 @@ function CourseCard({
     </Card>
   );
 }
+
+// questions in a learning step not due yet: Continue serves them early, so the line counts them
+const learningPart = (n: number) => (n ? `${n} learning · ` : '');

@@ -164,6 +164,9 @@ left to serve.
   break at random.
 - **A step due within 20 minutes is served early** when nothing else is
   servable, so a one-minute step does not end the queue.
+- **The app counts such steps apart from the due reviews**, and marks a
+  question served early. A due count of zero then never sits beside a queue
+  that keeps serving questions.
 - **New questions are limited per day, and reviews never are.** The limit
   counts questions first answered today across every device, ten by default.
   The day starts at 04:00 local time.

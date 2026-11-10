@@ -59,6 +59,7 @@ export function FocusCard(props: Props) {
       total: qs.length,
       n,
       due: queue.reviews(b, now).length,
+      learning: queue.stepping(b, now).count,
       newLeft: queue.newLeft(b, now),
       next: next && { label: `${next.sub} · ${levelName(b.rules, next.level)}`, passed: b.nPassed(next), of: b.groupQuestions(next).length },
       cert,
@@ -113,6 +114,7 @@ export function FocusCard(props: Props) {
 
         <View style={[styles.row, { gap: 16 }]}>
           <Stat icon="refresh" value={info.due} label="to review now" />
+          {info.learning ? <Stat icon="timer-sand" value={info.learning} label="learning" /> : null}
           <Stat icon="plus-circle-outline" value={info.newLeft} label="new left today" />
           <Chip
             compact
