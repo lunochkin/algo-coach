@@ -11,6 +11,7 @@ import {
   readFailure,
   recallLine,
   revealLabel,
+  techniqueCards,
   techniqueStats,
   type components,
 } from './index';
@@ -98,6 +99,13 @@ describe('the cards in progress', () => {
     ];
     expect(inProgress(cards)).toEqual([]);
     expect(notInProgress(cards).map((one) => one.slug)).toEqual(['done', 'lost', 'new']);
+  });
+});
+
+describe("a technique's cards", () => {
+  it("reads the cards the engine names, in the cards list's order", () => {
+    const listed = [card('a'), card('b'), card('c')];
+    expect(techniqueCards(listed, [{ slug: 'c' }, { slug: 'a' }]).map((one) => one.slug)).toEqual(['a', 'c']);
   });
 });
 

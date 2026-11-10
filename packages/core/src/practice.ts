@@ -89,6 +89,15 @@ export function notInProgress(cards: ListedCard[]): ListedCard[] {
   return cards.filter((card) => !STUDYING.includes(card.status.state));
 }
 
+/**
+ * A technique's cards as the cards list reads them, in its order: `taught` is
+ * what the engine names as teaching the technique or a narrower one.
+ */
+export function techniqueCards(listed: ListedCard[], taught: { slug: string }[]): ListedCard[] {
+  const slugs = new Set(taught.map((one) => one.slug));
+  return listed.filter((card) => slugs.has(card.slug));
+}
+
 // a family several cards teach is one block under its heading. A family of one
 // card joins the unheaded block beside it, since a heading over one row repeats it
 export interface CardBlock {

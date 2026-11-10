@@ -442,12 +442,13 @@ what it offers. The inventory is the list both clients build to.
 - **The phone opens on the knowledge home, where the web opens on the
   board.** The knowledge home serves from the phone's own copy, and the board
   needs a connection. A phone opened on a train then shows a page that works.
-- **Every technique on the phone's board opens the phone's Technique screen,
-  whatever number of cards teach the technique.** The screen lists the
-  technique's problems, as the web's technique page does. It also lists the
-  cards that teach the technique or a narrower one, as the cards list reads
-  them. A row opening a card where one card teaches the technique would make
-  one press land on two kinds of screen.
+- **Every technique on the board opens the technique's page, whatever number
+  of cards teach the technique.** A row opening a card where one card teaches
+  the technique would make one press land on two kinds of screen.
+- **A technique's page lists its cards, then its problems, on both clients.**
+  The cards are those teaching the technique or a narrower one, each as its
+  row on the cards list reads. A row carries the card's progress and its
+  recall, where a link carries the title alone.
 - **A technique no card teaches lists its problems alone.** The board lists
   every technique a served problem carries, and a technique can carry
   problems before any card teaches it.

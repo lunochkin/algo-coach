@@ -4,7 +4,7 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { readFailure, techniqueStats, type components } from '@algo-coach/core';
+import { readFailure, techniqueCards, techniqueStats, type components } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { CardPanel, Heading } from '@/ui/cards';
 import { Failed, styles } from '@/ui/common';
@@ -30,8 +30,7 @@ export default function TechniqueScreen() {
   const error = problems.error ?? taught.error ?? listed.error;
   const [now] = useState(() => Date.now());
 
-  const slugs = new Set((taught.data ?? []).map((one) => one.slug));
-  const cards = (listed.data ?? []).filter((one) => slugs.has(one.slug));
+  const cards = techniqueCards(listed.data ?? [], taught.data ?? []);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
