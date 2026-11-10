@@ -378,7 +378,7 @@ what it offers. The inventory is the list both clients build to.
 | A lesson a queue offers | a stop opening the lesson page | a stop opening the lesson screen | by platform |
 | A level exam's choices | `/knowledge/exam` | Exam | same |
 | An exam and its results | `/knowledge/queue?mode=exam` | the quiz screen | same |
-| The lessons | `/knowledge/lessons` | Lessons | to fix |
+| The lessons | `/knowledge/lessons` | Lessons | same |
 | A lesson | `/knowledge/lessons/:module/:lesson` | Lesson | same |
 | The certifications | `/knowledge/certifications` | Certifications | same |
 | A certification's conditions | a dialog on the certifications | a sheet on Certifications and Map | same |
@@ -446,9 +446,6 @@ what it offers. The inventory is the list both clients build to.
 `## The structure` settles most of these. Each names what holds now, then
 the change.
 
-- **The lessons.** The web lists every module's lessons by module. The phone
-  shows one module's lessons, picked by a chip. The phone moves to the web's
-  list.
 - **The settings.** The phone's Settings restores an archived module, names
   the sync's state and syncs on a press. The web's settings page gains all
   three.

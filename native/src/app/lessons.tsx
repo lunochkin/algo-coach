@@ -1,8 +1,8 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { memo, useMemo, useState } from 'react';
-import { Pressable, ScrollView, SectionList, View } from 'react-native';
-import { Appbar, Card, Chip, Text, useTheme } from 'react-native-paper';
+import { Pressable, SectionList, View } from 'react-native';
+import { Appbar, Card, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -16,30 +16,37 @@ import {
 import { useStore } from '@/lib/store';
 import { styles } from '@/ui/common';
 
+// every module's lessons, by module, as the web lists them: `pages.md`, The two clients
 export default function LessonsScreen() {
   const st = useStore();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const courses = useMemo(
-    () =>
-      bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.courseOrder).filter(
-        (c) => c.graph?.lessons.length,
-      ),
-    [st.catalog, st.courseOrder],
-  );
-  const [course, setCourse] = useState(
-    () => courses.find((c) => c.slug === st.focus?.course)?.slug ?? courses[0]?.slug ?? '',
-  );
-  const c = courses.find((x) => x.slug === course);
   const { board } = st;
-  const b = useMemo(() => board(null), [board]);
+  // a module's own board, so a paused module's lessons read too
+  const modules = useMemo(
+    () =>
+      bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.courseOrder)
+        .filter((c) => c.graph?.lessons.length)
+        .flatMap((c) => {
+          const b = board(c.slug);
+          return b ? [{ c, b }] : [];
+        }),
+    [st.catalog, st.courseOrder, board],
+  );
 
-  const groups = useMemo(() => (c && b ? lessonGroups(b, c) : null), [b, c]);
-
-  const [open, setOpen] = useState<Record<string, boolean>>({ toRead: true, read: true, locked: false });
+  // a locked lesson opens too, and the locked groups start closed: they are the longest
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const isOpen = (key: string, group: string) => open[key] ?? group !== 'locked';
   const sections = useMemo(
-    () => (groups ?? []).map((g) => ({ key: g.key, title: g.title, total: g.lessons.length, data: open[g.key] ? g.lessons : [] })),
-    [groups, open],
+    () =>
+      modules.flatMap(({ c, b }) =>
+        lessonGroups(b, c).map((g, i) => {
+          const key = `${c.slug}:${g.key}`;
+          return { key, c, b, module: i === 0 ? c.title : null, title: g.title, total: g.lessons.length, data: isOpen(key, g.key) ? g.lessons : [] };
+        }),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [modules, open],
   );
 
   return (
@@ -48,40 +55,35 @@ export default function LessonsScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="Lessons" />
       </Appbar.Header>
-      {courses.length > 1 ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }}>
-          <View style={[styles.row, { paddingHorizontal: 16, paddingBottom: 8 }]}>
-            {courses.map((x) => (
-              <Chip key={x.slug} selected={x.slug === course} showSelectedCheck onPress={() => setCourse(x.slug)}>
-                {x.title}
-              </Chip>
-            ))}
-          </View>
-        </ScrollView>
-      ) : null}
-      {!c || !b || !groups ? (
+      {!sections.length ? (
         <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>No lessons yet.</Text>
       ) : (
         <SectionList
           sections={sections}
           keyExtractor={(x) => x.slug}
-          renderItem={({ item }) => <LessonCard x={item} c={c} b={b} />}
-          renderSectionHeader={({ section }) => (
-            <Pressable
-              onPress={() => setOpen((o) => ({ ...o, [section.key]: !o[section.key] }))}
-              style={[styles.row, { justifyContent: 'space-between', paddingVertical: 8, backgroundColor: theme.colors.background }]}
-              accessibilityRole="button"
-              accessibilityState={{ expanded: !!open[section.key] }}>
-              <Text variant="titleSmall" style={{ color: theme.colors.primary }}>
-                {`${section.title} · ${section.total}`}
-              </Text>
-              <MaterialCommunityIcons
-                name={open[section.key] ? 'chevron-up' : 'chevron-down'}
-                size={22}
-                color={theme.colors.primary}
-              />
-            </Pressable>
-          )}
+          renderItem={({ item, section }) => <LessonCard x={item} c={section.c} b={section.b} />}
+          renderSectionHeader={({ section }) => {
+            const expanded = isOpen(section.key, section.key.split(':')[1]);
+            return (
+              <View style={{ backgroundColor: theme.colors.background }}>
+                {section.module ? (
+                  <Text variant="titleMedium" style={{ paddingTop: 12 }}>
+                    {section.module}
+                  </Text>
+                ) : null}
+                <Pressable
+                  onPress={() => setOpen((o) => ({ ...o, [section.key]: !expanded }))}
+                  style={[styles.row, { justifyContent: 'space-between', paddingVertical: 8 }]}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded }}>
+                  <Text variant="titleSmall" style={{ color: theme.colors.primary }}>
+                    {`${section.title} · ${section.total}`}
+                  </Text>
+                  <MaterialCommunityIcons name={expanded ? 'chevron-up' : 'chevron-down'} size={22} color={theme.colors.primary} />
+                </Pressable>
+              </View>
+            );
+          }}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           stickySectionHeadersEnabled
           initialNumToRender={8}

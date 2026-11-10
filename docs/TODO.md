@@ -109,7 +109,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Join the phone's Map and Stats into one module screen of groups and
       map, with the focus, the status and the start sheet on its four
       scopes. Stats, the row menu and the course chips go
-- [ ] List the phone's lessons by module, as the web does
+- [x] List the phone's lessons by module, as the web does
 - [ ] Serve the board and the cards in the native app
 
 ### Exit
