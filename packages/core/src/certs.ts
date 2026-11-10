@@ -28,10 +28,13 @@ export interface Cert {
 }
 
 export class Certs {
-  constructor(
-    readonly certs: Cert[],
-    readonly edges: [from: string, to: string][], // from needs to
-  ) {}
+  readonly certs: Cert[];
+  readonly edges: [from: string, to: string][]; // from needs to
+
+  constructor(certs: Cert[], edges: [from: string, to: string][]) {
+    this.certs = certs;
+    this.edges = edges;
+  }
 
   get(id: string): Cert | undefined {
     return this.certs.find((x) => x.id === id);

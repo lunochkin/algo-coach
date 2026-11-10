@@ -49,12 +49,13 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: package-lock.json
       - uses: extractions/setup-just@v4
       - run: uv lock --check
       - run: uv sync
-      # the frontend's packages, which `just ci` type-checks and lints against
-      - run: npm ci --prefix web
+      # the frontend's and the core's packages, which `just ci` type-checks,
+      # lints and tests against. The native app's are not needed here
+      - run: npm ci --workspace web --workspace packages/core
       # gVisor, for the tests that send a run through the broker's own
       # container. runsc runs only on Linux, so this runner is the one place
       # those tests run. A run starts with `--pull never`, so the submission's

@@ -1,8 +1,9 @@
-import { lazy, Suspense } from 'react'
+import { Fragment, lazy, Suspense } from 'react'
 import { Route, Routes, useMatch } from 'react-router'
 
 import { LOGIN, PRIVACY } from '@/api/client'
 import { NavMenu } from '@/components/NavMenu'
+import { KnowledgeProvider } from '@/knowledge/KnowledgeProvider'
 import { cn } from '@/lib/utils'
 import { BoardPage } from '@/pages/BoardPage'
 import { CardsPage } from '@/pages/CardsPage'
@@ -44,8 +45,11 @@ function App() {
   const signingIn = useMatch(LOGIN) !== null
   const readingPolicy = useMatch(PRIVACY) !== null
 
+  // the copy is kept for a session alone: both pages open without one
+  const Session = signingIn || readingPolicy ? Fragment : KnowledgeProvider
+
   return (
-    <>
+    <Session>
       {!signingIn && !readingPolicy && <NavMenu wide={wide} />}
       <main className={cn('mx-auto p-gutter', wide ? 'max-w-wide' : 'max-w-reading')}>
         <Suspense fallback={<p className="text-muted-foreground">Loading…</p>}>
@@ -72,7 +76,7 @@ function App() {
           </Routes>
         </Suspense>
       </main>
-    </>
+    </Session>
   )
 }
 

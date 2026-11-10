@@ -8,9 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint --deny-warnings",
     "preview": "vite preview",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@algo-coach/core": "*",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/language": "^6.13.1",
@@ -22,12 +24,13 @@
     "@tailwindcss/vite": "^4.3.5",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
+    "idb": "^8.0.4",
     "katex": "^0.19.1",
     "lucide-react": "^1.70.0",
     "openapi-fetch": "^0.17.0",
     "radix-ui": "^1.8.1",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "react-markdown": "^10.1.0",
     "react-router": "^8.5.1",
     "rehype-katex": "^7.0.1",
@@ -42,17 +45,12 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.2.1",
+    "fake-indexeddb": "^6.2.8",
     "openapi-typescript": "^7.13.0",
     "oxlint": "^1.92.0",
     "shadcn": "^4.23.0",
-    "typescript": "~6.0.2",
-    "vite": "^8.3.6"
-  },
-  "overrides": {
-    "katex": "$katex",
-    "postcss-selector-parser": "^6.1.5",
-    "openapi-typescript": {
-      "typescript": "$typescript"
-    }
+    "typescript": "~6.0.3",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
   }
 }

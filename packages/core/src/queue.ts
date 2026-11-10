@@ -66,14 +66,28 @@ export class Queue {
   offered = new Set<string>(); // lessons served this queue: "course:lesson"
   private lastCourse = -1;
 
+  readonly kind: QueueKind;
+  readonly scope: Question[]; // reviews and learn-ahead come from here
+  readonly want: Status[] | null;
+  limit: number;
+  readonly newScope: Question[] | null; // unseen, in order; null: frontiers round-robin
+  readonly offsetMinutes?: number;
+
   constructor(
-    readonly kind: QueueKind,
-    readonly scope: Question[], // reviews and learn-ahead come from here
-    readonly want: Status[] | null = null,
-    public limit = NEW_PER_DAY,
-    readonly newScope: Question[] | null = null, // unseen, in order; null: frontiers round-robin
-    readonly offsetMinutes?: number,
-  ) {}
+    kind: QueueKind,
+    scope: Question[],
+    want: Status[] | null = null,
+    limit = NEW_PER_DAY,
+    newScope: Question[] | null = null,
+    offsetMinutes?: number,
+  ) {
+    this.kind = kind;
+    this.scope = scope;
+    this.want = want;
+    this.limit = limit;
+    this.newScope = newScope;
+    this.offsetMinutes = offsetMinutes;
+  }
 
   newLeft(b: Board, now: number): number {
     return Math.max(0, this.limit - newToday(b, now, this.offsetMinutes));

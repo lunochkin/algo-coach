@@ -13,7 +13,9 @@ docs
 **/__pycache__
 .env
 CLAUDE.local.md
-# the workspace's packages and the native app, which the image never reads
+# the workspace's packages and the native app, which the image never reads.
+# The app's manifest stays: npm installs a workspace knowing every member
 node_modules
-native
+native/*
+!native/package.json
 packages/*/node_modules

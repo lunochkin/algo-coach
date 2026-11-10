@@ -39,6 +39,7 @@ dead:
 web-check:
     cd web && npm run --silent typecheck
     cd web && npm run --silent lint
+    cd web && npm run --silent test
 
 # Rewrite the schema snapshots after an intended tightening; the test holds them otherwise.
 schemas:
@@ -84,7 +85,7 @@ seed-module name="python":
 app:
     #!/usr/bin/env bash
     set -euo pipefail
-    [ -d web/node_modules ] || npm --prefix web install
+    [ -d node_modules ] || npm install
     # the API on any exit, so none is left holding the port the proxy names
     trap 'kill $(jobs -p) 2>/dev/null; wait' EXIT
     uv run python -m algo_coach.api --reload &

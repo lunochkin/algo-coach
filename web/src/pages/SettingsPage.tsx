@@ -7,19 +7,20 @@ import {
   validSetting,
   type SettingName,
   type SettingRecord,
-} from '@algo-coach/core/settings'
+} from '@algo-coach/core'
 
+import { named } from '@/api/account'
 import { api } from '@/api/client'
-import { linesOf, readLog, sendLines, type Cursor } from '@/api/log'
 import { useLoaded } from '@/api/useLoaded'
-import { named, signOut } from '@/api/account'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel } from '@/components/Panel'
 import { SignedInApps } from '@/components/SignedInApps'
+import { SignOut } from '@/components/SignOut'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { linesOf, loadedFrom, useKnowledge } from '@/knowledge/context'
 
 // the phone's Study settings, read in the phone's order: `pages.md`, Sections
 const STUDY: { name: SettingName; label: string }[] = [
@@ -29,23 +30,20 @@ const STUDY: { name: SettingName; label: string }[] = [
 
 type Values = Record<SettingName, number>
 
-async function load(signal: AbortSignal) {
-  const log = await readLog(signal)
-  if (log.data === undefined) return { error: log.error }
-  const records = linesOf<SettingRecord>(log.data.records, 'setting')
-  const values = Object.fromEntries(STUDY.map(({ name }) => [name, setting(records, name)])) as Values
-  return { data: { values, cursor: log.data.cursor } }
-}
-
 export function SettingsPage() {
-  const loaded = useLoaded(load, 'settings')
+  const k = useKnowledge()
+  const records = linesOf<SettingRecord>(k.records, 'setting')
+  const values = Object.fromEntries(STUDY.map(({ name }) => [name, setting(records, name)])) as Values
+  // held here: a save remounts the fields, and the line saying so outlives them
+  const [said, setSaid] = useState<string | null>(null)
 
   return (
     <section className="space-y-section">
       <PageHeader title="Settings" note="The study settings hold on every device you sign in on." />
       <Account />
-      <Loaded of="the settings" state={loaded}>
-        {({ values, cursor }) => <Study saved={values} cursor={cursor} />}
+      <Loaded of="the settings" state={loadedFrom(k, values)}>
+        {/* a value another device set reaches the fields at its sync */}
+        {(values) => <Study key={JSON.stringify(values)} stored={values} said={said} onSaid={setSaid} />}
       </Loaded>
     </section>
   )
@@ -74,10 +72,14 @@ function Account() {
             <Smartphone />
             Signed-in apps
           </Button>
-          <Button variant="outline" onClick={() => void signOut()}>
-            <LogOut />
-            Sign out
-          </Button>
+          <SignOut>
+            {(start) => (
+              <Button variant="outline" onClick={start}>
+                <LogOut />
+                Sign out
+              </Button>
+            )}
+          </SignOut>
         </div>
       </Panel>
       <SignedInApps open={apps} onOpenChange={setApps} />
@@ -85,23 +87,18 @@ function Account() {
   )
 }
 
-function Study({ saved, cursor }: { saved: Values; cursor: Cursor }) {
-  const [stored, setStored] = useState(saved)
-  const [typed, setTyped] = useState(() => texts(saved))
-  // the reply then carries only what was written since the page loaded
-  const [since, setSince] = useState(cursor)
-  const [said, setSaid] = useState<string | null>(null)
+type StudyProps = { stored: Values; said: string | null; onSaid: (said: string | null) => void }
+
+function Study({ stored, said, onSaid: setSaid }: StudyProps) {
+  const { add } = useKnowledge()
+  const [typed, setTyped] = useState(() => texts(stored))
 
   const values = Object.fromEntries(STUDY.map(({ name }) => [name, Number(typed[name])])) as Values
   const valid = STUDY.every(({ name }) => validSetting(name, values[name]))
   const changed = STUDY.filter(({ name }) => values[name] !== stored[name])
 
   async function save() {
-    const lines = changed.map(({ name }) => ({ kind: 'setting', name, n: values[name] }))
-    const next = await sendLines(lines, since)
-    if (next === null) return setSaid('Not saved: the engine did not answer.')
-    setSince(next)
-    setStored(values)
+    for (const { name } of changed) await add('setting', { name, n: values[name] })
     setSaid('Saved.')
   }
 

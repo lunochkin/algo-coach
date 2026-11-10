@@ -69,13 +69,18 @@ const NONE: Attempt[] = [];
 export class Board {
   readonly byGroup = new Map<string, Question[]>();
 
-  constructor(
-    readonly catalog: Catalog,
-    readonly courses: Course[],
-    readonly hist: History,
-    readonly explicit = false, // one course was selected by the learner
-    readonly include: string | null = null, // served even if paused: the focus course
-  ) {
+  readonly catalog: Catalog;
+  readonly courses: Course[];
+  readonly hist: History;
+  readonly explicit: boolean; // one course was selected by the learner
+  readonly include: string | null; // served even if paused: the focus course
+
+  constructor(catalog: Catalog, courses: Course[], hist: History, explicit = false, include: string | null = null) {
+    this.catalog = catalog;
+    this.courses = courses;
+    this.hist = hist;
+    this.explicit = explicit;
+    this.include = include;
     const slugs = new Set(courses.map((c) => c.slug));
     for (const q of catalog.questions) {
       if (!slugs.has(q.course)) continue;

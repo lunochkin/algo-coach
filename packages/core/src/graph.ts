@@ -37,11 +37,15 @@ export interface Lesson {
 export class Graph {
   private memo = new Map<string, number>();
 
-  constructor(
-    readonly matchUpTo: number,
-    readonly edges: Edge[],
-    readonly lessons: Lesson[] = [],
-  ) {}
+  readonly matchUpTo: number;
+  readonly edges: Edge[];
+  readonly lessons: Lesson[];
+
+  constructor(matchUpTo: number, edges: Edge[], lessons: Lesson[] = []) {
+    this.matchUpTo = matchUpTo;
+    this.edges = edges;
+    this.lessons = lessons;
+  }
 
   lesson(slug: string): Lesson | undefined {
     return this.lessons.find((x) => x.slug === slug);

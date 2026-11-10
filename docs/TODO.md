@@ -52,7 +52,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       sheet on the module's page. Starting a queue there moves no focus
 - [x] Add the `/settings` page to the web, with the daily limit and the exam
       size, linked from the account menu
-- [ ] Add `web` to the npm workspaces, and keep the snapshot and the log in
+- [x] Add `web` to the npm workspaces, and keep the snapshot and the log in
       IndexedDB with an outbox, synced as `knowledge.md` gives. The pages
       then read the copy, not the whole log
 - [ ] Serve the next queue and the review queue at `/knowledge/queue` from

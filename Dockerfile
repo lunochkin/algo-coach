@@ -3,14 +3,18 @@
 # the image carries that compose file.
 
 FROM node:26-slim AS pages
-WORKDIR /web
-# the manifests alone first, so a page edit reuses the installed layer
-COPY web/package.json web/package-lock.json ./
-RUN npm ci
-COPY web/ ./
-# the shared core: the API's generated types, and the rules the pages import
-COPY packages/core/src/ /packages/core/src/
-RUN npm run build
+WORKDIR /repo
+# the manifests alone first, so a page edit reuses the installed layer. Every
+# workspace's manifest is named, and only the web's packages and the core's
+# are installed: the native app's never reach the pages
+COPY package.json package-lock.json ./
+COPY packages/core/package.json packages/core/
+COPY native/package.json native/
+COPY web/package.json web/
+RUN npm ci --workspace web --workspace packages/core
+COPY packages/core/ packages/core/
+COPY web/ web/
+RUN npm run build --workspace web
 
 FROM python:3.15.2-slim AS engine
 COPY --from=ghcr.io/astral-sh/uv:0.12 /uv /bin/uv
@@ -37,7 +41,7 @@ COPY --from=engine /app/.venv .venv
 COPY alembic.ini ./
 COPY migrations migrations
 COPY deploy deploy
-COPY --from=pages /web/dist web/dist
+COPY --from=pages /repo/web/dist web/dist
 USER engine
 EXPOSE 8000
 # 0.0.0.0 inside the container, which `deploy/compose.yaml` publishes on the

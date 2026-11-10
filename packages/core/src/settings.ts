@@ -1,5 +1,3 @@
-// imports nothing: the web's pages import it before the web joins the workspace
-
 export type SettingName = 'new_per_day' | 'exam_size';
 
 /** A study setting as set: the latest of each name stands on every device. */

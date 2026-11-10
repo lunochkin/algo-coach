@@ -3,10 +3,16 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "native"
+    "native",
+    "web"
   ],
   "overrides": {
     "react": "19.3.0",
-    "react-native": "0.88.1"
+    "react-native": "0.88.1",
+    "katex": "^0.19.1",
+    "postcss-selector-parser": "^6.1.5",
+    "openapi-typescript": {
+      "typescript": "~6.0.3"
+    }
   }
 }

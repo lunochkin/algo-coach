@@ -2,10 +2,11 @@ import { LogOut, Menu, Settings, Smartphone } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 
-import { named, signOut } from '@/api/account'
+import { named } from '@/api/account'
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { SignedInApps } from '@/components/SignedInApps'
+import { SignOut } from '@/components/SignOut'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -23,7 +24,10 @@ export function AccountMenu() {
   const me = useLoaded((signal) => api.GET('/api/me', { signal }), 'me')
   const [apps, setApps] = useState(false)
 
+  // the confirmation sits outside the menu, which unmounts as it closes
   return (
+    <SignOut>
+      {(start) => (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -57,7 +61,7 @@ export function AccountMenu() {
             <Smartphone />
             Signed-in apps
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={signOut}>
+          <DropdownMenuItem onSelect={start}>
             <LogOut />
             Sign out
           </DropdownMenuItem>
@@ -65,5 +69,7 @@ export function AccountMenu() {
       </DropdownMenu>
       <SignedInApps open={apps} onOpenChange={setApps} />
     </>
+      )}
+    </SignOut>
   )
 }

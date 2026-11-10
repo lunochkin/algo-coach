@@ -11,10 +11,11 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 - `uv sync` to set up; `uv run pytest` to test, always, whether one file or
   the whole suite. `addopts` spreads it over every core, 9s against 65s.
 - `npm install` at the repository root installs the workspace: `packages/core`,
-  the shared TypeScript core, and `native/`, the native app. `just native-test`
-  runs both.
+  the shared TypeScript core, `native/`, the native app, and `web/`, the
+  frontend. `just native-test` runs the core's and the app's tests.
 - `web/` is the frontend: Vite, React and TypeScript, built to static files.
-  `npm install` and `npm run build` run inside `web/`.
+  `npm run build` runs inside `web/`, and `just web-check` runs its type
+  check, lint and tests.
 - shadcn/ui over Radix, with Tailwind, for the components. `npx shadcn add
   <name>` inside `web/` copies one into `web/src/components/ui/`. Restyle
   through the theme tokens in `web/src/index.css`, not by editing a copied
@@ -198,8 +199,8 @@ configuration produced it, or which prompt hash it was sent."
   untracked, since it names exactly what must never be committed. Without the
   list the hooks fail rather than pass. A guard that silently allows everything
   when unconfigured is worse than no guard.
-- Pre-commit runs the frontend's type check and lint when `web/` is staged,
-  and `just web-check` runs them by hand.
+- Pre-commit runs the frontend's type check, lint and tests when `web/` is
+  staged, and `just web-check` runs them by hand.
 - Pre-commit also runs ruff, pyright, vulture and `tests/test_architecture.py`
   when code is staged: the import contracts in `pyproject.toml`, the module size
   limit, and that a name is imported from where it is defined. The full suite is

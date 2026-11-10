@@ -1,5 +1,3 @@
-// imports nothing: the web's pages import it before the web joins the workspace
-
 /** The user's order of the modules, by slug, first to last: the latest stands on every device. */
 export interface OrderRecord {
   t: string;
