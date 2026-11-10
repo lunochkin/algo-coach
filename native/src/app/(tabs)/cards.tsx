@@ -4,7 +4,7 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Card, Divider, ProgressBar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { cardBlocks, cardRow, inProgress, readFailure, type components, type RecallMark } from '@algo-coach/core';
+import { cardBlocks, cardRow, inProgress, notInProgress, readFailure, type components, type RecallMark } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { Failed, styles, tones } from '@/ui/common';
@@ -43,7 +43,7 @@ export default function CardsScreen() {
 
 function Listing({ cards }: { cards: ListedCard[] }) {
   const studying = inProgress(cards);
-  const rest = cards.filter((card) => !card.status.started_at);
+  const rest = notInProgress(cards);
   return (
     <>
       {studying.length > 0 ? (

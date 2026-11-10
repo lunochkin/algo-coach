@@ -20,7 +20,7 @@ from algo_coach.board import (
     ungrouped,
 )
 from algo_coach.cards import CardStore
-from algo_coach.ladder import Gap, Rung, ladder
+from algo_coach.ladder import CardState, Gap, Rung, card_state, ladder
 from algo_coach.log import (
     AttemptLog,
     CardRunLog,
@@ -149,6 +149,7 @@ class CardStatus(BaseModel):
     every read, as the card's own page folds it."""
 
     started_at: datetime | None  # absent until the card is started
+    state: CardState
     rungs: int
     solved: int  # since the run began, as the card's page counts a rung
     required: int
@@ -245,6 +246,7 @@ def _status(
     ]
     return CardStatus(
         started_at=since,
+        state=card_state(since is not None, resolved.rungs),
         rungs=len(resolved.rungs),
         solved=sum(rung.solved for rung in resolved.rungs),
         required=sum(rung.required for rung in resolved.rungs),

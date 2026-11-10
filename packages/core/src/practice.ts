@@ -49,11 +49,19 @@ export function boardView(board: BoardReading): BoardView {
   };
 }
 
-/** The cards with a run open, the most recently active first. */
+// a graduated card is done, and a lapsed one is offered again: `pages.md`
+const STUDYING: ListedCard['status']['state'][] = ['acquiring', 'consolidating'];
+
+/** The cards acquiring or consolidating, the most recently active first. */
 export function inProgress(cards: ListedCard[]): ListedCard[] {
   return cards
-    .filter((card) => card.status.started_at)
+    .filter((card) => STUDYING.includes(card.status.state))
     .sort((a, b) => (b.status.last_at ?? '').localeCompare(a.status.last_at ?? ''));
+}
+
+/** Every card not in progress, in the API's order. */
+export function notInProgress(cards: ListedCard[]): ListedCard[] {
+  return cards.filter((card) => !STUDYING.includes(card.status.state));
 }
 
 // a family several cards teach is one block under its heading. A family of one

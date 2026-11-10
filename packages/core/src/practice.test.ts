@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { boardView, cardBlocks, cardRow, inProgress, readFailure, recallLine, revealLabel, techniqueStats, type components } from './index';
+import { boardView, cardBlocks, cardRow, inProgress, notInProgress, readFailure, recallLine, revealLabel, techniqueStats, type components } from './index';
 
 type ListedCard = components['schemas']['ListedCard'];
 type Template = components['schemas']['Template'];
@@ -15,7 +15,7 @@ const card = (slug: string, extra: Partial<ListedCard> = {}, status: Partial<Lis
     id: slug, slug, technique: slug, title: slug, trigger: 'When **sorted**', brief: '', family: slug,
     templates: [template(`${slug}-a`)], selector: {},
     ...extra,
-    status: { started_at: null, rungs: 0, solved: 0, required: 0, required_solved: 0, gaps: 0, recall: [], last_at: null, ...status },
+    status: { started_at: null, state: 'not_started', rungs: 0, solved: 0, required: 0, required_solved: 0, gaps: 0, recall: [], last_at: null, ...status },
   }) as ListedCard;
 
 describe("a technique's row", () => {
@@ -48,13 +48,25 @@ describe('the board', () => {
 });
 
 describe('the cards in progress', () => {
-  it('lists the started cards, the most recently active first', () => {
+  const at = '2026-11-01T00:00:00Z';
+
+  it('lists the acquiring and consolidating cards, the most recently active first', () => {
     const cards = [
-      card('a', {}, { started_at: '2026-11-01T00:00:00Z', last_at: '2026-11-02T00:00:00Z' }),
+      card('a', {}, { started_at: at, state: 'acquiring', last_at: '2026-11-02T00:00:00Z' }),
       card('b'),
-      card('c', {}, { started_at: '2026-11-01T00:00:00Z', last_at: '2026-11-05T00:00:00Z' }),
+      card('c', {}, { started_at: at, state: 'consolidating', last_at: '2026-11-05T00:00:00Z' }),
     ];
     expect(inProgress(cards).map((one) => one.slug)).toEqual(['c', 'a']);
+  });
+
+  it('counts a graduated and a lapsed card out, and lists them with the rest', () => {
+    const cards = [
+      card('done', {}, { started_at: at, state: 'graduated' }),
+      card('lost', {}, { started_at: at, state: 'lapsed' }),
+      card('new'),
+    ];
+    expect(inProgress(cards)).toEqual([]);
+    expect(notInProgress(cards).map((one) => one.slug)).toEqual(['done', 'lost', 'new']);
   });
 });
 

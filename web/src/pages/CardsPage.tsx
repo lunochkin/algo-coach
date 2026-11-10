@@ -1,4 +1,4 @@
-import { cardBlocks, inProgress } from '@algo-coach/core'
+import { cardBlocks, inProgress, notInProgress } from '@algo-coach/core'
 
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
@@ -21,7 +21,7 @@ export function CardsPage() {
           // the cards with a run open read first, the most recently active
           // first: they are the ones the user is working through
           const studying = inProgress(cards)
-          const rest = cards.filter((card) => !card.status.started_at)
+          const rest = notInProgress(cards)
           return (
             <div className="space-y-section">
               {studying.length > 0 && (

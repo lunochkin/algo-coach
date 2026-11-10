@@ -3,7 +3,7 @@ from datetime import datetime
 from helpers import T0
 from matching import canonical, card, problem, seeded, template
 
-from algo_coach.ladder import ladder, probes
+from algo_coach.ladder import CardState, Rung, card_state, ladder, probes
 from algo_coach.mint import generator_match, user_match
 from algo_coach.schema import Attempt, ProblemDifficulty, ProblemStatus, RetirementReason
 
@@ -455,3 +455,47 @@ def test_the_selector_s_difficulty_does_not_narrow_the_draw(database):
 
     # the ladder takes the hard one, and the easy one is still a probe
     assert drawn(held, problems) == ["p-easy"]
+
+
+def rung(required: bool, solved: bool) -> Rung:
+    return Rung(
+        problem=problem("p-1", techniques=[TECHNIQUE]),
+        templates=[],
+        required=required,
+        solved=solved,
+    )
+
+
+def test_a_card_with_no_run_is_not_started():
+    """Reading a card mints nothing, so a card read and never started stays
+    not started."""
+    assert card_state(False, [rung(True, True)]) == CardState.NOT_STARTED
+
+
+def test_a_run_with_a_required_rung_unsolved_is_acquiring():
+    """A solved optional rung moves nothing: the required ones teach the core
+    forms."""
+    assert card_state(True, [rung(True, False), rung(False, True)]) == CardState.ACQUIRING
+
+
+def test_every_required_rung_solved_is_consolidating():
+    assert card_state(True, [rung(True, True), rung(False, False)]) == CardState.CONSOLIDATING
+
+
+def test_a_ladder_with_no_required_rung_stays_acquiring():
+    """Every core template a gap leaves nothing required, and a vacuous solve
+    would claim a ladder nobody worked through."""
+    assert card_state(True, [rung(False, True)]) == CardState.ACQUIRING
+
+
+def test_the_card_states_are_the_five_log_md_names():
+    """The clients filter on these strings, so a renamed member breaks them."""
+    named = [
+        CardState.NOT_STARTED,
+        CardState.ACQUIRING,
+        CardState.CONSOLIDATING,
+        CardState.GRADUATED,
+        CardState.LAPSED,
+    ]
+    assert named == list(CardState)
+    assert named == ["not_started", "acquiring", "consolidating", "graduated", "lapsed"]

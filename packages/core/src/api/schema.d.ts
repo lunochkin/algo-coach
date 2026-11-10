@@ -677,6 +677,13 @@ export interface components {
             probes?: components["schemas"]["Probe"][];
         };
         /**
+         * CardState
+         * @description How far one user's study of one card has gone, derived on every read:
+         *     `log.md`, Card states.
+         * @enum {string}
+         */
+        CardState: "not_started" | "acquiring" | "consolidating" | "graduated" | "lapsed";
+        /**
          * CardStatus
          * @description Where the user stands on a card, as the cards list reads it. Folded on
          *     every read, as the card's own page folds it.
@@ -684,6 +691,7 @@ export interface components {
         CardStatus: {
             /** Started At */
             started_at: string | null;
+            state: components["schemas"]["CardState"];
             /** Rungs */
             rungs: number;
             /** Solved */

@@ -1596,6 +1596,18 @@
         ],
         "title": "CardRun"
       },
+      "CardState": {
+        "type": "string",
+        "enum": [
+          "not_started",
+          "acquiring",
+          "consolidating",
+          "graduated",
+          "lapsed"
+        ],
+        "title": "CardState",
+        "description": "How far one user's study of one card has gone, derived on every read:\n`log.md`, Card states."
+      },
       "CardStatus": {
         "properties": {
           "started_at": {
@@ -1609,6 +1621,9 @@
               }
             ],
             "title": "Started At"
+          },
+          "state": {
+            "$ref": "#/components/schemas/CardState"
           },
           "rungs": {
             "type": "integer",
@@ -1653,6 +1668,7 @@
         "type": "object",
         "required": [
           "started_at",
+          "state",
           "rungs",
           "solved",
           "required",

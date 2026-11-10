@@ -132,7 +132,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       until revealed. With no network it says so
 - [x] Write into `pages.md` what a technique on the phone's board opens: no
       card, one card, or several
-- [ ] Carry the card state on `CardStatus`, and count a graduated card out
+- [x] Carry the card state on `CardStatus`, and count a graduated card out
       of the cards in progress, as `pages.md` gives. Both clients count it
       in today
 - [ ] Serve the board on the phone as a Practice tab, first among the tabs:

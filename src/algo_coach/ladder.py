@@ -7,6 +7,7 @@ not allowed to hold.
 
 from collections.abc import Iterable
 from datetime import datetime
+from enum import StrEnum
 
 from pydantic import BaseModel
 
@@ -56,6 +57,29 @@ class Ladder(BaseModel):
     card_slug: str
     rungs: list[Rung]
     gaps: list[Gap]
+
+
+class CardState(StrEnum):
+    """How far one user's study of one card has gone, derived on every read:
+    `log.md`, Card states."""
+
+    NOT_STARTED = "not_started"
+    ACQUIRING = "acquiring"
+    CONSOLIDATING = "consolidating"
+    # reached by the graduation and lapse rules, neither written yet
+    GRADUATED = "graduated"
+    LAPSED = "lapsed"
+
+
+def card_state(started: bool, rungs: Iterable[Rung]) -> CardState:
+    if not started:
+        return CardState.NOT_STARTED
+    required = [rung for rung in rungs if rung.required]
+    # a ladder holding no required rung is deferred in `log.md`, and stays
+    # acquiring rather than claiming a ladder nobody solved
+    if required and all(rung.solved for rung in required):
+        return CardState.CONSOLIDATING
+    return CardState.ACQUIRING
 
 
 def ladder(

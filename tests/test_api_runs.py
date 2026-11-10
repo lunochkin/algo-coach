@@ -194,6 +194,7 @@ def test_the_cards_list_reads_where_each_card_stands(client, database):
     # no canonical displays either template, so both are gaps and no rung is
     # required
     assert (status["required"], status["required_solved"], status["gaps"]) == (0, 0, 2)
+    assert status["state"] == "acquiring"
     assert [one["verified"] for one in status["recall"]] == [False, False]
     assert status["last_at"] == (began + timedelta(minutes=5)).isoformat().replace("+00:00", "Z")
 
@@ -203,6 +204,7 @@ def test_an_unstarted_card_reads_no_progress(client):
 
     assert listed["status"]["started_at"] is None
     assert listed["status"]["solved"] == 0
+    assert listed["status"]["state"] == "not_started"
 
 
 def test_the_cards_list_reads_the_user_s_own_status(client, database):
