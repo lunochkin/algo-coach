@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   certStates,
+  type Board,
   NEW_STEP,
   drillQueue,
   minutesOf,
@@ -53,7 +54,10 @@ export default function Home() {
       const qs = all.filter((q) => q.course === c.slug);
       // Same count as `learn courses`: ready weak plus due, anywhere in the course.
       const toReview = qs.filter((q) => b.toReview(q, now)).length;
-      return { c, front: b.frontier(c)[0], total: qs.length, toReview };
+      const next = b.nextUp(c);
+      // the next step's progress, and how many other groups are open beside it
+      const step = next && { ...next, passed: b.nPassed(next.group), of: b.groupQuestions(next.group).length };
+      return { c, next: step, open: b.frontier(c).length, total: qs.length, toReview };
     });
     return { courses };
   }, [b]);
@@ -224,7 +228,8 @@ export default function Home() {
         renderItem={({ item }) => (
           <CourseCard
             c={item.c}
-            front={item.front}
+            next={item.next}
+            open={item.open}
             total={item.total}
             toReview={item.toReview}
             levels={levels}
@@ -420,7 +425,8 @@ function FocusLine(props: {
 /** A course row: tap opens Practice, long-press or the handle drags it to reorder. */
 function CourseCard({
   c,
-  front,
+  next,
+  open,
   total,
   toReview,
   levels,
@@ -429,7 +435,8 @@ function CourseCard({
   onArchive,
 }: {
   c: Course;
-  front: Group | undefined;
+  next: (NonNullable<ReturnType<Board['nextUp']>> & { passed: number; of: number }) | null;
+  open: number;
   total: number;
   toReview: number;
   levels: Record<string, string>;
@@ -486,17 +493,32 @@ function CourseCard({
         )}
       />
       <Card.Content>
-        {front ? (
+        {next ? (
           <TouchableRipple
-            onPress={() => onFrontier(front)}
+            onPress={() =>
+              next.lesson
+                ? router.push({ pathname: '/lesson', params: { course: c.slug, slug: next.lesson.slug } })
+                : onFrontier(next.group)
+            }
             borderless
             accessibilityRole="button"
-            accessibilityLabel={`Practice frontier ${front.topic} ${front.sub} level ${front.level}`}
+            accessibilityLabel={
+              next.lesson
+                ? `Next up: read the lesson ${next.lesson.title}`
+                : `Next up: practise ${next.group.topic} ${next.group.sub} ${levels[next.group.level] ?? ''}`
+            }
             style={{ minHeight: 48, justifyContent: 'center', borderRadius: 8, marginHorizontal: -8, paddingHorizontal: 8 }}>
             <View style={styles.row}>
-              <Text variant="bodyMedium" style={{ flex: 1, color: theme.colors.primary }}>
-                {`Frontier: ${front.topic}/${front.sub} · ${levels[front.level] ?? `L${front.level}`}`}
-              </Text>
+              <View style={{ flex: 1 }}>
+                <Text variant="bodyMedium" style={{ color: theme.colors.primary }}>
+                  {next.lesson
+                    ? `Next up: read “${next.lesson.title}”`
+                    : `Next up: ${next.group.topic}/${next.group.sub} · ${levels[next.group.level] ?? `L${next.group.level}`}`}
+                </Text>
+                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                  {`${next.passed}/${next.of} passed${open > 1 ? ` · ${open - 1} more open` : ''}`}
+                </Text>
+              </View>
               <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
                 ▶
               </Text>

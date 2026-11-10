@@ -206,6 +206,26 @@ export class Board {
     return open.map((g, i) => ({ g, i, d: depth(g) })).sort((a, b) => a.d - b.d || a.i - b.i).map((x) => x.g);
   }
 
+  /** The first frontier group with a new question to serve: where Continue introduces next. */
+  nextNew(c: Course): Group | null {
+    return this.frontier(c).find((g) => this.groupQuestions(g).some((q) => !this.attempts(q).length && !this.held(q))) ?? null;
+  }
+
+  /**
+   * What a module's next step is: the group Continue introduces from, or, where every open
+   * group's new questions wait for a lesson, that lesson. `null` once every open group is done.
+   */
+  nextUp(c: Course): { group: Group; lesson: null } | { group: Group; lesson: Lesson } | null {
+    const group = this.nextNew(c);
+    if (group) return { group, lesson: null };
+    for (const g of courseGroups(c, this.rules)) {
+      if (!this.groupQuestions(g).length || !this.unlocked(g) || this.done(g)) continue;
+      const lesson = this.groupGate(g);
+      if (lesson) return { group: g, lesson };
+    }
+    return null;
+  }
+
   // --- lessons
 
   lessons(c: Course): Lesson[] {

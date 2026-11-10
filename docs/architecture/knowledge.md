@@ -132,7 +132,13 @@ reviewed whatever gates it.
   no migration and loses no progress.
 - **The frontier is the open groups that are not done**, ordered by the
   length of the prerequisite chain below each subtopic, then by listing
-  order. A new question comes from the frontier.
+  order.
+- **A new question comes from the first frontier group with an unseen
+  question no lesson holds.** A group stays on the frontier until enough of it
+  is passed, so the first group can hold no new question at all.
+- **A module names that same group as next up**, with its passed share. A
+  module whose open groups all wait for a lesson names that lesson instead.
+  Continue and the module then point at one place.
 - **A graph that fails its own check opens everything.** A cycle or an
   unknown slug would otherwise lock questions nobody can unlock.
 

@@ -125,12 +125,12 @@ export class Queue {
     const cs = b.served;
     for (let i = 1; i <= cs.length; i++) {
       const k = (this.lastCourse + i) % cs.length;
-      for (const g of b.frontier(cs[k])) {
+      // the same group a module card names as next up: one rule for both
+      const g = b.nextNew(cs[k]);
+      if (g) {
         const unseen = (b.byGroup.get(groupKey(g)) ?? []).filter((q) => !b.attempts(q).length && !b.held(q));
-        if (unseen.length) {
-          if (take) this.lastCourse = k;
-          return unseen[Math.floor(rng() * unseen.length)];
-        }
+        if (take) this.lastCourse = k;
+        return unseen[Math.floor(rng() * unseen.length)];
       }
     }
     return null;
