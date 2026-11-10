@@ -58,11 +58,16 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Move what the phone's queue screen computes for display into
       `packages/core`: a result's verdict rows, its marks and its detail
       sections. The web's queue would otherwise compute them again
-- [ ] Add Continue to the web's knowledge home, with its counts line, the
-      empty notice and the focus panel's clear, strict and raise presses
+- [ ] Move what the phone's home computes into `packages/core`: the
+      catalog a client's records build, Continue's counts and the focus
+      card's counts. The web's home would otherwise compute them again
+- [ ] Read the web's knowledge home from the copy: the counts line under
+      Continue, the focus panel with its clear, strict and raise presses,
+      and each module's next-up row. The phone shows the same counts
 - [ ] Serve the next queue and the review queue at `/knowledge/queue` from
-      `packages/core`, started by Continue and by the reviews waiting outside
-      a strict focus. An answer given there reaches the phone at its sync
+      `packages/core`, started by Continue, with its empty notice, and by
+      the reviews waiting outside a strict focus. An answer given there
+      reaches the phone at its sync
 - [ ] Add the module's page to the web, with its start sheet serving the
       filtered queue, and its presses aiming the focus
 - [ ] Serve lessons, certifications and exams on the web
