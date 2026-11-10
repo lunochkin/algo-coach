@@ -31,6 +31,9 @@ those steps at low fidelity.
 - **Signed-in apps open a dialog from the account menu**, listing each native
   app by its device and when it was last used, with a press to revoke it. A
   lost phone is cut off there, where its own sign-out cannot reach.
+- **On the phone, the list names the phone it is read on**, and that row
+  signs out rather than revoking. Signing out sends the outbox first, and a
+  bare revoke would leave the outbox unsent.
 - **The settings are a page of their own, `/settings`, as on the phone.** The
   page reads as the phone's Settings screen does: the account first, then
   the Study settings, the daily limit on new questions and the exam size.
@@ -387,7 +390,7 @@ what it offers. The inventory is the list both clients build to.
 | The certifications | `/knowledge/certifications` | Certifications | same |
 | A certification's conditions | a dialog on the certifications and the map | a sheet on Certifications and Map | same |
 | The settings | `/settings` | Settings | same |
-| The signed-in apps | a dialog from the account menu | none | to fix |
+| The signed-in apps | a dialog from the account menu | a screen from the account menu | to fix |
 | The login | `/login` | Login | same |
 | The privacy policy | `/privacy` | none | web only |
 | The gallery | `/gallery`, in development | none | web only |
@@ -416,7 +419,7 @@ what it offers. The inventory is the list both clients build to.
 | Set the exam size for one exam | the exam page | Exam | same |
 | Read the sync's state, and sync now | the settings page | Settings, and Home's footer | same |
 | Sign out, naming unsent records | the account menu and the settings page | the account menu and Settings | same |
-| Revoke a signed-in app | the signed-in apps | none | to fix |
+| Revoke a signed-in app | the signed-in apps | the signed-in apps | same |
 | Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
 
 - **A sitting and a recall are web for now.** Each needs a keyboard and a
@@ -448,9 +451,10 @@ what it offers. The inventory is the list both clients build to.
 
 ### To fix
 
-- **The signed-in apps.** The web lists and revokes them from the account
-  menu. The phone gains the same list under its account menu, once an app
-  token reaches the account's endpoints.
+- **The signed-in apps.** The phone's list names the phone it is read on,
+  and the web's names no browser, its own included. Each client moves to
+  one list of every signed-in device, browser sessions with the apps, each
+  revocable and the one read on marked.
 ## A page's areas
 
 - **A page carries a header and a body.** The header holds the way back, the

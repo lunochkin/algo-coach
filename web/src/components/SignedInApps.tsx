@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { appLine } from '@algo-coach/core'
+
 import { api, type SignedInApp } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
 import { Button } from '@/components/ui/button'
@@ -10,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { lastAt } from '@/lib/format'
 
 // the native apps signed in as this account. Revoking one cuts off a lost
 // phone, which its own sign-out cannot reach
@@ -23,6 +24,8 @@ export function SignedInApps({
 }) {
   const apps = useLoaded((signal) => api.GET('/api/apps', { signal }), `apps-${open}`)
   const [failed, setFailed] = useState<string | null>(null)
+  // the moment the dialog opened, which its lines are read at
+  const [now] = useState(() => Date.now())
 
   async function revoke(app: SignedInApp) {
     setFailed(null)
@@ -53,7 +56,7 @@ export function SignedInApps({
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">{app.device}</p>
                   <p className="text-meta text-muted-foreground">
-                    {`used ${lastAt(app.last_used_at)} · signed in ${lastAt(app.created_at)}`}
+                    {appLine(app, now)}
                   </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => void revoke(app)}>

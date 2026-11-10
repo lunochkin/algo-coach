@@ -100,10 +100,12 @@ class SignedInApp(BaseModel):
     device: str
     created_at: datetime
     last_used_at: datetime
+    current: bool = False  # the app whose token asked, which signs out rather than revokes
 
 
-def signed_in_apps(root: Database, user_id: str) -> list[SignedInApp]:
-    """The user's apps still signed in: neither revoked nor idle past `IDLE`."""
+def signed_in_apps(root: Database, user_id: str, asking: str | None = None) -> list[SignedInApp]:
+    """The user's apps still signed in: neither revoked nor idle past `IDLE`.
+    `asking` is the token of the app that asks, which the list marks."""
     live = (
         (app_tokens.c.user_id == user_id)
         & app_tokens.c.revoked_at.is_(None)
@@ -111,7 +113,9 @@ def signed_in_apps(root: Database, user_id: str) -> list[SignedInApp]:
     )
     query = select(app_tokens).where(live).order_by(app_tokens.c.last_used_at.desc())
     with root.connect() as conn:
-        return [SignedInApp.model_validate(dict(row)) for row in conn.execute(query).mappings()]
+        rows = conn.execute(query).mappings()
+        mine = hashed(asking) if asking else None
+        return [SignedInApp.model_validate({**row, "current": row["id"] == mine}) for row in rows]
 
 
 def app_revoked_by_id(root: Database, user_id: str, app_id: str) -> bool:

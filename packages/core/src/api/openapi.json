@@ -2847,6 +2847,11 @@
             "type": "string",
             "format": "date-time",
             "title": "Last Used At"
+          },
+          "current": {
+            "type": "boolean",
+            "title": "Current",
+            "default": false
           }
         },
         "type": "object",

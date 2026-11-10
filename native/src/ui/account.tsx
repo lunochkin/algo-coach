@@ -24,6 +24,14 @@ export function AccountMenu() {
           }}
         />
         <Menu.Item
+          leadingIcon="cellphone-link"
+          title="Signed-in apps"
+          onPress={() => {
+            setOpen(false);
+            router.push('/apps');
+          }}
+        />
+        <Menu.Item
           leadingIcon="logout"
           title="Sign out"
           disabled={signOut.signing}

@@ -1,3 +1,5 @@
+import { lastAt as lastAtFrom } from '@algo-coach/core'
+
 export function share(solved: number, attempts: number): string {
   return attempts === 0 ? '—' : `${solved}/${attempts}`
 }
@@ -12,14 +14,9 @@ export function duration(seconds: number): string {
 
 // in the words the page reads in: a date is precision nobody acts on, and the
 // distance is what says whether the technique has gone stale
+// the core's wording, read at the moment the page renders
 export function lastAt(at: string | null | undefined): string {
-  if (!at) return 'never'
-  const days = Math.max(0, Math.floor((Date.now() - new Date(at).getTime()) / 86_400_000))
-  if (days === 0) return 'today'
-  if (days === 1) return 'yesterday'
-  if (days < 30) return `${days} days ago`
-  if (days < 365) return `${Math.floor(days / 30)} months ago`
-  return new Date(at).toLocaleDateString()
+  return lastAtFrom(at, Date.now())
 }
 
 // an untouched row reads as one word: three counts of nothing say less than

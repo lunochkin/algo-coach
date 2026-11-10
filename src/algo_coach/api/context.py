@@ -16,11 +16,17 @@ def _root(request: Request) -> Database:
 Root = Annotated[Database, Depends(_root)]
 
 
+def bearer_of(request: Request) -> str | None:
+    """The app's token where the request carries one."""
+    scheme, _, token = request.headers.get("authorization", "").partition(" ")
+    return token if scheme.lower() == "bearer" and token else None
+
+
 def _user_id(request: Request, root: Root) -> str:
     # an app's bearer token or the pages' session, read on every request, so a
     # revoked one ends at once. Each reaches every route: `README.md`
-    scheme, _, token = request.headers.get("authorization", "").partition(" ")
-    if scheme.lower() == "bearer" and token:
+    token = bearer_of(request)
+    if token:
         user_id = app_user_of(root, token)
     else:
         cookie = request.cookies.get(SESSION_COOKIE)

@@ -1186,6 +1186,11 @@ export interface components {
              * Format: date-time
              */
             last_used_at: string;
+            /**
+             * Current
+             * @default false
+             */
+            current: boolean;
         };
         /** Sitting */
         Sitting: {

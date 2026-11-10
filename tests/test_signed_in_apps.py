@@ -81,3 +81,22 @@ def test_an_app_s_token_lists_and_revokes_apps(database):
     assert client.delete(f"/api/apps/{devices['tablet']}", headers=bearer).status_code == 204
     cut_off = client.get("/api/knowledge/snapshot", headers={"authorization": f"Bearer {other}"})
     assert cut_off.status_code == 401
+
+
+def test_the_list_marks_the_app_that_asks(database):
+    """The asking phone signs out from its own row, rather than revoking its
+    token past the outbox."""
+    token = app_for(database, USER)
+    app_for(database, USER, device="tablet")
+    client = browsing(database, USER)
+    client.cookies.clear()
+
+    apps = client.get("/api/apps", headers={"authorization": f"Bearer {token}"}).json()
+
+    assert {app["device"]: app["current"] for app in apps} == {"phone": True, "tablet": False}
+
+
+def test_a_browser_is_none_of_the_apps(database):
+    app_for(database, USER)
+
+    assert [app["current"] for app in listed(browsing(database, USER))] == [False]

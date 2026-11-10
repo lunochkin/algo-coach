@@ -5,7 +5,7 @@ carries."""
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel
 
-from algo_coach.api.context import SESSION_COOKIE, Root, UserId
+from algo_coach.api.context import SESSION_COOKIE, Root, UserId, bearer_of
 from algo_coach.log import (
     Provider,
     SignedInApp,
@@ -56,8 +56,8 @@ def signed_out(request: Request, root: Root) -> Response:
 
 
 @router.get("/apps")
-def apps(root: Root, user_id: UserId) -> list[SignedInApp]:
-    return signed_in_apps(root, user_id)
+def apps(request: Request, root: Root, user_id: UserId) -> list[SignedInApp]:
+    return signed_in_apps(root, user_id, bearer_of(request))
 
 
 @router.delete("/apps/{app_id}", status_code=204)
