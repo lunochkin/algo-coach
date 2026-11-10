@@ -139,9 +139,12 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       the cards in progress, and the techniques by staleness opening their
       problems and cards. With no network it says so. The phone still opens
       on Knowledge, and the inventory names that difference
-- [ ] Add the phone's Problem screen: a problem's record without its
-      statement, opened from a technique's problems. Serving the statement
-      mints a sitting, and the sitting stays on the web
+- [ ] Mint the sitting at the first clock press or the first submission, as
+      `log.md` gives, so serving a statement records nothing. The web's
+      problem page stays on `/problems/:problem_id`, naming its sitting as
+      `?sitting=`
+- [ ] Add the phone's Problem screen: a problem's record and its statement,
+      opened from a technique's problems, with no editor and no clock
 
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both

@@ -87,8 +87,8 @@ those steps at low fidelity.
   on it stay in the log, and a link kept from before the retirement therefore
   opens a page rather than a 404.
 - **A retired page says so and serves nothing.** The serving call refuses a
-  retired problem, so opening one mints no sitting. The page reads as the
-  record of what the user did on that problem.
+  retired problem, so no statement is shown and no clock starts. The page
+  reads as the record of what the user did on that problem.
 - **The whole listing is fetched, and a page is a slice of it.** The tags count
   every problem the corpus carries, so a page of rows cannot produce them. The
   API pages the rows instead once the corpus outgrows one request.
@@ -115,8 +115,7 @@ those steps at low fidelity.
 | `/` | continues a card or picks a technique | Practice |
 | `/problems` | picks a problem across every technique | Problems |
 | `/techniques/:technique` | picks a problem | Practice |
-| `/problems/:problem_id` | opens the problem, which serves it, or reads a retired one | Practice |
-| `/sittings/:sitting_id` | solves, submits, claims | Practice |
+| `/problems/:problem_id` | reads the statement, solves, submits and claims, or reads a retired problem | Practice |
 | `/cards` | reads where each card stands, and picks one | Cards |
 | `/cards/:slug` | reads a card and reveals its templates | Cards |
 | `/cards/:slug/recall` | opens the recall of the template the trainer draws | Cards |
@@ -146,22 +145,29 @@ those steps at low fidelity.
   the pick came from, `?card=` names the card, and `?from=problems` names the
   listing, which holds no record of its own to name. A listing filtered to one
   tag adds that tag as `?technique=`, since picking one tag is drilling for
-  that technique as a pick from the board is. The sitting carries the
-  technique and the card on: the way back returns where the pick came from, and
+  that technique as a pick from the board is. The problem's page keeps the
+  technique and the card: the way back returns where the pick came from, and
   the claim answers for the card's own technique where a card offered the
   problem.
 - **A page loads the record its path names.** The picked problem is read as its
   own record rather than found in the technique's candidates, since a page
   reached from two places would otherwise load a different list at each of
   them.
-- **Opening a served problem sends the browser to its sitting.** The problem's
-  path serves the statement and replaces itself with `/sittings/:sitting_id`,
-  so a reload reaches the sitting rather than serving the problem again. A
+- **The problem's page holds the statement and the sitting.** The path serves
+  the statement and stays, since serving mints nothing, as `log.md` gives. A
   retired problem's path reads as its record and serves nothing.
-- **The sitting page carries what the picked problem's page carried**: the
-  difficulty, the techniques, the counts the user reached on the problem, and
-  the cards. Those facts sit in one line above the statement, and the
-  statement is the page's body.
+- **A sitting has no path of its own, and `?sitting=` names it on the
+  problem's path.** Before the first clock press or submission no sitting
+  exists, so the page's address cannot name one from its first load. The
+  page adds the parameter once the sitting is minted, replacing the address
+  rather than adding a history entry.
+- **A reload reads the sitting `?sitting=` names, running or ended.** A solve
+  ends the sitting, and the claim asked after it would otherwise be lost to a
+  reload. Without the parameter, a reload finds the sitting the problem has
+  running, where one runs.
+- **The problem's page reads the difficulty, the techniques, the counts the
+  user reached on the problem, and the cards** in one line above the
+  statement, and the statement is the page's body.
 - **A problem's unsent code, the clock preference and the chosen colour scheme
   are the state the browser keeps.** The code is stored under the problem's id
   with the moment it was typed, so a reload restores what the user typed, and
@@ -378,7 +384,7 @@ what it offers. The inventory is the list both clients build to.
 | A technique's problems and cards | `/techniques/:technique` | Technique | to fix |
 | The problem listing | `/problems` | none | web for now |
 | A picked problem | `/problems/:problem_id` | none | web for now |
-| A sitting | `/sittings/:sitting_id` | none | web for now |
+| A sitting | `/problems/:problem_id` | none | web for now |
 | The cards | `/cards` | the Cards tab | same |
 | A card's trigger, brief and templates | `/cards/:slug` | Card | same |
 | A card's ladder, probes and run | `/cards/:slug` | none | web for now |
@@ -447,12 +453,12 @@ what it offers. The inventory is the list both clients build to.
   problems before any card teaches it.
 - **A problem's row on the Technique screen opens the phone's Problem
   screen.** The screen reads the problem's record: its title, difficulty,
-  techniques, the counts the user reached on it, and its cards. `GET
-  /api/problems/:problem_id` returns the record, and that read serves nothing.
-- **The Problem screen serves no statement and mints no sitting.** Serving the
-  statement mints a sitting, and the sitting stays on the web. The screen says
-  the problem is sat on the web. A phone layout for writing code is the
-  trigger that adds the statement and the sitting.
+  techniques, the counts the user reached on it, and its cards, then the
+  statement. Serving the statement mints nothing, so the phone reads a problem
+  as the web does.
+- **The Problem screen holds no editor and no clock.** A sitting stays on the
+  web, and the screen says the problem is solved there. A phone layout for
+  writing code is the trigger that adds the editor and the clock.
 - **A card's ladder, its probes and the press starting its run follow the
   sitting.** A rung and a probe each open a problem, and a run measures
   sittings the phone cannot hold. The phone's card reads the study material

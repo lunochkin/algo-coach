@@ -443,10 +443,12 @@ The page layout is not designed here, and using the loop decides it.
    technique's cards are linked from this step on.
 2. Candidates for the technique, least recently attempted first, lowest solve
    rate breaking a tie. The user picks one.
-3. Opening the problem serves its statement and mints the sitting. The clock
-   starts on the user's press, or at once where the clock preference is on.
+3. Opening the problem serves its statement and mints nothing. The clock
+   starts on the user's press, or at once where the clock preference is on,
+   and the clock's start mints the sitting.
 4. The submission runs against the problem's own test cases, and the attempt is
-   minted carrying the result.
+   minted carrying the result. A submission where no clock started mints the
+   sitting first.
 5. Keyed to each attempt, the loop asks for an attempt claim and then for a
    self-label, and one press stores both.
 
@@ -458,10 +460,12 @@ The page layout is not designed here, and using the loop decides it.
 - **No press stands between the pick and the statement.** A press that started
   the clock before the statement was shown made opening a problem a commitment,
   and the author avoided opening problems because of it.
-- **The clock is shown, and the user starts it.** The sitting exists from the
-  moment the statement is served, and its clock does not run until the user
-  presses start. A sitting whose clock never ran is untimed, and that is a
-  legitimate way to practise.
+- **Opening a problem records nothing.** `log.md` gives why the sitting waits
+  for the first clock press or the first submission. A user can then read any
+  number of statements before choosing one to solve.
+- **The clock is shown, and the user starts it.** The clock does not run until
+  the user presses start. A sitting whose clock never ran is untimed, and that
+  is a legitimate way to practise.
 - **The clock preference decides whether the next clock starts by itself.**
   The user's last press sets it: starting or resuming a clock turns it on, and
   pausing one turns it off. It is off until the user first starts a
@@ -472,10 +476,9 @@ The page layout is not designed here, and using the loop decides it.
 - **The card is offered, and no sitting requires it.** A user who holds the
   form solves straight away, and a user who does not reads the card first.
   Recognising a form with no card in view is a probe's test.
-- **Opening a problem and leaving it ends nothing the user has to close.** The
-  sitting ends at a solve, at the End press, or at the idle bound `log.md`
-  gives. A sitting with no submission is browsing, and mastery reads nothing
-  from it.
+- **A sitting ends at a solve, at the End press, or at the idle bound `log.md`
+  gives.** A user who started a clock and left the page has nothing to close,
+  and mastery reads nothing from a sitting with no submission.
 - **An attempt nobody timed stays untimed**, rather than carrying a duration
   reconstructed after the fact.
 - **A running clock is paused and resumed**, and the elapsed time the attempt
@@ -618,8 +621,8 @@ to the card it came from.
 1. The ladder on the card: a rung per problem, each naming the templates it
    covers and whether it is required.
 2. The user picks a rung.
-3. The problem opens, named by the card the pick came from, which serves the
-   statement and mints the sitting as the drill loop gives.
+3. The problem opens, named by the card the pick came from, and serves the
+   statement as the drill loop gives.
 4. The submission, the verdict and the claim run as the drill loop gives them.
 5. The sitting ends and stays on the page, with a press back to the card, where
    the next rung is.

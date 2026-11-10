@@ -161,14 +161,15 @@ Every page under a section carries the same two rows above its body.
 
 ## The picked problem
 
-A served problem has no page of its own. Opening `/problems/:problem_id` serves
-the statement and sends the browser to the sitting, drawn below. A retired
+A served problem's page is the sitting's page. Opening `/problems/:problem_id`
+serves the statement on the page drawn below, and the first clock press or
+submission starts the sitting. A retired
 problem's path reads as its record, as "Every problem" gives.
 
 ## The sitting
 
 ```
-+- /sittings/s-91c2, solving --------------------------------------------+
++- /problems/p-91c2, solving --------------------------------------------+
 | algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Smallest feasible speed              12:04  [ Pause ]  [ End ]         |
@@ -226,7 +227,7 @@ problem's path reads as its record, as "Every problem" gives.
 ## The sitting, paused
 
 ```
-+- /sittings/s-91c2, paused ---------------------------------------------+
++- /problems/p-91c2, paused ---------------------------------------------+
 | algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Smallest feasible speed     12:04 paused  [ Start ]  [ End ]           |
@@ -244,7 +245,7 @@ problem's path reads as its record, as "Every problem" gives.
 ## The sitting, at phone width
 
 ```
-+- /sittings/s-91c2, at phone width ------+
++- /problems/p-91c2, at phone width ------+
 | algo-coach  [ Practice ] Problems Cards ☀ ≡ |
 +-----------------------------------------+
 | < Back to the card                      |

@@ -55,15 +55,22 @@ how an account signing in is linked to a user.
 One session on one problem: when it began, when its clock started, when it
 ended, and every pause between.
 
-- **The engine mints the sitting id as it serves the statement**, and every
-  attempt of that sitting carries the id. The log is append-only, so an attempt
-  written without the id can never be grouped with the sitting's others.
+- **The engine mints the sitting at the first clock press or the first
+  submission on the problem**, and every attempt of that sitting carries the
+  sitting's id. The log is append-only, so an attempt written without the id
+  can never be grouped with the sitting's others.
+- **Serving the statement mints nothing.** A sitting minted at serving made
+  every opened problem a record, and the author avoided opening problems
+  because of it. A user reading a problem and leaving it has not practised it.
+- **An untimed submission mints a sitting too.** Mastery counts execution per
+  sitting, and an untimed attempt carrying no sitting would need a second
+  grouping rule for its retries.
 - **The alternative is grouping attempts by how close together they were
   written.** Such a grouping is a guess about a pause, and two readers reading
   one log would draw the sitting's boundary at different attempts.
-- **The record is stored rather than held in the process that served the
-  statement.** One sitting reaches the engine as two calls, and a restart
-  between them would lose the start the duration is measured from.
+- **The record is stored rather than held in the process that minted it.**
+  One sitting reaches the engine as several calls, and a restart between them
+  would lose the start the duration is measured from.
 - **The store is revised in place, as the draft store is.** A sitting's state
   moves while the sitting runs, so the sitting store can be refactored where
   the append-only logs cannot.
@@ -72,12 +79,15 @@ ended, and every pause between.
   sitting is evidence about how practice ran rather than a record the board
   counts.
 - **The record is kept after the sitting ends**, and `ended_at` closes it. How
-  often practice is interrupted, how many sittings a day holds, and which
-  problems were opened and abandoned are readable in the sitting store alone.
+  often practice is interrupted and how many sittings a day holds are readable
+  in the sitting store alone.
+- **No store records which problems were opened and abandoned.** A problem
+  opened and left before any press or submission leaves no sitting, and
+  nothing reads that count today.
 - **A sitting records when its clock started**, as `clock_started_at`. The
-  sitting begins when the statement is served, and the clock begins on the
-  user's press or by the clock preference `flows.md` gives. Reading done before
-  the press is not counted.
+  clock begins on the user's press, or as the statement is served where the
+  clock preference `flows.md` gives is on. A sitting the first submission
+  minted carries no clock start. Reading done before the press is not counted.
 - **A sitting whose clock never started is untimed.** `clock_started_at` stays
   absent, and the sitting's attempts carry no `time_to_solve_sec`. Untimed
   practice is legitimate, and a time reconstructed afterwards would be a guess.
@@ -94,12 +104,13 @@ ended, and every pause between.
 - **The elapsed time runs from `clock_started_at` and excludes every pause**,
   and the attempt carries it as `time_to_solve_sec`.
 - **A solving submission ends the sitting.** A user who solved and left the page
-  then has nothing left open, and the next opening of the problem mints a new
-  sitting.
+  then has nothing left open, and the next press or submission on the problem
+  mints a new sitting.
 - **The loop decides what starts and ends a pause**, not the record. A button,
   a hidden tab and an idle timer each leave the same interval.
-- **A sitting records when it was last touched**, as `last_active_at`. Serving
-  the sitting, a submission, a pause and a resume each set it. The record then
+- **A sitting records when it was last touched**, as `last_active_at`. Minting
+  the sitting, serving its problem while it runs, a submission, a pause and a
+  resume each set it. The record then
   says when practice stopped, without a reader joining the attempt log to it.
 - **A sitting idle longer than 45 minutes is ended at its `last_active_at`.**
   Two of the first seven sittings were left running, and serving that problem
@@ -111,8 +122,9 @@ ended, and every pause between.
   until the loop serves or reads it. The elapsed time it reports is the
   same whenever that happens, since the end is `last_active_at` rather than
   the moment of reading.
-- **Serving the problem again mints a new sitting** once the idle one is
-  ended, so the clock the solver sees starts at zero.
+- **Serving the problem again shows no sitting** once the idle one is ended.
+  The next press or submission mints a new sitting, so the clock the solver
+  sees starts at zero.
 - **A submission to a sitting idle past the bound ends it and is refused.**
   The elapsed time that attempt would carry counts the hours the user was
   away, and no attempt is worth more than the time it reports.
@@ -487,9 +499,9 @@ model of mastery.
 - **Execution is counted per sitting.** One sitting can hold several
   attempts, one per submission. Counting attempts would punish a user who
   submits often, though they solved the same problem.
-- **A sitting with no submission counts for nothing.** Opening a problem
-  serves it, so such a sitting records that the user looked at the problem,
-  not that they tried it.
+- **A sitting with no submission counts for nothing.** A clock started and
+  never submitted against records that the user worked on the problem, not
+  that they tried a solution.
 - **An untimed sitting counts by its verdict alone.** It says whether the user
   solved the problem and nothing about how long the solve took, so any reading
   of speed comes from timed sittings.
