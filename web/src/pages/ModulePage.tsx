@@ -3,6 +3,10 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import {
+  type CellState,
+  counted,
+  type CourseStatus,
+  type Focus,
   focusLine,
   groupCell,
   levelCounts,
@@ -10,9 +14,6 @@ import {
   levels,
   subsByDepth,
   subTitle,
-  type CellState,
-  type CourseStatus,
-  type Focus,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -94,7 +95,7 @@ export function ModulePage() {
             <PageHeader back={{ to: HOME, label: 'Knowledge' }} title={c.title} />
             <div className="flex flex-wrap items-center gap-stack">
               <p className="flex-1 text-meta text-muted-foreground">
-                {c.topics.length} topics · {due} due · {c.paused ? 'paused' : 'active'}
+                {counted(c.topics.length, 'topic')} · {due} due · {c.paused ? 'paused' : 'active'}
               </p>
               <Button size="sm" onClick={() => setStarting({ course: module, topic: null, sub: null, level: null })}>
                 Start
@@ -166,7 +167,7 @@ export function ModulePage() {
                 <div className="flex items-baseline gap-stack">
                   <h2 className="flex-1 text-heading font-medium">
                     {t.title}
-                    <span className="ml-2 text-meta font-normal text-muted-foreground">{t.subs.length} subtopics</span>
+                    <span className="ml-2 text-meta font-normal text-muted-foreground">{counted(t.subs.length, 'subtopic')}</span>
                   </h2>
                   <Button variant="outline" size="sm" onClick={() => setStarting({ course: module, topic: t.slug, sub: null, level: null })}>
                     Start

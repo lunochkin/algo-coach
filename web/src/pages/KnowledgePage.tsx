@@ -7,19 +7,20 @@ import {
   continueCounts,
   continueLine,
   continuePlan,
-  readyCert,
-  readyLesson,
+  counted,
   emptyContinue,
   type EmptyContinue,
+  type Focus,
   focusLabel,
   focusLine,
+  type FocusPart,
   focusView,
+  type ModuleRow,
   moduleRows,
   moved,
   NEW_STEP,
-  type Focus,
-  type FocusPart,
-  type ModuleRow,
+  readyCert,
+  readyLesson,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -222,7 +223,7 @@ export function KnowledgePage() {
                       {row.view.detail && <p className="text-meta text-muted-foreground">{row.view.detail}</p>}
                     </Link>
                     <span className="text-meta text-muted-foreground tabular-nums">
-                      {row.toReview} due · {row.total} questions
+                      {row.toReview} due · {counted(row.total, 'question')}
                     </span>
                     <span className="flex gap-1">
                       <Button

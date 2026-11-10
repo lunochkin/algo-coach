@@ -52,13 +52,18 @@ export interface QueueCounts {
   newLeft: number;
 }
 
+/** A count and its noun, singular for one: "1 review", "2 reviews". */
+export function counted(n: number, one: string, many = `${one}s`): string {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
 const learningPart = (n: number) => (n ? `${n} learning · ` : '');
 
 /** The counts under Home's Continue. A strict focus names itself, and its new count is the focus's. */
 export function continueLine(n: QueueCounts, strict = false): string {
   return strict
-    ? `Strict focus · ${n.reviews} reviews · ${learningPart(n.learning)}${n.newLeft} new left`
-    : `${n.reviews} reviews · ${learningPart(n.learning)}${n.newLeft} new left today`;
+    ? `Strict focus · ${counted(n.reviews, 'review')} · ${learningPart(n.learning)}${n.newLeft} new left`
+    : `${counted(n.reviews, 'review')} · ${learningPart(n.learning)}${n.newLeft} new left today`;
 }
 
 /** The counts at the top of a running queue. */

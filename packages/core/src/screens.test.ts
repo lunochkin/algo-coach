@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   Board,
   continueLine,
+  counted,
   DEFAULT_RULES,
   emptyContinue,
   groupLabel,
@@ -96,7 +97,7 @@ describe('count lines', () => {
 
   it('names a strict focus', () => {
     expect(continueLine({ reviews: 1, learning: 1, newLeft: 2 }, true)).toBe(
-      'Strict focus · 1 reviews · 1 learning · 2 new left',
+      'Strict focus · 1 review · 1 learning · 2 new left',
     );
   });
 });
@@ -147,5 +148,17 @@ describe('a stopped queue', () => {
 
   it('titles the filtered queue by its own name, not the board section', () => {
     expect(queueTitle('drill')).toBe('Filtered');
+  });
+});
+
+describe('a count', () => {
+  it('names one in the singular, and any other number in the plural', () => {
+    expect(counted(1, 'review')).toBe('1 review');
+    expect(counted(0, 'review')).toBe('0 reviews');
+    expect(counted(2, 'subtopic')).toBe('2 subtopics');
+  });
+
+  it('reads one review in the singular under Continue', () => {
+    expect(continueLine({ reviews: 1, learning: 0, newLeft: 3 })).toBe('1 review · 3 new left today');
   });
 });

@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { View } from 'react-native';
 import { Chip, IconButton, Text, TouchableRipple, useTheme } from 'react-native-paper';
 
-import { type Board, type CertRecord, type Focus, type FocusPart, focusView, NEW_STEP, type Queue } from '@algo-coach/core';
+import { type Board, type CertRecord, counted, type Focus, type FocusPart, focusView, NEW_STEP, type Queue } from '@algo-coach/core';
 
 import { styles, tones } from './common';
 
@@ -40,7 +40,7 @@ export function FocusCard(props: Props) {
       onPress={props.onOpen}
       borderless
       accessibilityRole="button"
-      accessibilityLabel={`Focus: ${props.label}. ${info.total} questions, ${mastered} mastered, ${info.due} to review now, ${info.newLeft} new left today`}
+      accessibilityLabel={`Focus: ${props.label}. ${counted(info.total, 'question')}, ${mastered} mastered, ${info.due} to review now, ${info.newLeft} new left today`}
       accessibilityHint="Opens the map on the focus"
       style={{ borderRadius: 16, backgroundColor: theme.colors.elevation.level2, padding: 12 }}>
       <View style={{ gap: 8 }}>

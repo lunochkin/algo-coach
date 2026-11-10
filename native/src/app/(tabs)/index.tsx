@@ -15,6 +15,7 @@ import {
   continueCounts,
   continueLine,
   continuePlan,
+  counted,
   type Course,
   drillQueue,
   emptyContinue,
@@ -357,7 +358,7 @@ function CourseCard({
       accessibilityHint="Opens the module. Long-press to reorder.">
       <Card.Title
         title={c.title}
-        subtitle={`${total} questions · ${toReview} to review${c.paused ? ' · paused' : ''}`}
+        subtitle={`${counted(total, 'question')} · ${toReview} to review${c.paused ? ' · paused' : ''}`}
         right={() => (
           <View style={{ flexDirection: 'row' }}>
             <IconButton icon="drag" onPressIn={drag} accessibilityLabel={`Reorder ${c.title}`} />

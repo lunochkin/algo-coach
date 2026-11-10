@@ -3,9 +3,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 
 import {
+  type Catalog,
   certExam,
+  counted,
   examOpening,
   examOutcome,
+  type ExamPlan,
   examPool,
   examTitle,
   LETTERS,
@@ -14,13 +17,11 @@ import {
   levelName,
   levels,
   questionHead,
+  type Result,
   setting,
+  type SettingRecord,
   validSetting,
   youLine,
-  type Catalog,
-  type ExamPlan,
-  type Result,
-  type SettingRecord,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -131,7 +132,7 @@ function CertChoice({ id, catalog, onStart }: { id: string; catalog: Catalog; on
       {c && x && b ? (
         <Panel>
           <p>
-            {x.rule.size} questions, pass {Math.round(x.rule.passShare * 100)}%. Stopping before the last question
+            {counted(x.rule.size, 'question')}, pass {Math.round(x.rule.passShare * 100)}%. Stopping before the last question
             stores the exam as not passed.
           </p>
           <div>

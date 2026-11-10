@@ -97,7 +97,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       home's Exam press
 - [x] Add the sync's state, a sync press and the archived modules' restore
       to the web's settings page, as the phone's Settings holds them
-- [ ] Name one review and one new question in the singular in the core's
+- [x] Name one review and one new question in the singular in the core's
       count lines. Both clients read "1 reviews" today
 
 ### The engine on the phone

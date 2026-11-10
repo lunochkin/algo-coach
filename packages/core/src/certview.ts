@@ -3,6 +3,7 @@ import { levelName, subTitle } from './courses';
 import type { Focus } from './focus';
 import { bySavedOrder } from './order';
 import type { Board } from './schedule';
+import { counted } from './screens';
 import type { Course } from './types';
 
 /** One condition of a certification, held or not. */
@@ -41,7 +42,7 @@ export function certConditions(
   if (!x || !status) return null;
   const note =
     status.state === 'not_certified'
-      ? `This level is practice only: no certificate yet. So far ${status.passed}/${status.questions} questions passed. It becomes a certificate once the course enables it (when its question pool is ready).`
+      ? `This level is practice only: no certificate yet. So far ${status.passed}/${counted(status.questions, 'question')} passed. It becomes a certificate once the course enables it (when its question pool is ready).`
       : status.state === 'insufficient_pool'
         ? `Not enough questions yet for a fair exam: ${status.pool} available, ${Math.ceil(x.rule.minPoolRatio * x.rule.size)} needed (${x.rule.minPoolRatio}× the ${x.rule.size}-question exam). Until then it counts as not earned, so certificates that need it stay locked.`
         : null;
@@ -50,7 +51,7 @@ export function certConditions(
     const ok = held(s);
     return { ok, text: `Prerequisite: ${c.certs?.get(p)?.title ?? p}${ok ? '' : ` (${STATE_LABEL[s ?? 'locked'].toLowerCase()})`}` };
   });
-  checks.push({ ok: status.short.length === 0, text: `Coverage: ${pct(status.coverage)} of ${status.questions} questions passed` });
+  checks.push({ ok: status.short.length === 0, text: `Coverage: ${pct(status.coverage)} of ${counted(status.questions, 'question')} passed` });
   checks.push({
     ok: status.retention >= x.rule.share,
     text: `Retention: ${pct(status.retention)} stable ≥ ${x.rule.stabilityDays} days (needs ${pct(x.rule.share)})`,
@@ -61,7 +62,7 @@ export function certConditions(
       ok: status.state === 'earned' || status.state === 'needs_refresh',
       text: last
         ? `Exam: last ${last.score}/${last.n} ${last.passed ? 'passed' : 'not passed'} (${last.t.slice(0, 10)})`
-        : `Exam: ${x.rule.size} questions, pass ${pct(x.rule.passShare)}`,
+        : `Exam: ${counted(x.rule.size, 'question')}, pass ${pct(x.rule.passShare)}`,
     });
   }
   return {

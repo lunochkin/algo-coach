@@ -1,6 +1,7 @@
 import { levelName, levels } from './courses';
 import { drillQueue, type DrillScope, type Queue } from './queue';
 import type { Board } from './schedule';
+import { counted } from './screens';
 import type { Course, Group } from './types';
 
 /** How one group reads on a module's screens: covered, open, locked, or holding no questions. */
@@ -60,6 +61,6 @@ export function startPreview(b: Board, scope: DrillScope, limit: number, now: nu
   const reviews = queue.reviews(b, now).length;
   const newLeft = queue.newLeft(b, now);
   const empty = queue.isEmpty(b, now);
-  const label = empty ? 'Nothing ready here' : `Start · ${reviews} reviews · ${newLeft} new`;
+  const label = empty ? 'Nothing ready here' : `Start · ${counted(reviews, 'review')} · ${newLeft} new`;
   return { queue, reviews, newLeft, empty, label };
 }

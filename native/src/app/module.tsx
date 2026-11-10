@@ -19,6 +19,7 @@ import {
   certStates,
   type CertStatus,
   certToOpen as openedCert,
+  counted,
   type Course,
   groupCell,
   layoutClusters,
@@ -87,7 +88,7 @@ export default function ModuleScreen() {
       </Appbar.Header>
       <View style={{ paddingHorizontal: 16, gap: 8, paddingBottom: 8 }}>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {`${c.topics.length} topics · ${due} due · ${c.paused ? 'paused' : 'active'}`}
+          {`${counted(c.topics.length, 'topic')} · ${due} due · ${c.paused ? 'paused' : 'active'}`}
         </Text>
         <Text variant="bodySmall">
           {levelCounts(b, c)

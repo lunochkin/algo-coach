@@ -3,7 +3,7 @@ import { visibleCatalog, withCertExams, withLessons, withStatuses, type Catalog 
 import type { Focus } from './focus';
 import { focusQueue, focusScope, nextQueue, outsideFocus, type Queue } from './queue';
 import type { Board } from './schedule';
-import { groupLabel, nextUpView, type NextUpView, type QueueCounts } from './screens';
+import { counted, groupLabel, nextUpView, type NextUpView, type QueueCounts } from './screens';
 import type { Course, LessonRecord, StatusRecord } from './types';
 
 export interface LearnerRecords {
@@ -110,7 +110,7 @@ export function focusView(b: Board, focus: Focus, queue: Queue, exams: CertRecor
     if (s === 'unseen' && !b.unlocked(q)) locked++;
   }
   const parts = (Object.keys(PART_LABEL) as FocusPart[]).map((k) => ({ k, v: n[k], label: PART_LABEL[k] }));
-  const counted = parts.filter((p) => p.v).map((p) => `${p.v} ${p.label}`);
+  const shown = parts.filter((p) => p.v).map((p) => `${p.v} ${p.label}`);
   const c = b.course(focus.course);
   const group = c ? b.frontier(c).find((g) => b.groupQuestions(g).some((q) => inScope.has(q))) : undefined;
   const cert = focus.cert && c ? certStates(b, c, exams).get(focus.cert) : undefined;
@@ -119,7 +119,7 @@ export function focusView(b: Board, focus: Focus, queue: Queue, exams: CertRecor
     total: qs.length,
     parts,
     locked,
-    summary: `${qs.length} questions · ${counted.join(' · ')}${locked ? ` (${locked} locked)` : ''}`,
+    summary: `${counted(qs.length, 'question')} · ${shown.join(' · ')}${locked ? ` (${locked} locked)` : ''}`,
     due: queue.reviews(b, now).length,
     learning: queue.stepping(b, now).count,
     newLeft: queue.newLeft(b, now),
