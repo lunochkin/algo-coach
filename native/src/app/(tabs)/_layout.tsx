@@ -5,12 +5,13 @@ import { Tabs } from 'expo-router/js-tabs';
 // tab shows once the phone holds a page under its section, and a bar of one
 // tab names nothing, so it shows from the second section on
 const SECTIONS = [
+  { name: 'practice', title: 'Practice', icon: 'target' },
   { name: 'cards', title: 'Cards', icon: 'cards-outline' },
   { name: 'index', title: 'Knowledge', icon: 'brain' },
 ] as const;
 
 // Knowledge opens first, and back from another tab returns there: it holds the
-// redirect to the login, and the phone holds no board to land on
+// redirect to the login, and it serves offline where the board cannot
 export const unstable_settings = { anchor: 'index' };
 
 export default function TabsLayout() {

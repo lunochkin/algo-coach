@@ -135,7 +135,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Carry the card state on `CardStatus`, and count a graduated card out
       of the cards in progress, as `pages.md` gives. Both clients count it
       in today
-- [ ] Serve the board on the phone as a Practice tab, first among the tabs:
+- [x] Serve the board on the phone as a Practice tab, first among the tabs:
       the cards in progress, and the techniques by staleness opening their
       problems and cards. With no network it says so. The phone still opens
       on Knowledge, and the inventory names that difference

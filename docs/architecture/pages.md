@@ -373,8 +373,9 @@ what it offers. The inventory is the list both clients build to.
 
 | Screen | Web | Phone | Status |
 |---|---|---|---|
-| The board | `/` | none | web for now |
-| A technique's problems | `/techniques/:technique` | none | web for now |
+| The landing page | the board | the knowledge home | by platform |
+| The board | `/` | the Practice tab | same |
+| A technique's problems and cards | `/techniques/:technique` | Technique | to fix |
 | The problem listing | `/problems` | none | web for now |
 | A picked problem | `/problems/:problem_id` | none | web for now |
 | A sitting | `/sittings/:sitting_id` | none | web for now |
@@ -432,9 +433,9 @@ what it offers. The inventory is the list both clients build to.
 - **The problem listing follows the sitting.** The listing exists to pick a
   problem across every technique, and the phone picks one from a technique
   alone until it holds a sitting.
-- **The board is web for now.** The board reads where the user's practice
-  stands without writing code. The trigger is the phone's Practice tab, whose
-  techniques open the phone's Technique screen.
+- **The phone opens on the knowledge home, where the web opens on the
+  board.** The knowledge home serves from the phone's own copy, and the board
+  needs a connection. A phone opened on a train then shows a page that works.
 - **Every technique on the phone's board opens the phone's Technique screen,
   whatever number of cards teach the technique.** The screen lists the
   technique's problems, as the web's technique page does. It also lists the
@@ -456,8 +457,9 @@ what it offers. The inventory is the list both clients build to.
   sitting.** A rung and a probe each open a problem, and a run measures
   sittings the phone cannot hold. The phone's card reads the study material
   alone.
-- **The phone reads the cards from the engine and keeps no copy.** With no
-  connection the Cards tab and a card say so. The knowledge copy exists so a
+- **The phone reads the board and the cards from the engine and keeps no
+  copy.** With no connection the Practice tab, the Cards tab and each screen
+  under them say so. The knowledge copy exists so a
   queue picks offline, and reading a card picks nothing.
 - **The privacy policy and the gallery are web only.** The providers' consent
   screens link the policy by its URL, and the gallery is a tool for whoever
@@ -478,8 +480,12 @@ what it offers. The inventory is the list both clients build to.
 
 ### To fix
 
-No difference is open. A row a later change marks `to fix` is listed here
-with what holds now and the change it needs.
+A row marked `to fix` is listed here with what holds now and the change it
+needs.
+
+- **A technique's problems and cards.** A problem's row on the phone's
+  Technique screen opens nothing, where the web's opens the problem. The
+  phone's Problem screen closes the difference.
 ## A page's areas
 
 - **A page carries a header and a body.** The header holds the way back, the

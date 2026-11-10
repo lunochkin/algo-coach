@@ -1,0 +1,78 @@
+import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+import { ScrollView, View } from 'react-native';
+import { Appbar, Text, useTheme } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { readFailure, techniqueStats, type components } from '@algo-coach/core';
+import { useEngine } from '@/lib/useEngine';
+import { CardPanel, Heading } from '@/ui/cards';
+import { Failed, styles } from '@/ui/common';
+import { PickPanel, PickRow } from '@/ui/rows';
+
+type Candidate = components['schemas']['Candidate'];
+type Card = components['schemas']['Card'];
+type ListedCard = components['schemas']['ListedCard'];
+
+/**
+ * A technique's problems and the cards teaching it or a narrower one:
+ * `pages.md`, The two clients. A problem's row opens nothing until the
+ * phone's Problem screen lands.
+ */
+export default function TechniqueScreen() {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const { technique = '' } = useLocalSearchParams<{ technique: string }>();
+  const path = `/techniques/${encodeURIComponent(technique)}`;
+  const problems = useEngine<Candidate[]>(`${path}/candidates`);
+  // the technique's cards, read as the cards list reads them
+  const taught = useEngine<Card[]>(`${path}/cards`);
+  const listed = useEngine<ListedCard[]>('/cards');
+  const error = problems.error ?? taught.error ?? listed.error;
+  const [now] = useState(() => Date.now());
+
+  const slugs = new Set((taught.data ?? []).map((one) => one.slug));
+  const cards = (listed.data ?? []).filter((one) => slugs.has(one.slug));
+
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <Appbar.Header>
+        <Appbar.BackAction onPress={() => router.back()} />
+        <Appbar.Content title={technique} />
+      </Appbar.Header>
+      <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
+        {error ? (
+          <Failed
+            message={readFailure('the technique', error)}
+            onRetry={() => {
+              problems.reload();
+              taught.reload();
+              listed.reload();
+            }}
+          />
+        ) : problems.data === null || taught.data === null || listed.data === null ? (
+          <Text variant="bodyMedium">Reading the technique…</Text>
+        ) : (
+          <>
+            {cards.length > 0 ? (
+              <>
+                <Heading title="Cards" count={cards.length} />
+                <CardPanel technique={null} cards={cards} />
+              </>
+            ) : null}
+            <Heading title="Problems" count={problems.data.length} />
+            {problems.data.length === 0 ? (
+              <Text variant="bodyMedium">No served problem carries this technique.</Text>
+            ) : (
+              <PickPanel>
+                {problems.data.map((row) => (
+                  <PickRow key={row.problem_id} title={row.title} badge={row.difficulty} stats={techniqueStats(row, now)} />
+                ))}
+              </PickPanel>
+            )}
+          </>
+        )}
+      </ScrollView>
+    </View>
+  );
+}
