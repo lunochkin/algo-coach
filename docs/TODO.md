@@ -130,9 +130,15 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Serve the cards on the phone as a Cards tab: the list grouped by
       technique, and a card's trigger, brief and templates, each hidden
       until revealed. With no network it says so
-- [ ] Serve the board on the phone as a Practice tab: the cards in progress
-      opening their card, and the techniques by staleness opening their
-      cards. A problem stays on the web, as a sitting does
+- [ ] Write into `pages.md` what a technique on the phone's board opens: no
+      card, one card, or several. A technique's problems stay on the web
+- [ ] Carry the card state on `CardStatus`, and count a graduated card out
+      of the cards in progress, as `pages.md` gives. Both clients count it
+      in today
+- [ ] Serve the board on the phone as a Practice tab, first among the tabs:
+      the cards in progress and the techniques by staleness, each opening
+      its cards. With no network it says so. The phone still opens on
+      Knowledge, and the inventory names that difference
 
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
