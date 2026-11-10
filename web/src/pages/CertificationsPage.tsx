@@ -1,15 +1,12 @@
-import { FileX, Lock, RefreshCw, Target, Trophy } from 'lucide-react'
+import { FileX, Lock, RefreshCw, Trophy } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { useSearchParams } from 'react-router'
 
 import {
   bySavedOrder,
-  certConditions,
-  certFocus,
   certId,
   certStates,
   COURSE_SCOPE,
-  focusLine,
   levelName,
   levels,
   STATE_LABEL,
@@ -19,11 +16,10 @@ import {
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { loadedFrom, useKnowledge } from '@/knowledge/context'
+import { CertDialog } from '@/knowledge/CertDialog'
 import { useLearner } from '@/knowledge/learner'
-import { EXAM, KNOWLEDGE } from '@/knowledge/paths'
+import { KNOWLEDGE } from '@/knowledge/paths'
 import { StartSheet, type Scope } from '@/knowledge/StartSheet'
 import { cn } from '@/lib/utils'
 
@@ -32,7 +28,7 @@ type Picked = { course: string; id: string }
 // each module as a grid of scopes by level: `pages.md`, The knowledge pages
 export function CertificationsPage() {
   const k = useKnowledge()
-  const { catalog, board, order, certExams, focus } = useLearner()
+  const { catalog, board, order, certExams } = useLearner()
   const [params] = useSearchParams()
   // the home's ready certification opens on its conditions
   const [picked, setPicked] = useState<Picked | null>(() => {
@@ -52,7 +48,6 @@ export function CertificationsPage() {
   }, [catalog, board, order, certExams])
 
   const shown = picked && modules?.find((m) => m.c.slug === picked.course)
-  const v = shown ? certConditions(shown.b, shown.c, picked.id, shown.states, focus) : null
 
   return (
     <section className="space-y-section">
@@ -71,80 +66,11 @@ export function CertificationsPage() {
         )}
       </Loaded>
 
-      <Dialog open={!!v} onOpenChange={(open) => !open && setPicked(null)}>
-        <DialogContent>
-          {v && shown && picked && (
-            <>
-              <DialogHeader>
-                <DialogTitle>{v.title}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-stack text-meta">
-                <p className="font-medium text-brand-deep">{v.label}</p>
-                {v.note && <p>{v.note}</p>}
-                {v.progressNote && <p className="text-muted-foreground">{v.progressNote}</p>}
-                <ul className="space-y-1">
-                  {v.checks.map((x) => (
-                    <li key={x.text}>
-                      <span className={x.ok ? 'text-verdict-passed' : 'text-verdict-wrong'}>{x.ok ? '✓' : '✗'} </span>
-                      {x.text}
-                    </li>
-                  ))}
-                </ul>
-                {v.short.length > 0 && (
-                  <div className="space-y-1">
-                    <p className="font-medium">To cover</p>
-                    {v.short.map((g) => (
-                      <div key={g.sub} className="flex items-center gap-stack">
-                        <span className="flex-1">{g.line}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const level = shown.c.certs?.get(picked.id)?.level ?? null
-                            setPicked(null)
-                            setStarting({ course: shown.c.slug, topic: g.topic, sub: g.sub, level })
-                          }}
-                        >
-                          Start
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <p className="text-muted-foreground">{v.scope}</p>
-              </div>
-              <DialogFooter>
-                {v.offersExam && (
-                  <Button asChild>
-                    <Link to={`${EXAM}?${new URLSearchParams({ cert: picked.id })}`}>
-                      <Trophy />
-                      Take exam
-                    </Link>
-                  </Button>
-                )}
-                {v.offersTarget &&
-                  (v.targeted ? (
-                    <Button variant="outline" onClick={() => void k.add('focus', focusLine(null))}>
-                      Untarget
-                    </Button>
-                  ) : (
-                    <Button
-                      variant={v.offersExam ? 'outline' : 'default'}
-                      onClick={() => {
-                        const f = certFocus(shown.c, picked.id, !!focus?.strict)
-                        if (f) void k.add('focus', focusLine(f))
-                        setPicked(null)
-                      }}
-                    >
-                      <Target />
-                      Target
-                    </Button>
-                  ))}
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      <CertDialog
+        open={shown && picked ? { c: shown.c, b: shown.b, states: shown.states, id: picked.id } : null}
+        onClose={() => setPicked(null)}
+        onStart={setStarting}
+      />
       <StartSheet scope={starting} onClose={() => setStarting(null)} />
     </section>
   )

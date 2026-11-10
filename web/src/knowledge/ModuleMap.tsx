@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   alsoNeeds,
   certPips,
+  certToOpen,
   certStates,
   groupCell,
   layoutClusters,
@@ -13,7 +14,6 @@ import {
   levels,
   MAP_DIMS,
   mapLit,
-  STATE_LABEL,
   subTitle,
   topicTitle,
   unlocksLabel,
@@ -25,9 +25,14 @@ import {
   type PlacedNode,
 } from '@algo-coach/core'
 
+import { Link } from 'react-router'
+
 import { Panel } from '@/components/Panel'
 import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
+import { CertDialog } from '@/knowledge/CertDialog'
+import { lessonPath } from '@/knowledge/paths'
+import type { Scope } from '@/knowledge/StartSheet'
 import { cn } from '@/lib/utils'
 
 const W = MAP_DIMS.nodeW
@@ -58,7 +63,7 @@ type Props = {
   b: Board
   focus: Focus | null
   certExams: Parameters<typeof certStates>[2]
-  onStart: (topic: string, sub: string) => void
+  onStart: (s: Scope) => void
   onAim: (topic: string, sub: string) => void
 }
 
@@ -173,7 +178,19 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
         </svg>
       </div>
 
-      {sel && <Picked n={sel} c={c} b={b} states={states} focus={focus} onStart={onStart} onAim={onAim} />}
+      {sel?.kind === 'cert' ? (
+        // a certificate node opens the next certification of its scope to earn, as the phone's map does
+        <CertDialog
+          open={(() => {
+            const id = certToOpen(c, states, sel.topic)
+            return id ? { c, b, states, id } : null
+          })()}
+          onClose={() => setPicked(null)}
+          onStart={onStart}
+        />
+      ) : (
+        sel && <Picked n={sel} c={c} b={b} focus={focus} onStart={onStart} onAim={onAim} />
+      )}
     </div>
   )
 }
@@ -267,9 +284,8 @@ function Picked(props: {
   n: PlacedNode
   c: Course
   b: Board
-  states: Map<string, { state: CertState }>
   focus: Focus | null
-  onStart: (topic: string, sub: string) => void
+  onStart: (s: Scope) => void
   onAim: (topic: string, sub: string) => void
 }) {
   const { n, c, b } = props
@@ -283,19 +299,11 @@ function Picked(props: {
         <p className="text-meta">{v.teaches}</p>
         {v.needs && <p className="text-meta">{v.needs}</p>}
         {v.pretest && <p className="text-meta text-muted-foreground">{v.pretest}</p>}
-      </Panel>
-    )
-  }
-  if (n.kind === 'cert') {
-    const certs = (c.certs?.certs ?? []).filter((x) => x.scope === n.topic && x.certified)
-    return (
-      <Panel>
-        <p className="font-medium">{n.topic === 'all' ? c.title : topicTitle(c, n.topic)}</p>
-        {certs.map((x) => (
-          <p key={x.id} className="text-meta">
-            {levelName(b.rules, x.level)}: {STATE_LABEL[props.states.get(x.id)?.state ?? 'locked']}
-          </p>
-        ))}
+        <div>
+          <Button asChild size="sm">
+            <Link to={lessonPath(c.slug, n.sub.slice(7))}>Read</Link>
+          </Button>
+        </div>
       </Panel>
     )
   }
@@ -318,7 +326,7 @@ function Picked(props: {
         {unlocks && <p className="text-muted-foreground">{unlocks}</p>}
       </div>
       <div className="flex gap-stack">
-        <Button size="sm" onClick={() => props.onStart(n.topic, n.sub)}>
+        <Button size="sm" onClick={() => props.onStart({ course: c.slug, topic: n.topic, sub: n.sub, level: null })}>
           Start
         </Button>
         <Button variant="outline" size="sm" disabled={aimed} onClick={() => props.onAim(n.topic, n.sub)}>

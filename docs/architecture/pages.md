@@ -385,7 +385,7 @@ what it offers. The inventory is the list both clients build to.
 | The lessons | `/knowledge/lessons` | Lessons | same |
 | A lesson | `/knowledge/lessons/:module/:lesson` | Lesson | same |
 | The certifications | `/knowledge/certifications` | Certifications | same |
-| A certification's conditions | a dialog on the certifications | a sheet on Certifications and Map | to fix |
+| A certification's conditions | a dialog on the certifications and the map | a sheet on Certifications and Map | same |
 | The settings | `/settings` | Settings | same |
 | The signed-in apps | a dialog from the account menu | none | web only |
 | The login | `/login` | Login | same |
@@ -452,10 +452,8 @@ what it offers. The inventory is the list both clients build to.
 
 ### To fix
 
-- **A certification's conditions from the map.** The phone's map opens a
-  certificate node's conditions, and a lesson node's lesson on Read. The
-  web's map names a certificate's states and a lesson's lines alone. The
-  web's map gains both.
+No difference is open. A row a later change marks `to fix` is listed here
+with what holds now and the change it needs.
 ## A page's areas
 
 - **A page carries a header and a body.** The header holds the way back, the

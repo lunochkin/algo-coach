@@ -151,7 +151,7 @@ export function ModulePage() {
                   b={b}
                   focus={focus}
                   certExams={certExams}
-                  onStart={(topic, sub) => setStarting({ course: module, topic, sub, level: null })}
+                  onStart={setStarting}
                   onAim={(topic, sub) => aim({ course: module, topic, sub })}
                 />
               ) : (
