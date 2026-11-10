@@ -11,9 +11,10 @@ import ReorderableList, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  type Board,
   certStates,
+  continueLine,
   type Course,
+  emptyContinue,
   drillQueue,
   focusLabel,
   focusQueue,
@@ -21,10 +22,10 @@ import {
   minutesOf,
   NEW_STEP,
   nextQueue,
+  type NextUpView,
+  nextUpView,
   outsideFocus,
   reviewQueue,
-  subTitle,
-  topicTitle,
 } from '@algo-coach/core';
 import { bySavedOrder } from '@/lib/order';
 import { APP_NAME } from '@/lib/name';
@@ -56,10 +57,7 @@ export default function Home() {
       const qs = all.filter((q) => q.course === c.slug);
       // Same count as `learn courses`: ready weak plus due, anywhere in the course.
       const toReview = qs.filter((q) => b.toReview(q, now)).length;
-      const next = b.nextUp(c);
-      // the next step's progress, and how many other groups are open beside it
-      const step = next && { ...next, passed: b.nPassed(next.group), of: b.groupQuestions(next.group).length };
-      return { c, next: step, open: b.frontier(c).length, total: qs.length, toReview };
+      return { c, view: nextUpView(b, c), total: qs.length, toReview };
     });
     return { courses };
   }, [b]);
@@ -120,25 +118,18 @@ export default function Home() {
   const start = () => {
     if (!cont || !counts) return;
     if (counts.empty) {
-      if (counts.blocked) {
-        // the day's limit, not the content, emptied the queue: more is one press away
-        setNotice(`Today's ${st.newLimit} new questions are done, and more are unlocked.`);
-        setNoticeAction({
-          label: `+${NEW_STEP} new today`,
-          run: () => {
-            void st.raiseNew();
-            cont.queue.limit += NEW_STEP;
-            startQueue(st, 'next', cont.queue, cont.course, cont.include);
-          },
-        });
-      } else if (focused && focus?.cert) {
-        // A targeted certificate with nothing left to learn: its next step is retention or the exam.
-        setNotice('Nothing weak, due or new for the targeted certificate. See its requirements and exam.');
-        setNoticeAction({ label: 'Certificates', run: () => router.push('/certs') });
-      } else if (focused) {
-        setNotice('Nothing weak, due or new in the focus.');
-        setNoticeAction({ label: 'Clear focus', run: () => void st.setFocus(null) });
-      } else setNotice('Nothing due and nothing new unlocked. Try Practice or see Stats.');
+      const empty = emptyContinue({ blocked: counts.blocked, newLimit: st.newLimit, focus: focused });
+      setNotice(empty.notice);
+      const run = {
+        raise: () => {
+          void st.raiseNew();
+          cont.queue.limit += NEW_STEP;
+          startQueue(st, 'next', cont.queue, cont.course, cont.include);
+        },
+        certs: () => router.push('/certs'),
+        'clear-focus': () => void st.setFocus(null),
+      };
+      setNoticeAction(empty.action && { label: empty.action.label, run: run[empty.action.kind] });
       return;
     }
     startQueue(st, 'next', cont.queue, cont.course, cont.include);
@@ -157,7 +148,6 @@ export default function Home() {
     if (!queue.isEmpty(gb, Date.now())) startQueue(st, 'drill', queue, g.course);
   };
 
-  const levels = st.catalog?.rules.levels ?? {};
   const order = st.settings.courseOrder;
   const rows = useMemo(() => bySavedOrder(info?.courses ?? [], (r) => r.c.slug, order), [info, order]);
   const chips = useMemo(
@@ -230,11 +220,9 @@ export default function Home() {
         renderItem={({ item }) => (
           <CourseCard
             c={item.c}
-            next={item.next}
-            open={item.open}
+            view={item.view}
             total={item.total}
             toReview={item.toReview}
-            levels={levels}
             onFrontier={drillGroup}
             onTogglePause={pause.ask}
             onArchive={archive.ask}
@@ -320,9 +308,7 @@ export default function Home() {
         {counts ? (
           <View style={[styles.row, { justifyContent: 'center', flexWrap: 'wrap', minHeight: 24 }]}>
             <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              {focused?.strict
-                ? `Strict focus · ${counts.reviews} reviews · ${learningPart(counts.learning)}${counts.newLeft} new left`
-                : `${counts.reviews} reviews · ${learningPart(counts.learning)}${counts.newLeft} new left today`}
+              {continueLine(counts, !!focused?.strict)}
             </Text>
             {focused?.strict && counts.outside ? (
               <TouchableRipple
@@ -427,21 +413,17 @@ function FocusLine(props: {
 /** A course row: tap opens Practice, long-press or the handle drags it to reorder. */
 function CourseCard({
   c,
-  next,
-  open,
+  view,
   total,
   toReview,
-  levels,
   onFrontier,
   onTogglePause,
   onArchive,
 }: {
   c: Course;
-  next: (NonNullable<ReturnType<Board['nextUp']>> & { passed: number; of: number }) | null;
-  open: number;
+  view: NextUpView;
   total: number;
   toReview: number;
-  levels: Record<string, string>;
   onFrontier: (g: Group) => void;
   onTogglePause: (c: Course) => void;
   onArchive: (c: Course) => void;
@@ -495,30 +477,25 @@ function CourseCard({
         )}
       />
       <Card.Content>
-        {next ? (
+        {view.next ? (
           <TouchableRipple
-            onPress={() =>
-              next.lesson
-                ? router.push({ pathname: '/lesson', params: { course: c.slug, slug: next.lesson.slug } })
-                : onFrontier(next.group)
-            }
+            onPress={() => {
+              const next = view.next;
+              if (!next) return;
+              if (next.lesson) router.push({ pathname: '/lesson', params: { course: c.slug, slug: next.lesson.slug } });
+              else onFrontier(next.group);
+            }}
             borderless
             accessibilityRole="button"
-            accessibilityLabel={
-              next.lesson
-                ? `Next up: read the lesson ${next.lesson.title}`
-                : `Next up: practise ${subTitle(c, next.group.sub)} ${levels[next.group.level] ?? ''}`
-            }
+            accessibilityLabel={view.accessibilityLabel}
             style={{ minHeight: 48, justifyContent: 'center', borderRadius: 8, marginHorizontal: -8, paddingHorizontal: 8 }}>
             <View style={styles.row}>
               <View style={{ flex: 1 }}>
                 <Text variant="bodyMedium" style={{ color: theme.colors.primary }}>
-                  {next.lesson
-                    ? `Next up: read “${next.lesson.title}”`
-                    : `Next up: ${subTitle(c, next.group.sub)} · ${levels[next.group.level] ?? `L${next.group.level}`}`}
+                  {view.title}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                  {`${topicTitle(c, next.group.topic)} · ${next.passed}/${next.of} passed${open > 1 ? ` · ${open - 1} more open` : ''}`}
+                  {view.detail}
                 </Text>
               </View>
               <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
@@ -527,12 +504,9 @@ function CourseCard({
             </View>
           </TouchableRipple>
         ) : (
-          <Text variant="bodyMedium">All unlocked groups done</Text>
+          <Text variant="bodyMedium">{view.title}</Text>
         )}
       </Card.Content>
     </Card>
   );
 }
-
-// questions in a learning step not due yet: Continue serves them early, so the line counts them
-const learningPart = (n: number) => (n ? `${n} learning · ` : '');

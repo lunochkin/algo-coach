@@ -9,11 +9,9 @@ import {
   certStates,
   type Focus,
   focusScope,
-  levelName,
+  groupLabel,
   NEW_STEP,
   type Queue,
-  subTitle,
-  topicTitle,
 } from '@algo-coach/core';
 
 import { STATE_LABEL } from './certs';
@@ -65,7 +63,10 @@ export function FocusCard(props: Props) {
       newLeft: queue.newLeft(b, now),
       next: next && {
         // a topic focus names its topic already
-        label: `${focus.topic ? '' : `${topicTitle(c, next.topic)} › `}${subTitle(c, next.sub)} · ${levelName(b.rules, next.level)}`, passed: b.nPassed(next), of: b.groupQuestions(next).length },
+        label: groupLabel(c, b.rules, next, !focus.topic),
+        passed: b.nPassed(next),
+        of: b.groupQuestions(next).length,
+      },
       cert,
     };
   }, [b, focus, queue, props.exams]);

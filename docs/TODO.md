@@ -17,7 +17,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       Native or Expo already
 - [x] Move the OpenAPI-generated types into `packages/core`, and type the
       app's sync against them. The app writes its sync shapes by hand today
-- [ ] Move what the screens compute for display into `packages/core` as
+- [x] Move what the screens compute for display into `packages/core` as
       tested presentation functions: the module card, the queue header, the
       empty Continue. Two screens assembling one label drift apart unnoticed
 

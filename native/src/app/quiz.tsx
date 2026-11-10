@@ -16,6 +16,7 @@ import {
   type CardFields,
   cardLabel,
   choiceOrder,
+  DEFAULT_RULES,
   type Grade,
   gradeChoice,
   hasAnswer,
@@ -24,15 +25,15 @@ import {
   isoNow,
   type LessonItem,
   LETTERS,
-  levelName,
   makeAttempt,
   matchShort,
   NEW_STEP,
+  offersRaise,
   type Question,
+  questionHead,
+  queueLine,
   splitGuess,
   type Status,
-  subTitle,
-  topicTitle,
 } from '@algo-coach/core';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
@@ -188,7 +189,7 @@ function QueueQuiz({ s }: { s: QueueSession }) {
   const due = b ? queue.reviews(b, now).length : 0;
   const newLeft = b ? queue.newLeft(b, now) : 0;
   const stepping = b ? queue.stepping(b, now).count : 0;
-  const left = `${due} due · ${stepping ? `${stepping} learning · ` : ''}${newLeft} new left today`;
+  const left = queueLine({ reviews: due, learning: stepping, newLeft });
   const unseenLeft = !!b && queue.scope.some((q) => !b.attempts(q).length);
   const rs = results.current;
   const score = rs.filter((r) => r.correct).length;
@@ -204,7 +205,7 @@ function QueueQuiz({ s }: { s: QueueSession }) {
         <Text variant="labelMedium" style={{ flex: 1, color: theme.colors.onSurfaceVariant }}>
           {left}
         </Text>
-        {s.mode !== 'review' && newLeft === 0 && unseenLeft ? (
+        {offersRaise(s.mode, newLeft, unseenLeft) ? (
           <Button compact mode="text" onPress={moreNew} accessibilityLabel={`Allow ${NEW_STEP} more new questions`}>
             {`+${NEW_STEP} new`}
           </Button>
@@ -216,7 +217,8 @@ function QueueQuiz({ s }: { s: QueueSession }) {
         <Ask
           key={count}
           q={current.q}
-          tag={current.early ? `${current.tag} · learning step, early` : current.tag}
+          tag={current.tag}
+          early={current.early}
           exam={false}
           bottom={insets.bottom}
           onAnswered={onAnswered}
@@ -388,17 +390,14 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
   );
 }
 
-function Head({ q, tag }: { q: Question; tag: string }) {
+function Head({ q, tag, early = false }: { q: Question; tag: string; early?: boolean }) {
   const theme = useTheme();
   const catalog = useStore().catalog;
-  const rules = catalog?.rules;
-  const level = rules ? levelName(rules, q.level) : `L${q.level}`;
   const course = catalog?.courses.find((c) => c.slug === q.course);
-  const where = `${topicTitle(course, q.topic)} › ${subTitle(course, q.sub)}`;
   return (
     <>
       <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-        {`${where} · ${level} · ${q.kind}${tag ? ` · ${tag}` : ''}`}
+        {questionHead(course, catalog?.rules ?? DEFAULT_RULES, q, tag, early)}
       </Text>
       <Text variant="titleMedium" selectable>
         {block(q.prompt)}
@@ -455,13 +454,14 @@ function Choices(props: {
 function Ask(props: {
   q: Question;
   tag: string;
+  early?: boolean;
   exam: boolean;
   bottom: number;
   last: boolean;
   onAnswered: (r: Result) => void;
   onNext: () => void;
 }) {
-  const { q, tag, exam, bottom, last, onAnswered, onNext } = props;
+  const { q, tag, early, exam, bottom, last, onAnswered, onNext } = props;
   // Shuffle choices so position carries no information across sessions.
   const order = useMemo(() => choiceOrder(q.choices.length), [q]);
   const [picked, setPicked] = useState<number[]>([]);
@@ -509,7 +509,7 @@ function Ask(props: {
       <ScrollView
         contentContainerStyle={[styles.page, { paddingBottom: bottom + 96 }]}
         keyboardShouldPersistTaps="handled">
-        <Head q={q} tag={tag} />
+        <Head q={q} tag={tag} early={early} />
         {q.format === 'choice' ? (
           <Choices q={q} order={order} picked={picked} onToggle={result ? undefined : toggle} />
         ) : null}

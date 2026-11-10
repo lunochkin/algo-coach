@@ -7,13 +7,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   type Board,
   type Course,
+  groupLabel,
   levelName,
   levels,
   newToday,
   subsByDepth,
-  subTitle,
   summary,
-  topicTitle,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles, tones } from '@/ui/common';
@@ -168,7 +167,7 @@ function CourseCard({ b, c }: { b: Board; c: Course }) {
         ))}
         {front ? (
           <Text variant="bodyMedium">
-            {`Next up: ${topicTitle(c, front.topic)} › ${subTitle(c, front.sub)} · ${levelName(b.rules, front.level)}`}
+            {`Next up: ${groupLabel(c, b.rules, front)}`}
           </Text>
         ) : null}
       </Card.Content>
