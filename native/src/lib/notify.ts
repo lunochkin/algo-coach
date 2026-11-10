@@ -21,6 +21,11 @@ async function permitted(): Promise<boolean> {
 }
 
 /** One local notification at the first reminder hour at or after reviews become available. */
+/** A signed-out device reminds nobody of a log it no longer holds. */
+export async function cancelReminders(): Promise<void> {
+  await Notifications.cancelAllScheduledNotificationsAsync();
+}
+
 export async function scheduleReminder(b: Board, hour: number): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
   const now = Date.now();

@@ -348,6 +348,12 @@ the platform itself cannot do the same.
 - **The copy is keyed to the signed-in user.** A second account signed in on
   the same device would otherwise read the first account's log and upload
   its outbox under the wrong user.
+- **The engine names the user when it issues a token and in every sync
+  reply.** A copy kept before the owner was recorded is then claimed by the
+  account whose token wrote it, at that account's next sync.
+- **A token the engine revoked keeps the copy.** The app returns to the login
+  page, and the outbox waits for the same user's next sign-in. Another
+  account signing in reads only its own rows.
 - **Signing out sends the outbox, then deletes the copy.** A copy left behind
   keeps a user's log readable on a shared device. An outbox that cannot be
   sent is named before sign-out discards it, so the user decides whether

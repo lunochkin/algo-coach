@@ -39,8 +39,9 @@ import {
 
 import { readCatalog } from './courses-cache';
 import * as DB from './db';
-import { scheduleReminder } from './notify';
+import { cancelReminders, scheduleReminder } from './notify';
 import { DEFAULTS, getToken, legacyNewPerDay, loadSettings, saveSettings, setToken, type Settings } from './settings';
+import { signOut as signOutApp } from './auth';
 import { SignedOut } from './engine';
 import { syncOnce } from './sync';
 
@@ -86,7 +87,10 @@ interface Store {
   board: (only?: string | null, include?: string | null) => Board | null;
   requestSync: (delayMs?: number) => void;
   updateSettings: (s: Settings) => Promise<void>;
-  updateToken: (token: string) => Promise<void>;
+  signedIn: (token: string, user: string) => Promise<void>;
+  // sends the outbox, then deletes this user's copy. Returns the records still unsent
+  // instead, unless `force`, so the user decides whether they are lost
+  signOut: (force: boolean) => Promise<number>;
   record: (rec: AttemptRecord) => Promise<void>;
   session: Session | null;
   setSession: (s: Session | null) => void;
@@ -140,6 +144,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
 
   const settingsRef = useRef(settings);
+  const userRef = useRef<string | null>(null);
   const catalogRef = useRef(rawCatalog);
   const statusesRef = useRef<StatusRecord[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -209,7 +214,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       setSync((x) => ({ ...x, running: true }));
-      const r = await syncOnce(settingsRef.current, token);
+      const r = await syncOnce(settingsRef.current, token, userRef.current);
+      // a copy from before the owner was kept learns it from its first sync
+      if (!userRef.current) await own(r.user, userRef);
       const lastAt = new Date().toISOString();
       await DB.setMeta('last_sync', lastAt);
       await DB.setMeta('last_error', '');
@@ -250,6 +257,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     void (async () => {
+      userRef.current = (await DB.getMeta('user')) || null;
+      DB.setOwner(userRef.current);
       const s = await loadSettings();
       setSettings(s);
       settingsRef.current = s;
@@ -280,10 +289,41 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     settingsRef.current = s;
   }, []);
 
-  const updateToken = useCallback(async (token: string) => {
-    await setToken(token);
-    setHasToken(!!token);
-  }, []);
+  const signedIn = useCallback(
+    async (token: string, user: string) => {
+      if (userRef.current !== user) await own(user, userRef);
+      await setToken(token);
+      setHasToken(true);
+      await reload(false);
+    },
+    [reload],
+  );
+
+  const signOut = useCallback(
+    async (force: boolean) => {
+      const token = await getToken();
+      if (token && !force) {
+        try {
+          await syncOnce(settingsRef.current, token, userRef.current);
+        } catch {
+          // counted below: what the outbox still holds is what sign-out would lose
+        }
+        const left = (await DB.pending()).length;
+        if (left) return left;
+      }
+      if (token) await signOutApp(settingsRef.current.origin, token).catch(() => undefined);
+      await DB.erase(userRef.current);
+      await cancelReminders();
+      await DB.setMeta('user', '');
+      userRef.current = null;
+      DB.setOwner(null);
+      await setToken('');
+      setHasToken(false);
+      await reload(false);
+      return 0;
+    },
+    [reload],
+  );
 
   const record = useCallback(
     async (rec: AttemptRecord) => {
@@ -396,7 +436,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       board,
       requestSync,
       updateSettings,
-      updateToken,
+      signedIn,
+      signOut,
       record,
       session,
       setSession,
@@ -409,7 +450,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       recordCertExam,
     }),
     [ready, catalog, attempts, sessions, settings, limits, setNewPerDay, newLimit, raiseNew, hasToken, sync, filter, board, requestSync,
-      updateSettings, updateToken, record, session, finishSession, setCourseStatus, focus, setFocus, setLessonState, archived, recordCertExam],
+      updateSettings, signedIn, signOut, record, session, finishSession, setCourseStatus, focus, setFocus, setLessonState, archived, recordCertExam],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -424,4 +465,12 @@ async function movedLimit(s: Settings): Promise<void> {
     await DB.addLocal('limits', limitPath(s.device, rec.t), rec);
   }
   await saveSettings(s);
+}
+
+/** Keys this device's copy to `user`. A copy that had no owner yet is theirs: their token wrote it. */
+async function own(user: string, ref: { current: string | null }): Promise<void> {
+  if (!(await DB.getMeta('user'))) await DB.adopt(user);
+  await DB.setMeta('user', user);
+  ref.current = user;
+  DB.setOwner(user);
 }

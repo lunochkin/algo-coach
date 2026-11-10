@@ -65,6 +65,7 @@ class Refusal(BaseModel):
 
 
 class Synced(BaseModel):
+    user_id: str  # whose log the records are, so a client can key its copy
     stored: int = 0
     known: int = 0  # already stored under its `client_id`: a retried upload
     refused: list[Refusal] = []
@@ -75,7 +76,7 @@ class Synced(BaseModel):
 def sync(
     root: Database, user_id: str, device: str, sent: list[dict[str, Any]], since: dict[str, int]
 ) -> Synced:
-    result = Synced()
+    result = Synced(user_id=user_id)
     with root.begin() as conn:
         names = _Names(conn)
         for line in sent:

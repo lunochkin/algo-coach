@@ -47,6 +47,8 @@ class Exchange(BaseModel):
 
 class Issued(BaseModel):
     token: str
+    # the user the app keys its copy of the log to: `knowledge.md`
+    user_id: str
 
 
 @router.post("/token")
@@ -54,7 +56,7 @@ def token(exchange: Exchange, root: Root) -> Issued:
     found = exchanged(root, exchange.code, exchange.verifier, exchange.device)
     if found is None:
         raise HTTPException(400, "the code is spent, expired, or not this app's")
-    return Issued(token=found)
+    return Issued(token=found[0], user_id=found[1])
 
 
 @router.post("/signout", status_code=204)

@@ -1249,6 +1249,8 @@ export interface components {
         };
         /** Synced */
         Synced: {
+            /** User Id */
+            user_id: string;
             /**
              * Stored
              * @default 0

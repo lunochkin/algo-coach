@@ -2,11 +2,9 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Appbar, Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
+import { Appbar, Button, Dialog, HelperText, Portal, Text, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { signOut } from '@/lib/auth';
-import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { styles, SyncLine } from '@/ui/common';
 
@@ -15,6 +13,7 @@ export default function SettingsScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [signing, setSigning] = useState(false);
+  const [unsent, setUnsent] = useState(0);
   const [form, setForm] = useState({
     origin: st.settings.origin,
     device: st.settings.device,
@@ -59,15 +58,16 @@ export default function SettingsScreen() {
     st.requestSync(0);
   };
 
-  const signOutHere = async () => {
+  // the outbox goes first. Records it could not send are named before sign-out deletes them
+  const signOutHere = async (force: boolean) => {
+    setUnsent(0);
     setSigning(true);
     try {
-      const token = await getToken();
-      if (token) await signOut(st.settings.origin, token).catch(() => undefined);
+      const left = await st.signOut(force);
+      if (left) setUnsent(left);
+      else router.replace('/login');
     } finally {
-      await st.updateToken('');
       setSigning(false);
-      router.replace('/login');
     }
   };
 
@@ -104,7 +104,7 @@ export default function SettingsScreen() {
             {st.hasToken ? 'Signed in on this device.' : 'Not signed in.'}
           </Text>
           {st.hasToken ? (
-            <Button mode="outlined" icon="logout" disabled={signing} onPress={() => void signOutHere()}>
+            <Button mode="outlined" icon="logout" disabled={signing} onPress={() => void signOutHere(false)}>
               Sign out
             </Button>
           ) : null}
@@ -149,6 +149,20 @@ export default function SettingsScreen() {
           </>
         ) : null}
       </KeyboardAwareScrollView>
+      <Portal>
+        <Dialog visible={unsent > 0} onDismiss={() => setUnsent(0)}>
+          <Dialog.Title>Sign out and lose unsent answers?</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">
+              {`${unsent} ${unsent === 1 ? 'record has' : 'records have'} not reached the engine, and signing out deletes this device's copy. Stay signed in and sync later to keep them.`}
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setUnsent(0)}>Stay signed in</Button>
+            <Button onPress={() => void signOutHere(true)}>Sign out</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }

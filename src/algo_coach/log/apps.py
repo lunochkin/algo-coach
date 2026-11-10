@@ -35,10 +35,10 @@ def issued(root: Database, user_id: str, challenge: str) -> str:
     return code
 
 
-def exchanged(root: Database, code: str, verifier: str, device: str) -> str | None:
-    """The app's token, where the code is live and unused and the verifier
-    answers its challenge. Spends the code either way, so a wrong guess is
-    the code's last."""
+def exchanged(root: Database, code: str, verifier: str, device: str) -> tuple[str, str] | None:
+    """The app's token and its user, where the code is live and unused and
+    the verifier answers its challenge. Spends the code either way, so a
+    wrong guess is the code's last."""
     now = datetime.now(UTC)
     with root.begin() as conn:
         spent = conn.execute(
@@ -63,7 +63,7 @@ def exchanged(root: Database, code: str, verifier: str, device: str) -> str | No
                 last_used_at=now,
             )
         )
-    return token
+    return token, spent.user_id
 
 
 def app_user_of(root: Database, token: str) -> str | None:

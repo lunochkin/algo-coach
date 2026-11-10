@@ -131,6 +131,10 @@ def test_the_cursor_returns_only_what_came_after_it(database, tmp_path):
     assert [one["client_id"] for one in later["records"]] == ["c2"]
 
 
+def test_the_reply_names_whose_log_it_is(database, tmp_path):
+    assert synced(database, tmp_path, [])["user_id"] == USER
+
+
 def test_a_user_never_receives_another_user_s_records(database, tmp_path):
     synced(database, tmp_path, [attempt("c1")], user=OTHER)
 

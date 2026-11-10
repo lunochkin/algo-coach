@@ -6,6 +6,7 @@ import { call } from './engine';
 import type { Settings } from './settings';
 
 export interface SyncResult {
+  user: string; // whose log the engine answered with
   coursesChanged: boolean;
   progressChanged: boolean;
   pushed: number;
@@ -36,8 +37,8 @@ type Synced = components['schemas']['Synced'];
  * Fetches the content when it changed, sends this device's pending records, and
  * keeps every record the engine returns that this device does not hold yet.
  */
-export async function syncOnce(s: Settings, token: string): Promise<SyncResult> {
-  const result: SyncResult = { coursesChanged: false, progressChanged: false, pushed: 0 };
+export async function syncOnce(s: Settings, token: string, user: string | null): Promise<SyncResult> {
+  const result: SyncResult = { user: '', coursesChanged: false, progressChanged: false, pushed: 0 };
 
   const tag = await DB.getMeta('snapshot_etag');
   const content = await call(s.origin, '/knowledge/snapshot', {
@@ -51,10 +52,13 @@ export async function syncOnce(s: Settings, token: string): Promise<SyncResult> 
   }
 
   const sending = await DB.pending();
-  const since = JSON.parse((await DB.getMeta('sync_cursor')) ?? '{}') as Record<string, number>;
+  const since = JSON.parse((await DB.getMeta(DB.cursorKey(user))) ?? '{}') as Record<string, number>;
   const records = sending.map((one) => ({ ...JSON.parse(one.line), kind: KIND[one.table], client_id: one.client_id }));
   const upload: Upload = { device: s.device, records, since };
   const answer = (await (await call(s.origin, '/knowledge/sync', { token, body: upload })).json()) as Synced;
+  result.user = answer.user_id;
+  // a copy keyed to another user must not take this log's records: the next launch keys it again
+  if (user && user !== answer.user_id) throw new Error('the token names another user than this copy');
 
   // a refused record names content the engine does not hold, and sending it again changes nothing
   await DB.markSent(sending);
@@ -66,6 +70,6 @@ export async function syncOnce(s: Settings, token: string): Promise<SyncResult> 
       result.progressChanged = true;
     }
   }
-  await DB.setMeta('sync_cursor', JSON.stringify(answer.cursor));
+  await DB.setMeta(DB.cursorKey(answer.user_id), JSON.stringify(answer.cursor));
   return result;
 }

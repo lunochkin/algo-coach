@@ -3041,6 +3041,10 @@
       },
       "Synced": {
         "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
           "stored": {
             "type": "integer",
             "title": "Stored",
@@ -3078,6 +3082,9 @@
           }
         },
         "type": "object",
+        "required": [
+          "user_id"
+        ],
         "title": "Synced"
       },
       "TechniqueRow": {

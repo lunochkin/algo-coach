@@ -73,6 +73,17 @@ def test_the_code_and_the_verifier_exchange_for_a_token(database, monkeypatch):
     assert tuple(stored) == (hashed(answer.json()["token"]), "phone")
 
 
+def test_the_token_names_its_user(database, monkeypatch):
+    """The app keys its copy of the log to the user: `knowledge.md`."""
+    client, response = returned(database, monkeypatch)
+
+    issued = exchanged(client, code_in(response)).json()
+
+    with database.connect() as conn:
+        (owner,) = conn.execute(select(app_tokens.c.user_id)).scalars().all()
+    assert issued["user_id"] == owner
+
+
 def test_a_code_without_its_verifier_signs_no_app_in(database, monkeypatch):
     """Another app claiming the scheme receives the code, and the verifier is
     what it lacks."""

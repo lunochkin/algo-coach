@@ -30,7 +30,8 @@ export default function LoginScreen() {
       if (origin.trim() !== st.settings.origin) {
         await st.updateSettings({ ...st.settings, origin: origin.trim() });
       }
-      await st.updateToken(await signIn(origin.trim(), provider, st.settings.device));
+      const { token, user } = await signIn(origin.trim(), provider, st.settings.device);
+      await st.signedIn(token, user);
       st.requestSync(0);
       router.replace('/');
     } catch (e) {

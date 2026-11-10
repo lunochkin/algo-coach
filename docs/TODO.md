@@ -33,7 +33,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       Problems page. `level` now names a question's depth
 - [x] Write the clients' knowledge store into `knowledge.md`: one copy of
       the snapshot and the log on the device, an outbox, and when each syncs
-- [ ] Key the native app's copy to the signed-in user, and have sign-out
+- [x] Key the native app's copy to the signed-in user, and have sign-out
       send the outbox and delete the copy. Pending rows outlive a sign-out
       today
 - [ ] Add a section for the knowledge modules to the web's navigation, and

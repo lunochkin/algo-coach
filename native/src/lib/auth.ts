@@ -22,7 +22,11 @@ const base64url = (bytes: Uint8Array) =>
  * for the app's token. PKCE binds the code to this app: another app claiming the
  * scheme receives the code without the verifier.
  */
-export async function signIn(origin: string, provider: Provider, device: string): Promise<string> {
+export async function signIn(
+  origin: string,
+  provider: Provider,
+  device: string,
+): Promise<{ token: string; user: string }> {
   const verifier = base64url(Crypto.getRandomBytes(48));
   const digest = await Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA256, new TextEncoder().encode(verifier));
   const challenge = base64url(new Uint8Array(digest));
@@ -35,7 +39,8 @@ export async function signIn(origin: string, provider: Provider, device: string)
   const code = query.get('code');
   if (!code) throw new Error('sign-in returned no code');
   const answer = await call(origin, '/auth/app/token', { body: { code, verifier, device } });
-  return ((await answer.json()) as { token: string }).token;
+  const issued = (await answer.json()) as { token: string; user_id: string };
+  return { token: issued.token, user: issued.user_id };
 }
 
 export async function signOut(origin: string, token: string): Promise<void> {

@@ -13,9 +13,9 @@ OTHER = "u-b71e03"
 
 def app_for(database, user_id: str, device: str = "phone") -> str:
     named(database, user_id)
-    token = exchanged(database, issued(database, user_id, CHALLENGE), VERIFIER, device)
-    assert token is not None
-    return token
+    found = exchanged(database, issued(database, user_id, CHALLENGE), VERIFIER, device)
+    assert found is not None
+    return found[0]
 
 
 def listed(client) -> list[dict]:
