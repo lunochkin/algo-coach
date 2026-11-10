@@ -144,14 +144,6 @@ def test_the_token_reads_the_knowledge_endpoints(database, monkeypatch):
     assert response.status_code == 200
 
 
-def test_the_token_reaches_nothing_else_of_the_account(database, monkeypatch):
-    """A token taken from a lost phone reads and writes the knowledge log, and
-    nothing else."""
-    client, token = signed_in_app(database, monkeypatch)
-
-    assert client.get("/api/board", headers={"authorization": f"Bearer {token}"}).status_code == 401
-
-
 def test_signing_out_in_the_app_revokes_its_token(database, monkeypatch):
     client, token = signed_in_app(database, monkeypatch)
     bearer = {"authorization": f"Bearer {token}", **JSON}

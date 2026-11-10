@@ -5,14 +5,14 @@ from typing import Any
 from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel, Field
 
-from algo_coach.api.context import KnowledgeUserId, Root
+from algo_coach.api.context import Root, UserId
 from algo_coach.knowledge import Synced, snapshot, sync
 
 router = APIRouter(prefix="/knowledge")
 
 
 @router.get("/snapshot")
-def content(request: Request, root: Root, _user_id: KnowledgeUserId) -> Response:
+def content(request: Request, root: Root, _user_id: UserId) -> Response:
     """Every live module, in the shape learn's app reads: `knowledge.md`. The
     app syncs often and the content moves only at a seed, so an unchanged
     snapshot answers 304."""
@@ -31,5 +31,5 @@ class Upload(BaseModel):
 
 
 @router.post("/sync")
-def synced(root: Root, user_id: KnowledgeUserId, upload: Upload) -> Synced:
+def synced(root: Root, user_id: UserId, upload: Upload) -> Synced:
     return sync(root, user_id, upload.device, upload.records, upload.since)

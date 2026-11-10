@@ -67,11 +67,17 @@ def test_an_idle_app_is_no_longer_listed(database):
     assert listed(browsing(database, USER)) == []
 
 
-def test_an_app_s_token_cannot_list_or_revoke(database):
-    """An app token reaches the knowledge endpoints alone: `README.md`."""
+def test_an_app_s_token_lists_and_revokes_apps(database):
+    """A token reaches what a session reaches, the account's included:
+    `README.md`."""
     token = app_for(database, USER)
+    other = app_for(database, USER, device="tablet")
     client = browsing(database, USER)
     client.cookies.clear()
     bearer = {"authorization": f"Bearer {token}"}
 
-    assert client.get("/api/apps", headers=bearer).status_code == 401
+    devices = {app["device"]: app["id"] for app in client.get("/api/apps", headers=bearer).json()}
+    assert set(devices) == {"phone", "tablet"}
+    assert client.delete(f"/api/apps/{devices['tablet']}", headers=bearer).status_code == 204
+    cut_off = client.get("/api/knowledge/snapshot", headers={"authorization": f"Bearer {other}"})
+    assert cut_off.status_code == 401

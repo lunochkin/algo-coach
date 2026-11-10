@@ -57,13 +57,12 @@ def signed_out(request: Request, root: Root) -> Response:
 
 @router.get("/apps")
 def apps(root: Root, user_id: UserId) -> list[SignedInApp]:
-    # the pages' session alone: an app's token reaches the knowledge endpoints
     return signed_in_apps(root, user_id)
 
 
 @router.delete("/apps/{app_id}", status_code=204)
 def revoke_app(app_id: str, root: Root, user_id: UserId) -> Response:
-    # a lost phone is cut off here, where its own sign-out cannot reach
+    # a lost phone is cut off here, from any other signed-in client
     if not app_revoked_by_id(root, user_id, app_id):
         raise HTTPException(404, "no app of yours carries this id")
     return Response(status_code=204)
