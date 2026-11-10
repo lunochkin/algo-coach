@@ -18,6 +18,8 @@ import { TechniquePage } from '@/pages/TechniquePage'
 // loaded when first opened: the editor and the markdown with its math are most
 // of the bundle, and the board needs neither
 const CardPage = lazy(() => import('@/pages/CardPage').then((m) => ({ default: m.CardPage })))
+// lazy, as the card is: a lesson the queue offers reads through the Markdown renderer
+const QueuePage = lazy(() => import('@/pages/QueuePage').then((m) => ({ default: m.QueuePage })))
 const RecallPage = lazy(() =>
   import('@/pages/RecallPage').then((m) => ({ default: m.RecallPage })),
 )
@@ -68,6 +70,7 @@ function App() {
             <Route path="problems/:problemId" element={<ProblemPage />} />
             <Route path="sittings/:sittingId" element={<SittingPage />} />
             <Route path="knowledge" element={<KnowledgePage />} />
+            <Route path="knowledge/queue" element={<QueuePage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path={LOGIN} element={<LoginPage />} />
             <Route path={PRIVACY} element={<PrivacyPage />} />

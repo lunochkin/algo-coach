@@ -4,10 +4,10 @@ import { Link } from 'react-router'
 
 import type { Recalled, Template } from '@/api/client'
 import { Markdown } from '@/components/Markdown'
+import { PythonCode } from '@/components/PythonCode'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { lastAt } from '@/lib/format'
-import { pieces } from '@/lib/python'
 
 // the form stays hidden until it is asked for: `content.md` gives why a form
 // is worth deriving before it is read. The trigger reads either way, since it
@@ -45,15 +45,7 @@ export function TemplatePanel({
         <Markdown>{template.trigger}</Markdown>
 
         {revealed ? (
-          <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">
-            <code>
-              {pieces(template.code).map((piece, index) => (
-                <span key={index} className={piece.token}>
-                  {piece.text}
-                </span>
-              ))}
-            </code>
-          </pre>
+          <PythonCode code={template.code} />
         ) : (
           // the press is the cover: it names the length and nothing of the
           // form, and a reader decides from that whether to try recalling it

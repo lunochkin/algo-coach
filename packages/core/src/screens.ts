@@ -96,3 +96,19 @@ export function emptyContinue(o: { blocked: boolean; newLimit: number; focus: Fo
   if (o.focus) return { notice: 'Nothing weak, due or new in the focus.', action: { kind: 'clear-focus', label: 'Clear focus' } };
   return { notice: 'Nothing due and nothing new unlocked. Open a module to start a queue there.', action: null };
 }
+
+const QUEUE_TITLE: Record<string, string> = { next: 'Continue', review: 'Review', drill: 'Filtered' };
+
+/** A running queue's title, by its mode. */
+export function queueTitle(mode: string): string {
+  return QUEUE_TITLE[mode] ?? mode;
+}
+
+/** What a queue left once it stops: a stop the user pressed, or nothing more ready. */
+export function queueSummary(o: { answered: number; correct: number; introduced: number; stopped: boolean }) {
+  const accuracy = o.answered ? Math.round((100 * o.correct) / o.answered) : 0;
+  return {
+    title: o.stopped ? 'Stopped' : 'Nothing more ready',
+    line: `Accuracy ${accuracy}% · ${o.introduced} new introduced`,
+  };
+}

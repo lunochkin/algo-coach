@@ -1,11 +1,14 @@
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 
 import {
   bySavedOrder,
   continueCounts,
   continueLine,
   continuePlan,
+  emptyContinue,
+  type EmptyContinue,
   focusLabel,
   focusView,
   moduleRows,
@@ -37,6 +40,8 @@ const PART_TONE: Record<FocusPart, string> = {
 export function KnowledgePage() {
   const k = useKnowledge()
   const { catalog, focus, board, newLimit, order, certExams, now } = useLearner()
+  const navigate = useNavigate()
+  const [empty, setEmpty] = useState<EmptyContinue | null>(null)
 
   const home = useMemo(() => {
     const all = board(null)
@@ -52,6 +57,20 @@ export function KnowledgePage() {
   function setFocus(f: Focus | null) {
     const line = { course: f?.course ?? null, topic: f?.topic ?? null, sub: f?.sub ?? null, strict: !!f?.strict }
     void k.add('focus', f?.cert ? { ...line, cert: f.cert } : line)
+  }
+
+  // Continue starts the next queue, or says why nothing is ready and offers the one act that changes that
+  function start(counts: { empty: boolean; blocked: boolean }) {
+    if (!counts.empty) return navigate('/knowledge/queue?mode=next')
+    setEmpty(emptyContinue({ blocked: counts.blocked, newLimit, focus }))
+  }
+
+  async function act(kind: string) {
+    setEmpty(null)
+    if (kind === 'raise') {
+      await k.add('raise', { n: NEW_STEP })
+      navigate('/knowledge/queue?mode=next')
+    } else if (kind === 'clear-focus') setFocus(null)
   }
 
   function move(rows: ModuleRow[], from: number, to: number) {
@@ -121,13 +140,33 @@ export function KnowledgePage() {
             )}
 
             <div className="space-y-1">
-              {/* the press starts the next queue once `/knowledge/queue` serves one */}
-              <Button disabled>Continue</Button>
+              <Button disabled={!counts} onClick={() => counts && start(counts)}>
+                Continue
+              </Button>
               {counts && (
                 <p className="text-meta text-muted-foreground">
                   {continueLine(counts, !!focus?.strict)}
-                  {counts.outside > 0 && ` · ${counts.outside} waiting outside`}
+                  {counts.outside > 0 && (
+                    <>
+                      {' · '}
+                      {/* a press serves the reviews a strict focus leaves out */}
+                      <Link to="/knowledge/queue?mode=review" className="underline underline-offset-2">
+                        {counts.outside} waiting outside
+                      </Link>
+                    </>
+                  )}
                 </p>
+              )}
+              {empty && (
+                <div className="flex flex-wrap items-center gap-stack text-meta" role="status">
+                  <span>{empty.notice}</span>
+                  {/* the certifications page arrives with its own item */}
+                  {empty.action && empty.action.kind !== 'certs' && (
+                    <Button variant="outline" size="sm" onClick={() => void act(empty.action!.kind)}>
+                      {empty.action.label}
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
 

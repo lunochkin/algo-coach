@@ -1,0 +1,273 @@
+import { X } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
+
+import {
+  Board,
+  continuePlan,
+  isLessonItem,
+  makeAttempt,
+  NEW_STEP,
+  offersRaise,
+  queueLine,
+  queueSummary,
+  queueTitle,
+  questionHead,
+  reviewQueue,
+  type AttemptRecord,
+  type Catalog,
+  type LessonItem,
+  type Queue,
+  type Question,
+  type Result,
+  type Status,
+} from '@algo-coach/core'
+
+import { Markdown } from '@/components/Markdown'
+import { Panel } from '@/components/Panel'
+import { Button } from '@/components/ui/button'
+import { Ask } from '@/knowledge/Ask'
+import { linesOf, useKnowledge } from '@/knowledge/context'
+import { useLearner } from '@/knowledge/learner'
+
+type Mode = 'next' | 'review'
+type Current = { q: Question; tag: Status; fresh: boolean; early: boolean } | { lesson: LessonItem }
+
+const HOME = '/knowledge'
+
+// the query names the queue, and a reload starts one of the same mode again:
+// `pages.md`, The knowledge pages
+export function QueuePage() {
+  const [params] = useSearchParams()
+  const mode: Mode = params.get('mode') === 'review' ? 'review' : 'next'
+  const learner = useLearner()
+  if (!learner.ready || !learner.catalog) return <p className="text-meta text-muted-foreground">Loading the queue…</p>
+  return <Running key={mode} mode={mode} catalog={learner.catalog} learner={learner} />
+}
+
+type Learner = ReturnType<typeof useLearner>
+
+function Running({ mode, catalog, learner }: { mode: Mode; catalog: Catalog; learner: Learner }) {
+  const k = useKnowledge()
+  const navigate = useNavigate()
+  // fixed when the queue starts: a raise moves its limit, and the picks read the log as it grows
+  const [start] = useState(() => {
+    if (mode === 'review') {
+      const all = learner.board(null)
+      return all ? { queue: reviewQueue(all, ['weak', 'due']), course: null, include: null } : null
+    }
+    const plan = continuePlan(learner.board, learner.focus, null, learner.newLimit)
+    return plan && { queue: plan.queue, course: plan.course, include: plan.include }
+  })
+  const queue: Queue | null = start?.queue ?? null
+
+  // the answers of this queue, so a pick never waits for the copy to catch up
+  const [mine, setMine] = useState<AttemptRecord[]>([])
+  const board = useCallback((): Board | null => {
+    if (!start) return null
+    const held = linesOf<AttemptRecord>(k.records, 'attempt')
+    const known = new Set(held.map((a) => `${a.t}|${a.course}|${a.id}`))
+    const extra = mine.filter((a) => !known.has(`${a.t}|${a.course}|${a.id}`))
+    return Board.build(catalog, [...held, ...extra], start.course, start.include)
+  }, [catalog, k.records, start, mine])
+
+  const pickOne = useCallback((): Current | null => {
+    const b = board()
+    const now = Date.now()
+    const picked = b && queue ? queue.pick(b, now) : null
+    if (!picked || !b || !queue) return null
+    if (isLessonItem(picked)) return { lesson: picked }
+    return { q: picked, tag: b.status(picked, now), fresh: !b.attempts(picked).length, early: queue.early(b, picked, now) }
+  }, [board, queue])
+
+  const [current, setCurrent] = useState<Current | null>(() => pickOne())
+  const [shown, setShown] = useState(0) // keys Ask, so each pick starts clean
+  const [results, setResults] = useState<Result[]>([])
+  const [introduced, setIntroduced] = useState(0)
+  const [done, setDone] = useState(!current)
+  const ended = useRef(false)
+  const answered = useRef<Result[]>([])
+
+  // stopping stores the stint; a queue with no answer stores none
+  const end = useCallback(() => {
+    if (ended.current) return
+    ended.current = true
+    const rs = answered.current
+    if (rs.length) void k.add('session', { mode, score: rs.filter((r) => r.correct).length, n: rs.length })
+  }, [k, mode])
+
+  // leaving through the navigation stops the queue the same way. The effect
+  // runs at mount and unmount alone: `end` changes with every record the copy
+  // takes, and a cleanup run on each change stored a stint per record. The
+  // mount reopens the queue, since a development build mounts twice
+  const leave = useRef(end)
+  useEffect(() => {
+    leave.current = end
+  })
+  useEffect(() => {
+    ended.current = false
+    return () => leave.current()
+  }, [])
+
+  function onAnswered(r: Result) {
+    const rec = makeAttempt(new Date().toISOString(), r.q.course, r.q.id, r.correct, r.guess, r.grade, r.card)
+    setMine((xs) => [...xs, rec])
+    void k.add('attempt', { ...rec })
+    answered.current = [...answered.current, r]
+    setResults(answered.current)
+    if (current && 'q' in current && current.fresh) setIntroduced((n) => n + 1)
+  }
+
+  function next() {
+    const p = pickOne()
+    setCurrent(p)
+    setShown((n) => n + 1)
+    if (!p) {
+      end()
+      setDone(true)
+    }
+  }
+
+  function stop() {
+    end()
+    setDone(true)
+  }
+
+  function moreNew() {
+    if (!queue) return
+    queue.raise(NEW_STEP)
+    // today's limit, so the home and the next queue count the raise too
+    void k.add('raise', { n: NEW_STEP })
+    if (!current) {
+      const p = pickOne()
+      if (p) {
+        ended.current = false
+        setDone(false)
+        setCurrent(p)
+        setShown((n) => n + 1)
+      }
+    }
+  }
+
+  const b = board()
+  const now = learner.now
+  const counts = b && queue
+    ? { reviews: queue.reviews(b, now).length, learning: queue.stepping(b, now).count, newLeft: queue.newLeft(b, now) }
+    : { reviews: 0, learning: 0, newLeft: 0 }
+  const unseenLeft = !!b && !!queue && queue.scope.some((q) => !b.attempts(q).length)
+  const score = results.filter((r) => r.correct).length
+  const course = current && 'q' in current ? catalog.courses.find((c) => c.slug === current.q.course) : undefined
+
+  return (
+    <section className="space-y-section">
+      <header className="flex items-center gap-stack">
+        <h1 className="flex-1 text-title font-semibold">{done ? 'Done' : queueTitle(mode)}</h1>
+        <span className="text-meta tabular-nums">
+          {score}/{results.length}
+        </span>
+        {!done && (
+          <Button variant="outline" size="sm" onClick={stop}>
+            <X />
+            Stop
+          </Button>
+        )}
+      </header>
+      <div className="flex flex-wrap items-center gap-stack text-meta text-muted-foreground">
+        <span className="flex-1">{queueLine(counts)}</span>
+        {!done && offersRaise(mode, counts.newLeft, unseenLeft) && (
+          <Button variant="ghost" size="sm" onClick={moreNew}>
+            +{NEW_STEP} new
+          </Button>
+        )}
+      </div>
+
+      {!done && current && 'lesson' in current ? (
+        <LessonStop
+          item={current.lesson}
+          read={!!catalog.lessonsDone?.has(`${current.lesson.course.slug}:${current.lesson.lesson.slug}`)}
+          onNext={next}
+        />
+      ) : !done && current && 'q' in current ? (
+        <Ask
+          key={shown}
+          q={current.q}
+          course={course}
+          head={questionHead(course, catalog.rules, current.q, current.tag, current.early)}
+          onAnswered={onAnswered}
+          onNext={next}
+        />
+      ) : (
+        <Summary
+          answered={results.length}
+          correct={score}
+          introduced={introduced}
+          stopped={!!current}
+          left={queueLine(counts)}
+          onDone={() => navigate(HOME)}
+        />
+      )}
+    </section>
+  )
+}
+
+function Summary(props: {
+  answered: number
+  correct: number
+  introduced: number
+  stopped: boolean
+  left: string
+  onDone: () => void
+}) {
+  const summary = queueSummary(props)
+  return (
+    <Panel>
+      <p className="text-heading font-medium">{summary.title}</p>
+      <p>
+        <span className="text-title tabular-nums">{props.answered}</span> answered
+      </p>
+      <p>{summary.line}</p>
+      <p className="text-meta text-muted-foreground">Left: {props.left}</p>
+      <div>
+        <Button onClick={props.onDone}>Done</Button>
+      </div>
+    </Panel>
+  )
+}
+
+// a lesson the queue offers reads here: the lesson pages arrive with their own item
+function LessonStop(props: { item: LessonItem; read: boolean; onNext: () => void }) {
+  const { item, onNext } = props
+  const k = useKnowledge()
+  const [read, setRead] = useState(props.read)
+  const body = item.course.lessonBodies[item.lesson.slug] ?? ''
+
+  function markRead() {
+    void k.add('lesson', { course: item.course.slug, lesson: item.lesson.slug, status: 'done' })
+    setRead(true)
+  }
+
+  return (
+    <div className="space-y-stack">
+      <p className="text-meta text-brand-deep">New lesson</p>
+      <h2 className="text-heading font-medium">{item.lesson.title}</h2>
+      <p className="text-meta text-muted-foreground">
+        {read
+          ? 'Read. New questions on it are open again.'
+          : 'You have tried a few questions on this. Read it before more new ones; reviews are not affected.'}
+      </p>
+      <Markdown>{body}</Markdown>
+      <div className="flex gap-stack">
+        {read ? (
+          <Button onClick={onNext}>Next</Button>
+        ) : (
+          <>
+            <Button onClick={markRead}>Mark read</Button>
+            <Button variant="ghost" onClick={onNext}>
+              Later
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}

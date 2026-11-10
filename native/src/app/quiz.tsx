@@ -30,6 +30,8 @@ import {
   type Question,
   questionHead,
   queueLine,
+  queueSummary,
+  queueTitle,
   type Result,
   splitGuess,
   type Status,
@@ -90,8 +92,6 @@ function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number
     </View>
   );
 }
-
-const TITLES: Record<string, string> = { next: 'Continue', review: 'Review', drill: 'Practice' };
 
 /** A continuous queue: each question is picked when it is needed, from what is ready then. */
 function QueueQuiz({ s }: { s: QueueSession }) {
@@ -162,7 +162,7 @@ function QueueQuiz({ s }: { s: QueueSession }) {
     if (!p) void end();
   };
   const moreNew = () => {
-    queue.limit += NEW_STEP;
+    queue.raise(NEW_STEP);
     // today's limit, so Home and the next queue count the raise too
     void st.raiseNew();
     if (!current) {
@@ -185,12 +185,13 @@ function QueueQuiz({ s }: { s: QueueSession }) {
   const unseenLeft = !!b && queue.scope.some((q) => !b.attempts(q).length);
   const rs = results.current;
   const score = rs.filter((r) => r.correct).length;
+  const summary = queueSummary({ answered: rs.length, correct: score, introduced: introduced.current, stopped: !!current });
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.Action icon="close" onPress={quit} accessibilityLabel="Stop" />
-        <Appbar.Content title={done ? 'Done' : TITLES[s.mode] ?? s.mode} />
+        <Appbar.Content title={done ? 'Done' : queueTitle(s.mode)} />
         <Text variant="labelLarge" style={{ marginRight: 16 }}>{`${score}/${rs.length}`}</Text>
       </Appbar.Header>
       <View style={[styles.row, { paddingHorizontal: 16, minHeight: 40 }]}>
@@ -220,13 +221,11 @@ function QueueQuiz({ s }: { s: QueueSession }) {
       ) : (
         <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
           <View style={{ alignItems: 'center', paddingVertical: 24, gap: 4 }}>
-            <Text variant="titleMedium">{current ? 'Stopped' : 'Nothing more ready'}</Text>
+            <Text variant="titleMedium">{summary.title}</Text>
             <Text variant="displayMedium">{`${rs.length}`}</Text>
             <Text variant="bodyMedium">answered</Text>
           </View>
-          <Text variant="bodyLarge">
-            {`Accuracy ${rs.length ? Math.round((100 * score) / rs.length) : 0}% · ${introduced.current} new introduced`}
-          </Text>
+          <Text variant="bodyLarge">{summary.line}</Text>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
             {`Left: ${left}`}
           </Text>

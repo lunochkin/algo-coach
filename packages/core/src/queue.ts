@@ -89,6 +89,11 @@ export class Queue {
     this.offsetMinutes = offsetMinutes;
   }
 
+  /** Lets this queue serve `n` more new questions today, as a raise does. */
+  raise(n: number) {
+    this.limit += n;
+  }
+
   newLeft(b: Board, now: number): number {
     return Math.max(0, this.limit - newToday(b, now, this.offsetMinutes));
   }

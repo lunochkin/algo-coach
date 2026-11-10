@@ -11,6 +11,8 @@ import {
   offersRaise,
   questionHead,
   queueLine,
+  queueSummary,
+  queueTitle,
 } from './index';
 
 const mk = (id: string, sub: string) => ({
@@ -128,5 +130,22 @@ describe('empty Continue', () => {
 
   it('offers nothing without a focus', () => {
     expect(emptyContinue({ blocked: false, newLimit: 10, focus: null }).action).toBeNull();
+  });
+});
+
+describe('a stopped queue', () => {
+  it('names why it stopped, and how it went', () => {
+    expect(queueSummary({ answered: 4, correct: 3, introduced: 2, stopped: true })).toEqual({
+      title: 'Stopped',
+      line: 'Accuracy 75% · 2 new introduced',
+    });
+  });
+
+  it('reads an empty queue as nothing more ready', () => {
+    expect(queueSummary({ answered: 0, correct: 0, introduced: 0, stopped: false }).title).toBe('Nothing more ready');
+  });
+
+  it('titles the filtered queue by its own name, not the board section', () => {
+    expect(queueTitle('drill')).toBe('Filtered');
   });
 });

@@ -64,7 +64,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Read the web's knowledge home from the copy: the counts line under
       Continue, the focus panel with its clear, strict and raise presses,
       and each module's next-up row. The phone shows the same counts
-- [ ] Serve the next queue and the review queue at `/knowledge/queue` from
+- [x] Serve the next queue and the review queue at `/knowledge/queue` from
       `packages/core`, started by Continue, with its empty notice, and by
       the reviews waiting outside a strict focus. An answer given there
       reaches the phone at its sync

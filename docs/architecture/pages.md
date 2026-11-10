@@ -243,6 +243,9 @@ platforms.
 - **An answered question offers its detail on a press**: how it works, the
   example, the pitfalls, the version notes and the diagram, each where the
   question carries one.
+- **A lesson the queue offers reads inside the queue**, with Mark read and
+  Later as its presses. The reader then meets the lesson where the queue
+  holds back its new questions, without leaving the queue to find it.
 - **An open question reveals its key on a press.** The user then ticks the
   points recalled, the traps fallen into, and whether they said anything else
   wrong. `knowledge.md` gives the grade the ticks make.

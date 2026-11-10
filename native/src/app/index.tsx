@@ -94,7 +94,7 @@ export default function Home() {
       const run = {
         raise: () => {
           void st.raiseNew();
-          cont.queue.limit += NEW_STEP;
+          cont.queue.raise(NEW_STEP);
           startQueue(st, 'next', cont.queue, cont.course, cont.include);
         },
         certs: () => router.push('/certs'),
