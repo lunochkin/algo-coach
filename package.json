@@ -13,6 +13,8 @@
     "postcss-selector-parser": "^6.1.5",
     "openapi-typescript": {
       "typescript": "~6.0.3"
-    }
+    },
+    "minimatch@^10": "^11.0.6",
+    "glob@^13": "^14.0.4"
   }
 }
