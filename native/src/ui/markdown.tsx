@@ -22,6 +22,8 @@ function InlineCode({ text, style, size }: InlineCodeProps) {
   );
 }
 
+const soft = (text: string | ReactNode[]) => (typeof text === 'string' ? text.replace(/\n/g, ' ') : text);
+
 /** Code blocks in the app's monospace block, never wrapped. */
 export class CodeRenderer extends Renderer {
   code(text: string, _language?: string, _container?: ViewStyle, _style?: TextStyle): ReactNode {
@@ -37,7 +39,16 @@ export class CodeRenderer extends Renderer {
   // a newline inside a paragraph is a soft break, which markdown reads as a
   // space: a hard break reaches `br` instead
   text(text: string | ReactNode[], style?: TextStyle): ReactNode {
-    return super.text(typeof text === 'string' ? text.replace(/\n/g, ' ') : text, style);
+    return super.text(soft(text), style);
+  }
+
+  // emphasis whose only child is text reaches here unparsed, newline and all
+  em(children: string | ReactNode[], style?: TextStyle): ReactNode {
+    return super.em(soft(children), style);
+  }
+
+  strong(children: string | ReactNode[], style?: TextStyle): ReactNode {
+    return super.strong(soft(children), style);
   }
 
   heading(children: string | ReactNode[], style?: TextStyle): ReactNode {
