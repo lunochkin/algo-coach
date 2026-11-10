@@ -97,6 +97,10 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       home's Exam press
 - [x] Add the sync's state, a sync press and the archived modules' restore
       to the web's settings page, as the phone's Settings holds them
+- [ ] Open a certificate node's conditions and a lesson node's lesson from
+      the web's map, as the phone's map does
+- [ ] Correct the inventory's sign-out row: the phone signs out from its
+      account menu as well as Settings
 - [x] Name one review and one new question in the singular in the core's
       count lines. Both clients read "1 reviews" today
 
@@ -111,7 +115,14 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       map, with the focus, the status and the start sheet on its four
       scopes. Stats, the row menu and the course chips go
 - [x] List the phone's lessons by module, as the web does
-- [ ] Serve the board and the cards in the native app
+- [ ] Decide whether an app token may read the board's and the cards'
+      endpoints, and write the choice into `README.md`. The phone's board
+      and cards wait on it
+- [ ] Serve the board on the phone as a Practice tab: the cards in progress
+      and the techniques by staleness, read alone, since a sitting stays on
+      the web
+- [ ] Serve the cards on the phone as a Cards tab: the list and a card's
+      trigger, brief and templates, hidden until revealed
 
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both

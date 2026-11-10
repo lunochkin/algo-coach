@@ -385,7 +385,7 @@ what it offers. The inventory is the list both clients build to.
 | The lessons | `/knowledge/lessons` | Lessons | same |
 | A lesson | `/knowledge/lessons/:module/:lesson` | Lesson | same |
 | The certifications | `/knowledge/certifications` | Certifications | same |
-| A certification's conditions | a dialog on the certifications | a sheet on Certifications and Map | same |
+| A certification's conditions | a dialog on the certifications | a sheet on Certifications and Map | to fix |
 | The settings | `/settings` | Settings | same |
 | The signed-in apps | a dialog from the account menu | none | web only |
 | The login | `/login` | Login | same |
@@ -426,8 +426,9 @@ what it offers. The inventory is the list both clients build to.
   the sitting.** Each exists to pick a problem, and a pick opens a sitting,
   so each reaches the phone with the sitting's trigger.
 - **The board, the cards and a card are web for now.** Each reads where the
-  user's practice stands without writing code. The item serving the board and
-  the cards in the native app is the trigger.
+  user's practice stands without writing code. The trigger is the phone's
+  Practice and Cards tabs, which wait on whether an app token may read the
+  board's and the cards' endpoints.
 - **The signed-in apps are web only.** An app token reaches the knowledge
   endpoints alone, as `README.md` gives, so a phone cannot list or revoke
   apps. A lost phone is cut off from the web, where its own token cannot
@@ -451,9 +452,10 @@ what it offers. The inventory is the list both clients build to.
 
 ### To fix
 
-No difference is open. A row a later change marks `to fix` is listed here
-with what holds now and the change it needs.
-
+- **A certification's conditions from the map.** The phone's map opens a
+  certificate node's conditions, and a lesson node's lesson on Read. The
+  web's map names a certificate's states and a lesson's lines alone. The
+  web's map gains both.
 ## A page's areas
 
 - **A page carries a header and a body.** The header holds the way back, the
