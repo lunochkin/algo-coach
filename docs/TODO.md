@@ -148,8 +148,18 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 
 ### The phone beside the web
 
-- [ ] Audit every knowledge screen and act the inventory marks `same` against
+- [x] Audit every knowledge screen and act the inventory marks `same` against
       the web, and list each difference found under `pages.md` To fix
+- [ ] Move every sentence a knowledge screen says into `packages/core`, in the
+      web's wording, and read it on both clients. One copy closes the wording
+      entry under `pages.md` To fix
+- [ ] Fix the phone's side of `pages.md` To fix: the home, a module and its
+      map, the certifications, the settings, the login, the lessons and a
+      lesson. Each row reads `same` once its entries are gone
+- [ ] Fix the web's side of `pages.md` To fix: the module's summary line, the
+      paused mark on an exam's module, the raise after a queue ends, a failed
+      sync on the home, the certifications' coverage, and the exam size saved
+      at the start
 - [ ] Add a test that every web route and every native screen file has an
       inventory row, so a new screen cannot ship unlisted
 - [ ] Serve the problem listing on the phone as a Problems tab: the technique

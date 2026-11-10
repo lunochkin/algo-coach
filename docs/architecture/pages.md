@@ -389,20 +389,20 @@ what it offers. The inventory is the list both clients build to.
 | A card's trigger, brief and templates | `/cards/:slug` | Card | same |
 | A card's ladder, probes and run | `/cards/:slug` | none | web for now |
 | A recall | `/cards/:slug/recall/:template` | none | web for now |
-| The knowledge home | `/knowledge` | Home | same |
-| A module | `/knowledge/modules/:module` | Module | same |
+| The knowledge home | `/knowledge` | Home | to fix |
+| A module | `/knowledge/modules/:module` | Module | to fix |
 | The start sheet | a dialog on the module page | a dialog on Module | same |
-| A queue | `/knowledge/queue` | the quiz screen | same |
+| A queue | `/knowledge/queue` | the quiz screen | to fix |
 | A lesson a queue offers | a stop opening the lesson page | a stop opening the lesson screen | by platform |
-| A level exam's choices | `/knowledge/exam` | Exam | same |
+| A level exam's choices | `/knowledge/exam` | Exam | to fix |
 | An exam and its results | `/knowledge/exam` | the quiz screen | by platform |
-| The lessons | `/knowledge/lessons` | Lessons | same |
-| A lesson | `/knowledge/lessons/:module/:lesson` | Lesson | same |
-| The certifications | `/knowledge/certifications` | Certifications | same |
+| The lessons | `/knowledge/lessons` | Lessons | to fix |
+| A lesson | `/knowledge/lessons/:module/:lesson` | Lesson | to fix |
+| The certifications | `/knowledge/certifications` | Certifications | to fix |
 | A certification's conditions | a dialog on the certifications and the map | a sheet on Certifications and Map | same |
-| The settings | `/settings` | Settings | same |
-| The signed-in devices | a dialog from the account menu | a screen from the account menu | same |
-| The login | `/login` | Login | same |
+| The settings | `/settings` | Settings | to fix |
+| The signed-in devices | a dialog from the account menu | a screen from the account menu | to fix |
+| The login | `/login` | Login | to fix |
 | The privacy policy | `/privacy` | none | web only |
 | The gallery | `/gallery`, in development | none | web only |
 
@@ -412,8 +412,8 @@ what it offers. The inventory is the list both clients build to.
 |---|---|---|---|
 | Continue | the home | Home | same |
 | Review what a strict focus leaves out | the home's counts line | Home's counts line | same |
-| Raise today's limit | the focus panel and a queue | the focus card and a queue | same |
-| Clear the focus, or make it strict | the focus panel | the focus card | same |
+| Raise today's limit | the focus panel and a queue | the focus card and a queue | to fix |
+| Clear the focus, or make it strict | the focus panel | the focus card | to fix |
 | Aim the focus at a module | the module page | Module | same |
 | Aim the focus at a topic | the module page | Module | same |
 | Aim the focus at a subtopic | the module page | Module, its groups and its map | same |
@@ -422,15 +422,15 @@ what it offers. The inventory is the list both clients build to.
 | Start a filtered queue on a subtopic | the module page | Module, its groups and its map | same |
 | Start a filtered queue on a topic or a module | the module page | Module | same |
 | Order the modules | up and down presses | a drag | by platform |
-| Pause, resume or archive a module | the module page | Module | same |
-| Restore an archived module | the settings page | Settings | same |
+| Pause, resume or archive a module | the module page | Module | to fix |
+| Restore an archived module | the settings page | Settings | to fix |
 | Open a lesson ready to read, or a certification ready for its exam | the home | Home | same |
-| Mark a lesson read or unread | the lesson page | Lesson | same |
-| Set the daily limit and the exam size | the settings page | Settings | same |
-| Set the exam size for one exam | the exam page | Exam | same |
-| Read the sync's state, and sync now | the settings page | Settings, and Home's footer | same |
-| Sign out, naming unsent records | the account menu and the settings page | the account menu and Settings | same |
-| Revoke a signed-in device | the signed-in devices | the signed-in devices | same |
+| Mark a lesson read or unread | the lesson page | Lesson | to fix |
+| Set the daily limit and the exam size | the settings page | Settings | to fix |
+| Set the exam size for one exam | the exam page | Exam | to fix |
+| Read the sync's state, and sync now | the settings page | Settings, and Home's footer | to fix |
+| Sign out, naming unsent records | the account menu and the settings page | the account menu and Settings | to fix |
+| Revoke a signed-in device | the signed-in devices | the signed-in devices | to fix |
 | Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
 
 - **A sitting and a recall are web for now.** Each needs a keyboard and a
@@ -488,7 +488,86 @@ what it offers. The inventory is the list both clients build to.
 ### To fix
 
 A row marked `to fix` is listed here with what holds now and the change it
-needs. No row is marked `to fix` today.
+needs. The audit of 2026-11-10 compared every knowledge row marked `same`
+with the web's code.
+
+- **The wording of every knowledge screen.** Each client writes its own
+  labels, empty readings and dialog texts, and the two drift. The phone says
+  "courses" and "Course" where the web says modules, and the empty, refusal,
+  sign-out and missing-lesson texts differ. Every sentence a knowledge screen
+  says moves into `packages/core`, in the web's wording where this file gives
+  it, so one copy is said on both clients.
+- **The knowledge home.**
+  - The phone's module row starts a queue or opens a lesson from its next-up
+    line. The row opens the module and offers nothing else, as `## The
+    structure` gives.
+  - The row's counts read "N due" first on the web and "N to review" last on
+    the phone. Core words the line once.
+  - With no focus the phone reads "Focus: all courses", and its press does
+    nothing. The web names no focus there, and the phone drops the line.
+  - The phone places the ready lesson and the ready certification below the
+    focus. This file places them above it, as the next step the rules take.
+  - A press on the phone's focus card opens the module. The module row is the
+    one way into a module from the home, so the card drops the press.
+  - A failed sync reads on the phone's home alone. The web's home reads it
+    too, since a failed sync changes what the next queue serves.
+- **Raise today's limit.** The press reads "5 more new today" on the web and
+  "5" on the phone. The phone takes the web's label. A queue that has ended
+  offers the raise on the phone alone, and the web offers it there too.
+- **The settings, and the sync's state.**
+  - The phone writes the limits' ranges by hand, where the web reads them
+    from core. The phone reads them from core too.
+  - The web disables Save while nothing changed, and Sync now while a sync
+    runs. The phone does both too.
+  - The web names the user and the engine's id under Account, as the account
+    menu does. The phone names neither, and names both.
+  - The web counts the records waiting to be sent and reads a failed sync
+    through core. The phone shows no count and the raw error, and takes both.
+- **The signed-in devices.** The phone shows a failed read as the raw error.
+  It reads the failure as the web does.
+- **The login.** The phone offers the dev login in a dev build and Google and
+  GitHub otherwise, written in its code. The web lists the providers the
+  engine names, and the phone reads the same list.
+- **A module.**
+  - The phone reads "mastered, weak and due within 7 days" from core above the
+    groups. The web carries no such line, and adds it.
+  - The phone shows its empty reading while the content is still loading. It
+    reads the four readings `## A page's areas` gives.
+  - On the map, a press on a dimmed node selects it on the web and clears the
+    selection on the phone. The phone selects it.
+  - A certification node with nothing to open shows a subtopic's card on the
+    phone. It shows nothing, as on the web.
+- **Pause, resume or archive a module.**
+  - The phone asks before a pause and before a resume. This file asks before
+    an archive alone, since only an archive takes the module off the home.
+  - The archive dialogs say different things, and the phone stays on a module
+    it can no longer show. The phone takes the web's text and returns home.
+- **The certifications.**
+  - The phone names a topic by its slug, where `knowledge.md` gives the
+    title. The phone shows the title.
+  - The phone marks a level no scope certifies as practice, and shows the
+    coverage under a certification in progress. Core computes both, and the
+    web shows both.
+- **A queue.** Stop with nothing answered leaves the phone's quiz screen with
+  no summary. Stop reads a summary on both, as `## The knowledge pages` gives.
+- **A level exam's choices.**
+  - The phone marks a paused module as paused, and the web does too, since a
+    paused module leaves exams unless the user names it.
+  - The phone shows its choices before the content has loaded. It reads the
+    four readings, as the web does.
+- **Set the exam size for one exam.** The web saves the size 600 ms after the
+  typing stops, so a size typed just before Start is lost. The web also saves
+  it as the exam starts, as the phone does on leaving.
+- **The lessons.** The phone opens with the locked groups closed. Every
+  section is open until the reader closes it, as `## A page's areas` gives.
+- **A lesson, and marking it.**
+  - The phone's press reads "Done reading", then a disabled "Done", and
+    "Mark as unread" sits in a menu. The phone offers Mark read and Mark
+    unread, as `## The knowledge pages` gives.
+  - Marking a lesson read leaves the phone's screen. The page stays on both,
+    so the links to other lessons stay in reach.
+  - The web's header names the module, the minutes and whether the lesson is
+    read. The phone names the minutes alone, and adds the other two.
 
 ## A page's areas
 
