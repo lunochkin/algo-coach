@@ -146,6 +146,22 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Add the phone's Problem screen: a problem's record and its statement,
       opened from a technique's problems, with no editor and no clock
 
+### The phone beside the web
+
+- [ ] Audit every knowledge screen and act the inventory marks `same` against
+      the web, and list each difference found under `pages.md` To fix
+- [ ] Add a test that every web route and every native screen file has an
+      inventory row, so a new screen cannot ship unlisted
+- [ ] Serve the problem listing on the phone as a Problems tab: the technique
+      and difficulty filters, their counts and the pages, computed in core
+- [ ] Show a card's ladder and probes on the phone, each rung opening the
+      Problem screen. A rung reads, and the sitting it opens stays on the web
+- [ ] Add the press starting a card run to the phone's card. Starting declares
+      the study, and the sittings it measures are still sat on the web
+- [ ] Open the lesson a web queue offers over the running queue, as the phone
+      does, so Read no longer ends the queue
+- [ ] Link the privacy policy from the phone's Login and Settings, by its URL
+
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
       showing the same state
