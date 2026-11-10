@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import type { Held, Line } from '@/knowledge/copy'
+import type { Held } from '@/knowledge/copy'
 
 export interface SyncState {
   running: boolean
@@ -17,7 +17,7 @@ export interface Knowledge {
   sync: SyncState
   resync: () => Promise<void>
   /** Keeps a record the user made, and sends it as `knowledge.md` times it. */
-  add: (kind: string, line: Line) => Promise<void>
+  add: (kind: string, line: object) => Promise<void>
   /** Sends the outbox, then deletes the copy; the number left unsent where `force` is false. */
   leave: (force: boolean) => Promise<number>
 }

@@ -13,7 +13,6 @@ import {
   currentFocus,
   type ExamPlan,
   type Focus,
-  focusLine,
   focusPath,
   type FocusRecord,
   isoNow,
@@ -21,7 +20,6 @@ import {
   lessonPath,
   type LessonRecord,
   moduleOrder,
-  NEW_STEP,
   newPerDay,
   orderPath,
   type OrderRecord,
@@ -40,6 +38,9 @@ import {
   todayLimit,
   visibleCatalog,
   withStatuses,
+  newRecord,
+  SyncLoop,
+  syncDelay,
 } from '@algo-coach/core';
 
 import { readCatalog } from './courses-cache';
@@ -142,10 +143,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const userRef = useRef<string | null>(null);
   const catalogRef = useRef(rawCatalog);
   const statusesRef = useRef<StatusRecord[]>([]);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const running = useRef(false);
-  const retry = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const again = useRef(false);
 
   const reload = useCallback(async (withCatalog: boolean) => {
     const [a, s, ss, fs] = await Promise.all([
@@ -193,23 +190,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const runSync = useCallback(async () => {
-    if (running.current) {
-      again.current = true;
+  // one pass, reporting its state; the loop decides when it runs: `SyncLoop`
+  const runOnce = useCallback(async () => {
+    const token = await getToken();
+    if (!token) {
+      setSync((x) => ({ ...x, running: false, error: 'Not signed in: sign in from Settings' }));
       return;
     }
-    // Claim the slot before any await, or two syncs started together both get past the check.
-    running.current = true;
-    if (retry.current) clearTimeout(retry.current);
-    retry.current = null;
-    let failed = false;
+    setSync((x) => ({ ...x, running: true }));
     try {
-      const token = await getToken();
-      if (!token) {
-        setSync((x) => ({ ...x, running: false, error: 'Not signed in: sign in from Settings' }));
-        return;
-      }
-      setSync((x) => ({ ...x, running: true }));
       const r = await syncOnce(settingsRef.current, token, userRef.current);
       // a copy from before the owner was kept learns it from its first sync
       if (!userRef.current) await own(r.user, userRef);
@@ -228,35 +217,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         // The outbox keeps its records, which the next sign-in sends
         await setToken('');
         setHasToken(false);
-      } else failed = true;
-    } finally {
-      running.current = false;
-      if (again.current) {
-        again.current = false;
-        void runSync();
-      } else if (failed) {
-        retry.current = setTimeout(() => void runSync(), 30_000);
       }
+      throw e;
     }
   }, [reload, remind]);
 
-  // the earliest deadline asked for stands: a later request never pushes a sync
-  // already due sooner, so an answer every few seconds still syncs within ten
-  const dueAt = useRef<number | null>(null);
-  const requestSync = useCallback(
-    (delayMs = 0) => {
-      const at = Date.now() + delayMs;
-      if (timer.current && dueAt.current !== null && dueAt.current <= at) return;
-      if (timer.current) clearTimeout(timer.current);
-      dueAt.current = at;
-      timer.current = setTimeout(() => {
-        timer.current = null;
-        dueAt.current = null;
-        void runSync();
-      }, delayMs);
-    },
-    [runSync],
+  // a signed-out token is not tried again: the next sign-in syncs
+  const [loop] = useState(
+    () =>
+      new SyncLoop(
+        async () => {},
+        (e) => !(e instanceof SignedOut),
+      ),
   );
+  useEffect(() => loop.use(runOnce), [loop, runOnce]);
+  useEffect(() => () => loop.stop(), [loop]);
+  const requestSync = useCallback((delayMs = 0) => loop.request(delayMs), [loop]);
 
   useEffect(() => {
     void (async () => {
@@ -332,14 +308,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     async (rec: AttemptRecord) => {
       await DB.addLocal('attempts', attemptPath(settingsRef.current.device, rec.t), rec);
       setAttempts((xs) => [...xs, rec]);
-      requestSync(10_000);
+      requestSync(syncDelay('attempt'));
     },
     [requestSync],
   );
 
   const setCourseStatus = useCallback(
     async (course: string, status: CourseStatus) => {
-      const rec: StatusRecord = { t: isoNow(), course, status };
+      const rec = newRecord.status(course, status);
       await DB.addLocal('statuses', statusPath(settingsRef.current.device, rec.t), rec);
       statusesRef.current = [...statusesRef.current, rec];
       setStatuses(statusesRef.current);
@@ -351,7 +327,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const setFocus = useCallback(
     async (f: Focus | null) => {
-      const rec: FocusRecord = { t: isoNow(), ...focusLine(f) };
+      const rec = newRecord.focus(f);
       await DB.addLocal('focus', focusPath(settingsRef.current.device, rec.t), rec);
       setFocusRecords((xs) => [...xs, rec]);
       // a focus changes what another device serves, so it is sent at once
@@ -362,7 +338,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const setLessonState = useCallback(
     async (course: string, lesson: string, status: LessonRecord['status']) => {
-      const rec: LessonRecord = { t: isoNow(), course, lesson, status };
+      const rec = newRecord.lesson(course, lesson, status);
       await DB.addLocal('lessons', lessonPath(settingsRef.current.device, rec.t), rec);
       setLessonRecords((xs) => [...xs, rec]);
       requestSync(0);
@@ -372,7 +348,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const recordCertExam = useCallback(
     async (rec: Omit<CertRecord, 't'>) => {
-      const full: CertRecord = { t: isoNow(), ...rec };
+      const full = newRecord.cert(rec);
       await DB.addLocal('certs', certPath(settingsRef.current.device, full.t), full);
       setCertRecords((xs) => [...xs, full]);
       requestSync(0);
@@ -385,7 +361,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const s = session;
       setSession(null);
       if (s && answered > 0) {
-        const rec: SessionRecord = { t: isoNow(), mode: s.mode, score, n: answered };
+        const rec = newRecord.session(s.mode, score, answered);
         await DB.addLocal('sessions', sessionPath(settingsRef.current.device, rec.t), rec);
         setSessions((xs) => [...xs, rec]);
       }
@@ -399,14 +375,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // read on each render, so a raise ends at the rollover without a timer
   const newLimit = todayLimit(settingRecords, raises, Date.now());
   const raiseNew = useCallback(async () => {
-    const rec: RaiseRecord = { t: isoNow(), n: NEW_STEP };
+    const rec = newRecord.raise();
     await DB.addLocal('raises', raisePath(settingsRef.current.device, rec.t), rec);
     setRaises((xs) => [...xs, rec]);
     requestSync(0);
   }, [requestSync]);
   const setSetting = useCallback(
     async (name: SettingName, n: number) => {
-      const rec: SettingRecord = { t: isoNow(), name, n };
+      const rec = newRecord.setting(name, n);
       await DB.addLocal('setting_changes', settingPath(settingsRef.current.device, rec.t), rec);
       setSettingRecords((xs) => [...xs, rec]);
       requestSync(0);
@@ -416,7 +392,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const courseOrder = useMemo(() => moduleOrder(orders), [orders]);
   const setCourseOrder = useCallback(
     async (courses: string[]) => {
-      const rec: OrderRecord = { t: isoNow(), courses };
+      const rec = newRecord.order(courses);
       await DB.addLocal('orders', orderPath(settingsRef.current.device, rec.t), rec);
       setOrders((xs) => [...xs, rec]);
       requestSync(0);

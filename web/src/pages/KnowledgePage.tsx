@@ -18,7 +18,6 @@ import {
   FOCUS_CERT,
   FOCUS_NEXT,
   focusLabel,
-  focusLine,
   type FocusPart,
   focusTitle,
   focusView,
@@ -30,7 +29,6 @@ import {
   MODULES_OF,
   moved,
   NEW_LEFT,
-  NEW_STEP,
   NO_MODULES,
   PAUSED,
   RAISE_TODAY,
@@ -40,6 +38,7 @@ import {
   strictLabel,
   waitingOutside,
   syncErrorSummary,
+  newRecord,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -81,7 +80,7 @@ export function KnowledgePage() {
   }, [catalog, board, focus, newLimit, order, certExams, now])
 
   function setFocus(f: Focus | null) {
-    void k.add('focus', focusLine(f))
+    void k.add('focus', newRecord.focus(f))
   }
 
   // Continue starts the next queue, or says why nothing is ready and offers the one act that changes that
@@ -93,7 +92,7 @@ export function KnowledgePage() {
   async function act(kind: string) {
     setEmpty(null)
     if (kind === 'raise') {
-      await k.add('raise', { n: NEW_STEP })
+      await k.add('raise', newRecord.raise())
       navigate('/knowledge/queue?mode=next')
     } else if (kind === 'clear-focus') setFocus(null)
     else if (kind === 'certs') navigate(CERTIFICATIONS)
@@ -101,7 +100,7 @@ export function KnowledgePage() {
 
   function move(rows: ModuleRow[], from: number, to: number) {
     const slugs = rows.map((row) => row.c.slug)
-    void k.add('order', { courses: moved(slugs, from, to) })
+    void k.add('order', newRecord.order(moved(slugs, from, to)))
   }
 
   return (
@@ -196,7 +195,7 @@ export function KnowledgePage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => void k.add('raise', { n: NEW_STEP })}
+                    onClick={() => void k.add('raise', newRecord.raise())}
                   >
                     <Plus />
                     {RAISE_TODAY}

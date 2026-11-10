@@ -34,6 +34,7 @@ import {
   QUEUE_STOP,
   queueLeft,
   isoNow,
+  newRecord,
 } from '@algo-coach/core'
 
 import { Panel } from '@/components/Panel'
@@ -151,11 +152,7 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
     ended.current = true
     const rs = answered.current
     if (rs.length)
-      void k.add('session', {
-        mode,
-        score: rs.filter((r) => r.correct).length,
-        n: rs.length,
-      })
+      void k.add('session', newRecord.session(mode, rs.filter((r) => r.correct).length, rs.length))
   }, [k, mode])
 
   // leaving through the navigation stops the queue the same way. The effect
@@ -174,7 +171,7 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
   function onAnswered(r: Result) {
     const rec = makeAttempt(isoNow(), r.q.course, r.q.id, r.correct, r.guess, r.grade, r.card)
     setMine((xs) => [...xs, rec])
-    void k.add('attempt', { ...rec })
+    void k.add('attempt', rec)
     answered.current = [...answered.current, r]
     setResults(answered.current)
     if (current && 'q' in current && current.fresh) setIntroduced((n) => n + 1)
@@ -199,7 +196,7 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
     if (!queue) return
     queue.raise(NEW_STEP)
     // today's limit, so the home and the next queue count the raise too
-    void k.add('raise', { n: NEW_STEP })
+    void k.add('raise', newRecord.raise())
     if (!current) {
       const p = pickOne()
       if (p) {

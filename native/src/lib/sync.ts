@@ -1,4 +1,12 @@
-import { pyJson, syncedLine, type components } from '@algo-coach/core';
+import {
+  pyJson,
+  syncPass,
+  type components,
+  type Cursor,
+  type Outgoing,
+  type SyncStore,
+  type SyncTransport,
+} from '@algo-coach/core';
 
 import { writeCatalog } from './courses-cache';
 import * as DB from './db';
@@ -29,47 +37,69 @@ const TABLE = Object.fromEntries(Object.entries(KIND).map(([table, kind]) => [ki
   DB.Table
 >;
 
-// the sync's request and reply, as the engine's OpenAPI schema states them
-type Upload = components['schemas']['Upload'];
 type Synced = components['schemas']['Synced'];
+type Held = Outgoing & { row: DB.Pending };
 
-/**
- * Fetches the content when it changed, sends this device's pending records, and
- * keeps every record the engine returns that this device does not hold yet.
- */
+// the phone's copy, in SQLite, as the core's sync reads and writes it
+function store(user: string | null): SyncStore<Held> {
+  return {
+    etag: () => DB.getMeta('snapshot_etag'),
+    putSnapshot: async (text, etag) => {
+      await writeCatalog(text);
+      await DB.setMeta('snapshot_etag', etag);
+    },
+    outbox: async () =>
+      (await DB.pending()).map((row) => ({
+        kind: KIND[row.table],
+        client_id: row.client_id,
+        line: JSON.parse(row.line) as Record<string, unknown>,
+        row,
+      })),
+    cursor: async () => JSON.parse((await DB.getMeta(DB.cursorKey(user))) ?? '{}') as Cursor,
+    // a copy keyed to another user must not take this log's records: the next
+    // launch keys it again. A copy from before the owner was kept takes the reply's
+    checkUser: async (answered) => {
+      if (user && user !== answered) throw new Error('the token names another user than this copy');
+    },
+    commit: async (sent, received, answered, cursor) => {
+      await DB.markSent(sent.map((one) => one.row));
+      let merged = 0;
+      for (const line of received) {
+        const table = TABLE[line.kind];
+        if (table && (await DB.merged(table, line.client_id, line.device, pyJson(line.rest), line.t))) merged++;
+      }
+      await DB.setMeta(DB.cursorKey(answered), JSON.stringify(cursor));
+      return merged;
+    },
+  };
+}
+
+function transport(s: Settings, token: string): SyncTransport {
+  return {
+    snapshot: async (etag) => {
+      const content = await call(s.origin, '/knowledge/snapshot', {
+        token,
+        headers: etag ? { 'if-none-match': etag } : {},
+      });
+      if (content.status === 304) return null;
+      return { text: await content.text(), etag: content.headers.get('etag') ?? '' };
+    },
+    sync: async (records, since) => {
+      const answer = (await (
+        await call(s.origin, '/knowledge/sync', { token, body: { device: s.device, records, since } })
+      ).json()) as Synced;
+      return answer;
+    },
+  };
+}
+
+/** One pass of the sync both clients run: `syncPass`, over the phone's copy. */
 export async function syncOnce(s: Settings, token: string, user: string | null): Promise<SyncResult> {
-  const result: SyncResult = { user: '', coursesChanged: false, progressChanged: false, pushed: 0 };
-
-  const tag = await DB.getMeta('snapshot_etag');
-  const content = await call(s.origin, '/knowledge/snapshot', {
-    token,
-    headers: tag ? { 'if-none-match': tag } : {},
-  });
-  if (content.status !== 304) {
-    await writeCatalog(await content.text());
-    await DB.setMeta('snapshot_etag', content.headers.get('etag') ?? '');
-    result.coursesChanged = true;
-  }
-
-  const sending = await DB.pending();
-  const since = JSON.parse((await DB.getMeta(DB.cursorKey(user))) ?? '{}') as Record<string, number>;
-  const records = sending.map((one) => ({ ...JSON.parse(one.line), kind: KIND[one.table], client_id: one.client_id }));
-  const upload: Upload = { device: s.device, records, since };
-  const answer = (await (await call(s.origin, '/knowledge/sync', { token, body: upload })).json()) as Synced;
-  result.user = answer.user_id;
-  // a copy keyed to another user must not take this log's records: the next launch keys it again
-  if (user && user !== answer.user_id) throw new Error('the token names another user than this copy');
-
-  // a refused record names content the engine does not hold, and sending it again changes nothing
-  await DB.markSent(sending);
-  result.pushed = answer.stored;
-  for (const record of answer.records) {
-    const line = syncedLine(record);
-    const table = line && TABLE[line.kind];
-    if (line && table && (await DB.merged(table, line.client_id, line.device, pyJson(line.rest), line.t))) {
-      result.progressChanged = true;
-    }
-  }
-  await DB.setMeta(DB.cursorKey(answer.user_id), JSON.stringify(answer.cursor));
-  return result;
+  const passed = await syncPass(store(user), transport(s, token));
+  return {
+    user: passed.user,
+    coursesChanged: passed.contentChanged,
+    progressChanged: passed.logChanged,
+    pushed: passed.stored,
+  };
 }

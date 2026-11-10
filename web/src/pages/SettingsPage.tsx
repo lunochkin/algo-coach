@@ -22,6 +22,7 @@ import {
   type SettingRecord,
   validSetting,
   waitingToSend,
+  newRecord,
 } from '@algo-coach/core'
 
 import { api } from '@/api/client'
@@ -117,7 +118,7 @@ function Archived() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => void k.add('status', { course: c.slug, status: 'active' })}
+              onClick={() => void k.add('status', newRecord.status(c.slug, 'active'))}
             >
               <ArchiveRestore />
               {RESTORE}

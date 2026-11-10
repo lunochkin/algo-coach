@@ -9,10 +9,10 @@ import {
   CERT_UNTARGET,
   certConditions,
   certFocus,
-  focusLine,
   type Board,
   type CertStatus,
   type Course,
+  newRecord,
 } from '@algo-coach/core'
 
 import { Button } from '@/components/ui/button'
@@ -100,7 +100,10 @@ export function CertDialog({
               )}
               {v.offersTarget &&
                 (v.targeted ? (
-                  <Button variant="outline" onClick={() => void k.add('focus', focusLine(null))}>
+                  <Button
+                    variant="outline"
+                    onClick={() => void k.add('focus', newRecord.focus(null))}
+                  >
                     {CERT_UNTARGET}
                   </Button>
                 ) : (
@@ -108,7 +111,7 @@ export function CertDialog({
                     variant={v.offersExam ? 'outline' : 'default'}
                     onClick={() => {
                       const f = certFocus(open.c, open.id, !!focus?.strict)
-                      if (f) void k.add('focus', focusLine(f))
+                      if (f) void k.add('focus', newRecord.focus(f))
                       onClose()
                     }}
                   >

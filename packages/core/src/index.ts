@@ -35,3 +35,4 @@ export * from './practice';
 export * from './words/home';
 export * from './words/module';
 export * from './words/queue';
+export * from './sync';

@@ -36,6 +36,7 @@ import {
   certExamRule,
   CERT_EXAM_MISSING,
   CERT_EXAM_START,
+  newRecord,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -95,7 +96,7 @@ function LevelChoice({ catalog, onStart }: { catalog: Catalog; onStart: (p: Exam
   // the size is a setting, saved shortly after typing stops, as the phone saves it
   useEffect(() => {
     if (!validSetting('exam_size', n) || n === stored) return
-    const t = setTimeout(() => void k.add('setting', { name: 'exam_size', n }), 600)
+    const t = setTimeout(() => void k.add('setting', newRecord.setting('exam_size', n)), 600)
     return () => clearTimeout(t)
   }, [n, stored, k])
 
@@ -157,7 +158,7 @@ function LevelChoice({ catalog, onStart }: { catalog: Catalog; onStart: (p: Exam
           onClick={() => {
             if (!b) return
             // a size typed just before the press is saved with the start, not lost to the timer
-            if (n !== stored) void k.add('setting', { name: 'exam_size', n })
+            if (n !== stored) void k.add('setting', newRecord.setting('exam_size', n))
             onStart(levelExam(b, level, n))
           }}
         >
@@ -238,9 +239,9 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
     const rs = answered.current
     if (!rs.length) return
     const done = examOutcome(plan, rs, isoNow(), catalog.courses)
-    for (const a of done.attempts) void k.add('attempt', { ...a })
-    void k.add('session', { mode: plan.mode, score: done.score, n: done.n })
-    if (done.cert) void k.add('cert', done.cert)
+    for (const a of done.attempts) void k.add('attempt', a)
+    void k.add('session', newRecord.session(plan.mode, done.score, done.n))
+    if (done.cert) void k.add('cert', newRecord.cert(done.cert))
   }
 
   // leaving through the navigation ends the exam the same way; a closed tab leaves no record

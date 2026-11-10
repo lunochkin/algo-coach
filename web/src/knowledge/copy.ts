@@ -1,4 +1,11 @@
-import { syncedLine, isoNow } from '@algo-coach/core'
+import {
+  isoNow,
+  syncPass,
+  type Cursor,
+  type Line,
+  type SyncStore,
+  type SyncTransport,
+} from '@algo-coach/core'
 import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from 'idb'
 
 // the browser's copy of the content and of one user's log: `knowledge.md`,
@@ -7,8 +14,7 @@ import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from 'idb'
 // a browser carries no stable device name
 export const DEVICE = 'web'
 
-export type Cursor = Record<string, number>
-export type Line = Record<string, unknown>
+export type { Cursor, Line }
 
 /** One record of the log as the copy holds it: learn's line, apart from its kind and ids. */
 export interface Held {
@@ -20,15 +26,8 @@ export interface Held {
   pending: 0 | 1 // in the outbox: the engine has not acknowledged it
 }
 
-/** What the copy asks the engine for, so a test can answer in its place. */
-export interface Transport {
-  // null where the snapshot the copy holds still stands
-  snapshot(etag: string | null): Promise<{ text: string; etag: string } | null>
-  sync(
-    records: Line[],
-    since: Cursor,
-  ): Promise<{ user_id: string; records: Line[]; cursor: Cursor }>
-}
+// what the copy asks the engine for, so a test can answer in its place
+export type Transport = SyncTransport
 
 interface Schema extends DBSchema {
   meta: { key: string; value: string }
@@ -83,7 +82,8 @@ export class Copy {
   }
 
   /** Keeps a record the user made here, in the outbox until the engine has it. */
-  async add(kind: string, line: Line): Promise<Held> {
+  async add(kind: string, record: object): Promise<Held> {
+    const line = record as Line
     const t = typeof line.t === 'string' ? line.t : isoNow()
     const held: Held = {
       client_id: crypto.randomUUID(),
@@ -97,52 +97,50 @@ export class Copy {
     return held
   }
 
-  /**
-   * Fetches the content where it changed, sends the outbox, and keeps every
-   * record the engine returns that the copy does not hold yet.
-   */
+  /** Syncs with the engine, through the pass both clients run: `syncPass`. */
   async sync(): Promise<Synced> {
-    const result: Synced = { contentChanged: false, logChanged: false }
-    const content = await this.transport.snapshot((await this.db.get('meta', 'etag')) ?? null)
-    if (content) {
-      const tx = this.db.transaction('meta', 'readwrite')
-      await Promise.all([
-        tx.store.put(content.text, 'snapshot'),
-        tx.store.put(content.etag, 'etag'),
-        tx.done,
-      ])
-      result.contentChanged = true
-    }
+    const passed = await syncPass(this.store(), this.transport)
+    return { contentChanged: passed.contentChanged, logChanged: passed.logChanged }
+  }
 
-    const sending = await this.db.getAllFromIndex('records', 'pending', 1)
-    const since = JSON.parse((await this.db.get('meta', 'cursor')) ?? '{}') as Cursor
-    const lines = sending.map((one) => ({ ...one.line, kind: one.kind, client_id: one.client_id }))
-    const answer = await this.transport.sync(lines, since)
-    // the database is named by the user, so a reply for another one is a bug
-    if (answer.user_id !== this.user)
-      throw new Error('the session names another user than this copy')
-
-    const tx = this.db.transaction(['records', 'meta'], 'readwrite')
-    const records = tx.objectStore('records')
-    // a refused record names content the engine does not hold, and sending it again changes nothing
-    for (const one of sending) await records.put({ ...one, pending: 0 })
-    for (const record of answer.records) {
-      const one = syncedLine(record)
-      if (!one || (await records.get(one.client_id))) continue
-      await records.put({
-        client_id: one.client_id,
-        kind: one.kind,
-        device: one.device,
-        t: one.t,
-        line: one.rest,
-        pending: 0,
-      })
-      result.logChanged = true
+  private store(): SyncStore<Held> {
+    const db = this.db
+    return {
+      etag: async () => (await db.get('meta', 'etag')) ?? null,
+      putSnapshot: async (text, etag) => {
+        const tx = db.transaction('meta', 'readwrite')
+        await Promise.all([tx.store.put(text, 'snapshot'), tx.store.put(etag, 'etag'), tx.done])
+      },
+      outbox: () => db.getAllFromIndex('records', 'pending', 1),
+      cursor: async () => JSON.parse((await db.get('meta', 'cursor')) ?? '{}') as Cursor,
+      // the database is named by the user, so a reply for another one is a bug
+      checkUser: async (user) => {
+        if (user !== this.user) throw new Error('the session names another user than this copy')
+      },
+      // one transaction, so a sync either lands whole or not at all
+      commit: async (sent, received, _user, cursor) => {
+        const tx = db.transaction(['records', 'meta'], 'readwrite')
+        const records = tx.objectStore('records')
+        for (const one of sent) await records.put({ ...one, pending: 0 })
+        let merged = 0
+        for (const one of received) {
+          if (await records.get(one.client_id)) continue
+          await records.put({
+            client_id: one.client_id,
+            kind: one.kind,
+            device: one.device,
+            t: one.t,
+            line: one.rest,
+            pending: 0,
+          })
+          merged++
+        }
+        await tx.objectStore('meta').put(JSON.stringify(cursor), 'cursor')
+        await tx.objectStore('meta').put(new Date().toISOString(), 'last_sync')
+        await tx.done
+        return merged
+      },
     }
-    await tx.objectStore('meta').put(JSON.stringify(answer.cursor), 'cursor')
-    await tx.objectStore('meta').put(new Date().toISOString(), 'last_sync')
-    await tx.done
-    return result
   }
 
   close() {

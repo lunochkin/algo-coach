@@ -12,7 +12,6 @@ import {
   counted,
   type CourseStatus,
   type Focus,
-  focusLine,
   focusOn,
   groupCell,
   levelCounts,
@@ -33,6 +32,7 @@ import {
   startGroup,
   subsByDepth,
   subTitle,
+  newRecord,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -85,11 +85,11 @@ export function ModulePage() {
   }, [catalog, board, module])
 
   function aim(f: Focus) {
-    void k.add('focus', focusLine({ ...f, strict: !!focus?.strict }))
+    void k.add('focus', newRecord.focus({ ...f, strict: !!focus?.strict }))
   }
 
   function setStatus(status: CourseStatus) {
-    void k.add('status', { course: module, status })
+    void k.add('status', newRecord.status(module, status))
     // an archived module leaves the home and every page but its restore
     if (status === 'archived') navigate(HOME)
   }

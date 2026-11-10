@@ -12,6 +12,7 @@ import {
   LESSON_NO_TEXT,
   LESSON_RELATED,
   lessonNote,
+  newRecord,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -91,18 +92,14 @@ export function LessonPage() {
               {read ? (
                 <Button
                   variant="outline"
-                  onClick={() =>
-                    void k.add('lesson', { course: c.slug, lesson: x.slug, status: 'undone' })
-                  }
+                  onClick={() => void k.add('lesson', newRecord.lesson(c.slug, x.slug, 'undone'))}
                 >
                   <BookX />
                   {LESSON_MARK_UNREAD}
                 </Button>
               ) : (
                 <Button
-                  onClick={() =>
-                    void k.add('lesson', { course: c.slug, lesson: x.slug, status: 'done' })
-                  }
+                  onClick={() => void k.add('lesson', newRecord.lesson(c.slug, x.slug, 'done'))}
                 >
                   <BookCheck />
                   {LESSON_MARK_READ}

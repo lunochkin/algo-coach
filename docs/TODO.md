@@ -163,7 +163,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Fix where the two clients behave apart: the phone's 2 s focus delay, the
       web's timestamp format, forced sign-out, an exam stopped unanswered, the
       certification exam's rules, the start sheet's preview, the load wording
-- [ ] Move the sync into core: the scheduler, one pass and each record line,
+- [x] Move the sync into core: the scheduler, one pass and each record line,
       behind a store each client implements. Two copies have drifted once
 - [ ] Move the queue run, the exam run and one question's answer into core,
       each a state the clients draw. Both hold the same flow twice today
