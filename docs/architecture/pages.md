@@ -17,9 +17,13 @@ those steps at low fidelity.
 - **The scheme switch and the account menu sit at the right of the
   navigation**, apart from the sections, since neither names a page.
 - **The account menu names who the session signs in as**, and holds the
-  sign-out. The address the provider verified names the user, with the
-  engine's own id under it. A user no provider linked is named by that id
-  instead, since the dev login mints no identity to carry an address.
+  signed-in apps and the sign-out. The address the provider verified names
+  the user, with the engine's own id under it. A user no provider linked is
+  named by that id instead, since the dev login mints no identity to carry an
+  address.
+- **Signed-in apps open a dialog from the account menu**, listing each native
+  app by its device and when it was last used, with a press to revoke it. A
+  lost phone is cut off there, where its own sign-out cannot reach.
 - **Problems is marked on the listing alone.** A picked problem is a step down
   from the board, from a technique or from a card, so Practice stays marked on
   it and the way back names where the pick came from.

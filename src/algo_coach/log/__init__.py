@@ -1,4 +1,12 @@
-from algo_coach.log.apps import app_revoked, app_user_of, exchanged, issued
+from algo_coach.log.apps import (
+    SignedInApp,
+    app_revoked,
+    app_revoked_by_id,
+    app_user_of,
+    exchanged,
+    issued,
+    signed_in_apps,
+)
 from algo_coach.log.invitations import invitations_held, invite, invited, withdraw
 from algo_coach.log.latest import latest_by_attempt
 from algo_coach.log.owned import erased, whole_log
@@ -16,8 +24,10 @@ __all__ = [
     "CardRunLog",
     "Provider",
     "RecallLog",
+    "SignedInApp",
     "SittingStore",
     "app_revoked",
+    "app_revoked_by_id",
     "app_user_of",
     "email_of",
     "erased",
@@ -33,6 +43,7 @@ __all__ = [
     "opened",
     "revoked",
     "signed_in",
+    "signed_in_apps",
     "user_of",
     "whole_log",
     "withdraw",

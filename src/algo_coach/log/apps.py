@@ -6,7 +6,8 @@ import hashlib
 import secrets
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import insert, update
+from pydantic import BaseModel
+from sqlalchemy import insert, select, update
 
 from algo_coach.log.sessions import hashed
 from algo_coach.log.table import app_codes, app_tokens
@@ -89,6 +90,41 @@ def app_revoked(root: Database, token: str) -> None:
             .where(app_tokens.c.id == hashed(token), app_tokens.c.revoked_at.is_(None))
             .values(revoked_at=datetime.now(UTC))
         )
+
+
+class SignedInApp(BaseModel):
+    """A live app token as its owner sees it. The id is the token's hash, which
+    signs nothing in."""
+
+    id: str
+    device: str
+    created_at: datetime
+    last_used_at: datetime
+
+
+def signed_in_apps(root: Database, user_id: str) -> list[SignedInApp]:
+    """The user's apps still signed in: neither revoked nor idle past `IDLE`."""
+    live = (
+        (app_tokens.c.user_id == user_id)
+        & app_tokens.c.revoked_at.is_(None)
+        & (app_tokens.c.last_used_at > datetime.now(UTC) - IDLE)
+    )
+    query = select(app_tokens).where(live).order_by(app_tokens.c.last_used_at.desc())
+    with root.connect() as conn:
+        return [SignedInApp.model_validate(dict(row)) for row in conn.execute(query).mappings()]
+
+
+def app_revoked_by_id(root: Database, user_id: str, app_id: str) -> bool:
+    """Revokes one of the user's own apps, `False` where none has the id."""
+    with root.begin() as conn:
+        mine = (app_tokens.c.id == app_id) & (app_tokens.c.user_id == user_id)
+        found = conn.execute(
+            update(app_tokens)
+            .where(mine, app_tokens.c.revoked_at.is_(None))
+            .values(revoked_at=datetime.now(UTC))
+            .returning(app_tokens.c.id)
+        ).first()
+    return found is not None
 
 
 def _challenge_of(verifier: str) -> str:

@@ -2,11 +2,18 @@
 offers, who the session signs in as, and ending the session a browser
 carries."""
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel
 
 from algo_coach.api.context import SESSION_COOKIE, Root, UserId
-from algo_coach.log import Provider, email_of, revoked
+from algo_coach.log import (
+    Provider,
+    SignedInApp,
+    app_revoked_by_id,
+    email_of,
+    revoked,
+    signed_in_apps,
+)
 
 router = APIRouter()
 
@@ -46,3 +53,17 @@ def signed_out(request: Request, root: Root) -> Response:
     response = Response(status_code=204)
     response.delete_cookie(SESSION_COOKIE, httponly=True, samesite="lax")
     return response
+
+
+@router.get("/apps")
+def apps(root: Root, user_id: UserId) -> list[SignedInApp]:
+    # the pages' session alone: an app's token reaches the knowledge endpoints
+    return signed_in_apps(root, user_id)
+
+
+@router.delete("/apps/{app_id}", status_code=204)
+def revoke_app(app_id: str, root: Root, user_id: UserId) -> Response:
+    # a lost phone is cut off here, where its own sign-out cannot reach
+    if not app_revoked_by_id(root, user_id, app_id):
+        raise HTTPException(404, "no app of yours carries this id")
+    return Response(status_code=204)

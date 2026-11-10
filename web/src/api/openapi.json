@@ -991,6 +991,60 @@
         }
       }
     },
+    "/api/apps": {
+      "get": {
+        "summary": "Apps",
+        "operationId": "apps_api_apps_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SignedInApp"
+                  },
+                  "type": "array",
+                  "title": "Response Apps Api Apps Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apps/{app_id}": {
+      "delete": {
+        "summary": "Revoke App",
+        "operationId": "revoke_app_api_apps__app_id__delete",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "App Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/knowledge/snapshot": {
       "get": {
         "summary": "Content",
@@ -2773,6 +2827,37 @@
         ],
         "title": "Served",
         "description": "What a solver is handed: the statement and the clock, and nothing the\nproblem was written from."
+      },
+      "SignedInApp": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "device": {
+            "type": "string",
+            "title": "Device"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_used_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Used At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "device",
+          "created_at",
+          "last_used_at"
+        ],
+        "title": "SignedInApp",
+        "description": "A live app token as its owner sees it. The id is the token's hash, which\nsigns nothing in."
       },
       "Sitting": {
         "properties": {
