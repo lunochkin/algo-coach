@@ -5,9 +5,9 @@ schedule that spaces them, and the records the answers leave. Part of the
 architecture, and `README.md` is the map.
 
 The rules here were learn's, a personal study app merged into the engine in
-Phase 14. learn's native app became the engine's client, and it carries the
-same rules in TypeScript. Shared fixtures hold the app and the server to this
-file.
+Phase 14. learn's native app became the engine's client. The same rules in
+TypeScript now live in `packages/core`, which the native app and the web app
+both import. Shared fixtures hold that package and the server to this file.
 
 ## Modules
 
@@ -16,21 +16,22 @@ A module is one subject: Python first, then algorithms and system design.
 - **A module holds topics, and a topic holds subtopics.** A topic carries a
   tier, which orders the listing and gates nothing. A subtopic belongs to one
   topic, and its questions are listed in the order it names them.
-- **A subtopic may carry a title**, given by its topic, and the app shows the
+- **A subtopic may carry a title**, given by its topic, and a client shows the
   title in place of the slug. A subtopic with no title shows its slug, so a
   module authored without titles still reads.
 - **A subtopic is shown with its topic's title**, except where its topic
   already heads the view. Two topics can each hold a subtopic called basics.
 - **Titles are in sentence case**, as lesson and topic titles are: the first
   word and proper nouns alone are capitalized.
-- **Every question sits at one of four ranks**: 0 Foundation, 1 Associate,
-  2 Professional and 3 Expert. A rank measures the depth of a question. A
+- **Every question sits at one of four levels**: 0 Foundation, 1 Associate,
+  2 Professional and 3 Expert. A level measures the depth of a question. A
   problem's difficulty is a different field, on a different record.
-- **A group is one subtopic at one rank.** Gating, coverage and the frontier
+- **A group is one subtopic at one level.** Gating, coverage and the frontier
   are all counted per group.
 - **A module is authored in files and seeded into Postgres**, as a card is. The
   authoring format lives beside the files in the private content repository.
-  This file gives the rules the engine and the app apply to what is seeded.
+  This file gives the rules the engine and the clients apply to what is
+  seeded.
 - **A module, a topic, a subtopic, a question and a lesson each carry an
   engine-minted id**, and the seed matches each by its authored slug. A log
   record then references a minted id, as `README.md` requires of every
@@ -112,9 +113,9 @@ Each question's memory is FSRS-6, replayed from the user's answers.
   - due: the due time has passed.
   - retained: stability is at least 21 days.
   - learning: any other seen question, including one waiting on a step.
-- **A question is servable when it is unseen or its due time has passed.**
-  Every queue serves servable questions alone. A weak question inside its
-  step waits for the step.
+- **A question is servable when it is unseen or its due time has passed.** A
+  weak question inside its step waits for the step. A queue serves servable
+  questions first, and `## Queues` names the two exceptions after them.
 - **A question is passed once any of its answers was a pass**, and stays
   passed. A group is done when its passed share reaches the module's pass
   ratio.
@@ -124,12 +125,12 @@ Each question's memory is FSRS-6, replayed from the user's answers.
 New questions open as earlier ones are passed. A question already seen is
 reviewed whatever gates it.
 
-- **Ranks open in order within a subtopic.** A rank opens when every lower
-  rank of the same subtopic is done or holds no questions. Rank 0 is always
+- **Levels open in order within a subtopic.** A level opens when every lower
+  level of the same subtopic is done or holds no questions. Level 0 is always
   open.
 - **A module may carry a prerequisite graph between subtopics.** An edge from
-  one subtopic to another, at an offset, opens the first subtopic's rank only
-  once the second subtopic is done up to that rank plus the offset. Ranks
+  one subtopic to another, at an offset, opens the first subtopic's level only
+  once the second subtopic is done up to that level plus the offset. Levels
   above a configured bound match at the bound.
 - **A gate restricts new questions alone.** Every review reaches a seen
   question in a locked group, so a reordered graph never hides a fact the
@@ -173,32 +174,36 @@ A queue picks each question at the moment it is needed, from what is servable
 then. The user stops a queue at any time, and a queue ends when nothing is
 left to serve.
 
-- **Reviews come first, ordered weak, due, unseen, learning, retained.** Ties
-  break at random.
+- **A queue orders the questions it serves weak, due, unseen, learning,
+  retained.** Ties break at random.
 - **A step due within 20 minutes is served early** when nothing else is
   servable, so a one-minute step does not end the queue.
-- **The app counts such steps apart from the due reviews**, and marks a
+- **A client counts such steps apart from the due reviews**, and marks a
   question served early. A due count of zero then never sits beside a queue
   that keeps serving questions.
 - **New questions are limited per day, and reviews never are.** The limit
   counts questions first answered today across every device, ten by default.
-  The day starts at 04:00 local time.
+  The day starts at 00:00 UTC, on every device.
+- **The day is UTC rather than local time.** Two devices in different time
+  zones would otherwise count today's new questions and raises over different
+  windows. A local rollover is deferred until a user practises across time
+  zones or finds midnight UTC falling inside a practice session.
 - **The user can raise today's limit, five at a time**, from Home or inside the
-  next and filtered queues. The raise ends at the 04:00 rollover, and the
-  daily setting stands again the next day.
+  next and filtered queues. The raise ends when the day does, and the daily
+  setting stands again the next day.
 - **The daily limit and today's raise are records in the user's log.** A
   limit kept per device would have the phone and the web offer different
   counts of new questions on the same day.
 - **The latest daily limit stands**, as the latest focus does, across every
   device. A user who set none has the default of ten.
-- **Today's raise is the sum of the raises given since the day's 04:00.** Two
+- **Today's raise is the sum of the raises given since the day began.** Two
   devices raising on one day then add up rather than overwrite each other.
 - **The next queue serves the reviews, then the frontier's new questions.**
   Over every active module, the modules take turns.
-- **The review queue serves the weak and due questions alone**, at every rank,
+- **The review queue serves the weak and due questions alone**, at every level,
   locked or not. It serves no new question.
 - **The filtered queue serves chosen questions from one module**: by topic,
-  subtopic, rank, kind, or weak and due alone. Locks do not apply. After the
+  subtopic, level, kind, or weak and due alone. Locks do not apply. After the
   servable ones, it serves learning and retained questions it has not yet
   asked.
 - **Stopping a queue stores a stint**: the queue's mode, how many questions
@@ -230,23 +235,23 @@ certification.
 
 ## Certifications and exams
 
-- **A certification is a scope at a rank**: one topic, or the whole module.
-  Every scope at every rank is one. A module's certification file holds the
+- **A certification is a scope at a level**: one topic, or the whole module.
+  Every scope at every level is one. A module's certification file holds the
   defaults and the exceptions, never the list.
 - **Certifications form a graph derived from the prerequisite graph**, never
-  stored. A topic's rank needs its rank below and every topic its subtopics
-  need. The module's rank needs every topic at that rank.
+  stored. A topic's level needs its level below and every topic its subtopics
+  need. The module's level needs every topic at that level.
 - **A certification is earned on four conditions**: its prerequisites are
   earned, every subtopic's group is covered, enough questions are retained,
   and its exam was passed.
 - **Coverage is the passed share of each group.** Retention is the share of
-  the scope's questions at that rank whose stability reaches a set number of
+  the scope's questions at that level whose stability reaches a set number of
   days.
 - **A certification lapses back to needing a refresh** when coverage or
   retention falls short after its exam. A lapsed certification still counts
   as earned for the ones that need it, so one lapse does not cascade.
-- **An exam is a fixed sample from a scope at one rank**, with no feedback
-  until the end. A level exam samples every open group at a rank instead.
+- **An exam is a fixed sample from a scope at one level**, with no feedback
+  until the end. A level exam samples every open group at one level instead.
   Each exam answer is stored as an answer, and the exam as a stint.
 - **An exam is offered only once everything else in its certification
   holds.** A certification exam passed is stored as its own record.
@@ -261,7 +266,7 @@ trigger, as `README.md` requires.
   `client_id`, the `user_id`, the `device` that wrote it, the moment the user
   acted, and `created_at`.
 - **The client mints `client_id`, and a user's ids are unique.** A retried
-  upload then writes nothing twice. The app works offline, so a record can
+  upload then writes nothing twice. A client works offline, so a record can
   reach the server long after the user acted.
 - **The schedule reads the moment the user acted, never `created_at`.** A
   record uploaded a day late was still answered when the user answered it.
@@ -277,22 +282,23 @@ trigger, as `README.md` requires.
   questions and whether the exam passed.
 - **`daily_limits`**: how many new questions a day allows.
 - **`limit_raises`**: how many new questions the raise adds to today's limit.
-- **A certification is referenced by its module, its topic and its rank.** A
+- **A certification is referenced by its module, its topic and its level.** A
   certification is derived rather than stored, so no table holds it, and the
   three minted parts name it.
 - **The content tables are refreshed by the seed.** Their columns follow the
   authoring format and may change with a migration. The eight tables above are
   the part that cannot.
 
-## The app's wire
+## The wire
 
-The native app came from learn and still reads and writes learn's formats. The
-engine translates at its edge, so the store keeps this project's names.
+The native app came from learn and still reads and writes learn's formats, and
+the web app reads and writes them through the same `packages/core`. The engine
+translates at its edge, so the store keeps this project's names.
 
-- **The content reaches the app as one snapshot**, learn's `courses.json` at
+- **The content reaches a client as one snapshot**, learn's `courses.json` at
   format 6. The snapshot rebuilt from Postgres equals learn's own, so the
-  app's loader stays as it was.
-- **The app syncs learn's log lines**: `attempt`, `session`, `status`,
+  loader in `packages/core` stays as it was.
+- **A client syncs learn's log lines**: `attempt`, `session`, `status`,
   `focus`, `lesson` and `cert`. Each line carries a `client_id` and names its
   content by slug.
 - **Two lines are the engine's own**: `limit` and `raise`. learn kept the
@@ -302,49 +308,55 @@ engine translates at its edge, so the store keeps this project's names.
   open question, and its `drill` queue as the filtered queue. A line read
   back carries learn's names again.
 - **A line naming content the store does not hold is refused alone.** The
-  rest of the upload is stored, and the reply names each refused line, so the
-  app drops it rather than sending it again.
+  rest of the upload is stored, and the reply names each refused line.
 - **A sync returns the user's records since a cursor**, one append order per
-  table. The app merges them as it merged other devices' files.
+  table. A client merges them into its copy by `client_id`.
 
-## The web's store
+## A client's store
 
-The web app runs the knowledge module's rules from `packages/core`, as the
-native app does. A visit is one load of the web app in a browser tab. The
-engine holds the user's log, and the browser keeps only the records the
-engine has not yet acknowledged.
+The web app and the native app keep the knowledge log the same way. Each app
+runs the rules from `packages/core`, and each keeps a copy of the content and
+of the user's log on the device. A platform differs from the other only where
+the platform itself cannot do the same.
 
-- **A visit fetches the snapshot and the user's whole knowledge log.** The
-  first knowledge page of a visit asks for both, the log through a sync with
-  no cursor. A browser is cleared and shared in ways a phone is not, so a
-  copy kept between visits would be a second log disagreeing with the
-  engine's.
-- **The snapshot's ETag spares the download.** The content moves only at a
-  seed, so a later visit is answered 304 and reads the browser's cached copy.
-- **Each record is posted as it is written**: an answer, a stint, a focus, a
-  status change, a lesson mark or an exam. The queue picks the next question
-  from the state the tab holds, so a pick waits for no round trip.
-- **Each post also returns the records written since the visit's cursor.**
-  An answer given on the phone during a web visit then reaches the tab's
-  schedule at the next post, rather than at the next reload.
-- **The browser mints each record's `client_id`.** A post retried after a
-  dropped connection then writes nothing twice, as the app's upload does.
-- **A record the engine has not acknowledged waits in the outbox**, a list
-  kept in `localStorage`. The outbox survives a reload and a closed tab, so
-  an answer given while the connection was down is not lost with the page.
-- **The outbox is sent with every post and with the first fetch of a
-  visit.** A record then waits no longer than the next request that reaches
-  the engine.
+- **A client keeps the snapshot and the user's log between launches.** The
+  native app keeps them in SQLite, and the web app keeps them in IndexedDB.
+  A launch reads the copy first, so the first question waits for no round
+  trip.
+- **A launch then syncs from the copy's cursor.** A copy that is gone, after
+  a cleared browser or a reinstalled app, syncs with no cursor and receives
+  the whole log again. The engine's log is the truth, and a copy is only
+  ever rebuilt from it.
+- **The snapshot is revalidated by its ETag.** The content moves only at a
+  seed, so an unchanged snapshot answers 304 and the copy stands.
+- **A record the engine has not acknowledged waits in the outbox.** The
+  outbox is part of the copy, so a record survives a closed tab, a killed app
+  and a lost connection.
+- **An answer is sent within ten seconds of being given.** Answers given in
+  quick succession then travel in one upload. Every other record is sent at
+  once, since a focus, a status or a limit changes what another device
+  serves.
+- **A client also syncs when it returns to the foreground**: the app becoming
+  active, or the page becoming visible. Records another device wrote in the
+  meantime then reach the schedule before the next pick.
+- **Every upload returns the records written since the cursor.** An answer
+  given on the phone reaches an open web page at the page's next sync.
 - **A record leaves the outbox once the engine stored it, knew it already
   or refused it.** A refused line names content the store does not hold, so
   sending the line again would be refused again.
-- **The outbox is kept per user.** A second account signed in on the same
-  browser would otherwise upload the first account's answers into its own
-  log. A user's outbox waits for a visit signed in as that user.
-- **A queue keeps serving while the connection is down.** The tab holds the
-  snapshot and the log, and the rules run in the tab. A reload with no
-  connection fetches nothing, so the web works offline only inside a tab
-  already open.
-- **The browser's records name the device `web`.** The device says which
-  client wrote a record, and telling one browser from another would answer
-  no question the schedule asks.
+- **The copy is keyed to the signed-in user.** A second account signed in on
+  the same device would otherwise read the first account's log and upload
+  its outbox under the wrong user.
+- **Signing out sends the outbox, then deletes the copy.** A copy left behind
+  keeps a user's log readable on a shared device. An outbox that cannot be
+  sent is named before sign-out discards it, so the user decides whether
+  those answers are lost.
+- **A queue keeps serving while the connection is down**, on both clients,
+  since the rules and the copy are on the device.
+- **The web app does not start without a connection, where the native app
+  does.** The browser fetches the page's own files from the engine on each
+  load. A service worker serving those files offline is deferred until a
+  user practises on the web away from a connection.
+- **The web app's records name the device `web`.** A browser carries no
+  stable device name, and telling one browser from another would answer no
+  question the schedule asks.

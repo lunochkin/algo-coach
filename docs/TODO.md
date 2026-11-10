@@ -26,9 +26,18 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [ ] Add the `daily_limits` and `limit_raises` tables with their `limit`
       and `raise` sync lines, and have the app write them instead of keeping
       the limit and the raise on the device
-- [x] Write the web's knowledge store into `knowledge.md`: the snapshot and
-      the user's log fetched per visit, each answer posted as given, and a
-      `localStorage` outbox for a dropped connection
+- [ ] Move the day boundary in `packages/core` from 04:00 local time to
+      00:00 UTC, with the fixture's `new_today` cases rewritten to match
+- [ ] Rename the knowledge store's `rank` to `level`, in the migration, the
+      tables and the server code. The docs, the wire and `packages/core` say
+      `level` already
+- [ ] Rename the problems' `levels` to `difficulty` in `pages.md` and the
+      Problems page. `level` now names a question's depth
+- [x] Write the clients' knowledge store into `knowledge.md`: one copy of
+      the snapshot and the log on the device, an outbox, and when each syncs
+- [ ] Key the native app's copy to the signed-in user, and have sign-out
+      send the outbox and delete the copy. Pending rows outlive a sign-out
+      today
 - [ ] Add a section for the knowledge modules to the web's navigation, and
       write its pages into `pages.md` and `wireframes.md`
 - [ ] Serve the next queue, the review queue and practice on the web from

@@ -281,9 +281,9 @@ without redefining them. Grouped by the file that specifies the record.
 
 - **Module**: one subject of declarative knowledge, such as Python or system
   design. A module holds topics, and a topic holds subtopics.
-- **Rank**: how deep a question goes, one of four: 0 Foundation, 1 Associate,
+- **Level**: how deep a question goes, one of four: 0 Foundation, 1 Associate,
   2 Professional and 3 Expert. A problem's difficulty is a different field.
-- **Group**: one subtopic at one rank, the unit gating and coverage count.
+- **Group**: one subtopic at one level, the unit gating and coverage count.
 - **Question**: one fact asked about, in one of three formats: `choice`,
   `short` or `open`.
 - **Open question**: a question the user answers in their own head, then
@@ -298,7 +298,7 @@ without redefining them. Grouped by the file that specifies the record.
   Distinct from mastery, which is per technique.
 - **Servable**: a question a queue may serve now: unseen, or past its due
   time.
-- **Gating**: the rule opening a group's new questions once the lower ranks
+- **Gating**: the rule opening a group's new questions once the lower levels
   and the prerequisite subtopics are done.
 - **Frontier**: the open groups that are not done, where new questions come
   from.
@@ -309,21 +309,22 @@ without redefining them. Grouped by the file that specifies the record.
 - **Queue**: a sequence of questions picked one at a time from what is servable:
   the next queue, the review queue or the filtered queue.
 - **Filtered queue**: the queue serving questions the user chose by topic,
-  subtopic, rank or kind, locked or not.
+  subtopic, level or kind, locked or not.
 - **Stint**: the record of one queue or one exam, stored when it stops.
 - **Focus**: the module, topic, subtopic or certification the next queue is
   aimed at.
 - **Module status**: active, paused or archived, set by the user.
-- **Certification**: one scope, a topic or a whole module, at one rank. Earned
+- **Certification**: one scope, a topic or a whole module, at one level. Earned
   on coverage, retention, an exam and its prerequisites.
-- **Outbox**: the knowledge records a browser holds that the engine has not
-  acknowledged, kept in `localStorage` per user.
+- **Outbox**: the knowledge records a client holds that the engine has not
+  acknowledged, kept in the client's copy of the user's log.
 
 ### The native app
 
 - **Native app**: the engine's client on a phone, built from one codebase for
-  Android and iOS. It runs the knowledge module's rules itself and schedules
-  offline. Distinct from the web app opened on a phone, which does neither.
+  Android and iOS. It runs the knowledge module's rules from `packages/core`,
+  as the web app does, and starts without a connection, which the web app
+  cannot.
 
 ### The pages
 
@@ -557,8 +558,8 @@ times. Each record class is specified in one of the files beside it.
     screen would exist three times, and each copy would need testing on a
     device.
 - **The native app is the knowledge module's client, and schedules offline.**
-  It holds its own copy of the knowledge module's rules, in TypeScript, and
-  syncs with the engine through the API.
+  It runs the knowledge module's rules from `packages/core`, and syncs with
+  the engine through the API.
   - The app answers questions with no network. A queue picks each question at
     the moment it is needed, so a round trip per pick would stall practice on
     a train or a plane.
