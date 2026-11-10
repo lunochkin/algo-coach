@@ -451,6 +451,10 @@ one form its target named.
       the separating size and the count of a resumed landing are readable
       nowhere once the draft is cleared. Triggered when a report reads the
       separating size of a problem a resume landed
+- [ ] Tell the generator to write every bound and formula as a Python
+      expression in a code span, never TeX, and say so in `corpus.md`. A code
+      span reads the same on both clients, where the phone reads TeX through a
+      Unicode fallback. Triggered by the next generation sweep
 
 ### Cases and verdicts
 
