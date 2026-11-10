@@ -14,6 +14,8 @@ describe("a signed-in device's line", () => {
   it('reads a day never reached as never', () => {
     expect(lastAt(null, NOW)).toBe('never');
     expect(lastAt('2026-11-09T11:00:00Z', NOW)).toBe('yesterday');
+    expect(lastAt('2026-10-05T12:00:00Z', NOW)).toBe('a month ago');
+    expect(lastAt('2026-09-05T12:00:00Z', NOW)).toBe('2 months ago');
   });
 });
 

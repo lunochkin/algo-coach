@@ -5,7 +5,10 @@ export function lastAt(at: string | null | undefined, now: number): string {
   if (days === 0) return 'today';
   if (days === 1) return 'yesterday';
   if (days < 30) return `${days} days ago`;
-  if (days < 365) return `${Math.floor(days / 30)} months ago`;
+  if (days < 365) {
+    const months = Math.floor(days / 30);
+    return months === 1 ? 'a month ago' : `${months} months ago`;
+  }
   return new Date(at).toLocaleDateString();
 }
 
