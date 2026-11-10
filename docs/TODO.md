@@ -29,7 +29,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Rename the knowledge store's `rank` to `level`, in the migration, the
       tables and the server code. The docs, the wire and `packages/core` say
       `level` already
-- [ ] Rename the problems' `levels` to `difficulty` in `pages.md` and the
+- [x] Rename the problems' `levels` to `difficulty` in `pages.md` and the
       Problems page. `level` now names a question's depth
 - [x] Write the clients' knowledge store into `knowledge.md`: one copy of
       the snapshot and the log on the device, an outbox, and when each syncs

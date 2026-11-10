@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { lastAt, share } from '@/lib/format'
 
 // what the picked problem's page carried, in one line above the statement:
-// the level, the techniques, what the user has done on it, and the cards.
+// the difficulty, the techniques, what the user has done on it, and the cards.
 // `technique` narrows the cards to the one the pick came from
 export function ProblemFacts({
   problemId,

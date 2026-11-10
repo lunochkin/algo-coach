@@ -98,8 +98,8 @@ Every page under a section carries the same two rows above its body.
 | algo-coach   Practice  [ Problems ]  Cards          ☀  ≡               |
 +------------------------------------------------------------------------+
 | Problems                                                               |
-| Every problem the engine has written. A level and a tag narrow the     |
-| list, and a problem shows where it matches both.                       |
+| Every problem the engine has written. A difficulty and a tag narrow    |
+| the list, and a problem shows where it matches both.                   |
 |                                                                        |
 | ( easy 1 )( [medium 1] )( hard 0 )                                     |
 |                                                                        |
@@ -117,15 +117,15 @@ Every page under a section carries the same two rows above its body.
 - The navigation names the listing, and marks Problems on it alone. A picked
   problem is a step down from the board, from a technique or from a card.
 - A tag is a technique the listing holds, with how many problems carry it. A
-  picked tag is marked. The levels are the three a problem can carry, in the
-  order a solver reads them.
+  picked tag is marked. The difficulties are the three a problem can carry,
+  in the order a solver reads them.
 - The tags keep the order the whole listing gives, and each count holds a fixed
   width, so picking a filter moves no row of the page.
 - A problem is shown where it carries any tag the user picked and sits at any
-  level they asked for. Two techniques ask for the problems of either, where a
-  technique and a level ask for the problems of both.
-- Each chip counts what pressing it would leave: the levels count what the tags
-  left, and the tags count what the levels left.
+  difficulty they asked for. Two techniques ask for the problems of either,
+  where a technique and a difficulty ask for the problems of both.
+- Each chip counts what pressing it would leave: the difficulties count what
+  the tags left, and the tags count what the difficulties left.
 - The tags picked are in the URL, so a filtered listing is a link the user can
   keep.
 - A row names the problem's techniques under its title, since the counts take
@@ -202,7 +202,7 @@ problem's path reads as its record, as "Every problem" gives.
   the clock preference starts it on opening. Once running, the press reads
   `[ Pause ]`, and once paused, `[ Start ]` again.
 - One line above the statement carries what the picked problem's page used to:
-  the level, the techniques, the attempts on this problem and the cards.
+  the difficulty, the techniques, the attempts on this problem and the cards.
 - The bar carries the problem's title, the page's only one, at the heading
   size. The statement column repeats none, since the bar keeps the title in view
   while the statement scrolls.

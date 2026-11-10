@@ -38,21 +38,22 @@ those steps at low fidelity.
   card.
 - **The listing filters by two things a problem carries: its techniques and
   its difficulty.** The tags it offers are the techniques the listing itself
-  holds, and the levels are the three a problem can carry.
+  holds, and the difficulties are the three a problem can carry: easy, medium
+  and hard. A question's level is a different field, as `knowledge.md` gives.
 - **A second pick inside one filter widens the list, and the two filters
   narrow each other.** A problem is shown where it carries any tag the user
-  picked and sits at any level they asked for. Two techniques ask for the
-  problems of either, where a technique and a level ask for the problems of
-  both.
-- **Each chip counts what pressing it would leave**, so the levels count what
-  the tags left and the tags count what the levels left. A count over the whole
-  corpus would offer a chip that returns nothing.
+  picked and sits at any difficulty they asked for. Two techniques ask for
+  the problems of either, where a technique and a difficulty ask for the
+  problems of both.
+- **Each chip counts what pressing it would leave**, so the difficulties
+  count what the tags left and the tags count what the difficulties left. A
+  count over the whole corpus would offer a chip that returns nothing.
 - **Picking a filter moves no row of the page.** The chips keep the order the
   whole listing gives and a fixed width for their count, and the press that
   clears the filters sits in the heading rather than on a line of its own. A
   reader comparing two problems otherwise loses the one they were reading as
   the chips above rewrap.
-- **The URL carries the tags, the levels and the page**, as `?technique=`,
+- **The URL carries the tags, the difficulties and the page**, as `?technique=`,
   `?difficulty=` and `?page=`. A filtered listing is then a link the user can
   keep, and the three are the page's whole state.
 - **The listing is read in pages of twenty rows.** Fifty problems already scroll
@@ -129,9 +130,9 @@ those steps at low fidelity.
   so a reload reaches the sitting rather than serving the problem again. A
   retired problem's path reads as its record and serves nothing.
 - **The sitting page carries what the picked problem's page carried**: the
-  level, the techniques, the counts the user reached on the problem, and the
-  cards. Those facts sit in one line above the statement, and the statement
-  is the page's body.
+  difficulty, the techniques, the counts the user reached on the problem, and
+  the cards. Those facts sit in one line above the statement, and the
+  statement is the page's body.
 - **A problem's unsent code, the clock preference and the chosen colour scheme
   are the state the browser keeps.** The code is stored under the problem's id
   with the moment it was typed, so a reload restores what the user typed, and

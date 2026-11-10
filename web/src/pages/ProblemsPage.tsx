@@ -17,7 +17,7 @@ const PER_PAGE = 20
 
 // the three a problem carries, in the order a solver reads them rather than
 // the order they count in
-const LEVELS = ['easy', 'medium', 'hard']
+const DIFFICULTIES = ['easy', 'medium', 'hard']
 
 // every served problem at once, where the board reaches them one technique at
 // a time. The techniques a problem carries are the filter
@@ -28,7 +28,7 @@ export function ProblemsPage() {
   const picked = search.getAll('technique')
   // one tag picked is a technique drilled for, as a pick from the board is
   const drilled = picked.length === 1 ? picked[0] : null
-  const levels = search.getAll('difficulty')
+  const difficulties = search.getAll('difficulty')
   const page = Math.max(1, Number(search.get('page') ?? 1) || 1)
 
   // the two filters and the page are the page's whole state, so one writer
@@ -44,27 +44,27 @@ export function ProblemsPage() {
   // a filter moves the listing back to its first page: the page the reader was
   // on may hold nothing once the list is narrowed
   function toggle(technique: string) {
-    go(without(picked, technique), levels, 1)
+    go(without(picked, technique), difficulties, 1)
   }
 
-  function toggleLevel(level: string) {
-    go(picked, without(levels, level), 1)
+  function toggleDifficulty(difficulty: string) {
+    go(picked, without(difficulties, difficulty), 1)
   }
 
   return (
     <section className="space-y-section">
       <PageHeader
         title="Problems"
-        note="Every problem the engine has written. A level and a tag narrow the list, and a problem shows where it matches both."
+        note="Every problem the engine has written. A difficulty and a tag narrow the list, and a problem shows where it matches both."
       />
       <Loaded of="the problems" state={listed} blank="No problem is served yet.">
         {(listed) => {
           // a filter of its own narrows what the other one counts, so each
           // count says what pressing that chip would leave
-          const byLevel = listed.filter((one) => asked(one, levels))
+          const byDifficulty = listed.filter((one) => asked(one, difficulties))
           const byTag = listed.filter((one) => carries(one, picked))
-          const shown = byLevel.filter((one) => carries(one, picked))
-          const filtered = picked.length > 0 || levels.length > 0
+          const shown = byDifficulty.filter((one) => carries(one, picked))
+          const filtered = picked.length > 0 || difficulties.length > 0
           const pages = Math.max(1, Math.ceil(shown.length / PER_PAGE))
           const current = Math.min(page, pages)
           const held = shown.slice((current - 1) * PER_PAGE, current * PER_PAGE)
@@ -73,29 +73,29 @@ export function ProblemsPage() {
             <div className="space-y-section">
               <section className="space-y-stack">
                 <div className="flex flex-wrap gap-2">
-                  {LEVELS.map((level) => (
+                  {DIFFICULTIES.map((difficulty) => (
                     <button
-                      key={level}
+                      key={difficulty}
                       type="button"
-                      onClick={() => toggleLevel(level)}
-                      aria-pressed={levels.includes(level)}
+                      onClick={() => toggleDifficulty(difficulty)}
+                      aria-pressed={difficulties.includes(difficulty)}
                       className={cn(
                         'rounded-lg border px-2.5 py-1 text-meta transition-colors',
-                        levels.includes(level)
+                        difficulties.includes(difficulty)
                           ? 'border-transparent bg-secondary text-secondary-foreground'
                           : 'hover:bg-accent',
                       )}
                     >
-                      {level}{' '}
+                      {difficulty}{' '}
                       <span className="inline-block min-w-[2ch] text-right text-muted-foreground tabular-nums">
-                        {byTag.filter((one) => one.difficulty === level).length}
+                        {byTag.filter((one) => one.difficulty === difficulty).length}
                       </span>
                     </button>
                   ))}
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {tags(listed, byLevel).map(([technique, held]) => (
+                  {tags(listed, byDifficulty).map(([technique, held]) => (
                     <button
                       key={technique}
                       type="button"
@@ -131,15 +131,15 @@ export function ProblemsPage() {
                       className="ml-auto text-meta font-normal text-muted-foreground underline-offset-4 hover:underline"
                     >
                       Clear{' '}
-                      {picked.length + levels.length === 1
+                      {picked.length + difficulties.length === 1
                         ? 'the filter'
-                        : `all ${picked.length + levels.length} filters`}
+                        : `all ${picked.length + difficulties.length} filters`}
                     </button>
                   )}
                 </h2>
                 {shown.length === 0 ? (
                   <p className="text-meta text-muted-foreground">
-                    No problem carries a tag you picked at the level you asked for.
+                    No problem carries a tag you picked at the difficulty you asked for.
                   </p>
                 ) : (
                   <>
@@ -154,7 +154,7 @@ export function ProblemsPage() {
                           variant="outline"
                           size="sm"
                           disabled={current === 1}
-                          onClick={() => go(picked, levels, current - 1)}
+                          onClick={() => go(picked, difficulties, current - 1)}
                         >
                           Previous
                         </Button>
@@ -165,7 +165,7 @@ export function ProblemsPage() {
                           variant="outline"
                           size="sm"
                           disabled={current === pages}
-                          onClick={() => go(picked, levels, current + 1)}
+                          onClick={() => go(picked, difficulties, current + 1)}
                         >
                           Next
                         </Button>
@@ -222,10 +222,11 @@ function carries(one: Listed, picked: string[]): boolean {
   return picked.length === 0 || picked.some((technique) => one.techniques.includes(technique))
 }
 
-// the levels read the same way, and the two filters meet: a problem shows
-// where it carries a picked tag and sits at a level asked for
-function asked(one: Listed, levels: string[]): boolean {
-  return levels.length === 0 || (one.difficulty !== null && levels.includes(one.difficulty))
+// the difficulties read the same way, and the two filters meet: a problem shows
+// where it carries a picked tag and sits at a difficulty asked for
+function asked(one: Listed, difficulties: string[]): boolean {
+  if (difficulties.length === 0) return true
+  return one.difficulty !== null && difficulties.includes(one.difficulty)
 }
 
 // a chip that presses off where it is on
@@ -234,7 +235,7 @@ function without(held: string[], one: string): string[] {
 }
 
 // every technique the listing holds, ordered by how many problems carry it in
-// the whole listing, and counted over what the level filter left. The order is
+// the whole listing, and counted over what the difficulty filter left. The order is
 // the whole listing's so the rows never rewrap as a count moves
 function tags(all: Listed[], left: Listed[]): [string, number][] {
   const order = held(all)

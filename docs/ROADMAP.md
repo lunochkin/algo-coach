@@ -351,7 +351,7 @@ decided the work.
 - The pages reworked against real data: rows and panels in place of tables, a
   warm paper ground, a scheme switch, prose and code bound to the tokens, and
   the sitting fitted to a phone's width.
-- A `/problems` listing filtered by tag and level, an account menu, and a
+- A `/problems` listing filtered by tag and difficulty, an account menu, and a
   recall addressed by its template's slug, with every form reachable from the
   card.
 - Six DP codes under `dynamic-programming`, with `parents` added wherever codes
