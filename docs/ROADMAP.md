@@ -381,30 +381,45 @@ Measured:
   100 writings for 72 landed problems, $0.046 per landing and $0.067 per
   problem still served. The generator's call is the largest share, at $0.015.
 
-## Phase 14 — The knowledge module (current)
+## Phase 14 — The knowledge module — done
 
 learn, a personal study app, merged into the engine, so practice happens in
-one app with one log. Ordered ahead of scheduling on 2026-11-09: the author
-already practises daily in learn, and every day spent there is log this engine
-does not hold.
+one app with one log.
 
-- **Declarative knowledge as the third part of mastery**, beside recognition
-  and execution, fed by question attempts.
-- **Modules of questions**, Python first, authored in files and seeded into
-  Postgres. A question with attempts is retired, never deleted.
-- **learn's native app as the engine's client**, scheduling offline with its
-  TypeScript core and syncing through the engine's API, signed in through
-  Google or GitHub from the app itself.
-- **A sync API** appending a user's records by client-minted id, and a content
-  snapshot in the shape the app already reads.
-- **learn's history imported** for the author, and learn frozen.
-- **FSRS replay, question states and gating ported to Python**, held to the
-  app by shared fixtures, for the mastery formula and the scheduler to read on
-  the server. The queues stay in TypeScript.
-- Exit: a week of practice in the algo-coach app alone, with learn frozen and
-  its history imported.
+- Declarative knowledge as the third part of mastery, never standing in for
+  recognition.
+- Modules of questions authored in a private content repository and seeded
+  into Postgres: refreshed by slug, retired rather than deleted, their JSONB
+  structure typed, and their subtopics titled.
+- learn's Android app as the engine's client in `native/`: scheduling offline
+  with its TypeScript core, syncing by client-minted id, reading the content
+  as learn's snapshot behind an ETag, and signing in through Google or GitHub
+  with a one-time code and PKCE.
+- A private release key, and a dev build with a scheme of its own that syncs
+  with a local engine.
+- The account menu listing and revoking signed-in apps, and `log export` and
+  `log erase` covering the knowledge log.
+- learn's history imported for the author, and learn frozen.
+- From the first days of use: a login screen, the app named Algo Coach, a
+  raise of today's new-question limit, learning steps counted apart from the
+  due reviews, and next up named by Continue's own rule.
+- Exit met in part at close: practice moved to the app on 2026-11-09, and the
+  phase was closed by hand on 2026-11-10. The days before were practised in
+  learn. The Python port of FSRS replay, states and gating moved to Phase 16,
+  which reads it.
 
-## Phase 15 — Two platforms
+Measured:
+
+- The Python module: 9 topics, 57 subtopics, 1914 questions (1436 choice, 335
+  short, 143 open) and 345 lessons, seeded with nothing refused. The snapshot
+  rebuilt from Postgres equalled learn's own `courses.json`.
+- The history import: 175 lines read and 171 stored. The 4 refused were
+  statuses of the two modules dropped from learn, and a second run stored
+  nothing.
+- A seed took 2 s locally and minutes through the tunnel, one round trip per
+  row.
+
+## Phase 15 — Two platforms (current)
 
 The web and the native app become two ways into one learner model, each
 feature placed on the platforms where it works. Decided 2026-11-10, after
@@ -431,6 +446,9 @@ from attempts made after it ships, so a week earlier is a week more log to
 read it on. The matcher's score waits on work alone and loses nothing by
 following. The recognition drill moved to Further developments on 2026-10-02.
 
+- **FSRS replay, question states and gating ported to Python**, held to the
+  TypeScript core by the shared fixtures, for the mastery formula and the
+  scheduler to read on the server.
 - **Mastery per technique**, derived from attempts, their claims and their
   verdicts, and never stored. Recognition and execution stay apart in the
   state and on the board. Recognition reads as unknown until the recognition

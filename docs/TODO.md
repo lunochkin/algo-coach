@@ -4,88 +4,7 @@ The phases still open. A ticked item stays while its phase is open. When a
 phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 The work not yet ready for a phase waits under Further developments.
 
-## Phase 14 — the knowledge module (current)
-
-learn, a personal study app with a native client, merges into the
-engine: its question bank, its FSRS schedule, its queues and its app. Practice
-then happens in one app with one log, and declarative knowledge becomes the
-third part of mastery. Content is authored in files and seeded into Postgres,
-as cards are. The app carries the knowledge modules alone in this phase, as
-learn's app does, so the switch changes the backend and nothing the user sees.
-
-### The design
-
-- [x] Make `content/` a private git repository of its own, holding the cards
-      and the knowledge modules. It is gitignored here, so the cards carry no
-      history today
-- [x] Write `docs/architecture/knowledge.md` from learn's `spec/learn.md`:
-      modules, questions, lessons, levels, the prerequisite graph,
-      certifications, exams, the queues and the FSRS settings, with Postgres
-      tables in place of learn's data repo
-- [x] Rename in the glossary each learn term that collides with one here:
-      learn's `card` format against a Card, and its `drill` queue against the
-      drill loop. One name carries one meaning
-- [x] Write declarative knowledge into `log.md` as the third part of mastery,
-      fed by question attempts, with its formula deferred as the other two are
-- [x] Write the seed's two rules into `knowledge.md`: a question with attempts
-      is retired, never deleted, and a question asking something new takes a
-      new slug. The attempts answered the old question
-- [x] Write the app into `README.md` as a third adapter carrying the domain in
-      TypeScript, held to the Python side by shared fixtures. The invariant
-      names two adapters and one copy of the domain
-- [x] Write the app's sign-in into `README.md`: the provider flow opened
-      inside the app, ending in a token through a one-time code and PKCE. A
-      native client cannot carry the pages' cookie
-
-### The server
-
-- [x] Add the content tables and the six append-only learner tables in one
-      migration, each record carrying a client-minted id and each append-only
-      table its trigger
-- [x] Seed the Python module from `content/` with `algo-coach seed knowledge`,
-      refusing what learn's `learn check` refuses
-- [x] Type a question's body as one record per format, and a module's graph
-      and certification settings as records of their own, so the seed
-      refuses a malformed row the JSONB column would store
-- [x] Serve the content snapshot in the shape learn's app reads,
-      `courses.json` format 6, so the app's loader stays as it is
-- [x] Serve the sync API: append a user's records, ignoring an id already
-      stored, and return the records since a cursor. A retried upload then
-      writes nothing twice
-- [x] Sign the native app in through the provider flow, ending in a token
-      the app exchanges a one-time code for
-- [x] List and revoke the signed-in apps from the account menu
-- [x] Read out and erase the six knowledge tables with `algo-coach log export`
-      and `log erase`. `log.md` promises an erasure removes the whole log
-
-### The app
-
-- [x] Move learn's app into `native/` with its TypeScript core, the FSRS
-      parity fixtures and its USB install recipe. A store release is deferred
-- [x] Keep the app's signing key out of git and backed up off the laptop.
-      learn's app carries its debug keystore in the repo, and a sideloaded
-      update signed by another key installs only after an uninstall, which
-      drops unsynced attempts
-- [x] Replace the app's GitHub sync with the sync API, its outbox and its
-      merge rules kept
-- [x] Import learn's history for the author's user, and write down the record
-      counts on both sides. A count that differs names records lost in the copy.
-      175 read, 171 stored, and 4 statuses of dropped modules refused
-- [x] Freeze learn the day the app syncs with the engine. Two apps writing one
-      schedule would each read half the history
-
-### The engine on the server
-
-- [ ] Port FSRS replay, the question states and gating into
-      `algo_coach.knowledge`, with the shared fixtures passing against it. The
-      mastery formula and the scheduler read them on the server, and the
-      queues stay in TypeScript
-
-### Exit
-- [ ] Practise a week in the algo-coach app alone, with learn frozen and its
-      history imported
-
-## Phase 15 — two platforms
+## Phase 15 — two platforms (current)
 
 The web and the native app become two ways into one learner model. The
 knowledge rules and what the screens show move into one TypeScript package
@@ -127,6 +46,10 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 
 ## Phase 16 — scheduling and mastery
 
+- [ ] Port FSRS replay, the question states and gating into
+      `algo_coach.knowledge`, with the shared fixtures passing against it. The
+      mastery formula and the scheduler read them on the server, and the
+      queues stay in TypeScript
 - [x] Write into `docs/architecture/` what a technique's mastery is derived
       from: the attempts, their claims, their verdicts and the drills, with
       recognition kept apart from execution. Mastery is never stored, so the
