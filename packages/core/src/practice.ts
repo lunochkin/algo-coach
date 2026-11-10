@@ -154,3 +154,25 @@ export function cardRow(card: ListedCard, heading: string | null, now: number): 
     recall: recallMarks(card),
   };
 }
+
+/** A template's last recall. A hinted pass is not a pass, so the hints read beside it. */
+export function recallLine(one: Recalled | undefined, now: number): string {
+  if (one === undefined || one.last_at === null) return 'Never recalled';
+  const n = one.hints.length;
+  const hints = n === 0 ? 'no hint taken' : n === 1 ? '1 hint' : `${n} hints`;
+  return `Recalled ${lastAt(one.last_at, now)} · ${one.verified ? 'passed' : 'failed'} · ${hints}`;
+}
+
+/** The press covering a form: its length, and nothing of the form. */
+export function revealLabel(code: string): string {
+  const lines = code.trimEnd().split('\n').length;
+  return `Reveal the form · ${lines === 1 ? '1 line' : `${lines} lines`}`;
+}
+
+/** Why a read from the engine failed, where the device holds no copy of `what`. */
+export function readFailure(what: string, error: string): string {
+  if (/network request failed|failed to fetch|timed? ?out|offline/i.test(error)) {
+    return `No connection. ${what[0].toUpperCase()}${what.slice(1)} are read from the engine, and this device holds no copy.`;
+  }
+  return `${what[0].toUpperCase()}${what.slice(1)} did not load: ${error}`;
+}

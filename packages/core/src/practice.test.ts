@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { boardView, cardBlocks, cardRow, inProgress, techniqueStats, type components } from './index';
+import { boardView, cardBlocks, cardRow, inProgress, readFailure, recallLine, revealLabel, techniqueStats, type components } from './index';
 
 type ListedCard = components['schemas']['ListedCard'];
 type Template = components['schemas']['Template'];
@@ -106,5 +106,27 @@ describe("a card's row", () => {
       ['◐', null],
       ['✓', 'passed'],
     ]);
+  });
+});
+
+describe("a card's templates", () => {
+  it('reads a recall with its hints', () => {
+    expect(recallLine(undefined, NOW)).toBe('Never recalled');
+    expect(recallLine({ template_id: 'x', last_at: '2026-11-10T08:00:00Z', hints: ['notes'], verified: true }, NOW)).toBe(
+      'Recalled today · passed · 1 hint',
+    );
+  });
+
+  it('covers a form with its length alone', () => {
+    expect(revealLabel('def solve():\n    return 1\n')).toBe('Reveal the form · 2 lines');
+  });
+});
+
+describe('a failed read', () => {
+  it('says the device holds no copy when the network is down', () => {
+    expect(readFailure('the cards', 'TypeError: Network request failed')).toBe(
+      'No connection. The cards are read from the engine, and this device holds no copy.',
+    );
+    expect(readFailure('the card', '/cards/x 404: gone')).toBe('The card did not load: /cards/x 404: gone');
   });
 });

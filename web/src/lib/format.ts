@@ -1,4 +1,9 @@
-import { cardRow as cardRowAt, lastAt as lastAtFrom, techniqueStats } from '@algo-coach/core'
+import {
+  cardRow as cardRowAt,
+  lastAt as lastAtFrom,
+  recallLine as recallLineAt,
+  techniqueStats,
+} from '@algo-coach/core'
 
 export { share } from '@algo-coach/core'
 
@@ -21,4 +26,8 @@ export function counts(row: Parameters<typeof techniqueStats>[0]) {
 
 export function cardRow(card: Parameters<typeof cardRowAt>[0], heading: string | null) {
   return cardRowAt(card, heading, Date.now())
+}
+
+export function recallLine(one: Parameters<typeof recallLineAt>[0]) {
+  return recallLineAt(one, Date.now())
 }

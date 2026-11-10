@@ -1,3 +1,4 @@
+import { revealLabel } from '@algo-coach/core'
 import { useState } from 'react'
 
 import { Link } from 'react-router'
@@ -7,7 +8,7 @@ import { Markdown } from '@/components/Markdown'
 import { PythonCode } from '@/components/PythonCode'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { lastAt } from '@/lib/format'
+import { recallLine } from '@/lib/format'
 
 // the form stays hidden until it is asked for: `content.md` gives why a form
 // is worth deriving before it is read. The trigger reads either way, since it
@@ -23,7 +24,6 @@ export function TemplatePanel({
   recalled: Recalled | undefined
 }) {
   const [revealed, setRevealed] = useState(false)
-  const lines = template.code.trimEnd().split('\n').length
   // `content.md`: a template no case checks is read on the card and never
   // recalled
   const recallable = (template.cases ?? []).length > 0
@@ -37,7 +37,7 @@ export function TemplatePanel({
         {template.optional && <Badge variant="secondary">optional</Badge>}
         {template.kind === 'procedure' && <Badge variant="outline">procedure</Badge>}
         <span className="ml-auto text-meta text-muted-foreground">
-          {recallable ? reads(recalled) : 'No case checks this form'}
+          {recallable ? recallLine(recalled) : 'No case checks this form'}
         </span>
       </div>
 
@@ -54,7 +54,7 @@ export function TemplatePanel({
             onClick={() => setRevealed(true)}
             className="w-full rounded-md border border-dashed px-3 py-2 text-left text-meta text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
-            Reveal the form · {lines === 1 ? '1 line' : `${lines} lines`}
+            {revealLabel(template.code)}
           </button>
         )}
 
@@ -83,11 +83,4 @@ export function TemplatePanel({
       </div>
     </div>
   )
-}
-
-// a hinted pass is not a pass, so the hints read beside the moment
-function reads(one: Recalled | undefined): string {
-  if (one === undefined || one.last_at === null) return 'Never recalled'
-  const hints = one.hints.length === 0 ? 'no hint taken' : `${one.hints.length} hints`
-  return `Recalled ${lastAt(one.last_at)} · ${one.verified ? 'passed' : 'failed'} · ${hints}`
 }

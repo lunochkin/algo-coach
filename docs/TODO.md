@@ -127,7 +127,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Move what the web's board and cards pages compute for display into
       `packages/core`: a technique's row, a card's row and its state line.
       The phone would otherwise compute them again
-- [ ] Serve the cards on the phone as a Cards tab: the list grouped by
+- [x] Serve the cards on the phone as a Cards tab: the list grouped by
       technique, and a card's trigger, brief and templates, each hidden
       until revealed. With no network it says so
 - [ ] Serve the board on the phone as a Practice tab: the cards in progress

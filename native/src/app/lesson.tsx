@@ -1,55 +1,22 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { cloneElement, Fragment, isValidElement, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
-import { ScrollView, View, type ScrollViewInstance, type TextStyle, type ViewStyle } from 'react-native';
-import { Renderer, useMarkdown, type MarkedStyles } from 'react-native-marked';
-import { Appbar, Button, Chip, Menu, Text, useTheme, type MD3Theme } from 'react-native-paper';
+import { Fragment, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ScrollView, View, type ScrollViewInstance, type TextStyle } from 'react-native';
+import { useMarkdown } from 'react-native-marked';
+import { Appbar, Button, Chip, Menu, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { lessonsAround, minutesOf, sections, type Course, type Lesson } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
-import { BottomBar, CodeBlock, styles } from '@/ui/common';
+import { BottomBar, styles } from '@/ui/common';
+import { CodeRenderer, markdownOptions } from '@/ui/markdown';
 
-const CODE_SCALE = 0.85;
-
-interface InlineCodeProps {
-  text: string;
-  style: TextStyle;
-  size: number;
-}
-
-function InlineCode({ text, style, size }: InlineCodeProps) {
-  return (
-    <Text selectable style={[style, { fontSize: size }]}>
-      {text}
-    </Text>
-  );
-}
-
-/** Code blocks in the app's monospace block (no wrapping); `lesson:` links stay in the app. */
-class LessonRenderer extends Renderer {
+/** `lesson:` links stay in the app. */
+class LessonRenderer extends CodeRenderer {
   constructor(
     private readonly onLesson: (ref: string) => void,
     private readonly linkColor: string,
   ) {
     super();
-  }
-
-  code(text: string, _language?: string, _container?: ViewStyle, _style?: TextStyle): ReactNode {
-    return <CodeBlock code={text} verbatim />;
-  }
-
-  // Monospace looks larger than body text at the same size: scale it to the surrounding text.
-  codespan(text: string, style?: TextStyle): ReactNode {
-    const { fontSize: _fs, lineHeight: _lh, ...rest } = style ?? {};
-    return <InlineCode key={this.getKey()} text={text} style={rest} size={CODE_SCALE * 16} />;
-  }
-
-  heading(children: string | ReactNode[], style?: TextStyle): ReactNode {
-    const size = CODE_SCALE * (style?.fontSize ?? 16);
-    const scaled = Array.isArray(children)
-      ? children.map((x) => (isValidElement(x) && x.type === InlineCode ? cloneElement(x as ReactElement<InlineCodeProps>, { size }) : x))
-      : children;
-    return super.heading(scaled, style);
   }
 
   link(children: string | ReactNode[], href: string, style?: TextStyle, title?: string): ReactNode {
@@ -65,32 +32,10 @@ class LessonRenderer extends Renderer {
   }
 }
 
-function markdownStyles(theme: MD3Theme): MarkedStyles {
-  return {
-    h1: { ...theme.fonts.headlineSmall, color: theme.colors.onSurface, marginVertical: 8 },
-    h2: { ...theme.fonts.titleLarge, color: theme.colors.onSurface, marginVertical: 6 },
-    h3: { ...theme.fonts.titleMedium, color: theme.colors.onSurface, marginVertical: 4 },
-    text: { ...theme.fonts.bodyLarge, color: theme.colors.onSurface },
-    li: { ...theme.fonts.bodyLarge, color: theme.colors.onSurface },
-    codespan: { fontFamily: 'monospace', fontStyle: 'normal', backgroundColor: theme.colors.surfaceVariant },
-  };
-}
-
 /** One section of a lesson, rendered without a list so the outer ScrollView can jump to it. */
 function Section(props: { text: string; renderer: LessonRenderer; onY: (y: number) => void }) {
   const theme = useTheme();
-  const elements = useMarkdown(props.text, {
-    renderer: props.renderer,
-    styles: markdownStyles(theme),
-    theme: {
-      colors: {
-        text: theme.colors.onSurface,
-        link: theme.colors.primary,
-        code: theme.colors.surfaceVariant,
-        border: theme.colors.outlineVariant,
-      },
-    },
-  });
+  const elements = useMarkdown(props.text, markdownOptions(theme, props.renderer));
   return (
     <View onLayout={(e) => props.onY(e.nativeEvent.layout.y)}>
       {elements.map((el, i) => (

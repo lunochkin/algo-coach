@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Button, Text, useTheme } from 'react-native-paper';
 
 import { router } from 'expo-router';
 
@@ -128,3 +128,18 @@ export function BottomBar({ bottom, row = false, children }: { bottom: number; r
 /** Progress colours readable in light and dark mode: covered (done) and open (unlocked). */
 export const tones = (dark: boolean) =>
   dark ? { done: '#81c784', open: '#ffb74d' } : { done: '#2e7d32', open: '#a15c00' };
+
+/** A read from the engine that failed, with the press that asks again. */
+export function Failed({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const theme = useTheme();
+  return (
+    <View style={{ gap: 8, alignItems: 'flex-start' }}>
+      <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
+        {message}
+      </Text>
+      <Button mode="outlined" onPress={onRetry}>
+        Try again
+      </Button>
+    </View>
+  );
+}

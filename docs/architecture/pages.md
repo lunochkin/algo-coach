@@ -378,8 +378,9 @@ what it offers. The inventory is the list both clients build to.
 | The problem listing | `/problems` | none | web for now |
 | A picked problem | `/problems/:problem_id` | none | web for now |
 | A sitting | `/sittings/:sitting_id` | none | web for now |
-| The cards | `/cards` | none | web for now |
-| A card | `/cards/:slug` | none | web for now |
+| The cards | `/cards` | the Cards tab | same |
+| A card's trigger, brief and templates | `/cards/:slug` | Card | same |
+| A card's ladder, probes and run | `/cards/:slug` | none | web for now |
 | A recall | `/cards/:slug/recall/:template` | none | web for now |
 | The knowledge home | `/knowledge` | Home | same |
 | A module | `/knowledge/modules/:module` | Module | same |
@@ -431,10 +432,17 @@ what it offers. The inventory is the list both clients build to.
 - **A technique's problems, the problem listing and a picked problem follow
   the sitting.** Each exists to pick a problem, and a pick opens a sitting,
   so each reaches the phone with the sitting's trigger.
-- **The board, the cards and a card are web for now.** Each reads where the
-  user's practice stands without writing code. The trigger is the phone's
-  Cards tab, then its Practice tab, whose techniques open their cards on
-  the phone. A technique's problems stay with the sitting.
+- **The board is web for now.** The board reads where the user's practice
+  stands without writing code. The trigger is the phone's Practice tab, whose
+  techniques open their cards on the phone. A technique's problems stay with
+  the sitting.
+- **A card's ladder, its probes and the press starting its run follow the
+  sitting.** A rung and a probe each open a problem, and a run measures
+  sittings the phone cannot hold. The phone's card reads the study material
+  alone.
+- **The phone reads the cards from the engine and keeps no copy.** With no
+  connection the Cards tab and a card say so. The knowledge copy exists so a
+  queue picks offline, and reading a card picks nothing.
 - **The privacy policy and the gallery are web only.** The providers' consent
   screens link the policy by its URL, and the gallery is a tool for whoever
   styles the web.
