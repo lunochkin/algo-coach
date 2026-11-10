@@ -55,7 +55,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Add `web` to the npm workspaces, and keep the snapshot and the log in
       IndexedDB with an outbox, synced as `knowledge.md` gives. The pages
       then read the copy, not the whole log
-- [ ] Move what the phone's queue screen computes for display into
+- [x] Move what the phone's queue screen computes for display into
       `packages/core`: a result's verdict rows, its marks and its detail
       sections. The web's queue would otherwise compute them again
 - [ ] Add Continue to the web's knowledge home, with its counts line, the

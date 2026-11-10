@@ -7,20 +7,18 @@ import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  answerKey,
+  type AnswerRow,
   type AttemptRecord,
   block,
   Board,
   byTopic,
   cardFields,
-  type CardFields,
   cardLabel,
   choiceOrder,
   DEFAULT_RULES,
-  type Grade,
+  detailSections,
   gradeChoice,
   hasAnswer,
-  headings,
   isLessonItem,
   isoNow,
   type LessonItem,
@@ -32,22 +30,16 @@ import {
   type Question,
   questionHead,
   queueLine,
+  type Result,
   splitGuess,
   type Status,
+  taughtBy,
+  verdictView,
+  youLine,
+  yourAnswer,
 } from '@algo-coach/core';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
-
-interface Result {
-  q: Question;
-  correct: boolean;
-  guess: boolean;
-  order: number[]; // displayed position -> choice index
-  picked: number[]; // displayed positions
-  reply: string;
-  grade?: Grade;
-  card?: CardFields;
-}
 
 type Phase = 'ask' | 'done' | 'review';
 
@@ -610,20 +602,13 @@ function Reviewed({ r, bottom, last, onNext }: { r: Result; bottom: number; last
   const theme = useTheme();
   const [details, setDetails] = useState(false);
   const q = r.q;
-  const you =
-    q.format === 'short'
-      ? r.reply
-      : [...r.picked]
-          .sort((a, b) => a - b)
-          .map((p) => LETTERS[p])
-          .join('');
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={[styles.page, { paddingBottom: bottom + 96 }]}>
         <Head q={q} tag="" />
         {q.format === 'choice' ? <Choices q={q} order={r.order} picked={r.picked} /> : null}
         <Text variant="titleSmall" style={{ color: theme.colors.tertiary }}>
-          {`You: ${you}${r.guess ? ' (guess)' : ''}`}
+          {youLine(r)}
         </Text>
         <Verdict r={r} />
         <DetailsToggle r={r} open={details} onToggle={() => setDetails(!details)} />
@@ -639,24 +624,12 @@ function Reviewed({ r, bottom, last, onNext }: { r: Result; bottom: number; last
 
 function Verdict({ r }: { r: Result }) {
   const theme = useTheme();
-  const q = r.q;
-  const explain = q.explain ? block(q.explain) : '';
-  if (q.format === 'card') {
-    return explain ? <Text variant="bodyMedium">{explain}</Text> : null;
-  }
-  const key = q.format === 'short' ? q.accept[0] : answerKey(q, r.order);
-  const note =
-    r.correct && r.guess
-      ? 'Guessed: not counted as passed; it will come back.'
-      : !r.correct && !r.guess
-        ? 'Confidently wrong: a misconception. Details are worth it here.'
-        : '';
+  const { head, explain, note } = verdictView(r);
+  if (!head) return explain ? <Text variant="bodyMedium">{explain}</Text> : null;
   return (
     <View style={{ gap: 6 }}>
-      <Text
-        variant="titleMedium"
-        style={{ color: r.correct ? theme.colors.primary : theme.colors.error }}>
-        {r.correct ? '✓ Correct.' : `✗ Answer: ${key}.`}
+      <Text variant="titleMedium" style={{ color: head.correct ? theme.colors.primary : theme.colors.error }}>
+        {head.text}
       </Text>
       {explain ? (
         <Text variant="bodyMedium" selectable>
@@ -700,139 +673,81 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-/** A ✓/✗ row with an optional explanation under it; `yours` highlights the learner's pick. */
-function Row(props: { ok: boolean; mark?: string; label: string; note?: string; yours?: boolean }) {
-  const { ok, mark, label, note, yours } = props;
+/** One row of the learner's answer, as `yourAnswer` gives it; `yours` highlights the learner's pick. */
+function Row({ row }: { row: AnswerRow }) {
   const theme = useTheme();
   return (
     <View
       style={{
         borderRadius: 8,
         padding: 6,
-        backgroundColor: yours ? theme.colors.secondaryContainer : 'transparent',
+        backgroundColor: row.yours ? theme.colors.secondaryContainer : 'transparent',
       }}>
       <Text variant="bodyMedium" selectable>
-        <Text style={{ color: ok ? theme.colors.primary : theme.colors.error }}>{`${mark ?? (ok ? '✓' : '✗')} `}</Text>
-        {label}
-        {yours ? <Text style={{ color: theme.colors.tertiary }}>{'  ← you'}</Text> : null}
+        <Text style={{ color: row.ok ? theme.colors.primary : theme.colors.error }}>{`${row.mark} `}</Text>
+        {row.label}
+        {row.yours ? <Text style={{ color: theme.colors.tertiary }}>{'  ← you'}</Text> : null}
       </Text>
-      {note ? (
+      {row.note ? (
         <Text variant="bodySmall" selectable style={{ color: theme.colors.onSurfaceVariant, marginLeft: 18 }}>
-          {block(note)}
+          {row.note}
         </Text>
       ) : null}
     </View>
   );
 }
 
-/** Your answer, Diagram, How it works, Example, Pitfalls, Versions; empty sections omitted. */
+/** Your answer, then the detail's sections and the lessons teaching the question; empty ones omitted. */
 function Details({ r }: { r: Result }) {
   const theme = useTheme();
   const q = r.q;
-  const d = q.detail;
-  const missed = new Set(r.card?.missed ?? []);
   const course = useStore().catalog?.courses.find((c) => c.slug === q.course);
-  const graph = course?.graph;
-  // A question naming its lesson links straight to that section; otherwise the lessons of its level.
-  const [ownSlug, ownAnchor = ''] = q.lesson.split('#');
-  const own = q.lesson ? graph?.lesson(ownSlug) : undefined;
-  const part = own && ownAnchor ? headings(course?.lessonBodies[ownSlug] ?? '')[ownAnchor] : undefined;
-  const from = own ? [] : (graph?.teaching(q.sub, q.level) ?? []);
-  const fell = new Set(r.card?.traps ?? []);
-  const yours =
-    q.format === 'choice' && q.why.length ? (
-      r.order.map((i, pos) => (
-        <Row
-          key={pos}
-          ok={q.answer.includes(i)}
-          label={`${LETTERS[pos]}) ${q.why[i] ?? ''}`}
-          yours={r.picked.includes(pos)}
-        />
-      ))
-    ) : q.format === 'short' ? (
-      <Text variant="bodyMedium" selectable>
-        {`You: ${r.reply}`}
-        <Text style={{ color: theme.colors.onSurfaceVariant }}>{`  ·  accepted: ${q.accept.join(', ')}`}</Text>
-      </Text>
-    ) : q.format === 'card' && r.card ? (
-      <>
-        {q.key.map((point, i) => (
-          <Row key={`k${i}`} ok={!missed.has(i)} label={`${i + 1}. ${block(point)}`} note={q.keyDetail[i]} />
-        ))}
-        {[...q.traps.keys()]
-          .sort((a, b) => Number(fell.has(b)) - Number(fell.has(a)))
-          .map((i) => (
-            <Row
-              key={`t${i}`}
-              ok={!fell.has(i)}
-              mark={fell.has(i) ? '✗' : '·'}
-              label={`${'abc'[i]}) ${block(q.traps[i])}`}
-              note={q.trapsDetail[i]}
-              yours={fell.has(i)}
-            />
-          ))}
-      </>
-    ) : null;
+  const answer = yourAnswer(r);
+  const sections = detailSections(q);
   return (
     <View style={{ gap: 12 }}>
-      {yours ? <Section title="Your answer">{yours}</Section> : null}
-      {d?.diagram ? (
-        <Section title="Diagram">
-          <CodeBlock code={d.diagram} verbatim />
-        </Section>
-      ) : null}
-      {d?.mechanism ? (
-        <Section title="How it works">
-          <Text variant="bodyMedium" selectable>
-            {block(d.mechanism)}
-          </Text>
-        </Section>
-      ) : null}
-      {d?.example ? (
-        <Section title="Example">
-          <CodeBlock code={d.example} verbatim />
-        </Section>
-      ) : null}
-      {d?.pitfalls.length ? (
-        <Section title="Pitfalls">
-          {d.pitfalls.map((p, i) => (
-            <Text key={i} variant="bodyMedium" selectable>
-              {`•  ${block(p)}`}
+      {answer ? (
+        <Section title="Your answer">
+          {answer.kind === 'rows' ? (
+            answer.rows.map((row) => <Row key={row.key} row={row} />)
+          ) : (
+            <Text variant="bodyMedium" selectable>
+              {`You: ${answer.you}`}
+              <Text style={{ color: theme.colors.onSurfaceVariant }}>{`  ·  accepted: ${answer.accepted}`}</Text>
             </Text>
-          ))}
+          )}
         </Section>
       ) : null}
-      {d?.versions ? (
-        <Section title="Versions">
-          <Text variant="bodyMedium" selectable>
-            {block(d.versions)}
-          </Text>
+      {sections.map((x) => (
+        <Section key={x.title} title={x.title}>
+          {'code' in x ? (
+            <CodeBlock code={x.code} verbatim />
+          ) : 'items' in x ? (
+            x.items.map((p, i) => (
+              <Text key={i} variant="bodyMedium" selectable>
+                {`•  ${p}`}
+              </Text>
+            ))
+          ) : (
+            <Text variant="bodyMedium" selectable>
+              {x.text}
+            </Text>
+          )}
         </Section>
-      ) : null}
-      {!yours && !d ? (
+      ))}
+      {!answer && !sections.length ? (
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           (no detail for this question yet)
         </Text>
       ) : null}
-      {own ? (
-        <Text
-          variant="labelLarge"
-          accessibilityRole="link"
-          onPress={() =>
-            router.push({ pathname: '/lesson', params: { course: q.course, slug: own.slug, anchor: ownAnchor } })
-          }
-          style={{ color: theme.colors.primary, paddingVertical: 8 }}>
-          {`📖 Learn this: ${own.title}${part ? ` › ${part}` : ''}`}
-        </Text>
-      ) : null}
-      {from.map((x) => (
+      {taughtBy(q, course).map((x) => (
         <Text
           key={x.slug}
           variant="labelLarge"
           accessibilityRole="link"
-          onPress={() => router.push({ pathname: '/lesson', params: { course: q.course, slug: x.slug } })}
+          onPress={() => router.push({ pathname: '/lesson', params: { course: x.course, slug: x.slug, anchor: x.anchor } })}
           style={{ color: theme.colors.primary, paddingVertical: 8 }}>
-          {`From lesson: ${x.title}`}
+          {x.label}
         </Text>
       ))}
     </View>
