@@ -7,15 +7,15 @@ import {
   type CertRecord,
   type FocusRecord,
   type LessonRecord,
-  type LimitRecord,
   type OrderRecord,
   type RaiseRecord,
+  type SettingRecord,
   type SessionRecord,
   type StatusRecord,
 } from '@algo-coach/core';
 
-export type Table = 'attempts' | 'sessions' | 'statuses' | 'focus' | 'lessons' | 'certs' | 'limits' | 'raises' | 'orders';
-export const TABLES: Table[] = ['attempts', 'sessions', 'statuses', 'focus', 'lessons', 'certs', 'limits', 'raises', 'orders'];
+export type Table = 'attempts' | 'sessions' | 'statuses' | 'focus' | 'lessons' | 'certs' | 'setting_changes' | 'raises' | 'orders';
+export const TABLES: Table[] = ['attempts', 'sessions', 'statuses', 'focus', 'lessons', 'certs', 'setting_changes', 'raises', 'orders'];
 
 let opened: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -73,7 +73,7 @@ export const allStatuses = () => lines<StatusRecord>('statuses');
 export const allFocus = () => lines<FocusRecord>('focus');
 export const allCerts = () => lines<CertRecord>('certs');
 export const allLessons = () => lines<LessonRecord>('lessons');
-export const allLimits = () => lines<LimitRecord>('limits');
+export const allSettings = () => lines<SettingRecord>('setting_changes');
 export const allRaises = () => lines<RaiseRecord>('raises');
 export const allOrders = () => lines<OrderRecord>('orders');
 
@@ -97,7 +97,7 @@ export const cursorKey = (user: string | null) => (user ? `sync_cursor:${user}` 
 export async function addLocal(
   table: Table,
   path: string,
-  rec: AttemptRecord | SessionRecord | StatusRecord | FocusRecord | LessonRecord | CertRecord | LimitRecord | RaiseRecord | OrderRecord,
+  rec: AttemptRecord | SessionRecord | StatusRecord | FocusRecord | LessonRecord | CertRecord | SettingRecord | RaiseRecord | OrderRecord,
 ) {
   // minted once, here, so a retried upload is recognised by the engine
   await (

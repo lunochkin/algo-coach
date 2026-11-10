@@ -50,6 +50,18 @@ class StintMode(StrEnum):
     EXAM = "exam"
 
 
+class SettingName(StrEnum):
+    NEW_PER_DAY = "new_per_day"
+    EXAM_SIZE = "exam_size"
+
+
+# the values each setting admits: `knowledge.md`, The records
+SETTING_RANGE: dict[SettingName, tuple[int, int]] = {
+    SettingName.NEW_PER_DAY: (0, 200),
+    SettingName.EXAM_SIZE: (1, 500),
+}
+
+
 class ModuleStatus(StrEnum):
     ACTIVE = "active"
     PAUSED = "paused"
@@ -225,8 +237,16 @@ class LessonMark(KnowledgeRecord):
     read: bool  # false resets a lesson read before
 
 
-class DailyLimit(KnowledgeRecord):
-    new_per_day: int = Field(ge=0)
+class SettingChange(KnowledgeRecord):
+    name: SettingName
+    value: int
+
+    @model_validator(mode="after")
+    def _in_range(self) -> SettingChange:
+        low, high = SETTING_RANGE[self.name]
+        if not low <= self.value <= high:
+            raise ValueError(f"{self.name} takes {low} to {high}")
+        return self
 
 
 class LimitRaise(KnowledgeRecord):

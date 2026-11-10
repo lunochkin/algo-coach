@@ -13,7 +13,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
-from algo_coach.schema import ModuleStatus, OpenGrade, QuestionFormat, StintMode
+from algo_coach.schema import ModuleStatus, OpenGrade, QuestionFormat, SettingName, StintMode
 from algo_coach.storage import appended_column, enumerated, metadata, timestamp
 
 # a slug as `Slug` spells it
@@ -186,10 +186,16 @@ lesson_marks = _logged(
     Column("read", Boolean, nullable=False),
 )
 
-daily_limits = _logged(
-    "daily_limits",
-    Column("new_per_day", Integer, nullable=False),
-    CheckConstraint("new_per_day >= 0", name="counted"),
+setting_changes = _logged(
+    "setting_changes",
+    Column("name", enumerated(SettingName), nullable=False),
+    Column("value", Integer, nullable=False),
+    # `SETTING_RANGE`, which a record is validated against before it is stored
+    CheckConstraint(
+        "(name = 'new_per_day' AND value BETWEEN 0 AND 200)"
+        " OR (name = 'exam_size' AND value BETWEEN 1 AND 500)",
+        name="in_range",
+    ),
 )
 
 limit_raises = _logged(

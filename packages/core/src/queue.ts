@@ -3,10 +3,11 @@ import { inFocus, type Focus } from './focus';
 import type { Board } from './schedule';
 import { ranked, type Rng } from './select';
 import type { Lesson } from './graph';
-import type { Course, LimitRecord, Question, RaiseRecord, Status } from './types';
+import { setting, SETTING_DEFAULT, type SettingRecord } from './settings';
+import type { Course, Question, RaiseRecord, Status } from './types';
 
 const DAY = 86_400_000;
-export const NEW_PER_DAY = 10;
+export const NEW_PER_DAY = SETTING_DEFAULT.new_per_day;
 export const NEW_STEP = 5; // "+5 new": a raise of today's limit, from Home or a queue
 const ROLLOVER_HOUR = 4; // local time, as Anki
 const LEARN_AHEAD = 20 * 60_000;
@@ -20,22 +21,20 @@ export function dayStart(now: number, offsetMinutes = -new Date(now).getTimezone
   return now >= start ? start : start - DAY;
 }
 
-/** The daily limit the latest record set, file order breaking a tie; the default where none did. */
-export function newPerDay(limits: LimitRecord[]): number {
-  let latest: LimitRecord | null = null;
-  for (const r of limits) if (!latest || Date.parse(r.t) >= Date.parse(latest.t)) latest = r;
-  return latest ? latest.n : NEW_PER_DAY;
+/** The daily limit the latest setting record set; the default where none did. */
+export function newPerDay(settings: readonly SettingRecord[]): number {
+  return setting(settings, 'new_per_day');
 }
 
 /** The new-question limit today: the daily limit plus every raise given since the day began. */
-export function todayLimit(limits: LimitRecord[], raises: RaiseRecord[], now: number, offsetMinutes?: number): number {
+export function todayLimit(settings: readonly SettingRecord[], raises: RaiseRecord[], now: number, offsetMinutes?: number): number {
   const start = dayStart(now, offsetMinutes);
   let added = 0;
   for (const r of raises) {
     const t = Date.parse(r.t);
     if (t >= start && t <= now) added += r.n;
   }
-  return newPerDay(limits) + added;
+  return newPerDay(settings) + added;
 }
 
 /** Questions whose first-ever attempt, on any device, falls in today. */

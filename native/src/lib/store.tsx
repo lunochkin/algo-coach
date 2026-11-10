@@ -27,14 +27,16 @@ import {
   type Question,
   type Queue,
   type SessionRecord,
-  limitPath,
   moduleOrder,
   orderPath,
   type OrderRecord,
-  type LimitRecord,
-  NEW_PER_DAY,
   NEW_STEP,
   newPerDay,
+  setting,
+  SETTING_DEFAULT,
+  settingPath,
+  type SettingName,
+  type SettingRecord,
   raisePath,
   type RaiseRecord,
   todayLimit,
@@ -78,9 +80,10 @@ interface Store {
   attempts: AttemptRecord[];
   sessions: SessionRecord[];
   settings: Settings;
-  // the daily limit and today's raises are records, so every device reads one limit
+  // the study settings and today's raises are records, so every device reads one value
   newPerDay: number;
-  setNewPerDay: (n: number) => Promise<void>;
+  examSize: number;
+  setSetting: (name: SettingName, n: number) => Promise<void>;
   newLimit: number;
   // the user's module order, a record of the log, so every device lists the modules alike
   courseOrder: string[];
@@ -142,7 +145,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [attempts, setAttempts] = useState<AttemptRecord[]>([]);
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
-  const [limits, setLimits] = useState<LimitRecord[]>([]);
+  const [settingRecords, setSettingRecords] = useState<SettingRecord[]>([]);
   const [raises, setRaises] = useState<RaiseRecord[]>([]);
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [hasToken, setHasToken] = useState(false);
@@ -173,7 +176,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         setCertRecords(cs);
         return cs;
       }),
-      DB.allLimits().then(setLimits),
+      DB.allSettings().then(setSettingRecords),
       DB.allRaises().then(setRaises),
       DB.allOrders().then(setOrders),
     ]);
@@ -409,18 +412,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   );
 
   // read on each render, so a raise ends at the rollover without a timer
-  const newLimit = todayLimit(limits, raises, Date.now());
+  const newLimit = todayLimit(settingRecords, raises, Date.now());
   const raiseNew = useCallback(async () => {
     const rec: RaiseRecord = { t: isoNow(), n: NEW_STEP };
     await DB.addLocal('raises', raisePath(settingsRef.current.device, rec.t), rec);
     setRaises((xs) => [...xs, rec]);
     requestSync(0);
   }, [requestSync]);
-  const setNewPerDay = useCallback(
-    async (n: number) => {
-      const rec: LimitRecord = { t: isoNow(), n };
-      await DB.addLocal('limits', limitPath(settingsRef.current.device, rec.t), rec);
-      setLimits((xs) => [...xs, rec]);
+  const setSetting = useCallback(
+    async (name: SettingName, n: number) => {
+      const rec: SettingRecord = { t: isoNow(), name, n };
+      await DB.addLocal('setting_changes', settingPath(settingsRef.current.device, rec.t), rec);
+      setSettingRecords((xs) => [...xs, rec]);
       requestSync(0);
     },
     [requestSync],
@@ -443,8 +446,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       attempts,
       sessions,
       settings,
-      newPerDay: newPerDay(limits),
-      setNewPerDay,
+      newPerDay: newPerDay(settingRecords),
+      examSize: setting(settingRecords, 'exam_size'),
+      setSetting,
       newLimit,
       raiseNew,
       courseOrder,
@@ -469,20 +473,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       archived,
       recordCertExam,
     }),
-    [ready, catalog, attempts, sessions, settings, limits, setNewPerDay, newLimit, raiseNew, courseOrder, setCourseOrder, hasToken, sync, filter, board, requestSync,
+    [ready, catalog, attempts, sessions, settings, settingRecords, setSetting, newLimit, raiseNew, courseOrder, setCourseOrder, hasToken, sync, filter, board, requestSync,
       updateSettings, signedIn, signOut, record, session, finishSession, setCourseStatus, focus, setFocus, setLessonState, archived, recordCertExam],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-/** Writes the daily limit and the module order an earlier build kept on the device as records, once. */
+/** Writes the settings and the module order an earlier build kept on the device as records, once. */
 async function movedSettings(s: Settings): Promise<void> {
-  const { newPerDay: kept, courseOrder: order } = await legacySettings();
-  if (kept === undefined && order === undefined) return;
-  if (typeof kept === 'number' && kept !== NEW_PER_DAY && !(await DB.allLimits()).length) {
-    const rec: LimitRecord = { t: isoNow(), n: kept };
-    await DB.addLocal('limits', limitPath(s.device, rec.t), rec);
+  const { newPerDay: kept, examSize: size, courseOrder: order } = await legacySettings();
+  if (kept === undefined && size === undefined && order === undefined) return;
+  const held = await DB.allSettings();
+  const moved: [SettingName, number | undefined][] = [['new_per_day', kept], ['exam_size', size]];
+  for (const [name, n] of moved) {
+    if (typeof n !== 'number' || n === SETTING_DEFAULT[name] || held.some((r) => r.name === name)) continue;
+    const rec: SettingRecord = { t: isoNow(), name, n };
+    await DB.addLocal('setting_changes', settingPath(s.device, rec.t), rec);
   }
   if (order?.length && !(await DB.allOrders()).length) {
     const rec: OrderRecord = { t: isoNow(), courses: order };

@@ -12,7 +12,6 @@ from algo_coach.ids import new_id
 from algo_coach.knowledge.table import (
     answers,
     certification_exams,
-    daily_limits,
     focuses,
     lesson_marks,
     lessons,
@@ -21,6 +20,7 @@ from algo_coach.knowledge.table import (
     module_status_changes,
     modules,
     questions,
+    setting_changes,
     stints,
     subtopics,
     topics,
@@ -36,13 +36,13 @@ from algo_coach.knowledge.wire import (
 from algo_coach.schema import (
     Answer,
     CertificationExam,
-    DailyLimit,
     Focus,
     KnowledgeRecord,
     LessonMark,
     LimitRaise,
     ModuleOrder,
     ModuleStatusChange,
+    SettingChange,
     Stint,
 )
 from algo_coach.storage import Database
@@ -56,7 +56,7 @@ KINDS: dict[str, tuple[Table, type[KnowledgeRecord]]] = {
     "lesson": (lesson_marks, LessonMark),
     "cert": (certification_exams, CertificationExam),
     # the engine's own: learn kept these three on the device
-    "limit": (daily_limits, DailyLimit),
+    "setting": (setting_changes, SettingChange),
     "raise": (limit_raises, LimitRaise),
     "order": (module_orders, ModuleOrder),
 }
@@ -152,8 +152,8 @@ def _record(names: _Names, line: dict[str, Any]) -> tuple[Table, dict[str, Any]]
         return table, {"mode": mode, "level": level, "score": line["score"], "answered": line["n"]}
     if kind == "focus":
         return table, _focus(names, line)
-    if kind == "limit":
-        return table, {"new_per_day": line["n"]}
+    if kind == "setting":
+        return table, {"name": line["name"], "value": line["n"]}
     if kind == "raise":
         return table, {"added": line["n"]}
     if kind == "order":
@@ -231,8 +231,8 @@ def _line(kind: str, row: dict[str, Any], names: _Names) -> dict[str, Any]:
     if kind == "session":
         mode = mode_out(row["mode"], row["level"])
         return line | {"mode": mode, "score": row["score"], "n": row["answered"]}
-    if kind == "limit":
-        return line | {"n": row["new_per_day"]}
+    if kind == "setting":
+        return line | {"name": row["name"], "n": row["value"]}
     if kind == "raise":
         return line | {"n": row["added"]}
     if kind == "order":

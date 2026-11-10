@@ -5,6 +5,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Appbar, Button, Dialog, HelperText, Portal, Text, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { validSetting } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles, SyncLine } from '@/ui/common';
 
@@ -18,7 +19,7 @@ export default function SettingsScreen() {
     origin: st.settings.origin,
     device: st.settings.device,
     newPerDay: String(st.newPerDay),
-    examSize: String(st.settings.examSize),
+    examSize: String(st.examSize),
     reminderHour: String(st.settings.reminderHour),
   });
   const [saved, setSaved] = useState(false);
@@ -28,17 +29,15 @@ export default function SettingsScreen() {
       origin: st.settings.origin,
       device: st.settings.device,
       newPerDay: String(st.newPerDay),
-      examSize: String(st.settings.examSize),
+      examSize: String(st.examSize),
       reminderHour: String(st.settings.reminderHour),
     });
-  }, [st.settings, st.newPerDay]);
+  }, [st.settings, st.newPerDay, st.examSize]);
 
   const newPerDay = Number(form.newPerDay);
   const examSize = Number(form.examSize);
   const hour = Number(form.reminderHour);
-  const okSize = (v: number) => Number.isInteger(v) && v >= 1 && v <= 500;
-  const newOk = Number.isInteger(newPerDay) && newPerDay >= 0 && newPerDay <= 200;
-  const sizeOk = newOk && okSize(examSize);
+  const sizeOk = validSetting('new_per_day', newPerDay) && validSetting('exam_size', examSize);
   const hourOk = Number.isInteger(hour) && hour >= 0 && hour <= 23;
   const deviceOk = /^[A-Za-z0-9_-]+$/.test(form.device);
   const originOk = /^https?:\/\/[^\s/]+$/.test(form.origin.trim());
@@ -50,10 +49,10 @@ export default function SettingsScreen() {
       ...st.settings,
       origin: form.origin.trim(),
       device: form.device,
-      examSize,
       reminderHour: hour,
     });
-    if (newPerDay !== st.newPerDay) await st.setNewPerDay(newPerDay);
+    if (newPerDay !== st.newPerDay) await st.setSetting('new_per_day', newPerDay);
+    if (examSize !== st.examSize) await st.setSetting('exam_size', examSize);
     setSaved(true);
     st.requestSync(0);
   };

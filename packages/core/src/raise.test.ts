@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { NEW_PER_DAY, NEW_STEP, newPerDay, todayLimit } from './queue';
+import { setting, SETTING_DEFAULT, validSetting } from './settings';
 
 // 2026-11-10 12:00 UTC, read at UTC so the 04:00 rollover is 04:00 UTC
 const NOON = Date.UTC(2026, 10, 10, 12);
@@ -15,7 +16,8 @@ describe('the daily limit', () => {
 
   it('is the latest set, whatever order the records arrived in', () => {
     // a phone's later setting synced before a browser's earlier one
-    expect(newPerDay([{ t: at(NOON), n: 20 }, { t: at(NOON - 3_600_000), n: 15 }])).toBe(20);
+    const limit = (ms: number, n: number) => ({ t: at(ms), name: 'new_per_day' as const, n });
+    expect(newPerDay([limit(NOON, 20), limit(NOON - 3_600_000, 15)])).toBe(20);
   });
 });
 
@@ -39,6 +41,27 @@ describe("today's raise", () => {
   });
 
   it('raises the limit the latest record set', () => {
-    expect(todayLimit([{ t: at(NOON), n: 3 }], [raise(NOON)], NOON, UTC)).toBe(3 + NEW_STEP);
+    expect(todayLimit([{ t: at(NOON), name: 'new_per_day', n: 3 }], [raise(NOON)], NOON, UTC)).toBe(3 + NEW_STEP);
+  });
+});
+
+describe('the exam size', () => {
+  it('is the default where no device set one', () => {
+    expect(setting([], 'exam_size')).toBe(SETTING_DEFAULT.exam_size);
+  });
+
+  it('is read apart from the daily limit', () => {
+    const records = [
+      { t: at(NOON), name: 'new_per_day' as const, n: 20 },
+      { t: at(NOON - 3_600_000), name: 'exam_size' as const, n: 25 },
+    ];
+    expect(setting(records, 'exam_size')).toBe(25);
+    expect(newPerDay(records)).toBe(20);
+  });
+
+  it('takes one question at least, where a day may allow none', () => {
+    expect(validSetting('exam_size', 0)).toBe(false);
+    expect(validSetting('new_per_day', 0)).toBe(true);
+    expect(validSetting('exam_size', 2.5)).toBe(false);
   });
 });

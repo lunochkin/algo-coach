@@ -202,7 +202,7 @@ platforms.
   module's page. A paused module says so on its row.
 - **The home raises today's limit and never sets the daily limit.** A raise
   answers today's practice, so the home offers it beside the focus. The daily
-  limit is a standing choice, set in the settings dialog.
+  limit is a standing choice, set on the settings page.
 - **The home lists the modules in the user's order, and a row moves up or
   down on a press.** The phone drags a row instead. `knowledge.md` gives why
   one order holds on every device.

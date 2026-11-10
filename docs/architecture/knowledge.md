@@ -192,11 +192,10 @@ left to serve.
 - **The user can raise today's limit, five at a time**, from Home or inside the
   next and filtered queues. The raise ends when the day does, and the daily
   setting stands again the next day.
-- **The daily limit and today's raise are records in the user's log.** A
-  limit kept per device would have the phone and the web offer different
-  counts of new questions on the same day.
-- **The latest daily limit stands**, as the latest focus does, across every
-  device. A user who set none has the default of ten.
+- **The daily limit is a setting, and today's raise is a record of its
+  own.** `## Settings` gives how a setting is stored. A limit kept per device
+  would have the phone and the web offer different counts of new questions
+  on the same day.
 - **Today's raise is the sum of the raises given since the day began.** Two
   devices raising on one day then add up rather than overwrite each other.
 - **The next queue serves the reviews, then the frontier's new questions.**
@@ -213,11 +212,23 @@ left to serve.
   topic, subtopic, level, kind or due flag it was narrowed by. The
   latest filters for each mode stand across every device, so the next
   filtered queue or exam opens on them on the phone and the web alike.
-- **The exam size is a record of the log**, and the latest stands across
-  every device. A user who set none has the default of forty.
+- **The exam size is a setting**, as `## Settings` gives.
 - **A filter naming content the store no longer holds degrades**, as a focus
   does. An unknown topic keeps the module, and an unknown subtopic keeps the
   topic.
+
+## Settings
+
+- **A study setting is a name and a whole number**, and the latest record of
+  each name stands across every device. A setting kept per device would
+  have the phone and the web serve differently on the same day.
+- **Two settings exist.** `new_per_day` is the daily limit on new
+  questions, from 0 to 200, ten by default. `exam_size` counts the questions
+  an exam samples, from 1 to 500, forty by default.
+- **One table holds every setting.** A further setting that is a whole number
+  adds a name and its range, and no table.
+- **A setting outside its range is refused**, by the engine and by the
+  database's own check. An exam sampling no question would be no exam.
 
 ## The focus
 
@@ -279,7 +290,7 @@ certification.
 
 ## The records
 
-Eleven append-only tables hold the user's knowledge log, one per kind of event.
+Ten append-only tables hold the user's knowledge log, one per kind of event.
 Each is private to the user, and each refuses an update and a delete by a
 trigger, as `README.md` requires.
 
@@ -301,17 +312,16 @@ trigger, as `README.md` requires.
 - **`lesson_marks`**: the lesson, and whether it was read or reset.
 - **`certification_exams`**: the certification, the score, the number of
   questions and whether the exam passed.
-- **`daily_limits`**: how many new questions a day allows.
+- **`setting_changes`**: the setting's name and its new value.
 - **`limit_raises`**: how many new questions the raise adds to today's limit.
 - **`module_orders`**: the modules, first to last.
 - **`queue_filters`**: the mode, filtered or exam, and the module, topic,
   subtopic, level, kind and due flag it was started with, each optional.
-- **`exam_sizes`**: how many questions an exam samples.
 - **A certification is referenced by its module, its topic and its level.** A
   certification is derived rather than stored, so no table holds it, and the
   three minted parts name it.
 - **The content tables are refreshed by the seed.** Their columns follow the
-  authoring format and may change with a migration. The eleven tables above are
+  authoring format and may change with a migration. The ten tables above are
   the part that cannot.
 
 ## The wire
@@ -326,10 +336,10 @@ translates at its edge, so the store keeps this project's names.
 - **A client syncs learn's log lines**: `attempt`, `session`, `status`,
   `focus`, `lesson` and `cert`. Each line carries a `client_id` and names its
   content by slug.
-- **Five lines are the engine's own**: `limit`, `raise`, `order`, `filter`
-  and `size`. learn kept the daily limit, the raise, the module order, the
-  filters and the exam size on the device, so its format carries no line for
-  any of the five.
+- **Four lines are the engine's own**: `setting`, `raise`, `order` and
+  `filter`. learn kept the settings, the raise, the module order and the
+  filters on the device, so its format carries no line for any of the four.
+- **A `setting` line carries the name and the value**, as `name` and `n`.
 - **An `order` line names every module by slug, as `courses`.** A line naming
   a module the store does not hold is refused, as any line naming unknown
   content is.

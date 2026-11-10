@@ -96,16 +96,41 @@ def test_statuses_and_lesson_marks_round_trip(database, tmp_path):
     }
 
 
-def test_the_daily_limit_and_a_raise_round_trip(database, tmp_path):
-    """Neither names content, so every device receives both as sent."""
+def setting(client_id: str, name: str, n: int) -> dict:
+    return {"kind": "setting", "client_id": client_id, "t": T, "name": name, "n": n}
+
+
+def test_the_settings_and_a_raise_round_trip(database, tmp_path):
+    """None names content, so every device receives each as sent."""
     records = [
-        {"kind": "limit", "client_id": "d1", "t": T, "n": 15},
+        setting("d1", "new_per_day", 15),
+        setting("e1", "exam_size", 30),
         {"kind": "raise", "client_id": "r1", "t": T, "n": 5},
     ]
 
     back = synced(database, tmp_path, records)["records"]
 
-    assert {one["kind"]: one["n"] for one in back} == {"limit": 15, "raise": 5}
+    assert {one.get("name", one["kind"]): one["n"] for one in back} == {
+        "new_per_day": 15,
+        "exam_size": 30,
+        "raise": 5,
+    }
+
+
+def test_a_setting_out_of_its_range_is_refused(database, tmp_path):
+    """An exam samples one question at least, and a day may allow no new one."""
+    records = [setting("e1", "exam_size", 0), setting("d1", "new_per_day", 0)]
+
+    result = synced(database, tmp_path, records)
+
+    assert [one["client_id"] for one in result["refused"]] == ["e1"]
+    assert result["stored"] == 1
+
+
+def test_a_setting_the_engine_does_not_know_is_refused(database, tmp_path):
+    result = synced(database, tmp_path, [setting("x1", "volume", 3)])
+
+    assert [one["client_id"] for one in result["refused"]] == ["x1"]
 
 
 def test_a_raise_adds_at_least_one_question(database, tmp_path):

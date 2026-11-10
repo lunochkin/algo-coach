@@ -44,8 +44,8 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       choice into `pages.md`. A reload then restarts the queue
 - [x] Add the `module_orders` table with its `order` sync line, and have
       the phone and the web write and read it instead of a device setting
-- [ ] Add the `exam_sizes` table with its `size` sync line, and have the
-      phone write it instead of a device setting
+- [x] Replace `daily_limits` with one `setting_changes` table and its
+      `setting` sync line, and have the phone write the exam size there too
 - [ ] Add the `queue_filters` table with its `filter` sync line, and open the
       phone's Practice and Exam screens on the last filters
 - [ ] Add the `/settings` page to the web, with the daily limit and the exam

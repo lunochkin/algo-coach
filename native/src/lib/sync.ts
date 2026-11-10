@@ -20,7 +20,7 @@ const KIND: Record<DB.Table, string> = {
   focus: 'focus',
   lessons: 'lesson',
   certs: 'cert',
-  limits: 'limit',
+  setting_changes: 'setting',
   raises: 'raise',
   orders: 'order',
 };

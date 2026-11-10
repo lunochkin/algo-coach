@@ -35,7 +35,6 @@ from algo_coach.drafts.table import (
 from algo_coach.knowledge.table import (
     answers,
     certification_exams,
-    daily_limits,
     focuses,
     lesson_marks,
     lessons,
@@ -44,6 +43,7 @@ from algo_coach.knowledge.table import (
     module_status_changes,
     modules,
     questions,
+    setting_changes,
     stints,
     subtopics,
     topics,
@@ -81,7 +81,6 @@ from algo_coach.schema import (
     CaseResult,
     CertificationExam,
     ClaimSource,
-    DailyLimit,
     Diagnosis,
     Draft,
     DraftCase,
@@ -99,6 +98,7 @@ from algo_coach.schema import (
     Question,
     RecallAttempt,
     SelfLabel,
+    SettingChange,
     SettledCase,
     SiteOutcome,
     Sitting,
@@ -200,9 +200,9 @@ STORED: list[Stored] = [
     Stored(Focus, focuses),
     Stored(LessonMark, lesson_marks),
     Stored(CertificationExam, certification_exams),
-    Stored(DailyLimit, daily_limits),
     Stored(LimitRaise, limit_raises),
     Stored(ModuleOrder, module_orders),
+    Stored(SettingChange, setting_changes),
 ]
 
 
@@ -702,9 +702,9 @@ APPEND_ONLY = {
     "focuses",
     "lesson_marks",
     "certification_exams",
-    "daily_limits",
     "limit_raises",
     "module_orders",
+    "setting_changes",
 }
 
 

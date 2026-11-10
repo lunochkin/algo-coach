@@ -1,4 +1,14 @@
 {
+  "$defs": {
+    "SettingName": {
+      "enum": [
+        "new_per_day",
+        "exam_size"
+      ],
+      "title": "SettingName",
+      "type": "string"
+    }
+  },
   "properties": {
     "at": {
       "format": "date-time",
@@ -24,15 +34,17 @@
       "title": "Id",
       "type": "string"
     },
-    "new_per_day": {
-      "minimum": 0,
-      "title": "New Per Day",
-      "type": "integer"
+    "name": {
+      "$ref": "#/$defs/SettingName"
     },
     "user_id": {
       "minLength": 1,
       "title": "User Id",
       "type": "string"
+    },
+    "value": {
+      "title": "Value",
+      "type": "integer"
     }
   },
   "required": [
@@ -42,8 +54,9 @@
     "device",
     "at",
     "created_at",
-    "new_per_day"
+    "name",
+    "value"
   ],
-  "title": "DailyLimit",
+  "title": "SettingChange",
   "type": "object"
 }

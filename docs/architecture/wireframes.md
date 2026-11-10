@@ -462,7 +462,7 @@ problem's path reads as its record, as "Every problem" gives.
   row's `v` are disabled.
 - The focus panel reads "No focus" with a press to set one on a module's page
   where none is set. "5 more new today" raises today's limit.
-- The daily limit is set in the settings dialog the account menu opens.
+- The daily limit is set on the settings page the account menu links.
 - A module row opens the module's page. An archived module has no row.
 
 ## A module
@@ -663,7 +663,7 @@ problem's path reads as its record, as "Every problem" gives.
 - A level exam samples every open group at one level. A certification's exam
   starts from the certifications page instead.
 - The chips open on the last exam's queue filters, as Pick questions does.
-- The size field writes the exam size, a record of the log, shortly after
+- The size field writes the exam size, a setting of the log, shortly after
   typing stops. The settings page sets the same record.
 
 ## The lessons
@@ -764,7 +764,7 @@ problem's path reads as its record, as "Every problem" gives.
 - The page reads as the phone's Settings screen does: Account, then Study.
   The phone adds the engine's address, the device name and the reminder hour,
   which are about one phone.
-- The daily limit and the exam size are records of the log, so a value
+- The daily limit and the exam size are settings of the log, so a value
   saved here stands on the phone.
 
 ## The login

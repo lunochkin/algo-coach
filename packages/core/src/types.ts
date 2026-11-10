@@ -167,12 +167,6 @@ export interface StatusRecord {
   status: CourseStatus;
 }
 
-/** The daily limit on new questions, as set: the latest stands on every device. */
-export interface LimitRecord {
-  t: string;
-  n: number;
-}
-
 /** A raise of today's limit: the day's raises add up across devices. */
 export interface RaiseRecord {
   t: string;

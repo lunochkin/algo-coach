@@ -5,7 +5,7 @@ import { Appbar, Button, Chip, SegmentedButtons, Text, TextInput, useTheme } fro
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { examPool, levelName, levels, selectExam } from '@algo-coach/core';
+import { examPool, levelName, levels, selectExam, validSetting } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
 import { BottomBar, startExam, styles } from '@/ui/common';
@@ -17,12 +17,12 @@ export default function Exam() {
   const courses = st.catalog?.courses ?? [];
   const [course, setCourse] = useState<string | null>(st.filter);
   const [level, setLevel] = useState(1);
-  const [size, setSize] = useSavedSize('examSize');
+  const [size, setSize] = useSavedSize();
   const { board } = st;
   const b = useMemo(() => board(course), [board, course]);
   const pool = useMemo(() => (b ? examPool(b, level) : []), [b, level]);
   const n = Number(size);
-  const sizeOk = Number.isInteger(n) && n >= 1 && n <= 500;
+  const sizeOk = validSetting('exam_size', n);
   const count = sizeOk ? Math.min(n, pool.length) : 0;
   const lv = st.catalog ? levels(st.catalog.rules) : [0, 1, 2, 3];
 

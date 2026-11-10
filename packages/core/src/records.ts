@@ -29,8 +29,8 @@ export function certPath(device: string, t: string): string {
   return `progress/${device}/certs/${monthOf(t)}.jsonl`;
 }
 
-export function limitPath(device: string, t: string): string {
-  return `progress/${device}/limits/${monthOf(t)}.jsonl`;
+export function settingPath(device: string, t: string): string {
+  return `progress/${device}/settings/${monthOf(t)}.jsonl`;
 }
 
 export function raisePath(device: string, t: string): string {

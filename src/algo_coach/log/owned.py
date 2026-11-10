@@ -10,12 +10,12 @@ from algo_coach.calls.table import calls
 from algo_coach.knowledge.table import (
     answers,
     certification_exams,
-    daily_limits,
     focuses,
     lesson_marks,
     limit_raises,
     module_orders,
     module_status_changes,
+    setting_changes,
     stints,
 )
 from algo_coach.log.sittings import SittingStore
@@ -41,7 +41,6 @@ from algo_coach.schema import (
     AttemptVerification,
     Call,
     CertificationExam,
-    DailyLimit,
     Diagnosis,
     Focus,
     LessonMark,
@@ -49,6 +48,7 @@ from algo_coach.schema import (
     ModuleOrder,
     ModuleStatusChange,
     SelfLabel,
+    SettingChange,
     Sitting,
     Stint,
 )
@@ -62,9 +62,9 @@ KNOWLEDGE: dict[str, Table] = {
     "focuses": focuses,
     "lesson_marks": lesson_marks,
     "certification_exams": certification_exams,
-    "daily_limits": daily_limits,
     "limit_raises": limit_raises,
     "module_orders": module_orders,
+    "setting_changes": setting_changes,
 }
 
 
@@ -87,9 +87,9 @@ class UserLog(BaseModel):
     focuses: list[Focus]
     lesson_marks: list[LessonMark]
     certification_exams: list[CertificationExam]
-    daily_limits: list[DailyLimit]
     limit_raises: list[LimitRaise]
     module_orders: list[ModuleOrder]
+    setting_changes: list[SettingChange]
 
 
 def whole_log(root: Database, user_id: str) -> UserLog:
