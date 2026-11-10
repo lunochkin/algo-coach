@@ -1,13 +1,14 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Chip, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Appbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { problemCards, problemTried, readFailure, type components } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
-import { CodeBlock, Failed, styles } from '@/ui/common';
+import { Failed, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
+import { Badge } from '@/ui/rows';
 
 type Picked = components['schemas']['Picked'];
 type Served = components['schemas']['Served'];
@@ -54,11 +55,7 @@ export default function ProblemScreen() {
         ) : (
           <>
             <View style={[styles.row, { flexWrap: 'wrap' }]}>
-              {record.difficulty ? (
-                <Chip compact mode="outlined">
-                  {record.difficulty}
-                </Chip>
-              ) : null}
+              {record.difficulty ? <Badge label={record.difficulty} /> : null}
               <Text variant="bodySmall" style={muted}>
                 {record.techniques.join(' · ')}
               </Text>
@@ -91,7 +88,6 @@ export default function ProblemScreen() {
             ) : served.data ? (
               <>
                 <Markdown>{served.data.statement}</Markdown>
-                {served.data.signature ? <CodeBlock code={served.data.signature} verbatim /> : null}
                 <Text variant="bodySmall" style={muted}>
                   The problem is solved on the web, where the editor and the clock are.
                 </Text>

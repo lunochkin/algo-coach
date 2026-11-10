@@ -3,6 +3,7 @@ import { View, type TextStyle, type ViewStyle } from 'react-native';
 import { Renderer, useMarkdown, type MarkedStyles } from 'react-native-marked';
 import { Text, useTheme, type MD3Theme } from 'react-native-paper';
 
+import { withMath } from '@/lib/math';
 import { CodeBlock } from '@/ui/common';
 
 const CODE_SCALE = 0.85;
@@ -72,7 +73,7 @@ export function markdownOptions(theme: MD3Theme, renderer: Renderer) {
 export function Markdown({ children }: { children: string }) {
   const theme = useTheme();
   const renderer = useMemo(() => new CodeRenderer(), []);
-  const elements = useMarkdown(children, markdownOptions(theme, renderer));
+  const elements = useMarkdown(withMath(children), markdownOptions(theme, renderer));
   return (
     <View>
       {elements.map((el, i) => (

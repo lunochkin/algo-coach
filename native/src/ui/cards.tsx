@@ -25,66 +25,62 @@ export function CardPanel({ technique, cards }: { technique: string | null; card
   const theme = useTheme();
   const [now] = useState(() => Date.now());
   return (
+    // one View: Card hands each direct child an `index`, which a Fragment refuses
     <Card mode="outlined">
-      {technique ? (
-        <>
-          <View style={[styles.row, { paddingHorizontal: 16, paddingVertical: 12 }]}>
-            <Text variant="titleSmall" style={{ fontFamily: 'monospace', flex: 1 }}>
-              {technique}
-            </Text>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              {cards.length} cards
-            </Text>
-          </View>
-          <Divider />
-        </>
-      ) : null}
-      {cards.map((card, i) => {
-        const row = cardRow(card, technique, now);
-        return (
-          <Fragment key={card.slug}>
-            {i > 0 ? <Divider /> : null}
-            <TouchableRipple
-              onPress={() => router.push({ pathname: '/card', params: { slug: card.slug } })}
-              accessibilityRole="link"
-              accessibilityLabel={row.title}>
-              <View style={{ paddingHorizontal: 16, paddingVertical: 12, gap: 4 }}>
-                <View style={styles.row}>
-                  <Text variant="titleMedium" style={{ flexShrink: 1 }}>
-                    {row.title}
-                  </Text>
-                  {row.technique ? (
-                    <Text variant="bodySmall" style={{ fontFamily: 'monospace', color: theme.colors.onSurfaceVariant }}>
-                      {row.technique}
-                    </Text>
-                  ) : null}
-                  <Text variant="bodySmall" style={{ marginLeft: 'auto', color: theme.colors.onSurfaceVariant }}>
+      <View>
+        {technique ? (
+          <>
+            <View style={[styles.row, { paddingHorizontal: 16, paddingVertical: 12 }]}>
+              <Text variant="titleSmall" style={{ fontFamily: 'monospace', flex: 1 }}>
+                {technique}
+              </Text>
+              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                {cards.length} cards
+              </Text>
+            </View>
+            <Divider />
+          </>
+        ) : null}
+        {cards.map((card, i) => {
+          const row = cardRow(card, technique, now);
+          return (
+            <Fragment key={card.slug}>
+              {i > 0 ? <Divider /> : null}
+              <TouchableRipple
+                onPress={() => router.push({ pathname: '/card', params: { slug: card.slug } })}
+                accessibilityRole="link"
+                accessibilityLabel={row.title}>
+                <View style={{ paddingHorizontal: 16, paddingVertical: 12, gap: 4 }}>
+                  {/* the title alone on its line: a phone is too narrow for the aside beside it */}
+                  <Text variant="titleMedium">{row.title}</Text>
+                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                    {row.technique ? <Text style={{ fontFamily: 'monospace' }}>{row.technique} · </Text> : null}
                     {row.aside}
                   </Text>
+                  {row.state !== null ? (
+                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                      {row.state}
+                    </Text>
+                  ) : null}
+                  {row.progress ? (
+                    <ProgressBar
+                      progress={row.progress.rungs === 0 ? 0 : row.progress.solved / row.progress.rungs}
+                      accessibilityLabel={`Rungs solved: ${row.progress.solved} of ${row.progress.rungs}`}
+                      style={{ maxWidth: 240, borderRadius: 2 }}
+                    />
+                  ) : null}
+                  {row.trigger !== null ? (
+                    <Text variant="bodySmall" numberOfLines={2} style={{ color: theme.colors.onSurfaceVariant }}>
+                      {row.trigger}
+                    </Text>
+                  ) : null}
+                  <Marks marks={row.recall} />
                 </View>
-                {row.state !== null ? (
-                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                    {row.state}
-                  </Text>
-                ) : null}
-                {row.progress ? (
-                  <ProgressBar
-                    progress={row.progress.rungs === 0 ? 0 : row.progress.solved / row.progress.rungs}
-                    accessibilityLabel={`Rungs solved: ${row.progress.solved} of ${row.progress.rungs}`}
-                    style={{ maxWidth: 240, borderRadius: 2 }}
-                  />
-                ) : null}
-                {row.trigger !== null ? (
-                  <Text variant="bodySmall" numberOfLines={2} style={{ color: theme.colors.onSurfaceVariant }}>
-                    {row.trigger}
-                  </Text>
-                ) : null}
-                <Marks marks={row.recall} />
-              </View>
-            </TouchableRipple>
-          </Fragment>
-        );
-      })}
+              </TouchableRipple>
+            </Fragment>
+          );
+        })}
+      </View>
     </Card>
   );
 }
@@ -98,10 +94,11 @@ function Marks({ marks }: { marks: RecallMark[] }) {
       variant="bodySmall"
       style={{ color: theme.colors.onSurfaceVariant }}
       accessibilityLabel={`recall: ${marks.map((one) => `${one.title}, ${one.reading}`).join('; ')}`}>
-      recall{' '}
+      recall
       {marks.map((one) => (
-        <Text key={one.templateId} style={{ fontFamily: 'monospace', color: tone(one) }}>
-          {one.mark}{' '}
+        <Text key={one.templateId}>
+          {' '}
+          <Text style={{ fontFamily: 'monospace', color: tone(one) }}>{one.mark}</Text>
         </Text>
       ))}
     </Text>
