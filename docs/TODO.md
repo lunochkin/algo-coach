@@ -38,7 +38,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       today
 - [x] Add a section for the knowledge modules to the web's navigation, and
       write its pages into `pages.md` and `wireframes.md`
-- [ ] Decide whether the daily limit is set from the knowledge home or a
+- [x] Decide whether the daily limit is set from the knowledge home or a
       settings page, and write the choice into `pages.md`
 - [ ] Decide whether a queue keeps its state in the URL query, and write the
       choice into `pages.md`. A reload then restarts the queue

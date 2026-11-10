@@ -40,7 +40,8 @@ Every page under a section carries the same two rows above its body.
   verified, and the engine's own id under it. A user no provider linked is
   named by that id, and the menu says so.
 - Signing out is in that menu, since it is an act on the account rather than a
-  place the navigation names.
+  place the navigation names. The settings and the signed-in apps open a
+  dialog each from the same menu.
 - The header carries the way back, the title, and the one line identifying what
   the title names.
 - A section's root page carries no way back, since the navigation reaches that
@@ -434,7 +435,7 @@ problem's path reads as its record, as "Every problem" gives.
 |             [ Continue ]                                               |
 |    12 reviews . 7 new left today . 2 waiting outside                   |
 |                                                                        |
-|   ( Pick questions )   ( Exam )          10 new a day                  |
+|   ( Pick questions )   ( Exam )                                        |
 |                                                                        |
 | Modules  2                                                             |
 | +--------------------------------------------------------+             |
@@ -461,7 +462,7 @@ problem's path reads as its record, as "Every problem" gives.
   row's `v` are disabled.
 - The focus panel reads "No focus" with a press to set one on a module's page
   where none is set. "5 more new today" raises today's limit.
-- "10 new a day" opens the daily limit's dialog.
+- The daily limit is set in the settings dialog the account menu opens.
 - A module row opens the module's page. An archived module has no row.
 
 ## A module

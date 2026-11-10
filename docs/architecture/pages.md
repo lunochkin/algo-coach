@@ -23,13 +23,16 @@ those steps at low fidelity.
   holds beside the switch and the menu. The row scrolls to the marked
   section, so the reader always sees where they are.
 - **The account menu names who the session signs in as**, and holds the
-  signed-in apps and the sign-out. The address the provider verified names
-  the user, with the engine's own id under it. A user no provider linked is
-  named by that id instead, since the dev login mints no identity to carry an
-  address.
+  settings, the signed-in apps and the sign-out. The address the provider
+  verified names the user, with the engine's own id under it. A user no
+  provider linked is named by that id instead, since the dev login mints no
+  identity to carry an address.
 - **Signed-in apps open a dialog from the account menu**, listing each native
   app by its device and when it was last used, with a press to revoke it. A
   lost phone is cut off there, where its own sign-out cannot reach.
+- **Settings open a dialog from the account menu**, holding the daily limit
+  on new questions. The phone sets the limit on its Settings screen, so a
+  reader of either client looks for a standing choice in one place.
 - **Problems is marked on the listing alone.** A picked problem is a step down
   from the board, from a technique or from a card, so Practice stays marked on
   it and the way back names where the pick came from.
@@ -191,9 +194,9 @@ platforms.
 - **The modules read below as rows, one per module not archived.** A row names
   the group next up with its passed share, and the reviews due, and opens the
   module's page. A paused module says so on its row.
-- **The home sets the daily limit in a dialog**, as the account menu opens the
-  signed-in apps. The limit is a record of the log, so a limit set on the web
-  stands on the phone.
+- **The home raises today's limit and never sets the daily limit.** A raise
+  answers today's practice, so the home offers it beside the focus. The daily
+  limit is a standing choice, set in the settings dialog.
 - **The home lists the modules in the user's order, and a row moves up or
   down on a press.** The phone drags a row instead. `knowledge.md` gives why
   one order holds on every device.
