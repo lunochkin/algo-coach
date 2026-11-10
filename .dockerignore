@@ -13,3 +13,7 @@ docs
 **/__pycache__
 .env
 CLAUDE.local.md
+# the workspace's packages and the native app, which the image never reads
+node_modules
+native
+packages/*/node_modules

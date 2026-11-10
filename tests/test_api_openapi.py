@@ -3,7 +3,7 @@ from pathlib import Path
 
 from algo_coach.api.__main__ import app
 
-COMMITTED = Path(__file__).resolve().parent.parent / "web" / "src" / "api" / "openapi.json"
+COMMITTED = Path(__file__).resolve().parents[1] / "packages/core/src/api/openapi.json"
 
 
 def test_the_page_is_typed_against_the_api_as_it_stands():

@@ -1,4 +1,4 @@
-import { pyJson } from '@algo-coach/core';
+import { pyJson, syncedLine, type components } from '@algo-coach/core';
 
 import { writeCatalog } from './courses-cache';
 import * as DB from './db';
@@ -25,13 +25,10 @@ const TABLE = Object.fromEntries(Object.entries(KIND).map(([table, kind]) => [ki
   DB.Table
 >;
 
-interface Synced {
-  stored: number;
-  known: number;
-  refused: { client_id: string; reason: string }[];
-  records: ({ kind: string; client_id: string; device: string; t: string } & Record<string, unknown>)[];
-  cursor: Record<string, number>;
-}
+// the sync's request and reply, as the engine's OpenAPI schema states them
+type Upload = components['schemas']['Upload'];
+type Synced = components['schemas']['Synced'];
+
 
 /**
  * Fetches the content when it changed, sends this device's pending records, and
@@ -54,16 +51,16 @@ export async function syncOnce(s: Settings, token: string): Promise<SyncResult> 
   const sending = await DB.pending();
   const since = JSON.parse((await DB.getMeta('sync_cursor')) ?? '{}') as Record<string, number>;
   const records = sending.map((one) => ({ ...JSON.parse(one.line), kind: KIND[one.table], client_id: one.client_id }));
-  const answer = (await (
-    await call(s.origin, '/knowledge/sync', { token, body: { device: s.device, records, since } })
-  ).json()) as Synced;
+  const upload: Upload = { device: s.device, records, since };
+  const answer = (await (await call(s.origin, '/knowledge/sync', { token, body: upload })).json()) as Synced;
 
   // a refused record names content the engine does not hold, and sending it again changes nothing
   await DB.markSent(sending);
   result.pushed = answer.stored;
-  for (const { kind, client_id, device, ...line } of answer.records) {
-    const table = TABLE[kind];
-    if (table && (await DB.merged(table, client_id, device, pyJson(line), line.t))) {
+  for (const record of answer.records) {
+    const line = syncedLine(record);
+    const table = line && TABLE[line.kind];
+    if (line && table && (await DB.merged(table, line.client_id, line.device, pyJson(line.rest), line.t))) {
       result.progressChanged = true;
     }
   }

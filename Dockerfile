@@ -8,6 +8,8 @@ WORKDIR /web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci
 COPY web/ ./
+# the API's generated types, which the pages import as types alone
+COPY packages/core/src/api/ /packages/core/src/api/
 RUN npm run build
 
 FROM python:3.15.2-slim AS engine

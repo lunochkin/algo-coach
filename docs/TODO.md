@@ -15,7 +15,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Move `native/src/core` into `packages/core` behind npm workspaces, with
       the app importing it and its tests passing. Nothing in it names React
       Native or Expo already
-- [ ] Move the OpenAPI-generated types into `packages/core`, and type the
+- [x] Move the OpenAPI-generated types into `packages/core`, and type the
       app's sync against them. The app writes its sync shapes by hand today
 - [ ] Move what the screens compute for display into `packages/core` as
       tested presentation functions: the module card, the queue header, the

@@ -12,7 +12,8 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ]
+      ],
+      "@algo-coach/core/*": ["../packages/core/src/*"]
     }
   }
 }

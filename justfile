@@ -90,11 +90,12 @@ app:
     uv run python -m algo_coach.api --reload &
     npm --prefix web run dev
 
-# Regenerate the page's API types from the app's OpenAPI schema, after a route
-# or a response model changes.
+# Regenerate the API's types in packages/core, which the pages and the native
+# app read, from the app's OpenAPI schema, after a route or a response model
+# changes.
 types:
-    uv run python -m algo_coach.api --openapi > web/src/api/openapi.json
-    cd web && npx openapi-typescript src/api/openapi.json -o src/api/schema.d.ts
+    uv run python -m algo_coach.api --openapi > packages/core/src/api/openapi.json
+    cd web && npx openapi-typescript ../packages/core/src/api/openapi.json -o ../packages/core/src/api/schema.d.ts
 
 # Apply every migration the database named by DATABASE_URL has not had.
 migrate:

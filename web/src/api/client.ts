@@ -1,6 +1,6 @@
 import createClient from 'openapi-fetch'
 
-import type { components, paths } from './schema'
+import type { components, paths } from '@algo-coach/core/api/schema'
 
 // relative: the page and the API share one origin. Every request says JSON,
 // since the API refuses a write that does not, and a write with no body would
