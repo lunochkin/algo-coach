@@ -6,6 +6,7 @@ import { NavMenu } from '@/components/NavMenu'
 import { cn } from '@/lib/utils'
 import { BoardPage } from '@/pages/BoardPage'
 import { CardsPage } from '@/pages/CardsPage'
+import { KnowledgePage } from '@/pages/KnowledgePage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProblemPage } from '@/pages/ProblemPage'
@@ -61,6 +62,7 @@ function App() {
                 pick came from: Phase 11 opens the same page from a ladder */}
             <Route path="problems/:problemId" element={<ProblemPage />} />
             <Route path="sittings/:sittingId" element={<SittingPage />} />
+            <Route path="knowledge" element={<KnowledgePage />} />
             <Route path={LOGIN} element={<LoginPage />} />
             <Route path={PRIVACY} element={<PrivacyPage />} />
             {GalleryPage && <Route path="gallery" element={<GalleryPage />} />}

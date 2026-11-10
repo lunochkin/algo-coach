@@ -10,12 +10,18 @@ those steps at low fidelity.
 
 ## Sections
 
-- **The navigation names three sections: Practice, Problems and Cards.**
-  Practice holds the board, a technique's candidates, a picked problem and the
-  sitting. Problems holds the listing of every problem. Cards holds the card
-  list, one card, and the recall trainer Phase 11 adds.
+- **The navigation names four sections: Practice, Problems, Cards and
+  Knowledge.** Practice holds the board, a technique's candidates, a picked
+  problem and the sitting. Problems holds the listing of every problem. Cards
+  holds the card list, one card, and the recall trainer Phase 11 adds.
+  Knowledge holds the knowledge modules of `knowledge.md`: their queues, their
+  lessons and their certifications.
 - **The scheme switch and the account menu sit at the right of the
   navigation**, apart from the sections, since neither names a page.
+- **At phone width the wordmark reads as its flame dot alone, and the
+  sections scroll sideways.** Four sections need more width than a phone
+  holds beside the switch and the menu. The row scrolls to the marked
+  section, so the reader always sees where they are.
 - **The account menu names who the session signs in as**, and holds the
   signed-in apps and the sign-out. The address the provider verified names
   the user, with the engine's own id under it. A user no provider linked is
@@ -92,7 +98,7 @@ those steps at low fidelity.
 | URL | The user | Section |
 |---|---|---|
 | `/` | continues a card or picks a technique | Practice |
-| `/problems` | picks a problem across every technique | Practice |
+| `/problems` | picks a problem across every technique | Problems |
 | `/techniques/:technique` | picks a problem | Practice |
 | `/problems/:problem_id` | opens the problem, which serves it, or reads a retired one | Practice |
 | `/sittings/:sitting_id` | solves, submits, claims | Practice |
@@ -100,6 +106,14 @@ those steps at low fidelity.
 | `/cards/:slug` | reads a card and reveals its templates | Cards |
 | `/cards/:slug/recall` | opens the recall of the template the trainer draws | Cards |
 | `/cards/:slug/recall/:template` | reproduces one template from memory | Cards |
+| `/knowledge` | continues the next queue, or picks another way in | Knowledge |
+| `/knowledge/modules/:module` | reads where each group stands, and aims the focus | Knowledge |
+| `/knowledge/questions` | picks the questions a filtered queue serves | Knowledge |
+| `/knowledge/queue` | answers one question at a time | Knowledge |
+| `/knowledge/exam` | picks a level exam | Knowledge |
+| `/knowledge/lessons` | picks a lesson | Knowledge |
+| `/knowledge/lessons/:module/:lesson` | reads a lesson and marks it read | Knowledge |
+| `/knowledge/certifications` | reads where each certification stands | Knowledge |
 | `/login` | signs in | none |
 | `/privacy` | reads the privacy policy | none |
 | `/gallery` | reads the design system, in development alone | none |
@@ -147,6 +161,86 @@ those steps at low fidelity.
   path sends the browser to it. A reload then asks for the same form, and a
   user who means to practise one form reaches it by name. `flows.md` gives why
   naming the template costs the recall nothing.
+
+## The knowledge pages
+
+The pages of the Knowledge section. `knowledge.md` gives the rules each page
+applies, and `packages/core` computes every label and count the pages show.
+The native app serves the same acts, as `README.md` requires of the two
+platforms.
+
+- **The knowledge home asks for one act: Continue.** Continue starts the next
+  queue. The line under the press counts the reviews due and the new
+  questions left today, in the words the phone shows.
+- **The home offers two other ways in, at a lower weight: Pick questions and
+  Exam.** Pick questions opens the filtered queue's choices, and Exam opens a
+  level exam's.
+- **The home's header links the lessons and the certifications.** The two
+  pages are destinations rather than acts, so each reads as a link, and the
+  phone reaches them from its top bar.
+- **The filtered queue is named Pick questions on both clients.** The phone
+  names it Practice today. On the web Practice names the board's section, and
+  one word naming two places would send a reader to the wrong one.
+- **The home names the focus above Continue, with three presses**: clear the
+  focus, switch it between strict and relaxed, and raise today's limit. A
+  strict focus names the reviews waiting outside it, and a press serves them
+  as a review queue.
+- **The home names a lesson ready to read and a certification ready for its
+  exam**, each as a link above the focus. Each link is the next step the
+  rules would take, and a reader who never opens the lessons still meets it.
+- **The modules read below as rows, one per module not archived.** A row names
+  the group next up with its passed share, and the reviews due, and opens the
+  module's page. A paused module says so on its row.
+- **The home sets the daily limit in a dialog**, as the account menu opens the
+  signed-in apps. The limit is a record of the log, so a limit set on the web
+  stands on the phone.
+- **The user orders the modules, and the order holds on every device.** An
+  order kept per device would list the modules differently on the phone and
+  the web. The order changes no queue.
+- **A module's page reads each topic as a panel of subtopics by level.** Each
+  group reads as covered, open, locked or holding no questions. A press on a
+  group starts a filtered queue over that subtopic.
+- **The module's page joins the phone's Map and Stats.** A wide window holds
+  the groups and the counts per level together. The two clients read the same
+  numbers from `packages/core`, so the difference is the layout alone.
+- **The module's page aims the focus and sets the module's status.** The focus
+  is aimed at the module, a topic or a subtopic. The status is active, paused
+  or archived. A status press asks before it archives, since an archived
+  module leaves the home.
+- **The queue's path is `/knowledge/queue`, and its query names the queue**:
+  `?mode=next`, `?mode=review`, `?mode=filtered` with the choices, or
+  `?mode=exam` with the scope and the level. A queue is no stored record until
+  it stops, so the query is the page's whole state.
+- **A reload starts the same queue again.** The answers given before the
+  reload are in the log already, so the next pick reads them.
+- **The queue serves one question at a time, and the page asks for one act at
+  a time.** An unanswered question asks for the answer. An answered one reads
+  its verdict and the explanation, and Next is the act.
+- **An answered question offers its detail on a press**: how it works, the
+  example, the pitfalls, the version notes and the diagram, each where the
+  question carries one.
+- **An open question reveals its key on a press.** The user then ticks the
+  points recalled, the traps fallen into, and whether they said anything else
+  wrong. `knowledge.md` gives the grade the ticks make.
+- **A keyboard answers the queue.** A digit picks an option, and Enter submits
+  or moves to the next question. A reader at a keyboard answers faster than by
+  pointer, and the phone offers no keyboard to match.
+- **Stop ends the queue and stores its stint**, and the page reads a summary
+  of the answers given. Leaving the queue through the navigation stops it the
+  same way. A closed tab stores no stint, and the answers given stay.
+- **An exam stores its answers together at its end**, as the phone does. An
+  exam stopped before its last question is stored as not passed. An exam in a
+  closed tab leaves no record.
+- **The lessons page lists each module's lessons in order**, each row naming
+  whether the lesson is locked, ready or read, and its minutes. A row opens
+  the lesson, a locked one included, since reading early skips nothing.
+- **A lesson's page reads its text, and Mark read is the act.** A read lesson
+  offers Mark unread instead. The lessons the text links to open on the same
+  page.
+- **The certifications page reads each module as a grid of scopes by level.**
+  Each cell reads as earned, lapsed, ready for its exam or not yet. A cell
+  opens the certification's four conditions, and offers the exam once the
+  other three hold.
 
 ## A page's areas
 

@@ -18,7 +18,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- any page under a section ---------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
+| algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 |                                                                        |
 | < Binary search                  the way back, named                   |
@@ -33,7 +33,7 @@ Every page under a section carries the same two rows above its body.
 +------------------------------------------------------------------------+
 ```
 
-- The navigation carries the three sections at the left, and the scheme switch
+- The navigation carries the four sections at the left, and the scheme switch
   and the account menu at the right. It marks the section the page sits under,
   and the wordmark reaches the board.
 - The account menu names who the session signs in as: the address the provider
@@ -50,7 +50,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- / --------------------------------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
+| algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Practice                                                               |
 | Continue a card in progress, or pick a technique.                      |
@@ -95,7 +95,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /problems?technique=binary-search&difficulty=medium ------------------+
-| algo-coach   Practice  [ Problems ]  Cards          ☀  ≡               |
+| algo-coach   Practice  [ Problems ]  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Problems                                                               |
 | Every problem the engine has written. A difficulty and a tag narrow    |
@@ -139,7 +139,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /techniques/binary-search --------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
+| algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Board                                                                |
 | binary-search                                                          |
@@ -168,7 +168,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /sittings/s-91c2, solving --------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
+| algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Smallest feasible speed              12:04  [ Pause ]  [ End ]         |
 +----------------------------------+-------------------------------------+
@@ -226,7 +226,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /sittings/s-91c2, paused ---------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards          ☀  ≡               |
+| algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Smallest feasible speed     12:04 paused  [ Start ]  [ End ]           |
 +------------------------------------------------------------------------+
@@ -317,7 +317,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /cards ---------------------------------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]          ☀  ≡               |
+| algo-coach   Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Cards                                                                  |
 | One card teaches one technique: when to reach for it, and the forms to |
@@ -365,7 +365,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /cards/binary-search -------------------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]          ☀  ≡               |
+| algo-coach   Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Cards                                                                |
 | Binary search                                                          |
@@ -412,6 +412,327 @@ problem's path reads as its record, as "Every problem" gives.
   reader decides whether to try recalling the form from that length.
 - A revealed template shows its form and its notes, and the press then covers
   the form again.
+
+## The knowledge home
+
+```
++- /knowledge -----------------------------------------------------------+
+| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
++------------------------------------------------------------------------+
+| Knowledge                                                              |
+| Answer the questions due, then the new ones.                           |
+| Lessons . Certifications                                               |
+|                                                                        |
+| +--------------------------------------------------------+             |
+| | Ready to read: Names and binding . ~6 min              |             |
+| | Ready for exam: Python core, Associate                 |             |
+| +--------------------------------------------------------+             |
+| | Focus: Python . Core                                   |             |
+| | [ Strict ]  [ 5 more new today ]  [ Clear ]            |             |
+| +--------------------------------------------------------+             |
+|                                                                        |
+|             [ Continue ]                                               |
+|    12 reviews . 7 new left today . 2 waiting outside                   |
+|                                                                        |
+|   ( Pick questions )   ( Exam )          10 new a day                  |
+|                                                                        |
+| Modules  2                                                             |
+| +--------------------------------------------------------+             |
+| | Python                                 12 due          |             |
+| | next up: Core . Names, Associate   4/9                 |             |
+| +--------------------------------------------------------+             |
+| | System design                          paused          |             |
+| | next up: Caching . Basics, Foundation  0/6             |             |
+| +--------------------------------------------------------+             |
++------------------------------------------------------------------------+
+```
+
+- The home is the section's root, so it carries no way back.
+- The line under the note links the lessons page and the certifications
+  page. Each is a destination, so each reads as a link.
+- Continue is the page's act, an ink pill. Pick questions and Exam are
+  outlined presses below it, at a lower weight.
+- The line under Continue counts the reviews due and the new questions left
+  today. "waiting outside" reads only under a strict focus, and a press on it
+  serves those reviews.
+- The ready lesson and the ready certification read only where one exists.
+  With neither and no focus, the panel above Continue is absent.
+- The focus panel reads "No focus" with a press to set one on a module's page
+  where none is set. "5 more new today" raises today's limit.
+- "10 new a day" opens the daily limit's dialog.
+- A module row opens the module's page. An archived module has no row.
+
+## A module
+
+```
++- /knowledge/modules/python --------------------------------------------+
+| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
++------------------------------------------------------------------------+
+| < Knowledge                                                            |
+| Python                                                                 |
+| 4 topics . 12 due . active             ( Focus here ) ( Pause )        |
+|                                                                        |
+| Foundation 18/20   Associate 9/24   Professional 0/30   Expert 0/12    |
+|                                                                        |
+| Core  3 subtopics                                       ( Focus )      |
+| +--------------------------------------------------------+             |
+| |                  L0        L1        L2        L3      |             |
+| | Names            covered   open      locked    locked  |             |
+| | Types            covered   covered   open      locked  |             |
+| | Mutability       open      locked    locked    -       |             |
+| +--------------------------------------------------------+             |
+|                                                                        |
+| Functions  2 subtopics                                  ( Focus )      |
+| +--------------------------------------------------------+             |
+| | ...                                                    |             |
+| +--------------------------------------------------------+             |
++------------------------------------------------------------------------+
+```
+
+- The line under the title counts the topics and the reviews due, and names
+  the module's status. The status press reads Pause on an active module, and
+  Resume and Archive on a paused one.
+- The counts per level are the phone's Stats line: the passed questions of
+  each level over the questions the level holds.
+- Each topic is a section with its heading and a panel of its subtopics. A
+  cell is one group, and `-` is a group holding no questions.
+- A press on an open or covered cell starts a filtered queue over that
+  subtopic. A locked cell opens the same queue, since locks do not apply to
+  the filtered queue.
+- A subtopic's name aims the focus at the subtopic, on a press. The focus
+  press beside a topic's heading aims at the topic.
+
+## Pick questions
+
+```
++- /knowledge/questions?module=python -----------------------------------+
+| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
++------------------------------------------------------------------------+
+| < Knowledge                                                            |
+| Pick questions                                                         |
+| Locks do not apply here.                                               |
+|                                                                        |
+| Module   [ Python ]  ( System design )                                 |
+| Topic    ( any )  [ Core ]  ( Functions )  ( Classes )                 |
+| Subtopic [ any ]  ( Names )  ( Types )  ( Mutability )                 |
+| Level    [ any ]  ( Foundation )  ( Associate )  ( Professional ) ...  |
+| Kind     [ any ]  ( concept )  ( output )  ( debug )                   |
+| Only     ( weak and due )                                              |
+|                                                                        |
+|             [ Start . 6 reviews . 14 new ]                             |
++------------------------------------------------------------------------+
+```
+
+- The chips are controls, each a toggle within its row, and one pick per row.
+  A row narrows the rows below it.
+- The query carries every pick, so a filtered queue is a link the user can
+  keep.
+- Start is the act, and its label counts what the picks leave, as the phone's
+  does.
+
+## A queue, asking
+
+```
++- /knowledge/queue?mode=next -------------------------------------------+
+| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
++------------------------------------------------------------------------+
+| Next                                          3 answered ( Stop )      |
+| Python . Core . Names, Associate                         new           |
+|                                                                        |
+| What does `x is y` compare?                                            |
+|                                                                        |
+|   1  ( the values )                                                    |
+|   2  ( the identities )                                                |
+|   3  ( the types )                                                     |
+|   4  ( the hashes )                                                    |
+|                                                                        |
+| Type ? after a reply to mark it a guess.        [ Submit ]             |
++------------------------------------------------------------------------+
+```
+
+- The queue carries no way back, since a press on Stop leaves the queue. The
+  navigation still reads, and leaving through it stops the queue too.
+- The bar names the queue's mode, the answers given and Stop. The line under
+  it names the question's group and its state: new, due, weak or early.
+- A digit picks an option, and Enter submits. A `short` question reads a text
+  field in place of the options.
+- The exam reads the same page with its question count in the bar, and no
+  verdict until its end.
+
+## A queue, answered
+
+```
++- /knowledge/queue?mode=next -------------------------------------------+
+| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
++------------------------------------------------------------------------+
+| Next                                          4 answered ( Stop )      |
+| Python . Core . Names, Associate                                       |
+|                                                                        |
+| What does `x is y` compare?                                            |
+|                                                                        |
+|   ( the values )                                                       |
+|   [ the identities ]   correct                                         |
+|                                                                        |
+| +--------------------------------------------------------+             |
+| | `is` compares identity: the two names refer to one     |             |
+| | object.                                                |             |
+| +--------------------------------------------------------+             |
+| ( How it works )  ( Example )  ( Pitfalls )                            |
+|                                                                        |
+|                                                   [ Next ]             |
++------------------------------------------------------------------------+
+```
+
+- The verdict reads in the verdict's colours, passed or wrong, beside the
+  option picked. A wrong pick marks the correct option too.
+- The explanation's panel reads at once. Each detail opens on its press, and
+  only the detail the question carries is offered.
+- Enter moves to the next question.
+
+## An open question
+
+```
++- /knowledge/queue?mode=next -------------------------------------------+
+| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
++------------------------------------------------------------------------+
+| Next                                          4 answered ( Stop )      |
+| Python . Core . Mutability, Professional                               |
+|                                                                        |
+| Why does a default list argument keep its items between calls?         |
+|                                                                        |
+| Tick the points you recalled                                           |
+|   [x] The default is evaluated once, at definition                     |
+|   [ ] Every call without the argument shares that object               |
+| Traps                                                                  |
+|   [ ] "The list is copied on each call"                                |
+|   [ ] I also said something else wrong                                 |
+|                                                                        |
+|                                                 [ Submit ]             |
++------------------------------------------------------------------------+
+```
+
+- The key is withheld until the user presses Reveal, and this drawing is the
+  page after that press.
+- Submit grades the ticks as `knowledge.md` gives, and the page then reads as
+  an answered question does.
+
+## A stopped queue
+
+```
++- /knowledge/queue?mode=next -------------------------------------------+
+| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
++------------------------------------------------------------------------+
+| Next, stopped                                                          |
+| 9 answered . 7 correct                                                 |
+|                                                                        |
+| +--------------------------------------------------------+             |
+| | What does `x is y` compare?                  correct   |             |
+| | Why does a default list keep its items?      partial   |             |
+| | ...                                                    |             |
+| +--------------------------------------------------------+             |
+|                                                                        |
+|              [ Back to Knowledge ]   ( Continue again )                |
++------------------------------------------------------------------------+
+```
+
+- Stop stores the stint, and the summary lists every answer of the queue.
+- An exam's summary names whether it passed, and a certification exam names
+  the certification it was for.
+
+## A level exam
+
+```
++- /knowledge/exam ------------------------------------------------------+
+| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
++------------------------------------------------------------------------+
+| < Knowledge                                                            |
+| Exam                                                                   |
+| No feedback until the end.                                             |
+|                                                                        |
+| Module    [ any ]  ( Python )  ( System design )                       |
+| Level     ( Foundation )  [ Associate ]  ( Professional )  ( Expert )  |
+| Questions [ 20 ]                                                       |
+|                                                                        |
+|                      [ Start ]                                         |
++------------------------------------------------------------------------+
+```
+
+- A level exam samples every open group at one level. A certification's exam
+  starts from the certifications page instead.
+- The size field is saved as the phone's is, shortly after typing stops.
+
+## The lessons
+
+```
++- /knowledge/lessons ---------------------------------------------------+
+| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
++------------------------------------------------------------------------+
+| < Knowledge                                                            |
+| Lessons                                                                |
+|                                                                        |
+| Python  14 lessons                                                     |
+| +--------------------------------------------------------+             |
+| | Names and binding                  ready     ~6 min    |             |
+| | Mutability                         read      ~8 min    |             |
+| | Closures                           locked    ~5 min    |             |
+| +--------------------------------------------------------+             |
++------------------------------------------------------------------------+
+```
+
+- One section per module, the lessons in the module's own order.
+- A row opens the lesson. A locked lesson opens too, and names what it needs.
+
+## A lesson
+
+```
++- /knowledge/lessons/python/names --------------------------------------+
+| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
++------------------------------------------------------------------------+
+| < Lessons                                                              |
+| Names and binding                                                      |
+| Python . teaches Core . Names, Foundation and Associate . ~6 min       |
+|                                                                        |
+| the lesson's text, in the reading column                               |
+|                                                                        |
+| Next: Mutability, Closures                                             |
+|                                                [ Mark read ]           |
++------------------------------------------------------------------------+
+```
+
+- The text reads as authored prose, on the design tokens.
+- Mark read is the act, and Mark unread replaces it once the lesson is read.
+- A link inside the text to another lesson opens that lesson on this page.
+
+## The certifications
+
+```
++- /knowledge/certifications --------------------------------------------+
+| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
++------------------------------------------------------------------------+
+| < Knowledge                                                            |
+| Certifications                                                         |
+|                                                                        |
+| Python                                                                 |
+| +--------------------------------------------------------+             |
+| |                Foundation  Associate  Professional     |             |
+| | Core           earned      ready      not yet          |             |
+| | Functions      earned      not yet    not yet          |             |
+| | Whole module   not yet     not yet    not yet          |             |
+| +--------------------------------------------------------+             |
+|                                                                        |
+| Python core, Associate                                                 |
+|   prerequisites earned            yes                                  |
+|   every group covered             yes                                  |
+|   retained 18 of 20, needs 16     yes                                  |
+|   exam                            ( Start the exam )                   |
++------------------------------------------------------------------------+
+```
+
+- A cell opens its certification below the grid, with the four conditions
+  and the counts behind each.
+- A lapsed certification reads as lapsed in its cell, and names the
+  condition that fell short.
+- The exam's press reads only once the other three conditions hold.
 
 ## The login
 
@@ -480,7 +801,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- any path naming no page ----------------------------------------------+
-| algo-coach   Practice  Problems  Cards              ☀  ≡               |
+| algo-coach   Practice  Problems  Cards  Knowledge               ☀  ≡   |
 +------------------------------------------------------------------------+
 | No page here.                                                          |
 |                                                                        |
@@ -517,7 +838,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /cards/binary-search, no run open ------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]          ☀  ≡               |
+| algo-coach   Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Cards                                                                |
 | Binary search                                                          |
@@ -569,7 +890,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /cards/binary-search, a run open -------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]          ☀  ≡               |
+| algo-coach   Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Cards                                                                |
 | Binary search                                                          |
@@ -636,7 +957,7 @@ names the card. The sitting's bar offers a press back to the card throughout.
 
 ```
 +- the recall trainer, before a hint ------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]          ☀  ≡               |
+| algo-coach   Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Binary search                                                        |
 | Lower bound                                                            |
