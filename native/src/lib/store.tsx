@@ -36,6 +36,7 @@ import { readCatalog } from './courses-cache';
 import * as DB from './db';
 import { scheduleReminder } from './notify';
 import { DEFAULTS, getToken, loadSettings, saveSettings, setToken, type Settings } from './settings';
+import { SignedOut } from './engine';
 import { syncOnce } from './sync';
 
 export interface SyncState {
@@ -206,10 +207,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setSync({ running: false, lastAt, error: null });
       await remind(cat ?? catalogRef.current, a);
     } catch (e) {
-      failed = true;
       const error = e instanceof Error ? e.message : String(e);
       await DB.setMeta('last_error', error);
       setSync((x) => ({ ...x, running: false, error }));
+      if (e instanceof SignedOut) {
+        // revoked or expired on the engine: forget the token, and Home returns to Login.
+        // The outbox keeps its records, which the next sign-in sends
+        await setToken('');
+        setHasToken(false);
+      } else failed = true;
     } finally {
       running.current = false;
       if (again.current) {
