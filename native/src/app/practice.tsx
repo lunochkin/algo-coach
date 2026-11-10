@@ -25,7 +25,7 @@ import {
   subTitle,
   type Topic,
   unlocksLabel,
-} from '@/core';
+} from '@algo-coach/core';
 import { bySavedOrder, withFirst } from '@/lib/order';
 import { useStore } from '@/lib/store';
 import { BottomBar, startQueue, styles } from '@/ui/common';

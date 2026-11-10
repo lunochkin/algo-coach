@@ -4,7 +4,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { Appbar, Card, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { certId, certStates, COURSE_SCOPE, levelName, levels, type CertStatus, type Course } from '@/core';
+import { certId, certStates, COURSE_SCOPE, levelName, levels, type CertStatus, type Course } from '@algo-coach/core';
 import { bySavedOrder } from '@/lib/order';
 import { useStore } from '@/lib/store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';

@@ -10,6 +10,9 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
   through its pilot.
 - `uv sync` to set up; `uv run pytest` to test, always, whether one file or
   the whole suite. `addopts` spreads it over every core, 9s against 65s.
+- `npm install` at the repository root installs the workspace: `packages/core`,
+  the shared TypeScript core, and `native/`, the native app. `just native-test`
+  runs both.
 - `web/` is the frontend: Vite, React and TypeScript, built to static files.
   `npm install` and `npm run build` run inside `web/`.
 - shadcn/ui over Radix, with Tailwind, for the components. `npx shadcn add

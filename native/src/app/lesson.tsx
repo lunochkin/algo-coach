@@ -5,7 +5,7 @@ import { Renderer, useMarkdown, type MarkedStyles } from 'react-native-marked';
 import { Appbar, Button, Chip, Menu, Text, useTheme, type MD3Theme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { minutesOf, sections, type Course } from '@/core';
+import { minutesOf, sections, type Course } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
 

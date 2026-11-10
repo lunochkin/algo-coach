@@ -22,3 +22,6 @@ CLAUDE.local.md
 
 # Never committed: it names what must not be.
 .githooks/words
+
+# the workspace's packages, hoisted to the root
+node_modules/

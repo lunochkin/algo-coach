@@ -1,6 +1,6 @@
 import { File, Paths } from 'expo-file-system';
 
-import { loadSnapshot, type Catalog, type Snapshot } from '@/core';
+import { loadSnapshot, type Catalog, type Snapshot } from '@algo-coach/core';
 
 const file = () => new File(Paths.document, 'courses.json');
 

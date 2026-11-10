@@ -1,7 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import * as SQLite from 'expo-sqlite';
 
-import { pyJson, type AttemptRecord, type CertRecord, type FocusRecord, type LessonRecord, type SessionRecord, type StatusRecord } from '@/core';
+import { pyJson, type AttemptRecord, type CertRecord, type FocusRecord, type LessonRecord, type SessionRecord, type StatusRecord } from '@algo-coach/core';
 
 let opened: Promise<SQLite.SQLiteDatabase> | null = null;
 

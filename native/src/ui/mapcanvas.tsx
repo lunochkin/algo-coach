@@ -19,7 +19,7 @@ import { Platform, StyleSheet } from 'react-native';
 import { useTheme, type MD3Theme } from 'react-native-paper';
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 
-import { subTitle, type Board, type ClusterBox, type Course, type MapEdge } from '@/core';
+import { subTitle, type Board, type ClusterBox, type Course, type MapEdge } from '@algo-coach/core';
 
 import { tones } from './common';
 

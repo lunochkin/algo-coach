@@ -30,7 +30,7 @@ import {
   raised,
   todayLimit,
   type Raise,
-} from '@/core';
+} from '@algo-coach/core';
 
 import { readCatalog } from './courses-cache';
 import * as DB from './db';

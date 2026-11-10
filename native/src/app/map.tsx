@@ -24,7 +24,7 @@ import {
   subTitle,
   topicTitle,
   unlocksLabel,
-} from '@/core';
+} from '@algo-coach/core';
 import { bySavedOrder } from '@/lib/order';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';

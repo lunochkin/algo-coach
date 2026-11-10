@@ -14,7 +14,7 @@ import {
   type Queue,
   subTitle,
   topicTitle,
-} from '@/core';
+} from '@algo-coach/core';
 
 import { STATE_LABEL } from './certs';
 import { styles, tones } from './common';

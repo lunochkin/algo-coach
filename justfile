@@ -221,10 +221,11 @@ match *args:
 android_home := env_var_or_default("ANDROID_HOME", env_var("HOME") / "Library/Android/sdk")
 apk := "native/android/app/build/outputs/apk/release/app-release.apk"
 
-# The app's typecheck and tests, over the fixtures the Python side generates.
+# The shared core's and the app's typechecks and tests. The core's run over the
+# fixtures the Python side generates.
 native-test:
-    cd native && npx tsc --noEmit
-    cd native && npx vitest run
+    cd packages/core && npx tsc --noEmit && npx vitest run
+    cd native && npx tsc --noEmit && npx vitest run
 
 # The release APK (arm64 only), signed with the key in native/signing/, which git ignores.
 native-apk:

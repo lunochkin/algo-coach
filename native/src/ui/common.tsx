@@ -4,7 +4,7 @@ import { Text, useTheme } from 'react-native-paper';
 
 import { router } from 'expo-router';
 
-import { block, type Queue, type Question } from '@/core';
+import { block, type Queue, type Question } from '@algo-coach/core';
 import type { ExamSession, QueueSession, Session, SyncState } from '@/lib/store';
 import { syncErrorSummary } from '@/lib/syncError';
 

@@ -5,7 +5,7 @@ import { Appbar, Button, Chip, SegmentedButtons, Text, TextInput, useTheme } fro
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { examPool, levelName, levels, selectExam } from '@/core';
+import { examPool, levelName, levels, selectExam } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
 import { BottomBar, startExam, styles } from '@/ui/common';

@@ -12,7 +12,7 @@ import {
   levelName,
   shuffle,
   subTitle,
-} from '@/core';
+} from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { startExam, styles, tones } from './common';
 

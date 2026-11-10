@@ -33,7 +33,7 @@ import {
   type Status,
   subTitle,
   topicTitle,
-} from '@/core';
+} from '@algo-coach/core';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
 

@@ -14,7 +14,7 @@ import {
   subTitle,
   summary,
   topicTitle,
-} from '@/core';
+} from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles, tones } from '@/ui/common';
 

@@ -12,7 +12,7 @@ import {
   levelName,
   minutesOf,
   subTitle,
-} from '@/core';
+} from '@algo-coach/core';
 import { bySavedOrder } from '@/lib/order';
 import { useStore } from '@/lib/store';
 import { styles } from '@/ui/common';

@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Button, Dialog, Portal, Text } from 'react-native-paper';
 
-import type { Course } from '@/core';
+import type { Course } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 
 const SCOPE = 'Continue, exams across all courses, the due/weak totals and reminders';

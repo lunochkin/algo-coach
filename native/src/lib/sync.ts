@@ -1,4 +1,4 @@
-import { pyJson } from '@/core';
+import { pyJson } from '@algo-coach/core';
 
 import { writeCatalog } from './courses-cache';
 import * as DB from './db';

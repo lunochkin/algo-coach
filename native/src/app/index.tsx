@@ -25,7 +25,7 @@ import {
   reviewQueue,
   subTitle,
   topicTitle,
-} from '@/core';
+} from '@algo-coach/core';
 import { bySavedOrder } from '@/lib/order';
 import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
