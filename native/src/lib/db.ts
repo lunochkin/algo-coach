@@ -8,13 +8,14 @@ import {
   type FocusRecord,
   type LessonRecord,
   type LimitRecord,
+  type OrderRecord,
   type RaiseRecord,
   type SessionRecord,
   type StatusRecord,
 } from '@algo-coach/core';
 
-export type Table = 'attempts' | 'sessions' | 'statuses' | 'focus' | 'lessons' | 'certs' | 'limits' | 'raises';
-export const TABLES: Table[] = ['attempts', 'sessions', 'statuses', 'focus', 'lessons', 'certs', 'limits', 'raises'];
+export type Table = 'attempts' | 'sessions' | 'statuses' | 'focus' | 'lessons' | 'certs' | 'limits' | 'raises' | 'orders';
+export const TABLES: Table[] = ['attempts', 'sessions', 'statuses', 'focus', 'lessons', 'certs', 'limits', 'raises', 'orders'];
 
 let opened: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -74,6 +75,7 @@ export const allCerts = () => lines<CertRecord>('certs');
 export const allLessons = () => lines<LessonRecord>('lessons');
 export const allLimits = () => lines<LimitRecord>('limits');
 export const allRaises = () => lines<RaiseRecord>('raises');
+export const allOrders = () => lines<OrderRecord>('orders');
 
 /** Gives the rows written before any owner was kept to `user`, the account whose token wrote them. */
 export async function adopt(user: string) {
@@ -95,7 +97,7 @@ export const cursorKey = (user: string | null) => (user ? `sync_cursor:${user}` 
 export async function addLocal(
   table: Table,
   path: string,
-  rec: AttemptRecord | SessionRecord | StatusRecord | FocusRecord | LessonRecord | CertRecord | LimitRecord | RaiseRecord,
+  rec: AttemptRecord | SessionRecord | StatusRecord | FocusRecord | LessonRecord | CertRecord | LimitRecord | RaiseRecord | OrderRecord,
 ) {
   // minted once, here, so a retried upload is recognised by the engine
   await (

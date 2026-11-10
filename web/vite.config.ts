@@ -8,7 +8,12 @@ const api = { '/api': 'http://127.0.0.1:8000' }
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@algo-coach/core': fileURLToPath(new URL('../packages/core/src', import.meta.url)),
+    },
+  },
   server: { proxy: api },
   preview: { proxy: api },
 })

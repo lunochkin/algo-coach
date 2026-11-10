@@ -23,6 +23,7 @@ from algo_coach.schema import (
     LessonMark,
     LimitRaise,
     Module,
+    ModuleOrder,
     ModuleStatusChange,
     Problem,
     Question,
@@ -73,6 +74,7 @@ RECORDS: list[type[BaseModel]] = [
     CertificationExam,
     DailyLimit,
     LimitRaise,
+    ModuleOrder,
 ]
 SNAPSHOTS = Path(__file__).parent / "schemas"
 

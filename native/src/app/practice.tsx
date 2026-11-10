@@ -25,8 +25,9 @@ import {
   subTitle,
   type Topic,
   unlocksLabel,
+  bySavedOrder,
+  withFirst,
 } from '@algo-coach/core';
-import { bySavedOrder, withFirst } from '@/lib/order';
 import { useStore } from '@/lib/store';
 import { BottomBar, startQueue, styles } from '@/ui/common';
 import { usePauseToggle } from '@/ui/pause';
@@ -40,8 +41,8 @@ export default function Practice() {
   const insets = useSafeAreaInsets();
   const p = useLocalSearchParams<Params>();
   const saved = useMemo(
-    () => bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.settings.courseOrder),
-    [st.catalog, st.settings.courseOrder],
+    () => bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.courseOrder),
+    [st.catalog, st.courseOrder],
   );
   // The course the screen opened on leads; fixed at open so chips don't jump when another is tapped.
   // Opens on an explicit course, else on the focus, else the first course.

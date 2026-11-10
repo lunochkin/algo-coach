@@ -4,8 +4,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { Appbar, Card, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { certId, certStates, COURSE_SCOPE, levelName, levels, type CertStatus, type Course } from '@algo-coach/core';
-import { bySavedOrder } from '@/lib/order';
+import { bySavedOrder, certId, certStates, COURSE_SCOPE, levelName, levels, type CertStatus, type Course } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -27,8 +26,8 @@ export default function CertsScreen() {
   const { board } = st;
   const b = useMemo(() => board(null), [board]);
   const courses = useMemo(
-    () => bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.settings.courseOrder).filter((c) => c.certs),
-    [st.catalog, st.settings.courseOrder],
+    () => bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.courseOrder).filter((c) => c.certs),
+    [st.catalog, st.courseOrder],
   );
   const states = useMemo(
     () =>

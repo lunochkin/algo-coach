@@ -2,7 +2,7 @@
 since a cursor read back. `knowledge.md`, The records."""
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 from pydantic import BaseModel, ValidationError
 from sqlalchemy import Connection, Table, select
@@ -17,6 +17,7 @@ from algo_coach.knowledge.table import (
     lesson_marks,
     lessons,
     limit_raises,
+    module_orders,
     module_status_changes,
     modules,
     questions,
@@ -40,6 +41,7 @@ from algo_coach.schema import (
     KnowledgeRecord,
     LessonMark,
     LimitRaise,
+    ModuleOrder,
     ModuleStatusChange,
     Stint,
 )
@@ -53,9 +55,10 @@ KINDS: dict[str, tuple[Table, type[KnowledgeRecord]]] = {
     "focus": (focuses, Focus),
     "lesson": (lesson_marks, LessonMark),
     "cert": (certification_exams, CertificationExam),
-    # the engine's own: learn kept the limit and the raise on the device
+    # the engine's own: learn kept these three on the device
     "limit": (daily_limits, DailyLimit),
     "raise": (limit_raises, LimitRaise),
+    "order": (module_orders, ModuleOrder),
 }
 
 
@@ -153,6 +156,8 @@ def _record(names: _Names, line: dict[str, Any]) -> tuple[Table, dict[str, Any]]
         return table, {"new_per_day": line["n"]}
     if kind == "raise":
         return table, {"added": line["n"]}
+    if kind == "order":
+        return table, {"module_ids": [names.module(slug) for slug in _slugs(line["courses"])]}
     module = line["course"]
     module_id = names.module(module)
     if kind == "attempt":
@@ -179,6 +184,13 @@ def _record(names: _Names, line: dict[str, Any]) -> tuple[Table, dict[str, Any]]
         "answered": line["n"],
         "passed": line["passed"],
     }
+
+
+def _slugs(value: object) -> list[str]:
+    listed = cast(list[object], value) if isinstance(value, list) else None
+    if listed is None or not all(isinstance(one, str) for one in listed):
+        raise ValueError("courses: a list of module slugs")
+    return [str(one) for one in listed]
 
 
 def _focus(names: _Names, line: dict[str, Any]) -> dict[str, Any]:
@@ -223,6 +235,8 @@ def _line(kind: str, row: dict[str, Any], names: _Names) -> dict[str, Any]:
         return line | {"n": row["new_per_day"]}
     if kind == "raise":
         return line | {"n": row["added"]}
+    if kind == "order":
+        return line | {"courses": [names.slug[one] for one in row["module_ids"]]}
     if kind == "lesson":
         module, lesson = names.owned[row["lesson_id"]]
         status = "done" if row["read"] else "undone"

@@ -37,6 +37,10 @@ export function raisePath(device: string, t: string): string {
   return `progress/${device}/raises/${monthOf(t)}.jsonl`;
 }
 
+export function orderPath(device: string, t: string): string {
+  return `progress/${device}/orders/${monthOf(t)}.jsonl`;
+}
+
 export function isCertFile(path: string): boolean {
   return /^progress\/[^/]+\/certs\/[^/]+\.jsonl$/.test(path);
 }

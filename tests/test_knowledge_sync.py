@@ -114,6 +114,31 @@ def test_a_raise_adds_at_least_one_question(database, tmp_path):
     assert [one["client_id"] for one in result["refused"]] == ["r1"]
 
 
+def test_the_module_order_round_trips_by_slug(database, tmp_path):
+    """Stored as minted ids, returned as the slugs the client sent."""
+    order = {"kind": "order", "client_id": "o1", "t": T, "courses": ["python"]}
+
+    (back,) = synced(database, tmp_path, [order])["records"]
+
+    assert back["courses"] == ["python"]
+
+
+def test_an_order_naming_an_unknown_module_is_refused(database, tmp_path):
+    order = {"kind": "order", "client_id": "o1", "t": T, "courses": ["python", "nowhere"]}
+
+    result = synced(database, tmp_path, [order])
+
+    assert result["refused"] == [{"client_id": "o1", "reason": "unknown module nowhere"}]
+
+
+def test_an_order_that_is_no_list_of_slugs_is_refused(database, tmp_path):
+    order = {"kind": "order", "client_id": "o1", "t": T, "courses": "python"}
+
+    (refused,) = synced(database, tmp_path, [order])["refused"]
+
+    assert refused["reason"] == "courses: a list of module slugs"
+
+
 def test_a_record_naming_unknown_content_is_refused_alone(database, tmp_path):
     """One bad record leaves the rest of the upload stored, and the client
     learns which one to drop."""

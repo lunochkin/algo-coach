@@ -233,6 +233,11 @@ class LimitRaise(KnowledgeRecord):
     added: int = Field(ge=1)  # to the day the raise was given in
 
 
+class ModuleOrder(KnowledgeRecord):
+    # first to last; a module it leaves out follows in the seed's order
+    module_ids: list[str]
+
+
 class CertificationExam(KnowledgeRecord):
     module_id: str
     topic_id: str | None = None  # none for the whole module

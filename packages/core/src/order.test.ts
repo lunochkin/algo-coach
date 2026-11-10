@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { bySavedOrder, withFirst } from './order';
+import { bySavedOrder, moduleOrder, moved, withFirst } from './order';
 
 const slug = (s: string) => s;
 
@@ -25,5 +25,22 @@ describe('withFirst', () => {
   });
   it('leaves the order unchanged when the slug is absent', () => {
     expect(withFirst(['a', 'b'], slug, 'x')).toEqual(['a', 'b']);
+  });
+});
+
+describe('moduleOrder', () => {
+  it('is empty where no device set one', () => {
+    expect(moduleOrder([])).toEqual([]);
+  });
+  it('is the latest set, whatever order the records arrived in', () => {
+    const later = { t: '2026-11-10T12:00:00Z', courses: ['b', 'a'] };
+    expect(moduleOrder([later, { t: '2026-11-10T11:00:00Z', courses: ['a', 'b'] }])).toEqual(['b', 'a']);
+  });
+});
+
+describe('moved', () => {
+  it('moves one slug and keeps the rest in order', () => {
+    expect(moved(['a', 'b', 'c'], 2, 0)).toEqual(['c', 'a', 'b']);
+    expect(moved(['a', 'b', 'c'], 0, 1)).toEqual(['b', 'a', 'c']);
   });
 });

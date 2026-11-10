@@ -40,6 +40,7 @@ from algo_coach.knowledge.table import (
     lesson_marks,
     lessons,
     limit_raises,
+    module_orders,
     module_status_changes,
     modules,
     questions,
@@ -90,6 +91,7 @@ from algo_coach.schema import (
     LimitRaise,
     MachineProvenance,
     Module,
+    ModuleOrder,
     ModuleStatusChange,
     Pause,
     Probe,
@@ -200,6 +202,7 @@ STORED: list[Stored] = [
     Stored(CertificationExam, certification_exams),
     Stored(DailyLimit, daily_limits),
     Stored(LimitRaise, limit_raises),
+    Stored(ModuleOrder, module_orders),
 ]
 
 
@@ -701,6 +704,7 @@ APPEND_ONLY = {
     "certification_exams",
     "daily_limits",
     "limit_raises",
+    "module_orders",
 }
 
 

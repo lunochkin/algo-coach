@@ -22,6 +22,7 @@ const KIND: Record<DB.Table, string> = {
   certs: 'cert',
   limits: 'limit',
   raises: 'raise',
+  orders: 'order',
 };
 const TABLE = Object.fromEntries(Object.entries(KIND).map(([table, kind]) => [kind, table])) as Record<
   string,

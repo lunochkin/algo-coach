@@ -194,9 +194,9 @@ platforms.
 - **The home sets the daily limit in a dialog**, as the account menu opens the
   signed-in apps. The limit is a record of the log, so a limit set on the web
   stands on the phone.
-- **The user orders the modules, and the order holds on every device.** An
-  order kept per device would list the modules differently on the phone and
-  the web. The order changes no queue.
+- **The home lists the modules in the user's order, and a row moves up or
+  down on a press.** The phone drags a row instead. `knowledge.md` gives why
+  one order holds on every device.
 - **A module's page reads each topic as a panel of subtopics by level.** Each
   group reads as covered, open, locked or holding no questions. A press on a
   group starts a filtered queue over that subtopic.

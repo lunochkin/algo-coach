@@ -42,8 +42,8 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       settings page, and write the choice into `pages.md`
 - [ ] Decide whether a queue keeps its state in the URL query, and write the
       choice into `pages.md`. A reload then restarts the queue
-- [ ] Add the module order to the user's log, with its sync line, and let
-      the web reorder the modules. The phone keeps the order on the device
+- [x] Add the `module_orders` table with its `order` sync line, and have
+      the phone and the web write and read it instead of a device setting
 - [ ] Serve the next queue, the review queue and practice on the web from
       `packages/core`
 - [ ] Serve lessons, focus, certifications and exams on the web

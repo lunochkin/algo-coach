@@ -28,6 +28,9 @@ import {
   type Queue,
   type SessionRecord,
   limitPath,
+  moduleOrder,
+  orderPath,
+  type OrderRecord,
   type LimitRecord,
   NEW_PER_DAY,
   NEW_STEP,
@@ -40,7 +43,7 @@ import {
 import { readCatalog } from './courses-cache';
 import * as DB from './db';
 import { cancelReminders, scheduleReminder } from './notify';
-import { DEFAULTS, getToken, legacyNewPerDay, loadSettings, saveSettings, setToken, type Settings } from './settings';
+import { DEFAULTS, getToken, legacySettings, loadSettings, saveSettings, setToken, type Settings } from './settings';
 import { signOut as signOutApp } from './auth';
 import { SignedOut } from './engine';
 import { syncOnce } from './sync';
@@ -79,6 +82,9 @@ interface Store {
   newPerDay: number;
   setNewPerDay: (n: number) => Promise<void>;
   newLimit: number;
+  // the user's module order, a record of the log, so every device lists the modules alike
+  courseOrder: string[];
+  setCourseOrder: (slugs: string[]) => Promise<void>;
   raiseNew: () => Promise<void>;
   hasToken: boolean;
   sync: SyncState;
@@ -138,6 +144,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
   const [limits, setLimits] = useState<LimitRecord[]>([]);
   const [raises, setRaises] = useState<RaiseRecord[]>([]);
+  const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [hasToken, setHasToken] = useState(false);
   const [sync, setSync] = useState<SyncState>({ running: false, lastAt: null, error: null });
   const [filter, setFilter] = useState<string | null>(null);
@@ -168,6 +175,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }),
       DB.allLimits().then(setLimits),
       DB.allRaises().then(setRaises),
+      DB.allOrders().then(setOrders),
     ]);
     setFocusRecords(fs);
     statusesRef.current = ss;
@@ -266,7 +274,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const lastAt = await DB.getMeta('last_sync');
       const error = (await DB.getMeta('last_error')) || null;
       setSync({ running: false, lastAt, error });
-      await movedLimit(s);
+      await movedSettings(s);
       await reload(true);
       setReady(true);
       requestSync(0);
@@ -417,6 +425,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     },
     [requestSync],
   );
+  const courseOrder = useMemo(() => moduleOrder(orders), [orders]);
+  const setCourseOrder = useCallback(
+    async (courses: string[]) => {
+      const rec: OrderRecord = { t: isoNow(), courses };
+      await DB.addLocal('orders', orderPath(settingsRef.current.device, rec.t), rec);
+      setOrders((xs) => [...xs, rec]);
+      requestSync(0);
+    },
+    [requestSync],
+  );
 
   const value = useMemo<Store>(
     () => ({
@@ -429,6 +447,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setNewPerDay,
       newLimit,
       raiseNew,
+      courseOrder,
+      setCourseOrder,
       hasToken,
       sync,
       filter,
@@ -449,20 +469,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       archived,
       recordCertExam,
     }),
-    [ready, catalog, attempts, sessions, settings, limits, setNewPerDay, newLimit, raiseNew, hasToken, sync, filter, board, requestSync,
+    [ready, catalog, attempts, sessions, settings, limits, setNewPerDay, newLimit, raiseNew, courseOrder, setCourseOrder, hasToken, sync, filter, board, requestSync,
       updateSettings, signedIn, signOut, record, session, finishSession, setCourseStatus, focus, setFocus, setLessonState, archived, recordCertExam],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-/** Writes the daily limit an earlier build kept on the device as a record, once. */
-async function movedLimit(s: Settings): Promise<void> {
-  const kept = await legacyNewPerDay();
-  if (kept === null) return;
-  if (kept !== NEW_PER_DAY && !(await DB.allLimits()).length) {
+/** Writes the daily limit and the module order an earlier build kept on the device as records, once. */
+async function movedSettings(s: Settings): Promise<void> {
+  const { newPerDay: kept, courseOrder: order } = await legacySettings();
+  if (kept === undefined && order === undefined) return;
+  if (typeof kept === 'number' && kept !== NEW_PER_DAY && !(await DB.allLimits()).length) {
     const rec: LimitRecord = { t: isoNow(), n: kept };
     await DB.addLocal('limits', limitPath(s.device, rec.t), rec);
+  }
+  if (order?.length && !(await DB.allOrders()).length) {
+    const rec: OrderRecord = { t: isoNow(), courses: order };
+    await DB.addLocal('orders', orderPath(s.device, rec.t), rec);
   }
   await saveSettings(s);
 }

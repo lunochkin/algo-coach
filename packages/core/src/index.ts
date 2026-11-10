@@ -17,6 +17,7 @@ export * from './layout';
 export * from './lessontext';
 export * from './certs';
 export * from './synced';
+export * from './order';
 // the engine's API, generated from its OpenAPI schema by `just types`
 export type { components, paths } from './api/schema';
 export * from './screens';

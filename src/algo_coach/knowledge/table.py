@@ -198,6 +198,11 @@ limit_raises = _logged(
     CheckConstraint("added >= 1", name="counted"),
 )
 
+module_orders = _logged(
+    "module_orders",
+    Column("module_ids", ARRAY(Text), nullable=False),
+)
+
 certification_exams = _logged(
     "certification_exams",
     Column("module_id", Text, ForeignKey("modules.id"), nullable=False),

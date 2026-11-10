@@ -12,8 +12,8 @@ import {
   levelName,
   minutesOf,
   subTitle,
+  bySavedOrder,
 } from '@algo-coach/core';
-import { bySavedOrder } from '@/lib/order';
 import { useStore } from '@/lib/store';
 import { styles } from '@/ui/common';
 
@@ -30,10 +30,10 @@ export default function LessonsScreen() {
   const insets = useSafeAreaInsets();
   const courses = useMemo(
     () =>
-      bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.settings.courseOrder).filter(
+      bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.courseOrder).filter(
         (c) => c.graph?.lessons.length,
       ),
-    [st.catalog, st.settings.courseOrder],
+    [st.catalog, st.courseOrder],
   );
   const [course, setCourse] = useState(
     () => courses.find((c) => c.slug === st.focus?.course)?.slug ?? courses[0]?.slug ?? '',

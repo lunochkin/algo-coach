@@ -26,8 +26,8 @@ import {
   nextUpView,
   outsideFocus,
   reviewQueue,
+  bySavedOrder,
 } from '@algo-coach/core';
-import { bySavedOrder } from '@/lib/order';
 import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
 import { BottomBar, startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
@@ -91,20 +91,20 @@ export default function Home() {
   const readyCert = useMemo(() => {
     const all = board(null);
     if (!all) return null;
-    for (const c of bySavedOrder(all.courses, (x) => x.slug, st.settings.courseOrder)) {
+    for (const c of bySavedOrder(all.courses, (x) => x.slug, st.courseOrder)) {
       if (!c.certs) continue;
       for (const [id, s] of certStates(all, c, st.catalog?.certExams ?? [])) {
         if (s.state === 'ready') return { id, title: c.certs.get(id)?.title ?? id };
       }
     }
     return null;
-  }, [board, st.settings.courseOrder, st.catalog]);
+  }, [board, st.courseOrder, st.catalog]);
 
   // The first lesson due to be read (its pretest used up, or pretest 0), in course order.
   const readyLesson = useMemo(() => {
     const all = board(null);
     if (!all) return null;
-    for (const c of bySavedOrder(all.courses, (x) => x.slug, st.settings.courseOrder)) {
+    for (const c of bySavedOrder(all.courses, (x) => x.slug, st.courseOrder)) {
       for (const x of all.lessons(c)) {
         if (all.lessonReady(c, x)) {
           const body = c.lessonBodies[x.slug];
@@ -113,7 +113,7 @@ export default function Home() {
       }
     }
     return null;
-  }, [board, st.settings.courseOrder]);
+  }, [board, st.courseOrder]);
 
   const start = () => {
     if (!cont || !counts) return;
@@ -148,7 +148,7 @@ export default function Home() {
     if (!queue.isEmpty(gb, Date.now())) startQueue(st, 'drill', queue, g.course);
   };
 
-  const order = st.settings.courseOrder;
+  const order = st.courseOrder;
   const rows = useMemo(() => bySavedOrder(info?.courses ?? [], (r) => r.c.slug, order), [info, order]);
   const chips = useMemo(
     () => bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, order),
@@ -157,7 +157,7 @@ export default function Home() {
 
   const onReorder = ({ from, to }: ReorderableListReorderEvent) => {
     const slugs = reorderItems(rows, from, to).map((r) => r.c.slug);
-    void st.updateSettings({ ...st.settings, courseOrder: slugs });
+    void st.setCourseOrder(slugs);
   };
 
   const body = !st.catalog ? (

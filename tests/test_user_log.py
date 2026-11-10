@@ -51,6 +51,7 @@ KNOWLEDGE_LINES = [
      "score": 2, "n": 3, "passed": False},
     {"kind": "limit", "client_id": "k7", "t": T1, "n": 15},
     {"kind": "raise", "client_id": "k8", "t": T1, "n": 5},
+    {"kind": "order", "client_id": "k9", "t": T1, "courses": ["python"]},
 ]  # fmt: skip
 
 
@@ -136,6 +137,7 @@ def test_erasing_a_log_leaves_another_user_s_log_whole(practised):
         "certification_exams": [],
         "daily_limits": [],
         "limit_raises": [],
+        "module_orders": [],
     }
 
 
@@ -164,6 +166,7 @@ def test_erasing_counts_what_left_each_table(practised):
         "certification_exams": 1,
         "daily_limits": 1,
         "limit_raises": 1,
+        "module_orders": 1,
         "calls": 1,
     }
 

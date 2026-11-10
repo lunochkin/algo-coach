@@ -438,10 +438,10 @@ problem's path reads as its record, as "Every problem" gives.
 |                                                                        |
 | Modules  2                                                             |
 | +--------------------------------------------------------+             |
-| | Python                                 12 due          |             |
+| | Python                                 12 due    ^ v   |             |
 | | next up: Core . Names, Associate   4/9                 |             |
 | +--------------------------------------------------------+             |
-| | System design                          paused          |             |
+| | System design                          paused    ^ v   |             |
 | | next up: Caching . Basics, Foundation  0/6             |             |
 | +--------------------------------------------------------+             |
 +------------------------------------------------------------------------+
@@ -457,6 +457,8 @@ problem's path reads as its record, as "Every problem" gives.
   serves those reviews.
 - The ready lesson and the ready certification read only where one exists.
   With neither and no focus, the panel above Continue is absent.
+- `^` and `v` move a module row up or down. The first row's `^` and the last
+  row's `v` are disabled.
 - The focus panel reads "No focus" with a press to set one on a module's page
   where none is set. "5 more new today" raises today's limit.
 - "10 new a day" opens the daily limit's dialog.

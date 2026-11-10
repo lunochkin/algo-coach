@@ -234,6 +234,17 @@ certification.
 - **An archived module is also hidden everywhere** but the module list. Its
   answers stay, and restoring it loses nothing.
 
+## Module order
+
+- **The user orders the modules, and the latest order record stands** across
+  every device. An order kept per device would list the modules differently
+  on the phone and the web.
+- **A module the order does not name follows the named ones**, in the order
+  the seed gives. A module seeded after the user ordered the rest still
+  lists, at the end.
+- **The order changes no queue.** The next queue's modules take turns
+  whatever the order says.
+
 ## Certifications and exams
 
 - **A certification is a scope at a level**: one topic, or the whole module.
@@ -259,7 +270,7 @@ certification.
 
 ## The records
 
-Eight append-only tables hold the user's knowledge log, one per kind of event.
+Nine append-only tables hold the user's knowledge log, one per kind of event.
 Each is private to the user, and each refuses an update and a delete by a
 trigger, as `README.md` requires.
 
@@ -283,11 +294,12 @@ trigger, as `README.md` requires.
   questions and whether the exam passed.
 - **`daily_limits`**: how many new questions a day allows.
 - **`limit_raises`**: how many new questions the raise adds to today's limit.
+- **`module_orders`**: the modules, first to last.
 - **A certification is referenced by its module, its topic and its level.** A
   certification is derived rather than stored, so no table holds it, and the
   three minted parts name it.
 - **The content tables are refreshed by the seed.** Their columns follow the
-  authoring format and may change with a migration. The eight tables above are
+  authoring format and may change with a migration. The nine tables above are
   the part that cannot.
 
 ## The wire
@@ -302,9 +314,12 @@ translates at its edge, so the store keeps this project's names.
 - **A client syncs learn's log lines**: `attempt`, `session`, `status`,
   `focus`, `lesson` and `cert`. Each line carries a `client_id` and names its
   content by slug.
-- **Two lines are the engine's own**: `limit` and `raise`. learn kept the
-  daily limit and the raise on the device, so its format carries no line for
-  either.
+- **Three lines are the engine's own**: `limit`, `raise` and `order`. learn
+  kept the daily limit, the raise and the module order on the device, so its
+  format carries no line for any of the three.
+- **An `order` line names every module by slug, as `courses`.** A line naming
+  a module the store does not hold is refused, as any line naming unknown
+  content is.
 - **Two names change at the edge.** learn's `card` format is stored as an
   open question, and its `drill` queue as the filtered queue. A line read
   back carries learn's names again.

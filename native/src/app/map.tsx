@@ -24,8 +24,8 @@ import {
   subTitle,
   topicTitle,
   unlocksLabel,
+  bySavedOrder,
 } from '@algo-coach/core';
-import { bySavedOrder } from '@/lib/order';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
 import { styles, tones } from '@/ui/common';
@@ -42,8 +42,8 @@ export default function MapScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const courses = useMemo(
-    () => bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.settings.courseOrder),
-    [st.catalog, st.settings.courseOrder],
+    () => bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.courseOrder),
+    [st.catalog, st.courseOrder],
   );
   const [course, setCourse] = useState(
     () => courses.find((c) => c.slug === st.focus?.course)?.slug ?? courses[0]?.slug ?? '',

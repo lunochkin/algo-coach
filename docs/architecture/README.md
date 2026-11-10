@@ -374,7 +374,7 @@ times. Each record class is specified in one of the files beside it.
 | Calls | user | private | append-only | the store |
 | Self-labels | user | private | append-only | the store |
 | Diagnoses | user | private | append-only | the store |
-| Answers, stints, module statuses, focuses, lesson marks, certification exams, daily limits, limit raises | user | private | append-only | the store |
+| Answers, stints, module statuses, focuses, lesson marks, certification exams, daily limits, limit raises, module orders | user | private | append-only | the store |
 
 ## Boundaries
 
