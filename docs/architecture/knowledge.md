@@ -209,6 +209,15 @@ left to serve.
   asked.
 - **Stopping a queue stores a stint**: the queue's mode, how many questions
   were answered, and the score.
+- **Starting a filtered queue or an exam stores its filters**: the module,
+  topic, subtopic, level, kind or due flag it was narrowed by. The
+  latest filters for each mode stand across every device, so the next
+  filtered queue or exam opens on them on the phone and the web alike.
+- **The exam size is a record of the log**, and the latest stands across
+  every device. A user who set none has the default of forty.
+- **A filter naming content the store no longer holds degrades**, as a focus
+  does. An unknown topic keeps the module, and an unknown subtopic keeps the
+  topic.
 
 ## The focus
 
@@ -270,7 +279,7 @@ certification.
 
 ## The records
 
-Nine append-only tables hold the user's knowledge log, one per kind of event.
+Eleven append-only tables hold the user's knowledge log, one per kind of event.
 Each is private to the user, and each refuses an update and a delete by a
 trigger, as `README.md` requires.
 
@@ -295,11 +304,14 @@ trigger, as `README.md` requires.
 - **`daily_limits`**: how many new questions a day allows.
 - **`limit_raises`**: how many new questions the raise adds to today's limit.
 - **`module_orders`**: the modules, first to last.
+- **`queue_filters`**: the mode, filtered or exam, and the module, topic,
+  subtopic, level, kind and due flag it was started with, each optional.
+- **`exam_sizes`**: how many questions an exam samples.
 - **A certification is referenced by its module, its topic and its level.** A
   certification is derived rather than stored, so no table holds it, and the
   three minted parts name it.
 - **The content tables are refreshed by the seed.** Their columns follow the
-  authoring format and may change with a migration. The nine tables above are
+  authoring format and may change with a migration. The eleven tables above are
   the part that cannot.
 
 ## The wire
@@ -314,9 +326,10 @@ translates at its edge, so the store keeps this project's names.
 - **A client syncs learn's log lines**: `attempt`, `session`, `status`,
   `focus`, `lesson` and `cert`. Each line carries a `client_id` and names its
   content by slug.
-- **Three lines are the engine's own**: `limit`, `raise` and `order`. learn
-  kept the daily limit, the raise and the module order on the device, so its
-  format carries no line for any of the three.
+- **Five lines are the engine's own**: `limit`, `raise`, `order`, `filter`
+  and `size`. learn kept the daily limit, the raise, the module order, the
+  filters and the exam size on the device, so its format carries no line for
+  any of the five.
 - **An `order` line names every module by slug, as `courses`.** A line naming
   a module the store does not hold is refused, as any line naming unknown
   content is.

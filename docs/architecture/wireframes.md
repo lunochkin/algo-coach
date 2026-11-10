@@ -508,7 +508,7 @@ problem's path reads as its record, as "Every problem" gives.
 ## Pick questions
 
 ```
-+- /knowledge/questions?module=python -----------------------------------+
++- /knowledge/questions -------------------------------------------------+
 | algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Knowledge                                                            |
@@ -528,8 +528,8 @@ problem's path reads as its record, as "Every problem" gives.
 
 - The chips are controls, each a toggle within its row, and one pick per row.
   A row narrows the rows below it.
-- The query carries every pick, so a filtered queue is a link the user can
-  keep.
+- The chips open on the queue filters the user last started with, on either
+  client. Start stores the picks as the next queue filters.
 - Start is the act, and its label counts what the picks leave, as the phone's
   does.
 
@@ -662,7 +662,9 @@ problem's path reads as its record, as "Every problem" gives.
 
 - A level exam samples every open group at one level. A certification's exam
   starts from the certifications page instead.
-- The size field is saved as the phone's is, shortly after typing stops.
+- The chips open on the last exam's queue filters, as Pick questions does.
+- The size field writes the exam size, a record of the log, shortly after
+  typing stops. The settings page sets the same record.
 
 ## The lessons
 
@@ -736,6 +738,34 @@ problem's path reads as its record, as "Every problem" gives.
 - A lapsed certification reads as lapsed in its cell, and names the
   condition that fell short.
 - The exam's press reads only once the other three conditions hold.
+
+## The settings
+
+```
++- /settings ------------------------------------------------------------+
+| algo-coach   Practice  Problems  Cards  Knowledge               ☀  ≡   |
++------------------------------------------------------------------------+
+| Settings                                                               |
+|                                                                        |
+| Account                                                                |
+| you@example.invalid . u-4f9c2a                 ( Sign out )         |
+| Signed-in apps: 1                                 ( Manage )           |
+|                                                                        |
+| Study                                                                  |
+| New questions per day  [ 10 ]                                          |
+| Exam size              [ 40 ]                                          |
+|                                                                        |
+|                     [ Save ]                                           |
++------------------------------------------------------------------------+
+```
+
+- The account menu links the page. It carries no way back, since the
+  navigation reaches every section from it.
+- The page reads as the phone's Settings screen does: Account, then Study.
+  The phone adds the engine's address, the device name and the reminder hour,
+  which are about one phone.
+- The daily limit and the exam size are records of the log, so a value
+  saved here stands on the phone.
 
 ## The login
 

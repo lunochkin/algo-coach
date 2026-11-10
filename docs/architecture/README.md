@@ -310,6 +310,9 @@ without redefining them. Grouped by the file that specifies the record.
   the next queue, the review queue or the filtered queue.
 - **Filtered queue**: the queue serving questions the user chose by topic,
   subtopic, level or kind, locked or not.
+- **Queue filters**: the module, topic, subtopic, level, kind and due flag a
+  filtered queue or an exam was started with. The latest filters open the
+  next one, on every device.
 - **Stint**: the record of one queue or one exam, stored when it stops.
 - **Focus**: the module, topic, subtopic or certification the next queue is
   aimed at.
@@ -374,7 +377,7 @@ times. Each record class is specified in one of the files beside it.
 | Calls | user | private | append-only | the store |
 | Self-labels | user | private | append-only | the store |
 | Diagnoses | user | private | append-only | the store |
-| Answers, stints, module statuses, focuses, lesson marks, certification exams, daily limits, limit raises, module orders | user | private | append-only | the store |
+| Answers, stints, module statuses, focuses, lesson marks, certification exams, daily limits, limit raises, module orders, queue filters, exam sizes | user | private | append-only | the store |
 
 ## Boundaries
 

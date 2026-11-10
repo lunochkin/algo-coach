@@ -40,10 +40,16 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       write its pages into `pages.md` and `wireframes.md`
 - [x] Decide whether the daily limit is set from the knowledge home or a
       settings page, and write the choice into `pages.md`
-- [ ] Decide whether a queue keeps its state in the URL query, and write the
+- [x] Decide whether a queue keeps its state in the URL query, and write the
       choice into `pages.md`. A reload then restarts the queue
 - [x] Add the `module_orders` table with its `order` sync line, and have
       the phone and the web write and read it instead of a device setting
+- [ ] Add the `exam_sizes` table with its `size` sync line, and have the
+      phone write it instead of a device setting
+- [ ] Add the `queue_filters` table with its `filter` sync line, and open the
+      phone's Practice and Exam screens on the last filters
+- [ ] Add the `/settings` page to the web, with the daily limit and the exam
+      size, linked from the account menu
 - [ ] Serve the next queue, the review queue and practice on the web from
       `packages/core`
 - [ ] Serve lessons, focus, certifications and exams on the web

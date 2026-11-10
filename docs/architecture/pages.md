@@ -23,16 +23,21 @@ those steps at low fidelity.
   holds beside the switch and the menu. The row scrolls to the marked
   section, so the reader always sees where they are.
 - **The account menu names who the session signs in as**, and holds the
-  settings, the signed-in apps and the sign-out. The address the provider
-  verified names the user, with the engine's own id under it. A user no
-  provider linked is named by that id instead, since the dev login mints no
-  identity to carry an address.
+  link to the settings, the signed-in apps and the sign-out. The address the
+  provider verified names the user, with the engine's own id under it. A user
+  no provider linked is named by that id instead, since the dev login mints
+  no identity to carry an address.
 - **Signed-in apps open a dialog from the account menu**, listing each native
   app by its device and when it was last used, with a press to revoke it. A
   lost phone is cut off there, where its own sign-out cannot reach.
-- **Settings open a dialog from the account menu**, holding the daily limit
-  on new questions. The phone sets the limit on its Settings screen, so a
-  reader of either client looks for a standing choice in one place.
+- **The settings are a page of their own, `/settings`, as on the phone.** The
+  page reads as the phone's Settings screen does: the account first, then
+  the Study settings, the daily limit on new questions and the exam size.
+  A reader of either client then finds a standing choice in the same place.
+- **A study setting is a record of the user's log**, so a change on one
+  client stands on the other. `knowledge.md` gives the records. The engine's
+  address, the device name and the reminder hour are about one phone, and
+  stay on the phone's screen alone.
 - **Problems is marked on the listing alone.** A picked problem is a step down
   from the board, from a technique or from a card, so Practice stays marked on
   it and the way back names where the pick came from.
@@ -117,6 +122,7 @@ those steps at low fidelity.
 | `/knowledge/lessons` | picks a lesson | Knowledge |
 | `/knowledge/lessons/:module/:lesson` | reads a lesson and marks it read | Knowledge |
 | `/knowledge/certifications` | reads where each certification stands | Knowledge |
+| `/settings` | sets the daily limit and the exam size | none |
 | `/login` | signs in | none |
 | `/privacy` | reads the privacy policy | none |
 | `/gallery` | reads the design system, in development alone | none |
@@ -210,12 +216,18 @@ platforms.
   is aimed at the module, a topic or a subtopic. The status is active, paused
   or archived. A status press asks before it archives, since an archived
   module leaves the home.
-- **The queue's path is `/knowledge/queue`, and its query names the queue**:
-  `?mode=next`, `?mode=review`, `?mode=filtered` with the choices, or
-  `?mode=exam` with the scope and the level. A queue is no stored record until
-  it stops, so the query is the page's whole state.
+- **Pick questions and Exam open on the user's last filters**, on either
+  client. The filters are a record of the user's log, as `knowledge.md`
+  gives, so a filter chosen on the phone stands on the web.
+- **The queue's path is `/knowledge/queue`, and `?mode=` names the queue**:
+  next, review, filtered or exam. The filters come from the log, so the URL
+  carries the mode alone, as the phone's route does.
 - **A reload starts the same queue again.** The answers given before the
   reload are in the log already, so the next pick reads them.
+- **A reload loses the count and the score of the queue it ended.** The phone
+  holds a running queue in memory alone, so a killed app loses the same. A
+  copy of the running queue kept in the browser would make one client keep
+  what the other loses.
 - **The queue serves one question at a time, and the page asks for one act at
   a time.** An unanswered question asks for the answer. An answered one reads
   its verdict and the explanation, and Next is the act.
