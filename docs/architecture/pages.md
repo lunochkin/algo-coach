@@ -429,13 +429,29 @@ what it offers. The inventory is the list both clients build to.
 - **A sitting and a recall are web for now.** Each needs a keyboard and a
   wide window, as `README.md` gives. A phone layout for writing code is the
   trigger, and none is planned.
-- **A technique's problems, the problem listing and a picked problem follow
-  the sitting.** Each exists to pick a problem, and a pick opens a sitting,
-  so each reaches the phone with the sitting's trigger.
+- **The problem listing follows the sitting.** The listing exists to pick a
+  problem across every technique, and the phone picks one from a technique
+  alone until it holds a sitting.
 - **The board is web for now.** The board reads where the user's practice
   stands without writing code. The trigger is the phone's Practice tab, whose
-  techniques open their cards on the phone. A technique's problems stay with
-  the sitting.
+  techniques open the phone's Technique screen.
+- **Every technique on the phone's board opens the phone's Technique screen,
+  whatever number of cards teach the technique.** The screen lists the
+  technique's problems, as the web's technique page does. It also lists the
+  cards that teach the technique or a narrower one, as the cards list reads
+  them. A row opening a card where one card teaches the technique would make
+  one press land on two kinds of screen.
+- **A technique no card teaches lists its problems alone.** The board lists
+  every technique a served problem carries, and a technique can carry
+  problems before any card teaches it.
+- **A problem's row on the Technique screen opens the phone's Problem
+  screen.** The screen reads the problem's record: its title, difficulty,
+  techniques, the counts the user reached on it, and its cards. The record is
+  what `GET /api/problems/:problem_id` returns, and the read serves nothing.
+- **The Problem screen serves no statement and mints no sitting.** Serving the
+  statement mints a sitting, and the sitting stays on the web. The screen says
+  the problem is sat on the web. A phone layout for writing code is the
+  trigger that adds the statement and the sitting.
 - **A card's ladder, its probes and the press starting its run follow the
   sitting.** A rung and a probe each open a problem, and a run measures
   sittings the phone cannot hold. The phone's card reads the study material
