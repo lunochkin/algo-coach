@@ -528,8 +528,8 @@ problem's path reads as its record, as "Every problem" gives.
 
 - The chips are controls, each a toggle within its row, and one pick per row.
   A row narrows the rows below it.
-- The chips open on the queue filters the user last started with, on either
-  client. Start stores the picks as the next queue filters.
+- The chips open on the focus: its module, topic and subtopic. Level, kind
+  and the due flag start unset.
 - Start is the act, and its label counts what the picks leave, as the phone's
   does.
 
@@ -662,7 +662,8 @@ problem's path reads as its record, as "Every problem" gives.
 
 - A level exam samples every open group at one level. A certification's exam
   starts from the certifications page instead.
-- The chips open on the last exam's queue filters, as Pick questions does.
+- The chips open on the focus's module, and on a certification focus's
+  level. Associate is picked where no focus names a level.
 - The size field writes the exam size, a setting of the log, shortly after
   typing stops. The settings page sets the same record.
 

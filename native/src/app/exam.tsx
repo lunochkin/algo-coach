@@ -5,7 +5,7 @@ import { Appbar, Button, Chip, SegmentedButtons, Text, TextInput, useTheme } fro
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { examPool, levelName, levels, selectExam, validSetting } from '@algo-coach/core';
+import { examOpening, examPool, levelName, levels, selectExam, validSetting } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
 import { BottomBar, startExam, styles } from '@/ui/common';
@@ -15,8 +15,10 @@ export default function Exam() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const courses = st.catalog?.courses ?? [];
-  const [course, setCourse] = useState<string | null>(st.filter);
-  const [level, setLevel] = useState(1);
+  // opens on the focus, which the phone and the web share: `knowledge.md`, Queues
+  const [opening] = useState(() => examOpening(st.focus));
+  const [course, setCourse] = useState<string | null>(opening.course);
+  const [level, setLevel] = useState(opening.level);
   const [size, setSize] = useSavedSize();
   const { board } = st;
   const b = useMemo(() => board(course), [board, course]);

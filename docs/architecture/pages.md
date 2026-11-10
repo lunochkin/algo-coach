@@ -216,14 +216,16 @@ platforms.
   is aimed at the module, a topic or a subtopic. The status is active, paused
   or archived. A status press asks before it archives, since an archived
   module leaves the home.
-- **Pick questions and Exam open on the user's last filters**, on either
-  client. The filters are a record of the user's log, as `knowledge.md`
-  gives, so a filter chosen on the phone stands on the web.
+- **Pick questions and Exam open on the focus**, on either client, as
+  `knowledge.md` gives. The focus is a record of the log, so a focus aimed
+  on the phone opens the same choices on the web.
 - **The queue's path is `/knowledge/queue`, and `?mode=` names the queue**:
-  next, review, filtered or exam. The filters come from the log, so the URL
-  carries the mode alone, as the phone's route does.
-- **A reload starts the same queue again.** The answers given before the
-  reload are in the log already, so the next pick reads them.
+  next, review, filtered or exam. The URL carries the mode alone, as the
+  phone's route does.
+- **A reload starts a queue of the same mode again.** The answers given
+  before the reload are in the log already, so the next pick reads them. A
+  filtered queue or an exam restarts on the focus, with the level, the kind
+  and the due flag unset.
 - **A reload loses the count and the score of the queue it ended.** The phone
   holds a running queue in memory alone, so a killed app loses the same. A
   copy of the running queue kept in the browser would make one client keep

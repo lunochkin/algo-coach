@@ -1,4 +1,4 @@
-import { certScope, COURSE_SCOPE } from './certs';
+import { certScope, COURSE_SCOPE, LEVEL_SLUGS } from './certs';
 import { cmp, type Catalog } from './courses';
 import type { Question } from './types';
 
@@ -65,4 +65,10 @@ export function focusLabel(f: Focus | null, cat: Catalog | null): string {
   const title = c?.title ?? f.course;
   if (f.cert) return `${title} › ${c?.certs?.get(f.cert)?.title ?? f.cert}`;
   return [title, f.topic, f.sub].filter(Boolean).join(' › ');
+}
+
+/** Where a level exam opens: the focus's module, and a certification focus's level; Associate where none names one. */
+export function examOpening(f: Focus | null): { course: string | null; level: number } {
+  const named = f?.cert ? LEVEL_SLUGS.indexOf(f.cert.slice(f.cert.lastIndexOf('-') + 1)) : -1;
+  return { course: f?.course ?? null, level: named >= 0 ? named : 1 };
 }

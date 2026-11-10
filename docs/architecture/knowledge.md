@@ -208,14 +208,15 @@ left to serve.
   asked.
 - **Stopping a queue stores a stint**: the queue's mode, how many questions
   were answered, and the score.
-- **Starting a filtered queue or an exam stores its filters**: the module,
-  topic, subtopic, level, kind or due flag it was narrowed by. The
-  latest filters for each mode stand across every device, so the next
-  filtered queue or exam opens on them on the phone and the web alike.
+- **The filtered queue's choices open on the focus**: its module, topic and
+  subtopic. The focus is a record of the log, so the phone and the web open
+  on the same choices. A second record of the same three would disagree with
+  the focus about where the user practises.
+- **A level exam opens on the focus's module**, and on a certification
+  focus's level. Associate stands where no focus names a level.
+- **The level, the kind and the due flag start unset on every open.** Each
+  narrows one queue, and a record of them would change at most starts.
 - **The exam size is a setting**, as `## Settings` gives.
-- **A filter naming content the store no longer holds degrades**, as a focus
-  does. An unknown topic keeps the module, and an unknown subtopic keeps the
-  topic.
 
 ## Settings
 
@@ -290,7 +291,7 @@ certification.
 
 ## The records
 
-Ten append-only tables hold the user's knowledge log, one per kind of event.
+Nine append-only tables hold the user's knowledge log, one per kind of event.
 Each is private to the user, and each refuses an update and a delete by a
 trigger, as `README.md` requires.
 
@@ -315,13 +316,11 @@ trigger, as `README.md` requires.
 - **`setting_changes`**: the setting's name and its new value.
 - **`limit_raises`**: how many new questions the raise adds to today's limit.
 - **`module_orders`**: the modules, first to last.
-- **`queue_filters`**: the mode, filtered or exam, and the module, topic,
-  subtopic, level, kind and due flag it was started with, each optional.
 - **A certification is referenced by its module, its topic and its level.** A
   certification is derived rather than stored, so no table holds it, and the
   three minted parts name it.
 - **The content tables are refreshed by the seed.** Their columns follow the
-  authoring format and may change with a migration. The ten tables above are
+  authoring format and may change with a migration. The nine tables above are
   the part that cannot.
 
 ## The wire
@@ -336,9 +335,9 @@ translates at its edge, so the store keeps this project's names.
 - **A client syncs learn's log lines**: `attempt`, `session`, `status`,
   `focus`, `lesson` and `cert`. Each line carries a `client_id` and names its
   content by slug.
-- **Four lines are the engine's own**: `setting`, `raise`, `order` and
-  `filter`. learn kept the settings, the raise, the module order and the
-  filters on the device, so its format carries no line for any of the four.
+- **Three lines are the engine's own**: `setting`, `raise` and `order`.
+  learn kept the settings, the raise and the module order on the device, so
+  its format carries no line for any of the three.
 - **A `setting` line carries the name and the value**, as `name` and `n`.
 - **An `order` line names every module by slug, as `courses`.** A line naming
   a module the store does not hold is refused, as any line naming unknown
