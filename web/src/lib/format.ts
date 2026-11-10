@@ -1,6 +1,7 @@
 import {
   cardRow as cardRowAt,
   lastAt as lastAtFrom,
+  problemTried,
   recallLine as recallLineAt,
   techniqueStats,
 } from '@algo-coach/core'
@@ -30,4 +31,8 @@ export function cardRow(card: Parameters<typeof cardRowAt>[0], heading: string |
 
 export function recallLine(one: Parameters<typeof recallLineAt>[0]) {
   return recallLineAt(one, Date.now())
+}
+
+export function tried(picked: Parameters<typeof problemTried>[0]) {
+  return problemTried(picked, Date.now())
 }

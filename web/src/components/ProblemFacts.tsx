@@ -1,9 +1,11 @@
 import { Link } from 'react-router'
 
-import { api, type ListedCard, type Picked } from '@/api/client'
+import { problemCards } from '@algo-coach/core'
+
+import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Badge } from '@/components/ui/badge'
-import { lastAt, share } from '@/lib/format'
+import { tried } from '@/lib/format'
 
 // what the picked problem's page carried, in one line above the statement:
 // the difficulty, the techniques, what the user has done on it, and the cards.
@@ -29,8 +31,7 @@ export function ProblemFacts({
   // nothing rather than a refusal over the statement
   const problem = picked.data
   if (!problem) return null
-  const asked = technique === null ? problem.techniques : [technique]
-  const offered = (cards.data ?? []).filter((card) => taught(card, asked))
+  const offered = problemCards(cards.data ?? [], problem.techniques, technique)
 
   return (
     // spaced rather than dotted, as a row's counts are: a separator of its own
@@ -61,16 +62,4 @@ export function ProblemFacts({
       )}
     </p>
   )
-}
-
-// a card on a narrower technique teaches its family too, as the cards list
-// groups it
-function taught(card: ListedCard, techniques: string[]): boolean {
-  return techniques.includes(card.technique) || techniques.includes(card.family)
-}
-
-function tried(picked: Picked): string {
-  if (picked.attempt_count === 0) return 'never attempted'
-  const attempts = picked.attempt_count === 1 ? '1 attempt' : `${picked.attempt_count} attempts`
-  return `${attempts}, ${share(picked.solved_count, picked.attempt_count)} solved, last ${lastAt(picked.last_attempt_at)}`
 }

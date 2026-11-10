@@ -16,8 +16,7 @@ type ListedCard = components['schemas']['ListedCard'];
 
 /**
  * A technique's problems and the cards teaching it or a narrower one:
- * `pages.md`, The two clients. A problem's row opens nothing until the
- * phone's Problem screen lands.
+ * `pages.md`, The two clients. A problem's row opens the Problem screen.
  */
 export default function TechniqueScreen() {
   const theme = useTheme();
@@ -66,7 +65,13 @@ export default function TechniqueScreen() {
             ) : (
               <PickPanel>
                 {problems.data.map((row) => (
-                  <PickRow key={row.problem_id} title={row.title} badge={row.difficulty} stats={techniqueStats(row, now)} />
+                  <PickRow
+                    key={row.problem_id}
+                    title={row.title}
+                    badge={row.difficulty}
+                    stats={techniqueStats(row, now)}
+                    onPress={() => router.push({ pathname: '/problem', params: { problem: row.problem_id, technique } })}
+                  />
                 ))}
               </PickPanel>
             )}

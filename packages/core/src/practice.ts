@@ -7,6 +7,7 @@ type TechniqueRow = components['schemas']['TechniqueRow'];
 type BoardReading = components['schemas']['Board'];
 type ListedCard = components['schemas']['ListedCard'];
 type Recalled = components['schemas']['Recalled'];
+type Picked = components['schemas']['Picked'];
 
 export interface Stat {
   label: string;
@@ -47,6 +48,30 @@ export function boardView(board: BoardReading): BoardView {
     practised: board.rows.filter((row) => row.attempt_count > 0),
     foot: foot.length > 0 ? foot.join(' · ') : null,
   };
+}
+
+/** What the user has done on one problem, as the line above its statement reads. */
+export function problemTried(
+  picked: Pick<Picked, 'attempt_count' | 'solved_count' | 'last_attempt_at'>,
+  now: number,
+): string {
+  if (picked.attempt_count === 0) return 'never attempted';
+  const attempts = picked.attempt_count === 1 ? '1 attempt' : `${picked.attempt_count} attempts`;
+  return `${attempts}, ${share(picked.solved_count, picked.attempt_count)} solved, last ${lastAt(picked.last_attempt_at, now)}`;
+}
+
+/**
+ * The cards a problem's page offers: those teaching `technique`, the one the
+ * pick came from, or else any of the problem's own. A card on a narrower
+ * technique teaches its family too, as the cards list groups it.
+ */
+export function problemCards<C extends Pick<ListedCard, 'technique' | 'family'>>(
+  cards: C[],
+  techniques: string[],
+  technique: string | null,
+): C[] {
+  const asked = technique === null ? techniques : [technique];
+  return cards.filter((card) => asked.includes(card.technique) || asked.includes(card.family));
 }
 
 // a graduated card is done, and a lapsed one is offered again: `pages.md`

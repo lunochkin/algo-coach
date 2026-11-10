@@ -143,7 +143,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       `log.md` gives, so serving a statement records nothing. The web's
       problem page stays on `/problems/:problem_id`, naming its sitting as
       `?sitting=`
-- [ ] Add the phone's Problem screen: a problem's record and its statement,
+- [x] Add the phone's Problem screen: a problem's record and its statement,
       opened from a technique's problems, with no editor and no clock
 
 ### Exit

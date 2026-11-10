@@ -1,6 +1,19 @@
 import { describe, expect, it } from 'vitest';
 
-import { boardView, cardBlocks, cardRow, inProgress, notInProgress, readFailure, recallLine, revealLabel, techniqueStats, type components } from './index';
+import {
+  boardView,
+  cardBlocks,
+  cardRow,
+  inProgress,
+  notInProgress,
+  problemCards,
+  problemTried,
+  readFailure,
+  recallLine,
+  revealLabel,
+  techniqueStats,
+  type components,
+} from './index';
 
 type ListedCard = components['schemas']['ListedCard'];
 type Template = components['schemas']['Template'];
@@ -44,6 +57,24 @@ describe('the board', () => {
 
   it('names the attempts no row holds in one line', () => {
     expect(boardView({ rows: [], ungrouped: 1, excluded: 3 }).foot).toBe('1 attempt grouped nowhere · 3 on a defective problem');
+  });
+});
+
+describe("a problem's facts", () => {
+  it('reads an untouched problem as never attempted', () => {
+    expect(problemTried({ attempt_count: 0, solved_count: 0, last_attempt_at: null }, NOW)).toBe('never attempted');
+  });
+
+  it('counts the attempts, the solved share and the last attempt', () => {
+    expect(problemTried({ attempt_count: 1, solved_count: 1, last_attempt_at: '2026-11-09T12:00:00Z' }, NOW)).toBe(
+      '1 attempt, 1/1 solved, last yesterday',
+    );
+  });
+
+  it("offers the cards of the pick's technique, a narrower card counting for its family", () => {
+    const cards = [card('dp', { family: 'dp' }), card('knapsack', { family: 'dp' }), card('bfs')];
+    expect(problemCards(cards, ['dp', 'bfs'], 'dp').map((one) => one.slug)).toEqual(['dp', 'knapsack']);
+    expect(problemCards(cards, ['dp', 'bfs'], null).map((one) => one.slug)).toEqual(['dp', 'knapsack', 'bfs']);
   });
 });
 

@@ -381,9 +381,9 @@ what it offers. The inventory is the list both clients build to.
 |---|---|---|---|
 | The landing page | the board | the knowledge home | by platform |
 | The board | `/` | the Practice tab | same |
-| A technique's problems and cards | `/techniques/:technique` | Technique | to fix |
+| A technique's problems and cards | `/techniques/:technique` | Technique | same |
 | The problem listing | `/problems` | none | web for now |
-| A picked problem | `/problems/:problem_id` | none | web for now |
+| A picked problem's record and statement | `/problems/:problem_id` | Problem | same |
 | A sitting | `/problems/:problem_id` | none | web for now |
 | The cards | `/cards` | the Cards tab | same |
 | A card's trigger, brief and templates | `/cards/:slug` | Card | same |
@@ -487,11 +487,8 @@ what it offers. The inventory is the list both clients build to.
 ### To fix
 
 A row marked `to fix` is listed here with what holds now and the change it
-needs.
+needs. No row is marked `to fix` today.
 
-- **A technique's problems and cards.** A problem's row on the phone's
-  Technique screen opens nothing, where the web's opens the problem. The
-  phone's Problem screen closes the difference.
 ## A page's areas
 
 - **A page carries a header and a body.** The header holds the way back, the

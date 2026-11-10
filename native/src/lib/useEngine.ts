@@ -10,14 +10,18 @@ export interface Read<T> {
   reload: () => void;
 }
 
-/** One GET from the engine, read at mount and on `reload`. Nothing is kept on the device. */
-export function useEngine<T>(path: string): Read<T> {
+/**
+ * One GET from the engine, read at mount and on `reload`. Nothing is kept on
+ * the device. A `path` of null reads nothing until it names one.
+ */
+export function useEngine<T>(path: string | null): Read<T> {
   const { origin } = useStore().settings;
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
+    if (path === null) return;
     let live = true;
     void (async () => {
       try {
