@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { boardView, inProgress } from '@algo-coach/core'
 import { Link } from 'react-router'
 
 import { api, type TechniqueRow } from '@/api/client'
@@ -8,7 +9,6 @@ import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { PickList, PickRow } from '@/components/PickRow'
 import { SectionHeading } from '@/components/SectionHeading'
-import { inProgress } from '@/lib/cards'
 import { counts } from '@/lib/format'
 
 export function BoardPage() {
@@ -34,8 +34,7 @@ export function BoardPage() {
           // a technique never practised ranks stalest, so the untouched ones
           // come first. As names alone they stay one glance rather than thirty
           // rows of zeros
-          const untouched = board.rows.filter((row) => row.attempt_count === 0)
-          const practised = board.rows.filter((row) => row.attempt_count > 0)
+          const { untouched, practised, foot } = boardView(board)
 
           return (
             <div className="space-y-section">
@@ -76,16 +75,7 @@ export function BoardPage() {
               )}
 
               {/* the attempts no row holds, on one line under the lists */}
-              {(board.ungrouped > 0 || board.excluded > 0) && (
-                <p className="text-meta text-muted-foreground">
-                  {[
-                    board.ungrouped > 0 && `${board.ungrouped} attempt(s) grouped nowhere`,
-                    board.excluded > 0 && `${board.excluded} on a defective problem`,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </p>
-              )}
+              {foot && <p className="text-meta text-muted-foreground">{foot}</p>}
             </div>
           )
         }}

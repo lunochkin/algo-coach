@@ -124,7 +124,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] List every signed-in device on both clients, browser sessions with
       the apps, each one revocable and the one read on marked. A session
       gains `last_used_at`, and a browser is invisible on both today
-- [ ] Move what the web's board and cards pages compute for display into
+- [x] Move what the web's board and cards pages compute for display into
       `packages/core`: a technique's row, a card's row and its state line.
       The phone would otherwise compute them again
 - [ ] Serve the cards on the phone as a Cards tab: the list grouped by

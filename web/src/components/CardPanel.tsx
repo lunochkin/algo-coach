@@ -1,8 +1,9 @@
+import type { RecallMark } from '@algo-coach/core'
 import { Link } from 'react-router'
 
 import type { ListedCard } from '@/api/client'
 import { ProgressBar } from '@/components/ProgressBar'
-import { lastAt, plain } from '@/lib/format'
+import { cardRow } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 // every block is the same panel: a family several cards teach carries a
@@ -27,18 +28,15 @@ export function CardPanel({ technique, cards }: { technique: string | null; card
       )}
       <div className="divide-y divide-border">
         {cards.map((card) => (
-          <CardRow key={card.slug} card={card} named={card.technique !== technique} />
+          <CardRow key={card.slug} card={card} heading={technique} />
         ))}
       </div>
     </section>
   )
 }
 
-// `named` carries the technique on the row wherever no heading names it: a
-// card that stands alone, or a narrower technique under its family's heading
-function CardRow({ card, named = false }: { card: ListedCard; named?: boolean }) {
-  const optional = card.templates.filter((one) => one.optional).length
-  const { status } = card
+function CardRow({ card, heading }: { card: ListedCard; heading: string | null }) {
+  const row = cardRow(card, heading)
 
   return (
     <Link
@@ -46,81 +44,47 @@ function CardRow({ card, named = false }: { card: ListedCard; named?: boolean })
       className="group block px-4 py-3 transition-colors hover:bg-accent"
     >
       <div className="flex items-baseline gap-3">
-        <span className="font-medium underline-offset-4 group-hover:underline">{card.title}</span>
-        {named && (
-          <span className="font-mono text-meta text-muted-foreground">{card.technique}</span>
+        <span className="font-medium underline-offset-4 group-hover:underline">{row.title}</span>
+        {row.technique && (
+          <span className="font-mono text-meta text-muted-foreground">{row.technique}</span>
         )}
         <span className="ml-auto shrink-0 text-meta text-muted-foreground tabular-nums">
-          {status.started_at ? lastAt(status.last_at) : templates(card.templates.length, optional)}
+          {row.aside}
         </span>
       </div>
-      {status.started_at ? (
-        // a started card was already chosen, so its progress replaces the
-        // trigger it was chosen by
-        <>
-          <p className="mt-1 text-meta text-muted-foreground tabular-nums">
-            started {new Date(status.started_at).toLocaleDateString()} · ladder {status.solved}/
-            {status.rungs}, required {status.required_solved}/{status.required}
-            {status.gaps > 0 && ` · ${uncovered(status.gaps)}`}
-          </p>
-          <div className="mt-2 max-w-xs">
-            <ProgressBar value={status.solved} total={status.rungs} label="Rungs solved" />
-          </div>
-        </>
-      ) : (
-        // the trigger says when to reach for the technique, which is what a
-        // reader picks a card by
-        <p className="mt-1 line-clamp-2 text-meta text-muted-foreground">{plain(card.trigger)}</p>
+      {row.state !== null && (
+        <p className="mt-1 text-meta text-muted-foreground tabular-nums">{row.state}</p>
       )}
-      <RecallMarks card={card} />
+      {row.progress && (
+        <div className="mt-2 max-w-xs">
+          <ProgressBar value={row.progress.solved} total={row.progress.rungs} label="Rungs solved" />
+        </div>
+      )}
+      {row.trigger !== null && (
+        <p className="mt-1 line-clamp-2 text-meta text-muted-foreground">{row.trigger}</p>
+      )}
+      <RecallMarks marks={row.recall} />
     </Link>
   )
 }
 
-// one mark per template in the card's order: the last recall of each form
-function RecallMarks({ card }: { card: ListedCard }) {
-  const recalled = new Map(card.status.recall.map((one) => [one.template_id, one]))
+function RecallMarks({ marks }: { marks: RecallMark[] }) {
   return (
     <p className="mt-1 flex items-center gap-1.5 text-meta text-muted-foreground">
       recall
-      {card.templates.map((template) => {
-        const [mark, reading] = recallMark(template.cases?.length ?? 0, recalled.get(template.id))
-        return (
-          <span
-            key={template.id}
-            title={`${template.title}: ${reading}`}
-            // a pass and a fail read in the verdict's own colours, which mean
-            // the same outcome here; a hinted pass and no recall stay grey
-            className={cn(
-              'font-mono',
-              mark === '✓' && 'text-verdict-passed',
-              mark === '✗' && 'text-verdict-wrong',
-            )}
-          >
-            {mark}
-          </span>
-        )
-      })}
+      {marks.map((one) => (
+        <span
+          key={one.templateId}
+          title={`${one.title}: ${one.reading}`}
+          className={cn(
+            'font-mono',
+            one.tone === 'passed' && 'text-verdict-passed',
+            one.tone === 'wrong' && 'text-verdict-wrong',
+          )}
+        >
+          {one.mark}
+        </span>
+      ))}
     </p>
   )
-}
-
-function recallMark(
-  cases: number,
-  last: ListedCard['status']['recall'][number] | undefined,
-): [string, string] {
-  // a template no case checks is read on the card and never recalled
-  if (cases === 0) return ['-', 'read, not recalled']
-  if (!last?.last_at) return ['·', 'never recalled']
-  if (!last.verified) return ['✗', 'failed']
-  return last.hints.length > 0 ? ['◐', 'passed with hints'] : ['✓', 'recalled clean']
-}
-
-function uncovered(gaps: number): string {
-  return gaps === 1 ? '1 form uncovered' : `${gaps} forms uncovered`
-}
-
-function templates(count: number, optional: number): string {
-  const all = count === 1 ? '1 template' : `${count} templates`
-  return optional === 0 ? all : `${all}, ${optional} optional`
 }
