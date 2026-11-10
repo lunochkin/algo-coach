@@ -7,6 +7,7 @@ import {
   continueCounts,
   continueLine,
   continuePlan,
+  readyLesson,
   emptyContinue,
   type EmptyContinue,
   focusLabel,
@@ -28,6 +29,7 @@ import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
 import { loadedFrom, useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
+import { LESSONS, lessonPath } from '@/knowledge/paths'
 
 // the focus bar reads in the flame, as progress does, from what is held to
 // what is not yet met
@@ -50,6 +52,7 @@ export function KnowledgePage() {
     const plan = continuePlan(board, focus, null, newLimit)
     return {
       rows: bySavedOrder(moduleRows(all, now), (row) => row.c.slug, order),
+      toRead: readyLesson(all, order),
       counts: plan && continueCounts(plan, focus, now),
       panel: focus && plan ? focusView(plan.b, focus, plan.queue, certExams, now) : null,
     }
@@ -81,14 +84,29 @@ export function KnowledgePage() {
   return (
     <section className="space-y-section">
       <PageHeader title="Knowledge" note="Answer the questions due, then the new ones." />
+      {/* the lessons are a step down from the home: `pages.md`, The structure */}
+      <p className="text-meta">
+        <Link to={LESSONS} className="underline underline-offset-2">
+          Lessons
+        </Link>
+      </p>
       <Loaded
         of="the modules"
         state={loadedFrom(k, home)}
         blank="No module is seeded yet."
         blankWhen={(h) => h.rows.length === 0}
       >
-        {({ rows, counts, panel }) => (
+        {({ rows, counts, panel, toRead }) => (
           <>
+            {/* the next step the rules would take, for a reader who never opens the lessons */}
+            {toRead && (
+              <Link
+                to={lessonPath(toRead.c.slug, toRead.lesson.slug)}
+                className="block rounded-xl border bg-brand-wash/40 px-4 py-3 text-meta hover:bg-brand-wash"
+              >
+                {toRead.line}
+              </Link>
+            )}
             {focus && panel && (
               <Panel>
                 <div className="flex flex-wrap items-center gap-stack">

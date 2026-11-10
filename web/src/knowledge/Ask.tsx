@@ -19,11 +19,14 @@ import {
   type Result,
 } from '@algo-coach/core'
 
+import { Link } from 'react-router'
+
 import { PythonCode } from '@/components/PythonCode'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { lessonPath } from '@/knowledge/paths'
 import { cn } from '@/lib/utils'
 
 type Props = {
@@ -279,10 +282,11 @@ function Details({ r, course }: { r: Result; course: Course | undefined }) {
       {!answer && sections.length === 0 && (
         <p className="text-meta text-muted-foreground">No detail for this question yet.</p>
       )}
-      {/* the lesson pages arrive with their own item; until then the queue names the lesson */}
       {lessons.map((x) => (
         <p key={x.slug} className="text-meta">
-          {x.label}
+          <Link to={lessonPath(x.course, x.slug, x.anchor)} className="underline underline-offset-2">
+            {x.label}
+          </Link>
         </p>
       ))}
     </div>

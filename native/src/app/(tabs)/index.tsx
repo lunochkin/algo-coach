@@ -21,10 +21,10 @@ import {
   emptyContinue,
   focusLabel,
   type Group,
-  minutesOf,
   moduleRows,
   NEW_STEP,
   type NextUpView,
+  readyLesson,
   reviewQueue,
 } from '@algo-coach/core';
 import { APP_NAME } from '@/lib/name';
@@ -70,18 +70,9 @@ export default function Home() {
   }, [board, st.courseOrder, st.catalog]);
 
   // The first lesson due to be read (its pretest used up, or pretest 0), in course order.
-  const readyLesson = useMemo(() => {
+  const toRead = useMemo(() => {
     const all = board(null);
-    if (!all) return null;
-    for (const c of bySavedOrder(all.courses, (x) => x.slug, st.courseOrder)) {
-      for (const x of all.lessons(c)) {
-        if (all.lessonReady(c, x)) {
-          const body = c.lessonBodies[x.slug];
-          return { c, x, minutes: body ? minutesOf(x, body) : 0 };
-        }
-      }
-    }
-    return null;
+    return all ? readyLesson(all, st.courseOrder) : null;
   }, [board, st.courseOrder]);
 
   const start = () => {
@@ -222,13 +213,13 @@ export default function Home() {
             </View>
           </TouchableRipple>
         ) : null}
-        {readyLesson ? (
+        {toRead ? (
           <TouchableRipple
             onPress={() =>
-              router.push({ pathname: '/lesson', params: { course: readyLesson.c.slug, slug: readyLesson.x.slug } })
+              router.push({ pathname: '/lesson', params: { course: toRead.c.slug, slug: toRead.lesson.slug } })
             }
             accessibilityRole="button"
-            accessibilityLabel={`Ready to read: ${readyLesson.x.title}`}
+            accessibilityLabel={toRead.line}
             borderless
             style={{
               minHeight: 48,
@@ -240,7 +231,7 @@ export default function Home() {
             <View style={styles.row}>
               <MaterialCommunityIcons name="book-open-variant" size={20} color={theme.colors.onTertiaryContainer} />
               <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onTertiaryContainer }}>
-                {`Ready to read: ${readyLesson.x.title}${readyLesson.minutes ? ` · ~${readyLesson.minutes} min` : ''}`}
+                {toRead.line}
               </Text>
             </View>
           </TouchableRipple>

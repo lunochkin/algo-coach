@@ -5,7 +5,7 @@ import { Renderer, useMarkdown, type MarkedStyles } from 'react-native-marked';
 import { Appbar, Button, Chip, Menu, Text, useTheme, type MD3Theme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { minutesOf, sections, type Course } from '@algo-coach/core';
+import { lessonsAround, minutesOf, sections, type Course, type Lesson } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
 
@@ -206,13 +206,8 @@ export default function LessonScreen() {
 /** "Next": lessons that need this one. "Related": other lessons teaching the same subtopic. */
 function Footer({ c, slug }: { c: Course; slug: string }) {
   const theme = useTheme();
-  const all = c.graph?.lessons ?? [];
-  const me = all.find((x) => x.slug === slug);
-  if (!me) return null;
-  const next = all.filter((x) => x.needs.includes(`lesson:${slug}`));
-  const subs = new Set(me.teaches.map(([s]) => s));
-  const related = all.filter((x) => x.slug !== slug && !next.includes(x) && x.teaches.some(([s]) => subs.has(s)));
-  const row = (title: string, items: typeof all) =>
+  const { next, related } = lessonsAround(c, slug);
+  const row = (title: string, items: Lesson[]) =>
     items.length ? (
       <View style={{ gap: 6, marginTop: 16 }}>
         <Text variant="labelLarge" style={{ color: theme.colors.primary }}>

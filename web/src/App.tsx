@@ -21,6 +21,8 @@ import { TechniquePage } from '@/pages/TechniquePage'
 const CardPage = lazy(() => import('@/pages/CardPage').then((m) => ({ default: m.CardPage })))
 // lazy, as the card is: a lesson the queue offers reads through the Markdown renderer
 const QueuePage = lazy(() => import('@/pages/QueuePage').then((m) => ({ default: m.QueuePage })))
+const LessonsPage = lazy(() => import('@/pages/LessonsPage').then((m) => ({ default: m.LessonsPage })))
+const LessonPage = lazy(() => import('@/pages/LessonPage').then((m) => ({ default: m.LessonPage })))
 const RecallPage = lazy(() =>
   import('@/pages/RecallPage').then((m) => ({ default: m.RecallPage })),
 )
@@ -73,6 +75,8 @@ function App() {
             <Route path="knowledge" element={<KnowledgePage />} />
             <Route path="knowledge/queue" element={<QueuePage />} />
             <Route path="knowledge/modules/:module" element={<ModulePage />} />
+            <Route path="knowledge/lessons" element={<LessonsPage />} />
+            <Route path="knowledge/lessons/:module/:lesson" element={<LessonPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path={LOGIN} element={<LoginPage />} />
             <Route path={PRIVACY} element={<PrivacyPage />} />

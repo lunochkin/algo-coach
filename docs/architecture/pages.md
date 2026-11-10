@@ -261,6 +261,10 @@ platforms.
   opens the lesson's page, and its way back returns to the queue. The lesson
   page is the one place a lesson is read, with its minutes, Mark read and
   its links to other lessons.
+- **On the web, Read leaves the queue, as any navigation does.** The queue
+  stores its stint, and the way back starts a queue of the same mode again,
+  as a reload does. The phone opens the lesson over the running queue, which
+  the lesson's way back returns to.
 - **An open question reveals its key on a press.** The user then ticks the
   points recalled, the traps fallen into, and whether they said anything else
   wrong. `knowledge.md` gives the grade the ticks make.
@@ -371,7 +375,7 @@ what it offers. The inventory is the list both clients build to.
 | A module | `/knowledge/modules/:module` | Module | same |
 | The start sheet | a dialog on the module page | a dialog on Module | same |
 | A queue | `/knowledge/queue` | the quiz screen | same |
-| A lesson a queue offers | read inside the queue | a stop opening the lesson screen | to fix |
+| A lesson a queue offers | a stop opening the lesson page | a stop opening the lesson screen | by platform |
 | A level exam's choices | `/knowledge/exam` | Exam | same |
 | An exam and its results | `/knowledge/queue?mode=exam` | the quiz screen | same |
 | The lessons | `/knowledge/lessons` | Lessons | to fix |
@@ -427,6 +431,10 @@ what it offers. The inventory is the list both clients build to.
 - **The privacy policy and the gallery are web only.** The providers' consent
   screens link the policy by its URL, and the gallery is a tool for whoever
   styles the web.
+- **A lesson a queue offers differs by platform alone.** Each client stops
+  on the lesson and opens its page on Read. The web's page holds one route at a
+  time, so Read ends the queue and the way back starts it again. The phone
+  keeps the queue open beneath the lesson.
 - **Ordering by drag is the phone's, and up and down presses are the
   web's.** A drag needs a long press, which a pointer does not hold well.
 - **The engine's address, the device name and the reminder hour are
@@ -444,9 +452,6 @@ the change.
 - **The settings.** The phone's Settings restores an archived module, names
   the sync's state and syncs on a press. The web's settings page gains all
   three.
-- **A lesson a queue offers.** The web reads the lesson inside the queue. The
-  phone stops on the lesson's title and opens the lesson screen on Read. The
-  web moves to the phone's stop once its lesson page exists.
 
 ## A page's areas
 

@@ -84,7 +84,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       the knowledge endpoints alone, so a phone cannot list or revoke apps
 - [x] Decide how a queue offers a lesson on both clients, and write it into
       `pages.md`
-- [ ] Add the lessons to the web: `/knowledge/lessons` by module, the lesson
+- [x] Add the lessons to the web: `/knowledge/lessons` by module, the lesson
       page with Mark read and unread, the home's ready-lesson link, and the
       queue's lesson stop opening the page
 - [ ] Add the certifications to the web: the grid, a certification's

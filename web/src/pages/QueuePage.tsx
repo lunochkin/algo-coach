@@ -1,12 +1,13 @@
 import { X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Navigate, useNavigate, useSearchParams } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router'
 
 import {
   Board,
   continuePlan,
   drillQueue,
   isLessonItem,
+  lessonStopNote,
   makeAttempt,
   NEW_STEP,
   offersRaise,
@@ -25,13 +26,13 @@ import {
   type Status,
 } from '@algo-coach/core'
 
-import { Markdown } from '@/components/Markdown'
 import { Panel } from '@/components/Panel'
 import { Button } from '@/components/ui/button'
 import { Ask } from '@/knowledge/Ask'
 import { linesOf, useKnowledge } from '@/knowledge/context'
 import { filteredScope } from '@/knowledge/filtered'
 import { useLearner } from '@/knowledge/learner'
+import { lessonPath } from '@/knowledge/paths'
 
 // learn's names, which a stint stores: the filtered queue is `drill` on the wire
 type Mode = 'next' | 'review' | 'drill'
@@ -250,40 +251,31 @@ function Summary(props: {
   )
 }
 
-// a lesson the queue offers reads here: the lesson pages arrive with their own item
+// a lesson the queue offers is a stop: its title, why it is offered, and Read
+// opening the lesson page, whose way back returns here. `pages.md`, The
+// knowledge pages
 function LessonStop(props: { item: LessonItem; read: boolean; onNext: () => void }) {
-  const { item, onNext } = props
-  const k = useKnowledge()
-  const [read, setRead] = useState(props.read)
-  const body = item.course.lessonBodies[item.lesson.slug] ?? ''
-
-  function markRead() {
-    void k.add('lesson', { course: item.course.slug, lesson: item.lesson.slug, status: 'done' })
-    setRead(true)
-  }
-
+  const { item, read, onNext } = props
+  const { pathname, search } = useLocation()
   return (
-    <div className="space-y-stack">
+    <Panel>
       <p className="text-meta text-brand-deep">New lesson</p>
-      <h2 className="text-heading font-medium">{item.lesson.title}</h2>
-      <p className="text-meta text-muted-foreground">
-        {read
-          ? 'Read. New questions on it are open again.'
-          : 'You have tried a few questions on this. Read it before more new ones; reviews are not affected.'}
-      </p>
-      <Markdown>{body}</Markdown>
+      <p className="text-heading font-medium">{item.lesson.title}</p>
+      <p className="text-meta text-muted-foreground">{lessonStopNote(read)}</p>
       <div className="flex gap-stack">
         {read ? (
           <Button onClick={onNext}>Next</Button>
         ) : (
           <>
-            <Button onClick={markRead}>Mark read</Button>
+            <Button asChild>
+              <Link to={lessonPath(item.course.slug, item.lesson.slug, '', `${pathname}${search}`)}>Read</Link>
+            </Button>
             <Button variant="ghost" onClick={onNext}>
               Later
             </Button>
           </>
         )}
       </div>
-    </div>
+    </Panel>
   )
 }

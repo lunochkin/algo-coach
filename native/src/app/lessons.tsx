@@ -7,22 +7,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   type Board,
+  bySavedOrder,
   type Course,
   type Lesson,
-  levelName,
-  minutesOf,
-  subTitle,
-  bySavedOrder,
+  lessonGroups,
+  lessonRow,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles } from '@/ui/common';
-
-/** Lessons in graph order: shallowest taught subtopic and lowest level first, then listing order. */
-function inGraphOrder(c: Course, lessons: Lesson[]): Lesson[] {
-  const key = (x: Lesson) =>
-    Math.min(...x.teaches.map(([s, l]) => (c.graph?.depth(s) ?? 0) * 10 + l), Number.MAX_SAFE_INTEGER);
-  return lessons.map((x, i) => ({ x, i, k: key(x) })).sort((a, b) => a.k - b.k || a.i - b.i).map((e) => e.x);
-}
 
 export default function LessonsScreen() {
   const st = useStore();
@@ -42,29 +34,13 @@ export default function LessonsScreen() {
   const { board } = st;
   const b = useMemo(() => board(null), [board]);
 
-  const groups = useMemo(() => {
-    if (!c || !b) return null;
-    const all = inGraphOrder(c, c.graph?.lessons ?? []);
-    return {
-      toRead: all.filter((x) => b.lessonState(c, x) === 'available'),
-      read: all.filter((x) => b.lessonState(c, x) === 'done'),
-      locked: all.filter((x) => b.lessonState(c, x) === 'locked'),
-    };
-  }, [b, c]);
+  const groups = useMemo(() => (c && b ? lessonGroups(b, c) : null), [b, c]);
 
   const [open, setOpen] = useState<Record<string, boolean>>({ toRead: true, read: true, locked: false });
-  const sections = useMemo(() => {
-    if (!groups) return [];
-    return (
-      [
-        { key: 'toRead', title: 'To read', items: groups.toRead },
-        { key: 'read', title: 'Read', items: groups.read },
-        { key: 'locked', title: 'Locked', items: groups.locked },
-      ] as const
-    )
-      .filter((g) => g.items.length)
-      .map((g) => ({ key: g.key, title: g.title, total: g.items.length, data: open[g.key] ? g.items : [] }));
-  }, [groups, open]);
+  const sections = useMemo(
+    () => (groups ?? []).map((g) => ({ key: g.key, title: g.title, total: g.lessons.length, data: open[g.key] ? g.lessons : [] })),
+    [groups, open],
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -120,25 +96,7 @@ export default function LessonsScreen() {
 /** A tinted card: book icon, title, ~minutes, what it teaches, and its pretest or what it needs. */
 const LessonCard = memo(function LessonCard({ x, c, b }: { x: Lesson; c: Course; b: Board }) {
   const theme = useTheme();
-  const state = b.lessonState(c, x);
-  const body = c.lessonBodies[x.slug] ?? '';
-  const [sub, level] = x.teaches[0] ?? ['', 0];
-  const teaches = `Teaches ${subTitle(c, sub)} · ${levelName(b.rules, level)}${x.teaches.length > 1 ? ` +${x.teaches.length - 1}` : ''}`;
-  const status =
-    state === 'done'
-      ? 'Read'
-      : state === 'locked'
-        ? `Needs ${b
-            .unmetNeeds(c, x)
-            .map((r) =>
-              r.startsWith('lesson:')
-                ? (c.graph?.lesson(r.slice(7))?.title ?? r)
-                : `${r.slice(0, r.lastIndexOf('@'))} · ${levelName(b.rules, Number(r.slice(r.lastIndexOf('@') + 1)))}`,
-            )
-            .join(', ')}`
-        : b.lessonReady(c, x)
-          ? 'Ready to read'
-          : `Pretest ${Math.min(b.tried(c, x), x.pretest)}/${x.pretest}`;
+  const { state, minutes, teaches, status } = lessonRow(b, c, x);
   const tint =
     state === 'locked' ? theme.colors.surfaceVariant : state === 'done' ? theme.colors.secondaryContainer : theme.colors.tertiaryContainer;
   return (
@@ -156,7 +114,7 @@ const LessonCard = memo(function LessonCard({ x, c, b }: { x: Lesson; c: Course;
         <View style={{ flex: 1, gap: 2 }}>
           <Text variant="titleMedium">{x.title}</Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            {`${body ? `~${minutesOf(x, body)} min · ` : ''}${teaches}`}
+            {`${minutes ? `~${minutes} min · ` : ''}${teaches}`}
           </Text>
           <Text variant="labelMedium" style={{ color: state === 'available' ? theme.colors.primary : theme.colors.onSurfaceVariant }}>
             {status}

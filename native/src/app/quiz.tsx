@@ -22,6 +22,7 @@ import {
   isLessonItem,
   isoNow,
   type LessonItem,
+  lessonStopNote,
   LETTERS,
   makeAttempt,
   matchShort,
@@ -68,9 +69,7 @@ function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number
         </Text>
         <Text variant="headlineSmall">{item.lesson.title}</Text>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          {read
-            ? 'Read. New questions on it are open again.'
-            : 'You have tried a few questions on this. Read it before more new ones; reviews are not affected.'}
+          {lessonStopNote(read)}
         </Text>
       </View>
       <BottomBar bottom={bottom} row>
