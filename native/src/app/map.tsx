@@ -14,9 +14,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   type Board,
+  bySavedOrder,
   certStates,
   type CertStatus,
   type Course,
+  groupCell,
   layoutClusters,
   levelName,
   levels,
@@ -24,7 +26,6 @@ import {
   subTitle,
   topicTitle,
   unlocksLabel,
-  bySavedOrder,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
@@ -429,19 +430,11 @@ function NodePanel(props: {
       <Card.Title title={subTitle(c, sub)} subtitle={topicTitle(c, topic)} />
       <Card.Content style={{ gap: 2 }}>
         {levels(b.rules).map((level) => {
-          const g = { course: c.slug, topic, sub, level };
-          const n = b.groupQuestions(g).length;
-          const name = levelName(b.rules, level);
-          const state = !n
-            ? 'no questions'
-            : b.done(g)
-              ? `${b.nPassed(g)}/${n} · covered`
-              : b.unlocked(g)
-                ? `${b.nPassed(g)}/${n} · open`
-                : `${b.nPassed(g)}/${n} · ${b.needsLabel(g)}`;
+          const cell = groupCell(b, { course: c.slug, topic, sub, level });
+          const color = cell.state === 'empty' ? theme.colors.onSurfaceVariant : theme.colors.onSurface;
           return (
-            <Text key={level} variant="bodySmall" style={{ color: n ? theme.colors.onSurface : theme.colors.onSurfaceVariant }}>
-              {`${name}: ${state}`}
+            <Text key={level} variant="bodySmall" style={{ color }}>
+              {`${levelName(b.rules, level)}: ${cell.line}`}
             </Text>
           );
         })}

@@ -1,5 +1,5 @@
 import { certScope, COURSE_SCOPE, LEVEL_SLUGS } from './certs';
-import { cmp, type Catalog } from './courses';
+import { cmp, subTitle, topicTitle, type Catalog } from './courses';
 import type { Question } from './types';
 
 /** What `next` serves when set: a course, optionally narrowed to a topic and sub. */
@@ -64,7 +64,8 @@ export function focusLabel(f: Focus | null, cat: Catalog | null): string {
   const c = cat?.courses.find((x) => x.slug === f.course);
   const title = c?.title ?? f.course;
   if (f.cert) return `${title} › ${c?.certs?.get(f.cert)?.title ?? f.cert}`;
-  return [title, f.topic, f.sub].filter(Boolean).join(' › ');
+  // titles, not slugs: two topics can each hold a subtopic called basics
+  return [title, f.topic && topicTitle(c, f.topic), f.sub && subTitle(c, f.sub)].filter(Boolean).join(' › ');
 }
 
 /** Where a level exam opens: the focus's module, and a certification focus's level; Associate where none names one. */

@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Button, Chip, Dialog, Portal, Switch, Text } from 'react-native-paper';
 
-import { drillQueue, levelName, levels, subTitle, topicTitle } from '@algo-coach/core';
+import { levelName, levels, startPreview, subTitle, topicTitle } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { startQueue, styles } from '@/ui/common';
 
@@ -31,12 +31,10 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
   const b = useMemo(() => board(null), [board]);
   const c = st.catalog?.courses.find((x) => x.slug === scope.course);
   const limit = st.newLimit;
-  const preview = useMemo(() => {
-    if (!b) return null;
-    const now = Date.now();
-    const queue = drillQueue(b, { ...scope, level, kind, due }, limit);
-    return { queue, reviews: queue.reviews(b, now).length, newLeft: queue.newLeft(b, now), empty: queue.isEmpty(b, now) };
-  }, [b, scope, level, kind, due, limit]);
+  const preview = useMemo(
+    () => (b ? startPreview(b, { ...scope, level, kind, due }, limit, Date.now()) : null),
+    [b, scope, level, kind, due, limit],
+  );
   if (!c) return null;
 
   const title = scope.sub ? subTitle(c, scope.sub) : scope.topic ? topicTitle(c, scope.topic) : c.title;
@@ -89,9 +87,7 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
         <Dialog.Actions>
           <Button onPress={onClose}>Cancel</Button>
           <Button mode="contained" icon="play" disabled={!preview || preview.empty} onPress={start}>
-            {!preview || preview.empty
-              ? 'Nothing ready here'
-              : `Start · ${preview.reviews} reviews · ${preview.newLeft} new`}
+            {preview?.label ?? 'Nothing ready here'}
           </Button>
         </Dialog.Actions>
       </Dialog>

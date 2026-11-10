@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   type Board,
   type Course,
+  groupCell,
   groupLabel,
   levelName,
   levels,
@@ -119,7 +120,7 @@ function CourseCard({ b, c, onPractice }: { b: Board; c: Course; onPractice: (s:
             <View style={[styles.row, { marginTop: 4 }]}>
               <View style={{ flex: 1 }} />
               {lv.map((l) => (
-                <Text key={l} variant="labelSmall" style={cell}>
+                <Text key={l} variant="labelSmall" style={cellStyle}>
                   {levelName(b.rules, l, true)}
                 </Text>
               ))}
@@ -140,21 +141,16 @@ function CourseCard({ b, c, onPractice }: { b: Board; c: Course; onPractice: (s:
                   })()}
                 </View>
                 {lv.map((level) => {
-                  const g = { course: c.slug, topic: t.slug, sub, level };
-                  const n = b.groupQuestions(g).length;
-                  const color = b.done(g)
-                    ? done
-                    : n && b.unlocked(g)
-                      ? open
-                      : theme.colors.onSurfaceDisabled;
+                  const cell = groupCell(b, { course: c.slug, topic: t.slug, sub, level });
+                  const color = { covered: done, open, locked: theme.colors.onSurfaceDisabled, empty: theme.colors.onSurfaceDisabled }[cell.state];
                   return (
                     <Pressable
                       key={level}
-                      disabled={!n}
+                      disabled={cell.state === 'empty'}
                       accessibilityLabel={`Start ${sub} ${levelName(b.rules, level)}`}
                       onPress={() => onPractice({ course: c.slug, topic: t.slug, sub, level })}>
-                      <Text variant="bodyMedium" style={[cell, { color }]}>
-                        {n ? `${b.nPassed(g)}/${n}` : '·'}
+                      <Text variant="bodyMedium" style={[cellStyle, { color }]}>
+                        {cell.count}
                       </Text>
                     </Pressable>
                   );
@@ -173,4 +169,4 @@ function CourseCard({ b, c, onPractice }: { b: Board; c: Course; onPractice: (s:
   );
 }
 
-const cell = { width: 56, textAlign: 'right' as const, fontVariant: ['tabular-nums' as const] };
+const cellStyle = { width: 56, textAlign: 'right' as const, fontVariant: ['tabular-nums' as const] };

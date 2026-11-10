@@ -68,7 +68,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       `packages/core`, started by Continue, with its empty notice, and by
       the reviews waiting outside a strict focus. An answer given there
       reaches the phone at its sync
-- [ ] Move what the module's screens compute into `packages/core`: a
+- [x] Move what the module's screens compute into `packages/core`: a
       group cell's state and count, the counts per level, and the start
       sheet's counts and label. The web's page would otherwise compute them
 - [ ] Add `/knowledge/modules/:module` to the web: a panel of group cells
