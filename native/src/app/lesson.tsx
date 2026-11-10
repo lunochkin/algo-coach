@@ -1,11 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Fragment, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Fragment, useMemo, useRef, type ReactNode } from 'react';
 import { ScrollView, View, type ScrollViewInstance, type TextStyle } from 'react-native';
 import { useMarkdown } from 'react-native-marked';
-import { Appbar, Button, Chip, Menu, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Chip, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { lessonsAround, minutesOf, sections, type Course, type Lesson, aboutMinutes, LESSON_MARK_READ, LESSON_MARK_UNREAD, LESSON_MISSING, LESSON_NEXT, LESSON_NO_TEXT, LESSON_RELATED } from '@algo-coach/core';
+import { lessonsAround, minutesOf, sections, type Course, type Lesson, lessonNote, LESSON_MARK_READ, LESSON_MARK_UNREAD, LESSON_MISSING, LESSON_NEXT, LESSON_NO_TEXT, LESSON_RELATED } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { BottomBar, styles } from '@/ui/common';
 import { CodeRenderer, markdownOptions } from '@/ui/markdown';
@@ -50,7 +50,6 @@ export default function LessonScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { course, slug, anchor } = useLocalSearchParams<{ course: string; slug: string; anchor?: string }>();
-  const [menu, setMenu] = useState(false);
   const c = st.catalog?.courses.find((x) => x.slug === course);
   const lesson = c?.graph?.lesson(slug ?? '');
   const done = !!st.catalog?.lessonsDone?.has(`${course}:${slug}`);
@@ -76,7 +75,6 @@ export default function LessonScreen() {
   const mark = async (status: 'done' | 'undone') => {
     if (!course || !slug) return;
     await st.setLessonState(course, slug, status);
-    if (status === 'done') router.back();
   };
 
   return (
@@ -84,27 +82,12 @@ export default function LessonScreen() {
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={lesson?.title ?? 'Lesson'} />
-        {lesson && body ? (
-          <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, marginRight: 8 }}>
-            {aboutMinutes(minutesOf(lesson, body))}
-          </Text>
-        ) : null}
-        {done ? (
-          <Menu
-            visible={menu}
-            onDismiss={() => setMenu(false)}
-            anchor={<Appbar.Action icon="dots-vertical" onPress={() => setMenu(true)} accessibilityLabel="More" />}>
-            <Menu.Item
-              leadingIcon="book-refresh-outline"
-              title={LESSON_MARK_UNREAD}
-              onPress={() => {
-                setMenu(false);
-                void mark('undone');
-              }}
-            />
-          </Menu>
-        ) : null}
       </Appbar.Header>
+      {lesson && c ? (
+        <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, paddingHorizontal: 16, paddingBottom: 8 }}>
+          {lessonNote(c.title, body ? minutesOf(lesson, body) : null, done)}
+        </Text>
+      ) : null}
       {!lesson || !c ? (
         <Text style={{ padding: 16 }}>{LESSON_MISSING}</Text>
       ) : body ? (
@@ -135,12 +118,11 @@ export default function LessonScreen() {
       {lesson ? (
         <BottomBar bottom={insets.bottom}>
           <Button
-            mode="contained"
-            icon={done ? 'check' : 'book-check-outline'}
-            disabled={done}
-            onPress={() => void mark('done')}
+            mode={done ? 'outlined' : 'contained'}
+            icon={done ? 'book-remove-outline' : 'book-check-outline'}
+            onPress={() => void mark(done ? 'undone' : 'done')}
             contentStyle={{ paddingVertical: 8 }}>
-            {done ? 'Done' : LESSON_MARK_READ}
+            {done ? LESSON_MARK_UNREAD : LESSON_MARK_READ}
           </Button>
         </BottomBar>
       ) : null}

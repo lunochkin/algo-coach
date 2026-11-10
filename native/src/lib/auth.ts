@@ -1,7 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
 
-import { refusal } from '@algo-coach/core';
+import { type components, refusal } from '@algo-coach/core';
 
 import { call } from './engine';
 
@@ -11,7 +11,15 @@ export const REDIRECT = __DEV__ ? 'algocoachdev://signed-in' : 'algocoach://sign
 const CLIENT = __DEV__ ? 'app-dev' : 'app';
 
 // `dev` is the local engine's dev login, which signs the dev app alone in
-export type Provider = 'google' | 'github' | 'dev';
+export type Provider = components['schemas']['Provider'] | 'dev';
+export type Offered = components['schemas']['Offered'];
+
+// what this build may sign in through, of what the engine names: the dev app
+// the dev login alone, the release app the providers alone
+export async function offered(origin: string): Promise<Offered> {
+  const named = (await (await call(origin, '/sign-in')).json()) as Offered;
+  return __DEV__ ? { providers: [], dev_login: named.dev_login } : { providers: named.providers, dev_login: null };
+}
 
 const base64url = (bytes: Uint8Array) =>
   btoa(String.fromCharCode(...bytes))

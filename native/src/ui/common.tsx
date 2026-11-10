@@ -104,10 +104,22 @@ export function startExam(st: Starter, plan: ExamPlan) {
 }
 
 /** Bottom action bar with an opaque background, so scrolled content never shows behind the buttons. */
-export function BottomBar({ bottom, row = false, children }: { bottom: number; row?: boolean; children: ReactNode }) {
+// `onHeight` reports the bar's height, so a list under it can leave that much room
+export function BottomBar({
+  bottom,
+  row = false,
+  onHeight,
+  children,
+}: {
+  bottom: number;
+  row?: boolean;
+  onHeight?: (height: number) => void;
+  children: ReactNode;
+}) {
   const theme = useTheme();
   return (
     <View
+      onLayout={onHeight ? (e) => onHeight(e.nativeEvent.layout.height) : undefined}
       style={{
         position: 'absolute',
         left: 0,

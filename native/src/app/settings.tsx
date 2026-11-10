@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ACCOUNT,
   ARCHIVED_MODULES,
+  named,
   RESTORE,
   SAVE,
   SAVED,
@@ -18,8 +19,11 @@ import {
   STUDY,
   SYNC_NOW,
   validSetting,
+  waitingToSend,
 } from '@algo-coach/core';
+import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
+import { meLine, useMe } from '@/ui/account';
 import { styles, SyncLine } from '@/ui/common';
 import { useSignOut } from '@/ui/signout';
 
@@ -36,6 +40,18 @@ export default function SettingsScreen() {
     reminderHour: String(st.settings.reminderHour),
   });
   const [saved, setSaved] = useState(false);
+  const me = useMe();
+  // the outbox, counted again whenever a sync moves it
+  const [waiting, setWaiting] = useState(0);
+  useEffect(() => {
+    let live = true;
+    void DB.pending().then((left) => {
+      if (live) setWaiting(left.length);
+    });
+    return () => {
+      live = false;
+    };
+  }, [st.sync]);
 
   useEffect(() => {
     setForm({
@@ -57,6 +73,12 @@ export default function SettingsScreen() {
   const deviceOk = /^[A-Za-z0-9_-]+$/.test(form.device);
   const originOk = /^https?:\/\/[^\s/]+$/.test(form.origin.trim());
   const valid = sizeOk && hourOk && deviceOk && originOk;
+  const changed =
+    form.origin.trim() !== st.settings.origin ||
+    form.device !== st.settings.device ||
+    hour !== st.settings.reminderHour ||
+    newPerDay !== st.newPerDay ||
+    examSize !== st.examSize;
 
   const save = async () => {
     if (!valid) return;
@@ -102,9 +124,20 @@ export default function SettingsScreen() {
         {field('origin', 'Engine address')}
         {!originOk ? <HelperText type="error">An address such as https://example.invalid</HelperText> : null}
         <View style={styles.row}>
-          <Text variant="bodyMedium" style={{ flex: 1 }}>
-            {st.hasToken ? 'Signed in on this device.' : 'Not signed in.'}
-          </Text>
+          {st.hasToken ? (
+            <View style={{ flex: 1 }}>
+              <Text variant="bodyLarge">{named(me)}</Text>
+              <Text
+                variant="bodySmall"
+                style={{ color: theme.colors.onSurfaceVariant, fontFamily: me?.email ? 'monospace' : undefined }}>
+                {meLine(me)}
+              </Text>
+            </View>
+          ) : (
+            <Text variant="bodyMedium" style={{ flex: 1 }}>
+              Not signed in.
+            </Text>
+          )}
           {st.hasToken ? (
             <Button mode="outlined" icon="logout" disabled={signOut.signing} onPress={signOut.start}>
               {SIGN_OUT}
@@ -121,15 +154,20 @@ export default function SettingsScreen() {
         {field('reminderHour', 'Reminder hour (0–23)', true)}
         {!hourOk ? <HelperText type="error">0–23</HelperText> : null}
         <View style={styles.row}>
-          <Button mode="contained" onPress={save} disabled={!valid}>
+          <Button mode="contained" onPress={save} disabled={!valid || !changed}>
             {SAVE}
           </Button>
-          <Button mode="outlined" icon="sync" onPress={() => st.requestSync(0)}>
+          <Button mode="outlined" icon="sync" disabled={st.sync.running} onPress={() => st.requestSync(0)}>
             {SYNC_NOW}
           </Button>
           {saved ? <Text variant="bodySmall">{SAVED}</Text> : null}
         </View>
         <SyncLine sync={st.sync} />
+        {waiting ? (
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            {waitingToSend(waiting)}
+          </Text>
+        ) : null}
         {st.archived.length ? (
           <>
             <Text variant="titleMedium" style={{ marginTop: 16 }}>

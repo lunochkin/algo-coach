@@ -1,16 +1,25 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { continueWith, LOGIN_INTRO } from '@algo-coach/core';
-import { signIn, type Provider } from '@/lib/auth';
+import {
+  continueWith,
+  devLoginAs,
+  LOGIN_INTRO,
+  NO_DEV_LOGIN,
+  NO_SIGN_IN,
+  SIGN_IN_LOADING,
+  signInUnread,
+} from '@algo-coach/core';
+import { offered, signIn, type Offered, type Provider } from '@/lib/auth';
+import { described } from '@/lib/engine';
 import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
+import { Failed } from '@/ui/common';
 
 const ADDRESS = /^https?:\/\/[^\s/]+$/;
-const LABELS = { google: continueWith('google'), github: continueWith('github'), dev: 'Continue with the dev login' };
 const ICONS = { google: 'google', github: 'github', dev: 'laptop' };
 
 /** The app's first screen until it holds a token: sign in through a provider. */
@@ -23,6 +32,36 @@ export default function LoginScreen() {
   // asked only where the build named no engine: native/.env normally does
   const [origin, setOrigin] = useState(st.settings.origin);
   const originOk = ADDRESS.test(origin.trim());
+  const [offer, setOffer] = useState<Offered | null>(null);
+  const [unread, setUnread] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+
+  // the providers the engine names, read as the web's login reads them
+  useEffect(() => {
+    const at = origin.trim();
+    if (!ADDRESS.test(at)) return;
+    let live = true;
+    setOffer(null);
+    setUnread(null);
+    // the address may still be typed: read it once typing pauses
+    const wait = setTimeout(() => {
+      offered(at).then(
+        (one) => {
+          if (live) setOffer(one);
+        },
+        (e: unknown) => {
+          if (live) setUnread(described(e));
+        },
+      );
+    }, 400);
+    return () => {
+      live = false;
+      clearTimeout(wait);
+    };
+  }, [origin, attempt]);
+
+  const providers: Provider[] = offer ? [...offer.providers, ...(offer.dev_login === null ? [] : ['dev' as const])] : [];
+  const label = (p: Provider) => (p === 'dev' ? devLoginAs(offer?.dev_login ?? '') : continueWith(p));
 
   const signInWith = async (provider: Provider) => {
     setSigning(true);
@@ -71,17 +110,25 @@ export default function LoginScreen() {
           {!originOk ? <HelperText type="error">An address such as https://example.invalid</HelperText> : null}
         </>
       ) : null}
-      {(__DEV__ ? (['dev'] as const) : (['google', 'github'] as const)).map((provider) => (
-        <Button
-          key={provider}
-          mode="contained"
-          icon={ICONS[provider]}
-          loading={signing}
-          disabled={signing || !originOk}
-          onPress={() => void signInWith(provider)}>
-          {LABELS[provider]}
-        </Button>
-      ))}
+      {!originOk ? null : unread !== null ? (
+        <Failed message={signInUnread(unread)} onRetry={() => setAttempt((n) => n + 1)} />
+      ) : offer === null ? (
+        <Text variant="bodyMedium">{SIGN_IN_LOADING}</Text>
+      ) : providers.length === 0 ? (
+        <Text variant="bodyMedium">{__DEV__ ? NO_DEV_LOGIN : NO_SIGN_IN}</Text>
+      ) : (
+        providers.map((provider) => (
+          <Button
+            key={provider}
+            mode="contained"
+            icon={ICONS[provider]}
+            loading={signing}
+            disabled={signing}
+            onPress={() => void signInWith(provider)}>
+            {label(provider)}
+          </Button>
+        ))
+      )}
       {error ? <HelperText type="error">{error}</HelperText> : null}
     </View>
   );

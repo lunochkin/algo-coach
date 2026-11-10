@@ -1,19 +1,17 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { View } from 'react-native';
-import { Chip, IconButton, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Chip, IconButton, Text, useTheme } from 'react-native-paper';
 
 import {
   type Board,
   type CertRecord,
   CLEAR_FOCUS,
-  counted,
   DUE_NOW,
   type Focus,
   FOCUS_CERT,
   FOCUS_NEXT,
   type FocusPart,
-  focusTitle,
   focusView,
   LEARNING,
   NEW_LEFT,
@@ -32,7 +30,6 @@ interface Props {
   b: Board; // built with the focus course included, as the focus queue uses
   queue: Queue;
   exams: CertRecord[];
-  onOpen: () => void;
   onClear: () => void;
   onStrict: () => void;
 }
@@ -50,17 +47,10 @@ export function FocusCard(props: Props) {
     review: tone.open,
     unseen: theme.colors.surfaceVariant,
   };
-  const mastered = info.parts.find((p) => p.k === 'mastered')?.v ?? 0;
   const muted = { color: theme.colors.onSurfaceVariant };
 
   return (
-    <TouchableRipple
-      onPress={props.onOpen}
-      borderless
-      accessibilityRole="button"
-      accessibilityLabel={`${focusTitle(props.label)}. ${counted(info.total, 'question')}, ${mastered} mastered, ${info.due} ${DUE_NOW}, ${info.newLeft} ${NEW_LEFT}`}
-      accessibilityHint="Opens the map on the focus"
-      style={{ borderRadius: 16, backgroundColor: theme.colors.elevation.level2, padding: 12 }}>
+    <View style={{ borderRadius: 16, backgroundColor: theme.colors.elevation.level2, padding: 12 }}>
       <View style={{ gap: 8 }}>
         <View style={[styles.row, { gap: 4 }]}>
           <MaterialCommunityIcons name={focus.cert ? 'target' : 'crosshairs-gps'} size={20} color={theme.colors.primary} />
@@ -87,7 +77,8 @@ export function FocusCard(props: Props) {
           {info.summary}
         </Text>
 
-        <View style={[styles.row, { gap: 16 }]}>
+        {/* wraps: the raise's label is longer than a phone's row holds beside the counts */}
+        <View style={[styles.row, { gap: 16, flexWrap: 'wrap' }]}>
           <Stat icon="refresh" value={info.due} label={DUE_NOW} />
           {info.learning ? <Stat icon="timer-sand" value={info.learning} label={LEARNING} /> : null}
           <Stat icon="plus-circle-outline" value={info.newLeft} label={NEW_LEFT} />
@@ -112,7 +103,7 @@ export function FocusCard(props: Props) {
           </Text>
         ) : null}
       </View>
-    </TouchableRipple>
+    </View>
   );
 }
 

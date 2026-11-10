@@ -8,6 +8,8 @@ import type { Course } from '../types';
 
 // a module's page
 export const MODULE_MISSING = 'No module of that name is open: it may be archived.';
+export const MODULE_LOADING = 'Loading the module…';
+export const moduleFailed = (error: string) => `The module did not load: ${error}`;
 export const MODULE_START = 'Start';
 export const MODULE_FOCUS_HERE = 'Focus here';
 export const MODULE_FOCUS = 'Focus';

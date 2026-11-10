@@ -2,12 +2,16 @@ import { describe, expect, it } from 'vitest';
 
 import type { CertStatus } from '../certs';
 import type { Course } from '../types';
-import { certCell, moduleMeta, noGraph, practiceShare, startTitle } from './module';
+import { certCell, moduleFailed, moduleMeta, noGraph, practiceShare, startTitle } from './module';
 
 describe('module words', () => {
   it('counts topics in the singular for one', () => {
     expect(moduleMeta(1, 3, false)).toBe('1 topic · 3 due · active');
     expect(moduleMeta(2, 0, true)).toBe('2 topics · 0 due · paused');
+  });
+
+  it('names what failed to load the module', () => {
+    expect(moduleFailed('courses.json: bad')).toBe('The module did not load: courses.json: bad');
   });
 
   it('names an invalid graph by its first error', () => {

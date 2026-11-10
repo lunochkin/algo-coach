@@ -42,7 +42,9 @@ import {
   MODULE_FOCUSED,
   MODULE_GROUPS_TAB,
   MODULE_MAP_TAB,
+  MODULE_LOADING,
   MODULE_MISSING,
+  moduleFailed,
   MODULE_PAUSE,
   MODULE_RESUME,
   MODULE_START,
@@ -55,10 +57,10 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
-import { styles, tones } from '@/ui/common';
+import { Failed, styles, tones } from '@/ui/common';
 import { MapCanvas, NODE_H, NODE_W, type CertPip } from '@/ui/mapcanvas';
 import { ModuleGroups } from '@/ui/groups';
-import { useArchive, usePauseToggle } from '@/ui/pause';
+import { useArchive } from '@/ui/pause';
 import { useStartSheet, type Scope } from '@/ui/start';
 
 const MIN_SCALE = 0.25;
@@ -78,19 +80,29 @@ export default function ModuleScreen() {
   // named explicitly, so a paused module reads and serves too
   const b = useMemo(() => (c ? board(c.slug) : null), [board, c]);
   const starter = useStartSheet();
-  const pause = usePauseToggle();
-  const archive = useArchive();
+  // an archived module leaves every screen but its restore in Settings
+  const archive = useArchive(() => router.dismissTo('/'));
   const now = Date.now();
   const sum = useMemo(() => (b ? summary(b, now) : null), [b, now]);
 
   if (!c || !b || !sum) {
+    // a copy holding nothing yet fails with its sync, as the web's module page does
+    const loading = !st.ready || (!st.catalog && !st.sync.error);
     return (
       <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <Appbar.Header>
           <Appbar.BackAction onPress={() => router.back()} />
           <Appbar.Content title="Module" />
         </Appbar.Header>
-        <Text style={{ padding: 16 }}>{MODULE_MISSING}</Text>
+        <View style={styles.page}>
+          {loading ? (
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>{MODULE_LOADING}</Text>
+          ) : !st.catalog ? (
+            <Failed message={moduleFailed(st.sync.error ?? '')} onRetry={() => st.requestSync(0)} />
+          ) : (
+            <Text>{MODULE_MISSING}</Text>
+          )}
+        </View>
       </View>
     );
   }
@@ -128,7 +140,11 @@ export default function ModuleScreen() {
             onPress={() => void st.setFocus({ course: c.slug, topic: null, sub: null, strict: !!st.focus?.strict })}>
             {aimed ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
           </Button>
-          <Button mode="outlined" compact icon={c.paused ? 'play' : 'pause'} onPress={() => pause.ask(c)}>
+          <Button
+            mode="outlined"
+            compact
+            icon={c.paused ? 'play' : 'pause'}
+            onPress={() => void st.setCourseStatus(c.slug, c.paused ? 'active' : 'paused')}>
             {c.paused ? MODULE_RESUME : MODULE_PAUSE}
           </Button>
           {c.paused ? (
@@ -173,7 +189,6 @@ export default function ModuleScreen() {
         </>
       )}
       {starter.sheet}
-      {pause.dialog}
       {archive.dialog}
     </View>
   );
@@ -246,10 +261,9 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
       // A few points of slack around each node: small nodes at low zoom are hard to hit exactly.
       const k = 8 / scale.value;
       const n = nodes.find((p) => cx >= p.x - k && cx <= p.x + NODE_W + k && cy >= p.y - k && cy <= p.y + NODE_H + k);
-      // While a lineage is lit, dimmed nodes are background: tapping one only clears the selection.
-      setPicked(n && (!lit || lit.has(n.sub)) ? n.sub : null);
+      setPicked(n && n.sub !== picked ? n.sub : null);
     },
-    [nodes, tx, ty, scale, lit],
+    [nodes, tx, ty, scale, picked],
   );
 
   // Pan moves by per-event deltas and pauses while a pinch runs, so the two never fight over the
@@ -378,15 +392,17 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
           />
         </View>
       </GestureDetector>
-      {sel?.kind === 'cert' && certToOpen(sel.topic) ? (
-        <CertSheet
-          c={c}
-          b={b}
-          id={certToOpen(sel.topic)!}
-          states={certState}
-          onClose={() => setPicked(null)}
-          onPractice={starter.open}
-        />
+      {sel?.kind === 'cert' ? (
+        certToOpen(sel.topic) ? (
+          <CertSheet
+            c={c}
+            b={b}
+            id={certToOpen(sel.topic)!}
+            states={certState}
+            onClose={() => setPicked(null)}
+            onPractice={starter.open}
+          />
+        ) : null
       ) : sel?.kind === 'lesson' ? (
         <LessonPanel c={c} b={b} slug={sel.sub.slice(7)} bottom={bottom} />
       ) : sel ? (

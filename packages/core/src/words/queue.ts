@@ -48,6 +48,8 @@ export const EXAM_ALL = 'All';
 export const EXAM_LEVEL = 'Level';
 export const EXAM_SIZE = 'Questions';
 export const EXAM_DONE = 'Done';
+export const EXAM_LOADING = 'Loading the exam…';
+export const examFailed = (error: string) => `The exam did not load: ${error}`;
 export const examReviewMissed = (n: number) => `Review missed (${n})`;
 export const examReviewNext = (last: boolean) => (last ? 'Back to results' : 'Next missed');
 

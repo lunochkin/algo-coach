@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Appbar, Button, Card, Chip, IconButton, Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Appbar, Button, Card, IconButton, Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import ReorderableList, {
   reorderItems,
   useReorderableDrag,
@@ -13,19 +13,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   bySavedOrder,
   CERTIFICATIONS_LINK,
-  CLEAR_FOCUS,
   CONTINUE,
   continueCounts,
   continueLine,
   continuePlan,
   type Course,
-  drillQueue,
   emptyContinue,
   EXAM_LINK,
   focusLabel,
-  FOCUS_PREFIX,
-  focusTitle,
-  type Group,
   LESSONS_LINK,
   moduleCounts,
   moduleRows,
@@ -37,8 +32,6 @@ import {
   readyCert,
   readyLesson,
   reviewQueue,
-  STRICT,
-  strictLabel,
   SYNC_NOW,
   waitingOutside,
 } from '@algo-coach/core';
@@ -53,6 +46,8 @@ export default function Home() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [notice, setNotice] = useState('');
+  // the pinned bar's height, so the list ends above it however tall it grows
+  const [barHeight, setBarHeight] = useState(160);
   const [noticeAction, setNoticeAction] = useState<{ label: string; run: () => void } | null>(null);
   useEffect(() => {
     // the app opens on Login until it holds a token, and returns there on sign-out
@@ -109,13 +104,6 @@ export default function Home() {
     if (all) startQueue(st, 'review', reviewQueue(all, ['weak', 'due']), null);
   };
 
-  const drillGroup = (g: Group) => {
-    const gb = board(g.course);
-    if (!gb) return;
-    const queue = drillQueue(gb, g, limit);
-    if (!queue.isEmpty(gb, Date.now())) startQueue(st, 'drill', queue, g.course);
-  };
-
   const order = st.courseOrder;
   const rows = useMemo(() => bySavedOrder(info?.courses ?? [], (r) => r.c.slug, order), [info, order]);
   const onReorder = ({ from, to }: ReorderableListReorderEvent) => {
@@ -165,41 +153,17 @@ export default function Home() {
             <SyncLine sync={st.sync} showError={false} />
           </Pressable>
         }
-        contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 160 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: barHeight + 16 }}
         renderItem={({ item }) => (
           <CourseCard
             c={item.c}
             view={item.view}
             total={item.total}
             toReview={item.toReview}
-            onFrontier={drillGroup}
           />
         )}
       />
-      <BottomBar bottom={insets.bottom}>
-        {focused && cont ? (
-          <FocusCard
-            label={focusLabel(focused, st.catalog)}
-            focus={focused}
-            b={cont.b}
-            queue={cont.queue}
-            exams={st.catalog?.certExams ?? []}
-            onOpen={() => router.push({ pathname: '/module', params: { course: focused.course } })}
-            onClear={() => void st.setFocus(null)}
-            onStrict={() => void st.setFocus({ ...focused, strict: !focused.strict })}
-            onMoreNew={() => void st.raiseNew()}
-          />
-        ) : (
-          <FocusLine
-            label={focusLabel(focus, st.catalog)}
-            set={!!focus}
-            setAside={false}
-            onOpen={() => focus && router.push({ pathname: '/module', params: { course: focus.course } })}
-            onClear={() => void st.setFocus(null)}
-            strict={!!focus?.strict}
-            onStrict={() => focus && void st.setFocus({ ...focus, strict: !focus.strict })}
-          />
-        )}
+      <BottomBar bottom={insets.bottom} onHeight={setBarHeight}>
         {certToTake ? (
           <TouchableRipple
             onPress={() => router.push({ pathname: '/certs', params: { open: certToTake.id } })}
@@ -243,6 +207,18 @@ export default function Home() {
               </Text>
             </View>
           </TouchableRipple>
+        ) : null}
+        {focused && cont ? (
+          <FocusCard
+            label={focusLabel(focused, st.catalog)}
+            focus={focused}
+            b={cont.b}
+            queue={cont.queue}
+            exams={st.catalog?.certExams ?? []}
+            onClear={() => void st.setFocus(null)}
+            onStrict={() => void st.setFocus({ ...focused, strict: !focused.strict })}
+            onMoreNew={() => void st.raiseNew()}
+          />
         ) : null}
         <Button
           mode="contained"
@@ -297,70 +273,8 @@ export default function Home() {
   );
 }
 
-/** What Continue serves; tap opens Practice on it, ✕ clears it. */
-function FocusLine(props: {
-  label: string;
-  set: boolean;
-  setAside: boolean;
-  onOpen: () => void;
-  onClear: () => void;
-  strict: boolean;
-  onStrict: () => void;
-}) {
-  const { label, set, setAside, onOpen, onClear, strict, onStrict } = props;
-  const theme = useTheme();
-  return (
-    <View style={[styles.row, { minHeight: 48 }]}>
-      <TouchableRipple
-        onPress={onOpen}
-        borderless
-        accessibilityRole="button"
-        accessibilityLabel={`${focusTitle(label)}${setAside ? ', not used with a module filter' : ''}`}
-        accessibilityHint="Opens Practice on the focus"
-        style={{ flex: 1, minHeight: 48, justifyContent: 'center', borderRadius: 8, paddingHorizontal: 8 }}>
-        <View style={styles.row}>
-          <MaterialCommunityIcons name="crosshairs-gps" size={18} color={theme.colors.primary} />
-          <Text variant="bodyMedium" numberOfLines={2} style={{ flex: 1 }}>
-            <Text style={{ color: theme.colors.onSurfaceVariant }}>{FOCUS_PREFIX} </Text>
-            {label}
-            {setAside ? (
-              <Text style={{ color: theme.colors.onSurfaceVariant }}> · not used with a module filter</Text>
-            ) : null}
-          </Text>
-        </View>
-      </TouchableRipple>
-      {set ? (
-        <Chip
-          compact
-          selected={strict}
-          showSelectedCheck
-          onPress={onStrict}
-          accessibilityLabel={strictLabel(strict)}
-          style={{ minHeight: 48, justifyContent: 'center' }}>
-          {STRICT}
-        </Chip>
-      ) : null}
-      {set ? (
-        <IconButton icon="close" size={20} onPress={onClear} accessibilityLabel={CLEAR_FOCUS} style={{ margin: 0, width: 48, height: 48 }} />
-      ) : null}
-    </View>
-  );
-}
-
-/** A course row: tap opens its map, long-press or the handle drags it to reorder. */
-function CourseCard({
-  c,
-  view,
-  total,
-  toReview,
-  onFrontier,
-}: {
-  c: Course;
-  view: NextUpView;
-  total: number;
-  toReview: number;
-  onFrontier: (g: Group) => void;
-}) {
+/** A course row: tap opens the module, long-press or the handle drags it to reorder. */
+function CourseCard({ c, view, total, toReview }: { c: Course; view: NextUpView; total: number; toReview: number }) {
   const theme = useTheme();
   const drag = useReorderableDrag();
   return (
@@ -380,35 +294,12 @@ function CourseCard({
         )}
       />
       <Card.Content>
-        {view.next ? (
-          <TouchableRipple
-            onPress={() => {
-              const next = view.next;
-              if (!next) return;
-              if (next.lesson) router.push({ pathname: '/lesson', params: { course: c.slug, slug: next.lesson.slug } });
-              else onFrontier(next.group);
-            }}
-            borderless
-            accessibilityRole="button"
-            accessibilityLabel={view.accessibilityLabel}
-            style={{ minHeight: 48, justifyContent: 'center', borderRadius: 8, marginHorizontal: -8, paddingHorizontal: 8 }}>
-            <View style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <Text variant="bodyMedium" style={{ color: theme.colors.primary }}>
-                  {view.title}
-                </Text>
-                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                  {view.detail}
-                </Text>
-              </View>
-              <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
-                ▶
-              </Text>
-            </View>
-          </TouchableRipple>
-        ) : (
-          <Text variant="bodyMedium">{view.title}</Text>
-        )}
+        <Text variant="bodyMedium">{view.title}</Text>
+        {view.detail ? (
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            {view.detail}
+          </Text>
+        ) : null}
       </Card.Content>
     </Card>
   );

@@ -153,7 +153,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Move every sentence a knowledge screen says into `packages/core`, in the
       web's wording, and read it on both clients. One copy closes the wording
       entry under `pages.md` To fix
-- [ ] Fix the phone's side of `pages.md` To fix: the home, a module and its
+- [x] Fix the phone's side of `pages.md` To fix: the home, a module and its
       map, the certifications, the settings, the login, the lessons and a
       lesson. Each row reads `same` once its entries are gone
 - [ ] Fix the web's side of `pages.md` To fix: the module's summary line, the

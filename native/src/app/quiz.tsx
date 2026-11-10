@@ -84,7 +84,7 @@ export default function Quiz() {
 
 type Current = { q: Question; tag: Status; fresh: boolean; early: boolean } | { lesson: LessonItem };
 
-/** A lesson served in the queue: read it (the reader records Done), or go on without it. */
+/** A lesson served in the queue: read it, and its way back returns here, or go on without it. */
 function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number; onNext: () => void }) {
   const st = useStore();
   const theme = useTheme();
@@ -158,12 +158,10 @@ function QueueQuiz({ s }: { s: QueueSession }) {
     setDone(true);
   }, [st]);
 
+  // Stop reads the summary, a queue with nothing answered included; a second press leaves
   const quit = useCallback(async () => {
-    if (!done) {
-      await end();
-      if (results.current.length) return;
-    }
-    router.back();
+    if (done) router.back();
+    else await end();
   }, [done, end]);
 
   useFocusEffect(

@@ -88,10 +88,6 @@ export default function CertsScreen() {
   );
 }
 
-/** Single-line row label: the topic slug title-cased ("Stdlib"), or the course title. */
-const shortLabel = (scope: string, c: Course) =>
-  scope === COURSE_SCOPE ? c.title : scope.charAt(0).toUpperCase() + scope.slice(1);
-
 /** One cell per state, distinct at a glance; every cell is a 48dp-plus target except "—". */
 function Cell(props: { status: CertStatus; title: string; onPress: () => void }) {
   const { status: s, title, onPress } = props;
@@ -192,7 +188,7 @@ function Matrix(props: { c: Course; states: Map<string, CertStatus>; onPick: (id
   const theme = useTheme();
   const rules = useStore().catalog!.rules;
   const lv = levels(rules);
-  const rows = [...c.topics.map((t) => t.slug), COURSE_SCOPE].map((scope) => ({ scope, label: shortLabel(scope, c) }));
+  const rows = [...c.topics.map((t) => ({ scope: t.slug, label: t.title })), { scope: COURSE_SCOPE, label: c.title }];
   return (
     <Card mode="outlined">
       <Card.Title title={c.title} />

@@ -6,9 +6,26 @@ export class EngineError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    // the API refuses with the domain's own sentence, as the web reads it
+    readonly detail: string | null = null,
   ) {
     super(message);
   }
+}
+
+export function described(e: unknown): string {
+  if (e instanceof EngineError && e.detail) return e.detail;
+  return e instanceof Error ? e.message : String(e);
+}
+
+function detailOf(body: string): string | null {
+  try {
+    const parsed: unknown = JSON.parse(body);
+    if (parsed && typeof parsed === 'object' && 'detail' in parsed) return String(parsed.detail);
+  } catch {
+    // not JSON: the status line carries it
+  }
+  return null;
 }
 
 export async function call(
@@ -27,7 +44,8 @@ export async function call(
   });
   if (response.status === 401) throw new SignedOut('signed out: sign in again in Settings');
   if (!response.ok && response.status !== 304) {
-    throw new EngineError(response.status, `${path} ${response.status}: ${await response.text()}`);
+    const body = await response.text();
+    throw new EngineError(response.status, `${path} ${response.status}: ${body}`, detailOf(body));
   }
   return response;
 }

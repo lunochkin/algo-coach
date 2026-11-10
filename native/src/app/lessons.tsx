@@ -37,15 +37,15 @@ export default function LessonsScreen() {
     [st.catalog, st.courseOrder, board],
   );
 
-  // a locked lesson opens too, and the locked groups start closed: they are the longest
+  // every group is open until the reader closes it: `pages.md`, A page's areas
   const [open, setOpen] = useState<Record<string, boolean>>({});
-  const isOpen = (key: string, group: string) => open[key] ?? group !== 'locked';
+  const isOpen = (key: string) => open[key] ?? true;
   const sections = useMemo(
     () =>
       modules.flatMap(({ c, b }) =>
         lessonGroups(b, c).map((g, i) => {
           const key = `${c.slug}:${g.key}`;
-          return { key, c, b, module: i === 0 ? c.title : null, title: g.title, total: g.lessons.length, data: isOpen(key, g.key) ? g.lessons : [] };
+          return { key, c, b, module: i === 0 ? c.title : null, title: g.title, total: g.lessons.length, data: isOpen(key) ? g.lessons : [] };
         }),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -66,7 +66,7 @@ export default function LessonsScreen() {
           keyExtractor={(x) => x.slug}
           renderItem={({ item, section }) => <LessonCard x={item} c={section.c} b={section.b} />}
           renderSectionHeader={({ section }) => {
-            const expanded = isOpen(section.key, section.key.split(':')[1]);
+            const expanded = isOpen(section.key);
             return (
               <View style={{ backgroundColor: theme.colors.background }}>
                 {section.module ? (

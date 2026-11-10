@@ -8,6 +8,7 @@ import {
   DEVICES_LOADING,
   deviceLine,
   deviceName,
+  readFailure,
   REVOKE,
   REVOKED_NOTE,
   SIGN_OUT,
@@ -15,10 +16,10 @@ import {
   thisDevice,
   type components,
 } from '@algo-coach/core';
-import { call } from '@/lib/engine';
+import { call, described } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
-import { styles } from '@/ui/common';
+import { Failed, styles } from '@/ui/common';
 import { useSignOut } from '@/ui/signout';
 
 type SignedInDevice = components['schemas']['SignedInDevice'];
@@ -35,6 +36,8 @@ export default function DevicesScreen() {
   const signOut = useSignOut();
   const [devices, setDevices] = useState<SignedInDevice[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // a refused revoke, read beside the list as the web reads it
+  const [failed, setFailed] = useState<string | null>(null);
   const [now] = useState(() => Date.now());
 
   const load = useCallback(async () => {
@@ -43,7 +46,7 @@ export default function DevicesScreen() {
       setDevices((await (await call(st.settings.origin, '/devices', { token })).json()) as SignedInDevice[]);
       setError(null);
     } catch (e) {
-      setError(String(e));
+      setError(readFailure('the signed-in devices', described(e)));
     }
   }, [st.settings.origin]);
 
@@ -52,11 +55,12 @@ export default function DevicesScreen() {
   }, [load]);
 
   const revoke = async (device: SignedInDevice) => {
+    setFailed(null);
     try {
       const token = (await getToken()) ?? undefined;
       await call(st.settings.origin, `/devices/${device.kind}/${device.id}`, { token, method: 'DELETE' });
     } catch (e) {
-      setError(String(e));
+      setFailed(described(e));
     }
     void load();
   };
@@ -72,9 +76,7 @@ export default function DevicesScreen() {
           {REVOKED_NOTE}
         </Text>
         {error ? (
-          <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
-            {error}
-          </Text>
+          <Failed message={error} onRetry={() => void load()} />
         ) : devices === null ? (
           <Text variant="bodyMedium">{DEVICES_LOADING}</Text>
         ) : (
@@ -100,6 +102,11 @@ export default function DevicesScreen() {
             </Card>
           ))
         )}
+        {failed ? (
+          <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
+            {failed}
+          </Text>
+        ) : null}
       </ScrollView>
       {signOut.dialog}
     </View>

@@ -40,6 +40,11 @@ export const YOUR_ACCOUNT = 'Your account';
 export const SETTINGS = 'Settings';
 export const SIGNED_IN_DEVICES = 'Signed-in devices';
 export const SIGN_OUT = 'Sign out';
+// the address the provider verified, and the engine's own id where no provider linked one
+export const named = (me: { email: string | null; user_id: string } | undefined) =>
+  me === undefined ? 'Signed in' : (me.email ?? me.user_id);
+export const READING_SESSION = 'Reading the session…';
+export const NO_PROVIDER_LINKED = 'Signed in with no provider linked';
 
 // the settings
 export const ACCOUNT = 'Account';
@@ -77,6 +82,16 @@ export const REVOKE = 'Revoke';
 export const LOGIN_INTRO = 'Deliberate practice of algorithmic problem-solving. Access is by invitation.';
 const PROVIDER_NAMES = { google: 'Google', github: 'GitHub' } as const;
 export const continueWith = (provider: keyof typeof PROVIDER_NAMES) => `Continue with ${PROVIDER_NAMES[provider]}`;
+export const devLoginAs = (user: string) => `Dev login as ${user}`;
+export const SIGN_IN_LOADING = 'Reading the sign-in…';
+export const NO_SIGN_IN = 'No sign-in is configured.';
+export const NO_DEV_LOGIN = 'The engine offers no dev login, which the dev app signs in through.';
+export function signInUnread(error: string): string {
+  if (/network request failed|failed to fetch|timed? ?out|offline/i.test(error)) {
+    return 'No connection. The sign-in is read from the engine.';
+  }
+  return `The sign-in did not load: ${error}`;
+}
 
 // the codes `Refusal` in `api/signin.py` sends back. The code carries no
 // address, so a refusal names none
