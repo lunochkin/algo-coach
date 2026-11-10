@@ -9,13 +9,14 @@ const SECTIONS = [
   { name: 'index', title: 'Knowledge', icon: 'brain' },
 ] as const;
 
-// Knowledge opens first: it holds the redirect to the login, and the phone
-// holds no board to land on
-export const unstable_settings = { initialRouteName: 'index' };
+// Knowledge opens first, and back from another tab returns there: it holds the
+// redirect to the login, and the phone holds no board to land on
+export const unstable_settings = { anchor: 'index' };
 
 export default function TabsLayout() {
   return (
     <Tabs
+      backBehavior="initialRoute"
       screenOptions={{
         headerShown: false,
         tabBarStyle: SECTIONS.length > 1 ? undefined : { display: 'none' },
