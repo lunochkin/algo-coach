@@ -5,14 +5,13 @@ import Svg, { Circle } from 'react-native-svg';
 
 import {
   type Board,
+  certConditions,
+  certFocus,
   certQuestions,
   type CertState,
   type CertStatus,
   type Course,
-  levelName,
   shuffle,
-  subTitle,
-  STATE_LABEL,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import type { Scope } from '@/ui/start';
@@ -78,9 +77,8 @@ export function CertSheet(props: {
   const st = useStore();
   const theme = useTheme();
   const x = c.certs?.get(id);
-  if (!x || !status) return null;
-  const targeted = st.focus?.cert === id;
-  const prereqs = c.certs?.needs(id) ?? [];
+  const v = certConditions(b, c, id, states, st.focus);
+  if (!x || !status || !v) return null;
   const take = () => {
     const pool = certQuestions(b, c, x).filter((q) => q.format !== 'card');
     const qs = shuffle(pool).slice(0, x.rule.size);
@@ -93,7 +91,6 @@ export function CertSheet(props: {
       {text}
     </Text>
   );
-  const pct = (v: number) => `${Math.round(v * 100)}%`;
   return (
     <Portal>
       <Dialog visible onDismiss={onClose} style={{ maxHeight: '85%' }}>
@@ -101,46 +98,23 @@ export function CertSheet(props: {
         <Dialog.ScrollArea style={{ paddingHorizontal: 24 }}>
           <ScrollView contentContainerStyle={{ gap: 6, paddingVertical: 8 }}>
             <Text variant="labelLarge" style={{ color: stateColor(status.state, theme) }}>
-              {STATE_LABEL[status.state]}
+              {v.label}
             </Text>
-            {status.state === 'not_certified' ? (
-              <Text variant="bodyMedium">
-                {`This level is practice only: no certificate yet. So far ${status.passed}/${status.questions} questions passed. It becomes a certificate once the course enables it (when its question pool is ready).`}
-              </Text>
-            ) : null}
-            {status.state === 'insufficient_pool' ? (
-              <Text variant="bodyMedium">
-                {`Not enough questions yet for a fair exam: ${status.pool} available, ${Math.ceil(x.rule.minPoolRatio * x.rule.size)} needed (${x.rule.minPoolRatio}× the ${x.rule.size}-question exam). Until then it counts as not earned, so certificates that need it stay locked.`}
-              </Text>
-            ) : null}
-            {prereqs.map((p) => {
-              const s = states.get(p)?.state;
-              const ok = s === 'earned' || s === 'needs_refresh' || s === 'empty';
-              return check(ok, `Prerequisite: ${c.certs?.get(p)?.title ?? p}${ok ? '' : ` (${STATE_LABEL[s ?? 'locked'].toLowerCase()})`}`);
-            })}
-            {status.state === 'locked' ? (
+            {v.note ? <Text variant="bodyMedium">{v.note}</Text> : null}
+            {v.progressNote ? (
               <Text variant="labelLarge" style={{ marginTop: 8, color: theme.colors.onSurfaceVariant }}>
-                Progress so far (counts once unlocked)
+                {v.progressNote}
               </Text>
             ) : null}
-            {check(status.short.length === 0, `Coverage: ${pct(status.coverage)} of ${status.questions} questions passed`)}
-            {check(status.retention >= x.rule.share, `Retention: ${pct(status.retention)} stable ≥ ${x.rule.stabilityDays} days (needs ${pct(x.rule.share)})`)}
-            {x.rule.requireExam
-              ? check(
-                  status.state === 'earned' || status.state === 'needs_refresh',
-                  status.lastExam
-                    ? `Exam: last ${status.lastExam.score}/${status.lastExam.n} ${status.lastExam.passed ? 'passed' : 'not passed'} (${status.lastExam.t.slice(0, 10)})`
-                    : `Exam: ${x.rule.size} questions, pass ${pct(x.rule.passShare)}`,
-                )
-              : null}
-            {status.short.length ? (
+            {v.checks.map((x) => check(x.ok, x.text))}
+            {v.short.length ? (
               <Text variant="labelLarge" style={{ marginTop: 8 }}>
                 To cover
               </Text>
             ) : null}
-            {status.short.map((g) => (
+            {v.short.map((g) => (
               <View key={g.sub} style={styles.row}>
-                <Text variant="bodyMedium" style={{ flex: 1 }}>{`${subTitle(c, g.sub)}: ${g.passed}/${g.total}`}</Text>
+                <Text variant="bodyMedium" style={{ flex: 1 }}>{g.line}</Text>
                 <Button
                   compact
                   onPress={() => {
@@ -152,36 +126,31 @@ export function CertSheet(props: {
               </View>
             ))}
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
-              {`${levelName(b.rules, x.level)} · ${x.scope === 'all' ? 'whole course' : x.scope}`}
+              {v.scope}
             </Text>
           </ScrollView>
         </Dialog.ScrollArea>
         <Dialog.Actions>
           <Button onPress={onClose}>Close</Button>
-          {status.state !== 'earned' && status.state !== 'empty' ? (
-            targeted ? (
+          {v.offersTarget ? (
+            v.targeted ? (
               <Button icon="target" onPress={() => void st.setFocus(null)}>
                 Untarget
               </Button>
             ) : (
               <Button
                 icon="target"
-                mode={status.state === 'ready' ? 'text' : 'contained-tonal'}
+                mode={v.offersExam ? 'text' : 'contained-tonal'}
                 onPress={() => {
-                  void st.setFocus({
-                    course: c.slug,
-                    topic: x.scope === 'all' ? null : x.scope,
-                    sub: null,
-                    strict: !!st.focus?.strict,
-                    cert: x.id,
-                  });
+                  const f = certFocus(c, x.id, !!st.focus?.strict);
+                  if (f) void st.setFocus(f);
                   onClose();
                 }}>
                 Target
               </Button>
             )
           ) : null}
-          {status.state === 'ready' ? (
+          {v.offersExam ? (
             <Button mode="contained" icon="trophy-outline" onPress={take}>
               Take exam
             </Button>

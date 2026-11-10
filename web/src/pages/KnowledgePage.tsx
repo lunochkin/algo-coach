@@ -7,6 +7,7 @@ import {
   continueCounts,
   continueLine,
   continuePlan,
+  readyCert,
   readyLesson,
   emptyContinue,
   type EmptyContinue,
@@ -29,7 +30,7 @@ import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
 import { loadedFrom, useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
-import { LESSONS, lessonPath } from '@/knowledge/paths'
+import { CERTIFICATIONS, LESSONS, lessonPath } from '@/knowledge/paths'
 
 // the focus bar reads in the flame, as progress does, from what is held to
 // what is not yet met
@@ -53,6 +54,7 @@ export function KnowledgePage() {
     return {
       rows: bySavedOrder(moduleRows(all, now), (row) => row.c.slug, order),
       toRead: readyLesson(all, order),
+      toTake: readyCert(all, order, certExams),
       counts: plan && continueCounts(plan, focus, now),
       panel: focus && plan ? focusView(plan.b, focus, plan.queue, certExams, now) : null,
     }
@@ -74,6 +76,7 @@ export function KnowledgePage() {
       await k.add('raise', { n: NEW_STEP })
       navigate('/knowledge/queue?mode=next')
     } else if (kind === 'clear-focus') setFocus(null)
+    else if (kind === 'certs') navigate(CERTIFICATIONS)
   }
 
   function move(rows: ModuleRow[], from: number, to: number) {
@@ -85,9 +88,12 @@ export function KnowledgePage() {
     <section className="space-y-section">
       <PageHeader title="Knowledge" note="Answer the questions due, then the new ones." />
       {/* the lessons are a step down from the home: `pages.md`, The structure */}
-      <p className="text-meta">
+      <p className="flex gap-4 text-meta">
         <Link to={LESSONS} className="underline underline-offset-2">
           Lessons
+        </Link>
+        <Link to={CERTIFICATIONS} className="underline underline-offset-2">
+          Certifications
         </Link>
       </p>
       <Loaded
@@ -96,8 +102,16 @@ export function KnowledgePage() {
         blank="No module is seeded yet."
         blankWhen={(h) => h.rows.length === 0}
       >
-        {({ rows, counts, panel, toRead }) => (
+        {({ rows, counts, panel, toRead, toTake }) => (
           <>
+            {toTake && (
+              <Link
+                to={`${CERTIFICATIONS}?${new URLSearchParams({ open: toTake.id })}`}
+                className="block rounded-xl border bg-brand-wash px-4 py-3 text-meta hover:bg-brand-wash/70"
+              >
+                {toTake.line}
+              </Link>
+            )}
             {/* the next step the rules would take, for a reader who never opens the lessons */}
             {toRead && (
               <Link
@@ -178,8 +192,7 @@ export function KnowledgePage() {
               {empty && (
                 <div className="flex flex-wrap items-center gap-stack text-meta" role="status">
                   <span>{empty.notice}</span>
-                  {/* the certifications page arrives with its own item */}
-                  {empty.action && empty.action.kind !== 'certs' && (
+                  {empty.action && (
                     <Button variant="outline" size="sm" onClick={() => void act(empty.action!.kind)}>
                       {empty.action.label}
                     </Button>

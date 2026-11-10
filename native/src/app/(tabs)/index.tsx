@@ -12,7 +12,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   bySavedOrder,
-  certStates,
   continueCounts,
   continueLine,
   continuePlan,
@@ -24,6 +23,7 @@ import {
   moduleRows,
   NEW_STEP,
   type NextUpView,
+  readyCert,
   readyLesson,
   reviewQueue,
 } from '@algo-coach/core';
@@ -57,16 +57,9 @@ export default function Home() {
   const counts = useMemo(() => (cont ? continueCounts(cont, focused, Date.now()) : null), [cont, focused]);
 
   // The first certificate whose requirements are met but its exam (shown above Continue).
-  const readyCert = useMemo(() => {
+  const certToTake = useMemo(() => {
     const all = board(null);
-    if (!all) return null;
-    for (const c of bySavedOrder(all.courses, (x) => x.slug, st.courseOrder)) {
-      if (!c.certs) continue;
-      for (const [id, s] of certStates(all, c, st.catalog?.certExams ?? [])) {
-        if (s.state === 'ready') return { id, title: c.certs.get(id)?.title ?? id };
-      }
-    }
-    return null;
+    return all ? readyCert(all, st.courseOrder, st.catalog?.certExams ?? []) : null;
   }, [board, st.courseOrder, st.catalog]);
 
   // The first lesson due to be read (its pretest used up, or pretest 0), in course order.
@@ -192,11 +185,11 @@ export default function Home() {
             onStrict={() => focus && void st.setFocus({ ...focus, strict: !focus.strict })}
           />
         )}
-        {readyCert ? (
+        {certToTake ? (
           <TouchableRipple
-            onPress={() => router.push({ pathname: '/certs', params: { open: readyCert.id } })}
+            onPress={() => router.push({ pathname: '/certs', params: { open: certToTake.id } })}
             accessibilityRole="button"
-            accessibilityLabel={`Ready for exam: ${readyCert.title}`}
+            accessibilityLabel={certToTake.line}
             borderless
             style={{
               minHeight: 48,
@@ -208,7 +201,7 @@ export default function Home() {
             <View style={styles.row}>
               <MaterialCommunityIcons name="trophy-outline" size={20} color={theme.colors.onPrimaryContainer} />
               <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onPrimaryContainer }}>
-                {`Ready for exam: ${readyCert.title}`}
+                {certToTake.line}
               </Text>
             </View>
           </TouchableRipple>

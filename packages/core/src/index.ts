@@ -24,6 +24,7 @@ export * from './home';
 export * from './module';
 export * from './mapview';
 export * from './lessons';
+export * from './certview';
 // the engine's API, generated from its OpenAPI schema by `just types`
 export type { components, paths } from './api/schema';
 export * from './screens';
