@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   certStates,
+  NEW_STEP,
   drillQueue,
   minutesOf,
   focusLabel,
@@ -78,6 +79,7 @@ export default function Home() {
       newLeft: cont.queue.newLeft(cont.b, now),
       outside: focused?.strict ? outsideFocus(cont.b, focused, now) : 0,
       empty: cont.queue.isEmpty(cont.b, now),
+      blocked: cont.queue.blockedByLimit(cont.b, now),
     };
   }, [cont, focused]);
 
@@ -112,7 +114,18 @@ export default function Home() {
   const start = () => {
     if (!cont || !counts) return;
     if (counts.empty) {
-      if (focused && focus?.cert) {
+      if (counts.blocked) {
+        // the day's limit, not the content, emptied the queue: more is one press away
+        setNotice(`Today's ${st.newLimit} new questions are done, and more are unlocked.`);
+        setNoticeAction({
+          label: `+${NEW_STEP} new today`,
+          run: () => {
+            void st.raiseNew();
+            cont.queue.limit += NEW_STEP;
+            startQueue(st, 'next', cont.queue, cont.course, cont.include);
+          },
+        });
+      } else if (focused && focus?.cert) {
         // A targeted certificate with nothing left to learn: its next step is retention or the exam.
         setNotice('Nothing weak, due or new for the targeted certificate. See its requirements and exam.');
         setNoticeAction({ label: 'Certificates', run: () => router.push('/certs') });

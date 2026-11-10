@@ -40,3 +40,22 @@ describe('a learning step not due yet', () => {
     expect(queue.reviews(missed, later)).toHaveLength(1);
   });
 });
+
+describe("today's limit", () => {
+  const fresh = Board.build(cat, []);
+  it('names the limit as what empties a queue with unseen questions left', () => {
+    const queue = nextQueue(fresh, 0);
+    expect(queue.isEmpty(fresh, T)).toBe(true);
+    expect(queue.blockedByLimit(fresh, T)).toBe(true);
+  });
+  it('does not name the limit while new questions are still allowed', () => {
+    expect(nextQueue(fresh, 10).blockedByLimit(fresh, T)).toBe(false);
+  });
+  it('does not name the limit where nothing unseen is left', () => {
+    const seen = Board.build(cat, [
+      { t: new Date(T).toISOString(), course: 'c', id: 'a', ok: true },
+      { t: new Date(T).toISOString(), course: 'c', id: 'b', ok: true },
+    ]);
+    expect(nextQueue(seen, 0).blockedByLimit(seen, T + 1000)).toBe(false);
+  });
+});

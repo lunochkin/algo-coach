@@ -195,6 +195,13 @@ export class Queue {
     return q;
   }
 
+  /** Whether today's limit alone empties the queue: five more would let a new question in. */
+  blockedByLimit(b: Board, now: number): boolean {
+    if (this.newLeft(b, now) || !this.isEmpty(b, now)) return false;
+    const probe = new Queue(this.kind, this.scope, this.want, this.limit + NEW_STEP, this.newScope, this.offsetMinutes);
+    return !probe.isEmpty(b, now);
+  }
+
   /** Whether a fresh queue over this scope would serve anything now. */
   isEmpty(b: Board, now: number): boolean {
     const probe = new Queue(this.kind, this.scope, this.want, this.limit, this.newScope, this.offsetMinutes);
