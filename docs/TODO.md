@@ -52,9 +52,14 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       sheet on the module's page. Starting a queue there moves no focus
 - [x] Add the `/settings` page to the web, with the daily limit and the exam
       size, linked from the account menu
-- [ ] Serve the next queue, the review queue and practice on the web from
-      `packages/core`
-- [ ] Serve lessons, focus, certifications and exams on the web
+- [ ] Add `web` to the npm workspaces, and keep the snapshot and the log in
+      IndexedDB with an outbox, synced as `knowledge.md` gives. The pages
+      then read the copy, not the whole log
+- [ ] Serve the next queue and the review queue at `/knowledge/queue` from
+      `packages/core`, started by Continue and the home's review press
+- [ ] Add the module's page to the web, with its start sheet serving the
+      filtered queue, and its presses aiming the focus
+- [ ] Serve lessons, certifications and exams on the web
 
 ### The engine on the phone
 
