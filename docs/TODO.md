@@ -62,7 +62,7 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 
 - [x] Move learn's app into `native/` with its TypeScript core, the FSRS
       parity fixtures and its USB install recipe. A store release is deferred
-- [ ] Keep the app's signing key out of git and backed up off the laptop.
+- [x] Keep the app's signing key out of git and backed up off the laptop.
       learn's app carries its debug keystore in the repo, and a sideloaded
       update signed by another key installs only after an uninstall, which
       drops unsynced attempts
