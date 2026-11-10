@@ -186,8 +186,13 @@ left to serve.
 - **The user can raise today's limit, five at a time**, from Home or inside the
   next and filtered queues. The raise ends at the 04:00 rollover, and the
   daily setting stands again the next day.
-- **The raise is kept on the device**, as the daily setting is. It changes
-  which questions a queue offers, and the log records only the answers.
+- **The daily limit and today's raise are records in the user's log.** A
+  limit kept per device would have the phone and the web offer different
+  counts of new questions on the same day.
+- **The latest daily limit stands**, as the latest focus does, across every
+  device. A user who set none has the default of ten.
+- **Today's raise is the sum of the raises given since the day's 04:00.** Two
+  devices raising on one day then add up rather than overwrite each other.
 - **The next queue serves the reviews, then the frontier's new questions.**
   Over every active module, the modules take turns.
 - **The review queue serves the weak and due questions alone**, at every rank,
@@ -248,7 +253,7 @@ certification.
 
 ## The records
 
-Six append-only tables hold the user's knowledge log, one per kind of event.
+Eight append-only tables hold the user's knowledge log, one per kind of event.
 Each is private to the user, and each refuses an update and a delete by a
 trigger, as `README.md` requires.
 
@@ -270,11 +275,13 @@ trigger, as `README.md` requires.
 - **`lesson_marks`**: the lesson, and whether it was read or reset.
 - **`certification_exams`**: the certification, the score, the number of
   questions and whether the exam passed.
+- **`daily_limits`**: how many new questions a day allows.
+- **`limit_raises`**: how many new questions the raise adds to today's limit.
 - **A certification is referenced by its module, its topic and its rank.** A
   certification is derived rather than stored, so no table holds it, and the
   three minted parts name it.
 - **The content tables are refreshed by the seed.** Their columns follow the
-  authoring format and may change with a migration. The six tables above are
+  authoring format and may change with a migration. The eight tables above are
   the part that cannot.
 
 ## The app's wire
@@ -288,6 +295,9 @@ engine translates at its edge, so the store keeps this project's names.
 - **The app syncs learn's log lines**: `attempt`, `session`, `status`,
   `focus`, `lesson` and `cert`. Each line carries a `client_id` and names its
   content by slug.
+- **Two lines are the engine's own**: `limit` and `raise`. learn kept the
+  daily limit and the raise on the device, so its format carries no line for
+  either.
 - **Two names change at the edge.** learn's `card` format is stored as an
   open question, and its `drill` queue as the filtered queue. A line read
   back carries learn's names again.
@@ -296,3 +306,45 @@ engine translates at its edge, so the store keeps this project's names.
   app drops it rather than sending it again.
 - **A sync returns the user's records since a cursor**, one append order per
   table. The app merges them as it merged other devices' files.
+
+## The web's store
+
+The web app runs the knowledge module's rules from `packages/core`, as the
+native app does. A visit is one load of the web app in a browser tab. The
+engine holds the user's log, and the browser keeps only the records the
+engine has not yet acknowledged.
+
+- **A visit fetches the snapshot and the user's whole knowledge log.** The
+  first knowledge page of a visit asks for both, the log through a sync with
+  no cursor. A browser is cleared and shared in ways a phone is not, so a
+  copy kept between visits would be a second log disagreeing with the
+  engine's.
+- **The snapshot's ETag spares the download.** The content moves only at a
+  seed, so a later visit is answered 304 and reads the browser's cached copy.
+- **Each record is posted as it is written**: an answer, a stint, a focus, a
+  status change, a lesson mark or an exam. The queue picks the next question
+  from the state the tab holds, so a pick waits for no round trip.
+- **Each post also returns the records written since the visit's cursor.**
+  An answer given on the phone during a web visit then reaches the tab's
+  schedule at the next post, rather than at the next reload.
+- **The browser mints each record's `client_id`.** A post retried after a
+  dropped connection then writes nothing twice, as the app's upload does.
+- **A record the engine has not acknowledged waits in the outbox**, a list
+  kept in `localStorage`. The outbox survives a reload and a closed tab, so
+  an answer given while the connection was down is not lost with the page.
+- **The outbox is sent with every post and with the first fetch of a
+  visit.** A record then waits no longer than the next request that reaches
+  the engine.
+- **A record leaves the outbox once the engine stored it, knew it already
+  or refused it.** A refused line names content the store does not hold, so
+  sending the line again would be refused again.
+- **The outbox is kept per user.** A second account signed in on the same
+  browser would otherwise upload the first account's answers into its own
+  log. A user's outbox waits for a visit signed in as that user.
+- **A queue keeps serving while the connection is down.** The tab holds the
+  snapshot and the log, and the rules run in the tab. A reload with no
+  connection fetches nothing, so the web works offline only inside a tab
+  already open.
+- **The browser's records name the device `web`.** The device says which
+  client wrote a record, and telling one browser from another would answer
+  no question the schedule asks.

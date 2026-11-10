@@ -23,7 +23,10 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 
 ### The knowledge module on the web
 
-- [ ] Write the web's knowledge store into `knowledge.md`: the snapshot and
+- [ ] Add the `daily_limits` and `limit_raises` tables with their `limit`
+      and `raise` sync lines, and have the app write them instead of keeping
+      the limit and the raise on the device
+- [x] Write the web's knowledge store into `knowledge.md`: the snapshot and
       the user's log fetched per visit, each answer posted as given, and a
       `localStorage` outbox for a dropped connection
 - [ ] Add a section for the knowledge modules to the web's navigation, and

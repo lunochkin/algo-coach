@@ -139,6 +139,9 @@ those steps at low fidelity.
   preference and the scheme are about how the user practises at this machine,
   and a store holding them would carry them between machines nobody asked it
   to join. Every other reading is fetched from the API at each load.
+- **The knowledge module keeps its outbox in the browser too.** The outbox
+  holds the records the engine has not acknowledged, and `knowledge.md` gives
+  why it outlives the tab.
 - **The recall's path names the template by its authored slug**, and the drawn
   path sends the browser to it. A reload then asks for the same form, and a
   user who means to practise one form reaches it by name. `flows.md` gives why

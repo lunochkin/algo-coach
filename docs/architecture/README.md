@@ -316,6 +316,8 @@ without redefining them. Grouped by the file that specifies the record.
 - **Module status**: active, paused or archived, set by the user.
 - **Certification**: one scope, a topic or a whole module, at one rank. Earned
   on coverage, retention, an exam and its prerequisites.
+- **Outbox**: the knowledge records a browser holds that the engine has not
+  acknowledged, kept in `localStorage` per user.
 
 ### The native app
 
@@ -370,7 +372,7 @@ times. Each record class is specified in one of the files beside it.
 | Calls | user | private | append-only | the store |
 | Self-labels | user | private | append-only | the store |
 | Diagnoses | user | private | append-only | the store |
-| Answers, stints, module statuses, focuses, lesson marks, certification exams | user | private | append-only | the store |
+| Answers, stints, module statuses, focuses, lesson marks, certification exams, daily limits, limit raises | user | private | append-only | the store |
 
 ## Boundaries
 
