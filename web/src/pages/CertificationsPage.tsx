@@ -16,6 +16,9 @@ import {
   practiceShare,
   type CertStatus,
   type Course,
+  coverageShare,
+  PRACTICE,
+  practiceLevel,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -45,7 +48,11 @@ export function CertificationsPage() {
   const modules = useMemo(() => {
     const b = board(null)
     if (!catalog || !b) return undefined
-    return bySavedOrder(catalog.courses.filter((c) => c.certs), (c) => c.slug, order).map((c) => {
+    return bySavedOrder(
+      catalog.courses.filter((c) => c.certs),
+      (c) => c.slug,
+      order,
+    ).map((c) => {
       const own = board(c.slug)!
       return { c, b: own, states: certStates(own, c, certExams) }
     })
@@ -64,14 +71,23 @@ export function CertificationsPage() {
         {(modules) => (
           <>
             {modules.map(({ c, b, states }) => (
-              <Grid key={c.slug} c={c} levels={levels(b.rules)} rules={b.rules} states={states} onPick={(id) => setPicked({ course: c.slug, id })} />
+              <Grid
+                key={c.slug}
+                c={c}
+                levels={levels(b.rules)}
+                rules={b.rules}
+                states={states}
+                onPick={(id) => setPicked({ course: c.slug, id })}
+              />
             ))}
           </>
         )}
       </Loaded>
 
       <CertDialog
-        open={shown && picked ? { c: shown.c, b: shown.b, states: shown.states, id: picked.id } : null}
+        open={
+          shown && picked ? { c: shown.c, b: shown.b, states: shown.states, id: picked.id } : null
+        }
         onClose={() => setPicked(null)}
         onStart={setStarting}
       />
@@ -88,7 +104,10 @@ function Grid(props: {
   onPick: (id: string) => void
 }) {
   const { c, states } = props
-  const rows = [...c.topics.map((t) => ({ scope: t.slug, title: t.title })), { scope: COURSE_SCOPE, title: c.title }]
+  const rows = [
+    ...c.topics.map((t) => ({ scope: t.slug, title: t.title })),
+    { scope: COURSE_SCOPE, title: c.title },
+  ]
   return (
     <section className="space-y-stack">
       <h2 className="text-heading font-medium">{c.title}</h2>
@@ -98,8 +117,15 @@ function Grid(props: {
             <tr className="text-meta text-muted-foreground">
               <th className="px-4 py-2 text-left font-normal">Scope</th>
               {props.levels.map((l) => (
-                <th key={l} className="px-2 py-2 text-center font-normal">
+                <th
+                  key={l}
+                  className={cn(
+                    'px-2 py-2 text-center font-normal',
+                    practiceLevel(c, l) && 'opacity-60',
+                  )}
+                >
                   {levelName(props.rules, l, true)}
+                  {practiceLevel(c, l) && <span className="block">{PRACTICE}</span>}
                 </th>
               ))}
             </tr>
@@ -107,7 +133,9 @@ function Grid(props: {
           <tbody className="divide-y">
             {rows.map((row) => (
               <tr key={row.scope}>
-                <td className={cn('px-4 py-2', row.scope === COURSE_SCOPE && 'font-medium')}>{row.title}</td>
+                <td className={cn('px-4 py-2', row.scope === COURSE_SCOPE && 'font-medium')}>
+                  {row.title}
+                </td>
                 {props.levels.map((l) => {
                   const id = certId(c.slug, row.scope, l)
                   const s = states.get(id)
@@ -117,7 +145,10 @@ function Grid(props: {
                         <button
                           type="button"
                           onClick={() => props.onPick(id)}
-                          className={cn('inline-flex size-11 items-center justify-center rounded-lg hover:bg-muted', s.state === 'ready' && 'bg-brand-wash')}
+                          className={cn(
+                            'inline-flex size-11 items-center justify-center rounded-lg hover:bg-muted',
+                            s.state === 'ready' && 'bg-brand-wash',
+                          )}
                           aria-label={certCell(c.certs?.get(id)?.title ?? id, s)}
                         >
                           <Cell s={s} />
@@ -153,7 +184,14 @@ function Cell({ s }: { s: CertStatus }) {
     case 'not_certified':
       return <span className="text-meta text-muted-foreground">{practiceShare(s)}</span>
     default:
-      return <Ring coverage={s.coverage} retention={s.retention} />
+      return (
+        <span className="inline-flex flex-col items-center">
+          <Ring coverage={s.coverage} retention={s.retention} />
+          <span className="text-[10px] text-muted-foreground tabular-nums">
+            {coverageShare(s.coverage)}
+          </span>
+        </span>
+      )
   }
 }
 

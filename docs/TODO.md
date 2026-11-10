@@ -156,7 +156,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Fix the phone's side of `pages.md` To fix: the home, a module and its
       map, the certifications, the settings, the login, the lessons and a
       lesson. Each row reads `same` once its entries are gone
-- [ ] Fix the web's side of `pages.md` To fix: the module's summary line, the
+- [x] Fix the web's side of `pages.md` To fix: the module's summary line, the
       paused mark on an exam's module, the raise after a queue ends, a failed
       sync on the home, the certifications' coverage, and the exam size saved
       at the start

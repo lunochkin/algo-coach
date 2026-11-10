@@ -17,8 +17,7 @@ import {
   levels,
   practiceShare,
   type CertStatus,
-  type Course,
-} from '@algo-coach/core';
+  type Course, coverageShare, PRACTICE, practiceLevel } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -134,7 +133,7 @@ function Cell(props: { status: CertStatus; title: string; onPress: () => void })
       <>
         <CertRing status={s} />
         <Text variant="labelSmall" style={{ fontSize: 10, color: theme.colors.onSurfaceVariant }}>
-          {`${Math.round(s.coverage * 100)}%`}
+          {coverageShare(s.coverage)}
         </Text>
       </>
     );
@@ -196,14 +195,13 @@ function Matrix(props: { c: Course; states: Map<string, CertStatus>; onPick: (id
         <View style={styles.row}>
           <View style={{ flex: 1 }} />
           {lv.map((l) => {
-            // A level no scope certifies is a practice column, dimmed.
-            const practice = c.certs?.certs.filter((x) => x.level === l).every((x) => !x.certified);
+            const practice = practiceLevel(c, l);
             return (
               <Text
                 key={l}
                 variant="labelSmall"
                 style={{ width: CELL, textAlign: 'center', color: theme.colors.onSurfaceVariant, opacity: practice ? 0.6 : 1 }}>
-                {practice ? `${levelName(rules, l, true)}\n(practice)` : levelName(rules, l, true)}
+                {practice ? `${levelName(rules, l, true)}\n${PRACTICE}` : levelName(rules, l, true)}
               </Text>
             );
           })}

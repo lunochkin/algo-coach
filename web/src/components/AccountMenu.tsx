@@ -1,6 +1,6 @@
-import { LogOut, Menu, Settings, Smartphone } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router";
+import { LogOut, Menu, Settings, Smartphone } from 'lucide-react'
+import { useState } from 'react'
+import { Link } from 'react-router'
 
 import {
   named,
@@ -10,28 +10,28 @@ import {
   SIGN_OUT,
   SIGNED_IN_DEVICES,
   YOUR_ACCOUNT,
-} from "@algo-coach/core";
+} from '@algo-coach/core'
 
-import { api } from "@/api/client";
-import { useLoaded } from "@/api/useLoaded";
-import { SignedInDevices } from "@/components/SignedInDevices";
-import { SignOut } from "@/components/SignOut";
-import { Button } from "@/components/ui/button";
+import { api } from '@/api/client'
+import { useLoaded } from '@/api/useLoaded'
+import { SignedInDevices } from '@/components/SignedInDevices'
+import { SignOut } from '@/components/SignOut'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 
 // who the session signs in as, the settings, the apps signed in as it, and
 // the sign-out.
 // The menu holds them rather than the navigation, which names where a page is
 export function AccountMenu() {
-  const me = useLoaded((signal) => api.GET("/api/me", { signal }), "me");
-  const [apps, setApps] = useState(false);
+  const me = useLoaded((signal) => api.GET('/api/me', { signal }), 'me')
+  const [apps, setApps] = useState(false)
 
   // the confirmation sits outside the menu, which unmounts as it closes
   return (
@@ -46,9 +46,7 @@ export function AccountMenu() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
               <div className="space-y-0.5 px-2 py-1.5">
-                <p
-                  className={cn("font-medium", !me.data?.email && "font-mono")}
-                >
+                <p className={cn('font-medium', !me.data?.email && 'font-mono')}>
                   {named(me.data)}
                 </p>
                 {/* the engine's own id, which every private record of theirs
@@ -84,5 +82,5 @@ export function AccountMenu() {
         </>
       )}
     </SignOut>
-  );
+  )
 }

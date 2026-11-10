@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { askSubmit, detailsToggle, examFailed, examReviewNext, lessonNote, lessonRowLine } from '../index';
+import { askSubmit, detailsToggle, examFailed, examModuleChoice, examReviewNext, lessonNote, lessonRowLine } from '../index';
 
 describe('queue words', () => {
   it('names the answer press by whether an exam runs and ends', () => {
@@ -25,5 +25,12 @@ describe('queue words', () => {
     expect(lessonRowLine(7, 'Basics')).toBe('~7 min · Basics');
     expect(lessonNote('Python', null, false)).toBe('Python');
     expect(lessonNote('Python', 7, true)).toBe('Python · ~7 min · read');
+  });
+});
+
+describe("an exam's module choice", () => {
+  it('marks a paused module', () => {
+    expect(examModuleChoice({ title: 'Python', paused: true })).toBe('Python (paused)');
+    expect(examModuleChoice({ title: 'Python' })).toBe('Python');
   });
 });

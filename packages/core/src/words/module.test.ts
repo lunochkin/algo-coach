@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { CertStatus } from '../certs';
 import type { Course } from '../types';
-import { certCell, moduleFailed, moduleMeta, noGraph, practiceShare, startTitle } from './module';
+import { certCell, moduleFailed, moduleMeta, noGraph, practiceShare, startTitle, moduleSummary, practiceLevel, coverageShare } from './module';
 
 describe('module words', () => {
   it('counts topics in the singular for one', () => {
@@ -34,5 +34,20 @@ describe('module words', () => {
     expect(startTitle(c, { topic: null, sub: null })).toBe('Python');
     expect(startTitle(c, { topic: 'core', sub: null })).toBe('Core');
     expect(startTitle(c, { topic: 'core', sub: 'loops' })).toBe('Loops');
+  });
+});
+
+describe("a module's summary", () => {
+  it('names the mastered, the weak and the due in a week', () => {
+    expect(moduleSummary({ mastered: 3, weak: 1, soon: 4 })).toBe('3 mastered · 1 weak · 4 more due within 7 days');
+  });
+});
+
+describe('a certification column', () => {
+  it('reads a level no scope certifies as practice', () => {
+    const c = { certs: { certs: [{ level: 0, certified: false }, { level: 1, certified: true }] } } as unknown as Course;
+    expect(practiceLevel(c, 0)).toBe(true);
+    expect(practiceLevel(c, 1)).toBe(false);
+    expect(coverageShare(0.374)).toBe('37%');
   });
 });

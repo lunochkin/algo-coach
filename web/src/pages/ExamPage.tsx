@@ -32,6 +32,7 @@ import {
   examReviewMissed,
   examReviewNext,
   QUEUE_STOP,
+  examModuleChoice,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -97,20 +98,38 @@ function LevelChoice({ catalog, onStart }: { catalog: Catalog; onStart: (p: Exam
 
   return (
     <section className="space-y-section">
-      <PageHeader back={{ to: KNOWLEDGE, label: 'Knowledge' }} title={EXAM_TITLE} note={EXAM_NOTE} />
+      <PageHeader
+        back={{ to: KNOWLEDGE, label: 'Knowledge' }}
+        title={EXAM_TITLE}
+        note={EXAM_NOTE}
+      />
       <div className="space-y-stack">
         <Choice label={EXAM_MODULE}>
-          <ToggleGroup type="single" variant="outline" size="sm" className="w-auto flex-wrap" value={course ?? ALL} onValueChange={(v) => v && setCourse(v === ALL ? null : v)}>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="sm"
+            className="w-auto flex-wrap"
+            value={course ?? ALL}
+            onValueChange={(v) => v && setCourse(v === ALL ? null : v)}
+          >
             <ToggleGroupItem value={ALL}>{EXAM_ALL}</ToggleGroupItem>
             {catalog.courses.map((c) => (
               <ToggleGroupItem key={c.slug} value={c.slug}>
-                {c.title}
+                {examModuleChoice(c)}
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
         </Choice>
         <Choice label={EXAM_LEVEL}>
-          <ToggleGroup type="single" variant="outline" size="sm" className="w-auto flex-wrap" value={String(level)} onValueChange={(v) => v && setLevel(Number(v))}>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="sm"
+            className="w-auto flex-wrap"
+            value={String(level)}
+            onValueChange={(v) => v && setLevel(Number(v))}
+          >
             {levels(catalog.rules).map((l) => (
               <ToggleGroupItem key={l} value={String(l)}>
                 {levelName(catalog.rules, l)}
@@ -121,9 +140,24 @@ function LevelChoice({ catalog, onStart }: { catalog: Catalog; onStart: (p: Exam
         </Choice>
         <div className="flex items-center gap-stack">
           <Label htmlFor="exam-size">{EXAM_SIZE}</Label>
-          <Input id="exam-size" inputMode="numeric" className="w-24 tabular-nums" value={size} aria-invalid={!validSetting('exam_size', n)} onChange={(e) => setSize(e.target.value)} />
+          <Input
+            id="exam-size"
+            inputMode="numeric"
+            className="w-24 tabular-nums"
+            value={size}
+            aria-invalid={!validSetting('exam_size', n)}
+            onChange={(e) => setSize(e.target.value)}
+          />
         </div>
-        <Button disabled={!b || !count} onClick={() => b && onStart(levelExam(b, level, n))}>
+        <Button
+          disabled={!b || !count}
+          onClick={() => {
+            if (!b) return
+            // a size typed just before the press is saved with the start, not lost to the timer
+            if (n !== stored) void k.add('setting', { name: 'exam_size', n })
+            onStart(levelExam(b, level, n))
+          }}
+        >
           {levelExamLabel(catalog.rules, level, pool, count)}
         </Button>
       </div>
@@ -131,22 +165,41 @@ function LevelChoice({ catalog, onStart }: { catalog: Catalog; onStart: (p: Exam
   )
 }
 
-function CertChoice({ id, catalog, onStart }: { id: string; catalog: Catalog; onStart: (p: ExamPlan) => void }) {
+function CertChoice({
+  id,
+  catalog,
+  onStart,
+}: {
+  id: string
+  catalog: Catalog
+  onStart: (p: ExamPlan) => void
+}) {
   const { board } = useLearner()
   const c = catalog.courses.find((x) => x.certs?.get(id))
   const x = c?.certs?.get(id)
   const b = c ? board(c.slug) : null
   return (
     <section className="space-y-section">
-      <PageHeader back={{ to: CERTIFICATIONS, label: 'Certifications' }} title={x?.title ?? EXAM_TITLE} note={EXAM_NOTE} />
+      <PageHeader
+        back={{ to: CERTIFICATIONS, label: 'Certifications' }}
+        title={x?.title ?? EXAM_TITLE}
+        note={EXAM_NOTE}
+      />
       {c && x && b ? (
         <Panel>
           <p>
-            {counted(x.rule.size, 'question')}, pass {Math.round(x.rule.passShare * 100)}%. Stopping before the last question
-            stores the exam as not passed.
+            {counted(x.rule.size, 'question')}, pass {Math.round(x.rule.passShare * 100)}%. Stopping
+            before the last question stores the exam as not passed.
           </p>
           <div>
-            <Button onClick={() => { const p = certExam(b, c, id); if (p) onStart(p) }}>Start the exam</Button>
+            <Button
+              onClick={() => {
+                const p = certExam(b, c, id)
+                if (p) onStart(p)
+              }}
+            >
+              Start the exam
+            </Button>
           </div>
         </Panel>
       ) : (
@@ -211,7 +264,9 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
   return (
     <section className="space-y-section">
       <header className="flex items-center gap-stack">
-        <h1 className="flex-1 text-title font-semibold">{examTitle(phase, index, total, reviewAt, out.missed.length)}</h1>
+        <h1 className="flex-1 text-title font-semibold">
+          {examTitle(phase, index, total, reviewAt, out.missed.length)}
+        </h1>
         {phase !== 'ask' && (
           <span className="text-meta tabular-nums">
             {out.score}/{out.n}
@@ -243,12 +298,16 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
           r={out.missed[reviewAt]}
           catalog={catalog}
           last={reviewAt + 1 === out.missed.length}
-          onNext={() => (reviewAt + 1 < out.missed.length ? setReviewAt(reviewAt + 1) : setPhase('done'))}
+          onNext={() =>
+            reviewAt + 1 < out.missed.length ? setReviewAt(reviewAt + 1) : setPhase('done')
+          }
         />
       ) : (
         <Panel>
           <p>
-            <span className="text-title tabular-nums">{out.score}/{out.n}</span>
+            <span className="text-title tabular-nums">
+              {out.score}/{out.n}
+            </span>
             <span className="ml-2 text-meta text-muted-foreground">{out.percent}%</span>
           </p>
           <ul className="space-y-1">
@@ -263,7 +322,13 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
           </ul>
           <div className="flex gap-stack">
             {out.missed.length > 0 && (
-              <Button variant="outline" onClick={() => { setReviewAt(0); setPhase('review') }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setReviewAt(0)
+                  setPhase('review')
+                }}
+              >
                 {examReviewMissed(out.missed.length)}
               </Button>
             )}
@@ -278,16 +343,34 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
 }
 
 // a missed question, read back: the learner's reply, the key and the detail
-function Reviewed({ r, catalog, last, onNext }: { r: Result; catalog: Catalog; last: boolean; onNext: () => void }) {
+function Reviewed({
+  r,
+  catalog,
+  last,
+  onNext,
+}: {
+  r: Result
+  catalog: Catalog
+  last: boolean
+  onNext: () => void
+}) {
   const course = catalog.courses.find((c) => c.slug === r.q.course)
   return (
     <div className="space-y-stack">
-      <p className="text-meta text-muted-foreground">{questionHead(course, catalog.rules, r.q, '', false)}</p>
+      <p className="text-meta text-muted-foreground">
+        {questionHead(course, catalog.rules, r.q, '', false)}
+      </p>
       <p className="text-heading whitespace-pre-wrap">{r.q.prompt}</p>
       {r.q.format === 'choice' && (
         <ul className="space-y-2">
           {r.order.map((i, pos) => (
-            <li key={pos} className={cn('flex gap-3 rounded-xl border px-4 py-2.5', r.picked.includes(pos) && 'border-foreground bg-muted')}>
+            <li
+              key={pos}
+              className={cn(
+                'flex gap-3 rounded-xl border px-4 py-2.5',
+                r.picked.includes(pos) && 'border-foreground bg-muted',
+              )}
+            >
               <span className="font-medium">{LETTERS[pos]}</span>
               <span className="flex-1 whitespace-pre-wrap">{r.q.choices[i]}</span>
             </li>

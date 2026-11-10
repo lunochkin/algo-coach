@@ -45,6 +45,7 @@ import {
   MODULE_LOADING,
   MODULE_MISSING,
   moduleFailed,
+  moduleSummary,
   MODULE_PAUSE,
   MODULE_RESUME,
   MODULE_START,
@@ -126,7 +127,7 @@ export default function ModuleScreen() {
             .join(' · ')}
         </Text>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {`${sum.mastered} mastered · ${sum.weak} weak · ${sum.soon} more due within 7 days`}
+          {moduleSummary(sum)}
         </Text>
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           <Button mode="contained" compact icon="play" onPress={() => starter.open({ course: c.slug, topic: null, sub: null, level: null })}>

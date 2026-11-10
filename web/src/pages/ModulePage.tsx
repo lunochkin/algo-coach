@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import {
+  moduleSummary,
+  summary,
   ARCHIVE_BODY,
   ARCHIVE_KEEP,
   archiveTitle,
@@ -111,13 +113,29 @@ export function ModulePage() {
           <section className="space-y-section">
             <PageHeader back={{ to: HOME, label: 'Knowledge' }} title={c.title} />
             <div className="flex flex-wrap items-center gap-stack">
-              <p className="flex-1 text-meta text-muted-foreground">
-                {moduleMeta(c.topics.length, due, c.paused)}
-              </p>
-              <Button size="sm" onClick={() => setStarting({ course: module, topic: null, sub: null, level: null })}>
+              <div className="flex-1 text-meta text-muted-foreground">
+                <p>{moduleMeta(c.topics.length, due, c.paused)}</p>
+                <p>{moduleSummary(summary(b, now))}</p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() =>
+                  setStarting({
+                    course: module,
+                    topic: null,
+                    sub: null,
+                    level: null,
+                  })
+                }
+              >
                 {MODULE_START}
               </Button>
-              <Button variant="outline" size="sm" disabled={aimedAt(null, null)} onClick={() => aim({ course: module, topic: null, sub: null })}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={aimedAt(null, null)}
+                onClick={() => aim({ course: module, topic: null, sub: null })}
+              >
                 <Crosshair />
                 {aimedAt(null, null) ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
               </Button>
@@ -143,7 +161,10 @@ export function ModulePage() {
               {levelCounts(b, c).map((x) =>
                 x.total ? (
                   <span key={x.level}>
-                    {x.name} <span className="tabular-nums">{x.passed}/{x.total}</span>
+                    {x.name}{' '}
+                    <span className="tabular-nums">
+                      {x.passed}/{x.total}
+                    </span>
                   </span>
                 ) : null,
               )}
@@ -175,81 +196,131 @@ export function ModulePage() {
                 <p className="text-meta text-muted-foreground">{noGraph(c)}</p>
               ))}
 
-            {tab === 'groups' && c.topics.map((t) => (
-              <section key={t.slug} className="space-y-stack">
-                <div className="flex items-baseline gap-stack">
-                  <h2 className="flex-1 text-heading font-medium">
-                    {t.title}
-                    <span className="ml-2 text-meta font-normal text-muted-foreground">{counted(t.subs.length, 'subtopic')}</span>
-                  </h2>
-                  <Button variant="outline" size="sm" onClick={() => setStarting({ course: module, topic: t.slug, sub: null, level: null })}>
-                    {MODULE_START}
-                  </Button>
-                  <Button variant="ghost" size="sm" disabled={aimedAt(t.slug, null)} onClick={() => aim({ course: module, topic: t.slug, sub: null })}>
-                    {aimedAt(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
-                  </Button>
-                </div>
-                <div className="overflow-x-auto rounded-xl border bg-card">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-meta text-muted-foreground">
-                        <th className="px-4 py-2 text-left font-normal">Subtopic</th>
-                        {lv.map((level) => (
-                          <th key={level} className="px-3 py-2 text-right font-normal">
-                            {levelName(b.rules, level, true)}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {subsByDepth(c, t).map((sub) => (
-                        <tr key={sub}>
-                          <td className="px-4 py-2">
-                            <div className="flex items-center gap-1">
-                              {/* the name starts the subtopic at every level; the press beside it aims the focus */}
-                              <button
-                                type="button"
-                                className={cn('flex-1 text-left hover:underline', aimedAt(t.slug, sub) && 'font-medium text-brand-deep')}
-                                onClick={() => setStarting({ course: module, topic: t.slug, sub, level: null })}
-                              >
-                                {subTitle(c, sub)}
-                              </button>
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                aria-label={focusOn(subTitle(c, sub))}
-                                aria-pressed={aimedAt(t.slug, sub)}
-                                onClick={() => aim({ course: module, topic: t.slug, sub })}
-                              >
-                                <Crosshair className={cn(aimedAt(t.slug, sub) && 'text-brand-deep')} />
-                              </Button>
-                            </div>
-                          </td>
-                          {lv.map((level) => {
-                            const cell = groupCell(b, { course: c.slug, topic: t.slug, sub, level })
-                            return (
-                              <td key={level} className="px-1 py-1 text-right">
-                                {/* a locked cell starts too: locks do not apply to the filtered queue */}
+            {tab === 'groups' &&
+              c.topics.map((t) => (
+                <section key={t.slug} className="space-y-stack">
+                  <div className="flex items-baseline gap-stack">
+                    <h2 className="flex-1 text-heading font-medium">
+                      {t.title}
+                      <span className="ml-2 text-meta font-normal text-muted-foreground">
+                        {counted(t.subs.length, 'subtopic')}
+                      </span>
+                    </h2>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setStarting({
+                          course: module,
+                          topic: t.slug,
+                          sub: null,
+                          level: null,
+                        })
+                      }
+                    >
+                      {MODULE_START}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={aimedAt(t.slug, null)}
+                      onClick={() => aim({ course: module, topic: t.slug, sub: null })}
+                    >
+                      {aimedAt(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
+                    </Button>
+                  </div>
+                  <div className="overflow-x-auto rounded-xl border bg-card">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-meta text-muted-foreground">
+                          <th className="px-4 py-2 text-left font-normal">Subtopic</th>
+                          {lv.map((level) => (
+                            <th key={level} className="px-3 py-2 text-right font-normal">
+                              {levelName(b.rules, level, true)}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {subsByDepth(c, t).map((sub) => (
+                          <tr key={sub}>
+                            <td className="px-4 py-2">
+                              <div className="flex items-center gap-1">
+                                {/* the name starts the subtopic at every level; the press beside it aims the focus */}
                                 <button
                                   type="button"
-                                  disabled={cell.state === 'empty'}
-                                  className={cn('rounded-md px-2 py-1 tabular-nums hover:bg-muted disabled:hover:bg-transparent', CELL_TONE[cell.state])}
-                                  title={cell.line}
-                                  aria-label={startGroup(subTitle(c, sub), levelName(b.rules, level), cell.line)}
-                                  onClick={() => setStarting({ course: module, topic: t.slug, sub, level })}
+                                  className={cn(
+                                    'flex-1 text-left hover:underline',
+                                    aimedAt(t.slug, sub) && 'font-medium text-brand-deep',
+                                  )}
+                                  onClick={() =>
+                                    setStarting({
+                                      course: module,
+                                      topic: t.slug,
+                                      sub,
+                                      level: null,
+                                    })
+                                  }
                                 >
-                                  {cell.count}
+                                  {subTitle(c, sub)}
                                 </button>
-                              </td>
-                            )
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            ))}
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  aria-label={focusOn(subTitle(c, sub))}
+                                  aria-pressed={aimedAt(t.slug, sub)}
+                                  onClick={() => aim({ course: module, topic: t.slug, sub })}
+                                >
+                                  <Crosshair
+                                    className={cn(aimedAt(t.slug, sub) && 'text-brand-deep')}
+                                  />
+                                </Button>
+                              </div>
+                            </td>
+                            {lv.map((level) => {
+                              const cell = groupCell(b, {
+                                course: c.slug,
+                                topic: t.slug,
+                                sub,
+                                level,
+                              })
+                              return (
+                                <td key={level} className="px-1 py-1 text-right">
+                                  {/* a locked cell starts too: locks do not apply to the filtered queue */}
+                                  <button
+                                    type="button"
+                                    disabled={cell.state === 'empty'}
+                                    className={cn(
+                                      'rounded-md px-2 py-1 tabular-nums hover:bg-muted disabled:hover:bg-transparent',
+                                      CELL_TONE[cell.state],
+                                    )}
+                                    title={cell.line}
+                                    aria-label={startGroup(
+                                      subTitle(c, sub),
+                                      levelName(b.rules, level),
+                                      cell.line,
+                                    )}
+                                    onClick={() =>
+                                      setStarting({
+                                        course: module,
+                                        topic: t.slug,
+                                        sub,
+                                        level,
+                                      })
+                                    }
+                                  >
+                                    {cell.count}
+                                  </button>
+                                </td>
+                              )
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              ))}
 
             <StartSheet scope={starting} onClose={() => setStarting(null)} />
 
@@ -261,7 +332,9 @@ export function ModulePage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>{ARCHIVE_KEEP}</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => setStatus('archived')}>{MODULE_ARCHIVE}</AlertDialogAction>
+                  <AlertDialogAction onClick={() => setStatus('archived')}>
+                    {MODULE_ARCHIVE}
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

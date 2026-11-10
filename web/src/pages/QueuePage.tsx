@@ -56,16 +56,30 @@ export function QueuePage() {
   const named = params.get('mode')
   const mode: Mode = named === 'review' ? 'review' : named === 'filtered' ? 'drill' : 'next'
   const learner = useLearner()
-  if (!learner.ready || !learner.catalog) return <p className="text-meta text-muted-foreground">Loading the queue…</p>
+  if (!learner.ready || !learner.catalog)
+    return <p className="text-meta text-muted-foreground">Loading the queue…</p>
   const scope = mode === 'drill' ? filteredScope(params, learner.catalog) : null
   // a module the user no longer reads leaves nothing to filter
   if (mode === 'drill' && !scope) return <Navigate to={HOME} replace />
-  return <Running key={params.toString()} mode={mode} scope={scope} catalog={learner.catalog} learner={learner} />
+  return (
+    <Running
+      key={params.toString()}
+      mode={mode}
+      scope={scope}
+      catalog={learner.catalog}
+      learner={learner}
+    />
+  )
 }
 
 type Learner = ReturnType<typeof useLearner>
 
-type RunningProps = { mode: Mode; scope: DrillScope | null; catalog: Catalog; learner: Learner }
+type RunningProps = {
+  mode: Mode
+  scope: DrillScope | null
+  catalog: Catalog
+  learner: Learner
+}
 
 function Running({ mode, scope, catalog, learner }: RunningProps) {
   const k = useKnowledge()
@@ -75,11 +89,23 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
     if (scope) {
       // named explicitly, so a paused module serves too
       const b = learner.board(scope.course)
-      return b ? { queue: drillQueue(b, scope, learner.newLimit), course: scope.course, include: null } : null
+      return b
+        ? {
+            queue: drillQueue(b, scope, learner.newLimit),
+            course: scope.course,
+            include: null,
+          }
+        : null
     }
     if (mode === 'review') {
       const all = learner.board(null)
-      return all ? { queue: reviewQueue(all, ['weak', 'due']), course: null, include: null } : null
+      return all
+        ? {
+            queue: reviewQueue(all, ['weak', 'due']),
+            course: null,
+            include: null,
+          }
+        : null
     }
     const plan = continuePlan(learner.board, learner.focus, null, learner.newLimit)
     return plan && { queue: plan.queue, course: plan.course, include: plan.include }
@@ -102,7 +128,12 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
     const picked = b && queue ? queue.pick(b, now) : null
     if (!picked || !b || !queue) return null
     if (isLessonItem(picked)) return { lesson: picked }
-    return { q: picked, tag: b.status(picked, now), fresh: !b.attempts(picked).length, early: queue.early(b, picked, now) }
+    return {
+      q: picked,
+      tag: b.status(picked, now),
+      fresh: !b.attempts(picked).length,
+      early: queue.early(b, picked, now),
+    }
   }, [board, queue])
 
   const [current, setCurrent] = useState<Current | null>(() => pickOne())
@@ -118,7 +149,12 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
     if (ended.current) return
     ended.current = true
     const rs = answered.current
-    if (rs.length) void k.add('session', { mode, score: rs.filter((r) => r.correct).length, n: rs.length })
+    if (rs.length)
+      void k.add('session', {
+        mode,
+        score: rs.filter((r) => r.correct).length,
+        n: rs.length,
+      })
   }, [k, mode])
 
   // leaving through the navigation stops the queue the same way. The effect
@@ -135,7 +171,15 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
   }, [])
 
   function onAnswered(r: Result) {
-    const rec = makeAttempt(new Date().toISOString(), r.q.course, r.q.id, r.correct, r.guess, r.grade, r.card)
+    const rec = makeAttempt(
+      new Date().toISOString(),
+      r.q.course,
+      r.q.id,
+      r.correct,
+      r.guess,
+      r.grade,
+      r.card,
+    )
     setMine((xs) => [...xs, rec])
     void k.add('attempt', { ...rec })
     answered.current = [...answered.current, r]
@@ -176,12 +220,18 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
 
   const b = board()
   const now = learner.now
-  const counts = b && queue
-    ? { reviews: queue.reviews(b, now).length, learning: queue.stepping(b, now).count, newLeft: queue.newLeft(b, now) }
-    : { reviews: 0, learning: 0, newLeft: 0 }
+  const counts =
+    b && queue
+      ? {
+          reviews: queue.reviews(b, now).length,
+          learning: queue.stepping(b, now).count,
+          newLeft: queue.newLeft(b, now),
+        }
+      : { reviews: 0, learning: 0, newLeft: 0 }
   const unseenLeft = !!b && !!queue && queue.scope.some((q) => !b.attempts(q).length)
   const score = results.filter((r) => r.correct).length
-  const course = current && 'q' in current ? catalog.courses.find((c) => c.slug === current.q.course) : undefined
+  const course =
+    current && 'q' in current ? catalog.courses.find((c) => c.slug === current.q.course) : undefined
 
   return (
     <section className="space-y-section">
@@ -199,7 +249,8 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
       </header>
       <div className="flex flex-wrap items-center gap-stack text-meta text-muted-foreground">
         <span className="flex-1">{queueLine(counts)}</span>
-        {!done && offersRaise(mode, counts.newLeft, unseenLeft) && (
+        {/* an ended queue offers it too: the raise starts the queue again, as on the phone */}
+        {offersRaise(mode, counts.newLeft, unseenLeft) && (
           <Button variant="ghost" size="sm" onClick={moreNew}>
             {QUEUE_RAISE}
           </Button>
@@ -209,7 +260,11 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
       {!done && current && 'lesson' in current ? (
         <LessonStop
           item={current.lesson}
-          read={!!catalog.lessonsDone?.has(`${current.lesson.course.slug}:${current.lesson.lesson.slug}`)}
+          read={
+            !!catalog.lessonsDone?.has(
+              `${current.lesson.course.slug}:${current.lesson.lesson.slug}`,
+            )
+          }
           onNext={next}
         />
       ) : !done && current && 'q' in current ? (
@@ -277,7 +332,9 @@ function LessonStop(props: { item: LessonItem; read: boolean; onNext: () => void
         ) : (
           <>
             <Button asChild>
-              <Link to={lessonPath(item.course.slug, item.lesson.slug, '', `${pathname}${search}`)}>{LESSON_STOP_READ}</Link>
+              <Link to={lessonPath(item.course.slug, item.lesson.slug, '', `${pathname}${search}`)}>
+                {LESSON_STOP_READ}
+              </Link>
             </Button>
             <Button variant="ghost" onClick={onNext}>
               {LESSON_STOP_LATER}

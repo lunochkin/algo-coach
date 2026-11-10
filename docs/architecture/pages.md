@@ -389,16 +389,16 @@ what it offers. The inventory is the list both clients build to.
 | A card's trigger, brief and templates | `/cards/:slug` | Card | same |
 | A card's ladder, probes and run | `/cards/:slug` | none | web for now |
 | A recall | `/cards/:slug/recall/:template` | none | web for now |
-| The knowledge home | `/knowledge` | Home | to fix |
-| A module | `/knowledge/modules/:module` | Module | to fix |
+| The knowledge home | `/knowledge` | Home | same |
+| A module | `/knowledge/modules/:module` | Module | same |
 | The start sheet | a dialog on the module page | a dialog on Module | same |
 | A queue | `/knowledge/queue` | the quiz screen | same |
 | A lesson a queue offers | a stop opening the lesson page | a stop opening the lesson screen | by platform |
-| A level exam's choices | `/knowledge/exam` | Exam | to fix |
+| A level exam's choices | `/knowledge/exam` | Exam | same |
 | An exam and its results | `/knowledge/exam` | the quiz screen | by platform |
 | The lessons | `/knowledge/lessons` | Lessons | same |
 | A lesson | `/knowledge/lessons/:module/:lesson` | Lesson | same |
-| The certifications | `/knowledge/certifications` | Certifications | to fix |
+| The certifications | `/knowledge/certifications` | Certifications | same |
 | A certification's conditions | a dialog on the certifications and the map | a sheet on Certifications and Map | same |
 | The settings | `/settings` | Settings | same |
 | The signed-in devices | a dialog from the account menu | a screen from the account menu | same |
@@ -412,7 +412,7 @@ what it offers. The inventory is the list both clients build to.
 |---|---|---|---|
 | Continue | the home | Home | same |
 | Review what a strict focus leaves out | the home's counts line | Home's counts line | same |
-| Raise today's limit | the focus panel and a queue | the focus card and a queue | to fix |
+| Raise today's limit | the focus panel and a queue | the focus card and a queue | same |
 | Clear the focus, or make it strict | the focus panel | the focus card | same |
 | Aim the focus at a module | the module page | Module | same |
 | Aim the focus at a topic | the module page | Module | same |
@@ -427,7 +427,7 @@ what it offers. The inventory is the list both clients build to.
 | Open a lesson ready to read, or a certification ready for its exam | the home | Home | same |
 | Mark a lesson read or unread | the lesson page | Lesson | same |
 | Set the daily limit and the exam size | the settings page | Settings | same |
-| Set the exam size for one exam | the exam page | Exam | to fix |
+| Set the exam size for one exam | the exam page | Exam | same |
 | Read the sync's state, and sync now | the settings page | Settings, and Home's footer | same |
 | Sign out, naming unsent records | the account menu and the settings page | the account menu and Settings | same |
 | Revoke a signed-in device | the signed-in devices | the signed-in devices | same |
@@ -488,26 +488,9 @@ what it offers. The inventory is the list both clients build to.
 ### To fix
 
 A row marked `to fix` is listed here with what holds now and the change it
-needs. The audit of 2026-11-10 compared every knowledge row marked `same`
-with the web's code. The phone was brought to the web on every entry, and
-the entries left are the web's.
-
-- **The knowledge home.** A failed sync reads on the phone's home alone. The
-  web's home reads it too, since a failed sync changes what the next queue
-  serves.
-- **Raise today's limit.** A queue that has ended offers the raise on the
-  phone alone, and the web offers it there too.
-- **A module.** The phone reads "mastered, weak and due within 7 days" from
-  core above the groups. The web carries no such line, and adds it.
-- **The certifications.** The phone marks a level no scope certifies as
-  practice, and shows the coverage under a certification in progress. Core
-  computes both, and the web shows both.
-- **A level exam's choices.** The phone marks a paused module as paused, and
-  the web does too, since a paused module leaves exams unless the user names
-  it.
-- **Set the exam size for one exam.** The web saves the size 600 ms after the
-  typing stops, so a size typed just before Start is lost. The web also saves
-  it as the exam starts, as the phone does on leaving.
+needs. No row is marked `to fix` today. The audit of 2026-11-10 compared
+every knowledge row marked `same` with the other client's code, and both
+clients were brought together on each difference it found.
 
 ## A page's areas` gives.
   - On the map, a press on a dimmed node selects it on the web and clears the

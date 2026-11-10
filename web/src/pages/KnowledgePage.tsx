@@ -39,6 +39,7 @@ import {
   STRICT,
   strictLabel,
   waitingOutside,
+  syncErrorSummary,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -106,6 +107,15 @@ export function KnowledgePage() {
   return (
     <section className="space-y-section">
       <PageHeader title="Knowledge" note="Answer the questions due, then the new ones." />
+      {/* a failed sync changes what the next queue serves, so the home says so */}
+      {k.sync.error && !k.sync.running && (
+        <p
+          className="rounded-xl bg-destructive/10 px-4 py-3 text-meta text-verdict-wrong"
+          title={k.sync.error}
+        >
+          {syncErrorSummary(k.sync.error)}
+        </p>
+      )}
       {/* the lessons are a step down from the home: `pages.md`, The structure */}
       <p className="flex gap-4 text-meta">
         <Link to={LESSONS} className="underline underline-offset-2">
@@ -159,9 +169,14 @@ export function KnowledgePage() {
                   </Button>
                 </div>
                 {panel.total > 0 && (
-                  <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-muted" aria-hidden>
+                  <div
+                    className="flex h-1.5 w-full overflow-hidden rounded-full bg-muted"
+                    aria-hidden
+                  >
                     {panel.parts.map((part) =>
-                      part.v ? <div key={part.k} className={PART_TONE[part.k]} style={{ flex: part.v }} /> : null,
+                      part.v ? (
+                        <div key={part.k} className={PART_TONE[part.k]} style={{ flex: part.v }} />
+                      ) : null,
                     )}
                   </div>
                 )}
@@ -178,13 +193,25 @@ export function KnowledgePage() {
                   <span>
                     <span className="tabular-nums">{panel.newLeft}</span> {NEW_LEFT}
                   </span>
-                  <Button variant="outline" size="sm" onClick={() => void k.add('raise', { n: NEW_STEP })}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void k.add('raise', { n: NEW_STEP })}
+                  >
                     <Plus />
                     {RAISE_TODAY}
                   </Button>
                 </div>
-                {panel.next && <p className="text-meta">{FOCUS_NEXT} {panel.next}</p>}
-                {panel.cert && <p className="text-meta">{FOCUS_CERT} {panel.cert}</p>}
+                {panel.next && (
+                  <p className="text-meta">
+                    {FOCUS_NEXT} {panel.next}
+                  </p>
+                )}
+                {panel.cert && (
+                  <p className="text-meta">
+                    {FOCUS_CERT} {panel.cert}
+                  </p>
+                )}
               </Panel>
             )}
 
@@ -205,7 +232,10 @@ export function KnowledgePage() {
                     <>
                       {' · '}
                       {/* a press serves the reviews a strict focus leaves out */}
-                      <Link to="/knowledge/queue?mode=review" className="underline underline-offset-2">
+                      <Link
+                        to="/knowledge/queue?mode=review"
+                        className="underline underline-offset-2"
+                      >
                         {waitingOutside(counts.outside)}
                       </Link>
                     </>
@@ -216,7 +246,11 @@ export function KnowledgePage() {
                 <div className="flex flex-wrap items-center gap-stack text-meta" role="status">
                   <span>{empty.notice}</span>
                   {empty.action && (
-                    <Button variant="outline" size="sm" onClick={() => void act(empty.action!.kind)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void act(empty.action!.kind)}
+                    >
                       {empty.action.label}
                     </Button>
                   )}
@@ -230,13 +264,20 @@ export function KnowledgePage() {
                 {rows.map((row, i) => (
                   <li key={row.c.slug} className="flex items-center gap-4 px-4 py-3">
                     {/* the row opens the module's page; the order presses sit beside it */}
-                    <Link to={`/knowledge/modules/${row.c.slug}`} className="group flex-1 space-y-0.5">
+                    <Link
+                      to={`/knowledge/modules/${row.c.slug}`}
+                      className="group flex-1 space-y-0.5"
+                    >
                       <p className="group-hover:underline">
                         {row.c.title}
-                        {row.c.paused && <span className="text-meta text-muted-foreground"> · {PAUSED}</span>}
+                        {row.c.paused && (
+                          <span className="text-meta text-muted-foreground"> · {PAUSED}</span>
+                        )}
                       </p>
                       <p className="text-meta">{row.view.title}</p>
-                      {row.view.detail && <p className="text-meta text-muted-foreground">{row.view.detail}</p>}
+                      {row.view.detail && (
+                        <p className="text-meta text-muted-foreground">{row.view.detail}</p>
+                      )}
                     </Link>
                     <span className="text-meta text-muted-foreground tabular-nums">
                       {moduleCounts(row.toReview, row.total)}

@@ -21,8 +21,7 @@ import {
   EXAM_MODULE,
   EXAM_NOTE,
   EXAM_SIZE,
-  EXAM_TITLE,
-} from '@algo-coach/core';
+  EXAM_TITLE, examModuleChoice } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
 import { BottomBar, Failed, startExam, styles } from '@/ui/common';
@@ -100,7 +99,7 @@ function Choices({ catalog }: { catalog: Catalog }) {
               selected={course === c.slug}
               showSelectedCheck
               onPress={() => setCourse(c.slug)}>
-              {c.paused ? `${c.title} (paused)` : c.title}
+              {examModuleChoice(c)}
             </Chip>
           ))}
         </View>

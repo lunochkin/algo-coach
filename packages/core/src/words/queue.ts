@@ -74,3 +74,6 @@ export const LESSON_NEXT = 'Next';
 export const LESSON_RELATED = 'Related';
 export const LESSON_MARK_READ = 'Mark read';
 export const LESSON_MARK_UNREAD = 'Mark unread';
+
+// a paused module leaves exams unless the user names it, so its choice says so
+export const examModuleChoice = (c: { title: string; paused?: boolean }) => (c.paused ? `${c.title} (paused)` : c.title);

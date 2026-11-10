@@ -83,3 +83,14 @@ export function certCell(title: string, s: CertStatus): string {
 
 export const practiceShare = (s: Pick<CertStatus, 'passed' | 'questions'>) =>
   s.questions ? `${s.passed}/${s.questions}` : '—';
+
+// the line under a module's title: what its questions hold now and soon
+export const moduleSummary = (s: { mastered: number; weak: number; soon: number }) =>
+  `${s.mastered} mastered · ${s.weak} weak · ${s.soon} more due within 7 days`;
+
+// a level no scope certifies is practice alone, and its column says so
+export function practiceLevel(c: Pick<Course, 'certs'>, level: number): boolean {
+  return (c.certs?.certs ?? []).filter((x) => x.level === level).every((x) => !x.certified);
+}
+export const PRACTICE = '(practice)';
+export const coverageShare = (coverage: number) => `${Math.round(coverage * 100)}%`;
