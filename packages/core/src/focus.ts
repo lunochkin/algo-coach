@@ -64,9 +64,9 @@ export function inFocus(q: Question, f: Focus): boolean {
   );
 }
 
-/** "Python › concurrency › asyncio-core", or "all courses". */
+/** "Python › concurrency › asyncio-core", or "all modules". */
 export function focusLabel(f: Focus | null, cat: Catalog | null): string {
-  if (!f) return 'all courses';
+  if (!f) return 'all modules';
   const c = cat?.courses.find((x) => x.slug === f.course);
   const title = c?.title ?? f.course;
   if (f.cert) return `${title} › ${c?.certs?.get(f.cert)?.title ?? f.cert}`;

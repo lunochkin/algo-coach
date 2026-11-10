@@ -3,7 +3,25 @@ import { useMemo } from 'react';
 import { View } from 'react-native';
 import { Chip, IconButton, Text, TouchableRipple, useTheme } from 'react-native-paper';
 
-import { type Board, type CertRecord, counted, type Focus, type FocusPart, focusView, NEW_STEP, type Queue } from '@algo-coach/core';
+import {
+  type Board,
+  type CertRecord,
+  CLEAR_FOCUS,
+  counted,
+  DUE_NOW,
+  type Focus,
+  FOCUS_CERT,
+  FOCUS_NEXT,
+  type FocusPart,
+  focusTitle,
+  focusView,
+  LEARNING,
+  NEW_LEFT,
+  type Queue,
+  RAISE_TODAY,
+  STRICT,
+  strictLabel,
+} from '@algo-coach/core';
 
 import { styles, tones } from './common';
 
@@ -40,7 +58,7 @@ export function FocusCard(props: Props) {
       onPress={props.onOpen}
       borderless
       accessibilityRole="button"
-      accessibilityLabel={`Focus: ${props.label}. ${counted(info.total, 'question')}, ${mastered} mastered, ${info.due} to review now, ${info.newLeft} new left today`}
+      accessibilityLabel={`${focusTitle(props.label)}. ${counted(info.total, 'question')}, ${mastered} mastered, ${info.due} ${DUE_NOW}, ${info.newLeft} ${NEW_LEFT}`}
       accessibilityHint="Opens the map on the focus"
       style={{ borderRadius: 16, backgroundColor: theme.colors.elevation.level2, padding: 12 }}>
       <View style={{ gap: 8 }}>
@@ -54,10 +72,10 @@ export function FocusCard(props: Props) {
             selected={!!focus.strict}
             showSelectedCheck
             onPress={props.onStrict}
-            accessibilityLabel={focus.strict ? 'Strict focus on: reviews from the focus only' : 'Strict focus off: reviews from everywhere'}>
-            Strict
+            accessibilityLabel={strictLabel(!!focus.strict)}>
+            {STRICT}
           </Chip>
-          <IconButton icon="close" size={20} onPress={props.onClear} accessibilityLabel="Clear focus" style={{ margin: 0 }} />
+          <IconButton icon="close" size={20} onPress={props.onClear} accessibilityLabel={CLEAR_FOCUS} style={{ margin: 0 }} />
         </View>
 
         {info.total ? (
@@ -70,27 +88,26 @@ export function FocusCard(props: Props) {
         </Text>
 
         <View style={[styles.row, { gap: 16 }]}>
-          <Stat icon="refresh" value={info.due} label="to review now" />
-          {info.learning ? <Stat icon="timer-sand" value={info.learning} label="learning" /> : null}
-          <Stat icon="plus-circle-outline" value={info.newLeft} label="new left today" />
+          <Stat icon="refresh" value={info.due} label={DUE_NOW} />
+          {info.learning ? <Stat icon="timer-sand" value={info.learning} label={LEARNING} /> : null}
+          <Stat icon="plus-circle-outline" value={info.newLeft} label={NEW_LEFT} />
           <Chip
             compact
             icon="plus"
-            onPress={props.onMoreNew}
-            accessibilityLabel={`Allow ${NEW_STEP} more new questions today`}>
-            {`${NEW_STEP}`}
+            onPress={props.onMoreNew}>
+            {RAISE_TODAY}
           </Chip>
         </View>
 
         {info.next ? (
           <Text variant="bodySmall">
-            <Text style={muted}>Next: </Text>
+            <Text style={muted}>{FOCUS_NEXT} </Text>
             {info.next}
           </Text>
         ) : null}
         {info.cert ? (
           <Text variant="bodySmall">
-            <Text style={muted}>Certificate: </Text>
+            <Text style={muted}>{FOCUS_CERT} </Text>
             {info.cert}
           </Text>
         ) : null}

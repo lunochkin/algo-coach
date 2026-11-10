@@ -3,15 +3,32 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import {
+  ARCHIVE_BODY,
+  ARCHIVE_KEEP,
+  archiveTitle,
   type CellState,
   counted,
   type CourseStatus,
   type Focus,
   focusLine,
+  focusOn,
   groupCell,
   levelCounts,
   levelName,
   levels,
+  MODULE_ARCHIVE,
+  MODULE_FOCUS,
+  MODULE_FOCUS_HERE,
+  MODULE_FOCUSED,
+  MODULE_GROUPS_TAB,
+  MODULE_MAP_TAB,
+  MODULE_MISSING,
+  MODULE_PAUSE,
+  MODULE_RESUME,
+  MODULE_START,
+  moduleMeta,
+  noGraph,
+  startGroup,
   subsByDepth,
   subTitle,
 } from '@algo-coach/core'
@@ -82,7 +99,7 @@ export function ModulePage() {
     <Loaded
       of="the module"
       state={loadedFrom(k, page === undefined ? undefined : { page })}
-      blank="No module of that name is open: it may be archived."
+      blank={MODULE_MISSING}
       blankWhen={(x) => x.page === null}
     >
       {({ page }) => {
@@ -95,29 +112,29 @@ export function ModulePage() {
             <PageHeader back={{ to: HOME, label: 'Knowledge' }} title={c.title} />
             <div className="flex flex-wrap items-center gap-stack">
               <p className="flex-1 text-meta text-muted-foreground">
-                {counted(c.topics.length, 'topic')} · {due} due · {c.paused ? 'paused' : 'active'}
+                {moduleMeta(c.topics.length, due, c.paused)}
               </p>
               <Button size="sm" onClick={() => setStarting({ course: module, topic: null, sub: null, level: null })}>
-                Start
+                {MODULE_START}
               </Button>
               <Button variant="outline" size="sm" disabled={aimedAt(null, null)} onClick={() => aim({ course: module, topic: null, sub: null })}>
                 <Crosshair />
-                {aimedAt(null, null) ? 'Focused' : 'Focus here'}
+                {aimedAt(null, null) ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
               </Button>
               {c.paused ? (
                 <>
                   <Button variant="outline" size="sm" onClick={() => setStatus('active')}>
                     <Play />
-                    Resume
+                    {MODULE_RESUME}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => setArchiving(true)}>
-                    Archive
+                    {MODULE_ARCHIVE}
                   </Button>
                 </>
               ) : (
                 <Button variant="outline" size="sm" onClick={() => setStatus('paused')}>
                   <Pause />
-                  Pause
+                  {MODULE_PAUSE}
                 </Button>
               )}
             </div>
@@ -140,8 +157,8 @@ export function ModulePage() {
               value={tab}
               onValueChange={(v) => v && setTab(v as 'groups' | 'map')}
             >
-              <ToggleGroupItem value="groups">Groups</ToggleGroupItem>
-              <ToggleGroupItem value="map">Map</ToggleGroupItem>
+              <ToggleGroupItem value="groups">{MODULE_GROUPS_TAB}</ToggleGroupItem>
+              <ToggleGroupItem value="map">{MODULE_MAP_TAB}</ToggleGroupItem>
             </ToggleGroup>
 
             {tab === 'map' &&
@@ -155,11 +172,7 @@ export function ModulePage() {
                   onAim={(topic, sub) => aim({ course: module, topic, sub })}
                 />
               ) : (
-                <p className="text-meta text-muted-foreground">
-                  {c.graphErrors.length
-                    ? `The prerequisite graph of ${c.title} is invalid and ignored: ${c.graphErrors[0]}`
-                    : `${c.title} has no prerequisite graph.`}
-                </p>
+                <p className="text-meta text-muted-foreground">{noGraph(c)}</p>
               ))}
 
             {tab === 'groups' && c.topics.map((t) => (
@@ -170,10 +183,10 @@ export function ModulePage() {
                     <span className="ml-2 text-meta font-normal text-muted-foreground">{counted(t.subs.length, 'subtopic')}</span>
                   </h2>
                   <Button variant="outline" size="sm" onClick={() => setStarting({ course: module, topic: t.slug, sub: null, level: null })}>
-                    Start
+                    {MODULE_START}
                   </Button>
                   <Button variant="ghost" size="sm" disabled={aimedAt(t.slug, null)} onClick={() => aim({ course: module, topic: t.slug, sub: null })}>
-                    {aimedAt(t.slug, null) ? 'Focused' : 'Focus'}
+                    {aimedAt(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
                   </Button>
                 </div>
                 <div className="overflow-x-auto rounded-xl border bg-card">
@@ -204,7 +217,7 @@ export function ModulePage() {
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
-                                aria-label={`Focus on ${subTitle(c, sub)}`}
+                                aria-label={focusOn(subTitle(c, sub))}
                                 aria-pressed={aimedAt(t.slug, sub)}
                                 onClick={() => aim({ course: module, topic: t.slug, sub })}
                               >
@@ -222,7 +235,7 @@ export function ModulePage() {
                                   disabled={cell.state === 'empty'}
                                   className={cn('rounded-md px-2 py-1 tabular-nums hover:bg-muted disabled:hover:bg-transparent', CELL_TONE[cell.state])}
                                   title={cell.line}
-                                  aria-label={`Start ${subTitle(c, sub)}, ${levelName(b.rules, level)}: ${cell.line}`}
+                                  aria-label={startGroup(subTitle(c, sub), levelName(b.rules, level), cell.line)}
                                   onClick={() => setStarting({ course: module, topic: t.slug, sub, level })}
                                 >
                                   {cell.count}
@@ -243,15 +256,12 @@ export function ModulePage() {
             <AlertDialog open={archiving} onOpenChange={setArchiving}>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Archive {c.title}?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    An archived module leaves the home and every queue. Its answers stay, and restoring it loses
-                    nothing.
-                  </AlertDialogDescription>
+                  <AlertDialogTitle>{archiveTitle(c.title)}</AlertDialogTitle>
+                  <AlertDialogDescription>{ARCHIVE_BODY}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Keep it</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => setStatus('archived')}>Archive</AlertDialogAction>
+                  <AlertDialogCancel>{ARCHIVE_KEEP}</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => setStatus('archived')}>{MODULE_ARCHIVE}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

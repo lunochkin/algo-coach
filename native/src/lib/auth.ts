@@ -1,6 +1,8 @@
 import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
 
+import { refusal } from '@algo-coach/core';
+
 import { call } from './engine';
 
 // the engine redirects here, a constant on both sides: `docs/architecture/README.md`.
@@ -35,7 +37,7 @@ export async function signIn(
   if (result.type !== 'success') throw new Error('sign-in cancelled');
   const query = new URL(result.url).searchParams;
   const refused = query.get('refused');
-  if (refused) throw new Error(REFUSALS[refused] ?? `sign-in refused: ${refused}`);
+  if (refused) throw new Error(refusal(refused));
   const code = query.get('code');
   if (!code) throw new Error('sign-in returned no code');
   const answer = await call(origin, '/auth/app/token', { body: { code, verifier, device } });
@@ -46,9 +48,3 @@ export async function signIn(
 export async function signOut(origin: string, token: string): Promise<void> {
   await call(origin, '/auth/app/signout', { token, method: 'POST', body: {} });
 }
-
-const REFUSALS: Record<string, string> = {
-  uninvited: 'this email has no invitation',
-  'no-email': 'the provider verified no email',
-  incomplete: 'the sign-in did not complete',
-};

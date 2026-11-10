@@ -150,7 +150,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 
 - [x] Audit every knowledge screen and act the inventory marks `same` against
       the web, and list each difference found under `pages.md` To fix
-- [ ] Move every sentence a knowledge screen says into `packages/core`, in the
+- [x] Move every sentence a knowledge screen says into `packages/core`, in the
       web's wording, and read it on both clients. One copy closes the wording
       entry under `pages.md` To fix
 - [ ] Fix the phone's side of `pages.md` To fix: the home, a module and its

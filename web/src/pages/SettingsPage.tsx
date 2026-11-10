@@ -2,11 +2,23 @@ import { ArchiveRestore, LogOut, RefreshCw, Smartphone } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 
 import {
+  ACCOUNT,
+  ARCHIVED_MODULES,
+  RESTORE,
+  SAVE,
+  SAVED,
   setting,
+  SETTING_LABEL,
+  SETTINGS,
+  settingRange,
+  SIGN_OUT,
+  SIGNED_IN_DEVICES,
+  STUDY as STUDY_HEADING,
+  SYNC_NOW,
   syncErrorSummary,
   syncLine,
-  SETTING_RANGE,
   validSetting,
+  waitingToSend,
   type SettingName,
   type SettingRecord,
 } from '@algo-coach/core'
@@ -26,10 +38,10 @@ import { linesOf, loadedFrom, useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
 
 // the phone's Study settings, read in the phone's order: `pages.md`, Sections
-const STUDY: { name: SettingName; label: string }[] = [
-  { name: 'new_per_day', label: 'New questions per day' },
-  { name: 'exam_size', label: 'Exam size' },
-]
+const STUDY: { name: SettingName; label: string }[] = (['new_per_day', 'exam_size'] as const).map((name) => ({
+  name,
+  label: SETTING_LABEL[name],
+}))
 
 type Values = Record<SettingName, number>
 
@@ -42,7 +54,7 @@ export function SettingsPage() {
 
   return (
     <section className="space-y-section">
-      <PageHeader title="Settings" note="The study settings hold on every device you sign in on." />
+      <PageHeader title={SETTINGS} note="The study settings hold on every device you sign in on." />
       <Account />
       <Loaded of="the settings" state={loadedFrom(k, values)}>
         {/* a value another device set reaches the fields at its sync */}
@@ -67,7 +79,7 @@ function Sync() {
             <p>{syncLine(k.sync, now)}</p>
             {k.outbox > 0 && (
               <p className="text-meta text-muted-foreground">
-                {k.outbox} {k.outbox === 1 ? 'record waits' : 'records wait'} to be sent
+                {waitingToSend(k.outbox)}
               </p>
             )}
             {k.sync.error && !k.sync.running && (
@@ -78,7 +90,7 @@ function Sync() {
           </div>
           <Button variant="outline" disabled={k.sync.running} onClick={() => void k.resync()}>
             <RefreshCw />
-            Sync now
+            {SYNC_NOW}
           </Button>
         </div>
       </Panel>
@@ -93,14 +105,14 @@ function Archived() {
   if (!archived.length) return null
   return (
     <section className="space-y-stack">
-      <Heading>Archived modules</Heading>
+      <Heading>{ARCHIVED_MODULES}</Heading>
       <ul className="divide-y rounded-xl border bg-card">
         {archived.map((c) => (
           <li key={c.slug} className="flex items-center gap-stack px-4 py-3">
             <span className="flex-1">{c.title}</span>
             <Button variant="outline" size="sm" onClick={() => void k.add('status', { course: c.slug, status: 'active' })}>
               <ArchiveRestore />
-              Restore
+              {RESTORE}
             </Button>
           </li>
         ))}
@@ -119,7 +131,7 @@ function Account() {
 
   return (
     <section className="space-y-stack">
-      <Heading>Account</Heading>
+      <Heading>{ACCOUNT}</Heading>
       <Panel>
         <div className="flex flex-wrap items-center gap-stack">
           <div className="flex-1">
@@ -130,13 +142,13 @@ function Account() {
           </div>
           <Button variant="outline" onClick={() => setApps(true)}>
             <Smartphone />
-            Signed-in devices
+            {SIGNED_IN_DEVICES}
           </Button>
           <SignOut>
             {(start) => (
               <Button variant="outline" onClick={start}>
                 <LogOut />
-                Sign out
+                {SIGN_OUT}
               </Button>
             )}
           </SignOut>
@@ -159,15 +171,14 @@ function Study({ stored, said, onSaid: setSaid }: StudyProps) {
 
   async function save() {
     for (const { name } of changed) await add('setting', { name, n: values[name] })
-    setSaid('Saved.')
+    setSaid(SAVED)
   }
 
   return (
     <section className="space-y-stack">
-      <Heading>Study</Heading>
+      <Heading>{STUDY_HEADING}</Heading>
       <Panel>
         {STUDY.map(({ name, label }) => {
-          const [low, high] = SETTING_RANGE[name]
           const ok = validSetting(name, values[name])
           return (
             <div key={name} className="flex flex-wrap items-center gap-stack">
@@ -187,14 +198,14 @@ function Study({ stored, said, onSaid: setSaid }: StudyProps) {
                 }}
               />
               <span id={`${name}-range`} className="w-20 text-meta text-muted-foreground">
-                {low} to {high}
+                {settingRange(name)}
               </span>
             </div>
           )
         })}
         <div className="flex items-center gap-stack">
           <Button disabled={!valid || changed.length === 0} onClick={() => void save()}>
-            Save
+            {SAVE}
           </Button>
           {said && <span className="text-meta text-muted-foreground">{said}</span>}
         </div>

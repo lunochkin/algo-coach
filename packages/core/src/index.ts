@@ -32,3 +32,6 @@ export * from './account';
 export type { components, paths } from './api/schema';
 export * from './screens';
 export * from './practice';
+export * from './words/home';
+export * from './words/module';
+export * from './words/queue';

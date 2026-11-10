@@ -12,6 +12,9 @@ import {
   type Lesson,
   lessonGroups,
   lessonRow,
+  LESSONS_NONE,
+  LESSONS_TITLE,
+  lessonRowLine,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles } from '@/ui/common';
@@ -53,10 +56,10 @@ export default function LessonsScreen() {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Lessons" />
+        <Appbar.Content title={LESSONS_TITLE} />
       </Appbar.Header>
       {!sections.length ? (
-        <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>No lessons yet.</Text>
+        <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>{LESSONS_NONE}</Text>
       ) : (
         <SectionList
           sections={sections}
@@ -116,7 +119,7 @@ const LessonCard = memo(function LessonCard({ x, c, b }: { x: Lesson; c: Course;
         <View style={{ flex: 1, gap: 2 }}>
           <Text variant="titleMedium">{x.title}</Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            {`${minutes ? `~${minutes} min · ` : ''}${teaches}`}
+            {lessonRowLine(minutes, teaches)}
           </Text>
           <Text variant="labelMedium" style={{ color: state === 'available' ? theme.colors.primary : theme.colors.onSurfaceVariant }}>
             {status}

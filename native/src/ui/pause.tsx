@@ -1,12 +1,12 @@
 import { useState, type ReactNode } from 'react';
 import { Button, Dialog, Portal, Text } from 'react-native-paper';
 
-import type { Course } from '@algo-coach/core';
+import { ARCHIVE_BODY, ARCHIVE_KEEP, archiveTitle, type Course, MODULE_ARCHIVE, MODULE_PAUSE, MODULE_RESUME } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 
-const SCOPE = 'Continue, exams across all courses, the due/weak totals and reminders';
+const SCOPE = 'Continue, exams across all modules, the due/weak totals and reminders';
 
-/** Confirmed pause/resume of a course; returns the trigger and the dialog to render. */
+/** Confirmed pause/resume of a module; returns the trigger and the dialog to render. */
 export function usePauseToggle(): { ask: (c: Course) => void; dialog: ReactNode } {
   const st = useStore();
   const [target, setTarget] = useState<Course | null>(null);
@@ -20,7 +20,7 @@ export function usePauseToggle(): { ask: (c: Course) => void; dialog: ReactNode 
   const dialog = (
     <Portal>
       <Dialog visible={!!target} onDismiss={close}>
-        <Dialog.Title>{`${pausing ? 'Pause' : 'Resume'} ${target?.title ?? ''}?`}</Dialog.Title>
+        <Dialog.Title>{`${pausing ? MODULE_PAUSE : MODULE_RESUME} ${target?.title ?? ''}?`}</Dialog.Title>
         <Dialog.Content>
           <Text variant="bodyMedium">
             {pausing
@@ -30,7 +30,7 @@ export function usePauseToggle(): { ask: (c: Course) => void; dialog: ReactNode 
         </Dialog.Content>
         <Dialog.Actions>
           <Button onPress={close}>Cancel</Button>
-          <Button onPress={confirm}>{pausing ? 'Pause' : 'Resume'}</Button>
+          <Button onPress={confirm}>{pausing ? MODULE_PAUSE : MODULE_RESUME}</Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>
@@ -38,7 +38,7 @@ export function usePauseToggle(): { ask: (c: Course) => void; dialog: ReactNode 
   return { ask: setTarget, dialog };
 }
 
-/** Confirmed archive of a course: hidden everywhere, progress kept, restorable in Settings. */
+/** Confirmed archive of a module: hidden everywhere, progress kept, restorable in Settings. */
 export function useArchive(): { ask: (c: Course) => void; dialog: ReactNode } {
   const st = useStore();
   const [target, setTarget] = useState<Course | null>(null);
@@ -46,20 +46,18 @@ export function useArchive(): { ask: (c: Course) => void; dialog: ReactNode } {
   const dialog = (
     <Portal>
       <Dialog visible={!!target} onDismiss={close}>
-        <Dialog.Title>{`Archive ${target?.title ?? ''}?`}</Dialog.Title>
+        <Dialog.Title>{archiveTitle(target?.title ?? '')}</Dialog.Title>
         <Dialog.Content>
-          <Text variant="bodyMedium">
-            It disappears from the app; your progress is kept. Restore it in Settings.
-          </Text>
+          <Text variant="bodyMedium">{ARCHIVE_BODY}</Text>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={close}>Cancel</Button>
+          <Button onPress={close}>{ARCHIVE_KEEP}</Button>
           <Button
             onPress={() => {
               if (target) void st.setCourseStatus(target.slug, 'archived');
               close();
             }}>
-            Archive
+            {MODULE_ARCHIVE}
           </Button>
         </Dialog.Actions>
       </Dialog>

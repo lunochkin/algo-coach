@@ -42,7 +42,7 @@ export function certConditions(
   if (!x || !status) return null;
   const note =
     status.state === 'not_certified'
-      ? `This level is practice only: no certificate yet. So far ${status.passed}/${counted(status.questions, 'question')} passed. It becomes a certificate once the course enables it (when its question pool is ready).`
+      ? `This level is practice only: no certificate yet. So far ${status.passed}/${counted(status.questions, 'question')} passed. It becomes a certificate once the module enables it (when its question pool is ready).`
       : status.state === 'insufficient_pool'
         ? `Not enough questions yet for a fair exam: ${status.pool} available, ${Math.ceil(x.rule.minPoolRatio * x.rule.size)} needed (${x.rule.minPoolRatio}× the ${x.rule.size}-question exam). Until then it counts as not earned, so certificates that need it stay locked.`
         : null;
@@ -73,7 +73,7 @@ export function certConditions(
     progressNote: status.state === 'locked' ? 'Progress so far (counts once unlocked)' : null,
     checks,
     short: status.short.map((g) => ({ sub: g.sub, topic: g.topic, line: `${subTitle(c, g.sub)}: ${g.passed}/${g.total}` })),
-    scope: `${levelName(b.rules, x.level)} · ${x.scope === COURSE_SCOPE ? 'whole course' : x.scope}`,
+    scope: `${levelName(b.rules, x.level)} · ${x.scope === COURSE_SCOPE ? 'whole module' : x.scope}`,
     targeted: focus?.cert === id,
     offersTarget: status.state !== 'earned' && status.state !== 'empty',
     offersExam: status.state === 'ready',

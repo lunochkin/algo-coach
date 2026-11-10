@@ -2,7 +2,21 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Pressable, View } from 'react-native';
 import { Button, IconButton, Text, useTheme } from 'react-native-paper';
 
-import { type Board, type CellState, type Course, groupCell, levelName, levels, subsByDepth, subTitle } from '@algo-coach/core';
+import {
+  type Board,
+  type CellState,
+  type Course,
+  focusOn,
+  groupCell,
+  levelName,
+  levels,
+  MODULE_FOCUS,
+  MODULE_FOCUSED,
+  MODULE_START,
+  startGroup,
+  subsByDepth,
+  subTitle,
+} from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles, tones } from '@/ui/common';
 import type { Scope } from '@/ui/start';
@@ -37,10 +51,10 @@ export function ModuleGroups({ c, b, onStart }: { c: Course; b: Board; onStart: 
               {t.title}
             </Text>
             <Button compact icon="play" onPress={() => onStart({ course: c.slug, topic: t.slug, sub: null, level: null })}>
-              Start
+              {MODULE_START}
             </Button>
             <Button compact disabled={aimed(t.slug, null)} onPress={() => aim(t.slug, null)}>
-              {aimed(t.slug, null) ? 'Focused' : 'Focus'}
+              {aimed(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
             </Button>
           </View>
           <View style={[styles.row, { paddingLeft: 4 }]}>
@@ -68,7 +82,7 @@ export function ModuleGroups({ c, b, onStart }: { c: Course; b: Board; onStart: 
                 size={18}
                 selected={aimed(t.slug, sub)}
                 iconColor={aimed(t.slug, sub) ? theme.colors.primary : theme.colors.onSurfaceVariant}
-                accessibilityLabel={`Focus on ${subTitle(c, sub)}`}
+                accessibilityLabel={focusOn(subTitle(c, sub))}
                 onPress={() => aim(t.slug, sub)}
                 style={{ margin: 0 }}
               />
@@ -79,7 +93,7 @@ export function ModuleGroups({ c, b, onStart }: { c: Course; b: Board; onStart: 
                   <Pressable
                     key={level}
                     disabled={cell.state === 'empty'}
-                    accessibilityLabel={`Start ${subTitle(c, sub)} ${levelName(b.rules, level)}: ${cell.line}`}
+                    accessibilityLabel={startGroup(subTitle(c, sub), levelName(b.rules, level), cell.line)}
                     onPress={() => onStart({ course: c.slug, topic: t.slug, sub, level })}
                     style={{ width: 48, minHeight: 40, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 2 }}>
                     {cell.state === 'locked' ? (

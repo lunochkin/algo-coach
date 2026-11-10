@@ -2,6 +2,8 @@ import { LogOut, Menu, Settings, Smartphone } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 
+import { SETTINGS, SIGN_OUT, SIGNED_IN_DEVICES, YOUR_ACCOUNT } from '@algo-coach/core'
+
 import { named } from '@/api/account'
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
@@ -31,7 +33,7 @@ export function AccountMenu() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon-sm" aria-label="Your account">
+          <Button variant="ghost" size="icon-sm" aria-label={YOUR_ACCOUNT}>
             <Menu />
           </Button>
         </DropdownMenuTrigger>
@@ -54,16 +56,16 @@ export function AccountMenu() {
           <DropdownMenuItem asChild>
             <Link to="/settings">
               <Settings />
-              Settings
+              {SETTINGS}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setApps(true)}>
             <Smartphone />
-            Signed-in devices
+            {SIGNED_IN_DEVICES}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={start}>
             <LogOut />
-            Sign out
+            {SIGN_OUT}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

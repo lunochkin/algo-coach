@@ -13,6 +13,12 @@ import {
   levelName,
   levels,
   validSetting,
+  EXAM_ALL,
+  EXAM_LEVEL,
+  EXAM_MODULE,
+  EXAM_NOTE,
+  EXAM_SIZE,
+  EXAM_TITLE,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
@@ -44,19 +50,18 @@ export default function Exam() {
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Exam" />
+        <Appbar.Content title={EXAM_TITLE} />
       </Appbar.Header>
       <ScrollView
         contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 96 }]}
         keyboardShouldPersistTaps="handled">
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          Unlocked questions at one level, no cards. No feedback until the end; then the score per
-          topic and a review of what you missed.
+          {EXAM_NOTE}
         </Text>
-        <Text variant="titleSmall">Course</Text>
+        <Text variant="titleSmall">{EXAM_MODULE}</Text>
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           <Chip selected={course === null} showSelectedCheck onPress={() => setCourse(null)}>
-            All
+            {EXAM_ALL}
           </Chip>
           {courses.map((c) => (
             <Chip
@@ -68,7 +73,7 @@ export default function Exam() {
             </Chip>
           ))}
         </View>
-        <Text variant="titleSmall">Level</Text>
+        <Text variant="titleSmall">{EXAM_LEVEL}</Text>
         <SegmentedButtons
           value={String(level)}
           onValueChange={(v) => setLevel(Number(v))}
@@ -82,7 +87,7 @@ export default function Exam() {
         </Text>
         <TextInput
           mode="outlined"
-          label="Questions"
+          label={EXAM_SIZE}
           value={size}
           onChangeText={setSize}
           keyboardType="number-pad"

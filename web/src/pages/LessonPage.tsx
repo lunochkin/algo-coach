@@ -2,7 +2,7 @@ import { BookCheck, BookX } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router'
 
-import { lessonsAround, minutesOf } from '@algo-coach/core'
+import { lessonsAround, minutesOf, LESSON_MARK_READ, LESSON_MARK_UNREAD, LESSON_MISSING, LESSON_NEXT, LESSON_NO_TEXT, LESSON_RELATED, lessonNote } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
@@ -33,7 +33,7 @@ export function LessonPage() {
 
   const page = catalog ? { c: c ?? null, x: x ?? null } : undefined
   return (
-    <Loaded of="the lesson" state={loadedFrom(k, page)} blank="This lesson is not in the current modules." blankWhen={(p) => !p.x}>
+    <Loaded of="the lesson" state={loadedFrom(k, page)} blank={LESSON_MISSING} blankWhen={(p) => !p.x}>
       {({ c, x }) => {
         if (!c || !x) return null
         const { next, related } = lessonsAround(c, x.slug)
@@ -42,16 +42,16 @@ export function LessonPage() {
             <PageHeader
               back={back ? { to: back, label: 'Back to the queue' } : { to: LESSONS, label: 'Lessons' }}
               title={x.title}
-              note={`${c.title}${body ? ` · ~${minutesOf(x, body)} min` : ''}${read ? ' · read' : ''}`}
+              note={lessonNote(c.title, body ? minutesOf(x, body) : null, read)}
             />
             {body ? (
               <LessonText module={c.slug} text={body} />
             ) : (
-              <p className="text-meta text-muted-foreground">This lesson's text is not in the snapshot yet.</p>
+              <p className="text-meta text-muted-foreground">{LESSON_NO_TEXT}</p>
             )}
             {[
-              ['Next', next],
-              ['Related', related],
+              [LESSON_NEXT, next],
+              [LESSON_RELATED, related],
             ].map(([title, items]) =>
               (items as typeof next).length ? (
                 <section key={title as string} className="space-y-1">
@@ -70,12 +70,12 @@ export function LessonPage() {
               {read ? (
                 <Button variant="outline" onClick={() => void k.add('lesson', { course: c.slug, lesson: x.slug, status: 'undone' })}>
                   <BookX />
-                  Mark unread
+                  {LESSON_MARK_UNREAD}
                 </Button>
               ) : (
                 <Button onClick={() => void k.add('lesson', { course: c.slug, lesson: x.slug, status: 'done' })}>
                   <BookCheck />
-                  Mark read
+                  {LESSON_MARK_READ}
                 </Button>
               )}
             </div>

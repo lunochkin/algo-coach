@@ -4,23 +4,41 @@ import { Link, useNavigate } from 'react-router'
 
 import {
   bySavedOrder,
+  CERTIFICATIONS_LINK,
+  CLEAR_FOCUS,
+  CONTINUE,
   continueCounts,
   continueLine,
   continuePlan,
-  counted,
+  DUE_NOW,
   emptyContinue,
   type EmptyContinue,
+  EXAM_LINK,
   type Focus,
+  FOCUS_CERT,
+  FOCUS_NEXT,
   focusLabel,
   focusLine,
   type FocusPart,
+  focusTitle,
   focusView,
+  LEARNING,
+  LESSONS_LINK,
+  moduleCounts,
   type ModuleRow,
   moduleRows,
+  MODULES_OF,
   moved,
+  NEW_LEFT,
   NEW_STEP,
+  NO_MODULES,
+  PAUSED,
+  RAISE_TODAY,
   readyCert,
   readyLesson,
+  STRICT,
+  strictLabel,
+  waitingOutside,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -91,16 +109,16 @@ export function KnowledgePage() {
       {/* the lessons are a step down from the home: `pages.md`, The structure */}
       <p className="flex gap-4 text-meta">
         <Link to={LESSONS} className="underline underline-offset-2">
-          Lessons
+          {LESSONS_LINK}
         </Link>
         <Link to={CERTIFICATIONS} className="underline underline-offset-2">
-          Certifications
+          {CERTIFICATIONS_LINK}
         </Link>
       </p>
       <Loaded
-        of="the modules"
+        of={MODULES_OF}
         state={loadedFrom(k, home)}
-        blank="No module is seeded yet."
+        blank={NO_MODULES}
         blankWhen={(h) => h.rows.length === 0}
       >
         {({ rows, counts, panel, toRead, toTake }) => (
@@ -125,21 +143,19 @@ export function KnowledgePage() {
             {focus && panel && (
               <Panel>
                 <div className="flex flex-wrap items-center gap-stack">
-                  <p className="flex-1 font-medium">Focus: {focusLabel(focus, catalog)}</p>
+                  <p className="flex-1 font-medium">{focusTitle(focusLabel(focus, catalog))}</p>
                   <Toggle
                     size="sm"
                     variant="outline"
                     pressed={!!focus.strict}
                     onPressedChange={(strict) => setFocus({ ...focus, strict })}
-                    aria-label={
-                      focus.strict ? 'Strict: reviews from the focus alone' : 'Relaxed: reviews from everywhere'
-                    }
+                    aria-label={strictLabel(!!focus.strict)}
                   >
-                    Strict
+                    {STRICT}
                   </Toggle>
                   <Button variant="ghost" size="sm" onClick={() => setFocus(null)}>
                     <X />
-                    Clear
+                    {CLEAR_FOCUS}
                   </Button>
                 </div>
                 {panel.total > 0 && (
@@ -152,34 +168,34 @@ export function KnowledgePage() {
                 <p className="text-meta text-muted-foreground">{panel.summary}</p>
                 <div className="flex flex-wrap items-center gap-stack text-meta">
                   <span>
-                    <span className="tabular-nums">{panel.due}</span> to review now
+                    <span className="tabular-nums">{panel.due}</span> {DUE_NOW}
                   </span>
                   {panel.learning > 0 && (
                     <span>
-                      <span className="tabular-nums">{panel.learning}</span> learning
+                      <span className="tabular-nums">{panel.learning}</span> {LEARNING}
                     </span>
                   )}
                   <span>
-                    <span className="tabular-nums">{panel.newLeft}</span> new left today
+                    <span className="tabular-nums">{panel.newLeft}</span> {NEW_LEFT}
                   </span>
                   <Button variant="outline" size="sm" onClick={() => void k.add('raise', { n: NEW_STEP })}>
                     <Plus />
-                    {NEW_STEP} more new today
+                    {RAISE_TODAY}
                   </Button>
                 </div>
-                {panel.next && <p className="text-meta">Next: {panel.next}</p>}
-                {panel.cert && <p className="text-meta">Certificate: {panel.cert}</p>}
+                {panel.next && <p className="text-meta">{FOCUS_NEXT} {panel.next}</p>}
+                {panel.cert && <p className="text-meta">{FOCUS_CERT} {panel.cert}</p>}
               </Panel>
             )}
 
             <div className="space-y-1">
               <div className="flex gap-stack">
                 <Button disabled={!counts} onClick={() => counts && start(counts)}>
-                  Continue
+                  {CONTINUE}
                 </Button>
                 {/* the second way in, at a lower weight: `pages.md`, The knowledge pages */}
                 <Button variant="outline" asChild>
-                  <Link to={EXAM}>Exam</Link>
+                  <Link to={EXAM}>{EXAM_LINK}</Link>
                 </Button>
               </div>
               {counts && (
@@ -190,7 +206,7 @@ export function KnowledgePage() {
                       {' · '}
                       {/* a press serves the reviews a strict focus leaves out */}
                       <Link to="/knowledge/queue?mode=review" className="underline underline-offset-2">
-                        {counts.outside} waiting outside
+                        {waitingOutside(counts.outside)}
                       </Link>
                     </>
                   )}
@@ -217,13 +233,13 @@ export function KnowledgePage() {
                     <Link to={`/knowledge/modules/${row.c.slug}`} className="group flex-1 space-y-0.5">
                       <p className="group-hover:underline">
                         {row.c.title}
-                        {row.c.paused && <span className="text-meta text-muted-foreground"> · paused</span>}
+                        {row.c.paused && <span className="text-meta text-muted-foreground"> · {PAUSED}</span>}
                       </p>
                       <p className="text-meta">{row.view.title}</p>
                       {row.view.detail && <p className="text-meta text-muted-foreground">{row.view.detail}</p>}
                     </Link>
                     <span className="text-meta text-muted-foreground tabular-nums">
-                      {row.toReview} due · {counted(row.total, 'question')}
+                      {moduleCounts(row.toReview, row.total)}
                     </span>
                     <span className="flex gap-1">
                       <Button

@@ -3,16 +3,27 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   alsoNeeds,
+  alsoNeedsLine,
   certPips,
   certToOpen,
   certStates,
   groupCell,
   layoutClusters,
+  lessonNode,
+  lessonPanelSub,
   lessonView,
   levelDots,
   levelName,
+  levelLine,
   levels,
   MAP_DIMS,
+  MAP_FIT,
+  MAP_LEGEND,
+  MAP_LESSONS,
+  MAP_READ,
+  MODULE_FOCUS_HERE,
+  MODULE_FOCUSED,
+  MODULE_START,
   mapLit,
   subTitle,
   topicTitle,
@@ -101,14 +112,14 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
   return (
     <div className="space-y-stack">
       <div className="flex flex-wrap items-center gap-stack text-meta">
-        <Legend tone={DOT.covered} label="covered" />
-        <Legend tone={DOT.open} label="open" />
-        <Legend tone={DOT.locked} label="locked" />
-        <Legend tone={DOT.empty} label="no questions" />
+        <Legend tone={DOT.covered} label={MAP_LEGEND.covered} />
+        <Legend tone={DOT.open} label={MAP_LEGEND.open} />
+        <Legend tone={DOT.locked} label={MAP_LEGEND.locked} />
+        <Legend tone={DOT.empty} label={MAP_LEGEND.empty} />
         <span className="flex-1" />
         {(c.graph?.lessons.length ?? 0) > 0 && (
           <Toggle size="sm" variant="outline" pressed={withLessons} onPressedChange={setWithLessons}>
-            Lessons
+            {MAP_LESSONS}
           </Toggle>
         )}
         <Button variant="ghost" size="icon-sm" aria-label="Zoom out" disabled={zoom === 0} onClick={() => setZoom(zoom - 1)}>
@@ -117,7 +128,7 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
         <Button variant="ghost" size="icon-sm" aria-label="Zoom in" disabled={zoom === ZOOMS.length - 1} onClick={() => setZoom(zoom + 1)}>
           <Plus />
         </Button>
-        <Button variant="ghost" size="icon-sm" aria-label="Fit the map" onClick={() => setZoom(0)}>
+        <Button variant="ghost" size="icon-sm" aria-label={MAP_FIT} onClick={() => setZoom(0)}>
           <Maximize />
         </Button>
       </div>
@@ -254,7 +265,7 @@ function Node(props: {
         <>
           <rect x={n.x} y={n.y} width={W} height={H} rx={4} className={cn('fill-brand-wash', ring)} strokeWidth={picked ? 2.5 : 2} />
           <text x={n.x + 20} y={n.y + 22} className="fill-muted-foreground text-[12px]">
-            {lesson ? `lesson · ${props.b.lessonState(props.c, lesson)}` : 'lesson'}
+            {lesson ? lessonNode(props.b.lessonState(props.c, lesson)) : 'lesson'}
           </text>
           <text x={n.x + 20} y={n.y + 40} className="fill-foreground text-[13px]">
             {cut(lesson?.title ?? n.sub, 19)}
@@ -295,13 +306,13 @@ function Picked(props: {
     return (
       <Panel>
         <p className="font-medium">{v.title}</p>
-        <p className="text-meta text-muted-foreground">Lesson · {v.state}</p>
+        <p className="text-meta text-muted-foreground">{lessonPanelSub(v.state)}</p>
         <p className="text-meta">{v.teaches}</p>
         {v.needs && <p className="text-meta">{v.needs}</p>}
         {v.pretest && <p className="text-meta text-muted-foreground">{v.pretest}</p>}
         <div>
           <Button asChild size="sm">
-            <Link to={lessonPath(c.slug, n.sub.slice(7))}>Read</Link>
+            <Link to={lessonPath(c.slug, n.sub.slice(7))}>{MAP_READ}</Link>
           </Button>
         </div>
       </Panel>
@@ -319,18 +330,18 @@ function Picked(props: {
       <div className="space-y-0.5 text-meta">
         {levels(b.rules).map((level) => (
           <p key={level}>
-            {levelName(b.rules, level)}: {groupCell(b, { course: c.slug, topic: n.topic, sub: n.sub, level }).line}
+            {levelLine(levelName(b.rules, level), groupCell(b, { course: c.slug, topic: n.topic, sub: n.sub, level }).line)}
           </p>
         ))}
-        {outside.length > 0 && <p className="text-muted-foreground">Also needs: {outside.join(', ')}</p>}
+        {outside.length > 0 && <p className="text-muted-foreground">{alsoNeedsLine(outside)}</p>}
         {unlocks && <p className="text-muted-foreground">{unlocks}</p>}
       </div>
       <div className="flex gap-stack">
         <Button size="sm" onClick={() => props.onStart({ course: c.slug, topic: n.topic, sub: n.sub, level: null })}>
-          Start
+          {MODULE_START}
         </Button>
         <Button variant="outline" size="sm" disabled={aimed} onClick={() => props.onAim(n.topic, n.sub)}>
-          {aimed ? 'Focused' : 'Focus here'}
+          {aimed ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
         </Button>
       </div>
     </Panel>

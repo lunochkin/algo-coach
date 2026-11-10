@@ -14,23 +14,40 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   alsoNeeds,
+  alsoNeedsLine,
   type Board,
   certPips,
   certStates,
   type CertStatus,
   certToOpen as openedCert,
-  counted,
   type Course,
   groupCell,
   layoutClusters,
+  lessonPanelSub,
   lessonView,
   levelCounts,
   levelDots,
+  levelLine,
   levelName,
   levels,
   lineage,
   MAP_DIMS,
+  MAP_FIT,
+  MAP_LEGEND,
+  MAP_LESSONS,
+  MAP_READ,
   mapLit,
+  MODULE_ARCHIVE,
+  MODULE_FOCUS_HERE,
+  MODULE_FOCUSED,
+  MODULE_GROUPS_TAB,
+  MODULE_MAP_TAB,
+  MODULE_MISSING,
+  MODULE_PAUSE,
+  MODULE_RESUME,
+  MODULE_START,
+  moduleMeta,
+  noGraph,
   subTitle,
   summary,
   topicTitle,
@@ -73,7 +90,7 @@ export default function ModuleScreen() {
           <Appbar.BackAction onPress={() => router.back()} />
           <Appbar.Content title="Module" />
         </Appbar.Header>
-        <Text style={{ padding: 16 }}>No module of that name is open: it may be archived.</Text>
+        <Text style={{ padding: 16 }}>{MODULE_MISSING}</Text>
       </View>
     );
   }
@@ -88,7 +105,7 @@ export default function ModuleScreen() {
       </Appbar.Header>
       <View style={{ paddingHorizontal: 16, gap: 8, paddingBottom: 8 }}>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {`${counted(c.topics.length, 'topic')} · ${due} due · ${c.paused ? 'paused' : 'active'}`}
+          {moduleMeta(c.topics.length, due, c.paused)}
         </Text>
         <Text variant="bodySmall">
           {levelCounts(b, c)
@@ -101,7 +118,7 @@ export default function ModuleScreen() {
         </Text>
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           <Button mode="contained" compact icon="play" onPress={() => starter.open({ course: c.slug, topic: null, sub: null, level: null })}>
-            Start
+            {MODULE_START}
           </Button>
           <Button
             mode="outlined"
@@ -109,14 +126,14 @@ export default function ModuleScreen() {
             icon="crosshairs-gps"
             disabled={aimed}
             onPress={() => void st.setFocus({ course: c.slug, topic: null, sub: null, strict: !!st.focus?.strict })}>
-            {aimed ? 'Focused' : 'Focus here'}
+            {aimed ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
           </Button>
           <Button mode="outlined" compact icon={c.paused ? 'play' : 'pause'} onPress={() => pause.ask(c)}>
-            {c.paused ? 'Resume' : 'Pause'}
+            {c.paused ? MODULE_RESUME : MODULE_PAUSE}
           </Button>
           {c.paused ? (
             <Button mode="outlined" compact icon="archive-outline" onPress={() => archive.ask(c)}>
-              Archive
+              {MODULE_ARCHIVE}
             </Button>
           ) : null}
         </View>
@@ -124,8 +141,8 @@ export default function ModuleScreen() {
           value={tab}
           onValueChange={(v) => setTab(v as 'groups' | 'map')}
           buttons={[
-            { value: 'groups', label: 'Groups', icon: 'table' },
-            { value: 'map', label: 'Map', icon: 'graph-outline' },
+            { value: 'groups', label: MODULE_GROUPS_TAB, icon: 'table' },
+            { value: 'map', label: MODULE_MAP_TAB, icon: 'graph-outline' },
           ]}
         />
       </View>
@@ -142,15 +159,13 @@ export default function ModuleScreen() {
                 selected={lessonsOn}
                 onPress={() => setLessonsOn(!lessonsOn)}
                 accessibilityLabel={lessonsOn ? 'Hide lessons' : 'Show lessons'}>
-                Lessons
+                {MAP_LESSONS}
               </Chip>
             </View>
           ) : null}
           {!c.graph ? (
             <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>
-              {c.graphErrors.length
-                ? `The prerequisite graph of ${c.title} is invalid and ignored: ${c.graphErrors[0]}`
-                : `${c.title} has no prerequisite graph.`}
+              {noGraph(c)}
             </Text>
           ) : (
             <CourseMap key={`${c.slug}:${withLessons}`} c={c} b={b} bottom={insets.bottom} withLessons={withLessons} />
@@ -333,12 +348,12 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
   return (
     <View style={{ flex: 1 }}>
       <View style={[styles.row, { paddingHorizontal: 16, flexWrap: 'wrap' }]}>
-        <Legend color={tone.done} label="covered" />
-        <Legend color={tone.open} label="open" />
-        <Legend color={theme.colors.onSurfaceDisabled} label="locked" />
-        <Legend color={null} label="no questions" />
+        <Legend color={tone.done} label={MAP_LEGEND.covered} />
+        <Legend color={tone.open} label={MAP_LEGEND.open} />
+        <Legend color={theme.colors.onSurfaceDisabled} label={MAP_LEGEND.locked} />
+        <Legend color={null} label={MAP_LEGEND.empty} />
         <View style={{ flex: 1 }} />
-        <Button compact icon="fit-to-page-outline" onPress={fit} accessibilityLabel="Fit the map to the screen">
+        <Button compact icon="fit-to-page-outline" onPress={fit} accessibilityLabel={MAP_FIT}>
           Fit
         </Button>
       </View>
@@ -426,13 +441,13 @@ function NodePanel(props: {
           const color = cell.state === 'empty' ? theme.colors.onSurfaceVariant : theme.colors.onSurface;
           return (
             <Text key={level} variant="bodySmall" style={{ color }}>
-              {`${levelName(b.rules, level)}: ${cell.line}`}
+              {levelLine(levelName(b.rules, level), cell.line)}
             </Text>
           );
         })}
         {outside.length ? (
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
-            {`Also needs: ${outside.join(', ')}`}
+            {alsoNeedsLine(outside)}
           </Text>
         ) : null}
         {unlocks ? (
@@ -446,13 +461,13 @@ function NodePanel(props: {
           icon="crosshairs-gps"
           disabled={aimed}
           onPress={() => void st.setFocus({ course: c.slug, topic, sub, strict: !!st.focus?.strict })}>
-          {aimed ? 'Focused' : 'Focus here'}
+          {aimed ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
         </Button>
         <Button
           mode="contained-tonal"
           icon="play"
           onPress={() => onPractice({ course: c.slug, topic, sub, level: null })}>
-          Start
+          {MODULE_START}
         </Button>
       </Card.Actions>
     </Card>
@@ -469,7 +484,7 @@ function LessonPanel(props: { c: Course; b: Board; slug: string; bottom: number 
   if (!v) return null;
   return (
     <Card mode="elevated" style={{ margin: 12, marginBottom: bottom + 12 }}>
-      <Card.Title title={v.title} subtitle={`Lesson · ${v.state}`} />
+      <Card.Title title={v.title} subtitle={lessonPanelSub(v.state)} />
       <Card.Content style={{ gap: 2 }}>
         <Text variant="bodySmall">{v.teaches}</Text>
         {v.needs ? <Text variant="bodySmall">{v.needs}</Text> : null}
@@ -484,7 +499,7 @@ function LessonPanel(props: { c: Course; b: Board; slug: string; bottom: number 
           mode="contained-tonal"
           icon="book-open-variant"
           onPress={() => router.push({ pathname: '/lesson', params: { course: c.slug, slug } })}>
-          Read
+          {MAP_READ}
         </Button>
       </Card.Actions>
     </Card>

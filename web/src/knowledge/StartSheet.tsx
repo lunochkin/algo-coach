@@ -1,7 +1,18 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 
-import { levelName, levels, startPreview, subTitle, topicTitle, type DrillScope } from '@algo-coach/core'
+import {
+  levelName,
+  levels,
+  START_ALL,
+  START_KIND,
+  START_LEVEL,
+  START_NOTHING,
+  START_ONLY_REVIEWS,
+  startPreview,
+  startTitle,
+  type DrillScope,
+} from '@algo-coach/core'
 
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -39,14 +50,14 @@ function Choices({ scope }: { scope: Scope }) {
   const preview = b ? startPreview(b, choices, newLimit, now) : null
   if (!c || !catalog) return null
 
-  const title = scope.sub ? subTitle(c, scope.sub) : scope.topic ? topicTitle(c, scope.topic) : c.title
+  const title = startTitle(c, scope)
   return (
     <>
       <DialogHeader>
         <DialogTitle>{title}</DialogTitle>
       </DialogHeader>
       <div className="space-y-stack">
-        <Choice label="Level">
+        <Choice label={START_LEVEL}>
           <ToggleGroup
             type="single"
             variant="outline"
@@ -55,7 +66,7 @@ function Choices({ scope }: { scope: Scope }) {
             value={level === null ? ALL : String(level)}
             onValueChange={(v) => v && setLevel(v === ALL ? null : Number(v))}
           >
-            <ToggleGroupItem value={ALL}>All</ToggleGroupItem>
+            <ToggleGroupItem value={ALL}>{START_ALL}</ToggleGroupItem>
             {levels(catalog.rules).map((l) => (
               <ToggleGroupItem key={l} value={String(l)}>
                 {levelName(catalog.rules, l)}
@@ -64,7 +75,7 @@ function Choices({ scope }: { scope: Scope }) {
           </ToggleGroup>
         </Choice>
         {c.kinds.length > 1 && (
-          <Choice label="Kind">
+          <Choice label={START_KIND}>
             <ToggleGroup
               type="single"
               variant="outline"
@@ -73,7 +84,7 @@ function Choices({ scope }: { scope: Scope }) {
               value={kind ?? ALL}
               onValueChange={(v) => v && setKind(v === ALL ? null : v)}
             >
-              <ToggleGroupItem value={ALL}>All</ToggleGroupItem>
+              <ToggleGroupItem value={ALL}>{START_ALL}</ToggleGroupItem>
               {c.kinds.map((k) => (
                 <ToggleGroupItem key={k} value={k}>
                   {k}
@@ -84,12 +95,12 @@ function Choices({ scope }: { scope: Scope }) {
         )}
         <div className="flex items-center gap-2">
           <Checkbox id="only-reviews" checked={due} onCheckedChange={(on) => setDue(on === true)} />
-          <Label htmlFor="only-reviews">Only reviews</Label>
+          <Label htmlFor="only-reviews">{START_ONLY_REVIEWS}</Label>
         </div>
       </div>
       <DialogFooter>
         <Button disabled={!preview || preview.empty} onClick={() => navigate(filteredQuery(choices))}>
-          {preview?.label ?? 'Nothing ready here'}
+          {preview?.label ?? START_NOTHING}
         </Button>
       </DialogFooter>
     </>

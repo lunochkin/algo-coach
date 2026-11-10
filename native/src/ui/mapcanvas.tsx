@@ -19,7 +19,7 @@ import { Platform, StyleSheet } from 'react-native';
 import { useTheme, type MD3Theme } from 'react-native-paper';
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 
-import { MAP_DIMS, subTitle, type Board, type ClusterBox, type Course, type MapEdge } from '@algo-coach/core';
+import { lessonNode, MAP_DIMS, subTitle, type Board, type ClusterBox, type Course, type MapEdge } from '@algo-coach/core';
 
 import { tones } from './common';
 
@@ -250,7 +250,7 @@ const LessonNode = memo(function LessonNode(props: { theme: MD3Theme; n: Placed;
       <SkText
         x={n.x + 20}
         y={n.y + 22}
-        text={state === 'done' ? 'lesson · done' : state === 'available' ? 'lesson' : 'lesson · locked'}
+        text={lessonNode(state)}
         font={font(12)}
         color={theme.colors.onSurfaceVariant}
       />

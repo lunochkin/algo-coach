@@ -17,6 +17,22 @@ import {
   type Course,
   type Question,
   type Result,
+  ASK_ANSWER,
+  ASK_GUESSING,
+  ASK_NEXT,
+  ASK_REVEAL,
+  ASK_SAID_ELSE,
+  ASK_SAID_TRAP,
+  ASK_TICK_RECALLED,
+  ASK_TRAPS,
+  askChoose,
+  askSubmit,
+  detailAccepted,
+  DETAIL_NONE,
+  DETAIL_YOU,
+  DETAIL_YOUR_ANSWER,
+  DETAIL_YOURS,
+  detailsToggle,
 } from '@algo-coach/core'
 
 import { Link } from 'react-router'
@@ -111,7 +127,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
 
       {q.format === 'choice' && (
         <div className="space-y-2" role={multi ? 'group' : 'radiogroup'}>
-          {multi && <p className="text-meta text-brand-deep">Choose {q.answer.length}</p>}
+          {multi && <p className="text-meta text-brand-deep">{askChoose(q.answer.length)}</p>}
           {order.map((i, pos) => {
             const on = picked.includes(pos)
             return (
@@ -144,7 +160,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
           }}
         >
           <Input
-            aria-label="Answer"
+            aria-label={ASK_ANSWER}
             autoFocus
             autoComplete="off"
             spellCheck={false}
@@ -159,21 +175,21 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
       {q.format !== 'card' && !result && (
         <div className="flex items-center gap-2">
           <Checkbox id="guessing" checked={guessing} onCheckedChange={(on) => setGuessing(on === true)} />
-          <Label htmlFor="guessing">I'm guessing</Label>
+          <Label htmlFor="guessing">{ASK_GUESSING}</Label>
         </div>
       )}
 
       {q.format === 'card' && revealed && (
         <div className="space-y-2">
-          <p className="font-medium">Tick the points you recalled</p>
+          <p className="font-medium">{ASK_TICK_RECALLED}</p>
           {q.key.map((point, i) => (
             <Tick key={i} label={`${i + 1}. ${block(point)}`} on={recalled.has(i)} disabled={!!result} onFlip={() => setRecalled(flip(recalled, i))} />
           ))}
-          {q.traps.length > 0 && <p className="pt-2 font-medium">Common wrong answers</p>}
+          {q.traps.length > 0 && <p className="pt-2 font-medium">{ASK_TRAPS}</p>}
           {q.traps.map((trap, i) => (
-            <Tick key={i} label={block(trap)} hint="I said this" on={fell.has(i)} disabled={!!result} onFlip={() => setFell(flip(fell, i))} />
+            <Tick key={i} label={block(trap)} hint={ASK_SAID_TRAP} on={fell.has(i)} disabled={!!result} onFlip={() => setFell(flip(fell, i))} />
           ))}
-          <Tick label="I also said something else wrong" on={wrong} disabled={!!result} onFlip={() => setWrong(!wrong)} />
+          <Tick label={ASK_SAID_ELSE} on={wrong} disabled={!!result} onFlip={() => setWrong(!wrong)} />
         </div>
       )}
 
@@ -181,7 +197,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
       {result && (
         <div className="space-y-stack">
           <Button variant="ghost" size="sm" onClick={() => setDetails(!details)} aria-expanded={details}>
-            {details ? 'Hide details' : 'Details'}
+            {detailsToggle(details)}
           </Button>
           {details && <Details r={result} course={course} />}
         </div>
@@ -189,16 +205,16 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
 
       <div>
         {result ? (
-          <Button onClick={onNext}>Next</Button>
+          <Button onClick={onNext}>{ASK_NEXT}</Button>
         ) : q.format === 'card' ? (
           revealed ? (
             <Button onClick={grade}>{cardLabel(q.key.length, recalled, fell, wrong)}</Button>
           ) : (
-            <Button onClick={() => setRevealed(true)}>Reveal</Button>
+            <Button onClick={() => setRevealed(true)}>{ASK_REVEAL}</Button>
           )
         ) : (
           <Button disabled={!canSubmit} onClick={submit}>
-            {exam ? (exam.last ? 'Submit and finish' : 'Next') : 'Submit'}
+            {askSubmit(!!exam, !!exam?.last)}
           </Button>
         )}
       </div>
@@ -245,22 +261,22 @@ export function Details({ r, course }: { r: Result; course: Course | undefined }
   return (
     <div className="space-y-stack rounded-xl border bg-card px-4 py-3">
       {answer && (
-        <Section title="Your answer">
+        <Section title={DETAIL_YOUR_ANSWER}>
           {answer.kind === 'rows' ? (
             answer.rows.map((row) => (
               <div key={row.key} className={cn('rounded-md px-2 py-1', row.yours && 'bg-muted')}>
                 <p className="whitespace-pre-wrap">
                   <span className={row.ok ? 'text-verdict-passed' : 'text-verdict-wrong'}>{row.mark} </span>
                   {row.label}
-                  {row.yours && <span className="text-muted-foreground"> ← you</span>}
+                  {row.yours && <span className="text-muted-foreground">{DETAIL_YOURS}</span>}
                 </p>
                 {row.note && <p className="pl-4 text-meta whitespace-pre-wrap text-muted-foreground">{row.note}</p>}
               </div>
             ))
           ) : (
             <p>
-              You: <span className="font-mono">{answer.you}</span>
-              <span className="text-muted-foreground"> · accepted: {answer.accepted}</span>
+              {DETAIL_YOU} <span className="font-mono">{answer.you}</span>
+              <span className="text-muted-foreground">{detailAccepted(answer.accepted)}</span>
             </p>
           )}
         </Section>
@@ -283,7 +299,7 @@ export function Details({ r, course }: { r: Result; course: Course | undefined }
         </Section>
       ))}
       {!answer && sections.length === 0 && (
-        <p className="text-meta text-muted-foreground">No detail for this question yet.</p>
+        <p className="text-meta text-muted-foreground">{DETAIL_NONE}</p>
       )}
       {lessons.map((x) => (
         <p key={x.slug} className="text-meta">

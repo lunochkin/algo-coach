@@ -24,6 +24,15 @@ import {
   type Question,
   type Result,
   type Status,
+  ASK_NEXT,
+  LESSON_STOP_KICKER,
+  LESSON_STOP_LATER,
+  LESSON_STOP_READ,
+  QUEUE_ANSWERED,
+  QUEUE_DONE,
+  QUEUE_RAISE,
+  QUEUE_STOP,
+  queueLeft,
 } from '@algo-coach/core'
 
 import { Panel } from '@/components/Panel'
@@ -177,14 +186,14 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
   return (
     <section className="space-y-section">
       <header className="flex items-center gap-stack">
-        <h1 className="flex-1 text-title font-semibold">{done ? 'Done' : queueTitle(mode)}</h1>
+        <h1 className="flex-1 text-title font-semibold">{done ? QUEUE_DONE : queueTitle(mode)}</h1>
         <span className="text-meta tabular-nums">
           {score}/{results.length}
         </span>
         {!done && (
           <Button variant="outline" size="sm" onClick={stop}>
             <X />
-            Stop
+            {QUEUE_STOP}
           </Button>
         )}
       </header>
@@ -192,7 +201,7 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
         <span className="flex-1">{queueLine(counts)}</span>
         {!done && offersRaise(mode, counts.newLeft, unseenLeft) && (
           <Button variant="ghost" size="sm" onClick={moreNew}>
-            +{NEW_STEP} new
+            {QUEUE_RAISE}
           </Button>
         )}
       </div>
@@ -240,12 +249,12 @@ function Summary(props: {
     <Panel>
       <p className="text-heading font-medium">{summary.title}</p>
       <p>
-        <span className="text-title tabular-nums">{props.answered}</span> answered
+        <span className="text-title tabular-nums">{props.answered}</span> {QUEUE_ANSWERED}
       </p>
       <p>{summary.line}</p>
-      <p className="text-meta text-muted-foreground">Left: {props.left}</p>
+      <p className="text-meta text-muted-foreground">{queueLeft(props.left)}</p>
       <div>
-        <Button onClick={props.onDone}>Done</Button>
+        <Button onClick={props.onDone}>{QUEUE_DONE}</Button>
       </div>
     </Panel>
   )
@@ -259,19 +268,19 @@ function LessonStop(props: { item: LessonItem; read: boolean; onNext: () => void
   const { pathname, search } = useLocation()
   return (
     <Panel>
-      <p className="text-meta text-brand-deep">New lesson</p>
+      <p className="text-meta text-brand-deep">{LESSON_STOP_KICKER}</p>
       <p className="text-heading font-medium">{item.lesson.title}</p>
       <p className="text-meta text-muted-foreground">{lessonStopNote(read)}</p>
       <div className="flex gap-stack">
         {read ? (
-          <Button onClick={onNext}>Next</Button>
+          <Button onClick={onNext}>{ASK_NEXT}</Button>
         ) : (
           <>
             <Button asChild>
-              <Link to={lessonPath(item.course.slug, item.lesson.slug, '', `${pathname}${search}`)}>Read</Link>
+              <Link to={lessonPath(item.course.slug, item.lesson.slug, '', `${pathname}${search}`)}>{LESSON_STOP_READ}</Link>
             </Button>
             <Button variant="ghost" onClick={onNext}>
-              Later
+              {LESSON_STOP_LATER}
             </Button>
           </>
         )}

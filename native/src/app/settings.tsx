@@ -5,7 +5,20 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Appbar, Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { validSetting } from '@algo-coach/core';
+import {
+  ACCOUNT,
+  ARCHIVED_MODULES,
+  RESTORE,
+  SAVE,
+  SAVED,
+  SETTING_LABEL,
+  SETTINGS,
+  settingRange,
+  SIGN_OUT,
+  STUDY,
+  SYNC_NOW,
+  validSetting,
+} from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles, SyncLine } from '@/ui/common';
 import { useSignOut } from '@/ui/signout';
@@ -37,7 +50,9 @@ export default function SettingsScreen() {
   const newPerDay = Number(form.newPerDay);
   const examSize = Number(form.examSize);
   const hour = Number(form.reminderHour);
-  const sizeOk = validSetting('new_per_day', newPerDay) && validSetting('exam_size', examSize);
+  const newOk = validSetting('new_per_day', newPerDay);
+  const examOk = validSetting('exam_size', examSize);
+  const sizeOk = newOk && examOk;
   const hourOk = Number.isInteger(hour) && hour >= 0 && hour <= 23;
   const deviceOk = /^[A-Za-z0-9_-]+$/.test(form.device);
   const originOk = /^https?:\/\/[^\s/]+$/.test(form.origin.trim());
@@ -77,13 +92,13 @@ export default function SettingsScreen() {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Settings" />
+        <Appbar.Content title={SETTINGS} />
       </Appbar.Header>
       <KeyboardAwareScrollView
         bottomOffset={24}
         contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}
         keyboardShouldPersistTaps="handled">
-        <Text variant="titleMedium">Account</Text>
+        <Text variant="titleMedium">{ACCOUNT}</Text>
         {field('origin', 'Engine address')}
         {!originOk ? <HelperText type="error">An address such as https://example.invalid</HelperText> : null}
         <View style={styles.row}>
@@ -92,32 +107,33 @@ export default function SettingsScreen() {
           </Text>
           {st.hasToken ? (
             <Button mode="outlined" icon="logout" disabled={signOut.signing} onPress={signOut.start}>
-              Sign out
+              {SIGN_OUT}
             </Button>
           ) : null}
         </View>
         {field('device', 'Device name')}
         {!deviceOk ? <HelperText type="error">Letters, digits, - and _ only</HelperText> : null}
-        <Text variant="titleMedium">Study</Text>
-        {field('newPerDay', 'New questions per day', true)}
-        {field('examSize', 'Exam size', true)}
-        {!sizeOk ? <HelperText type="error">New per day 0–200, exam size 1–500</HelperText> : null}
+        <Text variant="titleMedium">{STUDY}</Text>
+        {field('newPerDay', SETTING_LABEL.new_per_day, true)}
+        {!newOk ? <HelperText type="error">{settingRange('new_per_day')}</HelperText> : null}
+        {field('examSize', SETTING_LABEL.exam_size, true)}
+        {!examOk ? <HelperText type="error">{settingRange('exam_size')}</HelperText> : null}
         {field('reminderHour', 'Reminder hour (0–23)', true)}
         {!hourOk ? <HelperText type="error">0–23</HelperText> : null}
         <View style={styles.row}>
           <Button mode="contained" onPress={save} disabled={!valid}>
-            Save
+            {SAVE}
           </Button>
           <Button mode="outlined" icon="sync" onPress={() => st.requestSync(0)}>
-            Sync now
+            {SYNC_NOW}
           </Button>
-          {saved ? <Text variant="bodySmall">Saved</Text> : null}
+          {saved ? <Text variant="bodySmall">{SAVED}</Text> : null}
         </View>
         <SyncLine sync={st.sync} />
         {st.archived.length ? (
           <>
             <Text variant="titleMedium" style={{ marginTop: 16 }}>
-              Archived courses
+              {ARCHIVED_MODULES}
             </Text>
             {st.archived.map((c) => (
               <View key={c.slug} style={styles.row}>
@@ -129,7 +145,7 @@ export default function SettingsScreen() {
                   icon="archive-arrow-up-outline"
                   accessibilityLabel={`Restore ${c.title}`}
                   onPress={() => void st.setCourseStatus(c.slug, 'active')}>
-                  Restore
+                  {RESTORE}
                 </Button>
               </View>
             ))}

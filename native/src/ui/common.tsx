@@ -69,7 +69,7 @@ export function SyncLine({ sync, showError = true }: { sync: SyncState; showErro
       </Text>
       {showError && sync.error && !sync.running ? (
         <Text variant="bodySmall" style={{ color: theme.colors.error }} numberOfLines={3}>
-          {sync.error}
+          {syncErrorSummary(sync.error)}
         </Text>
       ) : null}
     </View>

@@ -5,7 +5,7 @@ import { useMarkdown } from 'react-native-marked';
 import { Appbar, Button, Chip, Menu, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { lessonsAround, minutesOf, sections, type Course, type Lesson } from '@algo-coach/core';
+import { lessonsAround, minutesOf, sections, type Course, type Lesson, aboutMinutes, LESSON_MARK_READ, LESSON_MARK_UNREAD, LESSON_MISSING, LESSON_NEXT, LESSON_NO_TEXT, LESSON_RELATED } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { BottomBar, styles } from '@/ui/common';
 import { CodeRenderer, markdownOptions } from '@/ui/markdown';
@@ -86,7 +86,7 @@ export default function LessonScreen() {
         <Appbar.Content title={lesson?.title ?? 'Lesson'} />
         {lesson && body ? (
           <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, marginRight: 8 }}>
-            {`~${minutesOf(lesson, body)} min`}
+            {aboutMinutes(minutesOf(lesson, body))}
           </Text>
         ) : null}
         {done ? (
@@ -96,7 +96,7 @@ export default function LessonScreen() {
             anchor={<Appbar.Action icon="dots-vertical" onPress={() => setMenu(true)} accessibilityLabel="More" />}>
             <Menu.Item
               leadingIcon="book-refresh-outline"
-              title="Mark as unread"
+              title={LESSON_MARK_UNREAD}
               onPress={() => {
                 setMenu(false);
                 void mark('undone');
@@ -106,7 +106,7 @@ export default function LessonScreen() {
         ) : null}
       </Appbar.Header>
       {!lesson || !c ? (
-        <Text style={{ padding: 16 }}>This lesson is not in the current courses.</Text>
+        <Text style={{ padding: 16 }}>{LESSON_MISSING}</Text>
       ) : body ? (
         <ScrollView ref={scroll} contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 128 }}>
           {parts.map((p, i) => (
@@ -129,7 +129,7 @@ export default function LessonScreen() {
         </ScrollView>
       ) : (
         <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>
-          This lesson's text is not in the course snapshot yet; sync after the laptop publishes it.
+          {LESSON_NO_TEXT}
         </Text>
       )}
       {lesson ? (
@@ -140,7 +140,7 @@ export default function LessonScreen() {
             disabled={done}
             onPress={() => void mark('done')}
             contentStyle={{ paddingVertical: 8 }}>
-            {done ? 'Done' : 'Done reading'}
+            {done ? 'Done' : LESSON_MARK_READ}
           </Button>
         </BottomBar>
       ) : null}
@@ -172,8 +172,8 @@ function Footer({ c, slug }: { c: Course; slug: string }) {
     ) : null;
   return (
     <>
-      {row('Next', next)}
-      {row('Related', related)}
+      {row(LESSON_NEXT, next)}
+      {row(LESSON_RELATED, related)}
     </>
   );
 }

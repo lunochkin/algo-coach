@@ -4,7 +4,17 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Button, Card, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { deviceLine, deviceName, type components } from '@algo-coach/core';
+import {
+  DEVICES_LOADING,
+  deviceLine,
+  deviceName,
+  REVOKE,
+  REVOKED_NOTE,
+  SIGN_OUT,
+  SIGNED_IN_DEVICES,
+  thisDevice,
+  type components,
+} from '@algo-coach/core';
 import { call } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
@@ -55,35 +65,35 @@ export default function DevicesScreen() {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Signed-in devices" />
+        <Appbar.Content title={SIGNED_IN_DEVICES} />
       </Appbar.Header>
       <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          A revoked device is signed out at its next request.
+          {REVOKED_NOTE}
         </Text>
         {error ? (
           <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
             {error}
           </Text>
         ) : devices === null ? (
-          <Text variant="bodyMedium">Reading the signed-in devices…</Text>
+          <Text variant="bodyMedium">{DEVICES_LOADING}</Text>
         ) : (
           devices.map((device) => (
             <Card key={device.id} mode="outlined">
               <Card.Content style={[styles.row, { gap: 12 }]}>
                 <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="titleMedium">{device.current ? `${deviceName(device)} · this phone` : deviceName(device)}</Text>
+                  <Text variant="titleMedium">{device.current ? `${deviceName(device)} · ${thisDevice('phone')}` : deviceName(device)}</Text>
                   <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
                     {deviceLine(device, now)}
                   </Text>
                 </View>
                 {device.current ? (
                   <Button mode="outlined" icon="logout" disabled={signOut.signing} onPress={signOut.start}>
-                    Sign out
+                    {SIGN_OUT}
                   </Button>
                 ) : (
                   <Button mode="outlined" onPress={() => void revoke(device)} accessibilityLabel={`Revoke ${deviceName(device)}`}>
-                    Revoke
+                    {REVOKE}
                   </Button>
                 )}
               </Card.Content>

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router'
 
-import { bySavedOrder, lessonGroups, lessonRow } from '@algo-coach/core'
+import { bySavedOrder, lessonGroups, lessonRow, LESSONS_NONE, LESSONS_TITLE, lessonRowLine } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
@@ -26,8 +26,8 @@ export function LessonsPage() {
 
   return (
     <section className="space-y-section">
-      <PageHeader back={{ to: KNOWLEDGE, label: 'Knowledge' }} title="Lessons" />
-      <Loaded of="the lessons" state={loadedFrom(k, modules)} blank="No module carries a lesson yet.">
+      <PageHeader back={{ to: KNOWLEDGE, label: 'Knowledge' }} title={LESSONS_TITLE} />
+      <Loaded of="the lessons" state={loadedFrom(k, modules)} blank={LESSONS_NONE}>
         {(modules) => (
           <>
             {modules.map(({ c, b }) => (
@@ -47,8 +47,7 @@ export function LessonsPage() {
                             >
                               <p className="font-medium">{x.title}</p>
                               <p className="text-meta text-muted-foreground">
-                                {row.minutes ? `~${row.minutes} min · ` : ''}
-                                {row.teaches}
+                                {lessonRowLine(row.minutes, row.teaches)}
                               </p>
                               <p className={cn('text-meta', row.state === 'available' ? 'text-brand-deep' : 'text-muted-foreground')}>
                                 {row.status}

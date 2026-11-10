@@ -4,12 +4,16 @@ import { useSearchParams } from 'react-router'
 
 import {
   bySavedOrder,
+  certCell,
   certId,
+  CERTS_NONE,
+  CERTS_NOTE,
+  CERTS_TITLE,
   certStates,
   COURSE_SCOPE,
   levelName,
   levels,
-  STATE_LABEL,
+  practiceShare,
   type CertStatus,
   type Course,
 } from '@algo-coach/core'
@@ -53,10 +57,10 @@ export function CertificationsPage() {
     <section className="space-y-section">
       <PageHeader
         back={{ to: KNOWLEDGE, label: 'Knowledge' }}
-        title="Certifications"
-        note="Rings: coverage outside, retention inside. A certification opens on its conditions."
+        title={CERTS_TITLE}
+        note={CERTS_NOTE}
       />
-      <Loaded of="the certifications" state={loadedFrom(k, modules)} blank="No module carries certifications yet.">
+      <Loaded of="the certifications" state={loadedFrom(k, modules)} blank={CERTS_NONE}>
         {(modules) => (
           <>
             {modules.map(({ c, b, states }) => (
@@ -114,7 +118,7 @@ function Grid(props: {
                           type="button"
                           onClick={() => props.onPick(id)}
                           className={cn('inline-flex size-11 items-center justify-center rounded-lg hover:bg-muted', s.state === 'ready' && 'bg-brand-wash')}
-                          aria-label={`${c.certs?.get(id)?.title ?? id}: ${s.state === 'not_certified' ? `practice only, ${s.passed} of ${s.questions} passed` : STATE_LABEL[s.state]}`}
+                          aria-label={certCell(c.certs?.get(id)?.title ?? id, s)}
                         >
                           <Cell s={s} />
                         </button>
@@ -147,7 +151,7 @@ function Cell({ s }: { s: CertStatus }) {
     case 'insufficient_pool':
       return <FileX className="size-4 text-brand" />
     case 'not_certified':
-      return <span className="text-meta text-muted-foreground">{s.questions ? `${s.passed}/${s.questions}` : '—'}</span>
+      return <span className="text-meta text-muted-foreground">{practiceShare(s)}</span>
     default:
       return <Ring coverage={s.coverage} retention={s.retention} />
   }

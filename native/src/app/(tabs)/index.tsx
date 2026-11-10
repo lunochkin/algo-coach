@@ -12,21 +12,35 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   bySavedOrder,
+  CERTIFICATIONS_LINK,
+  CLEAR_FOCUS,
+  CONTINUE,
   continueCounts,
   continueLine,
   continuePlan,
-  counted,
   type Course,
   drillQueue,
   emptyContinue,
+  EXAM_LINK,
   focusLabel,
+  FOCUS_PREFIX,
+  focusTitle,
   type Group,
+  LESSONS_LINK,
+  moduleCounts,
   moduleRows,
+  MODULES_LOADING,
   NEW_STEP,
   type NextUpView,
+  NO_MODULES,
+  PAUSED,
   readyCert,
   readyLesson,
   reviewQueue,
+  STRICT,
+  strictLabel,
+  SYNC_NOW,
+  waitingOutside,
 } from '@algo-coach/core';
 import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
@@ -113,7 +127,7 @@ export default function Home() {
     <Card mode="contained">
       <Card.Content>
         <Text variant="bodyLarge">
-          {st.ready ? 'No courses yet. Add a token in Settings, then sync.' : 'Loading…'}
+          {st.ready ? NO_MODULES : MODULES_LOADING}
         </Text>
       </Card.Content>
     </Card>
@@ -124,10 +138,10 @@ export default function Home() {
       {/* the lessons and the certifications are steps down from the home: `pages.md`, The structure */}
       <View style={styles.row}>
         <Button compact icon="book-open-variant" onPress={() => router.push('/lessons')}>
-          Lessons
+          {LESSONS_LINK}
         </Button>
         <Button compact icon="trophy-outline" onPress={() => router.push('/certs')}>
-          Certifications
+          {CERTIFICATIONS_LINK}
         </Button>
       </View>
       {body}
@@ -147,7 +161,7 @@ export default function Home() {
         ListHeaderComponent={header}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         ListFooterComponent={
-          <Pressable onPress={() => st.requestSync(0)} accessibilityLabel="Sync now" style={{ marginTop: 12 }}>
+          <Pressable onPress={() => st.requestSync(0)} accessibilityLabel={SYNC_NOW} style={{ marginTop: 12 }}>
             <SyncLine sync={st.sync} showError={false} />
           </Pressable>
         }
@@ -236,7 +250,7 @@ export default function Home() {
           disabled={!st.catalog}
           onPress={start}
           contentStyle={{ paddingVertical: 8 }}>
-          Continue
+          {CONTINUE}
         </Button>
         {counts ? (
           <View style={[styles.row, { justifyContent: 'center', flexWrap: 'wrap', minHeight: 24 }]}>
@@ -248,10 +262,10 @@ export default function Home() {
                 onPress={reviewOutside}
                 borderless
                 accessibilityRole="link"
-                accessibilityLabel={`Review ${counts.outside} waiting outside the focus`}
+                accessibilityLabel={waitingOutside(counts.outside)}
                 style={{ minHeight: 48, justifyContent: 'center', paddingHorizontal: 4, borderRadius: 8 }}>
                 <Text variant="labelMedium" style={{ color: theme.colors.primary, textDecorationLine: 'underline' }}>
-                  {` · ${counts.outside} waiting outside`}
+                  {` · ${waitingOutside(counts.outside)}`}
                 </Text>
               </TouchableRipple>
             ) : null}
@@ -264,7 +278,7 @@ export default function Home() {
             style={{ flex: 1 }}
             disabled={!st.catalog}
             onPress={() => router.push('/exam')}>
-            Exam
+            {EXAM_LINK}
           </Button>
         </View>
       </BottomBar>
@@ -301,16 +315,16 @@ function FocusLine(props: {
         onPress={onOpen}
         borderless
         accessibilityRole="button"
-        accessibilityLabel={`Focus: ${label}${setAside ? ', not used with a course filter' : ''}`}
+        accessibilityLabel={`${focusTitle(label)}${setAside ? ', not used with a module filter' : ''}`}
         accessibilityHint="Opens Practice on the focus"
         style={{ flex: 1, minHeight: 48, justifyContent: 'center', borderRadius: 8, paddingHorizontal: 8 }}>
         <View style={styles.row}>
           <MaterialCommunityIcons name="crosshairs-gps" size={18} color={theme.colors.primary} />
           <Text variant="bodyMedium" numberOfLines={2} style={{ flex: 1 }}>
-            <Text style={{ color: theme.colors.onSurfaceVariant }}>Focus: </Text>
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>{FOCUS_PREFIX} </Text>
             {label}
             {setAside ? (
-              <Text style={{ color: theme.colors.onSurfaceVariant }}> · not used with a course filter</Text>
+              <Text style={{ color: theme.colors.onSurfaceVariant }}> · not used with a module filter</Text>
             ) : null}
           </Text>
         </View>
@@ -321,13 +335,13 @@ function FocusLine(props: {
           selected={strict}
           showSelectedCheck
           onPress={onStrict}
-          accessibilityLabel={strict ? 'Strict focus on: reviews from the focus only' : 'Strict focus off: reviews from everywhere'}
+          accessibilityLabel={strictLabel(strict)}
           style={{ minHeight: 48, justifyContent: 'center' }}>
-          Strict
+          {STRICT}
         </Chip>
       ) : null}
       {set ? (
-        <IconButton icon="close" size={20} onPress={onClear} accessibilityLabel="Clear focus" style={{ margin: 0, width: 48, height: 48 }} />
+        <IconButton icon="close" size={20} onPress={onClear} accessibilityLabel={CLEAR_FOCUS} style={{ margin: 0, width: 48, height: 48 }} />
       ) : null}
     </View>
   );
@@ -358,7 +372,7 @@ function CourseCard({
       accessibilityHint="Opens the module. Long-press to reorder.">
       <Card.Title
         title={c.title}
-        subtitle={`${counted(total, 'question')} · ${toReview} to review${c.paused ? ' · paused' : ''}`}
+        subtitle={`${moduleCounts(toReview, total)}${c.paused ? ` · ${PAUSED}` : ''}`}
         right={() => (
           <View style={{ flexDirection: 'row' }}>
             <IconButton icon="drag" onPressIn={drag} accessibilityLabel={`Reorder ${c.title}`} />

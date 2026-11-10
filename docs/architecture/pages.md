@@ -489,20 +489,13 @@ what it offers. The inventory is the list both clients build to.
 
 A row marked `to fix` is listed here with what holds now and the change it
 needs. The audit of 2026-11-10 compared every knowledge row marked `same`
-with the web's code.
+with the web's code. Every sentence a knowledge screen says is read from
+`packages/core` since, so the entries left are about what a screen offers.
 
-- **The wording of every knowledge screen.** Each client writes its own
-  labels, empty readings and dialog texts, and the two drift. The phone says
-  "courses" and "Course" where the web says modules, and the empty, refusal,
-  sign-out and missing-lesson texts differ. Every sentence a knowledge screen
-  says moves into `packages/core`, in the web's wording where this file gives
-  it, so one copy is said on both clients.
 - **The knowledge home.**
   - The phone's module row starts a queue or opens a lesson from its next-up
     line. The row opens the module and offers nothing else, as `## The
     structure` gives.
-  - The row's counts read "N due" first on the web and "N to review" last on
-    the phone. Core words the line once.
   - With no focus the phone reads "Focus: all courses", and its press does
     nothing. The web names no focus there, and the phone drops the line.
   - The phone places the ready lesson and the ready certification below the
@@ -511,18 +504,15 @@ with the web's code.
     one way into a module from the home, so the card drops the press.
   - A failed sync reads on the phone's home alone. The web's home reads it
     too, since a failed sync changes what the next queue serves.
-- **Raise today's limit.** The press reads "5 more new today" on the web and
-  "5" on the phone. The phone takes the web's label. A queue that has ended
-  offers the raise on the phone alone, and the web offers it there too.
+- **Raise today's limit.** A queue that has ended offers the raise on the
+  phone alone, and the web offers it there too.
 - **The settings, and the sync's state.**
-  - The phone writes the limits' ranges by hand, where the web reads them
-    from core. The phone reads them from core too.
   - The web disables Save while nothing changed, and Sync now while a sync
     runs. The phone does both too.
   - The web names the user and the engine's id under Account, as the account
     menu does. The phone names neither, and names both.
-  - The web counts the records waiting to be sent and reads a failed sync
-    through core. The phone shows no count and the raw error, and takes both.
+  - The web counts the records waiting to be sent. The phone shows no count,
+    and adds it.
 - **The signed-in devices.** The phone shows a failed read as the raw error.
   It reads the failure as the web does.
 - **The login.** The phone offers the dev login in a dev build and Google and
@@ -540,8 +530,8 @@ with the web's code.
 - **Pause, resume or archive a module.**
   - The phone asks before a pause and before a resume. This file asks before
     an archive alone, since only an archive takes the module off the home.
-  - The archive dialogs say different things, and the phone stays on a module
-    it can no longer show. The phone takes the web's text and returns home.
+  - After an archive the phone stays on a module it can no longer show. It
+    returns home, as the web does.
 - **The certifications.**
   - The phone names a topic by its slug, where `knowledge.md` gives the
     title. The phone shows the title.
@@ -561,9 +551,9 @@ with the web's code.
 - **The lessons.** The phone opens with the locked groups closed. Every
   section is open until the reader closes it, as `## A page's areas` gives.
 - **A lesson, and marking it.**
-  - The phone's press reads "Done reading", then a disabled "Done", and
-    "Mark as unread" sits in a menu. The phone offers Mark read and Mark
-    unread, as `## The knowledge pages` gives.
+  - The phone's Mark read turns into a disabled "Done", and Mark unread sits
+    in a menu. The phone offers Mark read and Mark unread as one press, as
+    `## The knowledge pages` gives.
   - Marking a lesson read leaves the phone's screen. The page stays on both,
     so the links to other lessons stay in reach.
   - The web's header names the module, the minutes and whether the lesson is

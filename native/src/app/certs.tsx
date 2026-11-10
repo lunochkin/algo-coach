@@ -4,7 +4,21 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { Appbar, Card, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { bySavedOrder, certId, certStates, COURSE_SCOPE, levelName, levels, type CertStatus, type Course, STATE_LABEL } from '@algo-coach/core';
+import {
+  bySavedOrder,
+  certCell,
+  certId,
+  CERTS_NONE,
+  CERTS_NOTE,
+  CERTS_TITLE,
+  certStates,
+  COURSE_SCOPE,
+  levelName,
+  levels,
+  practiceShare,
+  type CertStatus,
+  type Course,
+} from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -44,15 +58,15 @@ export default function CertsScreen() {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Certifications" />
+        <Appbar.Content title={CERTS_TITLE} />
       </Appbar.Header>
       {!courses.length || !b ? (
-        <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>No certifications yet.</Text>
+        <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>{CERTS_NONE}</Text>
       ) : (
         <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
             <Legend />
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            Rings: coverage outside, retention inside. Tap a certificate for its requirements.
+            {CERTS_NOTE}
           </Text>
           {courses.map((c) => (
             <Matrix key={c.slug} c={c} states={states.get(c.slug)!} onPick={(id) => setPicked({ course: c.slug, id })} />
@@ -88,10 +102,10 @@ function Cell(props: { status: CertStatus; title: string; onPress: () => void })
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={`${title}: practice only, ${s.passed} of ${s.questions} passed`}
+        accessibilityLabel={certCell(title, s)}
         style={{ width: CELL, minHeight: 52, alignItems: 'center', justifyContent: 'center', opacity: 0.6 }}>
         <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {s.questions ? `${s.passed}/${s.questions}` : '—'}
+          {practiceShare(s)}
         </Text>
       </Pressable>
     );
@@ -132,7 +146,7 @@ function Cell(props: { status: CertStatus; title: string; onPress: () => void })
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${title}: ${STATE_LABEL[s.state]}`}
+      accessibilityLabel={certCell(title, s)}
       style={{
         width: CELL,
         minHeight: 52,

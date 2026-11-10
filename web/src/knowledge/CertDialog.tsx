@@ -1,7 +1,19 @@
 import { Target, Trophy } from 'lucide-react'
 import { Link } from 'react-router'
 
-import { certConditions, certFocus, focusLine, type Board, type CertStatus, type Course } from '@algo-coach/core'
+import {
+  CERT_START,
+  CERT_TAKE_EXAM,
+  CERT_TARGET,
+  CERT_TO_COVER,
+  CERT_UNTARGET,
+  certConditions,
+  certFocus,
+  focusLine,
+  type Board,
+  type CertStatus,
+  type Course,
+} from '@algo-coach/core'
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -40,7 +52,7 @@ export function CertDialog({ open, onClose, onStart }: { open: OpenCert | null; 
               </ul>
               {v.short.length > 0 && (
                 <div className="space-y-1">
-                  <p className="font-medium">To cover</p>
+                  <p className="font-medium">{CERT_TO_COVER}</p>
                   {v.short.map((g) => (
                     <div key={g.sub} className="flex items-center gap-stack">
                       <span className="flex-1">{g.line}</span>
@@ -53,7 +65,7 @@ export function CertDialog({ open, onClose, onStart }: { open: OpenCert | null; 
                           onStart({ course: open.c.slug, topic: g.topic, sub: g.sub, level })
                         }}
                       >
-                        Start
+                        {CERT_START}
                       </Button>
                     </div>
                   ))}
@@ -66,14 +78,14 @@ export function CertDialog({ open, onClose, onStart }: { open: OpenCert | null; 
                 <Button asChild>
                   <Link to={`${EXAM}?${new URLSearchParams({ cert: open.id })}`}>
                     <Trophy />
-                    Take exam
+                    {CERT_TAKE_EXAM}
                   </Link>
                 </Button>
               )}
               {v.offersTarget &&
                 (v.targeted ? (
                   <Button variant="outline" onClick={() => void k.add('focus', focusLine(null))}>
-                    Untarget
+                    {CERT_UNTARGET}
                   </Button>
                 ) : (
                   <Button
@@ -85,7 +97,7 @@ export function CertDialog({ open, onClose, onStart }: { open: OpenCert | null; 
                     }}
                   >
                     <Target />
-                    Target
+                    {CERT_TARGET}
                   </Button>
                 ))}
             </DialogFooter>

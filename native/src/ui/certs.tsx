@@ -5,6 +5,11 @@ import Svg, { Circle } from 'react-native-svg';
 
 import {
   type Board,
+  CERT_START,
+  CERT_TAKE_EXAM,
+  CERT_TARGET,
+  CERT_TO_COVER,
+  CERT_UNTARGET,
   certConditions,
   certExam,
   certFocus,
@@ -107,7 +112,7 @@ export function CertSheet(props: {
             {v.checks.map((x) => check(x.ok, x.text))}
             {v.short.length ? (
               <Text variant="labelLarge" style={{ marginTop: 8 }}>
-                To cover
+                {CERT_TO_COVER}
               </Text>
             ) : null}
             {v.short.map((g) => (
@@ -119,7 +124,7 @@ export function CertSheet(props: {
                     onClose();
                     onPractice({ course: c.slug, topic: g.topic, sub: g.sub, level: x.level });
                   }}>
-                  Start
+                  {CERT_START}
                 </Button>
               </View>
             ))}
@@ -133,7 +138,7 @@ export function CertSheet(props: {
           {v.offersTarget ? (
             v.targeted ? (
               <Button icon="target" onPress={() => void st.setFocus(null)}>
-                Untarget
+                {CERT_UNTARGET}
               </Button>
             ) : (
               <Button
@@ -144,13 +149,13 @@ export function CertSheet(props: {
                   if (f) void st.setFocus(f);
                   onClose();
                 }}>
-                Target
+                {CERT_TARGET}
               </Button>
             )
           ) : null}
           {v.offersExam ? (
             <Button mode="contained" icon="trophy-outline" onPress={take}>
-              Take exam
+              {CERT_TAKE_EXAM}
             </Button>
           ) : null}
         </Dialog.Actions>

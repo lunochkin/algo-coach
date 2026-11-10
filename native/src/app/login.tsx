@@ -4,12 +4,13 @@ import { View } from 'react-native';
 import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { continueWith, LOGIN_INTRO } from '@algo-coach/core';
 import { signIn, type Provider } from '@/lib/auth';
 import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
 
 const ADDRESS = /^https?:\/\/[^\s/]+$/;
-const LABELS = { google: 'Continue with Google', github: 'Continue with GitHub', dev: 'Continue with the dev login' };
+const LABELS = { google: continueWith('google'), github: continueWith('github'), dev: 'Continue with the dev login' };
 const ICONS = { google: 'google', github: 'github', dev: 'laptop' };
 
 /** The app's first screen until it holds a token: sign in through a provider. */
@@ -54,7 +55,7 @@ export default function LoginScreen() {
       }}>
       <Text variant="displaySmall">{APP_NAME}</Text>
       <Text variant="bodyLarge">
-        {__DEV__ ? 'The dev app syncs with the local engine.' : 'Sign in to sync your practice with the engine.'}
+        {__DEV__ ? 'The dev app syncs with the local engine.' : LOGIN_INTRO}
       </Text>
       {!st.settings.origin ? (
         <>

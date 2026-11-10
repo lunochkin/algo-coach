@@ -22,6 +22,16 @@ import {
   type SettingRecord,
   validSetting,
   youLine,
+  EXAM_ALL,
+  EXAM_DONE,
+  EXAM_LEVEL,
+  EXAM_MODULE,
+  EXAM_NOTE,
+  EXAM_SIZE,
+  EXAM_TITLE,
+  examReviewMissed,
+  examReviewNext,
+  QUEUE_STOP,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -87,11 +97,11 @@ function LevelChoice({ catalog, onStart }: { catalog: Catalog; onStart: (p: Exam
 
   return (
     <section className="space-y-section">
-      <PageHeader back={{ to: KNOWLEDGE, label: 'Knowledge' }} title="Exam" note="No feedback until the end." />
+      <PageHeader back={{ to: KNOWLEDGE, label: 'Knowledge' }} title={EXAM_TITLE} note={EXAM_NOTE} />
       <div className="space-y-stack">
-        <Choice label="Module">
+        <Choice label={EXAM_MODULE}>
           <ToggleGroup type="single" variant="outline" size="sm" className="w-auto flex-wrap" value={course ?? ALL} onValueChange={(v) => v && setCourse(v === ALL ? null : v)}>
-            <ToggleGroupItem value={ALL}>All</ToggleGroupItem>
+            <ToggleGroupItem value={ALL}>{EXAM_ALL}</ToggleGroupItem>
             {catalog.courses.map((c) => (
               <ToggleGroupItem key={c.slug} value={c.slug}>
                 {c.title}
@@ -99,7 +109,7 @@ function LevelChoice({ catalog, onStart }: { catalog: Catalog; onStart: (p: Exam
             ))}
           </ToggleGroup>
         </Choice>
-        <Choice label="Level">
+        <Choice label={EXAM_LEVEL}>
           <ToggleGroup type="single" variant="outline" size="sm" className="w-auto flex-wrap" value={String(level)} onValueChange={(v) => v && setLevel(Number(v))}>
             {levels(catalog.rules).map((l) => (
               <ToggleGroupItem key={l} value={String(l)}>
@@ -110,7 +120,7 @@ function LevelChoice({ catalog, onStart }: { catalog: Catalog; onStart: (p: Exam
           <p className="text-meta text-muted-foreground">{catalog.rules.levels[level] ?? ''}</p>
         </Choice>
         <div className="flex items-center gap-stack">
-          <Label htmlFor="exam-size">Questions</Label>
+          <Label htmlFor="exam-size">{EXAM_SIZE}</Label>
           <Input id="exam-size" inputMode="numeric" className="w-24 tabular-nums" value={size} aria-invalid={!validSetting('exam_size', n)} onChange={(e) => setSize(e.target.value)} />
         </div>
         <Button disabled={!b || !count} onClick={() => b && onStart(levelExam(b, level, n))}>
@@ -128,7 +138,7 @@ function CertChoice({ id, catalog, onStart }: { id: string; catalog: Catalog; on
   const b = c ? board(c.slug) : null
   return (
     <section className="space-y-section">
-      <PageHeader back={{ to: CERTIFICATIONS, label: 'Certifications' }} title={x?.title ?? 'Exam'} note="No feedback until the end." />
+      <PageHeader back={{ to: CERTIFICATIONS, label: 'Certifications' }} title={x?.title ?? EXAM_TITLE} note={EXAM_NOTE} />
       {c && x && b ? (
         <Panel>
           <p>
@@ -210,7 +220,7 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
         {phase === 'ask' && (
           <Button variant="outline" size="sm" onClick={finish}>
             <X />
-            Stop
+            {QUEUE_STOP}
           </Button>
         )}
       </header>
@@ -254,11 +264,11 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
           <div className="flex gap-stack">
             {out.missed.length > 0 && (
               <Button variant="outline" onClick={() => { setReviewAt(0); setPhase('review') }}>
-                Review missed ({out.missed.length})
+                {examReviewMissed(out.missed.length)}
               </Button>
             )}
             <Button asChild>
-              <Link to={back}>Done</Link>
+              <Link to={back}>{EXAM_DONE}</Link>
             </Button>
           </div>
         </Panel>
@@ -287,7 +297,7 @@ function Reviewed({ r, catalog, last, onNext }: { r: Result; catalog: Catalog; l
       <p className="text-meta">{youLine(r)}</p>
       <Verdict r={r} />
       <Details r={r} course={course} />
-      <Button onClick={onNext}>{last ? 'Back to results' : 'Next missed'}</Button>
+      <Button onClick={onNext}>{examReviewNext(last)}</Button>
     </div>
   )
 }

@@ -1,6 +1,8 @@
 import { LogOut } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 
+import { SIGN_OUT, SIGN_OUT_TITLE, signOutWarning, STAY_SIGNED_IN } from '@algo-coach/core'
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,17 +32,14 @@ export function SignOut({ children }: { children: (start: () => void) => ReactNo
       <AlertDialog open={unsent > 0} onOpenChange={(open) => !open && setUnsent(0)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Sign out and lose unsent records?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {unsent === 1 ? 'One record' : `${unsent} records`} did not reach the engine. Signing
-              out now deletes {unsent === 1 ? 'it' : 'them'} from this browser.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{SIGN_OUT_TITLE}</AlertDialogTitle>
+            <AlertDialogDescription>{signOutWarning(unsent, 'browser')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Stay signed in</AlertDialogCancel>
+            <AlertDialogCancel>{STAY_SIGNED_IN}</AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={() => void leave(true)}>
               <LogOut />
-              Sign out
+              {SIGN_OUT}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

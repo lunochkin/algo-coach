@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { Button, Dialog, Portal, Text } from 'react-native-paper';
 
+import { SIGN_OUT, SIGN_OUT_TITLE, signOutWarning, STAY_SIGNED_IN } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 
 /**
@@ -28,15 +29,13 @@ export function useSignOut(): { start: () => void; signing: boolean; dialog: Rea
   const dialog = (
     <Portal>
       <Dialog visible={unsent > 0} onDismiss={() => setUnsent(0)}>
-        <Dialog.Title>Sign out and lose unsent records?</Dialog.Title>
+        <Dialog.Title>{SIGN_OUT_TITLE}</Dialog.Title>
         <Dialog.Content>
-          <Text variant="bodyMedium">
-            {`${unsent} ${unsent === 1 ? 'record has' : 'records have'} not reached the engine, and signing out deletes this device's copy. Stay signed in and sync later to keep them.`}
-          </Text>
+          <Text variant="bodyMedium">{signOutWarning(unsent, 'phone')}</Text>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={() => setUnsent(0)}>Stay signed in</Button>
-          <Button onPress={() => void run(true)}>Sign out</Button>
+          <Button onPress={() => setUnsent(0)}>{STAY_SIGNED_IN}</Button>
+          <Button onPress={() => void run(true)}>{SIGN_OUT}</Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>

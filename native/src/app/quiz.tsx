@@ -42,6 +42,33 @@ import {
   verdictView,
   youLine,
   yourAnswer,
+  ASK_ANSWER,
+  ASK_GUESSING,
+  ASK_NEXT,
+  ASK_REVEAL,
+  ASK_SAID_ELSE,
+  ASK_SAID_TRAP,
+  ASK_TICK_RECALLED,
+  ASK_TRAPS,
+  askChoose,
+  askSubmit,
+  detailAccepted,
+  DETAIL_NONE,
+  DETAIL_YOU,
+  DETAIL_YOUR_ANSWER,
+  DETAIL_YOURS,
+  detailsToggle,
+  EXAM_DONE,
+  examReviewMissed,
+  examReviewNext,
+  LESSON_STOP_KICKER,
+  LESSON_STOP_LATER,
+  LESSON_STOP_READ,
+  QUEUE_ANSWERED,
+  QUEUE_DONE,
+  QUEUE_RAISE,
+  QUEUE_STOP,
+  queueLeft,
 } from '@algo-coach/core';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
@@ -67,7 +94,7 @@ function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number
     <View style={{ flex: 1 }}>
       <View style={[styles.page, { flex: 1, justifyContent: 'center' }]}>
         <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
-          New lesson
+          {LESSON_STOP_KICKER}
         </Text>
         <Text variant="headlineSmall">{item.lesson.title}</Text>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -77,15 +104,15 @@ function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number
       <BottomBar bottom={bottom} row>
         {read ? (
           <Button mode="contained" style={{ flex: 1 }} onPress={onNext}>
-            Next
+            {ASK_NEXT}
           </Button>
         ) : (
           <>
             <Button mode="text" onPress={onNext}>
-              Later
+              {LESSON_STOP_LATER}
             </Button>
             <Button mode="contained" icon="book-open-variant" style={{ flex: 1 }} onPress={open}>
-              Read
+              {LESSON_STOP_READ}
             </Button>
           </>
         )}
@@ -191,8 +218,8 @@ function QueueQuiz({ s }: { s: QueueSession }) {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
-        <Appbar.Action icon="close" onPress={quit} accessibilityLabel="Stop" />
-        <Appbar.Content title={done ? 'Done' : queueTitle(s.mode)} />
+        <Appbar.Action icon="close" onPress={quit} accessibilityLabel={QUEUE_STOP} />
+        <Appbar.Content title={done ? QUEUE_DONE : queueTitle(s.mode)} />
         <Text variant="labelLarge" style={{ marginRight: 16 }}>{`${score}/${rs.length}`}</Text>
       </Appbar.Header>
       <View style={[styles.row, { paddingHorizontal: 16, minHeight: 40 }]}>
@@ -201,7 +228,7 @@ function QueueQuiz({ s }: { s: QueueSession }) {
         </Text>
         {offersRaise(s.mode, newLeft, unseenLeft) ? (
           <Button compact mode="text" onPress={moreNew} accessibilityLabel={`Allow ${NEW_STEP} more new questions`}>
-            {`+${NEW_STEP} new`}
+            {QUEUE_RAISE}
           </Button>
         ) : null}
       </View>
@@ -224,14 +251,14 @@ function QueueQuiz({ s }: { s: QueueSession }) {
           <View style={{ alignItems: 'center', paddingVertical: 24, gap: 4 }}>
             <Text variant="titleMedium">{summary.title}</Text>
             <Text variant="displayMedium">{`${rs.length}`}</Text>
-            <Text variant="bodyMedium">answered</Text>
+            <Text variant="bodyMedium">{QUEUE_ANSWERED}</Text>
           </View>
           <Text variant="bodyLarge">{summary.line}</Text>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            {`Left: ${left}`}
+            {queueLeft(left)}
           </Text>
           <Button mode="contained" onPress={() => router.back()} style={{ marginTop: 16 }}>
-            Done
+            {QUEUE_DONE}
           </Button>
         </ScrollView>
       )}
@@ -308,7 +335,7 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
-        <Appbar.Action icon="close" onPress={quit} accessibilityLabel="Quit exam" />
+        <Appbar.Action icon="close" onPress={quit} accessibilityLabel={QUEUE_STOP} />
         <Appbar.Content title={title} />
         {phase !== 'ask' ? (
           <Text variant="labelLarge" style={{ marginRight: 16 }}>{`${score}/${rs.length}`}</Text>
@@ -356,11 +383,11 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
                 setReviewAt(0);
                 setPhase('review');
               }}>
-              {`Review missed (${missed.length})`}
+              {examReviewMissed(missed.length)}
             </Button>
           ) : null}
           <Button mode="contained" onPress={() => router.back()} style={{ marginTop: 8 }}>
-            Done
+            {EXAM_DONE}
           </Button>
         </ScrollView>
       )}
@@ -398,7 +425,7 @@ function Choices(props: {
     <>
       {multi ? (
         <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
-          {`Choose ${q.answer.length}`}
+          {askChoose(q.answer.length)}
         </Text>
       ) : null}
       {order.map((i, pos) => {
@@ -494,7 +521,7 @@ function Ask(props: {
         {q.format === 'short' ? (
           <TextInput
             mode="outlined"
-            label="Answer"
+            label={ASK_ANSWER}
             value={text}
             onChangeText={setText}
             editable={!result}
@@ -509,13 +536,13 @@ function Ask(props: {
           <View style={styles.row}>
             <Switch value={guessing} onValueChange={setGuessing} />
             <Text variant="bodyMedium" onPress={() => setGuessing(!guessing)}>
-              {"I'm guessing"}
+              {ASK_GUESSING}
             </Text>
           </View>
         ) : null}
         {q.format === 'card' && revealed ? (
           <View style={{ gap: 4 }}>
-            <Text variant="titleSmall">Tick the points you recalled</Text>
+            <Text variant="titleSmall">{ASK_TICK_RECALLED}</Text>
             {q.key.map((point, i) => (
               <Tick
                 key={i}
@@ -528,13 +555,13 @@ function Ask(props: {
             {q.traps.length ? (
               <>
                 <Text variant="titleSmall" style={{ marginTop: 8 }}>
-                  Common wrong answers
+                  {ASK_TRAPS}
                 </Text>
                 {q.traps.map((trap, i) => (
                   <Tick
                     key={i}
                     label={block(trap)}
-                    hint="I said this"
+                    hint={ASK_SAID_TRAP}
                     on={fell.has(i)}
                     disabled={!!result}
                     onPress={() => setFell(flip(fell, i))}
@@ -543,7 +570,7 @@ function Ask(props: {
               </>
             ) : null}
             <Tick
-              label="I also said something else wrong"
+              label={ASK_SAID_ELSE}
               on={wrong}
               disabled={!!result}
               onPress={() => setWrong(!wrong)}
@@ -557,7 +584,7 @@ function Ask(props: {
       <BottomBar bottom={bottom} row>
         {result ? (
           <Button mode="contained" style={{ flex: 1 }} onPress={onNext}>
-            {last ? 'Finish' : 'Next'}
+            {last ? 'Finish' : ASK_NEXT}
           </Button>
         ) : q.format === 'card' ? (
           revealed ? (
@@ -570,12 +597,12 @@ function Ask(props: {
             </Button>
           ) : (
             <Button mode="contained" style={{ flex: 1 }} onPress={() => setRevealed(true)}>
-              Reveal
+              {ASK_REVEAL}
             </Button>
           )
         ) : (
           <Button mode="contained" style={{ flex: 1 }} disabled={!canSubmit} onPress={submit}>
-            {exam ? (last ? 'Submit and finish' : 'Next') : 'Submit'}
+            {askSubmit(exam, last)}
           </Button>
         )}
       </BottomBar>
@@ -601,7 +628,7 @@ function Reviewed({ r, bottom, last, onNext }: { r: Result; bottom: number; last
       </ScrollView>
       <BottomBar bottom={bottom} row>
         <Button mode="contained" style={{ flex: 1 }} onPress={onNext}>
-          {last ? 'Back to results' : 'Next missed'}
+          {examReviewNext(last)}
         </Button>
       </BottomBar>
     </View>
@@ -640,7 +667,7 @@ function DetailsToggle({ r, open, onToggle }: { r: Result; open: boolean; onTogg
         icon={open ? 'chevron-up' : 'chevron-down'}
         onPress={onToggle}
         style={{ alignSelf: 'flex-start' }}>
-        Details
+        {detailsToggle(open)}
       </Button>
       {open ? <Details r={r} /> : null}
     </>
@@ -672,7 +699,7 @@ function Row({ row }: { row: AnswerRow }) {
       <Text variant="bodyMedium" selectable>
         <Text style={{ color: row.ok ? theme.colors.primary : theme.colors.error }}>{`${row.mark} `}</Text>
         {row.label}
-        {row.yours ? <Text style={{ color: theme.colors.tertiary }}>{'  ← you'}</Text> : null}
+        {row.yours ? <Text style={{ color: theme.colors.tertiary }}>{DETAIL_YOURS}</Text> : null}
       </Text>
       {row.note ? (
         <Text variant="bodySmall" selectable style={{ color: theme.colors.onSurfaceVariant, marginLeft: 18 }}>
@@ -693,13 +720,13 @@ function Details({ r }: { r: Result }) {
   return (
     <View style={{ gap: 12 }}>
       {answer ? (
-        <Section title="Your answer">
+        <Section title={DETAIL_YOUR_ANSWER}>
           {answer.kind === 'rows' ? (
             answer.rows.map((row) => <Row key={row.key} row={row} />)
           ) : (
             <Text variant="bodyMedium" selectable>
-              {`You: ${answer.you}`}
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>{`  ·  accepted: ${answer.accepted}`}</Text>
+              {`${DETAIL_YOU} ${answer.you}`}
+              <Text style={{ color: theme.colors.onSurfaceVariant }}>{detailAccepted(answer.accepted)}</Text>
             </Text>
           )}
         </Section>
@@ -723,7 +750,7 @@ function Details({ r }: { r: Result }) {
       ))}
       {!answer && !sections.length ? (
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          (no detail for this question yet)
+          {DETAIL_NONE}
         </Text>
       ) : null}
       {taughtBy(q, course).map((x) => (
