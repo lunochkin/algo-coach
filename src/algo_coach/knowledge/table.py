@@ -64,6 +64,7 @@ subtopics = Table(
     Column("slug", Text, nullable=False),
     Column("retired_at", timestamp()),
     Column("position", Integer, nullable=False),
+    Column("title", Text),
     UniqueConstraint("topic_id", "slug"),
     CheckConstraint(f"slug ~ {SLUG}", name="slug_spelled"),
 )

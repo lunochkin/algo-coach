@@ -4,14 +4,16 @@ import { View } from 'react-native';
 import { Chip, IconButton, Text, TouchableRipple, useTheme } from 'react-native-paper';
 
 import {
+  type Board,
+  type CertRecord,
   certStates,
+  type Focus,
   focusScope,
   levelName,
   NEW_STEP,
-  type Board,
-  type CertRecord,
-  type Focus,
   type Queue,
+  subTitle,
+  topicTitle,
 } from '@/core';
 
 import { STATE_LABEL } from './certs';
@@ -61,7 +63,9 @@ export function FocusCard(props: Props) {
       due: queue.reviews(b, now).length,
       learning: queue.stepping(b, now).count,
       newLeft: queue.newLeft(b, now),
-      next: next && { label: `${next.sub} · ${levelName(b.rules, next.level)}`, passed: b.nPassed(next), of: b.groupQuestions(next).length },
+      next: next && {
+        // a topic focus names its topic already
+        label: `${focus.topic ? '' : `${topicTitle(c, next.topic)} › `}${subTitle(c, next.sub)} · ${levelName(b.rules, next.level)}`, passed: b.nPassed(next), of: b.groupQuestions(next).length },
       cert,
     };
   }, [b, focus, queue, props.exams]);

@@ -5,7 +5,14 @@ import { Pressable, ScrollView, SectionList, View } from 'react-native';
 import { Appbar, Card, Chip, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { levelName, minutesOf, type Board, type Course, type Lesson } from '@/core';
+import {
+  type Board,
+  type Course,
+  type Lesson,
+  levelName,
+  minutesOf,
+  subTitle,
+} from '@/core';
 import { bySavedOrder } from '@/lib/order';
 import { useStore } from '@/lib/store';
 import { styles } from '@/ui/common';
@@ -116,7 +123,7 @@ const LessonCard = memo(function LessonCard({ x, c, b }: { x: Lesson; c: Course;
   const state = b.lessonState(c, x);
   const body = c.lessonBodies[x.slug] ?? '';
   const [sub, level] = x.teaches[0] ?? ['', 0];
-  const teaches = `Teaches ${sub} · ${levelName(b.rules, level)}${x.teaches.length > 1 ? ` +${x.teaches.length - 1}` : ''}`;
+  const teaches = `Teaches ${subTitle(c, sub)} · ${levelName(b.rules, level)}${x.teaches.length > 1 ? ` +${x.teaches.length - 1}` : ''}`;
   const status =
     state === 'done'
       ? 'Read'

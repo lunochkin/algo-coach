@@ -10,6 +10,7 @@ export interface TopicDef {
   tier: number;
   title: string;
   subs: string[];
+  sub_titles?: Record<string, string>; // a subtopic's title, where the module gives one
 }
 
 export interface CourseDef {
@@ -95,6 +96,7 @@ export interface Topic {
   tier: number;
   title: string;
   subs: string[];
+  subTitles: Record<string, string>;
 }
 
 export interface Course {

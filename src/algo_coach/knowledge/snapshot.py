@@ -42,7 +42,12 @@ def snapshot(root: Database) -> dict[str, Any]:
 
 def _course(conn: Connection, module: dict[str, Any]) -> dict[str, Any]:
     tree = conn.execute(
-        select(topics, subtopics.c.id.label("sub_id"), subtopics.c.slug.label("sub"))
+        select(
+            topics,
+            subtopics.c.id.label("sub_id"),
+            subtopics.c.slug.label("sub"),
+            subtopics.c.title.label("sub_title"),
+        )
         .join(subtopics, subtopics.c.topic_id == topics.c.id)
         .where(topics.c.module_id == module["id"], topics.c.retired_at.is_(None))
         .where(subtopics.c.retired_at.is_(None))
@@ -56,6 +61,9 @@ def _course(conn: Connection, module: dict[str, Any]) -> dict[str, Any]:
             {"slug": row["slug"], "tier": row["tier"], "title": row["title"], "subs": []},
         )
         topic["subs"].append(row["sub"])
+        if row["sub_title"] is not None:
+            # absent without a title, so an untitled module equals learn's
+            topic.setdefault("sub_titles", {})[row["sub"]] = row["sub_title"]
         where[row["sub_id"]] = (row["slug"], row["sub"])
     course: dict[str, Any] = {
         "slug": module["slug"],

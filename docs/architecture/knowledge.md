@@ -16,6 +16,13 @@ A module is one subject: Python first, then algorithms and system design.
 - **A module holds topics, and a topic holds subtopics.** A topic carries a
   tier, which orders the listing and gates nothing. A subtopic belongs to one
   topic, and its questions are listed in the order it names them.
+- **A subtopic may carry a title**, given by its topic, and the app shows the
+  title in place of the slug. A subtopic with no title shows its slug, so a
+  module authored without titles still reads.
+- **A subtopic is shown with its topic's title**, except where its topic
+  already heads the view. Two topics can each hold a subtopic called basics.
+- **Titles are in sentence case**, as lesson and topic titles are: the first
+  word and proper nouns alone are capitalized.
 - **Every question sits at one of four ranks**: 0 Foundation, 1 Associate,
   2 Professional and 3 Expert. A rank measures the depth of a question. A
   problem's difficulty is a different field, on a different record.

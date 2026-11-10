@@ -88,7 +88,7 @@ export function loadSnapshot(snap: Snapshot): Catalog {
       // Array.prototype.sort is stable, so equal tiers keep their listed order.
       const topics = [...d.topic]
         .sort((a, b) => a.tier - b.tier)
-        .map((t) => ({ slug: t.slug, tier: t.tier, title: t.title, subs: [...t.subs] }));
+        .map((t) => ({ slug: t.slug, tier: t.tier, title: t.title, subs: [...t.subs], subTitles: { ...t.sub_titles } }));
       const course: Course = {
         slug: c.slug,
         title: d.title,
@@ -213,4 +213,15 @@ export function visibleCatalog(cat: Catalog): Catalog {
 /** Certificate exam results (learner state), sorted by time. */
 export function withCertExams(cat: Catalog, records: CertRecord[]): Catalog {
   return { ...cat, certExams: [...records].sort((a, b) => cmp(a.t, b.t)) };
+}
+
+/** A subtopic's title, or its slug where the module gives none. */
+export function subTitle(c: Course | undefined, sub: string): string {
+  for (const t of c?.topics ?? []) if (sub in t.subTitles) return t.subTitles[sub];
+  return sub;
+}
+
+/** A topic's title, or its slug where the module has no such topic. */
+export function topicTitle(c: Course | undefined, topic: string): string {
+  return c?.topics.find((t) => t.slug === topic)?.title ?? topic;
 }

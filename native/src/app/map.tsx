@@ -13,15 +13,17 @@ import { cancelAnimation, useSharedValue, withDecay } from 'react-native-reanima
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
+  type Board,
   certStates,
-  layoutClusters,
   type CertStatus,
+  type Course,
+  layoutClusters,
   levelName,
   levels,
   lineage,
+  subTitle,
+  topicTitle,
   unlocksLabel,
-  type Board,
-  type Course,
 } from '@/core';
 import { bySavedOrder } from '@/lib/order';
 import { useStore } from '@/lib/store';
@@ -403,7 +405,7 @@ function NodePanel(props: { c: Course; b: Board; sub: string; topic: string; bot
     .map(([to, t]) => `${to} (${t})`);
   return (
     <Card mode="elevated" style={{ margin: 12, marginBottom: bottom + 12 }}>
-      <Card.Title title={sub} subtitle={topic} />
+      <Card.Title title={subTitle(c, sub)} subtitle={topicTitle(c, topic)} />
       <Card.Content style={{ gap: 2 }}>
         {levels(b.rules).map((level) => {
           const g = { course: c.slug, topic, sub, level };

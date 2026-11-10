@@ -26,6 +26,18 @@
       "title": "Slug",
       "type": "string"
     },
+    "title": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Title"
+    },
     "topic_id": {
       "title": "Topic Id",
       "type": "string"

@@ -8,29 +8,31 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   answerKey,
+  type AttemptRecord,
   block,
   Board,
-  isLessonItem,
-  type LessonItem,
-  type Status,
   byTopic,
-  NEW_STEP,
-  type AttemptRecord,
   cardFields,
+  type CardFields,
   cardLabel,
   choiceOrder,
+  type Grade,
   gradeChoice,
   hasAnswer,
-  isoNow,
   headings,
-  levelName,
+  isLessonItem,
+  isoNow,
+  type LessonItem,
   LETTERS,
+  levelName,
   makeAttempt,
   matchShort,
-  splitGuess,
-  type CardFields,
-  type Grade,
+  NEW_STEP,
   type Question,
+  splitGuess,
+  type Status,
+  subTitle,
+  topicTitle,
 } from '@/core';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
@@ -388,12 +390,15 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
 
 function Head({ q, tag }: { q: Question; tag: string }) {
   const theme = useTheme();
-  const rules = useStore().catalog?.rules;
+  const catalog = useStore().catalog;
+  const rules = catalog?.rules;
   const level = rules ? levelName(rules, q.level) : `L${q.level}`;
+  const course = catalog?.courses.find((c) => c.slug === q.course);
+  const where = `${topicTitle(course, q.topic)} › ${subTitle(course, q.sub)}`;
   return (
     <>
       <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-        {`${q.course}/${q.topic}/${q.sub} · ${level} · ${q.kind}${tag ? ` · ${tag}` : ''}`}
+        {`${where} · ${level} · ${q.kind}${tag ? ` · ${tag}` : ''}`}
       </Text>
       <Text variant="titleMedium" selectable>
         {block(q.prompt)}

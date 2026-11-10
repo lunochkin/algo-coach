@@ -265,3 +265,31 @@ def test_certification_settings_seed_as_authored(database, tmp_path):
         "defaults": {"exam": {"size": 20, "pass": 0.8}},
         "scope": {"all": {"exam": {"size": 40}}},
     }
+
+
+TITLED = COURSE.replace(
+    'subs = ["types", "flow"]\n',
+    'subs = ["types", "flow"]\nsub_titles = { types = "Mutability and identity" }\n',
+)
+
+
+def titled(tmp_path: Path, course: str = TITLED) -> Path:
+    base = authored(tmp_path)
+    (base / "course.toml").write_text(course)
+    return base
+
+
+def test_a_subtopic_seeds_with_the_title_its_topic_gives(database, tmp_path):
+    seed_module(read_module(titled(tmp_path)), root=database)
+
+    stored = {row["slug"]: row["title"] for row in rows(database, subtopics)}
+    assert stored == {"types": "Mutability and identity", "flow": None}
+
+
+def test_a_title_for_a_subtopic_the_topic_does_not_list_is_refused(tmp_path):
+    stray = TITLED.replace("types = ", "nowhere = ")
+
+    assert any(
+        "sub_titles names 'nowhere'" in one
+        for one in refusals(read_module(titled(tmp_path, stray)))
+    )

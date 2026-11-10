@@ -19,7 +19,7 @@ import { Platform, StyleSheet } from 'react-native';
 import { useTheme, type MD3Theme } from 'react-native-paper';
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 
-import type { Board, ClusterBox, Course, MapEdge } from '@/core';
+import { subTitle, type Board, type ClusterBox, type Course, type MapEdge } from '@/core';
 
 import { tones } from './common';
 
@@ -153,6 +153,7 @@ export function MapCanvas(props: Props) {
               key={n.sub}
               theme={theme}
               n={n}
+              title={subTitle(props.c, n.sub)}
               picked={sel}
               opacity={opacity}
               dots={props.dots.get(n.sub) ?? []}
@@ -168,6 +169,7 @@ export function MapCanvas(props: Props) {
 const QuizNode = memo(function QuizNode(props: {
   theme: MD3Theme;
   n: Placed;
+  title: string;
   picked: boolean;
   opacity: number;
   dots: (string | null)[];
@@ -187,7 +189,7 @@ const QuizNode = memo(function QuizNode(props: {
         strokeWidth={picked ? 2 : 1}
         color={picked ? theme.colors.primary : theme.colors.outlineVariant}
       />
-      <SkText x={n.x + 12} y={n.y + 22} text={cut(n.sub, 21)} font={font(13)} color={theme.colors.onSurface} />
+      <SkText x={n.x + 12} y={n.y + 22} text={cut(props.title, 21)} font={font(13)} color={theme.colors.onSurface} />
       {props.entry ? (
         // Entry mark: this subtopic also needs subtopics of other topics (through the certificate edge).
         <Path

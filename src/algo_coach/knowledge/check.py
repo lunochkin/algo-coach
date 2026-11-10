@@ -4,7 +4,7 @@ ignores a graph that fails its own check, as `knowledge.md` gives."""
 
 import re
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, cast
 
 from pydantic import ValidationError
 
@@ -25,7 +25,7 @@ HEADING = re.compile(r"#{2,3}\s+(.+?)\s*#*\s*$")
 
 
 def refusals(source: ModuleSource) -> list[str]:
-    found = list(source.unread) + _settings(source)
+    found = list(source.unread) + _settings(source) + _sub_titles(source)
     course = source.course
     kinds, code_kinds = course.get("kinds", []), course.get("code_kinds", [])
     with_lessons = bool((source.graph or {}).get("lesson"))
@@ -159,3 +159,21 @@ def _cycle(edges: list[tuple[str, str, int]]) -> list[str] | None:
         if state.get(node) is None and (closed := visit(node, [node])):
             return closed
     return None
+
+
+def _sub_titles(source: ModuleSource) -> list[str]:
+    """A topic's `sub_titles`: a title per subtopic the topic lists, and nothing
+    else."""
+    found: list[str] = []
+    for topic in source.course.get("topic", []):
+        named = f"topic {topic.get('slug')}"
+        titles = topic.get("sub_titles", {})
+        if not isinstance(titles, dict):
+            found.append(f"{named}: sub_titles must be a table")
+            continue
+        for slug, title in cast(dict[str, object], titles).items():
+            if slug not in topic.get("subs", []):
+                found.append(f"{named}: sub_titles names {slug!r}, which subs does not list")
+            if not (isinstance(title, str) and title.strip()):
+                found.append(f"{named}: the title of {slug!r} must be non-empty text")
+    return found

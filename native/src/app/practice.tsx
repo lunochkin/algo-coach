@@ -13,7 +13,19 @@ import {
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { drillQueue, levelName, levels, subsByDepth, unlocksLabel, sameFocus, type Board, type Course, type Focus, type Topic } from '@/core';
+import {
+  type Board,
+  type Course,
+  drillQueue,
+  type Focus,
+  levelName,
+  levels,
+  sameFocus,
+  subsByDepth,
+  subTitle,
+  type Topic,
+  unlocksLabel,
+} from '@/core';
 import { bySavedOrder, withFirst } from '@/lib/order';
 import { useStore } from '@/lib/store';
 import { BottomBar, startQueue, styles } from '@/ui/common';
@@ -158,7 +170,7 @@ export default function Practice() {
         ) : null}
         <View style={styles.row}>
           <Text variant="bodyMedium" style={{ flex: 1, color: theme.colors.onSurfaceVariant }}>
-            {topic ? `Selected: ${topic}${sub ? `/${sub}` : ''}` : `Selected: all of ${c?.title ?? ''}`}
+            {topic ? `Selected: ${sub ? subTitle(c, sub) : topic}` : `Selected: all of ${c?.title ?? ''}`}
           </Text>
           {c ? (
             <Button
@@ -314,7 +326,7 @@ function TopicRow(props: {
                 ]}>
                 <View style={{ flex: 1 }}>
                   <Text variant="bodyMedium" numberOfLines={1}>
-                    {s}
+                    {subTitle(c, s)}
                   </Text>
                   {[
                     lv.map((level) => b.needsLabel({ course: c.slug, topic: t.slug, sub: s, level })).find(Boolean),

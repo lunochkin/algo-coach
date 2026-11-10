@@ -91,6 +91,7 @@ class Topic(Seeded):
 class Subtopic(Seeded):
     topic_id: str
     position: int
+    title: str | None = None  # shown in place of the slug, where the topic gives one
 
 
 class Question(Seeded):

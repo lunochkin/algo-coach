@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from helpers import browsing
-from test_seed_knowledge import CHOICE, authored
+from test_seed_knowledge import CHOICE, authored, titled
 
 from algo_coach.api.app import create_app
 from algo_coach.knowledge import read_module, seed_module
@@ -105,3 +105,17 @@ def test_a_seed_changes_the_snapshot_s_tag(database, tmp_path):
 
 def browser_of(database):
     return browsing(database, USER)
+
+
+def test_a_titled_subtopic_reaches_the_app_by_its_title(database, tmp_path):
+    seed_module(read_module(titled(tmp_path)), root=database)
+
+    (course,) = browser_of(database).get("/api/knowledge/snapshot").json()["courses"]
+    assert course["definition"]["topic"][0]["sub_titles"] == {"types": "Mutability and identity"}
+
+
+def test_a_topic_with_no_titles_reads_as_learn_wrote_it(database, tmp_path):
+    """The key is left out, so a module without titles still equals learn's."""
+    (course,) = snapshot(database, tmp_path)["courses"]
+
+    assert "sub_titles" not in course["definition"]["topic"][0]

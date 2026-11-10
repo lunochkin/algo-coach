@@ -87,8 +87,10 @@ def _topics(
         topic_id = _put(conn, topics, held.pop(topic["slug"], None), values)
         within = subtopics.c.topic_id == topic_id
         held_subs = {row["slug"]: row["id"] for row in _rows(conn, subtopics, within)}
+        titles = topic.get("sub_titles", {})
         for at, slug in enumerate(topic["subs"]):
             values = {"topic_id": topic_id, "slug": slug, "retired_at": None, "position": at}
+            values["title"] = titles.get(slug)
             subs[slug] = _put(conn, subtopics, held_subs.pop(slug, None), values)
         result.subtopics += len(topic["subs"])
         result.retired += _retire(conn, subtopics, held_subs.values())

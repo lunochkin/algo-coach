@@ -4,7 +4,17 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { Appbar, Button, Card, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { levelName, levels, newToday, subsByDepth, summary, type Board, type Course } from '@/core';
+import {
+  type Board,
+  type Course,
+  levelName,
+  levels,
+  newToday,
+  subsByDepth,
+  subTitle,
+  summary,
+  topicTitle,
+} from '@/core';
 import { useStore } from '@/lib/store';
 import { styles, tones } from '@/ui/common';
 
@@ -158,7 +168,7 @@ function CourseCard({ b, c }: { b: Board; c: Course }) {
         ))}
         {front ? (
           <Text variant="bodyMedium">
-            {`Frontier: ${front.topic}/${front.sub} · ${levelName(b.rules, front.level)}`}
+            {`Next up: ${topicTitle(c, front.topic)} › ${subTitle(c, front.sub)} · ${levelName(b.rules, front.level)}`}
           </Text>
         ) : null}
       </Card.Content>

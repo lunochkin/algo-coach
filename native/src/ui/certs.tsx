@@ -3,7 +3,16 @@ import { ScrollView, View } from 'react-native';
 import { Button, Dialog, Portal, Text, useTheme, type MD3Theme } from 'react-native-paper';
 import Svg, { Circle } from 'react-native-svg';
 
-import { certQuestions, levelName, shuffle, type Board, type CertState, type CertStatus, type Course } from '@/core';
+import {
+  type Board,
+  certQuestions,
+  type CertState,
+  type CertStatus,
+  type Course,
+  levelName,
+  shuffle,
+  subTitle,
+} from '@/core';
 import { useStore } from '@/lib/store';
 import { startExam, styles, tones } from './common';
 
@@ -139,7 +148,7 @@ export function CertSheet(props: {
             ) : null}
             {status.short.map((g) => (
               <View key={g.sub} style={styles.row}>
-                <Text variant="bodyMedium" style={{ flex: 1 }}>{`${g.sub}: ${g.passed}/${g.total}`}</Text>
+                <Text variant="bodyMedium" style={{ flex: 1 }}>{`${subTitle(c, g.sub)}: ${g.passed}/${g.total}`}</Text>
                 <Button
                   compact
                   onPress={() => {

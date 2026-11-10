@@ -11,18 +11,20 @@ import ReorderableList, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  certStates,
   type Board,
-  NEW_STEP,
+  certStates,
+  type Course,
   drillQueue,
-  minutesOf,
   focusLabel,
   focusQueue,
+  type Group,
+  minutesOf,
+  NEW_STEP,
   nextQueue,
   outsideFocus,
   reviewQueue,
-  type Course,
-  type Group,
+  subTitle,
+  topicTitle,
 } from '@/core';
 import { bySavedOrder } from '@/lib/order';
 import { APP_NAME } from '@/lib/name';
@@ -505,7 +507,7 @@ function CourseCard({
             accessibilityLabel={
               next.lesson
                 ? `Next up: read the lesson ${next.lesson.title}`
-                : `Next up: practise ${next.group.topic} ${next.group.sub} ${levels[next.group.level] ?? ''}`
+                : `Next up: practise ${subTitle(c, next.group.sub)} ${levels[next.group.level] ?? ''}`
             }
             style={{ minHeight: 48, justifyContent: 'center', borderRadius: 8, marginHorizontal: -8, paddingHorizontal: 8 }}>
             <View style={styles.row}>
@@ -513,10 +515,10 @@ function CourseCard({
                 <Text variant="bodyMedium" style={{ color: theme.colors.primary }}>
                   {next.lesson
                     ? `Next up: read “${next.lesson.title}”`
-                    : `Next up: ${next.group.topic}/${next.group.sub} · ${levels[next.group.level] ?? `L${next.group.level}`}`}
+                    : `Next up: ${subTitle(c, next.group.sub)} · ${levels[next.group.level] ?? `L${next.group.level}`}`}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                  {`${next.passed}/${next.of} passed${open > 1 ? ` · ${open - 1} more open` : ''}`}
+                  {`${topicTitle(c, next.group.topic)} · ${next.passed}/${next.of} passed${open > 1 ? ` · ${open - 1} more open` : ''}`}
                 </Text>
               </View>
               <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
