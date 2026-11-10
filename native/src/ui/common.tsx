@@ -8,9 +8,10 @@ import {
   block,
   type ExamPlan,
   type Queue,
+  syncErrorSummary,
+  syncLine,
 } from '@algo-coach/core';
 import type { ExamSession, QueueSession, Session, SyncState } from '@/lib/store';
-import { syncErrorSummary } from '@/lib/syncError';
 
 /** Monospace, horizontally scrollable, never wrapped. `verbatim` keeps leading spaces (diagrams). */
 export function CodeBlock({ code, verbatim = false }: { code: string; verbatim?: boolean }) {
@@ -28,13 +29,6 @@ export function CodeBlock({ code, verbatim = false }: { code: string; verbatim?:
   );
 }
 
-export function ago(iso: string, now = Date.now()): string {
-  const s = Math.max(0, Math.round((now - Date.parse(iso)) / 1000));
-  if (s < 60) return 'just now';
-  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
-  return `${Math.floor(s / 86400)} d ago`;
-}
 
 /** Sync error shown where it can be read: top of the screen, tap for the full message. */
 export function SyncBanner({ sync }: { sync: SyncState }) {
@@ -67,11 +61,7 @@ export function SyncBanner({ sync }: { sync: SyncState }) {
 
 export function SyncLine({ sync, showError = true }: { sync: SyncState; showError?: boolean }) {
   const theme = useTheme();
-  const text = sync.running
-    ? 'Syncing…'
-    : sync.lastAt
-      ? `Synced ${ago(sync.lastAt)}`
-      : 'Not synced yet';
+  const text = syncLine(sync, Date.now());
   return (
     <View>
       <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>

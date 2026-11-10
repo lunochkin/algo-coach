@@ -16,7 +16,7 @@ export function KnowledgeProvider({ children }: { children: ReactNode }) {
   const [text, setText] = useState<string | undefined>()
   const [records, setRecords] = useState<Held[]>([])
   const [outbox, setOutbox] = useState(0)
-  const [sync, setSync] = useState<SyncState>({ running: false, error: null })
+  const [sync, setSync] = useState<SyncState>({ running: false, error: null, lastAt: null })
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const running = useRef<Promise<void> | null>(null)
   const again = useRef(false)
@@ -39,14 +39,14 @@ export function KnowledgeProvider({ children }: { children: ReactNode }) {
     running.current = (async () => {
       do {
         again.current = false
-        setSync({ running: true, error: null })
+        setSync((x) => ({ ...x, running: true, error: null }))
         try {
           const synced = await one.sync()
-          setSync({ running: false, error: null })
+          setSync({ running: false, error: null, lastAt: new Date().toISOString() })
           if (synced.contentChanged || synced.logChanged) await reread(one)
           else setOutbox(await one.outbox())
         } catch (error) {
-          setSync({ running: false, error: String(error) })
+          setSync((x) => ({ ...x, running: false, error: String(error) }))
           setFailedAt(Date.now())
           again.current = false
         }
@@ -85,6 +85,8 @@ export function KnowledgeProvider({ children }: { children: ReactNode }) {
       const one = await Copy.open(data.user_id, engine)
       if (gone) return one.close()
       copy.current = one
+      const lastAt = (await one.lastSync()) ?? null
+      setSync((x) => ({ ...x, lastAt }))
       await reread(one)
       setReady(true)
       schedule(0)

@@ -70,6 +70,11 @@ export class Copy {
     return all.sort((a, b) => a.t.localeCompare(b.t))
   }
 
+  /** When the last sync finished, as the copy kept it between visits. */
+  lastSync(): Promise<string | undefined> {
+    return this.db.get('meta', 'last_sync')
+  }
+
   async outbox(): Promise<number> {
     return this.db.countFromIndex('records', 'pending', 1)
   }
@@ -113,6 +118,7 @@ export class Copy {
       result.logChanged = true
     }
     await tx.objectStore('meta').put(JSON.stringify(answer.cursor), 'cursor')
+    await tx.objectStore('meta').put(new Date().toISOString(), 'last_sync')
     await tx.done
     return result
   }

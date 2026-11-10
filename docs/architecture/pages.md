@@ -386,7 +386,7 @@ what it offers. The inventory is the list both clients build to.
 | A lesson | `/knowledge/lessons/:module/:lesson` | Lesson | same |
 | The certifications | `/knowledge/certifications` | Certifications | same |
 | A certification's conditions | a dialog on the certifications | a sheet on Certifications and Map | same |
-| The settings | `/settings` | Settings | to fix |
+| The settings | `/settings` | Settings | same |
 | The signed-in apps | a dialog from the account menu | none | web only |
 | The login | `/login` | Login | same |
 | The privacy policy | `/privacy` | none | web only |
@@ -409,12 +409,12 @@ what it offers. The inventory is the list both clients build to.
 | Start a filtered queue on a topic or a module | the module page | Module | same |
 | Order the modules | up and down presses | a drag | by platform |
 | Pause, resume or archive a module | the module page | Module | same |
-| Restore an archived module | none | Settings | to fix |
+| Restore an archived module | the settings page | Settings | same |
 | Open a lesson ready to read, or a certification ready for its exam | the home | Home | same |
 | Mark a lesson read or unread | the lesson page | Lesson | same |
 | Set the daily limit and the exam size | the settings page | Settings | same |
 | Set the exam size for one exam | the exam page | Exam | same |
-| Read the sync's state, and sync now | none | Home's footer and Settings | to fix |
+| Read the sync's state, and sync now | the settings page | Settings, and Home's footer | same |
 | Sign out, naming unsent records | the account menu and the settings page | Settings | same |
 | Revoke a signed-in app | the signed-in apps | none | web only |
 | Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
@@ -451,12 +451,8 @@ what it offers. The inventory is the list both clients build to.
 
 ### To fix
 
-`## The structure` settles most of these. Each names what holds now, then
-the change.
-
-- **The settings.** The phone's Settings restores an archived module, names
-  the sync's state and syncs on a press. The web's settings page gains all
-  three.
+No difference is open. A row a later change marks `to fix` is listed here
+with what holds now and the change it needs.
 
 ## A page's areas
 

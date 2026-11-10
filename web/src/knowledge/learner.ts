@@ -50,6 +50,8 @@ export function useLearner() {
   return {
     ready: k.ready,
     catalog,
+    // hidden everywhere but the settings, where they are restored
+    archived: learner?.archived ?? [],
     focus,
     board,
     now,

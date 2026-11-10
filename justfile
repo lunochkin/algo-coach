@@ -224,10 +224,10 @@ android_home := env_var_or_default("ANDROID_HOME", env_var("HOME") / "Library/An
 apk := "native/android/app/build/outputs/apk/release/app-release.apk"
 
 # The shared core's and the app's typechecks and tests. The core's run over the
-# fixtures the Python side generates.
+# fixtures the Python side generates, and the app's rules all live in the core.
 native-test:
     cd packages/core && npx tsc --noEmit && npx vitest run
-    cd native && npx tsc --noEmit && npx vitest run
+    cd native && npx tsc --noEmit && npx vitest run --passWithNoTests
 
 # The release APK (arm64 only), signed with the key in native/signing/, which git ignores.
 native-apk:

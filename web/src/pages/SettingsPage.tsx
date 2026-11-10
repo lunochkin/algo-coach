@@ -1,8 +1,10 @@
-import { LogOut, Smartphone } from 'lucide-react'
+import { ArchiveRestore, LogOut, RefreshCw, Smartphone } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 
 import {
   setting,
+  syncErrorSummary,
+  syncLine,
   SETTING_RANGE,
   validSetting,
   type SettingName,
@@ -21,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { linesOf, loadedFrom, useKnowledge } from '@/knowledge/context'
+import { useLearner } from '@/knowledge/learner'
 
 // the phone's Study settings, read in the phone's order: `pages.md`, Sections
 const STUDY: { name: SettingName; label: string }[] = [
@@ -45,6 +48,63 @@ export function SettingsPage() {
         {/* a value another device set reaches the fields at its sync */}
         {(values) => <Study key={JSON.stringify(values)} stored={values} said={said} onSaid={setSaid} />}
       </Loaded>
+      <Sync />
+      <Archived />
+    </section>
+  )
+}
+
+// the sync's state and a press to sync now, as the phone's Settings holds them
+function Sync() {
+  const k = useKnowledge()
+  const { now } = useLearner()
+  return (
+    <section className="space-y-stack">
+      <Heading>Sync</Heading>
+      <Panel>
+        <div className="flex flex-wrap items-center gap-stack">
+          <div className="flex-1 space-y-0.5">
+            <p>{syncLine(k.sync, now)}</p>
+            {k.outbox > 0 && (
+              <p className="text-meta text-muted-foreground">
+                {k.outbox} {k.outbox === 1 ? 'record waits' : 'records wait'} to be sent
+              </p>
+            )}
+            {k.sync.error && !k.sync.running && (
+              <p className="text-meta text-verdict-wrong" title={k.sync.error}>
+                {syncErrorSummary(k.sync.error)}
+              </p>
+            )}
+          </div>
+          <Button variant="outline" disabled={k.sync.running} onClick={() => void k.resync()}>
+            <RefreshCw />
+            Sync now
+          </Button>
+        </div>
+      </Panel>
+    </section>
+  )
+}
+
+// an archived module leaves every page but this one, and restoring it loses nothing
+function Archived() {
+  const k = useKnowledge()
+  const { archived } = useLearner()
+  if (!archived.length) return null
+  return (
+    <section className="space-y-stack">
+      <Heading>Archived modules</Heading>
+      <ul className="divide-y rounded-xl border bg-card">
+        {archived.map((c) => (
+          <li key={c.slug} className="flex items-center gap-stack px-4 py-3">
+            <span className="flex-1">{c.title}</span>
+            <Button variant="outline" size="sm" onClick={() => void k.add('status', { course: c.slug, status: 'active' })}>
+              <ArchiveRestore />
+              Restore
+            </Button>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }

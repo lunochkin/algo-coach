@@ -5,6 +5,7 @@ import type { Held, Line } from '@/knowledge/copy'
 export interface SyncState {
   running: boolean
   error: string | null
+  lastAt: string | null // when the last sync finished
 }
 
 export interface Knowledge {
