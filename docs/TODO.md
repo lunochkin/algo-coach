@@ -76,15 +76,56 @@ learn's app does, so the switch changes the backend and nothing the user sees.
 
 ### The engine on the server
 
-- [ ] Port learn's engine into `algo_coach.knowledge`, split along its seams,
-      with the shared fixtures passing against it. The mastery formula and the
-      scheduler read the schedule on the server
+- [ ] Port FSRS replay, the question states and gating into
+      `algo_coach.knowledge`, with the shared fixtures passing against it. The
+      mastery formula and the scheduler read them on the server, and the
+      queues stay in TypeScript
 
 ### Exit
 - [ ] Practise a week in the algo-coach app alone, with learn frozen and its
       history imported
 
-## Phase 15 — scheduling and mastery
+## Phase 15 — two platforms
+
+The web and the native app become two ways into one learner model. The
+knowledge rules and what the screens show move into one TypeScript package
+both apps import, and each app keeps a look of its own. Decided 2026-11-10.
+
+### The shared core
+
+- [ ] Move `native/src/core` into `packages/core` behind npm workspaces, with
+      the app importing it and its tests passing. Nothing in it names React
+      Native or Expo already
+- [ ] Move the OpenAPI-generated types into `packages/core`, and type the
+      app's sync against them. The app writes its sync shapes by hand today
+- [ ] Move what the screens compute for display into `packages/core` as
+      tested presentation functions: the module card, the queue header, the
+      empty Continue. Two screens assembling one label drift apart unnoticed
+
+### The knowledge module on the web
+
+- [ ] Write the web's knowledge store into `knowledge.md`: the snapshot and
+      the user's log fetched per visit, each answer posted as given, and a
+      `localStorage` outbox for a dropped connection
+- [ ] Add a section for the knowledge modules to the web's navigation, and
+      write its pages into `pages.md` and `wireframes.md`
+- [ ] Serve the next queue, the review queue and practice on the web from
+      `packages/core`
+- [ ] Serve lessons, focus, certifications and exams on the web
+
+### The engine on the phone
+
+- [ ] Write the native app's screens into `pages.md` as a section of their
+      own, beside the web's
+- [ ] Add tabs to the native app, once it holds more than the knowledge
+      modules
+- [ ] Serve the board and the cards in the native app
+
+### Exit
+- [ ] Practise questions on the web and the phone against one log, with both
+      showing the same state
+
+## Phase 16 — scheduling and mastery
 
 - [x] Write into `docs/architecture/` what a technique's mastery is derived
       from: the attempts, their claims, their verdicts and the drills, with
@@ -174,7 +215,7 @@ the schedule.
 - [ ] Start a sitting from the scheduler's pick on the board, and complete it
       to the claim, with the pick's prediction and its arm stored
 
-## Phase 16 — the matcher, measured
+## Phase 17 — the matcher, measured
 
 The matcher says which templates a generated solution displays, and every
 ladder is built from those matches. No number says how often the matcher is
@@ -246,7 +287,7 @@ returned. Both are read off the sample the hand pass already covers.
 - [ ] The matcher carries a per-template score in both directions, and the
       gate carries a share with the denominator the pass covered
 
-## Phase 17 — the diagnosis, measured
+## Phase 18 — the diagnosis, measured
 
 The machine counterpart of the self-label, and how much the program-analysis
 tools add to it. The mutants make the eval set: a mutant carries its mistake by
@@ -286,7 +327,7 @@ the event that makes the item ready.
 ### The recognition drill
 
 A problem served without its technique, answered in words with no code run.
-Moved out of Phase 15 on 2026-10-02: hiding the technique matters less than
+Moved out of Phase 16 on 2026-10-02: hiding the technique matters less than
 the schedule, and the mastery state reads recognition as unknown until a drill
 feeds it.
 
@@ -306,7 +347,7 @@ feeds it.
 
 ### Scheduling on the diagnosed cause
 
-Waits on the scores Phase 17 produces: a cause nothing measured is a guess the
+Waits on the scores Phase 18 produces: a cause nothing measured is a guess the
 board would act on.
 
 - [ ] Have the pick read the diagnosed cause beside mastery, once the call
@@ -404,15 +445,15 @@ one form its target named.
 - [ ] Write the repair search: a failing attempt and the problem's canonicals
       in, the smallest edit on the parsed tree passing every case out. The
       search returns no edit when none is found within a stated budget.
-      Triggered when Phase 17 scores its first tool
+      Triggered when Phase 18 scores its first tool
 - [ ] Measure the repair by what it adds to the diagnosis call, the same way
-      Phase 17 measures each tool. A tool nobody measured is a guess the call
+      Phase 18 measures each tool. A tool nobody measured is a guess the call
       acts on
 
 ### Technique detection by static analysis
 
 - [ ] Write rules per core template that say from the parsed tree whether a
-      solution displays the template's form. Triggered when Phase 16 names
+      solution displays the template's form. Triggered when Phase 17 names
       templates the matcher reads badly
 - [ ] Compare the rules with the matcher per template on the hand pass, and
       send each pair where the two disagree to adjudication
@@ -449,7 +490,7 @@ one form its target named.
 
 - [ ] Fit a knowledge-tracing model to the log, and score the model on the
       predictions each pick records against FSRS alone and the mastery state.
-      Triggered when Phase 15 has recorded predictions for a few hundred picks
+      Triggered when Phase 16 has recorded predictions for a few hundred picks
 
 ### Forgetting per technique
 
@@ -473,22 +514,31 @@ one form its target named.
       retrieved. Triggered when a flow needs a similar problem that the
       technique alone cannot select
 
-### The app beyond the knowledge module
+### Code on the phone
 
-Phase 14 moves learn's app over with the knowledge modules alone. The rest of
-the engine reaches the app one feature at a time, each once the move has held.
+Reading and writing code in the native app, once Phase 15 has brought the rest
+of the engine there.
 
-- [ ] Choose which of the engine's features the app serves first, and write
-      the choice and its reason into `pages.md`. A sitting needs a keyboard
-      and a wide window, so not every page belongs on a phone. Triggered when
-      Phase 14 exits
+- [ ] Serve code-adjacent practice in the native app: reading code natively,
+      and an editor in a WebView running the web's CodeMirror setup.
+      Triggered when a code-adjacent feature is chosen for the phone
+- [ ] Move the editor's setup into shared code beside `packages/core`: the
+      Python highlighting and the rule that the editor completes nothing. One
+      setup keeps the two editors behaving alike
+
+### Questions served by the engine
+
+- [ ] Serve the next question from the engine. Triggered when a client that
+      cannot run `packages/core` asks to practise questions: an MCP agent, a
+      terminal mode. Weigh first a thin client running the core in Node,
+      which keeps one copy of the queues
 
 ### MCP and autonomy
 
 - [ ] Expose the corpus and the engine's commands as an MCP server.
       Triggered when an agent outside the engine needs to read the corpus
 - [ ] Run the practice loop as a scheduled agent over the MCP server, serving
-      the scheduler's pick. Triggered when Phase 15's pick is served on the
+      the scheduler's pick. Triggered when Phase 16's pick is served on the
       board
 
 ### Design simulation

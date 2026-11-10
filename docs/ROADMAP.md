@@ -398,12 +398,30 @@ does not hold.
 - **A sync API** appending a user's records by client-minted id, and a content
   snapshot in the shape the app already reads.
 - **learn's history imported** for the author, and learn frozen.
-- **learn's engine ported to Python**, held to the app by shared fixtures, for
-  the mastery formula and the scheduler to read on the server.
+- **FSRS replay, question states and gating ported to Python**, held to the
+  app by shared fixtures, for the mastery formula and the scheduler to read on
+  the server. The queues stay in TypeScript.
 - Exit: a week of practice in the algo-coach app alone, with learn frozen and
   its history imported.
 
-## Phase 15 — Scheduling and mastery
+## Phase 15 — Two platforms
+
+The web and the native app become two ways into one learner model, each
+feature placed on the platforms where it works. Decided 2026-11-10, after
+learn's app proved the knowledge module on the phone, and ordered ahead of
+scheduling and mastery the same day.
+
+- **One TypeScript package, `packages/core`, imported by both apps**: the
+  knowledge rules and what the screens show, tested once.
+- **The knowledge module on the web**, scheduled by the same core the phone
+  runs, so one user sees one behaviour on both.
+- **The board and the cards in the native app**, with tabs once it holds more
+  than the knowledge modules. Sittings and recall stay on the web: they need
+  a keyboard and a wide window.
+- Exit: questions practised on the web and the phone against one log, with
+  both showing the same state.
+
+## Phase 16 — Scheduling and mastery
 
 Per-technique skill state derived from the log, a scheduler that says what is
 due, and a comparison of that scheduler against a simpler policy.
@@ -443,7 +461,7 @@ following. The recognition drill moved to Further developments on 2026-10-02.
 - Exit: a sitting started from the scheduler's pick on the board, and
   completed to the claim, with the pick's prediction and its arm stored.
 
-## Phase 16 — The matcher, measured
+## Phase 17 — The matcher, measured
 
 How often the matcher is right, measured.
 
@@ -461,7 +479,7 @@ How often the matcher is right, measured.
 - Exit: the matcher carries a per-template score in both directions, and the
   gate carries a share with the denominator the pass covered.
 
-## Phase 17 — The diagnosis, measured
+## Phase 18 — The diagnosis, measured
 
 The machine counterpart of the self-label, and how much the program-analysis
 tools add to it.
@@ -493,7 +511,7 @@ items of each block, the smaller ones included.
   and is scored against a hand-graded set before its grades feed mastery. The
   scheduler mixes drills with full sittings and never replaces a sitting with
   one. Text first, and a spoken answer later in front of the same judge.
-- **Scheduling on the diagnosed cause.** What Phase 17 names, fed back into
+- **Scheduling on the diagnosed cause.** What Phase 18 names, fed back into
   what the board picks next. It waits on the scores that phase produces.
 - **Alternative solutions.** Every other way to solve a stored problem,
   enumerated over the corpus, each approach its own canonical judged by the
@@ -503,7 +521,7 @@ items of each block, the smaller ones included.
   from every mutant already known.
 - **Repair as diagnosis.** The smallest edit on the parsed tree that makes a
   failing attempt pass every case, searched against the problem's canonicals.
-  The edit's location and kind name the mistake, and Phase 17 can score the
+  The edit's location and kind name the mistake, and Phase 18 can score the
   repair as one more tool.
 - **Technique detection by static analysis.** Rules per template that read a
   solution's form from its parsed tree, run beside the matcher. A pair where
@@ -522,7 +540,7 @@ items of each block, the smaller ones included.
   run of concurrent code says nothing about the next run.
 - **Knowledge tracing.** A model that estimates from attempts the probability
   that a user holds a technique, fitted to the log. The model is scored on the
-  predictions Phase 15 records, against FSRS alone and the mastery state.
+  predictions Phase 16 records, against FSRS alone and the mastery state.
 - **Forgetting per technique.** The decay of the chance of passing with time
   since the last pass, fitted per technique and mode from the log. A form that
   decays differently from a recalled fact needs different review intervals.

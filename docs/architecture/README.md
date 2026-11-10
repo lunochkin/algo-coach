@@ -528,6 +528,32 @@ times. Each record class is specified in one of the files beside it.
   - Caddy keeps its certificates on a volume. Without the volume a redeploy
     issues a certificate again, and the certificate authority limits how often
     it issues one.
+- **The web and the native app import one TypeScript package,
+  `packages/core`, and each keeps a look of its own.** The two apps are ways
+  into one learner model, and each feature sits on the platforms where it
+  works.
+  - Three layers divide the code. The rules live in the core, as one copy.
+    A screen's labels, counts and offered acts live in the core too, tested
+    once. The look and the interaction belong to each
+    platform.
+  - A platform may change how a thing looks and how it is used, and never
+    what it computes, says or offers. A difference in what two platforms say
+    is a bug, and a difference in how they look is a choice.
+  - The knowledge queues are scheduled on the device by the core, on the web
+    and the phone alike. The phone must work offline, and one user practising
+    on both has to see one behaviour.
+  - The server schedules what depends on the server already: the pick of a
+    sitting or a recall, mastery, the stored predictions and any reminder sent
+    while the app is closed. FSRS replay and the question states therefore
+    exist in TypeScript and in Python, held together by the shared fixtures.
+  - A sitting and a recall need a keyboard and a wide window, so they stay on
+    the web. Reading code and answering questions suit the phone.
+  - The web app wrapped in a WebView, as Capacitor ships one, was rejected.
+    Code-adjacent work on the phone needs a native keyboard and native
+    scrolling, which a WebView does least well.
+  - A native rewrite in Kotlin and Swift was rejected. Every rule and every
+    screen would exist three times, and each copy would need testing on a
+    device.
 - **The native app is the knowledge module's client, and schedules offline.**
   It holds its own copy of the knowledge module's rules, in TypeScript, and
   syncs with the engine through the API.
@@ -725,9 +751,10 @@ Properties the system holds at all times.
   adapter, the web app is the second, and the native app is the third. A
   sitting happens in the web app, the knowledge module's queues in the
   native app, and the by-hand passes stay in the terminal.
-- The native app carries the knowledge module's domain in TypeScript, the one
-  copy of domain logic outside Python. Fixtures generated from the Python side
-  hold the two copies to `knowledge.md`.
+- The knowledge module's domain in TypeScript lives in `packages/core`, the
+  one copy of domain logic outside Python, imported by the web and the native
+  app alike. Fixtures generated from the Python side hold the two copies to
+  `knowledge.md`.
 - No third-party problem statements or test cases in git, in any repo.
 
 ## Repo constraints
