@@ -214,7 +214,8 @@ left to serve.
 - **Starting a filtered queue moves no focus.** The focus aims the next
   queue, and one drill on a subtopic would otherwise retarget it.
 - **A filtered queue's choices are stored nowhere.** Each narrows one queue,
-  and a record of them would change at most starts.
+  and a record of them would change at most starts. The web carries them in
+  the queue's URL, which no other device reads.
 - **A level exam opens on the focus's module**, and on a certification
   focus's level. Associate stands where no focus names a level. The focus
   is a record of the log, so the phone and the web open the same exam.

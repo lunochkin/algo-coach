@@ -11,9 +11,10 @@ those steps at low fidelity.
 ## Sections
 
 - **The navigation names four sections: Practice, Problems, Cards and
-  Knowledge.** Practice holds the board, a technique's candidates, a picked
-  problem and the sitting. Problems holds the listing of every problem. Cards
-  holds the card list, one card, and the recall trainer Phase 11 adds.
+  Knowledge.** `## The structure` gives the tree both clients hold. Practice
+  holds the board, a technique's candidates, a picked problem and the
+  sitting. Problems holds the listing of every problem. Cards holds the card
+  list, one card, and the recall trainer Phase 11 adds.
   Knowledge holds the knowledge modules of `knowledge.md`: their queues, their
   lessons and their certifications.
 - **The scheme switch and the account menu sit at the right of the
@@ -204,20 +205,25 @@ platforms.
   one order holds on every device.
 - **A module's page reads each topic as a panel of subtopics by level.** Each
   group reads as covered, open, locked or holding no questions.
-- **A press on a group, a topic or the module opens the start sheet.** The
+- **The start sheet opens on four scopes, on both clients**: a group's cell,
+  a subtopic's name, Start beside a topic, and Start beside the module. The
   press names the scope, and a group also names its level. The sheet adds
   the kind and the due flag, and Start counts what the choices leave.
+- **Each scope is the natural drill at its depth.** The sheet narrows a scope
+  and never widens one, so a scope no press opens is a drill nobody can
+  start.
 - **The start sheet replaces a screen of choices.** A screen of its own drew
   the module's groups a second time, beside the Map and Stats that draw them
   already.
 - **The press that opens the sheet reads Start.** Practice names the board's
   section on the web, and one word naming two places would send a reader to
   the wrong one.
-- **The module's page joins the phone's Map and Stats.** A wide window holds
-  the groups and the counts per level together. The two clients read the same
-  numbers from `packages/core`, so the difference is the layout alone.
+- **The module's page is one screen on both clients**, as `## The
+  structure` gives. The two clients read the same numbers from
+  `packages/core`, so the difference is the layout alone.
 - **The module's page aims the focus and sets the module's status.** The focus
-  is aimed at the module, a topic or a subtopic, by a press of its own.
+  is aimed at the module, a topic or a subtopic, by a press of its own. A
+  subtopic's row carries a Focus press, since its name opens the sheet.
   Starting a queue from the sheet moves no focus, so one drill does not
   retarget Continue. The status is active, paused or archived. A status
   press asks before it archives, since an archived module leaves the home.
@@ -225,14 +231,21 @@ platforms.
   focus is a record of the log, so a focus aimed on the phone opens the same
   exam on the web.
 - **The queue's path is `/knowledge/queue`, and `?mode=` names the queue**:
-  next, review, filtered or exam. A filtered queue's URL names its module
-  too, as `?module=`, so the queue knows its way back.
-- **A reload starts a next queue or a review queue again.** The answers given
-  before the reload are in the log already, so the next pick reads them.
-- **A reload of a filtered queue returns to its module's page.** The sheet's
-  choices narrow one queue and are stored nowhere, and the phone keeps none
-  of them either. A reload of an exam returns to the exam's page, which opens
-  on the focus.
+  next, review, filtered or exam. A filtered queue's URL carries the sheet's
+  choices too: `?module=`, `&topic=`, `&sub=`, `&level=`, `&kind=` and
+  `&due=`.
+- **A reload starts a queue of the same mode again**, a filtered queue on the
+  choices its URL carries. The answers given before the reload are in the
+  log already, so the next pick reads them. The web then holds one reload
+  rule for its three queues.
+- **A filtered queue's URL is a link to that drill.** It writes no record,
+  so the choices reach no other device.
+- **A choice naming content the store no longer holds degrades**, as a focus
+  does. An unknown topic keeps the module, an unknown subtopic keeps the
+  topic, and an unknown module returns to the home.
+- **A reload of an exam returns to the exam's page**, which opens on the
+  focus. An exam's sample is drawn at its start, so a second draw would be a
+  different exam.
 - **A reload loses the count and the score of the queue it ended.** The phone
   holds a running queue in memory alone, so a killed app loses the same. A
   copy of the running queue kept in the browser would make one client keep
@@ -268,6 +281,55 @@ platforms.
   Each cell reads as earned, lapsed, ready for its exam or not yet. A cell
   opens the certification's four conditions, and offers the exam once the
   other three hold.
+
+## The structure
+
+Both clients hold one tree of sections and pages. A platform draws the tree
+its own way, and holds the same pages under the same sections.
+
+```
+Practice      the board, a technique, a picked problem, a sitting
+Problems      the listing, a picked problem
+Cards         the list, a card, a recall
+Knowledge     the home
+                a module: its groups, its map, the start sheet
+                a queue, an exam
+                the lessons, a lesson
+                the certifications, a certification's conditions
+Account       the settings, the signed-in apps, the sign-out
+```
+
+- **The four sections are the destinations both clients name.** The web
+  names them in its top bar. The phone names them as bottom tabs, and shows a
+  tab once the phone holds a page under it. The phone then holds a subset of
+  the tree rather than a tree of its own.
+- **Account sits apart from the sections on both clients.** The web opens it
+  from the account menu, and the phone from its top bar. Account holds the
+  settings, the signed-in apps and the sign-out, since none of the three is a
+  place to practise.
+- **A section's root is the only page the navigation reaches.** Every other
+  page is a step down with one way back, as `## Sections` gives. A shortcut
+  from the navigation to a page deeper in the tree would give that page two
+  ways in, and the way back could name only one.
+- **The Knowledge home links its lessons and its certifications**, and a
+  module row opens the module. The lessons, the certifications and every
+  module are then steps down from the home on each client.
+- **A module's page holds its groups and its map.** The groups read as a
+  table of subtopics by level, and the map draws the prerequisite graph. A
+  wide window can show the two side by side, and a narrow one shows them as
+  two tabs of the page.
+- **A module's focus, status and start sheet sit on the module's page.** The
+  home's module row opens the module, and offers nothing else.
+- **No page shows every module's groups at once.** The home names each
+  module's next group and its reviews, and a module's page holds its groups.
+  A page summing every module would be a second way to read the same groups.
+- **The platform decides how the tree is drawn.**
+  - Navigation: a top bar on the web, bottom tabs on the phone.
+  - The way back: the browser's and the header's link on the web, the
+    system's and the header's on the phone.
+  - An overlay: a dialog on the web, a bottom sheet on the phone.
+  - Two parts of one page: side by side in a wide window, stacked or tabbed in
+    a narrow one.
 
 ## The two clients
 
@@ -368,33 +430,37 @@ what it offers. The inventory is the list both clients build to.
 
 ### To fix
 
-- **The knowledge home.** The phone's top bar opens Map and Stats besides
-  Lessons, Certifications and Settings. The web's home links Lessons and
-  Certifications alone, and a module row opens the module. The two homes
-  then reach the same screens by different routes.
+`## The structure` settles most of these. Each names what holds now, then
+the change.
+
+- **The phone's navigation.** The phone opens Lessons, Certifications, Map,
+  Stats and Settings from its top bar. It moves to bottom tabs for its
+  sections and an account menu for Settings, with Lessons and Certifications
+  linked from the Knowledge home.
 - **A module.** The web shows one page per module. The phone shows Map, one
-  module's graph, and Stats, every module's cells together. Stats is the only
-  screen on either client showing every module's groups at once.
+  module's graph, and Stats, every module's cells together. The phone moves
+  to one module screen holding the groups and the map, and Stats goes.
+- **A module's focus and status.** The phone aims a module's focus and sets
+  its status from the home row's menu, and cannot aim at a topic. The focus
+  and the status move to the phone's module screen, as on the web.
+- **Picking a module on the home.** The phone's course chips narrow Continue
+  to one module and set the focus aside. They go: opening the module is the
+  pick.
+- **The lessons.** The web lists every module's lessons by module. The phone
+  shows one module's lessons, picked by a chip. The phone moves to the web's
+  list.
+- **The settings.** The phone's Settings restores an archived module, names
+  the sync's state and syncs on a press. The web's settings page gains all
+  three.
+- **The signed-in apps.** The web lists and revokes them. The phone gains the
+  same list under its account menu.
 - **The start sheet.** The web opens it on a group, a subtopic, a topic and
   the whole module. The phone opens it on a group and a subtopic, and on a
-  certification's short group.
+  certification's short group. The phone gains the topic and the module
+  scopes on its module screen.
 - **A lesson a queue offers.** The web reads the lesson inside the queue. The
   phone stops the queue on the lesson's title and opens the lesson screen on
-  Read.
-- **The lessons.** The web lists every module's lessons by module. The phone
-  shows one module's lessons, picked by a chip.
-- **The settings.** The phone's Settings also restores an archived module and
-  syncs on a press. The web's settings page does neither.
-- **The signed-in apps.** The web lists and revokes them. The phone has no way
-  to cut off another phone.
-- **Aiming the focus.** The phone aims at a module from a row's menu, and
-  cannot aim at a topic. The web aims at both from the module page.
-- **Picking a module on the home.** The phone's course chips narrow Continue
-  to one module and set the focus aside. The web has no such pick.
-- **A module's status.** The web sets it on the module page. The phone sets
-  it from a module row's menu.
-- **The sync's state.** The phone names the last sync and its error, and
-  syncs on a press. The web syncs on load and on return, and names neither.
+  Read. Which of the two both clients do is decided apart from the structure.
 
 ## A page's areas
 

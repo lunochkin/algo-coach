@@ -503,8 +503,9 @@ problem's path reads as its record, as "Every problem" gives.
   the cell's level. A locked cell opens it too, since locks do not apply to
   the filtered queue. Start beside the module or a topic opens the sheet on
   that scope at every level.
-- A subtopic's name aims the focus at the subtopic, on a press. The focus
-  press beside a topic's heading aims at the topic.
+- A subtopic's name opens the start sheet on the subtopic at every level. A
+  Focus press on the subtopic's row aims the focus at it, and the Focus press
+  beside a topic's heading aims at the topic.
 
 ## A module, starting a filtered queue
 

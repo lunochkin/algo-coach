@@ -74,17 +74,28 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Add `/knowledge/modules/:module` to the web: a panel of group cells
       per topic, the counts per level, the focus and status presses, and the
       home's rows opening it
-- [ ] Serve the filtered queue from the module page's start sheet, at
-      `?mode=filtered&module=`. A reload returns to the module's page, and
-      starting moves no focus
+- [ ] Open the start sheet from the module page: a group's cell, a
+      subtopic's name, and Start beside a topic and the module. Serve its
+      queue at `?mode=filtered` with the choices in the query. Starting moves
+      no focus
+- [ ] Add the map to the web's module page beside its groups, from the
+      layout `packages/core` computes for the phone
+- [ ] Add the sync's state, a sync press and the archived modules' restore
+      to the web's settings page, as the phone's Settings holds them
 - [ ] Serve lessons, certifications and exams on the web
 
 ### The engine on the phone
 
 - [x] Write the native app's screens into `pages.md` as a section of their
       own, beside the web's
-- [ ] Add tabs to the native app, once it holds more than the knowledge
-      modules
+- [ ] Move the phone to the shared structure: bottom tabs for the sections
+      it holds, an account menu for Settings, and the Knowledge home linking
+      Lessons and Certifications. The top bar's shortcuts go
+- [ ] Join the phone's Map and Stats into one module screen of groups and
+      map, with the focus, the status and the start sheet on its four
+      scopes. Stats, the row menu and the course chips go
+- [ ] List the phone's lessons by module, as the web does
+- [ ] Add the signed-in apps to the phone's account menu
 - [ ] Serve the board and the cards in the native app
 
 ### Exit

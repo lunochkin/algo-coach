@@ -328,7 +328,7 @@ without redefining them. Grouped by the file that specifies the record.
 
 ### The pages
 
-- **Section**: one of the four destinations the web app's navigation names:
+- **Section**: one of the four destinations both clients' navigation names:
   Practice, Problems, Cards and Knowledge. Every page sits under one of them
   or under neither.
 - **Gallery**: the page showing every design token and every component the
