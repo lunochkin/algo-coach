@@ -23,7 +23,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 
 ### The knowledge module on the web
 
-- [ ] Add the `daily_limits` and `limit_raises` tables with their `limit`
+- [x] Add the `daily_limits` and `limit_raises` tables with their `limit`
       and `raise` sync lines, and have the app write them instead of keeping
       the limit and the raise on the device
 - [ ] Move the day boundary in `packages/core` from 04:00 local time to

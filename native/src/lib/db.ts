@@ -1,7 +1,17 @@
 import * as Crypto from 'expo-crypto';
 import * as SQLite from 'expo-sqlite';
 
-import { pyJson, type AttemptRecord, type CertRecord, type FocusRecord, type LessonRecord, type SessionRecord, type StatusRecord } from '@algo-coach/core';
+import {
+  pyJson,
+  type AttemptRecord,
+  type CertRecord,
+  type FocusRecord,
+  type LessonRecord,
+  type LimitRecord,
+  type RaiseRecord,
+  type SessionRecord,
+  type StatusRecord,
+} from '@algo-coach/core';
 
 let opened: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -59,6 +69,22 @@ export function db(): Promise<SQLite.SQLiteDatabase> {
         t TEXT NOT NULL,
         pending INTEGER NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS limits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        client_id TEXT NOT NULL UNIQUE,
+        path TEXT NOT NULL,
+        line TEXT NOT NULL,
+        t TEXT NOT NULL,
+        pending INTEGER NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS raises (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        client_id TEXT NOT NULL UNIQUE,
+        path TEXT NOT NULL,
+        line TEXT NOT NULL,
+        t TEXT NOT NULL,
+        pending INTEGER NOT NULL
+      );
       CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     `);
     return d;
@@ -66,8 +92,8 @@ export function db(): Promise<SQLite.SQLiteDatabase> {
   return opened;
 }
 
-export type Table = 'attempts' | 'sessions' | 'statuses' | 'focus' | 'lessons' | 'certs';
-export const TABLES: Table[] = ['attempts', 'sessions', 'statuses', 'focus', 'lessons', 'certs'];
+export type Table = 'attempts' | 'sessions' | 'statuses' | 'focus' | 'lessons' | 'certs' | 'limits' | 'raises';
+export const TABLES: Table[] = ['attempts', 'sessions', 'statuses', 'focus', 'lessons', 'certs', 'limits', 'raises'];
 
 interface Row {
   id: number;
@@ -112,10 +138,20 @@ export async function allLessons(): Promise<LessonRecord[]> {
   return rows.map((r) => JSON.parse(r.line) as LessonRecord);
 }
 
+export async function allLimits(): Promise<LimitRecord[]> {
+  const rows = await (await db()).getAllAsync<Row>('SELECT line FROM limits ORDER BY t, id');
+  return rows.map((r) => JSON.parse(r.line) as LimitRecord);
+}
+
+export async function allRaises(): Promise<RaiseRecord[]> {
+  const rows = await (await db()).getAllAsync<Row>('SELECT line FROM raises ORDER BY t, id');
+  return rows.map((r) => JSON.parse(r.line) as RaiseRecord);
+}
+
 export async function addLocal(
   table: Table,
   path: string,
-  rec: AttemptRecord | SessionRecord | StatusRecord | FocusRecord | LessonRecord | CertRecord,
+  rec: AttemptRecord | SessionRecord | StatusRecord | FocusRecord | LessonRecord | CertRecord | LimitRecord | RaiseRecord,
 ) {
   // minted once, here, so a retried upload is recognised by the engine
   await (

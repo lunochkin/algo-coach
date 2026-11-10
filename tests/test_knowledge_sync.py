@@ -96,6 +96,24 @@ def test_statuses_and_lesson_marks_round_trip(database, tmp_path):
     }
 
 
+def test_the_daily_limit_and_a_raise_round_trip(database, tmp_path):
+    """Neither names content, so every device receives both as sent."""
+    records = [
+        {"kind": "limit", "client_id": "d1", "t": T, "n": 15},
+        {"kind": "raise", "client_id": "r1", "t": T, "n": 5},
+    ]
+
+    back = synced(database, tmp_path, records)["records"]
+
+    assert {one["kind"]: one["n"] for one in back} == {"limit": 15, "raise": 5}
+
+
+def test_a_raise_adds_at_least_one_question(database, tmp_path):
+    result = synced(database, tmp_path, [{"kind": "raise", "client_id": "r1", "t": T, "n": 0}])
+
+    assert [one["client_id"] for one in result["refused"]] == ["r1"]
+
+
 def test_a_record_naming_unknown_content_is_refused_alone(database, tmp_path):
     """One bad record leaves the rest of the upload stored, and the client
     learns which one to drop."""

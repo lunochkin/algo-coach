@@ -15,11 +15,13 @@ from algo_coach.schema import (
     Card,
     CardRun,
     CertificationExam,
+    DailyLimit,
     Diagnosis,
     Draft,
     Focus,
     Lesson,
     LessonMark,
+    LimitRaise,
     Module,
     ModuleStatusChange,
     Problem,
@@ -69,6 +71,8 @@ RECORDS: list[type[BaseModel]] = [
     Focus,
     LessonMark,
     CertificationExam,
+    DailyLimit,
+    LimitRaise,
 ]
 SNAPSHOTS = Path(__file__).parent / "schemas"
 

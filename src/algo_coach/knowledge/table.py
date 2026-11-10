@@ -186,6 +186,18 @@ lesson_marks = _logged(
     Column("read", Boolean, nullable=False),
 )
 
+daily_limits = _logged(
+    "daily_limits",
+    Column("new_per_day", Integer, nullable=False),
+    CheckConstraint("new_per_day >= 0", name="counted"),
+)
+
+limit_raises = _logged(
+    "limit_raises",
+    Column("added", Integer, nullable=False),
+    CheckConstraint("added >= 1", name="counted"),
+)
+
 certification_exams = _logged(
     "certification_exams",
     Column("module_id", Text, ForeignKey("modules.id"), nullable=False),

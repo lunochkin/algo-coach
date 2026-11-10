@@ -225,6 +225,14 @@ class LessonMark(KnowledgeRecord):
     read: bool  # false resets a lesson read before
 
 
+class DailyLimit(KnowledgeRecord):
+    new_per_day: int = Field(ge=0)
+
+
+class LimitRaise(KnowledgeRecord):
+    added: int = Field(ge=1)  # to the day the raise was given in
+
+
 class CertificationExam(KnowledgeRecord):
     module_id: str
     topic_id: str | None = None  # none for the whole module

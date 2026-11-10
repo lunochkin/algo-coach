@@ -19,6 +19,8 @@ const KIND: Record<DB.Table, string> = {
   focus: 'focus',
   lessons: 'lesson',
   certs: 'cert',
+  limits: 'limit',
+  raises: 'raise',
 };
 const TABLE = Object.fromEntries(Object.entries(KIND).map(([table, kind]) => [kind, table])) as Record<
   string,

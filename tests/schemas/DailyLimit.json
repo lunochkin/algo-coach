@@ -1,0 +1,49 @@
+{
+  "properties": {
+    "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+    },
+    "client_id": {
+      "minLength": 1,
+      "title": "Client Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "device": {
+      "minLength": 1,
+      "title": "Device",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "new_per_day": {
+      "minimum": 0,
+      "title": "New Per Day",
+      "type": "integer"
+    },
+    "user_id": {
+      "minLength": 1,
+      "title": "User Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "client_id",
+    "user_id",
+    "device",
+    "at",
+    "created_at",
+    "new_per_day"
+  ],
+  "title": "DailyLimit",
+  "type": "object"
+}

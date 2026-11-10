@@ -35,9 +35,11 @@ from algo_coach.drafts.table import (
 from algo_coach.knowledge.table import (
     answers,
     certification_exams,
+    daily_limits,
     focuses,
     lesson_marks,
     lessons,
+    limit_raises,
     module_status_changes,
     modules,
     questions,
@@ -78,12 +80,14 @@ from algo_coach.schema import (
     CaseResult,
     CertificationExam,
     ClaimSource,
+    DailyLimit,
     Diagnosis,
     Draft,
     DraftCase,
     Focus,
     Lesson,
     LessonMark,
+    LimitRaise,
     MachineProvenance,
     Module,
     ModuleStatusChange,
@@ -194,6 +198,8 @@ STORED: list[Stored] = [
     Stored(Focus, focuses),
     Stored(LessonMark, lesson_marks),
     Stored(CertificationExam, certification_exams),
+    Stored(DailyLimit, daily_limits),
+    Stored(LimitRaise, limit_raises),
 ]
 
 
@@ -693,6 +699,8 @@ APPEND_ONLY = {
     "focuses",
     "lesson_marks",
     "certification_exams",
+    "daily_limits",
+    "limit_raises",
 }
 
 

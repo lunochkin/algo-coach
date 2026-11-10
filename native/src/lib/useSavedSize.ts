@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useStore } from './store';
 
-type SizeKey = 'examSize' | 'newPerDay';
+type SizeKey = 'examSize';
 
 export const validSize = (n: number) => Number.isInteger(n) && n >= 1 && n <= 500;
 

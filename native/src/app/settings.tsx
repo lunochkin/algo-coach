@@ -18,7 +18,7 @@ export default function SettingsScreen() {
   const [form, setForm] = useState({
     origin: st.settings.origin,
     device: st.settings.device,
-    newPerDay: String(st.settings.newPerDay),
+    newPerDay: String(st.newPerDay),
     examSize: String(st.settings.examSize),
     reminderHour: String(st.settings.reminderHour),
   });
@@ -28,11 +28,11 @@ export default function SettingsScreen() {
     setForm({
       origin: st.settings.origin,
       device: st.settings.device,
-      newPerDay: String(st.settings.newPerDay),
-    examSize: String(st.settings.examSize),
+      newPerDay: String(st.newPerDay),
+      examSize: String(st.settings.examSize),
       reminderHour: String(st.settings.reminderHour),
     });
-  }, [st.settings]);
+  }, [st.settings, st.newPerDay]);
 
   const newPerDay = Number(form.newPerDay);
   const examSize = Number(form.examSize);
@@ -51,10 +51,10 @@ export default function SettingsScreen() {
       ...st.settings,
       origin: form.origin.trim(),
       device: form.device,
-      newPerDay,
       examSize,
       reminderHour: hour,
     });
+    if (newPerDay !== st.newPerDay) await st.setNewPerDay(newPerDay);
     setSaved(true);
     st.requestSync(0);
   };

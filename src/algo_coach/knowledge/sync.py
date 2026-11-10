@@ -12,9 +12,11 @@ from algo_coach.ids import new_id
 from algo_coach.knowledge.table import (
     answers,
     certification_exams,
+    daily_limits,
     focuses,
     lesson_marks,
     lessons,
+    limit_raises,
     module_status_changes,
     modules,
     questions,
@@ -33,9 +35,11 @@ from algo_coach.knowledge.wire import (
 from algo_coach.schema import (
     Answer,
     CertificationExam,
+    DailyLimit,
     Focus,
     KnowledgeRecord,
     LessonMark,
+    LimitRaise,
     ModuleStatusChange,
     Stint,
 )
@@ -49,6 +53,9 @@ KINDS: dict[str, tuple[Table, type[KnowledgeRecord]]] = {
     "focus": (focuses, Focus),
     "lesson": (lesson_marks, LessonMark),
     "cert": (certification_exams, CertificationExam),
+    # the engine's own: learn kept the limit and the raise on the device
+    "limit": (daily_limits, DailyLimit),
+    "raise": (limit_raises, LimitRaise),
 }
 
 
@@ -141,6 +148,10 @@ def _record(names: _Names, line: dict[str, Any]) -> tuple[Table, dict[str, Any]]
         return table, {"mode": mode, "level": level, "score": line["score"], "answered": line["n"]}
     if kind == "focus":
         return table, _focus(names, line)
+    if kind == "limit":
+        return table, {"new_per_day": line["n"]}
+    if kind == "raise":
+        return table, {"added": line["n"]}
     module = line["course"]
     module_id = names.module(module)
     if kind == "attempt":
@@ -207,6 +218,10 @@ def _line(kind: str, row: dict[str, Any], names: _Names) -> dict[str, Any]:
     if kind == "session":
         mode = mode_out(row["mode"], row["level"])
         return line | {"mode": mode, "score": row["score"], "n": row["answered"]}
+    if kind == "limit":
+        return line | {"n": row["new_per_day"]}
+    if kind == "raise":
+        return line | {"n": row["added"]}
     if kind == "lesson":
         module, lesson = names.owned[row["lesson_id"]]
         status = "done" if row["read"] else "undone"

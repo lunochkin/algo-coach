@@ -3,7 +3,7 @@ import { inFocus, type Focus } from './focus';
 import type { Board } from './schedule';
 import { ranked, type Rng } from './select';
 import type { Lesson } from './graph';
-import type { Course, Question, Status } from './types';
+import type { Course, LimitRecord, Question, RaiseRecord, Status } from './types';
 
 const DAY = 86_400_000;
 export const NEW_PER_DAY = 10;
@@ -20,21 +20,22 @@ export function dayStart(now: number, offsetMinutes = -new Date(now).getTimezone
   return now >= start ? start : start - DAY;
 }
 
-/** Today's raise of the new-question limit, kept per device until the rollover. */
-export interface Raise {
-  day: number; // the dayStart it was made in
-  extra: number;
+/** The daily limit the latest record set, file order breaking a tie; the default where none did. */
+export function newPerDay(limits: LimitRecord[]): number {
+  let latest: LimitRecord | null = null;
+  for (const r of limits) if (!latest || Date.parse(r.t) >= Date.parse(latest.t)) latest = r;
+  return latest ? latest.n : NEW_PER_DAY;
 }
 
-/** The new-question limit today: the daily setting plus today's raise, if any. */
-export function todayLimit(base: number, raise: Raise | null, now: number, offsetMinutes?: number): number {
-  return base + (raise && raise.day === dayStart(now, offsetMinutes) ? raise.extra : 0);
-}
-
-/** Today's raise after one more step. A raise from an earlier day counts for nothing. */
-export function raised(raise: Raise | null, now: number, offsetMinutes?: number): Raise {
-  const day = dayStart(now, offsetMinutes);
-  return { day, extra: (raise?.day === day ? raise.extra : 0) + NEW_STEP };
+/** The new-question limit today: the daily limit plus every raise given since the day began. */
+export function todayLimit(limits: LimitRecord[], raises: RaiseRecord[], now: number, offsetMinutes?: number): number {
+  const start = dayStart(now, offsetMinutes);
+  let added = 0;
+  for (const r of raises) {
+    const t = Date.parse(r.t);
+    if (t >= start && t <= now) added += r.n;
+  }
+  return newPerDay(limits) + added;
 }
 
 /** Questions whose first-ever attempt, on any device, falls in today. */

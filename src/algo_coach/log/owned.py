@@ -10,8 +10,10 @@ from algo_coach.calls.table import calls
 from algo_coach.knowledge.table import (
     answers,
     certification_exams,
+    daily_limits,
     focuses,
     lesson_marks,
+    limit_raises,
     module_status_changes,
     stints,
 )
@@ -38,9 +40,11 @@ from algo_coach.schema import (
     AttemptVerification,
     Call,
     CertificationExam,
+    DailyLimit,
     Diagnosis,
     Focus,
     LessonMark,
+    LimitRaise,
     ModuleStatusChange,
     SelfLabel,
     Sitting,
@@ -56,6 +60,8 @@ KNOWLEDGE: dict[str, Table] = {
     "focuses": focuses,
     "lesson_marks": lesson_marks,
     "certification_exams": certification_exams,
+    "daily_limits": daily_limits,
+    "limit_raises": limit_raises,
 }
 
 
@@ -78,6 +84,8 @@ class UserLog(BaseModel):
     focuses: list[Focus]
     lesson_marks: list[LessonMark]
     certification_exams: list[CertificationExam]
+    daily_limits: list[DailyLimit]
+    limit_raises: list[LimitRaise]
 
 
 def whole_log(root: Database, user_id: str) -> UserLog:
