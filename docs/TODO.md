@@ -99,7 +99,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       to the web's settings page, as the phone's Settings holds them
 - [x] Open a certificate node's conditions and a lesson node's lesson from
       the web's map, as the phone's map does
-- [ ] Correct the inventory's sign-out row: the phone signs out from its
+- [x] Correct the inventory's sign-out row: the phone signs out from its
       account menu as well as Settings
 - [x] Name one review and one new question in the singular in the core's
       count lines. Both clients read "1 reviews" today

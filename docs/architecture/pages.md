@@ -415,7 +415,7 @@ what it offers. The inventory is the list both clients build to.
 | Set the daily limit and the exam size | the settings page | Settings | same |
 | Set the exam size for one exam | the exam page | Exam | same |
 | Read the sync's state, and sync now | the settings page | Settings, and Home's footer | same |
-| Sign out, naming unsent records | the account menu and the settings page | Settings | same |
+| Sign out, naming unsent records | the account menu and the settings page | the account menu and Settings | same |
 | Revoke a signed-in app | the signed-in apps | none | web only |
 | Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
 
