@@ -235,9 +235,21 @@ native-test:
     cd packages/editor && npx tsc --noEmit && npx vitest run
     cd native && npx tsc --noEmit && npx vitest run --passWithNoTests
 
+# Regenerate native/android only when what it is generated from moved: the
+# config, the plugins, the dependencies or the variant. A clean prebuild
+# discards the compiled native code, so a TypeScript change skips it.
+_prebuild variant:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd native
+    hash=$( (echo {{ variant }}; cat app.config.js app.json package.json ../package-lock.json; find plugins -type f | sort | xargs cat) | shasum | cut -d' ' -f1)
+    if [ "$(cat android/.prebuild-hash 2>/dev/null)" != "$hash" ]; then
+        APP_VARIANT={{ if variant == "dev" { "dev" } else { "" } }} CI=1 ANDROID_HOME={{ android_home }} npx expo prebuild -p android --clean --no-install
+        echo "$hash" > android/.prebuild-hash
+    fi
+
 # The release APK (arm64 only), signed with the key in native/signing/, which git ignores.
-native-apk:
-    cd native && CI=1 ANDROID_HOME={{ android_home }} npx expo prebuild -p android --clean --no-install
+native-apk: (_prebuild "release")
     cd native/android && ANDROID_HOME={{ android_home }} ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a --console=plain -q
     @ls -lh {{ apk }}
 
@@ -246,8 +258,7 @@ native-install:
     {{ android_home }}/platform-tools/adb install -r {{ apk }}
 
 # The dev app ("algo-coach dev") beside the release one. Rebuild it only after native changes.
-native-dev-apk:
-    cd native && APP_VARIANT=dev CI=1 ANDROID_HOME={{ android_home }} npx expo prebuild -p android --clean --no-install
+native-dev-apk: (_prebuild "dev")
     cd native/android && ANDROID_HOME={{ android_home }} ./gradlew assembleDebug -PreactNativeArchitectures=arm64-v8a --console=plain -q
     {{ android_home }}/platform-tools/adb install -r native/android/app/build/outputs/apk/debug/app-debug.apk
 
