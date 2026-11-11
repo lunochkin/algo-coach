@@ -35,6 +35,9 @@ class Sitting(BaseModel):
     # when the loop last acted on the sitting. Absent on a sitting stored
     # before the field, where the start stands in
     last_active_at: datetime | None = None
+    # the device the sitting was minted on, as a knowledge record names it.
+    # Absent on a sitting stored before the field
+    device: str | None = Field(default=None, min_length=1)
     pauses: list[Pause] = Field(default_factory=list[Pause])
 
     @property

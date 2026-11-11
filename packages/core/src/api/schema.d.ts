@@ -628,6 +628,11 @@ export interface components {
       /** Attempt Id */
       attempt_id: string;
     };
+    /** Begin */
+    Begin: {
+      /** Device */
+      device?: string | null;
+    };
     /** Board */
     Board: {
       /** Rows */
@@ -1253,6 +1258,8 @@ export interface components {
       ended_at?: string | null;
       /** Last Active At */
       last_active_at?: string | null;
+      /** Device */
+      device?: string | null;
       /** Pauses */
       pauses?: components['schemas']['Pause'][];
     };
@@ -1913,7 +1920,11 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['Begin'] | null;
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {

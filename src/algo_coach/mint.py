@@ -228,7 +228,9 @@ def attempt_verification(attempt_id: str, execution: Execution) -> AttemptVerifi
     )
 
 
-def sitting(user_id: str, problem_id: str, at: datetime | None = None) -> Sitting:
+def sitting(
+    user_id: str, problem_id: str, at: datetime | None = None, device: str | None = None
+) -> Sitting:
     # the caller's clock where it has one, so the sitting it serves and the
     # elapsed time it reports read the same moment
     at = at or datetime.now(UTC)
@@ -238,6 +240,7 @@ def sitting(user_id: str, problem_id: str, at: datetime | None = None) -> Sittin
         problem_id=problem_id,
         started_at=at,
         last_active_at=at,
+        device=device,
     )
 
 

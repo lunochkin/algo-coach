@@ -6,7 +6,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from algo_coach.api.context import Root, UserId
 from algo_coach.cards import CardStore
@@ -54,6 +54,11 @@ class Submission(BaseModel):
     code: str
     # the page restored an earlier solve in this sitting: `log.md`
     restored: bool = False
+
+
+class Begin(BaseModel):
+    # the device pressing, as a knowledge record names it: `log.md`
+    device: str | None = Field(default=None, min_length=1)
 
 
 class Reproduction(BaseModel):
@@ -145,9 +150,12 @@ def _template(card: Card, template_slug: str) -> Template:
 # the first clock press or submission on a problem: the running sitting, or a
 # new one
 @router.post("/problems/{problem_id}/sittings")
-def begun(root: Root, user_id: UserId, problem_id: str) -> Timed:
+def begun(root: Root, user_id: UserId, problem_id: str, body: Begin | None = None) -> Timed:
     at = datetime.now(UTC)
-    one = begin(ProblemStore(root), SittingStore(root), problem_id, user_id=user_id, now=at)
+    device = body.device if body else None
+    one = begin(
+        ProblemStore(root), SittingStore(root), problem_id, user_id=user_id, device=device, now=at
+    )
     return Timed(sitting=one, elapsed_sec=one.elapsed(at))
 
 

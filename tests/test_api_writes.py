@@ -2,7 +2,7 @@ import pytest
 from helpers import PROVENANCE, browsing, seed_problem
 
 from algo_coach.cases import CaseLog
-from algo_coach.log import AttemptLog
+from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.mint import case
 
 USER = "u-4f9c2a"
@@ -33,6 +33,20 @@ def sitting_id(client) -> str:
 
 def submitted(client, sitting_id: str, code: str = DOUBLE):
     return client.post(f"/api/sittings/{sitting_id}/submissions", json={"code": code})
+
+
+def test_a_sitting_records_the_device_it_was_minted_on(client, root):
+    """A phone solve is slower, so execution reads the device apart."""
+    begun = client.post("/api/problems/p1/sittings", json={"device": "pixel-7"}).json()
+    again = client.post("/api/problems/p1/sittings", json={"device": "web"}).json()
+
+    assert begun["sitting"]["device"] == "pixel-7"
+    assert again["sitting"]["id"] == begun["sitting"]["id"]
+    assert SittingStore(root).get(begun["sitting"]["id"]).device == "pixel-7"
+
+
+def test_a_blank_device_is_unprocessable(client):
+    assert client.post("/api/problems/p1/sittings", json={"device": ""}).status_code == 422
 
 
 def test_a_submission_answers_with_its_verdict_per_case(client, sitting_id, root):

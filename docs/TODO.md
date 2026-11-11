@@ -193,7 +193,7 @@ reach the phone beside the rest of the engine. The phone types through a
 keyboard of the app's own: the system keyboard hides the symbols code and a
 `short` answer are made of, and its suggestion strip completes words.
 
-- [ ] Add `device` to the sitting, as the knowledge records carry it, and
+- [x] Add `device` to the sitting, as the knowledge records carry it, and
       snapshot the schema. A phone solve is slower, and an attempt's time is
       append-only, so the field lands before the first phone sitting
 - [ ] Draw a keyboard of the app's own, with brackets, commas, quotes, digits

@@ -142,7 +142,9 @@ sittings = Table(
     Column("ended_at", timestamp()),
     # when the loop last acted on it: a sitting idle past the bound ends here
     Column("last_active_at", timestamp()),
+    Column("device", Text),
     CheckConstraint("ended_at >= started_at", name="ends_after_it_starts"),
+    CheckConstraint("device <> ''", name="device_named"),
     CheckConstraint("clock_started_at >= started_at", name="clock_after_serving"),
     # one clock running on a problem for a user: a second serve reaches it
     # rather than starting another

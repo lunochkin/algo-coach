@@ -42,6 +42,19 @@
       "default": null,
       "title": "Clock Started At"
     },
+    "device": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Device"
+    },
     "ended_at": {
       "anyOf": [
         {

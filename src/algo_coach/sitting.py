@@ -164,15 +164,16 @@ def begin(
     problem_id: str,
     *,
     user_id: str,
+    device: str | None = None,
     now: datetime | None = None,
 ) -> Sitting:
     """The sitting a clock press or a submission runs in: the one running on
-    the problem, or a new one."""
+    the problem, or a new one minted on `device`."""
     _servable(problems, problem_id)
     at = now or _clock()
     one = _live(sittings, user_id, problem_id, at)
     if one is None:
-        one = mint.sitting(user_id, problem_id, at)
+        one = mint.sitting(user_id, problem_id, at, device)
         sittings.put(one)
     return one
 

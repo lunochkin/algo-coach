@@ -617,6 +617,23 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/Begin"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1462,6 +1479,24 @@
         ],
         "title": "AttemptVerification",
         "description": "Private to the user, where a solution's run is product data: `log.md`."
+      },
+      "Begin": {
+        "properties": {
+          "device": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
+          }
+        },
+        "type": "object",
+        "title": "Begin"
       },
       "Board": {
         "properties": {
@@ -3056,6 +3091,18 @@
               }
             ],
             "title": "Last Active At"
+          },
+          "device": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device"
           },
           "pauses": {
             "items": {

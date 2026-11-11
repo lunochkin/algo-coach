@@ -108,6 +108,13 @@ ended, and every pause between.
   mints a new sitting.
 - **The loop decides what starts and ends a pause**, not the record. A button,
   a hidden tab and an idle timer each leave the same interval.
+- **A sitting records the device it was minted on**, as `device`, named as a
+  knowledge record names its device: `web` on the web, the device name on the
+  phone. A solve typed on a phone is slower than one typed at a keyboard, and
+  execution reads the elapsed time, so the two have to read apart.
+- **The minting device names the whole sitting.** A press from a second device
+  reaches the running sitting, and that device is not recorded. The field is
+  absent on every sitting stored before it.
 - **A sitting records when it was last touched**, as `last_active_at`. Minting
   the sitting, serving its problem while it runs, a submission, a pause and a
   resume each set it. The record then

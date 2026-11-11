@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/dialog'
 import { Verdict } from '@/components/Verdict'
 import { autoStarts, pressed } from '@/lib/clock'
+import { DEVICE } from '@/knowledge/copy'
 import { draftOf, keepDraft, opening } from '@/lib/draft'
 
 type Moved = { sitting: Sitting; elapsedSec: number | null; at: number }
@@ -156,6 +157,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
     if (sittingId !== null) return sittingId
     const { data, error } = await api.POST('/api/problems/{problem_id}/sittings', {
       params: { path: { problem_id: problemId } },
+      body: { device: DEVICE },
     })
     if (!data) {
       if (!quiet) setRefused(described(error))
