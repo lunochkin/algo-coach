@@ -37,7 +37,7 @@ import {
 } from '@algo-coach/core';
 import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
-import { fromCopy, Loaded, startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
+import { BottomBar, fromCopy, Loaded, startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
 import { FocusCard } from '@/ui/focuscard';
 import { AccountMenu } from '@/ui/account';
 import { Heading, PanelItem, PickRow } from '@/ui/rows';
@@ -188,16 +188,20 @@ export default function Home() {
             onMoreNew={() => void st.raiseNew()}
           />
         ) : null}
-        <Button
-          mode="contained"
-          icon="play"
-          disabled={!st.catalog}
-          onPress={start}
-          contentStyle={{ paddingVertical: 8 }}
-        >
-          {CONTINUE}
-        </Button>
-        {counts ? (
+      </View>
+      {body}
+      {rows.length ? <Heading title={MODULES_HEADING} count={rows.length} /> : null}
+    </View>
+  );
+
+  // the home's act, Continue, in the bar at the bottom, with Exam beside it
+  // at a lower weight: `pages.md`, A page's areas
+  const bar = (
+    <BottomBar
+      bottom={0}
+      row
+      above={
+        counts ? (
           <View style={[styles.row, { justifyContent: 'center', flexWrap: 'wrap', minHeight: 24 }]}>
             <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
               {continueLine(counts, !!focused?.strict)}
@@ -216,22 +220,29 @@ export default function Home() {
               </TouchableRipple>
             ) : null}
           </View>
-        ) : null}
-        <View style={styles.row}>
-          <Button
-            mode="contained-tonal"
-            icon="clipboard-check-outline"
-            style={{ flex: 1 }}
-            disabled={!st.catalog}
-            onPress={() => router.push('/exam')}
-          >
-            {EXAM_LINK}
-          </Button>
-        </View>
-      </View>
-      {body}
-      {rows.length ? <Heading title={MODULES_HEADING} count={rows.length} /> : null}
-    </View>
+        ) : null
+      }
+    >
+      <Button
+        mode="contained-tonal"
+        icon="clipboard-check-outline"
+        disabled={!st.catalog}
+        onPress={() => router.push('/exam')}
+        contentStyle={{ paddingVertical: 8 }}
+      >
+        {EXAM_LINK}
+      </Button>
+      <Button
+        mode="contained"
+        icon="play"
+        style={{ flex: 1 }}
+        disabled={!st.catalog}
+        onPress={start}
+        contentStyle={{ paddingVertical: 8 }}
+      >
+        {CONTINUE}
+      </Button>
+    </BottomBar>
   );
 
   return (
@@ -250,13 +261,15 @@ export default function Home() {
             <SyncLine sync={st.sync} showError={false} />
           </Pressable>
         }
-        contentContainerStyle={{ padding: 16 }}
+        // room under the last row for the bar over it
+        contentContainerStyle={{ padding: 16, paddingBottom: 160 }}
         renderItem={({ item, index }) => (
           <PanelItem first={index === 0} last={index === rows.length - 1}>
             <ModuleRow c={item.c} view={item.view} total={item.total} toReview={item.toReview} />
           </PanelItem>
         )}
       />
+      {bar}
       <Snackbar
         visible={!!notice}
         onDismiss={() => {
@@ -265,7 +278,7 @@ export default function Home() {
         }}
         duration={noticeAction ? 6000 : 2500}
         action={noticeAction ? { label: noticeAction.label, onPress: noticeAction.run } : undefined}
-        wrapperStyle={{ bottom: 16 }}
+        wrapperStyle={{ bottom: 160 }}
       >
         {notice}
       </Snackbar>

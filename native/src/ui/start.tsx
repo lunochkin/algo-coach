@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { ScrollView, View } from 'react-native';
-import { Button, Chip, Dialog, Portal, Switch, Text } from 'react-native-paper';
+import { View } from 'react-native';
+import { Button, Chip, Switch, Text } from 'react-native-paper';
 
 import {
   levelName,
@@ -15,6 +15,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { startQueue, styles } from '@/ui/common';
+import { Sheet } from '@/ui/sheet';
 
 /** Where a filtered queue starts: a module, narrowed to a topic, a subtopic or one group. */
 export interface Scope {
@@ -56,52 +57,53 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
   };
 
   return (
-    <Portal>
-      <Dialog visible onDismiss={onClose} style={{ maxHeight: '85%' }}>
-        <Dialog.Title>{title}</Dialog.Title>
-        <Dialog.ScrollArea style={{ paddingHorizontal: 24 }}>
-          <ScrollView contentContainerStyle={{ gap: 8, paddingVertical: 8 }}>
-            <Text variant="titleSmall">{START_LEVEL}</Text>
-            <View style={[styles.row, { flexWrap: 'wrap' }]}>
-              <Chip selected={level === null} onPress={() => setLevel(null)}>
-                {START_ALL}
-              </Chip>
-              {levels(st.catalog!.rules).map((l) => (
-                <Chip key={l} selected={level === l} onPress={() => setLevel(level === l ? null : l)}>
-                  {levelName(st.catalog!.rules, l)}
-                </Chip>
-              ))}
-            </View>
-            {c.kinds.length > 1 ? (
-              <>
-                <Text variant="titleSmall">{START_KIND}</Text>
-                <View style={[styles.row, { flexWrap: 'wrap' }]}>
-                  <Chip selected={kind === null} onPress={() => setKind(null)}>
-                    {START_ALL}
-                  </Chip>
-                  {c.kinds.map((k) => (
-                    <Chip key={k} selected={kind === k} onPress={() => setKind(kind === k ? null : k)}>
-                      {k}
-                    </Chip>
-                  ))}
-                </View>
-              </>
-            ) : null}
-            <View style={styles.row}>
-              <Switch value={due} onValueChange={setDue} />
-              <Text variant="bodyMedium" onPress={() => setDue(!due)}>
-                {START_ONLY_REVIEWS}
-              </Text>
-            </View>
-          </ScrollView>
-        </Dialog.ScrollArea>
-        <Dialog.Actions>
+    <Sheet
+      visible
+      onDismiss={onClose}
+      title={title}
+      actions={
+        <>
           <Button onPress={onClose}>Cancel</Button>
           <Button mode="contained" icon="play" disabled={!preview || preview.empty} onPress={start}>
             {preview?.label ?? START_NOTHING}
           </Button>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>
+        </>
+      }
+    >
+      <View style={{ gap: 8 }}>
+        <Text variant="titleSmall">{START_LEVEL}</Text>
+        <View style={[styles.row, { flexWrap: 'wrap' }]}>
+          <Chip selected={level === null} onPress={() => setLevel(null)}>
+            {START_ALL}
+          </Chip>
+          {levels(st.catalog!.rules).map((l) => (
+            <Chip key={l} selected={level === l} onPress={() => setLevel(level === l ? null : l)}>
+              {levelName(st.catalog!.rules, l)}
+            </Chip>
+          ))}
+        </View>
+        {c.kinds.length > 1 ? (
+          <>
+            <Text variant="titleSmall">{START_KIND}</Text>
+            <View style={[styles.row, { flexWrap: 'wrap' }]}>
+              <Chip selected={kind === null} onPress={() => setKind(null)}>
+                {START_ALL}
+              </Chip>
+              {c.kinds.map((k) => (
+                <Chip key={k} selected={kind === k} onPress={() => setKind(kind === k ? null : k)}>
+                  {k}
+                </Chip>
+              ))}
+            </View>
+          </>
+        ) : null}
+        <View style={styles.row}>
+          <Switch value={due} onValueChange={setDue} />
+          <Text variant="bodyMedium" onPress={() => setDue(!due)}>
+            {START_ONLY_REVIEWS}
+          </Text>
+        </View>
+      </View>
+    </Sheet>
   );
 }

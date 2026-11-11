@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
-import { ScrollView, View } from 'react-native';
-import { Button, Dialog, Portal, Text, useTheme, type MD3Theme } from 'react-native-paper';
+import { View } from 'react-native';
+import { Button, Text, useTheme, type MD3Theme } from 'react-native-paper';
 import Svg, { Circle } from 'react-native-svg';
 
 import {
@@ -17,6 +17,7 @@ import {
   type Course,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
+import { Sheet } from '@/ui/sheet';
 import type { Scope } from '@/ui/start';
 import { styles, tones } from './common';
 
@@ -110,48 +111,12 @@ export function CertSheet(props: {
     </Text>
   );
   return (
-    <Portal>
-      <Dialog visible onDismiss={onClose} style={{ maxHeight: '85%' }}>
-        <Dialog.Title>{x.title}</Dialog.Title>
-        <Dialog.ScrollArea style={{ paddingHorizontal: 24 }}>
-          <ScrollView contentContainerStyle={{ gap: 6, paddingVertical: 8 }}>
-            <Text variant="labelLarge" style={{ color: stateColor(status.state, theme) }}>
-              {v.label}
-            </Text>
-            {v.note ? <Text variant="bodyMedium">{v.note}</Text> : null}
-            {v.progressNote ? (
-              <Text variant="labelLarge" style={{ marginTop: 8, color: theme.colors.onSurfaceVariant }}>
-                {v.progressNote}
-              </Text>
-            ) : null}
-            {v.checks.map((x) => check(x.ok, x.text))}
-            {v.short.length ? (
-              <Text variant="labelLarge" style={{ marginTop: 8 }}>
-                {CERT_TO_COVER}
-              </Text>
-            ) : null}
-            {v.short.map((g) => (
-              <View key={g.sub} style={styles.row}>
-                <Text variant="bodyMedium" style={{ flex: 1 }}>
-                  {g.line}
-                </Text>
-                <Button
-                  compact
-                  onPress={() => {
-                    onClose();
-                    onPractice({ course: c.slug, topic: g.topic, sub: g.sub, level: x.level });
-                  }}
-                >
-                  {CERT_START}
-                </Button>
-              </View>
-            ))}
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
-              {v.scope}
-            </Text>
-          </ScrollView>
-        </Dialog.ScrollArea>
-        <Dialog.Actions>
+    <Sheet
+      visible
+      onDismiss={onClose}
+      title={x.title}
+      actions={
+        <>
           <Button onPress={onClose}>Close</Button>
           {v.offersTarget ? (
             v.targeted ? (
@@ -177,8 +142,45 @@ export function CertSheet(props: {
               {CERT_TAKE_EXAM}
             </Button>
           ) : null}
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>
+        </>
+      }
+    >
+      <View style={{ gap: 6 }}>
+        <Text variant="labelLarge" style={{ color: stateColor(status.state, theme) }}>
+          {v.label}
+        </Text>
+        {v.note ? <Text variant="bodyMedium">{v.note}</Text> : null}
+        {v.progressNote ? (
+          <Text variant="labelLarge" style={{ marginTop: 8, color: theme.colors.onSurfaceVariant }}>
+            {v.progressNote}
+          </Text>
+        ) : null}
+        {v.checks.map((x) => check(x.ok, x.text))}
+        {v.short.length ? (
+          <Text variant="labelLarge" style={{ marginTop: 8 }}>
+            {CERT_TO_COVER}
+          </Text>
+        ) : null}
+        {v.short.map((g) => (
+          <View key={g.sub} style={styles.row}>
+            <Text variant="bodyMedium" style={{ flex: 1 }}>
+              {g.line}
+            </Text>
+            <Button
+              compact
+              onPress={() => {
+                onClose();
+                onPractice({ course: c.slug, topic: g.topic, sub: g.sub, level: x.level });
+              }}
+            >
+              {CERT_START}
+            </Button>
+          </View>
+        ))}
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
+          {v.scope}
+        </Text>
+      </View>
+    </Sheet>
   );
 }

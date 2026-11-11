@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { Button, Checkbox, Modal, Portal, RadioButton, SegmentedButtons, Text, useTheme } from 'react-native-paper';
+import { View } from 'react-native';
+import { Button, Checkbox, RadioButton, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 
 import {
   attemptLine,
@@ -27,6 +27,7 @@ import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { Loaded } from '@/ui/common';
+import { Sheet } from '@/ui/sheet';
 
 type Asked = components['schemas']['Asked'];
 type FailureMode = components['schemas']['FailureMode'];
@@ -47,7 +48,6 @@ export function ClaimSheet({
   visible: boolean;
   onDone: () => void;
 }) {
-  const theme = useTheme();
   const loaded = useEngine(visible ? '/api/sittings/{sitting_id}/unclaimed' : null, { sitting_id: sittingId });
   const [answered, setAnswered] = useState(0);
   const attempts = loaded.data?.attempts ?? [];
@@ -59,42 +59,23 @@ export function ClaimSheet({
 
   const asked = attempts[answered];
   return (
-    <Portal>
-      <Modal
-        visible={visible && !finished}
-        onDismiss={onDone}
-        // a sheet from the bottom edge, the phone's overlay: `pages.md`
-        style={{ justifyContent: 'flex-end', margin: 0 }}
-        contentContainerStyle={{
-          backgroundColor: theme.colors.surface,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
-          maxHeight: '85%',
-        }}
-      >
-        <ScrollView contentContainerStyle={{ padding: 20, gap: 12 }}>
-          <Text variant="titleLarge">{CLAIM_TITLE}</Text>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            {CLAIM_NOTE}
-          </Text>
-          {!loaded.data || !asked ? (
-            <Loaded of="the claim" state={{ ...loaded, data: null }}>
-              {() => null}
-            </Loaded>
-          ) : (
-            <ClaimForm
-              // a fresh form per attempt, so no answer carries over to the next
-              key={asked.attempt.id}
-              asked={asked}
-              position={attemptLine(answered, attempts.length, asked.attempt)}
-              techniques={loaded.data.techniques}
-              drilled={drilled}
-              onClaimed={() => setAnswered(answered + 1)}
-            />
-          )}
-        </ScrollView>
-      </Modal>
-    </Portal>
+    <Sheet visible={visible && !finished} onDismiss={onDone} title={CLAIM_TITLE} note={CLAIM_NOTE}>
+      {!loaded.data || !asked ? (
+        <Loaded of="the claim" state={{ ...loaded, data: null }}>
+          {() => null}
+        </Loaded>
+      ) : (
+        <ClaimForm
+          // a fresh form per attempt, so no answer carries over to the next
+          key={asked.attempt.id}
+          asked={asked}
+          position={attemptLine(answered, attempts.length, asked.attempt)}
+          techniques={loaded.data.techniques}
+          drilled={drilled}
+          onClaimed={() => setAnswered(answered + 1)}
+        />
+      )}
+    </Sheet>
   );
 }
 

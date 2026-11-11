@@ -402,11 +402,11 @@ what it offers. The inventory is the list both clients build to.
 | The cards | `/cards` | the Cards tab | same |
 | A card's trigger, brief and templates | `/cards/:slug` | Card | same |
 | A card's ladder and probes | `/cards/:slug` | Card | same |
-| The press starting a card's run | `/cards/:slug` | Card, below the ladder | same |
+| The press starting a card's run | `/cards/:slug` | Card, its bottom bar | same |
 | A recall | `/cards/:slug/recall/:template` | Recall, from Card | same |
 | The knowledge home | `/knowledge` | Home | same |
 | A module | `/knowledge/modules/:module` | Module | same |
-| The start sheet | a dialog on the module page | a dialog on Module | same |
+| The start sheet | a dialog on the module page | a sheet on Module | same |
 | A queue | `/knowledge/queue` | the quiz screen | same |
 | A lesson a queue offers | a stop opening the lesson over the queue | a stop opening the lesson screen | same |
 | A level exam's choices | `/knowledge/exam` | Exam | same |
@@ -503,10 +503,10 @@ what it offers. The inventory is the list both clients build to.
 - **The phone's card reads its ladder and its probes as the web's does.** A
   rung and a probe each open the phone's Problem screen, named by the card,
   and the sitting it opens returns to that card.
-- **The phone starts a card's run below the ladder.** The ladder names what
-  the run will measure, so the press follows it. Starting draws the probes
-  and opens the run on both clients, and the sittings it counts are sat on
-  either.
+- **The phone starts a card's run from the bar at the bottom of Card.** The
+  run is the card's act until one is open, and the note above the press
+  says the ladder counts from it. Starting draws the probes and opens the
+  run on both clients, and the sittings it counts are sat on either.
 - **The phone reads the board and the cards from the engine and keeps no
   copy.** With no connection the Practice tab, the Cards tab and each screen
   under them say so. The knowledge copy exists so a

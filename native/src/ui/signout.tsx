@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
-import { Button, Dialog, Portal, Text } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 
 import { SIGN_OUT, SIGN_OUT_TITLE, signOutWarning, STAY_SIGNED_IN } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
+import { Sheet } from '@/ui/sheet';
 
 /**
  * Signing out sends the outbox first, and names the records it could not send
@@ -27,18 +28,20 @@ export function useSignOut(): { start: () => void; signing: boolean; dialog: Rea
   };
 
   const dialog = (
-    <Portal>
-      <Dialog visible={unsent > 0} onDismiss={() => setUnsent(0)}>
-        <Dialog.Title>{SIGN_OUT_TITLE}</Dialog.Title>
-        <Dialog.Content>
-          <Text variant="bodyMedium">{signOutWarning(unsent, 'phone')}</Text>
-        </Dialog.Content>
-        <Dialog.Actions>
+    <Sheet
+      visible={unsent > 0}
+      onDismiss={() => setUnsent(0)}
+      title={SIGN_OUT_TITLE}
+      note={signOutWarning(unsent, 'phone')}
+      actions={
+        <>
           <Button onPress={() => setUnsent(0)}>{STAY_SIGNED_IN}</Button>
-          <Button onPress={() => void run(true)}>{SIGN_OUT}</Button>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>
+          <Button mode="contained" onPress={() => void run(true)}>
+            {SIGN_OUT}
+          </Button>
+        </>
+      }
+    />
   );
   return { start: () => void run(false), signing, dialog };
 }

@@ -53,7 +53,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
-import { fromCopy, Loaded, styles, tones } from '@/ui/common';
+import { BottomBar, fromCopy, Loaded, styles, tones } from '@/ui/common';
 import { MapCanvas, NODE_H, NODE_W, type CertPip } from '@/ui/mapcanvas';
 import { ModuleGroups } from '@/ui/groups';
 import { SectionBar, useSections } from '@/ui/sections';
@@ -127,14 +127,6 @@ export default function ModuleScreen() {
         </Text>
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           <Button
-            mode="contained"
-            compact
-            icon="play"
-            onPress={() => starter.open({ course: c.slug, topic: null, sub: null, level: null })}
-          >
-            {MODULE_START}
-          </Button>
-          <Button
             mode="outlined"
             compact
             icon="crosshairs-gps"
@@ -173,10 +165,22 @@ export default function ModuleScreen() {
             ref={sections.scroll}
             onScroll={sections.onScroll}
             scrollEventThrottle={32}
-            contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24 }}
+            // room under the last topic for the bar over it
+            contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 96 }}
           >
             <ModuleGroups c={c} b={b} of={sections} onStart={starter.open} />
           </ScrollView>
+          {/* the module's act, a queue over all of it; the map's nodes start their own */}
+          <BottomBar bottom={insets.bottom}>
+            <Button
+              mode="contained"
+              icon="play"
+              contentStyle={{ paddingVertical: 8 }}
+              onPress={() => starter.open({ course: c.slug, topic: null, sub: null, level: null })}
+            >
+              {MODULE_START}
+            </Button>
+          </BottomBar>
         </>
       ) : (
         <>

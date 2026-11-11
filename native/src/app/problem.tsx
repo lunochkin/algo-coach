@@ -1,17 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, ScrollView, View } from 'react-native';
-import {
-  Appbar,
-  Button,
-  Dialog,
-  IconButton,
-  Portal,
-  SegmentedButtons,
-  Text,
-  TouchableRipple,
-  useTheme,
-} from 'react-native-paper';
+import { Appbar, Button, IconButton, SegmentedButtons, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -44,6 +34,7 @@ import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { Loaded, styles, tones } from '@/ui/common';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
+import { Sheet } from '@/ui/sheet';
 import type { Key } from '@/lib/keys';
 import { KeyPad } from '@/ui/keys';
 import { Markdown } from '@/ui/markdown';
@@ -487,15 +478,16 @@ function SittingOn({
           onDone={() => setClaimed(true)}
         />
       ) : null}
-      <Portal>
-        <Dialog visible={ending} onDismiss={() => setEnding(false)}>
-          <Dialog.Title>{END_TITLE}</Dialog.Title>
-          <Dialog.Content>
-            <Text variant="bodyMedium">{END_NOTE}</Text>
-          </Dialog.Content>
-          <Dialog.Actions>
+      <Sheet
+        visible={ending}
+        onDismiss={() => setEnding(false)}
+        title={END_TITLE}
+        note={END_NOTE}
+        actions={
+          <>
             <Button onPress={() => setEnding(false)}>{END_KEEP}</Button>
             <Button
+              mode="contained"
               onPress={() => {
                 setEnding(false);
                 void move('end');
@@ -503,9 +495,9 @@ function SittingOn({
             >
               {SITTING_END}
             </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+          </>
+        }
+      />
     </View>
   );
 }

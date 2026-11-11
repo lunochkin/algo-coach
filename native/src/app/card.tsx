@@ -26,7 +26,7 @@ import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { CodeBlock, Loaded, styles } from '@/ui/common';
+import { BottomBar, CodeBlock, Loaded, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
 import { Badge, PickPanel, PickRow } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
@@ -71,7 +71,11 @@ export default function CardScreen() {
         ref={sections.scroll}
         onScroll={sections.onScroll}
         scrollEventThrottle={32}
-        contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}
+        // room under the last template for the run's press over it
+        contentContainerStyle={[
+          styles.page,
+          { paddingBottom: insets.bottom + (studied.data && !studied.data.run ? 140 : 24) },
+        ]}
       >
         <Loaded of="the card" state={studied}>
           {(data) => (
@@ -83,7 +87,6 @@ export default function CardScreen() {
                 <Markdown>{data.card.brief}</Markdown>
               </PageSection>
               <Ladder studied={data} of={sections} />
-              {data.run ? null : <RunStart slug={slug} onStarted={studied.reload} />}
               {data.probes.length > 0 ? <Probes studied={data} of={sections} /> : null}
               <PageSection
                 of={sections}
@@ -117,6 +120,9 @@ export default function CardScreen() {
           )}
         </Loaded>
       </ScrollView>
+      {studied.data && !studied.data.run ? (
+        <RunStart slug={slug} bottom={insets.bottom} onStarted={studied.reload} />
+      ) : null}
     </View>
   );
 }
@@ -279,9 +285,9 @@ function Probes({ studied, of }: { studied: Studied; of: Sections }) {
   );
 }
 
-// the press opening a run, below the ladder it measures from. Starting draws
-// the probes; the sittings the run counts are still sat on the web
-function RunStart({ slug, onStarted }: { slug: string; onStarted: () => void }) {
+// the card's act before a run: the press opening one, in the bar at the
+// bottom with the note on what it measures. Starting draws the probes
+function RunStart({ slug, bottom, onStarted }: { slug: string; bottom: number; onStarted: () => void }) {
   const theme = useTheme();
   const st = useStore();
   const [starting, setStarting] = useState(false);
@@ -301,18 +307,17 @@ function RunStart({ slug, onStarted }: { slug: string; onStarted: () => void }) 
     }
   };
   return (
-    <View style={{ gap: 8 }}>
-      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-        {RUN_START_NOTE}
-      </Text>
-      <Button mode="contained" onPress={() => void start()} disabled={starting} style={{ alignSelf: 'flex-start' }}>
+    <BottomBar
+      bottom={bottom}
+      above={
+        <Text variant="bodySmall" style={{ color: refused ? theme.colors.error : theme.colors.onSurfaceVariant }}>
+          {refused ? runStartRefused(refused) : RUN_START_NOTE}
+        </Text>
+      }
+    >
+      <Button mode="contained" onPress={() => void start()} disabled={starting} contentStyle={{ paddingVertical: 8 }}>
         {runStartLabel(starting)}
       </Button>
-      {refused ? (
-        <Text variant="bodySmall" style={{ color: theme.colors.error }}>
-          {runStartRefused(refused)}
-        </Text>
-      ) : null}
-    </View>
+    </BottomBar>
   );
 }

@@ -262,7 +262,7 @@ clients.
       the exam build their own header and skip it
 - [x] Add the section bar and collapsing headings to the long pages: the
       module, a lesson, the lessons and the certifications
-- [ ] Hold each page's act as one primary press, in the bottom bar on the
+- [x] Hold each page's act as one primary press, in the bottom bar on the
       phone, and turn the phone's dialogs into bottom sheets
 - [ ] Move every word the pages still type inline into `packages/core`,
       the engine pages' titles, intros and empty lines first
