@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { View } from 'react-native';
-import { Button, Chip, IconButton, Text, useTheme } from 'react-native-paper';
+import { Button, IconButton, Text, useTheme } from 'react-native-paper';
 
 import {
   type Board,
@@ -23,6 +23,7 @@ import {
 
 import { styles, tones } from './common';
 import { Panel } from './rows';
+import { Toggle } from './toggle';
 
 interface Props {
   onMoreNew: () => void; // raises today's new-question limit by NEW_STEP
@@ -62,15 +63,9 @@ export function FocusCard(props: Props) {
           <Text variant="titleSmall" numberOfLines={2} style={{ flex: 1 }}>
             {props.label}
           </Text>
-          <Chip
-            compact
-            selected={!!focus.strict}
-            showSelectedCheck
-            onPress={props.onStrict}
-            accessibilityLabel={strictLabel(!!focus.strict)}
-          >
+          <Toggle on={!!focus.strict} onPress={props.onStrict} accessibilityLabel={strictLabel(!!focus.strict)}>
             {STRICT}
-          </Chip>
+          </Toggle>
           <IconButton
             icon="close"
             size={20}

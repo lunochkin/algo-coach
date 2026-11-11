@@ -123,10 +123,10 @@ export function KnowledgePage() {
       )}
       {/* the lessons are a step down from the home: `pages.md`, The structure */}
       <p className="flex gap-4 text-meta">
-        <Link to={LESSONS} className="underline underline-offset-2">
+        <Link to={LESSONS} className="font-medium underline-offset-4 hover:underline">
           {LESSONS_LINK}
         </Link>
-        <Link to={CERTIFICATIONS} className="underline underline-offset-2">
+        <Link to={CERTIFICATIONS} className="font-medium underline-offset-4 hover:underline">
           {CERTIFICATIONS_LINK}
         </Link>
       </p>
@@ -242,7 +242,7 @@ export function KnowledgePage() {
                       {/* a press serves the reviews a strict focus leaves out */}
                       <Link
                         to="/knowledge/queue?mode=review"
-                        className="underline underline-offset-2"
+                        className="font-medium underline-offset-4 hover:underline"
                       >
                         {waitingOutside(counts.outside)}
                       </Link>

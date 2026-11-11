@@ -108,7 +108,7 @@ export function LessonBody(props: {
                     key={y.slug}
                     type="button"
                     onClick={() => onLesson(y.slug)}
-                    className="underline underline-offset-2"
+                    className="font-medium underline-offset-4 hover:underline"
                   >
                     {y.title}
                   </button>
@@ -116,7 +116,7 @@ export function LessonBody(props: {
                   <Link
                     key={y.slug}
                     to={lessonPath(c.slug, y.slug)}
-                    className="underline underline-offset-2"
+                    className="font-medium underline-offset-4 hover:underline"
                   >
                     {y.title}
                   </Link>

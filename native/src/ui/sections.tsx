@@ -7,9 +7,10 @@ import {
   type ScrollViewInstance,
   View,
 } from 'react-native';
-import { Chip, useTheme } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 
 import { Heading, Panel } from '@/ui/rows';
+import { Toggle } from '@/ui/toggle';
 
 export interface Item {
   id: string;
@@ -125,17 +126,9 @@ export function SectionBar({ sections }: { sections: Pick<Sections, 'items' | 'c
         contentContainerStyle={{ gap: 6, paddingHorizontal: 16, paddingVertical: 8 }}
       >
         {sections.items.map((item) => (
-          <Chip
-            key={item.id}
-            compact
-            // flat marks the current section, as a picked filter reads on Problems
-            mode={sections.current === item.id ? 'flat' : 'outlined'}
-            selected={sections.current === item.id}
-            showSelectedCheck={false}
-            onPress={() => sections.jump(item.id)}
-          >
+          <Toggle key={item.id} on={sections.current === item.id} onPress={() => sections.jump(item.id)}>
             {item.label}
-          </Chip>
+          </Toggle>
         ))}
       </ScrollView>
     </View>

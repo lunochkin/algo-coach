@@ -282,7 +282,7 @@ ways inside each client. Each item covers both clients.
 - [x] Give each press one look per role: the focus press, the raise, the
       primary's size and place, and the phone's acts still outside the
       bottom bar. A press beside an equivalent one carries its icon too
-- [ ] Draw every selectable chip, link and option one way: the filters and
+- [x] Draw every selectable chip, link and option one way: the filters and
       the toggle groups, links underlined on hover, a lesson's links as
       links on the phone, and the quiz's two kinds of option tile
 - [ ] Draw every error, small label, meta line and header note one way,

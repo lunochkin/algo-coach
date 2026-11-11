@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Button, Chip, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Text, useTheme } from 'react-native-paper';
 
 import {
   clearFilters,
@@ -24,6 +24,7 @@ import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { Loaded, styles } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
+import { Toggle } from '@/ui/toggle';
 
 /**
  * Every served problem, filtered by technique and difficulty, as the web's
@@ -59,16 +60,9 @@ export default function ProblemsScreen() {
                 ).map(([kind, chips]) => (
                   <View key={kind} style={[styles.row, { flexWrap: 'wrap' }]}>
                     {chips.map((chip) => (
-                      <Chip
-                        key={chip.name}
-                        compact
-                        selected={chip.on}
-                        showSelectedCheck={false}
-                        mode={chip.on ? 'flat' : 'outlined'}
-                        onPress={() => setFilter(toggled(filter, kind, chip.name))}
-                      >
+                      <Toggle key={chip.name} on={chip.on} onPress={() => setFilter(toggled(filter, kind, chip.name))}>
                         {`${chip.name} ${chip.count}`}
-                      </Chip>
+                      </Toggle>
                     ))}
                   </View>
                 ))}

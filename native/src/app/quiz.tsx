@@ -2,7 +2,17 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { BackHandler, Pressable, ScrollView, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Appbar, Button, Divider, Switch, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper';
+import {
+  Appbar,
+  Button,
+  Divider,
+  type MD3Theme,
+  Switch,
+  Text,
+  TextInput,
+  TouchableRipple,
+  useTheme,
+} from 'react-native-paper';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -390,6 +400,19 @@ function Head({ q, tag, early = false }: { q: Question; tag: string; early?: boo
   );
 }
 
+// one option tile for a choice and a tick alike, as the web draws both: picked
+// reads bordered in the primary and tinted
+function optionTile(on: boolean, theme: MD3Theme) {
+  return {
+    minHeight: 48,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: on ? theme.colors.primary : theme.colors.outlineVariant,
+    backgroundColor: on ? theme.colors.secondaryContainer : 'transparent',
+  } as const;
+}
+
 function Choices(props: { q: Question; order: number[]; picked: number[]; onToggle?: (pos: number) => void }) {
   const { q, order, picked, onToggle } = props;
   const theme = useTheme();
@@ -397,7 +420,7 @@ function Choices(props: { q: Question; order: number[]; picked: number[]; onTogg
   return (
     <>
       {multi ? (
-        <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {askChoose(q.answer.length)}
         </Text>
       ) : null}
@@ -409,15 +432,7 @@ function Choices(props: { q: Question; order: number[]; picked: number[]; onTogg
             onPress={onToggle ? () => onToggle(pos) : undefined}
             accessibilityRole={multi ? 'checkbox' : 'radio'}
             accessibilityState={{ checked: on, disabled: !onToggle }}
-            style={{
-              flexDirection: 'row',
-              gap: 12,
-              padding: 12,
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: on ? theme.colors.primary : theme.colors.outlineVariant,
-              backgroundColor: on ? theme.colors.secondaryContainer : 'transparent',
-            }}
+            style={[optionTile(on, theme), { flexDirection: 'row', gap: 12 }]}
           >
             <Text variant="titleSmall">{LETTERS[pos]}</Text>
             <Text variant="bodyLarge" style={{ flex: 1 }}>
@@ -746,14 +761,7 @@ function Tick(props: { label: string; hint?: string; on: boolean; disabled: bool
       accessibilityRole="checkbox"
       accessibilityState={{ checked: on, disabled }}
       accessibilityLabel={hint ? `${hint}: ${label}` : label}
-      style={{
-        minHeight: 48,
-        borderRadius: 12,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        justifyContent: 'center',
-        backgroundColor: on ? theme.colors.secondaryContainer : theme.colors.surfaceVariant,
-      }}
+      style={[optionTile(on, theme), { justifyContent: 'center' }]}
     >
       <View style={styles.row}>
         <MaterialCommunityIcons

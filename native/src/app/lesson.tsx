@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Fragment, useEffect, useMemo, type ReactNode } from 'react';
 import { type HostInstance, ScrollView, View, type TextStyle } from 'react-native';
 import { useMarkdown } from 'react-native-marked';
-import { Appbar, Button, Chip, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -22,8 +22,9 @@ import {
   LESSON_FALLBACK,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
-import { BottomBar, styles } from '@/ui/common';
+import { BottomBar } from '@/ui/common';
 import { CodeRenderer, markdownOptions } from '@/ui/markdown';
+import { Heading } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
 
 /** `lesson:` links stay in the app. */
@@ -179,18 +180,19 @@ function Footer({ c, slug }: { c: Course; slug: string }) {
   const row = (title: string, items: Lesson[]) =>
     items.length ? (
       <View style={{ gap: 6, marginTop: 16 }}>
-        <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
-          {title}
-        </Text>
-        <View style={[styles.row, { flexWrap: 'wrap' }]}>
+        <Heading sub title={title} />
+        {/* destinations, so links rather than chips: a chip is a control */}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 16, rowGap: 6 }}>
           {items.map((x) => (
-            <Chip
+            <Text
               key={x.slug}
-              icon="book-open-variant"
+              variant="bodyMedium"
+              accessibilityRole="link"
               onPress={() => router.push({ pathname: '/lesson', params: { course: c.slug, slug: x.slug } })}
+              style={{ color: theme.colors.primary }}
             >
               {x.title}
-            </Chip>
+            </Text>
           ))}
         </View>
       </View>

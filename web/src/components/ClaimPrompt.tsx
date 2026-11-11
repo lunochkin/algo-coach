@@ -160,6 +160,8 @@ function ClaimForm({ attempt, modes, position, techniques, drilled, onClaimed }:
         <ToggleGroup
           type="single"
           variant="outline"
+          size="sm"
+          className="w-auto flex-wrap"
           value={confidence ?? ''}
           onValueChange={(value) => setConfidence(value ? (value as Confidence) : null)}
         >

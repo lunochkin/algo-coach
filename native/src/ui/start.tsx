@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
-import { Button, Chip, Switch, Text } from 'react-native-paper';
+import { Button, Switch, Text } from 'react-native-paper';
 
 import {
   levelName,
@@ -17,6 +17,7 @@ import {
 import { useStore } from '@/lib/store';
 import { startQueue, styles } from '@/ui/common';
 import { Sheet } from '@/ui/sheet';
+import { Toggle } from '@/ui/toggle';
 
 /** Where a filtered queue starts: a module, narrowed to a topic, a subtopic or one group. */
 export interface Scope {
@@ -74,26 +75,26 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
       <View style={{ gap: 8 }}>
         <Text variant="titleSmall">{START_LEVEL}</Text>
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
-          <Chip selected={level === null} onPress={() => setLevel(null)}>
+          <Toggle on={level === null} onPress={() => setLevel(null)}>
             {START_ALL}
-          </Chip>
+          </Toggle>
           {levels(st.catalog!.rules).map((l) => (
-            <Chip key={l} selected={level === l} onPress={() => setLevel(level === l ? null : l)}>
+            <Toggle key={l} on={level === l} onPress={() => setLevel(level === l ? null : l)}>
               {levelName(st.catalog!.rules, l)}
-            </Chip>
+            </Toggle>
           ))}
         </View>
         {c.kinds.length > 1 ? (
           <>
             <Text variant="titleSmall">{START_KIND}</Text>
             <View style={[styles.row, { flexWrap: 'wrap' }]}>
-              <Chip selected={kind === null} onPress={() => setKind(null)}>
+              <Toggle on={kind === null} onPress={() => setKind(null)}>
                 {START_ALL}
-              </Chip>
+              </Toggle>
               {c.kinds.map((k) => (
-                <Chip key={k} selected={kind === k} onPress={() => setKind(kind === k ? null : k)}>
+                <Toggle key={k} on={kind === k} onPress={() => setKind(kind === k ? null : k)}>
                   {k}
-                </Chip>
+                </Toggle>
               ))}
             </View>
           </>

@@ -252,7 +252,11 @@ function Tick(props: {
 }) {
   return (
     <label
-      className={cn('flex items-start gap-3 rounded-xl border px-4 py-2.5', props.on && 'bg-muted')}
+      // one option tile, as a choice is drawn: picked reads bordered and tinted
+      className={cn(
+        'flex items-start gap-3 rounded-xl border px-4 py-2.5',
+        props.on ? 'border-foreground bg-muted' : 'hover:bg-muted/50',
+      )}
     >
       <Checkbox
         checked={props.on}
@@ -354,14 +358,14 @@ export function Details({
             <button
               type="button"
               onClick={() => onLesson(x.course, x.slug)}
-              className="underline underline-offset-2"
+              className="font-medium underline-offset-4 hover:underline"
             >
               {x.label}
             </button>
           ) : (
             <Link
               to={lessonPath(x.course, x.slug, x.anchor)}
-              className="underline underline-offset-2"
+              className="font-medium underline-offset-4 hover:underline"
             >
               {x.label}
             </Link>

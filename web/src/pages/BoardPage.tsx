@@ -62,7 +62,7 @@ export function BoardPage() {
                       <Link
                         key={row.technique}
                         to={`/techniques/${encodeURIComponent(row.technique)}`}
-                        className="underline-offset-4 hover:underline"
+                        className="font-medium underline-offset-4 hover:underline"
                       >
                         {row.technique}
                       </Link>

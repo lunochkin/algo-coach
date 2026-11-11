@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Button, Chip, SegmentedButtons, Text, TextInput, useTheme } from 'react-native-paper';
+import { Appbar, Button, Text, TextInput, useTheme } from 'react-native-paper';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -30,6 +30,7 @@ import {
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
 import { BottomBar, fromCopy, Loaded, startExam, styles } from '@/ui/common';
+import { Toggle, Toggles } from '@/ui/toggle';
 
 // the choices wait for the copy, so the size and the focus they open on are the stored ones
 export default function Exam() {
@@ -136,24 +137,23 @@ function Choices({ catalog }: { catalog: Catalog }) {
         </Text>
         <Text variant="titleSmall">{EXAM_MODULE}</Text>
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
-          <Chip selected={course === null} showSelectedCheck onPress={() => setCourse(null)}>
+          <Toggle on={course === null} onPress={() => setCourse(null)}>
             {EXAM_ALL}
-          </Chip>
+          </Toggle>
           {courses.map((c) => (
-            <Chip key={c.slug} selected={course === c.slug} showSelectedCheck onPress={() => setCourse(c.slug)}>
+            <Toggle key={c.slug} on={course === c.slug} onPress={() => setCourse(c.slug)}>
               {examModuleChoice(c)}
-            </Chip>
+            </Toggle>
           ))}
         </View>
         <Text variant="titleSmall">{EXAM_LEVEL}</Text>
-        <SegmentedButtons
-          value={String(level)}
-          onValueChange={(v) => setLevel(Number(v))}
-          buttons={lv.map((l) => ({
-            value: String(l),
-            label: levelName(catalog.rules, l, true),
-          }))}
-        />
+        <Toggles>
+          {lv.map((l) => (
+            <Toggle key={l} on={level === l} onPress={() => setLevel(l)}>
+              {levelName(catalog.rules, l, true)}
+            </Toggle>
+          ))}
+        </Toggles>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {catalog.rules.levels[level] ?? ''}
         </Text>

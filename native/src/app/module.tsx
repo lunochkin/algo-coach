@@ -8,7 +8,7 @@ import {
   useSimultaneousGestures,
   useTapGesture,
 } from 'react-native-gesture-handler';
-import { Appbar, Button, Card, Chip, SegmentedButtons, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Card, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 import { cancelAnimation, useSharedValue, withDecay } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -62,6 +62,7 @@ import { ModuleGroups } from '@/ui/groups';
 import { SectionBar, useSections } from '@/ui/sections';
 import { useArchive } from '@/ui/pause';
 import { useStartSheet, type Scope } from '@/ui/start';
+import { Toggle } from '@/ui/toggle';
 
 const MIN_SCALE = 0.25;
 const MAX_SCALE = 2.5;
@@ -189,14 +190,14 @@ export default function ModuleScreen() {
         <>
           {c.graph?.lessons.length ? (
             <View style={[styles.row, { paddingHorizontal: 16, paddingBottom: 4 }]}>
-              <Chip
-                icon={lessonsOn ? 'check' : 'book-open-variant'}
-                selected={lessonsOn}
+              <Toggle
+                icon="book-open-variant"
+                on={lessonsOn}
                 onPress={() => setLessonsOn(!lessonsOn)}
                 accessibilityLabel={mapLessonsToggle(lessonsOn)}
               >
                 {MAP_LESSONS}
-              </Chip>
+              </Toggle>
             </View>
           ) : null}
           {!c.graph ? (

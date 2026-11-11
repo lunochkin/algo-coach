@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { Button, Checkbox, RadioButton, SegmentedButtons, Text, useTheme } from 'react-native-paper';
+import { Button, Checkbox, RadioButton, Text, useTheme } from 'react-native-paper';
 
 import {
   attemptLine,
@@ -29,6 +29,7 @@ import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { Loaded } from '@/ui/common';
 import { Sheet } from '@/ui/sheet';
+import { Toggle, Toggles } from '@/ui/toggle';
 
 type Asked = components['schemas']['Asked'];
 type FailureMode = components['schemas']['FailureMode'];
@@ -165,11 +166,13 @@ function ClaimForm({
         />
       </View>
       <Text variant="titleSmall">{CLAIM_CONFIDENCE}</Text>
-      <SegmentedButtons
-        value={confidence ?? ''}
-        onValueChange={(value) => setConfidence(value as Confidence)}
-        buttons={CONFIDENCES.map((one) => ({ value: one, label: one }))}
-      />
+      <Toggles>
+        {CONFIDENCES.map((one) => (
+          <Toggle key={one} on={confidence === one} onPress={() => setConfidence(one)}>
+            {one}
+          </Toggle>
+        ))}
+      </Toggles>
       {asked.modes.length > 0 ? (
         <>
           <Text variant="titleSmall">{LABEL_QUESTION}</Text>

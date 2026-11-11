@@ -24,8 +24,8 @@ import { SectionHeading } from '@/components/SectionHeading'
 import { PickPanel, PickRow } from '@/components/PickRow'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { counts } from '@/lib/format'
-import { cn } from '@/lib/utils'
 
 // every served problem at once, where the board reaches them one technique at
 // a time. Core reads the filters, the counts and the page: `listingView`
@@ -62,27 +62,28 @@ export function ProblemsPage() {
                     ['techniques', view.tags],
                   ] as const
                 ).map(([kind, chips]) => (
-                  <div key={kind} className="flex flex-wrap gap-2">
+                  // the filters are toggles, drawn as every toggle on the pages is
+                  <ToggleGroup
+                    key={kind}
+                    type="multiple"
+                    variant="outline"
+                    size="sm"
+                    className="w-auto flex-wrap"
+                    value={chips.filter((chip) => chip.on).map((chip) => chip.name)}
+                  >
                     {chips.map((chip) => (
-                      <button
+                      <ToggleGroupItem
                         key={chip.name}
-                        type="button"
+                        value={chip.name}
                         onClick={() => go(toggled(filter, kind, chip.name))}
-                        aria-pressed={chip.on}
-                        className={cn(
-                          'rounded-lg border px-2.5 py-1 text-meta transition-colors',
-                          chip.on
-                            ? 'border-transparent bg-secondary text-secondary-foreground'
-                            : 'hover:bg-accent',
-                        )}
                       >
-                        {chip.name}{' '}
+                        {chip.name}
                         <span className="inline-block min-w-[2ch] text-right text-muted-foreground tabular-nums">
                           {chip.count}
                         </span>
-                      </button>
+                      </ToggleGroupItem>
                     ))}
-                  </div>
+                  </ToggleGroup>
                 ))}
               </section>
 
