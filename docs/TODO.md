@@ -306,7 +306,7 @@ ways inside each client. Each item covers both clients.
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
       showing the same state
-- [ ] Read the inventory with no row `to fix` and no row `web for now`
+- [x] Read the inventory with no row `to fix` and no row `web for now`
 - [ ] Sit a problem and recall a form on the phone, through the app's keyboard
 - [ ] Read the knowledge pages and the engine pages on both clients with no
       part drawn two ways
