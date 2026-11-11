@@ -8,13 +8,13 @@ import { CodeBlock } from '@/ui/common';
 
 const CODE_SCALE = 0.85;
 
-interface InlineCodeProps {
+export interface InlineCodeProps {
   text: string;
   style: TextStyle;
   size: number;
 }
 
-function InlineCode({ text, style, size }: InlineCodeProps) {
+export function InlineCode({ text, style, size }: InlineCodeProps) {
   return (
     <Text selectable style={[style, { fontSize: size }]}>
       {text}

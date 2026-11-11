@@ -59,6 +59,10 @@ export function sections(md: string): { anchor: string | null; text: string }[] 
 
 const PART = /^##\s+(.+?)\s*#*\s*$/;
 
+// a part's title reads as plain text in the section bar and the section's
+// heading, so the backticks an author typed around code would show as typed
+const plainHeading = (heading: string) => heading.replace(/`([^`]+)`/g, '$1');
+
 /**
  * A lesson cut at its `##` headings (outside code fences), each part its
  * heading and the text under it, as a page's sections read. The text before
@@ -72,7 +76,7 @@ export function lessonParts(md: string): { title: string | null; anchor: string 
   for (const line of md.split(/\r\n|\r|\n/)) {
     if (line.trimStart().startsWith('```')) fenced = !fenced;
     const m = !fenced ? PART.exec(line) : null;
-    if (m) out.push({ title: m[1], anchor: anchor(m[1]), text: [] });
+    if (m) out.push({ title: plainHeading(m[1]), anchor: anchor(m[1]), text: [] });
     else out[out.length - 1].text.push(line);
   }
   return out

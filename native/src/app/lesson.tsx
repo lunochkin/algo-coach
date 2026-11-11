@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Fragment, useEffect, useMemo, type ReactNode } from 'react';
+import { cloneElement, Fragment, isValidElement, useEffect, useMemo, type ReactElement, type ReactNode } from 'react';
 import { type HostInstance, ScrollView, View, type TextStyle } from 'react-native';
 import { useMarkdown } from 'react-native-marked';
 import { Appbar, Button, Text, useTheme } from 'react-native-paper';
@@ -24,7 +24,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { Blank, BottomBar, fromCopy, HeaderNote, Loaded, styles } from '@/ui/common';
-import { CodeRenderer, markdownOptions } from '@/ui/markdown';
+import { CodeRenderer, InlineCode, type InlineCodeProps, markdownOptions } from '@/ui/markdown';
 import { Heading } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
 
@@ -39,13 +39,24 @@ class LessonRenderer extends CodeRenderer {
 
   link(children: string | ReactNode[], href: string, style?: TextStyle, title?: string): ReactNode {
     if (!href.startsWith('lesson:')) return super.link(children, href, style, title);
+    const linked: TextStyle = { color: this.linkColor, textDecorationLine: 'underline' };
+    // inline code carries its own style, so it would not read as part of the link
+    const parts = Array.isArray(children)
+      ? children.map((x) =>
+          isValidElement(x) && x.type === InlineCode
+            ? cloneElement(x as ReactElement<InlineCodeProps>, {
+                style: { ...(x as ReactElement<InlineCodeProps>).props.style, ...linked },
+              })
+            : x,
+        )
+      : children;
     return (
       <Text
         accessibilityRole="link"
         onPress={() => this.onLesson(href.slice('lesson:'.length))}
-        style={[style, { color: this.linkColor, textDecorationLine: 'underline' }]}
+        style={[style, linked]}
       >
-        {children}
+        {parts}
       </Text>
     );
   }

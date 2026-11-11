@@ -119,6 +119,12 @@ describe("a lesson's parts", () => {
     ]);
   });
 
+  it('titles a part without the backticks around its code', () => {
+    expect(lessonParts('## `range` is lazy\n\nBody.')).toEqual([
+      { title: 'range is lazy', anchor: 'range-is-lazy', text: 'Body.' },
+    ]);
+  });
+
   it('leaves a heading inside a code fence in its part', () => {
     expect(lessonParts('```\n## not a heading\n```')).toEqual([
       { title: null, anchor: null, text: '```\n## not a heading\n```' },
