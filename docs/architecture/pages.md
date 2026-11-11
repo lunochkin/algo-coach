@@ -165,6 +165,12 @@ those steps at low fidelity.
   ends the sitting, and the claim asked after it would otherwise be lost to a
   reload. Without the parameter, a reload finds the sitting the problem has
   running, where one runs.
+- **The phone's Problem screen reopens the sitting the problem has running.**
+  The phone has no address to carry `?sitting=`, so opening the screen, or
+  the app again after it was closed, reads the running sitting with the
+  statement. Its own unsent code and its clock come back with it. An ended
+  sitting is not reopened, and the claim it asked stays with the claim's own
+  rule.
 - **The problem's page reads the difficulty, the techniques, the counts the
   user reached on the problem, and the cards** in one line above the
   statement, and the statement is the page's body.

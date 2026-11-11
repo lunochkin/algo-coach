@@ -234,7 +234,7 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
       back to the card. With no connection it says so
 - [x] Keep a problem's unsent code and the clock preference on the phone, and
       pause a running clock while the app is in the background
-- [ ] Reopen a running sitting when the Problem screen opens, where the web
+- [x] Reopen a running sitting when the Problem screen opens, where the web
       reads `?sitting=`, and write the phone's rule into `pages.md`
 - [ ] Ask the claim and the label in a bottom sheet after each attempt, and
       offer the press restoring the last solve

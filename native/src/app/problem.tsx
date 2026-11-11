@@ -210,7 +210,9 @@ function SittingOn({
     };
   }, [origin, problemId, card]);
 
-  const current = moved?.sitting ?? null;
+  // the running sitting comes with the statement, so the first render already
+  // names it, and the editor seeds from that sitting's own draft
+  const current = moved?.sitting ?? statement?.sitting ?? null;
   const sittingId = current?.id ?? null;
   const clock = clockState(current);
 
