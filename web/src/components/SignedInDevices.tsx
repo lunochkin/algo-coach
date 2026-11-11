@@ -3,17 +3,17 @@ import { useState } from 'react'
 
 import {
   deviceLine,
-  deviceName,
   REVOKE,
   REVOKED_NOTE,
   SIGN_OUT,
   SIGNED_IN_DEVICES,
-  thisDevice,
   OF,
+  deviceTitle,
+  revokeDevice,
 } from '@algo-coach/core'
 
 import { api, type SignedInDevice } from '@/api/client'
-import { described, useLoaded } from '@/api/useLoaded'
+import { useLoaded } from '@/api/useLoaded'
 import { ErrorLine } from '@/components/ErrorLine'
 import { PickPanel, PickRow } from '@/components/PickRow'
 import { Loaded } from '@/components/Loaded'
@@ -44,10 +44,8 @@ export function SignedInDevices({
 
   async function revoke(device: SignedInDevice) {
     setFailed(null)
-    const { error } = await api.DELETE('/api/devices/{kind}/{device_id}', {
-      params: { path: { kind: device.kind, device_id: device.id } },
-    })
-    if (error) setFailed(described(error))
+    const revoked = await revokeDevice(api, device)
+    if (!revoked.ok) setFailed(revoked.refused)
     devices.retry()
   }
 
@@ -65,11 +63,7 @@ export function SignedInDevices({
                 {listed.map((device) => (
                   <PickRow
                     key={device.id}
-                    title={
-                      device.current
-                        ? `${deviceName(device)} · ${thisDevice('browser')}`
-                        : deviceName(device)
-                    }
+                    title={deviceTitle(device, 'browser')}
                     note={deviceLine(device, now)}
                     stats={[]}
                     aside={

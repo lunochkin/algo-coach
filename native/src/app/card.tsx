@@ -15,7 +15,6 @@ import {
   PROBES_ASIDE,
   PROBES_TITLE,
   probeState,
-  described,
   RUN_START_NOTE,
   runStartLabel,
   runStartRefused,
@@ -31,6 +30,8 @@ import {
   PROBES_DRAWN,
   nextRung,
   templateView,
+  cardSections,
+  startCardRun,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -60,17 +61,7 @@ export default function CardScreen() {
   const card = studied.data?.card;
   const recall = new Map((studied.data?.recall ?? []).map((one) => [one.template_id, one]));
 
-  const sections = useSections(
-    studied.data
-      ? [
-          { id: 'trigger', label: CARD_TRIGGER },
-          { id: 'brief', label: CARD_BRIEF },
-          { id: 'ladder', label: LADDER_TITLE },
-          ...(studied.data.probes.length ? [{ id: 'probes', label: PROBES_TITLE }] : []),
-          { id: 'templates', label: CARD_TEMPLATES },
-        ]
-      : [],
-  );
+  const sections = useSections(cardSections(studied.data));
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -333,16 +324,11 @@ function RunStart({ slug, bottom, onStarted }: { slug: string; bottom: number; o
   const start = async () => {
     setStarting(true);
     setRefused(null);
-    try {
-      await engine(st.settings.origin, await getToken()).POST('/api/cards/{slug}/runs', {
-        params: { path: { slug } },
-      });
-      onStarted();
-    } catch (e) {
-      setRefused(described(e));
-    } finally {
-      setStarting(false);
-    }
+    // a refusal is named on the bar, never read as a run that started
+    const started = await startCardRun(engine(st.settings.origin, await getToken()), slug);
+    setStarting(false);
+    if (started.ok) onStarted();
+    else setRefused(started.refused);
   };
   return (
     <BottomBar

@@ -1,3 +1,7 @@
+import { described, type EngineClient } from './engine';
+import type { Outcome } from './sittingrun';
+import { thisDevice, type ThisDevice } from './words/home';
+
 /** How long ago a day was, in whole days: today, yesterday, then days and months. */
 export function lastAt(at: string | null | undefined, now: number): string {
   if (!at) return 'never';
@@ -39,4 +43,24 @@ export function deviceName(d: { kind: 'app' | 'browser'; name: string | null }):
   const system = SYSTEMS.find(([re]) => re.test(agent))?.[1];
   if (!browser) return 'A browser';
   return system ? `${browser} on ${system}` : browser;
+}
+
+/** A device's title in the list, naming the device it is read on. */
+export function deviceTitle(d: { kind: 'app' | 'browser'; name: string | null; current: boolean }, here: ThisDevice) {
+  return d.current ? `${deviceName(d)} · ${thisDevice(here)}` : deviceName(d);
+}
+
+/** Revokes another device's sign-in. A refusal is named rather than read as revoked. */
+export async function revokeDevice(
+  client: EngineClient,
+  d: { kind: 'app' | 'browser'; id: string },
+): Promise<Outcome<null>> {
+  try {
+    const { error } = await client.DELETE('/api/devices/{kind}/{device_id}', {
+      params: { path: { kind: d.kind, device_id: d.id } },
+    });
+    return error === undefined ? { ok: true, value: null } : { ok: false, refused: described(error) };
+  } catch (reason) {
+    return { ok: false, refused: String(reason) };
+  }
 }

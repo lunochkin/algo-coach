@@ -1,7 +1,12 @@
 import { lastAt } from './account';
 import type { components } from './api/schema';
+import { described, type EngineClient } from './engine';
+import type { Outcome } from './sittingrun';
 import {
+  CARD_BRIEF,
   CARD_OPTIONAL,
+  CARD_TEMPLATES,
+  CARD_TRIGGER,
   cardsOffered,
   FORM_NO_CASES,
   FORM_UNCHECKED,
@@ -376,4 +381,26 @@ export function cardProgress(studied: Studied): CardProgress {
 export function cardNote(studied: Studied, now: number): string {
   const run = studied.run;
   return [studied.card.technique, run && studyingSince(lastAt(run.started_at, now))].filter(Boolean).join(' · ');
+}
+
+/** A card's sections, as both clients' section bars name them. Probes read only once a run drew some. */
+export function cardSections(studied: Pick<Studied, 'probes'> | null | undefined): { id: string; label: string }[] {
+  if (!studied) return [];
+  return [
+    { id: 'trigger', label: CARD_TRIGGER },
+    { id: 'brief', label: CARD_BRIEF },
+    { id: 'ladder', label: LADDER_TITLE },
+    ...(studied.probes.length > 0 ? [{ id: 'probes', label: PROBES_TITLE }] : []),
+    { id: 'templates', label: CARD_TEMPLATES },
+  ];
+}
+
+/** Opens a run on a card, which draws its probes. A refusal is named rather than read as a start. */
+export async function startCardRun(client: EngineClient, slug: string): Promise<Outcome<null>> {
+  try {
+    const { error } = await client.POST('/api/cards/{slug}/runs', { params: { path: { slug } } });
+    return error === undefined ? { ok: true, value: null } : { ok: false, refused: described(error) };
+  } catch (reason) {
+    return { ok: false, refused: String(reason) };
+  }
 }

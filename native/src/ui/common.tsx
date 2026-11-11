@@ -7,13 +7,13 @@ import { router } from 'expo-router';
 import {
   block,
   type ExamPlan,
-  loadingLine,
   type Queue,
-  readFailure,
   RETRY,
   syncErrorSummary,
   syncLine,
   syncErrorLabel,
+  pageReading,
+  copyReading,
 } from '@algo-coach/core';
 import type { QueueSession, Session, SyncState } from '@/lib/store';
 import { palette } from '@/ui/tokens';
@@ -206,18 +206,16 @@ export function Loaded<T>(props: {
   children: (data: T) => ReactNode;
 }) {
   const theme = useTheme();
-  const { data, error, reload } = props.state;
-  const muted = { color: theme.colors.onSurfaceVariant };
-  if (error) return <Failed message={readFailure(props.of, error)} onRetry={reload} />;
-  if (data === null || data === undefined)
+  const shown = pageReading(props.of, props.state, props.blank, props.blankWhen);
+  if (shown.kind === 'failed') return <Failed message={shown.line} onRetry={props.state.reload} />;
+  if (shown.kind === 'blank') return <Blank>{shown.line}</Blank>;
+  if (shown.kind === 'loading')
     return (
-      <Text variant="bodyMedium" style={muted}>
-        {loadingLine(props.of)}
+      <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+        {shown.line}
       </Text>
     );
-  const blank = props.blankWhen ?? ((x: T) => Array.isArray(x) && x.length === 0);
-  if (props.blank !== undefined && blank(data)) return <Blank>{props.blank}</Blank>;
-  return <>{props.children(data)}</>;
+  return <>{props.children(shown.data)}</>;
 }
 
 /** The device's copy as a reading: held once ready, failed with the sync while it holds nothing. */
@@ -225,12 +223,7 @@ export function fromCopy<T>(
   st: { ready: boolean; sync: SyncState; requestSync: (ms: number) => void },
   data: T | null | undefined,
 ): Reading<T> {
-  const shown = st.ready ? data : undefined;
-  return {
-    data: shown,
-    error: shown == null && st.sync.error ? st.sync.error : null,
-    reload: () => st.requestSync(0),
-  };
+  return { ...copyReading(st.ready, st.sync.error, data), reload: () => st.requestSync(0) };
 }
 
 export function Failed({ message, onRetry }: { message: string; onRetry: () => void }) {

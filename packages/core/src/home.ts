@@ -12,7 +12,10 @@ import {
   type Queue,
 } from './queue';
 import { passed, type Board } from './schedule';
-import { counted, groupLabel, nextUpView, type NextUpView, type QueueCounts } from './screens';
+import { readyCert } from './certview';
+import { readyLesson } from './lessons';
+import { bySavedOrder } from './order';
+import { counted, groupLabel, nextUpView, type EmptyAction, type NextUpView, type QueueCounts } from './screens';
 import type { Course, LessonRecord, Status, StatusRecord } from './types';
 
 export interface LearnerRecords {
@@ -96,6 +99,33 @@ export function continueCounts(p: ContinuePlan, focus: Focus | null, now: number
     empty: p.queue.isEmpty(p.b, now),
     blocked: p.queue.blockedByLimit(p.b, now),
   };
+}
+
+/** The module rows in the user's order, as the board and the knowledge home both list them. */
+export function orderedModuleRows(b: Board, order: readonly string[], now: number): ModuleRow[] {
+  return bySavedOrder(moduleRows(b, now), (row) => row.c.slug, order);
+}
+
+/** The knowledge home: its module rows, then the lesson and the certification the rules would take next. */
+export function knowledgeHome(b: Board, order: string[], certExams: CertRecord[], now: number) {
+  return {
+    rows: orderedModuleRows(b, order, now),
+    toRead: readyLesson(b, order),
+    toTake: readyCert(b, order, certExams),
+  };
+}
+
+/** What a client does for Continue's one act when nothing is ready, in this order. */
+export interface ContinueAct {
+  raise: boolean; // store a raise of today's limit
+  clearFocus: boolean;
+  open: 'queue' | 'certs' | null;
+}
+
+export function continueAct(kind: EmptyAction): ContinueAct {
+  if (kind === 'raise') return { raise: true, clearFocus: false, open: 'queue' };
+  if (kind === 'certs') return { raise: false, clearFocus: false, open: 'certs' };
+  return { raise: false, clearFocus: true, open: null };
 }
 
 /** A module's row on the home: what comes next in it, and how much it holds and owes. */

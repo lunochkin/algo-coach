@@ -33,6 +33,9 @@ import {
   STUDY_SETTINGS,
   type SettingName,
   SIGNED_IN_DEVICES,
+  validReminderHour,
+  validDeviceName,
+  validOrigin,
 } from '@algo-coach/core';
 import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
@@ -80,9 +83,9 @@ export default function SettingsScreen() {
 
   const study = studyForm({ new_per_day: form.new_per_day, exam_size: form.exam_size }, stored);
   const hour = Number(form.reminderHour);
-  const hourOk = Number.isInteger(hour) && hour >= 0 && hour <= 23;
-  const deviceOk = /^[A-Za-z0-9_-]+$/.test(form.device);
-  const originOk = /^https?:\/\/[^\s/]+$/.test(form.origin.trim());
+  const hourOk = validReminderHour(hour);
+  const deviceOk = validDeviceName(form.device);
+  const originOk = validOrigin(form.origin);
   const valid = study.valid && hourOk && deviceOk && originOk;
   const changed =
     form.origin.trim() !== st.settings.origin ||

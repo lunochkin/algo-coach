@@ -11,10 +11,11 @@ import {
   REVOKED_NOTE,
   SIGN_OUT,
   SIGNED_IN_DEVICES,
-  thisDevice,
   type components,
   OF,
   revokeLabel,
+  deviceTitle,
+  revokeDevice,
 } from '@algo-coach/core';
 import { described, engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -57,13 +58,8 @@ export default function DevicesScreen() {
 
   const revoke = async (device: SignedInDevice) => {
     setFailed(null);
-    try {
-      await engine(st.settings.origin, await getToken()).DELETE('/api/devices/{kind}/{device_id}', {
-        params: { path: { kind: device.kind, device_id: device.id } },
-      });
-    } catch (e) {
-      setFailed(described(e));
-    }
+    const revoked = await revokeDevice(engine(st.settings.origin, await getToken()), device);
+    if (!revoked.ok) setFailed(revoked.refused);
     void load();
   };
 
@@ -83,7 +79,7 @@ export default function DevicesScreen() {
               {listed.map((device) => (
                 <PickRow
                   key={device.id}
-                  title={device.current ? `${deviceName(device)} · ${thisDevice('phone')}` : deviceName(device)}
+                  title={deviceTitle(device, 'phone')}
                   stats={[]}
                   note={deviceLine(device, now)}
                   aside={

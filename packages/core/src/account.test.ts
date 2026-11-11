@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { deviceLine, deviceName, lastAt } from './index';
+import { deviceLine, deviceName, deviceTitle, lastAt, revokeDevice, type EngineClient } from './index';
 
 const NOW = Date.parse('2026-11-10T12:00:00Z');
 
@@ -35,5 +35,17 @@ describe("a signed-in device's name", () => {
 
   it('names a browser it cannot read plainly', () => {
     expect(deviceName({ kind: 'browser', name: null })).toBe('A browser');
+  });
+});
+
+describe("a signed-in device's title and revoke", () => {
+  it('names the device it is read on', () => {
+    expect(deviceTitle({ kind: 'app', name: 'pixel', current: true }, 'phone')).toBe('pixel · this phone');
+    expect(deviceTitle({ kind: 'app', name: 'pixel', current: false }, 'phone')).toBe('pixel');
+  });
+
+  it('names a refused revoke rather than reading it as revoked', async () => {
+    const client = { DELETE: () => Promise.resolve({ error: { detail: 'gone' } }) } as unknown as EngineClient;
+    expect(await revokeDevice(client, { kind: 'app', id: 'd1' })).toEqual({ ok: false, refused: expect.any(String) });
   });
 });

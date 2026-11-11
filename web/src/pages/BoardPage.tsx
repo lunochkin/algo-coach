@@ -10,9 +10,8 @@ import {
   BOARD_STUDYING,
   BOARD_UNTOUCHED,
   BOARD_PRACTISED,
-  bySavedOrder,
-  moduleRows,
   MODULES_HEADING,
+  orderedModuleRows,
 } from '@algo-coach/core'
 import { Link } from 'react-router'
 
@@ -38,7 +37,7 @@ export function BoardPage() {
   const { catalog, board: learnerBoard, order, now } = useLearner()
   const modules = useMemo(() => {
     const all = learnerBoard(null)
-    return catalog && all ? bySavedOrder(moduleRows(all, now), (row) => row.c.slug, order) : []
+    return catalog && all ? orderedModuleRows(all, order, now) : []
   }, [catalog, learnerBoard, order, now])
 
   return (

@@ -1,5 +1,7 @@
 import { createContext, useContext } from 'react'
 
+import { copyReading } from '@algo-coach/core'
+
 import type { Held } from '@/knowledge/copy'
 
 export interface SyncState {
@@ -39,11 +41,7 @@ export function linesOf<T>(records: Held[], kind: string): T[] {
 
 /** A page's reading of the copy, in the states `Loaded` renders. */
 export function loadedFrom<T>(k: Knowledge, data: T | undefined) {
-  const shown = k.ready ? data : undefined
-  return {
-    data: shown,
-    // a copy holding nothing yet fails with its sync; one holding something reads on
-    error: shown === undefined && k.sync.error ? k.sync.error : undefined,
-    retry: () => void k.resync(),
-  }
+  const { data: shown, error } = copyReading(k.ready, k.sync.error, data)
+  // `data` as given once ready: a page may read a null as its content
+  return { data: shown as T | undefined, error: error ?? undefined, retry: () => void k.resync() }
 }

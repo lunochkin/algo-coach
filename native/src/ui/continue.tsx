@@ -13,6 +13,7 @@ import {
   NEW_STEP,
   queueStart,
   waitingOutside,
+  continueAct,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { BottomBar, startQueue, styles } from '@/ui/common';
@@ -35,16 +36,19 @@ export function useContinue() {
     if (counts.empty) {
       const empty = emptyContinue({ blocked: counts.blocked, newLimit, focus });
       setNotice(empty.notice);
-      const run = {
-        raise: () => {
+      const act = empty.action;
+      const run = () => {
+        if (!act) return;
+        const step = continueAct(act.kind);
+        if (step.raise) {
           void st.raiseNew();
           cont.queue.raise(NEW_STEP);
-          startQueue(st, 'next', cont.queue, cont.course, cont.include);
-        },
-        certs: () => router.push('/certs'),
-        'clear-focus': () => void st.setFocus(null),
+        }
+        if (step.clearFocus) void st.setFocus(null);
+        if (step.open === 'queue') startQueue(st, 'next', cont.queue, cont.course, cont.include);
+        else if (step.open === 'certs') router.push('/certs');
       };
-      setAction(empty.action && { label: empty.action.label, run: run[empty.action.kind] });
+      setAction(act && { label: act.label, run });
       return;
     }
     startQueue(st, 'next', cont.queue, cont.course, cont.include);

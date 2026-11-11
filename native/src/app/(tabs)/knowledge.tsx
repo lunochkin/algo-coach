@@ -5,21 +5,18 @@ import { Appbar, Button, IconButton, useTheme } from 'react-native-paper';
 import ReorderableList, { useReorderableDrag, type ReorderableListReorderEvent } from 'react-native-reorderable-list';
 
 import {
-  bySavedOrder,
   CERTIFICATIONS_LINK,
   type ModuleRow as ModuleRowView,
   focusLabel,
   LESSONS_LINK,
   MODULES_HEADING,
-  moduleRows,
   MODULES_OF,
   NO_MODULES,
-  readyCert,
-  readyLesson,
   SYNC_NOW,
   reorderLabel,
   SECTION_KNOWLEDGE,
   moved,
+  knowledgeHome,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { fromCopy, Loaded, styles, SyncBanner, SyncLine } from '@/ui/common';
@@ -39,23 +36,11 @@ export default function Home() {
 
   const { board } = st;
   const b = useMemo(() => board(null), [board]);
-  const { now } = st;
-  const info = useMemo(() => (b ? { courses: moduleRows(b, now) } : null), [b, now]);
-
-  // The first certificate whose requirements are met but its exam (shown above Continue).
-  const certToTake = useMemo(() => {
-    const all = board(null);
-    return all ? readyCert(all, st.courseOrder, st.catalog?.certExams ?? []) : null;
-  }, [board, st.courseOrder, st.catalog]);
-
-  // The first lesson due to be read (its pretest used up, or pretest 0), in course order.
-  const toRead = useMemo(() => {
-    const all = board(null);
-    return all ? readyLesson(all, st.courseOrder) : null;
-  }, [board, st.courseOrder]);
-
-  const order = st.courseOrder;
-  const rows = useMemo(() => bySavedOrder(info?.courses ?? [], (r) => r.c.slug, order), [info, order]);
+  const { now, courseOrder: order } = st;
+  const certExams = st.catalog?.certExams;
+  const home = useMemo(() => (b ? knowledgeHome(b, order, certExams ?? [], now) : null), [b, order, certExams, now]);
+  const rows = home?.rows ?? [];
+  const { toRead = null, toTake: certToTake = null } = home ?? {};
   const onReorder = ({ from, to }: ReorderableListReorderEvent) => {
     void st.setCourseOrder(
       moved(

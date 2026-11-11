@@ -17,6 +17,7 @@ import {
   ENGINE_ADDRESS,
   ADDRESS_HINT,
   DEV_LOGIN_INTRO,
+  validOrigin,
 } from '@algo-coach/core';
 import { offered, signIn, type Offered, type Provider } from '@/lib/auth';
 import { described } from '@/lib/engine';
@@ -24,7 +25,6 @@ import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
 import { Failed } from '@/ui/common';
 
-const ADDRESS = /^https?:\/\/[^\s/]+$/;
 const ICONS = { google: 'google', github: 'github', dev: 'laptop' };
 
 /** The app's first screen until it holds a token: sign in through a provider. */
@@ -36,7 +36,7 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   // asked only where the build named no engine: native/.env normally does
   const [origin, setOrigin] = useState(st.settings.origin);
-  const originOk = ADDRESS.test(origin.trim());
+  const originOk = validOrigin(origin);
   const [offer, setOffer] = useState<Offered | null>(null);
   const [unread, setUnread] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -44,7 +44,7 @@ export default function LoginScreen() {
   // the providers the engine names, read as the web's login reads them
   useEffect(() => {
     const at = origin.trim();
-    if (!ADDRESS.test(at)) return;
+    if (!validOrigin(at)) return;
     let live = true;
     setOffer(null);
     setUnread(null);

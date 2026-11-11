@@ -16,10 +16,9 @@ import {
   BOARD_UNTOUCHED,
   BOARD_PRACTISED,
   BOARD_NOTE,
-  bySavedOrder,
-  moduleRows,
   MODULES_HEADING,
   focusLabel,
+  orderedModuleRows,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
@@ -47,10 +46,7 @@ export default function PracticeScreen() {
   // of every study, `pages.md`, Sections
   const { board: learner, courseOrder, now } = st;
   const all = useMemo(() => learner(null), [learner]);
-  const modules = useMemo(
-    () => (all ? bySavedOrder(moduleRows(all, now), (row) => row.c.slug, courseOrder) : []),
-    [all, now, courseOrder],
-  );
+  const modules = useMemo(() => (all ? orderedModuleRows(all, courseOrder, now) : []), [all, now, courseOrder]);
   useEffect(() => {
     // the app opens on Login until it holds a token, and returns there on sign-out
     if (st.ready && !st.hasToken) router.replace('/login');

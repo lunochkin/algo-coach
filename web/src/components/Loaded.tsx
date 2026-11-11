@@ -1,4 +1,4 @@
-import { loadingLine, readFailure, RETRY } from '@algo-coach/core'
+import { RETRY, pageReading } from '@algo-coach/core'
 import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -21,22 +21,17 @@ type Props<T> = {
 // the three readings a page gives before its content, rendered once: a page
 // that is loading, failed or empty then reads the same wherever the user is
 export function Loaded<T>({ of, state, blank, blankWhen, children }: Props<T>) {
-  if (state.error !== undefined)
+  const shown = pageReading(of, state, blank, blankWhen)
+  if (shown.kind === 'failed')
     return (
       <div className="flex items-center gap-stack text-meta">
-        <ErrorLine>{readFailure(of, state.error)}</ErrorLine>
+        <ErrorLine>{shown.line}</ErrorLine>
         <Button variant="outline" size="sm" onClick={state.retry}>
           {RETRY}
         </Button>
       </div>
     )
-  if (state.data === undefined)
-    return <p className="text-meta text-muted-foreground">{loadingLine(of)}</p>
-  if (blank !== undefined && (blankWhen ?? isEmpty)(state.data))
-    return <p className="text-meta text-muted-foreground">{blank}</p>
-  return <>{children(state.data)}</>
-}
-
-function isEmpty(data: unknown): boolean {
-  return Array.isArray(data) && data.length === 0
+  if (shown.kind !== 'content')
+    return <p className="text-meta text-muted-foreground">{shown.line}</p>
+  return <>{children(shown.data)}</>
 }

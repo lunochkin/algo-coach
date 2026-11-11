@@ -3,23 +3,20 @@ import { useMemo } from 'react'
 import { Link } from 'react-router'
 
 import {
-  bySavedOrder,
   CERTIFICATIONS_LINK,
   LESSONS_LINK,
   MODULES_HEADING,
   type ModuleRow as ModuleRowView,
-  moduleRows,
   MODULES_OF,
   moved,
   NO_MODULES,
-  readyCert,
-  readyLesson,
   syncErrorSummary,
   newRecord,
   SECTION_KNOWLEDGE,
   KNOWLEDGE_NOTE,
   moveUp,
   moveDown,
+  knowledgeHome,
 } from '@algo-coach/core'
 
 import { ErrorLine } from '@/components/ErrorLine'
@@ -41,11 +38,7 @@ export function KnowledgePage() {
   const home = useMemo(() => {
     const all = board(null)
     if (!catalog || !all) return undefined
-    return {
-      rows: bySavedOrder(moduleRows(all, now), (row) => row.c.slug, order),
-      toRead: readyLesson(all, order),
-      toTake: readyCert(all, order, certExams),
-    }
+    return knowledgeHome(all, order, certExams, now)
   }, [catalog, board, order, certExams, now])
 
   function move(rows: ModuleRowView[], from: number, to: number) {

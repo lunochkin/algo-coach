@@ -26,6 +26,8 @@ import {
   STRICT,
   strictLabel,
   waitingOutside,
+  continueAct,
+  type EmptyAction,
 } from '@algo-coach/core'
 
 import { Panel } from '@/components/Panel'
@@ -75,13 +77,13 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
     setEmpty(emptyContinue({ blocked: c.blocked, newLimit, focus }))
   }
 
-  async function act(kind: string) {
+  async function act(kind: EmptyAction) {
     setEmpty(null)
-    if (kind === 'raise') {
-      await k.add('raise', newRecord.raise())
-      navigate('/knowledge/queue?mode=next')
-    } else if (kind === 'clear-focus') setFocus(null)
-    else if (kind === 'certs') navigate(CERTIFICATIONS)
+    const step = continueAct(kind)
+    if (step.raise) await k.add('raise', newRecord.raise())
+    if (step.clearFocus) setFocus(null)
+    if (step.open === 'queue') navigate('/knowledge/queue?mode=next')
+    else if (step.open === 'certs') navigate(CERTIFICATIONS)
   }
 
   const reading = focus && panel && (

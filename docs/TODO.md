@@ -363,6 +363,13 @@ removes the difference the pass found.
       Settings
 - [x] Move the phone's knowledge counts onto a clock that moves each minute,
       as the web's do
+- [x] Move the knowledge home's rows, its lesson to read and its
+      certification to take into core, and Continue's act where nothing is
+      ready
+- [x] Move starting a card's run and revoking a device into core. The phone
+      read a refused start as started, and a refused revoke as revoked
+- [x] Move a card's sections, a page's four readings, a device's title and
+      the phone's own settings checks into core
 - [ ] Offer Copy on a long failing value on the phone, once a clipboard
       module is in the app's build
 

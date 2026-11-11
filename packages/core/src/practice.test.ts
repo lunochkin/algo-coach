@@ -4,6 +4,7 @@ import {
   boardView,
   cardBlocks,
   cardRow,
+  cardSections,
   inProgress,
   cardNote,
   cardProgress,
@@ -15,6 +16,7 @@ import {
   readFailure,
   recallLine,
   revealLabel,
+  startCardRun,
   techniqueCards,
   techniqueStats,
   templateView,
@@ -320,5 +322,22 @@ describe("a card's ladder", () => {
     const one = { ...studied(true), card: { ...studied(true).card, technique: 'binary-search' } };
     expect(cardNote(one, Date.parse('2026-11-01T00:00:00Z'))).toMatch(/^binary-search · studying since /);
     expect(cardNote({ ...one, run: null }, 0)).toBe('binary-search');
+  });
+});
+
+describe("a card's sections and its run", () => {
+  it('names the probes only once a run drew some', () => {
+    expect(cardSections({ probes: [] }).map((one) => one.id)).toEqual(['trigger', 'brief', 'ladder', 'templates']);
+    expect(cardSections({ probes: [{}] as never }).map((one) => one.id)).toContain('probes');
+    expect(cardSections(null)).toEqual([]);
+  });
+
+  it('names a refused start rather than reading it as started', async () => {
+    const refusing = { POST: () => Promise.resolve({ error: { detail: 'no' } }) } as unknown as Parameters<
+      typeof startCardRun
+    >[0];
+    expect((await startCardRun(refusing, 'dp')).ok).toBe(false);
+    const starting = { POST: () => Promise.resolve({ data: {} }) } as unknown as Parameters<typeof startCardRun>[0];
+    expect(await startCardRun(starting, 'dp')).toEqual({ ok: true, value: null });
   });
 });

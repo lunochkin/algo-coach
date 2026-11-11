@@ -48,3 +48,8 @@ export function studyForm(typed: Record<SettingName, string>, stored: Record<Set
     changed: STUDY_SETTINGS.filter((name) => values[name] !== stored[name]),
   };
 }
+
+// the phone's own settings, each checked where its rule is worded: `pages.md`, The two clients
+export const validOrigin = (origin: string) => /^https?:\/\/[^\s/]+$/.test(origin.trim());
+export const validDeviceName = (name: string) => /^[A-Za-z0-9_-]+$/.test(name);
+export const validReminderHour = (hour: number) => Number.isInteger(hour) && hour >= 0 && hour <= 23;

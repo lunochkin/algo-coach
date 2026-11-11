@@ -8,6 +8,8 @@ import {
   learnerCatalog,
   loadSnapshot,
   moduleRows,
+  continueAct,
+  knowledgeHome,
   queueStart,
   type AttemptRecord,
   type Catalog,
@@ -130,5 +132,18 @@ describe('the home', () => {
     expect(v.next).toBe('Ints · Foundation · 0/2');
     // the answer this morning met a1 for the first time, so it spent one of today's ten
     expect([v.due, v.newLeft, v.cert]).toEqual([1, 9, null]);
+  });
+});
+
+describe('the knowledge home', () => {
+  it('lists the module rows in the saved order', () => {
+    const { catalog } = learnerCatalog(snapshot, none);
+    const home = knowledgeHome(boardOf(catalog)(null)!, ['b', 'a'], [], NOW);
+    expect(home.rows.map((row) => row.c.slug)).toEqual(['b', 'a']);
+  });
+
+  it("raises the day's limit before it opens the queue, and clears a focus in place", () => {
+    expect(continueAct('raise')).toEqual({ raise: true, clearFocus: false, open: 'queue' });
+    expect(continueAct('clear-focus')).toEqual({ raise: false, clearFocus: true, open: null });
   });
 });

@@ -20,12 +20,14 @@ import {
   nextRung,
   cardNote,
   cardProgress,
+  cardSections,
+  startCardRun,
 } from '@algo-coach/core'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { api, type Studied } from '@/api/client'
-import { described, useLoaded } from '@/api/useLoaded'
+import { useLoaded } from '@/api/useLoaded'
 import { ErrorLine } from '@/components/ErrorLine'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
@@ -38,7 +40,7 @@ import { TemplatePanel } from '@/components/TemplatePanel'
 import { ProgressBar } from '@/components/ProgressBar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { type Item, useSections } from '@/lib/sections'
+import { useSections } from '@/lib/sections'
 
 export function CardPage() {
   // the moment the page opened, which a run's age is read at
@@ -51,30 +53,17 @@ export function CardPage() {
   const [starting, setStarting] = useState(false)
   const [refused, setRefused] = useState<string | null>(null)
   const data = studied.data
-  const items: Item[] = [
-    { id: 'trigger', label: CARD_TRIGGER },
-    { id: 'brief', label: CARD_BRIEF },
-    { id: 'ladder', label: LADDER_TITLE },
-    ...(data && data.probes.length > 0 ? [{ id: 'probes', label: PROBES_TITLE }] : []),
-    { id: 'templates', label: CARD_TEMPLATES },
-  ]
+  const items = cardSections(data)
   const { current, closed, toggle, jump } = useSections(items)
 
   // the ladder is measured from the start, so the press is what opens a run
   async function study() {
     setStarting(true)
     setRefused(null)
-    try {
-      const { error } = await api.POST('/api/cards/{slug}/runs', {
-        params: { path: { slug } },
-      })
-      if (error) setRefused(described(error))
-      else studied.retry()
-    } catch (reason) {
-      setRefused(String(reason))
-    } finally {
-      setStarting(false)
-    }
+    const started = await startCardRun(api, slug)
+    setStarting(false)
+    if (started.ok) studied.retry()
+    else setRefused(started.refused)
   }
 
   return (
