@@ -229,7 +229,7 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
 - [x] Move the claim and the self-label into core: the drilled default, the
       glosses and the words. The modes an outcome allows stay the engine's,
       which sends them with each attempt and refuses a label outside them
-- [ ] Add the sitting to the phone's Problem screen, the statement and the
+- [x] Add the sitting to the phone's Problem screen, the statement and the
       editor as two tabs: the clock, Submit, the verdict, End and the press
       back to the card. With no connection it says so
 - [ ] Keep a problem's unsent code and the clock preference on the phone, and

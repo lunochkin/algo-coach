@@ -168,9 +168,10 @@ function TemplateCard({
 
 type Studied = components['schemas']['Studied'];
 
-// a rung and a probe each open the problem, with the card's technique drilled
-const openProblem = (problem: string, technique: string) =>
-  router.push({ pathname: '/problem', params: { problem, technique } });
+// a rung and a probe each open the problem, with the card's technique drilled,
+// and the card the sitting returns to
+const openProblem = (problem: string, technique: string, card: string) =>
+  router.push({ pathname: '/problem', params: { problem, technique, card } });
 
 function Ladder({ studied }: { studied: Studied }) {
   const theme = useTheme();
@@ -189,7 +190,7 @@ function Ladder({ studied }: { studied: Studied }) {
                 key={rung.problemId}
                 accessibilityRole="link"
                 accessibilityLabel={rung.title}
-                onPress={() => openProblem(rung.problemId, studied.card.technique)}
+                onPress={() => openProblem(rung.problemId, studied.card.technique, studied.card.slug)}
               >
                 <View style={{ paddingHorizontal: 16, paddingVertical: 12, gap: 6 }}>
                   <View style={[styles.row, { flexWrap: 'wrap' }]}>
@@ -248,7 +249,7 @@ function Probes({ studied }: { studied: Studied }) {
             title={one.problem.title}
             badge={one.problem.difficulty ?? null}
             stats={[{ label: '', value: probeState(one.attempted) }]}
-            onPress={() => openProblem(one.problem.id, studied.card.technique)}
+            onPress={() => openProblem(one.problem.id, studied.card.technique, studied.card.slug)}
           />
         ))}
       </PickPanel>

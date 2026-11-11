@@ -1,35 +1,116 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import { Appbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { AppState, ScrollView, View } from 'react-native';
+import {
+  Appbar,
+  Button,
+  Dialog,
+  IconButton,
+  Portal,
+  SegmentedButtons,
+  Text,
+  TouchableRipple,
+  useTheme,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { problemCards, problemTried, readFailure, loadingLine } from '@algo-coach/core';
+import {
+  CLOCK_PAUSE,
+  CLOCK_PAUSED,
+  CLOCK_RUNNING,
+  CLOCK_START,
+  clockState,
+  described,
+  editorOpening,
+  END_KEEP,
+  END_NOTE,
+  END_TITLE,
+  loadingLine,
+  problemCards,
+  problemTried,
+  readFailure,
+  SITTING_END,
+  SITTING_ENDED,
+  sittingBack,
+  sittingRefused,
+  submitLabel,
+  type components,
+} from '@algo-coach/core';
+import { engine } from '@/lib/engine';
+import { getToken } from '@/lib/settings';
+import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { Failed, styles } from '@/ui/common';
+import { Failed, styles, tones } from '@/ui/common';
+import { CodeEditor, type EditorHandle } from '@/ui/editor';
+import { KeyPad } from '@/ui/keys';
 import { Markdown } from '@/ui/markdown';
 import { Badge } from '@/ui/rows';
+import { ElapsedClock, SubmissionVerdict } from '@/ui/verdict';
+
+type Sitting = components['schemas']['Sitting'];
+type Served = components['schemas']['Served'];
+type Carry = components['schemas']['Carry'];
+type Submitted = components['schemas']['Submitted'];
+type Moved = { sitting: Sitting | null; elapsedSec: number | null; at: number };
+
+// the engine ends a sitting nothing has touched, and a solver thinking is
+// practising, so an open screen reads the sitting again, well under the
+// 45 minutes `log.md` ends an untouched one at
+const TOUCH_MS = 10 * 60 * 1000;
 
 /**
- * A problem's record and its statement, with no editor and no clock: the
- * sitting stays on the web. Reading the statement mints nothing, as
- * `log.md` gives.
+ * A problem's record and its statement, and the sitting on it: the statement
+ * and the editor as two tabs, under one bar holding the clock. Reading the
+ * statement mints nothing, and the first clock press or submission mints the
+ * sitting, as `log.md` gives.
  */
 export default function ProblemScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { problem = '', technique } = useLocalSearchParams<{ problem: string; technique?: string }>();
+  const {
+    problem = '',
+    technique,
+    card,
+  } = useLocalSearchParams<{ problem: string; technique?: string; card?: string }>();
   const picked = useEngine('/api/problems/{problem_id}', { problem_id: problem });
-  // a retired problem is refused its statement, and reads as its record alone
-  const served = useEngine(picked.data && !picked.data.retired ? '/api/problems/{problem_id}/statement' : null, {
-    problem_id: problem,
-  });
   const listed = useEngine('/api/cards');
-  const error = picked.error ?? served.error ?? listed.error;
+  const error = picked.error ?? listed.error;
   const [now] = useState(() => Date.now());
   const record = picked.data;
   const cards = record ? problemCards(listed.data ?? [], record.techniques, technique ?? null) : [];
   const muted = { color: theme.colors.onSurfaceVariant };
+
+  const facts = record ? (
+    <>
+      <View style={[styles.row, { flexWrap: 'wrap' }]}>
+        {record.difficulty ? <Badge label={record.difficulty} /> : null}
+        <Text variant="bodySmall" style={muted}>
+          {record.techniques.join(' · ')}
+        </Text>
+        <Text variant="bodySmall" style={muted}>
+          {problemTried(record, now)}
+        </Text>
+      </View>
+      {cards.length > 0 ? (
+        <View style={[styles.row, { flexWrap: 'wrap' }]}>
+          <Text variant="bodySmall" style={muted}>
+            {cards.length === 1 ? 'Card:' : 'Cards:'}
+          </Text>
+          {cards.map((one) => (
+            <TouchableRipple
+              key={one.slug}
+              accessibilityRole="link"
+              onPress={() => router.push({ pathname: '/card', params: { slug: one.slug } })}
+            >
+              <Text variant="bodySmall" style={{ color: theme.colors.primary }}>
+                {one.title}
+              </Text>
+            </TouchableRipple>
+          ))}
+        </View>
+      ) : null}
+    </>
+  ) : null;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -37,63 +118,308 @@ export default function ProblemScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={record?.title ?? 'The problem'} />
       </Appbar.Header>
-      <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
-        {error ? (
+      {error ? (
+        <View style={styles.page}>
           <Failed
             message={readFailure('the problem', error)}
             onRetry={() => {
               picked.reload();
-              served.reload();
               listed.reload();
             }}
           />
-        ) : !record || listed.data === null || (!record.retired && served.data === null) ? (
+        </View>
+      ) : !record || listed.data === null ? (
+        <View style={styles.page}>
           <Text variant="bodyMedium">{loadingLine('the problem')}</Text>
+        </View>
+      ) : record.retired ? (
+        <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
+          {facts}
+          <Text variant="bodyMedium">
+            This problem was retired: its statement asked for something its cases do not decide. It is served to nobody,
+            and your attempts on it stay in your log.
+          </Text>
+        </ScrollView>
+      ) : (
+        <SittingOn problemId={problem} card={card ?? null} facts={facts} bottom={insets.bottom} />
+      )}
+    </View>
+  );
+}
+
+function SittingOn({
+  problemId,
+  card,
+  facts,
+  bottom,
+}: {
+  problemId: string;
+  card: string | null;
+  facts: ReactNode;
+  bottom: number;
+}) {
+  const theme = useTheme();
+  const { origin, device } = useStore().settings;
+  // the statement comes with the sitting running on the problem, where one runs
+  const served = useEngine('/api/problems/{problem_id}/statement', { problem_id: problemId });
+  const [carry, setCarry] = useState<Carry | null | undefined>(undefined);
+  const [moved, setMoved] = useState<Moved | null>(null);
+  const [moving, setMoving] = useState(false);
+  const [refused, setRefused] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+  const [submitted, setSubmitted] = useState<Submitted | null>(null);
+  const [tab, setTab] = useState<'statement' | 'code'>('statement');
+  const [keys, setKeys] = useState(true);
+  const [ending, setEnding] = useState(false);
+  const editor = useRef<EditorHandle>(null);
+  const code = useRef<string | null>(null);
+
+  // each reading of the statement is a reading of the sitting, stamped on arrival
+  const statement: Served | null = served.data;
+  useEffect(() => {
+    if (statement) setMoved({ sitting: statement.sitting, elapsedSec: statement.elapsed_sec, at: performance.now() });
+  }, [statement]);
+
+  // what a new sitting may open on, bounded by the card's run where the
+  // problem came from a card. A carry that failed opens on the signature
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      try {
+        const { data } = await engine(origin, await getToken()).GET('/api/problems/{problem_id}/carry', {
+          params: { path: { problem_id: problemId }, query: { card } },
+        });
+        if (live) setCarry(data ?? null);
+      } catch {
+        if (live) setCarry(null);
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [origin, problemId, card]);
+
+  const current = moved?.sitting ?? null;
+  const sittingId = current?.id ?? null;
+  const clock = clockState(current);
+
+  useEffect(() => {
+    if (sittingId === null || clock.ended) return;
+    const tick = setInterval(() => {
+      if (AppState.currentState !== 'active') return;
+      void (async () => {
+        const { data } = await engine(origin, await getToken()).GET('/api/sittings/{sitting_id}', {
+          params: { path: { sitting_id: sittingId } },
+        });
+        if (data) setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() });
+      })();
+    }, TOUCH_MS);
+    return () => clearInterval(tick);
+  }, [origin, sittingId, clock.ended]);
+
+  // the first clock press or submission mints the sitting it runs in, named
+  // by the device it was minted on
+  async function begun(): Promise<string | null> {
+    if (sittingId !== null) return sittingId;
+    const { data, error } = await engine(origin, await getToken()).POST('/api/problems/{problem_id}/sittings', {
+      params: { path: { problem_id: problemId } },
+      body: { device },
+    });
+    if (!data) {
+      setRefused(described(error));
+      return null;
+    }
+    setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() });
+    return data.sitting.id;
+  }
+
+  async function move(to: 'start' | 'pause' | 'resume' | 'end') {
+    setMoving(true);
+    setRefused(null);
+    try {
+      const id = to === 'start' ? await begun() : sittingId;
+      if (id === null) return;
+      const client = engine(origin, await getToken());
+      const params = { params: { path: { sitting_id: id } } };
+      const { data, error } =
+        to === 'start'
+          ? await client.POST('/api/sittings/{sitting_id}/start', params)
+          : to === 'pause'
+            ? await client.POST('/api/sittings/{sitting_id}/pause', params)
+            : to === 'resume'
+              ? await client.POST('/api/sittings/{sitting_id}/resume', params)
+              : await client.POST('/api/sittings/{sitting_id}/end', params);
+      if (data) setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() });
+      else setRefused(described(error));
+    } catch (reason) {
+      setRefused(String(reason));
+    } finally {
+      setMoving(false);
+    }
+  }
+
+  if (served.error)
+    return (
+      <View style={styles.page}>
+        <Failed message={readFailure('the problem', served.error)} onRetry={served.reload} />
+      </View>
+    );
+  if (!statement || carry === undefined)
+    return (
+      <View style={styles.page}>
+        <Text variant="bodyMedium">{loadingLine('the problem')}</Text>
+      </View>
+    );
+
+  const opened = editorOpening(null, sittingId, carry, statement.signature);
+
+  async function submit() {
+    if (running) return;
+    setRunning(true);
+    setRefused(null);
+    try {
+      const id = await begun();
+      if (id === null) return;
+      const { data, error } = await engine(origin, await getToken()).POST('/api/sittings/{sitting_id}/submissions', {
+        params: { path: { sitting_id: id } },
+        body: { code: code.current ?? opened.code, restored: opened.restored },
+      });
+      if (data) {
+        setSubmitted(data);
+        // a solve ends the sitting
+        setMoved({ sitting: data.sitting, elapsedSec: data.attempt.time_to_solve_sec ?? null, at: performance.now() });
+      } else setRefused(described(error));
+    } catch (reason) {
+      setRefused(String(reason));
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  const toggleKeys = () => {
+    setKeys(!keys);
+    setTimeout(() => editor.current?.measure(), 100);
+  };
+
+  return (
+    <View style={{ flex: 1, paddingBottom: bottom + 8 }}>
+      {/* the sitting is run from one bar above both tabs: the clock is what
+          the solver is watched by */}
+      <View style={[styles.row, { paddingHorizontal: 12, paddingVertical: 4, gap: 8 }]}>
+        {clock.running ? (
+          <View
+            accessibilityLabel={CLOCK_RUNNING}
+            style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tones(theme.dark).done }}
+          />
+        ) : null}
+        {moved ? <ElapsedClock elapsedSec={moved.elapsedSec} receivedAt={moved.at} running={clock.running} /> : null}
+        {clock.paused && !clock.ended ? (
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            {CLOCK_PAUSED}
+          </Text>
+        ) : null}
+        <View style={{ flex: 1 }} />
+        {clock.ended ? (
+          <>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              {SITTING_ENDED}
+            </Text>
+            <Button mode="contained" compact onPress={() => router.back()}>
+              {sittingBack(card)}
+            </Button>
+          </>
         ) : (
           <>
-            <View style={[styles.row, { flexWrap: 'wrap' }]}>
-              {record.difficulty ? <Badge label={record.difficulty} /> : null}
-              <Text variant="bodySmall" style={muted}>
-                {record.techniques.join(' · ')}
-              </Text>
-              <Text variant="bodySmall" style={muted}>
-                {problemTried(record, now)}
-              </Text>
-            </View>
-            {cards.length > 0 ? (
-              <View style={[styles.row, { flexWrap: 'wrap' }]}>
-                <Text variant="bodySmall" style={muted}>
-                  {cards.length === 1 ? 'Card:' : 'Cards:'}
-                </Text>
-                {cards.map((card) => (
-                  <TouchableRipple
-                    key={card.slug}
-                    accessibilityRole="link"
-                    onPress={() => router.push({ pathname: '/card', params: { slug: card.slug } })}
-                  >
-                    <Text variant="bodySmall" style={{ color: theme.colors.primary }}>
-                      {card.title}
-                    </Text>
-                  </TouchableRipple>
-                ))}
-              </View>
-            ) : null}
-            {record.retired ? (
-              <Text variant="bodyMedium">
-                This problem was retired: its statement asked for something its cases do not decide. It is served to
-                nobody, and your attempts on it stay in your log.
-              </Text>
-            ) : served.data ? (
-              <>
-                <Markdown>{served.data.statement}</Markdown>
-                <Text variant="bodySmall" style={muted}>
-                  The problem is solved on the web, where the editor and the clock are.
-                </Text>
-              </>
-            ) : null}
+            {/* one press for the clock: it starts a clock that never ran,
+                resumes a paused one, and pauses a running one */}
+            <Button
+              mode="outlined"
+              compact
+              disabled={moving}
+              onPress={() => void move(clock.unstarted ? 'start' : clock.paused ? 'resume' : 'pause')}
+            >
+              {clock.unstarted || clock.paused ? CLOCK_START : CLOCK_PAUSE}
+            </Button>
+            <Button mode="outlined" compact disabled={moving || sittingId === null} onPress={() => setEnding(true)}>
+              {SITTING_END}
+            </Button>
           </>
         )}
+      </View>
+      {refused ? (
+        <Text variant="bodySmall" style={{ color: theme.colors.error, paddingHorizontal: 12 }}>
+          {sittingRefused(refused)}
+        </Text>
+      ) : null}
+      <SegmentedButtons
+        value={tab}
+        onValueChange={(value) => setTab(value as 'statement' | 'code')}
+        style={{ marginHorizontal: 12, marginVertical: 6 }}
+        buttons={[
+          { value: 'statement', label: 'Statement', icon: 'text-box-outline' },
+          { value: 'code', label: 'Code', icon: 'code-tags' },
+        ]}
+      />
+      {/* the editor stays mounted under the statement, so a tab switch keeps
+          what was typed */}
+      <ScrollView
+        style={{ display: tab === 'statement' ? 'flex' : 'none' }}
+        contentContainerStyle={[styles.page, { paddingTop: 4 }]}
+      >
+        {facts}
+        <Markdown>{statement.statement}</Markdown>
       </ScrollView>
+      <View style={{ flex: 1, display: tab === 'code' ? 'flex' : 'none' }}>
+        <CodeEditor
+          ref={editor}
+          initial={opened.code}
+          onChange={(typed) => {
+            code.current = typed;
+          }}
+        />
+        <View style={[styles.row, { paddingHorizontal: 8, paddingVertical: 6, gap: 8 }]}>
+          <Button mode="contained" onPress={() => void submit()} disabled={running || clock.ended}>
+            {submitLabel(running)}
+          </Button>
+          <IconButton
+            icon={keys ? 'keyboard-close' : 'keyboard'}
+            accessibilityLabel={keys ? 'Hide the keyboard' : 'Show the keyboard'}
+            style={{ marginLeft: 'auto' }}
+            onPress={toggleKeys}
+          />
+        </View>
+        {submitted ? (
+          // the verdict sits under the editor: a failing case is read beside
+          // the code that failed it
+          <ScrollView style={{ flexGrow: 0, maxHeight: 220 }} contentContainerStyle={{ paddingHorizontal: 12 }}>
+            <SubmissionVerdict submitted={submitted} />
+          </ScrollView>
+        ) : null}
+        {keys && !clock.ended ? (
+          <View style={{ paddingHorizontal: 8, paddingTop: 6 }}>
+            <KeyPad lines onKey={(key) => editor.current?.press(key)} />
+          </View>
+        ) : null}
+      </View>
+      <Portal>
+        <Dialog visible={ending} onDismiss={() => setEnding(false)}>
+          <Dialog.Title>{END_TITLE}</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">{END_NOTE}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setEnding(false)}>{END_KEEP}</Button>
+            <Button
+              onPress={() => {
+                setEnding(false);
+                void move('end');
+              }}
+            >
+              {SITTING_END}
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }

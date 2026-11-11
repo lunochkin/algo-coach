@@ -391,7 +391,7 @@ what it offers. The inventory is the list both clients build to.
 | A technique's problems and cards | `/techniques/:technique` | Technique | same |
 | The problem listing | `/problems` | the Problems tab | same |
 | A picked problem's record and statement | `/problems/:problem_id` | Problem | same |
-| A sitting | `/problems/:problem_id` | none | web for now |
+| A sitting | `/problems/:problem_id` | Problem, its Code tab | to fix |
 | The cards | `/cards` | the Cards tab | same |
 | A card's trigger, brief and templates | `/cards/:slug` | Card | same |
 | A card's ladder and probes | `/cards/:slug` | Card | same |
@@ -442,9 +442,11 @@ what it offers. The inventory is the list both clients build to.
 | Revoke a signed-in device | the signed-in devices | the signed-in devices | same |
 | Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
 
-- **A sitting is web for now.** Its phone layout is the trigger: the
-  statement and the editor as two tabs, and the clock beside them. The items
-  under "Code on the phone" in `TODO.md` build it.
+- **The phone's sitting holds the statement and the editor as two tabs**,
+  under one bar holding the clock, its press and End. The editor stays
+  mounted under the statement, so a switch keeps what was typed. The first
+  clock press or submission mints the sitting, named by the phone's device
+  name, and an ended sitting's press returns to the card or the board.
 - **The phone's Recall screen types the form through the app's keyboard**,
   into the editor `README.md` gives. The editor's pad adds enter, indent and
   dedent, a strip the finger drags to move the caret, and a layer of
@@ -482,16 +484,13 @@ what it offers. The inventory is the list both clients build to.
   techniques, the counts the user reached on it, and its cards, then the
   statement. Serving the statement mints nothing, so the phone reads a problem
   as the web does.
-- **The Problem screen holds no editor and no clock.** A sitting stays on the
-  web, and the screen says the problem is solved there. A phone layout for
-  writing code is the trigger that adds the editor and the clock.
 - **The phone's card reads its ladder and its probes as the web's does.** A
-  rung and a probe each open the phone's Problem screen, and the sitting the
-  problem asks for stays on the web.
+  rung and a probe each open the phone's Problem screen, named by the card,
+  and the sitting it opens returns to that card.
 - **The phone starts a card's run below the ladder.** The ladder names what
   the run will measure, so the press follows it. Starting draws the probes
   and opens the run on both clients, and the sittings it counts are sat on
-  the web.
+  either.
 - **The phone reads the board and the cards from the engine and keeps no
   copy.** With no connection the Practice tab, the Cards tab and each screen
   under them say so. The knowledge copy exists so a
@@ -517,9 +516,15 @@ what it offers. The inventory is the list both clients build to.
 ### To fix
 
 A row marked `to fix` is listed here with what holds now and the change it
-needs. No row is marked `to fix` today. The audit of 2026-11-10 compared
-every knowledge row marked `same` with the other client's code, and both
-clients were brought together on each difference it found.
+needs. The audit of 2026-11-10 compared every knowledge row marked `same`
+with the other client's code, and both clients were brought together on each
+difference it found.
+
+- **A sitting.** The phone's sitting asks no claim and no label once it
+  ends, offers no press restoring the last solve, keeps no unsent code
+  across a closed screen, and pauses no clock while the app is in the
+  background. Each is an item under "Code on the phone" in `TODO.md`, and
+  the row reads `same` once they land.
 
 ## A page's areas` gives.
   - On the map, a press on a dimmed node selects it on the web and clears the
