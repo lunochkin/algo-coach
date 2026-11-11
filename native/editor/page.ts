@@ -86,10 +86,25 @@ function press(key: EditorKey) {
   if (made) view.dispatch(made);
 }
 
+// the editor grew or shrank. Shrunk, the caret's line may sit under the new
+// edge. Grown, a scroll offset past the new end stays until the next touch,
+// which leaves the top of a file that now fits out of view
+function fit() {
+  if (!view) return;
+  view.dispatch({ effects: EditorView.scrollIntoView(view.state.selection.main.head, { y: 'nearest' }) });
+  view.requestMeasure({
+    read: (v) => v.scrollDOM.scrollHeight - v.scrollDOM.clientHeight,
+    write: (most, v) => {
+      if (v.scrollDOM.scrollTop > most) v.scrollDOM.scrollTop = Math.max(0, most);
+    },
+  });
+}
+
 function receive(event: MessageEvent) {
   const message = JSON.parse(String(event.data)) as FromApp;
   if (message.kind === 'open') open(message.doc, message.colors);
   else if (message.kind === 'key') press(message.key);
+  else if (message.kind === 'measure') fit();
 }
 
 // Android delivers the app's messages on the document, iOS on the window

@@ -33,6 +33,8 @@ const TOKENS = {
 
 export interface EditorHandle {
   press: (key: Key) => void;
+  // after the editor's height changed, so the page lays itself out again
+  measure: () => void;
 }
 
 /**
@@ -52,7 +54,10 @@ export function CodeEditor({
   const theme = useTheme();
   const page = useRef<PageHandle>(null);
   const send = (message: FromApp) => page.current?.postMessage(JSON.stringify(message));
-  useImperativeHandle(ref, () => ({ press: (key) => send({ kind: 'key', key }) }));
+  useImperativeHandle(ref, () => ({
+    press: (key) => send({ kind: 'key', key }),
+    measure: () => send({ kind: 'measure' }),
+  }));
 
   const colors: Colors = {
     dark: theme.dark,

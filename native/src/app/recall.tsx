@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { ScrollView, type ScrollViewInstance, View } from 'react-native';
-import { Appbar, Button, Menu, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, IconButton, Menu, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -91,6 +91,9 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
   const [running, setRunning] = useState(false);
   const [ran, setRan] = useState<RecallAttempt | null>(null);
   const [refused, setRefused] = useState<string | null>(null);
+  // hidden on a press, so the editor takes the pad's height: a median
+  // canonical is eighteen lines, and the pad leaves room for about eight
+  const [keys, setKeys] = useState(true);
   const next = nextHint(taken.map((one) => one.hint));
   const path = { slug, template_slug: prompt.template_slug };
 
@@ -166,15 +169,27 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
             {takeHint(next)}
           </Button>
         ) : null}
+        <IconButton
+          icon={keys ? 'keyboard-close' : 'keyboard'}
+          accessibilityLabel={keys ? 'Hide the keyboard' : 'Show the keyboard'}
+          style={{ marginLeft: 'auto' }}
+          onPress={() => {
+            setKeys(!keys);
+            // once the screen has laid out at the new height
+            setTimeout(() => editor.current?.measure(), 100);
+          }}
+        />
       </View>
       {refused ? (
         <Text variant="bodySmall" style={{ color: theme.colors.error, paddingHorizontal: 8 }}>
           {recallRefused(refused)}
         </Text>
       ) : null}
-      <View style={{ paddingHorizontal: 8 }}>
-        <KeyPad lines onKey={(key) => editor.current?.press(key)} />
-      </View>
+      {keys ? (
+        <View style={{ paddingHorizontal: 8 }}>
+          <KeyPad lines onKey={(key) => editor.current?.press(key)} />
+        </View>
+      ) : null}
     </View>
   );
 }

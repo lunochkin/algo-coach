@@ -17,6 +17,10 @@ export interface Colors {
   comment: string;
 }
 
-export type FromApp = { kind: 'open'; doc: string; colors: Colors } | { kind: 'key'; key: EditorKey };
+export type FromApp =
+  | { kind: 'open'; doc: string; colors: Colors }
+  | { kind: 'key'; key: EditorKey }
+  // the WebView changed size: the page lays itself out again only on its next input
+  | { kind: 'measure' };
 
 export type FromPage = { kind: 'ready' } | { kind: 'change'; doc: string };
