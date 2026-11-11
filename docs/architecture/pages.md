@@ -485,11 +485,12 @@ what it offers. The inventory is the list both clients build to.
   under one bar holding the clock, its press and End. The editor stays
   mounted under the statement, so a switch keeps what was typed. The first
   clock press or submission mints the sitting, named by the phone's device
-  name, and an ended sitting's press returns to the page the problem came from. The
-  phone keeps a problem's unsent code and the clock preference in its own
-  copy, as the browser keeps them, and signing out deletes the code with the
-  rest of the copy. The app going to the background pauses a running clock,
-  and returning resumes only that pause, as a hidden page does on the web.
+  name, and an ended sitting's press returns to the page the problem came
+  from. The phone keeps a problem's unsent code and the clock preference in
+  its own copy, as the browser keeps them, and signing out deletes the code
+  with the rest of the copy. The app going to the background pauses a
+  running clock, and returning resumes only that pause, as a hidden page
+  does on the web.
   Once the sitting ends, a sheet from the bottom asks the claim and the
   label of each attempt in turn, as the web's dialog does, and a press under
   the editor restores the last solve, which the attempts then report. The
