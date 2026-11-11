@@ -70,8 +70,17 @@ export function KeyPad({ onKey, lines = false }: { onKey: (key: Key) => void; li
       {lines ? (
         <Row>
           <Cap icon="format-indent-decrease" accessibilityLabel="Dedent" onPress={() => onKey('dedent')} />
-          <Strip onKey={onKey} />
           <Cap icon="format-indent-increase" accessibilityLabel="Indent" onPress={() => onKey('indent')} />
+          {/* a block selected here moves whole under indent and dedent */}
+          <Cap icon="select-group" accessibilityLabel="Select the block" onPress={() => onKey('block')} />
+          <Strip onKey={onKey} />
+          <Cap icon="arrow-up-bold-outline" accessibilityLabel="Move the line up" onPress={() => onKey('lineUp')} />
+          <Cap
+            icon="arrow-down-bold-outline"
+            accessibilityLabel="Move the line down"
+            onPress={() => onKey('lineDown')}
+          />
+          <Cap icon="content-duplicate" accessibilityLabel="Duplicate the line" onPress={() => onKey('duplicate')} />
         </Row>
       ) : null}
       {[...SYMBOLS, DIGITS].map((row) => (
@@ -210,7 +219,7 @@ function Strip({ onKey }: { onKey: (key: Key) => void }) {
       {...pan.panHandlers}
       accessibilityLabel="Drag to move the cursor"
       style={{
-        flex: 8,
+        flex: 3,
         height: HEIGHT,
         borderRadius: 8,
         alignItems: 'center',

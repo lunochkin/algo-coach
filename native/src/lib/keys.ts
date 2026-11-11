@@ -24,8 +24,8 @@ const at = (text: string, caret: number): Edit => ({ text, selection: { start: c
 /** The text and caret after one press. A selection is replaced by an insert and removed by back. */
 export function pressed(edit: Edit, key: Key): Edit {
   const { text } = edit;
-  // a field of one line moves sideways alone
-  if (key === 'enter' || key === 'indent' || key === 'dedent' || key === 'up' || key === 'down') return edit;
+  // a field of one line takes an insert, back and the sideways moves alone
+  if (typeof key === 'string' && key !== 'back' && key !== 'left' && key !== 'right') return edit;
   const start = Math.min(edit.selection.start, edit.selection.end);
   const end = Math.max(edit.selection.start, edit.selection.end);
   if (key === 'left') return at(text, start === end ? Math.max(0, start - 1) : start);

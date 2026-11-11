@@ -47,4 +47,30 @@ describe('a key from the app keyboard', () => {
     expect(typed(state, ['up']).selection.main.head).toBe(5);
     expect(typed(editing('abc\nabcdef', 9), ['up']).selection.main.head).toBe(3);
   });
+
+  it('moves a line and duplicates one', () => {
+    expect(typed(editing('a\nb\nc', 2), ['lineUp']).doc.toString()).toBe('b\na\nc');
+    expect(typed(editing('a\nb\nc', 2), ['lineDown']).doc.toString()).toBe('a\nc\nb');
+    expect(typed(editing('a\nb', 2), ['duplicate']).doc.toString()).toBe('a\nb\nb');
+  });
+
+  it('selects the block around the caret by indentation, wider on each press', () => {
+    const doc = 'def f(a):\n    if a:\n        b = 1\n        c = 2\n    return a';
+    let state = editing(doc, doc.indexOf('b = 1') + 2);
+    const picked = () => state.sliceDoc(state.selection.main.from, state.selection.main.to);
+    state = typed(state, ['block']);
+    expect(picked()).toBe('        b = 1\n        c = 2');
+    state = typed(state, ['block']);
+    expect(picked()).toBe('    if a:\n        b = 1\n        c = 2');
+    state = typed(state, ['block']);
+    expect(picked()).toBe('    if a:\n        b = 1\n        c = 2\n    return a');
+    state = typed(state, ['block']);
+    expect(picked()).toBe(doc);
+  });
+
+  it('indents a selected block whole, and nothing beside it', () => {
+    const doc = 'def f(a):\n    if a:\n        b = 1\n        c = 2\n    return a';
+    const state = typed(editing(doc, doc.indexOf('b = 1')), ['block', 'indent']);
+    expect(state.doc.toString()).toBe('def f(a):\n    if a:\n            b = 1\n            c = 2\n    return a');
+  });
 });

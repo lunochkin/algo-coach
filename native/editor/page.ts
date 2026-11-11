@@ -34,7 +34,9 @@ function look(colors: Colors) {
       '.cm-scroller': { fontFamily: 'monospace' },
       '.cm-content': { padding: '8px 0' },
       '.cm-gutters': { backgroundColor: colors.gutter, color: colors.muted, border: 'none' },
-      '.cm-activeLine, .cm-activeLineGutter': { backgroundColor: colors.active },
+      // translucent, so a selection drawn beneath the caret's line still shows
+      '.cm-activeLine': { backgroundColor: `color-mix(in srgb, ${colors.active} 55%, transparent)` },
+      '.cm-activeLineGutter': { backgroundColor: colors.active },
       // drawn whether or not the page has focus: the keys are the app's, so
       // the WebView is never tapped and the browser's own caret never shows
       '.cm-cursorLayer .cm-cursor': {

@@ -212,7 +212,7 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
       is CodeMirror in a WebView, typed through the app's keyboard
 - [x] Add the editor's layer to the keyboard: a key per Python keyword, a
       strip dragging the cursor, indent and dedent. No key carries a form
-- [ ] Add line keys to the editor's layer: move a line, indent or dedent a
+- [x] Add line keys to the editor's layer: move a line, indent or dedent a
       block, duplicate a line, and select the current block
 - [ ] Show the phone editor's indent at two characters per level while the
       file keeps four, and wrap a long line under its own indent. A median

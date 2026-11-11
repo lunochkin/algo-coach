@@ -89,6 +89,7 @@ describe('the editor layer', () => {
 
   it('leaves a one-line field alone on the editor-only keys', () => {
     const edit: Edit = { text: 'ab', selection: { start: 1, end: 1 } };
-    for (const key of ['enter', 'indent', 'dedent', 'up', 'down'] as Key[]) expect(pressed(edit, key)).toBe(edit);
+    for (const key of ['enter', 'indent', 'dedent', 'up', 'down', 'lineUp', 'duplicate', 'block'] as Key[])
+      expect(pressed(edit, key)).toBe(edit);
   });
 });
