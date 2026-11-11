@@ -633,6 +633,10 @@ difference it found. No row is marked `to fix` today.
   asks for is an ink pill, as the site's navigation press is: a flame press on
   every working page read louder than the page around it. No verdict reads in
   the flame either: its hue sits between wrong and timed out.
+- **The knowledge focus reads in the flame**, on the subtopic or the
+  module it is aimed at. The focus names the groups the study aims at next,
+  so it reads as progress does. A node picked on the map is a selection and
+  reads neutral.
 - **A state that asks for an act reads neutral.** A certification ready for
   its exam, one that needs a refresh and a lesson ready to read are states
   rather than progress. In the flame each would read as progress made.

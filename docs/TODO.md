@@ -270,6 +270,28 @@ clients.
       with tokens: the map, the certifications grid, `tones()` and the
       verdict colours
 
+### One look, second pass
+
+An audit on 2026-11-11, after the pass above, still found parts drawn two
+ways inside each client. Each item covers both clients.
+
+- [ ] Draw every panel with one edge and every list on `PickRow`: the
+      archived modules, the card rows, the ladder's rungs, the devices, the
+      exam's results, the ready lesson and certification, and the strips
+      heading a panel. The phone's Card border and its own panels differ
+- [ ] Give each press one look per role: the focus press, the raise, the
+      primary's size and place, and the phone's acts still outside the
+      bottom bar. A press beside an equivalent one carries its icon too
+- [ ] Draw every selectable chip, link and option one way: the filters and
+      the toggle groups, links underlined on hover, a lesson's links as
+      links on the phone, and the quiz's two kinds of option tile
+- [ ] Draw every error, small label, meta line and header note one way,
+      and move the words still typed inline into `packages/core`. The web
+      shows an error four ways, and the phone its header note three ways
+- [ ] Bring the rest onto shared parts: the dialogs, the code blocks, the
+      badges, the two grid tables, the gaps as tokens, and the phone's
+      readings still outside `Loaded`
+
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
       showing the same state
