@@ -390,7 +390,8 @@ what it offers. The inventory is the list both clients build to.
 | A sitting | `/problems/:problem_id` | none | web for now |
 | The cards | `/cards` | the Cards tab | same |
 | A card's trigger, brief and templates | `/cards/:slug` | Card | same |
-| A card's ladder, probes and run | `/cards/:slug` | none | web for now |
+| A card's ladder and probes | `/cards/:slug` | Card | same |
+| The press starting a card's run | `/cards/:slug` | none | web for now |
 | A recall | `/cards/:slug/recall/:template` | none | web for now |
 | The knowledge home | `/knowledge` | Home | same |
 | A module | `/knowledge/modules/:module` | Module | same |
@@ -464,10 +465,10 @@ what it offers. The inventory is the list both clients build to.
 - **The Problem screen holds no editor and no clock.** A sitting stays on the
   web, and the screen says the problem is solved there. A phone layout for
   writing code is the trigger that adds the editor and the clock.
-- **A card's ladder, its probes and the press starting its run follow the
-  sitting.** A rung and a probe each open a problem, and a run measures
-  sittings the phone cannot hold. The phone's card reads the study material
-  alone.
+- **The phone's card reads its ladder and its probes as the web's does.** A
+  rung and a probe each open the phone's Problem screen, and the sitting the
+  problem asks for stays on the web. The press starting a run waits for its
+  own item, since starting draws the probes.
 - **The phone reads the board and the cards from the engine and keeps no
   copy.** With no connection the Practice tab, the Cards tab and each screen
   under them say so. The knowledge copy exists so a

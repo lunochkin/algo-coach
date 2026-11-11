@@ -1,8 +1,16 @@
+import {
+  LADDER_GAP,
+  LADDER_TITLE,
+  ladderView,
+  PROBES_ASIDE,
+  PROBES_TITLE,
+  probeState,
+} from '@algo-coach/core'
 import { ChevronDown } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
-import { api, type Gap, type Studied } from '@/api/client'
+import { api, type Studied } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
@@ -230,58 +238,48 @@ function LadderView({
   closed: boolean
   onToggle: (id: string) => void
 }) {
-  const solved = studied.rungs.filter((one) => one.solved).length
-  const titles = new Map(studied.card.templates.map((one) => [one.id, one.title]))
-
+  const view = ladderView(studied)
   return (
     <Section
       id="ladder"
       body="rows"
-      title="Ladder"
+      title={LADDER_TITLE}
       closed={closed}
       onToggle={onToggle}
-      aside={
-        studied.run
-          ? `${solved} of ${studied.rungs.length} solved`
-          : countOf(studied.rungs.length, 'rung')
-      }
+      aside={view.aside}
     >
       <div className="divide-y divide-border">
-        {studied.rungs.map((rung) => (
+        {view.rows.map((rung) => (
           <Link
-            key={rung.problem.id}
-            to={`/problems/${encodeURIComponent(rung.problem.id)}?card=${encodeURIComponent(slug)}`}
+            key={rung.problemId}
+            to={`/problems/${encodeURIComponent(rung.problemId)}?card=${encodeURIComponent(slug)}`}
             className="group flex items-baseline gap-3 px-4 py-3 transition-colors hover:bg-accent"
           >
-            {studied.run && <Mark solved={rung.solved} />}
+            {rung.solved !== null && <Mark solved={rung.solved} />}
             <span className="min-w-0">
               <span className="font-medium underline-offset-4 group-hover:underline">
-                {rung.problem.title}
+                {rung.title}
               </span>
-              {rung.problem.difficulty && (
+              {rung.difficulty && (
                 <Badge variant="outline" className="ml-2 align-middle font-normal">
-                  {rung.problem.difficulty}
+                  {rung.difficulty}
                 </Badge>
               )}
-              {rung.templates.length > 0 && (
-                <span className="block text-meta text-muted-foreground">
-                  covers {rung.templates.map((id) => titles.get(id) ?? id).join(', ')}
-                </span>
+              {rung.covers && (
+                <span className="block text-meta text-muted-foreground">{rung.covers}</span>
               )}
             </span>
-            <span className="ml-auto shrink-0 text-meta text-muted-foreground">
-              {rung.required ? 'required' : 'optional'}
-            </span>
+            <span className="ml-auto shrink-0 text-meta text-muted-foreground">{rung.need}</span>
           </Link>
         ))}
-        {studied.gaps.map((gap: Gap) => (
+        {view.gaps.map((gap) => (
           <p
-            key={gap.template_id}
+            key={gap}
             className="flex items-baseline gap-3 px-4 py-3 text-meta text-muted-foreground"
           >
-            No problem covers {gap.title} yet.
+            {gap}
             <Badge variant="outline" className="ml-auto font-normal">
-              gap
+              {LADDER_GAP}
             </Badge>
           </p>
         ))}
@@ -327,8 +325,8 @@ function ProbesView({
     <Section
       id="probes"
       body="rows"
-      title="Probes"
-      aside="drawn at the start, never from the ladder"
+      title={PROBES_TITLE}
+      aside={PROBES_ASIDE}
       closed={closed}
       onToggle={onToggle}
     >
@@ -348,7 +346,7 @@ function ProbesView({
               </Badge>
             )}
             <span className="ml-auto shrink-0 text-meta text-muted-foreground">
-              {one.attempted ? 'attempted' : 'not attempted'}
+              {probeState(one.attempted)}
             </span>
           </Link>
         ))}

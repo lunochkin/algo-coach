@@ -5,6 +5,7 @@ import {
   cardBlocks,
   cardRow,
   inProgress,
+  ladderView,
   notInProgress,
   problemCards,
   problemTried,
@@ -246,5 +247,38 @@ describe('a failed read', () => {
       'No connection, and this device holds no copy of the cards.',
     );
     expect(readFailure('the card', '/cards/x 404: gone')).toBe('The card did not load: /cards/x 404: gone');
+  });
+});
+
+describe("a card's ladder", () => {
+  const rung = (id: string, templates: string[], required: boolean, solved = false) => ({
+    problem: { id, title: id, difficulty: 'easy' },
+    templates,
+    required,
+    solved,
+  });
+  const studied = (run: boolean) =>
+    ({
+      card: { templates: [template('t1', { title: 'Lower bound' })] },
+      run: run ? { started_at: '2026-11-01T00:00:00Z' } : null,
+      rungs: [rung('p1', ['t1'], true, true), rung('p2', [], false)],
+      gaps: [{ template_id: 't2', slug: 't2', title: 'Upper bound' }],
+      recall: [],
+      probes: [],
+    }) as unknown as components['schemas']['Studied'];
+
+  it('counts the rungs before a run, and the solved ones once it is open', () => {
+    expect(ladderView(studied(false)).aside).toBe('2 rungs');
+    expect(ladderView(studied(true)).aside).toBe('1 of 2 solved');
+  });
+
+  it('names what a rung covers and whether it is required, and the gaps', () => {
+    const view = ladderView(studied(true));
+    expect(view.rows.map((one) => [one.covers, one.need, one.solved])).toEqual([
+      ['covers Lower bound', 'required', true],
+      [null, 'optional', false],
+    ]);
+    expect(view.gaps).toEqual(['No problem covers Upper bound yet.']);
+    expect(ladderView(studied(false)).rows[0].solved).toBeNull();
   });
 });

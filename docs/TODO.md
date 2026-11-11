@@ -177,7 +177,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Serve the problem listing on the phone as a Problems tab, its filters,
       counts and pages computed in core, and drop the `pages.md` rule that the
       listing follows the sitting
-- [ ] Show a card's ladder and probes on the phone, each rung opening the
+- [x] Show a card's ladder and probes on the phone, each rung opening the
       Problem screen, and revise the `pages.md` rule that they follow the
       sitting. The sitting a rung opens stays on the web
 - [ ] Add the press starting a card run to the phone's card, below its

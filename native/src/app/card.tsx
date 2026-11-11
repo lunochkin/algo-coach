@@ -1,21 +1,35 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Button, Card, Chip, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Card, Chip, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { readFailure, recallLine, revealLabel, type components, loadingLine } from '@algo-coach/core';
+import {
+  readFailure,
+  recallLine,
+  revealLabel,
+  type components,
+  loadingLine,
+  ladderView,
+  LADDER_GAP,
+  LADDER_TITLE,
+  PROBES_ASIDE,
+  PROBES_TITLE,
+  probeState,
+} from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { CodeBlock, Failed, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
+import { Badge, PickPanel, PickRow } from '@/ui/rows';
 
 type Template = components['schemas']['Template'];
 type Recalled = components['schemas']['Recalled'];
 
 /**
- * A card's trigger, brief and templates, each form hidden until revealed:
- * `content.md`, Cards. The ladder, the probes and the recall stay on the web,
- * since each opens a sitting or the trainer.
+ * A card's trigger, brief, ladder, probes and templates, each form hidden
+ * until revealed: `content.md`, Cards. A rung and a probe open the Problem
+ * screen, and the sitting and the recall stay on the web.
  */
 export default function CardScreen() {
   const theme = useTheme();
@@ -43,6 +57,8 @@ export default function CardScreen() {
             <Markdown>{card.trigger}</Markdown>
             <Text variant="titleMedium">The brief</Text>
             <Markdown>{card.brief}</Markdown>
+            <Ladder studied={studied.data!} />
+            {studied.data!.probes.length > 0 ? <Probes studied={studied.data!} /> : null}
             <Text variant="titleMedium">
               Templates <Text style={{ color: theme.colors.onSurfaceVariant }}>{card.templates.length}</Text>
             </Text>
@@ -108,5 +124,95 @@ function TemplateCard({
         )}
       </Card.Content>
     </Card>
+  );
+}
+
+type Studied = components['schemas']['Studied'];
+
+// a rung and a probe each open the problem, with the card's technique drilled
+const openProblem = (problem: string, technique: string) =>
+  router.push({ pathname: '/problem', params: { problem, technique } });
+
+function Ladder({ studied }: { studied: Studied }) {
+  const theme = useTheme();
+  const view = ladderView(studied);
+  const muted = { color: theme.colors.onSurfaceVariant };
+  return (
+    <>
+      <Text variant="titleMedium">
+        {LADDER_TITLE} <Text style={muted}>{view.aside}</Text>
+      </Text>
+      {view.rows.length > 0 || view.gaps.length > 0 ? (
+        <PickPanel>
+          {[
+            ...view.rows.map((rung) => (
+              <TouchableRipple
+                key={rung.problemId}
+                accessibilityRole="link"
+                accessibilityLabel={rung.title}
+                onPress={() => openProblem(rung.problemId, studied.card.technique)}
+              >
+                <View style={{ paddingHorizontal: 16, paddingVertical: 12, gap: 6 }}>
+                  <View style={[styles.row, { flexWrap: 'wrap' }]}>
+                    {/* solved since the run began: a reading, not a control */}
+                    {rung.solved !== null ? (
+                      <MaterialCommunityIcons
+                        name={rung.solved ? 'checkbox-marked' : 'checkbox-blank-outline'}
+                        size={18}
+                        color={theme.colors.onSurfaceVariant}
+                      />
+                    ) : null}
+                    <Text variant="titleMedium" style={{ flexShrink: 1 }}>
+                      {rung.title}
+                    </Text>
+                  </View>
+                  <View style={[styles.row, { flexWrap: 'wrap' }]}>
+                    {rung.difficulty ? <Badge label={rung.difficulty} /> : null}
+                    <Text variant="bodySmall" style={muted}>
+                      {rung.need}
+                    </Text>
+                  </View>
+                  {rung.covers ? (
+                    <Text variant="bodySmall" style={muted}>
+                      {rung.covers}
+                    </Text>
+                  ) : null}
+                </View>
+              </TouchableRipple>
+            )),
+            ...view.gaps.map((gap) => (
+              <View key={gap} style={[styles.row, { paddingHorizontal: 16, paddingVertical: 12 }]}>
+                <Text variant="bodySmall" style={[muted, { flex: 1 }]}>
+                  {gap}
+                </Text>
+                <Badge label={LADDER_GAP} />
+              </View>
+            )),
+          ]}
+        </PickPanel>
+      ) : null}
+    </>
+  );
+}
+
+function Probes({ studied }: { studied: Studied }) {
+  const theme = useTheme();
+  return (
+    <>
+      <Text variant="titleMedium">
+        {PROBES_TITLE} <Text style={{ color: theme.colors.onSurfaceVariant }}>{PROBES_ASIDE}</Text>
+      </Text>
+      <PickPanel>
+        {studied.probes.map((one) => (
+          <PickRow
+            key={one.problem.id}
+            title={one.problem.title}
+            badge={one.problem.difficulty ?? null}
+            stats={[{ label: '', value: probeState(one.attempted) }]}
+            onPress={() => openProblem(one.problem.id, studied.card.technique)}
+          />
+        ))}
+      </PickPanel>
+    </>
   );
 }

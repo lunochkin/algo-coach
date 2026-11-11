@@ -223,3 +223,48 @@ export function readFailure(what: string, error: string): string {
 // a page's reading before its content, the same on both clients
 export const loadingLine = (what: string) => `Loading ${what}…`;
 export const RETRY = 'Retry';
+
+type Studied = components['schemas']['Studied'];
+
+export interface RungRow {
+  problemId: string;
+  title: string;
+  difficulty: string | null;
+  // the templates the rung covers, by title, or null where it covers none
+  covers: string | null;
+  need: 'required' | 'optional';
+  // whether the rung is solved since the run began, or null where no run is open
+  solved: boolean | null;
+}
+
+export interface LadderView {
+  aside: string;
+  rows: RungRow[];
+  // a core template no problem covers yet: `content.md`, Cards
+  gaps: string[];
+}
+
+/** A card's ladder: each rung, what it covers, and the gaps. Progress reads once a run is open. */
+export function ladderView(studied: Studied): LadderView {
+  const titles = new Map(studied.card.templates.map((one) => [one.id, one.title]));
+  const solved = studied.rungs.filter((one) => one.solved).length;
+  const n = studied.rungs.length;
+  return {
+    aside: studied.run ? `${solved} of ${n} solved` : n === 1 ? '1 rung' : `${n} rungs`,
+    rows: studied.rungs.map((rung) => ({
+      problemId: rung.problem.id,
+      title: rung.problem.title,
+      difficulty: rung.problem.difficulty ?? null,
+      covers: rung.templates.length ? `covers ${rung.templates.map((id) => titles.get(id) ?? id).join(', ')}` : null,
+      need: rung.required ? 'required' : 'optional',
+      solved: studied.run ? rung.solved : null,
+    })),
+    gaps: studied.gaps.map((gap) => `No problem covers ${gap.title} yet.`),
+  };
+}
+
+export const LADDER_TITLE = 'Ladder';
+export const LADDER_GAP = 'gap';
+export const PROBES_TITLE = 'Probes';
+export const PROBES_ASIDE = 'drawn at the start, never from the ladder';
+export const probeState = (attempted: boolean) => (attempted ? 'attempted' : 'not attempted');
