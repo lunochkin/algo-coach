@@ -186,11 +186,66 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Serve the privacy policy on the phone as a screen, opened from Login
       and Settings, with its text moved into `packages/core` for both clients
 
+### Code on the phone
+
+Reading and writing code in the native app, so the sitting and the recall
+reach the phone beside the rest of the engine. The phone types through a
+keyboard of the app's own: the system keyboard hides the symbols code and a
+`short` answer are made of, and its suggestion strip completes words.
+
+- [ ] Add `device` to the sitting, as the knowledge records carry it, and
+      snapshot the schema. A phone solve is slower, and an attempt's time is
+      append-only, so the field lands before the first phone sitting
+- [ ] Draw a keyboard of the app's own, with brackets, commas, quotes, digits
+      and `?` on its main layer and a switch to the system keyboard for words,
+      and answer a `short` question through it on the quiz screen
+- [ ] Type a form into CodeMirror in a WebView on the Android phone, its
+      content `inputmode="none"` and the app's keyboard sending each key, and
+      write the scrolling and key latency it showed into `README.md`
+- [ ] Add the editor's layer to the keyboard: a key per Python keyword, a
+      strip dragging the cursor, indent and dedent. No key carries a form
+- [ ] Add line keys to the editor's layer: move a line, indent or dedent a
+      block, duplicate a line, and select the current block
+- [ ] Show the phone editor's indent at two characters per level while the
+      file keeps four, and wrap a long line under its own indent. A median
+      canonical's widest line is 55 characters, where a phone fits 40
+- [ ] Hide the app's keyboard on a press, so a whole solution reads on one
+      screen. A median canonical is 18 lines
+- [ ] Pair brackets as they are typed, in the phone's editor and the web's
+      alike, so the two editors behave as one
+- [ ] Write into `flows.md` whether the keyboard offers the names the file
+      already declares. The rule today refuses every name the code typed
+- [ ] Move the editor's setup into shared code beside `packages/core`: the
+      Python highlighting and the rule that the editor completes nothing. One
+      setup keeps the two editors behaving alike
+- [ ] Move the recall trainer's state into core: the draw, the two hints in
+      order and the result's counts. `RecallPage.tsx` holds them for the web
+- [ ] Add a Recall screen to the phone, opened from each template on Card and
+      drawn from the card, switching between the card's templates
+- [ ] Move the sitting's state into core: the clock with its pauses and its
+      preference, the code the editor opens on, the verdict fold and the first
+      failing case. `SittingView.tsx` holds them for the web
+- [ ] Move the claim and the self-label into core: the candidates, the
+      drilled default, the modes each outcome allows, and the skip on an
+      attempt that crashed on every case
+- [ ] Add the sitting to the phone's Problem screen, the statement and the
+      editor as two tabs: the clock, Submit, the verdict, End and the press
+      back to the card. With no connection it says so
+- [ ] Keep a problem's unsent code and the clock preference on the phone, and
+      pause a running clock while the app is in the background
+- [ ] Reopen a running sitting when the Problem screen opens, where the web
+      reads `?sitting=`, and write the phone's rule into `pages.md`
+- [ ] Ask the claim and the label in a bottom sheet after each attempt, and
+      offer the press restoring the last solve
+- [ ] Revise `pages.md` and `README.md` for code on the phone: the sitting and
+      recall rows, the Problem screen's missing editor, and the rejected
+      WebView. Name the new screens in `tests/test_pages_inventory.py`
+
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
       showing the same state
-- [ ] Read the inventory with no row `to fix`, and `web for now` on the
-      sitting and the recall alone, which wait for a phone layout for code
+- [ ] Read the inventory with no row `to fix` and no row `web for now`
+- [ ] Sit a problem and recall a form on the phone, through the app's keyboard
 
 ## Phase 16 — scheduling and mastery
 
@@ -589,17 +644,17 @@ one form its target named.
       retrieved. Triggered when a flow needs a similar problem that the
       technique alone cannot select
 
-### Code on the phone
+### Exercises for the phone
 
-Reading and writing code in the native app, once Phase 15 has brought the rest
-of the engine there.
+Exercises that need little typing, and so suit a phone: ordering a solution's
+shuffled lines, filling one blank in it, and tracing what it prints. Each
+tests less than writing the solution does.
 
-- [ ] Serve code-adjacent practice in the native app: reading code natively,
-      and an editor in a WebView running the web's CodeMirror setup.
-      Triggered when a code-adjacent feature is chosen for the phone
-- [ ] Move the editor's setup into shared code beside `packages/core`: the
-      Python highlighting and the rule that the editor completes nothing. One
-      setup keeps the two editors behaving alike
+- [ ] Write the design of a short exercise into `log.md`: its own record
+      kind, and that mastery never counts it as execution. A reordered line
+      is not a solve. Triggered when a phone sitting proves too slow to use
+- [ ] Compare tracing with the knowledge module's `output` questions, and
+      write into `knowledge.md` whether a traced output is one of them
 
 ### Questions served by the engine
 
