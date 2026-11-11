@@ -5,9 +5,9 @@ import { Appbar, Card, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  bySavedOrder,
   certCell,
   certId,
+  certRows,
   CERTS_NONE,
   CERTS_NOTE,
   CERTS_TITLE,
@@ -15,6 +15,7 @@ import {
   COURSE_SCOPE,
   levelName,
   levels,
+  modulesInOrder,
   practiceShare,
   type CertStatus,
   type Course,
@@ -43,19 +44,16 @@ export default function CertsScreen() {
     return c && open ? { course: c.slug, id: open } : null;
   });
   const { board } = st;
-  const b = useMemo(() => board(null), [board]);
-  const courses = useMemo(
-    () => bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.courseOrder).filter((c) => c.certs),
-    [st.catalog, st.courseOrder],
-  );
-  const states = useMemo(
+  const modules = useMemo(
     () =>
-      new Map(
-        courses.map((c) => [c.slug, b ? certStates(b, c, st.catalog?.certExams ?? []) : new Map<string, CertStatus>()]),
-      ),
-    [b, courses, st.catalog],
+      modulesInOrder(st.catalog?.courses ?? [], st.courseOrder, board, (c) => !!c.certs).map(({ c, b }) => ({
+        c,
+        b,
+        states: certStates(b, c, st.catalog?.certExams ?? []),
+      })),
+    [st.catalog, st.courseOrder, board],
   );
-  const pickedCourse = courses.find((c) => c.slug === picked?.course);
+  const shown = modules.find((m) => m.c.slug === picked?.course);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -63,7 +61,7 @@ export default function CertsScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={CERTS_TITLE} />
       </Appbar.Header>
-      {!courses.length || !b ? (
+      {!modules.length ? (
         <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>{CERTS_NONE}</Text>
       ) : (
         <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
@@ -71,22 +69,17 @@ export default function CertsScreen() {
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             {CERTS_NOTE}
           </Text>
-          {courses.map((c) => (
-            <Matrix
-              key={c.slug}
-              c={c}
-              states={states.get(c.slug)!}
-              onPick={(id) => setPicked({ course: c.slug, id })}
-            />
+          {modules.map(({ c, states }) => (
+            <Matrix key={c.slug} c={c} states={states} onPick={(id) => setPicked({ course: c.slug, id })} />
           ))}
         </ScrollView>
       )}
-      {picked && pickedCourse && b ? (
+      {picked && shown ? (
         <CertSheet
-          c={pickedCourse}
-          b={b}
+          c={shown.c}
+          b={shown.b}
           id={picked.id}
-          states={states.get(pickedCourse.slug)!}
+          states={shown.states}
           onClose={() => setPicked(null)}
           onPractice={starter.open}
         />
@@ -198,7 +191,7 @@ function Matrix(props: { c: Course; states: Map<string, CertStatus>; onPick: (id
   const theme = useTheme();
   const rules = useStore().catalog!.rules;
   const lv = levels(rules);
-  const rows = [...c.topics.map((t) => ({ scope: t.slug, label: t.title })), { scope: COURSE_SCOPE, label: c.title }];
+  const rows = certRows(c);
   return (
     <Card mode="outlined">
       <Card.Title title={c.title} />
@@ -232,7 +225,7 @@ function Matrix(props: { c: Course; states: Map<string, CertStatus>; onPick: (id
               adjustsFontSizeToFit
               minimumFontScale={0.7}
             >
-              {r.label}
+              {r.title}
             </Text>
             {lv.map((l) => {
               const id = certId(c.slug, r.scope, l);

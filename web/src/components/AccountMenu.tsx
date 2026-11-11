@@ -3,9 +3,8 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 
 import {
+  meLine,
   named,
-  NO_PROVIDER_LINKED,
-  READING_SESSION,
   SETTINGS,
   SIGN_OUT,
   SIGNED_IN_DEVICES,
@@ -51,14 +50,8 @@ export function AccountMenu() {
                 </p>
                 {/* the engine's own id, which every private record of theirs
                 carries, and what the address is missing for where it is */}
-                <p className="text-meta text-muted-foreground">
-                  {me.data === undefined ? (
-                    READING_SESSION
-                  ) : me.data.email ? (
-                    <span className="font-mono">{me.data.user_id}</span>
-                  ) : (
-                    NO_PROVIDER_LINKED
-                  )}
+                <p className={cn('text-meta text-muted-foreground', me.data?.email && 'font-mono')}>
+                  {meLine(me.data)}
                 </p>
               </div>
               <DropdownMenuSeparator />

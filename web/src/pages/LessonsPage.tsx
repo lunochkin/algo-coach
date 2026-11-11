@@ -2,12 +2,12 @@ import { useMemo } from 'react'
 import { Link } from 'react-router'
 
 import {
-  bySavedOrder,
   lessonGroups,
   lessonRow,
   LESSONS_NONE,
   LESSONS_TITLE,
   lessonRowLine,
+  modulesInOrder,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -25,10 +25,8 @@ export function LessonsPage() {
   const { catalog, board, order } = useLearner()
 
   const modules = useMemo(() => {
-    const b = board(null)
-    if (!catalog || !b) return undefined
-    const withLessons = catalog.courses.filter((c) => c.graph?.lessons.length)
-    return bySavedOrder(withLessons, (c) => c.slug, order).map((c) => ({ c, b: board(c.slug)! }))
+    if (!catalog || !board(null)) return undefined
+    return modulesInOrder(catalog.courses, order, board, (c) => !!c.graph?.lessons.length)
   }, [catalog, board, order])
 
   return (

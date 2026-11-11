@@ -1,3 +1,6 @@
+import type { Board } from './schedule';
+import type { Course } from './types';
+
 /** The user's order of the modules, by slug, first to last: the latest stands on every device. */
 export interface OrderRecord {
   t: string;
@@ -26,4 +29,17 @@ export function bySavedOrder<T>(items: readonly T[], slug: (t: T) => string, ord
     .map((t, i) => ({ t, i, r: rank.get(slug(t)) ?? order.length + i }))
     .sort((a, b) => a.r - b.r)
     .map((x) => x.t);
+}
+
+/** The modules `keep` admits, in the saved order, each with its own board; a module with no board is left out. */
+export function modulesInOrder(
+  courses: readonly Course[],
+  order: readonly string[],
+  board: (slug: string) => Board | null | undefined,
+  keep: (c: Course) => boolean,
+): { c: Course; b: Board }[] {
+  return bySavedOrder(courses.filter(keep), (c) => c.slug, order).flatMap((c) => {
+    const b = board(c.slug);
+    return b ? [{ c, b }] : [];
+  });
 }

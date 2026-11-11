@@ -20,13 +20,16 @@ import { useTheme, type MD3Theme } from 'react-native-paper';
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 
 import {
+  cut,
+  entryMark,
   lessonNode,
+  lessonSlug,
   MAP_DIMS,
   subTitle,
   type Board,
   type ClusterBox,
   type Course,
-  type MapEdge,
+  type EdgePath,
 } from '@algo-coach/core';
 
 import { tones } from './common';
@@ -49,10 +52,6 @@ function font(size: number): SkFont {
   return (fonts[size] ??= matchFont({ fontFamily: family, fontSize: size }));
 }
 
-function cut(s: string, n: number): string {
-  return s.length > n ? `${s.slice(0, n - 1)}…` : s;
-}
-
 /** A certificate node's level pips: one per certified level, coloured by its state. */
 export interface CertPip {
   letter: string; // F, A, P, E
@@ -62,11 +61,10 @@ export interface CertPip {
 
 interface Props {
   nodes: Placed[];
-  edges: MapEdge[];
+  edges: EdgePath[];
   clusters: ClusterBox[];
   titles: Map<string, string>; // topic slug (or "all") -> title
   outside: Map<string, string[]>; // subtopics with prerequisites in other topics
-  at: Map<string, Placed>;
   picked: string | null;
   lit: Set<string> | null;
   dots: Map<string, (string | null)[]>;
@@ -79,27 +77,16 @@ interface Props {
 }
 
 export function MapCanvas(props: Props) {
-  const { nodes, edges, at, picked, lit, tx, ty, scale, clusters } = props;
+  const { nodes, edges, picked, lit, tx, ty, scale, clusters } = props;
   const theme = useTheme();
   const transform = useDerivedValue(() => [{ translateX: tx.value }, { translateY: ty.value }, { scale: scale.value }]);
   const paths = useMemo(
     () =>
-      edges.flatMap((e) => {
-        const a = at.get(e.from);
-        if (!a) return [];
-        // An edge into a cluster ends at the middle of the cluster's left side.
-        const box = e.to.startsWith('cluster:') ? clusters.find((k) => k.topic === e.to.slice(8)) : undefined;
-        const z = box ? { x: box.x, y: box.y + box.h / 2 - NODE_H / 2 } : at.get(e.to);
-        if (!z) return [];
-        const x1 = a.x + NODE_W;
-        const y1 = a.y + NODE_H / 2;
-        const x2 = z.x;
-        const y2 = z.y + NODE_H / 2;
-        const mid = (x1 + x2) / 2;
-        const p = Skia.Path.MakeFromSVGString(`M${x1},${y1} C${mid},${y1} ${mid},${y2} ${x2},${y2}`);
-        return p ? [{ e, p }] : [];
+      edges.flatMap(({ edge: e, d, dash }) => {
+        const p = Skia.Path.MakeFromSVGString(d);
+        return p ? [{ e, p, dash }] : [];
       }),
-    [edges, at, clusters],
+    [edges],
   );
   return (
     <Canvas style={StyleSheet.absoluteFill}>
@@ -129,7 +116,7 @@ export function MapCanvas(props: Props) {
             </Group>
           );
         })}
-        {paths.map(({ e, p }) => {
+        {paths.map(({ e, p, dash }) => {
           const on = !lit || (lit.has(e.from) && lit.has(e.to));
           const hi = on && !!lit;
           return (
@@ -149,11 +136,7 @@ export function MapCanvas(props: Props) {
               }
               opacity={on ? 0.9 : 0.12}
             >
-              {e.kind === 'teaches' ? (
-                <DashPathEffect intervals={[2, 3]} />
-              ) : e.offset || e.from.startsWith('cert:') ? (
-                <DashPathEffect intervals={[6, 4]} />
-              ) : null}
+              {dash ? <DashPathEffect intervals={dash} /> : null}
             </Path>
           );
         })}
@@ -223,12 +206,7 @@ const QuizNode = memo(function QuizNode(props: {
       <SkText x={n.x + 12} y={n.y + 22} text={cut(props.title, 21)} font={font(13)} color={theme.colors.onSurface} />
       {props.entry ? (
         // Entry mark: this subtopic also needs subtopics of other topics (through the certificate edge).
-        <Path
-          path={`M${n.x - 6},${n.y + NODE_H / 2 - 5} L${n.x},${n.y + NODE_H / 2} L${n.x - 6},${n.y + NODE_H / 2 + 5}`}
-          style="stroke"
-          strokeWidth={2}
-          color={theme.colors.secondary}
-        />
+        <Path path={entryMark(n)} style="stroke" strokeWidth={2} color={theme.colors.secondary} />
       ) : null}
       {props.dots.map((fill, i) => (
         <Group key={i}>
@@ -257,7 +235,7 @@ const LessonNode = memo(function LessonNode(props: {
 }) {
   const { n, c, b, picked, theme } = props;
   const tone = tones(theme.dark);
-  const x = c.graph?.lesson(n.sub.slice(7));
+  const x = c.graph?.lesson(lessonSlug(n.sub)!);
   if (!x) return null;
   const state = b.lessonState(c, x);
   const color = state === 'done' ? tone.done : state === 'available' ? tone.open : theme.colors.onSurfaceDisabled;

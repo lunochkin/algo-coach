@@ -7,10 +7,13 @@ import {
   summary,
   ARCHIVE_BODY,
   ARCHIVE_KEEP,
+  aimedAt,
+  aimFocus,
   archiveTitle,
   type CellState,
   counted,
   type CourseStatus,
+  dueCount,
   type Focus,
   focusOn,
   groupCell,
@@ -85,7 +88,7 @@ export function ModulePage() {
   }, [catalog, board, module])
 
   function aim(f: Focus) {
-    void k.add('focus', newRecord.focus({ ...f, strict: !!focus?.strict }))
+    void k.add('focus', newRecord.focus(aimFocus(focus, f)))
   }
 
   function setStatus(status: CourseStatus) {
@@ -94,8 +97,7 @@ export function ModulePage() {
     if (status === 'archived') navigate(HOME)
   }
 
-  const aimedAt = (topic: string | null, sub: string | null) =>
-    focus?.course === module && !focus.cert && focus.topic === topic && focus.sub === sub
+  const aimed = (topic: string | null, sub: string | null) => aimedAt(focus, module, topic, sub)
 
   return (
     <Loaded
@@ -108,7 +110,7 @@ export function ModulePage() {
         if (!page) return null
         const { b, c } = page
         const lv = levels(b.rules)
-        const due = b.questions().filter((q) => b.toReview(q, now)).length
+        const due = dueCount(b, now)
         return (
           <section className="space-y-section">
             <PageHeader back={{ to: HOME, label: 'Knowledge' }} title={c.title} />
@@ -133,11 +135,11 @@ export function ModulePage() {
               <Button
                 variant="outline"
                 size="sm"
-                disabled={aimedAt(null, null)}
+                disabled={aimed(null, null)}
                 onClick={() => aim({ course: module, topic: null, sub: null })}
               >
                 <Crosshair />
-                {aimedAt(null, null) ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
+                {aimed(null, null) ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
               </Button>
               {c.paused ? (
                 <>
@@ -223,10 +225,10 @@ export function ModulePage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      disabled={aimedAt(t.slug, null)}
+                      disabled={aimed(t.slug, null)}
                       onClick={() => aim({ course: module, topic: t.slug, sub: null })}
                     >
-                      {aimedAt(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
+                      {aimed(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
                     </Button>
                   </div>
                   <div className="overflow-x-auto rounded-xl border bg-card">
@@ -251,7 +253,7 @@ export function ModulePage() {
                                   type="button"
                                   className={cn(
                                     'flex-1 text-left hover:underline',
-                                    aimedAt(t.slug, sub) && 'font-medium text-brand-deep',
+                                    aimed(t.slug, sub) && 'font-medium text-brand-deep',
                                   )}
                                   onClick={() =>
                                     setStarting({
@@ -268,11 +270,11 @@ export function ModulePage() {
                                   variant="ghost"
                                   size="icon-sm"
                                   aria-label={focusOn(subTitle(c, sub))}
-                                  aria-pressed={aimedAt(t.slug, sub)}
+                                  aria-pressed={aimed(t.slug, sub)}
                                   onClick={() => aim({ course: module, topic: t.slug, sub })}
                                 >
                                   <Crosshair
-                                    className={cn(aimedAt(t.slug, sub) && 'text-brand-deep')}
+                                    className={cn(aimed(t.slug, sub) && 'text-brand-deep')}
                                   />
                                 </Button>
                               </div>

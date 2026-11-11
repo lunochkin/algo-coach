@@ -16,7 +16,7 @@ import {
   thisDevice,
   type components,
 } from '@algo-coach/core';
-import { call, described } from '@/lib/engine';
+import { described, engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { Failed, styles } from '@/ui/common';
@@ -42,8 +42,8 @@ export default function DevicesScreen() {
 
   const load = useCallback(async () => {
     try {
-      const token = (await getToken()) ?? undefined;
-      setDevices((await (await call(st.settings.origin, '/devices', { token })).json()) as SignedInDevice[]);
+      const { data } = await engine(st.settings.origin, await getToken()).GET('/api/devices');
+      setDevices(data ?? []);
       setError(null);
     } catch (e) {
       setError(readFailure('the signed-in devices', described(e)));
@@ -57,8 +57,9 @@ export default function DevicesScreen() {
   const revoke = async (device: SignedInDevice) => {
     setFailed(null);
     try {
-      const token = (await getToken()) ?? undefined;
-      await call(st.settings.origin, `/devices/${device.kind}/${device.id}`, { token, method: 'DELETE' });
+      await engine(st.settings.origin, await getToken()).DELETE('/api/devices/{kind}/{device_id}', {
+        params: { path: { kind: device.kind, device_id: device.id } },
+      });
     } catch (e) {
       setFailed(described(e));
     }

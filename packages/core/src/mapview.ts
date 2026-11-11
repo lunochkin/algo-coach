@@ -1,10 +1,11 @@
 import type { CertState, CertStatus } from './certs';
-import { levelName, levels } from './courses';
-import type { Focus } from './focus';
-import { lineage, type ClusterLayout, type PlacedNode } from './layout';
+import { levelName, levels, subTitle, topicTitle, unlocksLabel } from './courses';
+import { aimedAt, type Focus } from './focus';
+import { lineage, type ClusterLayout, type MapEdge, type PlacedNode } from './layout';
 import { groupCell, type CellState } from './module';
 import type { Board } from './schedule';
 import type { Course } from './types';
+import { alsoNeedsLine, levelLine, MODULE_FOCUS_HERE, MODULE_FOCUSED } from './words/module';
 
 /** The sizes a module's map is laid out at, on both clients. */
 export const MAP_DIMS = { nodeW: 164, nodeH: 56, col: 200, row: 74, pad: 16, header: 32, gapX: 96, gapY: 40 };
@@ -137,7 +138,7 @@ export function lessonView(b: Board, c: Course, slug: string): LessonView | null
     return `${ref.slice(0, at)} · ${levelName(b.rules, Number(ref.slice(at + 1)))}`;
   };
   const needs = x.needs.map((r) =>
-    r.startsWith('lesson:') ? `lesson ${c.graph?.lesson(r.slice(7))?.title ?? r}` : levelOf(r),
+    lessonSlug(r) ? `lesson ${c.graph?.lesson(lessonSlug(r)!)?.title ?? r}` : levelOf(r),
   );
   return {
     title: x.title,
@@ -145,5 +146,80 @@ export function lessonView(b: Board, c: Course, slug: string): LessonView | null
     teaches: `Teaches: ${x.teaches.map(([s, l]) => `${s} · ${levelName(b.rules, l)}`).join(', ')}`,
     needs: needs.length ? `Needs: ${needs.join(', ')}` : null,
     pretest: state === 'done' ? null : `Pretest: ${Math.min(b.tried(c, x), x.pretest)}/${x.pretest} questions tried`,
+  };
+}
+
+/** The lesson a `lesson:<slug>` node or reference names; null for any other. */
+export function lessonSlug(node: string): string | null {
+  return node.startsWith('lesson:') ? node.slice(7) : null;
+}
+
+/** A label cut to `n` characters, the last an ellipsis. */
+export function cut(s: string, n: number): string {
+  return s.length > n ? `${s.slice(0, n - 1)}…` : s;
+}
+
+/** Each topic's title by slug, and the module's under `all`: the clusters' and certificate nodes' labels. */
+export function mapTitles(c: Course): Map<string, string> {
+  return new Map([...c.topics.map((t) => [t.slug, t.title] as const), ['all', c.title] as const]);
+}
+
+export interface EdgePath {
+  edge: MapEdge;
+  d: string; // an SVG path: a horizontal bezier from the prerequisite's right side
+  dash: [number, number] | null; // dotted for a lesson's, dashed for an offset or a certificate's
+}
+
+/** Each drawable edge of the map, as a path in the layout's coordinates. */
+export function edgePaths(layout: ClusterLayout): EdgePath[] {
+  const { nodeW: W, nodeH: H } = MAP_DIMS;
+  const at = new Map(layout.nodes.map((n) => [n.sub, n]));
+  return layout.edges.flatMap((edge) => {
+    const a = at.get(edge.from);
+    // an edge into a cluster ends at the middle of the cluster's left side
+    const box = edge.to.startsWith('cluster:') ? layout.clusters.find((k) => k.topic === edge.to.slice(8)) : undefined;
+    const z = box ? { x: box.x, y: box.y + box.h / 2 - H / 2 } : at.get(edge.to);
+    if (!a || !z) return [];
+    const [x1, y1, x2, y2] = [a.x + W, a.y + H / 2, z.x, z.y + H / 2];
+    const mid = (x1 + x2) / 2;
+    const dash: EdgePath['dash'] =
+      edge.kind === 'teaches' ? [2, 3] : edge.offset || edge.from.startsWith('cert:') ? [6, 4] : null;
+    return [{ edge, d: `M${x1},${y1} C${mid},${y1} ${mid},${y2} ${x2},${y2}`, dash }];
+  });
+}
+
+/** The chevron at a subtopic node's left, marking prerequisites in other topics. */
+export function entryMark(n: PlacedNode): string {
+  const y = n.y + MAP_DIMS.nodeH / 2;
+  return `M${n.x - 6},${y - 5} L${n.x},${y} L${n.x - 6},${y + 5}`;
+}
+
+/** A subtopic node's panel: its level lines, what else it needs and unlocks, and its two presses. */
+export interface NodeView {
+  title: string;
+  topic: string;
+  levels: { line: string; empty: boolean }[];
+  alsoNeeds: string | null;
+  unlocks: string | null;
+  aimed: boolean;
+  aimLabel: string;
+  scope: { course: string; topic: string; sub: string; level: null };
+}
+
+export function nodeView(b: Board, c: Course, n: { topic: string; sub: string }, focus: Focus | null): NodeView {
+  const outside = alsoNeeds(c, n.sub, n.topic);
+  const aimed = aimedAt(focus, c.slug, n.topic, n.sub);
+  return {
+    title: subTitle(c, n.sub),
+    topic: topicTitle(c, n.topic),
+    levels: levels(b.rules).map((level) => {
+      const cell = groupCell(b, { course: c.slug, topic: n.topic, sub: n.sub, level });
+      return { line: levelLine(levelName(b.rules, level), cell.line), empty: cell.state === 'empty' };
+    }),
+    alsoNeeds: outside.length ? alsoNeedsLine(outside) : null,
+    unlocks: unlocksLabel(c, n.sub) || null,
+    aimed,
+    aimLabel: aimed ? MODULE_FOCUSED : MODULE_FOCUS_HERE,
+    scope: { course: c.slug, topic: n.topic, sub: n.sub, level: null },
   };
 }

@@ -75,3 +75,13 @@ export function examOpening(f: Focus | null): { course: string | null; level: nu
   const named = f?.cert ? LEVEL_SLUGS.indexOf(f.cert.slice(f.cert.lastIndexOf('-') + 1)) : -1;
   return { course: f?.course ?? null, level: named >= 0 ? named : 1 };
 }
+
+/** Whether the focus is aimed at exactly this module, topic or subtopic, and not at a certification. */
+export function aimedAt(f: Focus | null, course: string, topic: string | null, sub: string | null): boolean {
+  return !!f && f.course === course && !f.cert && f.topic === topic && f.sub === sub;
+}
+
+/** A new aim, carrying the current focus's strictness over. */
+export function aimFocus(current: Focus | null, f: Focus): Focus {
+  return { ...f, strict: !!current?.strict };
+}

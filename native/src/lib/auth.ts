@@ -3,7 +3,7 @@ import * as WebBrowser from 'expo-web-browser';
 
 import { type components, refusal } from '@algo-coach/core';
 
-import { call } from './engine';
+import { call, engine } from './engine';
 
 // the engine redirects here, a constant on both sides: `docs/architecture/README.md`.
 // The dev app has a scheme of its own, so the release app never receives its code
@@ -17,7 +17,8 @@ export type Offered = components['schemas']['Offered'];
 // what this build may sign in through, of what the engine names: the dev app
 // the dev login alone, the release app the providers alone
 export async function offered(origin: string): Promise<Offered> {
-  const named = (await (await call(origin, '/sign-in')).json()) as Offered;
+  const { data } = await engine(origin).GET('/api/sign-in');
+  const named = data as Offered;
   return __DEV__ ? { providers: [], dev_login: named.dev_login } : { providers: named.providers, dev_login: null };
 }
 

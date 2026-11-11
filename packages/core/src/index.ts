@@ -38,3 +38,5 @@ export * from './words/home';
 export * from './words/module';
 export * from './words/queue';
 export * from './sync';
+export * from './learner';
+export * from './engine';

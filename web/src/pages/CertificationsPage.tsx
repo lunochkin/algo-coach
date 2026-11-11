@@ -3,9 +3,9 @@ import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 
 import {
-  bySavedOrder,
   certCell,
   certId,
+  certRows,
   CERTS_NONE,
   CERTS_NOTE,
   CERTS_TITLE,
@@ -13,6 +13,7 @@ import {
   COURSE_SCOPE,
   levelName,
   levels,
+  modulesInOrder,
   practiceShare,
   type CertStatus,
   type Course,
@@ -46,16 +47,12 @@ export function CertificationsPage() {
   const [starting, setStarting] = useState<Scope | null>(null)
 
   const modules = useMemo(() => {
-    const b = board(null)
-    if (!catalog || !b) return undefined
-    return bySavedOrder(
-      catalog.courses.filter((c) => c.certs),
-      (c) => c.slug,
-      order,
-    ).map((c) => {
-      const own = board(c.slug)!
-      return { c, b: own, states: certStates(own, c, certExams) }
-    })
+    if (!catalog || !board(null)) return undefined
+    return modulesInOrder(catalog.courses, order, board, (c) => !!c.certs).map(({ c, b }) => ({
+      c,
+      b,
+      states: certStates(b, c, certExams),
+    }))
   }, [catalog, board, order, certExams])
 
   const shown = picked && modules?.find((m) => m.c.slug === picked.course)
@@ -104,10 +101,7 @@ function Grid(props: {
   onPick: (id: string) => void
 }) {
   const { c, states } = props
-  const rows = [
-    ...c.topics.map((t) => ({ scope: t.slug, title: t.title })),
-    { scope: COURSE_SCOPE, title: c.title },
-  ]
+  const rows = certRows(c)
   return (
     <section className="space-y-stack">
       <h2 className="text-heading font-medium">{c.title}</h2>

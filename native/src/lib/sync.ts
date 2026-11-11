@@ -10,7 +10,7 @@ import {
 
 import { writeCatalog } from './courses-cache';
 import * as DB from './db';
-import { call } from './engine';
+import { engine } from './engine';
 import type { Settings } from './settings';
 
 export interface SyncResult {
@@ -77,18 +77,19 @@ function store(user: string | null): SyncStore<Held> {
 function transport(s: Settings, token: string): SyncTransport {
   return {
     snapshot: async (etag) => {
-      const content = await call(s.origin, '/knowledge/snapshot', {
-        token,
+      const { data, response } = await engine(s.origin, token).GET('/api/knowledge/snapshot', {
         headers: etag ? { 'if-none-match': etag } : {},
+        parseAs: 'text',
       });
-      if (content.status === 304) return null;
-      return { text: await content.text(), etag: content.headers.get('etag') ?? '' };
+      if (response.status === 304) return null;
+      return { text: data ?? '', etag: response.headers.get('etag') ?? '' };
     },
     sync: async (records, since) => {
-      const answer = (await (
-        await call(s.origin, '/knowledge/sync', { token, body: { device: s.device, records, since } })
-      ).json()) as Synced;
-      return answer;
+      const { data } = await engine(s.origin, token).POST('/api/knowledge/sync', {
+        body: { device: s.device, records, since },
+      });
+      // a refusal threw already
+      return data as Synced;
     },
   };
 }

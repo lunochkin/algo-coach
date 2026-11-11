@@ -1,11 +1,4 @@
-import createClient from 'openapi-fetch'
-
-import type { components, paths } from '@algo-coach/core'
-
-// relative: the page and the API share one origin. Every request says JSON,
-// since the API refuses a write that does not, and a write with no body would
-// otherwise send no content type
-export const api = createClient<paths>({ headers: { 'Content-Type': 'application/json' } })
+import { engineClient, type components } from '@algo-coach/core'
 
 // the login page needs no session, so it is the one page a refusal leaves be
 export const LOGIN = '/login'
@@ -13,13 +6,12 @@ export const LOGIN = '/login'
 // screen links here
 export const PRIVACY = '/privacy'
 
-// a request with no session sends the browser to the login. A full load rather
-// than the router's: the login's own links leave the app for the provider
-api.use({
-  onResponse({ response }) {
-    if (response.status === 401 && window.location.pathname !== LOGIN) {
-      window.location.assign(LOGIN)
-    }
+// relative: the page and the API share one origin, and the session is a cookie.
+// A request with no session sends the browser to the login, by a full load
+// rather than the router's: the login's own links leave the app for the provider
+export const api = engineClient('', {
+  signedOut() {
+    if (window.location.pathname !== LOGIN) window.location.assign(LOGIN)
   },
 })
 

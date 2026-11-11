@@ -9,7 +9,6 @@ import { useEngine } from '@/lib/useEngine';
 import { CodeBlock, Failed, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
 
-type Studied = components['schemas']['Studied'];
 type Template = components['schemas']['Template'];
 type Recalled = components['schemas']['Recalled'];
 
@@ -22,7 +21,7 @@ export default function CardScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { slug = '' } = useLocalSearchParams<{ slug: string }>();
-  const studied = useEngine<Studied>(`/cards/${encodeURIComponent(slug)}`);
+  const studied = useEngine('/api/cards/{slug}', { slug });
   const [now] = useState(() => Date.now());
   const card = studied.data?.card;
   const recall = new Map((studied.data?.recall ?? []).map((one) => [one.template_id, one]));

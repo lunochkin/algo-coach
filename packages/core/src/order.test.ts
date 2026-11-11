@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { bySavedOrder, moduleOrder, moved } from './order';
+import type { Board } from './schedule';
+import type { Course } from './types';
+import { bySavedOrder, modulesInOrder, moduleOrder, moved } from './order';
 
 const slug = (s: string) => s;
 
@@ -33,5 +35,22 @@ describe('moved', () => {
   it('moves one slug and keeps the rest in order', () => {
     expect(moved(['a', 'b', 'c'], 2, 0)).toEqual(['c', 'a', 'b']);
     expect(moved(['a', 'b', 'c'], 0, 1)).toEqual(['b', 'a', 'c']);
+  });
+});
+
+describe('modulesInOrder', () => {
+  it('keeps the admitted modules in the saved order, each with its own board, and drops one with none', () => {
+    const courses = ['a', 'b', 'c', 'd'].map((slug) => ({ slug, keep: slug !== 'b' }) as unknown as Course);
+    const boards = new Map(['a', 'c'].map((slug) => [slug, { slug } as unknown as Board]));
+    const got = modulesInOrder(
+      courses,
+      ['c', 'a'],
+      (s) => boards.get(s),
+      (c) => (c as unknown as { keep: boolean }).keep,
+    );
+    expect(got.map((m) => [m.c.slug, (m.b as unknown as { slug: string }).slug])).toEqual([
+      ['c', 'c'],
+      ['a', 'a'],
+    ]);
   });
 });

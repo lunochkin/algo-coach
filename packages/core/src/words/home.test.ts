@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { moduleCounts, named, refusal, settingRange, signInUnread, signOutWarning, waitingToSend } from './home';
+import {
+  meLine,
+  moduleCounts,
+  named,
+  refusal,
+  settingRange,
+  signInUnread,
+  signOutWarning,
+  waitingToSend,
+} from './home';
 
 describe('home words', () => {
   it('counts a module row due first, then its questions', () => {
@@ -31,6 +40,12 @@ describe('home words', () => {
     expect(named({ email: 'a@example.invalid', user_id: 'u-4f9c2a' })).toBe('a@example.invalid');
     expect(named({ email: null, user_id: 'u-4f9c2a' })).toBe('u-4f9c2a');
     expect(named(undefined)).toBe('Signed in');
+  });
+
+  it('reads the engine id under an address, and why there is none without one', () => {
+    expect(meLine({ email: 'a@example.invalid', user_id: 'u-4f9c2a' })).toBe('u-4f9c2a');
+    expect(meLine({ email: null, user_id: 'u-4f9c2a' })).toBe('Signed in with no provider linked');
+    expect(meLine(undefined)).toBe('Reading the session…');
   });
 
   it('says the sign-in needs a connection when the network is down', () => {

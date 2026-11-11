@@ -3,6 +3,8 @@ import { Pressable, View } from 'react-native';
 import { Button, IconButton, Text, useTheme } from 'react-native-paper';
 
 import {
+  aimedAt,
+  aimFocus,
   type Board,
   type CellState,
   type Course,
@@ -37,10 +39,9 @@ export function ModuleGroups({ c, b, onStart }: { c: Course; b: Board; onStart: 
     empty: theme.colors.onSurfaceDisabled,
   };
   const lv = levels(b.rules);
-  const aimed = (topic: string | null, sub: string | null) =>
-    st.focus?.course === c.slug && !st.focus.cert && st.focus.topic === topic && st.focus.sub === sub;
+  const aimed = (topic: string | null, sub: string | null) => aimedAt(st.focus, c.slug, topic, sub);
   const aim = (topic: string | null, sub: string | null) =>
-    void st.setFocus({ course: c.slug, topic, sub, strict: !!st.focus?.strict });
+    void st.setFocus(aimFocus(st.focus, { course: c.slug, topic, sub }));
 
   return (
     <View style={{ gap: 16 }}>

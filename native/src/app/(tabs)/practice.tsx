@@ -20,8 +20,8 @@ const open = (technique: string) => router.push({ pathname: '/technique', params
 export default function PracticeScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const board = useEngine<Board>('/board');
-  const cards = useEngine<ListedCard[]>('/cards');
+  const board = useEngine('/api/board');
+  const cards = useEngine('/api/cards');
   const error = board.error ?? cards.error;
 
   return (

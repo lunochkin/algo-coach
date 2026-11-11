@@ -2,32 +2,28 @@ import { Maximize, Minus, Plus } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import {
-  alsoNeeds,
-  alsoNeedsLine,
   certPips,
   certToOpen,
   certStates,
-  groupCell,
+  cut,
+  edgePaths,
+  entryMark,
   layoutClusters,
   lessonNode,
   lessonPanelSub,
+  lessonSlug,
   lessonView,
   levelDots,
-  levelName,
-  levelLine,
-  levels,
   MAP_DIMS,
   MAP_FIT,
   MAP_LEGEND,
   MAP_LESSONS,
   MAP_READ,
-  MODULE_FOCUS_HERE,
-  MODULE_FOCUSED,
   MODULE_START,
   mapLit,
+  mapTitles,
+  nodeView,
   subTitle,
-  topicTitle,
-  unlocksLabel,
   type Board,
   type CellState,
   type CertState,
@@ -94,10 +90,8 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
   const dots = useMemo(() => levelDots(b, c, layout.nodes), [b, c, layout])
   const pips = useMemo(() => certPips(c, states, layout.nodes), [c, states, layout])
   const lit = useMemo(() => mapLit(c, layout, picked, focus), [c, layout, picked, focus])
-  const titles = useMemo(
-    () => new Map([...c.topics.map((t) => [t.slug, t.title] as const), ['all', c.title] as const]),
-    [c],
-  )
+  const titles = useMemo(() => mapTitles(c), [c])
+  const paths = useMemo(() => edgePaths(layout), [layout])
   const scale = ZOOMS[zoom]
 
   // opens on the first group with new work, as the phone's map does
@@ -180,28 +174,14 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
               </text>
             </g>
           ))}
-          {layout.edges.map((e) => {
-            const a = at.get(e.from)
-            const into = e.to.startsWith('cluster:')
-              ? layout.clusters.find((k) => k.topic === e.to.slice(8))
-              : undefined
-            const z = into ? { x: into.x, y: into.y + into.h / 2 - H / 2 } : at.get(e.to)
-            if (!a || !z) return null
-            const [x1, y1, x2, y2] = [a.x + W, a.y + H / 2, z.x, z.y + H / 2]
-            const mid = (x1 + x2) / 2
+          {paths.map(({ edge: e, d, dash }) => {
             const shown = on(e.from) && on(e.to)
-            const dashed =
-              e.kind === 'teaches'
-                ? '2 3'
-                : e.offset || e.from.startsWith('cert:')
-                  ? '6 4'
-                  : undefined
             return (
               <path
                 key={`${e.from}>${e.to}`}
-                d={`M${x1},${y1} C${mid},${y1} ${mid},${y2} ${x2},${y2}`}
+                d={d}
                 fill="none"
-                strokeDasharray={dashed}
+                strokeDasharray={dash?.join(' ')}
                 strokeWidth={shown && lit ? 2 : 1.2}
                 opacity={shown ? 0.9 : 0.12}
                 className={
@@ -260,8 +240,6 @@ function Legend({ tone, label }: { tone: string; label: string }) {
   )
 }
 
-const cut = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s)
-
 function Node(props: {
   n: PlacedNode
   c: Course
@@ -280,7 +258,8 @@ function Node(props: {
     event.stopPropagation()
     props.onPick()
   }
-  const lesson = n.kind === 'lesson' ? props.c.graph?.lesson(n.sub.slice(7)) : undefined
+  const slug = lessonSlug(n.sub)
+  const lesson = slug ? props.c.graph?.lesson(slug) : undefined
   return (
     <g
       opacity={props.dim ? 0.2 : 1}
@@ -358,7 +337,7 @@ function Node(props: {
           {/* the subtopic also needs subtopics of other topics, through its cluster's edge */}
           {props.entry && (
             <path
-              d={`M${n.x - 6},${n.y + H / 2 - 5} L${n.x},${n.y + H / 2} L${n.x - 6},${n.y + H / 2 + 5}`}
+              d={entryMark(n)}
               fill="none"
               strokeWidth={2}
               className="stroke-muted-foreground"
@@ -390,8 +369,9 @@ function Picked(props: {
   onAim: (topic: string, sub: string) => void
 }) {
   const { n, c, b } = props
-  if (n.kind === 'lesson') {
-    const v = lessonView(b, c, n.sub.slice(7))
+  const slug = lessonSlug(n.sub)
+  if (slug) {
+    const v = lessonView(b, c, slug)
     if (!v) return null
     return (
       <Panel>
@@ -402,47 +382,37 @@ function Picked(props: {
         {v.pretest && <p className="text-meta text-muted-foreground">{v.pretest}</p>}
         <div>
           <Button asChild size="sm">
-            <Link to={lessonPath(c.slug, n.sub.slice(7))}>{MAP_READ}</Link>
+            <Link to={lessonPath(c.slug, slug)}>{MAP_READ}</Link>
           </Button>
         </div>
       </Panel>
     )
   }
-  const aimed = props.focus?.course === c.slug && !props.focus.cert && props.focus.sub === n.sub
-  const outside = alsoNeeds(c, n.sub, n.topic)
-  const unlocks = unlocksLabel(c, n.sub)
+  const v = nodeView(b, c, n, props.focus)
   return (
     <Panel>
       <div>
-        <p className="font-medium">{subTitle(c, n.sub)}</p>
-        <p className="text-meta text-muted-foreground">{topicTitle(c, n.topic)}</p>
+        <p className="font-medium">{v.title}</p>
+        <p className="text-meta text-muted-foreground">{v.topic}</p>
       </div>
       <div className="space-y-0.5 text-meta">
-        {levels(b.rules).map((level) => (
-          <p key={level}>
-            {levelLine(
-              levelName(b.rules, level),
-              groupCell(b, { course: c.slug, topic: n.topic, sub: n.sub, level }).line,
-            )}
-          </p>
+        {v.levels.map((x) => (
+          <p key={x.line}>{x.line}</p>
         ))}
-        {outside.length > 0 && <p className="text-muted-foreground">{alsoNeedsLine(outside)}</p>}
-        {unlocks && <p className="text-muted-foreground">{unlocks}</p>}
+        {v.alsoNeeds && <p className="text-muted-foreground">{v.alsoNeeds}</p>}
+        {v.unlocks && <p className="text-muted-foreground">{v.unlocks}</p>}
       </div>
       <div className="flex gap-stack">
-        <Button
-          size="sm"
-          onClick={() => props.onStart({ course: c.slug, topic: n.topic, sub: n.sub, level: null })}
-        >
+        <Button size="sm" onClick={() => props.onStart(v.scope)}>
           {MODULE_START}
         </Button>
         <Button
           variant="outline"
           size="sm"
-          disabled={aimed}
+          disabled={v.aimed}
           onClick={() => props.onAim(n.topic, n.sub)}
         >
-          {aimed ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
+          {v.aimLabel}
         </Button>
       </div>
     </Panel>

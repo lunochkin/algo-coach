@@ -4,6 +4,7 @@ import { useState, type ReactNode } from 'react'
 import {
   ACCOUNT,
   ARCHIVED_MODULES,
+  meLine,
   named,
   RESTORE,
   SAVE,
@@ -15,12 +16,13 @@ import {
   SIGN_OUT,
   SIGNED_IN_DEVICES,
   STUDY as STUDY_HEADING,
+  STUDY_SETTINGS,
+  studyForm,
   SYNC_NOW,
   syncErrorSummary,
   syncLine,
   type SettingName,
   type SettingRecord,
-  validSetting,
   waitingToSend,
   newRecord,
 } from '@algo-coach/core'
@@ -37,14 +39,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { linesOf, loadedFrom, useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
+import { cn } from '@/lib/utils'
 
-// the phone's Study settings, read in the phone's order: `pages.md`, Sections
-const STUDY: { name: SettingName; label: string }[] = (['new_per_day', 'exam_size'] as const).map(
-  (name) => ({
-    name,
-    label: SETTING_LABEL[name],
-  }),
-)
+const STUDY = STUDY_SETTINGS.map((name) => ({ name, label: SETTING_LABEL[name] }))
 
 type Values = Record<SettingName, number>
 
@@ -145,9 +142,9 @@ function Account() {
         <div className="flex flex-wrap items-center gap-stack">
           <div className="flex-1">
             <p className="font-medium">{named(me.data)}</p>
-            {me.data?.email && (
-              <p className="font-mono text-meta text-muted-foreground">{me.data.user_id}</p>
-            )}
+            <p className={cn('text-meta text-muted-foreground', me.data?.email && 'font-mono')}>
+              {meLine(me.data)}
+            </p>
           </div>
           <Button variant="outline" onClick={() => setApps(true)}>
             <Smartphone />
@@ -178,12 +175,10 @@ function Study({ stored, said, onSaid: setSaid }: StudyProps) {
   const { add } = useKnowledge()
   const [typed, setTyped] = useState(() => texts(stored))
 
-  const values = Object.fromEntries(STUDY.map(({ name }) => [name, Number(typed[name])])) as Values
-  const valid = STUDY.every(({ name }) => validSetting(name, values[name]))
-  const changed = STUDY.filter(({ name }) => values[name] !== stored[name])
+  const { values, ok, valid, changed } = studyForm(typed, stored)
 
   async function save() {
-    for (const { name } of changed) await add('setting', { name, n: values[name] })
+    for (const name of changed) await add('setting', { name, n: values[name] })
     setSaid(SAVED)
   }
 
@@ -191,31 +186,28 @@ function Study({ stored, said, onSaid: setSaid }: StudyProps) {
     <section className="space-y-stack">
       <Heading>{STUDY_HEADING}</Heading>
       <Panel>
-        {STUDY.map(({ name, label }) => {
-          const ok = validSetting(name, values[name])
-          return (
-            <div key={name} className="flex flex-wrap items-center gap-stack">
-              <Label htmlFor={name} className="flex-1">
-                {label}
-              </Label>
-              <Input
-                id={name}
-                inputMode="numeric"
-                className="w-24 tabular-nums"
-                value={typed[name]}
-                aria-invalid={!ok}
-                aria-describedby={`${name}-range`}
-                onChange={(event) => {
-                  setTyped({ ...typed, [name]: event.target.value })
-                  setSaid(null)
-                }}
-              />
-              <span id={`${name}-range`} className="w-20 text-meta text-muted-foreground">
-                {settingRange(name)}
-              </span>
-            </div>
-          )
-        })}
+        {STUDY.map(({ name, label }) => (
+          <div key={name} className="flex flex-wrap items-center gap-stack">
+            <Label htmlFor={name} className="flex-1">
+              {label}
+            </Label>
+            <Input
+              id={name}
+              inputMode="numeric"
+              className="w-24 tabular-nums"
+              value={typed[name]}
+              aria-invalid={!ok[name]}
+              aria-describedby={`${name}-range`}
+              onChange={(event) => {
+                setTyped({ ...typed, [name]: event.target.value })
+                setSaid(null)
+              }}
+            />
+            <span id={`${name}-range`} className="w-20 text-meta text-muted-foreground">
+              {settingRange(name)}
+            </span>
+          </div>
+        ))}
         <div className="flex items-center gap-stack">
           <Button disabled={!valid || changed.length === 0} onClick={() => void save()}>
             {SAVE}

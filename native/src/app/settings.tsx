@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ACCOUNT,
   ARCHIVED_MODULES,
+  meLine,
   named,
   RESTORE,
   SAVE,
@@ -17,13 +18,13 @@ import {
   settingRange,
   SIGN_OUT,
   STUDY,
+  studyForm,
   SYNC_NOW,
-  validSetting,
   waitingToSend,
 } from '@algo-coach/core';
 import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
-import { meLine, useMe } from '@/ui/account';
+import { useMe } from '@/ui/account';
 import { styles, SyncLine } from '@/ui/common';
 import { useSignOut } from '@/ui/signout';
 
@@ -63,22 +64,20 @@ export default function SettingsScreen() {
     });
   }, [st.settings, st.newPerDay, st.examSize]);
 
-  const newPerDay = Number(form.newPerDay);
-  const examSize = Number(form.examSize);
+  const study = studyForm(
+    { new_per_day: form.newPerDay, exam_size: form.examSize },
+    { new_per_day: st.newPerDay, exam_size: st.examSize },
+  );
   const hour = Number(form.reminderHour);
-  const newOk = validSetting('new_per_day', newPerDay);
-  const examOk = validSetting('exam_size', examSize);
-  const sizeOk = newOk && examOk;
   const hourOk = Number.isInteger(hour) && hour >= 0 && hour <= 23;
   const deviceOk = /^[A-Za-z0-9_-]+$/.test(form.device);
   const originOk = /^https?:\/\/[^\s/]+$/.test(form.origin.trim());
-  const valid = sizeOk && hourOk && deviceOk && originOk;
+  const valid = study.valid && hourOk && deviceOk && originOk;
   const changed =
     form.origin.trim() !== st.settings.origin ||
     form.device !== st.settings.device ||
     hour !== st.settings.reminderHour ||
-    newPerDay !== st.newPerDay ||
-    examSize !== st.examSize;
+    study.changed.length > 0;
 
   const save = async () => {
     if (!valid) return;
@@ -88,8 +87,7 @@ export default function SettingsScreen() {
       device: form.device,
       reminderHour: hour,
     });
-    if (newPerDay !== st.newPerDay) await st.setSetting('new_per_day', newPerDay);
-    if (examSize !== st.examSize) await st.setSetting('exam_size', examSize);
+    for (const name of study.changed) await st.setSetting(name, study.values[name]);
     setSaved(true);
     st.requestSync(0);
   };
@@ -149,9 +147,9 @@ export default function SettingsScreen() {
         {!deviceOk ? <HelperText type="error">Letters, digits, - and _ only</HelperText> : null}
         <Text variant="titleMedium">{STUDY}</Text>
         {field('newPerDay', SETTING_LABEL.new_per_day, true)}
-        {!newOk ? <HelperText type="error">{settingRange('new_per_day')}</HelperText> : null}
+        {!study.ok.new_per_day ? <HelperText type="error">{settingRange('new_per_day')}</HelperText> : null}
         {field('examSize', SETTING_LABEL.exam_size, true)}
-        {!examOk ? <HelperText type="error">{settingRange('exam_size')}</HelperText> : null}
+        {!study.ok.exam_size ? <HelperText type="error">{settingRange('exam_size')}</HelperText> : null}
         {field('reminderHour', 'Reminder hour (0–23)', true)}
         {!hourOk ? <HelperText type="error">0–23</HelperText> : null}
         <View style={styles.row}>

@@ -111,3 +111,8 @@ export function readyCert(
   }
   return null;
 }
+
+/** A module's rows on the certification grid: each topic, then the whole module. */
+export function certRows(c: Course): { scope: string; title: string }[] {
+  return [...c.topics.map((t) => ({ scope: t.slug, title: t.title })), { scope: COURSE_SCOPE, title: c.title }];
+}

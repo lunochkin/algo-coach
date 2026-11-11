@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   type Board,
-  bySavedOrder,
   type Course,
   type Lesson,
   lessonGroups,
@@ -15,6 +14,7 @@ import {
   LESSONS_NONE,
   LESSONS_TITLE,
   lessonRowLine,
+  modulesInOrder,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles } from '@/ui/common';
@@ -27,13 +27,7 @@ export default function LessonsScreen() {
   const { board } = st;
   // a module's own board, so a paused module's lessons read too
   const modules = useMemo(
-    () =>
-      bySavedOrder(st.catalog?.courses ?? [], (c) => c.slug, st.courseOrder)
-        .filter((c) => c.graph?.lessons.length)
-        .flatMap((c) => {
-          const b = board(c.slug);
-          return b ? [{ c, b }] : [];
-        }),
+    () => modulesInOrder(st.catalog?.courses ?? [], st.courseOrder, board, (c) => !!c.graph?.lessons.length),
     [st.catalog, st.courseOrder, board],
   );
 

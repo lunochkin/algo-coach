@@ -64,3 +64,8 @@ export function startPreview(b: Board, scope: DrillScope, limit: number, now: nu
   const label = empty ? 'Nothing ready here' : `Start · ${counted(reviews, 'review')} · ${newLeft} new`;
   return { queue, reviews, newLeft, empty, label };
 }
+
+/** The module's questions due for review now. */
+export function dueCount(b: Board, now: number): number {
+  return b.questions().filter((q) => b.toReview(q, now)).length;
+}

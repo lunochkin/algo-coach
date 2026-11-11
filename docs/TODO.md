@@ -169,7 +169,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       each a state the clients draw. Both hold the same flow twice today
 - [x] Open the lesson a web queue offers over the running queue, as the phone
       does, so Read no longer ends the queue
-- [ ] Move the map's edges and node panel, the learner, one typed engine
+- [x] Move the map's edges and node panel, the learner, one typed engine
       client and the small focus, order and certification helpers into core
 - [ ] Add a test that every web route and every native screen file has an
       inventory row, so a new screen cannot ship unlisted

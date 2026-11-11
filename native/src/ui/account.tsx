@@ -3,17 +3,8 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Appbar, Divider, Menu, Text, useTheme } from 'react-native-paper';
 
-import {
-  type components,
-  named,
-  NO_PROVIDER_LINKED,
-  READING_SESSION,
-  SETTINGS,
-  SIGN_OUT,
-  SIGNED_IN_DEVICES,
-  YOUR_ACCOUNT,
-} from '@algo-coach/core';
-import { call } from '@/lib/engine';
+import { type components, meLine, named, SETTINGS, SIGN_OUT, SIGNED_IN_DEVICES, YOUR_ACCOUNT } from '@algo-coach/core';
+import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useSignOut } from '@/ui/signout';
@@ -29,9 +20,8 @@ export function useMe(read = true): Me | undefined {
     let live = true;
     void (async () => {
       try {
-        const token = (await getToken()) ?? undefined;
-        const body = (await (await call(settings.origin, '/me', { token })).json()) as Me;
-        if (live) setMe(body);
+        const { data } = await engine(settings.origin, await getToken()).GET('/api/me');
+        if (live) setMe(data);
       } catch {
         // offline: the name stays unread, and nothing else needs it
       }
@@ -41,12 +31,6 @@ export function useMe(read = true): Me | undefined {
     };
   }, [read, hasToken, settings.origin]);
   return me;
-}
-
-// the engine's own id under a verified address, or why there is no address
-export function meLine(me: Me | undefined): string {
-  if (me === undefined) return READING_SESSION;
-  return me.email ? me.user_id : NO_PROVIDER_LINKED;
 }
 
 // Account sits apart from the sections, as the web's account menu does:

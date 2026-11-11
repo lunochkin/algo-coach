@@ -13,24 +13,22 @@ import { cancelAnimation, useSharedValue, withDecay } from 'react-native-reanima
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  alsoNeeds,
-  alsoNeedsLine,
+  aimedAt,
+  aimFocus,
   type Board,
   certPips,
   certStates,
   type CertStatus,
   certToOpen as openedCert,
   type Course,
-  groupCell,
+  dueCount,
+  edgePaths,
   layoutClusters,
   lessonPanelSub,
+  lessonSlug,
   lessonView,
   levelCounts,
   levelDots,
-  levelLine,
-  levelName,
-  levels,
-  lineage,
   MAP_DIMS,
   MAP_FIT,
   MAP_LEGEND,
@@ -38,6 +36,7 @@ import {
   MAP_READ,
   mapLit,
   MODULE_ARCHIVE,
+  mapTitles,
   MODULE_FOCUS_HERE,
   MODULE_FOCUSED,
   MODULE_GROUPS_TAB,
@@ -50,11 +49,9 @@ import {
   MODULE_RESUME,
   MODULE_START,
   moduleMeta,
+  nodeView,
   noGraph,
-  subTitle,
   summary,
-  topicTitle,
-  unlocksLabel,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
@@ -107,8 +104,8 @@ export default function ModuleScreen() {
       </View>
     );
   }
-  const aimed = st.focus?.course === c.slug && !st.focus.cert && !st.focus.topic;
-  const due = b.questions().filter((q) => b.toReview(q, now)).length;
+  const aimed = aimedAt(st.focus, c.slug, null, null);
+  const due = dueCount(b, now);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -143,7 +140,7 @@ export default function ModuleScreen() {
             compact
             icon="crosshairs-gps"
             disabled={aimed}
-            onPress={() => void st.setFocus({ course: c.slug, topic: null, sub: null, strict: !!st.focus?.strict })}
+            onPress={() => void st.setFocus(aimFocus(st.focus, { course: c.slug, topic: null, sub: null }))}
           >
             {aimed ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
           </Button>
@@ -213,13 +210,10 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
   const layout = useMemo(() => layoutClusters(c, c.graph!, MAP_DIMS, withLessons), [c, withLessons]);
   const { nodes, width, height } = layout;
   const at = useMemo(() => new Map(nodes.map((n) => [n.sub, n])), [nodes]);
-  const lv = levels(b.rules);
   const [picked, setPicked] = useState<string | null>(null);
   const starter = useStartSheet();
-  const titles = useMemo(
-    () => new Map([...c.topics.map((t) => [t.slug, t.title] as const), ['all', c.title] as const]),
-    [c],
-  );
+  const titles = useMemo(() => mapTitles(c), [c]);
+  const paths = useMemo(() => edgePaths(layout), [layout]);
   // a certificate node stands for its scope's certified levels; a tap opens the next one to earn
   const pips = useMemo(() => {
     const out = new Map<string, CertPip[]>();
@@ -389,8 +383,7 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
         <View style={{ flex: 1, overflow: 'hidden' }} onLayout={onLayout} collapsable={false}>
           <MapCanvas
             nodes={nodes}
-            edges={layout.edges}
-            at={at}
+            edges={paths}
             picked={picked}
             lit={lit}
             dots={dots}
@@ -418,7 +411,7 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
           />
         ) : null
       ) : sel?.kind === 'lesson' ? (
-        <LessonPanel c={c} b={b} slug={sel.sub.slice(7)} bottom={bottom} />
+        <LessonPanel c={c} b={b} slug={lessonSlug(sel.sub)!} bottom={bottom} />
       ) : sel ? (
         <NodePanel c={c} b={b} sub={sel.sub} topic={sel.topic} bottom={bottom} onPractice={starter.open} />
       ) : null}
@@ -458,47 +451,38 @@ function NodePanel(props: {
 }) {
   const { c, b, sub, topic, bottom, onPractice } = props;
   const st = useStore();
-  const aimed = st.focus?.course === c.slug && st.focus.sub === sub && !st.focus.cert;
   const theme = useTheme();
-  const unlocks = unlocksLabel(c, sub);
-  const outside = alsoNeeds(c, sub, topic);
+  const v = nodeView(b, c, { topic, sub }, st.focus);
+  const muted = theme.colors.onSurfaceVariant;
   return (
     <Card mode="elevated" style={{ margin: 12, marginBottom: bottom + 12 }}>
-      <Card.Title title={subTitle(c, sub)} subtitle={topicTitle(c, topic)} />
+      <Card.Title title={v.title} subtitle={v.topic} />
       <Card.Content style={{ gap: 2 }}>
-        {levels(b.rules).map((level) => {
-          const cell = groupCell(b, { course: c.slug, topic, sub, level });
-          const color = cell.state === 'empty' ? theme.colors.onSurfaceVariant : theme.colors.onSurface;
-          return (
-            <Text key={level} variant="bodySmall" style={{ color }}>
-              {levelLine(levelName(b.rules, level), cell.line)}
-            </Text>
-          );
-        })}
-        {outside.length ? (
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
-            {alsoNeedsLine(outside)}
+        {v.levels.map((x) => (
+          <Text key={x.line} variant="bodySmall" style={{ color: x.empty ? muted : theme.colors.onSurface }}>
+            {x.line}
+          </Text>
+        ))}
+        {v.alsoNeeds ? (
+          <Text variant="bodySmall" style={{ color: muted, marginTop: 4 }}>
+            {v.alsoNeeds}
           </Text>
         ) : null}
-        {unlocks ? (
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
-            {unlocks}
+        {v.unlocks ? (
+          <Text variant="bodySmall" style={{ color: muted, marginTop: 4 }}>
+            {v.unlocks}
           </Text>
         ) : null}
       </Card.Content>
       <Card.Actions>
         <Button
           icon="crosshairs-gps"
-          disabled={aimed}
-          onPress={() => void st.setFocus({ course: c.slug, topic, sub, strict: !!st.focus?.strict })}
+          disabled={v.aimed}
+          onPress={() => void st.setFocus(aimFocus(st.focus, { course: c.slug, topic, sub }))}
         >
-          {aimed ? MODULE_FOCUSED : MODULE_FOCUS_HERE}
+          {v.aimLabel}
         </Button>
-        <Button
-          mode="contained-tonal"
-          icon="play"
-          onPress={() => onPractice({ course: c.slug, topic, sub, level: null })}
-        >
+        <Button mode="contained-tonal" icon="play" onPress={() => onPractice(v.scope)}>
           {MODULE_START}
         </Button>
       </Card.Actions>

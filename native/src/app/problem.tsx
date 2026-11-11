@@ -4,15 +4,11 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { problemCards, problemTried, readFailure, type components, loadingLine } from '@algo-coach/core';
+import { problemCards, problemTried, readFailure, loadingLine } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { Failed, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
 import { Badge } from '@/ui/rows';
-
-type Picked = components['schemas']['Picked'];
-type Served = components['schemas']['Served'];
-type ListedCard = components['schemas']['ListedCard'];
 
 /**
  * A problem's record and its statement, with no editor and no clock: the
@@ -23,11 +19,12 @@ export default function ProblemScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { problem = '', technique } = useLocalSearchParams<{ problem: string; technique?: string }>();
-  const path = `/problems/${encodeURIComponent(problem)}`;
-  const picked = useEngine<Picked>(path);
+  const picked = useEngine('/api/problems/{problem_id}', { problem_id: problem });
   // a retired problem is refused its statement, and reads as its record alone
-  const served = useEngine<Served>(picked.data && !picked.data.retired ? `${path}/statement` : null);
-  const listed = useEngine<ListedCard[]>('/cards');
+  const served = useEngine(picked.data && !picked.data.retired ? '/api/problems/{problem_id}/statement' : null, {
+    problem_id: problem,
+  });
+  const listed = useEngine('/api/cards');
   const error = picked.error ?? served.error ?? listed.error;
   const [now] = useState(() => Date.now());
   const record = picked.data;

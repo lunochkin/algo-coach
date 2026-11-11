@@ -10,17 +10,14 @@ import {
   type CertRecord,
   type Course,
   type CourseStatus,
-  currentFocus,
   type ExamPlan,
   type Focus,
   focusPath,
   type FocusRecord,
   isoNow,
-  learnerCatalog,
+  learnerView,
   lessonPath,
   type LessonRecord,
-  moduleOrder,
-  newPerDay,
   orderPath,
   type OrderRecord,
   type Queue,
@@ -28,14 +25,12 @@ import {
   type RaiseRecord,
   sessionPath,
   type SessionRecord,
-  setting,
   SETTING_DEFAULT,
   type SettingName,
   settingPath,
   type SettingRecord,
   statusPath,
   type StatusRecord,
-  todayLimit,
   visibleCatalog,
   withStatuses,
   newRecord,
@@ -122,20 +117,27 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [focusRecords, setFocusRecords] = useState<FocusRecord[]>([]);
   const [lessonRecords, setLessonRecords] = useState<LessonRecord[]>([]);
   const [certRecords, setCertRecords] = useState<CertRecord[]>([]);
-  // Pause state is learner data from status records, applied over the course snapshot.
-  const learner = useMemo(
-    () => (rawCatalog ? learnerCatalog(rawCatalog, { statuses, lessons: lessonRecords, certs: certRecords }) : null),
-    [rawCatalog, statuses, lessonRecords, certRecords],
-  );
-  const archived = useMemo(() => learner?.archived ?? [], [learner]);
-  const catalog = learner?.catalog ?? null;
-  const focus = useMemo(() => (catalog ? currentFocus(focusRecords, catalog) : null), [catalog, focusRecords]);
   const [attempts, setAttempts] = useState<AttemptRecord[]>([]);
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
   const [settingRecords, setSettingRecords] = useState<SettingRecord[]>([]);
   const [raises, setRaises] = useState<RaiseRecord[]>([]);
   const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const learner = useMemo(
+    () =>
+      learnerView(rawCatalog, {
+        attempts,
+        statuses,
+        lessons: lessonRecords,
+        certs: certRecords,
+        focuses: focusRecords,
+        settings: settingRecords,
+        raises,
+        orders,
+      }),
+    [rawCatalog, attempts, statuses, lessonRecords, certRecords, focusRecords, settingRecords, raises, orders],
+  );
+  const { catalog, archived, focus, board, order: courseOrder } = learner;
   const [hasToken, setHasToken] = useState(false);
   const [sync, setSync] = useState<SyncState>({ running: false, lastAt: null, error: null });
   const [session, setSession] = useState<Session | null>(null);
@@ -257,12 +259,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return () => sub.remove();
   }, [reload, requestSync]);
 
-  const board = useCallback(
-    (only?: string | null, include: string | null = null) =>
-      catalog ? Board.build(catalog, attempts, only, include) : null,
-    [catalog, attempts],
-  );
-
   const updateSettings = useCallback(async (s: Settings) => {
     await saveSettings(s);
     setSettings(s);
@@ -371,7 +367,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   );
 
   // read on each render, so a raise ends at the rollover without a timer
-  const newLimit = todayLimit(settingRecords, raises, Date.now());
+  const newLimit = learner.limitAt(Date.now());
   const raiseNew = useCallback(
     async (rec: RaiseRecord = newRecord.raise()) => {
       await DB.addLocal('raises', raisePath(settingsRef.current.device, rec.t), rec);
@@ -389,7 +385,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     },
     [requestSync],
   );
-  const courseOrder = useMemo(() => moduleOrder(orders), [orders]);
   const setCourseOrder = useCallback(
     async (courses: string[]) => {
       const rec = newRecord.order(courses);
@@ -407,8 +402,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       attempts,
       sessions,
       settings,
-      newPerDay: newPerDay(settingRecords),
-      examSize: setting(settingRecords, 'exam_size'),
+      newPerDay: learner.newPerDay,
+      examSize: learner.examSize,
       setSetting,
       newLimit,
       raiseNew,
@@ -438,7 +433,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       attempts,
       sessions,
       settings,
-      settingRecords,
+      learner,
       setSetting,
       newLimit,
       raiseNew,

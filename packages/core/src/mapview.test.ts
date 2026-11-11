@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
-import { alsoNeeds, Board, layoutClusters, levelDots, loadSnapshot, MAP_DIMS, mapLit, reach } from './index';
+import {
+  alsoNeeds,
+  Board,
+  cut,
+  edgePaths,
+  layoutClusters,
+  lessonSlug,
+  levelDots,
+  loadSnapshot,
+  MAP_DIMS,
+  mapLit,
+  mapTitles,
+  nodeView,
+  reach,
+} from './index';
 
 const mk = (id: string, sub: string, level: number) => ({
   id,
@@ -60,5 +74,46 @@ describe('the map', () => {
   it("names a subtopic's prerequisites in other topics", () => {
     expect(alsoNeeds(c, 'x', 'u')).toEqual(['c (t)']);
     expect(alsoNeeds(c, 'b', 't')).toEqual([]);
+  });
+
+  it('draws an edge from the right side of its prerequisite to the left side of its dependent', () => {
+    const layout = layoutClusters(c, c.graph!, MAP_DIMS);
+    const e = edgePaths(layout).find((p) => p.edge.from === 'a' && p.edge.to === 'b')!;
+    const [a, b] = ['a', 'b'].map((s) => layout.nodes.find((n) => n.sub === s)!);
+    expect(e.d.startsWith(`M${a.x + MAP_DIMS.nodeW},${a.y + MAP_DIMS.nodeH / 2} `)).toBe(true);
+    expect(e.d.endsWith(` ${b.x},${b.y + MAP_DIMS.nodeH / 2}`)).toBe(true);
+    expect(e.dash).toBeNull();
+  });
+
+  it("ends an edge into a cluster at the middle of the cluster's left side, dashed from a certificate", () => {
+    const layout = layoutClusters(c, c.graph!, MAP_DIMS);
+    const e = edgePaths(layout).find((p) => p.edge.to === 'cluster:u')!;
+    const box = layout.clusters.find((k) => k.topic === 'u')!;
+    expect(e.d.endsWith(` ${box.x},${box.y + box.h / 2}`)).toBe(true);
+    expect(e.dash).toEqual([6, 4]);
+  });
+
+  it('cuts a long label to its length, ending on an ellipsis', () => {
+    expect(cut('abcdef', 4)).toBe('abc…');
+    expect(cut('abc', 4)).toBe('abc');
+  });
+
+  it("reads a lesson node's slug, and none from a subtopic", () => {
+    expect(lessonSlug('lesson:intro')).toBe('intro');
+    expect(lessonSlug('a')).toBeNull();
+  });
+
+  it("titles each cluster by its topic, and the module's certificate by the module", () => {
+    expect(mapTitles(c).get('u')).toBe('U');
+    expect(mapTitles(c).get('all')).toBe('M');
+  });
+
+  it("reads a subtopic's panel as aimed only where the focus names that subtopic", () => {
+    const board = Board.build(catalog, []);
+    const v = nodeView(board, c, { topic: 'u', sub: 'x' }, { course: 'm', topic: 'u', sub: 'x' });
+    expect(v.aimed).toBe(true);
+    expect(v.alsoNeeds).toBe('Also needs: c (t)');
+    expect(v.levels[0]).toEqual({ line: expect.stringMatching(/^Foundation: /), empty: false });
+    expect(nodeView(board, c, { topic: 'u', sub: 'x' }, { course: 'm', topic: 'u', sub: null }).aimed).toBe(false);
   });
 });

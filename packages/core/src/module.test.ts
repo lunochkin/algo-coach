@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { Board, focusLabel, focusLine, groupCell, levelCounts, loadSnapshot, startPreview } from './index';
+import { Board, dueCount, focusLabel, focusLine, groupCell, levelCounts, loadSnapshot, startPreview } from './index';
 
 const mk = (id: string, sub: string, level: number) => ({
   id,
@@ -61,6 +61,14 @@ describe('the counts per level', () => {
       { level: 0, name: 'Foundation', passed: 1, total: 3 },
       { level: 1, name: 'Associate', passed: 0, total: 1 },
     ]);
+  });
+});
+
+describe('the due count', () => {
+  it('counts a question answered wrong once its step has passed, and none unseen', () => {
+    const b = Board.build(catalog, [{ t: T, course: 'c', id: 'd', ok: false }]);
+    expect(dueCount(b, NOW)).toBe(1);
+    expect(dueCount(Board.build(catalog, []), NOW)).toBe(0);
   });
 });
 

@@ -23,3 +23,28 @@ export function setting(records: readonly SettingRecord[], name: SettingName): n
   for (const r of records) if (r.name === name && (!latest || Date.parse(r.t) >= Date.parse(latest.t))) latest = r;
   return latest ? latest.n : SETTING_DEFAULT[name];
 }
+
+// the Study settings, in the phone's order: `pages.md`, Sections
+export const STUDY_SETTINGS: readonly SettingName[] = ['new_per_day', 'exam_size'];
+
+export interface StudyForm {
+  values: Record<SettingName, number>;
+  ok: Record<SettingName, boolean>;
+  valid: boolean;
+  changed: SettingName[]; // the ones a save writes
+}
+
+/** The Study settings as typed, read against the stored values. */
+export function studyForm(typed: Record<SettingName, string>, stored: Record<SettingName, number>): StudyForm {
+  const values = { new_per_day: Number(typed.new_per_day), exam_size: Number(typed.exam_size) };
+  const ok = {
+    new_per_day: validSetting('new_per_day', values.new_per_day),
+    exam_size: validSetting('exam_size', values.exam_size),
+  };
+  return {
+    values,
+    ok,
+    valid: STUDY_SETTINGS.every((name) => ok[name]),
+    changed: STUDY_SETTINGS.filter((name) => values[name] !== stored[name]),
+  };
+}

@@ -14,7 +14,7 @@ type ListedCard = components['schemas']['ListedCard'];
 export default function CardsScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const cards = useEngine<ListedCard[]>('/cards');
+  const cards = useEngine('/api/cards');
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>

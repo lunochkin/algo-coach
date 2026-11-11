@@ -2,7 +2,17 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { Board, certConditions, certFocus, certStates, loadSnapshot, readyCert, type Snapshot } from './index';
+import {
+  Board,
+  certConditions,
+  certRows,
+  COURSE_SCOPE,
+  certFocus,
+  certStates,
+  loadSnapshot,
+  readyCert,
+  type Snapshot,
+} from './index';
 
 // the shared fixtures, which the Python side generates: `README.md`, Boundaries
 const fixtures = JSON.parse(
@@ -53,5 +63,13 @@ describe('the home', () => {
   it('names none where nothing is ready', () => {
     const { b, exams } = named('nothing done');
     expect(readyCert(b, [], exams)).toBeNull();
+  });
+});
+
+describe('certRows', () => {
+  it("lists a module's topics, then the module itself", () => {
+    const { c } = named('nothing done');
+    expect(certRows(c).map((r) => r.scope)).toEqual([...c.topics.map((t) => t.slug), COURSE_SCOPE]);
+    expect(certRows(c).at(-1)?.title).toBe(c.title);
   });
 });

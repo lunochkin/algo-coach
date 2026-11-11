@@ -45,6 +45,11 @@ export const named = (me: { email: string | null; user_id: string } | undefined)
   me === undefined ? 'Signed in' : (me.email ?? me.user_id);
 export const READING_SESSION = 'Reading the session…';
 export const NO_PROVIDER_LINKED = 'Signed in with no provider linked';
+// the line under the name: the engine's own id under a verified address, or why there is no address
+export function meLine(me: { email: string | null; user_id: string } | undefined): string {
+  if (me === undefined) return READING_SESSION;
+  return me.email ? me.user_id : NO_PROVIDER_LINKED;
+}
 
 // the settings
 export const ACCOUNT = 'Account';
