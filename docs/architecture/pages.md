@@ -446,7 +446,11 @@ what it offers. The inventory is the list both clients build to.
   under one bar holding the clock, its press and End. The editor stays
   mounted under the statement, so a switch keeps what was typed. The first
   clock press or submission mints the sitting, named by the phone's device
-  name, and an ended sitting's press returns to the card or the board.
+  name, and an ended sitting's press returns to the card or the board. The
+  phone keeps a problem's unsent code and the clock preference in its own
+  copy, as the browser keeps them, and signing out deletes the code with the
+  rest of the copy. The app going to the background pauses a running clock,
+  and returning resumes only that pause, as a hidden page does on the web.
 - **The phone's Recall screen types the form through the app's keyboard**,
   into the editor `README.md` gives. The editor's pad adds enter, indent and
   dedent, a strip the finger drags to move the caret, and a layer of
@@ -521,10 +525,8 @@ with the other client's code, and both clients were brought together on each
 difference it found.
 
 - **A sitting.** The phone's sitting asks no claim and no label once it
-  ends, offers no press restoring the last solve, keeps no unsent code
-  across a closed screen, and pauses no clock while the app is in the
-  background. Each is an item under "Code on the phone" in `TODO.md`, and
-  the row reads `same` once they land.
+  ends, and offers no press restoring the last solve. Each is an item under
+  "Code on the phone" in `TODO.md`, and the row reads `same` once they land.
 
 ## A page's areas` gives.
   - On the map, a press on a dimmed node selects it on the web and clears the

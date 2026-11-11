@@ -33,11 +33,14 @@ import {
   SITTING_ENDED,
   sittingBack,
   sittingRefused,
+  type Draft,
+  visibilityMove,
   submitLabel,
   type components,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
+import { autoStarts, draftOf, keepDraft, pressed } from '@/lib/sitting';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { Failed, styles, tones } from '@/ui/common';
@@ -163,6 +166,14 @@ function SittingOn({
   // the statement comes with the sitting running on the problem, where one runs
   const served = useEngine('/api/problems/{problem_id}/statement', { problem_id: problemId });
   const [carry, setCarry] = useState<Carry | null | undefined>(undefined);
+  // the draft as the screen opened, read once: the editor seeds once
+  const [kept, setKept] = useState<Draft | null | undefined>(undefined);
+  useEffect(() => {
+    void draftOf(problemId).then(setKept);
+  }, [problemId]);
+  // true where the app going to the background paused the sitting, so a pause
+  // the user pressed is not resumed on return
+  const byBackground = useRef(false);
   const [moved, setMoved] = useState<Moved | null>(null);
   const [moving, setMoving] = useState(false);
   const [refused, setRefused] = useState<string | null>(null);
@@ -203,6 +214,32 @@ function SittingOn({
   const sittingId = current?.id ?? null;
   const clock = clockState(current);
 
+  // the preference starts a clock the user has not, once per screen
+  const autoStarted = useRef(false);
+  const statementIn = statement !== null;
+  useEffect(() => {
+    if (!statementIn || !clock.unstarted || clock.ended || autoStarted.current) return;
+    autoStarted.current = true;
+    void autoStarts().then((on) => {
+      if (on) void move('start', { quiet: true });
+    });
+    // `move` is a new closure on every render, and it reads `sittingId` alone
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statementIn, clock.unstarted, clock.ended]);
+
+  // the clock counts the time on the problem, and an app in the background
+  // is time away from it. Returning resumes only what the background paused
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      const next = visibilityMove(clock, state !== 'active', byBackground.current);
+      byBackground.current = next.pausedByHiding;
+      if (next.move) void move(next.move, { quiet: true });
+    });
+    return () => sub.remove();
+    // `move` is a new closure on every render, and it reads `sittingId` alone
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clock.unstarted, clock.paused, clock.ended, sittingId]);
+
   useEffect(() => {
     if (sittingId === null || clock.ended) return;
     const tick = setInterval(() => {
@@ -233,9 +270,11 @@ function SittingOn({
     return data.sitting.id;
   }
 
-  async function move(to: 'start' | 'pause' | 'resume' | 'end') {
+  // a move the app took by itself says nothing to the user, so it reports no
+  // refusal: the next reading of the sitting carries whatever happened
+  async function move(to: 'start' | 'pause' | 'resume' | 'end', { quiet = false } = {}) {
     setMoving(true);
-    setRefused(null);
+    if (!quiet) setRefused(null);
     try {
       const id = to === 'start' ? await begun() : sittingId;
       if (id === null) return;
@@ -250,12 +289,18 @@ function SittingOn({
               ? await client.POST('/api/sittings/{sitting_id}/resume', params)
               : await client.POST('/api/sittings/{sitting_id}/end', params);
       if (data) setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() });
-      else setRefused(described(error));
+      else if (!quiet) setRefused(described(error));
     } catch (reason) {
-      setRefused(String(reason));
+      if (!quiet) setRefused(String(reason));
     } finally {
       setMoving(false);
     }
+  }
+
+  // the user's own press, which alone sets the clock preference
+  function press(to: 'start' | 'pause' | 'resume') {
+    void pressed(to);
+    void move(to);
   }
 
   if (served.error)
@@ -264,14 +309,14 @@ function SittingOn({
         <Failed message={readFailure('the problem', served.error)} onRetry={served.reload} />
       </View>
     );
-  if (!statement || carry === undefined)
+  if (!statement || carry === undefined || kept === undefined)
     return (
       <View style={styles.page}>
         <Text variant="bodyMedium">{loadingLine('the problem')}</Text>
       </View>
     );
 
-  const opened = editorOpening(null, sittingId, carry, statement.signature);
+  const opened = editorOpening(kept, sittingId, carry, statement.signature);
 
   async function submit() {
     if (running) return;
@@ -336,7 +381,7 @@ function SittingOn({
               mode="outlined"
               compact
               disabled={moving}
-              onPress={() => void move(clock.unstarted ? 'start' : clock.paused ? 'resume' : 'pause')}
+              onPress={() => press(clock.unstarted ? 'start' : clock.paused ? 'resume' : 'pause')}
             >
               {clock.unstarted || clock.paused ? CLOCK_START : CLOCK_PAUSE}
             </Button>
@@ -375,6 +420,7 @@ function SittingOn({
           initial={opened.code}
           onChange={(typed) => {
             code.current = typed;
+            void keepDraft(problemId, sittingId, typed, opened.restored);
           }}
         />
         <View style={[styles.row, { paddingHorizontal: 8, paddingVertical: 6, gap: 8 }]}>

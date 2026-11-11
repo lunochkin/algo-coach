@@ -94,12 +94,17 @@ export async function adopt(user: string) {
   for (const table of TABLES) await d.runAsync(`UPDATE ${table} SET owner = ? WHERE owner IS NULL`, user);
 }
 
-/** Deletes `user`'s copy: every row, and the cursor its sync read from. */
+/** Deletes `user`'s copy: every row, the cursor its sync read from, and the unsent code. */
 export async function erase(user: string | null) {
   const d = await db();
   await d.withExclusiveTransactionAsync(async (tx) => {
     for (const table of TABLES) await tx.runAsync(`DELETE FROM ${table} WHERE owner IS ?`, user);
     await tx.runAsync('DELETE FROM meta WHERE key = ?', cursorKey(user));
+    // the code typed and not sent, which is the user's own
+    await tx.runAsync(
+      "DELETE FROM meta WHERE key LIKE ? ESCAPE '\\'",
+      `draft:${(user ?? '').replace(/[\\%_]/g, '\\$&')}:%`,
+    );
   });
 }
 
