@@ -8,7 +8,7 @@ import {
   useSimultaneousGestures,
   useTapGesture,
 } from 'react-native-gesture-handler';
-import { Appbar, Button, SegmentedButtons, Text, useTheme } from 'react-native-paper';
+import { Button, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 import { cancelAnimation, useSharedValue, withDecay } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -57,7 +57,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
-import { Blank, BottomBar, fromCopy, HeaderNote, Loaded, styles, tones } from '@/ui/common';
+import { Blank, BottomBar, fromCopy, HeaderNote, Loaded, styles, tones, Press, ScreenHeader } from '@/ui/common';
 import { MapCanvas, NODE_H, NODE_W, type CertPip } from '@/ui/mapcanvas';
 import { ModuleGroups } from '@/ui/groups';
 import { SectionBar, useSections } from '@/ui/sections';
@@ -66,6 +66,7 @@ import { useArchive } from '@/ui/pause';
 import { useStartSheet, type Scope } from '@/ui/start';
 import { Toggle } from '@/ui/toggle';
 import { usePullSync } from '@/ui/pull';
+import { radius, space } from '@/ui/tokens';
 
 const MIN_SCALE = 0.25;
 const MAX_SCALE = 2.5;
@@ -94,10 +95,7 @@ export default function ModuleScreen() {
   if (!c || !b || !sum) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-        <Appbar.Header>
-          <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title={c?.title ?? p.course ?? ''} />
-        </Appbar.Header>
+        <ScreenHeader title={c?.title ?? p.course ?? ''} />
         <View style={styles.page}>
           <Loaded
             of={OF.module}
@@ -116,13 +114,10 @@ export default function ModuleScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={c.title} />
-      </Appbar.Header>
+      <ScreenHeader title={c.title} />
       {/* the web's order: the note, the presses, then the counts by level */}
       <HeaderNote lines={[moduleMeta(c.topics.length, due, c.paused), moduleSummary(sum)]} />
-      <View style={{ paddingHorizontal: 16, gap: 8, paddingBottom: 8 }}>
+      <View style={{ paddingHorizontal: space[4], gap: space[2], paddingBottom: space[2] }}>
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           <Button
             mode="outlined"
@@ -172,20 +167,15 @@ export default function ModuleScreen() {
           </ScrollView>
           {/* the module's act, a queue over all of it; the map's nodes start their own */}
           <BottomBar bottom={insets.bottom}>
-            <Button
-              mode="contained"
-              icon="play"
-              contentStyle={{ paddingVertical: 8 }}
-              onPress={() => starter.open({ course: c.slug, topic: null, sub: null, level: null })}
-            >
+            <Press icon="play" onPress={() => starter.open({ course: c.slug, topic: null, sub: null, level: null })}>
               {MODULE_START}
-            </Button>
+            </Press>
           </BottomBar>
         </>
       ) : (
         <>
           {c.graph?.lessons.length ? (
-            <View style={[styles.row, { paddingHorizontal: 16, paddingBottom: 4 }]}>
+            <View style={[styles.row, { paddingHorizontal: space[4], paddingBottom: space[1] }]}>
               <Toggle
                 icon="book-open-variant"
                 on={lessonsOn}
@@ -381,7 +371,7 @@ function CourseMap(props: { c: Course; b: Board; withLessons: boolean }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={[styles.row, { paddingHorizontal: 16, flexWrap: 'wrap' }]}>
+      <View style={[styles.row, { paddingHorizontal: space[4], flexWrap: 'wrap' }]}>
         <Legend color={tone.done} label={MAP_LEGEND.covered} />
         <Legend color={tone.open} label={MAP_LEGEND.open} />
         <Legend color={theme.colors.onSurfaceDisabled} label={MAP_LEGEND.locked} />
@@ -442,12 +432,12 @@ function CourseMap(props: { c: Course; b: Board; withLessons: boolean }) {
 function Legend({ color, label }: { color: string | null; label: string }) {
   const theme = useTheme();
   return (
-    <View style={[styles.row, { gap: 4, minHeight: 32 }]}>
+    <View style={[styles.row, { gap: space[1], minHeight: 32 }]}>
       <View
         style={{
           width: 10,
           height: 10,
-          borderRadius: 5,
+          borderRadius: radius(theme).full,
           backgroundColor: color ?? 'transparent',
           borderWidth: 1.2,
           borderColor: color ?? theme.colors.outline,
@@ -503,19 +493,19 @@ function NodePanel(props: {
         </>
       }
     >
-      <View style={{ gap: 2 }}>
+      <View style={{ gap: space[0.5] }}>
         {v.levels.map((x) => (
           <Text key={x.line} variant="bodySmall" style={{ color: x.empty ? muted : theme.colors.onSurface }}>
             {x.line}
           </Text>
         ))}
         {v.alsoNeeds ? (
-          <Text variant="bodySmall" style={{ color: muted, marginTop: 4 }}>
+          <Text variant="bodySmall" style={{ color: muted, marginTop: space[1] }}>
             {v.alsoNeeds}
           </Text>
         ) : null}
         {v.unlocks ? (
-          <Text variant="bodySmall" style={{ color: muted, marginTop: 4 }}>
+          <Text variant="bodySmall" style={{ color: muted, marginTop: space[1] }}>
             {v.unlocks}
           </Text>
         ) : null}
@@ -551,7 +541,7 @@ function LessonPanel(props: { c: Course; b: Board; slug: string; onClose: () => 
         </Button>
       }
     >
-      <View style={{ gap: 2 }}>
+      <View style={{ gap: space[0.5] }}>
         <Text variant="bodySmall">{v.teaches}</Text>
         {v.needs ? <Text variant="bodySmall">{v.needs}</Text> : null}
         {v.pretest ? (

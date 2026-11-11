@@ -26,6 +26,7 @@ import { styles, tones } from './common';
 import { Panel } from './rows';
 import { Toggle } from './toggle';
 import { useStore } from '@/lib/store';
+import { radius, space } from '@/ui/tokens';
 
 // without the presses the card is a reading, as the Practice tab holds it:
 // the focus's presses live on the knowledge home alone
@@ -59,8 +60,8 @@ export function FocusCard(props: Props) {
 
   return (
     <Panel padded>
-      <View style={{ gap: 8 }}>
-        <View style={[styles.row, { gap: 4 }]}>
+      <View style={{ gap: space[2] }}>
+        <View style={[styles.row, { gap: space[1] }]}>
           <MaterialCommunityIcons
             name={focus.cert ? 'target' : 'crosshairs-gps'}
             size={20}
@@ -80,7 +81,7 @@ export function FocusCard(props: Props) {
               size={20}
               onPress={props.onClear}
               accessibilityLabel={CLEAR_FOCUS}
-              style={{ margin: 0 }}
+              style={{ margin: space[0] }}
             />
           ) : null}
         </View>
@@ -90,7 +91,7 @@ export function FocusCard(props: Props) {
             style={{
               flexDirection: 'row',
               height: 8,
-              borderRadius: 4,
+              borderRadius: radius(theme).full,
               overflow: 'hidden',
               backgroundColor: theme.colors.surfaceVariant,
             }}
@@ -105,7 +106,7 @@ export function FocusCard(props: Props) {
         </Text>
 
         {/* wraps: the raise's label is longer than a phone's row holds beside the counts */}
-        <View style={[styles.row, { gap: 16, flexWrap: 'wrap' }]}>
+        <View style={[styles.row, { gap: space[4], flexWrap: 'wrap' }]}>
           <Stat icon="refresh" value={info.due} label={DUE_NOW} />
           {info.learning ? <Stat icon="timer-sand" value={info.learning} label={LEARNING} /> : null}
           <Stat icon="plus-circle-outline" value={info.newLeft} label={NEW_LEFT} />
@@ -136,7 +137,7 @@ export function FocusCard(props: Props) {
 function Stat({ icon, value, label }: { icon: string; value: number; label: string }) {
   const theme = useTheme();
   return (
-    <View style={[styles.row, { gap: 4 }]}>
+    <View style={[styles.row, { gap: space[1] }]}>
       <MaterialCommunityIcons name={icon as 'refresh'} size={16} color={theme.colors.primary} />
       <Text variant="titleSmall">{value}</Text>
       <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>

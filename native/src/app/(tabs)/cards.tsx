@@ -1,5 +1,5 @@
 import { ScrollView, View } from 'react-native';
-import { Appbar, Text, useTheme } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -18,7 +18,7 @@ import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { CardPanel } from '@/ui/cards';
 import { Heading } from '@/ui/rows';
-import { Loaded, styles } from '@/ui/common';
+import { Loaded, styles, ScreenHeader } from '@/ui/common';
 import { usePullSync } from '@/ui/pull';
 
 type ListedCard = components['schemas']['ListedCard'];
@@ -32,10 +32,7 @@ export default function CardsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.Content title={CARDS_TITLE} />
-        <AccountMenu />
-      </Appbar.Header>
+      <ScreenHeader title={CARDS_TITLE} back={null} aside={<AccountMenu />} />
       <ScrollView refreshControl={pull} contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
           {CARDS_NOTE}

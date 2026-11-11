@@ -5,6 +5,7 @@ import { Divider, ProgressBar, Text, TouchableRipple, useTheme } from 'react-nat
 
 import type { Stat } from '@algo-coach/core';
 import { styles } from '@/ui/common';
+import { font, radius, space } from '@/ui/tokens';
 
 /**
  * One pick on a list of picks. A phone is too narrow for the counts beside
@@ -35,7 +36,7 @@ export function PickRow(props: {
   const theme = useTheme();
   const counts = props.stats.map((one) => (one.label ? `${one.value} ${one.label}` : String(one.value))).join(' · ');
   const text = (
-    <View style={{ flex: 1, gap: 6 }}>
+    <View style={{ flex: 1, gap: space[1.5] }}>
       {props.lead ? (
         <View style={styles.row}>
           {props.lead}
@@ -57,17 +58,15 @@ export function PickRow(props: {
       {props.note ? (
         <Text
           variant="bodySmall"
-          style={{ fontFamily: props.mono ? 'monospace' : undefined, color: theme.colors.onSurfaceVariant }}
+          style={{ fontFamily: props.mono ? font.mono : undefined, color: theme.colors.onSurfaceVariant }}
         >
           {props.note}
         </Text>
       ) : null}
       {props.progress ? (
-        <ProgressBar
-          progress={props.progress.total === 0 ? 0 : props.progress.value / props.progress.total}
-          accessibilityLabel={`${props.progress.label}: ${props.progress.value} / ${props.progress.total}`}
-          style={{ maxWidth: 240, borderRadius: 2 }}
-        />
+        <View style={{ maxWidth: ROW_BAR_WIDTH }}>
+          <Progress {...props.progress} />
+        </View>
       ) : null}
       {props.children}
     </View>
@@ -76,7 +75,12 @@ export function PickRow(props: {
     <View
       style={[
         styles.row,
-        { paddingLeft: 16, paddingRight: props.aside ? 4 : 16, paddingVertical: 12, opacity: props.dim ? 0.7 : 1 },
+        {
+          paddingLeft: space[4],
+          paddingRight: props.aside ? 4 : 16,
+          paddingVertical: space[3],
+          opacity: props.dim ? 0.7 : 1,
+        },
       ]}
     >
       {text}
@@ -96,6 +100,41 @@ export function PickRow(props: {
   );
 }
 
+// a row's bar stops short of the row's width, as the web's row bounds it
+const ROW_BAR_WIDTH = 240;
+
+/** How far a count has got, as one thin bar wherever a study's progress reads. */
+export function Progress({ value, total, label }: { value: number; total: number; label: string }) {
+  const theme = useTheme();
+  return (
+    <ProgressBar
+      progress={total === 0 ? 0 : Math.min(1, value / total)}
+      accessibilityLabel={`${label}: ${value} / ${total}`}
+      style={{ borderRadius: radius(theme).full }}
+    />
+  );
+}
+
+/** One count and what it counts, read as a pair, as the web's `Stat`. */
+export function Stat({ value, label }: { value: ReactNode; label: string }) {
+  const theme = useTheme();
+  return (
+    <View>
+      <Text variant="titleMedium">{value}</Text>
+      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+/** The counts of one panel, in a row that wraps. */
+export function Stats({ children }: { children: ReactNode }) {
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: space[6], rowGap: space[2] }}>{children}</View>
+  );
+}
+
 /** A small outlined label, sized to the meta line it sits in. */
 export function Badge({ label }: { label: string }) {
   const theme = useTheme();
@@ -104,9 +143,9 @@ export function Badge({ label }: { label: string }) {
       style={{
         borderWidth: 1,
         borderColor: theme.colors.outline,
-        borderRadius: 6,
-        paddingHorizontal: 6,
-        paddingVertical: 1,
+        borderRadius: radius(theme).md,
+        paddingHorizontal: space[1.5],
+        paddingVertical: space.px,
       }}
     >
       <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -138,7 +177,7 @@ export function Panel({
           backgroundColor: theme.colors.surface,
           borderColor: theme.colors.outlineVariant,
           borderWidth: 1,
-          borderRadius: theme.roundness * 3,
+          borderRadius: radius(theme).xl,
           overflow: 'hidden',
           padding: padded ? 12 : 0,
           gap: padded ? 8 : 0,
@@ -159,8 +198,8 @@ export function PanelStrip({ children, onPress }: { children: ReactNode; onPress
       style={[
         styles.row,
         {
-          paddingHorizontal: 16,
-          paddingVertical: 12,
+          paddingHorizontal: space[4],
+          paddingVertical: space[3],
           borderBottomWidth: StyleSheet.hairlineWidth,
           borderColor: theme.colors.outlineVariant,
         },
@@ -199,7 +238,7 @@ export function PickPanel({ children }: { children: ReactNode }) {
  */
 export function PanelItem({ first, last, children }: { first: boolean; last: boolean; children: ReactNode }) {
   const theme = useTheme();
-  const radius = theme.roundness * 3;
+  const edge = radius(theme).xl;
   return (
     <View
       style={{
@@ -209,10 +248,10 @@ export function PanelItem({ first, last, children }: { first: boolean; last: boo
         borderRightWidth: 1,
         borderTopWidth: first ? 1 : StyleSheet.hairlineWidth,
         borderBottomWidth: last ? 1 : 0,
-        borderTopLeftRadius: first ? radius : 0,
-        borderTopRightRadius: first ? radius : 0,
-        borderBottomLeftRadius: last ? radius : 0,
-        borderBottomRightRadius: last ? radius : 0,
+        borderTopLeftRadius: first ? edge : 0,
+        borderTopRightRadius: first ? edge : 0,
+        borderBottomLeftRadius: last ? edge : 0,
+        borderBottomRightRadius: last ? edge : 0,
         overflow: 'hidden',
       }}
     >
@@ -237,7 +276,7 @@ export function Heading(props: {
   const theme = useTheme();
   const muted = theme.colors.onSurfaceVariant;
   const text = (
-    <View style={[styles.row, { flex: 1, gap: 6 }]}>
+    <View style={[styles.row, { flex: 1, gap: space[1.5] }]}>
       {props.onToggle ? (
         <MaterialCommunityIcons name={props.closed ? 'chevron-right' : 'chevron-down'} size={20} color={muted} />
       ) : null}

@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { cloneElement, Fragment, isValidElement, useEffect, useMemo, type ReactElement, type ReactNode } from 'react';
 import { type HostInstance, ScrollView, View, type TextStyle } from 'react-native';
 import { useMarkdown } from 'react-native-marked';
-import { Appbar, Button, Text, useTheme } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -21,10 +21,11 @@ import {
   lessonPage,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
-import { Blank, BottomBar, fromCopy, HeaderNote, Loaded, styles } from '@/ui/common';
+import { Blank, BottomBar, fromCopy, Loaded, styles, Press, ScreenHeader } from '@/ui/common';
 import { CodeRenderer, InlineCode, type InlineCodeProps, markdownOptions } from '@/ui/markdown';
 import { Heading } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
+import { space } from '@/ui/tokens';
 
 /** `lesson:` links stay in the app. */
 class LessonRenderer extends CodeRenderer {
@@ -126,11 +127,7 @@ export default function LessonScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={title} />
-      </Appbar.Header>
-      <HeaderNote lines={[note]} />
+      <ScreenHeader title={title} note={[note]} />
       {!lesson || !c ? (
         <View style={styles.page}>
           <Loaded
@@ -172,14 +169,13 @@ export default function LessonScreen() {
       )}
       {lesson ? (
         <BottomBar bottom={insets.bottom}>
-          <Button
+          <Press
             mode={done ? 'outlined' : 'contained'}
             icon={done ? 'book-remove-outline' : 'book-check-outline'}
             onPress={() => void mark(done ? 'undone' : 'done')}
-            contentStyle={{ paddingVertical: 8 }}
           >
             {done ? LESSON_MARK_UNREAD : LESSON_MARK_READ}
-          </Button>
+          </Press>
         </BottomBar>
       ) : null}
     </View>
@@ -192,7 +188,7 @@ function Footer({ c, slug }: { c: Course; slug: string }) {
   const { next, related } = lessonsAround(c, slug);
   const row = (title: string, items: Lesson[]) =>
     items.length ? (
-      <View style={{ gap: 6, marginTop: 16 }}>
+      <View style={{ gap: space[1.5], marginTop: space[4] }}>
         <Heading sub title={title} />
         {/* destinations, so links rather than chips: a chip is a control */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 16, rowGap: 6 }}>

@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Button, ProgressBar, Text, useTheme } from 'react-native-paper';
+import { Button, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -37,11 +37,12 @@ import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { BottomBar, CodeBlock, HeaderNote, Loaded, styles } from '@/ui/common';
+import { BottomBar, CodeBlock, Loaded, styles, Press, ScreenHeader } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
-import { Badge, Panel, PickPanel, PickRow } from '@/ui/rows';
+import { Badge, Panel, PickPanel, PickRow, Progress, Stat, Stats } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
 import { usePullSync } from '@/ui/pull';
+import { space } from '@/ui/tokens';
 
 type Template = components['schemas']['Template'];
 type Recalled = components['schemas']['Recalled'];
@@ -65,11 +66,7 @@ export default function CardScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={card?.title ?? slug} />
-      </Appbar.Header>
-      <HeaderNote lines={[studied.data ? cardNote(studied.data, now) : card?.technique]} />
+      <ScreenHeader title={card?.title ?? slug} note={[studied.data ? cardNote(studied.data, now) : card?.technique]} />
       <SectionBar sections={sections} />
       <ScrollView
         refreshControl={pull}
@@ -197,22 +194,15 @@ const openProblem = (problem: string, technique: string, card: string) =>
 // forms recalled and the probes drawn, with the recall offered where a form
 // carries cases to check it
 function RunProgress({ studied }: { studied: Studied }) {
-  const theme = useTheme();
   const p = cardProgress(studied);
   return (
     <Panel padded>
-      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-        {[
-          `${p.solved}/${p.rungs} ${RUNGS_SOLVED}`,
-          `${p.recalled}/${p.forms} ${FORMS_RECALLED}`,
-          `${p.probes} ${PROBES_DRAWN}`,
-        ].join(' · ')}
-      </Text>
-      <ProgressBar
-        progress={p.rungs === 0 ? 0 : p.solved / p.rungs}
-        accessibilityLabel={`${RUNGS_SOLVED}: ${p.solved} / ${p.rungs}`}
-        style={{ borderRadius: 2 }}
-      />
+      <Stats>
+        <Stat value={`${p.solved}/${p.rungs}`} label={RUNGS_SOLVED} />
+        <Stat value={`${p.recalled}/${p.forms}`} label={FORMS_RECALLED} />
+        <Stat value={p.probes} label={PROBES_DRAWN} />
+      </Stats>
+      <Progress value={p.solved} total={p.rungs} label={RUNGS_SOLVED} />
       {p.recallable ? (
         <Button
           mode="outlined"
@@ -233,14 +223,9 @@ function NextRung({ studied, bottom }: { studied: Studied; bottom: number }) {
   if (!next) return null;
   return (
     <BottomBar bottom={bottom}>
-      <Button
-        mode="contained"
-        icon="play"
-        contentStyle={{ paddingVertical: 8 }}
-        onPress={() => openProblem(next.problemId, studied.card.technique, studied.card.slug)}
-      >
+      <Press icon="play" onPress={() => openProblem(next.problemId, studied.card.technique, studied.card.slug)}>
         {nextRung(next.title)}
-      </Button>
+      </Press>
     </BottomBar>
   );
 }
@@ -275,7 +260,7 @@ function Ladder({ studied, of }: { studied: Studied; of: Sections }) {
               />
             )),
             ...view.gaps.map((gap) => (
-              <View key={gap} style={[styles.row, { paddingHorizontal: 16, paddingVertical: 12 }]}>
+              <View key={gap} style={[styles.row, { paddingHorizontal: space[4], paddingVertical: space[3] }]}>
                 <Text variant="bodySmall" style={[muted, { flex: 1 }]}>
                   {gap}
                 </Text>
@@ -339,9 +324,9 @@ function RunStart({ slug, bottom, onStarted }: { slug: string; bottom: number; o
         </Text>
       }
     >
-      <Button mode="contained" onPress={() => void start()} disabled={starting} contentStyle={{ paddingVertical: 8 }}>
+      <Press onPress={() => void start()} disabled={starting}>
         {runStartLabel(starting)}
-      </Button>
+      </Press>
     </BottomBar>
   );
 }

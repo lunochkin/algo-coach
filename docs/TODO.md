@@ -398,21 +398,21 @@ both. These items remove what still behaves or draws two ways.
       way on both clients. The phone hides its keys, and the web stays open
 - [x] Move the phone's two sign-in errors and its notification channel's
       name into core, the last words a client still types
-- [ ] Add spacing, type and radius tokens to the phone, and replace the
+- [x] Add spacing, type and radius tokens to the phone, and replace the
       numbers in `native/src` styles with them. Some 150 are typed inline,
       a quarter of them in the quiz
 - [x] Draw the phone's running clock's dot in its own token, as `pages.md`
       gives it. The dot uses the passed colour
-- [ ] Give the phone a primary press, a counts and a progress bar component,
+- [x] Give the phone a primary press, a counts and a progress bar component,
       as the web's `Button`, `Stats` and `ProgressBar`. The press's padding
       is repeated in 19 places, and the card's counts read as one line
-- [ ] Route the phone quiz's header and score through the shared header and
+- [x] Route the phone quiz's header and score through the shared header and
       `Loaded`. The quiz builds its own
-- [ ] Draw the web's verdict, answer and hint panels with `Panel`, and its
+- [x] Draw the web's verdict, answer and hint panels with `Panel`, and its
       three option tiles as one component. Each copies the classes
-- [ ] Draw a problem's row one way on Problems and a technique's page, on
+- [x] Draw a problem's row one way on Problems and a technique's page, on
       the web. Only the listing names its techniques
-- [ ] Draw the web's two grid tables and its difficulty badge each as one
+- [x] Draw the web's two grid tables and its difficulty badge each as one
       component, and the failing case with the panel's edge
 
 ### Exit

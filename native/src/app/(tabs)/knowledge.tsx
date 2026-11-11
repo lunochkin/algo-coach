@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, View } from 'react-native';
-import { Appbar, Button, IconButton, useTheme } from 'react-native-paper';
+import { Button, IconButton, useTheme } from 'react-native-paper';
 import ReorderableList, { useReorderableDrag, type ReorderableListReorderEvent } from 'react-native-reorderable-list';
 
 import {
@@ -20,13 +20,14 @@ import {
   knowledgeHome,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
-import { fromCopy, HeaderNote, Loaded, styles, SyncBanner, SyncLine } from '@/ui/common';
+import { fromCopy, Loaded, styles, SyncBanner, SyncLine, ScreenHeader } from '@/ui/common';
 import { ContinueBar, ContinueNotice, useContinue } from '@/ui/continue';
 import { FocusCard } from '@/ui/focuscard';
 import { AccountMenu } from '@/ui/account';
 import { ModuleRow } from '@/ui/modules';
 import { Heading, PanelItem, PickPanel, PickRow } from '@/ui/rows';
 import { usePullSync } from '@/ui/pull';
+import { space } from '@/ui/tokens';
 
 export default function Home() {
   const st = useStore();
@@ -61,7 +62,7 @@ export default function Home() {
       </Loaded>
     ) : null;
   const header = (
-    <View style={{ gap: 12, marginBottom: 12 }}>
+    <View style={{ gap: space[3], marginBottom: space[3] }}>
       <SyncBanner sync={st.sync} />
       {/* the lessons and the certifications are steps down from the home: `pages.md`, The structure */}
       <View style={styles.row}>
@@ -74,7 +75,7 @@ export default function Home() {
       </View>
       {/* one scroll, in the web's order: the next steps and the focus, the acts,
           then the modules. A bar pinned over the list left the modules a sliver */}
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: space[2] }}>
         {/* the next steps the rules would take, as rows, since each opens a page */}
         {certToTake || toRead ? (
           <PickPanel>
@@ -116,11 +117,7 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.Content title={SECTION_KNOWLEDGE} />
-        <AccountMenu />
-      </Appbar.Header>
-      <HeaderNote lines={[KNOWLEDGE_NOTE]} />
+      <ScreenHeader title={SECTION_KNOWLEDGE} back={null} aside={<AccountMenu />} note={[KNOWLEDGE_NOTE]} />
       <ReorderableList
         refreshControl={pull}
         data={rows}
@@ -128,12 +125,12 @@ export default function Home() {
         onReorder={onReorder}
         ListHeaderComponent={header}
         ListFooterComponent={
-          <Pressable onPress={() => st.requestSync(0)} accessibilityLabel={SYNC_NOW} style={{ marginTop: 12 }}>
+          <Pressable onPress={() => st.requestSync(0)} accessibilityLabel={SYNC_NOW} style={{ marginTop: space[3] }}>
             <SyncLine sync={st.sync} showError={false} />
           </Pressable>
         }
         // room under the last row for the bar over it
-        contentContainerStyle={{ padding: 16, paddingBottom: 160 }}
+        contentContainerStyle={{ padding: space[4], paddingBottom: 160 }}
         renderItem={({ item, index }) => (
           <PanelItem first={index === 0} last={index === rows.length - 1}>
             <DraggedModule row={item} />

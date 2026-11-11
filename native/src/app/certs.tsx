@@ -1,7 +1,7 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { Appbar, Text, useTheme } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -33,9 +33,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Panel } from '@/ui/rows';
 import { CertRing, CertSheet } from '@/ui/certs';
 import { useStartSheet } from '@/ui/start';
-import { fromCopy, Loaded, styles, tones } from '@/ui/common';
+import { fromCopy, Loaded, styles, tones, ScreenHeader } from '@/ui/common';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
 import { usePullSync } from '@/ui/pull';
+import { radius, space, textSize } from '@/ui/tokens';
 
 const CELL = 54;
 
@@ -66,10 +67,7 @@ export default function CertsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={CERTS_TITLE} />
-      </Appbar.Header>
+      <ScreenHeader title={CERTS_TITLE} />
       {!modules.length ? (
         <View style={styles.page}>
           <Loaded of={OF.certifications} state={fromCopy(st, st.catalog ? modules : null)} blank={CERTS_NONE}>
@@ -163,7 +161,7 @@ function Cell(props: { status: CertStatus; title: string; onPress: () => void })
     ) : (
       <>
         <CertRing status={s} />
-        <Text variant="labelSmall" style={{ fontSize: 10, color: theme.colors.onSurfaceVariant }}>
+        <Text variant="labelSmall" style={{ fontSize: textSize.micro, color: theme.colors.onSurfaceVariant }}>
           {coverageShare(s.coverage)}
         </Text>
       </>
@@ -178,7 +176,7 @@ function Cell(props: { status: CertStatus; title: string; onPress: () => void })
         minHeight: 52,
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 12,
+        borderRadius: radius(theme).xl,
         backgroundColor: s.state === 'ready' ? theme.colors.primaryContainer : 'transparent',
       }}
     >
@@ -204,7 +202,7 @@ function Legend() {
       {CERT_LEGEND.map((one) => {
         const drawn = icon[one.state];
         return (
-          <View key={one.state} style={[styles.row, { gap: 4 }]}>
+          <View key={one.state} style={[styles.row, { gap: space[1] }]}>
             {drawn ? (
               <MaterialCommunityIcons name={drawn[0] as never} size={16} color={drawn[1]} />
             ) : (

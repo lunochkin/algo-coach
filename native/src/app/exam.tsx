@@ -1,7 +1,7 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Button, Text, TextInput, useTheme } from 'react-native-paper';
+import { Text, TextInput, useTheme } from 'react-native-paper';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -28,9 +28,10 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
-import { BottomBar, fromCopy, Loaded, startExam, styles } from '@/ui/common';
+import { BottomBar, fromCopy, Loaded, startExam, styles, Press, ScreenHeader } from '@/ui/common';
 import { Toggle, Toggles } from '@/ui/toggle';
 import { Heading } from '@/ui/rows';
+import { space } from '@/ui/tokens';
 
 // the choices wait for the copy, so the size and the focus they open on are the stored ones
 export default function Exam() {
@@ -42,22 +43,13 @@ export default function Exam() {
   if (catalog) return <Choices catalog={catalog} />;
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Header />
+      <ScreenHeader title={EXAM_TITLE} />
       <View style={styles.page}>
         <Loaded of={OF.exam} state={fromCopy(st, null)}>
           {() => null}
         </Loaded>
       </View>
     </View>
-  );
-}
-
-function Header({ title = EXAM_TITLE }: { title?: string }) {
-  return (
-    <Appbar.Header>
-      <Appbar.BackAction onPress={() => router.back()} />
-      <Appbar.Content title={title} />
-    </Appbar.Header>
   );
 }
 
@@ -70,7 +62,7 @@ function CertChoice({ id, catalog }: { id: string; catalog: Catalog }) {
   const b = found ? st.board(found.c.slug) : null;
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Header title={found?.x.title ?? EXAM_TITLE} />
+      <ScreenHeader title={found?.x.title ?? EXAM_TITLE} />
       <View style={styles.page}>
         {found && b ? (
           <>
@@ -85,17 +77,15 @@ function CertChoice({ id, catalog }: { id: string; catalog: Catalog }) {
       </View>
       {found && b ? (
         <BottomBar bottom={insets.bottom}>
-          <Button
-            mode="contained"
+          <Press
             icon="play"
-            contentStyle={{ paddingVertical: 8 }}
             onPress={() => {
               const plan = certExam(b, found.c, id);
               if (plan) startExam(st, plan);
             }}
           >
             {CERT_EXAM_START}
-          </Button>
+          </Press>
         </BottomBar>
       ) : null}
     </View>
@@ -124,7 +114,7 @@ function Choices({ catalog }: { catalog: Catalog }) {
 
   return (
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Header />
+      <ScreenHeader title={EXAM_TITLE} />
       <ScrollView
         contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 96 }]}
         keyboardShouldPersistTaps="handled"
@@ -157,15 +147,9 @@ function Choices({ catalog }: { catalog: Catalog }) {
         <TextInput mode="outlined" label={EXAM_SIZE} value={size} onChangeText={setSize} keyboardType="number-pad" />
       </ScrollView>
       <BottomBar bottom={insets.bottom}>
-        <Button
-          mode="contained"
-          icon="play"
-          disabled={!choice.count}
-          onPress={start}
-          contentStyle={{ paddingVertical: 8 }}
-        >
+        <Press icon="play" disabled={!choice.count} onPress={start}>
           {choice.label}
-        </Button>
+        </Press>
       </BottomBar>
     </KeyboardAvoidingView>
   );

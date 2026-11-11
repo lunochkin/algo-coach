@@ -21,7 +21,7 @@ import {
   showAllKb,
   COPY,
 } from '@algo-coach/core';
-import { palette } from '@/ui/tokens';
+import { font, palette, radius, space, textSize } from '@/ui/tokens';
 
 type Submitted = components['schemas']['Submitted'];
 type Outcome = components['schemas']['CaseOutcome'];
@@ -53,7 +53,7 @@ export function ElapsedClock({
     return () => clearInterval(tick);
   }, [running]);
   return (
-    <Text variant="titleMedium" style={{ fontFamily: 'monospace' }} accessibilityLabel={ELAPSED_TIME}>
+    <Text variant="titleMedium" style={{ fontFamily: font.mono }} accessibilityLabel={ELAPSED_TIME}>
       {duration(shownSeconds(elapsedSec, receivedAt, now, running && elapsedSec !== null))}
     </Text>
   );
@@ -66,7 +66,7 @@ export function SubmissionVerdict({ submitted }: { submitted: Submitted }) {
   const results = submitted.verification.results ?? [];
   const muted = { color: theme.colors.onSurfaceVariant };
   return (
-    <View style={{ gap: 6 }}>
+    <View style={{ gap: space[1.5] }}>
       <Text
         variant="titleSmall"
         style={{ color: view.overall ? outcomeColor(view.overall, theme.dark, theme.colors.error) : undefined }}
@@ -78,7 +78,7 @@ export function SubmissionVerdict({ submitted }: { submitted: Submitted }) {
           {view.failures}
         </Text>
       ) : null}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }} accessibilityLabel={CASES_IN_ORDER}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[1] }} accessibilityLabel={CASES_IN_ORDER}>
         {results.map((one, index) => (
           <View
             key={one.case_id}
@@ -86,14 +86,14 @@ export function SubmissionVerdict({ submitted }: { submitted: Submitted }) {
             style={{
               width: 12,
               height: 12,
-              borderRadius: 3,
+              borderRadius: radius(theme).sm,
               backgroundColor: outcomeColor(one.outcome, theme.dark, theme.colors.error),
             }}
           />
         ))}
       </View>
       {view.failure ? (
-        <View style={{ gap: 4 }}>
+        <View style={{ gap: space[1] }}>
           <Text
             variant="labelLarge"
             style={{ color: outcomeColor(view.failure.outcome, theme.dark, theme.colors.error) }}
@@ -119,8 +119,8 @@ function Value({ label, text }: { label: string; text: string }) {
   const [whole, setWhole] = useState(false);
   const shown = cutValue(text, whole);
   return (
-    <View style={{ gap: 2 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+    <View style={{ gap: space[0.5] }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space[1] }}>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {label}
         </Text>
@@ -137,10 +137,13 @@ function Value({ label, text }: { label: string; text: string }) {
       </View>
       <ScrollView
         horizontal
-        style={{ backgroundColor: theme.colors.surfaceVariant, borderRadius: 6 }}
-        contentContainerStyle={{ padding: 6 }}
+        style={{ backgroundColor: theme.colors.surfaceVariant, borderRadius: radius(theme).md }}
+        contentContainerStyle={{ padding: space[1.5] }}
       >
-        <Text selectable style={{ fontFamily: 'monospace', fontSize: 13, color: theme.colors.onSurfaceVariant }}>
+        <Text
+          selectable
+          style={{ fontFamily: font.mono, fontSize: textSize.codeInline, color: theme.colors.onSurfaceVariant }}
+        >
           {shown.text}
         </Text>
       </ScrollView>

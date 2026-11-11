@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, type ScrollViewInstance, View } from 'react-native';
-import { Appbar, Button, IconButton, Menu, Text, useTheme } from 'react-native-paper';
+import { Button, IconButton, Menu, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -36,12 +36,13 @@ import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { BottomBar, CodeBlock, ErrorLine, Loaded, styles, tones } from '@/ui/common';
+import { BottomBar, CodeBlock, ErrorLine, Loaded, styles, tones, Press, ScreenHeader } from '@/ui/common';
 import { Heading } from '@/ui/rows';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
 import type { Key } from '@/lib/keys';
 import { KeyPad } from '@/ui/keys';
 import { Markdown } from '@/ui/markdown';
+import { space } from '@/ui/tokens';
 
 type Prompted = components['schemas']['Prompted'];
 type Hint = components['schemas']['Hint'];
@@ -67,10 +68,7 @@ export default function RecallScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={drawn ? RECALL_TITLE : (data?.title ?? RECALL_TITLE)} />
-      </Appbar.Header>
+      <ScreenHeader title={drawn ? RECALL_TITLE : (data?.title ?? RECALL_TITLE)} />
       {data ? (
         <Trainer key={data.template_slug} slug={slug} prompt={data} drawn={drawn} bottom={insets.bottom} />
       ) : (
@@ -133,7 +131,7 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
       <ScrollView
         ref={top}
         style={{ flexGrow: 0, maxHeight: 200 }}
-        contentContainerStyle={{ padding: 16, gap: 8 }}
+        contentContainerStyle={{ padding: space[4], gap: space[2] }}
         // a hint taken lands below the trigger, where the panel scrolls to it
         onContentSizeChange={() => taken.length > 0 && top.current?.scrollToEnd()}
       >
@@ -146,7 +144,7 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
         </Text>
         <Markdown>{prompt.trigger}</Markdown>
         {taken.map((one) => (
-          <View key={one.hint} style={{ gap: 4 }}>
+          <View key={one.hint} style={{ gap: space[1] }}>
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
               {hintTaken(one.hint)}
             </Text>
@@ -157,7 +155,7 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
       <CodeEditor ref={editor} onNames={setNames} initial={code.current} onChange={(typed) => (code.current = typed)} />
       {/* the ladder, as on the web, so the reader sees what a hint costs
           before taking it: each one answers more of the question than the last */}
-      <View style={[styles.row, { paddingHorizontal: 8, paddingTop: 6, gap: 8 }]}>
+      <View style={[styles.row, { paddingHorizontal: space[2], paddingTop: space[1.5], gap: space[2] }]}>
         {HINTS.map((one) => (
           <Text
             key={one}
@@ -171,7 +169,7 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
           </Text>
         ))}
       </View>
-      <View style={[styles.row, { paddingHorizontal: 8, paddingVertical: 6, gap: 8 }]}>
+      <View style={[styles.row, { paddingHorizontal: space[2], paddingVertical: space[1.5], gap: space[2] }]}>
         <Button mode="contained" onPress={run} disabled={running}>
           {runLabel(running)}
         </Button>
@@ -192,12 +190,12 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
         />
       </View>
       {refused ? (
-        <View style={{ paddingHorizontal: 8 }}>
+        <View style={{ paddingHorizontal: space[2] }}>
           <ErrorLine>{recallRefused(refused)}</ErrorLine>
         </View>
       ) : null}
       {keys ? (
-        <View style={{ paddingHorizontal: 8 }}>
+        <View style={{ paddingHorizontal: space[2] }}>
           <KeyPad lines names={names} onKey={onKey} />
         </View>
       ) : null}
@@ -295,17 +293,12 @@ function Ran({
       </ScrollView>
       {/* the result's act, another recall, with the way back to the card beside it */}
       <BottomBar bottom={bottom} row>
-        <Button mode="outlined" contentStyle={{ paddingVertical: 8 }} onPress={() => router.back()}>
+        <Press mode="outlined" onPress={() => router.back()}>
           {BACK_TO_CARD}
-        </Button>
-        <Button
-          mode="contained"
-          style={{ flex: 1 }}
-          contentStyle={{ paddingVertical: 8 }}
-          onPress={() => router.replace({ pathname: '/recall', params: { slug } })}
-        >
+        </Press>
+        <Press style={{ flex: 1 }} onPress={() => router.replace({ pathname: '/recall', params: { slug } })}>
           {RECALL_ANOTHER}
-        </Button>
+        </Press>
       </BottomBar>
     </>
   );

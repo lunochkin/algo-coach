@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -24,12 +24,13 @@ import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { CardPanel } from '@/ui/cards';
-import { Loaded, styles } from '@/ui/common';
+import { Loaded, styles, ScreenHeader } from '@/ui/common';
 import { ContinueBar, ContinueNotice, useContinue } from '@/ui/continue';
 import { FocusCard } from '@/ui/focuscard';
 import { ModuleRow } from '@/ui/modules';
 import { Heading, Panel, PickPanel, PickRow } from '@/ui/rows';
 import { usePullSync } from '@/ui/pull';
+import { radius } from '@/ui/tokens';
 
 type Board = components['schemas']['Board'];
 type ListedCard = components['schemas']['ListedCard'];
@@ -61,10 +62,7 @@ export default function PracticeScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.Content title={BOARD_TITLE} />
-        <AccountMenu />
-      </Appbar.Header>
+      <ScreenHeader title={BOARD_TITLE} back={null} aside={<AccountMenu />} />
       {/* room under the last row for the bar over it */}
       <ScrollView refreshControl={pull} contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 160 }]}>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -77,7 +75,7 @@ export default function PracticeScreen() {
             onPress={() => router.navigate('/knowledge')}
             accessibilityRole="link"
             borderless
-            style={{ borderRadius: theme.roundness * 3 }}
+            style={{ borderRadius: radius(theme).xl }}
           >
             <FocusCard
               label={focusLabel(next.focus, st.catalog)}

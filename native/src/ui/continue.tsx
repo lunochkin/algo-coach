@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { Button, Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 
 import {
   CONTINUE,
@@ -17,7 +17,8 @@ import {
   continueAct,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
-import { BottomBar, startQueue, styles } from '@/ui/common';
+import { BottomBar, startQueue, styles, Press } from '@/ui/common';
+import { radius, space } from '@/ui/tokens';
 
 /**
  * The knowledge study's next step, the same on Practice and on Knowledge:
@@ -94,7 +95,12 @@ export function ContinueBar({ next, exam = false }: { next: Next; exam?: boolean
                 borderless
                 accessibilityRole="link"
                 accessibilityLabel={waitingOutside(counts.outside)}
-                style={{ minHeight: 48, justifyContent: 'center', paddingHorizontal: 4, borderRadius: 8 }}
+                style={{
+                  minHeight: 48,
+                  justifyContent: 'center',
+                  paddingHorizontal: space[1],
+                  borderRadius: radius(theme).lg,
+                }}
               >
                 <Text variant="bodySmall" style={{ color: theme.colors.primary, textDecorationLine: 'underline' }}>
                   {` · ${waitingOutside(counts.outside)}`}
@@ -106,26 +112,18 @@ export function ContinueBar({ next, exam = false }: { next: Next; exam?: boolean
       }
     >
       {exam ? (
-        <Button
+        <Press
           mode="contained-tonal"
           icon="clipboard-check-outline"
           disabled={!next.ready}
           onPress={() => router.push('/exam')}
-          contentStyle={{ paddingVertical: 8 }}
         >
           {EXAM_LINK}
-        </Button>
+        </Press>
       ) : null}
-      <Button
-        mode="contained"
-        icon="play"
-        style={{ flex: 1 }}
-        disabled={!next.ready}
-        onPress={next.start}
-        contentStyle={{ paddingVertical: 8 }}
-      >
+      <Press icon="play" style={{ flex: 1 }} disabled={!next.ready} onPress={next.start}>
         {CONTINUE}
-      </Button>
+      </Press>
     </BottomBar>
   );
 }

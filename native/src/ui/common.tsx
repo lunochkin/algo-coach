@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, type ButtonProps, Text, useTheme } from 'react-native-paper';
 
 import { router } from 'expo-router';
 
@@ -16,7 +16,7 @@ import {
   copyReading,
 } from '@algo-coach/core';
 import type { QueueSession, Session, SyncState } from '@/lib/store';
-import { palette } from '@/ui/tokens';
+import { font, palette, radius, space, textSize } from '@/ui/tokens';
 
 /** Monospace, horizontally scrollable, never wrapped. `verbatim` keeps leading spaces (diagrams). */
 export function CodeBlock({ code, verbatim = false }: { code: string; verbatim?: boolean }) {
@@ -25,7 +25,7 @@ export function CodeBlock({ code, verbatim = false }: { code: string; verbatim?:
     <ScrollView
       horizontal
       persistentScrollbar
-      style={[styles.code, { backgroundColor: theme.colors.surfaceVariant }]}
+      style={[styles.code, { borderRadius: radius(theme).lg, backgroundColor: theme.colors.surfaceVariant }]}
       contentContainerStyle={styles.codeInner}
     >
       <Text selectable style={[styles.mono, { color: theme.colors.onSurfaceVariant }]}>
@@ -48,8 +48,8 @@ export function SyncBanner({ sync }: { sync: SyncState }) {
       style={{
         minHeight: 48,
         justifyContent: 'center',
-        padding: 12,
-        borderRadius: 12,
+        padding: space[3],
+        borderRadius: radius(theme).xl,
         backgroundColor: theme.colors.errorContainer,
       }}
     >
@@ -57,7 +57,7 @@ export function SyncBanner({ sync }: { sync: SyncState }) {
         {syncErrorSummary(sync.error)}
       </Text>
       {open ? (
-        <Text variant="bodySmall" selectable style={{ marginTop: 4, color: theme.colors.onErrorContainer }}>
+        <Text variant="bodySmall" selectable style={{ marginTop: space[1], color: theme.colors.onErrorContainer }}>
           {sync.error}
         </Text>
       ) : null}
@@ -83,11 +83,11 @@ export function SyncLine({ sync, showError = true }: { sync: SyncState; showErro
 }
 
 export const styles = StyleSheet.create({
-  code: { borderRadius: 8, marginVertical: 8 },
-  codeInner: { padding: 12 },
-  mono: { fontFamily: 'monospace', fontSize: 14 },
-  page: { padding: 16, gap: 12 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  code: { marginVertical: space[2] },
+  codeInner: { padding: space[3] },
+  mono: { fontFamily: font.mono, fontSize: textSize.code },
+  page: { padding: space.gutter, gap: space.stack },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
 });
 
 type Starter = { setSession: (s: Session) => void };
@@ -130,21 +130,61 @@ export function BottomBar({
         left: 0,
         right: 0,
         bottom: 0,
-        paddingHorizontal: 16,
-        paddingTop: 12,
+        paddingHorizontal: space[4],
+        paddingTop: space[3],
         paddingBottom: bottom + 16,
-        gap: 8,
+        gap: space[2],
         backgroundColor: theme.colors.background,
       }}
     >
       {above}
-      <View style={{ gap: 8, flexDirection: row ? 'row' : 'column' }}>{children}</View>
+      <View style={{ gap: space[2], flexDirection: row ? 'row' : 'column' }}>{children}</View>
     </View>
   );
 }
 
+/**
+ * A press in a screen's bottom bar, as the web's `Button`: the act in the
+ * primary fill, and a press beside it at a lower weight through `mode`.
+ */
+export function Press({ mode = 'contained', ...props }: Omit<ButtonProps, 'contentStyle'>) {
+  return <Button mode={mode} contentStyle={{ paddingVertical: space[2] }} {...props} />;
+}
+
 /** Progress colours in either scheme: covered (done) and open (unlocked), from the phone's tokens. */
 export const tones = (dark: boolean) => ({ done: palette(dark).passed, open: palette(dark).timeout });
+
+/**
+ * A screen's header, as the web's `PageHeader`: the way back, the title, what
+ * sits beside it, and the note under it. A tab's root carries no way back;
+ * a running queue's way back is its Stop.
+ */
+export function ScreenHeader({
+  title,
+  back = { onPress: () => router.back() },
+  aside,
+  note = [],
+}: {
+  title: string;
+  back?: { onPress: () => void; close?: string } | null;
+  aside?: ReactNode;
+  note?: (string | null | undefined)[];
+}) {
+  return (
+    <>
+      <Appbar.Header>
+        {back?.close ? (
+          <Appbar.Action icon="close" onPress={back.onPress} accessibilityLabel={back.close} />
+        ) : back ? (
+          <Appbar.BackAction onPress={back.onPress} />
+        ) : null}
+        <Appbar.Content title={title} />
+        {aside}
+      </Appbar.Header>
+      <HeaderNote lines={note} />
+    </>
+  );
+}
 
 /**
  * The lines identifying what a screen's title names, under the header bar,
@@ -156,7 +196,7 @@ export function HeaderNote({ lines }: { lines: (string | null | undefined)[] }) 
   const shown = lines.filter((line): line is string => !!line);
   if (!shown.length) return null;
   return (
-    <View style={{ paddingHorizontal: 16, paddingBottom: 8, gap: 2 }}>
+    <View style={{ paddingHorizontal: space[4], paddingBottom: space[2], gap: space[0.5] }}>
       {shown.map((line) => (
         <Text key={line} variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {line}
@@ -228,7 +268,7 @@ export function fromCopy<T>(
 
 export function Failed({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <View style={{ gap: 8, alignItems: 'flex-start' }}>
+    <View style={{ gap: space[2], alignItems: 'flex-start' }}>
       <ErrorLine>{message}</ErrorLine>
       <Button mode="outlined" onPress={onRetry}>
         {RETRY}

@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, ScrollView, View } from 'react-native';
-import { Appbar, Button, IconButton, SegmentedButtons, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Button, IconButton, SegmentedButtons, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -42,8 +42,8 @@ import { getToken } from '@/lib/settings';
 import { autoStarts, draftOf, keepDraft, pressed } from '@/lib/sitting';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { ErrorLine, Loaded, styles } from '@/ui/common';
-import { palette } from '@/ui/tokens';
+import { ErrorLine, Loaded, styles, ScreenHeader } from '@/ui/common';
+import { palette, radius, space } from '@/ui/tokens';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
 import { Sheet } from '@/ui/sheet';
 import type { Key } from '@/lib/keys';
@@ -121,10 +121,7 @@ export default function ProblemScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={record?.title ?? PROBLEM_FALLBACK} />
-      </Appbar.Header>
+      <ScreenHeader title={record?.title ?? PROBLEM_FALLBACK} />
       {error || !record || !cardsIn ? (
         <View style={styles.page}>
           <Loaded
@@ -350,11 +347,16 @@ function SittingOn({
     <View style={{ flex: 1, paddingBottom: bottom + 8 }}>
       {/* the sitting is run from one bar above both tabs: the clock is what
           the solver is watched by */}
-      <View style={[styles.row, { paddingHorizontal: 12, paddingVertical: 4, gap: 8 }]}>
+      <View style={[styles.row, { paddingHorizontal: space[3], paddingVertical: space[1], gap: space[2] }]}>
         {clock.running ? (
           <View
             accessibilityLabel={CLOCK_RUNNING}
-            style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: palette(theme.dark).running }}
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: radius(theme).full,
+              backgroundColor: palette(theme.dark).running,
+            }}
           />
         ) : null}
         {moved ? <ElapsedClock elapsedSec={moved.elapsedSec} receivedAt={moved.at} running={clock.running} /> : null}
@@ -394,14 +396,14 @@ function SittingOn({
         )}
       </View>
       {refused ? (
-        <View style={{ paddingHorizontal: 12 }}>
+        <View style={{ paddingHorizontal: space[3] }}>
           <ErrorLine>{sittingRefused(refused)}</ErrorLine>
         </View>
       ) : null}
       <SegmentedButtons
         value={tab}
         onValueChange={(value) => setTab(value as 'statement' | 'code')}
-        style={{ marginHorizontal: 12, marginVertical: 6 }}
+        style={{ marginHorizontal: space[3], marginVertical: space[1.5] }}
         buttons={[
           { value: 'statement', label: SITTING_STATEMENT, icon: 'text-box-outline' },
           { value: 'code', label: SITTING_CODE, icon: 'code-tags' },
@@ -411,7 +413,7 @@ function SittingOn({
           what was typed */}
       <ScrollView
         style={{ display: tab === 'statement' ? 'flex' : 'none' }}
-        contentContainerStyle={[styles.page, { paddingTop: 4 }]}
+        contentContainerStyle={[styles.page, { paddingTop: space[1] }]}
       >
         {facts}
         <Markdown>{statement.statement}</Markdown>
@@ -426,7 +428,7 @@ function SittingOn({
             void keepDraft(problemId, sittingId, typed, restored.current ?? opened.restored);
           }}
         />
-        <View style={[styles.row, { paddingHorizontal: 8, paddingVertical: 6, gap: 8 }]}>
+        <View style={[styles.row, { paddingHorizontal: space[2], paddingVertical: space[1.5], gap: space[2] }]}>
           <Button mode="contained" onPress={() => void submit()} disabled={running || clock.ended}>
             {submitLabel(running)}
           </Button>
@@ -447,12 +449,12 @@ function SittingOn({
         {submitted ? (
           // the verdict sits under the editor: a failing case is read beside
           // the code that failed it
-          <ScrollView style={{ flexGrow: 0, maxHeight: 220 }} contentContainerStyle={{ paddingHorizontal: 12 }}>
+          <ScrollView style={{ flexGrow: 0, maxHeight: 220 }} contentContainerStyle={{ paddingHorizontal: space[3] }}>
             <SubmissionVerdict submitted={submitted} />
           </ScrollView>
         ) : null}
         {keys && !clock.ended ? (
-          <View style={{ paddingHorizontal: 8, paddingTop: 6 }}>
+          <View style={{ paddingHorizontal: space[2], paddingTop: space[1.5] }}>
             <KeyPad lines names={names} onKey={onKey} />
           </View>
         ) : null}

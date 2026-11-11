@@ -5,6 +5,7 @@ import { Text, useTheme, type MD3Theme } from 'react-native-paper';
 
 import { withMath } from '@/lib/math';
 import { CodeBlock } from '@/ui/common';
+import { font, space, textSize } from '@/ui/tokens';
 
 const CODE_SCALE = 0.85;
 
@@ -33,7 +34,7 @@ export class CodeRenderer extends Renderer {
   // monospace reads larger than body text at the same size
   codespan(text: string, style?: TextStyle): ReactNode {
     const { fontSize: _fs, lineHeight: _lh, ...rest } = style ?? {};
-    return <InlineCode key={this.getKey()} text={text} style={rest} size={CODE_SCALE * 16} />;
+    return <InlineCode key={this.getKey()} text={text} style={rest} size={CODE_SCALE * textSize.body} />;
   }
 
   // a newline inside a paragraph is a soft break, which markdown reads as a
@@ -52,7 +53,7 @@ export class CodeRenderer extends Renderer {
   }
 
   heading(children: string | ReactNode[], style?: TextStyle): ReactNode {
-    const size = CODE_SCALE * (style?.fontSize ?? 16);
+    const size = CODE_SCALE * (style?.fontSize ?? textSize.body);
     const scaled = Array.isArray(children)
       ? children.map((x) =>
           isValidElement(x) && x.type === InlineCode ? cloneElement(x as ReactElement<InlineCodeProps>, { size }) : x,
@@ -64,12 +65,12 @@ export class CodeRenderer extends Renderer {
 
 function markdownStyles(theme: MD3Theme): MarkedStyles {
   return {
-    h1: { ...theme.fonts.headlineSmall, color: theme.colors.onSurface, marginVertical: 8 },
-    h2: { ...theme.fonts.titleLarge, color: theme.colors.onSurface, marginVertical: 6 },
-    h3: { ...theme.fonts.titleMedium, color: theme.colors.onSurface, marginVertical: 4 },
+    h1: { ...theme.fonts.headlineSmall, color: theme.colors.onSurface, marginVertical: space[2] },
+    h2: { ...theme.fonts.titleLarge, color: theme.colors.onSurface, marginVertical: space[1.5] },
+    h3: { ...theme.fonts.titleMedium, color: theme.colors.onSurface, marginVertical: space[1] },
     text: { ...theme.fonts.bodyLarge, color: theme.colors.onSurface },
     li: { ...theme.fonts.bodyLarge, color: theme.colors.onSurface },
-    codespan: { fontFamily: 'monospace', fontStyle: 'normal', backgroundColor: theme.colors.surfaceVariant },
+    codespan: { fontFamily: font.mono, fontStyle: 'normal', backgroundColor: theme.colors.surfaceVariant },
   };
 }
 

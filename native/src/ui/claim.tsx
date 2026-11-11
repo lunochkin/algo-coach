@@ -32,6 +32,7 @@ import { ErrorLine, Loaded } from '@/ui/common';
 import { Sheet } from '@/ui/sheet';
 import { Toggle, Toggles } from '@/ui/toggle';
 import { Heading } from '@/ui/rows';
+import { space } from '@/ui/tokens';
 
 type Asked = components['schemas']['Asked'];
 type FailureMode = components['schemas']['FailureMode'];
@@ -118,7 +119,7 @@ function ClaimForm({
   }
 
   return (
-    <View style={{ gap: 12 }}>
+    <View style={{ gap: space[3] }}>
       <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
         {position}
       </Text>

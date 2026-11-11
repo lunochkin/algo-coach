@@ -13,6 +13,7 @@ import {
 } from '@algo-coach/core';
 import { tones } from '@/ui/common';
 import { Panel, PanelStrip, PickRow } from '@/ui/rows';
+import { font } from '@/ui/tokens';
 
 type ListedCard = components['schemas']['ListedCard'];
 
@@ -27,7 +28,7 @@ export function CardPanel({ technique, cards }: { technique: string | null; card
     <Panel>
       {technique ? (
         <PanelStrip onPress={() => router.push({ pathname: '/technique', params: { technique } })}>
-          <Text variant="titleSmall" style={{ fontFamily: 'monospace', flex: 1 }}>
+          <Text variant="titleSmall" style={{ fontFamily: font.mono, flex: 1 }}>
             {technique}
           </Text>
           <Text variant="bodySmall" style={muted}>
@@ -79,7 +80,7 @@ function Marks({ marks }: { marks: RecallMark[] }) {
       {marks.map((one) => (
         <Text key={one.templateId}>
           {' '}
-          <Text style={{ fontFamily: 'monospace', color: tone(one) }}>{one.mark}</Text>
+          <Text style={{ fontFamily: font.mono, color: tone(one) }}>{one.mark}</Text>
         </Text>
       ))}
     </Text>

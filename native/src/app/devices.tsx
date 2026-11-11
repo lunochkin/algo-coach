@@ -1,7 +1,6 @@
-import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Button, Text, useTheme } from 'react-native-paper';
+import { Button, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -20,7 +19,7 @@ import {
 import { described, engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
-import { ErrorLine, Loaded, styles } from '@/ui/common';
+import { ErrorLine, Loaded, styles, ScreenHeader } from '@/ui/common';
 import { PickPanel, PickRow } from '@/ui/rows';
 import { useSignOut } from '@/ui/signout';
 
@@ -65,10 +64,7 @@ export default function DevicesScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={SIGNED_IN_DEVICES} />
-      </Appbar.Header>
+      <ScreenHeader title={SIGNED_IN_DEVICES} />
       <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
           {REVOKED_NOTE}

@@ -1,12 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, useTheme } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   techniqueCards,
   techniqueStats,
+  techniquesLine,
   OF,
   TECHNIQUE_CARDS,
   TECHNIQUE_PROBLEMS,
@@ -14,7 +15,7 @@ import {
 } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { CardPanel } from '@/ui/cards';
-import { Blank, Loaded, styles } from '@/ui/common';
+import { Blank, Loaded, styles, ScreenHeader } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 import { usePullSync } from '@/ui/pull';
 
@@ -40,10 +41,7 @@ export default function TechniqueScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={technique} />
-      </Appbar.Header>
+      <ScreenHeader title={technique} />
       <ScrollView refreshControl={pull} contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
         <Loaded
           of={OF.technique}
@@ -78,6 +76,9 @@ export default function TechniqueScreen() {
                         title={row.title}
                         badge={row.difficulty}
                         stats={techniqueStats(row, now)}
+                        // one problem reads as one row wherever it is listed
+                        note={techniquesLine(row.techniques)}
+                        mono
                         onPress={() =>
                           router.push({ pathname: '/problem', params: { problem: row.problem_id, technique } })
                         }

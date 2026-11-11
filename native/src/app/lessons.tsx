@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { memo, useMemo, useRef, useState } from 'react';
 import { SectionList, View } from 'react-native';
-import { Appbar, useTheme } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -19,10 +19,11 @@ import {
   sectionToggled,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
-import { fromCopy, Loaded, styles } from '@/ui/common';
+import { fromCopy, Loaded, styles, ScreenHeader } from '@/ui/common';
 import { Heading, PanelItem, PickRow } from '@/ui/rows';
 import { SectionBar } from '@/ui/sections';
 import { usePullSync } from '@/ui/pull';
+import { space } from '@/ui/tokens';
 
 // every module's lessons, by module, as the web lists them: `pages.md`, The two clients
 export default function LessonsScreen() {
@@ -72,10 +73,7 @@ export default function LessonsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={LESSONS_TITLE} />
-      </Appbar.Header>
+      <ScreenHeader title={LESSONS_TITLE} />
       {!sections.length ? (
         <View style={styles.page}>
           <Loaded of={OF.lessons} state={fromCopy(st, st.catalog ? sections : null)} blank={LESSONS_NONE}>
@@ -100,7 +98,7 @@ export default function LessonsScreen() {
             renderSectionHeader={({ section }) => {
               const expanded = isOpen(section.key);
               return (
-                <View style={{ backgroundColor: theme.colors.background, paddingBottom: 4 }}>
+                <View style={{ backgroundColor: theme.colors.background, paddingBottom: space[1] }}>
                   {section.module ? <Heading title={section.module} count={section.inModule} /> : null}
                   <Heading
                     sub
@@ -115,7 +113,7 @@ export default function LessonsScreen() {
             stickySectionHeadersEnabled={false}
             initialNumToRender={8}
             windowSize={5}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 24 }}
+            contentContainerStyle={{ paddingHorizontal: space[4], paddingBottom: insets.bottom + 24 }}
           />
         </>
       )}

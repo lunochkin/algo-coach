@@ -9,3 +9,42 @@ export const TONES = {
 } as const;
 
 export const palette = (dark: boolean) => (dark ? TONES.dark : TONES.light);
+
+// the spacing steps, keyed as the web's 4px steps are: `space[2]` is the
+// web's `gap-2`. `gutter` is a screen's and a row's edge, `stack` the gap
+// between a screen's blocks
+export const space = {
+  0: 0,
+  px: 1,
+  0.5: 2,
+  1: 4,
+  1.5: 6,
+  2: 8,
+  2.5: 10,
+  3: 12,
+  4: 16,
+  5: 20,
+  6: 24,
+  gutter: 16,
+  stack: 12,
+} as const;
+
+// the type sizes the theme's variants leave unset, named by the web's roles.
+// Text reads a theme variant first; a size is set only where none fits
+export const textSize = {
+  title: 24,
+  heading: 18,
+  meta: 14,
+  body: 16,
+  micro: 10,
+  code: 14,
+  codeInline: 13,
+} as const;
+
+export const font = { mono: 'monospace' } as const;
+
+// every radius derives from the theme's one base, as the web's from `--radius`
+export const radius = (theme: { roundness: number }) => {
+  const r = theme.roundness;
+  return { xs: r / 2, sm: r, md: r * 1.5, lg: r * 2, xl: r * 3, full: 999 } as const;
+};

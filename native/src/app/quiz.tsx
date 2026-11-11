@@ -2,17 +2,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useReducer, useState } from 'react';
 import { BackHandler, Pressable, ScrollView, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {
-  Appbar,
-  Button,
-  Divider,
-  type MD3Theme,
-  Switch,
-  Text,
-  TextInput,
-  TouchableRipple,
-  useTheme,
-} from 'react-native-paper';
+import { Button, Divider, type MD3Theme, Switch, Text, TextInput, TouchableRipple, useTheme } from 'react-native-paper';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -66,6 +56,8 @@ import {
   type QueueSource,
   NEW_STEP,
   NO_SESSION,
+  OF,
+  EXAM_TITLE,
   raiseLabel,
   gradeLabel,
   askAct,
@@ -79,15 +71,43 @@ import {
 import { EMPTY, type Edit, type Key, pressed } from '@/lib/keys';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
-import { BottomBar, CodeBlock, styles } from '@/ui/common';
+import { BottomBar, CodeBlock, fromCopy, Loaded, Press, ScreenHeader, styles } from '@/ui/common';
 import { KeyPad, PAD_HEIGHT } from '@/ui/keys';
-import { palette } from '@/ui/tokens';
+import { font, palette, radius, space } from '@/ui/tokens';
+
+// a note under an answer row starts past the row's mark and its space
+const MARK_INDENT = 18;
 
 export default function Quiz() {
   const st = useStore();
+  const theme = useTheme();
   const [s] = useState(st.session);
-  if (s && 'queue' in s) return <QueueQuiz s={s} />;
-  return <ExamQuiz s={s} />;
+  if (s && st.catalog) return 'queue' in s ? <QueueQuiz s={s} /> : <ExamQuiz s={s} />;
+  const queue = !!s && 'queue' in s;
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <ScreenHeader title={s && 'queue' in s ? queueTitle(s.mode) : s ? EXAM_TITLE : NO_SESSION} />
+      <View style={styles.page}>
+        <Loaded
+          of={queue ? OF.queue : OF.exam}
+          state={fromCopy(st, st.catalog ? { s } : null)}
+          blank={NO_SESSION}
+          blankWhen={(x) => !x.s}
+        >
+          {() => null}
+        </Loaded>
+      </View>
+    </View>
+  );
+}
+
+// a running queue's score, beside its title
+function Score({ children }: { children: string }) {
+  return (
+    <Text variant="labelLarge" style={{ marginRight: space[4] }}>
+      {children}
+    </Text>
+  );
 }
 
 /** A lesson served in the queue: read it, and its way back returns here, or go on without it. */
@@ -109,23 +129,17 @@ function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number
       </View>
       <BottomBar bottom={bottom} row>
         {read ? (
-          <Button mode="contained" style={{ flex: 1 }} onPress={onNext} contentStyle={{ paddingVertical: 8 }}>
+          <Press style={{ flex: 1 }} onPress={onNext}>
             {ASK_NEXT}
-          </Button>
+          </Press>
         ) : (
           <>
-            <Button mode="text" onPress={onNext} contentStyle={{ paddingVertical: 8 }}>
+            <Press mode="text" onPress={onNext}>
               {LESSON_STOP_LATER}
-            </Button>
-            <Button
-              mode="contained"
-              icon="book-open-variant"
-              style={{ flex: 1 }}
-              onPress={open}
-              contentStyle={{ paddingVertical: 8 }}
-            >
+            </Press>
+            <Press icon="book-open-variant" style={{ flex: 1 }} onPress={open}>
               {LESSON_STOP_READ}
-            </Button>
+            </Press>
           </>
         )}
       </BottomBar>
@@ -190,12 +204,12 @@ function QueueQuiz({ s }: { s: QueueSession }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.Action icon="close" onPress={quit} accessibilityLabel={QUEUE_STOP} />
-        <Appbar.Content title={done ? QUEUE_DONE : queueTitle(s.mode)} />
-        <Text variant="labelLarge" style={{ marginRight: 16 }}>{`${score}/${rs.length}`}</Text>
-      </Appbar.Header>
-      <View style={[styles.row, { paddingHorizontal: 16, minHeight: 40 }]}>
+      <ScreenHeader
+        title={done ? QUEUE_DONE : queueTitle(s.mode)}
+        back={{ onPress: quit, close: QUEUE_STOP }}
+        aside={<Score>{`${score}/${rs.length}`}</Score>}
+      />
+      <View style={[styles.row, { paddingHorizontal: space[4], minHeight: 40 }]}>
         <Text variant="bodySmall" style={{ flex: 1, color: theme.colors.onSurfaceVariant }}>
           {left}
         </Text>
@@ -221,7 +235,7 @@ function QueueQuiz({ s }: { s: QueueSession }) {
         />
       ) : (
         <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 120 }]}>
-          <View style={{ alignItems: 'center', paddingVertical: 24, gap: 4 }}>
+          <View style={{ alignItems: 'center', paddingVertical: space[6], gap: space[1] }}>
             <Text variant="titleMedium">{summary.title}</Text>
             <Text variant="displayMedium">{`${rs.length}`}</Text>
             <Text variant="bodyMedium">{QUEUE_ANSWERED}</Text>
@@ -234,23 +248,21 @@ function QueueQuiz({ s }: { s: QueueSession }) {
       )}
       {done || !current ? (
         <BottomBar bottom={insets.bottom}>
-          <Button mode="contained" contentStyle={{ paddingVertical: 8 }} onPress={() => router.back()}>
-            {QUEUE_DONE}
-          </Button>
+          <Press onPress={() => router.back()}>{QUEUE_DONE}</Press>
         </BottomBar>
       ) : null}
     </View>
   );
 }
 
-function ExamQuiz({ s }: { s: ExamSession | null }) {
+function ExamQuiz({ s }: { s: ExamSession }) {
   const st = useStore();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const [run] = useState(() => (s ? new ExamRun(s, st.catalog?.courses ?? []) : null));
+  const [run] = useState(() => new ExamRun(s, st.catalog?.courses ?? []));
   const [, rerender] = useState(0);
   const changed = () => rerender((x) => x + 1);
-  const phase = run?.phase;
+  const phase = run.phase;
 
   // the answers, the stint and a certification's record are stored together at the end
   const store = useCallback(
@@ -265,7 +277,6 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
   );
 
   const quit = useCallback(async () => {
-    if (!run) return router.back();
     if (phase === 'review') {
       run.closeReview();
       return changed();
@@ -288,17 +299,6 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
     }, [quit]),
   );
 
-  if (!run) {
-    return (
-      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-        <Appbar.Header>
-          <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title={NO_SESSION} />
-        </Appbar.Header>
-      </View>
-    );
-  }
-
   const out = run.outcome;
   const { score, missed } = out;
   const q = run.question;
@@ -316,11 +316,11 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.Action icon="close" onPress={quit} accessibilityLabel={QUEUE_STOP} />
-        <Appbar.Content title={run.title} />
-        {phase !== 'ask' ? <Text variant="labelLarge" style={{ marginRight: 16 }}>{`${score}/${out.n}`}</Text> : null}
-      </Appbar.Header>
+      <ScreenHeader
+        title={run.title}
+        back={{ onPress: quit, close: QUEUE_STOP }}
+        aside={phase !== 'ask' ? <Score>{`${score}/${out.n}`}</Score> : null}
+      />
       {q ? (
         <Ask
           key={run.index}
@@ -345,7 +345,7 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
         />
       ) : (
         <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 120 }]}>
-          <View style={{ alignItems: 'center', paddingVertical: 24 }}>
+          <View style={{ alignItems: 'center', paddingVertical: space[6] }}>
             <Text variant="displayMedium">{`${score}/${out.n}`}</Text>
             <Text variant="titleMedium">{`${out.percent}%`}</Text>
           </View>
@@ -359,26 +359,20 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
       {!q && !reviewed ? (
         <BottomBar bottom={insets.bottom} row>
           {missed.length ? (
-            <Button
+            <Press
               mode="contained-tonal"
               icon="eye-outline"
-              contentStyle={{ paddingVertical: 8 }}
               onPress={() => {
                 run.review();
                 changed();
               }}
             >
               {examReviewMissed(missed.length)}
-            </Button>
+            </Press>
           ) : null}
-          <Button
-            mode="contained"
-            style={{ flex: 1 }}
-            contentStyle={{ paddingVertical: 8 }}
-            onPress={() => router.back()}
-          >
+          <Press style={{ flex: 1 }} onPress={() => router.back()}>
             {EXAM_DONE}
-          </Button>
+          </Press>
         </BottomBar>
       ) : null}
     </View>
@@ -407,8 +401,8 @@ function Head({ q, tag, early = false }: { q: Question; tag: string; early?: boo
 function optionTile(on: boolean, theme: MD3Theme) {
   return {
     minHeight: 48,
-    padding: 12,
-    borderRadius: 12,
+    padding: space[3],
+    borderRadius: radius(theme).xl,
     borderWidth: 1,
     borderColor: on ? theme.colors.primary : theme.colors.outlineVariant,
     backgroundColor: on ? theme.colors.secondaryContainer : 'transparent',
@@ -434,7 +428,7 @@ function Choices(props: { q: Question; order: number[]; picked: number[]; onTogg
             onPress={onToggle ? () => onToggle(pos) : undefined}
             accessibilityRole={multi ? 'checkbox' : 'radio'}
             accessibilityState={{ checked: on, disabled: !onToggle }}
-            style={[optionTile(on, theme), { flexDirection: 'row', gap: 12 }]}
+            style={[optionTile(on, theme), { flexDirection: 'row', gap: space[3] }]}
           >
             <Text variant="titleSmall">{LETTERS[pos]}</Text>
             <Text variant="bodyLarge" style={{ flex: 1 }}>
@@ -510,7 +504,7 @@ function Ask(props: {
             autoCapitalize="none"
             autoCorrect={false}
             spellCheck={false}
-            style={{ fontFamily: 'monospace' }}
+            style={{ fontFamily: font.mono }}
             onSubmitEditing={() => press.act === 'submit' && act()}
           />
         ) : null}
@@ -523,7 +517,7 @@ function Ask(props: {
           </View>
         ) : null}
         {q.format === 'card' && revealed ? (
-          <View style={{ gap: 4 }}>
+          <View style={{ gap: space[1] }}>
             <Heading sub title={ASK_TICK_RECALLED} />
             {q.key.map((point, i) => (
               <Tick
@@ -557,16 +551,14 @@ function Ask(props: {
       </ScrollView>
 
       <BottomBar bottom={bottom} row above={padOpen ? <KeyPad onKey={onKey} /> : undefined}>
-        <Button
-          mode="contained"
+        <Press
           style={{ flex: 1 }}
           disabled={!press.enabled}
           accessibilityLabel={press.act === 'grade' ? gradeLabel(press.label) : undefined}
           onPress={act}
-          contentStyle={{ paddingVertical: 8 }}
         >
           {press.label}
-        </Button>
+        </Press>
       </BottomBar>
     </KeyboardAvoidingView>
   );
@@ -589,9 +581,9 @@ function Reviewed({ r, bottom, last, onNext }: { r: Result; bottom: number; last
         <DetailsToggle r={r} open={details} onToggle={() => setDetails(!details)} />
       </ScrollView>
       <BottomBar bottom={bottom} row>
-        <Button mode="contained" style={{ flex: 1 }} onPress={onNext} contentStyle={{ paddingVertical: 8 }}>
+        <Press style={{ flex: 1 }} onPress={onNext}>
           {examReviewNext(last)}
-        </Button>
+        </Press>
       </BottomBar>
     </View>
   );
@@ -602,7 +594,7 @@ function Verdict({ r }: { r: Result }) {
   const { head, explain, note } = verdictView(r);
   if (!head) return explain ? <Text variant="bodyMedium">{explain}</Text> : null;
   return (
-    <View style={{ gap: 6 }}>
+    <View style={{ gap: space[1.5] }}>
       <Text variant="titleMedium" style={{ color: head.correct ? palette(theme.dark).passed : theme.colors.error }}>
         {head.text}
       </Text>
@@ -639,7 +631,7 @@ function DetailsToggle({ r, open, onToggle }: { r: Result; open: boolean; onTogg
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <View style={{ gap: 4 }}>
+    <View style={{ gap: space[1] }}>
       <Heading sub title={title} />
       {children}
     </View>
@@ -652,8 +644,8 @@ function Row({ row }: { row: AnswerRow }) {
   return (
     <View
       style={{
-        borderRadius: 8,
-        padding: 6,
+        borderRadius: radius(theme).lg,
+        padding: space[1.5],
         backgroundColor: row.yours ? theme.colors.secondaryContainer : 'transparent',
       }}
     >
@@ -663,7 +655,7 @@ function Row({ row }: { row: AnswerRow }) {
         {row.yours ? <Text style={{ color: theme.colors.tertiary }}>{DETAIL_YOURS}</Text> : null}
       </Text>
       {row.note ? (
-        <Text variant="bodySmall" selectable style={{ color: theme.colors.onSurfaceVariant, marginLeft: 18 }}>
+        <Text variant="bodySmall" selectable style={{ color: theme.colors.onSurfaceVariant, marginLeft: MARK_INDENT }}>
           {row.note}
         </Text>
       ) : null}
@@ -679,7 +671,7 @@ function Details({ r }: { r: Result }) {
   const answer = yourAnswer(r);
   const sections = detailSections(q);
   return (
-    <View style={{ gap: 12 }}>
+    <View style={{ gap: space[3] }}>
       {answer ? (
         <Section title={DETAIL_YOUR_ANSWER}>
           {answer.kind === 'rows' ? (
@@ -722,7 +714,7 @@ function Details({ r }: { r: Result }) {
           onPress={() =>
             router.push({ pathname: '/lesson', params: { course: x.course, slug: x.slug, anchor: x.anchor } })
           }
-          style={{ color: theme.colors.primary, paddingVertical: 8 }}
+          style={{ color: theme.colors.primary, paddingVertical: space[2] }}
         >
           {x.label}
         </Text>

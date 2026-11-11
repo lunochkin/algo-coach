@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Fragment, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Appbar, Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
+import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -41,9 +41,10 @@ import {
 import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
 import { useMe } from '@/ui/account';
-import { BottomBar, HeaderNote, styles, SyncLine } from '@/ui/common';
+import { BottomBar, styles, SyncLine, Press, ScreenHeader } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 import { useSignOut } from '@/ui/signout';
+import { font, space } from '@/ui/tokens';
 
 export default function SettingsScreen() {
   const st = useStore();
@@ -124,11 +125,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={SETTINGS} />
-      </Appbar.Header>
-      <HeaderNote lines={[SETTINGS_NOTE]} />
+      <ScreenHeader title={SETTINGS} note={[SETTINGS_NOTE]} />
       <KeyboardAwareScrollView
         // a focused field stays above the bar as well as the keyboard
         bottomOffset={120}
@@ -145,7 +142,7 @@ export default function SettingsScreen() {
               <Text variant="bodyLarge">{named(me)}</Text>
               <Text
                 variant="bodySmall"
-                style={{ color: theme.colors.onSurfaceVariant, fontFamily: me?.email ? 'monospace' : undefined }}
+                style={{ color: theme.colors.onSurfaceVariant, fontFamily: me?.email ? font.mono : undefined }}
               >
                 {meLine(me)}
               </Text>
@@ -230,9 +227,9 @@ export default function SettingsScreen() {
       </KeyboardAwareScrollView>
       {/* the screen's act, saving what the fields hold */}
       <BottomBar bottom={insets.bottom} above={saved ? <Text variant="bodySmall">{SAVED}</Text> : undefined}>
-        <Button mode="contained" contentStyle={{ paddingVertical: 8 }} onPress={save} disabled={!valid || !changed}>
+        <Press onPress={save} disabled={!valid || !changed}>
           {SAVE}
-        </Button>
+        </Press>
       </BottomBar>
       {signOut.dialog}
     </View>

@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Button, Text, useTheme } from 'react-native-paper';
+import { Button, Text, useTheme } from 'react-native-paper';
 
 import {
   clearFilters,
@@ -23,10 +23,11 @@ import {
 } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
-import { Loaded, styles } from '@/ui/common';
+import { Loaded, styles, ScreenHeader } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 import { Toggle } from '@/ui/toggle';
 import { usePullSync } from '@/ui/pull';
+import { space } from '@/ui/tokens';
 
 /**
  * Every served problem, filtered by technique and difficulty, as the web's
@@ -42,11 +43,8 @@ export default function ProblemsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.Content title={PROBLEMS_TITLE} />
-        <AccountMenu />
-      </Appbar.Header>
-      <ScrollView refreshControl={pull} contentContainerStyle={[styles.page, { paddingBottom: 24 }]}>
+      <ScreenHeader title={PROBLEMS_TITLE} back={null} aside={<AccountMenu />} />
+      <ScrollView refreshControl={pull} contentContainerStyle={[styles.page, { paddingBottom: space[6] }]}>
         <Text variant="bodyMedium" style={muted}>
           {PROBLEMS_NOTE}
         </Text>

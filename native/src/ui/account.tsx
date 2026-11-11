@@ -8,6 +8,7 @@ import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useSignOut } from '@/ui/signout';
+import { space } from '@/ui/tokens';
 
 type Me = components['schemas']['Me'];
 
@@ -54,7 +55,7 @@ export function AccountMenu() {
         }
       >
         {/* text rather than items: a menu item holds one line, and the id runs longer */}
-        <View style={{ paddingHorizontal: 16, paddingVertical: 8, maxWidth: 200, gap: 2 }}>
+        <View style={{ paddingHorizontal: space[4], paddingVertical: space[2], maxWidth: 200, gap: space[0.5] }}>
           <Text variant="titleSmall">{named(me)}</Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             {meLine(me)}

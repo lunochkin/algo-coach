@@ -655,10 +655,11 @@ difference it found. No row is marked `to fix` today.
   rules for one thing. A page that wants an exception gets a different layout
   of the shared shapes instead, and a shape changes everywhere or nowhere.
 
-- **The tokens in `web/src/index.css` are the only place a colour, a radius, a
-  spacing step, a type size or a font family is defined.** Every component reads
-  a token. A value set inside one component alone is a design no other component
-  follows.
+- **The tokens are the only place a colour, a radius, a spacing step, a type
+  size or a font family is defined**: `web/src/index.css` on the web and
+  `native/src/ui/tokens.ts` on the phone, named by the same roles. Every
+  component reads a token. A value set inside one component alone is a design
+  no other component follows.
 - **The app takes the site's palette and shapes**, so the product reads as one
   thing from the landing page to a sitting. The neutrals, the type, the code
   colours and the verdict colours were already shared. The flame and the

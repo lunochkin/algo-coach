@@ -1,10 +1,9 @@
-import { router } from 'expo-router';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Text, useTheme } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { privacyPolicy, privacyUpdated } from '@algo-coach/core';
-import { styles } from '@/ui/common';
+import { styles, ScreenHeader } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
 
 const POLICY = privacyPolicy();
@@ -15,10 +14,7 @@ export default function PrivacyScreen() {
   const insets = useSafeAreaInsets();
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={POLICY.title} />
-      </Appbar.Header>
+      <ScreenHeader title={POLICY.title} />
       <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
         {POLICY.updated ? (
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>

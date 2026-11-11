@@ -22,6 +22,7 @@ import { Sheet } from '@/ui/sheet';
 import type { Scope } from '@/ui/start';
 import { Heading } from '@/ui/rows';
 import { styles, tones } from './common';
+import { space } from '@/ui/tokens';
 
 export function stateColor(state: CertState, theme: MD3Theme): string {
   const tone = tones(theme.dark);
@@ -147,13 +148,13 @@ export function CertSheet(props: {
         </>
       }
     >
-      <View style={{ gap: 6 }}>
+      <View style={{ gap: space[1.5] }}>
         <Text variant="labelLarge" style={{ color: stateColor(status.state, theme) }}>
           {v.label}
         </Text>
         {v.note ? <Text variant="bodyMedium">{v.note}</Text> : null}
         {v.progressNote ? (
-          <Text variant="bodySmall" style={{ marginTop: 8, color: theme.colors.onSurfaceVariant }}>
+          <Text variant="bodySmall" style={{ marginTop: space[2], color: theme.colors.onSurfaceVariant }}>
             {v.progressNote}
           </Text>
         ) : null}
@@ -176,7 +177,7 @@ export function CertSheet(props: {
             </Button>
           </View>
         ))}
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: space[1] }}>
           {v.scope}
         </Text>
       </View>

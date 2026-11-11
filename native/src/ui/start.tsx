@@ -21,6 +21,7 @@ import { startQueue, styles } from '@/ui/common';
 import { Sheet } from '@/ui/sheet';
 import { Toggle } from '@/ui/toggle';
 import { Heading } from '@/ui/rows';
+import { space } from '@/ui/tokens';
 
 /** Where a filtered queue starts: a module, narrowed to a topic, a subtopic or one group. */
 export type Scope = StartScope;
@@ -71,7 +72,7 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
         </>
       }
     >
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: space[2] }}>
         <Heading sub title={START_LEVEL} />
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           {/* one choice of several, All among them: pressing the chosen one keeps it, as on the web */}

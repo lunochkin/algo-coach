@@ -17,6 +17,7 @@ import { useStore } from '@/lib/store';
 import { styles, tones } from '@/ui/common';
 import { PageSection, type Sections } from '@/ui/sections';
 import type { Scope } from '@/ui/start';
+import { space } from '@/ui/tokens';
 
 /**
  * A module's groups, a table of subtopics by level per topic. Each scope
@@ -49,7 +50,7 @@ export function ModuleGroups({
     void st.setFocus(aimFocus(st.focus, { course: c.slug, topic, sub }));
 
   return (
-    <View style={{ gap: 16 }}>
+    <View style={{ gap: space[4] }}>
       {grid.topics.map((t) => (
         <PageSection
           key={t.slug}
@@ -73,7 +74,7 @@ export function ModuleGroups({
             </>
           }
         >
-          <View style={[styles.row, { paddingLeft: 4 }]}>
+          <View style={[styles.row, { paddingLeft: space[1] }]}>
             <View style={{ flex: 1 }} />
             {grid.levels.map((l) => (
               <Text key={l.level} variant="labelSmall" style={cellStyle}>
@@ -105,7 +106,7 @@ export function ModuleGroups({
                 iconColor={aimed(t.slug, row.sub) ? theme.colors.primary : theme.colors.onSurfaceVariant}
                 accessibilityLabel={row.focus}
                 onPress={() => aim(t.slug, row.sub)}
-                style={{ margin: 0 }}
+                style={{ margin: space[0] }}
               />
               {row.cells.map(({ level, cell, label }) => {
                 return (
@@ -121,7 +122,7 @@ export function ModuleGroups({
                       flexDirection: 'row',
                       justifyContent: 'flex-end',
                       alignItems: 'center',
-                      gap: 2,
+                      gap: space[0.5],
                     }}
                   >
                     {cell.state === 'locked' ? (

@@ -19,6 +19,7 @@ import {
   SYMBOLS,
   WORDS,
 } from '@/lib/keys';
+import { font, radius, space, textSize } from '@/ui/tokens';
 
 const HEIGHT = 40;
 const GAP = 5;
@@ -220,12 +221,19 @@ function Names({ names, onKey }: { names: string[]; onKey: (key: Key) => void })
   return (
     // a horizontal scroll sizes to its content inside a row, so a plain view
     // holds the row's share and the scroll fills it
-    <View style={{ flex: 5, height: HEIGHT, borderRadius: 8, backgroundColor: theme.colors.elevation.level3 }}>
+    <View
+      style={{
+        flex: 5,
+        height: HEIGHT,
+        borderRadius: radius(theme).lg,
+        backgroundColor: theme.colors.elevation.level3,
+      }}
+    >
       <ScrollView
         horizontal
         keyboardShouldPersistTaps="always"
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ alignItems: 'center', gap: GAP, paddingHorizontal: 4 }}
+        contentContainerStyle={{ alignItems: 'center', gap: GAP, paddingHorizontal: space[1] }}
       >
         {names.map((one) => (
           <Pressable
@@ -235,13 +243,15 @@ function Names({ names, onKey }: { names: string[]; onKey: (key: Key) => void })
             onPress={() => onKey({ name: one })}
             style={({ pressed }) => ({
               height: HEIGHT - 8,
-              paddingHorizontal: 10,
-              borderRadius: 6,
+              paddingHorizontal: space[2.5],
+              borderRadius: radius(theme).md,
               justifyContent: 'center',
               backgroundColor: pressed ? theme.colors.surfaceDisabled : theme.colors.surfaceVariant,
             })}
           >
-            <Text style={{ fontFamily: 'monospace', fontSize: 14, color: theme.colors.onSurfaceVariant }}>{one}</Text>
+            <Text style={{ fontFamily: font.mono, fontSize: textSize.code, color: theme.colors.onSurfaceVariant }}>
+              {one}
+            </Text>
           </Pressable>
         ))}
       </ScrollView>
@@ -304,7 +314,12 @@ function Cap(props: {
         // the fit costs a layout, so a single character skips it
         adjustsFontSizeToFit={label.length > 1}
         minimumFontScale={0.6}
-        style={{ fontFamily: 'monospace', fontSize: label.length > 1 ? 13 : 18, color: ink, paddingHorizontal: 2 }}
+        style={{
+          fontFamily: font.mono,
+          fontSize: label.length > 1 ? textSize.codeInline : textSize.heading,
+          color: ink,
+          paddingHorizontal: space[0.5],
+        }}
       >
         {label}
       </Text>
@@ -322,7 +337,7 @@ function Cap(props: {
       style={{
         flex: grow,
         height: HEIGHT,
-        borderRadius: 8,
+        borderRadius: radius(theme).lg,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: pressed ? theme.colors.surfaceDisabled : ground,
@@ -337,14 +352,16 @@ function Cap(props: {
             bottom: HEIGHT + 4,
             minWidth: '120%',
             height: HEIGHT + 8,
-            borderRadius: 8,
+            borderRadius: radius(theme).lg,
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: theme.colors.inverseSurface,
             elevation: 4,
           }}
         >
-          <Text style={{ fontFamily: 'monospace', fontSize: 24, color: theme.colors.inverseOnSurface }}>{label}</Text>
+          <Text style={{ fontFamily: font.mono, fontSize: textSize.title, color: theme.colors.inverseOnSurface }}>
+            {label}
+          </Text>
         </View>
       ) : null}
     </View>

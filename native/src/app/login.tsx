@@ -24,6 +24,7 @@ import { described } from '@/lib/engine';
 import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
 import { Failed } from '@/ui/common';
+import { space } from '@/ui/tokens';
 
 const ICONS = { google: 'google', github: 'github', dev: 'laptop' };
 
@@ -93,8 +94,8 @@ export default function LoginScreen() {
       style={{
         flex: 1,
         justifyContent: 'center',
-        gap: 16,
-        padding: 24,
+        gap: space[4],
+        padding: space[6],
         paddingTop: insets.top + 24,
         paddingBottom: insets.bottom + 24,
         backgroundColor: theme.colors.background,

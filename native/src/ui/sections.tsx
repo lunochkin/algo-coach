@@ -12,6 +12,7 @@ import { useTheme } from 'react-native-paper';
 import { sectionOpened, sectionToggled } from '@algo-coach/core';
 import { Heading, Panel } from '@/ui/rows';
 import { Toggle } from '@/ui/toggle';
+import { space } from '@/ui/tokens';
 
 export interface Item {
   id: string;
@@ -124,7 +125,7 @@ export function SectionBar({ sections }: { sections: Pick<Sections, 'items' | 'c
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 6, paddingHorizontal: 16, paddingVertical: 8 }}
+        contentContainerStyle={{ gap: space[1.5], paddingHorizontal: space[4], paddingVertical: space[2] }}
       >
         {sections.items.map((item) => (
           <Toggle key={item.id} on={sections.current === item.id} onPress={() => sections.jump(item.id)}>
@@ -151,7 +152,7 @@ export function PageSection(props: {
 }) {
   const closed = props.of.closed(props.id);
   return (
-    <View ref={props.of.register(props.id)} collapsable={false} style={{ gap: 8 }}>
+    <View ref={props.of.register(props.id)} collapsable={false} style={{ gap: space[2] }}>
       <Heading
         title={props.title}
         count={props.count}
@@ -162,7 +163,7 @@ export function PageSection(props: {
       {closed ? null : props.body === 'bare' ? (
         props.children
       ) : (
-        <Panel style={{ paddingHorizontal: 12, paddingVertical: 4 }}>{props.children}</Panel>
+        <Panel style={{ paddingHorizontal: space[3], paddingVertical: space[1] }}>{props.children}</Panel>
       )}
     </View>
   );
