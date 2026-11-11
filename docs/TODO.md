@@ -292,6 +292,17 @@ ways inside each client. Each item covers both clients.
       badges, the two grid tables, the gaps as tokens, and the phone's
       readings still outside `Loaded`
 
+### The board as the overview
+
+- [x] List the knowledge modules on the board, between the cards in progress
+      and the techniques, each as its row on the knowledge home. The board is
+      the one page reading every study the user declared
+- [x] Draw a module's progress as the bar a card's row draws, on both
+      clients: the questions passed against the module's questions
+- [x] Hold the focus and Continue on the board, the focus as a reading that
+      opens the knowledge home, and open the phone on the Practice tab, as
+      the web opens on the board
+
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
       showing the same state

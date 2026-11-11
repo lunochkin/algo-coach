@@ -5,7 +5,6 @@ import { Link } from 'react-router'
 import type { ListedCard } from '@/api/client'
 import { PanelStrip } from '@/components/Panel'
 import { PickList, PickRow } from '@/components/PickRow'
-import { ProgressBar } from '@/components/ProgressBar'
 import { cardRow } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -53,16 +52,14 @@ function CardRow({ card, heading }: { card: ListedCard; heading: string | null }
       }
       stats={[{ label: '', value: row.aside }]}
       note={row.state}
+      progress={
+        row.progress && {
+          value: row.progress.solved,
+          total: row.progress.rungs,
+          label: RUNGS_SOLVED,
+        }
+      }
     >
-      {row.progress && (
-        <div className="mt-2 max-w-xs">
-          <ProgressBar
-            value={row.progress.solved}
-            total={row.progress.rungs}
-            label={RUNGS_SOLVED}
-          />
-        </div>
-      )}
       {row.trigger !== null && (
         <p className="mt-1 line-clamp-2 text-meta text-muted-foreground">{row.trigger}</p>
       )}

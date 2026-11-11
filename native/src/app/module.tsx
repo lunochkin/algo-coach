@@ -83,7 +83,7 @@ export default function ModuleScreen() {
   const b = useMemo(() => (c ? board(c.slug) : null), [board, c]);
   const starter = useStartSheet();
   // an archived module leaves every screen but its restore in Settings
-  const archive = useArchive(() => router.dismissTo('/'));
+  const archive = useArchive(() => router.dismissTo('/knowledge'));
   const now = Date.now();
   const sum = useMemo(() => (b ? summary(b, now) : null), [b, now]);
   const sections = useSections((c?.topics ?? []).map((t) => ({ id: t.slug, label: t.title })));

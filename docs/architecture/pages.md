@@ -48,15 +48,33 @@ those steps at low fidelity.
 - **Problems is marked on the listing alone.** A picked problem is a step down
   from the board, from a technique or from a card, so Practice stays marked on
   it and the way back names where the pick came from.
-- **A signed-in user lands on the board.** Every sitting starts from a technique
-  the user picks there, and Phase 16 serves the scheduler's pick on the same
-  page.
-- **The board names the cards in progress first.** A card in progress is one
+- **A signed-in user lands on the board, on both clients.** Every sitting
+  starts from a technique the user picks there, Continue starts the next
+  queue there, and Phase 16 serves the scheduler's pick on the same page.
+- **The board names the cards in progress before the techniques.** A card in
+  progress is one
   acquiring or consolidating: a study the user declared and has not finished.
   Ranking techniques by staleness alone can bury such a card. A graduated card
   keeps its run open and is not in progress, since a graduated card is done.
   Each card in progress reads as its row on the cards list does, and opens the
   card.
+- **The board is the overview of the user's practice.** It reads the
+  knowledge study first: the focus, Continue and the modules. The cards in
+  progress and the techniques follow. A user reads every study they declared
+  on one page before picking what to practise.
+- **The knowledge part reads from the device's copy**, ahead of the engine's
+  answer and without it. The board then works offline as the knowledge home
+  does, and a phone opened on a train shows a page that works.
+- **The board holds the focus as a reading and Continue as its act.** The
+  focus's presses, Strict, Clear and the raise, stay on the knowledge home,
+  and the focus's panel opens it. Exam stays there too, as the home's second
+  way in. A press living on two pages drifts apart.
+- **Each module on the board reads as its row on the knowledge home**, and
+  opens the module, whose way back then names the board. The board offers no
+  order press, since ordering the modules belongs to the knowledge home.
+- **A row's progress reads as one bar, the same on a card and a module.** A
+  card's bar counts the rungs solved, and a module's counts the questions
+  passed. A reader then compares two studies by one shape.
 - **The listing filters by two things a problem carries: its techniques and
   its difficulty.** The tags it offers are the techniques the listing itself
   holds, and the difficulties are the three a problem can carry: easy, medium
@@ -393,7 +411,7 @@ what it offers. The inventory is the list both clients build to.
 
 | Screen | Web | Phone | Status |
 |---|---|---|---|
-| The landing page | the board | the knowledge home | by platform |
+| The landing page | the board | the Practice tab | same |
 | The board | `/` | the Practice tab | same |
 | A technique's problems and cards | `/techniques/:technique` | Technique | same |
 | The problem listing | `/problems` | the Problems tab | same |
@@ -482,9 +500,9 @@ what it offers. The inventory is the list both clients build to.
   row opens the phone's Problem screen, which reads the record and the
   statement. The filters live in the tab while it is open, since the phone
   has no URL to keep them in.
-- **The phone opens on the knowledge home, where the web opens on the
-  board.** The knowledge home serves from the phone's own copy, and the board
-  needs a connection. A phone opened on a train then shows a page that works.
+- **The phone opens on the Practice tab, as the web opens on the board.** The
+  board's knowledge part serves from the phone's own copy, so the first page
+  works without a connection.
 - **Every technique on the board opens the technique's page, whatever number
   of cards teach the technique.** A row opening a card where one card teaches
   the technique would make one press land on two kinds of screen.

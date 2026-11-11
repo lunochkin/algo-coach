@@ -1,6 +1,6 @@
 import { Archive, Crosshair, Pause, Play } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import {
   moduleSummary,
@@ -38,6 +38,7 @@ import {
   BACK_KNOWLEDGE,
   OF,
   SUBTOPIC_COLUMN,
+  BACK_BOARD,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -78,6 +79,8 @@ const CELL_TONE: Record<CellState, string> = {
 // where each group of one module stands: `pages.md`, The knowledge pages
 export function ModulePage() {
   const { module = '' } = useParams()
+  // a module opened from the board returns there: `pages.md`, Sections
+  const from = useSearchParams()[0].get('from')
   const k = useKnowledge()
   const navigate = useNavigate()
   const { catalog, focus, board, now, certExams } = useLearner()
@@ -111,7 +114,9 @@ export function ModulePage() {
   return (
     <section className="space-y-section">
       <PageHeader
-        back={{ to: HOME, label: BACK_KNOWLEDGE }}
+        back={
+          from === 'board' ? { to: '/', label: BACK_BOARD } : { to: HOME, label: BACK_KNOWLEDGE }
+        }
         title={page?.c.title ?? module}
         // the lines identifying the module sit under its title, as every
         // page's note does, and read while the page loads too

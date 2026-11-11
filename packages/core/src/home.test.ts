@@ -88,9 +88,9 @@ describe('the home', () => {
 
   it('counts each module and what it owes', () => {
     const b = Board.build(catalog, [{ t: T, course: 'a', id: 'a1', ok: false }]);
-    expect(moduleRows(b, NOW).map((r) => [r.c.slug, r.total, r.toReview])).toEqual([
-      ['a', 3, 1],
-      ['b', 3, 0],
+    expect(moduleRows(b, NOW).map((r) => [r.c.slug, r.total, r.toReview, r.passed])).toEqual([
+      ['a', 3, 1, 0],
+      ['b', 3, 0, 0],
     ]);
   });
 

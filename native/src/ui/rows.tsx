@@ -1,7 +1,7 @@
 import { Children, Fragment, type ReactNode } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Pressable, type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
-import { Divider, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Divider, ProgressBar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 
 import type { Stat } from '@algo-coach/core';
 import { styles } from '@/ui/common';
@@ -24,7 +24,10 @@ export function PickRow(props: {
   dim?: boolean;
   // a control at the row's right, such as a module's drag handle
   aside?: ReactNode;
-  // under the note: a card's progress bar, its trigger and its recall marks
+  // how far a study has got, as one bar on every row that carries one: a
+  // card's rungs solved, a module's questions passed
+  progress?: { value: number; total: number; label: string } | null;
+  // under the note and the bar: a card's trigger and its recall marks
   children?: ReactNode;
   onPress?: () => void;
   onLongPress?: () => void;
@@ -58,6 +61,13 @@ export function PickRow(props: {
         >
           {props.note}
         </Text>
+      ) : null}
+      {props.progress ? (
+        <ProgressBar
+          progress={props.progress.total === 0 ? 0 : props.progress.value / props.progress.total}
+          accessibilityLabel={`${props.progress.label}: ${props.progress.value} / ${props.progress.total}`}
+          style={{ maxWidth: 240, borderRadius: 2 }}
+        />
       ) : null}
       {props.children}
     </View>

@@ -2,7 +2,7 @@ import { certStates, STATE_LABEL, type CertRecord } from './certs';
 import { visibleCatalog, withCertExams, withLessons, withStatuses, type Catalog } from './courses';
 import type { Focus } from './focus';
 import { focusQueue, focusScope, nextQueue, outsideFocus, type Queue } from './queue';
-import type { Board } from './schedule';
+import { passed, type Board } from './schedule';
 import { counted, groupLabel, nextUpView, type NextUpView, type QueueCounts } from './screens';
 import type { Course, LessonRecord, StatusRecord } from './types';
 
@@ -71,13 +71,20 @@ export interface ModuleRow {
   view: NextUpView;
   total: number;
   toReview: number; // weak and due, anywhere in the module
+  passed: number; // questions passed at least once: the module's progress
 }
 
 export function moduleRows(b: Board, now: number): ModuleRow[] {
   const all = b.questions();
   return b.courses.map((c) => {
     const qs = all.filter((q) => q.course === c.slug);
-    return { c, view: nextUpView(b, c), total: qs.length, toReview: qs.filter((q) => b.toReview(q, now)).length };
+    return {
+      c,
+      view: nextUpView(b, c),
+      total: qs.length,
+      toReview: qs.filter((q) => b.toReview(q, now)).length,
+      passed: qs.filter((q) => passed(b.attempts(q))).length,
+    };
   });
 }
 

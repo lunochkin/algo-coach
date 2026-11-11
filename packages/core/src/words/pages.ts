@@ -46,7 +46,7 @@ export const COPY = 'Copy';
 
 // the board
 export const BOARD_TITLE = 'Practice';
-export const BOARD_NOTE = 'Continue a card in progress, or pick a technique, stalest first.';
+export const BOARD_NOTE = 'Continue a card or a module, or pick a technique, stalest first.';
 export const BOARD_NONE = 'No served problem carries a technique yet.';
 export const BOARD_STUDYING = 'Cards in progress';
 export const BOARD_UNTOUCHED = 'Techniques not practised yet';
@@ -70,6 +70,7 @@ export const CARD_BRIEF = 'The brief';
 export const CARD_TEMPLATES = 'Templates';
 export const CARD_OPTIONAL = 'optional';
 export const RUNGS_SOLVED = 'rungs solved';
+export const QUESTIONS_PASSED = 'questions passed';
 export const FORMS_RECALLED = 'forms recalled';
 export const PROBES_DRAWN = 'probes drawn';
 export const HIDE_FORM = 'Hide the form';

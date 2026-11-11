@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import {
   boardView,
   inProgress,
@@ -8,6 +10,9 @@ import {
   BOARD_STUDYING,
   BOARD_UNTOUCHED,
   BOARD_PRACTISED,
+  bySavedOrder,
+  moduleRows,
+  MODULES_HEADING,
 } from '@algo-coach/core'
 import { Link } from 'react-router'
 
@@ -17,8 +22,11 @@ import { CardPanel } from '@/components/CardPanel'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { PageSection } from '@/components/PageSection'
-import { PickList, PickRow } from '@/components/PickRow'
+import { PickList, PickPanel, PickRow } from '@/components/PickRow'
 import { SectionHeading } from '@/components/SectionHeading'
+import { useLearner } from '@/knowledge/learner'
+import { KnowledgeNext } from '@/knowledge/KnowledgeNext'
+import { ModuleRow } from '@/knowledge/ModuleRow'
 import { counts } from '@/lib/format'
 
 export function BoardPage() {
@@ -27,10 +35,28 @@ export function BoardPage() {
   // one way on both pages
   const cards = useLoaded((signal) => api.GET('/api/cards', { signal }), 'cards')
   const studying = inProgress(cards.data ?? [])
+  const { catalog, board: learnerBoard, order, now } = useLearner()
+  const modules = useMemo(() => {
+    const all = learnerBoard(null)
+    return catalog && all ? bySavedOrder(moduleRows(all, now), (row) => row.c.slug, order) : []
+  }, [catalog, learnerBoard, order, now])
 
   return (
     <section className="space-y-section">
       <PageHeader title={BOARD_TITLE} note={BOARD_NOTE} />
+      {/* the knowledge study first, from the device's copy, so it reads before
+          and without the engine's answer: `pages.md`, Sections */}
+      <KnowledgeNext controls={false} />
+      {modules.length > 0 && (
+        <section className="space-y-stack">
+          <SectionHeading title={MODULES_HEADING} count={modules.length} />
+          <PickPanel>
+            {modules.map((row) => (
+              <ModuleRow key={row.c.slug} row={row} from="board" />
+            ))}
+          </PickPanel>
+        </section>
+      )}
       <Loaded
         of={OF.board}
         state={board}

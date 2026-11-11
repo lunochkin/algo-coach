@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 
+import { ProgressBar } from '@/components/ProgressBar'
 import { cn } from '@/lib/utils'
 
 type Props = {
@@ -22,7 +23,10 @@ type Props = {
   dim?: boolean
   // presses beside the counts, such as a module's order
   aside?: ReactNode
-  // under the note: a card's progress bar, its trigger and its recall marks
+  // how far a study has got, as one bar on every row that carries one: a
+  // card's rungs solved, a module's questions passed
+  progress?: { value: number; total: number; label: string } | null
+  // under the note and the bar: a card's trigger and its recall marks
   children?: ReactNode
 }
 
@@ -40,6 +44,7 @@ export function PickRow({
   mono,
   dim,
   aside,
+  progress,
   children,
 }: Props) {
   return (
@@ -69,6 +74,11 @@ export function PickRow({
           <span className={cn('mt-1 block text-meta text-muted-foreground', mono && 'font-mono')}>
             {note}
           </span>
+        )}
+        {progress && (
+          <div className="mt-2 max-w-xs">
+            <ProgressBar value={progress.value} total={progress.total} label={progress.label} />
+          </div>
         )}
         {children}
       </div>

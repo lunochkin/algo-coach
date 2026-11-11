@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { Fragment, useState } from 'react';
-import { Divider, ProgressBar, Text, useTheme } from 'react-native-paper';
+import { Divider, Text, useTheme } from 'react-native-paper';
 
 import { cardRow, type components, type RecallMark, cardsCounted, RECALL_MARKS, RUNGS_SOLVED } from '@algo-coach/core';
 import { tones } from '@/ui/common';
@@ -37,14 +37,8 @@ export function CardPanel({ technique, cards }: { technique: string | null; card
               stats={[...(row.technique ? [{ label: '', value: row.technique }] : []), { label: '', value: row.aside }]}
               note={row.state ?? undefined}
               onPress={() => router.push({ pathname: '/card', params: { slug: card.slug } })}
+              progress={row.progress && { value: row.progress.solved, total: row.progress.rungs, label: RUNGS_SOLVED }}
             >
-              {row.progress ? (
-                <ProgressBar
-                  progress={row.progress.rungs === 0 ? 0 : row.progress.solved / row.progress.rungs}
-                  accessibilityLabel={`${RUNGS_SOLVED}: ${row.progress.solved} / ${row.progress.rungs}`}
-                  style={{ maxWidth: 240, borderRadius: 2 }}
-                />
-              ) : null}
               {row.trigger !== null ? (
                 <Text variant="bodySmall" numberOfLines={2} style={muted}>
                   {row.trigger}

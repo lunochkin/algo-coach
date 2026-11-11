@@ -1,278 +1,178 @@
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
-import { Appbar, Button, IconButton, Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
-import ReorderableList, {
-  reorderItems,
-  useReorderableDrag,
-  type ReorderableListReorderEvent,
-} from 'react-native-reorderable-list';
+import { ScrollView, View } from 'react-native';
+import { Appbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
+  boardView,
+  inProgress,
+  techniqueStats,
+  type components,
+  BOARD_TITLE,
+  OF,
+  BOARD_NONE,
+  BOARD_STUDYING,
+  BOARD_UNTOUCHED,
+  BOARD_PRACTISED,
+  BOARD_NOTE,
   bySavedOrder,
-  CERTIFICATIONS_LINK,
-  CONTINUE,
-  continueCounts,
-  continueLine,
-  continuePlan,
-  type Course,
-  emptyContinue,
-  EXAM_LINK,
-  focusLabel,
-  LESSONS_LINK,
-  MODULES_HEADING,
-  moduleStats,
   moduleRows,
-  MODULES_OF,
-  NEW_STEP,
-  type NextUpView,
-  NO_MODULES,
-  PAUSED,
-  readyCert,
-  readyLesson,
-  reviewQueue,
-  SYNC_NOW,
-  waitingOutside,
-  reorderLabel,
+  MODULES_HEADING,
+  focusLabel,
 } from '@algo-coach/core';
-import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
-import { BottomBar, fromCopy, Loaded, startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
-import { FocusCard } from '@/ui/focuscard';
+import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
-import { Heading, PanelItem, PickPanel, PickRow } from '@/ui/rows';
+import { CardPanel } from '@/ui/cards';
+import { Loaded, styles } from '@/ui/common';
+import { ContinueBar, ContinueNotice, useContinue } from '@/ui/continue';
+import { FocusCard } from '@/ui/focuscard';
+import { ModuleRow } from '@/ui/modules';
+import { Heading, Panel, PickPanel, PickRow } from '@/ui/rows';
 
-export default function Home() {
-  const st = useStore();
+type Board = components['schemas']['Board'];
+type ListedCard = components['schemas']['ListedCard'];
+
+const open = (technique: string) => router.push({ pathname: '/technique', params: { technique } });
+
+/** The board, as the web's: the cards in progress, then the techniques by staleness. */
+export default function PracticeScreen() {
   const theme = useTheme();
-  const [notice, setNotice] = useState('');
-  const [noticeAction, setNoticeAction] = useState<{ label: string; run: () => void } | null>(null);
+  const insets = useSafeAreaInsets();
+  const st = useStore();
+  const [now] = useState(() => Date.now());
+  const next = useContinue();
+  // the knowledge modules, from the device's copy: the board is the overview
+  // of every study, `pages.md`, Sections
+  const { board: learner, courseOrder } = st;
+  const all = useMemo(() => learner(null), [learner]);
+  const modules = useMemo(
+    () => (all ? bySavedOrder(moduleRows(all, now), (row) => row.c.slug, courseOrder) : []),
+    [all, now, courseOrder],
+  );
   useEffect(() => {
     // the app opens on Login until it holds a token, and returns there on sign-out
     if (st.ready && !st.hasToken) router.replace('/login');
   }, [st.ready, st.hasToken]);
 
-  const { board } = st;
-  const b = useMemo(() => board(null), [board]);
-  const info = useMemo(() => (b ? { courses: moduleRows(b, Date.now()) } : null), [b]);
-
-  // opening a module is the pick of one module: `pages.md`, The structure
-  const { focus } = st;
-  const focused = focus;
-  const limit = st.newLimit;
-  // The queue Continue would open, and the board its picks use.
-  const cont = useMemo(() => continuePlan(board, focus, null, limit), [board, focus, limit]);
-  const counts = useMemo(() => (cont ? continueCounts(cont, focused, Date.now()) : null), [cont, focused]);
-
-  // The first certificate whose requirements are met but its exam (shown above Continue).
-  const certToTake = useMemo(() => {
-    const all = board(null);
-    return all ? readyCert(all, st.courseOrder, st.catalog?.certExams ?? []) : null;
-  }, [board, st.courseOrder, st.catalog]);
-
-  // The first lesson due to be read (its pretest used up, or pretest 0), in course order.
-  const toRead = useMemo(() => {
-    const all = board(null);
-    return all ? readyLesson(all, st.courseOrder) : null;
-  }, [board, st.courseOrder]);
-
-  const start = () => {
-    if (!cont || !counts) return;
-    if (counts.empty) {
-      const empty = emptyContinue({ blocked: counts.blocked, newLimit: st.newLimit, focus: focused });
-      setNotice(empty.notice);
-      const run = {
-        raise: () => {
-          void st.raiseNew();
-          cont.queue.raise(NEW_STEP);
-          startQueue(st, 'next', cont.queue, cont.course, cont.include);
-        },
-        certs: () => router.push('/certs'),
-        'clear-focus': () => void st.setFocus(null),
-      };
-      setNoticeAction(empty.action && { label: empty.action.label, run: run[empty.action.kind] });
-      return;
-    }
-    startQueue(st, 'next', cont.queue, cont.course, cont.include);
-  };
-
-  /** The reviews waiting outside a strict focus: a plain review queue over all served courses. */
-  const reviewOutside = () => {
-    const all = board(null);
-    if (all) startQueue(st, 'review', reviewQueue(all, ['weak', 'due']), null);
-  };
-
-  const order = st.courseOrder;
-  const rows = useMemo(() => bySavedOrder(info?.courses ?? [], (r) => r.c.slug, order), [info, order]);
-  const onReorder = ({ from, to }: ReorderableListReorderEvent) => {
-    const slugs = reorderItems(rows, from, to).map((r) => r.c.slug);
-    void st.setCourseOrder(slugs);
-  };
-
-  // a snapshot holding no module reads as empty; the banner above names a failed sync
-  const body = !st.catalog ? (
-    <Loaded of={MODULES_OF} state={fromCopy(st, st.ready ? [] : null)} blank={NO_MODULES}>
-      {() => null}
-    </Loaded>
-  ) : null;
-  const header = (
-    <View style={{ gap: 12, marginBottom: 12 }}>
-      <SyncBanner sync={st.sync} />
-      {/* the lessons and the certifications are steps down from the home: `pages.md`, The structure */}
-      <View style={styles.row}>
-        <Button compact icon="book-open-variant" onPress={() => router.push('/lessons')}>
-          {LESSONS_LINK}
-        </Button>
-        <Button compact icon="trophy-outline" onPress={() => router.push('/certs')}>
-          {CERTIFICATIONS_LINK}
-        </Button>
-      </View>
-      {/* one scroll, in the web's order: the next steps and the focus, the acts,
-          then the modules. A bar pinned over the list left the modules a sliver */}
-      <View style={{ gap: 8 }}>
-        {/* the next steps the rules would take, as rows, since each opens a page */}
-        {certToTake || toRead ? (
-          <PickPanel>
-            {certToTake ? (
-              <PickRow
-                title={certToTake.line}
-                stats={[]}
-                onPress={() => router.push({ pathname: '/certs', params: { open: certToTake.id } })}
-              />
-            ) : null}
-            {toRead ? (
-              <PickRow
-                title={toRead.line}
-                stats={[]}
-                onPress={() =>
-                  router.push({ pathname: '/lesson', params: { course: toRead.c.slug, slug: toRead.lesson.slug } })
-                }
-              />
-            ) : null}
-          </PickPanel>
-        ) : null}
-        {focused && cont ? (
-          <FocusCard
-            label={focusLabel(focused, st.catalog)}
-            focus={focused}
-            b={cont.b}
-            queue={cont.queue}
-            exams={st.catalog?.certExams ?? []}
-            onClear={() => void st.setFocus(null)}
-            onStrict={() => void st.setFocus({ ...focused, strict: !focused.strict })}
-            onMoreNew={() => void st.raiseNew()}
-          />
-        ) : null}
-      </View>
-      {body}
-      {rows.length ? <Heading title={MODULES_HEADING} count={rows.length} /> : null}
-    </View>
-  );
-
-  // the home's act, Continue, in the bar at the bottom, with Exam beside it
-  // at a lower weight: `pages.md`, A page's areas
-  const bar = (
-    <BottomBar
-      bottom={0}
-      row
-      above={
-        counts ? (
-          <View style={[styles.row, { justifyContent: 'center', flexWrap: 'wrap', minHeight: 24 }]}>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              {continueLine(counts, !!focused?.strict)}
-            </Text>
-            {focused?.strict && counts.outside ? (
-              <TouchableRipple
-                onPress={reviewOutside}
-                borderless
-                accessibilityRole="link"
-                accessibilityLabel={waitingOutside(counts.outside)}
-                style={{ minHeight: 48, justifyContent: 'center', paddingHorizontal: 4, borderRadius: 8 }}
-              >
-                <Text variant="bodySmall" style={{ color: theme.colors.primary, textDecorationLine: 'underline' }}>
-                  {` · ${waitingOutside(counts.outside)}`}
-                </Text>
-              </TouchableRipple>
-            ) : null}
-          </View>
-        ) : null
-      }
-    >
-      <Button
-        mode="contained-tonal"
-        icon="clipboard-check-outline"
-        disabled={!st.catalog}
-        onPress={() => router.push('/exam')}
-        contentStyle={{ paddingVertical: 8 }}
-      >
-        {EXAM_LINK}
-      </Button>
-      <Button
-        mode="contained"
-        icon="play"
-        style={{ flex: 1 }}
-        disabled={!st.catalog}
-        onPress={start}
-        contentStyle={{ paddingVertical: 8 }}
-      >
-        {CONTINUE}
-      </Button>
-    </BottomBar>
-  );
+  const board = useEngine('/api/board');
+  const cards = useEngine('/api/cards');
+  const error = board.error ?? cards.error;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
-        <Appbar.Content title={APP_NAME} />
+        <Appbar.Content title={BOARD_TITLE} />
         <AccountMenu />
       </Appbar.Header>
-      <ReorderableList
-        data={rows}
-        keyExtractor={(r) => r.c.slug}
-        onReorder={onReorder}
-        ListHeaderComponent={header}
-        ListFooterComponent={
-          <Pressable onPress={() => st.requestSync(0)} accessibilityLabel={SYNC_NOW} style={{ marginTop: 12 }}>
-            <SyncLine sync={st.sync} showError={false} />
-          </Pressable>
-        }
-        // room under the last row for the bar over it
-        contentContainerStyle={{ padding: 16, paddingBottom: 160 }}
-        renderItem={({ item, index }) => (
-          <PanelItem first={index === 0} last={index === rows.length - 1}>
-            <ModuleRow c={item.c} view={item.view} total={item.total} toReview={item.toReview} />
-          </PanelItem>
-        )}
-      />
-      {bar}
-      <Snackbar
-        visible={!!notice}
-        onDismiss={() => {
-          setNotice('');
-          setNoticeAction(null);
-        }}
-        duration={noticeAction ? 6000 : 2500}
-        action={noticeAction ? { label: noticeAction.label, onPress: noticeAction.run } : undefined}
-        wrapperStyle={{ bottom: 160 }}
-      >
-        {notice}
-      </Snackbar>
+      {/* room under the last row for the bar over it */}
+      <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 160 }]}>
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+          {BOARD_NOTE}
+        </Text>
+        {/* the knowledge study first, from the device's copy, so it reads
+            before and without the engine's answer: `pages.md`, Sections */}
+        {next.focus && next.cont ? (
+          <TouchableRipple
+            onPress={() => router.navigate('/knowledge')}
+            accessibilityRole="link"
+            borderless
+            style={{ borderRadius: theme.roundness * 3 }}
+          >
+            <FocusCard
+              label={focusLabel(next.focus, st.catalog)}
+              focus={next.focus}
+              b={next.cont.b}
+              queue={next.cont.queue}
+              exams={st.catalog?.certExams ?? []}
+            />
+          </TouchableRipple>
+        ) : null}
+        {modules.length > 0 ? (
+          <>
+            <Heading title={MODULES_HEADING} count={modules.length} />
+            <PickPanel>
+              {modules.map((row) => (
+                <ModuleRow key={row.c.slug} row={row} />
+              ))}
+            </PickPanel>
+          </>
+        ) : null}
+
+        <Loaded
+          of={OF.board}
+          state={{
+            data: board.data && cards.data ? { board: board.data, cards: cards.data } : null,
+            error,
+            reload: () => {
+              board.reload();
+              cards.reload();
+            },
+          }}
+          blank={BOARD_NONE}
+          blankWhen={(x) => x.board.rows.length === 0}
+        >
+          {(x) => <BoardBody board={x.board} cards={x.cards} />}
+        </Loaded>
+      </ScrollView>
+      <ContinueBar next={next} />
+      <ContinueNotice next={next} />
     </View>
   );
 }
 
-/** A module's row: a press opens the module, a long press or the handle drags it to reorder. */
-function ModuleRow({ c, view, total, toReview }: { c: Course; view: NextUpView; total: number; toReview: number }) {
-  const drag = useReorderableDrag();
+function BoardBody({ board, cards }: { board: Board; cards: ListedCard[] }) {
+  const theme = useTheme();
+  const [now] = useState(() => Date.now());
+  const { untouched, practised, foot } = boardView(board);
+  const studying = inProgress(cards);
   return (
-    <PickRow
-      title={c.title}
-      badge={c.paused ? PAUSED : null}
-      stats={moduleStats(toReview, total)}
-      note={[view.title, view.detail].filter(Boolean).join(' · ')}
-      onPress={() => router.push({ pathname: '/module', params: { course: c.slug } })}
-      onLongPress={drag}
-      aside={<IconButton icon="drag" onPressIn={drag} accessibilityLabel={reorderLabel(c.title)} />}
-    />
+    <>
+      {studying.length > 0 ? (
+        <>
+          <Heading title={BOARD_STUDYING} count={studying.length} />
+          <CardPanel technique={null} cards={studying} />
+        </>
+      ) : null}
+      {untouched.length > 0 ? (
+        <>
+          <Heading title={BOARD_UNTOUCHED} count={untouched.length} />
+          <Panel padded style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 20, rowGap: 8 }}>
+            {untouched.map((row) => (
+              <Text
+                key={row.technique}
+                variant="bodyLarge"
+                accessibilityRole="link"
+                onPress={() => open(row.technique)}
+                style={{ color: theme.colors.primary }}
+              >
+                {row.technique}
+              </Text>
+            ))}
+          </Panel>
+        </>
+      ) : null}
+      {practised.length > 0 ? (
+        <>
+          <Heading title={BOARD_PRACTISED} count={practised.length} />
+          <PickPanel>
+            {practised.map((row) => (
+              <PickRow
+                key={row.technique}
+                title={row.technique}
+                stats={techniqueStats(row, now)}
+                onPress={() => open(row.technique)}
+              />
+            ))}
+          </PickPanel>
+        </>
+      ) : null}
+      {foot ? (
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          {foot}
+        </Text>
+      ) : null}
+    </>
   );
 }

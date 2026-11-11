@@ -17,6 +17,7 @@ import {
   NEW_LEFT,
   type Queue,
   RAISE_TODAY,
+  focusTitle,
   STRICT,
   strictLabel,
 } from '@algo-coach/core';
@@ -25,15 +26,17 @@ import { styles, tones } from './common';
 import { Panel } from './rows';
 import { Toggle } from './toggle';
 
+// without the presses the card is a reading, as the Practice tab holds it:
+// the focus's presses live on the knowledge home alone
 interface Props {
-  onMoreNew: () => void; // raises today's new-question limit by NEW_STEP
+  onMoreNew?: () => void; // raises today's new-question limit by NEW_STEP
   label: string;
   focus: Focus;
   b: Board; // built with the focus course included, as the focus queue uses
   queue: Queue;
   exams: CertRecord[];
-  onClear: () => void;
-  onStrict: () => void;
+  onClear?: () => void;
+  onStrict?: () => void;
 }
 
 /** The focus as a card: what it covers, how far along it is, and what comes next. */
@@ -46,7 +49,8 @@ export function FocusCard(props: Props) {
   const color: Record<FocusPart, string> = {
     mastered: tone.done,
     learning: theme.colors.primary,
-    review: tone.open,
+    // owed rather than held, so neutral, as the web's bar reads it
+    review: theme.colors.outline,
     unseen: theme.colors.surfaceVariant,
   };
   const muted = { color: theme.colors.onSurfaceVariant };
@@ -61,18 +65,22 @@ export function FocusCard(props: Props) {
             color={theme.colors.primary}
           />
           <Text variant="titleSmall" numberOfLines={2} style={{ flex: 1 }}>
-            {props.label}
+            {focusTitle(props.label)}
           </Text>
-          <Toggle on={!!focus.strict} onPress={props.onStrict} accessibilityLabel={strictLabel(!!focus.strict)}>
-            {STRICT}
-          </Toggle>
-          <IconButton
-            icon="close"
-            size={20}
-            onPress={props.onClear}
-            accessibilityLabel={CLEAR_FOCUS}
-            style={{ margin: 0 }}
-          />
+          {props.onStrict ? (
+            <Toggle on={!!focus.strict} onPress={props.onStrict} accessibilityLabel={strictLabel(!!focus.strict)}>
+              {STRICT}
+            </Toggle>
+          ) : null}
+          {props.onClear ? (
+            <IconButton
+              icon="close"
+              size={20}
+              onPress={props.onClear}
+              accessibilityLabel={CLEAR_FOCUS}
+              style={{ margin: 0 }}
+            />
+          ) : null}
         </View>
 
         {info.total ? (
@@ -99,9 +107,11 @@ export function FocusCard(props: Props) {
           <Stat icon="refresh" value={info.due} label={DUE_NOW} />
           {info.learning ? <Stat icon="timer-sand" value={info.learning} label={LEARNING} /> : null}
           <Stat icon="plus-circle-outline" value={info.newLeft} label={NEW_LEFT} />
-          <Button compact mode="outlined" icon="plus" onPress={props.onMoreNew}>
-            {RAISE_TODAY}
-          </Button>
+          {props.onMoreNew ? (
+            <Button compact mode="outlined" icon="plus" onPress={props.onMoreNew}>
+              {RAISE_TODAY}
+            </Button>
+          ) : null}
         </View>
 
         {info.next ? (
