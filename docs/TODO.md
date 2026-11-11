@@ -373,6 +373,48 @@ removes the difference the pass found.
 - [x] Offer Copy on a long failing value on the phone, with `expo-clipboard`
       in the app's build, as the web offers it
 
+### A third audit
+
+A third pass on 2026-11-11 read both clients against each other and each
+client against its own parts. The rules and the words come from core on
+both. These items remove what still behaves or draws two ways.
+
+- [ ] Return a sitting's way back to the page the problem came from, on both
+      clients, with the press naming that page. The web goes to the board
+      from Problems, and the phone's "Back to the board" goes elsewhere
+- [ ] Draw a page whose cards request failed without its cards on the phone,
+      as the web does. The phone fails the whole page and hides the statement
+- [ ] List both recall hints on the phone, the taken ones struck, as the web
+      lists them. The phone shows only the next hint's press
+- [ ] Show the empty knowledge home's line on the phone, and the notes the
+      web's knowledge home and settings carry. The phone draws nothing there
+- [ ] Open an answer's lesson link at its section on the web, as the phone
+      does. The web drops the anchor
+- [ ] Decide in core when Continue is offered, and put both clients on it.
+      The web waits for the counts, and the phone only for the catalog
+- [ ] Clear the start sheet's toggles and the claim's confidence the same
+      way on both clients. Each client lets a different one be cleared
+- [ ] Keep the editor editable or read-only after a sitting ends the same
+      way on both clients. The phone hides its keys, and the web stays open
+- [ ] Move the phone's two sign-in errors and its notification channel's
+      name into core, the last words a client still types
+- [ ] Add spacing, type and radius tokens to the phone, and replace the
+      numbers in `native/src` styles with them. Some 150 are typed inline,
+      a quarter of them in the quiz
+- [ ] Draw the phone's running clock's dot in its own token, as `pages.md`
+      gives it. The dot uses the passed colour
+- [ ] Give the phone a primary press, a counts and a progress bar component,
+      as the web's `Button`, `Stats` and `ProgressBar`. The press's padding
+      is repeated in 19 places, and the card's counts read as one line
+- [ ] Route the phone quiz's header and score through the shared header and
+      `Loaded`. The quiz builds its own
+- [ ] Draw the web's verdict, answer and hint panels with `Panel`, and its
+      three option tiles as one component. Each copies the classes
+- [ ] Draw a problem's row one way on Problems and a technique's page, on
+      the web. Only the listing names its techniques
+- [ ] Draw the web's two grid tables and its difficulty badge each as one
+      component, and the failing case with the panel's edge
+
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
       showing the same state
