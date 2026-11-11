@@ -556,8 +556,28 @@ times. Each record class is specified in one of the files beside it.
     answering questions suit the phone. `pages.md` lists what each client
     holds.
   - The web app wrapped in a WebView, as Capacitor ships one, was rejected.
-    Code-adjacent work on the phone needs a native keyboard and native
-    scrolling, which a WebView does least well.
+    Every screen would then scroll, type and navigate through a WebView, where
+    a native screen gets the platform's own lists, sheets and back gesture.
+  - The phone's code editor is the one WebView, inside a native screen:
+    CodeMirror, typed through the app's own keyboard. One editor setup then
+    serves both clients. The system keyboard is the part of a WebView that
+    handles worst, and the app's keyboard replaces it.
+  - A key reached the painted editor in 23 ms at the median. On 2026-11-11 a
+    nine-line binary search was typed through the app's keys on a Redmi Note
+    13 Pro 5G at 120 Hz. Over 126 keys, the time from the press to the second
+    animation frame after CodeMirror applied the key was 23 ms at p50, 27 ms
+    at p90 and 48 ms at most. The message across the bridge took 6 ms of it.
+  - The editor scrolled as a native list does. Over the same flings and
+    drags, the editor and the native Problems list each missed one frame
+    deadline in about 4,000 frames. The editor's frames took longer: 11 ms
+    against 9 ms at p50, and 19 ms against 14 ms at p99.
+  - A key reaches CodeMirror as typed input, after a forced parse. CodeMirror
+    reindents `else:` only on a transaction marked `input.type`, and reads a
+    syntax tree its parser fills in idle time. Without both, `else:` kept the
+    indentation of the line above it.
+  - Enter after `else:` indents to the level of `else` rather than of its
+    body. Node reproduces it with the same packages, so the web's editor does
+    the same, and the dedent and indent keys correct it on the phone.
   - A native rewrite in Kotlin and Swift was rejected. Every rule and every
     screen would exist three times, and each copy would need testing on a
     device.

@@ -199,7 +199,7 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
 - [x] Draw a keyboard of the app's own, with two rows of symbols above the
       digits and the letters and the rare symbols on a layer, and answer a
       `short` question through it on the quiz screen
-- [ ] Type a form into CodeMirror in a WebView on the Android phone, its
+- [x] Type a form into CodeMirror in a WebView on the Android phone, its
       content `inputmode="none"` and the app's keyboard sending each key, and
       write the scrolling and key latency it showed into `README.md`
 - [ ] Add the editor's layer to the keyboard: a key per Python keyword, a
