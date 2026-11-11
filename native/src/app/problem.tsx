@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, ScrollView, View } from 'react-native';
 import {
   Appbar,
@@ -46,6 +46,7 @@ import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { Failed, styles, tones } from '@/ui/common';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
+import type { Key } from '@/lib/keys';
 import { KeyPad } from '@/ui/keys';
 import { Markdown } from '@/ui/markdown';
 import { ClaimSheet } from '@/ui/claim';
@@ -199,6 +200,7 @@ function SittingOn({
   // set by the restore press, and kept with the draft so a reopened screen keeps it
   const restored = useRef<boolean | null>(null);
   const editor = useRef<EditorHandle>(null);
+  const onKey = useCallback((key: Key) => editor.current?.press(key), []);
   const [names, setNames] = useState<string[]>([]);
   const code = useRef<string | null>(null);
 
@@ -477,7 +479,7 @@ function SittingOn({
         ) : null}
         {keys && !clock.ended ? (
           <View style={{ paddingHorizontal: 8, paddingTop: 6 }}>
-            <KeyPad lines names={names} onKey={(key) => editor.current?.press(key)} />
+            <KeyPad lines names={names} onKey={onKey} />
           </View>
         ) : null}
       </View>

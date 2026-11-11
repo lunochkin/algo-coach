@@ -64,7 +64,7 @@ import {
   togglePick,
   NEW_STEP,
 } from '@algo-coach/core';
-import { EMPTY, type Edit, pressed } from '@/lib/keys';
+import { EMPTY, type Edit, type Key, pressed } from '@/lib/keys';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
 import { KeyPad, PAD_HEIGHT } from '@/ui/keys';
@@ -426,6 +426,7 @@ function Ask(props: {
   const order = useMemo(() => choiceOrder(q.choices.length), [q]);
   const [picked, setPicked] = useState<number[]>([]);
   const [edit, setEdit] = useState<Edit>(EMPTY);
+  const onKey = useCallback((key: Key) => setEdit((was) => pressed(was, key)), []);
   const text = edit.text;
   const [guessing, setGuessing] = useState(false);
   const [revealed, setRevealed] = useState(false);
@@ -523,11 +524,7 @@ function Ask(props: {
         {result ? <DetailsToggle r={result} open={details} onToggle={() => setDetails(!details)} /> : null}
       </ScrollView>
 
-      <BottomBar
-        bottom={bottom}
-        row
-        above={padOpen ? <KeyPad onKey={(key) => setEdit((was) => pressed(was, key))} /> : undefined}
-      >
+      <BottomBar bottom={bottom} row above={padOpen ? <KeyPad onKey={onKey} /> : undefined}>
         {result ? (
           <Button mode="contained" style={{ flex: 1 }} onPress={onNext}>
             {last ? 'Finish' : ASK_NEXT}

@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { memo, type ReactNode, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 
@@ -34,7 +34,9 @@ type Layer = 'letters' | 'rare' | 'keywords';
 
 // `lines` is the editor's pad: enter where `?` sits, the line keys, the
 // names the file declares, and the keywords
-export function KeyPad({
+// memoised, so a screen re-rendering on each key leaves the pad alone: a
+// caller passes a stable `onKey`
+export const KeyPad = memo(function KeyPad({
   onKey,
   lines = false,
   names = [],
@@ -46,12 +48,6 @@ export function KeyPad({
   const [shift, setShift] = useState<Shift>('off');
   const [layer, setLayer] = useState<Layer>('letters');
   const lastShift = useRef(0);
-  const repeat = useRef<ReturnType<typeof setInterval> | null>(null);
-  const stop = () => {
-    if (repeat.current) clearInterval(repeat.current);
-    repeat.current = null;
-  };
-  useEffect(() => stop, []);
 
   const insert = (text: string) => onKey({ insert: text });
   const letter = (one: string) => {
@@ -59,17 +55,7 @@ export function KeyPad({
     setShift(afterLetter(shift));
   };
   const back = (
-    <Cap
-      icon="backspace-outline"
-      accessibilityLabel="Backspace"
-      grow={1.5}
-      onPress={() => onKey('back')}
-      onLongPress={() => {
-        stop();
-        repeat.current = setInterval(() => onKey('back'), REPEAT_MS);
-      }}
-      onPressOut={stop}
-    />
+    <Cap icon="backspace-outline" accessibilityLabel="Backspace" grow={1.5} repeats onPress={() => onKey('back')} />
   );
 
   return (
@@ -203,7 +189,7 @@ export function KeyPad({
       </Row>
     </View>
   );
-}
+});
 
 // the names the file declares, in the strip's place so they cost no height:
 // `flows.md` gives why a declared name is offered and a library name never is
@@ -254,21 +240,47 @@ function Cap(props: {
   preview?: boolean;
   on?: boolean;
   onPress: () => void;
-  onLongPress?: () => void;
-  onPressOut?: () => void;
+  // a held key presses again after a delay, every REPEAT_MS
+  repeats?: boolean;
 }) {
   const theme = useTheme();
   const { label, icon, grow = 1, preview = false, on = false } = props;
+  const [pressed, setPressed] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handler = useRef(props.onPress);
+  handler.current = props.onPress;
+  const release = () => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      clearInterval(timer.current);
+    }
+    timer.current = null;
+    setPressed(false);
+  };
+  useEffect(() => release, []);
+
+  // raw touches rather than a Pressable: the responder holds one touch at a
+  // time and fires on release, so a key pressed before the last one lifted lagged
+  const down = () => {
+    setPressed(true);
+    handler.current();
+    if (props.repeats)
+      timer.current = setTimeout(() => {
+        timer.current = setInterval(() => handler.current(), REPEAT_MS);
+      }, 350);
+  };
+
   const ink = on ? theme.colors.onPrimary : theme.colors.onSurfaceVariant;
   const ground = on ? theme.colors.primary : theme.colors.surfaceVariant;
   let face: ReactNode = null;
   if (icon) face = <MaterialCommunityIcons name={icon} size={20} color={ink} />;
   else if (label)
     face = (
-      // a keyword shrinks to its key rather than wrapping inside it
       <Text
         numberOfLines={1}
-        adjustsFontSizeToFit
+        // a keyword shrinks to its key rather than wrapping inside it; measuring
+        // the fit costs a layout, so a single character skips it
+        adjustsFontSizeToFit={label.length > 1}
         minimumFontScale={0.6}
         style={{ fontFamily: 'monospace', fontSize: label.length > 1 ? 13 : 18, color: ink, paddingHorizontal: 2 }}
       >
@@ -276,47 +288,43 @@ function Cap(props: {
       </Text>
     );
   return (
-    <Pressable
+    <View
+      accessible
       accessibilityRole="button"
       accessibilityLabel={props.accessibilityLabel ?? label}
-      onPress={props.onPress}
-      onLongPress={props.onLongPress}
-      onPressOut={props.onPressOut}
-      delayLongPress={350}
-      style={({ pressed }) => ({
+      accessibilityActions={[{ name: 'activate' }]}
+      onAccessibilityAction={() => handler.current()}
+      onTouchStart={down}
+      onTouchEnd={release}
+      onTouchCancel={release}
+      style={{
         flex: grow,
         height: HEIGHT,
         borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: pressed ? theme.colors.surfaceDisabled : ground,
-      })}
+      }}
     >
-      {({ pressed }) => (
-        <>
-          {face}
-          {pressed && preview && label ? (
-            <View
-              pointerEvents="none"
-              style={{
-                position: 'absolute',
-                bottom: HEIGHT + 4,
-                minWidth: '120%',
-                height: HEIGHT + 8,
-                borderRadius: 8,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: theme.colors.inverseSurface,
-                elevation: 4,
-              }}
-            >
-              <Text style={{ fontFamily: 'monospace', fontSize: 24, color: theme.colors.inverseOnSurface }}>
-                {label}
-              </Text>
-            </View>
-          ) : null}
-        </>
-      )}
-    </Pressable>
+      {face}
+      {pressed && preview && label ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            bottom: HEIGHT + 4,
+            minWidth: '120%',
+            height: HEIGHT + 8,
+            borderRadius: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: theme.colors.inverseSurface,
+            elevation: 4,
+          }}
+        >
+          <Text style={{ fontFamily: 'monospace', fontSize: 24, color: theme.colors.inverseOnSurface }}>{label}</Text>
+        </View>
+      ) : null}
+    </View>
   );
 }

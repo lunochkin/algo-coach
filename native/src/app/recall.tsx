@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ScrollView, type ScrollViewInstance, View } from 'react-native';
 import { Appbar, Button, IconButton, Menu, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,6 +35,7 @@ import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { CodeBlock, Failed, styles, tones } from '@/ui/common';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
+import type { Key } from '@/lib/keys';
 import { KeyPad } from '@/ui/keys';
 import { Markdown } from '@/ui/markdown';
 
@@ -85,6 +86,7 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
   const theme = useTheme();
   const { origin } = useStore().settings;
   const editor = useRef<EditorHandle>(null);
+  const onKey = useCallback((key: Key) => editor.current?.press(key), []);
   const [names, setNames] = useState<string[]>([]);
   const top = useRef<ScrollViewInstance>(null);
   const code = useRef(recallBlank(prompt.signature));
@@ -188,7 +190,7 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
       ) : null}
       {keys ? (
         <View style={{ paddingHorizontal: 8 }}>
-          <KeyPad lines names={names} onKey={(key) => editor.current?.press(key)} />
+          <KeyPad lines names={names} onKey={onKey} />
         </View>
       ) : null}
     </View>
