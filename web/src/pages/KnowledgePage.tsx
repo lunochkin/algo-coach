@@ -140,7 +140,7 @@ export function KnowledgePage() {
             {toTake && (
               <Link
                 to={`${CERTIFICATIONS}?${new URLSearchParams({ open: toTake.id })}`}
-                className="block rounded-xl border bg-brand-wash px-4 py-3 text-meta hover:bg-brand-wash/70"
+                className="block rounded-xl border bg-card px-4 py-3 text-meta hover:bg-accent"
               >
                 {toTake.line}
               </Link>
@@ -149,7 +149,7 @@ export function KnowledgePage() {
             {toRead && (
               <Link
                 to={lessonPath(toRead.c.slug, toRead.lesson.slug)}
-                className="block rounded-xl border bg-brand-wash/40 px-4 py-3 text-meta hover:bg-brand-wash"
+                className="block rounded-xl border bg-card px-4 py-3 text-meta hover:bg-accent"
               >
                 {toRead.line}
               </Link>
@@ -174,7 +174,7 @@ export function KnowledgePage() {
                 </div>
                 {panel.total > 0 && (
                   <div
-                    className="flex h-1.5 w-full overflow-hidden rounded-full bg-muted"
+                    className="flex h-1 w-full overflow-hidden rounded-full bg-muted"
                     aria-hidden
                   >
                     {panel.parts.map((part) =>

@@ -121,7 +121,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Pro
 
       {q.format === 'choice' && (
         <div className="space-y-2" role={multi ? 'group' : 'radiogroup'}>
-          {multi && <p className="text-meta text-brand-deep">{askChoose(q.answer.length)}</p>}
+          {multi && <p className="text-meta text-muted-foreground">{askChoose(q.answer.length)}</p>}
           {order.map((i, pos) => {
             const on = picked.includes(pos)
             return (
@@ -375,7 +375,7 @@ export function Details({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-1">
-      <h3 className="text-meta font-medium text-brand-deep">{title}</h3>
+      <h3 className="text-meta font-medium text-muted-foreground">{title}</h3>
       {children}
     </section>
   )

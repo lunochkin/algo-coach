@@ -58,13 +58,13 @@ const DOT: Record<CellState, string> = {
 }
 const PIP: Record<CertState, string> = {
   earned: 'fill-brand stroke-brand',
-  needs_refresh: 'fill-brand-wash stroke-brand',
-  ready: 'fill-brand-deep stroke-brand-deep',
+  needs_refresh: 'fill-none stroke-foreground',
+  ready: 'fill-foreground stroke-foreground',
   in_progress: 'fill-foreground/60 stroke-foreground',
   locked: 'fill-muted stroke-muted-foreground/50',
   empty: 'fill-none stroke-border',
   not_certified: 'fill-none stroke-muted-foreground',
-  insufficient_pool: 'fill-brand-wash stroke-brand',
+  insufficient_pool: 'fill-none stroke-muted-foreground',
 }
 
 type Props = {
@@ -171,7 +171,11 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
                 rx={18}
                 className="fill-card stroke-border"
               />
-              <text x={k.x + 16} y={k.y + 22} className="fill-brand-deep text-[14px]">
+              <text
+                x={k.x + 16}
+                y={k.y + 22}
+                className="fill-muted-foreground text-meta font-medium"
+              >
                 {titles.get(k.topic) ?? k.topic}
               </text>
             </g>
@@ -278,10 +282,10 @@ function Node(props: {
             width={W}
             height={H}
             rx={H / 2}
-            className={cn('fill-brand-wash/50', ring)}
+            className={cn('fill-muted', ring)}
             strokeWidth={picked ? 2.5 : 1.5}
           />
-          <text x={n.x + 18} y={n.y + 22} className="fill-foreground text-[13px]">
+          <text x={n.x + 18} y={n.y + 22} className="fill-foreground text-meta">
             {cut(props.title, 20)}
           </text>
           {props.pips.map((p, i) => (
@@ -294,11 +298,7 @@ function Node(props: {
                 strokeWidth={1.2}
                 opacity={p.filled ? 1 : 0.6}
               />
-              <text
-                x={n.x + 22.5 + i * 26}
-                y={n.y + H - 11}
-                className="fill-foreground text-[10px]"
-              >
+              <text x={n.x + 22.5 + i * 26} y={n.y + H - 11} className="fill-foreground text-micro">
                 {p.letter}
               </text>
             </g>
@@ -312,13 +312,13 @@ function Node(props: {
             width={W}
             height={H}
             rx={4}
-            className={cn('fill-brand-wash', ring)}
+            className={cn('fill-card', ring)}
             strokeWidth={picked ? 2.5 : 2}
           />
-          <text x={n.x + 20} y={n.y + 22} className="fill-muted-foreground text-[12px]">
+          <text x={n.x + 20} y={n.y + 22} className="fill-muted-foreground text-meta">
             {lesson ? lessonNode(props.b.lessonState(props.c, lesson)) : 'lesson'}
           </text>
-          <text x={n.x + 20} y={n.y + 40} className="fill-foreground text-[13px]">
+          <text x={n.x + 20} y={n.y + 40} className="fill-foreground text-meta">
             {cut(lesson?.title ?? n.sub, 19)}
           </text>
         </>
@@ -333,7 +333,7 @@ function Node(props: {
             className={cn(picked ? 'fill-brand-wash' : 'fill-muted', ring)}
             strokeWidth={picked ? 2 : 1}
           />
-          <text x={n.x + 12} y={n.y + 22} className="fill-foreground text-[13px]">
+          <text x={n.x + 12} y={n.y + 22} className="fill-foreground text-meta">
             {cut(props.title, 21)}
           </text>
           {/* the subtopic also needs subtopics of other topics, through its cluster's edge */}

@@ -633,6 +633,9 @@ difference it found. No row is marked `to fix` today.
   asks for is an ink pill, as the site's navigation press is: a flame press on
   every working page read louder than the page around it. No verdict reads in
   the flame either: its hue sits between wrong and timed out.
+- **A state that asks for an act reads neutral.** A certification ready for
+  its exam, one that needs a refresh and a lesson ready to read are states
+  rather than progress. In the flame each would read as progress made.
 - **A recall's pass and fail read in the verdict's colours**, since they are the
   same outcomes: a clean recall in passed, a failed one in wrong. A hinted pass
   and a form never recalled stay grey.
@@ -643,8 +646,12 @@ difference it found. No row is marked `to fix` today.
   out and crashed. One `destructive` token cannot separate a wrong answer from a
   timeout, and the drill loop shows that difference on every failing submission.
 - **The type scale is named by the role a page reads a size in**: title,
-  heading, body, meta and code. A page asking for a size by its role cannot
-  choose a size no other page uses.
+  heading, body, meta, code and micro. Micro is a chart's smallest label, such
+  as a ring's share. A page asking for a size by its role cannot choose a size
+  no other page uses.
+- **The phone's colours come from the device's Material palette**, and the
+  colours that palette holds no role for live in one file of the phone's
+  own. A verdict's four outcomes are among them, each apart, as on the web.
 - **Code inside a line of prose takes a step below the code role.** The mono
   family has a larger x-height than the sans beside it, so mono set at the code
   role reads larger than the prose around it. The step is its own token.

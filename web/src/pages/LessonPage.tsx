@@ -100,7 +100,7 @@ export function LessonBody(props: {
       ].map(([title, items]) =>
         (items as typeof next).length ? (
           <section key={title as string} className="space-y-1">
-            <h2 className="text-meta font-medium text-brand-deep">{title as string}</h2>
+            <h2 className="text-meta font-medium text-muted-foreground">{title as string}</h2>
             <p className="flex flex-wrap gap-x-4">
               {(items as typeof next).map((y) =>
                 onLesson ? (

@@ -252,7 +252,7 @@ export function ModulePage() {
                     }
                   >
                     <div className="overflow-x-auto rounded-xl border bg-card">
-                      <table className="w-full text-sm">
+                      <table className="w-full text-meta">
                         <thead>
                           <tr className="text-meta text-muted-foreground">
                             <th className="px-4 py-2 text-left font-normal">{SUBTOPIC_COLUMN}</th>

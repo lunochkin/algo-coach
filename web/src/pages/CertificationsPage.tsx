@@ -122,7 +122,7 @@ function Grid(props: {
       onToggle={props.sections.toggle}
     >
       <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full text-sm">
+        <table className="w-full text-meta">
           <thead>
             <tr className="text-meta text-muted-foreground">
               <th className="px-4 py-2 text-left font-normal">{SCOPE_COLUMN}</th>
@@ -157,7 +157,7 @@ function Grid(props: {
                           onClick={() => props.onPick(id)}
                           className={cn(
                             'inline-flex size-11 items-center justify-center rounded-lg hover:bg-muted',
-                            s.state === 'ready' && 'bg-brand-wash',
+                            s.state === 'ready' && 'bg-accent',
                           )}
                           aria-label={certCell(c.certs?.get(id)?.title ?? id, s)}
                         >
@@ -184,20 +184,20 @@ function Cell({ s }: { s: CertStatus }) {
     case 'earned':
       return <Trophy className="size-5 fill-brand text-brand" />
     case 'ready':
-      return <Trophy className="size-5 text-brand-deep" />
+      return <Trophy className="size-5 text-foreground" />
     case 'locked':
       return <Lock className="size-4 text-muted-foreground" />
     case 'needs_refresh':
-      return <RefreshCw className="size-4 text-brand" />
+      return <RefreshCw className="size-4 text-foreground" />
     case 'insufficient_pool':
-      return <FileX className="size-4 text-brand" />
+      return <FileX className="size-4 text-foreground" />
     case 'not_certified':
       return <span className="text-meta text-muted-foreground">{practiceShare(s)}</span>
     default:
       return (
         <span className="inline-flex flex-col items-center">
           <Ring coverage={s.coverage} retention={s.retention} />
-          <span className="text-[10px] text-muted-foreground tabular-nums">
+          <span className="text-micro text-muted-foreground tabular-nums">
             {coverageShare(s.coverage)}
           </span>
         </span>
@@ -225,7 +225,7 @@ function Ring({ coverage, retention }: { coverage: number; retention: number }) 
     )
   }
   return (
-    <svg width={32} height={32} aria-hidden>
+    <svg viewBox="0 0 32 32" className="size-8" aria-hidden>
       {arc(13, coverage)}
       {arc(8, retention)}
     </svg>

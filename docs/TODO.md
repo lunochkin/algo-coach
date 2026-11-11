@@ -266,7 +266,7 @@ clients.
       phone, and turn the phone's dialogs into bottom sheets
 - [x] Move every word the pages still type inline into `packages/core`,
       the engine pages' titles, intros and empty lines first
-- [ ] Replace the raw sizes, the hex colours and the flame used for status
+- [x] Replace the raw sizes, the hex colours and the flame used for status
       with tokens: the map, the certifications grid, `tones()` and the
       verdict colours
 

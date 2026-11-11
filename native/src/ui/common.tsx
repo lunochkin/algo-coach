@@ -15,6 +15,7 @@ import {
   syncLine,
 } from '@algo-coach/core';
 import type { QueueSession, Session, SyncState } from '@/lib/store';
+import { palette } from '@/ui/tokens';
 
 /** Monospace, horizontally scrollable, never wrapped. `verbatim` keeps leading spaces (diagrams). */
 export function CodeBlock({ code, verbatim = false }: { code: string; verbatim?: boolean }) {
@@ -141,11 +142,9 @@ export function BottomBar({
   );
 }
 
-/** Progress colours readable in light and dark mode: covered (done) and open (unlocked). */
-export const tones = (dark: boolean) =>
-  dark ? { done: '#81c784', open: '#ffb74d' } : { done: '#2e7d32', open: '#a15c00' };
+/** Progress colours in either scheme: covered (done) and open (unlocked), from the phone's tokens. */
+export const tones = (dark: boolean) => ({ done: palette(dark).passed, open: palette(dark).timeout });
 
-/** A read from the engine that failed, with the press that asks again. */
 /** What a screen loads, from the engine or the device's copy: the data, or why it is missing. */
 export interface Reading<T> {
   data: T | null | undefined;

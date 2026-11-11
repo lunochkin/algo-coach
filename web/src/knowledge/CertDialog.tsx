@@ -53,7 +53,7 @@ export function CertDialog({
               <DialogTitle>{v.title}</DialogTitle>
             </DialogHeader>
             <div className="space-y-stack text-meta">
-              <p className="font-medium text-brand-deep">{v.label}</p>
+              <p className="font-medium text-foreground">{v.label}</p>
               {v.note && <p>{v.note}</p>}
               {v.progressNote && <p className="text-muted-foreground">{v.progressNote}</p>}
               <ul className="space-y-1">

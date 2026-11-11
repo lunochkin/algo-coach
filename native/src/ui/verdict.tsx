@@ -15,7 +15,7 @@ import {
   ELAPSED_TIME,
   CASES_IN_ORDER,
 } from '@algo-coach/core';
-import { tones } from '@/ui/common';
+import { palette } from '@/ui/tokens';
 
 type Submitted = components['schemas']['Submitted'];
 type Outcome = components['schemas']['CaseOutcome'];
@@ -23,10 +23,8 @@ type Outcome = components['schemas']['CaseOutcome'];
 // a colour per outcome: a wrong answer and a timeout are different remedies,
 // so they never share one
 function outcomeColor(outcome: Outcome, dark: boolean, error: string): string {
-  if (outcome === 'passed') return tones(dark).done;
   if (outcome === 'wrong') return error;
-  if (outcome === 'timeout') return dark ? '#ffb74d' : '#a15c00';
-  return dark ? '#ce93d8' : '#7b1fa2';
+  return palette(dark)[outcome];
 }
 
 /**

@@ -271,7 +271,7 @@ function LessonStop(props: {
   const { item, read, onRead, onNext } = props
   return (
     <Panel>
-      <p className="text-meta text-brand-deep">{LESSON_STOP_KICKER}</p>
+      <p className="text-meta font-medium text-muted-foreground">{LESSON_STOP_KICKER}</p>
       <p className="text-heading font-medium">{item.lesson.title}</p>
       <p className="text-meta text-muted-foreground">{lessonStopNote(read)}</p>
       <div className="flex gap-stack">
