@@ -1,3 +1,4 @@
+import { LogOut, X } from 'lucide-react'
 import { useState } from 'react'
 
 import {
@@ -75,12 +76,14 @@ export function SignedInDevices({
                         <SignOut>
                           {(start) => (
                             <Button variant="outline" size="sm" onClick={start}>
+                              <LogOut />
                               {SIGN_OUT}
                             </Button>
                           )}
                         </SignOut>
                       ) : (
                         <Button variant="outline" size="sm" onClick={() => void revoke(device)}>
+                          <X />
                           {REVOKE}
                         </Button>
                       )

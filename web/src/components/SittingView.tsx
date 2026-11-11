@@ -321,9 +321,9 @@ export function SittingView({ problemId, drilled, card }: Props) {
           {/* the way back, at any point: leaving a sitting ends nothing, and an
               ended one has nothing left to do here */}
           {ended ? (
-            <Button asChild size="sm">
+            <Button asChild>
               <Link to={back.to}>
-                <ChevronLeft className="size-4" />
+                <ChevronLeft />
                 {back.label}
               </Link>
             </Button>

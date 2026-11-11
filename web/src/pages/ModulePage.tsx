@@ -1,4 +1,4 @@
-import { Crosshair, Pause, Play } from 'lucide-react'
+import { Archive, Crosshair, Pause, Play } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
@@ -129,7 +129,6 @@ export function ModulePage() {
                   <p>{moduleSummary(summary(b, now))}</p>
                 </div>
                 <Button
-                  size="sm"
                   onClick={() =>
                     setStarting({
                       course: module,
@@ -157,6 +156,7 @@ export function ModulePage() {
                       {MODULE_RESUME}
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => setArchiving(true)}>
+                      <Archive />
                       {MODULE_ARCHIVE}
                     </Button>
                   </>
@@ -227,7 +227,7 @@ export function ModulePage() {
                     aside={
                       <>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() =>
                             setStarting({
@@ -238,6 +238,7 @@ export function ModulePage() {
                             })
                           }
                         >
+                          <Play />
                           {MODULE_START}
                         </Button>
                         <Button
@@ -246,6 +247,7 @@ export function ModulePage() {
                           disabled={aimed(t.slug, null)}
                           onClick={() => aim({ course: module, topic: t.slug, sub: null })}
                         >
+                          <Crosshair />
                           {aimed(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
                         </Button>
                       </>

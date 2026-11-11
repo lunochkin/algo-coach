@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router'
 
@@ -193,7 +193,8 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
         <span className="flex-1">{left}</span>
         {/* an ended queue offers it too: the raise starts the queue again, as on the phone */}
         {reading?.raise && (
-          <Button variant="ghost" size="sm" onClick={moreNew}>
+          <Button variant="outline" size="sm" onClick={moreNew}>
+            <Plus />
             {QUEUE_RAISE}
           </Button>
         )}

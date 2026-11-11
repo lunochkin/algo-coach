@@ -121,13 +121,13 @@ export function CertSheet(props: {
           <Button onPress={onClose}>{CLOSE}</Button>
           {v.offersTarget ? (
             v.targeted ? (
-              <Button icon="target" onPress={() => void st.setFocus(null)}>
+              <Button mode="outlined" icon="crosshairs-gps" onPress={() => void st.setFocus(null)}>
                 {CERT_UNTARGET}
               </Button>
             ) : (
               <Button
-                icon="target"
-                mode={v.offersExam ? 'text' : 'contained-tonal'}
+                icon="crosshairs-gps"
+                mode={v.offersExam ? 'outlined' : 'contained'}
                 onPress={() => {
                   const f = certFocus(c, x.id, !!st.focus?.strict);
                   if (f) void st.setFocus(f);
@@ -169,6 +169,7 @@ export function CertSheet(props: {
             </Text>
             <Button
               compact
+              icon="play"
               onPress={() => {
                 onClose();
                 onPractice({ course: c.slug, topic: g.topic, sub: g.sub, level: x.level });

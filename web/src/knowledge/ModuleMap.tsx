@@ -1,4 +1,4 @@
-import { Maximize, Minus, Plus } from 'lucide-react'
+import { BookOpen, Crosshair, Maximize, Minus, Play, Plus } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import {
@@ -383,8 +383,11 @@ function Picked(props: {
         {v.needs && <p className="text-meta">{v.needs}</p>}
         {v.pretest && <p className="text-meta text-muted-foreground">{v.pretest}</p>}
         <div>
-          <Button asChild size="sm">
-            <Link to={lessonPath(c.slug, slug)}>{MAP_READ}</Link>
+          <Button asChild variant="outline" size="sm">
+            <Link to={lessonPath(c.slug, slug)}>
+              <BookOpen />
+              {MAP_READ}
+            </Link>
           </Button>
         </div>
       </Panel>
@@ -405,7 +408,8 @@ function Picked(props: {
         {v.unlocks && <p className="text-muted-foreground">{v.unlocks}</p>}
       </div>
       <div className="flex gap-stack">
-        <Button size="sm" onClick={() => props.onStart(v.scope)}>
+        <Button variant="outline" size="sm" onClick={() => props.onStart(v.scope)}>
+          <Play />
           {MODULE_START}
         </Button>
         <Button
@@ -414,6 +418,7 @@ function Picked(props: {
           disabled={v.aimed}
           onClick={() => props.onAim(n.topic, n.sub)}
         >
+          <Crosshair />
           {v.aimLabel}
         </Button>
       </div>

@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { View } from 'react-native';
-import { Chip, IconButton, Text, useTheme } from 'react-native-paper';
+import { Button, Chip, IconButton, Text, useTheme } from 'react-native-paper';
 
 import {
   type Board,
@@ -104,9 +104,9 @@ export function FocusCard(props: Props) {
           <Stat icon="refresh" value={info.due} label={DUE_NOW} />
           {info.learning ? <Stat icon="timer-sand" value={info.learning} label={LEARNING} /> : null}
           <Stat icon="plus-circle-outline" value={info.newLeft} label={NEW_LEFT} />
-          <Chip compact icon="plus" onPress={props.onMoreNew}>
+          <Button compact mode="outlined" icon="plus" onPress={props.onMoreNew}>
             {RAISE_TODAY}
-          </Chip>
+          </Button>
         </View>
 
         {info.next ? (

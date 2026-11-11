@@ -178,7 +178,7 @@ function Progress({ studied }: { studied: Studied }) {
           <Link to={`/cards/${encodeURIComponent(studied.card.slug)}/recall`}>{RECALL_TITLE}</Link>
         </Button>
         {next && (
-          <Button size="sm" asChild>
+          <Button asChild>
             <Link
               to={`/problems/${encodeURIComponent(next.problem.id)}?card=${encodeURIComponent(studied.card.slug)}`}
             >
@@ -206,7 +206,7 @@ function Start({
     <Panel>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <p className="text-meta text-muted-foreground">{RUN_START_NOTE}</p>
-        <Button className="ml-auto" onClick={onStart} disabled={starting}>
+        <Button onClick={onStart} disabled={starting}>
           {runStartLabel(starting)}
         </Button>
       </div>

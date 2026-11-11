@@ -183,7 +183,13 @@ function QueueQuiz({ s }: { s: QueueSession }) {
           {left}
         </Text>
         {reading.raise ? (
-          <Button compact mode="text" onPress={moreNew} accessibilityLabel={`Allow ${NEW_STEP} more new questions`}>
+          <Button
+            compact
+            mode="outlined"
+            icon="plus"
+            onPress={moreNew}
+            accessibilityLabel={`Allow ${NEW_STEP} more new questions`}
+          >
             {QUEUE_RAISE}
           </Button>
         ) : null}
@@ -203,7 +209,7 @@ function QueueQuiz({ s }: { s: QueueSession }) {
           last={false}
         />
       ) : (
-        <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
+        <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 120 }]}>
           <View style={{ alignItems: 'center', paddingVertical: 24, gap: 4 }}>
             <Text variant="titleMedium">{summary.title}</Text>
             <Text variant="displayMedium">{`${rs.length}`}</Text>
@@ -213,11 +219,15 @@ function QueueQuiz({ s }: { s: QueueSession }) {
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
             {queueLeft(left)}
           </Text>
-          <Button mode="contained" onPress={() => router.back()} style={{ marginTop: 16 }}>
-            {QUEUE_DONE}
-          </Button>
         </ScrollView>
       )}
+      {done || !current ? (
+        <BottomBar bottom={insets.bottom}>
+          <Button mode="contained" contentStyle={{ paddingVertical: 8 }} onPress={() => router.back()}>
+            {QUEUE_DONE}
+          </Button>
+        </BottomBar>
+      ) : null}
     </View>
   );
 }
@@ -322,7 +332,7 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
           }}
         />
       ) : (
-        <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
+        <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 120 }]}>
           <View style={{ alignItems: 'center', paddingVertical: 24 }}>
             <Text variant="displayMedium">{`${score}/${out.n}`}</Text>
             <Text variant="titleMedium">{`${out.percent}%`}</Text>
@@ -332,11 +342,15 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
               <PickRow key={t.topic} title={t.title} stats={[{ label: '', value: `${t.score}/${t.n}` }]} />
             ))}
           </PickPanel>
+        </ScrollView>
+      )}
+      {!q && !reviewed ? (
+        <BottomBar bottom={insets.bottom} row>
           {missed.length ? (
             <Button
               mode="contained-tonal"
               icon="eye-outline"
-              style={{ marginTop: 16 }}
+              contentStyle={{ paddingVertical: 8 }}
               onPress={() => {
                 run.review();
                 changed();
@@ -345,11 +359,16 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
               {examReviewMissed(missed.length)}
             </Button>
           ) : null}
-          <Button mode="contained" onPress={() => router.back()} style={{ marginTop: 8 }}>
+          <Button
+            mode="contained"
+            style={{ flex: 1 }}
+            contentStyle={{ paddingVertical: 8 }}
+            onPress={() => router.back()}
+          >
             {EXAM_DONE}
           </Button>
-        </ScrollView>
-      )}
+        </BottomBar>
+      ) : null}
     </View>
   );
 }

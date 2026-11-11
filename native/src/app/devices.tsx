@@ -93,6 +93,7 @@ export default function DevicesScreen() {
                     ) : (
                       <Button
                         mode="outlined"
+                        icon="close"
                         onPress={() => void revoke(device)}
                         accessibilityLabel={`Revoke ${deviceName(device)}`}
                       >

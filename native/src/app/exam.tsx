@@ -64,6 +64,7 @@ function Header({ title = EXAM_TITLE }: { title?: string }) {
 function CertChoice({ id, catalog }: { id: string; catalog: Catalog }) {
   const st = useStore();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const c = catalog.courses.find((x) => x.certs?.get(id));
   const x = c?.certs?.get(id);
   const b = c ? st.board(c.slug) : null;
@@ -77,20 +78,26 @@ function CertChoice({ id, catalog }: { id: string; catalog: Catalog }) {
               {EXAM_NOTE}
             </Text>
             <Text variant="bodyLarge">{certExamRule(x.rule.size, x.rule.passShare)}</Text>
-            <Button
-              mode="contained"
-              onPress={() => {
-                const plan = certExam(b, c, id);
-                if (plan) startExam(st, plan);
-              }}
-            >
-              {CERT_EXAM_START}
-            </Button>
           </>
         ) : (
           <Text variant="bodyMedium">{CERT_EXAM_MISSING}</Text>
         )}
       </View>
+      {c && x && b ? (
+        <BottomBar bottom={insets.bottom}>
+          <Button
+            mode="contained"
+            icon="play"
+            contentStyle={{ paddingVertical: 8 }}
+            onPress={() => {
+              const plan = certExam(b, c, id);
+              if (plan) startExam(st, plan);
+            }}
+          >
+            {CERT_EXAM_START}
+          </Button>
+        </BottomBar>
+      ) : null}
     </View>
   );
 }

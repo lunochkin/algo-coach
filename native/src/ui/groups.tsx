@@ -73,7 +73,7 @@ export function ModuleGroups({
               >
                 {MODULE_START}
               </Button>
-              <Button compact disabled={aimed(t.slug, null)} onPress={() => aim(t.slug, null)}>
+              <Button compact icon="crosshairs-gps" disabled={aimed(t.slug, null)} onPress={() => aim(t.slug, null)}>
                 {aimed(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
               </Button>
             </>

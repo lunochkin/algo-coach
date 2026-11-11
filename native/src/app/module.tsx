@@ -490,13 +490,14 @@ function NodePanel(props: {
       </Card.Content>
       <Card.Actions>
         <Button
+          mode="outlined"
           icon="crosshairs-gps"
           disabled={v.aimed}
           onPress={() => void st.setFocus(aimFocus(st.focus, { course: c.slug, topic, sub }))}
         >
           {v.aimLabel}
         </Button>
-        <Button mode="contained-tonal" icon="play" onPress={() => onPractice(v.scope)}>
+        <Button mode="outlined" icon="play" onPress={() => onPractice(v.scope)}>
           {MODULE_START}
         </Button>
       </Card.Actions>
@@ -526,7 +527,7 @@ function LessonPanel(props: { c: Course; b: Board; slug: string; bottom: number 
       </Card.Content>
       <Card.Actions>
         <Button
-          mode="contained-tonal"
+          mode="outlined"
           icon="book-open-variant"
           onPress={() => router.push({ pathname: '/lesson', params: { course: c.slug, slug } })}
         >

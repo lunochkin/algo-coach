@@ -279,7 +279,7 @@ ways inside each client. Each item covers both clients.
       archived modules, the card rows, the ladder's rungs, the devices, the
       exam's results, the ready lesson and certification, and the strips
       heading a panel. The phone's Card border and its own panels differ
-- [ ] Give each press one look per role: the focus press, the raise, the
+- [x] Give each press one look per role: the focus press, the raise, the
       primary's size and place, and the phone's acts still outside the
       bottom bar. A press beside an equivalent one carries its icon too
 - [ ] Draw every selectable chip, link and option one way: the filters and

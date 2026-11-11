@@ -33,7 +33,7 @@ import {
 import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
 import { useMe } from '@/ui/account';
-import { styles, SyncLine } from '@/ui/common';
+import { BottomBar, styles, SyncLine } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 import { useSignOut } from '@/ui/signout';
 
@@ -123,8 +123,10 @@ export default function SettingsScreen() {
         <Appbar.Content title={SETTINGS} />
       </Appbar.Header>
       <KeyboardAwareScrollView
-        bottomOffset={24}
-        contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}
+        // a focused field stays above the bar as well as the keyboard
+        bottomOffset={120}
+        // room under the last setting for the bar over it
+        contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 120 }]}
         keyboardShouldPersistTaps="handled"
       >
         <Heading title={ACCOUNT} />
@@ -170,13 +172,9 @@ export default function SettingsScreen() {
         {field('reminderHour', REMINDER_HOUR, true)}
         {!hourOk ? <HelperText type="error">{REMINDER_HOUR_RULE}</HelperText> : null}
         <View style={styles.row}>
-          <Button mode="contained" onPress={save} disabled={!valid || !changed}>
-            {SAVE}
-          </Button>
           <Button mode="outlined" icon="sync" disabled={st.sync.running} onPress={() => st.requestSync(0)}>
             {SYNC_NOW}
           </Button>
-          {saved ? <Text variant="bodySmall">{SAVED}</Text> : null}
         </View>
         <SyncLine sync={st.sync} />
         {waiting ? (
@@ -209,6 +207,12 @@ export default function SettingsScreen() {
           </>
         ) : null}
       </KeyboardAwareScrollView>
+      {/* the screen's act, saving what the fields hold */}
+      <BottomBar bottom={insets.bottom} above={saved ? <Text variant="bodySmall">{SAVED}</Text> : undefined}>
+        <Button mode="contained" contentStyle={{ paddingVertical: 8 }} onPress={save} disabled={!valid || !changed}>
+          {SAVE}
+        </Button>
+      </BottomBar>
       {signOut.dialog}
     </View>
   );

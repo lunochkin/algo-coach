@@ -33,7 +33,7 @@ import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { CodeBlock, Loaded, styles, tones } from '@/ui/common';
+import { BottomBar, CodeBlock, Loaded, styles, tones } from '@/ui/common';
 import { Heading } from '@/ui/rows';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
 import type { Key } from '@/lib/keys';
@@ -266,39 +266,47 @@ function Ran({
   }
 
   return (
-    <ScrollView contentContainerStyle={[styles.page, { paddingBottom: bottom + 24 }]}>
-      <Text variant="titleMedium" style={{ color: view.recalled ? tones(theme.dark).done : theme.colors.error }}>
-        {view.verdict}
-      </Text>
-      {view.failures ? (
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {view.failures}
+    <>
+      <ScrollView contentContainerStyle={[styles.page, { paddingBottom: bottom + 120 }]}>
+        <Text variant="titleMedium" style={{ color: view.recalled ? tones(theme.dark).done : theme.colors.error }}>
+          {view.verdict}
         </Text>
-      ) : null}
-      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-        {view.hints}
-      </Text>
-      <Heading title={RECALL_FORM} />
-      {form === null ? (
-        <>
+        {view.failures ? (
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            {FORM_HIDDEN}
+            {view.failures}
           </Text>
-          <Button mode="outlined" icon="eye-outline" onPress={reveal} style={{ alignSelf: 'flex-start' }}>
-            {REVEAL_FORM}
-          </Button>
-        </>
-      ) : (
-        <CodeBlock code={form} verbatim />
-      )}
-      <View style={[styles.row, { flexWrap: 'wrap', gap: 8 }]}>
-        <Button mode="contained" onPress={() => router.replace({ pathname: '/recall', params: { slug } })}>
-          {RECALL_ANOTHER}
-        </Button>
-        <Button mode="outlined" onPress={() => router.back()}>
+        ) : null}
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          {view.hints}
+        </Text>
+        <Heading title={RECALL_FORM} />
+        {form === null ? (
+          <>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              {FORM_HIDDEN}
+            </Text>
+            <Button mode="outlined" icon="eye-outline" onPress={reveal} style={{ alignSelf: 'flex-start' }}>
+              {REVEAL_FORM}
+            </Button>
+          </>
+        ) : (
+          <CodeBlock code={form} verbatim />
+        )}
+      </ScrollView>
+      {/* the result's act, another recall, with the way back to the card beside it */}
+      <BottomBar bottom={bottom} row>
+        <Button mode="outlined" contentStyle={{ paddingVertical: 8 }} onPress={() => router.back()}>
           {BACK_TO_CARD}
         </Button>
-      </View>
-    </ScrollView>
+        <Button
+          mode="contained"
+          style={{ flex: 1 }}
+          contentStyle={{ paddingVertical: 8 }}
+          onPress={() => router.replace({ pathname: '/recall', params: { slug } })}
+        >
+          {RECALL_ANOTHER}
+        </Button>
+      </BottomBar>
+    </>
   );
 }

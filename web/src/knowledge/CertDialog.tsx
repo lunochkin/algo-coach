@@ -1,4 +1,4 @@
-import { Target, Trophy } from 'lucide-react'
+import { Crosshair, Play, Trophy } from 'lucide-react'
 import { Link } from 'react-router'
 
 import {
@@ -81,6 +81,7 @@ export function CertDialog({
                           onStart({ course: open.c.slug, topic: g.topic, sub: g.sub, level })
                         }}
                       >
+                        <Play />
                         {CERT_START}
                       </Button>
                     </div>
@@ -104,6 +105,7 @@ export function CertDialog({
                     variant="outline"
                     onClick={() => void k.add('focus', newRecord.focus(null))}
                   >
+                    <Crosshair />
                     {CERT_UNTARGET}
                   </Button>
                 ) : (
@@ -115,7 +117,7 @@ export function CertDialog({
                       onClose()
                     }}
                   >
-                    <Target />
+                    <Crosshair />
                     {CERT_TARGET}
                   </Button>
                 ))}
