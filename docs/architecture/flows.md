@@ -492,11 +492,17 @@ The page layout is not designed here, and using the loop decides it.
   The clock counts the time on the problem, and a solver who left the tab is
   away from it. A clock the user paused stays paused when the page returns,
   since the page resumes only the pause hiding it started.
-- **The editor completes nothing.** The editor a sitting is typed into
-  highlights syntax and indents, and it proposes no name from the standard
-  library or from the code already typed. A solver offered `bisect_left` after
-  three characters has recalled no form, and the sitting exists to measure
-  recalling the form. The recall trainer Phase 11 adds holds the same rule.
+- **The editor proposes no name from the standard library.** The editor a
+  sitting is typed into highlights syntax and indents. A solver offered
+  `bisect_left` after three characters has recalled no form, and the sitting
+  exists to measure recalling the form. The recall trainer Phase 11 adds holds
+  the same rule.
+- **The phone's keyboard offers the names the file already declares.** A
+  variable, a parameter or a function the solver wrote is the solver's own
+  word, and offering it back recalls no form. Retyping `nums` and `prefix`
+  is the largest cost left on a phone's keys, where a physical keyboard
+  makes it cheap. A name the file only imports is offered too, since typing
+  the import was the recall.
 - **The editor pairs a bracket or a quote as it is typed**, on the web and
   the phone alike. A closing bracket names nothing, so the pair recalls
   nothing for the solver, and the two editors then behave as one.
@@ -715,9 +721,10 @@ trainer never prints the form until the user asks for it as a hint.
   and that order has to be stated somewhere, as `corpus.md` says of a
   statement. A signature the user infers wrongly fails every case for a form
   recalled correctly.
-- **The file is otherwise blank, and the editor proposes nothing.** The editor
-  the drill loop gives holds the same rule, and a solver offered `bisect_left`
-  after three characters has recalled no form.
+- **The file is otherwise blank, and the editor proposes no library name.**
+  The editor the drill loop gives holds the same rule, and a solver offered
+  `bisect_left` after three characters has recalled no form. The phone's
+  keyboard offers the names the file declares, as in a sitting.
 - **The hints are two, in one order: the notes, then the form.** Each answers
   more of the question than the last, so a record of which hint was taken says
   how far the memory reached. The title was the first hint until the page

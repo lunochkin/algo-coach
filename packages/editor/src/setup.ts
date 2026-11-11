@@ -10,7 +10,7 @@ import { HIGHLIGHTER } from './python';
 /**
  * How Python is edited on every client: highlighting, indentation and paired
  * brackets, and no `autocompletion()`. `flows.md` gives why the editor
- * proposes nothing, and a closing bracket names nothing. A client adds its
+ * proposes no library name, and a closing bracket names none. A client adds its
  * own keymap and its own look.
  */
 export function pythonEditing(): Extension[] {

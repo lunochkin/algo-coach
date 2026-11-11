@@ -221,8 +221,10 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
       screen. A median canonical is 18 lines
 - [x] Pair brackets as they are typed, in the phone's editor and the web's
       alike, so the two editors behave as one
-- [ ] Write into `flows.md` whether the keyboard offers the names the file
+- [x] Write into `flows.md` whether the keyboard offers the names the file
       already declares. The rule today refuses every name the code typed
+- [ ] Offer the names the file declares in the editor's top row, in the
+      strip's place, so the row costs no height. `flows.md` gives the rule
 - [x] Move the sitting's state into core: the clock with its pauses and its
       preference, the code the editor opens on, the verdict fold and the first
       failing case. `SittingView.tsx` holds them for the web
