@@ -200,6 +200,91 @@ the log to fill.
 - [ ] The call carries a per-mode score, and each tool carries the difference
       it made
 
+## Phase 19 — modules written by a pipeline
+
+A knowledge module written, checked and revised by Claude Code sessions, with
+no call to the API. The pipeline lives in this repo, and the content
+repository holds the modules alone. Planned 2026-11-11.
+
+### The design
+
+- [ ] Write into `knowledge.md` where authoring lives: the rules, the level
+      definitions, the skills and the checks in this repo, and the modules
+      with their own rules and skip lists in the content repository
+- [ ] Add "Authoring a module" to `flows.md`: the steps in order, why a
+      reviewer sees neither the key nor the writer's reasoning, why the fixer
+      is another session, and what stops the loop
+- [ ] Decide what a question written by a session records about its writer,
+      and write the choice into `machine.md`. A Claude Code session leaves no
+      call in the call log
+
+### The move
+
+- [ ] Move `RULES.md` and the authoring half of `content/modules/CLAUDE.md`
+      into this repo's docs, with learn's names replaced: `courses/`,
+      `just learn check`, `spec/learn.md`. A writer session follows them
+- [ ] Port `content/modules/check.py` to `algo-coach module check <slug>`,
+      with a test per rule it checks. Its 433 lines carry no test today, and
+      every later step trusts its verdict
+- [ ] Add the `Finding` record and its schema snapshot: the rule, the
+      question, the reviewer, the verdict and the outcome, stored as one
+      JSON-lines file per module in the content repository
+
+### The reviewers
+
+- [ ] Write the solver's skill: a session answers each question without its
+      key, and a reply differing from the key is a finding under rules 7
+      and 9
+- [ ] Write the form reviewer's skill: a session picks from the choices
+      alone, with no prompt, and a keyed pick above chance is a finding under
+      rules 10 and 11
+- [ ] Write the leveller's skill: a session assigns each question a level
+      from the definitions, and a level differing from the bank's is a finding
+      under rule 16
+- [ ] Write the fact reviewer's skill: a session checks each claim against
+      the sources the module names, under rules 4 to 6 and 12
+- [ ] Write the lesson reviewer's skill: a session reads each lesson's prose
+      against its example and its questions, under rules 15 and 22
+- [ ] Have each reviewer read its example defects from a path in the content
+      repository. The skill is public, and a real question is not
+- [ ] Write the loop's skill: the writer, the check, the reviewers and a fixer
+      in turn, reviewing again only a question whose text or whose rule moved
+      since its last review
+
+### The reviewers, scored
+
+- [ ] List the defects the three passes fixed, each with its question and the
+      rule it broke, read from the content repository's three fix commits
+- [ ] Run the reviewers over the Python module as it stood before the first
+      pass, and write each rule's recall against that list into `ROADMAP.md`
+- [ ] Read by hand a sample of the findings the three passes did not make, and
+      write the share that are real defects beside the recall
+
+### System Design
+
+- [ ] Write the module's own `CLAUDE.md`: its scope, its sources, its kinds,
+      and how each kind is proved
+- [ ] Add the rule for a question no interpreter proves to the rules: the
+      question names its source and the date the source was read
+- [ ] Write the topics, the subtopics, the graph and the coverage maps, and
+      read them by hand before any question is written
+- [ ] Write levels 0 and 1 of every subtopic through the loop, and seed the
+      module
+
+### AI Engineering
+
+- [ ] Write into the module's own `CLAUDE.md` where AI Engineering ends and
+      Machine Learning begins. The two share embeddings, attention and
+      evaluation metrics, and rule 14 allows one question per fact
+- [ ] Write levels 0 and 1 of every subtopic through the loop, and seed the
+      module
+
+### Exit
+- [ ] The reviewers carry a recall per rule against the three passes, written
+      in `ROADMAP.md`
+- [ ] The System Design module is seeded with nothing refused and every
+      finding closed
+
 ## Further developments
 
 Blocks of work not ready for a phase, grouped and unordered. A planned phase is
