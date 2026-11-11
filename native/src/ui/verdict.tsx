@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import * as Clipboard from 'expo-clipboard';
 import { ScrollView, View } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 
@@ -18,6 +19,7 @@ import {
   cutValue,
   CUT_VALUE,
   showAllKb,
+  COPY,
 } from '@algo-coach/core';
 import { palette } from '@/ui/tokens';
 
@@ -110,7 +112,8 @@ export function SubmissionVerdict({ submitted }: { submitted: Submitted }) {
   );
 }
 
-// a long value reads cut until the reader asks for it whole, as on the web
+// a long value reads cut until the reader asks for it whole, and copies whole
+// either way, as on the web
 function Value({ label, text }: { label: string; text: string }) {
   const theme = useTheme();
   const [whole, setWhole] = useState(false);
@@ -122,9 +125,14 @@ function Value({ label, text }: { label: string; text: string }) {
           {label}
         </Text>
         {shown.long ? (
-          <Button compact onPress={() => setWhole(!whole)}>
-            {whole ? CUT_VALUE : showAllKb(text.length)}
-          </Button>
+          <>
+            <Button compact onPress={() => setWhole(!whole)}>
+              {whole ? CUT_VALUE : showAllKb(text.length)}
+            </Button>
+            <Button compact onPress={() => void Clipboard.setStringAsync(text)}>
+              {COPY}
+            </Button>
+          </>
         ) : null}
       </View>
       <ScrollView

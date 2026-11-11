@@ -370,8 +370,8 @@ removes the difference the pass found.
       read a refused start as started, and a refused revoke as revoked
 - [x] Move a card's sections, a page's four readings, a device's title and
       the phone's own settings checks into core
-- [ ] Offer Copy on a long failing value on the phone, once a clipboard
-      module is in the app's build
+- [x] Offer Copy on a long failing value on the phone, with `expo-clipboard`
+      in the app's build, as the web offers it
 
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
