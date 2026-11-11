@@ -1,16 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useReducer, useState } from 'react'
 
 import {
-  answerResult,
   block,
-  canSubmit,
-  cardLabel,
   choiceOrder,
   detailSections,
-  flipped,
-  gradeResult,
   LETTERS,
-  togglePick,
   taughtBy,
   verdictView,
   yourAnswer,
@@ -19,20 +13,22 @@ import {
   type Result,
   ASK_ANSWER,
   ASK_GUESSING,
-  ASK_NEXT,
-  ASK_REVEAL,
   ASK_SAID_ELSE,
   ASK_SAID_TRAP,
   ASK_TICK_RECALLED,
   ASK_TRAPS,
   askChoose,
-  askSubmit,
   detailAccepted,
   DETAIL_NONE,
   DETAIL_YOU,
   DETAIL_YOUR_ANSWER,
   DETAIL_YOURS,
   detailsToggle,
+  askAct,
+  askReducer,
+  askResult,
+  initialAsk,
+  keyPointLabel,
 } from '@algo-coach/core'
 
 import { Link } from 'react-router'
@@ -63,28 +59,24 @@ type Props = {
 export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Props) {
   // shuffled on each display, so a position carries no answer
   const order = useMemo(() => choiceOrder(q.choices.length), [q])
-  const [picked, setPicked] = useState<number[]>([])
-  const [text, setText] = useState('')
-  const [guessing, setGuessing] = useState(false)
-  const [revealed, setRevealed] = useState(false)
-  const [recalled, setRecalled] = useState<Set<number>>(new Set())
-  const [fell, setFell] = useState<Set<number>>(new Set())
-  const [wrong, setWrong] = useState(false)
-  const [result, setResult] = useState<Result | null>(null)
+  // the answer's state and its one press, as core keeps them for every platform
+  const [state, dispatch] = useReducer(askReducer, undefined, initialAsk)
+  const { picked, text, guessing, revealed, recalled, fell, wrong, result } = state
   const [details, setDetails] = useState(false)
   const multi = q.answer.length > 1
-  const reply = { text, picked, guessing }
-  const ready = canSubmit(q, reply)
+  const press = askAct(q, state, exam ?? null)
 
-  function answer(r: Result) {
+  // an exam moves on at once; elsewhere the verdict reads before Next
+  function act() {
+    if (press.act === 'next') return onNext()
+    if (press.act === 'reveal') return dispatch({ type: 'reveal' })
+    if (!press.enabled) return
+    const r = askResult(q, order, state)
     onAnswered(r)
     if (exam) onNext()
-    else setResult(r)
+    else dispatch({ type: 'answered', result: r })
   }
-
-  const submit = () => answer(answerResult(q, order, reply))
-  const grade = () => answer(gradeResult(q, order, recalled, fell, wrong))
-  const toggle = (pos: number) => setPicked(togglePick(picked, pos, multi))
+  const toggle = (pos: number) => dispatch({ type: 'pick', pos, multi })
 
   // a digit picks an option, and Enter submits or moves on: a reader at a
   // keyboard answers faster than by pointer
@@ -103,11 +95,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Pro
         toggle(pos)
       } else if (event.key === 'Enter') {
         event.preventDefault()
-        if (result) onNext()
-        else if (q.format === 'card') {
-          if (revealed) grade()
-          else setRevealed(true)
-        } else if (ready) submit()
+        act()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -151,7 +139,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Pro
         <form
           onSubmit={(event) => {
             event.preventDefault()
-            if (ready && !result) submit()
+            if (press.act === 'submit') act()
           }}
         >
           <Input
@@ -162,7 +150,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Pro
             className="font-mono"
             value={text}
             disabled={!!result}
-            onChange={(event) => setText(event.target.value)}
+            onChange={(event) => dispatch({ type: 'text', text: event.target.value })}
           />
         </form>
       )}
@@ -172,7 +160,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Pro
           <Checkbox
             id="guessing"
             checked={guessing}
-            onCheckedChange={(on) => setGuessing(on === true)}
+            onCheckedChange={(on) => dispatch({ type: 'guess', on: on === true })}
           />
           <Label htmlFor="guessing">{ASK_GUESSING}</Label>
         </div>
@@ -184,10 +172,10 @@ export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Pro
           {q.key.map((point, i) => (
             <Tick
               key={i}
-              label={`${i + 1}. ${block(point)}`}
+              label={keyPointLabel(i, block(point))}
               on={recalled.has(i)}
               disabled={!!result}
-              onFlip={() => setRecalled(flipped(recalled, i))}
+              onFlip={() => dispatch({ type: 'recall', i })}
             />
           ))}
           {q.traps.length > 0 && <p className="pt-2 font-medium">{ASK_TRAPS}</p>}
@@ -198,14 +186,14 @@ export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Pro
               hint={ASK_SAID_TRAP}
               on={fell.has(i)}
               disabled={!!result}
-              onFlip={() => setFell(flipped(fell, i))}
+              onFlip={() => dispatch({ type: 'fall', i })}
             />
           ))}
           <Tick
             label={ASK_SAID_ELSE}
             on={wrong}
             disabled={!!result}
-            onFlip={() => setWrong(!wrong)}
+            onFlip={() => dispatch({ type: 'wrong' })}
           />
         </div>
       )}
@@ -226,19 +214,9 @@ export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Pro
       )}
 
       <div>
-        {result ? (
-          <Button onClick={onNext}>{ASK_NEXT}</Button>
-        ) : q.format === 'card' ? (
-          revealed ? (
-            <Button onClick={grade}>{cardLabel(q.key.length, recalled, fell, wrong)}</Button>
-          ) : (
-            <Button onClick={() => setRevealed(true)}>{ASK_REVEAL}</Button>
-          )
-        ) : (
-          <Button disabled={!ready} onClick={submit}>
-            {askSubmit(!!exam, !!exam?.last)}
-          </Button>
-        )}
+        <Button disabled={!press.enabled} onClick={act}>
+          {press.label}
+        </Button>
       </div>
     </div>
   )

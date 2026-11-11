@@ -1,4 +1,5 @@
 import type { components } from './api/schema';
+import { described, type EngineClient } from './engine';
 import { duration } from './sitting';
 
 // the claim and the self-label asked after a sitting, for every platform:
@@ -46,3 +47,34 @@ export const LABEL_QUESTION = 'Why did it go that way?';
 export const LABEL_OPTIONAL = 'Answering is optional, and a skipped label leaves the attempt unlabelled.';
 export const claimRefused = (why: string) => `The answer was refused: ${why}`;
 export const saveLabel = (sending: boolean) => (sending ? 'Saving…' : 'Save');
+
+/** A decline clears the ticks rather than hiding them, so undoing it starts from nothing. */
+export function claimDeclined(declined: boolean, chosen: string[]): { declined: boolean; chosen: string[] } {
+  return declined ? { declined: false, chosen } : { declined: true, chosen: [] };
+}
+
+/**
+ * Sends one attempt's claim, then its label where a mode was picked: naming
+ * the techniques is what the label asks about. Returns the refusal, or null.
+ */
+export async function sendClaim(
+  client: EngineClient,
+  attemptId: string,
+  form: { chosen: string[]; declined: boolean; confidence: Confidence; mode: FailureMode | null },
+): Promise<string | null> {
+  try {
+    const params = { params: { path: { attempt_id: attemptId } } };
+    const claimed = await client.POST('/api/attempts/{attempt_id}/claims', {
+      ...params,
+      body: { techniques: form.chosen, declined: form.declined, confidence: form.confidence },
+    });
+    if (!claimed.data) return described(claimed.error);
+    if (form.mode) {
+      const labelled = await client.POST('/api/attempts/{attempt_id}/labels', { ...params, body: { mode: form.mode } });
+      if (!labelled.data) return described(labelled.error);
+    }
+    return null;
+  } catch (reason) {
+    return String(reason);
+  }
+}

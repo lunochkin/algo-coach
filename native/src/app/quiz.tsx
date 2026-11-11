@@ -1,5 +1,5 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useReducer, useState } from 'react';
 import { BackHandler, Pressable, ScrollView, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
@@ -20,7 +20,6 @@ import {
   type AnswerRow,
   block,
   byTopic,
-  cardLabel,
   choiceOrder,
   DEFAULT_RULES,
   detailSections,
@@ -39,13 +38,11 @@ import {
   ASK_ANSWER,
   ASK_GUESSING,
   ASK_NEXT,
-  ASK_REVEAL,
   ASK_SAID_ELSE,
   ASK_SAID_TRAP,
   ASK_TICK_RECALLED,
   ASK_TRAPS,
   askChoose,
-  askSubmit,
   detailAccepted,
   DETAIL_NONE,
   DETAIL_YOU,
@@ -63,20 +60,19 @@ import {
   QUEUE_RAISE,
   QUEUE_STOP,
   queueLeft,
-  answerResult,
-  canSubmit,
   ExamRun,
   type ExamRecords,
-  flipped,
-  gradeResult,
   QueueRun,
   type QueueSource,
-  togglePick,
   NEW_STEP,
   NO_SESSION,
-  FINISH,
   raiseLabel,
   gradeLabel,
+  askAct,
+  askReducer,
+  askResult,
+  initialAsk,
+  keyPointLabel,
 } from '@algo-coach/core';
 import { EMPTY, type Edit, type Key, pressed } from '@/lib/keys';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
@@ -455,30 +451,28 @@ function Ask(props: {
   const { q, tag, early, exam, bottom, last, onAnswered, onNext } = props;
   // Shuffle choices so position carries no information across sessions.
   const order = useMemo(() => choiceOrder(q.choices.length), [q]);
-  const [picked, setPicked] = useState<number[]>([]);
   const [edit, setEdit] = useState<Edit>(EMPTY);
   const onKey = useCallback((key: Key) => setEdit((was) => pressed(was, key)), []);
   const text = edit.text;
-  const [guessing, setGuessing] = useState(false);
-  const [revealed, setRevealed] = useState(false);
-  const [recalled, setRecalled] = useState<Set<number>>(new Set());
-  const [fell, setFell] = useState<Set<number>>(new Set());
-  const [wrong, setWrong] = useState(false);
-  const [result, setResult] = useState<Result | null>(null);
+  // the answer's state and its one press, as core keeps them for every
+  // platform; the reply's text lives in the app's keyboard state
+  const [asked, dispatch] = useReducer(askReducer, undefined, initialAsk);
+  const state = { ...asked, text };
+  const { picked, guessing, revealed, recalled, fell, wrong, result } = state;
   const [details, setDetails] = useState(false);
   const multi = q.answer.length > 1;
-  const reply = { text, picked, guessing };
-  const ready = canSubmit(q, reply);
-
-  const answer = (r: Result) => {
+  const press = askAct(q, state, exam ? { last } : null);
+  const act = () => {
+    if (press.act === 'next') return onNext();
+    if (press.act === 'reveal') return dispatch({ type: 'reveal' });
+    if (!press.enabled) return;
+    const r = askResult(q, order, state);
     onAnswered(r);
     // Exam: no feedback until the end.
     if (exam) onNext();
-    else setResult(r);
+    else dispatch({ type: 'answered', result: r });
   };
-  const submit = () => answer(answerResult(q, order, reply));
-  const gradeCardNow = () => answer(gradeResult(q, order, recalled, fell, wrong));
-  const toggle = (pos: number) => setPicked(togglePick(picked, pos, multi));
+  const toggle = (pos: number) => dispatch({ type: 'pick', pos, multi });
   const padOpen = q.format === 'short' && !result;
 
   return (
@@ -508,13 +502,13 @@ function Ask(props: {
             autoCorrect={false}
             spellCheck={false}
             style={{ fontFamily: 'monospace' }}
-            onSubmitEditing={() => ready && !result && submit()}
+            onSubmitEditing={() => press.act === 'submit' && act()}
           />
         ) : null}
         {q.format !== 'card' && !result ? (
           <View style={styles.row}>
-            <Switch value={guessing} onValueChange={setGuessing} />
-            <Text variant="bodyMedium" onPress={() => setGuessing(!guessing)}>
+            <Switch value={guessing} onValueChange={(on) => dispatch({ type: 'guess', on })} />
+            <Text variant="bodyMedium" onPress={() => dispatch({ type: 'guess', on: !guessing })}>
               {ASK_GUESSING}
             </Text>
           </View>
@@ -525,10 +519,10 @@ function Ask(props: {
             {q.key.map((point, i) => (
               <Tick
                 key={i}
-                label={`${i + 1}. ${block(point)}`}
+                label={keyPointLabel(i, block(point))}
                 on={recalled.has(i)}
                 disabled={!!result}
-                onPress={() => setRecalled(flipped(recalled, i))}
+                onPress={() => dispatch({ type: 'recall', i })}
               />
             ))}
             {q.traps.length ? (
@@ -541,12 +535,12 @@ function Ask(props: {
                     hint={ASK_SAID_TRAP}
                     on={fell.has(i)}
                     disabled={!!result}
-                    onPress={() => setFell(flipped(fell, i))}
+                    onPress={() => dispatch({ type: 'fall', i })}
                   />
                 ))}
               </>
             ) : null}
-            <Tick label={ASK_SAID_ELSE} on={wrong} disabled={!!result} onPress={() => setWrong(!wrong)} />
+            <Tick label={ASK_SAID_ELSE} on={wrong} disabled={!!result} onPress={() => dispatch({ type: 'wrong' })} />
           </View>
         ) : null}
         {result ? <Verdict r={result} /> : null}
@@ -554,30 +548,15 @@ function Ask(props: {
       </ScrollView>
 
       <BottomBar bottom={bottom} row above={padOpen ? <KeyPad onKey={onKey} /> : undefined}>
-        {result ? (
-          <Button mode="contained" style={{ flex: 1 }} onPress={onNext}>
-            {last ? FINISH : ASK_NEXT}
-          </Button>
-        ) : q.format === 'card' ? (
-          revealed ? (
-            <Button
-              mode="contained"
-              style={{ flex: 1 }}
-              accessibilityLabel={gradeLabel(cardLabel(q.key.length, recalled, fell, wrong))}
-              onPress={gradeCardNow}
-            >
-              {cardLabel(q.key.length, recalled, fell, wrong)}
-            </Button>
-          ) : (
-            <Button mode="contained" style={{ flex: 1 }} onPress={() => setRevealed(true)}>
-              {ASK_REVEAL}
-            </Button>
-          )
-        ) : (
-          <Button mode="contained" style={{ flex: 1 }} disabled={!ready} onPress={submit}>
-            {askSubmit(exam, last)}
-          </Button>
-        )}
+        <Button
+          mode="contained"
+          style={{ flex: 1 }}
+          disabled={!press.enabled}
+          accessibilityLabel={press.act === 'grade' ? gradeLabel(press.label) : undefined}
+          onPress={act}
+        >
+          {press.label}
+        </Button>
       </BottomBar>
     </KeyboardAvoidingView>
   );

@@ -9,17 +9,18 @@ import {
   CLAIM_NOTE,
   CLAIM_QUESTION,
   CLAIM_TITLE,
+  claimDeclined,
   claimDefault,
   claimReady,
   claimRefused,
   claimToggled,
   type Confidence,
   CONFIDENCES,
-  described,
   LABEL_OPTIONAL,
   LABEL_QUESTION,
   MODE_GLOSS,
   saveLabel,
+  sendClaim,
   type components,
   OF,
 } from '@algo-coach/core';
@@ -105,32 +106,15 @@ function ClaimForm({
   const [refused, setRefused] = useState<string | null>(null);
   const id = asked.attempt.id;
 
-  // the claim first, since naming the techniques is what the label then asks
-  // about. A mode nobody picked sends no second request
+  // the claim first, then the label where a mode was picked, as core sends them
   async function send() {
     if (!confidence) return;
     setSending(true);
     setRefused(null);
-    try {
-      const client = engine(origin, await getToken());
-      const claimed = await client.POST('/api/attempts/{attempt_id}/claims', {
-        params: { path: { attempt_id: id } },
-        body: { techniques: chosen, declined, confidence },
-      });
-      if (!claimed.data) return setRefused(described(claimed.error));
-      if (mode) {
-        const labelled = await client.POST('/api/attempts/{attempt_id}/labels', {
-          params: { path: { attempt_id: id } },
-          body: { mode },
-        });
-        if (!labelled.data) return setRefused(described(labelled.error));
-      }
-      onClaimed();
-    } catch (reason) {
-      setRefused(String(reason));
-    } finally {
-      setSending(false);
-    }
+    const refusal = await sendClaim(engine(origin, await getToken()), id, { chosen, declined, confidence, mode });
+    setSending(false);
+    if (refusal) setRefused(refusal);
+    else onClaimed();
   }
 
   return (
@@ -159,10 +143,9 @@ function ClaimForm({
           labelStyle={{ textAlign: 'left' }}
           status={declined ? 'checked' : 'unchecked'}
           onPress={() => {
-            // a decline clears the ticks rather than hiding them, so undoing
-            // it starts from nothing
-            setDeclined(!declined);
-            if (!declined) setChosen([]);
+            const next = claimDeclined(declined, chosen);
+            setDeclined(next.declined);
+            setChosen(next.chosen);
           }}
         />
       </View>

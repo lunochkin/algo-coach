@@ -14,11 +14,13 @@ import {
   MODE_GLOSS,
   saveLabel,
   OF,
+  claimDeclined,
+  sendClaim,
 } from '@algo-coach/core'
 import { useEffect, useState } from 'react'
 
 import { api, type Attempt, type FailureMode } from '@/api/client'
-import { described, useLoaded } from '@/api/useLoaded'
+import { useLoaded } from '@/api/useLoaded'
 import { ErrorLine } from '@/components/ErrorLine'
 import { Loaded } from '@/components/Loaded'
 import { Button } from '@/components/ui/button'
@@ -104,25 +106,10 @@ function ClaimForm({ attempt, modes, position, techniques, drilled, onClaimed }:
     if (!confidence) return
     setSending(true)
     setRefused(null)
-    try {
-      const claimed = await api.POST('/api/attempts/{attempt_id}/claims', {
-        params: { path: { attempt_id: attempt.id } },
-        body: { techniques: chosen, declined, confidence },
-      })
-      if (!claimed.data) return setRefused(described(claimed.error))
-      if (mode) {
-        const labelled = await api.POST('/api/attempts/{attempt_id}/labels', {
-          params: { path: { attempt_id: attempt.id } },
-          body: { mode },
-        })
-        if (!labelled.data) return setRefused(described(labelled.error))
-      }
-      onClaimed()
-    } catch (reason) {
-      setRefused(String(reason))
-    } finally {
-      setSending(false)
-    }
+    const refusal = await sendClaim(api, attempt.id, { chosen, declined, confidence, mode })
+    setSending(false)
+    if (refusal) setRefused(refusal)
+    else onClaimed()
   }
 
   return (
@@ -146,11 +133,10 @@ function ClaimForm({ attempt, modes, position, techniques, drilled, onClaimed }:
           <Checkbox
             id="claim-declined"
             checked={declined}
-            onCheckedChange={(checked) => {
-              // a decline clears the ticks rather than hiding them, so undoing
-              // it starts from nothing instead of bringing back an earlier choice
-              setDeclined(checked === true)
-              if (checked === true) setChosen([])
+            onCheckedChange={() => {
+              const next = claimDeclined(declined, chosen)
+              setDeclined(next.declined)
+              setChosen(next.chosen)
             }}
           />
           <Label htmlFor="claim-declined">{CLAIM_DECLINE}</Label>

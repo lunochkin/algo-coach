@@ -313,7 +313,7 @@ and removes the drift the audit found.
 - [x] Move the sitting's controller into core, with the clock's press: the
       start, pause, resume and end, the touch, and the submission. The web
       keeps touching an ended sitting, and the two pick the clock's press apart
-- [ ] Move a question's answer state and the press it asks for into core,
+- [x] Move a question's answer state and the press it asks for into core,
       and the claim's send with it. Each client keeps eight fields of state
       and decides next, reveal, grade or submit on its own
 - [ ] Move the recall trainer's requests and its template menu into core,

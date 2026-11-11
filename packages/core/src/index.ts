@@ -27,6 +27,7 @@ export * from './lessons';
 export * from './certview';
 export * from './exam';
 export * from './answer';
+export * from './ask';
 export * from './run';
 export * from './syncstate';
 export * from './account';
