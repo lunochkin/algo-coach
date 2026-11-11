@@ -1,10 +1,8 @@
 import {
   CLAIM_NOTE,
   CLAIM_TITLE,
-  CLOCK_PAUSE,
   CLOCK_PAUSED,
   CLOCK_RUNNING,
-  CLOCK_START,
   clockState,
   editorOpening,
   END_KEEP,
@@ -19,13 +17,20 @@ import {
   visibilityMove,
   OF,
   SUBMIT_HINT,
+  type ClockMove,
+  type Moved,
+  moveSitting,
+  sittingControls,
+  submitToSitting,
+  TOUCH_MS,
+  touchSitting,
 } from '@algo-coach/core'
 import { ChevronLeft } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 
-import { api, type Sitting, type Submitted } from '@/api/client'
-import { described, useLoaded } from '@/api/useLoaded'
+import { api, type Submitted } from '@/api/client'
+import { useLoaded } from '@/api/useLoaded'
 import { ErrorLine } from '@/components/ErrorLine'
 import { BackLink } from '@/components/BackLink'
 import { ClaimPrompt } from '@/components/ClaimPrompt'
@@ -58,8 +63,6 @@ import { autoStarts, pressed } from '@/lib/clock'
 import { DEVICE } from '@/knowledge/copy'
 import { draftOf, keepDraft } from '@/lib/draft'
 
-type Moved = { sitting: Sitting; elapsedSec: number | null; at: number }
-
 type Props = {
   problemId: string
   // the technique the claim answers for: the card's own, or the pick's
@@ -70,6 +73,9 @@ type Props = {
 // the problem's page once its statement is served. No sitting exists until the
 // first clock press or submission mints one, and `?sitting=` then names it, so
 // a reload reads that sitting, ended or not: `pages.md`
+// the platform's monotonic clock, which a reading's arrival is stamped with
+const now = () => performance.now()
+
 export function SittingView({ problemId, drilled, card }: Props) {
   const [search, setSearch] = useSearchParams()
   // read once: the page names the sitting it minted without reading it again
@@ -132,6 +138,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
   const sittingId = current?.id ?? null
   const clockNow = clockState(current)
   const { paused, ended, unstarted } = clockNow
+  const controls = sittingControls(clockNow, sittingId)
 
   // the address names the sitting once one exists, replacing itself so the
   // way back leaves the problem rather than returning to it
@@ -150,70 +157,27 @@ export function SittingView({ problemId, drilled, card }: Props) {
   // the engine ends a sitting nothing has touched, and a solver thinking is
   // practising, so a visible page reads the sitting again and that read
   // touches it. A hidden page touches nothing, and the bound then ends the
-  // sitting where the page was left
+  // sitting where the page was left. An ended sitting is touched no more
   useEffect(() => {
-    if (sittingId === null) return
-    const tick = setInterval(
-      () => {
-        if (document.hidden) return
-        void api
-          .GET('/api/sittings/{sitting_id}', { params: { path: { sitting_id: sittingId } } })
-          .then(({ data }) => {
-            if (data) {
-              setMoved({
-                sitting: data.sitting,
-                elapsedSec: data.elapsed_sec,
-                at: performance.now(),
-              })
-            }
-          })
-      },
-      // well under the 45 minutes an untouched sitting is ended at
-      10 * 60 * 1000,
-    )
+    if (sittingId === null || !controls.touch) return
+    const tick = setInterval(() => {
+      if (document.hidden) return
+      void touchSitting(api, sittingId, now).then((read) => read.ok && setMoved(read.value))
+    }, TOUCH_MS)
     return () => clearInterval(tick)
-  }, [sittingId])
-
-  // the first clock press or submission mints the sitting it runs in
-  async function begun(quiet: boolean): Promise<string | null> {
-    if (sittingId !== null) return sittingId
-    const { data, error } = await api.POST('/api/problems/{problem_id}/sittings', {
-      params: { path: { problem_id: problemId } },
-      body: { device: DEVICE },
-    })
-    if (!data) {
-      if (!quiet) setRefused(described(error))
-      return null
-    }
-    setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() })
-    return data.sitting.id
-  }
+  }, [sittingId, controls.touch])
 
   // a move the page took by itself says nothing to the user, so it reports no
-  // refusal: the next reading of the sitting carries whatever happened
-  async function move(to: 'start' | 'pause' | 'resume' | 'end', { quiet = false } = {}) {
+  // refusal: the next reading of the sitting carries whatever happened. The
+  // first clock press mints the sitting it runs in
+  async function move(to: ClockMove, { quiet = false } = {}) {
     setMoving(true)
     if (!quiet) setRefused(null)
-    try {
-      const id = to === 'start' ? await begun(quiet) : sittingId
-      if (id === null) return
-      const params = { params: { path: { sitting_id: id } } }
-      const { data, error } =
-        to === 'start'
-          ? await api.POST('/api/sittings/{sitting_id}/start', params)
-          : to === 'pause'
-            ? await api.POST('/api/sittings/{sitting_id}/pause', params)
-            : to === 'resume'
-              ? await api.POST('/api/sittings/{sitting_id}/resume', params)
-              : await api.POST('/api/sittings/{sitting_id}/end', params)
-      if (data)
-        setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() })
-      else if (!quiet) setRefused(described(error))
-    } catch (reason) {
-      if (!quiet) setRefused(String(reason))
-    } finally {
-      setMoving(false)
-    }
+    const out = await moveSitting(api, problemId, DEVICE, sittingId, to, now)
+    if (out.minted) setMoved(out.minted)
+    if (out.ok) setMoved(out.value)
+    else if (!quiet) setRefused(out.refused)
+    setMoving(false)
   }
 
   // the user's own press on the clock, which alone sets the clock preference
@@ -289,27 +253,21 @@ export function SittingView({ problemId, drilled, card }: Props) {
     if (running) return
     setRunning(true)
     setRefused(null)
-    try {
-      const id = await begun(false)
-      if (id === null) return
-      const { data, error } = await api.POST('/api/sittings/{sitting_id}/submissions', {
-        params: { path: { sitting_id: id } },
-        body: { code: code.current ?? initial, restored: restored.current ?? keptRestored },
-      })
-      if (data) {
-        setSubmitted(data)
-        // a solve ends the sitting, and the ended sitting asks for the claims
-        setMoved({
-          sitting: data.sitting,
-          elapsedSec: data.attempt.time_to_solve_sec ?? null,
-          at: performance.now(),
-        })
-      } else setRefused(described(error))
-    } catch (reason) {
-      setRefused(String(reason))
-    } finally {
-      setRunning(false)
-    }
+    const sent = await submitToSitting(
+      api,
+      problemId,
+      DEVICE,
+      sittingId,
+      { code: code.current ?? initial, restored: restored.current ?? keptRestored },
+      now,
+    )
+    if (sent.minted) setMoved(sent.minted)
+    if (sent.ok) {
+      setSubmitted(sent.value.submitted)
+      // a solve ends the sitting, and the ended sitting asks for the claims
+      setMoved(sent.value.moved)
+    } else setRefused(sent.refused)
+    setRunning(false)
   }
 
   return (
@@ -338,7 +296,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
           <div className="flex items-center gap-3 sm:ml-auto">
             {/* a dot while the clock runs: the label on the press alone left
                 running and stopped looking alike */}
-            {!paused && !ended && !unstarted && (
+            {clockNow.running && (
               <span
                 role="img"
                 aria-label={CLOCK_RUNNING}
@@ -348,7 +306,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
             <ElapsedClock
               elapsedSec={clock.elapsedSec}
               receivedAt={clock.at}
-              running={!paused && !ended && !unstarted}
+              running={clockNow.running}
             />
             {paused && !ended && (
               <span className="text-meta text-muted-foreground">{CLOCK_PAUSED}</span>
@@ -359,31 +317,21 @@ export function SittingView({ problemId, drilled, card }: Props) {
               </>
             ) : (
               <>
-                {/* one press for the clock: it starts a clock that never ran,
-                    resumes a paused one, and pauses a running one */}
-                {unstarted || paused ? (
-                  <Button
-                    // a control rather than the page's act
-                    variant="outline"
-                    size="sm"
-                    onClick={() => press(unstarted ? 'start' : 'resume')}
-                    disabled={moving}
-                  >
-                    {CLOCK_START}
-                  </Button>
-                ) : (
+                {/* one press for the clock, as core picks it: a control
+                    rather than the page's act */}
+                {controls.clock && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => press('pause')}
+                    onClick={() => controls.clock && press(controls.clock.to)}
                     disabled={moving}
                   >
-                    {CLOCK_PAUSE}
+                    {controls.clock.label}
                   </Button>
                 )}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm" disabled={moving}>
+                    <Button variant="outline" size="sm" disabled={moving || !controls.end}>
                       {SITTING_END}
                     </Button>
                   </AlertDialogTrigger>

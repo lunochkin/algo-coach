@@ -310,7 +310,7 @@ own: the requests, the form state and the pick of the next press. Each item
 moves one piece into `packages/core` with its tests, puts both clients on it,
 and removes the drift the audit found.
 
-- [ ] Move the sitting's controller into core, with the clock's press: the
+- [x] Move the sitting's controller into core, with the clock's press: the
       start, pause, resume and end, the touch, and the submission. The web
       keeps touching an ended sitting, and the two pick the clock's press apart
 - [ ] Move a question's answer state and the press it asks for into core,

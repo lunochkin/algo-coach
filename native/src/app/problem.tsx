@@ -5,12 +5,9 @@ import { Appbar, Button, IconButton, SegmentedButtons, Text, TouchableRipple, us
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  CLOCK_PAUSE,
   CLOCK_PAUSED,
   CLOCK_RUNNING,
-  CLOCK_START,
   clockState,
-  described,
   editorOpening,
   END_KEEP,
   END_NOTE,
@@ -33,6 +30,12 @@ import {
   SITTING_CODE,
   keyboardToggle,
   PROBLEM_RETIRED,
+  type ClockMove,
+  moveSitting,
+  sittingControls,
+  submitToSitting,
+  TOUCH_MS,
+  touchSitting,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -55,17 +58,15 @@ type Carry = components['schemas']['Carry'];
 type Submitted = components['schemas']['Submitted'];
 type Moved = { sitting: Sitting | null; elapsedSec: number | null; at: number };
 
-// the engine ends a sitting nothing has touched, and a solver thinking is
-// practising, so an open screen reads the sitting again, well under the
-// 45 minutes `log.md` ends an untouched one at
-const TOUCH_MS = 10 * 60 * 1000;
-
 /**
  * A problem's record and its statement, and the sitting on it: the statement
  * and the editor as two tabs, under one bar holding the clock. Reading the
  * statement mints nothing, and the first clock press or submission mints the
  * sitting, as `log.md` gives.
  */
+// the platform's monotonic clock, which a reading's arrival is stamped with
+const now = () => performance.now();
+
 export default function ProblemScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -229,6 +230,7 @@ function SittingOn({
   const current = moved?.sitting ?? statement?.sitting ?? null;
   const sittingId = current?.id ?? null;
   const clock = clockState(current);
+  const controls = sittingControls(clock, sittingId);
 
   // the preference starts a clock the user has not, once per screen
   const autoStarted = useRef(false);
@@ -256,61 +258,31 @@ function SittingOn({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clock.unstarted, clock.paused, clock.ended, sittingId]);
 
+  // a reading touches the sitting, so a solver thinking keeps it running; an
+  // app in the background touches nothing, and an ended sitting is touched no more
   useEffect(() => {
-    if (sittingId === null || clock.ended) return;
+    if (sittingId === null || !controls.touch) return;
     const tick = setInterval(() => {
       if (AppState.currentState !== 'active') return;
       void (async () => {
-        const { data } = await engine(origin, await getToken()).GET('/api/sittings/{sitting_id}', {
-          params: { path: { sitting_id: sittingId } },
-        });
-        if (data) setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() });
+        const read = await touchSitting(engine(origin, await getToken()), sittingId, now);
+        if (read.ok) setMoved(read.value);
       })();
     }, TOUCH_MS);
     return () => clearInterval(tick);
-  }, [origin, sittingId, clock.ended]);
-
-  // the first clock press or submission mints the sitting it runs in, named
-  // by the device it was minted on
-  async function begun(): Promise<string | null> {
-    if (sittingId !== null) return sittingId;
-    const { data, error } = await engine(origin, await getToken()).POST('/api/problems/{problem_id}/sittings', {
-      params: { path: { problem_id: problemId } },
-      body: { device },
-    });
-    if (!data) {
-      setRefused(described(error));
-      return null;
-    }
-    setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() });
-    return data.sitting.id;
-  }
+  }, [origin, sittingId, controls.touch]);
 
   // a move the app took by itself says nothing to the user, so it reports no
-  // refusal: the next reading of the sitting carries whatever happened
-  async function move(to: 'start' | 'pause' | 'resume' | 'end', { quiet = false } = {}) {
+  // refusal: the next reading of the sitting carries whatever happened. The
+  // first clock press mints the sitting it runs in, named by the device
+  async function move(to: ClockMove, { quiet = false } = {}) {
     setMoving(true);
     if (!quiet) setRefused(null);
-    try {
-      const id = to === 'start' ? await begun() : sittingId;
-      if (id === null) return;
-      const client = engine(origin, await getToken());
-      const params = { params: { path: { sitting_id: id } } };
-      const { data, error } =
-        to === 'start'
-          ? await client.POST('/api/sittings/{sitting_id}/start', params)
-          : to === 'pause'
-            ? await client.POST('/api/sittings/{sitting_id}/pause', params)
-            : to === 'resume'
-              ? await client.POST('/api/sittings/{sitting_id}/resume', params)
-              : await client.POST('/api/sittings/{sitting_id}/end', params);
-      if (data) setMoved({ sitting: data.sitting, elapsedSec: data.elapsed_sec, at: performance.now() });
-      else if (!quiet) setRefused(described(error));
-    } catch (reason) {
-      if (!quiet) setRefused(String(reason));
-    } finally {
-      setMoving(false);
-    }
+    const out = await moveSitting(engine(origin, await getToken()), problemId, device, sittingId, to, now);
+    if (out.minted) setMoved(out.minted);
+    if (out.ok) setMoved(out.value);
+    else if (!quiet) setRefused(out.refused);
+    setMoving(false);
   }
 
   // the user's own press, which alone sets the clock preference
@@ -341,23 +313,21 @@ function SittingOn({
     if (running) return;
     setRunning(true);
     setRefused(null);
-    try {
-      const id = await begun();
-      if (id === null) return;
-      const { data, error } = await engine(origin, await getToken()).POST('/api/sittings/{sitting_id}/submissions', {
-        params: { path: { sitting_id: id } },
-        body: { code: code.current ?? opened.code, restored: restored.current ?? opened.restored },
-      });
-      if (data) {
-        setSubmitted(data);
-        // a solve ends the sitting
-        setMoved({ sitting: data.sitting, elapsedSec: data.attempt.time_to_solve_sec ?? null, at: performance.now() });
-      } else setRefused(described(error));
-    } catch (reason) {
-      setRefused(String(reason));
-    } finally {
-      setRunning(false);
-    }
+    const sent = await submitToSitting(
+      engine(origin, await getToken()),
+      problemId,
+      device,
+      sittingId,
+      { code: code.current ?? opened.code, restored: restored.current ?? opened.restored },
+      now,
+    );
+    if (sent.minted) setMoved(sent.minted);
+    if (sent.ok) {
+      setSubmitted(sent.value.submitted);
+      // a solve ends the sitting
+      setMoved(sent.value.moved);
+    } else setRefused(sent.refused);
+    setRunning(false);
   }
 
   const toggleKeys = () => {
@@ -396,15 +366,17 @@ function SittingOn({
           <>
             {/* one press for the clock: it starts a clock that never ran,
                 resumes a paused one, and pauses a running one */}
-            <Button
-              mode="outlined"
-              compact
-              disabled={moving}
-              onPress={() => press(clock.unstarted ? 'start' : clock.paused ? 'resume' : 'pause')}
-            >
-              {clock.unstarted || clock.paused ? CLOCK_START : CLOCK_PAUSE}
-            </Button>
-            <Button mode="outlined" compact disabled={moving || sittingId === null} onPress={() => setEnding(true)}>
+            {controls.clock ? (
+              <Button
+                mode="outlined"
+                compact
+                disabled={moving}
+                onPress={() => controls.clock && press(controls.clock.to)}
+              >
+                {controls.clock.label}
+              </Button>
+            ) : null}
+            <Button mode="outlined" compact disabled={moving || !controls.end} onPress={() => setEnding(true)}>
               {SITTING_END}
             </Button>
           </>
