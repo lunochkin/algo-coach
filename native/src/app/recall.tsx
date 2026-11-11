@@ -33,7 +33,7 @@ import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { BottomBar, CodeBlock, Loaded, styles, tones } from '@/ui/common';
+import { BottomBar, CodeBlock, ErrorLine, Loaded, styles, tones } from '@/ui/common';
 import { Heading } from '@/ui/rows';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
 import type { Key } from '@/lib/keys';
@@ -148,13 +148,13 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
           {recallNote(drawn)}
         </Text>
         {drawn ? null : <Templates slug={slug} prompt={prompt} />}
-        <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {RECALL_TRIGGER}
         </Text>
         <Markdown>{prompt.trigger}</Markdown>
         {taken.map((one) => (
           <View key={one.hint} style={{ gap: 4 }}>
-            <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
               {hintTaken(one.hint)}
             </Text>
             {one.hint === 'form' ? <CodeBlock code={one.text} verbatim /> : <Markdown>{one.text}</Markdown>}
@@ -183,9 +183,9 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
         />
       </View>
       {refused ? (
-        <Text variant="bodySmall" style={{ color: theme.colors.error, paddingHorizontal: 8 }}>
-          {recallRefused(refused)}
-        </Text>
+        <View style={{ paddingHorizontal: 8 }}>
+          <ErrorLine>{recallRefused(refused)}</ErrorLine>
+        </View>
       ) : null}
       {keys ? (
         <View style={{ paddingHorizontal: 8 }}>

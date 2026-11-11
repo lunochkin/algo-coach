@@ -21,6 +21,8 @@ import {
   runLabel,
   takeHint,
   OF,
+  A_FORM,
+  SUBMIT_KEYS,
 } from '@algo-coach/core'
 import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -28,6 +30,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { api, type Hint, type Named, type RecallAttempt } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
+import { ErrorLine } from '@/components/ErrorLine'
 import { CodeEditor } from '@/components/CodeEditor'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
@@ -155,7 +158,7 @@ function Templates({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm">
-            {here?.title ?? 'a form'}
+            {here?.title ?? A_FORM}
             <ChevronDown />
           </Button>
         </DropdownMenuTrigger>
@@ -277,7 +280,7 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
           <Button onClick={run} disabled={running}>
             {runLabel(running)}
           </Button>
-          <span className="text-meta text-muted-foreground">⌘/Ctrl + Enter</span>
+          <span className="text-meta text-muted-foreground">{SUBMIT_KEYS}</span>
           {/* the ladder, so the reader sees what a hint costs before taking
               it: each one answers more of the question than the last */}
           <span className="ml-auto flex items-center gap-2 text-meta text-muted-foreground">
@@ -296,7 +299,7 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
             )}
           </span>
         </div>
-        {refused && <p className="text-meta text-destructive">{recallRefused(refused)}</p>}
+        {refused && <ErrorLine>{recallRefused(refused)}</ErrorLine>}
       </section>
     </div>
   )

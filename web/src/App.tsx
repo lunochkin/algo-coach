@@ -1,6 +1,7 @@
 import { Fragment, lazy, Suspense } from 'react'
 import { Route, Routes, useMatch } from 'react-router'
 
+import { LOADING } from '@algo-coach/core'
 import { LOGIN, PRIVACY } from '@/api/client'
 import { NavMenu } from '@/components/NavMenu'
 import { KnowledgeProvider } from '@/knowledge/KnowledgeProvider'
@@ -58,7 +59,7 @@ function App() {
     <Session>
       {!signingIn && !readingPolicy && <NavMenu wide={wide} />}
       <main className={cn('mx-auto p-gutter', wide ? 'max-w-wide' : 'max-w-reading')}>
-        <Suspense fallback={<p className="text-muted-foreground">Loading…</p>}>
+        <Suspense fallback={<p className="text-meta text-muted-foreground">{LOADING}</p>}>
           <Routes>
             {/* the board is where every sitting starts: the user picks the
                 technique, never a problem id */}

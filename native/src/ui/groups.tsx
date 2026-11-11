@@ -18,6 +18,7 @@ import {
   startGroup,
   subsByDepth,
   subTitle,
+  startLabel,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles, tones } from '@/ui/common';
@@ -93,7 +94,7 @@ export function ModuleGroups({
               <Pressable
                 style={{ flex: 1, minHeight: 40, justifyContent: 'center' }}
                 accessibilityRole="button"
-                accessibilityLabel={`Start ${subTitle(c, sub)}`}
+                accessibilityLabel={startLabel(subTitle(c, sub))}
                 onPress={() => onStart({ course: c.slug, topic: t.slug, sub, level: null })}
               >
                 <Text

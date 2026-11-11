@@ -18,6 +18,7 @@ import { useStore } from '@/lib/store';
 import { startQueue, styles } from '@/ui/common';
 import { Sheet } from '@/ui/sheet';
 import { Toggle } from '@/ui/toggle';
+import { Heading } from '@/ui/rows';
 
 /** Where a filtered queue starts: a module, narrowed to a topic, a subtopic or one group. */
 export interface Scope {
@@ -73,7 +74,7 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
       }
     >
       <View style={{ gap: 8 }}>
-        <Text variant="titleSmall">{START_LEVEL}</Text>
+        <Heading sub title={START_LEVEL} />
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           <Toggle on={level === null} onPress={() => setLevel(null)}>
             {START_ALL}
@@ -86,7 +87,7 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
         </View>
         {c.kinds.length > 1 ? (
           <>
-            <Text variant="titleSmall">{START_KIND}</Text>
+            <Heading sub title={START_KIND} />
             <View style={[styles.row, { flexWrap: 'wrap' }]}>
               <Toggle on={kind === null} onPress={() => setKind(null)}>
                 {START_ALL}

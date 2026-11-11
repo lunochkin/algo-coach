@@ -22,7 +22,7 @@ import {
   LESSON_FALLBACK,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
-import { BottomBar } from '@/ui/common';
+import { BottomBar, HeaderNote } from '@/ui/common';
 import { CodeRenderer, markdownOptions } from '@/ui/markdown';
 import { Heading } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
@@ -123,14 +123,7 @@ export default function LessonScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={lesson?.title ?? LESSON_FALLBACK} />
       </Appbar.Header>
-      {lesson && c ? (
-        <Text
-          variant="labelMedium"
-          style={{ color: theme.colors.onSurfaceVariant, paddingHorizontal: 16, paddingBottom: 8 }}
-        >
-          {lessonNote(c.title, body ? minutesOf(lesson, body) : null, done)}
-        </Text>
-      ) : null}
+      <HeaderNote lines={[lesson && c ? lessonNote(c.title, body ? minutesOf(lesson, body) : null, done) : null]} />
       {!lesson || !c ? (
         <Text style={{ padding: 16 }}>{LESSON_MISSING}</Text>
       ) : body ? (

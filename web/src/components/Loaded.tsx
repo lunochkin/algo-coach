@@ -3,6 +3,8 @@ import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
 
+import { ErrorLine } from '@/components/ErrorLine'
+
 type State<T> = { data?: T; error?: string; retry: () => void }
 
 type Props<T> = {
@@ -22,7 +24,7 @@ export function Loaded<T>({ of, state, blank, blankWhen, children }: Props<T>) {
   if (state.error !== undefined)
     return (
       <div className="flex items-center gap-stack text-meta">
-        <p className="text-destructive">{readFailure(of, state.error)}</p>
+        <ErrorLine>{readFailure(of, state.error)}</ErrorLine>
         <Button variant="outline" size="sm" onClick={state.retry}>
           {RETRY}
         </Button>

@@ -9,6 +9,8 @@ import {
   type SubmissionView,
   CASES_IN_ORDER,
   COPY,
+  CUT_VALUE,
+  showAllKb,
 } from '@algo-coach/core'
 
 import type { CaseResult, Submitted } from '@/api/client'
@@ -76,7 +78,7 @@ function Value({ label, value, text }: { label: string; value?: unknown; text?: 
         {full.length > SHOWN && (
           <>
             <Button variant="ghost" size="xs" onClick={() => setWhole(!whole)}>
-              {whole ? 'Cut' : `Show all ${(full.length / 1024).toFixed(0)} KB`}
+              {whole ? CUT_VALUE : showAllKb(full.length)}
             </Button>
             <Button variant="ghost" size="xs" onClick={() => navigator.clipboard.writeText(full)}>
               {COPY}

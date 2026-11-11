@@ -136,3 +136,26 @@ export const keyboardToggle = (shown: boolean) => (shown ? 'Hide the keyboard' :
 export const mapLessonsToggle = (shown: boolean) => (shown ? 'Hide lessons' : 'Show lessons');
 export const NOT_SIGNED_IN = 'Not signed in.';
 export const RECALL_MARKS = 'recall';
+
+// the rest the pages typed inline
+export const studyingSince = (when: string) => `studying since ${when}`;
+export const nextRung = (title: string) => `Next rung: ${title}`;
+export const A_FORM = 'a form';
+export const SUBMIT_KEYS = '⌘/Ctrl + Enter';
+export const SUBMIT_HINT = `${SUBMIT_KEYS} · judged against the problem's own test cases`;
+export const CUT_VALUE = 'Cut';
+export const showAllKb = (bytes: number) => `Show all ${(bytes / 1024).toFixed(0)} KB`;
+export const PROCEDURE = 'procedure';
+export const FORM_NO_CASES = 'No case checks this form';
+export const LOADING = 'Loading…';
+export const mapOf = (title: string) => `The prerequisite map of ${title}`;
+
+// what a screen reader reads for a press that names its record
+export const restoreLabel = (title: string) => `Restore ${title}`;
+export const revokeLabel = (name: string) => `Revoke ${name}`;
+export const reorderLabel = (title: string) => `Reorder ${title}`;
+export const startLabel = (title: string) => `Start ${title}`;
+export const gradeLabel = (grade: string) => `Grade: ${grade}`;
+export const raiseLabel = (step: number) => `Allow ${step} more new questions`;
+export const caseLabel = (index: number, outcome: string) => `case ${index + 1}: ${outcome}`;
+export const syncErrorLabel = (summary: string) => `Sync error: ${summary}. Tap for details.`;

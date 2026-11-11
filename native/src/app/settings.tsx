@@ -29,6 +29,7 @@ import {
   REMINDER_HOUR,
   REMINDER_HOUR_RULE,
   NOT_SIGNED_IN,
+  restoreLabel,
 } from '@algo-coach/core';
 import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
@@ -195,7 +196,7 @@ export default function SettingsScreen() {
                     <Button
                       mode="outlined"
                       icon="archive-arrow-up-outline"
-                      accessibilityLabel={`Restore ${c.title}`}
+                      accessibilityLabel={restoreLabel(c.title)}
                       onPress={() => void st.setCourseStatus(c.slug, 'active')}
                     >
                       {RESTORE}

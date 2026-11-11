@@ -56,7 +56,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
-import { BottomBar, fromCopy, Loaded, styles, tones } from '@/ui/common';
+import { BottomBar, fromCopy, HeaderNote, Loaded, styles, tones } from '@/ui/common';
 import { MapCanvas, NODE_H, NODE_W, type CertPip } from '@/ui/mapcanvas';
 import { ModuleGroups } from '@/ui/groups';
 import { SectionBar, useSections } from '@/ui/sections';
@@ -116,19 +116,9 @@ export default function ModuleScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={c.title} />
       </Appbar.Header>
+      {/* the web's order: the note, the presses, then the counts by level */}
+      <HeaderNote lines={[moduleMeta(c.topics.length, due, c.paused), moduleSummary(sum)]} />
       <View style={{ paddingHorizontal: 16, gap: 8, paddingBottom: 8 }}>
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {moduleMeta(c.topics.length, due, c.paused)}
-        </Text>
-        <Text variant="bodySmall">
-          {levelCounts(b, c)
-            .filter((x) => x.total)
-            .map((x) => `${x.name} ${x.passed}/${x.total}`)
-            .join(' · ')}
-        </Text>
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {moduleSummary(sum)}
-        </Text>
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           <Button
             mode="outlined"
@@ -153,6 +143,12 @@ export default function ModuleScreen() {
             </Button>
           ) : null}
         </View>
+        <Text variant="bodySmall">
+          {levelCounts(b, c)
+            .filter((x) => x.total)
+            .map((x) => `${x.name} ${x.passed}/${x.total}`)
+            .join(' · ')}
+        </Text>
         <SegmentedButtons
           value={tab}
           onValueChange={(v) => setTab(v as 'groups' | 'map')}

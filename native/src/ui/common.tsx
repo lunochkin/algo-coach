@@ -13,6 +13,7 @@ import {
   RETRY,
   syncErrorSummary,
   syncLine,
+  syncErrorLabel,
 } from '@algo-coach/core';
 import type { QueueSession, Session, SyncState } from '@/lib/store';
 import { palette } from '@/ui/tokens';
@@ -43,7 +44,7 @@ export function SyncBanner({ sync }: { sync: SyncState }) {
     <Pressable
       onPress={() => setOpen(!open)}
       accessibilityRole="button"
-      accessibilityLabel={`Sync error: ${syncErrorSummary(sync.error)}. Tap for details.`}
+      accessibilityLabel={syncErrorLabel(syncErrorSummary(sync.error))}
       style={{
         minHeight: 48,
         justifyContent: 'center',
@@ -145,6 +146,36 @@ export function BottomBar({
 /** Progress colours in either scheme: covered (done) and open (unlocked), from the phone's tokens. */
 export const tones = (dark: boolean) => ({ done: palette(dark).passed, open: palette(dark).timeout });
 
+/**
+ * The lines identifying what a screen's title names, under the header bar,
+ * as the web's PageHeader carries its note: a card's technique, a lesson's
+ * module and minutes, a module's counts.
+ */
+export function HeaderNote({ lines }: { lines: (string | null | undefined)[] }) {
+  const theme = useTheme();
+  const shown = lines.filter((line): line is string => !!line);
+  if (!shown.length) return null;
+  return (
+    <View style={{ paddingHorizontal: 16, paddingBottom: 8, gap: 2 }}>
+      {shown.map((line) => (
+        <Text key={line} variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          {line}
+        </Text>
+      ))}
+    </View>
+  );
+}
+
+/** A refusal or a failure, the same wherever it shows, as the web's ErrorLine. */
+export function ErrorLine({ children }: { children: ReactNode }) {
+  const theme = useTheme();
+  return (
+    <Text variant="bodySmall" style={{ color: theme.colors.error }}>
+      {children}
+    </Text>
+  );
+}
+
 /** What a screen loads, from the engine or the device's copy: the data, or why it is missing. */
 export interface Reading<T> {
   data: T | null | undefined;
@@ -198,12 +229,9 @@ export function fromCopy<T>(
 }
 
 export function Failed({ message, onRetry }: { message: string; onRetry: () => void }) {
-  const theme = useTheme();
   return (
     <View style={{ gap: 8, alignItems: 'flex-start' }}>
-      <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
-        {message}
-      </Text>
+      <ErrorLine>{message}</ErrorLine>
       <Button mode="outlined" onPress={onRetry}>
         {RETRY}
       </Button>

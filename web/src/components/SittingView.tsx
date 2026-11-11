@@ -18,6 +18,7 @@ import {
   submitLabel,
   visibilityMove,
   OF,
+  SUBMIT_HINT,
 } from '@algo-coach/core'
 import { ChevronLeft } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -25,6 +26,7 @@ import { Link, useSearchParams } from 'react-router'
 
 import { api, type Sitting, type Submitted } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
+import { ErrorLine } from '@/components/ErrorLine'
 import { BackLink } from '@/components/BackLink'
 import { ClaimPrompt } from '@/components/ClaimPrompt'
 import { CodeEditor, type EditorHandle } from '@/components/CodeEditor'
@@ -403,7 +405,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
           </div>
         </div>
       </div>
-      {refused && <p className="text-meta text-destructive">{sittingRefused(refused)}</p>}
+      {refused && <ErrorLine>{sittingRefused(refused)}</ErrorLine>}
       {/* a paused clock leaves the page as it was: a pause stops the timing,
           not the practice */}
       {/* explicit columns: an implicit one grows to the editor's longest line,
@@ -434,9 +436,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
             </Button>
             {/* a keyboard's shortcut, so a narrow window leaves it out and the
                 restore press keeps the submit press's row */}
-            <span className="hidden text-meta text-muted-foreground sm:inline">
-              ⌘/Ctrl + Enter · judged against the problem&rsquo;s own test cases
-            </span>
+            <span className="hidden text-meta text-muted-foreground sm:inline">{SUBMIT_HINT}</span>
             {/* quiet, and marked on the attempt: a solve typed over a restored
                 one is not an independent solve */}
             {solve !== null && !ended && (

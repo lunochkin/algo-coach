@@ -4,6 +4,8 @@ import {
   CARD_OPTIONAL,
   FORM_UNCHECKED,
   HIDE_FORM,
+  PROCEDURE,
+  FORM_NO_CASES,
 } from '@algo-coach/core'
 import { useState } from 'react'
 
@@ -42,9 +44,9 @@ export function TemplatePanel({
       <PanelStrip>
         <h3 className="font-medium">{template.title}</h3>
         {template.optional && <Badge variant="secondary">{CARD_OPTIONAL}</Badge>}
-        {template.kind === 'procedure' && <Badge variant="outline">procedure</Badge>}
+        {template.kind === 'procedure' && <Badge variant="outline">{PROCEDURE}</Badge>}
         <span className="ml-auto text-meta text-muted-foreground">
-          {recallable ? recallLine(recalled) : 'No case checks this form'}
+          {recallable ? recallLine(recalled) : FORM_NO_CASES}
         </span>
       </PanelStrip>
 

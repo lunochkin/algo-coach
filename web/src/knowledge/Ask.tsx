@@ -37,6 +37,7 @@ import {
 
 import { Link } from 'react-router'
 
+import { SectionHeading } from '@/components/SectionHeading'
 import { PythonCode } from '@/components/PythonCode'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -379,7 +380,7 @@ export function Details({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-1">
-      <h3 className="text-meta font-medium text-muted-foreground">{title}</h3>
+      <SectionHeading sub title={title} />
       {children}
     </section>
   )

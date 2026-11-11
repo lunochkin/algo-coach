@@ -42,8 +42,11 @@ import {
   newRecord,
   SECTION_KNOWLEDGE,
   KNOWLEDGE_NOTE,
+  moveUp,
+  moveDown,
 } from '@algo-coach/core'
 
+import { ErrorLine } from '@/components/ErrorLine'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel } from '@/components/Panel'
@@ -114,12 +117,7 @@ export function KnowledgePage() {
       <PageHeader title={SECTION_KNOWLEDGE} note={KNOWLEDGE_NOTE} />
       {/* a failed sync changes what the next queue serves, so the home says so */}
       {k.sync.error && !k.sync.running && (
-        <p
-          className="rounded-xl bg-destructive/10 px-4 py-3 text-meta text-verdict-wrong"
-          title={k.sync.error}
-        >
-          {syncErrorSummary(k.sync.error)}
-        </p>
+        <ErrorLine title={k.sync.error}>{syncErrorSummary(k.sync.error)}</ErrorLine>
       )}
       {/* the lessons are a step down from the home: `pages.md`, The structure */}
       <p className="flex gap-4 text-meta">
@@ -289,7 +287,7 @@ export function KnowledgePage() {
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          aria-label={`Move ${row.c.title} up`}
+                          aria-label={moveUp(row.c.title)}
                           disabled={i === 0}
                           onClick={() => move(rows, i, i - 1)}
                         >
@@ -298,7 +296,7 @@ export function KnowledgePage() {
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          aria-label={`Move ${row.c.title} down`}
+                          aria-label={moveDown(row.c.title)}
                           disabled={i === rows.length - 1}
                           onClick={() => move(rows, i, i + 1)}
                         >

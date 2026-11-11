@@ -285,7 +285,7 @@ ways inside each client. Each item covers both clients.
 - [x] Draw every selectable chip, link and option one way: the filters and
       the toggle groups, links underlined on hover, a lesson's links as
       links on the phone, and the quiz's two kinds of option tile
-- [ ] Draw every error, small label, meta line and header note one way,
+- [x] Draw every error, small label, meta line and header note one way,
       and move the words still typed inline into `packages/core`. The web
       shows an error four ways, and the phone its header note three ways
 - [ ] Bring the rest onto shared parts: the dialogs, the code blocks, the

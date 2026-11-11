@@ -27,9 +27,10 @@ import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { Loaded } from '@/ui/common';
+import { ErrorLine, Loaded } from '@/ui/common';
 import { Sheet } from '@/ui/sheet';
 import { Toggle, Toggles } from '@/ui/toggle';
+import { Heading } from '@/ui/rows';
 
 type Asked = components['schemas']['Asked'];
 type FailureMode = components['schemas']['FailureMode'];
@@ -137,7 +138,7 @@ function ClaimForm({
       <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
         {position}
       </Text>
-      <Text variant="titleSmall">{CLAIM_QUESTION}</Text>
+      <Heading sub title={CLAIM_QUESTION} />
       <View>
         {techniques.map((technique) => (
           <Checkbox.Item
@@ -165,7 +166,7 @@ function ClaimForm({
           }}
         />
       </View>
-      <Text variant="titleSmall">{CLAIM_CONFIDENCE}</Text>
+      <Heading sub title={CLAIM_CONFIDENCE} />
       <Toggles>
         {CONFIDENCES.map((one) => (
           <Toggle key={one} on={confidence === one} onPress={() => setConfidence(one)}>
@@ -175,7 +176,7 @@ function ClaimForm({
       </Toggles>
       {asked.modes.length > 0 ? (
         <>
-          <Text variant="titleSmall">{LABEL_QUESTION}</Text>
+          <Heading sub title={LABEL_QUESTION} />
           <RadioButton.Group value={mode ?? ''} onValueChange={(value) => setMode(value as FailureMode)}>
             {asked.modes.map((one) => (
               <RadioButton.Item
@@ -193,11 +194,7 @@ function ClaimForm({
           </Text>
         </>
       ) : null}
-      {refused ? (
-        <Text variant="bodySmall" style={{ color: theme.colors.error }}>
-          {claimRefused(refused)}
-        </Text>
-      ) : null}
+      {refused ? <ErrorLine>{claimRefused(refused)}</ErrorLine> : null}
       <Button
         mode="contained"
         onPress={() => void send()}

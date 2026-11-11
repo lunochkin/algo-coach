@@ -14,6 +14,7 @@ import {
   type DrillScope,
 } from '@algo-coach/core'
 
+import { Choice } from '@/components/Choice'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -115,14 +116,5 @@ function Choices({ scope }: { scope: Scope }) {
         </Button>
       </DialogFooter>
     </>
-  )
-}
-
-function Choice({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-meta text-muted-foreground">{label}</p>
-      <div className="flex flex-wrap">{children}</div>
-    </div>
   )
 }

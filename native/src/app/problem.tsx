@@ -39,7 +39,7 @@ import { getToken } from '@/lib/settings';
 import { autoStarts, draftOf, keepDraft, pressed } from '@/lib/sitting';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { Loaded, styles, tones } from '@/ui/common';
+import { ErrorLine, Loaded, styles, tones } from '@/ui/common';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
 import { Sheet } from '@/ui/sheet';
 import type { Key } from '@/lib/keys';
@@ -411,9 +411,9 @@ function SittingOn({
         )}
       </View>
       {refused ? (
-        <Text variant="bodySmall" style={{ color: theme.colors.error, paddingHorizontal: 12 }}>
-          {sittingRefused(refused)}
-        </Text>
+        <View style={{ paddingHorizontal: 12 }}>
+          <ErrorLine>{sittingRefused(refused)}</ErrorLine>
+        </View>
       ) : null}
       <SegmentedButtons
         value={tab}

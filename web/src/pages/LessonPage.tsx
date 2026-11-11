@@ -20,6 +20,7 @@ import {
   OF,
 } from '@algo-coach/core'
 
+import { SectionHeading } from '@/components/SectionHeading'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { PageSection } from '@/components/PageSection'
@@ -100,7 +101,7 @@ export function LessonBody(props: {
       ].map(([title, items]) =>
         (items as typeof next).length ? (
           <section key={title as string} className="space-y-1">
-            <h2 className="text-meta font-medium text-muted-foreground">{title as string}</h2>
+            <SectionHeading sub title={title as string} />
             <p className="flex flex-wrap gap-x-4">
               {(items as typeof next).map((y) =>
                 onLesson ? (

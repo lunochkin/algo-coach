@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react'
 
 import { api, type Attempt, type FailureMode } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
+import { ErrorLine } from '@/components/ErrorLine'
 import { Loaded } from '@/components/Loaded'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -191,7 +192,7 @@ function ClaimForm({ attempt, modes, position, techniques, drilled, onClaimed }:
         </fieldset>
       )}
 
-      {refused && <p className="text-destructive">{claimRefused(refused)}</p>}
+      {refused && <ErrorLine>{claimRefused(refused)}</ErrorLine>}
       <Button onClick={send} disabled={!claimReady(chosen, declined, confidence) || sending}>
         {saveLabel(sending)}
       </Button>

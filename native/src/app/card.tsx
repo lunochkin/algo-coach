@@ -31,7 +31,7 @@ import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { BottomBar, CodeBlock, Loaded, styles } from '@/ui/common';
+import { BottomBar, CodeBlock, HeaderNote, Loaded, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
 import { Badge, Panel, PickPanel, PickRow } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
@@ -69,8 +69,9 @@ export default function CardScreen() {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={card?.title ?? slug} subtitle={card?.technique} />
+        <Appbar.Content title={card?.title ?? slug} />
       </Appbar.Header>
+      <HeaderNote lines={[card?.technique]} />
       <SectionBar sections={sections} />
       <ScrollView
         ref={sections.scroll}

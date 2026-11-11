@@ -14,11 +14,12 @@ import {
   thisDevice,
   type components,
   OF,
+  revokeLabel,
 } from '@algo-coach/core';
 import { described, engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
-import { Loaded, styles } from '@/ui/common';
+import { ErrorLine, Loaded, styles } from '@/ui/common';
 import { PickPanel, PickRow } from '@/ui/rows';
 import { useSignOut } from '@/ui/signout';
 
@@ -95,7 +96,7 @@ export default function DevicesScreen() {
                         mode="outlined"
                         icon="close"
                         onPress={() => void revoke(device)}
-                        accessibilityLabel={`Revoke ${deviceName(device)}`}
+                        accessibilityLabel={revokeLabel(deviceName(device))}
                       >
                         {REVOKE}
                       </Button>
@@ -106,11 +107,7 @@ export default function DevicesScreen() {
             </PickPanel>
           )}
         </Loaded>
-        {failed ? (
-          <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
-            {failed}
-          </Text>
-        ) : null}
+        {failed ? <ErrorLine>{failed}</ErrorLine> : null}
       </ScrollView>
       {signOut.dialog}
     </View>

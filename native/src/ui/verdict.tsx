@@ -14,6 +14,7 @@ import {
   type components,
   ELAPSED_TIME,
   CASES_IN_ORDER,
+  caseLabel,
 } from '@algo-coach/core';
 import { palette } from '@/ui/tokens';
 
@@ -80,7 +81,7 @@ export function SubmissionVerdict({ submitted }: { submitted: Submitted }) {
         {results.map((one, index) => (
           <View
             key={one.case_id}
-            accessibilityLabel={`case ${index + 1}: ${OUTCOME_LABELS[one.outcome]}`}
+            accessibilityLabel={caseLabel(index, OUTCOME_LABELS[one.outcome])}
             style={{
               width: 12,
               height: 12,

@@ -32,6 +32,7 @@ import {
 
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
+import { ErrorLine } from '@/components/ErrorLine'
 import { PickPanel, PickRow } from '@/components/PickRow'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
@@ -90,9 +91,7 @@ function Sync() {
               <p className="text-meta text-muted-foreground">{waitingToSend(k.outbox)}</p>
             )}
             {k.sync.error && !k.sync.running && (
-              <p className="text-meta text-verdict-wrong" title={k.sync.error}>
-                {syncErrorSummary(k.sync.error)}
-              </p>
+              <ErrorLine title={k.sync.error}>{syncErrorSummary(k.sync.error)}</ErrorLine>
             )}
           </div>
           <Button variant="outline" disabled={k.sync.running} onClick={() => void k.resync()}>

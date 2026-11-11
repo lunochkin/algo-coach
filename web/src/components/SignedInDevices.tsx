@@ -14,6 +14,7 @@ import {
 
 import { api, type SignedInDevice } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
+import { ErrorLine } from '@/components/ErrorLine'
 import { PickPanel, PickRow } from '@/components/PickRow'
 import { Loaded } from '@/components/Loaded'
 import { SignOut } from '@/components/SignOut'
@@ -94,7 +95,7 @@ export function SignedInDevices({
             </div>
           )}
         </Loaded>
-        {failed ? <p className="text-destructive">{failed}</p> : null}
+        {failed ? <ErrorLine>{failed}</ErrorLine> : null}
       </DialogContent>
     </Dialog>
   )

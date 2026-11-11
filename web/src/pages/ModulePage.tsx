@@ -109,7 +109,20 @@ export function ModulePage() {
 
   return (
     <section className="space-y-section">
-      <PageHeader back={{ to: HOME, label: BACK_KNOWLEDGE }} title={page?.c.title ?? module} />
+      <PageHeader
+        back={{ to: HOME, label: BACK_KNOWLEDGE }}
+        title={page?.c.title ?? module}
+        // the lines identifying the module sit under its title, as every
+        // page's note does, and read while the page loads too
+        note={
+          page && (
+            <>
+              <p>{moduleMeta(page.c.topics.length, dueCount(page.b, now), page.c.paused)}</p>
+              <p>{moduleSummary(summary(page.b, now))}</p>
+            </>
+          )
+        }
+      />
       <Loaded
         of={OF.module}
         state={loadedFrom(k, page === undefined ? undefined : { page })}
@@ -120,14 +133,9 @@ export function ModulePage() {
           if (!page) return null
           const { b, c } = page
           const lv = levels(b.rules)
-          const due = dueCount(b, now)
           return (
             <section className="space-y-section">
               <div className="flex flex-wrap items-center gap-stack">
-                <div className="flex-1 text-meta text-muted-foreground">
-                  <p>{moduleMeta(c.topics.length, due, c.paused)}</p>
-                  <p>{moduleSummary(summary(b, now))}</p>
-                </div>
                 <Button
                   onClick={() =>
                     setStarting({

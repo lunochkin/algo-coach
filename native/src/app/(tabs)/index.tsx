@@ -33,6 +33,7 @@ import {
   reviewQueue,
   SYNC_NOW,
   waitingOutside,
+  reorderLabel,
 } from '@algo-coach/core';
 import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
@@ -177,7 +178,7 @@ export default function Home() {
       above={
         counts ? (
           <View style={[styles.row, { justifyContent: 'center', flexWrap: 'wrap', minHeight: 24 }]}>
-            <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
               {continueLine(counts, !!focused?.strict)}
             </Text>
             {focused?.strict && counts.outside ? (
@@ -188,7 +189,7 @@ export default function Home() {
                 accessibilityLabel={waitingOutside(counts.outside)}
                 style={{ minHeight: 48, justifyContent: 'center', paddingHorizontal: 4, borderRadius: 8 }}
               >
-                <Text variant="labelMedium" style={{ color: theme.colors.primary, textDecorationLine: 'underline' }}>
+                <Text variant="bodySmall" style={{ color: theme.colors.primary, textDecorationLine: 'underline' }}>
                   {` · ${waitingOutside(counts.outside)}`}
                 </Text>
               </TouchableRipple>
@@ -271,7 +272,7 @@ function ModuleRow({ c, view, total, toReview }: { c: Course; view: NextUpView; 
       note={[view.title, view.detail].filter(Boolean).join(' · ')}
       onPress={() => router.push({ pathname: '/module', params: { course: c.slug } })}
       onLongPress={drag}
-      aside={<IconButton icon="drag" onPressIn={drag} accessibilityLabel={`Reorder ${c.title}`} />}
+      aside={<IconButton icon="drag" onPressIn={drag} accessibilityLabel={reorderLabel(c.title)} />}
     />
   );
 }

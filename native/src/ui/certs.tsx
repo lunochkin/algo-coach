@@ -20,6 +20,7 @@ import {
 import { useStore } from '@/lib/store';
 import { Sheet } from '@/ui/sheet';
 import type { Scope } from '@/ui/start';
+import { Heading } from '@/ui/rows';
 import { styles, tones } from './common';
 
 export function stateColor(state: CertState, theme: MD3Theme): string {
@@ -152,16 +153,12 @@ export function CertSheet(props: {
         </Text>
         {v.note ? <Text variant="bodyMedium">{v.note}</Text> : null}
         {v.progressNote ? (
-          <Text variant="labelLarge" style={{ marginTop: 8, color: theme.colors.onSurfaceVariant }}>
+          <Text variant="bodySmall" style={{ marginTop: 8, color: theme.colors.onSurfaceVariant }}>
             {v.progressNote}
           </Text>
         ) : null}
         {v.checks.map((x) => check(x.ok, x.text))}
-        {v.short.length ? (
-          <Text variant="labelLarge" style={{ marginTop: 8 }}>
-            {CERT_TO_COVER}
-          </Text>
-        ) : null}
+        {v.short.length ? <Heading sub title={CERT_TO_COVER} /> : null}
         {v.short.map((g) => (
           <View key={g.sub} style={styles.row}>
             <Text variant="bodyMedium" style={{ flex: 1 }}>

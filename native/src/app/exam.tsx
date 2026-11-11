@@ -31,6 +31,7 @@ import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
 import { BottomBar, fromCopy, Loaded, startExam, styles } from '@/ui/common';
 import { Toggle, Toggles } from '@/ui/toggle';
+import { Heading } from '@/ui/rows';
 
 // the choices wait for the copy, so the size and the focus they open on are the stored ones
 export default function Exam() {
@@ -135,7 +136,7 @@ function Choices({ catalog }: { catalog: Catalog }) {
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
           {EXAM_NOTE}
         </Text>
-        <Text variant="titleSmall">{EXAM_MODULE}</Text>
+        <Heading sub title={EXAM_MODULE} />
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           <Toggle on={course === null} onPress={() => setCourse(null)}>
             {EXAM_ALL}
@@ -146,7 +147,7 @@ function Choices({ catalog }: { catalog: Catalog }) {
             </Toggle>
           ))}
         </View>
-        <Text variant="titleSmall">{EXAM_LEVEL}</Text>
+        <Heading sub title={EXAM_LEVEL} />
         <Toggles>
           {lv.map((l) => (
             <Toggle key={l} on={level === l} onPress={() => setLevel(l)}>

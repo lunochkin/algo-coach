@@ -17,12 +17,15 @@ import {
   RUNGS_SOLVED,
   FORMS_RECALLED,
   PROBES_DRAWN,
+  studyingSince,
+  nextRung,
 } from '@algo-coach/core'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { api, type Studied } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
+import { ErrorLine } from '@/components/ErrorLine'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
 import { PageHeader } from '@/components/PageHeader'
@@ -80,7 +83,7 @@ export function CardPage() {
         title={studied.data?.card.title ?? slug}
         note={
           studied.data &&
-          [studied.data.card.technique, run && `studying since ${lastAt(run.started_at)}`]
+          [studied.data.card.technique, run && studyingSince(lastAt(run.started_at))]
             .filter(Boolean)
             .join(' · ')
         }
@@ -182,7 +185,7 @@ function Progress({ studied }: { studied: Studied }) {
             <Link
               to={`/problems/${encodeURIComponent(next.problem.id)}?card=${encodeURIComponent(studied.card.slug)}`}
             >
-              Next rung: {next.problem.title}
+              {nextRung(next.problem.title)}
             </Link>
           </Button>
         )}
@@ -210,7 +213,7 @@ function Start({
           {runStartLabel(starting)}
         </Button>
       </div>
-      {refused && <p className="text-meta text-destructive">{runStartRefused(refused)}</p>}
+      {refused && <ErrorLine>{runStartRefused(refused)}</ErrorLine>}
     </Panel>
   )
 }

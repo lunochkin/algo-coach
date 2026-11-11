@@ -75,12 +75,15 @@ import {
   NEW_STEP,
   NO_SESSION,
   FINISH,
+  raiseLabel,
+  gradeLabel,
 } from '@algo-coach/core';
 import { EMPTY, type Edit, type Key, pressed } from '@/lib/keys';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
-import { PickPanel, PickRow } from '@/ui/rows';
+import { Heading, PickPanel, PickRow } from '@/ui/rows';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
 import { KeyPad, PAD_HEIGHT } from '@/ui/keys';
+import { palette } from '@/ui/tokens';
 
 export default function Quiz() {
   const st = useStore();
@@ -98,7 +101,7 @@ function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number
   return (
     <View style={{ flex: 1 }}>
       <View style={[styles.page, { flex: 1, justifyContent: 'center' }]}>
-        <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {LESSON_STOP_KICKER}
         </Text>
         <Text variant="headlineSmall">{item.lesson.title}</Text>
@@ -189,17 +192,11 @@ function QueueQuiz({ s }: { s: QueueSession }) {
         <Text variant="labelLarge" style={{ marginRight: 16 }}>{`${score}/${rs.length}`}</Text>
       </Appbar.Header>
       <View style={[styles.row, { paddingHorizontal: 16, minHeight: 40 }]}>
-        <Text variant="labelMedium" style={{ flex: 1, color: theme.colors.onSurfaceVariant }}>
+        <Text variant="bodySmall" style={{ flex: 1, color: theme.colors.onSurfaceVariant }}>
           {left}
         </Text>
         {reading.raise ? (
-          <Button
-            compact
-            mode="outlined"
-            icon="plus"
-            onPress={moreNew}
-            accessibilityLabel={`Allow ${NEW_STEP} more new questions`}
-          >
+          <Button compact mode="outlined" icon="plus" onPress={moreNew} accessibilityLabel={raiseLabel(NEW_STEP)}>
             {QUEUE_RAISE}
           </Button>
         ) : null}
@@ -389,7 +386,7 @@ function Head({ q, tag, early = false }: { q: Question; tag: string; early?: boo
   const course = catalog?.courses.find((c) => c.slug === q.course);
   return (
     <>
-      <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
         {questionHead(course, catalog?.rules ?? DEFAULT_RULES, q, tag, early)}
       </Text>
       <Text variant="titleMedium" selectable>
@@ -524,7 +521,7 @@ function Ask(props: {
         ) : null}
         {q.format === 'card' && revealed ? (
           <View style={{ gap: 4 }}>
-            <Text variant="titleSmall">{ASK_TICK_RECALLED}</Text>
+            <Heading sub title={ASK_TICK_RECALLED} />
             {q.key.map((point, i) => (
               <Tick
                 key={i}
@@ -536,9 +533,7 @@ function Ask(props: {
             ))}
             {q.traps.length ? (
               <>
-                <Text variant="titleSmall" style={{ marginTop: 8 }}>
-                  {ASK_TRAPS}
-                </Text>
+                <Heading sub title={ASK_TRAPS} />
                 {q.traps.map((trap, i) => (
                   <Tick
                     key={i}
@@ -568,7 +563,7 @@ function Ask(props: {
             <Button
               mode="contained"
               style={{ flex: 1 }}
-              accessibilityLabel={`Grade: ${cardLabel(q.key.length, recalled, fell, wrong)}`}
+              accessibilityLabel={gradeLabel(cardLabel(q.key.length, recalled, fell, wrong))}
               onPress={gradeCardNow}
             >
               {cardLabel(q.key.length, recalled, fell, wrong)}
@@ -619,7 +614,7 @@ function Verdict({ r }: { r: Result }) {
   if (!head) return explain ? <Text variant="bodyMedium">{explain}</Text> : null;
   return (
     <View style={{ gap: 6 }}>
-      <Text variant="titleMedium" style={{ color: head.correct ? theme.colors.primary : theme.colors.error }}>
+      <Text variant="titleMedium" style={{ color: head.correct ? palette(theme.dark).passed : theme.colors.error }}>
         {head.text}
       </Text>
       {explain ? (
@@ -654,12 +649,9 @@ function DetailsToggle({ r, open, onToggle }: { r: Result; open: boolean; onTogg
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  const theme = useTheme();
   return (
     <View style={{ gap: 4 }}>
-      <Text variant="labelMedium" style={{ color: theme.colors.primary }}>
-        {title}
-      </Text>
+      <Heading sub title={title} />
       {children}
     </View>
   );
@@ -677,7 +669,7 @@ function Row({ row }: { row: AnswerRow }) {
       }}
     >
       <Text variant="bodyMedium" selectable>
-        <Text style={{ color: row.ok ? theme.colors.primary : theme.colors.error }}>{`${row.mark} `}</Text>
+        <Text style={{ color: row.ok ? palette(theme.dark).passed : theme.colors.error }}>{`${row.mark} `}</Text>
         {row.label}
         {row.yours ? <Text style={{ color: theme.colors.tertiary }}>{DETAIL_YOURS}</Text> : null}
       </Text>

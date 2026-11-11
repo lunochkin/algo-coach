@@ -14,6 +14,7 @@ import {
 
 import { api, PRIVACY } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
+import { ErrorLine } from '@/components/ErrorLine'
 import { Loaded } from '@/components/Loaded'
 import { Button } from '@/components/ui/button'
 
@@ -30,11 +31,7 @@ export function LoginPage() {
         <p className="text-meta text-muted-foreground">{LOGIN_INTRO}</p>
       </div>
 
-      {refused !== null && (
-        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-meta text-destructive">
-          {refusal(refused)}
-        </p>
-      )}
+      {refused !== null && <ErrorLine>{refusal(refused)}</ErrorLine>}
 
       <Loaded
         of={OF.signIn}

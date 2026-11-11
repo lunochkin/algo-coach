@@ -42,6 +42,7 @@ import {
   OF,
 } from '@algo-coach/core'
 
+import { Choice } from '@/components/Choice'
 import { PickPanel, PickRow } from '@/components/PickRow'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
@@ -214,15 +215,6 @@ function CertChoice({
         <p className="text-meta text-muted-foreground">{CERT_EXAM_MISSING}</p>
       )}
     </section>
-  )
-}
-
-function Choice({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-meta text-muted-foreground">{label}</p>
-      {children}
-    </div>
   )
 }
 

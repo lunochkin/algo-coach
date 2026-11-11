@@ -32,6 +32,7 @@ import {
   type PlacedNode,
   ZOOM_OUT,
   ZOOM_IN,
+  mapOf,
 } from '@algo-coach/core'
 
 import { Link } from 'react-router'
@@ -159,7 +160,7 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
           viewBox={`0 0 ${layout.width} ${layout.height}`}
           onClick={() => setPicked(null)}
           role="img"
-          aria-label={`The prerequisite map of ${c.title}`}
+          aria-label={mapOf(c.title)}
         >
           {layout.clusters.map((k) => (
             <g key={k.topic} opacity={on(`cluster:${k.topic}`) ? 1 : 0.35}>
