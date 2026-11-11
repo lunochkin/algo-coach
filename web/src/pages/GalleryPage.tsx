@@ -8,7 +8,7 @@ import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel, Stat, Stats } from '@/components/Panel'
-import { PickList, PickRow } from '@/components/PickRow'
+import { PickPanel, PickRow } from '@/components/PickRow'
 import { ProgressBar } from '@/components/ProgressBar'
 import { SectionHeading } from '@/components/SectionHeading'
 import { SectionBar } from '@/components/SectionBar'
@@ -229,7 +229,7 @@ export function GalleryPage() {
       </Section>
 
       <Section title="A list of picks">
-        <PickList>
+        <PickPanel>
           <PickRow
             to="/gallery"
             title="Smallest feasible speed"
@@ -245,28 +245,20 @@ export function GalleryPage() {
             title="Monotonic stack"
             stats={[{ label: 'attempts', value: 0 }]}
           />
-        </PickList>
+        </PickPanel>
       </Section>
 
       <Section title="A section of picks in a panel">
         <div className="space-y-stack">
           <SectionHeading title="Techniques practised" count={2} />
-          <div className="overflow-hidden rounded-xl border">
-            <PickList>
-              <PickRow
-                inPanel
-                to="/gallery"
-                title="binary-search"
-                stats={[{ label: 'solved', value: '9/12' }]}
-              />
-              <PickRow
-                inPanel
-                to="/gallery"
-                title="greedy"
-                stats={[{ label: 'solved', value: '1/4' }]}
-              />
-            </PickList>
-          </div>
+          <PickPanel>
+            <PickRow
+              to="/gallery"
+              title="binary-search"
+              stats={[{ label: 'solved', value: '9/12' }]}
+            />
+            <PickRow to="/gallery" title="greedy" stats={[{ label: 'solved', value: '1/4' }]} />
+          </PickPanel>
         </div>
       </Section>
 

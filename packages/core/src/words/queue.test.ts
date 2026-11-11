@@ -7,7 +7,7 @@ import {
   examModuleChoice,
   examReviewNext,
   lessonNote,
-  lessonRowLine,
+  lessonStats,
   certExamRule,
 } from '../index';
 
@@ -30,8 +30,8 @@ describe('queue words', () => {
   });
 
   it('drops the minutes of a lesson whose text is not held', () => {
-    expect(lessonRowLine(0, 'Basics')).toBe('Basics');
-    expect(lessonRowLine(7, 'Basics')).toBe('~7 min · Basics');
+    expect(lessonStats('Read', 0)).toEqual([{ value: 'Read', label: '' }]);
+    expect(lessonStats('Read', 7)[1]).toEqual({ value: '~7 min', label: '' });
     expect(lessonNote('Python', null, false)).toBe('Python');
     expect(lessonNote('Python', 7, true)).toBe('Python · ~7 min · read');
   });

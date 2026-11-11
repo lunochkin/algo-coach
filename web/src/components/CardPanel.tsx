@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 // name on the row instead
 export function CardPanel({ technique, cards }: { technique: string | null; cards: ListedCard[] }) {
   return (
-    <section className="overflow-hidden rounded-xl border">
+    <section className="overflow-hidden rounded-xl border bg-card">
       {technique && (
         <div className="flex items-baseline gap-3 border-b bg-card px-4 py-3">
           {/* a header naming a record opens it */}

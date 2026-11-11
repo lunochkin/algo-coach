@@ -13,13 +13,13 @@ import {
   toggled,
   type ListingFilter,
 } from '@algo-coach/core'
-import { Link, useSearchParams } from 'react-router'
+import { useSearchParams } from 'react-router'
 
 import { api, type Listed } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
-import { PickList } from '@/components/PickRow'
+import { PickPanel, PickRow } from '@/components/PickRow'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { counts } from '@/lib/format'
@@ -104,11 +104,11 @@ export function ProblemsPage() {
                   <p className="text-meta text-muted-foreground">{PROBLEMS_NONE_MATCH}</p>
                 ) : (
                   <>
-                    <PickList>
+                    <PickPanel>
                       {view.rows.map((one) => (
                         <ProblemRow key={one.problem_id} listed={one} drilled={view.drilled} />
                       ))}
-                    </PickList>
+                    </PickPanel>
                     {view.pages > 1 && (
                       <div className="flex items-center gap-3 pt-1 text-meta text-muted-foreground">
                         <Button
@@ -142,33 +142,25 @@ export function ProblemsPage() {
 }
 
 // the techniques read under the title, where a row's right-hand cluster is
-// the counts: three badges and three counts on one line wrap into each other
-// `drilled` is the one tag the listing is filtered to, which the claim then
-// ticks as a pick from the board ticks its technique
+// the counts. `drilled` is the one tag the listing is filtered to, which the
+// claim then ticks as a pick from the board ticks its technique
 function ProblemRow({ listed, drilled }: { listed: Listed; drilled: string | null }) {
   const query = new URLSearchParams({ from: 'problems' })
   if (drilled !== null) query.set('technique', drilled)
   return (
-    <Link
+    <PickRow
       to={`/problems/${encodeURIComponent(listed.problem_id)}?${query.toString()}`}
-      className="group -mx-3 block rounded-lg px-3 py-3 transition-colors hover:bg-accent"
-    >
-      <div className="flex items-baseline gap-3">
-        <span className="font-medium underline-offset-4 group-hover:underline">{listed.title}</span>
-        {listed.difficulty && (
+      title={listed.title}
+      badge={
+        listed.difficulty && (
           <Badge variant="outline" className="font-normal">
             {listed.difficulty}
           </Badge>
-        )}
-        <span className="ml-auto shrink-0 text-meta text-muted-foreground tabular-nums">
-          {counts(listed)
-            .map((one) => (one.label ? `${one.value} ${one.label}` : String(one.value)))
-            .join(' · ')}
-        </span>
-      </div>
-      <p className="mt-1 font-mono text-meta text-muted-foreground">
-        {listed.techniques.join(' · ')}
-      </p>
-    </Link>
+        )
+      }
+      stats={counts(listed)}
+      note={listed.techniques.join(' · ')}
+      mono
+    />
   )
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   meLine,
-  moduleCounts,
+  moduleStats,
   named,
   refusal,
   settingRange,
@@ -13,8 +13,11 @@ import {
 
 describe('home words', () => {
   it('counts a module row due first, then its questions', () => {
-    expect(moduleCounts(3, 1)).toBe('3 due · 1 question');
-    expect(moduleCounts(0, 12)).toBe('0 due · 12 questions');
+    expect(moduleStats(3, 1)).toEqual([
+      { value: 3, label: 'due' },
+      { value: 1, label: 'question' },
+    ]);
+    expect(moduleStats(0, 12)[1]).toEqual({ value: 12, label: 'questions' });
   });
 
   it('counts the records waiting to be sent', () => {

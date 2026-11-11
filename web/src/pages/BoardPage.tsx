@@ -87,7 +87,6 @@ export function BoardPage() {
 function Practised({ row }: { row: TechniqueRow }) {
   return (
     <PickRow
-      inPanel
       to={`/techniques/${encodeURIComponent(row.technique)}`}
       title={row.technique}
       stats={counts(row)}
@@ -101,7 +100,7 @@ function Group({ title, count, children }: { title: string; count: number; child
   return (
     <section className="space-y-stack">
       <SectionHeading title={title} count={count} />
-      <div className="overflow-hidden rounded-xl border">{children}</div>
+      <div className="overflow-hidden rounded-xl border bg-card">{children}</div>
     </section>
   )
 }

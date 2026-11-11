@@ -103,6 +103,7 @@ export default function ProblemsScreen() {
                         badge={row.difficulty}
                         stats={techniqueStats(row, now)}
                         note={row.techniques.join(' · ')}
+                        mono
                         // the one tag the listing is filtered to is the technique drilled
                         onPress={() =>
                           router.push({

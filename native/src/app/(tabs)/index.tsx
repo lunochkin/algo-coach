@@ -21,7 +21,7 @@ import {
   EXAM_LINK,
   focusLabel,
   LESSONS_LINK,
-  moduleCounts,
+  moduleStats,
   moduleRows,
   MODULES_LOADING,
   NEW_STEP,
@@ -39,6 +39,7 @@ import { useStore } from '@/lib/store';
 import { startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
 import { FocusCard } from '@/ui/focuscard';
 import { AccountMenu } from '@/ui/account';
+import { PanelItem, PickRow } from '@/ui/rows';
 
 export default function Home() {
   const st = useStore();
@@ -243,15 +244,16 @@ export default function Home() {
         keyExtractor={(r) => r.c.slug}
         onReorder={onReorder}
         ListHeaderComponent={header}
-        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         ListFooterComponent={
           <Pressable onPress={() => st.requestSync(0)} accessibilityLabel={SYNC_NOW} style={{ marginTop: 12 }}>
             <SyncLine sync={st.sync} showError={false} />
           </Pressable>
         }
         contentContainerStyle={{ padding: 16 }}
-        renderItem={({ item }) => (
-          <CourseCard c={item.c} view={item.view} total={item.total} toReview={item.toReview} />
+        renderItem={({ item, index }) => (
+          <PanelItem first={index === 0} last={index === rows.length - 1}>
+            <ModuleRow c={item.c} view={item.view} total={item.total} toReview={item.toReview} />
+          </PanelItem>
         )}
       />
       <Snackbar
@@ -270,35 +272,18 @@ export default function Home() {
   );
 }
 
-/** A course row: tap opens the module, long-press or the handle drags it to reorder. */
-function CourseCard({ c, view, total, toReview }: { c: Course; view: NextUpView; total: number; toReview: number }) {
-  const theme = useTheme();
+/** A module's row: a press opens the module, a long press or the handle drags it to reorder. */
+function ModuleRow({ c, view, total, toReview }: { c: Course; view: NextUpView; total: number; toReview: number }) {
   const drag = useReorderableDrag();
   return (
-    <Card
-      mode="outlined"
+    <PickRow
+      title={c.title}
+      badge={c.paused ? PAUSED : null}
+      stats={moduleStats(toReview, total)}
+      note={[view.title, view.detail].filter(Boolean).join(' · ')}
       onPress={() => router.push({ pathname: '/module', params: { course: c.slug } })}
       onLongPress={drag}
-      accessibilityLabel={`Open ${c.title}`}
-      accessibilityHint="Opens the module. Long-press to reorder."
-    >
-      <Card.Title
-        title={c.title}
-        subtitle={`${moduleCounts(toReview, total)}${c.paused ? ` · ${PAUSED}` : ''}`}
-        right={() => (
-          <View style={{ flexDirection: 'row' }}>
-            <IconButton icon="drag" onPressIn={drag} accessibilityLabel={`Reorder ${c.title}`} />
-          </View>
-        )}
-      />
-      <Card.Content>
-        <Text variant="bodyMedium">{view.title}</Text>
-        {view.detail ? (
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            {view.detail}
-          </Text>
-        ) : null}
-      </Card.Content>
-    </Card>
+      aside={<IconButton icon="drag" onPressIn={drag} accessibilityLabel={`Reorder ${c.title}`} />}
+    />
   );
 }

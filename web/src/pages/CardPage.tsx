@@ -19,6 +19,7 @@ import { described, useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
 import { PageHeader } from '@/components/PageHeader'
+import { PickList, PickRow } from '@/components/PickRow'
 import { Panel, Stat, Stats } from '@/components/Panel'
 import { SectionBar } from '@/components/SectionBar'
 import { TemplatePanel } from '@/components/TemplatePanel'
@@ -249,29 +250,23 @@ function LadderView({
       onToggle={onToggle}
       aside={view.aside}
     >
-      <div className="divide-y divide-border">
+      <PickList>
         {view.rows.map((rung) => (
-          <Link
+          <PickRow
             key={rung.problemId}
             to={`/problems/${encodeURIComponent(rung.problemId)}?card=${encodeURIComponent(slug)}`}
-            className="group flex items-baseline gap-3 px-4 py-3 transition-colors hover:bg-accent"
-          >
-            {rung.solved !== null && <Mark solved={rung.solved} />}
-            <span className="min-w-0">
-              <span className="font-medium underline-offset-4 group-hover:underline">
-                {rung.title}
-              </span>
-              {rung.difficulty && (
-                <Badge variant="outline" className="ml-2 align-middle font-normal">
+            lead={rung.solved !== null && <Mark solved={rung.solved} />}
+            title={rung.title}
+            badge={
+              rung.difficulty && (
+                <Badge variant="outline" className="font-normal">
                   {rung.difficulty}
                 </Badge>
-              )}
-              {rung.covers && (
-                <span className="block text-meta text-muted-foreground">{rung.covers}</span>
-              )}
-            </span>
-            <span className="ml-auto shrink-0 text-meta text-muted-foreground">{rung.need}</span>
-          </Link>
+              )
+            }
+            note={rung.covers}
+            stats={[{ label: '', value: rung.need }]}
+          />
         ))}
         {view.gaps.map((gap) => (
           <p
@@ -284,7 +279,7 @@ function LadderView({
             </Badge>
           </p>
         ))}
-      </div>
+      </PickList>
     </Section>
   )
 }
@@ -331,27 +326,23 @@ function ProbesView({
       closed={closed}
       onToggle={onToggle}
     >
-      <div className="divide-y divide-border">
+      <PickList>
         {studied.probes.map((one) => (
-          <Link
+          <PickRow
             key={one.problem.id}
             to={`/problems/${encodeURIComponent(one.problem.id)}?card=${encodeURIComponent(slug)}`}
-            className="group flex items-baseline gap-3 px-4 py-3 transition-colors hover:bg-accent"
-          >
-            <span className="font-medium underline-offset-4 group-hover:underline">
-              {one.problem.title}
-            </span>
-            {one.problem.difficulty && (
-              <Badge variant="outline" className="font-normal">
-                {one.problem.difficulty}
-              </Badge>
-            )}
-            <span className="ml-auto shrink-0 text-meta text-muted-foreground">
-              {probeState(one.attempted)}
-            </span>
-          </Link>
+            title={one.problem.title}
+            badge={
+              one.problem.difficulty && (
+                <Badge variant="outline" className="font-normal">
+                  {one.problem.difficulty}
+                </Badge>
+              )
+            }
+            stats={[{ label: '', value: probeState(one.attempted) }]}
+          />
         ))}
-      </div>
+      </PickList>
     </Section>
   )
 }
@@ -401,7 +392,10 @@ function Section({
           children
         ) : (
           <div
-            className={cn('rounded-xl border', body === 'prose' ? 'px-4 py-3' : 'overflow-hidden')}
+            className={cn(
+              'rounded-xl border bg-card',
+              body === 'prose' ? 'px-4 py-3' : 'overflow-hidden',
+            )}
           >
             {children}
           </div>

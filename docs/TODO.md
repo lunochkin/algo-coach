@@ -251,7 +251,7 @@ and an audit on 2026-11-11 found them laid out two ways. `pages.md`, A
 page's areas, gives the rules each item brings the pages to, on both
 clients.
 
-- [ ] Read every list as rows in one bordered panel, the whole row the link:
+- [x] Read every list as rows in one bordered panel, the whole row the link:
       the modules, the lessons, the problems and the card's own lists. The
       phone draws a card per item on the knowledge screens today
 - [ ] Give every section one heading component with its count, and every

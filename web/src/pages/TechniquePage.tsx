@@ -7,7 +7,7 @@ import { useLoaded } from '@/api/useLoaded'
 import { CardPanel } from '@/components/CardPanel'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
-import { PickList, PickRow } from '@/components/PickRow'
+import { PickPanel, PickRow } from '@/components/PickRow'
 import { SectionHeading } from '@/components/SectionHeading'
 import { counts } from '@/lib/format'
 import { Badge } from '@/components/ui/badge'
@@ -39,7 +39,7 @@ export function TechniquePage() {
           <div className="space-y-stack">
             {/* no statement in the list: the clock starts when it is served */}
             <SectionHeading title="Problems" count={rows.length} />
-            <PickList>
+            <PickPanel>
               {rows.map((row) => (
                 <PickRow
                   key={row.problem_id}
@@ -55,7 +55,7 @@ export function TechniquePage() {
                   stats={counts(row)}
                 />
               ))}
-            </PickList>
+            </PickPanel>
           </div>
         )}
       </Loaded>

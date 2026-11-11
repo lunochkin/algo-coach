@@ -23,7 +23,7 @@ import {
   focusView,
   LEARNING,
   LESSONS_LINK,
-  moduleCounts,
+  moduleStats,
   type ModuleRow,
   moduleRows,
   MODULES_OF,
@@ -44,7 +44,9 @@ import {
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel } from '@/components/Panel'
+import { PickPanel, PickRow } from '@/components/PickRow'
 import { SectionHeading } from '@/components/SectionHeading'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
 import { loadedFrom, useKnowledge } from '@/knowledge/context'
@@ -259,51 +261,47 @@ export function KnowledgePage() {
 
             <section className="space-y-stack">
               <SectionHeading title="Modules" count={rows.length} />
-              <ul className="divide-y rounded-xl border bg-card">
+              <PickPanel>
                 {rows.map((row, i) => (
-                  <li key={row.c.slug} className="flex items-center gap-4 px-4 py-3">
-                    {/* the row opens the module's page; the order presses sit beside it */}
-                    <Link
-                      to={`/knowledge/modules/${row.c.slug}`}
-                      className="group flex-1 space-y-0.5"
-                    >
-                      <p className="group-hover:underline">
-                        {row.c.title}
-                        {row.c.paused && (
-                          <span className="text-meta text-muted-foreground"> · {PAUSED}</span>
-                        )}
-                      </p>
-                      <p className="text-meta">{row.view.title}</p>
-                      {row.view.detail && (
-                        <p className="text-meta text-muted-foreground">{row.view.detail}</p>
-                      )}
-                    </Link>
-                    <span className="text-meta text-muted-foreground tabular-nums">
-                      {moduleCounts(row.toReview, row.total)}
-                    </span>
-                    <span className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Move ${row.c.title} up`}
-                        disabled={i === 0}
-                        onClick={() => move(rows, i, i - 1)}
-                      >
-                        <ChevronUp />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Move ${row.c.title} down`}
-                        disabled={i === rows.length - 1}
-                        onClick={() => move(rows, i, i + 1)}
-                      >
-                        <ChevronDown />
-                      </Button>
-                    </span>
-                  </li>
+                  <PickRow
+                    key={row.c.slug}
+                    to={`/knowledge/modules/${row.c.slug}`}
+                    title={row.c.title}
+                    badge={
+                      row.c.paused && (
+                        <Badge variant="outline" className="font-normal">
+                          {PAUSED}
+                        </Badge>
+                      )
+                    }
+                    note={[row.view.title, row.view.detail].filter(Boolean).join(' · ')}
+                    stats={moduleStats(row.toReview, row.total)}
+                    // the order presses sit beside the counts, outside the row's link
+                    aside={
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Move ${row.c.title} up`}
+                          disabled={i === 0}
+                          onClick={() => move(rows, i, i - 1)}
+                        >
+                          <ChevronUp />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Move ${row.c.title} down`}
+                          disabled={i === rows.length - 1}
+                          onClick={() => move(rows, i, i + 1)}
+                        >
+                          <ChevronDown />
+                        </Button>
+                      </>
+                    }
+                  />
                 ))}
-              </ul>
+              </PickPanel>
             </section>
           </>
         )}

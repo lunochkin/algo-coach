@@ -1,7 +1,7 @@
 // what the knowledge screens say about the home, for every platform: a
 // platform changes the look alone, and reads each sentence from here
 import { NEW_STEP } from '../queue';
-import { counted } from '../screens';
+import type { Stat } from '../practice';
 import { SETTING_RANGE, type SettingName } from '../settings';
 
 // the platform a device names itself by, where a sentence says "this browser"
@@ -19,7 +19,11 @@ export const PAUSED = 'paused';
 
 export const waitingOutside = (n: number) => `${n} waiting outside`;
 
-export const moduleCounts = (due: number, total: number) => `${due} due · ${counted(total, 'question')}`;
+/** A module row's counts: what it owes now, then how much it holds. */
+export const moduleStats = (due: number, total: number): Stat[] => [
+  { value: due, label: 'due' },
+  { value: total, label: total === 1 ? 'question' : 'questions' },
+];
 
 // the focus panel
 export const FOCUS_PREFIX = 'Focus:';

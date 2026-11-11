@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { memo, useMemo, useState } from 'react';
 import { Pressable, SectionList, View } from 'react-native';
-import { Appbar, Card, Text, useTheme } from 'react-native-paper';
+import { Appbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -13,11 +13,12 @@ import {
   lessonRow,
   LESSONS_NONE,
   LESSONS_TITLE,
-  lessonRowLine,
+  lessonStats,
   modulesInOrder,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles } from '@/ui/common';
+import { PanelItem, PickRow } from '@/ui/rows';
 
 // every module's lessons, by module, as the web lists them: `pages.md`, The two clients
 export default function LessonsScreen() {
@@ -66,7 +67,11 @@ export default function LessonsScreen() {
         <SectionList
           sections={sections}
           keyExtractor={(x) => x.slug}
-          renderItem={({ item, section }) => <LessonCard x={item} c={section.c} b={section.b} />}
+          renderItem={({ item, index, section }) => (
+            <PanelItem first={index === 0} last={index === section.data.length - 1}>
+              <LessonRow x={item} c={section.c} b={section.b} />
+            </PanelItem>
+          )}
           renderSectionHeader={({ section }) => {
             const expanded = isOpen(section.key);
             return (
@@ -94,7 +99,6 @@ export default function LessonsScreen() {
               </View>
             );
           }}
-          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           stickySectionHeadersEnabled
           initialNumToRender={8}
           windowSize={5}
@@ -105,42 +109,16 @@ export default function LessonsScreen() {
   );
 }
 
-/** A tinted card: book icon, title, ~minutes, what it teaches, and its pretest or what it needs. */
-const LessonCard = memo(function LessonCard({ x, c, b }: { x: Lesson; c: Course; b: Board }) {
-  const theme = useTheme();
-  const { state, minutes, teaches, status } = lessonRow(b, c, x);
-  const tint =
-    state === 'locked'
-      ? theme.colors.surfaceVariant
-      : state === 'done'
-        ? theme.colors.secondaryContainer
-        : theme.colors.tertiaryContainer;
+/** A lesson's row: what it teaches, then its status and its minutes. */
+const LessonRow = memo(function LessonRow({ x, c, b }: { x: Lesson; c: Course; b: Board }) {
+  const row = lessonRow(b, c, x);
   return (
-    <Card
-      mode="contained"
-      style={{ backgroundColor: tint, opacity: state === 'locked' ? 0.7 : 1 }}
+    <PickRow
+      title={x.title}
+      stats={lessonStats(row.status, row.minutes)}
+      note={row.teaches}
+      dim={row.state === 'locked'}
       onPress={() => router.push({ pathname: '/lesson', params: { course: c.slug, slug: x.slug } })}
-      accessibilityLabel={`${x.title}, ${status}`}
-    >
-      <Card.Content style={[styles.row, { gap: 12 }]}>
-        <MaterialCommunityIcons
-          name={state === 'done' ? 'book-check-outline' : 'book-open-variant'}
-          size={28}
-          color={theme.colors.onTertiaryContainer}
-        />
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text variant="titleMedium">{x.title}</Text>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            {lessonRowLine(minutes, teaches)}
-          </Text>
-          <Text
-            variant="labelMedium"
-            style={{ color: state === 'available' ? theme.colors.primary : theme.colors.onSurfaceVariant }}
-          >
-            {status}
-          </Text>
-        </View>
-      </Card.Content>
-    </Card>
+    />
   );
 });

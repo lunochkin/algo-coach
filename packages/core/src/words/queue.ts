@@ -2,6 +2,7 @@
 // platform changes the look alone, and reads each sentence from here
 import { counted } from '../screens';
 import { NEW_STEP } from '../queue';
+import type { Stat } from '../practice';
 
 // a running queue, and its summary
 export const QUEUE_DONE = 'Done';
@@ -59,9 +60,11 @@ export const LESSONS_TITLE = 'Lessons';
 export const LESSONS_NONE = 'No module carries a lesson yet.';
 export const aboutMinutes = (n: number) => `~${n} min`;
 
-/** A lesson row's second line: its minutes where known, then what it teaches. */
-export function lessonRowLine(minutes: number, teaches: string): string {
-  return minutes ? `${aboutMinutes(minutes)} · ${teaches}` : teaches;
+/** A lesson row's counts: its status, then its minutes where the text is held. */
+export function lessonStats(status: string, minutes: number): Stat[] {
+  const stats: Stat[] = [{ value: status, label: '' }];
+  if (minutes) stats.push({ value: aboutMinutes(minutes), label: '' });
+  return stats;
 }
 
 /** Under a lesson's title: its module, its minutes where the text is held, and whether it is read. */
