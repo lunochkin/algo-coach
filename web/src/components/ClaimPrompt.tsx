@@ -1,3 +1,19 @@
+import {
+  attemptLine,
+  CLAIM_CONFIDENCE,
+  CLAIM_DECLINE,
+  CLAIM_QUESTION,
+  claimDefault,
+  claimReady,
+  claimRefused,
+  claimToggled,
+  type Confidence,
+  CONFIDENCES,
+  LABEL_OPTIONAL,
+  LABEL_QUESTION,
+  MODE_GLOSS,
+  saveLabel,
+} from '@algo-coach/core'
 import { useEffect, useState } from 'react'
 
 import { api, type Attempt, type FailureMode } from '@/api/client'
@@ -8,20 +24,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { duration } from '@/lib/format'
-
-type Confidence = 'guess' | 'leaning' | 'sure'
-
-// each mode is offered as its own word beside a gloss: the word alone does not
-// separate `rust` from `gap`. Which of them an attempt leaves open is the
-// route's answer, since the verdict decides it
-const GLOSS: Record<FailureMode, string> = {
-  speed: 'I got there, slower than I should have',
-  none: 'Nothing went wrong',
-  gap: 'I did not hold the form',
-  rust: 'I held the form and did not reach it',
-  syntax: 'I slipped writing code I know',
-}
 
 type Props = {
   sittingId: string
@@ -66,7 +68,7 @@ export function ClaimPrompt({ sittingId, drilled, onDone }: Props) {
       key={asked.attempt.id}
       attempt={asked.attempt}
       modes={asked.modes}
-      position={`Attempt ${answered + 1} of ${attempts.length}`}
+      position={attemptLine(answered, attempts.length, asked.attempt)}
       techniques={data.techniques}
       drilled={drilled}
       onClaimed={() => setAnswered(answered + 1)}
@@ -86,15 +88,12 @@ type FormProps = {
 }
 
 function ClaimForm({ attempt, modes, position, techniques, drilled, onClaimed }: FormProps) {
-  const [chosen, setChosen] = useState<string[]>(
-    drilled && techniques.includes(drilled) ? [drilled] : [],
-  )
+  const [chosen, setChosen] = useState<string[]>(() => claimDefault(drilled, techniques))
   const [declined, setDeclined] = useState(false)
   const [confidence, setConfidence] = useState<Confidence | null>(null)
   const [mode, setMode] = useState<FailureMode | null>(null)
   const [sending, setSending] = useState(false)
   const [refused, setRefused] = useState<string | null>(null)
-  const answers = declined || chosen.length > 0
 
   // the claim first, since naming the techniques is what the label then asks
   // about. A mode nobody picked sends no second request
@@ -125,26 +124,17 @@ function ClaimForm({ attempt, modes, position, techniques, drilled, onClaimed }:
 
   return (
     <div className="space-y-5">
-      <p className="text-meta text-muted-foreground">
-        {position} · {attempt.solved ? 'solved' : 'not solved'}
-        {attempt.time_to_solve_sec != null && ` · ${duration(attempt.time_to_solve_sec)}`}
-      </p>
+      <p className="text-meta text-muted-foreground">{position}</p>
 
       <fieldset className="space-y-2">
-        <legend className="mb-2 font-medium">Which techniques did this code use?</legend>
+        <legend className="mb-2 font-medium">{CLAIM_QUESTION}</legend>
         {techniques.map((technique) => (
           <div key={technique} className="flex items-center gap-2">
             <Checkbox
               id={`claim-${technique}`}
               checked={chosen.includes(technique)}
               disabled={declined}
-              onCheckedChange={(checked) =>
-                setChosen(
-                  checked === true
-                    ? [...chosen, technique]
-                    : chosen.filter((one) => one !== technique),
-                )
-              }
+              onCheckedChange={() => setChosen(claimToggled(chosen, technique))}
             />
             <Label htmlFor={`claim-${technique}`}>{technique}</Label>
           </div>
@@ -160,47 +150,47 @@ function ClaimForm({ attempt, modes, position, techniques, drilled, onClaimed }:
               if (checked === true) setChosen([])
             }}
           />
-          <Label htmlFor="claim-declined">None of these</Label>
+          <Label htmlFor="claim-declined">{CLAIM_DECLINE}</Label>
         </div>
       </fieldset>
 
       <div className="space-y-2">
-        <p className="font-medium">How sure are you?</p>
+        <p className="font-medium">{CLAIM_CONFIDENCE}</p>
         <ToggleGroup
           type="single"
           variant="outline"
           value={confidence ?? ''}
           onValueChange={(value) => setConfidence(value ? (value as Confidence) : null)}
         >
-          <ToggleGroupItem value="guess">guess</ToggleGroupItem>
-          <ToggleGroupItem value="leaning">leaning</ToggleGroupItem>
-          <ToggleGroupItem value="sure">sure</ToggleGroupItem>
+          {CONFIDENCES.map((one) => (
+            <ToggleGroupItem key={one} value={one}>
+              {one}
+            </ToggleGroupItem>
+          ))}
         </ToggleGroup>
       </div>
 
       {modes.length > 0 && (
         <fieldset className="space-y-2">
-          <legend className="mb-2 font-medium">Why did it go that way?</legend>
+          <legend className="mb-2 font-medium">{LABEL_QUESTION}</legend>
           <RadioGroup value={mode ?? ''} onValueChange={(value) => setMode(value as FailureMode)}>
             {modes.map((one) => (
               <div key={one} className="flex items-center gap-2">
                 <RadioGroupItem id={`label-${one}`} value={one} />
                 <Label htmlFor={`label-${one}`} className="gap-2">
                   <span className="font-mono">{one}</span>
-                  <span className="text-muted-foreground">{GLOSS[one]}</span>
+                  <span className="text-muted-foreground">{MODE_GLOSS[one]}</span>
                 </Label>
               </div>
             ))}
           </RadioGroup>
-          <p className="text-meta text-muted-foreground">
-            Answering is optional, and a skipped label leaves the attempt unlabelled.
-          </p>
+          <p className="text-meta text-muted-foreground">{LABEL_OPTIONAL}</p>
         </fieldset>
       )}
 
-      {refused && <p className="text-destructive">The answer was refused: {refused}</p>}
-      <Button onClick={send} disabled={!answers || !confidence || sending}>
-        {sending ? 'Saving…' : 'Save'}
+      {refused && <p className="text-destructive">{claimRefused(refused)}</p>}
+      <Button onClick={send} disabled={!claimReady(chosen, declined, confidence) || sending}>
+        {saveLabel(sending)}
       </Button>
     </div>
   )

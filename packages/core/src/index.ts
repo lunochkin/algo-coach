@@ -43,4 +43,5 @@ export * from './engine';
 export * from './listing';
 export * from './recall';
 export * from './sitting';
+export * from './claim';
 export * from './privacy';
