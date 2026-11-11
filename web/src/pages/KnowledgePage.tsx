@@ -57,11 +57,12 @@ import { useLearner } from '@/knowledge/learner'
 import { CERTIFICATIONS, EXAM, LESSONS, lessonPath } from '@/knowledge/paths'
 
 // the focus bar reads in the flame, as progress does, from what is held to
-// what is not yet met
+// what is not yet met. Each part steps down in strength, and the faintest
+// stays tinted, since a wash on the muted track reads as nothing
 const PART_TONE: Record<FocusPart, string> = {
   mastered: 'bg-brand',
-  learning: 'bg-brand/60',
-  review: 'bg-brand-wash',
+  learning: 'bg-brand/65',
+  review: 'bg-brand/35',
   unseen: 'bg-muted',
 }
 
