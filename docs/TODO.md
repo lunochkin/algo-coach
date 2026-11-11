@@ -6,10 +6,13 @@ The work not yet ready for a phase waits under Further developments.
 
 ## Phase 16 — scheduling and mastery (current)
 
-- [ ] Port FSRS replay, the question states and gating into
+- [ ] Port learn's FSRS replay, question states and gating into
       `algo_coach.knowledge`, with the shared fixtures passing against it. The
       mastery formula and the scheduler read them on the server, and the
       queues stay in TypeScript
+- [ ] Generate `tests/fixtures/knowledge/scheduling.json` from this repo, by
+      a `just` recipe. The fixture was generated outside it, so no rule
+      change here can regenerate it
 - [x] Write into `docs/architecture/` what a technique's mastery is derived
       from: the attempts, their claims, their verdicts and the drills, with
       recognition kept apart from execution. Mastery is never stored, so the
