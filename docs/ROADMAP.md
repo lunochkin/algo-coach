@@ -419,24 +419,62 @@ Measured:
 - A seed took 2 s locally and minutes through the tunnel, one round trip per
   row.
 
-## Phase 15 — Two platforms (current)
+## Phase 15 — Two platforms — done
 
-The web and the native app become two ways into one learner model, each
-feature placed on the platforms where it works. Decided 2026-11-10, after
-learn's app proved the knowledge module on the phone, and ordered ahead of
-scheduling and mastery the same day.
+The web and the native app became two ways into one learner model. Decided
+2026-11-10, after learn's app proved the knowledge module on the phone, and
+ordered ahead of scheduling and mastery the same day.
 
-- **One TypeScript package, `packages/core`, imported by both apps**: the
-  knowledge rules and what the screens show, tested once.
-- **The knowledge module on the web**, scheduled by the same core the phone
-  runs, so one user sees one behaviour on both.
-- **The board and the cards in the native app**, with tabs once it holds more
-  than the knowledge modules. Sittings and recall stay on the web: they need
-  a keyboard and a wide window.
-- Exit: questions practised on the web and the phone against one log, with
-  both showing the same state.
+- `packages/core`, one TypeScript package both apps import: the knowledge
+  rules, the sync, the state of a queue, an exam, a sitting and a recall, and
+  every label, count and sentence a screen shows.
+- The knowledge module on the web: the home, a module with its groups and its
+  map, the queues, the exams, the lessons, the certifications and `/settings`,
+  read from a copy in IndexedDB with an outbox.
+- The daily limit, the exam size, today's raise and the module order as
+  records of the log, in `setting_changes`, `limit_raises` and
+  `module_orders`.
+- The engine on the phone: bottom tabs for the four sections, the board, the
+  problem listing, and the cards with their ladders, probes and runs. An app
+  token reaches every endpoint a session reaches.
+- Every signed-in device listed and revocable on both clients, browser
+  sessions beside the apps.
+- Code on the phone: a keyboard of the app's own, and CodeMirror in a WebView,
+  set up by `packages/editor` for both clients. The sitting and the recall
+  trainer run there, and a sitting records its `device`.
+- The sitting minted at the first clock press or the first submission, so
+  serving a statement records nothing.
+- The board as the overview and the landing page of both clients: the focus,
+  Continue and the modules, then the cards in progress and the techniques.
+- One shared component per client for each part of a page, the phone's own
+  tokens, and `tests/test_pages_inventory.py` holding the inventory in
+  `pages.md` to the code.
+- Exit met on 2026-11-11: questions practised on the web and the phone against
+  one log, with both showing the same state. A problem was sat and a form
+  recalled on the phone, through the app's keyboard. The inventory reads with
+  no row `to fix` and no row `web for now`, and no part of a page reads two
+  ways on either client.
 
-## Phase 16 — Scheduling and mastery
+Measured:
+
+- A key typed through the app's keyboard reached the painted editor in 23 ms
+  at p50, 27 ms at p90 and 48 ms at most, over 126 keys on a Redmi Note 13 Pro
+  5G on 2026-11-11. The message across the bridge took 6 ms of it.
+- The editor in the WebView and the native Problems list each missed one frame
+  deadline in about 4,000 frames. The editor's frames took 11 ms against 9 ms
+  at p50.
+- A median canonical is 18 lines, and its widest line is 55 characters, where
+  the phone fits 40. The phone's editor therefore draws an indent level two
+  characters wide and wraps a long line.
+- Five audit passes over both clients on 2026-11-11 opened 7, 5, 5, 11 and 16
+  items in turn. Each pass found parts drawn or computed two ways after the
+  pass before it had closed its own items.
+- The third audit counted some 150 sizes typed inline in the phone's styles, a
+  quarter of them in the quiz, and one press's padding repeated in 19 places.
+- A release build of the app after a TypeScript change took 25 s against
+  177 s, once the Android project is regenerated only when its inputs change.
+
+## Phase 16 — Scheduling and mastery (current)
 
 Per-technique skill state derived from the log, a scheduler that says what is
 due, and a comparison of that scheduler against a simpler policy.
