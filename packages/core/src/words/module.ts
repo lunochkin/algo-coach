@@ -59,6 +59,7 @@ export const START_LEVEL = 'Level';
 export const START_KIND = 'Kind';
 export const START_ALL = 'All';
 export const START_ONLY_REVIEWS = 'Only reviews';
+export const START_NOTE = 'A queue over what these choices leave. The focus stays where it is.';
 export const START_NOTHING = 'Nothing ready here';
 
 export function startTitle(c: Course, scope: { topic?: string | null; sub?: string | null }): string {

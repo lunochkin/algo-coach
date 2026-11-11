@@ -35,6 +35,7 @@ import { useLearner } from '@/knowledge/learner'
 import { KNOWLEDGE } from '@/knowledge/paths'
 import { StartSheet, type Scope } from '@/knowledge/StartSheet'
 import { type Sections, useSections } from '@/lib/sections'
+import { GRID_CELL, GRID_LEVEL_HEAD, GRID_PRESS } from '@/lib/grid'
 import { cn } from '@/lib/utils'
 
 type Picked = { course: string; id: string }
@@ -127,13 +128,7 @@ function Grid(props: {
             <tr className="text-meta text-muted-foreground">
               <th className="px-4 py-2 text-left font-normal">{SCOPE_COLUMN}</th>
               {props.levels.map((l) => (
-                <th
-                  key={l}
-                  className={cn(
-                    'px-2 py-2 text-center font-normal',
-                    practiceLevel(c, l) && 'opacity-60',
-                  )}
-                >
+                <th key={l} className={cn(GRID_LEVEL_HEAD, practiceLevel(c, l) && 'opacity-60')}>
                   {levelName(props.rules, l, true)}
                   {practiceLevel(c, l) && <span className="block">{PRACTICE}</span>}
                 </th>
@@ -150,15 +145,12 @@ function Grid(props: {
                   const id = certId(c.slug, row.scope, l)
                   const s = states.get(id)
                   return (
-                    <td key={l} className="px-1 py-1 text-center">
+                    <td key={l} className={GRID_CELL}>
                       {s && s.state !== 'empty' ? (
                         <button
                           type="button"
                           onClick={() => props.onPick(id)}
-                          className={cn(
-                            'inline-flex size-11 items-center justify-center rounded-lg hover:bg-muted',
-                            s.state === 'ready' && 'bg-accent',
-                          )}
+                          className={cn(GRID_PRESS, s.state === 'ready' && 'bg-accent')}
                           aria-label={certCell(c.certs?.get(id)?.title ?? id, s)}
                         >
                           <Cell s={s} />

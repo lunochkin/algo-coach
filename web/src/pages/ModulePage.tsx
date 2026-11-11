@@ -61,6 +61,7 @@ import { useLearner } from '@/knowledge/learner'
 import { ModuleMap } from '@/knowledge/ModuleMap'
 import { StartSheet, type Scope } from '@/knowledge/StartSheet'
 import { useSections } from '@/lib/sections'
+import { GRID_CELL, GRID_LEVEL_HEAD, GRID_PRESS } from '@/lib/grid'
 import { cn } from '@/lib/utils'
 
 const HOME = '/knowledge'
@@ -267,7 +268,7 @@ export function ModulePage() {
                           <tr className="text-meta text-muted-foreground">
                             <th className="px-4 py-2 text-left font-normal">{SUBTOPIC_COLUMN}</th>
                             {lv.map((level) => (
-                              <th key={level} className="px-3 py-2 text-right font-normal">
+                              <th key={level} className={GRID_LEVEL_HEAD}>
                                 {levelName(b.rules, level, true)}
                               </th>
                             ))}
@@ -317,15 +318,12 @@ export function ModulePage() {
                                   level,
                                 })
                                 return (
-                                  <td key={level} className="px-1 py-1 text-right">
+                                  <td key={level} className={GRID_CELL}>
                                     {/* a locked cell starts too: locks do not apply to the filtered queue */}
                                     <button
                                       type="button"
                                       disabled={cell.state === 'empty'}
-                                      className={cn(
-                                        'rounded-md px-2 py-1 tabular-nums hover:bg-muted disabled:hover:bg-transparent',
-                                        CELL_TONE[cell.state],
-                                      )}
+                                      className={cn(GRID_PRESS, CELL_TONE[cell.state])}
                                       title={cell.line}
                                       aria-label={startGroup(
                                         subTitle(c, sub),

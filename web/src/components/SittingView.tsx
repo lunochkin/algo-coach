@@ -410,13 +410,13 @@ export function SittingView({ problemId, drilled, card }: Props) {
           not the practice */}
       {/* explicit columns: an implicit one grows to the editor's longest line,
           and a narrow window then scrolls sideways */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-gutter lg:grid-cols-2">
         <section className="space-y-stack">
           <ProblemFacts problemId={problemId} technique={drilled} />
           <Markdown>{served.statement}</Markdown>
         </section>
         {/* the verdict sits under the editor: one page is the whole sitting */}
-        <section className="flex flex-col gap-3 lg:sticky lg:top-6 lg:h-[calc(100vh-10rem)]">
+        <section className="flex flex-col gap-stack lg:sticky lg:top-6 lg:h-[calc(100vh-10rem)]">
           <div className="min-h-96 flex-1 lg:min-h-0">
             <CodeEditor
               // what was typed survives a reload; a first visit starts on the
@@ -430,7 +430,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
               handle={editor}
             />
           </div>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <div className="flex flex-wrap items-center gap-stack">
             <Button onClick={submit} disabled={running || ended}>
               {submitLabel(running)}
             </Button>

@@ -207,7 +207,7 @@ function Start({
 }) {
   return (
     <Panel>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <div className="flex flex-wrap items-center gap-stack">
         <p className="text-meta text-muted-foreground">{RUN_START_NOTE}</p>
         <Button onClick={onStart} disabled={starting}>
           {runStartLabel(starting)}

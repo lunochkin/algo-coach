@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BACK_TO_CARD,
   described,
-  FORM_HIDDEN,
   hintTaken,
   nextHint,
   RECALL_ANOTHER,
@@ -281,14 +280,10 @@ function Ran({
         </Text>
         <Heading title={RECALL_FORM} />
         {form === null ? (
-          <>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              {FORM_HIDDEN}
-            </Text>
-            <Button mode="outlined" icon="eye-outline" onPress={reveal} style={{ alignSelf: 'flex-start' }}>
-              {REVEAL_FORM}
-            </Button>
-          </>
+          // the cover over the form, drawn as a card's template draws its own
+          <Button mode="outlined" icon="eye-outline" onPress={reveal} style={{ alignSelf: 'flex-start' }}>
+            {REVEAL_FORM}
+          </Button>
         ) : (
           <CodeBlock code={form} verbatim />
         )}

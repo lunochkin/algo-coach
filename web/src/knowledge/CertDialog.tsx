@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -51,9 +52,9 @@ export function CertDialog({
           <>
             <DialogHeader>
               <DialogTitle>{v.title}</DialogTitle>
+              <DialogDescription>{v.label}</DialogDescription>
             </DialogHeader>
-            <div className="space-y-stack text-meta">
-              <p className="font-medium text-foreground">{v.label}</p>
+            <div className="space-y-stack">
               {v.note && <p>{v.note}</p>}
               {v.progressNote && <p className="text-muted-foreground">{v.progressNote}</p>}
               <ul className="space-y-1">

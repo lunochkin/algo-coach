@@ -82,6 +82,5 @@ export const runLabel = (running: boolean) => (running ? 'Running…' : 'Run');
 export const recallRefused = (why: string) => `The recall did not run: ${why}`;
 export const RECALL_FORM = 'The form';
 export const REVEAL_FORM = 'Reveal the form';
-export const FORM_HIDDEN = 'The form is still hidden.';
 export const RECALL_ANOTHER = 'Recall another';
 export const BACK_TO_CARD = 'Back to the card';

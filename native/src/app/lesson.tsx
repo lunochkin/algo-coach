@@ -19,10 +19,11 @@ import {
   LESSON_NEXT,
   LESSON_NO_TEXT,
   LESSON_RELATED,
+  OF,
   LESSON_FALLBACK,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
-import { BottomBar, HeaderNote } from '@/ui/common';
+import { Blank, BottomBar, fromCopy, HeaderNote, Loaded, styles } from '@/ui/common';
 import { CodeRenderer, markdownOptions } from '@/ui/markdown';
 import { Heading } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
@@ -125,7 +126,16 @@ export default function LessonScreen() {
       </Appbar.Header>
       <HeaderNote lines={[lesson && c ? lessonNote(c.title, body ? minutesOf(lesson, body) : null, done) : null]} />
       {!lesson || !c ? (
-        <Text style={{ padding: 16 }}>{LESSON_MISSING}</Text>
+        <View style={styles.page}>
+          <Loaded
+            of={OF.lesson}
+            state={fromCopy(st, st.catalog ? { lesson } : null)}
+            blank={LESSON_MISSING}
+            blankWhen={(x) => !x.lesson}
+          >
+            {() => null}
+          </Loaded>
+        </View>
       ) : body ? (
         <>
           <SectionBar sections={sections} />
@@ -133,7 +143,7 @@ export default function LessonScreen() {
             ref={sections.scroll}
             onScroll={sections.onScroll}
             scrollEventThrottle={32}
-            contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: insets.bottom + 128 }}
+            contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 128 }]}
           >
             {parts.map((part, i) =>
               part.title === null ? (
@@ -148,7 +158,9 @@ export default function LessonScreen() {
           </ScrollView>
         </>
       ) : (
-        <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>{LESSON_NO_TEXT}</Text>
+        <View style={styles.page}>
+          <Blank>{LESSON_NO_TEXT}</Blank>
+        </View>
       )}
       {lesson ? (
         <BottomBar bottom={insets.bottom}>

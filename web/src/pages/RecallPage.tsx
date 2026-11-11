@@ -1,6 +1,5 @@
 import {
   BACK_TO_CARD,
-  FORM_HIDDEN,
   HINT_NAMES,
   HINTS,
   hintTaken,
@@ -30,6 +29,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { api, type Hint, type Named, type RecallAttempt } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
+import { PythonCode, RevealPress } from '@/components/PythonCode'
 import { ErrorLine } from '@/components/ErrorLine'
 import { CodeEditor } from '@/components/CodeEditor'
 import { Loaded } from '@/components/Loaded'
@@ -46,7 +46,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { pieces } from '@algo-coach/editor'
 import { cn } from '@/lib/utils'
 
 // the path names no template, so the trainer draws one and sends the browser
@@ -110,7 +109,11 @@ export function RecallPage() {
                   says which kind this one is. Withheld on a drawn recall: a
                   card carries at most one optional template, and the badge
                   would name the form the trigger is asking for */}
-              {recallOptional(prompt.data) && <Badge variant="secondary">{RECALL_OPTIONAL}</Badge>}
+              {recallOptional(prompt.data) && (
+                <Badge variant="outline" className="font-normal">
+                  {RECALL_OPTIONAL}
+                </Badge>
+              )}
             </span>
           )
         }
@@ -253,19 +256,7 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
             <span className="text-meta text-muted-foreground">{hintTaken(one.hint)}</span>
           </PanelStrip>
           <div className="px-4 py-3">
-            {one.hint === 'form' ? (
-              <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">
-                <code>
-                  {pieces(one.text).map((piece, index) => (
-                    <span key={index} className={piece.token}>
-                      {piece.text}
-                    </span>
-                  ))}
-                </code>
-              </pre>
-            ) : (
-              <Markdown>{one.text}</Markdown>
-            )}
+            {one.hint === 'form' ? <PythonCode code={one.text} /> : <Markdown>{one.text}</Markdown>}
           </div>
         </div>
       ))}
@@ -276,7 +267,7 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
               the parameter order is stated rather than inferred */}
           <CodeEditor initial={blank} onChange={(typed) => (code.current = typed)} onSubmit={run} />
         </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="flex flex-wrap items-center gap-stack">
           <Button onClick={run} disabled={running}>
             {runLabel(running)}
           </Button>
@@ -348,34 +339,15 @@ function Ran({
       {/* the form on a press: a user who failed to recall it learns which form
           it was and decides whether to read it */}
       <section className="space-y-stack">
-        <SectionHeading
-          title={RECALL_FORM}
-          aside={
-            form === null && (
-              <Button variant="outline" size="sm" onClick={reveal}>
-                {REVEAL_FORM}
-              </Button>
-            )
-          }
-        />
+        <SectionHeading title={RECALL_FORM} />
         {form === null ? (
-          <p className="rounded-md border border-dashed px-3 py-2 text-meta text-muted-foreground">
-            {FORM_HIDDEN}
-          </p>
+          <RevealPress label={REVEAL_FORM} onReveal={() => void reveal()} />
         ) : (
-          <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">
-            <code>
-              {pieces(form).map((piece, index) => (
-                <span key={index} className={piece.token}>
-                  {piece.text}
-                </span>
-              ))}
-            </code>
-          </pre>
+          <PythonCode code={form} />
         )}
       </section>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-stack">
         <Button asChild>
           <Link to={`/cards/${encodeURIComponent(slug)}/recall`}>{RECALL_ANOTHER}</Link>
         </Button>

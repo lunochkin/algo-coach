@@ -113,7 +113,7 @@ export function ProblemsPage() {
                       ))}
                     </PickPanel>
                     {view.pages > 1 && (
-                      <div className="flex items-center gap-3 pt-1 text-meta text-muted-foreground">
+                      <div className="flex items-center gap-stack pt-1 text-meta text-muted-foreground">
                         <Button
                           variant="outline"
                           size="sm"

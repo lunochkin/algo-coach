@@ -14,7 +14,7 @@ import { Link } from 'react-router'
 import type { Recalled, Template } from '@/api/client'
 import { PanelStrip } from '@/components/Panel'
 import { Markdown } from '@/components/Markdown'
-import { PythonCode } from '@/components/PythonCode'
+import { PythonCode, RevealPress } from '@/components/PythonCode'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { recallLine } from '@/lib/format'
@@ -43,8 +43,16 @@ export function TemplatePanel({
           identity, and the body carries the form and the acts on it */}
       <PanelStrip>
         <h3 className="font-medium">{template.title}</h3>
-        {template.optional && <Badge variant="secondary">{CARD_OPTIONAL}</Badge>}
-        {template.kind === 'procedure' && <Badge variant="outline">{PROCEDURE}</Badge>}
+        {template.optional && (
+          <Badge variant="outline" className="font-normal">
+            {CARD_OPTIONAL}
+          </Badge>
+        )}
+        {template.kind === 'procedure' && (
+          <Badge variant="outline" className="font-normal">
+            {PROCEDURE}
+          </Badge>
+        )}
         <span className="ml-auto text-meta text-muted-foreground">
           {recallable ? recallLine(recalled) : FORM_NO_CASES}
         </span>
@@ -58,18 +66,12 @@ export function TemplatePanel({
         ) : (
           // the press is the cover: it names the length and nothing of the
           // form, and a reader decides from that whether to try recalling it
-          <button
-            type="button"
-            onClick={() => setRevealed(true)}
-            className="w-full rounded-md border border-dashed px-3 py-2 text-left text-meta text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          >
-            {revealLabel(template.code)}
-          </button>
+          <RevealPress label={revealLabel(template.code)} onReveal={() => setRevealed(true)} />
         )}
 
         {revealed && template.notes && <Markdown>{template.notes}</Markdown>}
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-stack">
           {recallable ? (
             <Button variant="outline" size="sm" asChild>
               <Link

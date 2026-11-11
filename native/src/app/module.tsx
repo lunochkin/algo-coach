@@ -8,7 +8,7 @@ import {
   useSimultaneousGestures,
   useTapGesture,
 } from 'react-native-gesture-handler';
-import { Appbar, Button, Card, SegmentedButtons, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 import { cancelAnimation, useSharedValue, withDecay } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -56,10 +56,11 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
-import { BottomBar, fromCopy, HeaderNote, Loaded, styles, tones } from '@/ui/common';
+import { Blank, BottomBar, fromCopy, HeaderNote, Loaded, styles, tones } from '@/ui/common';
 import { MapCanvas, NODE_H, NODE_W, type CertPip } from '@/ui/mapcanvas';
 import { ModuleGroups } from '@/ui/groups';
 import { SectionBar, useSections } from '@/ui/sections';
+import { Sheet } from '@/ui/sheet';
 import { useArchive } from '@/ui/pause';
 import { useStartSheet, type Scope } from '@/ui/start';
 import { Toggle } from '@/ui/toggle';
@@ -166,7 +167,7 @@ export default function ModuleScreen() {
             onScroll={sections.onScroll}
             scrollEventThrottle={32}
             // room under the last topic for the bar over it
-            contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 96 }}
+            contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 96 }]}
           >
             <ModuleGroups c={c} b={b} of={sections} onStart={starter.open} />
           </ScrollView>
@@ -197,9 +198,11 @@ export default function ModuleScreen() {
             </View>
           ) : null}
           {!c.graph ? (
-            <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>{noGraph(c)}</Text>
+            <View style={styles.page}>
+              <Blank>{noGraph(c)}</Blank>
+            </View>
           ) : (
-            <CourseMap key={`${c.slug}:${withLessons}`} c={c} b={b} bottom={insets.bottom} withLessons={withLessons} />
+            <CourseMap key={`${c.slug}:${withLessons}`} c={c} b={b} withLessons={withLessons} />
           )}
         </>
       )}
@@ -209,8 +212,8 @@ export default function ModuleScreen() {
   );
 }
 
-function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: boolean }) {
-  const { c, b, bottom, withLessons } = props;
+function CourseMap(props: { c: Course; b: Board; withLessons: boolean }) {
+  const { c, b, withLessons } = props;
   const st = useStore();
   const certState = useMemo(
     () => (c.certs ? certStates(b, c, st.catalog?.certExams ?? []) : new Map<string, CertStatus>()),
@@ -422,9 +425,16 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
           />
         ) : null
       ) : sel?.kind === 'lesson' ? (
-        <LessonPanel c={c} b={b} slug={lessonSlug(sel.sub)!} bottom={bottom} />
+        <LessonPanel c={c} b={b} slug={lessonSlug(sel.sub)!} onClose={() => setPicked(null)} />
       ) : sel ? (
-        <NodePanel c={c} b={b} sub={sel.sub} topic={sel.topic} bottom={bottom} onPractice={starter.open} />
+        <NodePanel
+          c={c}
+          b={b}
+          sub={sel.sub}
+          topic={sel.topic}
+          onClose={() => setPicked(null)}
+          onPractice={starter.open}
+        />
       ) : null}
       {starter.sheet}
     </View>
@@ -457,18 +467,45 @@ function NodePanel(props: {
   b: Board;
   sub: string;
   topic: string;
-  bottom: number;
+  onClose: () => void;
   onPractice: (s: Scope) => void;
 }) {
-  const { c, b, sub, topic, bottom, onPractice } = props;
+  const { c, b, sub, topic, onClose, onPractice } = props;
   const st = useStore();
   const theme = useTheme();
   const v = nodeView(b, c, { topic, sub }, st.focus);
   const muted = theme.colors.onSurfaceVariant;
   return (
-    <Card mode="elevated" style={{ margin: 12, marginBottom: bottom + 12 }}>
-      <Card.Title title={v.title} subtitle={v.topic} />
-      <Card.Content style={{ gap: 2 }}>
+    // a node's detail opens as every overlay does on the phone: a sheet
+    <Sheet
+      visible
+      onDismiss={onClose}
+      title={v.title}
+      note={v.topic}
+      actions={
+        <>
+          <Button
+            mode="outlined"
+            icon="crosshairs-gps"
+            disabled={v.aimed}
+            onPress={() => void st.setFocus(aimFocus(st.focus, { course: c.slug, topic, sub }))}
+          >
+            {v.aimLabel}
+          </Button>
+          <Button
+            mode="outlined"
+            icon="play"
+            onPress={() => {
+              onClose();
+              onPractice(v.scope);
+            }}
+          >
+            {MODULE_START}
+          </Button>
+        </>
+      }
+    >
+      <View style={{ gap: 2 }}>
         {v.levels.map((x) => (
           <Text key={x.line} variant="bodySmall" style={{ color: x.empty ? muted : theme.colors.onSurface }}>
             {x.line}
@@ -484,36 +521,39 @@ function NodePanel(props: {
             {v.unlocks}
           </Text>
         ) : null}
-      </Card.Content>
-      <Card.Actions>
-        <Button
-          mode="outlined"
-          icon="crosshairs-gps"
-          disabled={v.aimed}
-          onPress={() => void st.setFocus(aimFocus(st.focus, { course: c.slug, topic, sub }))}
-        >
-          {v.aimLabel}
-        </Button>
-        <Button mode="outlined" icon="play" onPress={() => onPractice(v.scope)}>
-          {MODULE_START}
-        </Button>
-      </Card.Actions>
-    </Card>
+      </View>
+    </Sheet>
   );
 }
 
 /** A lesson as a book: a cover with a spine, outlined by its state (done / available / locked). */
 
 /** A lesson's state, its pretest so far, what it needs and teaches, and a way to read it. */
-function LessonPanel(props: { c: Course; b: Board; slug: string; bottom: number }) {
-  const { c, b, slug, bottom } = props;
+function LessonPanel(props: { c: Course; b: Board; slug: string; onClose: () => void }) {
+  const { c, b, slug, onClose } = props;
   const theme = useTheme();
   const v = lessonView(b, c, slug);
   if (!v) return null;
   return (
-    <Card mode="elevated" style={{ margin: 12, marginBottom: bottom + 12 }}>
-      <Card.Title title={v.title} subtitle={lessonPanelSub(v.state)} />
-      <Card.Content style={{ gap: 2 }}>
+    <Sheet
+      visible
+      onDismiss={onClose}
+      title={v.title}
+      note={lessonPanelSub(v.state)}
+      actions={
+        <Button
+          mode="outlined"
+          icon="book-open-variant"
+          onPress={() => {
+            onClose();
+            router.push({ pathname: '/lesson', params: { course: c.slug, slug } });
+          }}
+        >
+          {MAP_READ}
+        </Button>
+      }
+    >
+      <View style={{ gap: 2 }}>
         <Text variant="bodySmall">{v.teaches}</Text>
         {v.needs ? <Text variant="bodySmall">{v.needs}</Text> : null}
         {v.pretest ? (
@@ -521,17 +561,8 @@ function LessonPanel(props: { c: Course; b: Board; slug: string; bottom: number 
             {v.pretest}
           </Text>
         ) : null}
-      </Card.Content>
-      <Card.Actions>
-        <Button
-          mode="outlined"
-          icon="book-open-variant"
-          onPress={() => router.push({ pathname: '/lesson', params: { course: c.slug, slug } })}
-        >
-          {MAP_READ}
-        </Button>
-      </Card.Actions>
-    </Card>
+      </View>
+    </Sheet>
   );
 }
 

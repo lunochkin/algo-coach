@@ -22,6 +22,7 @@ import { described, useLoaded } from '@/api/useLoaded'
 import { ErrorLine } from '@/components/ErrorLine'
 import { Loaded } from '@/components/Loaded'
 import { Button } from '@/components/ui/button'
+import { DialogFooter } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -125,7 +126,7 @@ function ClaimForm({ attempt, modes, position, techniques, drilled, onClaimed }:
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-section">
       <p className="text-meta text-muted-foreground">{position}</p>
 
       <fieldset className="space-y-2">
@@ -193,9 +194,11 @@ function ClaimForm({ attempt, modes, position, techniques, drilled, onClaimed }:
       )}
 
       {refused && <ErrorLine>{claimRefused(refused)}</ErrorLine>}
-      <Button onClick={send} disabled={!claimReady(chosen, declined, confidence) || sending}>
-        {saveLabel(sending)}
-      </Button>
+      <DialogFooter>
+        <Button onClick={send} disabled={!claimReady(chosen, declined, confidence) || sending}>
+          {saveLabel(sending)}
+        </Button>
+      </DialogFooter>
     </div>
   )
 }

@@ -12,6 +12,7 @@ import {
   startPreview,
   startTitle,
   type DrillScope,
+  START_NOTE,
 } from '@algo-coach/core'
 
 import { Choice } from '@/components/Choice'
@@ -20,6 +21,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -64,6 +66,7 @@ function Choices({ scope }: { scope: Scope }) {
     <>
       <DialogHeader>
         <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>{START_NOTE}</DialogDescription>
       </DialogHeader>
       <div className="space-y-stack">
         <Choice label={START_LEVEL}>

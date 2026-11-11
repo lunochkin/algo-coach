@@ -12,7 +12,7 @@ export function PageSection({
   aside,
   sub = false,
   body = 'prose',
-  closed,
+  closed = false,
   onToggle,
   children,
 }: {
@@ -25,8 +25,9 @@ export function PageSection({
   // the panel the body sits in: prose padded, rows edge to edge, or none
   // where the body brings panels of its own
   body?: 'prose' | 'rows' | 'bare'
-  closed: boolean
-  onToggle: (id: string) => void
+  // without onToggle the section does not close, as the board's sections do not
+  closed?: boolean
+  onToggle?: (id: string) => void
   children: ReactNode
 }) {
   return (
@@ -39,7 +40,7 @@ export function PageSection({
         count={count}
         aside={aside}
         closed={closed}
-        onToggle={() => onToggle(id)}
+        onToggle={onToggle && (() => onToggle(id))}
       />
       {!closed &&
         (body === 'bare' ? (

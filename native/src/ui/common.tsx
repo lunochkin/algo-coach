@@ -176,6 +176,16 @@ export function ErrorLine({ children }: { children: ReactNode }) {
   );
 }
 
+/** The empty reading, as `Loaded` draws it: a list or a record holding nothing. */
+export function Blank({ children }: { children: ReactNode }) {
+  const theme = useTheme();
+  return (
+    <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+      {children}
+    </Text>
+  );
+}
+
 /** What a screen loads, from the engine or the device's copy: the data, or why it is missing. */
 export interface Reading<T> {
   data: T | null | undefined;
@@ -206,12 +216,7 @@ export function Loaded<T>(props: {
       </Text>
     );
   const blank = props.blankWhen ?? ((x: T) => Array.isArray(x) && x.length === 0);
-  if (props.blank !== undefined && blank(data))
-    return (
-      <Text variant="bodyMedium" style={muted}>
-        {props.blank}
-      </Text>
-    );
+  if (props.blank !== undefined && blank(data)) return <Blank>{props.blank}</Blank>;
   return <>{props.children(data)}</>;
 }
 

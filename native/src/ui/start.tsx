@@ -13,6 +13,7 @@ import {
   startPreview,
   startTitle,
   CANCEL,
+  START_NOTE,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { startQueue, styles } from '@/ui/common';
@@ -64,6 +65,7 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
       visible
       onDismiss={onClose}
       title={title}
+      note={START_NOTE}
       actions={
         <>
           <Button onPress={onClose}>{CANCEL}</Button>

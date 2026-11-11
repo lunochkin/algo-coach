@@ -153,7 +153,7 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
         </Button>
       </div>
 
-      <div ref={box} className="h-[60vh] overflow-auto rounded-xl border bg-background">
+      <div ref={box} className="h-[60vh] overflow-auto rounded-xl border bg-card">
         <svg
           width={layout.width * scale}
           height={layout.height * scale}

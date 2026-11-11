@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import {
   boardView,
   inProgress,
@@ -17,6 +16,7 @@ import { useLoaded } from '@/api/useLoaded'
 import { CardPanel } from '@/components/CardPanel'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
+import { PageSection } from '@/components/PageSection'
 import { PickList, PickRow } from '@/components/PickRow'
 import { SectionHeading } from '@/components/SectionHeading'
 import { counts } from '@/lib/format'
@@ -54,7 +54,12 @@ export function BoardPage() {
               )}
 
               {untouched.length > 0 && (
-                <Group title={BOARD_UNTOUCHED} count={untouched.length}>
+                <PageSection
+                  id="untouched"
+                  title={BOARD_UNTOUCHED}
+                  count={untouched.length}
+                  body="rows"
+                >
                   {/* names rather than chips: a bordered chip is what the
                       listing's filters are, and these open a technique */}
                   <div className="flex flex-wrap gap-x-5 gap-y-1 px-4 py-3">
@@ -68,17 +73,22 @@ export function BoardPage() {
                       </Link>
                     ))}
                   </div>
-                </Group>
+                </PageSection>
               )}
 
               {practised.length > 0 && (
-                <Group title={BOARD_PRACTISED} count={practised.length}>
+                <PageSection
+                  id="practised"
+                  title={BOARD_PRACTISED}
+                  count={practised.length}
+                  body="rows"
+                >
                   <PickList>
                     {practised.map((row) => (
                       <Practised key={row.technique} row={row} />
                     ))}
                   </PickList>
-                </Group>
+                </PageSection>
               )}
 
               {/* the attempts no row holds, on one line under the lists */}
@@ -98,16 +108,5 @@ function Practised({ row }: { row: TechniqueRow }) {
       title={row.technique}
       stats={counts(row)}
     />
-  )
-}
-
-// a section heading above a bordered panel, as the cards list draws its
-// sections. A panel's own header strip is kept for naming a record
-function Group({ title, count, children }: { title: string; count: number; children: ReactNode }) {
-  return (
-    <section className="space-y-stack">
-      <SectionHeading title={title} count={count} />
-      <div className="overflow-hidden rounded-xl border bg-card">{children}</div>
-    </section>
   )
 }

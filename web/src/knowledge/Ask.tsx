@@ -38,7 +38,7 @@ import {
 import { Link } from 'react-router'
 
 import { SectionHeading } from '@/components/SectionHeading'
-import { PythonCode } from '@/components/PythonCode'
+import { PlainCode, PythonCode } from '@/components/PythonCode'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -334,9 +334,7 @@ export function Details({
       {sections.map((x) => (
         <Section key={x.title} title={x.title}>
           {'code' in x ? (
-            <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">
-              {x.code}
-            </pre>
+            <PlainCode>{x.code}</PlainCode>
           ) : 'items' in x ? (
             <ul className="list-disc space-y-1 pl-5">
               {x.items.map((item, i) => (

@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Text, useTheme } from 'react-native-paper';
+import { Appbar, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -14,7 +14,7 @@ import {
 } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { CardPanel } from '@/ui/cards';
-import { Loaded, styles } from '@/ui/common';
+import { Blank, Loaded, styles } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 
 /**
@@ -63,7 +63,7 @@ export default function TechniqueScreen() {
               ) : null}
               <Heading title={TECHNIQUE_PROBLEMS} count={rows.length} />
               {rows.length === 0 ? (
-                <Text variant="bodyMedium">{TECHNIQUE_NONE}</Text>
+                <Blank>{TECHNIQUE_NONE}</Blank>
               ) : (
                 <PickPanel>
                   {rows.map((row) => (

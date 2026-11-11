@@ -288,7 +288,7 @@ ways inside each client. Each item covers both clients.
 - [x] Draw every error, small label, meta line and header note one way,
       and move the words still typed inline into `packages/core`. The web
       shows an error four ways, and the phone its header note three ways
-- [ ] Bring the rest onto shared parts: the dialogs, the code blocks, the
+- [x] Bring the rest onto shared parts: the dialogs, the code blocks, the
       badges, the two grid tables, the gaps as tokens, and the phone's
       readings still outside `Loaded`
 
