@@ -171,19 +171,26 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       does, so Read no longer ends the queue
 - [x] Move the map's edges and node panel, the learner, one typed engine
       client and the small focus, order and certification helpers into core
-- [ ] Add a test that every web route and every native screen file has an
-      inventory row, so a new screen cannot ship unlisted
-- [ ] Serve the problem listing on the phone as a Problems tab: the technique
-      and difficulty filters, their counts and the pages, computed in core
+- [ ] Add a test in `tests/` that every web route and native screen file has
+      an inventory row, matched by a table in the test, and that a row's
+      phone column reads `none` exactly where no phone screen holds it
+- [ ] Serve the problem listing on the phone as a Problems tab, its filters,
+      counts and pages computed in core, and drop the `pages.md` rule that the
+      listing follows the sitting
 - [ ] Show a card's ladder and probes on the phone, each rung opening the
-      Problem screen. A rung reads, and the sitting it opens stays on the web
-- [ ] Add the press starting a card run to the phone's card. Starting declares
-      the study, and the sittings it measures are still sat on the web
-- [ ] Link the privacy policy from the phone's Login and Settings, by its URL
+      Problem screen, and revise the `pages.md` rule that they follow the
+      sitting. The sitting a rung opens stays on the web
+- [ ] Add the press starting a card run to the phone's card, below its
+      ladder. Starting draws the probes and declares the study, and the
+      sittings it measures are still sat on the web
+- [ ] Link the privacy policy from the phone's Login and Settings, opening
+      its web URL, and name the link in the inventory's phone column
 
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
       showing the same state
+- [ ] Read the inventory with no row `to fix`, and `web for now` on the
+      sitting and the recall alone, which wait for a phone layout for code
 
 ## Phase 16 — scheduling and mastery
 
