@@ -99,7 +99,18 @@ export function startExam(st: Starter, plan: ExamPlan) {
 }
 
 /** Bottom action bar with an opaque background, so scrolled content never shows behind the buttons. */
-export function BottomBar({ bottom, row = false, children }: { bottom: number; row?: boolean; children: ReactNode }) {
+export function BottomBar({
+  bottom,
+  row = false,
+  above,
+  children,
+}: {
+  bottom: number;
+  row?: boolean;
+  // drawn over the presses, as the app's keyboard is
+  above?: ReactNode;
+  children: ReactNode;
+}) {
   const theme = useTheme();
   return (
     <View
@@ -112,11 +123,11 @@ export function BottomBar({ bottom, row = false, children }: { bottom: number; r
         paddingTop: 12,
         paddingBottom: bottom + 16,
         gap: 8,
-        flexDirection: row ? 'row' : 'column',
         backgroundColor: theme.colors.background,
       }}
     >
-      {children}
+      {above}
+      <View style={{ gap: 8, flexDirection: row ? 'row' : 'column' }}>{children}</View>
     </View>
   );
 }

@@ -64,8 +64,10 @@ import {
   togglePick,
   NEW_STEP,
 } from '@algo-coach/core';
+import { EMPTY, type Edit, pressed } from '@/lib/keys';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
+import { KeyPad, PAD_HEIGHT } from '@/ui/keys';
 
 export default function Quiz() {
   const st = useStore();
@@ -423,7 +425,8 @@ function Ask(props: {
   // Shuffle choices so position carries no information across sessions.
   const order = useMemo(() => choiceOrder(q.choices.length), [q]);
   const [picked, setPicked] = useState<number[]>([]);
-  const [text, setText] = useState('');
+  const [edit, setEdit] = useState<Edit>(EMPTY);
+  const text = edit.text;
   const [guessing, setGuessing] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [recalled, setRecalled] = useState<Set<number>>(new Set());
@@ -444,12 +447,13 @@ function Ask(props: {
   const submit = () => answer(answerResult(q, order, reply));
   const gradeCardNow = () => answer(gradeResult(q, order, recalled, fell, wrong));
   const toggle = (pos: number) => setPicked(togglePick(picked, pos, multi));
+  const padOpen = q.format === 'short' && !result;
 
   return (
     // Edge-to-edge Android no longer resizes the window for the keyboard; this keeps the input and bottom bar above it.
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
       <ScrollView
-        contentContainerStyle={[styles.page, { paddingBottom: bottom + 96 }]}
+        contentContainerStyle={[styles.page, { paddingBottom: bottom + 96 + (padOpen ? PAD_HEIGHT + 8 : 0) }]}
         keyboardShouldPersistTaps="handled"
       >
         <Head q={q} tag={tag} early={early} />
@@ -461,7 +465,12 @@ function Ask(props: {
             mode="outlined"
             label={ASK_ANSWER}
             value={text}
-            onChangeText={setText}
+            selection={edit.selection}
+            onChangeText={(typed) => setEdit((was) => ({ ...was, text: typed }))}
+            onSelectionChange={(e) => setEdit((was) => ({ ...was, selection: e.nativeEvent.selection }))}
+            // the app's keyboard answers, and the system's never opens
+            showSoftInputOnFocus={false}
+            autoFocus
             editable={!result}
             autoCapitalize="none"
             autoCorrect={false}
@@ -514,7 +523,11 @@ function Ask(props: {
         {result ? <DetailsToggle r={result} open={details} onToggle={() => setDetails(!details)} /> : null}
       </ScrollView>
 
-      <BottomBar bottom={bottom} row>
+      <BottomBar
+        bottom={bottom}
+        row
+        above={padOpen ? <KeyPad onKey={(key) => setEdit((was) => pressed(was, key))} /> : undefined}
+      >
         {result ? (
           <Button mode="contained" style={{ flex: 1 }} onPress={onNext}>
             {last ? 'Finish' : ASK_NEXT}

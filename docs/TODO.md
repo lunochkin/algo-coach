@@ -196,9 +196,9 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
 - [x] Add `device` to the sitting, as the knowledge records carry it, and
       snapshot the schema. A phone solve is slower, and an attempt's time is
       append-only, so the field lands before the first phone sitting
-- [ ] Draw a keyboard of the app's own, with brackets, commas, quotes, digits
-      and `?` on its main layer and a switch to the system keyboard for words,
-      and answer a `short` question through it on the quiz screen
+- [x] Draw a keyboard of the app's own, with two rows of symbols above the
+      digits and the letters and the rare symbols on a layer, and answer a
+      `short` question through it on the quiz screen
 - [ ] Type a form into CodeMirror in a WebView on the Android phone, its
       content `inputmode="none"` and the app's keyboard sending each key, and
       write the scrolling and key latency it showed into `README.md`

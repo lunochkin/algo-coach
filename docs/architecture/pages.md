@@ -281,7 +281,11 @@ platforms.
   wrong. `knowledge.md` gives the grade the ticks make.
 - **A keyboard answers the queue.** A digit picks an option, and Enter submits
   or moves to the next question. A reader at a keyboard answers faster than by
-  pointer, and the phone offers no keyboard to match.
+  pointer.
+- **The phone types a `short` reply on a keyboard of the app's own, and the
+  system keyboard never opens.** Two rows of symbols sit above the digits and
+  the letters, so a reply needs no layer. A layer holds the rare symbols and
+  `True`, `False` and `None`, behind a key that names it.
 - **Stop ends the queue and stores its stint**, and the page reads a summary
   of the answers given. Leaving the queue through the navigation stops it the
   same way. A closed tab stores no stint, and the answers given stay.
@@ -432,6 +436,7 @@ what it offers. The inventory is the list both clients build to.
 | Mark a lesson read or unread | the lesson page | Lesson | same |
 | Set the daily limit and the exam size | the settings page | Settings | same |
 | Set the exam size for one exam | the exam page | Exam | same |
+| Type a `short` reply | the browser's keyboard | the app's keyboard | by platform |
 | Read the sync's state, and sync now | the settings page | Settings, and Home's footer | same |
 | Sign out, naming unsent records | the account menu and the settings page | the account menu and Settings | same |
 | Revoke a signed-in device | the signed-in devices | the signed-in devices | same |
@@ -487,6 +492,9 @@ what it offers. The inventory is the list both clients build to.
   reload, and its quiz screen runs every queue and exam.
 - **Ordering by drag is the phone's, and up and down presses are the
   web's.** A drag needs a long press, which a pointer does not hold well.
+- **A `short` reply is typed on the app's keyboard on the phone.** The web is
+  read at a physical keyboard, which holds every symbol on its keys. The
+  phone's system keyboard hides them, and its suggestion strip completes words.
 - **The engine's address, the device name and the reminder hour are
   phone only.** Each one is about one phone, and the web reaches the engine
   it was served from.
