@@ -244,11 +244,39 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
       recall rows, the Problem screen's missing editor, and the rejected
       WebView. Name the new screens in `tests/test_pages_inventory.py`
 
+### One look across the pages
+
+The knowledge pages came from learn and the engine pages were built after,
+and an audit on 2026-11-11 found them laid out two ways. `pages.md`, A
+page's areas, gives the rules each item brings the pages to, on both
+clients.
+
+- [ ] Read every list as rows in one bordered panel, the whole row the link:
+      the modules, the lessons, the problems and the card's own lists. The
+      phone draws a card per item on the knowledge screens today
+- [ ] Give every section one heading component with its count, and every
+      panel one ground. The knowledge screens and the engine panels each
+      write their own
+- [ ] Draw every header outside the four readings, and route every page's
+      loading, failed and empty through the one component. The queue and
+      the exam build their own header and skip it
+- [ ] Add the section bar and collapsing headings to the long pages: the
+      module, a lesson, the lessons and the certifications
+- [ ] Hold each page's act as one primary press, in the bottom bar on the
+      phone, and turn the phone's dialogs into bottom sheets
+- [ ] Move every word the pages still type inline into `packages/core`,
+      the engine pages' titles, intros and empty lines first
+- [ ] Replace the raw sizes, the hex colours and the flame used for status
+      with tokens: the map, the certifications grid, `tones()` and the
+      verdict colours
+
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
       showing the same state
 - [ ] Read the inventory with no row `to fix` and no row `web for now`
 - [ ] Sit a problem and recall a form on the phone, through the app's keyboard
+- [ ] Read the knowledge pages and the engine pages on both clients with no
+      part drawn two ways
 
 ## Phase 16 — scheduling and mastery
 

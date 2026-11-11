@@ -536,53 +536,28 @@ needs. The audit of 2026-11-10 compared every knowledge row marked `same`
 with the other client's code, and both clients were brought together on each
 difference it found. No row is marked `to fix` today.
 
-## A page's areas` gives.
-  - On the map, a press on a dimmed node selects it on the web and clears the
-    selection on the phone. The phone selects it.
-  - A certification node with nothing to open shows a subtopic's card on the
-    phone. It shows nothing, as on the web.
-- **Pause, resume or archive a module.**
-  - The phone asks before a pause and before a resume. This file asks before
-    an archive alone, since only an archive takes the module off the home.
-  - After an archive the phone stays on a module it can no longer show. It
-    returns home, as the web does.
-- **The certifications.**
-  - The phone names a topic by its slug, where `knowledge.md` gives the
-    title. The phone shows the title.
-  - The phone marks a level no scope certifies as practice, and shows the
-    coverage under a certification in progress. Core computes both, and the
-    web shows both.
-- **A queue.** Stop with nothing answered leaves the phone's quiz screen with
-  no summary. Stop reads a summary on both, as `## The knowledge pages` gives.
-- **A level exam's choices.**
-  - The phone marks a paused module as paused, and the web does too, since a
-    paused module leaves exams unless the user names it.
-  - The phone shows its choices before the content has loaded. It reads the
-    four readings, as the web does.
-- **Set the exam size for one exam.** The web saves the size 600 ms after the
-  typing stops, so a size typed just before Start is lost. The web also saves
-  it as the exam starts, as the phone does on leaving.
-- **The lessons.** The phone opens with the locked groups closed. Every
-  section is open until the reader closes it, as `## A page's areas` gives.
-- **A lesson, and marking it.**
-  - The phone's Mark read turns into a disabled "Done", and Mark unread sits
-    in a menu. The phone offers Mark read and Mark unread as one press, as
-    `## The knowledge pages` gives.
-  - Marking a lesson read leaves the phone's screen. The page stays on both,
-    so the links to other lessons stay in reach.
-  - The web's header names the module, the minutes and whether the lesson is
-    read. The phone names the minutes alone, and adds the other two.
-
 ## A page's areas
 
 - **A page carries a header and a body.** The header holds the way back, the
   title, and the one line that identifies what the title names, such as the
   technique a card teaches.
+- **The header reads in every reading of the page**, loading and failed
+  included. A page whose header waits for its record leaves a reader on a
+  failed load with no title and no way back.
+- **Each part of a page is one shared component per client**: the header,
+  the four readings, a row, a section's heading and its panel. Every page
+  uses it, the knowledge pages and the engine pages alike. A part copied
+  into one page drifts from the rest, and the two families of pages read as
+  two apps.
 - **One page asks for one act.** The board asks what to practise next, a card in
   progress or a technique. The candidates ask for a problem, and the sitting
   asks for a submission. The clock's press sits in the bar as a control, not as
   an act the page waits on. A page offering two acts of equal weight makes the
   user choose before the flow asks them to.
+- **The act reads as the page's one primary press.** The phone holds it in
+  the bar at the bottom of the screen, where the thumb rests, and the web
+  holds it in the page. A second way in reads at a lower weight, as the
+  knowledge home's Exam does beside Continue.
 - **The body reads in one column of at most 56rem.** A line of prose wider than
   that is hard to track back to the next line's start.
 - **The sitting is the exception, and reads in two columns.** The statement and
