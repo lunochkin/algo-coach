@@ -6,6 +6,7 @@ import { Tabs } from 'expo-router/js-tabs';
 // tab names nothing, so it shows from the second section on
 const SECTIONS = [
   { name: 'practice', title: 'Practice', icon: 'target' },
+  { name: 'problems', title: 'Problems', icon: 'format-list-bulleted' },
   { name: 'cards', title: 'Cards', icon: 'cards-outline' },
   { name: 'index', title: 'Knowledge', icon: 'brain' },
 ] as const;

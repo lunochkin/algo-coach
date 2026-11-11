@@ -385,7 +385,7 @@ what it offers. The inventory is the list both clients build to.
 | The landing page | the board | the knowledge home | by platform |
 | The board | `/` | the Practice tab | same |
 | A technique's problems and cards | `/techniques/:technique` | Technique | same |
-| The problem listing | `/problems` | none | web for now |
+| The problem listing | `/problems` | the Problems tab | same |
 | A picked problem's record and statement | `/problems/:problem_id` | Problem | same |
 | A sitting | `/problems/:problem_id` | none | web for now |
 | The cards | `/cards` | the Cards tab | same |
@@ -439,9 +439,10 @@ what it offers. The inventory is the list both clients build to.
 - **A sitting and a recall are web for now.** Each needs a keyboard and a
   wide window, as `README.md` gives. A phone layout for writing code is the
   trigger, and none is planned.
-- **The problem listing follows the sitting.** The listing exists to pick a
-  problem across every technique, and the phone picks one from a technique
-  alone until it holds a sitting.
+- **The phone's Problems tab reads the listing as the web's page does.** A
+  row opens the phone's Problem screen, which reads the record and the
+  statement. The filters live in the tab while it is open, since the phone
+  has no URL to keep them in.
 - **The phone opens on the knowledge home, where the web opens on the
   board.** The knowledge home serves from the phone's own copy, and the board
   needs a connection. A phone opened on a train then shows a page that works.

@@ -34,6 +34,7 @@ WEB_UNLISTED = {"*"}
 # each phone screen file, by its path under native/src/app, and its row
 PHONE = {
     "(tabs)/practice.tsx": "The board",
+    "(tabs)/problems.tsx": "The problem listing",
     "(tabs)/cards.tsx": "The cards",
     "(tabs)/index.tsx": "The knowledge home",
     "technique.tsx": "A technique's problems and cards",

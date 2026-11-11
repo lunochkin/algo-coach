@@ -1,3 +1,18 @@
+import {
+  clearFilters,
+  listingHeading,
+  listingView,
+  NO_FILTER,
+  PAGE_NEXT,
+  PAGE_PREVIOUS,
+  pageOf,
+  PROBLEMS_NONE,
+  PROBLEMS_NONE_MATCH,
+  PROBLEMS_NOTE,
+  PROBLEMS_TITLE,
+  toggled,
+  type ListingFilter,
+} from '@algo-coach/core'
 import { Link, useSearchParams } from 'react-router'
 
 import { api, type Listed } from '@/api/client'
@@ -7,166 +22,111 @@ import { PageHeader } from '@/components/PageHeader'
 import { PickList } from '@/components/PickRow'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { lastAt, share } from '@/lib/format'
+import { counts } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
-// the rows one page of the listing holds. The whole listing is fetched, since
-// the tags count every problem the corpus carries, and a page is a slice of
-// what the tags left
-const PER_PAGE = 20
-
-// the three a problem carries, in the order a solver reads them rather than
-// the order they count in
-const DIFFICULTIES = ['easy', 'medium', 'hard']
-
 // every served problem at once, where the board reaches them one technique at
-// a time. The techniques a problem carries are the filter
+// a time. Core reads the filters, the counts and the page: `listingView`
 export function ProblemsPage() {
   const listed = useLoaded((signal) => api.GET('/api/problems', { signal }), 'problems')
-  // the tags in the URL, so a filtered listing is a link the user can keep
+  // the filters and the page in the URL, so a filtered listing is a link the user can keep
   const [search, setSearch] = useSearchParams()
-  const picked = search.getAll('technique')
-  // one tag picked is a technique drilled for, as a pick from the board is
-  const drilled = picked.length === 1 ? picked[0] : null
-  const difficulties = search.getAll('difficulty')
-  const page = Math.max(1, Number(search.get('page') ?? 1) || 1)
+  const filter: ListingFilter = {
+    techniques: search.getAll('technique'),
+    difficulties: search.getAll('difficulty'),
+    page: Math.max(1, Number(search.get('page') ?? 1) || 1),
+  }
 
-  // the two filters and the page are the page's whole state, so one writer
-  // sets all three
-  function go(tags: string[], asked: string[], to: number) {
+  function go(next: ListingFilter) {
     const params = new URLSearchParams()
-    for (const one of tags) params.append('technique', one)
-    for (const one of asked) params.append('difficulty', one)
-    if (to > 1) params.set('page', String(to))
+    for (const one of next.techniques) params.append('technique', one)
+    for (const one of next.difficulties) params.append('difficulty', one)
+    if (next.page > 1) params.set('page', String(next.page))
     setSearch(params)
-  }
-
-  // a filter moves the listing back to its first page: the page the reader was
-  // on may hold nothing once the list is narrowed
-  function toggle(technique: string) {
-    go(without(picked, technique), difficulties, 1)
-  }
-
-  function toggleDifficulty(difficulty: string) {
-    go(picked, without(difficulties, difficulty), 1)
   }
 
   return (
     <section className="space-y-section">
-      <PageHeader
-        title="Problems"
-        note="Every problem the engine has written. A difficulty and a tag narrow the list, and a problem shows where it matches both."
-      />
-      <Loaded of="the problems" state={listed} blank="No problem is served yet.">
+      <PageHeader title={PROBLEMS_TITLE} note={PROBLEMS_NOTE} />
+      <Loaded of="the problems" state={listed} blank={PROBLEMS_NONE}>
         {(listed) => {
-          // a filter of its own narrows what the other one counts, so each
-          // count says what pressing that chip would leave
-          const byDifficulty = listed.filter((one) => asked(one, difficulties))
-          const byTag = listed.filter((one) => carries(one, picked))
-          const shown = byDifficulty.filter((one) => carries(one, picked))
-          const filtered = picked.length > 0 || difficulties.length > 0
-          const pages = Math.max(1, Math.ceil(shown.length / PER_PAGE))
-          const current = Math.min(page, pages)
-          const held = shown.slice((current - 1) * PER_PAGE, current * PER_PAGE)
-
+          const view = listingView(listed, filter)
           return (
             <div className="space-y-section">
               <section className="space-y-stack">
-                <div className="flex flex-wrap gap-2">
-                  {DIFFICULTIES.map((difficulty) => (
-                    <button
-                      key={difficulty}
-                      type="button"
-                      onClick={() => toggleDifficulty(difficulty)}
-                      aria-pressed={difficulties.includes(difficulty)}
-                      className={cn(
-                        'rounded-lg border px-2.5 py-1 text-meta transition-colors',
-                        difficulties.includes(difficulty)
-                          ? 'border-transparent bg-secondary text-secondary-foreground'
-                          : 'hover:bg-accent',
-                      )}
-                    >
-                      {difficulty}{' '}
-                      <span className="inline-block min-w-[2ch] text-right text-muted-foreground tabular-nums">
-                        {byTag.filter((one) => one.difficulty === difficulty).length}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {tags(listed, byDifficulty).map(([technique, held]) => (
-                    <button
-                      key={technique}
-                      type="button"
-                      onClick={() => toggle(technique)}
-                      aria-pressed={picked.includes(technique)}
-                      className={cn(
-                        'rounded-lg border px-2.5 py-1 text-meta transition-colors',
-                        picked.includes(technique)
-                          ? 'border-transparent bg-secondary text-secondary-foreground'
-                          : 'hover:bg-accent',
-                      )}
-                    >
-                      {technique}{' '}
-                      <span className="inline-block min-w-[2ch] text-right text-muted-foreground tabular-nums">
-                        {held}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                {(
+                  [
+                    ['difficulties', view.difficulties],
+                    ['techniques', view.tags],
+                  ] as const
+                ).map(([kind, chips]) => (
+                  <div key={kind} className="flex flex-wrap gap-2">
+                    {chips.map((chip) => (
+                      <button
+                        key={chip.name}
+                        type="button"
+                        onClick={() => go(toggled(filter, kind, chip.name))}
+                        aria-pressed={chip.on}
+                        className={cn(
+                          'rounded-lg border px-2.5 py-1 text-meta transition-colors',
+                          chip.on
+                            ? 'border-transparent bg-secondary text-secondary-foreground'
+                            : 'hover:bg-accent',
+                        )}
+                      >
+                        {chip.name}{' '}
+                        <span className="inline-block min-w-[2ch] text-right text-muted-foreground tabular-nums">
+                          {chip.count}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ))}
               </section>
 
               <section className="space-y-stack">
                 <h2 className="flex items-baseline gap-2 text-heading font-medium">
-                  {filtered ? 'Matching your filters' : 'Every problem'}
+                  {listingHeading(view.filtered)}
                   <span className="text-meta font-normal text-muted-foreground tabular-nums">
-                    {shown.length}
+                    {view.shown}
                   </span>
-                  {filtered && (
+                  {view.filtered && (
                     <button
                       type="button"
-                      onClick={() => go([], [], 1)}
+                      onClick={() => go(NO_FILTER)}
                       className="ml-auto text-meta font-normal text-muted-foreground underline-offset-4 hover:underline"
                     >
-                      Clear{' '}
-                      {picked.length + difficulties.length === 1
-                        ? 'the filter'
-                        : `all ${picked.length + difficulties.length} filters`}
+                      {clearFilters(filter)}
                     </button>
                   )}
                 </h2>
-                {shown.length === 0 ? (
-                  <p className="text-meta text-muted-foreground">
-                    No problem carries a tag you picked at the difficulty you asked for.
-                  </p>
+                {view.shown === 0 ? (
+                  <p className="text-meta text-muted-foreground">{PROBLEMS_NONE_MATCH}</p>
                 ) : (
                   <>
                     <PickList>
-                      {held.map((one) => (
-                        <ProblemRow key={one.problem_id} listed={one} drilled={drilled} />
+                      {view.rows.map((one) => (
+                        <ProblemRow key={one.problem_id} listed={one} drilled={view.drilled} />
                       ))}
                     </PickList>
-                    {pages > 1 && (
+                    {view.pages > 1 && (
                       <div className="flex items-center gap-3 pt-1 text-meta text-muted-foreground">
                         <Button
                           variant="outline"
                           size="sm"
-                          disabled={current === 1}
-                          onClick={() => go(picked, difficulties, current - 1)}
+                          disabled={view.page === 1}
+                          onClick={() => go({ ...filter, page: view.page - 1 })}
                         >
-                          Previous
+                          {PAGE_PREVIOUS}
                         </Button>
-                        <span className="tabular-nums">
-                          Page {current} of {pages}
-                        </span>
+                        <span className="tabular-nums">{pageOf(view.page, view.pages)}</span>
                         <Button
                           variant="outline"
                           size="sm"
-                          disabled={current === pages}
-                          onClick={() => go(picked, difficulties, current + 1)}
+                          disabled={view.page === view.pages}
+                          onClick={() => go({ ...filter, page: view.page + 1 })}
                         >
-                          Next
+                          {PAGE_NEXT}
                         </Button>
                       </div>
                     )}
@@ -201,9 +161,9 @@ function ProblemRow({ listed, drilled }: { listed: Listed; drilled: string | nul
           </Badge>
         )}
         <span className="ml-auto shrink-0 text-meta text-muted-foreground tabular-nums">
-          {listed.attempt_count === 0
-            ? 'never attempted'
-            : `${listed.attempt_count} attempts · ${share(listed.solved_count, listed.attempt_count)} solved · ${lastAt(listed.last_attempt_at)}`}
+          {counts(listed)
+            .map((one) => (one.label ? `${one.value} ${one.label}` : String(one.value)))
+            .join(' · ')}
         </span>
       </div>
       <p className="mt-1 font-mono text-meta text-muted-foreground">
@@ -211,41 +171,4 @@ function ProblemRow({ listed, drilled }: { listed: Listed; drilled: string | nul
       </p>
     </Link>
   )
-}
-
-// a problem is shown where it carries any tag the user picked: the tags
-// narrow the list rather than asking for a problem carrying all of them
-function carries(one: Listed, picked: string[]): boolean {
-  return picked.length === 0 || picked.some((technique) => one.techniques.includes(technique))
-}
-
-// the difficulties read the same way, and the two filters meet: a problem shows
-// where it carries a picked tag and sits at a difficulty asked for
-function asked(one: Listed, difficulties: string[]): boolean {
-  if (difficulties.length === 0) return true
-  return one.difficulty !== null && difficulties.includes(one.difficulty)
-}
-
-// a chip that presses off where it is on
-function without(held: string[], one: string): string[] {
-  return held.includes(one) ? held.filter((other) => other !== one) : [...held, one]
-}
-
-// every technique the listing holds, ordered by how many problems carry it in
-// the whole listing, and counted over what the difficulty filter left. The order is
-// the whole listing's so the rows never rewrap as a count moves
-function tags(all: Listed[], left: Listed[]): [string, number][] {
-  const order = held(all)
-  const counted = held(left)
-  return [...order]
-    .sort(([one, a], [other, b]) => b - a || one.localeCompare(other))
-    .map(([technique]) => [technique, counted.get(technique) ?? 0])
-}
-
-function held(listed: Listed[]): Map<string, number> {
-  const counted = new Map<string, number>()
-  for (const one of listed)
-    for (const technique of one.techniques)
-      counted.set(technique, (counted.get(technique) ?? 0) + 1)
-  return counted
 }

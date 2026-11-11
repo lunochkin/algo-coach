@@ -9,7 +9,14 @@ import { styles } from '@/ui/common';
  * One pick on a list of picks. A phone is too narrow for the counts beside
  * the title, so they read on a line under it. Without `onPress` it opens nothing.
  */
-export function PickRow(props: { title: string; badge?: string | null; stats: Stat[]; onPress?: () => void }) {
+export function PickRow(props: {
+  title: string;
+  badge?: string | null;
+  stats: Stat[];
+  // a line under the counts, such as the techniques a problem carries
+  note?: string;
+  onPress?: () => void;
+}) {
   const theme = useTheme();
   const counts = props.stats.map((one) => (one.label ? `${one.value} ${one.label}` : String(one.value))).join(' · ');
   const body = (
@@ -21,6 +28,11 @@ export function PickRow(props: { title: string; badge?: string | null; stats: St
           {counts}
         </Text>
       </View>
+      {props.note ? (
+        <Text variant="bodySmall" style={{ fontFamily: 'monospace', color: theme.colors.onSurfaceVariant }}>
+          {props.note}
+        </Text>
+      ) : null}
     </View>
   );
   if (!props.onPress) return body;

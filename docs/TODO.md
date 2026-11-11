@@ -174,7 +174,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Add a test in `tests/` that every web route and native screen file has
       an inventory row, matched by a table in the test, and that a row's
       phone column reads `none` exactly where no phone screen holds it
-- [ ] Serve the problem listing on the phone as a Problems tab, its filters,
+- [x] Serve the problem listing on the phone as a Problems tab, its filters,
       counts and pages computed in core, and drop the `pages.md` rule that the
       listing follows the sitting
 - [ ] Show a card's ladder and probes on the phone, each rung opening the
