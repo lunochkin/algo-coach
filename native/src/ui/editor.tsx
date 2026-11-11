@@ -35,6 +35,8 @@ export interface EditorHandle {
   press: (key: Key) => void;
   // after the editor's height changed, so the page lays itself out again
   measure: () => void;
+  // the whole code replaced, as the restore press replaces it
+  replace: (code: string) => void;
 }
 
 /**
@@ -60,6 +62,7 @@ export function CodeEditor({
   useImperativeHandle(ref, () => ({
     press: (key) => send({ kind: 'key', key }),
     measure: () => send({ kind: 'measure' }),
+    replace: (doc) => send({ kind: 'replace', doc }),
   }));
 
   const colors: Colors = {

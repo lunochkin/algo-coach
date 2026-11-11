@@ -131,6 +131,12 @@ function receive(event: MessageEvent) {
   if (message.kind === 'open') open(message.doc, message.colors);
   else if (message.kind === 'key') press(message.key);
   else if (message.kind === 'measure') fit();
+  else if (message.kind === 'replace' && view)
+    view.dispatch({
+      changes: { from: 0, to: view.state.doc.length, insert: message.doc },
+      selection: { anchor: message.doc.length },
+      scrollIntoView: true,
+    });
 }
 
 // Android delivers the app's messages on the document, iOS on the window

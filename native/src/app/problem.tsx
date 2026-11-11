@@ -29,6 +29,7 @@ import {
   problemCards,
   problemTried,
   readFailure,
+  RESTORE_SOLVE,
   SITTING_END,
   SITTING_ENDED,
   sittingBack,
@@ -47,6 +48,7 @@ import { Failed, styles, tones } from '@/ui/common';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
 import { KeyPad } from '@/ui/keys';
 import { Markdown } from '@/ui/markdown';
+import { ClaimSheet } from '@/ui/claim';
 import { Badge } from '@/ui/rows';
 import { ElapsedClock, SubmissionVerdict } from '@/ui/verdict';
 
@@ -144,7 +146,13 @@ export default function ProblemScreen() {
           </Text>
         </ScrollView>
       ) : (
-        <SittingOn problemId={problem} card={card ?? null} facts={facts} bottom={insets.bottom} />
+        <SittingOn
+          problemId={problem}
+          card={card ?? null}
+          drilled={technique ?? null}
+          facts={facts}
+          bottom={insets.bottom}
+        />
       )}
     </View>
   );
@@ -153,11 +161,14 @@ export default function ProblemScreen() {
 function SittingOn({
   problemId,
   card,
+  drilled,
   facts,
   bottom,
 }: {
   problemId: string;
   card: string | null;
+  // the technique the claim answers for: the card's own, or the pick's
+  drilled: string | null;
   facts: ReactNode;
   bottom: number;
 }) {
@@ -182,6 +193,11 @@ function SittingOn({
   const [tab, setTab] = useState<'statement' | 'code'>('statement');
   const [keys, setKeys] = useState(true);
   const [ending, setEnding] = useState(false);
+  // the claim is asked once the sitting ends on this screen, and answering it
+  // or closing it leaves the screen where it is
+  const [claimed, setClaimed] = useState(false);
+  // set by the restore press, and kept with the draft so a reopened screen keeps it
+  const restored = useRef<boolean | null>(null);
   const editor = useRef<EditorHandle>(null);
   const [names, setNames] = useState<string[]>([]);
   const code = useRef<string | null>(null);
@@ -320,6 +336,13 @@ function SittingOn({
     );
 
   const opened = editorOpening(kept, sittingId, carry, statement.signature);
+  const solve = carry?.solved_code ?? null;
+  // the user's own act: a solve is never carried, so it returns only here
+  function restore() {
+    if (solve === null) return;
+    restored.current = true;
+    editor.current?.replace(solve);
+  }
 
   async function submit() {
     if (running) return;
@@ -330,7 +353,7 @@ function SittingOn({
       if (id === null) return;
       const { data, error } = await engine(origin, await getToken()).POST('/api/sittings/{sitting_id}/submissions', {
         params: { path: { sitting_id: id } },
-        body: { code: code.current ?? opened.code, restored: opened.restored },
+        body: { code: code.current ?? opened.code, restored: restored.current ?? opened.restored },
       });
       if (data) {
         setSubmitted(data);
@@ -424,13 +447,20 @@ function SittingOn({
           initial={opened.code}
           onChange={(typed) => {
             code.current = typed;
-            void keepDraft(problemId, sittingId, typed, opened.restored);
+            void keepDraft(problemId, sittingId, typed, restored.current ?? opened.restored);
           }}
         />
         <View style={[styles.row, { paddingHorizontal: 8, paddingVertical: 6, gap: 8 }]}>
           <Button mode="contained" onPress={() => void submit()} disabled={running || clock.ended}>
             {submitLabel(running)}
           </Button>
+          {/* quiet, and marked on the attempt: a solve typed over a restored
+              one is not an independent solve */}
+          {solve !== null && !clock.ended ? (
+            <Button mode="text" compact onPress={restore}>
+              {RESTORE_SOLVE}
+            </Button>
+          ) : null}
           <IconButton
             icon={keys ? 'keyboard-close' : 'keyboard'}
             accessibilityLabel={keys ? 'Hide the keyboard' : 'Show the keyboard'}
@@ -451,6 +481,14 @@ function SittingOn({
           </View>
         ) : null}
       </View>
+      {sittingId !== null ? (
+        <ClaimSheet
+          sittingId={sittingId}
+          drilled={drilled}
+          visible={clock.ended && !claimed}
+          onDone={() => setClaimed(true)}
+        />
+      ) : null}
       <Portal>
         <Dialog visible={ending} onDismiss={() => setEnding(false)}>
           <Dialog.Title>{END_TITLE}</Dialog.Title>

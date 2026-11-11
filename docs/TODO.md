@@ -238,7 +238,7 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
       pause a running clock while the app is in the background
 - [x] Reopen a running sitting when the Problem screen opens, where the web
       reads `?sitting=`, and write the phone's rule into `pages.md`
-- [ ] Ask the claim and the label in a bottom sheet after each attempt, and
+- [x] Ask the claim and the label in a bottom sheet after each attempt, and
       offer the press restoring the last solve
 - [ ] Revise `pages.md` and `README.md` for code on the phone: the sitting and
       recall rows, the Problem screen's missing editor, and the rejected

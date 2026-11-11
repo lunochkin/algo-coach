@@ -169,8 +169,9 @@ those steps at low fidelity.
   The phone has no address to carry `?sitting=`, so opening the screen, or
   the app again after it was closed, reads the running sitting with the
   statement. Its own unsent code and its clock come back with it. An ended
-  sitting is not reopened, and the claim it asked stays with the claim's own
-  rule.
+  sitting is not reopened, so a claim the sheet left unanswered is not asked
+  again, where a reload of the web's page asks it again. The attempts it
+  leaves count under the problem's own techniques, as a skipped claim's do.
 - **The problem's page reads the difficulty, the techniques, the counts the
   user reached on the problem, and the cards** in one line above the
   statement, and the statement is the page's body.
@@ -397,7 +398,7 @@ what it offers. The inventory is the list both clients build to.
 | A technique's problems and cards | `/techniques/:technique` | Technique | same |
 | The problem listing | `/problems` | the Problems tab | same |
 | A picked problem's record and statement | `/problems/:problem_id` | Problem | same |
-| A sitting | `/problems/:problem_id` | Problem, its Code tab | to fix |
+| A sitting | `/problems/:problem_id` | Problem, its Code tab | by platform |
 | The cards | `/cards` | the Cards tab | same |
 | A card's trigger, brief and templates | `/cards/:slug` | Card | same |
 | A card's ladder and probes | `/cards/:slug` | Card | same |
@@ -457,6 +458,11 @@ what it offers. The inventory is the list both clients build to.
   copy, as the browser keeps them, and signing out deletes the code with the
   rest of the copy. The app going to the background pauses a running clock,
   and returning resumes only that pause, as a hidden page does on the web.
+  Once the sitting ends, a sheet from the bottom asks the claim and the
+  label of each attempt in turn, as the web's dialog does, and a press under
+  the editor restores the last solve, which the attempts then report. The
+  sitting is `by platform` for its reopening alone, which the bullet on the
+  Problem screen gives.
 - **The phone's Recall screen types the form through the app's keyboard**,
   into the editor `README.md` gives. The editor's pad adds enter, indent and
   dedent, a row of the names the file declares, narrowed to the word being
@@ -528,11 +534,7 @@ what it offers. The inventory is the list both clients build to.
 A row marked `to fix` is listed here with what holds now and the change it
 needs. The audit of 2026-11-10 compared every knowledge row marked `same`
 with the other client's code, and both clients were brought together on each
-difference it found.
-
-- **A sitting.** The phone's sitting asks no claim and no label once it
-  ends, and offers no press restoring the last solve. Each is an item under
-  "Code on the phone" in `TODO.md`, and the row reads `same` once they land.
+difference it found. No row is marked `to fix` today.
 
 ## A page's areas` gives.
   - On the map, a press on a dimmed node selects it on the web and clears the
