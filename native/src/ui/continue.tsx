@@ -11,7 +11,7 @@ import {
   emptyContinue,
   EXAM_LINK,
   NEW_STEP,
-  reviewQueue,
+  queueStart,
   waitingOutside,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
@@ -50,10 +50,10 @@ export function useContinue() {
     startQueue(st, 'next', cont.queue, cont.course, cont.include);
   };
 
-  /** The reviews waiting outside a strict focus: a plain review queue over all served courses. */
+  /** The reviews waiting outside a strict focus: a plain review queue over every served module. */
   const reviewOutside = () => {
-    const all = board(null);
-    if (all) startQueue(st, 'review', reviewQueue(all, ['weak', 'due']), null);
+    const review = queueStart('review', null, st);
+    if (review) startQueue(st, 'review', review.queue, review.course, review.include);
   };
 
   const clear = () => {
@@ -83,7 +83,7 @@ export function ContinueBar({ next, exam = false }: { next: Next; exam?: boolean
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
               {continueLine(counts, !!focus?.strict)}
             </Text>
-            {focus?.strict && counts.outside ? (
+            {counts.outside > 0 ? (
               <TouchableRipple
                 onPress={next.reviewOutside}
                 borderless

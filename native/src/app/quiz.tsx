@@ -60,6 +60,7 @@ import {
   QUEUE_RAISE,
   QUEUE_STOP,
   queueLeft,
+  examLines,
   ExamRun,
   type ExamRecords,
   QueueRun,
@@ -247,10 +248,11 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
   // the answers, the stint and a certification's record are stored together at the end
   const store = useCallback(
     async (records: ExamRecords | null) => {
-      if (!records) return;
-      for (const a of records.attempts) await st.record(a);
-      await st.finishSession(records.session);
-      if (records.cert) await st.recordCertExam(records.cert);
+      for (const line of examLines(records)) {
+        if (line.kind === 'attempt') await st.record(line.record);
+        else if (line.kind === 'session') await st.finishSession(line.record);
+        else await st.recordCertExam(line.record);
+      }
     },
     [st],
   );

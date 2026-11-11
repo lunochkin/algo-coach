@@ -2,12 +2,16 @@ import { describe, expect, it } from 'vitest';
 
 import {
   Board,
+  certById,
+  examChoice,
+  examLines,
   DEFAULT_RULES,
   examOpening,
   examOutcome,
   examTitle,
   levelExam,
   levelExamLabel,
+  sizeToSave,
   loadSnapshot,
   type Result,
 } from './index';
@@ -64,6 +68,34 @@ describe('a level exam', () => {
   it('names how many it asks of how many the level holds', () => {
     expect(levelExamLabel(DEFAULT_RULES, 0, 3, 10)).toBe('Start (3 of 3)');
     expect(levelExamLabel(DEFAULT_RULES, 1, 0, 10)).toBe('No unlocked Associate questions');
+  });
+});
+
+describe("a level exam's choice", () => {
+  it('asks the size typed, capped by the pool, and nothing for a size out of range', () => {
+    expect(examChoice(b, DEFAULT_RULES, 0, '2')).toEqual({ n: 2, pool: 3, count: 2, label: 'Start (2 of 3)' });
+    expect(examChoice(b, DEFAULT_RULES, 0, '0').count).toBe(0);
+    expect(examChoice(null, DEFAULT_RULES, 0, '5').pool).toBe(0);
+  });
+
+  it('saves a valid size other than the standing one', () => {
+    expect(sizeToSave('25', 40)).toBe(25);
+    expect(sizeToSave('40', 40)).toBeNull();
+    expect(sizeToSave('x', 40)).toBeNull();
+  });
+
+  it('finds no certification where no module holds the id', () => {
+    expect(certById(catalog, 'nope')).toBeNull();
+    expect(certById(null, 'nope')).toBeNull();
+  });
+});
+
+describe("an exam's records", () => {
+  it('stores the answers, then the stint, then a certification', () => {
+    const session = { t: 'x', mode: 'exam-L0', score: 1, n: 1 } as never;
+    const lines = examLines({ attempts: [{ id: 'a' } as never], session, cert: { id: 'c' } as never });
+    expect(lines.map((l) => l.kind)).toEqual(['attempt', 'session', 'cert']);
+    expect(examLines(null)).toEqual([]);
   });
 });
 

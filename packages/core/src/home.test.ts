@@ -8,6 +8,7 @@ import {
   learnerCatalog,
   loadSnapshot,
   moduleRows,
+  queueStart,
   type AttemptRecord,
   type Catalog,
 } from './index';
@@ -80,6 +81,33 @@ describe('what Continue opens', () => {
     const strict = { ...focus, strict: true };
     const plan = continuePlan(boardOf(catalog, wrong), strict, null, 10)!;
     expect(continueCounts(plan, strict, NOW).outside).toBe(1);
+  });
+
+  it('counts none outside a relaxed focus, which serves every review already', () => {
+    const wrong = [{ t: T, course: 'b', id: 'b1', ok: false }];
+    const plan = continuePlan(boardOf(catalog, wrong), focus, null, 10)!;
+    expect(continueCounts(plan, focus, NOW).outside).toBe(0);
+  });
+});
+
+describe("a queue's start by its mode", () => {
+  const { catalog } = learnerCatalog(snapshot, none);
+  const learner = { board: boardOf(catalog), focus: null, newLimit: 10 };
+
+  it('drills its scope, reviews every module, and otherwise opens what Continue would', () => {
+    expect(queueStart('drill', { course: 'b' }, learner)).toMatchObject({
+      queue: { kind: 'drill', want: null },
+      course: 'b',
+    });
+    expect(queueStart('review', null, learner)).toMatchObject({
+      queue: { kind: 'review', want: ['weak', 'due'] },
+      course: null,
+    });
+    expect(queueStart('next', null, learner)).toMatchObject({ queue: { kind: 'mix' }, course: null });
+  });
+
+  it('starts no drill without a scope', () => {
+    expect(queueStart('drill', null, learner)).toBeNull();
   });
 });
 

@@ -319,7 +319,7 @@ and removes the drift the audit found.
 - [x] Move the recall trainer's requests and its template menu into core,
       and a card's progress and note. The phone's card has no progress block,
       and the two menus name a missing template differently
-- [ ] Move an exam's choice and a queue's start by mode into core, with the
+- [x] Move an exam's choice and a queue's start by mode into core, with the
       lookup of a certification by its id. The phone offers the reviews
       outside a focus only where the focus is strict, and the web on any
 - [ ] Move the small helpers both clients repeat into core, and use what

@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 
 import {
+  certById,
   certCell,
   certId,
   certRows,
@@ -48,8 +49,8 @@ export function CertificationsPage() {
   // the home's ready certification opens on its conditions
   const [picked, setPicked] = useState<Picked | null>(() => {
     const id = params.get('open')
-    const c = id ? catalog?.courses.find((x) => x.certs?.get(id)) : undefined
-    return c && id ? { course: c.slug, id } : null
+    const found = certById(catalog, id)
+    return found && id ? { course: found.c.slug, id } : null
   })
   const [starting, setStarting] = useState<Scope | null>(null)
 

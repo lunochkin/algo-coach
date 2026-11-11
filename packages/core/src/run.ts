@@ -152,6 +152,21 @@ export interface ExamRecords {
   cert: CertRecord | null;
 }
 
+/** An exam's records as the lines a client stores, in order: the answers, the stint, then the certification's. */
+export type ExamLine =
+  | { kind: 'attempt'; record: AttemptRecord }
+  | { kind: 'session'; record: SessionRecord }
+  | { kind: 'cert'; record: CertRecord };
+
+export function examLines(r: ExamRecords | null): ExamLine[] {
+  if (!r) return [];
+  return [
+    ...r.attempts.map((record) => ({ kind: 'attempt' as const, record })),
+    { kind: 'session' as const, record: r.session },
+    ...(r.cert ? [{ kind: 'cert' as const, record: r.cert }] : []),
+  ];
+}
+
 /** A running exam: the questions asked one by one, the results, and the missed ones read back. */
 export class ExamRun {
   phase: ExamPhase = 'ask';

@@ -3,14 +3,13 @@ import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router'
 
 import {
-  continuePlan,
-  drillQueue,
   lessonStopNote,
   queueLine,
   queueSummary,
   queueTitle,
   questionHead,
-  reviewQueue,
+  queueStart,
+  type QueueMode,
   type AttemptRecord,
   type Catalog,
   type DrillScope,
@@ -41,7 +40,6 @@ import { useLearner } from '@/knowledge/learner'
 import { LessonOver, type Reading } from '@/knowledge/LessonOver'
 
 // learn's names, which a stint stores: the filtered queue is `drill` on the wire
-type Mode = 'next' | 'review' | 'drill'
 
 const HOME = '/knowledge'
 
@@ -50,7 +48,7 @@ const HOME = '/knowledge'
 export function QueuePage() {
   const [params] = useSearchParams()
   const named = params.get('mode')
-  const mode: Mode = named === 'review' ? 'review' : named === 'filtered' ? 'drill' : 'next'
+  const mode: QueueMode = named === 'review' ? 'review' : named === 'filtered' ? 'drill' : 'next'
   const learner = useLearner()
   const k = useKnowledge()
   if (!learner.ready || !learner.catalog)
@@ -79,7 +77,7 @@ export function QueuePage() {
 type Learner = ReturnType<typeof useLearner>
 
 type RunningProps = {
-  mode: Mode
+  mode: QueueMode
   scope: DrillScope | null
   catalog: Catalog
   learner: Learner
@@ -94,23 +92,7 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
   })
   // fixed when the queue starts: a raise moves its limit, and the picks read the log as it grows
   const [run] = useState(() => {
-    const start = (() => {
-      if (scope) {
-        // named explicitly, so a paused module serves too
-        const b = learner.board(scope.course)
-        return b
-          ? { queue: drillQueue(b, scope, learner.newLimit), course: scope.course, include: null }
-          : null
-      }
-      if (mode === 'review') {
-        const all = learner.board(null)
-        return all
-          ? { queue: reviewQueue(all, ['weak', 'due']), course: null, include: null }
-          : null
-      }
-      const plan = continuePlan(learner.board, learner.focus, null, learner.newLimit)
-      return plan && { queue: plan.queue, course: plan.course, include: plan.include }
-    })()
+    const start = queueStart(mode, scope, learner)
     return start && new QueueRun(start.queue, mode, start.course, start.include, held())
   })
   const [, rerender] = useState(0)

@@ -1,10 +1,19 @@
 import { certStates, STATE_LABEL, type CertRecord } from './certs';
 import { visibleCatalog, withCertExams, withLessons, withStatuses, type Catalog } from './courses';
 import type { Focus } from './focus';
-import { focusQueue, focusScope, nextQueue, outsideFocus, type Queue } from './queue';
+import {
+  drillQueue,
+  focusQueue,
+  focusScope,
+  nextQueue,
+  outsideFocus,
+  reviewQueue,
+  type DrillScope,
+  type Queue,
+} from './queue';
 import { passed, type Board } from './schedule';
 import { counted, groupLabel, nextUpView, type NextUpView, type QueueCounts } from './screens';
-import type { Course, LessonRecord, StatusRecord } from './types';
+import type { Course, LessonRecord, Status, StatusRecord } from './types';
 
 export interface LearnerRecords {
   statuses: StatusRecord[];
@@ -46,6 +55,30 @@ export function continuePlan(
   }
   const b = board(only);
   return b ? { b, queue: nextQueue(b, limit), course: only, include: null } : null;
+}
+
+// a plain review queue serves the weak and due questions alone: `knowledge.md`, Queues
+export const REVIEW_WANT: Status[] = ['weak', 'due'];
+
+export type QueueMode = 'next' | 'review' | 'drill';
+
+/** What a queue starts on by its mode: a drill on its scope, a review over every module, or Continue's queue. */
+export function queueStart(
+  mode: QueueMode,
+  scope: DrillScope | null,
+  learner: { board: BoardOf; focus: Focus | null; newLimit: number },
+): { queue: Queue; course: string | null; include: string | null } | null {
+  if (mode === 'drill') {
+    // named explicitly, so a paused module serves too
+    const b = scope ? learner.board(scope.course) : null;
+    return b && scope ? { queue: drillQueue(b, scope, learner.newLimit), course: scope.course, include: null } : null;
+  }
+  if (mode === 'review') {
+    const all = learner.board(null);
+    return all ? { queue: reviewQueue(all, REVIEW_WANT), course: null, include: null } : null;
+  }
+  const plan = continuePlan(learner.board, learner.focus, null, learner.newLimit);
+  return plan && { queue: plan.queue, course: plan.course, include: plan.include };
 }
 
 export interface ContinueCounts extends QueueCounts {

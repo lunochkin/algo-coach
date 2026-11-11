@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { validSetting } from '@algo-coach/core';
+import { SIZE_SAVE_MS, sizeToSave } from '@algo-coach/core';
 
 import { useStore } from './store';
 
@@ -12,7 +12,7 @@ export function useSavedSize(): [string, (v: string) => void] {
   latest.current = { size, st };
 
   useEffect(() => {
-    const t = setTimeout(() => save(latest.current), 600);
+    const t = setTimeout(() => save(latest.current), SIZE_SAVE_MS);
     return () => clearTimeout(t);
   }, [size]);
   useEffect(() => () => save(latest.current), []);
@@ -22,6 +22,6 @@ export function useSavedSize(): [string, (v: string) => void] {
 
 // a value equal to the standing one writes nothing, so a pause and a leave store one record
 function save({ size, st }: { size: string; st: ReturnType<typeof useStore> }) {
-  const n = Number(size);
-  if (validSetting('exam_size', n) && n !== st.examSize) void st.setSetting('exam_size', n);
+  const n = sizeToSave(size, st.examSize);
+  if (n !== null) void st.setSetting('exam_size', n);
 }

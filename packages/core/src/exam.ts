@@ -1,7 +1,8 @@
-import { certQuestions, type CertRecord } from './certs';
-import { levelName, topicTitle } from './courses';
+import { certQuestions, type Cert, type CertRecord } from './certs';
+import { levelName, topicTitle, type Catalog } from './courses';
 import { examPool } from './modes';
 import { makeAttempt } from './records';
+import { validSetting } from './settings';
 import type { Result } from './result';
 import type { Board } from './schedule';
 import { shuffle, type Rng } from './select';
@@ -34,6 +35,43 @@ export function certExam(b: Board, c: Course, id: string, rng: Rng = Math.random
 /** The level exam's press: how many it would ask of how many the level holds. */
 export function levelExamLabel(rules: Rules, level: number, pool: number, n: number): string {
   return pool ? `Start (${Math.min(n, pool)} of ${pool})` : `No unlocked ${levelName(rules, level)} questions`;
+}
+
+// the size field is saved shortly after typing stops, on both clients
+export const SIZE_SAVE_MS = 600;
+
+/** A level exam's choice as it stands: the size typed, the level's pool, how many it asks, and its press. */
+export interface LevelChoice {
+  n: number;
+  pool: number;
+  count: number;
+  label: string;
+}
+
+export function examChoice(b: Board | null, rules: Rules, level: number, sizeText: string): LevelChoice {
+  const n = Number(sizeText);
+  const pool = b ? examPool(b, level).length : 0;
+  const count = validSetting('exam_size', n) ? Math.min(n, pool) : 0;
+  return { n, pool, count, label: levelExamLabel(rules, level, pool, count) };
+}
+
+/** The size typed, where it is valid and differs from the standing one, so a save writes one record. */
+export function sizeToSave(sizeText: string, stored: number): number | null {
+  const n = Number(sizeText);
+  return validSetting('exam_size', n) && n !== stored ? n : null;
+}
+
+/** A certification by its id, with the module that holds it. */
+export function certById(
+  catalog: Catalog | null | undefined,
+  id: string | null | undefined,
+): { c: Course; x: Cert } | null {
+  if (!catalog || !id) return null;
+  for (const c of catalog.courses) {
+    const x = c.certs?.get(id);
+    if (x) return { c, x };
+  }
+  return null;
 }
 
 /** An exam's title while it runs, while its misses are reviewed, and once it is done. */

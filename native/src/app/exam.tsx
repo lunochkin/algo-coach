@@ -7,17 +7,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   type Catalog,
+  certById,
   certExam,
+  examChoice,
   certExamRule,
   CERT_EXAM_MISSING,
   CERT_EXAM_START,
   examOpening,
-  examPool,
   levelExam,
-  levelExamLabel,
   levelName,
   levels,
-  validSetting,
   EXAM_ALL,
   EXAM_LEVEL,
   EXAM_MODULE,
@@ -67,32 +66,31 @@ function CertChoice({ id, catalog }: { id: string; catalog: Catalog }) {
   const st = useStore();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const c = catalog.courses.find((x) => x.certs?.get(id));
-  const x = c?.certs?.get(id);
-  const b = c ? st.board(c.slug) : null;
+  const found = certById(catalog, id);
+  const b = found ? st.board(found.c.slug) : null;
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Header title={x?.title ?? EXAM_TITLE} />
+      <Header title={found?.x.title ?? EXAM_TITLE} />
       <View style={styles.page}>
-        {c && x && b ? (
+        {found && b ? (
           <>
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
               {EXAM_NOTE}
             </Text>
-            <Text variant="bodyLarge">{certExamRule(x.rule.size, x.rule.passShare)}</Text>
+            <Text variant="bodyLarge">{certExamRule(found.x.rule.size, found.x.rule.passShare)}</Text>
           </>
         ) : (
           <Text variant="bodyMedium">{CERT_EXAM_MISSING}</Text>
         )}
       </View>
-      {c && x && b ? (
+      {found && b ? (
         <BottomBar bottom={insets.bottom}>
           <Button
             mode="contained"
             icon="play"
             contentStyle={{ paddingVertical: 8 }}
             onPress={() => {
-              const plan = certExam(b, c, id);
+              const plan = certExam(b, found.c, id);
               if (plan) startExam(st, plan);
             }}
           >
@@ -116,14 +114,12 @@ function Choices({ catalog }: { catalog: Catalog }) {
   const [size, setSize] = useSavedSize();
   const { board } = st;
   const b = useMemo(() => board(course), [board, course]);
-  const pool = useMemo(() => (b ? examPool(b, level) : []), [b, level]);
-  const n = Number(size);
-  const count = validSetting('exam_size', n) ? Math.min(n, pool.length) : 0;
+  const choice = useMemo(() => examChoice(b, catalog.rules, level, size), [b, catalog, level, size]);
   const lv = levels(catalog.rules);
 
   const start = () => {
-    if (!b || !count) return;
-    startExam(st, levelExam(b, level, n));
+    if (!b || !choice.count) return;
+    startExam(st, levelExam(b, level, choice.n));
   };
 
   return (
@@ -161,8 +157,14 @@ function Choices({ catalog }: { catalog: Catalog }) {
         <TextInput mode="outlined" label={EXAM_SIZE} value={size} onChangeText={setSize} keyboardType="number-pad" />
       </ScrollView>
       <BottomBar bottom={insets.bottom}>
-        <Button mode="contained" icon="play" disabled={!count} onPress={start} contentStyle={{ paddingVertical: 8 }}>
-          {levelExamLabel(catalog.rules, level, pool.length, count)}
+        <Button
+          mode="contained"
+          icon="play"
+          disabled={!choice.count}
+          onPress={start}
+          contentStyle={{ paddingVertical: 8 }}
+        >
+          {choice.label}
         </Button>
       </BottomBar>
     </KeyboardAvoidingView>

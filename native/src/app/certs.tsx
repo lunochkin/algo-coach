@@ -5,6 +5,7 @@ import { Appbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
+  certById,
   certCell,
   certId,
   certRows,
@@ -43,8 +44,8 @@ export default function CertsScreen() {
   const insets = useSafeAreaInsets();
   const { open } = useLocalSearchParams<{ open?: string }>();
   const [picked, setPicked] = useState<{ course: string; id: string } | null>(() => {
-    const c = st.catalog?.courses.find((x) => open && x.certs?.get(open));
-    return c && open ? { course: c.slug, id: open } : null;
+    const found = certById(st.catalog, open);
+    return found && open ? { course: found.c.slug, id: open } : null;
   });
   const { board } = st;
   const modules = useMemo(

@@ -7,18 +7,21 @@ import {
   type Catalog,
   ExamRun,
   type ExamRecords,
+  certById,
   certExam,
+  examChoice,
+  examLines,
   examOpening,
   type ExamPlan,
-  examPool,
   LETTERS,
   levelExam,
-  levelExamLabel,
   levelName,
   levels,
   questionHead,
   type Result,
   setting,
+  SIZE_SAVE_MS,
+  sizeToSave,
   type SettingRecord,
   validSetting,
   youLine,
@@ -72,7 +75,7 @@ export function ExamPage() {
   const catalog = learner.catalog
   if (plan && catalog)
     return <Running plan={plan} catalog={catalog} back={cert ? CERTIFICATIONS : KNOWLEDGE} />
-  const certified = cert ? catalog?.courses.map((c) => c.certs?.get(cert)).find(Boolean) : undefined
+  const certified = certById(catalog, cert)?.x
   return (
     <section className="space-y-section">
       <PageHeader
@@ -107,16 +110,18 @@ function LevelChoice({ catalog, onStart }: { catalog: Catalog; onStart: (p: Exam
   const stored = setting(linesOf<SettingRecord>(k.records, 'setting'), 'exam_size')
   const [size, setSize] = useState(String(stored))
   const b = useMemo(() => board(course), [board, course])
-  const pool = useMemo(() => (b ? examPool(b, level).length : 0), [b, level])
-  const n = Number(size)
-  const count = validSetting('exam_size', n) ? Math.min(n, pool) : 0
+  const choice = useMemo(() => examChoice(b, catalog.rules, level, size), [b, catalog, level, size])
+  const save = sizeToSave(size, stored)
 
   // the size is a setting, saved shortly after typing stops, as the phone saves it
   useEffect(() => {
-    if (!validSetting('exam_size', n) || n === stored) return
-    const t = setTimeout(() => void k.add('setting', newRecord.setting('exam_size', n)), 600)
+    if (save === null) return
+    const t = setTimeout(
+      () => void k.add('setting', newRecord.setting('exam_size', save)),
+      SIZE_SAVE_MS,
+    )
     return () => clearTimeout(t)
-  }, [n, stored, k])
+  }, [save, k])
 
   return (
     <section className="space-y-section">
@@ -162,20 +167,20 @@ function LevelChoice({ catalog, onStart }: { catalog: Catalog; onStart: (p: Exam
             inputMode="numeric"
             className="w-24 tabular-nums"
             value={size}
-            aria-invalid={!validSetting('exam_size', n)}
+            aria-invalid={!validSetting('exam_size', choice.n)}
             onChange={(e) => setSize(e.target.value)}
           />
         </div>
         <Button
-          disabled={!b || !count}
+          disabled={!b || !choice.count}
           onClick={() => {
             if (!b) return
             // a size typed just before the press is saved with the start, not lost to the timer
-            if (n !== stored) void k.add('setting', newRecord.setting('exam_size', n))
-            onStart(levelExam(b, level, n))
+            if (save !== null) void k.add('setting', newRecord.setting('exam_size', save))
+            onStart(levelExam(b, level, choice.n))
           }}
         >
-          {levelExamLabel(catalog.rules, level, pool, count)}
+          {choice.label}
         </Button>
       </div>
     </section>
@@ -192,18 +197,17 @@ function CertChoice({
   onStart: (p: ExamPlan) => void
 }) {
   const { board } = useLearner()
-  const c = catalog.courses.find((x) => x.certs?.get(id))
-  const x = c?.certs?.get(id)
-  const b = c ? board(c.slug) : null
+  const found = certById(catalog, id)
+  const b = found ? board(found.c.slug) : null
   return (
     <section className="space-y-section">
-      {c && x && b ? (
+      {found && b ? (
         <Panel>
-          <p>{certExamRule(x.rule.size, x.rule.passShare)}</p>
+          <p>{certExamRule(found.x.rule.size, found.x.rule.passShare)}</p>
           <div>
             <Button
               onClick={() => {
-                const p = certExam(b, c, id)
+                const p = certExam(b, found.c, id)
                 if (p) onStart(p)
               }}
             >
@@ -311,10 +315,7 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
 
 // the answers, the stint and a certification's record are stored together at the end
 function store(add: Knowledge['add'], records: ExamRecords | null) {
-  if (!records) return
-  for (const a of records.attempts) void add('attempt', a)
-  void add('session', records.session)
-  if (records.cert) void add('cert', records.cert)
+  for (const line of examLines(records)) void add(line.kind, line.record)
 }
 
 // a missed question, read back: the learner's reply, the key and the detail
