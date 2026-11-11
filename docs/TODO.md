@@ -240,7 +240,7 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
       reads `?sitting=`, and write the phone's rule into `pages.md`
 - [x] Ask the claim and the label in a bottom sheet after each attempt, and
       offer the press restoring the last solve
-- [ ] Revise `pages.md` and `README.md` for code on the phone: the sitting and
+- [x] Revise `pages.md` and `README.md` for code on the phone: the sitting and
       recall rows, the Problem screen's missing editor, and the rejected
       WebView. Name the new screens in `tests/test_pages_inventory.py`
 

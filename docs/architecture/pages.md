@@ -587,9 +587,10 @@ difference it found. No row is marked `to fix` today.
   that is hard to track back to the next line's start.
 - **The sitting is the exception, and reads in two columns.** The statement and
   the editor sit side by side, and a reading column is too narrow to hold both.
-- **Every page but the sitting reads at phone width.** A sitting needs a
-  keyboard and a wide window, and a narrow window stacks the statement above the
-  editor rather than shrinking both.
+- **Every page but the sitting reads at phone width.** A sitting on the web
+  wants a wide window, and a narrow one stacks the statement above the editor
+  rather than shrinking both. The phone's sitting holds the two as tabs
+  instead, as `## The two clients` gives.
 - **A page has four readings: loading, failed, empty and the content.** One
   component renders the first three, so a page that failed reads the same
   whichever request failed.

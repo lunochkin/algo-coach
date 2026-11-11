@@ -551,10 +551,10 @@ times. Each record class is specified in one of the files beside it.
     sitting or a recall, mastery, the stored predictions and any reminder sent
     while the app is closed. FSRS replay and the question states therefore
     exist in TypeScript and in Python, held together by the shared fixtures.
-  - A sitting and a recall need a keyboard, and the phone types them through
-    a keyboard of the app's own. The recall is on the phone, and the sitting
-    stays on the web until its phone layout exists. `pages.md` lists what
-    each client holds.
+  - A sitting and a recall are typed on both clients. The phone types them
+    through a keyboard of the app's own, since the system keyboard hides the
+    symbols code is made of and completes words. `pages.md` lists what each
+    client holds.
   - The web app wrapped in a WebView, as Capacitor ships one, was rejected.
     Every screen would then scroll, type and navigate through a WebView, where
     a native screen gets the platform's own lists, sheets and back gesture.
@@ -581,9 +581,9 @@ times. Each record class is specified in one of the files beside it.
   - A native rewrite in Kotlin and Swift was rejected. Every rule and every
     screen would exist three times, and each copy would need testing on a
     device.
-- **The native app is the knowledge module's client, and schedules offline.**
-  It runs the knowledge module's rules from `packages/core`, and syncs with
-  the engine through the API.
+- **The native app schedules the knowledge queues offline.** It runs the
+  knowledge module's rules from `packages/core`, and syncs with the engine
+  through the API.
   - The app answers questions with no network. A queue picks each question at
     the moment it is needed, so a round trip per pick would stall practice on
     a train or a plane.
@@ -592,10 +592,9 @@ times. Each record class is specified in one of the files beside it.
     rule changed in one copy fails the other copy's tests.
   - A rule changes in `knowledge.md` first, then in both copies. The doc is
     the contract the fixtures are generated against.
-  - The app serves the knowledge modules first, and the rest of the engine
-    follows feature by feature. Every other page stays in the web app until
-    a feature is chosen for the phone, and `pages.md` lists what each client
-    holds.
+  - The app served the knowledge modules first, and the rest of the engine
+    followed feature by feature. The phone now holds every page but the
+    gallery, and `pages.md` lists what each client holds.
   - The app runs on Android first, and iOS follows from the same code. It is
     installed directly from a build signed by a key kept out of git. A store
     release is deferred until someone other than the author installs it.
@@ -789,8 +788,8 @@ Properties the system holds at all times.
   user authors a technique or a card.
 - Domain logic stays adapter-free and directly callable. The CLI is one
   adapter, the web app is the second, and the native app is the third. A
-  sitting happens in the web app, the knowledge module's queues in the
-  native app, and the by-hand passes stay in the terminal.
+  sitting and the knowledge module's queues happen in either app, and the
+  by-hand passes stay in the terminal.
 - The knowledge module's domain in TypeScript lives in `packages/core`, the
   one copy of domain logic outside Python, imported by the web and the native
   app alike. Fixtures generated from the Python side hold the two copies to
