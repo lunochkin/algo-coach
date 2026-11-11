@@ -11,6 +11,8 @@ export interface SyncState {
 export interface Knowledge {
   // false until the copy is read: a page then shows what the device held
   ready: boolean
+  // the signed-in user the copy belongs to, once the session named one
+  user: string | null
   snapshot: unknown
   records: Held[]
   outbox: number

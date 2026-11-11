@@ -6,10 +6,12 @@ import { api, LOGIN } from '@/api/client'
 import { Copy, eraseCopy, type Held } from '@/knowledge/copy'
 import { KnowledgeContext, type Knowledge, type SyncState } from '@/knowledge/context'
 import { engine } from '@/knowledge/transport'
+import { eraseDrafts } from '@/lib/draft'
 
 export function KnowledgeProvider({ children }: { children: ReactNode }) {
   const copy = useRef<Copy | null>(null)
   const [ready, setReady] = useState(false)
+  const [user, setUser] = useState<string | null>(null)
   const [text, setText] = useState<string | undefined>()
   const [records, setRecords] = useState<Held[]>([])
   const [outbox, setOutbox] = useState(0)
@@ -53,6 +55,8 @@ export function KnowledgeProvider({ children }: { children: ReactNode }) {
     void (async () => {
       const { data } = await api.GET('/api/me')
       if (!data || gone) return
+      // named before the copy opens: a sitting's draft needs the user, not the copy
+      setUser(data.user_id)
       const one = await Copy.open(data.user_id, engine)
       if (gone) return one.close()
       copy.current = one
@@ -99,6 +103,7 @@ export function KnowledgeProvider({ children }: { children: ReactNode }) {
         copy.current = null
         await eraseCopy(one.user)
       }
+      eraseDrafts()
       // revoked on the server, not only dropped from the browser
       await api.DELETE('/api/session')
       window.location.assign(LOGIN)
@@ -110,8 +115,8 @@ export function KnowledgeProvider({ children }: { children: ReactNode }) {
   // parsed once per snapshot: it weighs megabytes
   const snapshot = useMemo(() => (text ? (JSON.parse(text) as unknown) : null), [text])
   const value = useMemo<Knowledge>(
-    () => ({ ready, snapshot, records, outbox, sync, resync: runSync, add, leave }),
-    [ready, snapshot, records, outbox, sync, runSync, add, leave],
+    () => ({ ready, user, snapshot, records, outbox, sync, resync: runSync, add, leave }),
+    [ready, user, snapshot, records, outbox, sync, runSync, add, leave],
   )
   return <KnowledgeContext.Provider value={value}>{children}</KnowledgeContext.Provider>
 }

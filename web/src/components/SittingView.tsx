@@ -62,6 +62,7 @@ import { Verdict } from '@/components/Verdict'
 import { autoStarts, pressed } from '@/lib/clock'
 import { DEVICE } from '@/knowledge/copy'
 import { draftOf, keepDraft } from '@/lib/draft'
+import { useKnowledge } from '@/knowledge/context'
 
 type Props = {
   problemId: string
@@ -78,6 +79,7 @@ const now = () => performance.now()
 
 export function SittingView({ problemId, drilled, card }: Props) {
   const [search, setSearch] = useSearchParams()
+  const { user } = useKnowledge()
   // read once: the page names the sitting it minted without reading it again
   const [named] = useState(() => search.get('sitting'))
   // the way back: the card the problem came from, where the next rung is, or
@@ -221,7 +223,8 @@ export function SittingView({ problemId, drilled, card }: Props) {
     )
   // the editor seeds once, so it waits for the carry. A carry that failed
   // opens the editor on the signature rather than holding the sitting
-  if (carried.data === undefined && carried.error === undefined)
+  // a draft is keyed to its user, so the editor waits for the session to name one
+  if ((carried.data === undefined && carried.error === undefined) || user === null)
     return (
       <Loaded of={OF.problem} state={{ ...carried, data: undefined }}>
         {() => null}
@@ -233,7 +236,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
   // a reload during the sitting restores what was typed in it, and a new
   // sitting opens on the work in progress `flows.md` carries
   const opened = editorOpening(
-    draftOf(problemId),
+    draftOf(user, problemId),
     sittingId,
     carried.data ?? null,
     served.signature ?? null,
@@ -372,7 +375,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
               initial={initial}
               onChange={(typed) => {
                 code.current = typed
-                keepDraft(problemId, sittingId, typed, restored.current ?? keptRestored)
+                keepDraft(user, problemId, sittingId, typed, restored.current ?? keptRestored)
               }}
               onSubmit={submit}
               handle={editor}

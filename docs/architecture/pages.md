@@ -200,6 +200,10 @@ those steps at low fidelity.
   preference and the scheme are about how the user practises at this machine,
   and a store holding them would carry them between machines nobody asked it
   to join. Every other reading is fetched from the API at each load.
+- **The unsent code is keyed to the signed-in user, and signing out deletes
+  it.** A browser can be shared between two accounts. The code a user has not
+  submitted is that user's own, and the next account to sign in must not open
+  it. The phone keys its copy the same way.
 - **The knowledge module keeps a copy of its content and of the user's log in
   the browser too**, in IndexedDB. `knowledge.md` gives why the native app
   and the web app keep the same copy.

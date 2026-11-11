@@ -81,6 +81,15 @@ export interface Draft {
 
 export const draftKey = (problemId: string) => `algo-coach:problem:${problemId}:draft`;
 
+/**
+ * A browser's key for one user's draft. A browser is shared between the
+ * accounts signed in on it, and an unsent draft is that user's own code.
+ */
+export const userDraftKey = (user: string, problemId: string) => `algo-coach:user:${user}:problem:${problemId}:draft`;
+
+/** Every draft key a browser holds, any user's or none, which signing out deletes. */
+export const isDraftKey = (key: string) => key.startsWith('algo-coach:') && key.endsWith(':draft');
+
 export function isDraft(value: unknown): value is Draft {
   return (
     typeof value === 'object' &&

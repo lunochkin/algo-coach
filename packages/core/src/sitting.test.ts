@@ -4,6 +4,9 @@ import {
   caseLabel,
   clockState,
   cutValue,
+  draftKey,
+  isDraftKey,
+  userDraftKey,
   duration,
   editorOpening,
   opening,
@@ -66,6 +69,18 @@ describe('the sitting clock', () => {
     expect(visibilityMove(paused, false, true)).toEqual({ move: 'resume', pausedByHiding: false });
     expect(visibilityMove(paused, false, false).move).toBeNull();
     expect(visibilityMove(clockState(null), true, false).move).toBeNull();
+  });
+});
+
+describe("a draft's key", () => {
+  it("names the user, so one account never opens another's code", () => {
+    expect(userDraftKey('u-4f9c2a', 'p1')).not.toBe(userDraftKey('u-7b1e3d', 'p1'));
+  });
+
+  it("finds every draft a browser holds, a user's or one written before the user was named", () => {
+    expect(isDraftKey(userDraftKey('u-4f9c2a', 'p1'))).toBe(true);
+    expect(isDraftKey(draftKey('p1'))).toBe(true);
+    expect(isDraftKey('algo-coach:clock')).toBe(false);
   });
 });
 
