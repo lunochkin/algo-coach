@@ -202,6 +202,14 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
 - [x] Type a form into CodeMirror in a WebView on the Android phone, its
       content `inputmode="none"` and the app's keyboard sending each key, and
       write the scrolling and key latency it showed into `README.md`
+- [x] Move the editor's setup into shared code beside `packages/core`: the
+      Python highlighting and the rule that the editor completes nothing. One
+      setup keeps the two editors behaving alike
+- [x] Move the recall trainer's state into core: the draw, the two hints in
+      order and the result's counts. `RecallPage.tsx` holds them for the web
+- [x] Add a Recall screen to the phone, opened from each template on Card and
+      drawn from the card, switching between the card's templates. Its editor
+      is CodeMirror in a WebView, typed through the app's keyboard
 - [ ] Add the editor's layer to the keyboard: a key per Python keyword, a
       strip dragging the cursor, indent and dedent. No key carries a form
 - [ ] Add line keys to the editor's layer: move a line, indent or dedent a
@@ -215,13 +223,6 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
       alike, so the two editors behave as one
 - [ ] Write into `flows.md` whether the keyboard offers the names the file
       already declares. The rule today refuses every name the code typed
-- [ ] Move the editor's setup into shared code beside `packages/core`: the
-      Python highlighting and the rule that the editor completes nothing. One
-      setup keeps the two editors behaving alike
-- [ ] Move the recall trainer's state into core: the draw, the two hints in
-      order and the result's counts. `RecallPage.tsx` holds them for the web
-- [ ] Add a Recall screen to the phone, opened from each template on Card and
-      drawn from the card, switching between the card's templates
 - [ ] Move the sitting's state into core: the clock with its pauses and its
       preference, the code the editor opens on, the verdict fold and the first
       failing case. `SittingView.tsx` holds them for the web

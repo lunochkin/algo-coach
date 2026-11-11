@@ -10,6 +10,7 @@ import {
   type Key,
   LETTERS,
   RARE,
+  RARE_LINES,
   type Shift,
   shiftPressed,
   SYMBOLS,
@@ -25,7 +26,8 @@ const REPEAT_MS = 70;
 /** The pad's height, for the space a screen leaves under its content. */
 export const PAD_HEIGHT = ROWS * HEIGHT + (ROWS - 1) * GAP;
 
-export function KeyPad({ onKey }: { onKey: (key: Key) => void }) {
+// `lines` puts enter where `?` sits, for text of several lines
+export function KeyPad({ onKey, lines = false }: { onKey: (key: Key) => void; lines?: boolean }) {
   const [shift, setShift] = useState<Shift>('off');
   const [rare, setRare] = useState(false);
   const lastShift = useRef(0);
@@ -67,7 +69,7 @@ export function KeyPad({ onKey }: { onKey: (key: Key) => void }) {
       {rare ? (
         <>
           <Row>
-            {RARE.map((one) => (
+            {(lines ? RARE_LINES : RARE).map((one) => (
               <Cap key={one} label={one} preview onPress={() => insert(one)} />
             ))}
           </Row>
@@ -123,7 +125,11 @@ export function KeyPad({ onKey }: { onKey: (key: Key) => void }) {
         <Cap icon="chevron-left" accessibilityLabel="Cursor left" onPress={() => onKey('left')} />
         <Cap label="space" grow={3.5} accessibilityLabel="Space" onPress={() => insert(' ')} />
         <Cap icon="chevron-right" accessibilityLabel="Cursor right" onPress={() => onKey('right')} />
-        <Cap label="?" preview onPress={() => insert('?')} />
+        {lines ? (
+          <Cap icon="keyboard-return" accessibilityLabel="Enter" onPress={() => onKey('enter')} />
+        ) : (
+          <Cap label="?" preview onPress={() => insert('?')} />
+        )}
       </Row>
     </View>
   );

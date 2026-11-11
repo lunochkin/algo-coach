@@ -7,6 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   readFailure,
+  RECALL_THIS,
+  RECALL_TITLE,
   recallLine,
   revealLabel,
   type components,
@@ -36,7 +38,7 @@ type Recalled = components['schemas']['Recalled'];
 /**
  * A card's trigger, brief, ladder, probes and templates, each form hidden
  * until revealed: `content.md`, Cards. A rung and a probe open the Problem
- * screen, and the sitting and the recall stay on the web.
+ * screen, where the sitting stays on the web, and a template opens its recall.
  */
 export default function CardScreen() {
   const theme = useTheme();
@@ -70,8 +72,25 @@ export default function CardScreen() {
             <Text variant="titleMedium">
               Templates <Text style={{ color: theme.colors.onSurfaceVariant }}>{card.templates.length}</Text>
             </Text>
+            {/* a drawn recall is offered beside a run's progress, as on the web */}
+            {studied.data!.run && card.templates.some((one) => (one.cases ?? []).length > 0) ? (
+              <Button
+                mode="outlined"
+                icon="pencil-outline"
+                style={{ alignSelf: 'flex-start' }}
+                onPress={() => router.push({ pathname: '/recall', params: { slug } })}
+              >
+                {RECALL_TITLE}
+              </Button>
+            ) : null}
             {card.templates.map((template) => (
-              <TemplateCard key={template.slug} template={template} recalled={recall.get(template.id)} now={now} />
+              <TemplateCard
+                key={template.slug}
+                card={slug}
+                template={template}
+                recalled={recall.get(template.id)}
+                now={now}
+              />
             ))}
           </>
         )}
@@ -81,10 +100,12 @@ export default function CardScreen() {
 }
 
 function TemplateCard({
+  card,
   template,
   recalled,
   now,
 }: {
+  card: string;
   template: Template;
   recalled: Recalled | undefined;
   now: number;
@@ -112,6 +133,16 @@ function TemplateCard({
           {recallable ? recallLine(recalled, now) : 'No case checks this form'}
         </Text>
         <Markdown>{template.trigger}</Markdown>
+        {recallable ? (
+          <Button
+            mode="contained-tonal"
+            icon="pencil-outline"
+            style={{ alignSelf: 'flex-start' }}
+            onPress={() => router.push({ pathname: '/recall', params: { slug: card, template: template.slug } })}
+          >
+            {RECALL_THIS}
+          </Button>
+        ) : null}
         {revealed ? (
           <>
             <CodeBlock code={template.code} verbatim />

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@algo-coach/core": "*",
+    "@algo-coach/editor": "*",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/language": "^6.13.1",

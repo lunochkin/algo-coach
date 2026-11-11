@@ -1,8 +1,31 @@
+import {
+  BACK_TO_CARD,
+  FORM_HIDDEN,
+  HINT_NAMES,
+  HINTS,
+  hintTaken,
+  nextHint,
+  RECALL_ANOTHER,
+  RECALL_FORM,
+  RECALL_NO_CASES,
+  RECALL_OPTIONAL,
+  RECALL_TITLE,
+  RECALL_TRIGGER,
+  recallBlank,
+  RECALLING,
+  recallNote,
+  recallOptional,
+  recallRefused,
+  recallView,
+  REVEAL_FORM,
+  runLabel,
+  takeHint,
+} from '@algo-coach/core'
 import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 
-import { api, type Hint, type Named, type Prompted, type RecallAttempt } from '@/api/client'
+import { api, type Hint, type Named, type RecallAttempt } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
 import { CodeEditor } from '@/components/CodeEditor'
 import { Loaded } from '@/components/Loaded'
@@ -18,14 +41,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { pieces } from '@/lib/python'
+import { pieces } from '@algo-coach/editor'
 import { cn } from '@/lib/utils'
-import { failures } from '@/lib/verdicts'
-
-// the order the trainer offers them, and each one answers more of the
-// question than the last: `flows.md`
-const LADDER: Hint[] = ['notes', 'form']
-const NAMES: Record<Hint, string> = { notes: 'the notes', form: 'the form' }
 
 // the path names no template, so the trainer draws one and sends the browser
 // to it: a reload then asks for the same form
@@ -50,7 +67,7 @@ export function DrawnRecallPage() {
     <article className="space-y-section">
       <PageHeader
         back={{ to: `/cards/${encodeURIComponent(slug)}`, label: 'the card' }}
-        title="Recall a form"
+        title={RECALL_TITLE}
       />
       <Loaded of="the form to recall" state={prompt}>
         {() => null}
@@ -80,23 +97,19 @@ export function RecallPage() {
         back={{ to: `/cards/${encodeURIComponent(slug)}`, label: 'the card' }}
         title={
           drawn ? (
-            'Recall a form'
+            RECALL_TITLE
           ) : (
             <span className="flex flex-wrap items-center gap-3">
-              {prompt.data?.title ?? 'Recall a form'}
+              {prompt.data?.title ?? RECALL_TITLE}
               {/* a card is covered without its optional form, so the page
                   says which kind this one is. Withheld on a drawn recall: a
                   card carries at most one optional template, and the badge
                   would name the form the trigger is asking for */}
-              {optional(prompt.data) && <Badge variant="secondary">optional</Badge>}
+              {recallOptional(prompt.data) && <Badge variant="secondary">{RECALL_OPTIONAL}</Badge>}
             </span>
           )
         }
-        note={
-          drawn
-            ? 'The trigger names the form. Type it from memory, and reach for a hint where memory fails.'
-            : 'The form is withheld. Type it from memory, and reach for a hint where memory fails.'
-        }
+        note={recallNote(drawn)}
       />
       <Loaded of="the form to recall" state={prompt}>
         {(prompt) => (
@@ -120,11 +133,6 @@ export function RecallPage() {
   )
 }
 
-// whether the form this recall asks for is the card's optional one
-function optional(prompt: Prompted | undefined): boolean {
-  return prompt?.templates.some((one) => one.slug === prompt.template_slug && one.optional) ?? false
-}
-
 // every form the card teaches, so the user switches without reading the card
 // again. A menu rather than a row of titles: six of them wrapped over four
 // lines and pushed the prompt itself off the first screen
@@ -141,7 +149,7 @@ function Templates({
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-meta text-muted-foreground">
-      Recalling
+      {RECALLING}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm">
@@ -164,7 +172,7 @@ function Templates({
                 >
                   <Check className={cn(one.slug !== current && 'invisible')} />
                   <span className="flex-1 whitespace-nowrap">{one.title}</span>
-                  {one.optional && <span className="text-muted-foreground">optional</span>}
+                  {one.optional && <span className="text-muted-foreground">{RECALL_OPTIONAL}</span>}
                 </Link>
               </DropdownMenuItem>
             ) : (
@@ -172,7 +180,7 @@ function Templates({
               <DropdownMenuItem key={one.slug} disabled>
                 <Check className="invisible" />
                 <span className="flex-1 whitespace-nowrap">{one.title}</span>
-                <span className="text-muted-foreground">no cases</span>
+                <span className="text-muted-foreground">{RECALL_NO_CASES}</span>
               </DropdownMenuItem>
             ),
           )}
@@ -190,18 +198,17 @@ type Props = {
 }
 
 function Trainer({ slug, templateSlug, trigger, signature }: Props) {
-  // the signature, and the file otherwise blank
-  const blank = `${signature}\n    `
+  const blank = recallBlank(signature)
   const code = useRef(blank)
   const [taken, setTaken] = useState<{ hint: Hint; text: string }[]>([])
   const [running, setRunning] = useState(false)
   const [ran, setRan] = useState<RecallAttempt | null>(null)
   const [refused, setRefused] = useState<string | null>(null)
-  const next = LADDER[taken.length]
+  const next = nextHint(taken.map((one) => one.hint))
 
   // one hint per request, so the page holds nothing it was not given
   async function hint() {
-    if (next === undefined) return
+    if (next === null) return
     const { data, error } = await api.GET('/api/cards/{slug}/recall/{template_slug}/hints/{hint}', {
       params: { path: { slug, template_slug: templateSlug, hint: next } },
     })
@@ -231,14 +238,14 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
   return (
     <div className="space-y-section">
       <Panel>
-        <p className="text-meta text-muted-foreground">When to reach for it</p>
+        <p className="text-meta text-muted-foreground">{RECALL_TRIGGER}</p>
         <p>{trigger}</p>
       </Panel>
 
       {taken.map((one) => (
         <div key={one.hint} className="overflow-hidden rounded-xl border">
           <p className="border-b bg-card px-4 py-2 text-meta text-muted-foreground">
-            Hint taken: {NAMES[one.hint]}
+            {hintTaken(one.hint)}
           </p>
           <div className="px-4 py-3">
             {one.hint === 'form' ? (
@@ -266,28 +273,28 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <Button onClick={run} disabled={running}>
-            {running ? 'Running…' : 'Run'}
+            {runLabel(running)}
           </Button>
           <span className="text-meta text-muted-foreground">⌘/Ctrl + Enter</span>
           {/* the ladder, so the reader sees what a hint costs before taking
               it: each one answers more of the question than the last */}
           <span className="ml-auto flex items-center gap-2 text-meta text-muted-foreground">
-            {LADDER.map((one) => (
+            {HINTS.map((one) => (
               <span
                 key={one}
                 className={cn(taken.some((each) => each.hint === one) && 'line-through')}
               >
-                {NAMES[one]}
+                {HINT_NAMES[one]}
               </span>
             ))}
-            {next !== undefined && (
+            {next !== null && (
               <Button variant="outline" size="sm" onClick={hint}>
-                Take: {NAMES[next]}
+                {takeHint(next)}
               </Button>
             )}
           </span>
         </div>
-        {refused && <p className="text-meta text-destructive">The recall did not run: {refused}</p>}
+        {refused && <p className="text-meta text-destructive">{recallRefused(refused)}</p>}
       </section>
     </div>
   )
@@ -314,8 +321,7 @@ function Ran({
     if (data) setForm(data.text)
   }
 
-  const results = ran.results ?? []
-  const hints = ran.hints ?? []
+  const view = recallView(ran)
 
   return (
     <div className="space-y-section">
@@ -323,38 +329,31 @@ function Ran({
         <p
           className={cn(
             'font-medium',
-            verified(ran) ? 'text-verdict-passed' : 'text-verdict-wrong',
+            view.recalled ? 'text-verdict-passed' : 'text-verdict-wrong',
           )}
         >
-          {verified(ran) ? 'Recalled' : 'Not recalled'}: {passed(ran)} of {results.length} cases
-          passed
+          {view.verdict}
         </p>
-        {failures(results).length > 0 && (
-          <p className="text-meta text-muted-foreground">{failures(results).join(' · ')}</p>
-        )}
-        <CaseStrip results={results} />
+        {view.failures && <p className="text-meta text-muted-foreground">{view.failures}</p>}
+        <CaseStrip results={ran.results ?? []} />
         {/* a hinted pass is a pass with its hints, which the record keeps */}
-        <p className="text-meta text-muted-foreground">
-          {hints.length === 0
-            ? 'Recalled cold, with no hint taken.'
-            : `Taken on the way: ${hints.map((one) => NAMES[one]).join(', ')}.`}
-        </p>
+        <p className="text-meta text-muted-foreground">{view.hints}</p>
       </Panel>
 
       {/* the form on a press: a user who failed to recall it learns which form
           it was and decides whether to read it */}
       <section className="space-y-stack">
         <div className="flex items-baseline justify-between gap-3">
-          <h2 className="text-heading font-medium">The form</h2>
+          <h2 className="text-heading font-medium">{RECALL_FORM}</h2>
           {form === null && (
             <Button variant="outline" size="sm" onClick={reveal}>
-              Reveal the form
+              {REVEAL_FORM}
             </Button>
           )}
         </div>
         {form === null ? (
           <p className="rounded-md border border-dashed px-3 py-2 text-meta text-muted-foreground">
-            The form is still hidden.
+            {FORM_HIDDEN}
           </p>
         ) : (
           <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">
@@ -371,21 +370,12 @@ function Ran({
 
       <div className="flex flex-wrap items-center gap-3">
         <Button asChild>
-          <Link to={`/cards/${encodeURIComponent(slug)}/recall`}>Recall another</Link>
+          <Link to={`/cards/${encodeURIComponent(slug)}/recall`}>{RECALL_ANOTHER}</Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link to={`/cards/${encodeURIComponent(slug)}`}>Back to the card</Link>
+          <Link to={`/cards/${encodeURIComponent(slug)}`}>{BACK_TO_CARD}</Link>
         </Button>
       </div>
     </div>
   )
-}
-
-function verified(ran: RecallAttempt): boolean {
-  const results = ran.results ?? []
-  return results.length > 0 && results.every((one) => one.outcome === 'passed')
-}
-
-function passed(ran: RecallAttempt): number {
-  return (ran.results ?? []).filter((one) => one.outcome === 'passed').length
 }

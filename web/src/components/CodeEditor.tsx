@@ -1,22 +1,8 @@
-import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands'
-import { python } from '@codemirror/lang-python'
-import {
-  bracketMatching,
-  indentOnInput,
-  indentUnit,
-  syntaxHighlighting,
-} from '@codemirror/language'
+import { pythonEditing } from '@algo-coach/editor'
+import { defaultKeymap, historyKeymap, indentWithTab } from '@codemirror/commands'
 import { EditorState } from '@codemirror/state'
-import {
-  EditorView,
-  highlightActiveLine,
-  highlightActiveLineGutter,
-  keymap,
-  lineNumbers,
-} from '@codemirror/view'
+import { EditorView, keymap } from '@codemirror/view'
 import { type Ref, useEffect, useImperativeHandle, useRef } from 'react'
-
-import { HIGHLIGHTER } from '@/lib/python'
 
 // replacing the document is one transaction, so the editor's undo takes it back
 export type EditorHandle = { replace: (code: string) => void }
@@ -28,8 +14,7 @@ type Props = {
   handle?: Ref<EditorHandle>
 }
 
-// highlighting and indentation, and no `autocompletion()`: `flows.md` gives
-// why the editor a sitting is typed into proposes nothing
+// the shared Python setup, with the web's own keymap and look
 export function CodeEditor({ initial, onChange, onSubmit, handle }: Props) {
   const host = useRef<HTMLDivElement>(null)
   const live = useRef<EditorView | null>(null)
@@ -53,16 +38,7 @@ export function CodeEditor({ initial, onChange, onSubmit, handle }: Props) {
       state: EditorState.create({
         doc: initial,
         extensions: [
-          lineNumbers(),
-          highlightActiveLineGutter(),
-          highlightActiveLine(),
-          history(),
-          indentOnInput(),
-          indentUnit.of('    '),
-          EditorState.tabSize.of(4),
-          bracketMatching(),
-          syntaxHighlighting(HIGHLIGHTER),
-          python(),
+          ...pythonEditing(),
           // ahead of the default keymap, where Mod-Enter inserts a blank line
           keymap.of([
             { key: 'Mod-Enter', run: () => (submitted.current(), true) },

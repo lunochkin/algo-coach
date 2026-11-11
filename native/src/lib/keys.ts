@@ -1,3 +1,5 @@
+import type { EditorKey } from '@algo-coach/editor';
+
 // the app's own keyboard: what a key press does to the text and the caret.
 // The system keyboard hides the symbols code and a `short` reply are made of,
 // and its suggestion strip completes words
@@ -12,15 +14,17 @@ export interface Edit {
   selection: Selection;
 }
 
-export type Key = { insert: string } | 'back' | 'left' | 'right';
+// one key type for a one-line field and the editor alike
+export type Key = EditorKey;
 
 export const EMPTY: Edit = { text: '', selection: { start: 0, end: 0 } };
 
 const at = (text: string, caret: number): Edit => ({ text, selection: { start: caret, end: caret } });
 
-/** The text and caret after one press. A selection is replaced by an insert and removed by back. */
+/** The text and caret after one press. A selection is replaced by an insert and removed by back. A field of one line takes no enter. */
 export function pressed(edit: Edit, key: Key): Edit {
   const { text } = edit;
+  if (key === 'enter') return edit;
   const start = Math.min(edit.selection.start, edit.selection.end);
   const end = Math.max(edit.selection.start, edit.selection.end);
   if (key === 'left') return at(text, start === end ? Math.max(0, start - 1) : start);
@@ -67,4 +71,6 @@ export const LETTERS: string[][] = [
 // the rare symbols, and the values a `short` reply most often is, on a layer
 // that takes the letters' place
 export const RARE = ['#', '@', '\\', '^', '~', ';', '$', '`'];
+// where the bottom row holds enter, `?` joins them
+export const RARE_LINES = [...RARE, '?'];
 export const WORDS = ['True', 'False', 'None'];

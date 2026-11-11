@@ -4,6 +4,7 @@ import {
   ladderView,
   PROBES_ASIDE,
   PROBES_TITLE,
+  RECALL_TITLE,
   probeState,
   RUN_START_NOTE,
   runStartLabel,
@@ -185,7 +186,7 @@ function Progress({ studied }: { studied: Studied }) {
         <Stat value={`${recalled}/${studied.card.templates.length}`} label="forms recalled" />
         <Stat value={studied.probes.length} label="probes drawn" />
         <Button variant="outline" size="sm" className="ml-auto" asChild>
-          <Link to={`/cards/${encodeURIComponent(studied.card.slug)}/recall`}>Recall a form</Link>
+          <Link to={`/cards/${encodeURIComponent(studied.card.slug)}/recall`}>{RECALL_TITLE}</Link>
         </Button>
         {next && (
           <Button size="sm" asChild>

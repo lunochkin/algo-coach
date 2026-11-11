@@ -1,0 +1,38 @@
+import { EditorState } from '@codemirror/state';
+import { describe, expect, it } from 'vitest';
+
+import { type EditorKey, keyed } from './keys';
+import { pythonEditing } from './setup';
+
+const editing = (doc = '', at = doc.length) =>
+  EditorState.create({ doc, selection: { anchor: at }, extensions: pythonEditing() });
+
+function typed(state: EditorState, keys: EditorKey[]): EditorState {
+  for (const key of keys) state = keyed(state, key)?.state ?? state;
+  return state;
+}
+
+const text = (s: string): EditorKey[] => [...s].map((one) => (one === '\n' ? 'enter' : { insert: one }));
+
+describe('a key from the app keyboard', () => {
+  it('indents after a colon and moves `else:` back to its `if`', () => {
+    const state = typed(editing(), text('if a:\nb = 1\nelse:'));
+    expect(state.doc.toString()).toBe('if a:\n    b = 1\nelse:');
+  });
+
+  it('removes a whole indent step with back in leading whitespace', () => {
+    const state = typed(editing('def f():\n        '), ['back']);
+    expect(state.doc.toString()).toBe('def f():\n    ');
+  });
+
+  it('moves the caret one character, held at either end', () => {
+    expect(typed(editing('ab', 0), ['left']).selection.main.head).toBe(0);
+    expect(typed(editing('ab', 2), ['right']).selection.main.head).toBe(2);
+    expect(typed(editing('ab', 1), ['left']).selection.main.head).toBe(0);
+  });
+
+  it('replaces a selection with the insert', () => {
+    const state = EditorState.create({ doc: 'abcd', selection: { anchor: 1, head: 3 }, extensions: pythonEditing() });
+    expect(typed(state, [{ insert: 'x' }]).doc.toString()).toBe('axd');
+  });
+});

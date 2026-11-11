@@ -551,10 +551,10 @@ times. Each record class is specified in one of the files beside it.
     sitting or a recall, mastery, the stored predictions and any reminder sent
     while the app is closed. FSRS replay and the question states therefore
     exist in TypeScript and in Python, held together by the shared fixtures.
-  - A sitting and a recall need a keyboard and a wide window, so they stay on
-    the web until a phone layout for writing code exists. Reading code and
-    answering questions suit the phone. `pages.md` lists what each client
-    holds.
+  - A sitting and a recall need a keyboard, and the phone types them through
+    a keyboard of the app's own. The recall is on the phone, and the sitting
+    stays on the web until its phone layout exists. `pages.md` lists what
+    each client holds.
   - The web app wrapped in a WebView, as Capacitor ships one, was rejected.
     Every screen would then scroll, type and navigate through a WebView, where
     a native screen gets the platform's own lists, sheets and back gesture.

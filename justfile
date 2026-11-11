@@ -223,10 +223,16 @@ match *args:
 android_home := env_var_or_default("ANDROID_HOME", env_var("HOME") / "Library/Android/sdk")
 apk := "native/android/app/build/outputs/apk/release/app-release.apk"
 
-# The shared core's and the app's typechecks and tests. The core's run over the
+# The phone's editor page, bundled from native/editor and the shared editor into
+# the HTML string the app ships. A test fails while the string is stale.
+editor-page:
+    cd native && node editor/build.mjs
+
+# The shared core's, the shared editor's and the app's typechecks and tests. The core's run over the
 # fixtures the Python side generates, and the app's rules all live in the core.
 native-test:
     cd packages/core && npx tsc --noEmit && npx vitest run
+    cd packages/editor && npx tsc --noEmit && npx vitest run
     cd native && npx tsc --noEmit && npx vitest run --passWithNoTests
 
 # The release APK (arm64 only), signed with the key in native/signing/, which git ignores.

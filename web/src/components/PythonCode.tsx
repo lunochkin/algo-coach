@@ -1,4 +1,4 @@
-import { pieces } from '@/lib/python'
+import { pieces } from '@algo-coach/editor'
 
 // Python read on a page, coloured by the one mapping the editor uses:
 // `pages.md`, The design system

@@ -396,7 +396,7 @@ what it offers. The inventory is the list both clients build to.
 | A card's trigger, brief and templates | `/cards/:slug` | Card | same |
 | A card's ladder and probes | `/cards/:slug` | Card | same |
 | The press starting a card's run | `/cards/:slug` | Card, below the ladder | same |
-| A recall | `/cards/:slug/recall/:template` | none | web for now |
+| A recall | `/cards/:slug/recall/:template` | Recall, from Card | same |
 | The knowledge home | `/knowledge` | Home | same |
 | A module | `/knowledge/modules/:module` | Module | same |
 | The start sheet | a dialog on the module page | a dialog on Module | same |
@@ -442,9 +442,13 @@ what it offers. The inventory is the list both clients build to.
 | Revoke a signed-in device | the signed-in devices | the signed-in devices | same |
 | Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
 
-- **A sitting and a recall are web for now.** Each needs a keyboard and a
-  wide window, as `README.md` gives. A phone layout for writing code is the
-  trigger, and none is planned.
+- **A sitting is web for now.** Its phone layout is the trigger: the
+  statement and the editor as two tabs, and the clock beside them. The items
+  under "Code on the phone" in `TODO.md` build it.
+- **The phone's Recall screen types the form through the app's keyboard**,
+  into the editor `README.md` gives. It opens from a template's press on Card,
+  and a drawn recall opens beside a run, as on the web. A menu switches
+  between the card's templates, where the web's page holds the same menu.
 - **The phone's Problems tab reads the listing as the web's page does.** A
   row opens the phone's Problem screen, which reads the record and the
   statement. The filters live in the tab while it is open, since the phone

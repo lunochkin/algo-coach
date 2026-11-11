@@ -1,4 +1,4 @@
-import { revealLabel } from '@algo-coach/core'
+import { RECALL_THIS, revealLabel } from '@algo-coach/core'
 import { useState } from 'react'
 
 import { Link } from 'react-router'
@@ -66,7 +66,7 @@ export function TemplatePanel({
               <Link
                 to={`/cards/${encodeURIComponent(card)}/recall/${encodeURIComponent(template.slug)}`}
               >
-                Recall this form
+                {RECALL_THIS}
               </Link>
             </Button>
           ) : (

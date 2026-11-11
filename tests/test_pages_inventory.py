@@ -50,6 +50,7 @@ PHONE = {
     "devices.tsx": "The signed-in devices",
     "login.tsx": "The login",
     "privacy.tsx": "The privacy policy",
+    "recall.tsx": "A recall",
 }
 # files that are no screen: the layouts, and the sign-in callback that only
 # hands the token over
