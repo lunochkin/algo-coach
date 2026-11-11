@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Chip, useTheme } from 'react-native-paper';
 
-import { Heading } from '@/ui/rows';
+import { Heading, Panel } from '@/ui/rows';
 
 export interface Item {
   id: string;
@@ -155,7 +155,6 @@ export function PageSection(props: {
   body?: 'prose' | 'bare';
   children: ReactNode;
 }) {
-  const theme = useTheme();
   const closed = props.of.closed(props.id);
   return (
     <View ref={props.of.register(props.id)} collapsable={false} style={{ gap: 8 }}>
@@ -169,18 +168,7 @@ export function PageSection(props: {
       {closed ? null : props.body === 'bare' ? (
         props.children
       ) : (
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: theme.colors.outlineVariant,
-            borderRadius: theme.roundness * 3,
-            backgroundColor: theme.colors.surface,
-            paddingHorizontal: 12,
-            paddingVertical: 4,
-          }}
-        >
-          {props.children}
-        </View>
+        <Panel style={{ paddingHorizontal: 12, paddingVertical: 4 }}>{props.children}</Panel>
       )}
     </View>
   );

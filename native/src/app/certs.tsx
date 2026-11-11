@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { Appbar, Card, Text, useTheme } from 'react-native-paper';
+import { Appbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -27,6 +27,7 @@ import {
 import { useStore } from '@/lib/store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+import { Panel } from '@/ui/rows';
 import { CertRing, CertSheet } from '@/ui/certs';
 import { useStartSheet } from '@/ui/start';
 import { fromCopy, Loaded, styles, tones } from '@/ui/common';
@@ -215,49 +216,47 @@ function Matrix(props: { of: Sections; c: Course; states: Map<string, CertStatus
   const rows = certRows(c);
   return (
     <PageSection of={props.of} id={c.slug} title={c.title} count={rows.length} body="bare">
-      <Card mode="outlined">
-        <Card.Content>
-          <View style={styles.row}>
-            <View style={{ flex: 1 }} />
+      <Panel padded>
+        <View style={styles.row}>
+          <View style={{ flex: 1 }} />
+          {lv.map((l) => {
+            const practice = practiceLevel(c, l);
+            return (
+              <Text
+                key={l}
+                variant="labelSmall"
+                style={{
+                  width: CELL,
+                  textAlign: 'center',
+                  color: theme.colors.onSurfaceVariant,
+                  opacity: practice ? 0.6 : 1,
+                }}
+              >
+                {practice ? `${levelName(rules, l, true)}\n${PRACTICE}` : levelName(rules, l, true)}
+              </Text>
+            );
+          })}
+        </View>
+        {rows.map((r) => (
+          <View key={r.scope} style={[styles.row, { minHeight: 52 }]}>
+            <Text
+              variant={r.scope === COURSE_SCOPE ? 'titleSmall' : 'bodyMedium'}
+              style={{ flex: 1 }}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
+            >
+              {r.title}
+            </Text>
             {lv.map((l) => {
-              const practice = practiceLevel(c, l);
-              return (
-                <Text
-                  key={l}
-                  variant="labelSmall"
-                  style={{
-                    width: CELL,
-                    textAlign: 'center',
-                    color: theme.colors.onSurfaceVariant,
-                    opacity: practice ? 0.6 : 1,
-                  }}
-                >
-                  {practice ? `${levelName(rules, l, true)}\n${PRACTICE}` : levelName(rules, l, true)}
-                </Text>
-              );
+              const id = certId(c.slug, r.scope, l);
+              const s = states.get(id);
+              if (!s) return <View key={l} style={{ width: CELL }} />;
+              return <Cell key={l} status={s} title={c.certs?.get(id)?.title ?? id} onPress={() => onPick(id)} />;
             })}
           </View>
-          {rows.map((r) => (
-            <View key={r.scope} style={[styles.row, { minHeight: 52 }]}>
-              <Text
-                variant={r.scope === COURSE_SCOPE ? 'titleSmall' : 'bodyMedium'}
-                style={{ flex: 1 }}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.7}
-              >
-                {r.title}
-              </Text>
-              {lv.map((l) => {
-                const id = certId(c.slug, r.scope, l);
-                const s = states.get(id);
-                if (!s) return <View key={l} style={{ width: CELL }} />;
-                return <Cell key={l} status={s} title={c.certs?.get(id)?.title ?? id} onPress={() => onPick(id)} />;
-              })}
-            </View>
-          ))}
-        </Card.Content>
-      </Card>
+        ))}
+      </Panel>
     </PageSection>
   );
 }

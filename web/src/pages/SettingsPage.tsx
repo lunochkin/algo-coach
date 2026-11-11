@@ -32,6 +32,7 @@ import {
 
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
+import { PickPanel, PickRow } from '@/components/PickRow'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { SectionHeading } from '@/components/SectionHeading'
@@ -112,21 +113,25 @@ function Archived() {
   return (
     <section className="space-y-stack">
       <SectionHeading title={ARCHIVED_MODULES} count={archived.length} />
-      <ul className="divide-y rounded-xl border bg-card">
+      <PickPanel>
         {archived.map((c) => (
-          <li key={c.slug} className="flex items-center gap-stack px-4 py-3">
-            <span className="flex-1">{c.title}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void k.add('status', newRecord.status(c.slug, 'active'))}
-            >
-              <ArchiveRestore />
-              {RESTORE}
-            </Button>
-          </li>
+          <PickRow
+            key={c.slug}
+            title={c.title}
+            stats={[]}
+            aside={
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void k.add('status', newRecord.status(c.slug, 'active'))}
+              >
+                <ArchiveRestore />
+                {RESTORE}
+              </Button>
+            }
+          />
         ))}
-      </ul>
+      </PickPanel>
     </section>
   )
 }

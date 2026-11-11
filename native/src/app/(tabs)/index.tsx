@@ -1,4 +1,3 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -40,7 +39,7 @@ import { useStore } from '@/lib/store';
 import { BottomBar, fromCopy, Loaded, startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
 import { FocusCard } from '@/ui/focuscard';
 import { AccountMenu } from '@/ui/account';
-import { Heading, PanelItem, PickRow } from '@/ui/rows';
+import { Heading, PanelItem, PickPanel, PickRow } from '@/ui/rows';
 
 export default function Home() {
   const st = useStore();
@@ -130,51 +129,26 @@ export default function Home() {
       {/* one scroll, in the web's order: the next steps and the focus, the acts,
           then the modules. A bar pinned over the list left the modules a sliver */}
       <View style={{ gap: 8 }}>
-        {certToTake ? (
-          <TouchableRipple
-            onPress={() => router.push({ pathname: '/certs', params: { open: certToTake.id } })}
-            accessibilityRole="button"
-            accessibilityLabel={certToTake.line}
-            borderless
-            style={{
-              minHeight: 48,
-              borderRadius: 12,
-              paddingHorizontal: 12,
-              justifyContent: 'center',
-              backgroundColor: theme.colors.primaryContainer,
-            }}
-          >
-            <View style={styles.row}>
-              <MaterialCommunityIcons name="trophy-outline" size={20} color={theme.colors.onPrimaryContainer} />
-              <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onPrimaryContainer }}>
-                {certToTake.line}
-              </Text>
-            </View>
-          </TouchableRipple>
-        ) : null}
-        {toRead ? (
-          <TouchableRipple
-            onPress={() =>
-              router.push({ pathname: '/lesson', params: { course: toRead.c.slug, slug: toRead.lesson.slug } })
-            }
-            accessibilityRole="button"
-            accessibilityLabel={toRead.line}
-            borderless
-            style={{
-              minHeight: 48,
-              borderRadius: 12,
-              paddingHorizontal: 12,
-              justifyContent: 'center',
-              backgroundColor: theme.colors.tertiaryContainer,
-            }}
-          >
-            <View style={styles.row}>
-              <MaterialCommunityIcons name="book-open-variant" size={20} color={theme.colors.onTertiaryContainer} />
-              <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onTertiaryContainer }}>
-                {toRead.line}
-              </Text>
-            </View>
-          </TouchableRipple>
+        {/* the next steps the rules would take, as rows, since each opens a page */}
+        {certToTake || toRead ? (
+          <PickPanel>
+            {certToTake ? (
+              <PickRow
+                title={certToTake.line}
+                stats={[]}
+                onPress={() => router.push({ pathname: '/certs', params: { open: certToTake.id } })}
+              />
+            ) : null}
+            {toRead ? (
+              <PickRow
+                title={toRead.line}
+                stats={[]}
+                onPress={() =>
+                  router.push({ pathname: '/lesson', params: { course: toRead.c.slug, slug: toRead.lesson.slug } })
+                }
+              />
+            ) : null}
+          </PickPanel>
         ) : null}
         {focused && cont ? (
           <FocusCard

@@ -42,6 +42,7 @@ import {
   OF,
 } from '@algo-coach/core'
 
+import { PickPanel, PickRow } from '@/components/PickRow'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel } from '@/components/Panel'
@@ -291,16 +292,15 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
             </span>
             <span className="ml-2 text-meta text-muted-foreground">{out.percent}%</span>
           </p>
-          <ul className="space-y-1">
+          <PickPanel>
             {out.byTopic.map((t) => (
-              <li key={t.topic} className="flex">
-                <span className="flex-1">{t.title}</span>
-                <span className="tabular-nums">
-                  {t.score}/{t.n}
-                </span>
-              </li>
+              <PickRow
+                key={t.topic}
+                title={t.title}
+                stats={[{ label: '', value: `${t.score}/${t.n}` }]}
+              />
             ))}
-          </ul>
+          </PickPanel>
           <div className="flex gap-stack">
             {out.missed.length > 0 && (
               <Button variant="outline" onClick={() => act(() => run.review())}>

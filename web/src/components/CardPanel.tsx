@@ -3,6 +3,8 @@ import type { RecallMark } from '@algo-coach/core'
 import { Link } from 'react-router'
 
 import type { ListedCard } from '@/api/client'
+import { PanelStrip } from '@/components/Panel'
+import { PickList, PickRow } from '@/components/PickRow'
 import { ProgressBar } from '@/components/ProgressBar'
 import { cardRow } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -14,7 +16,7 @@ export function CardPanel({ technique, cards }: { technique: string | null; card
   return (
     <section className="overflow-hidden rounded-xl border bg-card">
       {technique && (
-        <div className="flex items-baseline gap-3 border-b bg-card px-4 py-3">
+        <PanelStrip>
           {/* a header naming a record opens it */}
           <h2 className="font-mono text-heading font-medium">
             <Link
@@ -27,37 +29,31 @@ export function CardPanel({ technique, cards }: { technique: string | null; card
           <span className="ml-auto text-meta text-muted-foreground">
             {cardsCounted(cards.length)}
           </span>
-        </div>
+        </PanelStrip>
       )}
-      <div className="divide-y divide-border">
+      <PickList>
         {cards.map((card) => (
           <CardRow key={card.slug} card={card} heading={technique} />
         ))}
-      </div>
+      </PickList>
     </section>
   )
 }
 
 function CardRow({ card, heading }: { card: ListedCard; heading: string | null }) {
   const row = cardRow(card, heading)
-
   return (
-    <Link
+    <PickRow
       to={`/cards/${encodeURIComponent(card.slug)}`}
-      className="group block px-4 py-3 transition-colors hover:bg-accent"
-    >
-      <div className="flex items-baseline gap-3">
-        <span className="font-medium underline-offset-4 group-hover:underline">{row.title}</span>
-        {row.technique && (
+      title={row.title}
+      badge={
+        row.technique && (
           <span className="font-mono text-meta text-muted-foreground">{row.technique}</span>
-        )}
-        <span className="ml-auto shrink-0 text-meta text-muted-foreground tabular-nums">
-          {row.aside}
-        </span>
-      </div>
-      {row.state !== null && (
-        <p className="mt-1 text-meta text-muted-foreground tabular-nums">{row.state}</p>
-      )}
+        )
+      }
+      stats={[{ label: '', value: row.aside }]}
+      note={row.state}
+    >
       {row.progress && (
         <div className="mt-2 max-w-xs">
           <ProgressBar
@@ -71,7 +67,7 @@ function CardRow({ card, heading }: { card: ListedCard; heading: string | null }
         <p className="mt-1 line-clamp-2 text-meta text-muted-foreground">{row.trigger}</p>
       )}
       <RecallMarks marks={row.recall} />
-    </Link>
+    </PickRow>
   )
 }
 

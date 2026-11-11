@@ -33,7 +33,7 @@ import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
 import { PageHeader } from '@/components/PageHeader'
 import { SectionHeading } from '@/components/SectionHeading'
-import { Panel } from '@/components/Panel'
+import { Panel, PanelStrip } from '@/components/Panel'
 import { CaseStrip } from '@/components/Verdict'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -246,9 +246,9 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
 
       {taken.map((one) => (
         <div key={one.hint} className="overflow-hidden rounded-xl border bg-card">
-          <p className="border-b bg-card px-4 py-2 text-meta text-muted-foreground">
-            {hintTaken(one.hint)}
-          </p>
+          <PanelStrip>
+            <span className="text-meta text-muted-foreground">{hintTaken(one.hint)}</span>
+          </PanelStrip>
           <div className="px-4 py-3">
             {one.hint === 'form' ? (
               <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-code">

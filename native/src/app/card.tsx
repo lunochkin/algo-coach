@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Button, Card, Chip, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Appbar, Button, Chip, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -33,7 +33,7 @@ import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { BottomBar, CodeBlock, Loaded, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
-import { Badge, PickPanel, PickRow } from '@/ui/rows';
+import { Badge, Panel, PickPanel, PickRow } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
 
 type Template = components['schemas']['Template'];
@@ -149,53 +149,51 @@ function TemplateCard({
   const recallable = (template.cases ?? []).length > 0;
 
   return (
-    <Card mode="outlined">
-      <Card.Content style={{ gap: 8 }}>
-        <View style={[styles.row, { flexWrap: 'wrap' }]}>
-          <Text variant="titleMedium" style={{ flexShrink: 1 }}>
-            {template.title}
-          </Text>
-          {template.optional ? <Chip compact>optional</Chip> : null}
-          {template.kind === 'procedure' ? (
-            <Chip compact mode="outlined">
-              procedure
-            </Chip>
-          ) : null}
-        </View>
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {recallable ? recallLine(recalled, now) : 'No case checks this form'}
+    <Panel padded>
+      <View style={[styles.row, { flexWrap: 'wrap' }]}>
+        <Text variant="titleMedium" style={{ flexShrink: 1 }}>
+          {template.title}
         </Text>
-        <Markdown>{template.trigger}</Markdown>
-        {recallable ? (
-          <Button
-            mode="contained-tonal"
-            icon="pencil-outline"
-            style={{ alignSelf: 'flex-start' }}
-            onPress={() => router.push({ pathname: '/recall', params: { slug: card, template: template.slug } })}
-          >
-            {RECALL_THIS}
-          </Button>
+        {template.optional ? <Chip compact>optional</Chip> : null}
+        {template.kind === 'procedure' ? (
+          <Chip compact mode="outlined">
+            procedure
+          </Chip>
         ) : null}
-        {revealed ? (
-          <>
-            <CodeBlock code={template.code} verbatim />
-            {template.notes ? <Markdown>{template.notes}</Markdown> : null}
-            <Button mode="text" onPress={() => setRevealed(false)} style={{ alignSelf: 'flex-end' }}>
-              {HIDE_FORM}
-            </Button>
-          </>
-        ) : (
-          <Button
-            mode="outlined"
-            icon="eye-outline"
-            onPress={() => setRevealed(true)}
-            style={{ alignSelf: 'flex-start' }}
-          >
-            {revealLabel(template.code)}
+      </View>
+      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+        {recallable ? recallLine(recalled, now) : 'No case checks this form'}
+      </Text>
+      <Markdown>{template.trigger}</Markdown>
+      {recallable ? (
+        <Button
+          mode="contained-tonal"
+          icon="pencil-outline"
+          style={{ alignSelf: 'flex-start' }}
+          onPress={() => router.push({ pathname: '/recall', params: { slug: card, template: template.slug } })}
+        >
+          {RECALL_THIS}
+        </Button>
+      ) : null}
+      {revealed ? (
+        <>
+          <CodeBlock code={template.code} verbatim />
+          {template.notes ? <Markdown>{template.notes}</Markdown> : null}
+          <Button mode="text" onPress={() => setRevealed(false)} style={{ alignSelf: 'flex-end' }}>
+            {HIDE_FORM}
           </Button>
-        )}
-      </Card.Content>
-    </Card>
+        </>
+      ) : (
+        <Button
+          mode="outlined"
+          icon="eye-outline"
+          onPress={() => setRevealed(true)}
+          style={{ alignSelf: 'flex-start' }}
+        >
+          {revealLabel(template.code)}
+        </Button>
+      )}
+    </Panel>
   );
 }
 
@@ -216,39 +214,24 @@ function Ladder({ studied, of }: { studied: Studied; of: Sections }) {
         <PickPanel>
           {[
             ...view.rows.map((rung) => (
-              <TouchableRipple
+              <PickRow
                 key={rung.problemId}
-                accessibilityRole="link"
-                accessibilityLabel={rung.title}
+                // solved since the run began: a reading, not a control
+                lead={
+                  rung.solved !== null ? (
+                    <MaterialCommunityIcons
+                      name={rung.solved ? 'checkbox-marked' : 'checkbox-blank-outline'}
+                      size={18}
+                      color={theme.colors.onSurfaceVariant}
+                    />
+                  ) : undefined
+                }
+                title={rung.title}
+                badge={rung.difficulty}
+                stats={[{ label: '', value: rung.need }]}
+                note={rung.covers ?? undefined}
                 onPress={() => openProblem(rung.problemId, studied.card.technique, studied.card.slug)}
-              >
-                <View style={{ paddingHorizontal: 16, paddingVertical: 12, gap: 6 }}>
-                  <View style={[styles.row, { flexWrap: 'wrap' }]}>
-                    {/* solved since the run began: a reading, not a control */}
-                    {rung.solved !== null ? (
-                      <MaterialCommunityIcons
-                        name={rung.solved ? 'checkbox-marked' : 'checkbox-blank-outline'}
-                        size={18}
-                        color={theme.colors.onSurfaceVariant}
-                      />
-                    ) : null}
-                    <Text variant="titleMedium" style={{ flexShrink: 1 }}>
-                      {rung.title}
-                    </Text>
-                  </View>
-                  <View style={[styles.row, { flexWrap: 'wrap' }]}>
-                    {rung.difficulty ? <Badge label={rung.difficulty} /> : null}
-                    <Text variant="bodySmall" style={muted}>
-                      {rung.need}
-                    </Text>
-                  </View>
-                  {rung.covers ? (
-                    <Text variant="bodySmall" style={muted}>
-                      {rung.covers}
-                    </Text>
-                  ) : null}
-                </View>
-              </TouchableRipple>
+              />
             )),
             ...view.gaps.map((gap) => (
               <View key={gap} style={[styles.row, { paddingHorizontal: 16, paddingVertical: 12 }]}>

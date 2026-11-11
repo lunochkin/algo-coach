@@ -138,22 +138,25 @@ export function KnowledgePage() {
       >
         {({ rows, counts, panel, toRead, toTake }) => (
           <>
-            {toTake && (
-              <Link
-                to={`${CERTIFICATIONS}?${new URLSearchParams({ open: toTake.id })}`}
-                className="block rounded-xl border bg-card px-4 py-3 text-meta hover:bg-accent"
-              >
-                {toTake.line}
-              </Link>
-            )}
-            {/* the next step the rules would take, for a reader who never opens the lessons */}
-            {toRead && (
-              <Link
-                to={lessonPath(toRead.c.slug, toRead.lesson.slug)}
-                className="block rounded-xl border bg-card px-4 py-3 text-meta hover:bg-accent"
-              >
-                {toRead.line}
-              </Link>
+            {/* the next steps the rules would take, for a reader who never opens
+                the lessons or the certifications: rows, since each opens a page */}
+            {(toTake || toRead) && (
+              <PickPanel>
+                {toTake && (
+                  <PickRow
+                    to={`${CERTIFICATIONS}?${new URLSearchParams({ open: toTake.id })}`}
+                    title={toTake.line}
+                    stats={[]}
+                  />
+                )}
+                {toRead && (
+                  <PickRow
+                    to={lessonPath(toRead.c.slug, toRead.lesson.slug)}
+                    title={toRead.line}
+                    stats={[]}
+                  />
+                )}
+              </PickPanel>
             )}
             {focus && panel && (
               <Panel>

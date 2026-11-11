@@ -68,6 +68,7 @@ import {
 } from '@algo-coach/core';
 import { EMPTY, type Edit, type Key, pressed } from '@/lib/keys';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
+import { PickPanel, PickRow } from '@/ui/rows';
 import { BottomBar, CodeBlock, styles } from '@/ui/common';
 import { KeyPad, PAD_HEIGHT } from '@/ui/keys';
 
@@ -326,14 +327,11 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
             <Text variant="displayMedium">{`${score}/${out.n}`}</Text>
             <Text variant="titleMedium">{`${out.percent}%`}</Text>
           </View>
-          {out.byTopic.map((t) => (
-            <View key={t.topic} style={styles.row}>
-              <Text variant="bodyLarge" style={{ flex: 1 }}>
-                {t.title}
-              </Text>
-              <Text variant="bodyLarge">{`${t.score}/${t.n}`}</Text>
-            </View>
-          ))}
+          <PickPanel>
+            {out.byTopic.map((t) => (
+              <PickRow key={t.topic} title={t.title} stats={[{ label: '', value: `${t.score}/${t.n}` }]} />
+            ))}
+          </PickPanel>
           {missed.length ? (
             <Button
               mode="contained-tonal"

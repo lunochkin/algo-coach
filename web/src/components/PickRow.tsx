@@ -4,7 +4,9 @@ import { Link } from 'react-router'
 import { cn } from '@/lib/utils'
 
 type Props = {
-  to: string
+  // where the row leads; a row naming a record it does not open, such as a
+  // signed-in device, carries its presses in `aside` instead
+  to?: string
   title: string
   // before the title: a rung's solved mark
   lead?: ReactNode
@@ -20,37 +22,56 @@ type Props = {
   dim?: boolean
   // presses beside the counts, such as a module's order
   aside?: ReactNode
+  // under the note: a card's progress bar, its trigger and its recall marks
+  children?: ReactNode
 }
 
 // one pick on a list of picks: a technique on the board, a problem, a module,
 // a lesson. The whole row is the link, so the pointer never hunts for the
 // title, and the counts read as one cluster rather than as four columns. The
 // title's link stretches over the row, so a press in `aside` stays its own
-export function PickRow({ to, title, lead, badge, stats, note, mono, dim, aside }: Props) {
+export function PickRow({
+  to,
+  title,
+  lead,
+  badge,
+  stats,
+  note,
+  mono,
+  dim,
+  aside,
+  children,
+}: Props) {
   return (
     <div
       className={cn(
-        'group relative flex items-center gap-3 px-4 py-3 transition-colors hover:bg-accent',
+        'group relative flex items-center gap-3 px-4 py-3',
+        to && 'transition-colors hover:bg-accent',
         dim && 'opacity-70',
       )}
     >
       {lead}
-      <span className="min-w-0">
-        <span className="flex items-baseline gap-3">
-          <Link
-            to={to}
-            className="font-medium underline-offset-4 after:absolute after:inset-0 group-hover:underline"
-          >
-            {title}
-          </Link>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-3">
+          {to ? (
+            <Link
+              to={to}
+              className="font-medium underline-offset-4 after:absolute after:inset-0 group-hover:underline"
+            >
+              {title}
+            </Link>
+          ) : (
+            <span className="font-medium">{title}</span>
+          )}
           {badge}
-        </span>
+        </div>
         {note && (
           <span className={cn('mt-1 block text-meta text-muted-foreground', mono && 'font-mono')}>
             {note}
           </span>
         )}
-      </span>
+        {children}
+      </div>
       <span className="ml-auto flex shrink-0 items-center gap-5 text-meta text-muted-foreground">
         {stats.map((stat, i) => (
           <span key={i} className="flex items-baseline gap-1.5">

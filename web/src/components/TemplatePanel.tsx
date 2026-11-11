@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 
 import type { Recalled, Template } from '@/api/client'
+import { PanelStrip } from '@/components/Panel'
 import { Markdown } from '@/components/Markdown'
 import { PythonCode } from '@/components/PythonCode'
 import { Badge } from '@/components/ui/badge'
@@ -38,14 +39,14 @@ export function TemplatePanel({
     <div className="overflow-hidden rounded-xl border bg-card">
       {/* what the form is, and how its recall has gone: the header carries the
           identity, and the body carries the form and the acts on it */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b bg-card px-4 py-3">
+      <PanelStrip>
         <h3 className="font-medium">{template.title}</h3>
         {template.optional && <Badge variant="secondary">{CARD_OPTIONAL}</Badge>}
         {template.kind === 'procedure' && <Badge variant="outline">procedure</Badge>}
         <span className="ml-auto text-meta text-muted-foreground">
           {recallable ? recallLine(recalled) : 'No case checks this form'}
         </span>
-      </div>
+      </PanelStrip>
 
       <div className="space-y-stack px-4 py-3">
         <Markdown>{template.trigger}</Markdown>

@@ -6,6 +6,16 @@ export function Panel({ children }: { children: ReactNode }) {
   return <div className="space-y-stack rounded-xl border bg-card px-4 py-3">{children}</div>
 }
 
+// the strip heading a panel: it names what the panel holds, and where it
+// names a record it opens it
+export function PanelStrip({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b bg-card px-4 py-3">
+      {children}
+    </div>
+  )
+}
+
 // one count and what it counts, read as a pair
 export function Stat({ value, label }: { value: ReactNode; label: string }) {
   return (

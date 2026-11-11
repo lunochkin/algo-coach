@@ -1,7 +1,7 @@
-import { Fragment, type ReactNode } from 'react';
+import { Children, Fragment, type ReactNode } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { Card, Divider, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Pressable, type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Divider, Text, TouchableRipple, useTheme } from 'react-native-paper';
 
 import type { Stat } from '@algo-coach/core';
 import { styles } from '@/ui/common';
@@ -12,6 +12,8 @@ import { styles } from '@/ui/common';
  */
 export function PickRow(props: {
   title: string;
+  // before the title: a rung's solved mark
+  lead?: ReactNode;
   badge?: string | null;
   stats: Stat[];
   // a line under the counts, such as the techniques a problem carries
@@ -22,6 +24,8 @@ export function PickRow(props: {
   dim?: boolean;
   // a control at the row's right, such as a module's drag handle
   aside?: ReactNode;
+  // under the note: a card's progress bar, its trigger and its recall marks
+  children?: ReactNode;
   onPress?: () => void;
   onLongPress?: () => void;
 }) {
@@ -29,7 +33,16 @@ export function PickRow(props: {
   const counts = props.stats.map((one) => (one.label ? `${one.value} ${one.label}` : String(one.value))).join(' · ');
   const text = (
     <View style={{ flex: 1, gap: 6 }}>
-      <Text variant="titleMedium">{props.title}</Text>
+      {props.lead ? (
+        <View style={styles.row}>
+          {props.lead}
+          <Text variant="titleMedium" style={{ flexShrink: 1 }}>
+            {props.title}
+          </Text>
+        </View>
+      ) : (
+        <Text variant="titleMedium">{props.title}</Text>
+      )}
       {props.badge || counts ? (
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           {props.badge ? <Badge label={props.badge} /> : null}
@@ -46,6 +59,7 @@ export function PickRow(props: {
           {props.note}
         </Text>
       ) : null}
+      {props.children}
     </View>
   );
   const body = (
@@ -92,20 +106,79 @@ export function Badge({ label }: { label: string }) {
   );
 }
 
-/** Rows in one bordered panel, divided by a hairline. */
-export function PickPanel({ children }: { children: ReactNode[] }) {
+/**
+ * A bordered block on the surface: every panel the phone draws, so a list,
+ * a card's template and the focus read with one edge. `padded` holds prose
+ * or controls; without it the rows inside run edge to edge.
+ */
+export function Panel({
+  children,
+  padded = false,
+  style,
+}: {
+  children: ReactNode;
+  padded?: boolean;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const theme = useTheme();
   return (
-    // one View: Card hands each direct child an `index`, which a Fragment refuses
-    <Card mode="outlined">
-      <View>
-        {children.map((child, i) => (
-          <Fragment key={i}>
-            {i > 0 ? <Divider /> : null}
-            {child}
-          </Fragment>
-        ))}
-      </View>
-    </Card>
+    <View
+      style={[
+        {
+          backgroundColor: theme.colors.surface,
+          borderColor: theme.colors.outlineVariant,
+          borderWidth: 1,
+          borderRadius: theme.roundness * 3,
+          overflow: 'hidden',
+          padding: padded ? 12 : 0,
+          gap: padded ? 8 : 0,
+        },
+        style,
+      ]}
+    >
+      {children}
+    </View>
+  );
+}
+
+/** The strip heading a panel: it names what the panel holds, and where it names a record it opens it. */
+export function PanelStrip({ children, onPress }: { children: ReactNode; onPress?: () => void }) {
+  const theme = useTheme();
+  const strip = (
+    <View
+      style={[
+        styles.row,
+        {
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderColor: theme.colors.outlineVariant,
+        },
+      ]}
+    >
+      {children}
+    </View>
+  );
+  return onPress ? (
+    <TouchableRipple onPress={onPress} accessibilityRole="link">
+      {strip}
+    </TouchableRipple>
+  ) : (
+    strip
+  );
+}
+
+/** Rows in one bordered panel, divided by a hairline. */
+export function PickPanel({ children }: { children: ReactNode }) {
+  return (
+    <Panel>
+      {Children.toArray(children).map((child, i) => (
+        <Fragment key={i}>
+          {i > 0 ? <Divider /> : null}
+          {child}
+        </Fragment>
+      ))}
+    </Panel>
   );
 }
 

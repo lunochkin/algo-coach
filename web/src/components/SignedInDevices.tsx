@@ -13,6 +13,7 @@ import {
 
 import { api, type SignedInDevice } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
+import { PickPanel, PickRow } from '@/components/PickRow'
 import { Loaded } from '@/components/Loaded'
 import { SignOut } from '@/components/SignOut'
 import { Button } from '@/components/ui/button'
@@ -57,37 +58,37 @@ export function SignedInDevices({
         </DialogHeader>
         <Loaded of={OF.devices} state={devices}>
           {(listed) => (
-            <ul className="max-h-[60vh] divide-y overflow-y-auto rounded-lg border">
-              {listed.map((device) => (
-                <li key={device.id} className="flex items-center gap-3 px-3 py-2">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">
-                      {deviceName(device)}
-                      {device.current && (
-                        <span className="font-normal text-muted-foreground">
-                          {' '}
-                          · {thisDevice('browser')}
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-meta text-muted-foreground">{deviceLine(device, now)}</p>
-                  </div>
-                  {device.current ? (
-                    <SignOut>
-                      {(start) => (
-                        <Button variant="outline" size="sm" onClick={start}>
-                          {SIGN_OUT}
+            <div className="max-h-[60vh] overflow-y-auto">
+              <PickPanel>
+                {listed.map((device) => (
+                  <PickRow
+                    key={device.id}
+                    title={
+                      device.current
+                        ? `${deviceName(device)} · ${thisDevice('browser')}`
+                        : deviceName(device)
+                    }
+                    note={deviceLine(device, now)}
+                    stats={[]}
+                    aside={
+                      device.current ? (
+                        <SignOut>
+                          {(start) => (
+                            <Button variant="outline" size="sm" onClick={start}>
+                              {SIGN_OUT}
+                            </Button>
+                          )}
+                        </SignOut>
+                      ) : (
+                        <Button variant="outline" size="sm" onClick={() => void revoke(device)}>
+                          {REVOKE}
                         </Button>
-                      )}
-                    </SignOut>
-                  ) : (
-                    <Button variant="outline" size="sm" onClick={() => void revoke(device)}>
-                      {REVOKE}
-                    </Button>
-                  )}
-                </li>
-              ))}
-            </ul>
+                      )
+                    }
+                  />
+                ))}
+              </PickPanel>
+            </div>
           )}
         </Loaded>
         {failed ? <p className="text-destructive">{failed}</p> : null}

@@ -34,7 +34,7 @@ import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
 import { useMe } from '@/ui/account';
 import { styles, SyncLine } from '@/ui/common';
-import { Heading } from '@/ui/rows';
+import { Heading, PickPanel, PickRow } from '@/ui/rows';
 import { useSignOut } from '@/ui/signout';
 
 export default function SettingsScreen() {
@@ -187,21 +187,25 @@ export default function SettingsScreen() {
         {st.archived.length ? (
           <>
             <Heading title={ARCHIVED_MODULES} count={st.archived.length} />
-            {st.archived.map((c) => (
-              <View key={c.slug} style={styles.row}>
-                <Text variant="bodyLarge" style={{ flex: 1 }}>
-                  {c.title}
-                </Text>
-                <Button
-                  mode="outlined"
-                  icon="archive-arrow-up-outline"
-                  accessibilityLabel={`Restore ${c.title}`}
-                  onPress={() => void st.setCourseStatus(c.slug, 'active')}
-                >
-                  {RESTORE}
-                </Button>
-              </View>
-            ))}
+            <PickPanel>
+              {st.archived.map((c) => (
+                <PickRow
+                  key={c.slug}
+                  title={c.title}
+                  stats={[]}
+                  aside={
+                    <Button
+                      mode="outlined"
+                      icon="archive-arrow-up-outline"
+                      accessibilityLabel={`Restore ${c.title}`}
+                      onPress={() => void st.setCourseStatus(c.slug, 'active')}
+                    >
+                      {RESTORE}
+                    </Button>
+                  }
+                />
+              ))}
+            </PickPanel>
           </>
         ) : null}
       </KeyboardAwareScrollView>

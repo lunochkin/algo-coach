@@ -275,7 +275,7 @@ clients.
 An audit on 2026-11-11, after the pass above, still found parts drawn two
 ways inside each client. Each item covers both clients.
 
-- [ ] Draw every panel with one edge and every list on `PickRow`: the
+- [x] Draw every panel with one edge and every list on `PickRow`: the
       archived modules, the card rows, the ladder's rungs, the devices, the
       exam's results, the ready lesson and certification, and the strips
       heading a panel. The phone's Card border and its own panels differ
