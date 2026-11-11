@@ -8,13 +8,15 @@ import {
   type Board,
   type Course,
   type Lesson,
-  lessonGroups,
+  lessonSections,
   lessonRow,
   LESSONS_NONE,
   LESSONS_TITLE,
   lessonStats,
   modulesInOrder,
   OF,
+  sectionOpened,
+  sectionToggled,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { fromCopy, Loaded, styles } from '@/ui/common';
@@ -34,29 +36,17 @@ export default function LessonsScreen() {
   );
 
   // every group is open until the reader closes it: `pages.md`, A page's areas
-  const [open, setOpen] = useState<Record<string, boolean>>({});
-  const isOpen = (key: string) => open[key] ?? true;
+  const [closed, setClosed] = useState<string[]>([]);
+  const isOpen = (key: string) => !closed.includes(key);
   const sections = useMemo(
     () =>
-      modules.flatMap(({ c, b }) => {
-        const groups = lessonGroups(b, c);
-        const lessons = groups.reduce((n, g) => n + g.lessons.length, 0);
-        return groups.map((g, i) => {
-          const key = `${c.slug}:${g.key}`;
-          return {
-            key,
-            c,
-            b,
-            module: i === 0 ? c.title : null,
-            lessons,
-            title: g.title,
-            total: g.lessons.length,
-            data: isOpen(key) ? g.lessons : [],
-          };
-        });
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [modules, open],
+      lessonSections(modules).map((x) => ({
+        ...x,
+        key: x.id,
+        total: x.lessons.length,
+        data: closed.includes(x.id) ? [] : x.lessons,
+      })),
+    [modules, closed],
   );
 
   // the groups as a long screen's sections: a bar jumps to one and marks the
@@ -65,13 +55,10 @@ export default function LessonsScreen() {
   const list = useRef<SectionList<Lesson, (typeof sections)[number]>>(null);
   const [current, setCurrent] = useState<string | null>(null);
   const bar = {
-    items: sections.map((x) => ({
-      id: x.key,
-      label: modules.length > 1 ? `${x.c.title} · ${x.title}` : x.title,
-    })),
+    items: sections.map((x) => ({ id: x.key, label: x.label })),
     current,
     jump: (key: string) => {
-      if (!isOpen(key)) setOpen((o) => ({ ...o, [key]: true }));
+      setClosed((was) => sectionOpened(was, key));
       const sectionIndex = sections.findIndex((x) => x.key === key);
       requestAnimationFrame(() => list.current?.scrollToLocation({ sectionIndex, itemIndex: 0, viewOffset: 0 }));
     },
@@ -111,13 +98,13 @@ export default function LessonsScreen() {
               const expanded = isOpen(section.key);
               return (
                 <View style={{ backgroundColor: theme.colors.background, paddingBottom: 4 }}>
-                  {section.module ? <Heading title={section.module} count={section.lessons} /> : null}
+                  {section.module ? <Heading title={section.module} count={section.inModule} /> : null}
                   <Heading
                     sub
                     title={section.title}
                     count={section.total}
                     closed={!expanded}
-                    onToggle={() => setOpen((o) => ({ ...o, [section.key]: !expanded }))}
+                    onToggle={() => setClosed((was) => sectionToggled(was, section.key))}
                   />
                 </View>
               );

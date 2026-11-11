@@ -11,6 +11,7 @@ import {
   loadSnapshot,
   MAP_DIMS,
   mapLit,
+  mapOpening,
   mapTitles,
   nodeView,
   reach,
@@ -48,6 +49,15 @@ const catalog = loadSnapshot({
   ],
 } as never);
 const [c] = catalog.courses;
+
+describe("the map's opening", () => {
+  it('centres the first group with new work across the view, a third down it', () => {
+    const layout = layoutClusters(c, c.graph!, MAP_DIMS);
+    const a = layout.nodes.find((n) => n.sub === 'a')!;
+    const at = mapOpening(Board.build(catalog, []), c, layout.nodes, { w: 300, h: 600 }, 1)!;
+    expect(at).toEqual({ left: a.x + MAP_DIMS.nodeW / 2 - 150, top: a.y + MAP_DIMS.nodeH / 2 - 200 });
+  });
+});
 
 describe('the map', () => {
   it("reaches a subtopic's prerequisites upstream and its dependents downstream", () => {

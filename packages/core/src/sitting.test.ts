@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  caseLabel,
   clockState,
+  cutValue,
   duration,
   editorOpening,
   opening,
   preferenceAfter,
   shownSeconds,
   submissionView,
+  VALUE_SHOWN,
   visibilityMove,
   type components,
   type Draft,
@@ -105,5 +108,17 @@ describe('a submission read back', () => {
     expect(view.overall).toBe('wrong');
     expect(view.failures).toBe('1 wrong answer · 1 timed out');
     expect(view.failure).toMatchObject({ title: 'Case 2: wrong answer', returned: 3 });
+  });
+
+  it('cuts a long value unless asked for it whole, and keeps a short one', () => {
+    const long = 'x'.repeat(VALUE_SHOWN + 1);
+    expect(cutValue(long, false)).toEqual({ text: `${'x'.repeat(VALUE_SHOWN)}…`, long: true });
+    expect(cutValue(long, true).text).toBe(long);
+    expect(cutValue('[1]', false)).toEqual({ text: '[1]', long: false });
+  });
+
+  it("names a case's mark by its outcome, and its time where one was measured", () => {
+    expect(caseLabel(0, 'passed', 12)).toBe('case 1: passed, 12 ms');
+    expect(caseLabel(1, 'crashed', null)).toBe('case 2: crashed');
   });
 });

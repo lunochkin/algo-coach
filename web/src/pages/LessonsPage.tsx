@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 
 import {
-  lessonGroups,
+  lessonSections,
   lessonRow,
   LESSONS_NONE,
   LESSONS_TITLE,
@@ -32,16 +32,8 @@ export function LessonsPage() {
     if (!catalog || !board(null)) return undefined
     return modulesInOrder(catalog.courses, order, board, (c) => !!c.graph?.lessons.length)
   }, [catalog, board, order])
-  // a group of one module's lessons is a section: the bar names the module
-  // beside it only where several modules hold lessons
-  const sections = useSections(
-    (modules ?? []).flatMap(({ c, b }) =>
-      lessonGroups(b, c).map((g) => ({
-        id: `${c.slug}-${g.key}`,
-        label: (modules ?? []).length > 1 ? `${c.title} · ${g.title}` : g.title,
-      })),
-    ),
-  )
+  const groups = useMemo(() => lessonSections(modules ?? []), [modules])
+  const sections = useSections(groups)
 
   return (
     <section className="space-y-section">
@@ -50,40 +42,40 @@ export function LessonsPage() {
         {(modules) => (
           <>
             <SectionBar items={sections.items} current={sections.current} onJump={sections.jump} />
-            {modules.map(({ c, b }) => (
+            {modules.map(({ c }) => (
               <section key={c.slug} className="space-y-stack">
-                <SectionHeading
-                  title={c.title}
-                  count={lessonGroups(b, c).reduce((n, g) => n + g.lessons.length, 0)}
-                />
-                {lessonGroups(b, c).map((g) => (
-                  <PageSection
-                    key={g.key}
-                    id={`${c.slug}-${g.key}`}
-                    sub
-                    title={g.title}
-                    count={g.lessons.length}
-                    body="rows"
-                    closed={sections.closed(`${c.slug}-${g.key}`)}
-                    onToggle={sections.toggle}
-                  >
-                    <PickList>
-                      {g.lessons.map((x) => {
-                        const row = lessonRow(b, c, x)
-                        return (
-                          <PickRow
-                            key={x.slug}
-                            to={lessonPath(c.slug, x.slug)}
-                            title={x.title}
-                            note={row.teaches}
-                            stats={lessonStats(row.status, row.minutes)}
-                            dim={row.state === 'locked'}
-                          />
-                        )
-                      })}
-                    </PickList>
-                  </PageSection>
-                ))}
+                {groups
+                  .filter((g) => g.c === c)
+                  .map((g) => (
+                    <Fragment key={g.id}>
+                      {g.module && <SectionHeading title={g.module} count={g.inModule} />}
+                      <PageSection
+                        id={g.id}
+                        sub
+                        title={g.title}
+                        count={g.lessons.length}
+                        body="rows"
+                        closed={sections.closed(g.id)}
+                        onToggle={sections.toggle}
+                      >
+                        <PickList>
+                          {g.lessons.map((x) => {
+                            const row = lessonRow(g.b, g.c, x)
+                            return (
+                              <PickRow
+                                key={x.slug}
+                                to={lessonPath(g.c.slug, x.slug)}
+                                title={x.title}
+                                note={row.teaches}
+                                stats={lessonStats(row.status, row.minutes)}
+                                dim={row.state === 'locked'}
+                              />
+                            )
+                          })}
+                        </PickList>
+                      </PageSection>
+                    </Fragment>
+                  ))}
               </section>
             ))}
           </>

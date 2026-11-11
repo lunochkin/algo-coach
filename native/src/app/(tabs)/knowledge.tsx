@@ -2,11 +2,7 @@ import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, View } from 'react-native';
 import { Appbar, Button, IconButton, useTheme } from 'react-native-paper';
-import ReorderableList, {
-  reorderItems,
-  useReorderableDrag,
-  type ReorderableListReorderEvent,
-} from 'react-native-reorderable-list';
+import ReorderableList, { useReorderableDrag, type ReorderableListReorderEvent } from 'react-native-reorderable-list';
 
 import {
   bySavedOrder,
@@ -23,6 +19,7 @@ import {
   SYNC_NOW,
   reorderLabel,
   SECTION_KNOWLEDGE,
+  moved,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { fromCopy, Loaded, styles, SyncBanner, SyncLine } from '@/ui/common';
@@ -57,8 +54,13 @@ export default function Home() {
   const order = st.courseOrder;
   const rows = useMemo(() => bySavedOrder(info?.courses ?? [], (r) => r.c.slug, order), [info, order]);
   const onReorder = ({ from, to }: ReorderableListReorderEvent) => {
-    const slugs = reorderItems(rows, from, to).map((r) => r.c.slug);
-    void st.setCourseOrder(slugs);
+    void st.setCourseOrder(
+      moved(
+        rows.map((r) => r.c.slug),
+        from,
+        to,
+      ),
+    );
   };
 
   // a snapshot holding no module reads as empty; the banner above names a failed sync

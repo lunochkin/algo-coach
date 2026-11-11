@@ -36,6 +36,7 @@ import {
   submitToSitting,
   TOUCH_MS,
   touchSitting,
+  techniquesLine,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -88,7 +89,7 @@ export default function ProblemScreen() {
       <View style={[styles.row, { flexWrap: 'wrap' }]}>
         {record.difficulty ? <Badge label={record.difficulty} /> : null}
         <Text variant="bodySmall" style={muted}>
-          {record.techniques.join(' · ')}
+          {techniquesLine(record.techniques)}
         </Text>
         <Text variant="bodySmall" style={muted}>
           {problemTried(record, now)}

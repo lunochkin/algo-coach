@@ -24,6 +24,7 @@ export * from './home';
 export * from './module';
 export * from './mapview';
 export * from './lessons';
+export * from './sections';
 export * from './certview';
 export * from './exam';
 export * from './answer';

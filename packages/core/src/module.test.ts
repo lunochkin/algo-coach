@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
-import { Board, dueCount, focusLabel, focusLine, groupCell, levelCounts, loadSnapshot, startPreview } from './index';
+import {
+  Board,
+  dueCount,
+  focusLabel,
+  focusLine,
+  groupCell,
+  levelCounts,
+  levelCountsLine,
+  loadSnapshot,
+  moduleGrid,
+  startPreview,
+} from './index';
 
 const mk = (id: string, sub: string, level: number) => ({
   id,
@@ -61,6 +72,25 @@ describe('the counts per level', () => {
       { level: 0, name: 'Foundation', passed: 1, total: 3 },
       { level: 1, name: 'Associate', passed: 0, total: 1 },
     ]);
+  });
+});
+
+describe('the counts in one line', () => {
+  it('leaves out a level that holds no questions', () => {
+    const b = Board.build(catalog, [{ t: T, course: 'c', id: 'd', ok: true }]);
+    expect(levelCountsLine(b, b.courses[0])).toBe('Foundation 1/3 · Associate 0/1');
+  });
+});
+
+describe("a module's grid", () => {
+  it('reads a row per subtopic by its title, and a cell per level named for its press', () => {
+    const b = Board.build(catalog, []);
+    const grid = moduleGrid(b, b.courses[0]);
+    expect(grid.levels[0]).toEqual({ level: 0, name: expect.any(String) });
+    const [t] = grid.topics;
+    expect([t.title, t.count, t.rows.map((r) => r.title)]).toEqual(['Types', 2, ['Ints', 's2']]);
+    expect(t.rows[0]).toMatchObject({ start: 'Start Ints', focus: 'Focus on Ints' });
+    expect(t.rows[0].cells[0].label).toBe('Start Ints, Foundation: 0/2 · open');
   });
 });
 

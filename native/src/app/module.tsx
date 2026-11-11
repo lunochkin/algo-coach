@@ -27,7 +27,8 @@ import {
   lessonPanelSub,
   lessonSlug,
   lessonView,
-  levelCounts,
+  levelCountsLine,
+  mapOpening,
   levelDots,
   MAP_DIMS,
   MAP_FIT,
@@ -144,12 +145,7 @@ export default function ModuleScreen() {
             </Button>
           ) : null}
         </View>
-        <Text variant="bodySmall">
-          {levelCounts(b, c)
-            .filter((x) => x.total)
-            .map((x) => `${x.name} ${x.passed}/${x.total}`)
-            .join(' · ')}
-        </Text>
+        <Text variant="bodySmall">{levelCountsLine(b, c)}</Text>
         <SegmentedButtons
           value={tab}
           onValueChange={(v) => setTab(v as 'groups' | 'map')}
@@ -263,13 +259,12 @@ function CourseMap(props: { c: Course; b: Board; withLessons: boolean }) {
     viewSize.value = view.current;
     if (placedOnce.current) return;
     placedOnce.current = true;
-    // Start on the first group with new work, at full size.
-    const first = b.frontier(c)[0];
-    const n = first ? at.get(first.sub) : undefined;
-    if (!n) return fit();
+    // start on the first group with new work, at full size
+    const opening = mapOpening(b, c, nodes, view.current, 1);
+    if (!opening) return fit();
     scale.value = 1;
-    tx.value = view.current.w / 2 - (n.x + NODE_W / 2);
-    ty.value = view.current.h / 3 - (n.y + NODE_H / 2);
+    tx.value = -opening.left;
+    ty.value = -opening.top;
   };
 
   const hit = useCallback(

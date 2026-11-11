@@ -1,4 +1,4 @@
-import { RUNGS_SOLVED, cardsCounted, RECALL_MARKS } from '@algo-coach/core'
+import { RUNGS_SOLVED, cardsCounted, RECALL_MARKS, recallMarkLabel } from '@algo-coach/core'
 import type { RecallMark } from '@algo-coach/core'
 import { Link } from 'react-router'
 
@@ -75,7 +75,7 @@ function RecallMarks({ marks }: { marks: RecallMark[] }) {
       {marks.map((one) => (
         <span
           key={one.templateId}
-          title={`${one.title}: ${one.reading}`}
+          title={recallMarkLabel(one)}
           className={cn(
             'font-mono',
             one.tone === 'passed' && 'text-verdict-passed',

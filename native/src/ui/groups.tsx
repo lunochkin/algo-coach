@@ -8,17 +8,10 @@ import {
   type Board,
   type CellState,
   type Course,
-  focusOn,
-  groupCell,
-  levelName,
-  levels,
   MODULE_FOCUS,
   MODULE_FOCUSED,
+  moduleGrid,
   MODULE_START,
-  startGroup,
-  subsByDepth,
-  subTitle,
-  startLabel,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles, tones } from '@/ui/common';
@@ -50,20 +43,20 @@ export function ModuleGroups({
     locked: theme.colors.onSurfaceDisabled,
     empty: theme.colors.onSurfaceDisabled,
   };
-  const lv = levels(b.rules);
+  const grid = moduleGrid(b, c);
   const aimed = (topic: string | null, sub: string | null) => aimedAt(st.focus, c.slug, topic, sub);
   const aim = (topic: string | null, sub: string | null) =>
     void st.setFocus(aimFocus(st.focus, { course: c.slug, topic, sub }));
 
   return (
     <View style={{ gap: 16 }}>
-      {c.topics.map((t) => (
+      {grid.topics.map((t) => (
         <PageSection
           key={t.slug}
           of={of}
           id={t.slug}
           title={t.title}
-          count={t.subs.length}
+          count={t.count}
           body="bare"
           aside={
             <>
@@ -82,47 +75,46 @@ export function ModuleGroups({
         >
           <View style={[styles.row, { paddingLeft: 4 }]}>
             <View style={{ flex: 1 }} />
-            {lv.map((l) => (
-              <Text key={l} variant="labelSmall" style={cellStyle}>
-                {levelName(b.rules, l, true)}
+            {grid.levels.map((l) => (
+              <Text key={l.level} variant="labelSmall" style={cellStyle}>
+                {l.name}
               </Text>
             ))}
           </View>
-          {subsByDepth(c, t).map((sub) => (
-            <View key={sub} style={styles.row}>
+          {t.rows.map((row) => (
+            <View key={row.sub} style={styles.row}>
               {/* the name starts the subtopic at every level; the press beside it aims the focus */}
               <Pressable
                 style={{ flex: 1, minHeight: 40, justifyContent: 'center' }}
                 accessibilityRole="button"
-                accessibilityLabel={startLabel(subTitle(c, sub))}
-                onPress={() => onStart({ course: c.slug, topic: t.slug, sub, level: null })}
+                accessibilityLabel={row.start}
+                onPress={() => onStart({ course: c.slug, topic: t.slug, sub: row.sub, level: null })}
               >
                 <Text
                   variant="bodyMedium"
                   numberOfLines={1}
-                  style={aimed(t.slug, sub) ? { color: theme.colors.primary } : null}
+                  style={aimed(t.slug, row.sub) ? { color: theme.colors.primary } : null}
                 >
-                  {subTitle(c, sub)}
+                  {row.title}
                 </Text>
               </Pressable>
               <IconButton
                 icon="crosshairs-gps"
                 size={18}
-                selected={aimed(t.slug, sub)}
-                iconColor={aimed(t.slug, sub) ? theme.colors.primary : theme.colors.onSurfaceVariant}
-                accessibilityLabel={focusOn(subTitle(c, sub))}
-                onPress={() => aim(t.slug, sub)}
+                selected={aimed(t.slug, row.sub)}
+                iconColor={aimed(t.slug, row.sub) ? theme.colors.primary : theme.colors.onSurfaceVariant}
+                accessibilityLabel={row.focus}
+                onPress={() => aim(t.slug, row.sub)}
                 style={{ margin: 0 }}
               />
-              {lv.map((level) => {
-                const cell = groupCell(b, { course: c.slug, topic: t.slug, sub, level });
+              {row.cells.map(({ level, cell, label }) => {
                 return (
                   // a locked cell starts too: locks do not apply to the filtered queue
                   <Pressable
                     key={level}
                     disabled={cell.state === 'empty'}
-                    accessibilityLabel={startGroup(subTitle(c, sub), levelName(b.rules, level), cell.line)}
-                    onPress={() => onStart({ course: c.slug, topic: t.slug, sub, level })}
+                    accessibilityLabel={label}
+                    onPress={() => onStart({ course: c.slug, topic: t.slug, sub: row.sub, level })}
                     style={{
                       width: 48,
                       minHeight: 40,

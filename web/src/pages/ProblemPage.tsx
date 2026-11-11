@@ -7,6 +7,7 @@ import {
   techniqueStats,
   PROBLEM_RETIRED,
   PROBLEM_OPENING,
+  techniquesLine,
 } from '@algo-coach/core'
 import { lazy, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router'
@@ -91,7 +92,7 @@ export function ProblemPage() {
               <Badge variant="outline" className="font-normal">
                 {picked.data.difficulty ?? NO_DIFFICULTY}
               </Badge>
-              <span>{picked.data.techniques.join(' · ')}</span>
+              <span>{techniquesLine(picked.data.techniques)}</span>
             </span>
           )
         }

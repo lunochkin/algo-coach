@@ -14,6 +14,7 @@ import {
   startTitle,
   CANCEL,
   START_NOTE,
+  type StartScope,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { startQueue, styles } from '@/ui/common';
@@ -22,12 +23,7 @@ import { Toggle } from '@/ui/toggle';
 import { Heading } from '@/ui/rows';
 
 /** Where a filtered queue starts: a module, narrowed to a topic, a subtopic or one group. */
-export interface Scope {
-  course: string;
-  topic: string | null;
-  sub: string | null;
-  level: number | null;
-}
+export type Scope = StartScope;
 
 /** The sheet that starts a filtered queue, opened from a press on the module's screens. */
 export function useStartSheet(): { open: (s: Scope) => void; sheet: ReactNode } {

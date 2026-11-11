@@ -19,6 +19,7 @@ import {
   toggled,
   type ListingFilter,
   OF,
+  techniquesLine,
 } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
@@ -89,7 +90,7 @@ export default function ProblemsScreen() {
                         title={row.title}
                         badge={row.difficulty}
                         stats={techniqueStats(row, now)}
-                        note={row.techniques.join(' · ')}
+                        note={techniquesLine(row.techniques)}
                         mono
                         // the one tag the listing is filtered to is the technique drilled
                         onPress={() =>

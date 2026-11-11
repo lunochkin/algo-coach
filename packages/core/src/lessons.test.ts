@@ -4,6 +4,7 @@ import {
   Board,
   lessonGroups,
   lessonParts,
+  lessonSections,
   lessonRow,
   lessonsAround,
   lessonStopNote,
@@ -60,6 +61,14 @@ describe('the lessons', () => {
     expect(groups.map((g) => [g.key, g.lessons.map((x) => x.title)])).toEqual([
       ['toRead', ['first']],
       ['locked', ['second']],
+    ]);
+  });
+
+  it('reads each group as a section, the module heading its first', () => {
+    const sections = lessonSections([{ c, b: Board.build(catalog, []) }]);
+    expect(sections.map((x) => [x.id, x.label, x.module, x.inModule])).toEqual([
+      ['m-toRead', sections[0].title, 'M', 2],
+      ['m-locked', sections[1].title, null, 2],
     ]);
   });
 

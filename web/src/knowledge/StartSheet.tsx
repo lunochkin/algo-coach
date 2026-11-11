@@ -13,6 +13,7 @@ import {
   startTitle,
   type DrillScope,
   START_NOTE,
+  type StartScope,
 } from '@algo-coach/core'
 
 import { Choice } from '@/components/Choice'
@@ -32,7 +33,7 @@ import { filteredQuery } from '@/knowledge/filtered'
 import { useLearner } from '@/knowledge/learner'
 
 /** Where a filtered queue starts: the module, a topic, a subtopic or one group. */
-export type Scope = Pick<DrillScope, 'course' | 'topic' | 'sub' | 'level'>
+export type Scope = StartScope
 
 // the sheet's choices narrow this one queue, and starting it moves no focus:
 // `knowledge.md`, Queues

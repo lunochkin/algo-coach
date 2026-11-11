@@ -284,6 +284,9 @@ export interface DrillScope {
   due?: boolean; // only weak or due
 }
 
+/** The scope a press opens the start sheet on, before the sheet adds the kind and the due flag. */
+export type StartScope = Pick<DrillScope, 'course' | 'topic' | 'sub' | 'level'>;
+
 export function drillQueue(b: Board, f: DrillScope, limit: number): Queue {
   const scope = b
     .questions()

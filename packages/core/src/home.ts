@@ -107,6 +107,9 @@ export interface ModuleRow {
   passed: number; // questions passed at least once: the module's progress
 }
 
+/** A module row's note: the group next up, and what it is waiting for. */
+export const moduleRowNote = (row: ModuleRow) => [row.view.title, row.view.detail].filter(Boolean).join(' · ');
+
 export function moduleRows(b: Board, now: number): ModuleRow[] {
   const all = b.questions();
   return b.courses.map((c) => {

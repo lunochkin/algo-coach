@@ -2,7 +2,15 @@ import { router } from 'expo-router';
 import { Fragment, useState } from 'react';
 import { Divider, Text, useTheme } from 'react-native-paper';
 
-import { cardRow, type components, type RecallMark, cardsCounted, RECALL_MARKS, RUNGS_SOLVED } from '@algo-coach/core';
+import {
+  cardRow,
+  type components,
+  type RecallMark,
+  cardsCounted,
+  RECALL_MARKS,
+  RUNGS_SOLVED,
+  recallMarkLabel,
+} from '@algo-coach/core';
 import { tones } from '@/ui/common';
 import { Panel, PanelStrip, PickRow } from '@/ui/rows';
 
@@ -65,7 +73,7 @@ function Marks({ marks }: { marks: RecallMark[] }) {
     <Text
       variant="bodySmall"
       style={{ color: theme.colors.onSurfaceVariant }}
-      accessibilityLabel={`${RECALL_MARKS}: ${marks.map((one) => `${one.title}, ${one.reading}`).join('; ')}`}
+      accessibilityLabel={`${RECALL_MARKS}: ${marks.map(recallMarkLabel).join('; ')}`}
     >
       {RECALL_MARKS}
       {marks.map((one) => (

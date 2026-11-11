@@ -14,12 +14,9 @@ import {
   type CourseStatus,
   dueCount,
   type Focus,
-  focusOn,
-  groupCell,
-  levelCounts,
-  levelName,
-  levels,
+  levelCountsLine,
   MODULE_ARCHIVE,
+  moduleGrid,
   MODULE_FOCUS,
   MODULE_FOCUS_HERE,
   MODULE_FOCUSED,
@@ -31,9 +28,6 @@ import {
   MODULE_START,
   moduleMeta,
   noGraph,
-  startGroup,
-  subsByDepth,
-  subTitle,
   newRecord,
   BACK_KNOWLEDGE,
   OF,
@@ -138,7 +132,7 @@ export function ModulePage() {
         {({ page }) => {
           if (!page) return null
           const { b, c } = page
-          const lv = levels(b.rules)
+          const grid = moduleGrid(b, c)
           return (
             <section className="space-y-section">
               <div className="flex flex-wrap items-center gap-stack">
@@ -182,18 +176,7 @@ export function ModulePage() {
                 )}
               </div>
 
-              <p className="flex flex-wrap gap-x-4 text-meta">
-                {levelCounts(b, c).map((x) =>
-                  x.total ? (
-                    <span key={x.level}>
-                      {x.name}{' '}
-                      <span className="tabular-nums">
-                        {x.passed}/{x.total}
-                      </span>
-                    </span>
-                  ) : null,
-                )}
-              </p>
+              <p className="text-meta tabular-nums">{levelCountsLine(b, c)}</p>
 
               {/* the groups and the map are two tabs of one page: `pages.md`, The structure */}
               <ToggleGroup
@@ -229,12 +212,12 @@ export function ModulePage() {
                 />
               )}
               {tab === 'groups' &&
-                c.topics.map((t) => (
+                grid.topics.map((t) => (
                   <PageSection
                     key={t.slug}
                     id={t.slug}
                     title={t.title}
-                    count={t.subs.length}
+                    count={t.count}
                     body="bare"
                     closed={sections.closed(t.slug)}
                     onToggle={sections.toggle}
@@ -272,83 +255,74 @@ export function ModulePage() {
                         <thead>
                           <tr className="text-meta text-muted-foreground">
                             <th className="px-4 py-2 text-left font-normal">{SUBTOPIC_COLUMN}</th>
-                            {lv.map((level) => (
-                              <th key={level} className={GRID_LEVEL_HEAD}>
-                                {levelName(b.rules, level, true)}
+                            {grid.levels.map((l) => (
+                              <th key={l.level} className={GRID_LEVEL_HEAD}>
+                                {l.name}
                               </th>
                             ))}
                           </tr>
                         </thead>
                         <tbody className="divide-y">
-                          {subsByDepth(c, t).map((sub) => (
-                            <tr key={sub}>
+                          {t.rows.map((row) => (
+                            <tr key={row.sub}>
                               <td className="px-4 py-2">
                                 <div className="flex items-center gap-1">
                                   {/* the name starts the subtopic at every level; the press beside it aims the focus */}
                                   <button
                                     type="button"
+                                    aria-label={row.start}
                                     className={cn(
                                       'flex-1 text-left hover:underline',
-                                      aimed(t.slug, sub) && 'font-medium text-brand-deep',
+                                      aimed(t.slug, row.sub) && 'font-medium text-brand-deep',
                                     )}
                                     onClick={() =>
                                       setStarting({
                                         course: module,
                                         topic: t.slug,
-                                        sub,
+                                        sub: row.sub,
                                         level: null,
                                       })
                                     }
                                   >
-                                    {subTitle(c, sub)}
+                                    {row.title}
                                   </button>
                                   <Button
                                     variant="ghost"
                                     size="icon-sm"
-                                    aria-label={focusOn(subTitle(c, sub))}
-                                    aria-pressed={aimed(t.slug, sub)}
-                                    onClick={() => aim({ course: module, topic: t.slug, sub })}
+                                    aria-label={row.focus}
+                                    aria-pressed={aimed(t.slug, row.sub)}
+                                    onClick={() =>
+                                      aim({ course: module, topic: t.slug, sub: row.sub })
+                                    }
                                   >
                                     <Crosshair
-                                      className={cn(aimed(t.slug, sub) && 'text-brand-deep')}
+                                      className={cn(aimed(t.slug, row.sub) && 'text-brand-deep')}
                                     />
                                   </Button>
                                 </div>
                               </td>
-                              {lv.map((level) => {
-                                const cell = groupCell(b, {
-                                  course: c.slug,
-                                  topic: t.slug,
-                                  sub,
-                                  level,
-                                })
-                                return (
-                                  <td key={level} className={GRID_CELL}>
-                                    {/* a locked cell starts too: locks do not apply to the filtered queue */}
-                                    <button
-                                      type="button"
-                                      disabled={cell.state === 'empty'}
-                                      className={cn(GRID_PRESS, CELL_TONE[cell.state])}
-                                      title={cell.line}
-                                      aria-label={startGroup(
-                                        subTitle(c, sub),
-                                        levelName(b.rules, level),
-                                        cell.line,
-                                      )}
-                                      onClick={() =>
-                                        setStarting({
-                                          course: module,
-                                          topic: t.slug,
-                                          sub,
-                                          level,
-                                        })
-                                      }
-                                    >
-                                      {cell.count}
-                                    </button>
-                                  </td>
-                                )
-                              })}
+                              {row.cells.map(({ level, cell, label }) => (
+                                <td key={level} className={GRID_CELL}>
+                                  {/* a locked cell starts too: locks do not apply to the filtered queue */}
+                                  <button
+                                    type="button"
+                                    disabled={cell.state === 'empty'}
+                                    className={cn(GRID_PRESS, CELL_TONE[cell.state])}
+                                    title={cell.line}
+                                    aria-label={label}
+                                    onClick={() =>
+                                      setStarting({
+                                        course: module,
+                                        topic: t.slug,
+                                        sub: row.sub,
+                                        level,
+                                      })
+                                    }
+                                  >
+                                    {cell.count}
+                                  </button>
+                                </td>
+                              ))}
                             </tr>
                           ))}
                         </tbody>

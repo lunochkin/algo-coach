@@ -158,5 +158,8 @@ export const reorderLabel = (title: string) => `Reorder ${title}`;
 export const startLabel = (title: string) => `Start ${title}`;
 export const gradeLabel = (grade: string) => `Grade: ${grade}`;
 export const raiseLabel = (step: number) => `Allow ${step} more new questions`;
-export const caseLabel = (index: number, outcome: string) => `case ${index + 1}: ${outcome}`;
+export const caseLabel = (index: number, outcome: string, elapsedMs?: number | null) =>
+  `case ${index + 1}: ${outcome}${elapsedMs == null ? '' : `, ${elapsedMs} ms`}`;
+/** A problem's techniques in one line, as its row and its page read them. */
+export const techniquesLine = (techniques: readonly string[]) => techniques.join(' · ');
 export const syncErrorLabel = (summary: string) => `Sync error: ${summary}. Tap for details.`;

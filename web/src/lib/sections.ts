@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import { sectionOpened, sectionToggled } from '@algo-coach/core'
+
 export type Item = { id: string; label: string }
 
 // the section the reader is in, read from where each one sits rather than
@@ -44,10 +46,9 @@ export function useSections(items: Item[]) {
     items,
     current,
     closed: (id: string) => closed.includes(id),
-    toggle: (id: string) =>
-      setClosed(closed.includes(id) ? closed.filter((one) => one !== id) : [...closed, id]),
+    toggle: (id: string) => setClosed((was) => sectionToggled(was, id)),
     jump: (id: string) => {
-      setClosed(closed.filter((one) => one !== id))
+      setClosed((was) => sectionOpened(was, id))
       requestAnimationFrame(() =>
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }),
       )

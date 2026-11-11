@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Button, Text, useTheme } from 'react-native-paper';
 
 import {
   duration,
@@ -15,6 +15,9 @@ import {
   ELAPSED_TIME,
   CASES_IN_ORDER,
   caseLabel,
+  cutValue,
+  CUT_VALUE,
+  showAllKb,
 } from '@algo-coach/core';
 import { palette } from '@/ui/tokens';
 
@@ -54,10 +57,6 @@ export function ElapsedClock({
   );
 }
 
-// a value cut on screen past this many characters: a separating case weighs
-// up to a mebibyte, and drawing it whole stalls the screen
-const SHOWN = 2_000;
-
 /** A submission read back: the verdict, a mark per case, and the first failing case whole. */
 export function SubmissionVerdict({ submitted }: { submitted: Submitted }) {
   const theme = useTheme();
@@ -81,7 +80,7 @@ export function SubmissionVerdict({ submitted }: { submitted: Submitted }) {
         {results.map((one, index) => (
           <View
             key={one.case_id}
-            accessibilityLabel={caseLabel(index, OUTCOME_LABELS[one.outcome])}
+            accessibilityLabel={caseLabel(index, OUTCOME_LABELS[one.outcome], one.elapsed_ms)}
             style={{
               width: 12,
               height: 12,
@@ -111,20 +110,30 @@ export function SubmissionVerdict({ submitted }: { submitted: Submitted }) {
   );
 }
 
+// a long value reads cut until the reader asks for it whole, as on the web
 function Value({ label, text }: { label: string; text: string }) {
   const theme = useTheme();
+  const [whole, setWhole] = useState(false);
+  const shown = cutValue(text, whole);
   return (
     <View style={{ gap: 2 }}>
-      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-        {label}
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          {label}
+        </Text>
+        {shown.long ? (
+          <Button compact onPress={() => setWhole(!whole)}>
+            {whole ? CUT_VALUE : showAllKb(text.length)}
+          </Button>
+        ) : null}
+      </View>
       <ScrollView
         horizontal
         style={{ backgroundColor: theme.colors.surfaceVariant, borderRadius: 6 }}
         contentContainerStyle={{ padding: 6 }}
       >
         <Text selectable style={{ fontFamily: 'monospace', fontSize: 13, color: theme.colors.onSurfaceVariant }}>
-          {text.length > SHOWN ? `${text.slice(0, SHOWN)}…` : text}
+          {shown.text}
         </Text>
       </ScrollView>
     </View>

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
 
+import { sectionOpened, sectionToggled } from '@algo-coach/core';
 import { Heading, Panel } from '@/ui/rows';
 import { Toggle } from '@/ui/toggle';
 
@@ -76,7 +77,7 @@ export function useSections(items: Item[]) {
 
   const jump = useCallback(
     (id: string, animated = true) => {
-      setClosed((was) => was.filter((one) => one !== id));
+      setClosed((was) => sectionOpened(was, id));
       if (ids.split(',').includes(id)) setCurrent(id);
       // a closed section lays out its body on the next frame
       requestAnimationFrame(
@@ -105,7 +106,7 @@ export function useSections(items: Item[]) {
     jump,
     register,
     closed: (id: string) => closed.includes(id),
-    toggle: (id: string) => setClosed((was) => (was.includes(id) ? was.filter((one) => one !== id) : [...was, id])),
+    toggle: (id: string) => setClosed((was) => sectionToggled(was, id)),
   };
 }
 

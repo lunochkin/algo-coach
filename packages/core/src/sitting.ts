@@ -146,6 +146,16 @@ export interface SubmissionView {
   } | null;
 }
 
+// cut on screen past this many characters: a separating case weighs up to a
+// mebibyte, and drawing it whole stalls the page. The response stays whole
+export const VALUE_SHOWN = 2_000;
+
+/** A failing case's value as the page draws it: cut unless the reader asked for it whole. */
+export function cutValue(full: string, whole: boolean): { text: string; long: boolean } {
+  const long = full.length > VALUE_SHOWN;
+  return { text: long && !whole ? `${full.slice(0, VALUE_SHOWN)}…` : full, long };
+}
+
 export function submissionView(submitted: Submitted): SubmissionView {
   const results = submitted.verification.results ?? [];
   const passed = results.filter((one) => one.outcome === 'passed').length;

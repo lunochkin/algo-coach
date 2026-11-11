@@ -11,6 +11,8 @@ import {
   COPY,
   CUT_VALUE,
   showAllKb,
+  caseLabel,
+  cutValue,
 } from '@algo-coach/core'
 
 import type { CaseResult, Submitted } from '@/api/client'
@@ -41,9 +43,7 @@ export function CaseStrip({ results }: { results: CaseResult[] }) {
       {results.map((one, index) => (
         <li
           key={one.case_id}
-          title={`case ${index + 1}: ${OUTCOME[one.outcome].label}${
-            one.elapsed_ms == null ? '' : `, ${one.elapsed_ms} ms`
-          }`}
+          title={caseLabel(index, OUTCOME[one.outcome].label, one.elapsed_ms)}
           className={cn('size-3 rounded-sm', OUTCOME[one.outcome].mark)}
         />
       ))}
@@ -63,20 +63,16 @@ function FailureView({ failure }: { failure: NonNullable<SubmissionView['failure
   )
 }
 
-// cut on screen past this many characters: a separating case weighs up to a
-// mebibyte, and drawing it whole stalls the page. The response stays whole
-const SHOWN = 2_000
-
 function Value({ label, value, text }: { label: string; value?: unknown; text?: string }) {
   const [whole, setWhole] = useState(false)
   const full = text ?? JSON.stringify(value)
-  const cut = !whole && full.length > SHOWN
+  const shown = cutValue(full, whole)
 
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2">
         <span className="text-muted-foreground">{label}</span>
-        {full.length > SHOWN && (
+        {shown.long && (
           <>
             <Button variant="ghost" size="xs" onClick={() => setWhole(!whole)}>
               {whole ? CUT_VALUE : showAllKb(full.length)}
@@ -89,7 +85,7 @@ function Value({ label, value, text }: { label: string; value?: unknown; text?: 
       </div>
       {/* a word breaks only where it alone overflows the line: a traceback keeps
           its words, and a long value without spaces still wraps */}
-      <PlainCode wrap>{cut ? `${full.slice(0, SHOWN)}…` : full}</PlainCode>
+      <PlainCode wrap>{shown.text}</PlainCode>
     </div>
   )
 }

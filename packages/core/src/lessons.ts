@@ -5,6 +5,38 @@ import { bySavedOrder } from './order';
 import type { Board } from './schedule';
 import type { Course } from './types';
 
+/**
+ * A group of one module's lessons, as a long page's section. The bar names
+ * the module beside the group only where several modules hold lessons.
+ */
+export interface LessonSection {
+  id: string;
+  label: string;
+  c: Course;
+  b: Board;
+  module: string | null; // the module's heading, on its first group alone
+  inModule: number; // the lessons the module holds, which its heading counts
+  title: string;
+  lessons: Lesson[];
+}
+
+export function lessonSections(modules: readonly { c: Course; b: Board }[]): LessonSection[] {
+  return modules.flatMap(({ c, b }) => {
+    const groups = lessonGroups(b, c);
+    const inModule = groups.reduce((n, g) => n + g.lessons.length, 0);
+    return groups.map((g, i) => ({
+      id: `${c.slug}-${g.key}`,
+      label: modules.length > 1 ? `${c.title} · ${g.title}` : g.title,
+      c,
+      b,
+      module: i === 0 ? c.title : null,
+      inModule,
+      title: g.title,
+      lessons: g.lessons,
+    }));
+  });
+}
+
 /** Lessons in graph order: the shallowest subtopic taught and the lowest level first, then listing order. */
 export function inGraphOrder(c: Course, lessons: Lesson[]): Lesson[] {
   const key = (x: Lesson) =>

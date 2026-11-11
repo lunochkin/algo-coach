@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import { problemCards, cardsOffered } from '@algo-coach/core'
+import { problemCards, cardsOffered, techniquesLine } from '@algo-coach/core'
 
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
@@ -42,7 +42,7 @@ export function ProblemFacts({
           {problem.difficulty}
         </Badge>
       )}
-      <span>{problem.techniques.join(' · ')}</span>
+      <span>{techniquesLine(problem.techniques)}</span>
       <span>{tried(problem)}</span>
       {offered.length > 0 && (
         <span>

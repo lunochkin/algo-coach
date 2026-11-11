@@ -7,6 +7,27 @@ import type { Board } from './schedule';
 import type { Course } from './types';
 import { alsoNeedsLine, levelLine, MODULE_FOCUS_HERE, MODULE_FOCUSED } from './words/module';
 
+/**
+ * Where a map opens: the first group with new work, centred across the view
+ * and a third of the way down it, as a scroll offset at `scale`. Null where
+ * no group has new work, and the map is then fitted whole.
+ */
+export function mapOpening(
+  b: Board,
+  c: Course,
+  nodes: readonly PlacedNode[],
+  view: { w: number; h: number },
+  scale: number,
+): { left: number; top: number } | null {
+  const first = b.frontier(c)[0];
+  const n = first ? nodes.find((one) => one.sub === first.sub) : undefined;
+  if (!n) return null;
+  return {
+    left: (n.x + MAP_DIMS.nodeW / 2) * scale - view.w / 2,
+    top: (n.y + MAP_DIMS.nodeH / 2) * scale - view.h / 3,
+  };
+}
+
 /** The sizes a module's map is laid out at, on both clients. */
 export const MAP_DIMS = { nodeW: 164, nodeH: 56, col: 200, row: 74, pad: 16, header: 32, gapX: 96, gapY: 40 };
 

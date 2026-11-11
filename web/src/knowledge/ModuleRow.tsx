@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react'
 
-import { moduleStats, PAUSED, QUESTIONS_PASSED, type ModuleRow as Row } from '@algo-coach/core'
+import {
+  moduleStats,
+  PAUSED,
+  QUESTIONS_PASSED,
+  type ModuleRow as Row,
+  moduleRowNote,
+} from '@algo-coach/core'
 
 import { PickRow } from '@/components/PickRow'
 import { Badge } from '@/components/ui/badge'
@@ -21,7 +27,7 @@ export function ModuleRow({ row, from, aside }: { row: Row; from?: 'board'; asid
           </Badge>
         )
       }
-      note={[row.view.title, row.view.detail].filter(Boolean).join(' · ')}
+      note={moduleRowNote(row)}
       stats={moduleStats(row.toReview, row.total)}
       progress={{ value: row.passed, total: row.total, label: QUESTIONS_PASSED }}
       aside={aside}

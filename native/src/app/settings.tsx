@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Appbar, Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
@@ -30,6 +30,8 @@ import {
   REMINDER_HOUR_RULE,
   NOT_SIGNED_IN,
   restoreLabel,
+  STUDY_SETTINGS,
+  type SettingName,
 } from '@algo-coach/core';
 import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
@@ -43,11 +45,12 @@ export default function SettingsScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const signOut = useSignOut();
+  const stored: Record<SettingName, number> = { new_per_day: st.newPerDay, exam_size: st.examSize };
   const [form, setForm] = useState({
     origin: st.settings.origin,
     device: st.settings.device,
-    newPerDay: String(st.newPerDay),
-    examSize: String(st.examSize),
+    new_per_day: String(st.newPerDay),
+    exam_size: String(st.examSize),
     reminderHour: String(st.settings.reminderHour),
   });
   const [saved, setSaved] = useState(false);
@@ -68,16 +71,13 @@ export default function SettingsScreen() {
     setForm({
       origin: st.settings.origin,
       device: st.settings.device,
-      newPerDay: String(st.newPerDay),
-      examSize: String(st.examSize),
+      new_per_day: String(st.newPerDay),
+      exam_size: String(st.examSize),
       reminderHour: String(st.settings.reminderHour),
     });
   }, [st.settings, st.newPerDay, st.examSize]);
 
-  const study = studyForm(
-    { new_per_day: form.newPerDay, exam_size: form.examSize },
-    { new_per_day: st.newPerDay, exam_size: st.examSize },
-  );
+  const study = studyForm({ new_per_day: form.new_per_day, exam_size: form.exam_size }, stored);
   const hour = Number(form.reminderHour);
   const hourOk = Number.isInteger(hour) && hour >= 0 && hour <= 23;
   const deviceOk = /^[A-Za-z0-9_-]+$/.test(form.device);
@@ -166,10 +166,13 @@ export default function SettingsScreen() {
         {field('device', DEVICE_NAME)}
         {!deviceOk ? <HelperText type="error">{DEVICE_NAME_RULE}</HelperText> : null}
         <Heading title={STUDY} />
-        {field('newPerDay', SETTING_LABEL.new_per_day, true)}
-        {!study.ok.new_per_day ? <HelperText type="error">{settingRange('new_per_day')}</HelperText> : null}
-        {field('examSize', SETTING_LABEL.exam_size, true)}
-        {!study.ok.exam_size ? <HelperText type="error">{settingRange('exam_size')}</HelperText> : null}
+        {/* the study settings in the order core lists them, as the web's page reads them */}
+        {STUDY_SETTINGS.map((name) => (
+          <Fragment key={name}>
+            {field(name, SETTING_LABEL[name], true)}
+            {!study.ok[name] ? <HelperText type="error">{settingRange(name)}</HelperText> : null}
+          </Fragment>
+        ))}
         {field('reminderHour', REMINDER_HOUR, true)}
         {!hourOk ? <HelperText type="error">{REMINDER_HOUR_RULE}</HelperText> : null}
         <View style={styles.row}>

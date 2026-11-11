@@ -13,6 +13,7 @@ import {
   toggled,
   type ListingFilter,
   OF,
+  techniquesLine,
 } from '@algo-coach/core'
 import { useSearchParams } from 'react-router'
 
@@ -162,7 +163,7 @@ function ProblemRow({ listed, drilled }: { listed: Listed; drilled: string | nul
         )
       }
       stats={counts(listed)}
-      note={listed.techniques.join(' · ')}
+      note={techniquesLine(listed.techniques)}
       mono
     />
   )

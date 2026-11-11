@@ -33,6 +33,7 @@ import {
   ZOOM_OUT,
   ZOOM_IN,
   mapOf,
+  mapOpening,
 } from '@algo-coach/core'
 
 import { Link } from 'react-router'
@@ -99,12 +100,12 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
 
   // opens on the first group with new work, as the phone's map does
   useEffect(() => {
-    const first = b.frontier(c)[0]
-    const n = first ? at.get(first.sub) : undefined
     const el = box.current
-    if (!n || !el) return
-    el.scrollLeft = (n.x + W / 2) * scale - el.clientWidth / 2
-    el.scrollTop = (n.y + H / 2) * scale - el.clientHeight / 3
+    const opening =
+      el && mapOpening(b, c, layout.nodes, { w: el.clientWidth, h: el.clientHeight }, scale)
+    if (!el || !opening) return
+    el.scrollLeft = opening.left
+    el.scrollTop = opening.top
     // the first frame alone: a later zoom keeps the reader's place
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

@@ -137,6 +137,9 @@ export interface RecallMark {
   tone: 'passed' | 'wrong' | null;
 }
 
+/** A recall mark in words, as its hover and its spoken label name it. */
+export const recallMarkLabel = (one: Pick<RecallMark, 'title' | 'reading'>) => `${one.title}: ${one.reading}`;
+
 function recallMark(cases: number, last: Recalled | undefined): Pick<RecallMark, 'mark' | 'reading' | 'tone'> {
   if (cases === 0) return { mark: '-', reading: 'read, not recalled', tone: null };
   if (!last?.last_at) return { mark: '·', reading: 'never recalled', tone: null };

@@ -322,7 +322,7 @@ and removes the drift the audit found.
 - [x] Move an exam's choice and a queue's start by mode into core, with the
       lookup of a certification by its id. The phone offers the reviews
       outside a focus only where the focus is strict, and the web on any
-- [ ] Move the small helpers both clients repeat into core, and use what
+- [x] Move the small helpers both clients repeat into core, and use what
       core already holds: the lessons' sections, closing a section, the
       module grid, a value's cut, the map's opening, and the joined lines
 
