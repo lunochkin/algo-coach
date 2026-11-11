@@ -373,6 +373,10 @@ what it offers. The inventory is the list both clients build to.
 - **A planned screen counts as held.** A screen `pages.md` gives and the web
   does not serve yet is listed on the web, so the phone is compared with what
   the web will offer.
+- **`tests/test_pages_inventory.py` holds the screens table to the code.**
+  Each web route and phone screen file names its row there, and a row's phone
+  column reads `none` exactly where no phone screen holds it. A screen added
+  without its row fails the suite.
 
 ### Screens
 

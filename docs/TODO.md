@@ -171,7 +171,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
       does, so Read no longer ends the queue
 - [x] Move the map's edges and node panel, the learner, one typed engine
       client and the small focus, order and certification helpers into core
-- [ ] Add a test in `tests/` that every web route and native screen file has
+- [x] Add a test in `tests/` that every web route and native screen file has
       an inventory row, matched by a table in the test, and that a row's
       phone column reads `none` exactly where no phone screen holds it
 - [ ] Serve the problem listing on the phone as a Problems tab, its filters,
