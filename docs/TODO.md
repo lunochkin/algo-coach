@@ -303,6 +303,29 @@ ways inside each client. Each item covers both clients.
       opens the knowledge home, and open the phone on the Practice tab, as
       the web opens on the board
 
+### One logic across the clients
+
+An audit on 2026-11-11 found the clients each running the same act on their
+own: the requests, the form state and the pick of the next press. Each item
+moves one piece into `packages/core` with its tests, puts both clients on it,
+and removes the drift the audit found.
+
+- [ ] Move the sitting's controller into core, with the clock's press: the
+      start, pause, resume and end, the touch, and the submission. The web
+      keeps touching an ended sitting, and the two pick the clock's press apart
+- [ ] Move a question's answer state and the press it asks for into core,
+      and the claim's send with it. Each client keeps eight fields of state
+      and decides next, reveal, grade or submit on its own
+- [ ] Move the recall trainer's requests and its template menu into core,
+      and a card's progress and note. The phone's card has no progress block,
+      and the two menus name a missing template differently
+- [ ] Move an exam's choice and a queue's start by mode into core, with the
+      lookup of a certification by its id. The phone offers the reviews
+      outside a focus only where the focus is strict, and the web on any
+- [ ] Move the small helpers both clients repeat into core, and use what
+      core already holds: the lessons' sections, closing a section, the
+      module grid, a value's cut, the map's opening, and the joined lines
+
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
       showing the same state
