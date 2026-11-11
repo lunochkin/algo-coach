@@ -5,6 +5,8 @@ import {
   cardBlocks,
   cardRow,
   inProgress,
+  cardNote,
+  cardProgress,
   ladderView,
   notInProgress,
   problemCards,
@@ -281,5 +283,18 @@ describe("a card's ladder", () => {
     ]);
     expect(view.gaps).toEqual(['No problem covers Upper bound yet.']);
     expect(ladderView(studied(false)).rows[0].solved).toBeNull();
+  });
+
+  it("reads a run's progress: the rungs solved, and the rung next", () => {
+    const progress = cardProgress(studied(true));
+    expect([progress.solved, progress.rungs, progress.next?.problemId]).toEqual([1, 2, 'p2']);
+    // the fixture's template carries its cases, so a recall is offered
+    expect(progress.recallable).toBe(true);
+  });
+
+  it('names the technique under the title, and since when a run studies it', () => {
+    const one = { ...studied(true), card: { ...studied(true).card, technique: 'binary-search' } };
+    expect(cardNote(one, Date.parse('2026-11-01T00:00:00Z'))).toMatch(/^binary-search · studying since /);
+    expect(cardNote({ ...one, run: null }, 0)).toBe('binary-search');
   });
 });

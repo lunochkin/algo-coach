@@ -316,7 +316,7 @@ and removes the drift the audit found.
 - [x] Move a question's answer state and the press it asks for into core,
       and the claim's send with it. Each client keeps eight fields of state
       and decides next, reveal, grade or submit on its own
-- [ ] Move the recall trainer's requests and its template menu into core,
+- [x] Move the recall trainer's requests and its template menu into core,
       and a card's progress and note. The phone's card has no progress block,
       and the two menus name a missing template differently
 - [ ] Move an exam's choice and a queue's start by mode into core, with the

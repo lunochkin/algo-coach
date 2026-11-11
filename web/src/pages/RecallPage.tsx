@@ -6,7 +6,6 @@ import {
   nextHint,
   RECALL_ANOTHER,
   RECALL_FORM,
-  RECALL_NO_CASES,
   RECALL_OPTIONAL,
   RECALL_TITLE,
   RECALL_TRIGGER,
@@ -20,15 +19,18 @@ import {
   runLabel,
   takeHint,
   OF,
-  A_FORM,
   SUBMIT_KEYS,
+  recallMenu,
+  requestHint,
+  revealForm,
+  runRecall,
 } from '@algo-coach/core'
 import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { api, type Hint, type Named, type RecallAttempt } from '@/api/client'
-import { described, useLoaded } from '@/api/useLoaded'
+import { useLoaded } from '@/api/useLoaded'
 import { PythonCode, RevealPress } from '@/components/PythonCode'
 import { ErrorLine } from '@/components/ErrorLine'
 import { CodeEditor } from '@/components/CodeEditor'
@@ -153,7 +155,8 @@ function Templates({
   current: string
   templates: Named[]
 }) {
-  const here = templates.find((one) => one.slug === current)
+  // which form is recalled, and each one the menu offers, as core names them
+  const menu = recallMenu({ templates, template_slug: current })
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-meta text-muted-foreground">
@@ -161,7 +164,7 @@ function Templates({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm">
-            {here?.title ?? A_FORM}
+            {menu.here}
             <ChevronDown />
           </Button>
         </DropdownMenuTrigger>
@@ -171,16 +174,16 @@ function Templates({
           align="start"
           className="w-auto min-w-(--radix-dropdown-menu-trigger-width) max-w-[min(90vw,var(--container-form))]"
         >
-          {templates.map((one) =>
-            one.recallable ? (
+          {menu.items.map((one) =>
+            one.enabled ? (
               <DropdownMenuItem key={one.slug} asChild>
                 <Link
                   to={`/cards/${encodeURIComponent(slug)}/recall/${encodeURIComponent(one.slug)}`}
-                  aria-current={one.slug === current ? 'true' : undefined}
+                  aria-current={one.current ? 'true' : undefined}
                 >
-                  <Check className={cn(one.slug !== current && 'invisible')} />
+                  <Check className={cn(!one.current && 'invisible')} />
                   <span className="flex-1 whitespace-nowrap">{one.title}</span>
-                  {one.optional && <span className="text-muted-foreground">{RECALL_OPTIONAL}</span>}
+                  {one.note && <span className="text-muted-foreground">{one.note}</span>}
                 </Link>
               </DropdownMenuItem>
             ) : (
@@ -188,7 +191,7 @@ function Templates({
               <DropdownMenuItem key={one.slug} disabled>
                 <Check className="invisible" />
                 <span className="flex-1 whitespace-nowrap">{one.title}</span>
-                <span className="text-muted-foreground">{RECALL_NO_CASES}</span>
+                <span className="text-muted-foreground">{one.note}</span>
               </DropdownMenuItem>
             ),
           )}
@@ -217,28 +220,24 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
   // one hint per request, so the page holds nothing it was not given
   async function hint() {
     if (next === null) return
-    const { data, error } = await api.GET('/api/cards/{slug}/recall/{template_slug}/hints/{hint}', {
-      params: { path: { slug, template_slug: templateSlug, hint: next } },
-    })
-    if (data) setTaken([...taken, { hint: data.hint, text: data.text }])
-    else setRefused(described(error))
+    const got = await requestHint(api, slug, templateSlug, next)
+    if (got.ok) setTaken([...taken, got.value])
+    else setRefused(got.refused)
   }
 
   async function run() {
     setRunning(true)
     setRefused(null)
-    try {
-      const { data, error } = await api.POST('/api/cards/{slug}/recall/{template_slug}', {
-        params: { path: { slug, template_slug: templateSlug } },
-        body: { code: code.current, hints: taken.map((one) => one.hint) },
-      })
-      if (data) setRan(data)
-      else setRefused(described(error))
-    } catch (reason) {
-      setRefused(String(reason))
-    } finally {
-      setRunning(false)
-    }
+    const out = await runRecall(
+      api,
+      slug,
+      templateSlug,
+      code.current,
+      taken.map((one) => one.hint),
+    )
+    if (out.ok) setRan(out.value)
+    else setRefused(out.refused)
+    setRunning(false)
   }
 
   if (ran !== null) return <Ran ran={ran} slug={slug} templateSlug={templateSlug} />
@@ -311,10 +310,7 @@ function Ran({
   const [form, setForm] = useState<string | null>(null)
 
   async function reveal() {
-    const { data } = await api.GET('/api/cards/{slug}/recall/{template_slug}/hints/{hint}', {
-      params: { path: { slug, template_slug: templateSlug, hint: 'form' } },
-    })
-    if (data) setForm(data.text)
+    setForm(await revealForm(api, slug, templateSlug))
   }
 
   const view = recallView(ran)

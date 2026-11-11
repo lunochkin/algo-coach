@@ -17,8 +17,9 @@ import {
   RUNGS_SOLVED,
   FORMS_RECALLED,
   PROBES_DRAWN,
-  studyingSince,
   nextRung,
+  cardNote,
+  cardProgress,
 } from '@algo-coach/core'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
@@ -37,10 +38,11 @@ import { TemplatePanel } from '@/components/TemplatePanel'
 import { ProgressBar } from '@/components/ProgressBar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { lastAt } from '@/lib/format'
 import { type Item, useSections } from '@/lib/sections'
 
 export function CardPage() {
+  // the moment the page opened, which a run's age is read at
+  const [now] = useState(() => Date.now())
   const { slug = '' } = useParams()
   const studied = useLoaded(
     (signal) => api.GET('/api/cards/{slug}', { params: { path: { slug } }, signal }),
@@ -48,7 +50,6 @@ export function CardPage() {
   )
   const [starting, setStarting] = useState(false)
   const [refused, setRefused] = useState<string | null>(null)
-  const run = studied.data?.run ?? null
   const data = studied.data
   const items: Item[] = [
     { id: 'trigger', label: CARD_TRIGGER },
@@ -81,12 +82,7 @@ export function CardPage() {
       <PageHeader
         back={{ to: '/cards', label: BACK_CARDS }}
         title={studied.data?.card.title ?? slug}
-        note={
-          studied.data &&
-          [studied.data.card.technique, run && studyingSince(lastAt(run.started_at))]
-            .filter(Boolean)
-            .join(' · ')
-        }
+        note={studied.data && cardNote(studied.data, now)}
       />
       <Loaded of={OF.card} state={studied}>
         {(studied) => {
@@ -164,34 +160,34 @@ export function CardPage() {
 // the three folds a run makes readable, as counts: the ladder's progress, the
 // forms recalled, and the probes the start drew
 function Progress({ studied }: { studied: Studied }) {
-  const solved = studied.rungs.filter((one) => one.solved).length
-  const recalled = studied.recall.filter((one) => one.last_at !== null).length
-  // the next rung: the first unsolved required one, else the first unsolved,
-  // each in the ladder's order. None once every rung is solved
-  const open = studied.rungs.filter((one) => !one.solved)
-  const next = open.find((one) => one.required) ?? open[0]
+  const { solved, rungs, recalled, forms, probes, next, recallable } = cardProgress(studied)
 
   return (
     <Panel>
       <Stats>
-        <Stat value={`${solved}/${studied.rungs.length}`} label={RUNGS_SOLVED} />
-        <Stat value={`${recalled}/${studied.card.templates.length}`} label={FORMS_RECALLED} />
-        <Stat value={studied.probes.length} label={PROBES_DRAWN} />
-        <Button variant="outline" size="sm" className="ml-auto" asChild>
-          <Link to={`/cards/${encodeURIComponent(studied.card.slug)}/recall`}>{RECALL_TITLE}</Link>
-        </Button>
+        <Stat value={`${solved}/${rungs}`} label={RUNGS_SOLVED} />
+        <Stat value={`${recalled}/${forms}`} label={FORMS_RECALLED} />
+        <Stat value={probes} label={PROBES_DRAWN} />
+        {/* a recall is offered where some form carries the cases that check it */}
+        {recallable && (
+          <Button variant="outline" size="sm" className="ml-auto" asChild>
+            <Link to={`/cards/${encodeURIComponent(studied.card.slug)}/recall`}>
+              {RECALL_TITLE}
+            </Link>
+          </Button>
+        )}
         {next && (
           <Button asChild>
             <Link
-              to={`/problems/${encodeURIComponent(next.problem.id)}?card=${encodeURIComponent(studied.card.slug)}`}
+              to={`/problems/${encodeURIComponent(next.problemId)}?card=${encodeURIComponent(studied.card.slug)}`}
             >
-              {nextRung(next.problem.title)}
+              {nextRung(next.title)}
             </Link>
           </Button>
         )}
       </Stats>
       {/* the ladder's progress, drawn as the cards list draws it */}
-      <ProgressBar value={solved} total={studied.rungs.length} label={RUNGS_SOLVED} />
+      <ProgressBar value={solved} total={rungs} label={RUNGS_SOLVED} />
     </Panel>
   )
 }

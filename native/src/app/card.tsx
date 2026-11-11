@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Button, Chip, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, ProgressBar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -26,6 +26,15 @@ import {
   CARD_BRIEF,
   CARD_TEMPLATES,
   HIDE_FORM,
+  cardNote,
+  cardProgress,
+  CARD_OPTIONAL,
+  PROCEDURE,
+  FORM_NO_CASES,
+  RUNGS_SOLVED,
+  FORMS_RECALLED,
+  PROBES_DRAWN,
+  nextRung,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -71,21 +80,19 @@ export default function CardScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={card?.title ?? slug} />
       </Appbar.Header>
-      <HeaderNote lines={[card?.technique]} />
+      <HeaderNote lines={[studied.data ? cardNote(studied.data, now) : card?.technique]} />
       <SectionBar sections={sections} />
       <ScrollView
         ref={sections.scroll}
         onScroll={sections.onScroll}
         scrollEventThrottle={32}
         // room under the last template for the run's press over it
-        contentContainerStyle={[
-          styles.page,
-          { paddingBottom: insets.bottom + (studied.data && !studied.data.run ? 140 : 24) },
-        ]}
+        contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + (studied.data ? 140 : 24) }]}
       >
         <Loaded of={OF.card} state={studied}>
           {(data) => (
             <>
+              {data.run ? <RunProgress studied={data} /> : null}
               <PageSection of={sections} id="trigger" title={CARD_TRIGGER}>
                 <Markdown>{data.card.trigger}</Markdown>
               </PageSection>
@@ -101,17 +108,6 @@ export default function CardScreen() {
                 count={data.card.templates.length}
                 body="bare"
               >
-                {/* a drawn recall is offered beside a run's progress, as on the web */}
-                {data.run && data.card.templates.some((one) => (one.cases ?? []).length > 0) ? (
-                  <Button
-                    mode="outlined"
-                    icon="pencil-outline"
-                    style={{ alignSelf: 'flex-start' }}
-                    onPress={() => router.push({ pathname: '/recall', params: { slug } })}
-                  >
-                    {RECALL_TITLE}
-                  </Button>
-                ) : null}
                 {data.card.templates.map((template) => (
                   <TemplateCard
                     key={template.slug}
@@ -126,7 +122,9 @@ export default function CardScreen() {
           )}
         </Loaded>
       </ScrollView>
-      {studied.data && !studied.data.run ? (
+      {studied.data?.run ? (
+        <NextRung studied={studied.data} bottom={insets.bottom} />
+      ) : studied.data ? (
         <RunStart slug={slug} bottom={insets.bottom} onStarted={studied.reload} />
       ) : null}
     </View>
@@ -155,15 +153,11 @@ function TemplateCard({
         <Text variant="titleMedium" style={{ flexShrink: 1 }}>
           {template.title}
         </Text>
-        {template.optional ? <Chip compact>optional</Chip> : null}
-        {template.kind === 'procedure' ? (
-          <Chip compact mode="outlined">
-            procedure
-          </Chip>
-        ) : null}
+        {template.optional ? <Badge label={CARD_OPTIONAL} /> : null}
+        {template.kind === 'procedure' ? <Badge label={PROCEDURE} /> : null}
       </View>
       <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-        {recallable ? recallLine(recalled, now) : 'No case checks this form'}
+        {recallable ? recallLine(recalled, now) : FORM_NO_CASES}
       </Text>
       <Markdown>{template.trigger}</Markdown>
       {recallable ? (
@@ -204,6 +198,58 @@ type Studied = components['schemas']['Studied'];
 // and the card the sitting returns to
 const openProblem = (problem: string, technique: string, card: string) =>
   router.push({ pathname: '/problem', params: { problem, technique, card } });
+
+// what a run has reached, as the web's card reads it: the rungs solved, the
+// forms recalled and the probes drawn, with the recall offered where a form
+// carries cases to check it
+function RunProgress({ studied }: { studied: Studied }) {
+  const theme = useTheme();
+  const p = cardProgress(studied);
+  return (
+    <Panel padded>
+      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+        {[
+          `${p.solved}/${p.rungs} ${RUNGS_SOLVED}`,
+          `${p.recalled}/${p.forms} ${FORMS_RECALLED}`,
+          `${p.probes} ${PROBES_DRAWN}`,
+        ].join(' · ')}
+      </Text>
+      <ProgressBar
+        progress={p.rungs === 0 ? 0 : p.solved / p.rungs}
+        accessibilityLabel={`${RUNGS_SOLVED}: ${p.solved} / ${p.rungs}`}
+        style={{ borderRadius: 2 }}
+      />
+      {p.recallable ? (
+        <Button
+          mode="outlined"
+          icon="pencil-outline"
+          style={{ alignSelf: 'flex-start' }}
+          onPress={() => router.push({ pathname: '/recall', params: { slug: studied.card.slug } })}
+        >
+          {RECALL_TITLE}
+        </Button>
+      ) : null}
+    </Panel>
+  );
+}
+
+// the card's act once a run is open: the rung next, in the bar at the bottom
+function NextRung({ studied, bottom }: { studied: Studied; bottom: number }) {
+  const { next } = cardProgress(studied);
+  if (!next) return null;
+  return (
+    <BottomBar bottom={bottom}>
+      <Button
+        mode="contained"
+        icon="play"
+        contentStyle={{ paddingVertical: 8 }}
+        onPress={() => openProblem(next.problemId, studied.card.technique, studied.card.slug)}
+      >
+        {nextRung(next.title)}
+      </Button>
+    </BottomBar>
+  );
+}
 
 function Ladder({ studied, of }: { studied: Studied; of: Sections }) {
   const theme = useTheme();

@@ -6,12 +6,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   BACK_TO_CARD,
-  described,
   hintTaken,
   nextHint,
   RECALL_ANOTHER,
   RECALL_FORM,
-  RECALL_NO_CASES,
   RECALL_OPTIONAL,
   RECALL_TITLE,
   RECALL_TRIGGER,
@@ -27,6 +25,10 @@ import {
   type components,
   OF,
   keyboardToggle,
+  recallMenu,
+  requestHint,
+  revealForm,
+  runRecall,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -96,38 +98,28 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
   // canonical is eighteen lines, and the pad leaves room for about eight
   const [keys, setKeys] = useState(true);
   const next = nextHint(taken.map((one) => one.hint));
-  const path = { slug, template_slug: prompt.template_slug };
 
   // one hint per request, so the screen holds nothing it was not given
   async function hint() {
     if (next === null) return;
-    try {
-      const { data, error } = await engine(origin, await getToken()).GET(
-        '/api/cards/{slug}/recall/{template_slug}/hints/{hint}',
-        { params: { path: { ...path, hint: next } } },
-      );
-      if (data) setTaken([...taken, { hint: data.hint, text: data.text }]);
-      else setRefused(described(error));
-    } catch (reason) {
-      setRefused(String(reason));
-    }
+    const got = await requestHint(engine(origin, await getToken()), slug, prompt.template_slug, next);
+    if (got.ok) setTaken([...taken, got.value]);
+    else setRefused(got.refused);
   }
 
   async function run() {
     setRunning(true);
     setRefused(null);
-    try {
-      const { data, error } = await engine(origin, await getToken()).POST('/api/cards/{slug}/recall/{template_slug}', {
-        params: { path },
-        body: { code: code.current, hints: taken.map((one) => one.hint) },
-      });
-      if (data) setRan(data);
-      else setRefused(described(error));
-    } catch (reason) {
-      setRefused(String(reason));
-    } finally {
-      setRunning(false);
-    }
+    const out = await runRecall(
+      engine(origin, await getToken()),
+      slug,
+      prompt.template_slug,
+      code.current,
+      taken.map((one) => one.hint),
+    );
+    if (out.ok) setRan(out.value);
+    else setRefused(out.refused);
+    setRunning(false);
   }
 
   if (ran) return <Ran ran={ran} slug={slug} templateSlug={prompt.template_slug} bottom={bottom} />;
@@ -199,7 +191,8 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
 // again. A template no case checks is named and never opened
 function Templates({ slug, prompt }: { slug: string; prompt: Prompted }) {
   const [open, setOpen] = useState(false);
-  const here = prompt.templates.find((one) => one.slug === prompt.template_slug);
+  // which form is recalled, and each one the menu offers, as core names them
+  const menu = recallMenu(prompt);
   return (
     <View style={[styles.row, { flexWrap: 'wrap' }]}>
       <Text variant="bodySmall">{RECALLING}</Text>
@@ -214,18 +207,16 @@ function Templates({ slug, prompt }: { slug: string; prompt: Prompted }) {
             contentStyle={{ flexDirection: 'row-reverse' }}
             onPress={() => setOpen(true)}
           >
-            {here?.title ?? RECALL_TITLE}
+            {menu.here}
           </Button>
         }
       >
-        {prompt.templates.map((one) => (
+        {menu.items.map((one) => (
           <Menu.Item
             key={one.slug}
-            title={[one.title, one.optional && RECALL_OPTIONAL, !one.recallable && RECALL_NO_CASES]
-              .filter(Boolean)
-              .join(' · ')}
-            leadingIcon={one.slug === prompt.template_slug ? 'check' : undefined}
-            disabled={!one.recallable}
+            title={[one.title, one.note].filter(Boolean).join(' · ')}
+            leadingIcon={one.current ? 'check' : undefined}
+            disabled={!one.enabled}
             onPress={() => {
               setOpen(false);
               router.setParams({ slug, template: one.slug });
@@ -257,11 +248,7 @@ function Ran({
   const view = recallView(ran);
 
   async function reveal() {
-    const { data } = await engine(origin, await getToken()).GET(
-      '/api/cards/{slug}/recall/{template_slug}/hints/{hint}',
-      { params: { path: { slug, template_slug: templateSlug, hint: 'form' } } },
-    );
-    if (data) setForm(data.text);
+    setForm(await revealForm(engine(origin, await getToken()), slug, templateSlug));
   }
 
   return (

@@ -1,5 +1,6 @@
 import { lastAt } from './account';
 import type { components } from './api/schema';
+import { studyingSince } from './words/pages';
 
 // what the board and the cards list say, for every platform
 
@@ -279,3 +280,36 @@ export const RUN_START_NOTE =
   'The ladder is measured from the start, so a problem solved before it counts toward nothing.';
 export const runStartLabel = (starting: boolean) => (starting ? 'Starting…' : 'Start studying this card');
 export const runStartRefused = (error: string) => `The card did not start: ${error}`;
+
+/** What a run has reached on a card: the rungs solved, the forms recalled, the probes drawn and the rung next. */
+export interface CardProgress {
+  solved: number;
+  rungs: number;
+  recalled: number;
+  forms: number;
+  probes: number;
+  // the first unsolved required rung, else the first unsolved, in the ladder's order
+  next: { problemId: string; title: string } | null;
+  // a recall is offered where some template carries cases to check it
+  recallable: boolean;
+}
+
+export function cardProgress(studied: Studied): CardProgress {
+  const open = studied.rungs.filter((one) => !one.solved);
+  const next = open.find((one) => one.required) ?? open[0];
+  return {
+    solved: studied.rungs.length - open.length,
+    rungs: studied.rungs.length,
+    recalled: studied.recall.filter((one) => one.last_at !== null).length,
+    forms: studied.card.templates.length,
+    probes: studied.probes.length,
+    next: next ? { problemId: next.problem.id, title: next.problem.title } : null,
+    recallable: studied.card.templates.some((one) => (one.cases ?? []).length > 0),
+  };
+}
+
+/** The line under a card's title: its technique, and since when a run studies it. */
+export function cardNote(studied: Studied, now: number): string {
+  const run = studied.run;
+  return [studied.card.technique, run && studyingSince(lastAt(run.started_at, now))].filter(Boolean).join(' · ');
+}

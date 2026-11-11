@@ -1,4 +1,7 @@
 import type { components } from './api/schema';
+import { described, type EngineClient } from './engine';
+import type { Outcome } from './sittingrun';
+import { A_FORM } from './words/pages';
 
 // the recall trainer, for every platform: `flows.md`, Recalling a template
 
@@ -84,3 +87,71 @@ export const RECALL_FORM = 'The form';
 export const REVEAL_FORM = 'Reveal the form';
 export const RECALL_ANOTHER = 'Recall another';
 export const BACK_TO_CARD = 'Back to the card';
+
+// the trainer's requests: a hint at a time, the run with the hints taken, and
+// the form revealed after a run. Each returns a value or a refusal in words
+const path = (slug: string, template: string) => ({ slug, template_slug: template });
+
+export async function requestHint(
+  client: EngineClient,
+  slug: string,
+  template: string,
+  hint: Hint,
+): Promise<Outcome<{ hint: Hint; text: string }>> {
+  try {
+    const { data, error } = await client.GET('/api/cards/{slug}/recall/{template_slug}/hints/{hint}', {
+      params: { path: { ...path(slug, template), hint } },
+    });
+    return data ? { ok: true, value: { hint: data.hint, text: data.text } } : { ok: false, refused: described(error) };
+  } catch (reason) {
+    return { ok: false, refused: String(reason) };
+  }
+}
+
+export async function runRecall(
+  client: EngineClient,
+  slug: string,
+  template: string,
+  code: string,
+  hints: Hint[],
+): Promise<Outcome<RecallAttempt>> {
+  try {
+    const { data, error } = await client.POST('/api/cards/{slug}/recall/{template_slug}', {
+      params: { path: path(slug, template) },
+      body: { code, hints },
+    });
+    return data ? { ok: true, value: data } : { ok: false, refused: described(error) };
+  } catch (reason) {
+    return { ok: false, refused: String(reason) };
+  }
+}
+
+/** The form a run revealed on a press, or null where the engine gave none. */
+export async function revealForm(client: EngineClient, slug: string, template: string): Promise<string | null> {
+  const shown = await requestHint(client, slug, template, 'form');
+  return shown.ok ? shown.value.text : null;
+}
+
+/** One entry of the trainer's menu: a template no case checks is named and never offered. */
+export interface RecallMenuItem {
+  slug: string;
+  title: string;
+  note: string | null;
+  current: boolean;
+  enabled: boolean;
+}
+
+export function recallMenu(prompt: Pick<Prompted, 'templates' | 'template_slug'>): {
+  here: string;
+  items: RecallMenuItem[];
+} {
+  const items = prompt.templates.map((one) => ({
+    slug: one.slug,
+    title: one.title,
+    note: !one.recallable ? RECALL_NO_CASES : one.optional ? RECALL_OPTIONAL : null,
+    current: one.slug === prompt.template_slug,
+    enabled: one.recallable,
+  }));
+  // the press names the form being recalled, and a form when none is named
+  return { here: items.find((one) => one.current)?.title ?? A_FORM, items };
+}

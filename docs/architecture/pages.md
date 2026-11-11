@@ -524,7 +524,9 @@ what it offers. The inventory is the list both clients build to.
 - **The phone starts a card's run from the bar at the bottom of Card.** The
   run is the card's act until one is open, and the note above the press
   says the ladder counts from it. Starting draws the probes and opens the
-  run on both clients, and the sittings it counts are sat on either.
+  run on both clients, and the sittings it counts are sat on either. Once a
+  run is open the bar holds the next rung, and the run's progress and its
+  recall read at the top of the card, as on the web.
 - **The phone reads the board and the cards from the engine and keeps no
   copy.** With no connection the Practice tab, the Cards tab and each screen
   under them say so. The knowledge copy exists so a
