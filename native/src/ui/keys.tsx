@@ -1,13 +1,16 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { PanResponder, Pressable, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 
 import {
   afterLetter,
   cased,
   DIGITS,
+  dragSteps,
   type Key,
+  KEYWORDS,
+  keywordText,
   LETTERS,
   RARE,
   RARE_LINES,
@@ -26,10 +29,15 @@ const REPEAT_MS = 70;
 /** The pad's height, for the space a screen leaves under its content. */
 export const PAD_HEIGHT = ROWS * HEIGHT + (ROWS - 1) * GAP;
 
-// `lines` puts enter where `?` sits, for text of several lines
+// the layer in the letters' place: the letters, the rare symbols, or the
+// keywords an editor adds
+type Layer = 'letters' | 'rare' | 'keywords';
+
+// `lines` is the editor's pad: enter where `?` sits, the strip dragging the
+// caret, indent and dedent, and the keywords
 export function KeyPad({ onKey, lines = false }: { onKey: (key: Key) => void; lines?: boolean }) {
   const [shift, setShift] = useState<Shift>('off');
-  const [rare, setRare] = useState(false);
+  const [layer, setLayer] = useState<Layer>('letters');
   const lastShift = useRef(0);
   const repeat = useRef<ReturnType<typeof setInterval> | null>(null);
   const stop = () => {
@@ -59,6 +67,13 @@ export function KeyPad({ onKey, lines = false }: { onKey: (key: Key) => void; li
 
   return (
     <View style={{ gap: GAP }}>
+      {lines ? (
+        <Row>
+          <Cap icon="format-indent-decrease" accessibilityLabel="Dedent" onPress={() => onKey('dedent')} />
+          <Strip onKey={onKey} />
+          <Cap icon="format-indent-increase" accessibilityLabel="Indent" onPress={() => onKey('indent')} />
+        </Row>
+      ) : null}
       {[...SYMBOLS, DIGITS].map((row) => (
         <Row key={row.join('')}>
           {row.map((one) => (
@@ -66,7 +81,26 @@ export function KeyPad({ onKey, lines = false }: { onKey: (key: Key) => void; li
           ))}
         </Row>
       ))}
-      {rare ? (
+      {layer === 'keywords' ? (
+        <>
+          {KEYWORDS.map((row, index) => (
+            <Row key={row.join('')}>
+              {row.map((one) => (
+                <Cap
+                  key={one}
+                  label={one}
+                  onPress={() => {
+                    insert(keywordText(one));
+                    // one keyword at a time: a name follows it, typed in letters
+                    setLayer('letters');
+                  }}
+                />
+              ))}
+              {index === KEYWORDS.length - 1 ? back : null}
+            </Row>
+          ))}
+        </>
+      ) : layer === 'rare' ? (
         <>
           <Row>
             {(lines ? RARE_LINES : RARE).map((one) => (
@@ -116,14 +150,23 @@ export function KeyPad({ onKey, lines = false }: { onKey: (key: Key) => void; li
       )}
       <Row>
         <Cap
-          label={rare ? 'abc' : '#@'}
-          accessibilityLabel={rare ? 'Letters' : 'More symbols'}
+          label={layer === 'rare' ? 'abc' : '#@'}
+          accessibilityLabel={layer === 'rare' ? 'Letters' : 'More symbols'}
           grow={1.5}
-          onPress={() => setRare(!rare)}
+          onPress={() => setLayer(layer === 'rare' ? 'letters' : 'rare')}
         />
+        {lines ? (
+          <Cap
+            label={layer === 'keywords' ? 'abc' : 'def'}
+            accessibilityLabel={layer === 'keywords' ? 'Letters' : 'Keywords'}
+            grow={1.5}
+            on={layer === 'keywords'}
+            onPress={() => setLayer(layer === 'keywords' ? 'letters' : 'keywords')}
+          />
+        ) : null}
         <Cap label="," preview onPress={() => insert(',')} />
         <Cap icon="chevron-left" accessibilityLabel="Cursor left" onPress={() => onKey('left')} />
-        <Cap label="space" grow={3.5} accessibilityLabel="Space" onPress={() => insert(' ')} />
+        <Cap label="space" grow={lines ? 2 : 3.5} accessibilityLabel="Space" onPress={() => insert(' ')} />
         <Cap icon="chevron-right" accessibilityLabel="Cursor right" onPress={() => onKey('right')} />
         {lines ? (
           <Cap icon="keyboard-return" accessibilityLabel="Enter" onPress={() => onKey('enter')} />
@@ -131,6 +174,51 @@ export function KeyPad({ onKey, lines = false }: { onKey: (key: Key) => void; li
           <Cap label="?" preview onPress={() => insert('?')} />
         )}
       </Row>
+    </View>
+  );
+}
+
+// a bar the finger drags to move the caret: a character per stride sideways,
+// a line per stride up or down. Tapping between characters on a phone lands
+// a character or two off
+function Strip({ onKey }: { onKey: (key: Key) => void }) {
+  const theme = useTheme();
+  const [held, setHeld] = useState(false);
+  const made = useRef({ x: 0, y: 0 });
+  const sink = useRef(onKey);
+  sink.current = onKey;
+  const pan = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        made.current = { x: 0, y: 0 };
+        setHeld(true);
+      },
+      onPanResponderMove: (_, drag) => {
+        const steps = dragSteps(drag.dx, drag.dy);
+        for (; made.current.x < steps.x; made.current.x++) sink.current('right');
+        for (; made.current.x > steps.x; made.current.x--) sink.current('left');
+        for (; made.current.y < steps.y; made.current.y++) sink.current('down');
+        for (; made.current.y > steps.y; made.current.y--) sink.current('up');
+      },
+      onPanResponderRelease: () => setHeld(false),
+      onPanResponderTerminate: () => setHeld(false),
+    }),
+  ).current;
+  return (
+    <View
+      {...pan.panHandlers}
+      accessibilityLabel="Drag to move the cursor"
+      style={{
+        flex: 8,
+        height: HEIGHT,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: held ? theme.colors.surfaceDisabled : theme.colors.elevation.level3,
+      }}
+    >
+      <MaterialCommunityIcons name="cursor-move" size={20} color={theme.colors.onSurfaceVariant} />
     </View>
   );
 }
@@ -158,7 +246,17 @@ function Cap(props: {
   let face: ReactNode = null;
   if (icon) face = <MaterialCommunityIcons name={icon} size={20} color={ink} />;
   else if (label)
-    face = <Text style={{ fontFamily: 'monospace', fontSize: label.length > 1 ? 13 : 18, color: ink }}>{label}</Text>;
+    face = (
+      // a keyword shrinks to its key rather than wrapping inside it
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.6}
+        style={{ fontFamily: 'monospace', fontSize: label.length > 1 ? 13 : 18, color: ink, paddingHorizontal: 2 }}
+      >
+        {label}
+      </Text>
+    );
   return (
     <Pressable
       accessibilityRole="button"

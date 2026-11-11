@@ -3,7 +3,7 @@
 // `src/editor/page.ts`, which the app ships
 import { type EditorKey, keyed, pythonEditing } from '@algo-coach/editor';
 import { EditorState } from '@codemirror/state';
-import { EditorView } from '@codemirror/view';
+import { drawSelection, EditorView } from '@codemirror/view';
 
 import type { Colors, FromApp } from './protocol';
 
@@ -35,7 +35,13 @@ function look(colors: Colors) {
       '.cm-content': { padding: '8px 0' },
       '.cm-gutters': { backgroundColor: colors.gutter, color: colors.muted, border: 'none' },
       '.cm-activeLine, .cm-activeLineGutter': { backgroundColor: colors.active },
-      '.cm-cursor': { borderLeftColor: colors.foreground, borderLeftWidth: '2px' },
+      // drawn whether or not the page has focus: the keys are the app's, so
+      // the WebView is never tapped and the browser's own caret never shows
+      '.cm-cursorLayer .cm-cursor': {
+        display: 'block',
+        borderLeftColor: colors.foreground,
+        borderLeftWidth: '2px',
+      },
       '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection': {
         backgroundColor: colors.selection,
       },
@@ -53,6 +59,7 @@ function open(doc: string, colors: Colors) {
       selection: { anchor: doc.length },
       extensions: [
         ...pythonEditing(),
+        drawSelection(),
         // the app's keyboard types, and the system's never opens
         EditorView.contentAttributes.of({
           inputmode: 'none',

@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
-import { afterLetter, cased, DOUBLE_TAP_MS, EMPTY, type Edit, type Key, pressed, shiftPressed } from './keys';
+import {
+  afterLetter,
+  cased,
+  DOUBLE_TAP_MS,
+  dragSteps,
+  EMPTY,
+  type Edit,
+  type Key,
+  KEYWORDS,
+  keywordText,
+  pressed,
+  shiftPressed,
+  STEP_X,
+  STEP_Y,
+} from './keys';
 
 const typed = (keys: Key[], from: Edit = EMPTY) => keys.reduce(pressed, from);
 const caret = (text: string, at: number): Edit => ({ text, selection: { start: at, end: at } });
@@ -51,5 +65,30 @@ describe('shift', () => {
 
   it('releases on a second tap that comes late', () => {
     expect(shiftPressed('once', DOUBLE_TAP_MS)).toBe('off');
+  });
+});
+
+describe('the editor layer', () => {
+  it('types a keyword with the space that follows it, and a bare one alone', () => {
+    expect(keywordText('return')).toBe('return ');
+    expect(keywordText('else')).toBe('else');
+    expect(keywordText('None')).toBe('None');
+  });
+
+  it('carries Python keywords alone, and no name of the library', () => {
+    const names = KEYWORDS.flat();
+    expect(names).not.toContain('range');
+    expect(names).not.toContain('len');
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('steps the caret once per stride of the drag, either way', () => {
+    expect(dragSteps(STEP_X * 2.5, 0)).toEqual({ x: 2, y: 0 });
+    expect(dragSteps(-STEP_X, STEP_Y * 1.9)).toEqual({ x: -1, y: 1 });
+  });
+
+  it('leaves a one-line field alone on the editor-only keys', () => {
+    const edit: Edit = { text: 'ab', selection: { start: 1, end: 1 } };
+    for (const key of ['enter', 'indent', 'dedent', 'up', 'down'] as Key[]) expect(pressed(edit, key)).toBe(edit);
   });
 });

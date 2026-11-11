@@ -35,4 +35,16 @@ describe('a key from the app keyboard', () => {
     const state = EditorState.create({ doc: 'abcd', selection: { anchor: 1, head: 3 }, extensions: pythonEditing() });
     expect(typed(state, [{ insert: 'x' }]).doc.toString()).toBe('axd');
   });
+
+  it('indents and dedents the line by one step, wherever the caret sits', () => {
+    expect(typed(editing('x = 1', 2), ['indent']).doc.toString()).toBe('    x = 1');
+    expect(typed(editing('        x = 1', 10), ['dedent']).doc.toString()).toBe('    x = 1');
+  });
+
+  it('moves a line up or down at the same column, held to the line end', () => {
+    const state = editing('abcdef\nab\nabcdef', 5);
+    expect(typed(state, ['down']).selection.main.head).toBe(9);
+    expect(typed(state, ['up']).selection.main.head).toBe(5);
+    expect(typed(editing('abc\nabcdef', 9), ['up']).selection.main.head).toBe(3);
+  });
 });

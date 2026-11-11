@@ -210,7 +210,7 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
 - [x] Add a Recall screen to the phone, opened from each template on Card and
       drawn from the card, switching between the card's templates. Its editor
       is CodeMirror in a WebView, typed through the app's keyboard
-- [ ] Add the editor's layer to the keyboard: a key per Python keyword, a
+- [x] Add the editor's layer to the keyboard: a key per Python keyword, a
       strip dragging the cursor, indent and dedent. No key carries a form
 - [ ] Add line keys to the editor's layer: move a line, indent or dedent a
       block, duplicate a line, and select the current block
