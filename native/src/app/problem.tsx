@@ -25,10 +25,8 @@ import {
   END_KEEP,
   END_NOTE,
   END_TITLE,
-  loadingLine,
   problemCards,
   problemTried,
-  readFailure,
   RESTORE_SOLVE,
   SITTING_END,
   SITTING_ENDED,
@@ -44,7 +42,7 @@ import { getToken } from '@/lib/settings';
 import { autoStarts, draftOf, keepDraft, pressed } from '@/lib/sitting';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { Failed, styles, tones } from '@/ui/common';
+import { Loaded, styles, tones } from '@/ui/common';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
 import type { Key } from '@/lib/keys';
 import { KeyPad } from '@/ui/keys';
@@ -124,19 +122,21 @@ export default function ProblemScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={record?.title ?? 'The problem'} />
       </Appbar.Header>
-      {error ? (
+      {error || !record || listed.data === null ? (
         <View style={styles.page}>
-          <Failed
-            message={readFailure('the problem', error)}
-            onRetry={() => {
-              picked.reload();
-              listed.reload();
+          <Loaded
+            of="the problem"
+            state={{
+              data: null,
+              error,
+              reload: () => {
+                picked.reload();
+                listed.reload();
+              },
             }}
-          />
-        </View>
-      ) : !record || listed.data === null ? (
-        <View style={styles.page}>
-          <Text variant="bodyMedium">{loadingLine('the problem')}</Text>
+          >
+            {() => null}
+          </Loaded>
         </View>
       ) : record.retired ? (
         <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
@@ -324,16 +324,12 @@ function SittingOn({
     void move(to);
   }
 
-  if (served.error)
+  if (served.error || !statement || carry === undefined || kept === undefined)
     return (
       <View style={styles.page}>
-        <Failed message={readFailure('the problem', served.error)} onRetry={served.reload} />
-      </View>
-    );
-  if (!statement || carry === undefined || kept === undefined)
-    return (
-      <View style={styles.page}>
-        <Text variant="bodyMedium">{loadingLine('the problem')}</Text>
+        <Loaded of="the problem" state={{ data: null, error: served.error, reload: served.reload }}>
+          {() => null}
+        </Loaded>
       </View>
     );
 

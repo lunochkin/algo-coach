@@ -9,13 +9,20 @@ type Props = {
   title: ReactNode
   // the one line identifying what the title names
   note?: ReactNode
+  // beside the title: a running queue's score and its Stop
+  aside?: ReactNode
 }
 
-export function PageHeader({ back, title, note }: Props) {
+// drawn outside the page's readings, so a page loading or failed still names
+// itself and its way back: `pages.md`, A page's areas
+export function PageHeader({ back, title, note, aside }: Props) {
   return (
     <header className="space-y-1">
       {back && <BackLink {...back} />}
-      <h1 className="text-title font-semibold">{title}</h1>
+      <div className="flex items-center gap-stack">
+        <h1 className="flex-1 text-title font-semibold">{title}</h1>
+        {aside}
+      </div>
       {note && <div className="text-meta text-muted-foreground">{note}</div>}
     </header>
   )

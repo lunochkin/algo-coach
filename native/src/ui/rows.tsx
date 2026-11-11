@@ -30,12 +30,14 @@ export function PickRow(props: {
   const text = (
     <View style={{ flex: 1, gap: 6 }}>
       <Text variant="titleMedium">{props.title}</Text>
-      <View style={[styles.row, { flexWrap: 'wrap' }]}>
-        {props.badge ? <Badge label={props.badge} /> : null}
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {counts}
-        </Text>
-      </View>
+      {props.badge || counts ? (
+        <View style={[styles.row, { flexWrap: 'wrap' }]}>
+          {props.badge ? <Badge label={props.badge} /> : null}
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            {counts}
+          </Text>
+        </View>
+      ) : null}
       {props.note ? (
         <Text
           variant="bodySmall"

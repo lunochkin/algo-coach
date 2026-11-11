@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   askSubmit,
   detailsToggle,
-  examFailed,
   examModuleChoice,
   examReviewNext,
   lessonNote,
@@ -23,10 +22,6 @@ describe('queue words', () => {
   it('reads the details toggle and the review press by their state', () => {
     expect([detailsToggle(false), detailsToggle(true)]).toEqual(['Details', 'Hide details']);
     expect([examReviewNext(false), examReviewNext(true)]).toEqual(['Next missed', 'Back to results']);
-  });
-
-  it('names the error an exam that did not load carries', () => {
-    expect(examFailed('offline')).toBe('The exam did not load: offline');
   });
 
   it('drops the minutes of a lesson whose text is not held', () => {

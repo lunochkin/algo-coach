@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Appbar, Button, Card, IconButton, Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Appbar, Button, IconButton, Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import ReorderableList, {
   reorderItems,
   useReorderableDrag,
@@ -24,7 +24,7 @@ import {
   MODULES_HEADING,
   moduleStats,
   moduleRows,
-  MODULES_LOADING,
+  MODULES_OF,
   NEW_STEP,
   type NextUpView,
   NO_MODULES,
@@ -37,7 +37,7 @@ import {
 } from '@algo-coach/core';
 import { APP_NAME } from '@/lib/name';
 import { useStore } from '@/lib/store';
-import { startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
+import { fromCopy, Loaded, startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
 import { FocusCard } from '@/ui/focuscard';
 import { AccountMenu } from '@/ui/account';
 import { Heading, PanelItem, PickRow } from '@/ui/rows';
@@ -109,12 +109,11 @@ export default function Home() {
     void st.setCourseOrder(slugs);
   };
 
+  // a snapshot holding no module reads as empty; the banner above names a failed sync
   const body = !st.catalog ? (
-    <Card mode="contained">
-      <Card.Content>
-        <Text variant="bodyLarge">{st.ready ? NO_MODULES : MODULES_LOADING}</Text>
-      </Card.Content>
-    </Card>
+    <Loaded of={MODULES_OF} state={fromCopy(st, st.ready ? [] : null)} blank={NO_MODULES}>
+      {() => null}
+    </Loaded>
   ) : null;
   const header = (
     <View style={{ gap: 12, marginBottom: 12 }}>

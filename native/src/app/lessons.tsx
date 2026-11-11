@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { memo, useMemo, useState } from 'react';
 import { SectionList, View } from 'react-native';
-import { Appbar, Text, useTheme } from 'react-native-paper';
+import { Appbar, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -16,6 +16,7 @@ import {
   modulesInOrder,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
+import { fromCopy, Loaded, styles } from '@/ui/common';
 import { Heading, PanelItem, PickRow } from '@/ui/rows';
 
 // every module's lessons, by module, as the web lists them: `pages.md`, The two clients
@@ -63,7 +64,11 @@ export default function LessonsScreen() {
         <Appbar.Content title={LESSONS_TITLE} />
       </Appbar.Header>
       {!sections.length ? (
-        <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>{LESSONS_NONE}</Text>
+        <View style={styles.page}>
+          <Loaded of="the lessons" state={fromCopy(st, st.catalog ? sections : null)} blank={LESSONS_NONE}>
+            {() => null}
+          </Loaded>
+        </View>
       ) : (
         <SectionList
           sections={sections}

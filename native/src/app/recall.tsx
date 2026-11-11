@@ -9,9 +9,7 @@ import {
   described,
   FORM_HIDDEN,
   hintTaken,
-  loadingLine,
   nextHint,
-  readFailure,
   RECALL_ANOTHER,
   RECALL_FORM,
   RECALL_NO_CASES,
@@ -33,7 +31,7 @@ import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { CodeBlock, Failed, styles, tones } from '@/ui/common';
+import { CodeBlock, Loaded, styles, tones } from '@/ui/common';
 import { Heading } from '@/ui/rows';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
 import type { Key } from '@/lib/keys';
@@ -68,16 +66,14 @@ export default function RecallScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={drawn ? RECALL_TITLE : (data?.title ?? RECALL_TITLE)} />
       </Appbar.Header>
-      {prompt.error ? (
-        <View style={styles.page}>
-          <Failed message={readFailure('the form to recall', prompt.error)} onRetry={prompt.reload} />
-        </View>
-      ) : !data ? (
-        <View style={styles.page}>
-          <Text variant="bodyMedium">{loadingLine('the form to recall')}</Text>
-        </View>
-      ) : (
+      {data ? (
         <Trainer key={data.template_slug} slug={slug} prompt={data} drawn={drawn} bottom={insets.bottom} />
+      ) : (
+        <View style={styles.page}>
+          <Loaded of="the form to recall" state={prompt}>
+            {() => null}
+          </Loaded>
+        </View>
       )}
     </View>
   );

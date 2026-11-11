@@ -64,18 +64,31 @@ export function ExamPage() {
   const [plan, setPlan] = useState<ExamPlan | null>(null)
   const cert = params.get('cert')
 
+  const catalog = learner.catalog
+  if (plan && catalog)
+    return <Running plan={plan} catalog={catalog} back={cert ? CERTIFICATIONS : KNOWLEDGE} />
+  const certified = cert ? catalog?.courses.map((c) => c.certs?.get(cert)).find(Boolean) : undefined
   return (
-    <Loaded of="the exam" state={loadedFrom(k, learner.catalog ?? undefined)}>
-      {(catalog) =>
-        plan ? (
-          <Running plan={plan} catalog={catalog} back={cert ? CERTIFICATIONS : KNOWLEDGE} />
-        ) : cert ? (
-          <CertChoice id={cert} catalog={catalog} onStart={setPlan} />
-        ) : (
-          <LevelChoice catalog={catalog} onStart={setPlan} />
-        )
-      }
-    </Loaded>
+    <section className="space-y-section">
+      <PageHeader
+        back={
+          cert
+            ? { to: CERTIFICATIONS, label: 'Certifications' }
+            : { to: KNOWLEDGE, label: 'Knowledge' }
+        }
+        title={certified?.title ?? EXAM_TITLE}
+        note={EXAM_NOTE}
+      />
+      <Loaded of="the exam" state={loadedFrom(k, catalog ?? undefined)}>
+        {(catalog) =>
+          cert ? (
+            <CertChoice id={cert} catalog={catalog} onStart={setPlan} />
+          ) : (
+            <LevelChoice catalog={catalog} onStart={setPlan} />
+          )
+        }
+      </Loaded>
+    </section>
   )
 }
 
@@ -102,11 +115,6 @@ function LevelChoice({ catalog, onStart }: { catalog: Catalog; onStart: (p: Exam
 
   return (
     <section className="space-y-section">
-      <PageHeader
-        back={{ to: KNOWLEDGE, label: 'Knowledge' }}
-        title={EXAM_TITLE}
-        note={EXAM_NOTE}
-      />
       <div className="space-y-stack">
         <Choice label={EXAM_MODULE}>
           <ToggleGroup
@@ -184,11 +192,6 @@ function CertChoice({
   const b = c ? board(c.slug) : null
   return (
     <section className="space-y-section">
-      <PageHeader
-        back={{ to: CERTIFICATIONS, label: 'Certifications' }}
-        title={x?.title ?? EXAM_TITLE}
-        note={EXAM_NOTE}
-      />
       {c && x && b ? (
         <Panel>
           <p>{certExamRule(x.rule.size, x.rule.passShare)}</p>
@@ -244,20 +247,21 @@ function Running({ plan, catalog, back }: { plan: ExamPlan; catalog: Catalog; ba
 
   return (
     <section className="space-y-section">
-      <header className="flex items-center gap-stack">
-        <h1 className="flex-1 text-title font-semibold">{run.title}</h1>
-        {run.phase !== 'ask' && (
-          <span className="text-meta tabular-nums">
-            {out.score}/{out.n}
-          </span>
-        )}
-        {run.phase === 'ask' && (
-          <Button variant="outline" size="sm" onClick={() => act(() => run.stop())}>
-            <X />
-            {QUEUE_STOP}
-          </Button>
-        )}
-      </header>
+      <PageHeader
+        title={run.title}
+        aside={
+          run.phase === 'ask' ? (
+            <Button variant="outline" size="sm" onClick={() => act(() => run.stop())}>
+              <X />
+              {QUEUE_STOP}
+            </Button>
+          ) : (
+            <span className="text-meta tabular-nums">
+              {out.score}/{out.n}
+            </span>
+          )
+        }
+      />
 
       {q ? (
         <Ask

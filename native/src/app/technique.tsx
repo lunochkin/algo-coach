@@ -4,10 +4,10 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { readFailure, techniqueCards, techniqueStats, loadingLine } from '@algo-coach/core';
+import { techniqueCards, techniqueStats } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { CardPanel } from '@/ui/cards';
-import { Failed, styles } from '@/ui/common';
+import { Loaded, styles } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 
 /**
@@ -34,45 +34,47 @@ export default function TechniqueScreen() {
         <Appbar.Content title={technique} />
       </Appbar.Header>
       <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
-        {error ? (
-          <Failed
-            message={readFailure('the technique', error)}
-            onRetry={() => {
+        <Loaded
+          of="the technique"
+          state={{
+            data: problems.data && taught.data && listed.data ? problems.data : null,
+            error,
+            reload: () => {
               problems.reload();
               taught.reload();
               listed.reload();
-            }}
-          />
-        ) : problems.data === null || taught.data === null || listed.data === null ? (
-          <Text variant="bodyMedium">{loadingLine('the technique')}</Text>
-        ) : (
-          <>
-            {cards.length > 0 ? (
-              <>
-                <Heading title="Cards" count={cards.length} />
-                <CardPanel technique={null} cards={cards} />
-              </>
-            ) : null}
-            <Heading title="Problems" count={problems.data.length} />
-            {problems.data.length === 0 ? (
-              <Text variant="bodyMedium">No served problem carries this technique.</Text>
-            ) : (
-              <PickPanel>
-                {problems.data.map((row) => (
-                  <PickRow
-                    key={row.problem_id}
-                    title={row.title}
-                    badge={row.difficulty}
-                    stats={techniqueStats(row, now)}
-                    onPress={() =>
-                      router.push({ pathname: '/problem', params: { problem: row.problem_id, technique } })
-                    }
-                  />
-                ))}
-              </PickPanel>
-            )}
-          </>
-        )}
+            },
+          }}
+        >
+          {(rows) => (
+            <>
+              {cards.length > 0 ? (
+                <>
+                  <Heading title="Cards" count={cards.length} />
+                  <CardPanel technique={null} cards={cards} />
+                </>
+              ) : null}
+              <Heading title="Problems" count={rows.length} />
+              {rows.length === 0 ? (
+                <Text variant="bodyMedium">No served problem carries this technique.</Text>
+              ) : (
+                <PickPanel>
+                  {rows.map((row) => (
+                    <PickRow
+                      key={row.problem_id}
+                      title={row.title}
+                      badge={row.difficulty}
+                      stats={techniqueStats(row, now)}
+                      onPress={() =>
+                        router.push({ pathname: '/problem', params: { problem: row.problem_id, technique } })
+                      }
+                    />
+                  ))}
+                </PickPanel>
+              )}
+            </>
+          )}
+        </Loaded>
       </ScrollView>
     </View>
   );

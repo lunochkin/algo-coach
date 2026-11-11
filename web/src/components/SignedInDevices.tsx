@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
 import {
-  DEVICES_LOADING,
   deviceLine,
   deviceName,
   REVOKE,
@@ -13,6 +12,7 @@ import {
 
 import { api, type SignedInDevice } from '@/api/client'
 import { described, useLoaded } from '@/api/useLoaded'
+import { Loaded } from '@/components/Loaded'
 import { SignOut } from '@/components/SignOut'
 import { Button } from '@/components/ui/button'
 import {
@@ -54,43 +54,41 @@ export function SignedInDevices({
           <DialogTitle>{SIGNED_IN_DEVICES}</DialogTitle>
           <DialogDescription>{REVOKED_NOTE}</DialogDescription>
         </DialogHeader>
-        {devices.error ? (
-          <p className="text-destructive">{devices.error}</p>
-        ) : devices.data === undefined ? (
-          <p className="text-muted-foreground">{DEVICES_LOADING}</p>
-        ) : (
-          <ul className="max-h-[60vh] divide-y overflow-y-auto rounded-lg border">
-            {devices.data.map((device) => (
-              <li key={device.id} className="flex items-center gap-3 px-3 py-2">
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium">
-                    {deviceName(device)}
-                    {device.current && (
-                      <span className="font-normal text-muted-foreground">
-                        {' '}
-                        · {thisDevice('browser')}
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-meta text-muted-foreground">{deviceLine(device, now)}</p>
-                </div>
-                {device.current ? (
-                  <SignOut>
-                    {(start) => (
-                      <Button variant="outline" size="sm" onClick={start}>
-                        {SIGN_OUT}
-                      </Button>
-                    )}
-                  </SignOut>
-                ) : (
-                  <Button variant="outline" size="sm" onClick={() => void revoke(device)}>
-                    {REVOKE}
-                  </Button>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+        <Loaded of="the signed-in devices" state={devices}>
+          {(listed) => (
+            <ul className="max-h-[60vh] divide-y overflow-y-auto rounded-lg border">
+              {listed.map((device) => (
+                <li key={device.id} className="flex items-center gap-3 px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium">
+                      {deviceName(device)}
+                      {device.current && (
+                        <span className="font-normal text-muted-foreground">
+                          {' '}
+                          · {thisDevice('browser')}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-meta text-muted-foreground">{deviceLine(device, now)}</p>
+                  </div>
+                  {device.current ? (
+                    <SignOut>
+                      {(start) => (
+                        <Button variant="outline" size="sm" onClick={start}>
+                          {SIGN_OUT}
+                        </Button>
+                      )}
+                    </SignOut>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => void revoke(device)}>
+                      {REVOKE}
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Loaded>
         {failed ? <p className="text-destructive">{failed}</p> : null}
       </DialogContent>
     </Dialog>

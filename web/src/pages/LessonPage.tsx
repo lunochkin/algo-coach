@@ -43,26 +43,24 @@ export function LessonPage() {
 
   const page = catalog ? { c: c ?? null, x: x ?? null } : undefined
   return (
-    <Loaded
-      of="the lesson"
-      state={loadedFrom(k, page)}
-      blank={LESSON_MISSING}
-      blankWhen={(p) => !p.x}
-    >
-      {({ c, x }) => {
-        if (!c || !x) return null
-        return (
-          <article className="space-y-section">
-            <PageHeader
-              back={{ to: LESSONS, label: 'Lessons' }}
-              title={x.title}
-              note={lessonNote(c.title, body ? minutesOf(x, body) : null, read)}
-            />
-            <LessonBody c={c} x={x} body={body} read={read} />
-          </article>
-        )
-      }}
-    </Loaded>
+    <article className="space-y-section">
+      <PageHeader
+        back={{ to: LESSONS, label: 'Lessons' }}
+        title={x?.title ?? lesson}
+        note={c && x ? lessonNote(c.title, body ? minutesOf(x, body) : null, read) : undefined}
+      />
+      <Loaded
+        of="the lesson"
+        state={loadedFrom(k, page)}
+        blank={LESSON_MISSING}
+        blankWhen={(p) => !p.x}
+      >
+        {({ c, x }) => {
+          if (!c || !x) return null
+          return <LessonBody c={c} x={x} body={body} read={read} />
+        }}
+      </Loaded>
+    </article>
   )
 }
 

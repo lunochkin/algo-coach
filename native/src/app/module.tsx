@@ -41,9 +41,7 @@ import {
   MODULE_FOCUSED,
   MODULE_GROUPS_TAB,
   MODULE_MAP_TAB,
-  MODULE_LOADING,
   MODULE_MISSING,
-  moduleFailed,
   moduleSummary,
   MODULE_PAUSE,
   MODULE_RESUME,
@@ -55,7 +53,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
-import { Failed, styles, tones } from '@/ui/common';
+import { fromCopy, Loaded, styles, tones } from '@/ui/common';
 import { MapCanvas, NODE_H, NODE_W, type CertPip } from '@/ui/mapcanvas';
 import { ModuleGroups } from '@/ui/groups';
 import { useArchive } from '@/ui/pause';
@@ -84,22 +82,21 @@ export default function ModuleScreen() {
   const sum = useMemo(() => (b ? summary(b, now) : null), [b, now]);
 
   if (!c || !b || !sum) {
-    // a copy holding nothing yet fails with its sync, as the web's module page does
-    const loading = !st.ready || (!st.catalog && !st.sync.error);
     return (
       <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <Appbar.Header>
           <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title="Module" />
+          <Appbar.Content title={c?.title ?? p.course ?? ''} />
         </Appbar.Header>
         <View style={styles.page}>
-          {loading ? (
-            <Text style={{ color: theme.colors.onSurfaceVariant }}>{MODULE_LOADING}</Text>
-          ) : !st.catalog ? (
-            <Failed message={moduleFailed(st.sync.error ?? '')} onRetry={() => st.requestSync(0)} />
-          ) : (
-            <Text>{MODULE_MISSING}</Text>
-          )}
+          <Loaded
+            of="the module"
+            state={fromCopy(st, st.catalog ? { c: c ?? null } : null)}
+            blank={MODULE_MISSING}
+            blankWhen={(x) => !x.c}
+          >
+            {() => null}
+          </Loaded>
         </View>
       </View>
     );

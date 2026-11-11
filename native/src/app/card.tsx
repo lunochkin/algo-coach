@@ -6,13 +6,11 @@ import { Appbar, Button, Card, Chip, Text, TouchableRipple, useTheme } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  readFailure,
   RECALL_THIS,
   RECALL_TITLE,
   recallLine,
   revealLabel,
   type components,
-  loadingLine,
   ladderView,
   LADDER_GAP,
   LADDER_TITLE,
@@ -28,7 +26,7 @@ import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { CodeBlock, Failed, styles } from '@/ui/common';
+import { CodeBlock, Loaded, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
 import { Badge, Heading, PickPanel, PickRow } from '@/ui/rows';
 
@@ -56,42 +54,40 @@ export default function CardScreen() {
         <Appbar.Content title={card?.title ?? slug} subtitle={card?.technique} />
       </Appbar.Header>
       <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
-        {studied.error ? (
-          <Failed message={readFailure('the card', studied.error)} onRetry={studied.reload} />
-        ) : !card ? (
-          <Text variant="bodyMedium">{loadingLine('the card')}</Text>
-        ) : (
-          <>
-            <Heading title="When to reach for it" />
-            <Markdown>{card.trigger}</Markdown>
-            <Heading title="The brief" />
-            <Markdown>{card.brief}</Markdown>
-            <Ladder studied={studied.data!} />
-            {studied.data!.run ? null : <RunStart slug={slug} onStarted={studied.reload} />}
-            {studied.data!.probes.length > 0 ? <Probes studied={studied.data!} /> : null}
-            <Heading title="Templates" count={card.templates.length} />
-            {/* a drawn recall is offered beside a run's progress, as on the web */}
-            {studied.data!.run && card.templates.some((one) => (one.cases ?? []).length > 0) ? (
-              <Button
-                mode="outlined"
-                icon="pencil-outline"
-                style={{ alignSelf: 'flex-start' }}
-                onPress={() => router.push({ pathname: '/recall', params: { slug } })}
-              >
-                {RECALL_TITLE}
-              </Button>
-            ) : null}
-            {card.templates.map((template) => (
-              <TemplateCard
-                key={template.slug}
-                card={slug}
-                template={template}
-                recalled={recall.get(template.id)}
-                now={now}
-              />
-            ))}
-          </>
-        )}
+        <Loaded of="the card" state={studied}>
+          {(data) => (
+            <>
+              <Heading title="When to reach for it" />
+              <Markdown>{data.card.trigger}</Markdown>
+              <Heading title="The brief" />
+              <Markdown>{data.card.brief}</Markdown>
+              <Ladder studied={data} />
+              {data.run ? null : <RunStart slug={slug} onStarted={studied.reload} />}
+              {data.probes.length > 0 ? <Probes studied={data} /> : null}
+              <Heading title="Templates" count={data.card.templates.length} />
+              {/* a drawn recall is offered beside a run's progress, as on the web */}
+              {data.run && data.card.templates.some((one) => (one.cases ?? []).length > 0) ? (
+                <Button
+                  mode="outlined"
+                  icon="pencil-outline"
+                  style={{ alignSelf: 'flex-start' }}
+                  onPress={() => router.push({ pathname: '/recall', params: { slug } })}
+                >
+                  {RECALL_TITLE}
+                </Button>
+              ) : null}
+              {data.card.templates.map((template) => (
+                <TemplateCard
+                  key={template.slug}
+                  card={slug}
+                  template={template}
+                  recalled={recall.get(template.id)}
+                  now={now}
+                />
+              ))}
+            </>
+          )}
+        </Loaded>
       </ScrollView>
     </View>
   );

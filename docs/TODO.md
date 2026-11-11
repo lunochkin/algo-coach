@@ -257,7 +257,7 @@ clients.
 - [x] Give every section one heading component with its count, and every
       panel one ground. The knowledge screens and the engine panels each
       write their own
-- [ ] Draw every header outside the four readings, and route every page's
+- [x] Draw every header outside the four readings, and route every page's
       loading, failed and empty through the one component. The queue and
       the exam build their own header and skip it
 - [ ] Add the section bar and collapsing headings to the long pages: the

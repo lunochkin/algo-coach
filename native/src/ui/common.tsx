@@ -4,8 +4,17 @@ import { Button, Text, useTheme } from 'react-native-paper';
 
 import { router } from 'expo-router';
 
-import { block, type ExamPlan, type Queue, syncErrorSummary, syncLine, RETRY } from '@algo-coach/core';
-import type { ExamSession, QueueSession, Session, SyncState } from '@/lib/store';
+import {
+  block,
+  type ExamPlan,
+  loadingLine,
+  type Queue,
+  readFailure,
+  RETRY,
+  syncErrorSummary,
+  syncLine,
+} from '@algo-coach/core';
+import type { QueueSession, Session, SyncState } from '@/lib/store';
 
 /** Monospace, horizontally scrollable, never wrapped. `verbatim` keeps leading spaces (diagrams). */
 export function CodeBlock({ code, verbatim = false }: { code: string; verbatim?: boolean }) {
@@ -137,6 +146,58 @@ export const tones = (dark: boolean) =>
   dark ? { done: '#81c784', open: '#ffb74d' } : { done: '#2e7d32', open: '#a15c00' };
 
 /** A read from the engine that failed, with the press that asks again. */
+/** What a screen loads, from the engine or the device's copy: the data, or why it is missing. */
+export interface Reading<T> {
+  data: T | null | undefined;
+  error: string | null | undefined;
+  reload: () => void;
+}
+
+/**
+ * The three readings a screen gives before its content, rendered once, as
+ * the web's `Loaded` renders them: a screen loading, failed or empty then
+ * reads the same whichever screen it is. `of` names what is loaded.
+ */
+export function Loaded<T>(props: {
+  of: string;
+  state: Reading<T>;
+  blank?: string;
+  blankWhen?: (data: T) => boolean;
+  children: (data: T) => ReactNode;
+}) {
+  const theme = useTheme();
+  const { data, error, reload } = props.state;
+  const muted = { color: theme.colors.onSurfaceVariant };
+  if (error) return <Failed message={readFailure(props.of, error)} onRetry={reload} />;
+  if (data === null || data === undefined)
+    return (
+      <Text variant="bodyMedium" style={muted}>
+        {loadingLine(props.of)}
+      </Text>
+    );
+  const blank = props.blankWhen ?? ((x: T) => Array.isArray(x) && x.length === 0);
+  if (props.blank !== undefined && blank(data))
+    return (
+      <Text variant="bodyMedium" style={muted}>
+        {props.blank}
+      </Text>
+    );
+  return <>{props.children(data)}</>;
+}
+
+/** The device's copy as a reading: held once ready, failed with the sync while it holds nothing. */
+export function fromCopy<T>(
+  st: { ready: boolean; sync: SyncState; requestSync: (ms: number) => void },
+  data: T | null | undefined,
+): Reading<T> {
+  const shown = st.ready ? data : undefined;
+  return {
+    data: shown,
+    error: shown == null && st.sync.error ? st.sync.error : null,
+    reload: () => st.requestSync(0),
+  };
+}
+
 export function Failed({ message, onRetry }: { message: string; onRetry: () => void }) {
   const theme = useTheme();
   return (

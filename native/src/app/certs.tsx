@@ -28,7 +28,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { CertRing, CertSheet } from '@/ui/certs';
 import { useStartSheet } from '@/ui/start';
-import { styles, tones } from '@/ui/common';
+import { fromCopy, Loaded, styles, tones } from '@/ui/common';
 
 const CELL = 54;
 
@@ -62,7 +62,11 @@ export default function CertsScreen() {
         <Appbar.Content title={CERTS_TITLE} />
       </Appbar.Header>
       {!modules.length ? (
-        <Text style={{ padding: 16, color: theme.colors.onSurfaceVariant }}>{CERTS_NONE}</Text>
+        <View style={styles.page}>
+          <Loaded of="the certifications" state={fromCopy(st, st.catalog ? modules : null)} blank={CERTS_NONE}>
+            {() => null}
+          </Loaded>
+        </View>
       ) : (
         <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
           <Legend />

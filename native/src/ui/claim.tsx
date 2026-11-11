@@ -18,9 +18,7 @@ import {
   described,
   LABEL_OPTIONAL,
   LABEL_QUESTION,
-  loadingLine,
   MODE_GLOSS,
-  readFailure,
   saveLabel,
   type components,
 } from '@algo-coach/core';
@@ -28,7 +26,7 @@ import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { Failed } from '@/ui/common';
+import { Loaded } from '@/ui/common';
 
 type Asked = components['schemas']['Asked'];
 type FailureMode = components['schemas']['FailureMode'];
@@ -79,10 +77,10 @@ export function ClaimSheet({
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             {CLAIM_NOTE}
           </Text>
-          {loaded.error ? (
-            <Failed message={readFailure('the claim', loaded.error)} onRetry={loaded.reload} />
-          ) : !loaded.data || !asked ? (
-            <Text variant="bodyMedium">{loadingLine('the claim')}</Text>
+          {!loaded.data || !asked ? (
+            <Loaded of="the claim" state={{ ...loaded, data: null }}>
+              {() => null}
+            </Loaded>
           ) : (
             <ClaimForm
               // a fresh form per attempt, so no answer carries over to the next

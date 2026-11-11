@@ -29,10 +29,12 @@ import {
   queueLeft,
 } from '@algo-coach/core'
 
+import { Loaded } from '@/components/Loaded'
+import { PageHeader } from '@/components/PageHeader'
 import { Panel } from '@/components/Panel'
 import { Button } from '@/components/ui/button'
 import { Ask } from '@/knowledge/Ask'
-import { linesOf, useKnowledge } from '@/knowledge/context'
+import { linesOf, loadedFrom, useKnowledge } from '@/knowledge/context'
 import { filteredScope } from '@/knowledge/filtered'
 import { useLearner } from '@/knowledge/learner'
 import { LessonOver, type Reading } from '@/knowledge/LessonOver'
@@ -49,8 +51,16 @@ export function QueuePage() {
   const named = params.get('mode')
   const mode: Mode = named === 'review' ? 'review' : named === 'filtered' ? 'drill' : 'next'
   const learner = useLearner()
+  const k = useKnowledge()
   if (!learner.ready || !learner.catalog)
-    return <p className="text-meta text-muted-foreground">Loading the queue…</p>
+    return (
+      <section className="space-y-section">
+        <PageHeader title={queueTitle(mode)} />
+        <Loaded of="the queue" state={loadedFrom(k, undefined)}>
+          {() => null}
+        </Loaded>
+      </section>
+    )
   const scope = mode === 'drill' ? filteredScope(params, learner.catalog) : null
   // a module the user no longer reads leaves nothing to filter
   if (mode === 'drill' && !scope) return <Navigate to={HOME} replace />
@@ -162,18 +172,22 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
 
   return (
     <section className="space-y-section">
-      <header className="flex items-center gap-stack">
-        <h1 className="flex-1 text-title font-semibold">{done ? QUEUE_DONE : queueTitle(mode)}</h1>
-        <span className="text-meta tabular-nums">
-          {score}/{results.length}
-        </span>
-        {!done && (
-          <Button variant="outline" size="sm" onClick={stop}>
-            <X />
-            {QUEUE_STOP}
-          </Button>
-        )}
-      </header>
+      <PageHeader
+        title={done ? QUEUE_DONE : queueTitle(mode)}
+        aside={
+          <>
+            <span className="text-meta tabular-nums">
+              {score}/{results.length}
+            </span>
+            {!done && (
+              <Button variant="outline" size="sm" onClick={stop}>
+                <X />
+                {QUEUE_STOP}
+              </Button>
+            )}
+          </>
+        }
+      />
       <div className="flex flex-wrap items-center gap-stack text-meta text-muted-foreground">
         <span className="flex-1">{left}</span>
         {/* an ended queue offers it too: the raise starts the queue again, as on the phone */}

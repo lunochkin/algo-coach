@@ -1,14 +1,12 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Appbar, Button, Card, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  DEVICES_LOADING,
   deviceLine,
   deviceName,
-  readFailure,
   REVOKE,
   REVOKED_NOTE,
   SIGN_OUT,
@@ -19,7 +17,8 @@ import {
 import { described, engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
-import { Failed, styles } from '@/ui/common';
+import { Loaded, styles } from '@/ui/common';
+import { PickPanel, PickRow } from '@/ui/rows';
 import { useSignOut } from '@/ui/signout';
 
 type SignedInDevice = components['schemas']['SignedInDevice'];
@@ -46,7 +45,7 @@ export default function DevicesScreen() {
       setDevices(data ?? []);
       setError(null);
     } catch (e) {
-      setError(readFailure('the signed-in devices', described(e)));
+      setError(described(e));
     }
   }, [st.settings.origin]);
 
@@ -76,39 +75,35 @@ export default function DevicesScreen() {
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
           {REVOKED_NOTE}
         </Text>
-        {error ? (
-          <Failed message={error} onRetry={() => void load()} />
-        ) : devices === null ? (
-          <Text variant="bodyMedium">{DEVICES_LOADING}</Text>
-        ) : (
-          devices.map((device) => (
-            <Card key={device.id} mode="outlined">
-              <Card.Content style={[styles.row, { gap: 12 }]}>
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="titleMedium">
-                    {device.current ? `${deviceName(device)} · ${thisDevice('phone')}` : deviceName(device)}
-                  </Text>
-                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                    {deviceLine(device, now)}
-                  </Text>
-                </View>
-                {device.current ? (
-                  <Button mode="outlined" icon="logout" disabled={signOut.signing} onPress={signOut.start}>
-                    {SIGN_OUT}
-                  </Button>
-                ) : (
-                  <Button
-                    mode="outlined"
-                    onPress={() => void revoke(device)}
-                    accessibilityLabel={`Revoke ${deviceName(device)}`}
-                  >
-                    {REVOKE}
-                  </Button>
-                )}
-              </Card.Content>
-            </Card>
-          ))
-        )}
+        <Loaded of="the signed-in devices" state={{ data: devices, error, reload: () => void load() }}>
+          {(listed) => (
+            <PickPanel>
+              {listed.map((device) => (
+                <PickRow
+                  key={device.id}
+                  title={device.current ? `${deviceName(device)} · ${thisDevice('phone')}` : deviceName(device)}
+                  stats={[]}
+                  note={deviceLine(device, now)}
+                  aside={
+                    device.current ? (
+                      <Button mode="outlined" icon="logout" disabled={signOut.signing} onPress={signOut.start}>
+                        {SIGN_OUT}
+                      </Button>
+                    ) : (
+                      <Button
+                        mode="outlined"
+                        onPress={() => void revoke(device)}
+                        accessibilityLabel={`Revoke ${deviceName(device)}`}
+                      >
+                        {REVOKE}
+                      </Button>
+                    )
+                  }
+                />
+              ))}
+            </PickPanel>
+          )}
+        </Loaded>
         {failed ? (
           <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
             {failed}

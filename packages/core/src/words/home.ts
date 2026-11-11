@@ -9,7 +9,6 @@ export type ThisDevice = 'browser' | 'phone';
 
 // the home
 export const MODULES_OF = 'the modules';
-export const MODULES_LOADING = `Loading ${MODULES_OF}…`;
 export const NO_MODULES = 'No module is seeded yet.';
 export const LESSONS_LINK = 'Lessons';
 export const CERTIFICATIONS_LINK = 'Certifications';
@@ -84,7 +83,6 @@ export const STAY_SIGNED_IN = 'Stay signed in';
 
 // the signed-in devices
 export const REVOKED_NOTE = 'A revoked device is signed out at its next request.';
-export const DEVICES_LOADING = 'Reading the signed-in devices…';
 export const thisDevice = (here: ThisDevice) => `this ${here}`;
 export const REVOKE = 'Revoke';
 

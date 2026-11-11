@@ -11,7 +11,6 @@ import {
   certExamRule,
   CERT_EXAM_MISSING,
   CERT_EXAM_START,
-  examFailed,
   examOpening,
   examPool,
   levelExam,
@@ -21,7 +20,6 @@ import {
   validSetting,
   EXAM_ALL,
   EXAM_LEVEL,
-  EXAM_LOADING,
   EXAM_MODULE,
   EXAM_NOTE,
   EXAM_SIZE,
@@ -30,7 +28,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
-import { BottomBar, Failed, startExam, styles } from '@/ui/common';
+import { BottomBar, fromCopy, Loaded, startExam, styles } from '@/ui/common';
 
 // the choices wait for the copy, so the size and the focus they open on are the stored ones
 export default function Exam() {
@@ -44,13 +42,9 @@ export default function Exam() {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Header />
       <View style={styles.page}>
-        {st.sync.error && !st.sync.running ? (
-          <Failed message={examFailed(st.sync.error)} onRetry={() => st.requestSync(0)} />
-        ) : (
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            {EXAM_LOADING}
-          </Text>
-        )}
+        <Loaded of="the exam" state={fromCopy(st, null)}>
+          {() => null}
+        </Loaded>
       </View>
     </View>
   );

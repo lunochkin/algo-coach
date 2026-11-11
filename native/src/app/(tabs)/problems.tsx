@@ -7,7 +7,6 @@ import {
   clearFilters,
   listingHeading,
   listingView,
-  loadingLine,
   NO_FILTER,
   PAGE_NEXT,
   PAGE_PREVIOUS,
@@ -16,14 +15,13 @@ import {
   PROBLEMS_NONE_MATCH,
   PROBLEMS_NOTE,
   PROBLEMS_TITLE,
-  readFailure,
   techniqueStats,
   toggled,
   type ListingFilter,
 } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
-import { Failed, styles } from '@/ui/common';
+import { Loaded, styles } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 
 /**
@@ -47,15 +45,9 @@ export default function ProblemsScreen() {
         <Text variant="bodyMedium" style={muted}>
           {PROBLEMS_NOTE}
         </Text>
-        {listed.error ? (
-          <Failed message={readFailure('the problems', listed.error)} onRetry={listed.reload} />
-        ) : listed.data === null ? (
-          <Text variant="bodyMedium">{loadingLine('the problems')}</Text>
-        ) : listed.data.length === 0 ? (
-          <Text variant="bodyMedium">{PROBLEMS_NONE}</Text>
-        ) : (
-          (() => {
-            const view = listingView(listed.data, filter);
+        <Loaded of="the problems" state={listed} blank={PROBLEMS_NONE}>
+          {(data) => {
+            const view = listingView(data, filter);
             return (
               <>
                 {(
@@ -142,8 +134,8 @@ export default function ProblemsScreen() {
                 ) : null}
               </>
             );
-          })()
-        )}
+          }}
+        </Loaded>
       </ScrollView>
     </View>
   );

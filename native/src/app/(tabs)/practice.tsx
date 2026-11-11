@@ -4,11 +4,11 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Card, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { boardView, inProgress, readFailure, techniqueStats, type components, loadingLine } from '@algo-coach/core';
+import { boardView, inProgress, techniqueStats, type components } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { CardPanel } from '@/ui/cards';
-import { Failed, styles } from '@/ui/common';
+import { Loaded, styles } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 
 type Board = components['schemas']['Board'];
@@ -34,21 +34,21 @@ export default function PracticeScreen() {
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
           Continue a card in progress, or pick a technique, stalest first.
         </Text>
-        {error ? (
-          <Failed
-            message={readFailure('the board', error)}
-            onRetry={() => {
+        <Loaded
+          of="the board"
+          state={{
+            data: board.data && cards.data ? { board: board.data, cards: cards.data } : null,
+            error,
+            reload: () => {
               board.reload();
               cards.reload();
-            }}
-          />
-        ) : board.data === null || cards.data === null ? (
-          <Text variant="bodyMedium">{loadingLine('the board')}</Text>
-        ) : board.data.rows.length === 0 ? (
-          <Text variant="bodyMedium">No served problem carries a technique yet.</Text>
-        ) : (
-          <BoardBody board={board.data} cards={cards.data} />
-        )}
+            },
+          }}
+          blank="No served problem carries a technique yet."
+          blankWhen={(x) => x.board.rows.length === 0}
+        >
+          {(x) => <BoardBody board={x.board} cards={x.cards} />}
+        </Loaded>
       </ScrollView>
     </View>
   );
