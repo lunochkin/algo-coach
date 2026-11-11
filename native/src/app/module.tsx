@@ -56,6 +56,7 @@ import { CertSheet, stateColor } from '@/ui/certs';
 import { fromCopy, Loaded, styles, tones } from '@/ui/common';
 import { MapCanvas, NODE_H, NODE_W, type CertPip } from '@/ui/mapcanvas';
 import { ModuleGroups } from '@/ui/groups';
+import { SectionBar, useSections } from '@/ui/sections';
 import { useArchive } from '@/ui/pause';
 import { useStartSheet, type Scope } from '@/ui/start';
 
@@ -80,6 +81,7 @@ export default function ModuleScreen() {
   const archive = useArchive(() => router.dismissTo('/'));
   const now = Date.now();
   const sum = useMemo(() => (b ? summary(b, now) : null), [b, now]);
+  const sections = useSections((c?.topics ?? []).map((t) => ({ id: t.slug, label: t.title })));
 
   if (!c || !b || !sum) {
     return (
@@ -165,9 +167,17 @@ export default function ModuleScreen() {
         />
       </View>
       {tab === 'groups' ? (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24 }}>
-          <ModuleGroups c={c} b={b} onStart={starter.open} />
-        </ScrollView>
+        <>
+          <SectionBar sections={sections} />
+          <ScrollView
+            ref={sections.scroll}
+            onScroll={sections.onScroll}
+            scrollEventThrottle={32}
+            contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24 }}
+          >
+            <ModuleGroups c={c} b={b} of={sections} onStart={starter.open} />
+          </ScrollView>
+        </>
       ) : (
         <>
           {c.graph?.lessons.length ? (

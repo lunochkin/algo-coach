@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   Board,
   lessonGroups,
+  lessonParts,
   lessonRow,
   lessonsAround,
   lessonStopNote,
@@ -91,5 +92,22 @@ describe('the lessons', () => {
   it('says why a queue stops on a lesson', () => {
     expect(lessonStopNote(false)).toMatch(/^You have tried a few questions/);
     expect(lessonStopNote(true)).toMatch(/^Read\./);
+  });
+});
+
+describe("a lesson's parts", () => {
+  it('cuts at each `##` heading and keeps the text before the first', () => {
+    const md = 'Intro.\n\n## Why it matters\n\nBody.\n\n### A detail\n\nMore.\n\n## How';
+    expect(lessonParts(md)).toEqual([
+      { title: null, anchor: null, text: 'Intro.' },
+      { title: 'Why it matters', anchor: 'why-it-matters', text: 'Body.\n\n### A detail\n\nMore.' },
+      { title: 'How', anchor: 'how', text: '' },
+    ]);
+  });
+
+  it('leaves a heading inside a code fence in its part', () => {
+    expect(lessonParts('```\n## not a heading\n```')).toEqual([
+      { title: null, anchor: null, text: '```\n## not a heading\n```' },
+    ]);
   });
 });

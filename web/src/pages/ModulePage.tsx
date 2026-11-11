@@ -39,7 +39,8 @@ import {
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
-import { SectionHeading } from '@/components/SectionHeading'
+import { PageSection } from '@/components/PageSection'
+import { SectionBar } from '@/components/SectionBar'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import {
@@ -56,6 +57,7 @@ import { loadedFrom, useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
 import { ModuleMap } from '@/knowledge/ModuleMap'
 import { StartSheet, type Scope } from '@/knowledge/StartSheet'
+import { useSections } from '@/lib/sections'
 import { cn } from '@/lib/utils'
 
 const HOME = '/knowledge'
@@ -86,6 +88,9 @@ export function ModulePage() {
     if (!catalog || !b) return undefined
     return c ? { b, c } : null
   }, [catalog, board, module])
+  const sections = useSections(
+    page ? page.c.topics.map((t) => ({ id: t.slug, label: t.title })) : [],
+  )
 
   function aim(f: Focus) {
     void k.add('focus', newRecord.focus(aimFocus(focus, f)))
@@ -199,39 +204,50 @@ export function ModulePage() {
                   <p className="text-meta text-muted-foreground">{noGraph(c)}</p>
                 ))}
 
+              {tab === 'groups' && (
+                <SectionBar
+                  items={sections.items}
+                  current={sections.current}
+                  onJump={sections.jump}
+                />
+              )}
               {tab === 'groups' &&
                 c.topics.map((t) => (
-                  <section key={t.slug} className="space-y-stack">
-                    <SectionHeading
-                      title={t.title}
-                      count={t.subs.length}
-                      aside={
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              setStarting({
-                                course: module,
-                                topic: t.slug,
-                                sub: null,
-                                level: null,
-                              })
-                            }
-                          >
-                            {MODULE_START}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={aimed(t.slug, null)}
-                            onClick={() => aim({ course: module, topic: t.slug, sub: null })}
-                          >
-                            {aimed(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
-                          </Button>
-                        </>
-                      }
-                    />
+                  <PageSection
+                    key={t.slug}
+                    id={t.slug}
+                    title={t.title}
+                    count={t.subs.length}
+                    body="bare"
+                    closed={sections.closed(t.slug)}
+                    onToggle={sections.toggle}
+                    aside={
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setStarting({
+                              course: module,
+                              topic: t.slug,
+                              sub: null,
+                              level: null,
+                            })
+                          }
+                        >
+                          {MODULE_START}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={aimed(t.slug, null)}
+                          onClick={() => aim({ course: module, topic: t.slug, sub: null })}
+                        >
+                          {aimed(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
+                        </Button>
+                      </>
+                    }
+                  >
                     <div className="overflow-x-auto rounded-xl border bg-card">
                       <table className="w-full text-sm">
                         <thead>
@@ -322,7 +338,7 @@ export function ModulePage() {
                         </tbody>
                       </table>
                     </div>
-                  </section>
+                  </PageSection>
                 ))}
 
               <StartSheet scope={starting} onClose={() => setStarting(null)} />

@@ -56,3 +56,26 @@ export function sections(md: string): { anchor: string | null; text: string }[] 
   }
   return out.map((s) => ({ anchor: s.anchor, text: s.text.join('\n') })).filter((s) => s.text.trim());
 }
+
+const PART = /^##\s+(.+?)\s*#*\s*$/;
+
+/**
+ * A lesson cut at its `##` headings (outside code fences), each part its
+ * heading and the text under it, as a page's sections read. The text before
+ * the first heading is a part with no title.
+ */
+export function lessonParts(md: string): { title: string | null; anchor: string | null; text: string }[] {
+  const out: { title: string | null; anchor: string | null; text: string[] }[] = [
+    { title: null, anchor: null, text: [] },
+  ];
+  let fenced = false;
+  for (const line of md.split(/\r\n|\r|\n/)) {
+    if (line.trimStart().startsWith('```')) fenced = !fenced;
+    const m = !fenced ? PART.exec(line) : null;
+    if (m) out.push({ title: m[1], anchor: anchor(m[1]), text: [] });
+    else out[out.length - 1].text.push(line);
+  }
+  return out
+    .map((s) => ({ title: s.title, anchor: s.anchor, text: s.text.join('\n').trim() }))
+    .filter((s) => s.title !== null || s.text);
+}

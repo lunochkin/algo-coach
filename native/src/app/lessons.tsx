@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 import { SectionList, View } from 'react-native';
 import { Appbar, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,6 +18,7 @@ import {
 import { useStore } from '@/lib/store';
 import { fromCopy, Loaded, styles } from '@/ui/common';
 import { Heading, PanelItem, PickRow } from '@/ui/rows';
+import { SectionBar } from '@/ui/sections';
 
 // every module's lessons, by module, as the web lists them: `pages.md`, The two clients
 export default function LessonsScreen() {
@@ -57,6 +58,28 @@ export default function LessonsScreen() {
     [modules, open],
   );
 
+  // the groups as a long screen's sections: a bar jumps to one and marks the
+  // one in view, as on every long screen. A virtualised list scrolls by index,
+  // and its headers do not stick, since a stuck header covers the one jumped to
+  const list = useRef<SectionList<Lesson, (typeof sections)[number]>>(null);
+  const [current, setCurrent] = useState<string | null>(null);
+  const bar = {
+    items: sections.map((x) => ({
+      id: x.key,
+      label: modules.length > 1 ? `${x.c.title} · ${x.title}` : x.title,
+    })),
+    current,
+    jump: (key: string) => {
+      if (!isOpen(key)) setOpen((o) => ({ ...o, [key]: true }));
+      const sectionIndex = sections.findIndex((x) => x.key === key);
+      requestAnimationFrame(() => list.current?.scrollToLocation({ sectionIndex, itemIndex: 0, viewOffset: 0 }));
+    },
+  };
+  const onViewable = useRef(({ viewableItems }: { viewableItems: { section?: { key: string } }[] }) => {
+    const first = viewableItems.find((one) => one.section);
+    if (first?.section) setCurrent(first.section.key);
+  }).current;
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
@@ -70,34 +93,40 @@ export default function LessonsScreen() {
           </Loaded>
         </View>
       ) : (
-        <SectionList
-          sections={sections}
-          keyExtractor={(x) => x.slug}
-          renderItem={({ item, index, section }) => (
-            <PanelItem first={index === 0} last={index === section.data.length - 1}>
-              <LessonRow x={item} c={section.c} b={section.b} />
-            </PanelItem>
-          )}
-          renderSectionHeader={({ section }) => {
-            const expanded = isOpen(section.key);
-            return (
-              <View style={{ backgroundColor: theme.colors.background, paddingBottom: 4 }}>
-                {section.module ? <Heading title={section.module} count={section.lessons} /> : null}
-                <Heading
-                  sub
-                  title={section.title}
-                  count={section.total}
-                  closed={!expanded}
-                  onToggle={() => setOpen((o) => ({ ...o, [section.key]: !expanded }))}
-                />
-              </View>
-            );
-          }}
-          stickySectionHeadersEnabled
-          initialNumToRender={8}
-          windowSize={5}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 24 }}
-        />
+        <>
+          <SectionBar sections={bar} />
+          <SectionList
+            ref={list}
+            onViewableItemsChanged={onViewable}
+            onScrollToIndexFailed={() => {}}
+            sections={sections}
+            keyExtractor={(x) => x.slug}
+            renderItem={({ item, index, section }) => (
+              <PanelItem first={index === 0} last={index === section.data.length - 1}>
+                <LessonRow x={item} c={section.c} b={section.b} />
+              </PanelItem>
+            )}
+            renderSectionHeader={({ section }) => {
+              const expanded = isOpen(section.key);
+              return (
+                <View style={{ backgroundColor: theme.colors.background, paddingBottom: 4 }}>
+                  {section.module ? <Heading title={section.module} count={section.lessons} /> : null}
+                  <Heading
+                    sub
+                    title={section.title}
+                    count={section.total}
+                    closed={!expanded}
+                    onToggle={() => setOpen((o) => ({ ...o, [section.key]: !expanded }))}
+                  />
+                </View>
+              );
+            }}
+            stickySectionHeadersEnabled={false}
+            initialNumToRender={8}
+            windowSize={5}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 24 }}
+          />
+        </>
       )}
     </View>
   );

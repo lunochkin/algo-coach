@@ -11,11 +11,14 @@ import {
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
-import { PickPanel, PickRow } from '@/components/PickRow'
+import { PageSection } from '@/components/PageSection'
+import { PickList, PickRow } from '@/components/PickRow'
+import { SectionBar } from '@/components/SectionBar'
 import { SectionHeading } from '@/components/SectionHeading'
 import { loadedFrom, useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
 import { KNOWLEDGE, lessonPath } from '@/knowledge/paths'
+import { useSections } from '@/lib/sections'
 
 // every module's lessons, by module and in graph order: `pages.md`, The
 // knowledge pages. A locked lesson opens too, since reading early skips nothing
@@ -27,6 +30,16 @@ export function LessonsPage() {
     if (!catalog || !board(null)) return undefined
     return modulesInOrder(catalog.courses, order, board, (c) => !!c.graph?.lessons.length)
   }, [catalog, board, order])
+  // a group of one module's lessons is a section: the bar names the module
+  // beside it only where several modules hold lessons
+  const sections = useSections(
+    (modules ?? []).flatMap(({ c, b }) =>
+      lessonGroups(b, c).map((g) => ({
+        id: `${c.slug}-${g.key}`,
+        label: (modules ?? []).length > 1 ? `${c.title} · ${g.title}` : g.title,
+      })),
+    ),
+  )
 
   return (
     <section className="space-y-section">
@@ -34,6 +47,7 @@ export function LessonsPage() {
       <Loaded of="the lessons" state={loadedFrom(k, modules)} blank={LESSONS_NONE}>
         {(modules) => (
           <>
+            <SectionBar items={sections.items} current={sections.current} onJump={sections.jump} />
             {modules.map(({ c, b }) => (
               <section key={c.slug} className="space-y-stack">
                 <SectionHeading
@@ -41,9 +55,17 @@ export function LessonsPage() {
                   count={lessonGroups(b, c).reduce((n, g) => n + g.lessons.length, 0)}
                 />
                 {lessonGroups(b, c).map((g) => (
-                  <section key={g.key} className="space-y-stack">
-                    <SectionHeading sub title={g.title} count={g.lessons.length} />
-                    <PickPanel>
+                  <PageSection
+                    key={g.key}
+                    id={`${c.slug}-${g.key}`}
+                    sub
+                    title={g.title}
+                    count={g.lessons.length}
+                    body="rows"
+                    closed={sections.closed(`${c.slug}-${g.key}`)}
+                    onToggle={sections.toggle}
+                  >
+                    <PickList>
                       {g.lessons.map((x) => {
                         const row = lessonRow(b, c, x)
                         return (
@@ -57,8 +79,8 @@ export function LessonsPage() {
                           />
                         )
                       })}
-                    </PickPanel>
-                  </section>
+                    </PickList>
+                  </PageSection>
                 ))}
               </section>
             ))}

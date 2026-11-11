@@ -13,6 +13,8 @@ export function SectionBar({
   current: string | null
   onJump: (id: string) => void
 }) {
+  // one section has nothing to jump between
+  if (items.length < 2) return null
   return (
     <nav className="sticky top-0 z-10 -mx-gutter border-b bg-background px-gutter">
       <div className="flex gap-1 overflow-x-auto py-2">

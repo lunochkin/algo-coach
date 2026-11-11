@@ -32,3 +32,27 @@ export function useCurrent(ids: string[]): string | null {
 
   return current
 }
+
+// a long page's sections: which the reader closed, the one they are in, and
+// a jump that opens a section before scrolling to it, since a closed one
+// would land on its heading with nothing under it. Nothing is closed until
+// the reader closes it, and a reload opens every one again
+export function useSections(items: Item[]) {
+  const [closed, setClosed] = useState<string[]>([])
+  const current = useCurrent(items.map((item) => item.id))
+  return {
+    items,
+    current,
+    closed: (id: string) => closed.includes(id),
+    toggle: (id: string) =>
+      setClosed(closed.includes(id) ? closed.filter((one) => one !== id) : [...closed, id]),
+    jump: (id: string) => {
+      setClosed(closed.filter((one) => one !== id))
+      requestAnimationFrame(() =>
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }),
+      )
+    },
+  }
+}
+
+export type Sections = ReturnType<typeof useSections>

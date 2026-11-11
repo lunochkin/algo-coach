@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 
 import {
+  lessonParts,
   lessonsAround,
   minutesOf,
   LESSON_MARK_READ,
@@ -19,11 +20,14 @@ import {
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
+import { PageSection } from '@/components/PageSection'
+import { SectionBar } from '@/components/SectionBar'
 import { Button } from '@/components/ui/button'
 import { loadedFrom, useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
 import { LessonText } from '@/knowledge/LessonText'
 import { LESSONS, lessonPath } from '@/knowledge/paths'
+import { useSections } from '@/lib/sections'
 
 // a lesson read in one place, on both clients: `pages.md`, The knowledge pages
 export function LessonPage() {
@@ -57,7 +61,7 @@ export function LessonPage() {
       >
         {({ c, x }) => {
           if (!c || !x) return null
-          return <LessonBody c={c} x={x} body={body} read={read} />
+          return <LessonBody c={c} x={x} body={body} read={read} sectioned />
         }}
       </Loaded>
     </article>
@@ -72,13 +76,18 @@ export function LessonBody(props: {
   body: string
   read: boolean
   onLesson?: (slug: string) => void
+  // on the lesson's own page its parts read as sections; over a queue the
+  // text reads whole
+  sectioned?: boolean
 }) {
-  const { c, x, body, read, onLesson } = props
+  const { c, x, body, read, onLesson, sectioned = false } = props
   const k = useKnowledge()
   const { next, related } = lessonsAround(c, x.slug)
   return (
     <>
-      {body ? (
+      {body && sectioned ? (
+        <LessonSections module={c.slug} text={body} />
+      ) : body ? (
         <LessonText module={c.slug} text={body} onLesson={onLesson} />
       ) : (
         <p className="text-meta text-muted-foreground">{LESSON_NO_TEXT}</p>
@@ -131,6 +140,31 @@ export function LessonBody(props: {
           </Button>
         )}
       </div>
+    </>
+  )
+}
+
+// a lesson cut at its `##` headings, each part a section the bar reaches and
+// its heading closes, as a long page reads: `pages.md`, A page's areas
+function LessonSections({ module, text }: { module: string; text: string }) {
+  const parts = lessonParts(text)
+  const titled = parts.filter((part) => part.title !== null)
+  const sections = useSections(titled.map((part) => ({ id: part.anchor!, label: part.title! })))
+  return (
+    <>
+      {parts[0]?.title === null && <LessonText module={module} text={parts[0].text} />}
+      <SectionBar items={sections.items} current={sections.current} onJump={sections.jump} />
+      {titled.map((part) => (
+        <PageSection
+          key={part.anchor}
+          id={part.anchor!}
+          title={part.title!}
+          closed={sections.closed(part.anchor!)}
+          onToggle={sections.toggle}
+        >
+          <LessonText module={module} text={part.text} />
+        </PageSection>
+      ))}
     </>
   )
 }

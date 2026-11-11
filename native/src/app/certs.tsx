@@ -29,6 +29,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CertRing, CertSheet } from '@/ui/certs';
 import { useStartSheet } from '@/ui/start';
 import { fromCopy, Loaded, styles, tones } from '@/ui/common';
+import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
 
 const CELL = 54;
 
@@ -54,6 +55,7 @@ export default function CertsScreen() {
     [st.catalog, st.courseOrder, board],
   );
   const shown = modules.find((m) => m.c.slug === picked?.course);
+  const sections = useSections(modules.map(({ c }) => ({ id: c.slug, label: c.title })));
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -68,15 +70,29 @@ export default function CertsScreen() {
           </Loaded>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
-          <Legend />
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            {CERTS_NOTE}
-          </Text>
-          {modules.map(({ c, states }) => (
-            <Matrix key={c.slug} c={c} states={states} onPick={(id) => setPicked({ course: c.slug, id })} />
-          ))}
-        </ScrollView>
+        <>
+          <SectionBar sections={sections} />
+          <ScrollView
+            ref={sections.scroll}
+            onScroll={sections.onScroll}
+            scrollEventThrottle={32}
+            contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}
+          >
+            <Legend />
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              {CERTS_NOTE}
+            </Text>
+            {modules.map(({ c, states }) => (
+              <Matrix
+                key={c.slug}
+                of={sections}
+                c={c}
+                states={states}
+                onPick={(id) => setPicked({ course: c.slug, id })}
+              />
+            ))}
+          </ScrollView>
+        </>
       )}
       {picked && shown ? (
         <CertSheet
@@ -190,56 +206,57 @@ function Legend() {
   );
 }
 
-function Matrix(props: { c: Course; states: Map<string, CertStatus>; onPick: (id: string) => void }) {
+function Matrix(props: { of: Sections; c: Course; states: Map<string, CertStatus>; onPick: (id: string) => void }) {
   const { c, states, onPick } = props;
   const theme = useTheme();
   const rules = useStore().catalog!.rules;
   const lv = levels(rules);
   const rows = certRows(c);
   return (
-    <Card mode="outlined">
-      <Card.Title title={c.title} />
-      <Card.Content>
-        <View style={styles.row}>
-          <View style={{ flex: 1 }} />
-          {lv.map((l) => {
-            const practice = practiceLevel(c, l);
-            return (
-              <Text
-                key={l}
-                variant="labelSmall"
-                style={{
-                  width: CELL,
-                  textAlign: 'center',
-                  color: theme.colors.onSurfaceVariant,
-                  opacity: practice ? 0.6 : 1,
-                }}
-              >
-                {practice ? `${levelName(rules, l, true)}\n${PRACTICE}` : levelName(rules, l, true)}
-              </Text>
-            );
-          })}
-        </View>
-        {rows.map((r) => (
-          <View key={r.scope} style={[styles.row, { minHeight: 52 }]}>
-            <Text
-              variant={r.scope === COURSE_SCOPE ? 'titleSmall' : 'bodyMedium'}
-              style={{ flex: 1 }}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.7}
-            >
-              {r.title}
-            </Text>
+    <PageSection of={props.of} id={c.slug} title={c.title} count={rows.length} body="bare">
+      <Card mode="outlined">
+        <Card.Content>
+          <View style={styles.row}>
+            <View style={{ flex: 1 }} />
             {lv.map((l) => {
-              const id = certId(c.slug, r.scope, l);
-              const s = states.get(id);
-              if (!s) return <View key={l} style={{ width: CELL }} />;
-              return <Cell key={l} status={s} title={c.certs?.get(id)?.title ?? id} onPress={() => onPick(id)} />;
+              const practice = practiceLevel(c, l);
+              return (
+                <Text
+                  key={l}
+                  variant="labelSmall"
+                  style={{
+                    width: CELL,
+                    textAlign: 'center',
+                    color: theme.colors.onSurfaceVariant,
+                    opacity: practice ? 0.6 : 1,
+                  }}
+                >
+                  {practice ? `${levelName(rules, l, true)}\n${PRACTICE}` : levelName(rules, l, true)}
+                </Text>
+              );
             })}
           </View>
-        ))}
-      </Card.Content>
-    </Card>
+          {rows.map((r) => (
+            <View key={r.scope} style={[styles.row, { minHeight: 52 }]}>
+              <Text
+                variant={r.scope === COURSE_SCOPE ? 'titleSmall' : 'bodyMedium'}
+                style={{ flex: 1 }}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
+              >
+                {r.title}
+              </Text>
+              {lv.map((l) => {
+                const id = certId(c.slug, r.scope, l);
+                const s = states.get(id);
+                if (!s) return <View key={l} style={{ width: CELL }} />;
+                return <Cell key={l} status={s} title={c.certs?.get(id)?.title ?? id} onPress={() => onPick(id)} />;
+              })}
+            </View>
+          ))}
+        </Card.Content>
+      </Card>
+    </PageSection>
   );
 }

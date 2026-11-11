@@ -24,12 +24,14 @@ import {
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
-import { SectionHeading } from '@/components/SectionHeading'
+import { PageSection } from '@/components/PageSection'
+import { SectionBar } from '@/components/SectionBar'
 import { loadedFrom, useKnowledge } from '@/knowledge/context'
 import { CertDialog } from '@/knowledge/CertDialog'
 import { useLearner } from '@/knowledge/learner'
 import { KNOWLEDGE } from '@/knowledge/paths'
 import { StartSheet, type Scope } from '@/knowledge/StartSheet'
+import { type Sections, useSections } from '@/lib/sections'
 import { cn } from '@/lib/utils'
 
 type Picked = { course: string; id: string }
@@ -57,6 +59,7 @@ export function CertificationsPage() {
   }, [catalog, board, order, certExams])
 
   const shown = picked && modules?.find((m) => m.c.slug === picked.course)
+  const sections = useSections((modules ?? []).map(({ c }) => ({ id: c.slug, label: c.title })))
 
   return (
     <section className="space-y-section">
@@ -68,9 +71,11 @@ export function CertificationsPage() {
       <Loaded of="the certifications" state={loadedFrom(k, modules)} blank={CERTS_NONE}>
         {(modules) => (
           <>
+            <SectionBar items={sections.items} current={sections.current} onJump={sections.jump} />
             {modules.map(({ c, b, states }) => (
               <Grid
                 key={c.slug}
+                sections={sections}
                 c={c}
                 levels={levels(b.rules)}
                 rules={b.rules}
@@ -95,6 +100,7 @@ export function CertificationsPage() {
 }
 
 function Grid(props: {
+  sections: Sections
   c: Course
   levels: number[]
   rules: Parameters<typeof levelName>[0]
@@ -104,8 +110,14 @@ function Grid(props: {
   const { c, states } = props
   const rows = certRows(c)
   return (
-    <section className="space-y-stack">
-      <SectionHeading title={c.title} count={rows.length} />
+    <PageSection
+      id={c.slug}
+      title={c.title}
+      count={rows.length}
+      body="bare"
+      closed={props.sections.closed(c.slug)}
+      onToggle={props.sections.toggle}
+    >
       <div className="overflow-x-auto rounded-xl border bg-card">
         <table className="w-full text-sm">
           <thead>
@@ -159,7 +171,7 @@ function Grid(props: {
           </tbody>
         </table>
       </div>
-    </section>
+    </PageSection>
   )
 }
 

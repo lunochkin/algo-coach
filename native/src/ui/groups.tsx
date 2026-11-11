@@ -21,7 +21,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { styles, tones } from '@/ui/common';
-import { Heading } from '@/ui/rows';
+import { PageSection, type Sections } from '@/ui/sections';
 import type { Scope } from '@/ui/start';
 
 /**
@@ -29,7 +29,17 @@ import type { Scope } from '@/ui/start';
  * starts a filtered queue, and each subtopic carries its own focus press:
  * `pages.md`, The knowledge pages.
  */
-export function ModuleGroups({ c, b, onStart }: { c: Course; b: Board; onStart: (s: Scope) => void }) {
+export function ModuleGroups({
+  c,
+  b,
+  of,
+  onStart,
+}: {
+  c: Course;
+  b: Board;
+  of: Sections;
+  onStart: (s: Scope) => void;
+}) {
   const st = useStore();
   const theme = useTheme();
   const { done, open } = tones(theme.dark);
@@ -47,25 +57,28 @@ export function ModuleGroups({ c, b, onStart }: { c: Course; b: Board; onStart: 
   return (
     <View style={{ gap: 16 }}>
       {c.topics.map((t) => (
-        <View key={t.slug} style={{ gap: 4 }}>
-          <Heading
-            title={t.title}
-            count={t.subs.length}
-            aside={
-              <>
-                <Button
-                  compact
-                  icon="play"
-                  onPress={() => onStart({ course: c.slug, topic: t.slug, sub: null, level: null })}
-                >
-                  {MODULE_START}
-                </Button>
-                <Button compact disabled={aimed(t.slug, null)} onPress={() => aim(t.slug, null)}>
-                  {aimed(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
-                </Button>
-              </>
-            }
-          />
+        <PageSection
+          key={t.slug}
+          of={of}
+          id={t.slug}
+          title={t.title}
+          count={t.subs.length}
+          body="bare"
+          aside={
+            <>
+              <Button
+                compact
+                icon="play"
+                onPress={() => onStart({ course: c.slug, topic: t.slug, sub: null, level: null })}
+              >
+                {MODULE_START}
+              </Button>
+              <Button compact disabled={aimed(t.slug, null)} onPress={() => aim(t.slug, null)}>
+                {aimed(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
+              </Button>
+            </>
+          }
+        >
           <View style={[styles.row, { paddingLeft: 4 }]}>
             <View style={{ flex: 1 }} />
             {lv.map((l) => (
@@ -129,7 +142,7 @@ export function ModuleGroups({ c, b, onStart }: { c: Course; b: Board; onStart: 
               })}
             </View>
           ))}
-        </View>
+        </PageSection>
       ))}
     </View>
   );

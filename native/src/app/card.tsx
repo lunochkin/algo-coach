@@ -28,7 +28,8 @@ import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { CodeBlock, Loaded, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
-import { Badge, Heading, PickPanel, PickRow } from '@/ui/rows';
+import { Badge, PickPanel, PickRow } from '@/ui/rows';
+import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
 
 type Template = components['schemas']['Template'];
 type Recalled = components['schemas']['Recalled'];
@@ -47,44 +48,71 @@ export default function CardScreen() {
   const card = studied.data?.card;
   const recall = new Map((studied.data?.recall ?? []).map((one) => [one.template_id, one]));
 
+  const sections = useSections(
+    studied.data
+      ? [
+          { id: 'trigger', label: 'When to reach for it' },
+          { id: 'brief', label: 'The brief' },
+          { id: 'ladder', label: LADDER_TITLE },
+          ...(studied.data.probes.length ? [{ id: 'probes', label: PROBES_TITLE }] : []),
+          { id: 'templates', label: 'Templates' },
+        ]
+      : [],
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={card?.title ?? slug} subtitle={card?.technique} />
       </Appbar.Header>
-      <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
+      <SectionBar sections={sections} />
+      <ScrollView
+        ref={sections.scroll}
+        onScroll={sections.onScroll}
+        scrollEventThrottle={32}
+        contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}
+      >
         <Loaded of="the card" state={studied}>
           {(data) => (
             <>
-              <Heading title="When to reach for it" />
-              <Markdown>{data.card.trigger}</Markdown>
-              <Heading title="The brief" />
-              <Markdown>{data.card.brief}</Markdown>
-              <Ladder studied={data} />
+              <PageSection of={sections} id="trigger" title="When to reach for it">
+                <Markdown>{data.card.trigger}</Markdown>
+              </PageSection>
+              <PageSection of={sections} id="brief" title="The brief">
+                <Markdown>{data.card.brief}</Markdown>
+              </PageSection>
+              <Ladder studied={data} of={sections} />
               {data.run ? null : <RunStart slug={slug} onStarted={studied.reload} />}
-              {data.probes.length > 0 ? <Probes studied={data} /> : null}
-              <Heading title="Templates" count={data.card.templates.length} />
-              {/* a drawn recall is offered beside a run's progress, as on the web */}
-              {data.run && data.card.templates.some((one) => (one.cases ?? []).length > 0) ? (
-                <Button
-                  mode="outlined"
-                  icon="pencil-outline"
-                  style={{ alignSelf: 'flex-start' }}
-                  onPress={() => router.push({ pathname: '/recall', params: { slug } })}
-                >
-                  {RECALL_TITLE}
-                </Button>
-              ) : null}
-              {data.card.templates.map((template) => (
-                <TemplateCard
-                  key={template.slug}
-                  card={slug}
-                  template={template}
-                  recalled={recall.get(template.id)}
-                  now={now}
-                />
-              ))}
+              {data.probes.length > 0 ? <Probes studied={data} of={sections} /> : null}
+              <PageSection
+                of={sections}
+                id="templates"
+                title="Templates"
+                count={data.card.templates.length}
+                body="bare"
+              >
+                {/* a drawn recall is offered beside a run's progress, as on the web */}
+                {data.run && data.card.templates.some((one) => (one.cases ?? []).length > 0) ? (
+                  <Button
+                    mode="outlined"
+                    icon="pencil-outline"
+                    style={{ alignSelf: 'flex-start' }}
+                    onPress={() => router.push({ pathname: '/recall', params: { slug } })}
+                  >
+                    {RECALL_TITLE}
+                  </Button>
+                ) : null}
+                {data.card.templates.map((template) => (
+                  <TemplateCard
+                    key={template.slug}
+                    card={slug}
+                    template={template}
+                    recalled={recall.get(template.id)}
+                    now={now}
+                  />
+                ))}
+              </PageSection>
             </>
           )}
         </Loaded>
@@ -167,13 +195,12 @@ type Studied = components['schemas']['Studied'];
 const openProblem = (problem: string, technique: string, card: string) =>
   router.push({ pathname: '/problem', params: { problem, technique, card } });
 
-function Ladder({ studied }: { studied: Studied }) {
+function Ladder({ studied, of }: { studied: Studied; of: Sections }) {
   const theme = useTheme();
   const view = ladderView(studied);
   const muted = { color: theme.colors.onSurfaceVariant };
   return (
-    <>
-      <Heading title={LADDER_TITLE} count={view.count} aside={view.aside} />
+    <PageSection of={of} id="ladder" title={LADDER_TITLE} count={view.count} aside={view.aside} body="bare">
       {view.rows.length > 0 || view.gaps.length > 0 ? (
         <PickPanel>
           {[
@@ -223,14 +250,20 @@ function Ladder({ studied }: { studied: Studied }) {
           ]}
         </PickPanel>
       ) : null}
-    </>
+    </PageSection>
   );
 }
 
-function Probes({ studied }: { studied: Studied }) {
+function Probes({ studied, of }: { studied: Studied; of: Sections }) {
   return (
-    <>
-      <Heading title={PROBES_TITLE} count={studied.probes.length} aside={PROBES_ASIDE} />
+    <PageSection
+      of={of}
+      id="probes"
+      title={PROBES_TITLE}
+      count={studied.probes.length}
+      aside={PROBES_ASIDE}
+      body="bare"
+    >
       <PickPanel>
         {studied.probes.map((one) => (
           <PickRow
@@ -242,7 +275,7 @@ function Probes({ studied }: { studied: Studied }) {
           />
         ))}
       </PickPanel>
-    </>
+    </PageSection>
   );
 }
 

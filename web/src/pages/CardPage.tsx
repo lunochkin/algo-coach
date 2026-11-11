@@ -10,7 +10,7 @@ import {
   runStartLabel,
   runStartRefused,
 } from '@algo-coach/core'
-import { type ReactNode, useState } from 'react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { api, type Studied } from '@/api/client'
@@ -20,15 +20,14 @@ import { Markdown } from '@/components/Markdown'
 import { PageHeader } from '@/components/PageHeader'
 import { PickList, PickRow } from '@/components/PickRow'
 import { Panel, Stat, Stats } from '@/components/Panel'
+import { PageSection as Section } from '@/components/PageSection'
 import { SectionBar } from '@/components/SectionBar'
-import { SectionHeading } from '@/components/SectionHeading'
 import { TemplatePanel } from '@/components/TemplatePanel'
 import { ProgressBar } from '@/components/ProgressBar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { lastAt } from '@/lib/format'
-import { type Item, useCurrent } from '@/lib/sections'
-import { cn } from '@/lib/utils'
+import { type Item, useSections } from '@/lib/sections'
 
 export function CardPage() {
   const { slug = '' } = useParams()
@@ -38,9 +37,6 @@ export function CardPage() {
   )
   const [starting, setStarting] = useState(false)
   const [refused, setRefused] = useState<string | null>(null)
-  // a section the reader closed, by id. Nothing is closed until they close
-  // it, and a reload opens every one again
-  const [closed, setClosed] = useState<string[]>([])
   const run = studied.data?.run ?? null
   const data = studied.data
   const items: Item[] = [
@@ -50,18 +46,7 @@ export function CardPage() {
     ...(data && data.probes.length > 0 ? [{ id: 'probes', label: 'Probes' }] : []),
     { id: 'templates', label: 'Templates' },
   ]
-  const current = useCurrent(items.map((item) => item.id))
-
-  function toggle(id: string) {
-    setClosed(closed.includes(id) ? closed.filter((one) => one !== id) : [...closed, id])
-  }
-
-  // a jump opens the section first: scrolling to a closed one lands on its
-  // heading with nothing under it
-  function jump(id: string) {
-    setClosed(closed.filter((one) => one !== id))
-    requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }))
-  }
+  const { current, closed, toggle, jump } = useSections(items)
 
   // the ladder is measured from the start, so the press is what opens a run
   async function study() {
@@ -112,33 +97,28 @@ export function CardPage() {
               <Section
                 id="trigger"
                 title="When to reach for it"
-                closed={closed.includes('trigger')}
+                closed={closed('trigger')}
                 onToggle={toggle}
               >
                 {/* authored as markdown, as the brief and the notes are */}
                 <Markdown>{studied.card.trigger}</Markdown>
               </Section>
 
-              <Section
-                id="brief"
-                title="The brief"
-                closed={closed.includes('brief')}
-                onToggle={toggle}
-              >
+              <Section id="brief" title="The brief" closed={closed('brief')} onToggle={toggle}>
                 <Markdown>{studied.card.brief}</Markdown>
               </Section>
 
               <LadderView
                 studied={studied}
                 slug={slug}
-                closed={closed.includes('ladder')}
+                closed={closed('ladder')}
                 onToggle={toggle}
               />
               {studied.probes.length > 0 && (
                 <ProbesView
                   studied={studied}
                   slug={slug}
-                  closed={closed.includes('probes')}
+                  closed={closed('probes')}
                   onToggle={toggle}
                 />
               )}
@@ -148,7 +128,7 @@ export function CardPage() {
                 title="Templates"
                 count={studied.card.templates.length}
                 body="bare"
-                closed={closed.includes('templates')}
+                closed={closed('templates')}
                 onToggle={toggle}
               >
                 <div className="space-y-stack">
@@ -346,56 +326,5 @@ function ProbesView({
         ))}
       </PickList>
     </Section>
-  )
-}
-
-// the heading is the press that closes its own section, and the bar above
-// reaches every one of them by id
-function Section({
-  id,
-  title,
-  count,
-  aside,
-  body = 'prose',
-  closed,
-  onToggle,
-  children,
-}: {
-  id: string
-  title: string
-  count?: number
-  aside?: string | null
-  // the panel the body sits in: prose padded, rows edge to edge, or none
-  // where the body brings panels of its own
-  body?: 'prose' | 'rows' | 'bare'
-  closed: boolean
-  onToggle: (id: string) => void
-  children: ReactNode
-}) {
-  return (
-    // a heading over a bordered panel, as every page's sections read: a brief
-    // carrying headings of its own then reads inside one of them
-    <section id={id} className="scroll-mt-16 space-y-stack">
-      <SectionHeading
-        title={title}
-        count={count}
-        aside={aside}
-        closed={closed}
-        onToggle={() => onToggle(id)}
-      />
-      {!closed &&
-        (body === 'bare' ? (
-          children
-        ) : (
-          <div
-            className={cn(
-              'rounded-xl border bg-card',
-              body === 'prose' ? 'px-4 py-3' : 'overflow-hidden',
-            )}
-          >
-            {children}
-          </div>
-        ))}
-    </section>
   )
 }

@@ -260,7 +260,7 @@ clients.
 - [x] Draw every header outside the four readings, and route every page's
       loading, failed and empty through the one component. The queue and
       the exam build their own header and skip it
-- [ ] Add the section bar and collapsing headings to the long pages: the
+- [x] Add the section bar and collapsing headings to the long pages: the
       module, a lesson, the lessons and the certifications
 - [ ] Hold each page's act as one primary press, in the bottom bar on the
       phone, and turn the phone's dialogs into bottom sheets
