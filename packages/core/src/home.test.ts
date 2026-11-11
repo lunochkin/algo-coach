@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   Board,
   continueCounts,
+  continueOffered,
   continuePlan,
   focusView,
   learnerCatalog,
@@ -145,5 +146,14 @@ describe('the knowledge home', () => {
   it("raises the day's limit before it opens the queue, and clears a focus in place", () => {
     expect(continueAct('raise')).toEqual({ raise: true, clearFocus: false, open: 'queue' });
     expect(continueAct('clear-focus')).toEqual({ raise: false, clearFocus: true, open: null });
+  });
+});
+
+describe('when Continue is offered', () => {
+  it('waits for the counts, and offers an empty plan so the press can say why', () => {
+    expect(continueOffered(null)).toBe(false);
+    expect(continueOffered(undefined)).toBe(false);
+    const counts = { reviews: 0, learning: 0, newLeft: 0, outside: 0, empty: true, blocked: false };
+    expect(continueOffered(counts)).toBe(true);
   });
 });

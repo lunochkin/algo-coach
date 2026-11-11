@@ -12,6 +12,7 @@ import {
   MODULES_HEADING,
   MODULES_OF,
   NO_MODULES,
+  KNOWLEDGE_NOTE,
   SYNC_NOW,
   reorderLabel,
   SECTION_KNOWLEDGE,
@@ -19,7 +20,7 @@ import {
   knowledgeHome,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
-import { fromCopy, Loaded, styles, SyncBanner, SyncLine } from '@/ui/common';
+import { fromCopy, HeaderNote, Loaded, styles, SyncBanner, SyncLine } from '@/ui/common';
 import { ContinueBar, ContinueNotice, useContinue } from '@/ui/continue';
 import { FocusCard } from '@/ui/focuscard';
 import { AccountMenu } from '@/ui/account';
@@ -51,12 +52,14 @@ export default function Home() {
     );
   };
 
-  // a snapshot holding no module reads as empty; the banner above names a failed sync
-  const body = !st.catalog ? (
-    <Loaded of={MODULES_OF} state={fromCopy(st, st.ready ? [] : null)} blank={NO_MODULES}>
-      {() => null}
-    </Loaded>
-  ) : null;
+  // a snapshot holding no module reads as empty, as on the web; the banner
+  // above names a failed sync
+  const body =
+    !st.catalog || rows.length === 0 ? (
+      <Loaded of={MODULES_OF} state={fromCopy(st, st.ready ? [] : null)} blank={NO_MODULES}>
+        {() => null}
+      </Loaded>
+    ) : null;
   const header = (
     <View style={{ gap: 12, marginBottom: 12 }}>
       <SyncBanner sync={st.sync} />
@@ -117,6 +120,7 @@ export default function Home() {
         <Appbar.Content title={SECTION_KNOWLEDGE} />
         <AccountMenu />
       </Appbar.Header>
+      <HeaderNote lines={[KNOWLEDGE_NOTE]} />
       <ReorderableList
         refreshControl={pull}
         data={rows}

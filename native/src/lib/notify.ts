@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 
-import { earliestReview, nextReminderAt, reviewCount, type Board } from '@algo-coach/core';
+import { earliestReview, nextReminderAt, REMINDER_CHANNEL, reviewCount, type Board } from '@algo-coach/core';
 
 import { getMeta, setMeta } from './db';
 import { APP_NAME } from './name';
@@ -9,7 +9,7 @@ const CHANNEL = 'reminders';
 
 async function permitted(): Promise<boolean> {
   await Notifications.setNotificationChannelAsync(CHANNEL, {
-    name: 'Review reminders',
+    name: REMINDER_CHANNEL,
     importance: Notifications.AndroidImportance.DEFAULT,
   });
   const cur = await Notifications.getPermissionsAsync();

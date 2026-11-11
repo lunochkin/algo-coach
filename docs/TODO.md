@@ -384,19 +384,19 @@ both. These items remove what still behaves or draws two ways.
       from Problems, and the phone's "Back to the board" goes elsewhere
 - [x] Draw a page whose cards request failed without its cards on the phone,
       as the web does. The phone fails the whole page and hides the statement
-- [ ] List both recall hints on the phone, the taken ones struck, as the web
+- [x] List both recall hints on the phone, the taken ones struck, as the web
       lists them. The phone shows only the next hint's press
-- [ ] Show the empty knowledge home's line on the phone, and the notes the
+- [x] Show the empty knowledge home's line on the phone, and the notes the
       web's knowledge home and settings carry. The phone draws nothing there
-- [ ] Open an answer's lesson link at its section on the web, as the phone
+- [x] Open an answer's lesson link at its section on the web, as the phone
       does. The web drops the anchor
-- [ ] Decide in core when Continue is offered, and put both clients on it.
+- [x] Decide in core when Continue is offered, and put both clients on it.
       The web waits for the counts, and the phone only for the catalog
-- [ ] Clear the start sheet's toggles and the claim's confidence the same
+- [x] Clear the start sheet's toggles and the claim's confidence the same
       way on both clients. Each client lets a different one be cleared
 - [x] Keep the editor editable or read-only after a sitting ends the same
       way on both clients. The phone hides its keys, and the web stays open
-- [ ] Move the phone's two sign-in errors and its notification channel's
+- [x] Move the phone's two sign-in errors and its notification channel's
       name into core, the last words a client still types
 - [ ] Add spacing, type and radius tokens to the phone, and replace the
       numbers in `native/src` styles with them. Some 150 are typed inline,

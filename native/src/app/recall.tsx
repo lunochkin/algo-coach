@@ -7,6 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BACK_TO_CARD,
   hintTaken,
+  HINT_NAMES,
+  HINTS,
   nextHint,
   RECALL_ANOTHER,
   RECALL_FORM,
@@ -153,6 +155,22 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
         ))}
       </ScrollView>
       <CodeEditor ref={editor} onNames={setNames} initial={code.current} onChange={(typed) => (code.current = typed)} />
+      {/* the ladder, as on the web, so the reader sees what a hint costs
+          before taking it: each one answers more of the question than the last */}
+      <View style={[styles.row, { paddingHorizontal: 8, paddingTop: 6, gap: 8 }]}>
+        {HINTS.map((one) => (
+          <Text
+            key={one}
+            variant="bodySmall"
+            style={{
+              color: theme.colors.onSurfaceVariant,
+              textDecorationLine: taken.some((each) => each.hint === one) ? 'line-through' : 'none',
+            }}
+          >
+            {HINT_NAMES[one]}
+          </Text>
+        ))}
+      </View>
       <View style={[styles.row, { paddingHorizontal: 8, paddingVertical: 6, gap: 8 }]}>
         <Button mode="contained" onPress={run} disabled={running}>
           {runLabel(running)}

@@ -6,6 +6,7 @@ import {
   CLEAR_FOCUS,
   CONTINUE,
   continueCounts,
+  continueOffered,
   continueLine,
   continuePlan,
   DUE_NOW,
@@ -167,7 +168,10 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
         ))}
       <div className="space-y-1">
         <div className="flex gap-stack">
-          <Button disabled={!counts} onClick={() => counts && start(counts)}>
+          <Button
+            disabled={!continueOffered(counts)}
+            onClick={() => continueOffered(counts) && start(counts)}
+          >
             {CONTINUE}
           </Button>
           {/* the second way in, at a lower weight, on the knowledge home: `pages.md`, The knowledge pages */}

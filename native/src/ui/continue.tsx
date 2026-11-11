@@ -5,6 +5,7 @@ import { Button, Snackbar, Text, TouchableRipple, useTheme } from 'react-native-
 
 import {
   CONTINUE,
+  continueOffered,
   continueCounts,
   continueLine,
   continuePlan,
@@ -64,7 +65,7 @@ export function useContinue() {
     setNotice('');
     setAction(null);
   };
-  return { cont, counts, focus, start, reviewOutside, notice, action, clear, ready: !!st.catalog };
+  return { cont, counts, focus, start, reviewOutside, notice, action, clear, ready: continueOffered(counts) };
 }
 
 export type Next = ReturnType<typeof useContinue>;

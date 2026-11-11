@@ -200,7 +200,7 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
           head={questionHead(course, catalog.rules, current.q, current.tag, current.early)}
           onAnswered={onAnswered}
           onNext={next}
-          onLesson={(course, slug) => setLessonOpen({ course, slug })}
+          onLesson={(course, slug, anchor) => setLessonOpen({ course, slug, anchor })}
         />
       ) : (
         <Summary

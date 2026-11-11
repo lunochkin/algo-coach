@@ -90,6 +90,10 @@ export interface ContinueCounts extends QueueCounts {
   blocked: boolean; // the day's limit alone empties the queue
 }
 
+// Continue is offered once a plan is counted: a press before then would start
+// nothing, and an empty plan is pressed to learn why nothing is ready
+export const continueOffered = (counts: ContinueCounts | null | undefined): counts is ContinueCounts => !!counts;
+
 export function continueCounts(p: ContinuePlan, focus: Focus | null, now: number): ContinueCounts {
   return {
     reviews: p.queue.reviews(p.b, now).length,

@@ -74,7 +74,7 @@ export function LessonBody(props: {
   x: Lesson
   body: string
   read: boolean
-  onLesson?: (slug: string) => void
+  onLesson?: (slug: string, part?: string) => void
   // on the lesson's own page its parts read as sections; over a queue the
   // text reads whole
   sectioned?: boolean

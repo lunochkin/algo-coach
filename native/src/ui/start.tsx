@@ -74,11 +74,12 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
       <View style={{ gap: 8 }}>
         <Heading sub title={START_LEVEL} />
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
+          {/* one choice of several, All among them: pressing the chosen one keeps it, as on the web */}
           <Toggle on={level === null} onPress={() => setLevel(null)}>
             {START_ALL}
           </Toggle>
           {levels(st.catalog!.rules).map((l) => (
-            <Toggle key={l} on={level === l} onPress={() => setLevel(level === l ? null : l)}>
+            <Toggle key={l} on={level === l} onPress={() => setLevel(l)}>
               {levelName(st.catalog!.rules, l)}
             </Toggle>
           ))}
@@ -91,7 +92,7 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
                 {START_ALL}
               </Toggle>
               {c.kinds.map((k) => (
-                <Toggle key={k} on={kind === k} onPress={() => setKind(kind === k ? null : k)}>
+                <Toggle key={k} on={kind === k} onPress={() => setKind(k)}>
                   {k}
                 </Toggle>
               ))}

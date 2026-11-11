@@ -151,7 +151,8 @@ function ClaimForm({ attempt, modes, position, techniques, drilled, onClaimed }:
           size="sm"
           className="w-auto flex-wrap"
           value={confidence ?? ''}
-          onValueChange={(value) => setConfidence(value ? (value as Confidence) : null)}
+          // a confidence is required, so pressing the chosen one keeps it, as on the phone
+          onValueChange={(value) => value && setConfidence(value as Confidence)}
         >
           {CONFIDENCES.map((one) => (
             <ToggleGroupItem key={one} value={one}>

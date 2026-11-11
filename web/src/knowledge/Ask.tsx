@@ -51,7 +51,7 @@ type Props = {
   // an exam shows no verdict until its end: the answer moves on at once
   exam?: { last: boolean }
   // opens an answer's lesson over the queue, which following its link would end
-  onLesson?: (course: string, slug: string) => void
+  onLesson?: (course: string, slug: string, anchor: string) => void
 }
 
 // one question, one act at a time: the answer, then the verdict and Next.
@@ -275,7 +275,7 @@ export function Details({
 }: {
   r: Result
   course: Course | undefined
-  onLesson?: (course: string, slug: string) => void
+  onLesson?: (course: string, slug: string, anchor: string) => void
 }) {
   const answer = yourAnswer(r)
   const sections = detailSections(r.q)
@@ -334,7 +334,7 @@ export function Details({
           {onLesson ? (
             <button
               type="button"
-              onClick={() => onLesson(x.course, x.slug)}
+              onClick={() => onLesson(x.course, x.slug, x.anchor)}
               className="font-medium underline-offset-4 hover:underline"
             >
               {x.label}

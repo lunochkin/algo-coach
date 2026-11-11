@@ -15,6 +15,7 @@ import {
   SAVED,
   SETTING_LABEL,
   SETTINGS,
+  SETTINGS_NOTE,
   settingRange,
   SIGN_OUT,
   STUDY,
@@ -40,7 +41,7 @@ import {
 import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
 import { useMe } from '@/ui/account';
-import { BottomBar, styles, SyncLine } from '@/ui/common';
+import { BottomBar, HeaderNote, styles, SyncLine } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 import { useSignOut } from '@/ui/signout';
 
@@ -127,6 +128,7 @@ export default function SettingsScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={SETTINGS} />
       </Appbar.Header>
+      <HeaderNote lines={[SETTINGS_NOTE]} />
       <KeyboardAwareScrollView
         // a focused field stays above the bar as well as the keyboard
         bottomOffset={120}

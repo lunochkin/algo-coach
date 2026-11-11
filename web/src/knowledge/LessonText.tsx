@@ -20,7 +20,7 @@ export function LessonText({
 }: {
   module: string
   text: string
-  onLesson?: (slug: string) => void
+  onLesson?: (slug: string, part: string) => void
 }) {
   return (
     <div className="prose max-w-none">
@@ -39,7 +39,7 @@ export function LessonText({
                   href={lessonPath(module, slug, part)}
                   onClick={(e) => {
                     e.preventDefault()
-                    onLesson(slug)
+                    onLesson(slug, part)
                   }}
                 >
                   {children}

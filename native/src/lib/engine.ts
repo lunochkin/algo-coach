@@ -1,5 +1,5 @@
 /** The engine's HTTP API, as the app calls it. */
-import { engineClient, type EngineClient } from '@algo-coach/core';
+import { engineClient, type EngineClient, NO_ENGINE_ERROR, SIGNED_OUT_ERROR } from '@algo-coach/core';
 
 export { described } from '@algo-coach/core';
 
@@ -26,7 +26,7 @@ function detailOf(body: string): string | null {
   return null;
 }
 
-const signedOut = () => new SignedOut('signed out: sign in again in Settings');
+const signedOut = () => new SignedOut(SIGNED_OUT_ERROR);
 
 async function refused(path: string, response: Response): Promise<never> {
   if (response.status === 401) throw signedOut();
@@ -34,7 +34,7 @@ async function refused(path: string, response: Response): Promise<never> {
   throw new EngineError(response.status, `${path} ${response.status}: ${body}`, detailOf(body));
 }
 
-const noOrigin = () => new EngineError(0, 'no engine address: set one in Settings');
+const noOrigin = () => new EngineError(0, NO_ENGINE_ERROR);
 
 /** The typed client: a refusal throws, `SignedOut` on a 401, and a 304 is answered. */
 export function engine(origin: string, token?: string | null): EngineClient {
