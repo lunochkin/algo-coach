@@ -16,6 +16,8 @@ import {
   SITTING_END,
   SITTING_ENDED,
   sittingBack,
+  problemFrom,
+  type ProblemFrom,
   sittingRefused,
   type Draft,
   visibilityMove,
@@ -40,7 +42,8 @@ import { getToken } from '@/lib/settings';
 import { autoStarts, draftOf, keepDraft, pressed } from '@/lib/sitting';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
-import { ErrorLine, Loaded, styles, tones } from '@/ui/common';
+import { ErrorLine, Loaded, styles } from '@/ui/common';
+import { palette } from '@/ui/tokens';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
 import { Sheet } from '@/ui/sheet';
 import type { Key } from '@/lib/keys';
@@ -72,10 +75,13 @@ export default function ProblemScreen() {
     problem = '',
     technique,
     card,
-  } = useLocalSearchParams<{ problem: string; technique?: string; card?: string }>();
+    from: listing,
+  } = useLocalSearchParams<{ problem: string; technique?: string; card?: string; from?: string }>();
   const picked = useEngine('/api/problems/{problem_id}', { problem_id: problem });
   const listed = useEngine('/api/cards');
-  const error = picked.error ?? listed.error;
+  // the cards only add their links, so a failed list reads as none, as on the web
+  const error = picked.error;
+  const cardsIn = listed.data !== null || listed.error !== null;
   const [now] = useState(() => Date.now());
   const record = picked.data;
   const shown = record ? problemFacts(record, listed.data ?? [], technique ?? null, now) : null;
@@ -119,7 +125,7 @@ export default function ProblemScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={record?.title ?? PROBLEM_FALLBACK} />
       </Appbar.Header>
-      {error || !record || listed.data === null ? (
+      {error || !record || !cardsIn ? (
         <View style={styles.page}>
           <Loaded
             of={OF.problem}
@@ -144,6 +150,11 @@ export default function ProblemScreen() {
         <SittingOn
           problemId={problem}
           card={card ?? null}
+          from={problemFrom(
+            card ? { slug: card, title: listed.data?.find((one) => one.slug === card)?.title ?? null } : null,
+            technique ?? null,
+            listing === 'problems',
+          )}
           drilled={technique ?? null}
           facts={facts}
           bottom={insets.bottom}
@@ -156,12 +167,14 @@ export default function ProblemScreen() {
 function SittingOn({
   problemId,
   card,
+  from,
   drilled,
   facts,
   bottom,
 }: {
   problemId: string;
   card: string | null;
+  from: ProblemFrom;
   // the technique the claim answers for: the card's own, or the pick's
   drilled: string | null;
   facts: ReactNode;
@@ -341,7 +354,7 @@ function SittingOn({
         {clock.running ? (
           <View
             accessibilityLabel={CLOCK_RUNNING}
-            style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tones(theme.dark).done }}
+            style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: palette(theme.dark).running }}
           />
         ) : null}
         {moved ? <ElapsedClock elapsedSec={moved.elapsedSec} receivedAt={moved.at} running={clock.running} /> : null}
@@ -357,7 +370,7 @@ function SittingOn({
               {SITTING_ENDED}
             </Text>
             <Button mode="contained" compact onPress={() => router.back()}>
-              {sittingBack(card)}
+              {sittingBack(from)}
             </Button>
           </>
         ) : (

@@ -118,9 +118,14 @@ those steps at low fidelity.
   the board, so the section a page sits in cannot say where the user came from.
 - **The sitting names its way back as a press, running or ended.** Leaving a
   sitting's page costs nothing: the clock is the user's to run, and the
-  unsent code is kept. The press returns to the card the problem came from, or
-  to the board. An ended sitting stays on the page after the claim, and its
-  press is the page's next act.
+  unsent code is kept. The press returns to the page the problem came from:
+  the card, the technique, the listing or the board, and names that page. An
+  ended sitting stays on the page after the claim, and its press is the
+  page's next act.
+- **An ended sitting's code is read-only.** The code reads back as it was
+  submitted, and the next sitting on the problem opens on the signature, as
+  `flows.md` gives. A submission typed over the solve would be a solve read
+  rather than recalled.
 - **The login page and the privacy policy carry no navigation.** The two pages
   open without a session, and every section behind the menu answers 401 to a
   request carrying none. The policy names the login as its way back, since the
@@ -480,7 +485,7 @@ what it offers. The inventory is the list both clients build to.
   under one bar holding the clock, its press and End. The editor stays
   mounted under the statement, so a switch keeps what was typed. The first
   clock press or submission mints the sitting, named by the phone's device
-  name, and an ended sitting's press returns to the card or the board. The
+  name, and an ended sitting's press returns to the page the problem came from. The
   phone keeps a problem's unsent code and the clock preference in its own
   copy, as the browser keeps them, and signing out deletes the code with the
   rest of the copy. The app going to the background pauses a running clock,

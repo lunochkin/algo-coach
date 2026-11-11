@@ -98,9 +98,10 @@ export default function ProblemsScreen() {
                         onPress={() =>
                           router.push({
                             pathname: '/problem',
+                            // `from` names the listing, so the sitting's way back names it
                             params: view.drilled
-                              ? { problem: row.problem_id, technique: view.drilled }
-                              : { problem: row.problem_id },
+                              ? { problem: row.problem_id, technique: view.drilled, from: 'problems' }
+                              : { problem: row.problem_id, from: 'problems' },
                           })
                         }
                       />

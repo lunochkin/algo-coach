@@ -1,6 +1,6 @@
 import {
-  BACK_PROBLEMS,
-  BACK_BOARD,
+  backLabel,
+  problemFrom,
   PROBLEM_FALLBACK,
   OF,
   PROBLEM_RETIRED,
@@ -14,6 +14,7 @@ import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { ProblemFacts } from '@/components/ProblemFacts'
+import { fromPath } from '@/lib/paths'
 
 // the editor is the bulk of the bundle, and a retired problem needs none
 const SittingView = lazy(() =>
@@ -52,6 +53,11 @@ export function ProblemPage() {
 
   const served = picked.data !== undefined && !picked.data.retired
   const carded = slug === null || card.data !== undefined
+  const from = problemFrom(
+    slug === null ? null : { slug, title: card.data?.card.title ?? null },
+    technique,
+    listing,
+  )
   // the claim answers for the card's own technique where a card offered it
   if (served && carded)
     return (
@@ -59,6 +65,7 @@ export function ProblemPage() {
         problemId={problemId}
         drilled={card.data?.card.technique ?? technique}
         card={slug}
+        from={from}
       />
     )
 
@@ -67,18 +74,7 @@ export function ProblemPage() {
     // the loading header read in the reading column every other page reads in
     <section className="mx-auto max-w-reading space-y-section">
       <PageHeader
-        back={
-          slug !== null
-            ? {
-                to: `/cards/${encodeURIComponent(slug)}`,
-                label: card.data?.card.title ?? slug,
-              }
-            : listing
-              ? { to: '/problems', label: BACK_PROBLEMS }
-              : technique === null
-                ? { to: '/', label: BACK_BOARD }
-                : { to: `/techniques/${encodeURIComponent(technique)}`, label: technique }
-        }
+        back={{ to: fromPath(from), label: backLabel(from) }}
         title={picked.data?.title ?? PROBLEM_FALLBACK}
       />
       <Loaded of={OF.problem} state={picked}>

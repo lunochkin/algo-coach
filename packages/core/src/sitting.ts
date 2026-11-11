@@ -1,5 +1,6 @@
 import type { components } from './api/schema';
 import { failures, OUTCOME_LABELS, SEVEREST } from './recall';
+import { BACK_BOARD, BACK_PROBLEMS } from './words/pages';
 
 // a sitting, for every platform: `flows.md`, Drill loop, and `log.md`,
 // Sittings. Each platform keeps the draft and the clock preference in its own
@@ -188,8 +189,53 @@ export function submissionView(submitted: Submitted): SubmissionView {
   };
 }
 
+/** The page a problem was opened from: the way back from it returns there, `pages.md` Sections. */
+export type ProblemFrom =
+  | { kind: 'card'; slug: string; title: string | null }
+  | { kind: 'listing' }
+  | { kind: 'technique'; technique: string }
+  | { kind: 'board' };
+
+// a card names the page before a listing filtered to one tag does, and that
+// tag is a technique the pick did not come from
+export function problemFrom(
+  card: { slug: string; title: string | null } | null,
+  technique: string | null,
+  listing: boolean,
+): ProblemFrom {
+  if (card !== null) return { kind: 'card', ...card };
+  if (listing) return { kind: 'listing' };
+  if (technique !== null) return { kind: 'technique', technique };
+  return { kind: 'board' };
+}
+
+/** The page's header link back, named as the page it returns to. */
+export function backLabel(from: ProblemFrom): string {
+  switch (from.kind) {
+    case 'card':
+      return from.title ?? from.slug;
+    case 'listing':
+      return BACK_PROBLEMS;
+    case 'technique':
+      return from.technique;
+    case 'board':
+      return BACK_BOARD;
+  }
+}
+
 // the sitting's words, each said on every platform
-export const sittingBack = (card: string | null) => (card === null ? 'Back to the board' : 'Back to the card');
+export function sittingBack(from: ProblemFrom): string {
+  switch (from.kind) {
+    case 'card':
+      return 'Back to the card';
+    case 'listing':
+      return 'Back to the problems';
+    case 'technique':
+      return `Back to ${from.technique}`;
+    case 'board':
+      return 'Back to the board';
+  }
+}
 export const CLOCK_RUNNING = 'The clock is running';
 export const CLOCK_PAUSED = 'paused';
 export const SITTING_ENDED = 'This sitting has ended';

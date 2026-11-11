@@ -55,7 +55,9 @@ export default function PracticeScreen() {
   const board = useEngine('/api/board');
   const cards = useEngine('/api/cards');
   const pull = usePullSync(board.reload, cards.reload);
-  const error = board.error ?? cards.error;
+  // the cards in progress only add to the board, so a failed list reads as none, as on the web
+  const error = board.error;
+  const cardsIn = cards.data !== null || cards.error !== null;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -100,7 +102,7 @@ export default function PracticeScreen() {
         <Loaded
           of={OF.board}
           state={{
-            data: board.data && cards.data ? { board: board.data, cards: cards.data } : null,
+            data: board.data && cardsIn ? { board: board.data, cards: cards.data ?? [] } : null,
             error,
             reload: () => {
               board.reload();

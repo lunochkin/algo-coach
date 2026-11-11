@@ -31,7 +31,9 @@ export default function TechniqueScreen() {
   const taught = useEngine('/api/techniques/{technique}/cards', { technique });
   const listed = useEngine('/api/cards');
   const pull = usePullSync(problems.reload, taught.reload, listed.reload);
-  const error = problems.error ?? taught.error ?? listed.error;
+  // the cards list only fills the cards' rows, so a failed list reads as none, as on the web
+  const error = problems.error ?? taught.error;
+  const listedIn = listed.data !== null || listed.error !== null;
   const [now] = useState(() => Date.now());
 
   const cards = techniqueCards(listed.data ?? [], taught.data ?? []);
@@ -46,7 +48,7 @@ export default function TechniqueScreen() {
         <Loaded
           of={OF.technique}
           state={{
-            data: problems.data && taught.data && listed.data ? problems.data : null,
+            data: problems.data && taught.data && listedIn ? problems.data : null,
             error,
             reload: () => {
               problems.reload();

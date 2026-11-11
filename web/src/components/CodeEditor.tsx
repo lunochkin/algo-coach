@@ -1,6 +1,6 @@
 import { pythonEditing } from '@algo-coach/editor'
 import { defaultKeymap, historyKeymap, indentWithTab } from '@codemirror/commands'
-import { EditorState } from '@codemirror/state'
+import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
 import { type Ref, useEffect, useImperativeHandle, useRef } from 'react'
 
@@ -12,10 +12,14 @@ type Props = {
   onChange: (code: string) => void
   onSubmit: () => void
   handle?: Ref<EditorHandle>
+  readOnly?: boolean
 }
 
+const locked = (readOnly: boolean) => [EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)]
+
 // the shared Python setup, with the web's own keymap and look
-export function CodeEditor({ initial, onChange, onSubmit, handle }: Props) {
+export function CodeEditor({ initial, onChange, onSubmit, handle, readOnly = false }: Props) {
+  const lock = useRef(new Compartment())
   const host = useRef<HTMLDivElement>(null)
   const live = useRef<EditorView | null>(null)
   useImperativeHandle(handle, () => ({
@@ -39,6 +43,7 @@ export function CodeEditor({ initial, onChange, onSubmit, handle }: Props) {
         doc: initial,
         extensions: [
           ...pythonEditing(),
+          lock.current.of(locked(readOnly)),
           // ahead of the default keymap, where Mod-Enter inserts a blank line
           keymap.of([
             { key: 'Mod-Enter', run: () => (submitted.current(), true) },
@@ -91,6 +96,11 @@ export function CodeEditor({ initial, onChange, onSubmit, handle }: Props) {
     // pushed into a live editor, which would move the cursor
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // switched on the live editor, which keeps its cursor and scroll
+  useEffect(() => {
+    live.current?.dispatch({ effects: lock.current.reconfigure(locked(readOnly)) })
+  }, [readOnly])
 
   return <div ref={host} className="h-full min-h-96 overflow-hidden rounded-xl border" />
 }

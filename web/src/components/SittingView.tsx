@@ -12,6 +12,7 @@ import {
   SITTING_END,
   SITTING_ENDED,
   sittingBack,
+  type ProblemFrom,
   sittingRefused,
   submitLabel,
   visibilityMove,
@@ -62,6 +63,7 @@ import { Verdict } from '@/components/Verdict'
 import { autoStarts, pressed } from '@/lib/clock'
 import { DEVICE } from '@/knowledge/copy'
 import { draftOf, keepDraft } from '@/lib/draft'
+import { fromPath } from '@/lib/paths'
 import { useKnowledge } from '@/knowledge/context'
 
 type Props = {
@@ -69,6 +71,7 @@ type Props = {
   // the technique the claim answers for: the card's own, or the pick's
   drilled: string | null
   card: string | null
+  from: ProblemFrom
 }
 
 // the problem's page once its statement is served. No sitting exists until the
@@ -77,17 +80,14 @@ type Props = {
 // the platform's monotonic clock, which a reading's arrival is stamped with
 const now = () => performance.now()
 
-export function SittingView({ problemId, drilled, card }: Props) {
+export function SittingView({ problemId, drilled, card, from }: Props) {
   const [search, setSearch] = useSearchParams()
   const { user } = useKnowledge()
   // read once: the page names the sitting it minted without reading it again
   const [named] = useState(() => search.get('sitting'))
-  // the way back: the card the problem came from, where the next rung is, or
-  // the board. An ended sitting stays on the page, so the solve reads back
-  const back = {
-    to: card === null ? '/' : `/cards/${encodeURIComponent(card)}`,
-    label: sittingBack(card),
-  }
+  // the way back: the page the problem came from. An ended sitting stays on
+  // the page, so the solve reads back
+  const back = { to: fromPath(from), label: sittingBack(from) }
   // the claim is asked once the sitting ends, and answering it closes the
   // dialog over the page rather than leaving it
   const [answered, setAnswered] = useState(false)
@@ -253,7 +253,9 @@ export function SittingView({ problemId, drilled, card }: Props) {
   }
 
   async function submit() {
-    if (running) return
+    // the shortcut reaches here with the press disabled: an ended sitting
+    // takes no submission, as on the phone
+    if (running || ended) return
     setRunning(true)
     setRefused(null)
     const sent = await submitToSitting(
@@ -379,6 +381,9 @@ export function SittingView({ problemId, drilled, card }: Props) {
               }}
               onSubmit={submit}
               handle={editor}
+              // a solve ends the sitting, and its code is read back, not
+              // carried into a new sitting: `flows.md`, Drill loop
+              readOnly={ended}
             />
           </div>
           <div className="flex flex-wrap items-center gap-stack">

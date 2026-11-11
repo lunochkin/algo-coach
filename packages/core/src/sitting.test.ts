@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  backLabel,
   caseLabel,
   clockState,
   cutValue,
@@ -11,7 +12,9 @@ import {
   editorOpening,
   opening,
   preferenceAfter,
+  problemFrom,
   shownSeconds,
+  sittingBack,
   submissionView,
   VALUE_SHOWN,
   visibilityMove,
@@ -135,5 +138,23 @@ describe('a submission read back', () => {
   it("names a case's mark by its outcome, and its time where one was measured", () => {
     expect(caseLabel(0, 'passed', 12)).toBe('case 1: passed, 12 ms');
     expect(caseLabel(1, 'crashed', null)).toBe('case 2: crashed');
+  });
+});
+
+describe('the way back from a problem', () => {
+  it('names the page the problem came from, a card first', () => {
+    const card = { slug: 'two-pointers', title: 'Two pointers' };
+    expect(problemFrom(card, 'two-pointers', false)).toEqual({ kind: 'card', ...card });
+    expect(problemFrom(null, 'heap', true)).toEqual({ kind: 'listing' });
+    expect(problemFrom(null, 'heap', false)).toEqual({ kind: 'technique', technique: 'heap' });
+    expect(problemFrom(null, null, false)).toEqual({ kind: 'board' });
+  });
+
+  it('labels the header link and the sitting press by that page', () => {
+    const from = problemFrom(null, 'heap', false);
+    expect(backLabel(from)).toBe('heap');
+    expect(sittingBack(from)).toBe('Back to heap');
+    expect(sittingBack(problemFrom(null, null, true))).toBe('Back to the problems');
+    expect(backLabel(problemFrom({ slug: 'dp', title: null }, null, false))).toBe('dp');
   });
 });
