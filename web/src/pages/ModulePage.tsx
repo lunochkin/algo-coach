@@ -35,6 +35,9 @@ import {
   subsByDepth,
   subTitle,
   newRecord,
+  BACK_KNOWLEDGE,
+  OF,
+  SUBTOPIC_COLUMN,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -106,9 +109,9 @@ export function ModulePage() {
 
   return (
     <section className="space-y-section">
-      <PageHeader back={{ to: HOME, label: 'Knowledge' }} title={page?.c.title ?? module} />
+      <PageHeader back={{ to: HOME, label: BACK_KNOWLEDGE }} title={page?.c.title ?? module} />
       <Loaded
-        of="the module"
+        of={OF.module}
         state={loadedFrom(k, page === undefined ? undefined : { page })}
         blank={MODULE_MISSING}
         blankWhen={(x) => x.page === null}
@@ -252,7 +255,7 @@ export function ModulePage() {
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="text-meta text-muted-foreground">
-                            <th className="px-4 py-2 text-left font-normal">Subtopic</th>
+                            <th className="px-4 py-2 text-left font-normal">{SUBTOPIC_COLUMN}</th>
                             {lv.map((level) => (
                               <th key={level} className="px-3 py-2 text-right font-normal">
                                 {levelName(b.rules, level, true)}

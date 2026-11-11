@@ -20,6 +20,7 @@ import {
   REVEAL_FORM,
   runLabel,
   takeHint,
+  OF,
 } from '@algo-coach/core'
 import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -67,10 +68,10 @@ export function DrawnRecallPage() {
   return (
     <article className="space-y-section">
       <PageHeader
-        back={{ to: `/cards/${encodeURIComponent(slug)}`, label: 'the card' }}
+        back={{ to: `/cards/${encodeURIComponent(slug)}`, label: OF.card }}
         title={RECALL_TITLE}
       />
-      <Loaded of="the form to recall" state={prompt}>
+      <Loaded of={OF.recall} state={prompt}>
         {() => null}
       </Loaded>
     </article>
@@ -95,7 +96,7 @@ export function RecallPage() {
   return (
     <article className="space-y-section">
       <PageHeader
-        back={{ to: `/cards/${encodeURIComponent(slug)}`, label: 'the card' }}
+        back={{ to: `/cards/${encodeURIComponent(slug)}`, label: OF.card }}
         title={
           drawn ? (
             RECALL_TITLE
@@ -112,7 +113,7 @@ export function RecallPage() {
         }
         note={recallNote(drawn)}
       />
-      <Loaded of="the form to recall" state={prompt}>
+      <Loaded of={OF.recall} state={prompt}>
         {(prompt) => (
           <>
             {/* withheld while the trainer drew the form: a marked title names

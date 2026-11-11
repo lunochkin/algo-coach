@@ -1,4 +1,10 @@
-import { RECALL_THIS, revealLabel } from '@algo-coach/core'
+import {
+  RECALL_THIS,
+  revealLabel,
+  CARD_OPTIONAL,
+  FORM_UNCHECKED,
+  HIDE_FORM,
+} from '@algo-coach/core'
 import { useState } from 'react'
 
 import { Link } from 'react-router'
@@ -34,7 +40,7 @@ export function TemplatePanel({
           identity, and the body carries the form and the acts on it */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b bg-card px-4 py-3">
         <h3 className="font-medium">{template.title}</h3>
-        {template.optional && <Badge variant="secondary">optional</Badge>}
+        {template.optional && <Badge variant="secondary">{CARD_OPTIONAL}</Badge>}
         {template.kind === 'procedure' && <Badge variant="outline">procedure</Badge>}
         <span className="ml-auto text-meta text-muted-foreground">
           {recallable ? recallLine(recalled) : 'No case checks this form'}
@@ -70,9 +76,7 @@ export function TemplatePanel({
               </Link>
             </Button>
           ) : (
-            <span className="text-meta text-muted-foreground">
-              Read here and never recalled, since no case checks it.
-            </span>
+            <span className="text-meta text-muted-foreground">{FORM_UNCHECKED}</span>
           )}
           {revealed && (
             <Button
@@ -81,7 +85,7 @@ export function TemplatePanel({
               className="ml-auto"
               onClick={() => setRevealed(false)}
             >
-              Hide the form
+              {HIDE_FORM}
             </Button>
           )}
         </div>

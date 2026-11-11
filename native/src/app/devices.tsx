@@ -13,6 +13,7 @@ import {
   SIGNED_IN_DEVICES,
   thisDevice,
   type components,
+  OF,
 } from '@algo-coach/core';
 import { described, engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -75,7 +76,7 @@ export default function DevicesScreen() {
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
           {REVOKED_NOTE}
         </Text>
-        <Loaded of="the signed-in devices" state={{ data: devices, error, reload: () => void load() }}>
+        <Loaded of={OF.devices} state={{ data: devices, error, reload: () => void load() }}>
           {(listed) => (
             <PickPanel>
               {listed.map((device) => (

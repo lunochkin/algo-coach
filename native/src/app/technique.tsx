@@ -4,7 +4,14 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { techniqueCards, techniqueStats } from '@algo-coach/core';
+import {
+  techniqueCards,
+  techniqueStats,
+  OF,
+  TECHNIQUE_CARDS,
+  TECHNIQUE_PROBLEMS,
+  TECHNIQUE_NONE,
+} from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { CardPanel } from '@/ui/cards';
 import { Loaded, styles } from '@/ui/common';
@@ -35,7 +42,7 @@ export default function TechniqueScreen() {
       </Appbar.Header>
       <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
         <Loaded
-          of="the technique"
+          of={OF.technique}
           state={{
             data: problems.data && taught.data && listed.data ? problems.data : null,
             error,
@@ -50,13 +57,13 @@ export default function TechniqueScreen() {
             <>
               {cards.length > 0 ? (
                 <>
-                  <Heading title="Cards" count={cards.length} />
+                  <Heading title={TECHNIQUE_CARDS} count={cards.length} />
                   <CardPanel technique={null} cards={cards} />
                 </>
               ) : null}
-              <Heading title="Problems" count={rows.length} />
+              <Heading title={TECHNIQUE_PROBLEMS} count={rows.length} />
               {rows.length === 0 ? (
-                <Text variant="bodyMedium">No served problem carries this technique.</Text>
+                <Text variant="bodyMedium">{TECHNIQUE_NONE}</Text>
               ) : (
                 <PickPanel>
                   {rows.map((row) => (

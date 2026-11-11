@@ -20,6 +20,9 @@ import {
   coverageShare,
   PRACTICE,
   practiceLevel,
+  BACK_KNOWLEDGE,
+  OF,
+  SCOPE_COLUMN,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -64,11 +67,11 @@ export function CertificationsPage() {
   return (
     <section className="space-y-section">
       <PageHeader
-        back={{ to: KNOWLEDGE, label: 'Knowledge' }}
+        back={{ to: KNOWLEDGE, label: BACK_KNOWLEDGE }}
         title={CERTS_TITLE}
         note={CERTS_NOTE}
       />
-      <Loaded of="the certifications" state={loadedFrom(k, modules)} blank={CERTS_NONE}>
+      <Loaded of={OF.certifications} state={loadedFrom(k, modules)} blank={CERTS_NONE}>
         {(modules) => (
           <>
             <SectionBar items={sections.items} current={sections.current} onJump={sections.jump} />
@@ -122,7 +125,7 @@ function Grid(props: {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-meta text-muted-foreground">
-              <th className="px-4 py-2 text-left font-normal">Scope</th>
+              <th className="px-4 py-2 text-left font-normal">{SCOPE_COLUMN}</th>
               {props.levels.map((l) => (
                 <th
                   key={l}

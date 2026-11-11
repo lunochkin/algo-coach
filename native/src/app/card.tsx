@@ -21,6 +21,11 @@ import {
   RUN_START_NOTE,
   runStartLabel,
   runStartRefused,
+  OF,
+  CARD_TRIGGER,
+  CARD_BRIEF,
+  CARD_TEMPLATES,
+  HIDE_FORM,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -51,11 +56,11 @@ export default function CardScreen() {
   const sections = useSections(
     studied.data
       ? [
-          { id: 'trigger', label: 'When to reach for it' },
-          { id: 'brief', label: 'The brief' },
+          { id: 'trigger', label: CARD_TRIGGER },
+          { id: 'brief', label: CARD_BRIEF },
           { id: 'ladder', label: LADDER_TITLE },
           ...(studied.data.probes.length ? [{ id: 'probes', label: PROBES_TITLE }] : []),
-          { id: 'templates', label: 'Templates' },
+          { id: 'templates', label: CARD_TEMPLATES },
         ]
       : [],
   );
@@ -77,13 +82,13 @@ export default function CardScreen() {
           { paddingBottom: insets.bottom + (studied.data && !studied.data.run ? 140 : 24) },
         ]}
       >
-        <Loaded of="the card" state={studied}>
+        <Loaded of={OF.card} state={studied}>
           {(data) => (
             <>
-              <PageSection of={sections} id="trigger" title="When to reach for it">
+              <PageSection of={sections} id="trigger" title={CARD_TRIGGER}>
                 <Markdown>{data.card.trigger}</Markdown>
               </PageSection>
-              <PageSection of={sections} id="brief" title="The brief">
+              <PageSection of={sections} id="brief" title={CARD_BRIEF}>
                 <Markdown>{data.card.brief}</Markdown>
               </PageSection>
               <Ladder studied={data} of={sections} />
@@ -91,7 +96,7 @@ export default function CardScreen() {
               <PageSection
                 of={sections}
                 id="templates"
-                title="Templates"
+                title={CARD_TEMPLATES}
                 count={data.card.templates.length}
                 body="bare"
               >
@@ -176,7 +181,7 @@ function TemplateCard({
             <CodeBlock code={template.code} verbatim />
             {template.notes ? <Markdown>{template.notes}</Markdown> : null}
             <Button mode="text" onPress={() => setRevealed(false)} style={{ alignSelf: 'flex-end' }}>
-              Hide the form
+              {HIDE_FORM}
             </Button>
           </>
         ) : (

@@ -16,6 +16,8 @@ import {
   newRecord,
   type Course,
   type Lesson,
+  BACK_LESSONS,
+  OF,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -49,12 +51,12 @@ export function LessonPage() {
   return (
     <article className="space-y-section">
       <PageHeader
-        back={{ to: LESSONS, label: 'Lessons' }}
+        back={{ to: LESSONS, label: BACK_LESSONS }}
         title={x?.title ?? lesson}
         note={c && x ? lessonNote(c.title, body ? minutesOf(x, body) : null, read) : undefined}
       />
       <Loaded
-        of="the lesson"
+        of={OF.lesson}
         state={loadedFrom(k, page)}
         blank={LESSON_MISSING}
         blankWhen={(p) => !p.x}

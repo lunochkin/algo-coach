@@ -7,6 +7,8 @@ import {
   FAILURE_RETURNED,
   submissionView,
   type SubmissionView,
+  CASES_IN_ORDER,
+  COPY,
 } from '@algo-coach/core'
 
 import type { CaseResult, Submitted } from '@/api/client'
@@ -32,7 +34,7 @@ export function Verdict({ submitted }: { submitted: Submitted }) {
 // one mark per case, in the order the problem carries them
 export function CaseStrip({ results }: { results: CaseResult[] }) {
   return (
-    <ol className="flex flex-wrap gap-1" aria-label="Cases, in order">
+    <ol className="flex flex-wrap gap-1" aria-label={CASES_IN_ORDER}>
       {results.map((one, index) => (
         <li
           key={one.case_id}
@@ -77,7 +79,7 @@ function Value({ label, value, text }: { label: string; value?: unknown; text?: 
               {whole ? 'Cut' : `Show all ${(full.length / 1024).toFixed(0)} KB`}
             </Button>
             <Button variant="ghost" size="xs" onClick={() => navigator.clipboard.writeText(full)}>
-              Copy
+              {COPY}
             </Button>
           </>
         )}

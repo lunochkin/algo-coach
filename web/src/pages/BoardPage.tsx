@@ -1,5 +1,15 @@
 import type { ReactNode } from 'react'
-import { boardView, inProgress } from '@algo-coach/core'
+import {
+  boardView,
+  inProgress,
+  BOARD_TITLE,
+  BOARD_NOTE,
+  OF,
+  BOARD_NONE,
+  BOARD_STUDYING,
+  BOARD_UNTOUCHED,
+  BOARD_PRACTISED,
+} from '@algo-coach/core'
 import { Link } from 'react-router'
 
 import { api, type TechniqueRow } from '@/api/client'
@@ -20,14 +30,11 @@ export function BoardPage() {
 
   return (
     <section className="space-y-section">
-      <PageHeader
-        title="Practice"
-        note="Continue a card in progress, or pick a technique, stalest first."
-      />
+      <PageHeader title={BOARD_TITLE} note={BOARD_NOTE} />
       <Loaded
-        of="the board"
+        of={OF.board}
         state={board}
-        blank="No served problem carries a technique yet."
+        blank={BOARD_NONE}
         blankWhen={(one) => one.rows.length === 0}
       >
         {(board) => {
@@ -41,13 +48,13 @@ export function BoardPage() {
               {/* the study the user declared, ahead of any staleness ranking */}
               {studying.length > 0 && (
                 <section className="space-y-stack">
-                  <SectionHeading title="Cards in progress" count={studying.length} />
+                  <SectionHeading title={BOARD_STUDYING} count={studying.length} />
                   <CardPanel technique={null} cards={studying} />
                 </section>
               )}
 
               {untouched.length > 0 && (
-                <Group title="Techniques not practised yet" count={untouched.length}>
+                <Group title={BOARD_UNTOUCHED} count={untouched.length}>
                   {/* names rather than chips: a bordered chip is what the
                       listing's filters are, and these open a technique */}
                   <div className="flex flex-wrap gap-x-5 gap-y-1 px-4 py-3">
@@ -65,7 +72,7 @@ export function BoardPage() {
               )}
 
               {practised.length > 0 && (
-                <Group title="Techniques practised" count={practised.length}>
+                <Group title={BOARD_PRACTISED} count={practised.length}>
                   <PickList>
                     {practised.map((row) => (
                       <Practised key={row.technique} row={row} />

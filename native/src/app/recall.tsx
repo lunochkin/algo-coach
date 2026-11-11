@@ -26,6 +26,8 @@ import {
   runLabel,
   takeHint,
   type components,
+  OF,
+  keyboardToggle,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -70,7 +72,7 @@ export default function RecallScreen() {
         <Trainer key={data.template_slug} slug={slug} prompt={data} drawn={drawn} bottom={insets.bottom} />
       ) : (
         <View style={styles.page}>
-          <Loaded of="the form to recall" state={prompt}>
+          <Loaded of={OF.recall} state={prompt}>
             {() => null}
           </Loaded>
         </View>
@@ -171,7 +173,7 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
         ) : null}
         <IconButton
           icon={keys ? 'keyboard-close' : 'keyboard'}
-          accessibilityLabel={keys ? 'Hide the keyboard' : 'Show the keyboard'}
+          accessibilityLabel={keyboardToggle(keys)}
           style={{ marginLeft: 'auto' }}
           onPress={() => {
             setKeys(!keys);

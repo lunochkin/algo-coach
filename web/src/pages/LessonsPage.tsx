@@ -7,6 +7,8 @@ import {
   LESSONS_TITLE,
   lessonStats,
   modulesInOrder,
+  BACK_KNOWLEDGE,
+  OF,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -43,8 +45,8 @@ export function LessonsPage() {
 
   return (
     <section className="space-y-section">
-      <PageHeader back={{ to: KNOWLEDGE, label: 'Knowledge' }} title={LESSONS_TITLE} />
-      <Loaded of="the lessons" state={loadedFrom(k, modules)} blank={LESSONS_NONE}>
+      <PageHeader back={{ to: KNOWLEDGE, label: BACK_KNOWLEDGE }} title={LESSONS_TITLE} />
+      <Loaded of={OF.lessons} state={loadedFrom(k, modules)} blank={LESSONS_NONE}>
         {(modules) => (
           <>
             <SectionBar items={sections.items} current={sections.current} onJump={sections.jump} />

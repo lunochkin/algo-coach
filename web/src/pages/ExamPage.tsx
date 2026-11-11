@@ -37,6 +37,9 @@ import {
   certExamRule,
   CERT_EXAM_MISSING,
   CERT_EXAM_START,
+  BACK_CERTIFICATIONS,
+  BACK_KNOWLEDGE,
+  OF,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -73,13 +76,13 @@ export function ExamPage() {
       <PageHeader
         back={
           cert
-            ? { to: CERTIFICATIONS, label: 'Certifications' }
-            : { to: KNOWLEDGE, label: 'Knowledge' }
+            ? { to: CERTIFICATIONS, label: BACK_CERTIFICATIONS }
+            : { to: KNOWLEDGE, label: BACK_KNOWLEDGE }
         }
         title={certified?.title ?? EXAM_TITLE}
         note={EXAM_NOTE}
       />
-      <Loaded of="the exam" state={loadedFrom(k, catalog ?? undefined)}>
+      <Loaded of={OF.exam} state={loadedFrom(k, catalog ?? undefined)}>
         {(catalog) =>
           cert ? (
             <CertChoice id={cert} catalog={catalog} onStart={setPlan} />

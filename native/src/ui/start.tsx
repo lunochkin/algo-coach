@@ -12,6 +12,7 @@ import {
   START_ONLY_REVIEWS,
   startPreview,
   startTitle,
+  CANCEL,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { startQueue, styles } from '@/ui/common';
@@ -63,7 +64,7 @@ function StartSheet({ scope, onClose }: { scope: Scope; onClose: () => void }) {
       title={title}
       actions={
         <>
-          <Button onPress={onClose}>Cancel</Button>
+          <Button onPress={onClose}>{CANCEL}</Button>
           <Button mode="contained" icon="play" disabled={!preview || preview.empty} onPress={start}>
             {preview?.label ?? START_NOTHING}
           </Button>

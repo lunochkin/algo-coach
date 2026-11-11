@@ -1,4 +1,4 @@
-import { privacyPolicy, privacyUpdated } from '@algo-coach/core'
+import { privacyPolicy, privacyUpdated, BACK_SIGN_IN } from '@algo-coach/core'
 
 import { LOGIN } from '@/api/client'
 import { Markdown } from '@/components/Markdown'
@@ -12,7 +12,7 @@ export function PrivacyPage() {
       {/* the login is the page this one is reached from, so it is the way
           back. No section: the page opens with no session */}
       <PageHeader
-        back={{ to: LOGIN, label: 'Sign in' }}
+        back={{ to: LOGIN, label: BACK_SIGN_IN }}
         title={POLICY.title}
         note={POLICY.updated && privacyUpdated(POLICY.updated)}
       />

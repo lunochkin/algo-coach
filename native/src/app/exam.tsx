@@ -25,6 +25,7 @@ import {
   EXAM_SIZE,
   EXAM_TITLE,
   examModuleChoice,
+  OF,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
@@ -42,7 +43,7 @@ export default function Exam() {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Header />
       <View style={styles.page}>
-        <Loaded of="the exam" state={fromCopy(st, null)}>
+        <Loaded of={OF.exam} state={fromCopy(st, null)}>
           {() => null}
         </Loaded>
       </View>

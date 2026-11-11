@@ -63,6 +63,8 @@ import {
   type QueueSource,
   togglePick,
   NEW_STEP,
+  NO_SESSION,
+  FINISH,
 } from '@algo-coach/core';
 import { EMPTY, type Edit, type Key, pressed } from '@/lib/keys';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
@@ -268,7 +270,7 @@ function ExamQuiz({ s }: { s: ExamSession | null }) {
       <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <Appbar.Header>
           <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title="No session" />
+          <Appbar.Content title={NO_SESSION} />
         </Appbar.Header>
       </View>
     );
@@ -527,7 +529,7 @@ function Ask(props: {
       <BottomBar bottom={bottom} row above={padOpen ? <KeyPad onKey={onKey} /> : undefined}>
         {result ? (
           <Button mode="contained" style={{ flex: 1 }} onPress={onNext}>
-            {last ? 'Finish' : ASK_NEXT}
+            {last ? FINISH : ASK_NEXT}
           </Button>
         ) : q.format === 'card' ? (
           revealed ? (

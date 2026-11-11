@@ -25,6 +25,9 @@ import {
   type SettingRecord,
   waitingToSend,
   newRecord,
+  SETTINGS_NOTE,
+  OF,
+  SYNC_HEADING,
 } from '@algo-coach/core'
 
 import { api } from '@/api/client'
@@ -57,9 +60,9 @@ export function SettingsPage() {
 
   return (
     <section className="space-y-section">
-      <PageHeader title={SETTINGS} note="The study settings hold on every device you sign in on." />
+      <PageHeader title={SETTINGS} note={SETTINGS_NOTE} />
       <Account />
-      <Loaded of="the settings" state={loadedFrom(k, values)}>
+      <Loaded of={OF.settings} state={loadedFrom(k, values)}>
         {/* a value another device set reaches the fields at its sync */}
         {(values) => (
           <Study key={JSON.stringify(values)} stored={values} said={said} onSaid={setSaid} />
@@ -77,7 +80,7 @@ function Sync() {
   const { now } = useLearner()
   return (
     <section className="space-y-stack">
-      <SectionHeading title="Sync" />
+      <SectionHeading title={SYNC_HEADING} />
       <Panel>
         <div className="flex flex-wrap items-center gap-stack">
           <div className="flex-1 space-y-0.5">

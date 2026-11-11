@@ -4,7 +4,19 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Card, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { boardView, inProgress, techniqueStats, type components } from '@algo-coach/core';
+import {
+  boardView,
+  inProgress,
+  techniqueStats,
+  type components,
+  BOARD_TITLE,
+  OF,
+  BOARD_NONE,
+  BOARD_STUDYING,
+  BOARD_UNTOUCHED,
+  BOARD_PRACTISED,
+  BOARD_NOTE,
+} from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { CardPanel } from '@/ui/cards';
@@ -27,15 +39,15 @@ export default function PracticeScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
-        <Appbar.Content title="Practice" />
+        <Appbar.Content title={BOARD_TITLE} />
         <AccountMenu />
       </Appbar.Header>
       <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          Continue a card in progress, or pick a technique, stalest first.
+          {BOARD_NOTE}
         </Text>
         <Loaded
-          of="the board"
+          of={OF.board}
           state={{
             data: board.data && cards.data ? { board: board.data, cards: cards.data } : null,
             error,
@@ -44,7 +56,7 @@ export default function PracticeScreen() {
               cards.reload();
             },
           }}
-          blank="No served problem carries a technique yet."
+          blank={BOARD_NONE}
           blankWhen={(x) => x.board.rows.length === 0}
         >
           {(x) => <BoardBody board={x.board} cards={x.cards} />}
@@ -63,13 +75,13 @@ function BoardBody({ board, cards }: { board: Board; cards: ListedCard[] }) {
     <>
       {studying.length > 0 ? (
         <>
-          <Heading title="Cards in progress" count={studying.length} />
+          <Heading title={BOARD_STUDYING} count={studying.length} />
           <CardPanel technique={null} cards={studying} />
         </>
       ) : null}
       {untouched.length > 0 ? (
         <>
-          <Heading title="Techniques not practised yet" count={untouched.length} />
+          <Heading title={BOARD_UNTOUCHED} count={untouched.length} />
           <Card mode="outlined">
             <Card.Content style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 20, rowGap: 8 }}>
               {untouched.map((row) => (
@@ -89,7 +101,7 @@ function BoardBody({ board, cards }: { board: Board; cards: ListedCard[] }) {
       ) : null}
       {practised.length > 0 ? (
         <>
-          <Heading title="Techniques practised" count={practised.length} />
+          <Heading title={BOARD_PRACTISED} count={practised.length} />
           <PickPanel>
             {practised.map((row) => (
               <PickRow

@@ -1,6 +1,13 @@
 import { useParams } from 'react-router'
 
-import { techniqueCards } from '@algo-coach/core'
+import {
+  techniqueCards,
+  BACK_BOARD,
+  TECHNIQUE_CARDS,
+  OF,
+  TECHNIQUE_NONE,
+  TECHNIQUE_PROBLEMS,
+} from '@algo-coach/core'
 
 import { api, candidates } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
@@ -27,18 +34,18 @@ export function TechniquePage() {
 
   return (
     <section className="space-y-section">
-      <PageHeader back={{ to: '/', label: 'Board' }} title={technique} />
+      <PageHeader back={{ to: '/', label: BACK_BOARD }} title={technique} />
       {cards.length > 0 && (
         <section className="space-y-stack">
-          <SectionHeading title="Cards" count={cards.length} />
+          <SectionHeading title={TECHNIQUE_CARDS} count={cards.length} />
           <CardPanel technique={null} cards={cards} />
         </section>
       )}
-      <Loaded of="the candidates" state={rows} blank="No served problem carries this technique.">
+      <Loaded of={OF.candidates} state={rows} blank={TECHNIQUE_NONE}>
         {(rows) => (
           <div className="space-y-stack">
             {/* no statement in the list: the clock starts when it is served */}
-            <SectionHeading title="Problems" count={rows.length} />
+            <SectionHeading title={TECHNIQUE_PROBLEMS} count={rows.length} />
             <PickPanel>
               {rows.map((row) => (
                 <PickRow

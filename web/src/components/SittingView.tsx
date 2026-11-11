@@ -17,6 +17,7 @@ import {
   sittingRefused,
   submitLabel,
   visibilityMove,
+  OF,
 } from '@algo-coach/core'
 import { ChevronLeft } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -248,7 +249,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
   // the three readings; the page starts once the statement has loaded
   if (loaded.data === undefined)
     return (
-      <Loaded of="the problem" state={loaded}>
+      <Loaded of={OF.problem} state={loaded}>
         {() => null}
       </Loaded>
     )
@@ -256,7 +257,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
   // opens the editor on the signature rather than holding the sitting
   if (carried.data === undefined && carried.error === undefined)
     return (
-      <Loaded of="the problem" state={{ ...carried, data: undefined }}>
+      <Loaded of={OF.problem} state={{ ...carried, data: undefined }}>
         {() => null}
       </Loaded>
     )

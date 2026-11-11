@@ -264,7 +264,7 @@ clients.
       module, a lesson, the lessons and the certifications
 - [x] Hold each page's act as one primary press, in the bottom bar on the
       phone, and turn the phone's dialogs into bottom sheets
-- [ ] Move every word the pages still type inline into `packages/core`,
+- [x] Move every word the pages still type inline into `packages/core`,
       the engine pages' titles, intros and empty lines first
 - [ ] Replace the raw sizes, the hex colours and the flame used for status
       with tokens: the map, the certifications grid, `tones()` and the

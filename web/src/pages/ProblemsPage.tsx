@@ -12,6 +12,7 @@ import {
   PROBLEMS_TITLE,
   toggled,
   type ListingFilter,
+  OF,
 } from '@algo-coach/core'
 import { useSearchParams } from 'react-router'
 
@@ -49,7 +50,7 @@ export function ProblemsPage() {
   return (
     <section className="space-y-section">
       <PageHeader title={PROBLEMS_TITLE} note={PROBLEMS_NOTE} />
-      <Loaded of="the problems" state={listed} blank={PROBLEMS_NONE}>
+      <Loaded of={OF.problems} state={listed} blank={PROBLEMS_NONE}>
         {(listed) => {
           const view = listingView(listed, filter)
           return (

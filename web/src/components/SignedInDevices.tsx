@@ -8,6 +8,7 @@ import {
   SIGN_OUT,
   SIGNED_IN_DEVICES,
   thisDevice,
+  OF,
 } from '@algo-coach/core'
 
 import { api, type SignedInDevice } from '@/api/client'
@@ -54,7 +55,7 @@ export function SignedInDevices({
           <DialogTitle>{SIGNED_IN_DEVICES}</DialogTitle>
           <DialogDescription>{REVOKED_NOTE}</DialogDescription>
         </DialogHeader>
-        <Loaded of="the signed-in devices" state={devices}>
+        <Loaded of={OF.devices} state={devices}>
           {(listed) => (
             <ul className="max-h-[60vh] divide-y overflow-y-auto rounded-lg border">
               {listed.map((device) => (

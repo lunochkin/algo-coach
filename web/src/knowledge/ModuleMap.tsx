@@ -30,6 +30,8 @@ import {
   type Course,
   type Focus,
   type PlacedNode,
+  ZOOM_OUT,
+  ZOOM_IN,
 } from '@algo-coach/core'
 
 import { Link } from 'react-router'
@@ -130,7 +132,7 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="Zoom out"
+          aria-label={ZOOM_OUT}
           disabled={zoom === 0}
           onClick={() => setZoom(zoom - 1)}
         >
@@ -139,7 +141,7 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="Zoom in"
+          aria-label={ZOOM_IN}
           disabled={zoom === ZOOMS.length - 1}
           onClick={() => setZoom(zoom + 1)}
         >

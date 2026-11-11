@@ -27,6 +27,7 @@ import {
   QUEUE_RAISE,
   QUEUE_STOP,
   queueLeft,
+  OF,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -56,7 +57,7 @@ export function QueuePage() {
     return (
       <section className="space-y-section">
         <PageHeader title={queueTitle(mode)} />
-        <Loaded of="the queue" state={loadedFrom(k, undefined)}>
+        <Loaded of={OF.queue} state={loadedFrom(k, undefined)}>
           {() => null}
         </Loaded>
       </section>

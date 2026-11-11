@@ -12,6 +12,8 @@ import {
   shownSeconds,
   submissionView,
   type components,
+  ELAPSED_TIME,
+  CASES_IN_ORDER,
 } from '@algo-coach/core';
 import { tones } from '@/ui/common';
 
@@ -47,7 +49,7 @@ export function ElapsedClock({
     return () => clearInterval(tick);
   }, [running]);
   return (
-    <Text variant="titleMedium" style={{ fontFamily: 'monospace' }} accessibilityLabel="Elapsed time">
+    <Text variant="titleMedium" style={{ fontFamily: 'monospace' }} accessibilityLabel={ELAPSED_TIME}>
       {duration(shownSeconds(elapsedSec, receivedAt, now, running && elapsedSec !== null))}
     </Text>
   );
@@ -76,7 +78,7 @@ export function SubmissionVerdict({ submitted }: { submitted: Submitted }) {
           {view.failures}
         </Text>
       ) : null}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }} accessibilityLabel="Cases, in order">
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }} accessibilityLabel={CASES_IN_ORDER}>
         {results.map((one, index) => (
           <View
             key={one.case_id}

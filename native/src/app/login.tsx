@@ -14,6 +14,8 @@ import {
   signInUnread,
   PRIVACY_LINK,
   PRIVACY_NOTE,
+  ENGINE_ADDRESS,
+  ADDRESS_HINT,
 } from '@algo-coach/core';
 import { offered, signIn, type Offered, type Provider } from '@/lib/auth';
 import { described } from '@/lib/engine';
@@ -103,14 +105,14 @@ export default function LoginScreen() {
         <>
           <TextInput
             mode="outlined"
-            label="Engine address"
+            label={ENGINE_ADDRESS}
             value={origin}
             onChangeText={setOrigin}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="url"
           />
-          {!originOk ? <HelperText type="error">An address such as https://example.invalid</HelperText> : null}
+          {!originOk ? <HelperText type="error">{ADDRESS_HINT}</HelperText> : null}
         </>
       ) : null}
       {!originOk ? null : unread !== null ? (

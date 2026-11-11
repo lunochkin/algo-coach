@@ -19,6 +19,7 @@ import {
   LESSON_NEXT,
   LESSON_NO_TEXT,
   LESSON_RELATED,
+  LESSON_FALLBACK,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { BottomBar, styles } from '@/ui/common';
@@ -119,7 +120,7 @@ export default function LessonScreen() {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={lesson?.title ?? 'Lesson'} />
+        <Appbar.Content title={lesson?.title ?? LESSON_FALLBACK} />
       </Appbar.Header>
       {lesson && c ? (
         <Text

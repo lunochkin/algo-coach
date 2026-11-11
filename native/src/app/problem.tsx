@@ -26,6 +26,13 @@ import {
   visibilityMove,
   submitLabel,
   type components,
+  OF,
+  cardsOffered,
+  PROBLEM_FALLBACK,
+  SITTING_STATEMENT,
+  SITTING_CODE,
+  keyboardToggle,
+  PROBLEM_RETIRED,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -89,7 +96,7 @@ export default function ProblemScreen() {
       {cards.length > 0 ? (
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           <Text variant="bodySmall" style={muted}>
-            {cards.length === 1 ? 'Card:' : 'Cards:'}
+            {cardsOffered(cards.length)}
           </Text>
           {cards.map((one) => (
             <TouchableRipple
@@ -111,12 +118,12 @@ export default function ProblemScreen() {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={record?.title ?? 'The problem'} />
+        <Appbar.Content title={record?.title ?? PROBLEM_FALLBACK} />
       </Appbar.Header>
       {error || !record || listed.data === null ? (
         <View style={styles.page}>
           <Loaded
-            of="the problem"
+            of={OF.problem}
             state={{
               data: null,
               error,
@@ -132,10 +139,7 @@ export default function ProblemScreen() {
       ) : record.retired ? (
         <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
           {facts}
-          <Text variant="bodyMedium">
-            This problem was retired: its statement asked for something its cases do not decide. It is served to nobody,
-            and your attempts on it stay in your log.
-          </Text>
+          <Text variant="bodyMedium">{PROBLEM_RETIRED}</Text>
         </ScrollView>
       ) : (
         <SittingOn
@@ -318,7 +322,7 @@ function SittingOn({
   if (served.error || !statement || carry === undefined || kept === undefined)
     return (
       <View style={styles.page}>
-        <Loaded of="the problem" state={{ data: null, error: served.error, reload: served.reload }}>
+        <Loaded of={OF.problem} state={{ data: null, error: served.error, reload: served.reload }}>
           {() => null}
         </Loaded>
       </View>
@@ -416,8 +420,8 @@ function SittingOn({
         onValueChange={(value) => setTab(value as 'statement' | 'code')}
         style={{ marginHorizontal: 12, marginVertical: 6 }}
         buttons={[
-          { value: 'statement', label: 'Statement', icon: 'text-box-outline' },
-          { value: 'code', label: 'Code', icon: 'code-tags' },
+          { value: 'statement', label: SITTING_STATEMENT, icon: 'text-box-outline' },
+          { value: 'code', label: SITTING_CODE, icon: 'code-tags' },
         ]}
       />
       {/* the editor stays mounted under the statement, so a tab switch keeps
@@ -452,7 +456,7 @@ function SittingOn({
           ) : null}
           <IconButton
             icon={keys ? 'keyboard-close' : 'keyboard'}
-            accessibilityLabel={keys ? 'Hide the keyboard' : 'Show the keyboard'}
+            accessibilityLabel={keyboardToggle(keys)}
             style={{ marginLeft: 'auto' }}
             onPress={toggleKeys}
           />

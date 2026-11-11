@@ -14,6 +14,7 @@ import {
   LESSONS_TITLE,
   lessonStats,
   modulesInOrder,
+  OF,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { fromCopy, Loaded, styles } from '@/ui/common';
@@ -88,7 +89,7 @@ export default function LessonsScreen() {
       </Appbar.Header>
       {!sections.length ? (
         <View style={styles.page}>
-          <Loaded of="the lessons" state={fromCopy(st, st.catalog ? sections : null)} blank={LESSONS_NONE}>
+          <Loaded of={OF.lessons} state={fromCopy(st, st.catalog ? sections : null)} blank={LESSONS_NONE}>
             {() => null}
           </Loaded>
         </View>

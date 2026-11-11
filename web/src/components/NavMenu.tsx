@@ -1,3 +1,9 @@
+import {
+  SECTION_PRACTICE,
+  SECTION_PROBLEMS,
+  SECTION_CARDS,
+  SECTION_KNOWLEDGE,
+} from '@algo-coach/core'
 import { useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router'
 
@@ -10,17 +16,17 @@ import { cn } from '@/lib/utils'
 // holds its sitting, are steps down from the board, so Practice stays marked
 const SECTIONS = [
   {
-    label: 'Practice',
+    label: SECTION_PRACTICE,
     to: '/',
     owns: (path: string) =>
       path === '/' || path.startsWith('/techniques/') || path.startsWith('/problems/'),
   },
   // the listing alone: a picked problem is a step down from the board, from a
   // technique or from a card, and the section it sits under cannot say which
-  { label: 'Problems', to: '/problems', owns: (path: string) => path === '/problems' },
-  { label: 'Cards', to: '/cards', owns: (path: string) => path.startsWith('/cards') },
+  { label: SECTION_PROBLEMS, to: '/problems', owns: (path: string) => path === '/problems' },
+  { label: SECTION_CARDS, to: '/cards', owns: (path: string) => path.startsWith('/cards') },
   {
-    label: 'Knowledge',
+    label: SECTION_KNOWLEDGE,
     to: '/knowledge',
     owns: (path: string) => path === '/knowledge' || path.startsWith('/knowledge/'),
   },

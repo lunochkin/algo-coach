@@ -3,6 +3,7 @@ import { memo, type ReactNode, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 
+import { KEY_NAMES, KEY_SPACE, nameKey } from '@algo-coach/core';
 import {
   afterLetter,
   cased,
@@ -55,34 +56,50 @@ export const KeyPad = memo(function KeyPad({
     setShift(afterLetter(shift));
   };
   const back = (
-    <Cap icon="backspace-outline" accessibilityLabel="Backspace" grow={1.5} repeats onPress={() => onKey('back')} />
+    <Cap
+      icon="backspace-outline"
+      accessibilityLabel={KEY_NAMES.back}
+      grow={1.5}
+      repeats
+      onPress={() => onKey('back')}
+    />
   );
 
   return (
     <View style={{ gap: GAP }}>
       {lines ? (
         <Row>
-          <Cap grow={0.75} icon="format-indent-decrease" accessibilityLabel="Dedent" onPress={() => onKey('dedent')} />
-          <Cap grow={0.75} icon="format-indent-increase" accessibilityLabel="Indent" onPress={() => onKey('indent')} />
+          <Cap
+            grow={0.75}
+            icon="format-indent-decrease"
+            accessibilityLabel={KEY_NAMES.dedent}
+            onPress={() => onKey('dedent')}
+          />
+          <Cap
+            grow={0.75}
+            icon="format-indent-increase"
+            accessibilityLabel={KEY_NAMES.indent}
+            onPress={() => onKey('indent')}
+          />
           {/* a block selected here moves whole under indent and dedent */}
-          <Cap grow={0.75} icon="select-group" accessibilityLabel="Select the block" onPress={() => onKey('block')} />
+          <Cap grow={0.75} icon="select-group" accessibilityLabel={KEY_NAMES.block} onPress={() => onKey('block')} />
           <Names names={names} onKey={onKey} />
           <Cap
             grow={0.75}
             icon="arrow-up-bold-outline"
-            accessibilityLabel="Move the line up"
+            accessibilityLabel={KEY_NAMES.lineUp}
             onPress={() => onKey('lineUp')}
           />
           <Cap
             grow={0.75}
             icon="arrow-down-bold-outline"
-            accessibilityLabel="Move the line down"
+            accessibilityLabel={KEY_NAMES.lineDown}
             onPress={() => onKey('lineDown')}
           />
           <Cap
             grow={0.75}
             icon="content-duplicate"
-            accessibilityLabel="Duplicate the line"
+            accessibilityLabel={KEY_NAMES.duplicate}
             onPress={() => onKey('duplicate')}
           />
         </Row>
@@ -145,7 +162,7 @@ export const KeyPad = memo(function KeyPad({
           <Row>
             <Cap
               icon={shift === 'lock' ? 'apple-keyboard-caps' : 'apple-keyboard-shift'}
-              accessibilityLabel="Shift"
+              accessibilityLabel={KEY_NAMES.shift}
               grow={1.5}
               on={shift !== 'off'}
               onPress={() => {
@@ -164,25 +181,30 @@ export const KeyPad = memo(function KeyPad({
       <Row>
         <Cap
           label={layer === 'rare' ? 'abc' : '#@'}
-          accessibilityLabel={layer === 'rare' ? 'Letters' : 'More symbols'}
+          accessibilityLabel={layer === 'rare' ? KEY_NAMES.letters : KEY_NAMES.symbols}
           grow={1.5}
           onPress={() => setLayer(layer === 'rare' ? 'letters' : 'rare')}
         />
         {lines ? (
           <Cap
             label={layer === 'keywords' ? 'abc' : 'def'}
-            accessibilityLabel={layer === 'keywords' ? 'Letters' : 'Keywords'}
+            accessibilityLabel={layer === 'keywords' ? KEY_NAMES.letters : KEY_NAMES.keywords}
             grow={1.5}
             on={layer === 'keywords'}
             onPress={() => setLayer(layer === 'keywords' ? 'letters' : 'keywords')}
           />
         ) : null}
         <Cap label="," preview onPress={() => insert(',')} />
-        <Cap icon="chevron-left" accessibilityLabel="Cursor left" onPress={() => onKey('left')} />
-        <Cap label="space" grow={lines ? 2 : 3.5} accessibilityLabel="Space" onPress={() => insert(' ')} />
-        <Cap icon="chevron-right" accessibilityLabel="Cursor right" onPress={() => onKey('right')} />
+        <Cap icon="chevron-left" accessibilityLabel={KEY_NAMES.left} onPress={() => onKey('left')} />
+        <Cap
+          label={KEY_SPACE}
+          grow={lines ? 2 : 3.5}
+          accessibilityLabel={KEY_NAMES.space}
+          onPress={() => insert(' ')}
+        />
+        <Cap icon="chevron-right" accessibilityLabel={KEY_NAMES.right} onPress={() => onKey('right')} />
         {lines ? (
-          <Cap icon="keyboard-return" accessibilityLabel="Enter" onPress={() => onKey('enter')} />
+          <Cap icon="keyboard-return" accessibilityLabel={KEY_NAMES.enter} onPress={() => onKey('enter')} />
         ) : (
           <Cap label="?" preview onPress={() => insert('?')} />
         )}
@@ -209,7 +231,7 @@ function Names({ names, onKey }: { names: string[]; onKey: (key: Key) => void })
           <Pressable
             key={one}
             accessibilityRole="button"
-            accessibilityLabel={`Name ${one}`}
+            accessibilityLabel={nameKey(one)}
             onPress={() => onKey({ name: one })}
             style={({ pressed }) => ({
               height: HEIGHT - 8,

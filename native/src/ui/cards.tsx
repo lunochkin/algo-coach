@@ -3,7 +3,7 @@ import { Fragment, useState } from 'react';
 import { View } from 'react-native';
 import { Card, Divider, ProgressBar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 
-import { cardRow, type components, type RecallMark } from '@algo-coach/core';
+import { cardRow, type components, type RecallMark, cardsCounted, RECALL_MARKS } from '@algo-coach/core';
 import { styles, tones } from '@/ui/common';
 
 type ListedCard = components['schemas']['ListedCard'];
@@ -25,7 +25,7 @@ export function CardPanel({ technique, cards }: { technique: string | null; card
                 {technique}
               </Text>
               <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                {cards.length} cards
+                {cardsCounted(cards.length)}
               </Text>
             </View>
             <Divider />
@@ -88,9 +88,9 @@ function Marks({ marks }: { marks: RecallMark[] }) {
     <Text
       variant="bodySmall"
       style={{ color: theme.colors.onSurfaceVariant }}
-      accessibilityLabel={`recall: ${marks.map((one) => `${one.title}, ${one.reading}`).join('; ')}`}
+      accessibilityLabel={`${RECALL_MARKS}: ${marks.map((one) => `${one.title}, ${one.reading}`).join('; ')}`}
     >
-      recall
+      {RECALL_MARKS}
       {marks.map((one) => (
         <Text key={one.templateId}>
           {' '}

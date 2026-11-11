@@ -22,6 +22,7 @@ import {
   coverageShare,
   PRACTICE,
   practiceLevel,
+  OF,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -65,7 +66,7 @@ export default function CertsScreen() {
       </Appbar.Header>
       {!modules.length ? (
         <View style={styles.page}>
-          <Loaded of="the certifications" state={fromCopy(st, st.catalog ? modules : null)} blank={CERTS_NONE}>
+          <Loaded of={OF.certifications} state={fromCopy(st, st.catalog ? modules : null)} blank={CERTS_NONE}>
             {() => null}
           </Loaded>
         </View>

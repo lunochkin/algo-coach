@@ -13,6 +13,7 @@ import {
   LABEL_QUESTION,
   MODE_GLOSS,
   saveLabel,
+  OF,
 } from '@algo-coach/core'
 import { useEffect, useState } from 'react'
 
@@ -56,7 +57,7 @@ export function ClaimPrompt({ sittingId, drilled, onDone }: Props) {
 
   if (data === undefined || finished)
     return (
-      <Loaded of="the claim" state={loaded}>
+      <Loaded of={OF.claim} state={loaded}>
         {() => null}
       </Loaded>
     )

@@ -50,6 +50,9 @@ import {
   nodeView,
   noGraph,
   summary,
+  OF,
+  mapLessonsToggle,
+  MAP_FIT_PRESS,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
@@ -92,7 +95,7 @@ export default function ModuleScreen() {
         </Appbar.Header>
         <View style={styles.page}>
           <Loaded
-            of="the module"
+            of={OF.module}
             state={fromCopy(st, st.catalog ? { c: c ?? null } : null)}
             blank={MODULE_MISSING}
             blankWhen={(x) => !x.c}
@@ -190,7 +193,7 @@ export default function ModuleScreen() {
                 icon={lessonsOn ? 'check' : 'book-open-variant'}
                 selected={lessonsOn}
                 onPress={() => setLessonsOn(!lessonsOn)}
-                accessibilityLabel={lessonsOn ? 'Hide lessons' : 'Show lessons'}
+                accessibilityLabel={mapLessonsToggle(lessonsOn)}
               >
                 {MAP_LESSONS}
               </Chip>
@@ -387,7 +390,7 @@ function CourseMap(props: { c: Course; b: Board; bottom: number; withLessons: bo
         <Legend color={null} label={MAP_LEGEND.empty} />
         <View style={{ flex: 1 }} />
         <Button compact icon="fit-to-page-outline" onPress={fit} accessibilityLabel={MAP_FIT}>
-          Fit
+          {MAP_FIT_PRESS}
         </Button>
       </View>
       <GestureDetector gesture={gestures}>

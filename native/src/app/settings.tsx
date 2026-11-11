@@ -22,6 +22,13 @@ import {
   SYNC_NOW,
   waitingToSend,
   PRIVACY_LINK,
+  ENGINE_ADDRESS,
+  ADDRESS_HINT,
+  DEVICE_NAME,
+  DEVICE_NAME_RULE,
+  REMINDER_HOUR,
+  REMINDER_HOUR_RULE,
+  NOT_SIGNED_IN,
 } from '@algo-coach/core';
 import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
@@ -121,8 +128,8 @@ export default function SettingsScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Heading title={ACCOUNT} />
-        {field('origin', 'Engine address')}
-        {!originOk ? <HelperText type="error">An address such as https://example.invalid</HelperText> : null}
+        {field('origin', ENGINE_ADDRESS)}
+        {!originOk ? <HelperText type="error">{ADDRESS_HINT}</HelperText> : null}
         <View style={styles.row}>
           {st.hasToken ? (
             <View style={{ flex: 1 }}>
@@ -136,7 +143,7 @@ export default function SettingsScreen() {
             </View>
           ) : (
             <Text variant="bodyMedium" style={{ flex: 1 }}>
-              Not signed in.
+              {NOT_SIGNED_IN}
             </Text>
           )}
           {st.hasToken ? (
@@ -153,15 +160,15 @@ export default function SettingsScreen() {
         >
           {PRIVACY_LINK}
         </Button>
-        {field('device', 'Device name')}
-        {!deviceOk ? <HelperText type="error">Letters, digits, - and _ only</HelperText> : null}
+        {field('device', DEVICE_NAME)}
+        {!deviceOk ? <HelperText type="error">{DEVICE_NAME_RULE}</HelperText> : null}
         <Heading title={STUDY} />
         {field('newPerDay', SETTING_LABEL.new_per_day, true)}
         {!study.ok.new_per_day ? <HelperText type="error">{settingRange('new_per_day')}</HelperText> : null}
         {field('examSize', SETTING_LABEL.exam_size, true)}
         {!study.ok.exam_size ? <HelperText type="error">{settingRange('exam_size')}</HelperText> : null}
-        {field('reminderHour', 'Reminder hour (0–23)', true)}
-        {!hourOk ? <HelperText type="error">0–23</HelperText> : null}
+        {field('reminderHour', REMINDER_HOUR, true)}
+        {!hourOk ? <HelperText type="error">{REMINDER_HOUR_RULE}</HelperText> : null}
         <View style={styles.row}>
           <Button mode="contained" onPress={save} disabled={!valid || !changed}>
             {SAVE}

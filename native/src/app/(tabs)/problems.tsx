@@ -18,6 +18,7 @@ import {
   techniqueStats,
   toggled,
   type ListingFilter,
+  OF,
 } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
@@ -45,7 +46,7 @@ export default function ProblemsScreen() {
         <Text variant="bodyMedium" style={muted}>
           {PROBLEMS_NOTE}
         </Text>
-        <Loaded of="the problems" state={listed} blank={PROBLEMS_NONE}>
+        <Loaded of={OF.problems} state={listed} blank={PROBLEMS_NONE}>
           {(data) => {
             const view = listingView(data, filter);
             return (

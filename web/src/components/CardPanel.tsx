@@ -1,3 +1,4 @@
+import { RUNGS_SOLVED, cardsCounted, RECALL_MARKS } from '@algo-coach/core'
 import type { RecallMark } from '@algo-coach/core'
 import { Link } from 'react-router'
 
@@ -23,7 +24,9 @@ export function CardPanel({ technique, cards }: { technique: string | null; card
               {technique}
             </Link>
           </h2>
-          <span className="ml-auto text-meta text-muted-foreground">{cards.length} cards</span>
+          <span className="ml-auto text-meta text-muted-foreground">
+            {cardsCounted(cards.length)}
+          </span>
         </div>
       )}
       <div className="divide-y divide-border">
@@ -60,7 +63,7 @@ function CardRow({ card, heading }: { card: ListedCard; heading: string | null }
           <ProgressBar
             value={row.progress.solved}
             total={row.progress.rungs}
-            label="Rungs solved"
+            label={RUNGS_SOLVED}
           />
         </div>
       )}
@@ -75,7 +78,7 @@ function CardRow({ card, heading }: { card: ListedCard; heading: string | null }
 function RecallMarks({ marks }: { marks: RecallMark[] }) {
   return (
     <p className="mt-1 flex items-center gap-1.5 text-meta text-muted-foreground">
-      recall
+      {RECALL_MARKS}
       {marks.map((one) => (
         <span
           key={one.templateId}

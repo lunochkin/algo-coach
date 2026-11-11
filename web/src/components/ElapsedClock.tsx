@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { duration, shownSeconds } from '@algo-coach/core'
+import { duration, shownSeconds, ELAPSED_TIME } from '@algo-coach/core'
 
 type Props = {
   // the engine's reading, none while the clock has not run, and the moment
@@ -28,7 +28,7 @@ export function ElapsedClock({ elapsedSec, receivedAt, running: asked }: Props) 
   const shown = shownSeconds(elapsedSec, receivedAt, now, running)
 
   return (
-    <span className="font-mono text-heading tabular-nums" aria-label="Elapsed time">
+    <span className="font-mono text-heading tabular-nums" aria-label={ELAPSED_TIME}>
       {duration(shown)}
     </span>
   )

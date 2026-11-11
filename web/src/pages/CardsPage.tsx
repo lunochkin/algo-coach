@@ -1,4 +1,14 @@
-import { cardBlocks, inProgress, notInProgress } from '@algo-coach/core'
+import {
+  cardBlocks,
+  inProgress,
+  notInProgress,
+  CARDS_TITLE,
+  OF,
+  CARDS_NONE,
+  CARDS_STUDYING,
+  CARDS_NOT_STARTED,
+  CARDS_NOTE,
+} from '@algo-coach/core'
 
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
@@ -12,11 +22,8 @@ export function CardsPage() {
 
   return (
     <section className="space-y-section">
-      <PageHeader
-        title="Cards"
-        note="One card teaches one technique: when to reach for it, and the forms to reproduce from memory."
-      />
-      <Loaded of="the cards" state={cards} blank="No card is seeded yet.">
+      <PageHeader title={CARDS_TITLE} note={CARDS_NOTE} />
+      <Loaded of={OF.cards} state={cards} blank={CARDS_NONE}>
         {(cards) => {
           // the cards with a run open read first, the most recently active
           // first: they are the ones the user is working through
@@ -26,14 +33,14 @@ export function CardsPage() {
             <div className="space-y-section">
               {studying.length > 0 && (
                 <section className="space-y-stack">
-                  <SectionHeading title="Studying" count={studying.length} />
+                  <SectionHeading title={CARDS_STUDYING} count={studying.length} />
                   <CardPanel technique={null} cards={studying} />
                 </section>
               )}
               {rest.length > 0 && (
                 <section className="space-y-stack">
                   {studying.length > 0 && (
-                    <SectionHeading title="Not started" count={rest.length} />
+                    <SectionHeading title={CARDS_NOT_STARTED} count={rest.length} />
                   )}
                   {cardBlocks(rest).map((block) => (
                     <CardPanel

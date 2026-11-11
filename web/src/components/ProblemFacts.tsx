@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 
-import { problemCards } from '@algo-coach/core'
+import { problemCards, cardsOffered } from '@algo-coach/core'
 
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
@@ -46,7 +46,7 @@ export function ProblemFacts({
       <span>{tried(problem)}</span>
       {offered.length > 0 && (
         <span>
-          {offered.length === 1 ? 'Card' : 'Cards'}:{' '}
+          {cardsOffered(offered.length)}{' '}
           {offered.map((card, index) => (
             <span key={card.slug}>
               {index > 0 && ', '}

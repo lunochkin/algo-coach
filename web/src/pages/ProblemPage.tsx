@@ -1,13 +1,22 @@
-import { lazy } from 'react'
+import {
+  BACK_PROBLEMS,
+  BACK_BOARD,
+  PROBLEM_FALLBACK,
+  NO_DIFFICULTY,
+  OF,
+  techniqueStats,
+  PROBLEM_RETIRED,
+  PROBLEM_OPENING,
+} from '@algo-coach/core'
+import { lazy, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router'
 
-import { api, type Picked } from '@/api/client'
+import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel, Stat, Stats } from '@/components/Panel'
 import { Badge } from '@/components/ui/badge'
-import { lastAt, share } from '@/lib/format'
 
 // the editor is the bulk of the bundle, and a retired problem needs none
 const SittingView = lazy(() =>
@@ -20,6 +29,8 @@ const SittingView = lazy(() =>
 // the pick came from
 export function ProblemPage() {
   const { problemId = '' } = useParams()
+  // the moment the page opened, which the retired record's counts are read at
+  const [now] = useState(() => Date.now())
   const [search] = useSearchParams()
   const technique = search.get('technique')
   const slug = search.get('card')
@@ -68,52 +79,39 @@ export function ProblemPage() {
                 label: card.data?.card.title ?? slug,
               }
             : listing
-              ? { to: '/problems', label: 'Problems' }
+              ? { to: '/problems', label: BACK_PROBLEMS }
               : technique === null
-                ? { to: '/', label: 'Board' }
+                ? { to: '/', label: BACK_BOARD }
                 : { to: `/techniques/${encodeURIComponent(technique)}`, label: technique }
         }
-        title={picked.data?.title ?? 'The problem'}
+        title={picked.data?.title ?? PROBLEM_FALLBACK}
         note={
           picked.data && (
             <span className="flex flex-wrap items-center gap-2">
               <Badge variant="outline" className="font-normal">
-                {picked.data.difficulty ?? 'no difficulty'}
+                {picked.data.difficulty ?? NO_DIFFICULTY}
               </Badge>
               <span>{picked.data.techniques.join(' · ')}</span>
             </span>
           )
         }
       />
-      <Loaded of="the problem" state={picked}>
+      <Loaded of={OF.problem} state={picked}>
         {(picked) =>
           picked.retired ? (
             <Panel>
               <Stats>
-                {standing(picked).map((stat) => (
+                {techniqueStats(picked, now).map((stat) => (
                   <Stat key={stat.label} value={stat.value} label={stat.label} />
                 ))}
               </Stats>
-              <p className="text-meta text-muted-foreground">
-                This problem was retired: its statement asked for something its cases do not decide.
-                It is served to nobody, and the attempts above stay in your log.
-              </p>
+              <p className="text-meta text-muted-foreground">{PROBLEM_RETIRED}</p>
             </Panel>
           ) : (
-            <p className="text-meta text-muted-foreground">Opening the problem…</p>
+            <p className="text-meta text-muted-foreground">{PROBLEM_OPENING}</p>
           )
         }
       </Loaded>
     </section>
   )
-}
-
-// what the user has done on this problem, as counts rather than a sentence
-function standing(picked: Picked): { value: string | number; label: string }[] {
-  if (picked.attempt_count === 0) return [{ value: 'never', label: 'attempted' }]
-  return [
-    { value: picked.attempt_count, label: picked.attempt_count === 1 ? 'attempt' : 'attempts' },
-    { value: share(picked.solved_count, picked.attempt_count), label: 'solved' },
-    { value: lastAt(picked.last_attempt_at), label: 'last attempted' },
-  ]
 }

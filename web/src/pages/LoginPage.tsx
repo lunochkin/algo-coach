@@ -8,6 +8,8 @@ import {
   refusal,
   PRIVACY_LINK,
   PRIVACY_NOTE,
+  SIGN_IN_TITLE,
+  OF,
 } from '@algo-coach/core'
 
 import { api, PRIVACY } from '@/api/client'
@@ -24,7 +26,7 @@ export function LoginPage() {
     <section className="mx-auto max-w-form space-y-section py-16">
       <div className="space-y-1">
         <p className="font-semibold">algo-coach</p>
-        <h1 className="text-title font-semibold">Sign in</h1>
+        <h1 className="text-title font-semibold">{SIGN_IN_TITLE}</h1>
         <p className="text-meta text-muted-foreground">{LOGIN_INTRO}</p>
       </div>
 
@@ -35,7 +37,7 @@ export function LoginPage() {
       )}
 
       <Loaded
-        of="the sign-in"
+        of={OF.signIn}
         state={offered}
         blank={NO_SIGN_IN}
         blankWhen={(one) => one.providers.length === 0 && one.dev_login === null}

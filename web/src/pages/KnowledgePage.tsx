@@ -40,6 +40,8 @@ import {
   waitingOutside,
   syncErrorSummary,
   newRecord,
+  SECTION_KNOWLEDGE,
+  KNOWLEDGE_NOTE,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -108,7 +110,7 @@ export function KnowledgePage() {
 
   return (
     <section className="space-y-section">
-      <PageHeader title="Knowledge" note="Answer the questions due, then the new ones." />
+      <PageHeader title={SECTION_KNOWLEDGE} note={KNOWLEDGE_NOTE} />
       {/* a failed sync changes what the next queue serves, so the home says so */}
       {k.sync.error && !k.sync.running && (
         <p

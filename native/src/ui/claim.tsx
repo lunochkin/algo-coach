@@ -21,6 +21,7 @@ import {
   MODE_GLOSS,
   saveLabel,
   type components,
+  OF,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -61,7 +62,7 @@ export function ClaimSheet({
   return (
     <Sheet visible={visible && !finished} onDismiss={onDone} title={CLAIM_TITLE} note={CLAIM_NOTE}>
       {!loaded.data || !asked ? (
-        <Loaded of="the claim" state={{ ...loaded, data: null }}>
+        <Loaded of={OF.claim} state={{ ...loaded, data: null }}>
           {() => null}
         </Loaded>
       ) : (

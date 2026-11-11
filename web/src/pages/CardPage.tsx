@@ -9,6 +9,14 @@ import {
   RUN_START_NOTE,
   runStartLabel,
   runStartRefused,
+  CARD_TRIGGER,
+  CARD_BRIEF,
+  CARD_TEMPLATES,
+  BACK_CARDS,
+  OF,
+  RUNGS_SOLVED,
+  FORMS_RECALLED,
+  PROBES_DRAWN,
 } from '@algo-coach/core'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
@@ -40,11 +48,11 @@ export function CardPage() {
   const run = studied.data?.run ?? null
   const data = studied.data
   const items: Item[] = [
-    { id: 'trigger', label: 'When to reach for it' },
-    { id: 'brief', label: 'The brief' },
-    { id: 'ladder', label: 'Ladder' },
-    ...(data && data.probes.length > 0 ? [{ id: 'probes', label: 'Probes' }] : []),
-    { id: 'templates', label: 'Templates' },
+    { id: 'trigger', label: CARD_TRIGGER },
+    { id: 'brief', label: CARD_BRIEF },
+    { id: 'ladder', label: LADDER_TITLE },
+    ...(data && data.probes.length > 0 ? [{ id: 'probes', label: PROBES_TITLE }] : []),
+    { id: 'templates', label: CARD_TEMPLATES },
   ]
   const { current, closed, toggle, jump } = useSections(items)
 
@@ -68,7 +76,7 @@ export function CardPage() {
   return (
     <article className="space-y-section">
       <PageHeader
-        back={{ to: '/cards', label: 'Cards' }}
+        back={{ to: '/cards', label: BACK_CARDS }}
         title={studied.data?.card.title ?? slug}
         note={
           studied.data &&
@@ -77,7 +85,7 @@ export function CardPage() {
             .join(' · ')
         }
       />
-      <Loaded of="the card" state={studied}>
+      <Loaded of={OF.card} state={studied}>
         {(studied) => {
           // the recall of each form, read on the form itself
           const recall = new Map(studied.recall.map((one) => [one.template_id, one]))
@@ -96,7 +104,7 @@ export function CardPage() {
 
               <Section
                 id="trigger"
-                title="When to reach for it"
+                title={CARD_TRIGGER}
                 closed={closed('trigger')}
                 onToggle={toggle}
               >
@@ -104,7 +112,7 @@ export function CardPage() {
                 <Markdown>{studied.card.trigger}</Markdown>
               </Section>
 
-              <Section id="brief" title="The brief" closed={closed('brief')} onToggle={toggle}>
+              <Section id="brief" title={CARD_BRIEF} closed={closed('brief')} onToggle={toggle}>
                 <Markdown>{studied.card.brief}</Markdown>
               </Section>
 
@@ -125,7 +133,7 @@ export function CardPage() {
 
               <Section
                 id="templates"
-                title="Templates"
+                title={CARD_TEMPLATES}
                 count={studied.card.templates.length}
                 body="bare"
                 closed={closed('templates')}
@@ -163,9 +171,9 @@ function Progress({ studied }: { studied: Studied }) {
   return (
     <Panel>
       <Stats>
-        <Stat value={`${solved}/${studied.rungs.length}`} label="rungs solved" />
-        <Stat value={`${recalled}/${studied.card.templates.length}`} label="forms recalled" />
-        <Stat value={studied.probes.length} label="probes drawn" />
+        <Stat value={`${solved}/${studied.rungs.length}`} label={RUNGS_SOLVED} />
+        <Stat value={`${recalled}/${studied.card.templates.length}`} label={FORMS_RECALLED} />
+        <Stat value={studied.probes.length} label={PROBES_DRAWN} />
         <Button variant="outline" size="sm" className="ml-auto" asChild>
           <Link to={`/cards/${encodeURIComponent(studied.card.slug)}/recall`}>{RECALL_TITLE}</Link>
         </Button>
@@ -180,7 +188,7 @@ function Progress({ studied }: { studied: Studied }) {
         )}
       </Stats>
       {/* the ladder's progress, drawn as the cards list draws it */}
-      <ProgressBar value={solved} total={studied.rungs.length} label="Rungs solved" />
+      <ProgressBar value={solved} total={studied.rungs.length} label={RUNGS_SOLVED} />
     </Panel>
   )
 }

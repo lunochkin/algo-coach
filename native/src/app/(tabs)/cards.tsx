@@ -2,7 +2,18 @@ import { ScrollView, View } from 'react-native';
 import { Appbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { cardBlocks, inProgress, notInProgress, type components } from '@algo-coach/core';
+import {
+  cardBlocks,
+  inProgress,
+  notInProgress,
+  type components,
+  CARDS_TITLE,
+  OF,
+  CARDS_NONE,
+  CARDS_STUDYING,
+  CARDS_NOT_STARTED,
+  CARDS_NOTE,
+} from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { CardPanel } from '@/ui/cards';
@@ -20,14 +31,14 @@ export default function CardsScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
-        <Appbar.Content title="Cards" />
+        <Appbar.Content title={CARDS_TITLE} />
         <AccountMenu />
       </Appbar.Header>
       <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          One card teaches one technique: when to reach for it, and the forms to reproduce from memory.
+          {CARDS_NOTE}
         </Text>
-        <Loaded of="the cards" state={cards} blank="No card is seeded yet.">
+        <Loaded of={OF.cards} state={cards} blank={CARDS_NONE}>
           {(data) => <Listing cards={data} />}
         </Loaded>
       </ScrollView>
@@ -42,11 +53,11 @@ function Listing({ cards }: { cards: ListedCard[] }) {
     <>
       {studying.length > 0 ? (
         <>
-          <Heading title="Studying" count={studying.length} />
+          <Heading title={CARDS_STUDYING} count={studying.length} />
           <CardPanel technique={null} cards={studying} />
         </>
       ) : null}
-      {rest.length > 0 && studying.length > 0 ? <Heading title="Not started" count={rest.length} /> : null}
+      {rest.length > 0 && studying.length > 0 ? <Heading title={CARDS_NOT_STARTED} count={rest.length} /> : null}
       {cardBlocks(rest).map((block) => (
         <CardPanel key={block.technique ?? block.cards[0].slug} technique={block.technique} cards={block.cards} />
       ))}

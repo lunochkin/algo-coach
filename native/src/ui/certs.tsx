@@ -15,6 +15,7 @@ import {
   type CertState,
   type CertStatus,
   type Course,
+  CLOSE,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { Sheet } from '@/ui/sheet';
@@ -117,7 +118,7 @@ export function CertSheet(props: {
       title={x.title}
       actions={
         <>
-          <Button onPress={onClose}>Close</Button>
+          <Button onPress={onClose}>{CLOSE}</Button>
           {v.offersTarget ? (
             v.targeted ? (
               <Button icon="target" onPress={() => void st.setFocus(null)}>
