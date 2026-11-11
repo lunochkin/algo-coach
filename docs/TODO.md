@@ -180,7 +180,7 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Show a card's ladder and probes on the phone, each rung opening the
       Problem screen, and revise the `pages.md` rule that they follow the
       sitting. The sitting a rung opens stays on the web
-- [ ] Add the press starting a card run to the phone's card, below its
+- [x] Add the press starting a card run to the phone's card, below its
       ladder. Starting draws the probes and declares the study, and the
       sittings it measures are still sat on the web
 - [ ] Link the privacy policy from the phone's Login and Settings, opening

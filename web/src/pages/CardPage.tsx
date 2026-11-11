@@ -5,6 +5,9 @@ import {
   PROBES_ASIDE,
   PROBES_TITLE,
   probeState,
+  RUN_START_NOTE,
+  runStartLabel,
+  runStartRefused,
 } from '@algo-coach/core'
 import { ChevronDown } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
@@ -212,15 +215,12 @@ function Start({
   return (
     <Panel>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <p className="text-meta text-muted-foreground">
-          The ladder is measured from the start, so a problem solved before it counts toward
-          nothing.
-        </p>
+        <p className="text-meta text-muted-foreground">{RUN_START_NOTE}</p>
         <Button className="ml-auto" onClick={onStart} disabled={starting}>
-          {starting ? 'Starting…' : 'Start studying this card'}
+          {runStartLabel(starting)}
         </Button>
       </div>
-      {refused && <p className="text-meta text-destructive">The card did not start: {refused}</p>}
+      {refused && <p className="text-meta text-destructive">{runStartRefused(refused)}</p>}
     </Panel>
   )
 }

@@ -268,3 +268,10 @@ export const LADDER_GAP = 'gap';
 export const PROBES_TITLE = 'Probes';
 export const PROBES_ASIDE = 'drawn at the start, never from the ladder';
 export const probeState = (attempted: boolean) => (attempted ? 'attempted' : 'not attempted');
+
+// the press opening a card's run: the ladder counts from it, so a problem
+// solved before it counts toward nothing
+export const RUN_START_NOTE =
+  'The ladder is measured from the start, so a problem solved before it counts toward nothing.';
+export const runStartLabel = (starting: boolean) => (starting ? 'Starting…' : 'Start studying this card');
+export const runStartRefused = (error: string) => `The card did not start: ${error}`;

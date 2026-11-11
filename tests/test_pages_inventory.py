@@ -61,6 +61,7 @@ PHONE_PARTS = {
     "An exam and its results": "quiz.tsx",
     "A certification's conditions": "certs.tsx",
     "A card's ladder and probes": "card.tsx",
+    "The press starting a card's run": "card.tsx",
 }
 
 

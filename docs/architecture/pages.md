@@ -391,7 +391,7 @@ what it offers. The inventory is the list both clients build to.
 | The cards | `/cards` | the Cards tab | same |
 | A card's trigger, brief and templates | `/cards/:slug` | Card | same |
 | A card's ladder and probes | `/cards/:slug` | Card | same |
-| The press starting a card's run | `/cards/:slug` | none | web for now |
+| The press starting a card's run | `/cards/:slug` | Card, below the ladder | same |
 | A recall | `/cards/:slug/recall/:template` | none | web for now |
 | The knowledge home | `/knowledge` | Home | same |
 | A module | `/knowledge/modules/:module` | Module | same |
@@ -467,8 +467,11 @@ what it offers. The inventory is the list both clients build to.
   writing code is the trigger that adds the editor and the clock.
 - **The phone's card reads its ladder and its probes as the web's does.** A
   rung and a probe each open the phone's Problem screen, and the sitting the
-  problem asks for stays on the web. The press starting a run waits for its
-  own item, since starting draws the probes.
+  problem asks for stays on the web.
+- **The phone starts a card's run below the ladder.** The ladder names what
+  the run will measure, so the press follows it. Starting draws the probes
+  and opens the run on both clients, and the sittings it counts are sat on
+  the web.
 - **The phone reads the board and the cards from the engine and keeps no
   copy.** With no connection the Practice tab, the Cards tab and each screen
   under them say so. The knowledge copy exists so a

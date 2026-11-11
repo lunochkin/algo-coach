@@ -17,7 +17,14 @@ import {
   PROBES_ASIDE,
   PROBES_TITLE,
   probeState,
+  described,
+  RUN_START_NOTE,
+  runStartLabel,
+  runStartRefused,
 } from '@algo-coach/core';
+import { engine } from '@/lib/engine';
+import { getToken } from '@/lib/settings';
+import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { CodeBlock, Failed, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
@@ -58,6 +65,7 @@ export default function CardScreen() {
             <Text variant="titleMedium">The brief</Text>
             <Markdown>{card.brief}</Markdown>
             <Ladder studied={studied.data!} />
+            {studied.data!.run ? null : <RunStart slug={slug} onStarted={studied.reload} />}
             {studied.data!.probes.length > 0 ? <Probes studied={studied.data!} /> : null}
             <Text variant="titleMedium">
               Templates <Text style={{ color: theme.colors.onSurfaceVariant }}>{card.templates.length}</Text>
@@ -214,5 +222,43 @@ function Probes({ studied }: { studied: Studied }) {
         ))}
       </PickPanel>
     </>
+  );
+}
+
+// the press opening a run, below the ladder it measures from. Starting draws
+// the probes; the sittings the run counts are still sat on the web
+function RunStart({ slug, onStarted }: { slug: string; onStarted: () => void }) {
+  const theme = useTheme();
+  const st = useStore();
+  const [starting, setStarting] = useState(false);
+  const [refused, setRefused] = useState<string | null>(null);
+  const start = async () => {
+    setStarting(true);
+    setRefused(null);
+    try {
+      await engine(st.settings.origin, await getToken()).POST('/api/cards/{slug}/runs', {
+        params: { path: { slug } },
+      });
+      onStarted();
+    } catch (e) {
+      setRefused(described(e));
+    } finally {
+      setStarting(false);
+    }
+  };
+  return (
+    <View style={{ gap: 8 }}>
+      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+        {RUN_START_NOTE}
+      </Text>
+      <Button mode="contained" onPress={() => void start()} disabled={starting} style={{ alignSelf: 'flex-start' }}>
+        {runStartLabel(starting)}
+      </Button>
+      {refused ? (
+        <Text variant="bodySmall" style={{ color: theme.colors.error }}>
+          {runStartRefused(refused)}
+        </Text>
+      ) : null}
+    </View>
   );
 }
