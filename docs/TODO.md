@@ -326,6 +326,21 @@ and removes the drift the audit found.
       core already holds: the lessons' sections, closing a section, the
       module grid, a value's cut, the map's opening, and the joined lines
 
+### From use on the phone
+
+The author's first sittings on the phone, on 2026-11-11, found these.
+
+- [x] Show a lesson stop's reading time on both clients, so Read or Later is
+      chosen before the lesson opens
+- [x] Serve a question between two lesson stops wherever one is left, with
+      the shared fixture's lesson case moved to say so
+- [x] Build one board per scope for each log, and freeze the phone's tabs out
+      of view. Every record rebuilt several boards on every mounted screen
+- [x] Give each press in the queue's bottom bar the height every other bar
+      press has
+- [x] Sync on a pull down the phone's browsing screens, and read their engine
+      data again
+
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
       showing the same state

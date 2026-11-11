@@ -16,6 +16,7 @@ import { useEngine } from '@/lib/useEngine';
 import { CardPanel } from '@/ui/cards';
 import { Blank, Loaded, styles } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
+import { usePullSync } from '@/ui/pull';
 
 /**
  * A technique's problems and the cards teaching it or a narrower one:
@@ -29,6 +30,7 @@ export default function TechniqueScreen() {
   // the technique's cards, read as the cards list reads them
   const taught = useEngine('/api/techniques/{technique}/cards', { technique });
   const listed = useEngine('/api/cards');
+  const pull = usePullSync(problems.reload, taught.reload, listed.reload);
   const error = problems.error ?? taught.error ?? listed.error;
   const [now] = useState(() => Date.now());
 
@@ -40,7 +42,7 @@ export default function TechniqueScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={technique} />
       </Appbar.Header>
-      <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
+      <ScrollView refreshControl={pull} contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
         <Loaded
           of={OF.technique}
           state={{

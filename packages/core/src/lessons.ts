@@ -4,6 +4,7 @@ import { minutesOf } from './lessontext';
 import { bySavedOrder } from './order';
 import type { Board } from './schedule';
 import type { Course } from './types';
+import { aboutMinutes, LESSON_STOP_KICKER } from './words/queue';
 
 /**
  * A group of one module's lessons, as a long page's section. The bar names
@@ -68,9 +69,20 @@ export interface LessonRow {
   status: string;
 }
 
+/** A lesson's reading time, or 0 where the snapshot holds no text yet. */
+export function lessonMinutes(c: Course, x: Lesson): number {
+  const body = c.lessonBodies[x.slug];
+  return body ? minutesOf(x, body) : 0;
+}
+
+/** A queue's lesson stop above its title: what it is, and how long it takes to read, to decide before opening it. */
+export function lessonStopKicker(c: Course, x: Lesson): string {
+  const minutes = lessonMinutes(c, x);
+  return minutes ? `${LESSON_STOP_KICKER} · ${aboutMinutes(minutes)}` : LESSON_STOP_KICKER;
+}
+
 export function lessonRow(b: Board, c: Course, x: Lesson): LessonRow {
   const state = b.lessonState(c, x);
-  const body = c.lessonBodies[x.slug] ?? '';
   const [sub, level] = x.teaches[0] ?? ['', 0];
   const more = x.teaches.length > 1 ? ` +${x.teaches.length - 1}` : '';
   const need = (r: string) =>
@@ -87,7 +99,7 @@ export function lessonRow(b: Board, c: Course, x: Lesson): LessonRow {
           : `Pretest ${Math.min(b.tried(c, x), x.pretest)}/${x.pretest}`;
   return {
     state,
-    minutes: body ? minutesOf(x, body) : 0,
+    minutes: lessonMinutes(c, x),
     teaches: `Teaches ${subTitle(c, sub)} · ${levelName(b.rules, level)}${more}`,
     status,
   };
@@ -109,9 +121,8 @@ export function readyLesson(b: Board, order: string[]): { c: Course; lesson: Les
   for (const c of bySavedOrder(b.courses, (x) => x.slug, order)) {
     for (const x of b.lessons(c)) {
       if (!b.lessonReady(c, x)) continue;
-      const body = c.lessonBodies[x.slug];
-      const minutes = body ? minutesOf(x, body) : 0;
-      return { c, lesson: x, line: `Ready to read: ${x.title}${minutes ? ` · ~${minutes} min` : ''}` };
+      const minutes = lessonMinutes(c, x);
+      return { c, lesson: x, line: `Ready to read: ${x.title}${minutes ? ` · ${aboutMinutes(minutes)}` : ''}` };
     }
   }
   return null;

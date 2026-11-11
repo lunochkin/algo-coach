@@ -166,7 +166,10 @@ questions.
 - **A question names its lesson, or takes the lessons teaching its group.** A
   question with several lessons waits while any one holds it.
 - **A queue offers a lesson where it would serve a new question**, after the
-  reviews, and at most once per queue.
+  reviews, and each lesson at most once per queue.
+- **A question comes between two lessons wherever one is left to serve.** Two
+  lesson stops in a row break the queue's flow. A queue with nothing but
+  lessons left still offers them one after another.
 
 ## Queues
 

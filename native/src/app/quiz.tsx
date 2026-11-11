@@ -52,7 +52,6 @@ import {
   EXAM_DONE,
   examReviewMissed,
   examReviewNext,
-  LESSON_STOP_KICKER,
   LESSON_STOP_LATER,
   LESSON_STOP_READ,
   QUEUE_ANSWERED,
@@ -74,6 +73,7 @@ import {
   askResult,
   initialAsk,
   keyPointLabel,
+  lessonStopKicker,
 } from '@algo-coach/core';
 import { EMPTY, type Edit, type Key, pressed } from '@/lib/keys';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
@@ -99,7 +99,7 @@ function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number
     <View style={{ flex: 1 }}>
       <View style={[styles.page, { flex: 1, justifyContent: 'center' }]}>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {LESSON_STOP_KICKER}
+          {lessonStopKicker(item.course, item.lesson)}
         </Text>
         <Text variant="headlineSmall">{item.lesson.title}</Text>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -108,15 +108,21 @@ function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number
       </View>
       <BottomBar bottom={bottom} row>
         {read ? (
-          <Button mode="contained" style={{ flex: 1 }} onPress={onNext}>
+          <Button mode="contained" style={{ flex: 1 }} onPress={onNext} contentStyle={{ paddingVertical: 8 }}>
             {ASK_NEXT}
           </Button>
         ) : (
           <>
-            <Button mode="text" onPress={onNext}>
+            <Button mode="text" onPress={onNext} contentStyle={{ paddingVertical: 8 }}>
               {LESSON_STOP_LATER}
             </Button>
-            <Button mode="contained" icon="book-open-variant" style={{ flex: 1 }} onPress={open}>
+            <Button
+              mode="contained"
+              icon="book-open-variant"
+              style={{ flex: 1 }}
+              onPress={open}
+              contentStyle={{ paddingVertical: 8 }}
+            >
               {LESSON_STOP_READ}
             </Button>
           </>
@@ -556,6 +562,7 @@ function Ask(props: {
           disabled={!press.enabled}
           accessibilityLabel={press.act === 'grade' ? gradeLabel(press.label) : undefined}
           onPress={act}
+          contentStyle={{ paddingVertical: 8 }}
         >
           {press.label}
         </Button>
@@ -581,7 +588,7 @@ function Reviewed({ r, bottom, last, onNext }: { r: Result; bottom: number; last
         <DetailsToggle r={r} open={details} onToggle={() => setDetails(!details)} />
       </ScrollView>
       <BottomBar bottom={bottom} row>
-        <Button mode="contained" style={{ flex: 1 }} onPress={onNext}>
+        <Button mode="contained" style={{ flex: 1 }} onPress={onNext} contentStyle={{ paddingVertical: 8 }}>
           {examReviewNext(last)}
         </Button>
       </BottomBar>

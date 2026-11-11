@@ -26,6 +26,7 @@ import { AccountMenu } from '@/ui/account';
 import { Loaded, styles } from '@/ui/common';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 import { Toggle } from '@/ui/toggle';
+import { usePullSync } from '@/ui/pull';
 
 /**
  * Every served problem, filtered by technique and difficulty, as the web's
@@ -34,6 +35,7 @@ import { Toggle } from '@/ui/toggle';
 export default function ProblemsScreen() {
   const theme = useTheme();
   const listed = useEngine('/api/problems');
+  const pull = usePullSync(listed.reload);
   const [filter, setFilter] = useState<ListingFilter>(NO_FILTER);
   const [now] = useState(() => Date.now());
   const muted = { color: theme.colors.onSurfaceVariant };
@@ -44,7 +46,7 @@ export default function ProblemsScreen() {
         <Appbar.Content title={PROBLEMS_TITLE} />
         <AccountMenu />
       </Appbar.Header>
-      <ScrollView contentContainerStyle={[styles.page, { paddingBottom: 24 }]}>
+      <ScrollView refreshControl={pull} contentContainerStyle={[styles.page, { paddingBottom: 24 }]}>
         <Text variant="bodyMedium" style={muted}>
           {PROBLEMS_NOTE}
         </Text>

@@ -5,6 +5,7 @@ import {
   lessonGroups,
   lessonParts,
   lessonSections,
+  lessonStopKicker,
   lessonRow,
   lessonsAround,
   lessonStopNote,
@@ -62,6 +63,10 @@ describe('the lessons', () => {
       ['toRead', ['first']],
       ['locked', ['second']],
     ]);
+  });
+
+  it("names a lesson stop's reading time, to decide before opening it", () => {
+    expect(lessonStopKicker(c, c.graph!.lesson('first')!)).toBe('New lesson · ~3 min');
   });
 
   it('reads each group as a section, the module heading its first', () => {

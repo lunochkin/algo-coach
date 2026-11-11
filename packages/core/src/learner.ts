@@ -66,11 +66,19 @@ export function learnerLog(lines: readonly { kind: string; line: unknown }[]): L
 /** The learner over the snapshot, or over none yet: the settings, the limit and the order need no content. */
 export function learnerView(raw: Catalog | null, log: LearnerLog): Learner {
   const { catalog, archived } = raw ? learnerCatalog(raw, log) : { catalog: null, archived: [] };
+  const boards = new Map<string, Board>();
   return {
     catalog,
     archived,
     focus: catalog ? currentFocus(log.focuses, catalog) : null,
-    board: (only, include = null) => (catalog ? Board.build(catalog, log.attempts, only, include) : null),
+    board: (only, include = null) => {
+      if (!catalog) return null;
+      // one board per scope for this log: every screen reading it shares the replays
+      const key = `${only ?? ''}|${include ?? ''}`;
+      let b = boards.get(key);
+      if (!b) boards.set(key, (b = Board.build(catalog, log.attempts, only, include)));
+      return b;
+    },
     newPerDay: newPerDay(log.settings),
     examSize: setting(log.settings, 'exam_size'),
     limitAt: (now) => todayLimit(log.settings, log.raises, now),

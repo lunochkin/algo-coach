@@ -19,6 +19,7 @@ import { AccountMenu } from '@/ui/account';
 import { CardPanel } from '@/ui/cards';
 import { Heading } from '@/ui/rows';
 import { Loaded, styles } from '@/ui/common';
+import { usePullSync } from '@/ui/pull';
 
 type ListedCard = components['schemas']['ListedCard'];
 
@@ -27,6 +28,7 @@ export default function CardsScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const cards = useEngine('/api/cards');
+  const pull = usePullSync(cards.reload);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -34,7 +36,7 @@ export default function CardsScreen() {
         <Appbar.Content title={CARDS_TITLE} />
         <AccountMenu />
       </Appbar.Header>
-      <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
+      <ScrollView refreshControl={pull} contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
           {CARDS_NOTE}
         </Text>

@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router/js-tabs';
 
 import { SECTION_PRACTICE, SECTION_PROBLEMS, SECTION_CARDS, SECTION_KNOWLEDGE } from '@algo-coach/core';
+import { Frozen } from '@/ui/frozen';
 
 // the sections the phone holds, as bottom tabs: `pages.md`, The structure. A
 // tab shows once the phone holds a page under its section, and a bar of one
@@ -22,6 +23,7 @@ export default function TabsLayout() {
   return (
     <Tabs
       backBehavior="initialRoute"
+      screenLayout={({ children }) => <Frozen>{children}</Frozen>}
       screenOptions={{
         headerShown: false,
         tabBarStyle: SECTIONS.length > 1 ? undefined : { display: 'none' },

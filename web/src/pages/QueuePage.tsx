@@ -18,7 +18,6 @@ import {
   type QueueSource,
   type Result,
   ASK_NEXT,
-  LESSON_STOP_KICKER,
   LESSON_STOP_LATER,
   LESSON_STOP_READ,
   QUEUE_ANSWERED,
@@ -27,6 +26,7 @@ import {
   QUEUE_STOP,
   queueLeft,
   OF,
+  lessonStopKicker,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -254,7 +254,9 @@ function LessonStop(props: {
   const { item, read, onRead, onNext } = props
   return (
     <Panel>
-      <p className="text-meta font-medium text-muted-foreground">{LESSON_STOP_KICKER}</p>
+      <p className="text-meta font-medium text-muted-foreground">
+        {lessonStopKicker(item.course, item.lesson)}
+      </p>
       <p className="text-heading font-medium">{item.lesson.title}</p>
       <p className="text-meta text-muted-foreground">{lessonStopNote(read)}</p>
       <div className="flex gap-stack">

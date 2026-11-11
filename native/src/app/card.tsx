@@ -44,6 +44,7 @@ import { BottomBar, CodeBlock, HeaderNote, Loaded, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
 import { Badge, Panel, PickPanel, PickRow } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
+import { usePullSync } from '@/ui/pull';
 
 type Template = components['schemas']['Template'];
 type Recalled = components['schemas']['Recalled'];
@@ -58,6 +59,7 @@ export default function CardScreen() {
   const insets = useSafeAreaInsets();
   const { slug = '' } = useLocalSearchParams<{ slug: string }>();
   const studied = useEngine('/api/cards/{slug}', { slug });
+  const pull = usePullSync(studied.reload);
   const [now] = useState(() => Date.now());
   const card = studied.data?.card;
   const recall = new Map((studied.data?.recall ?? []).map((one) => [one.template_id, one]));
@@ -83,6 +85,7 @@ export default function CardScreen() {
       <HeaderNote lines={[studied.data ? cardNote(studied.data, now) : card?.technique]} />
       <SectionBar sections={sections} />
       <ScrollView
+        refreshControl={pull}
         ref={sections.scroll}
         onScroll={sections.onScroll}
         scrollEventThrottle={32}

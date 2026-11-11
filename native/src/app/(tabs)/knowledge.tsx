@@ -28,9 +28,11 @@ import { FocusCard } from '@/ui/focuscard';
 import { AccountMenu } from '@/ui/account';
 import { ModuleRow } from '@/ui/modules';
 import { Heading, PanelItem, PickPanel, PickRow } from '@/ui/rows';
+import { usePullSync } from '@/ui/pull';
 
 export default function Home() {
   const st = useStore();
+  const pull = usePullSync();
   const theme = useTheme();
   const next = useContinue();
   const { cont, focus: focused } = next;
@@ -130,6 +132,7 @@ export default function Home() {
         <AccountMenu />
       </Appbar.Header>
       <ReorderableList
+        refreshControl={pull}
         data={rows}
         keyExtractor={(r) => r.c.slug}
         onReorder={onReorder}

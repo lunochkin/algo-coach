@@ -24136,7 +24136,7 @@
  ],
  "queue": [
   {
-   "name": "lessons: pretest, then the lesson as an item, then the rest",
+   "name": "lessons: pretest, then the lesson as an item, and a question before the next",
    "now": "2026-01-15T09:00:00+00:00",
    "limit": 10,
    "courses": [
@@ -24404,8 +24404,8 @@
      "ls:g1",
      "ls:g2",
      "lesson:gen",
-     "lesson:gen2",
-     "ls:g3"
+     "ls:g1",
+     "lesson:gen2"
     ]
    }
   },

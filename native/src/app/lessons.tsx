@@ -22,10 +22,12 @@ import { useStore } from '@/lib/store';
 import { fromCopy, Loaded, styles } from '@/ui/common';
 import { Heading, PanelItem, PickRow } from '@/ui/rows';
 import { SectionBar } from '@/ui/sections';
+import { usePullSync } from '@/ui/pull';
 
 // every module's lessons, by module, as the web lists them: `pages.md`, The two clients
 export default function LessonsScreen() {
   const st = useStore();
+  const pull = usePullSync();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { board } = st;
@@ -84,6 +86,7 @@ export default function LessonsScreen() {
         <>
           <SectionBar sections={bar} />
           <SectionList
+            refreshControl={pull}
             ref={list}
             onViewableItemsChanged={onViewable}
             onScrollToIndexFailed={() => {}}

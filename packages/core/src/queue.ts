@@ -68,6 +68,7 @@ export type QueueKind = 'mix' | 'focus' | 'review' | 'drill';
 export class Queue {
   asked = new Set<string>();
   offered = new Set<string>(); // lessons served this queue: "course:lesson"
+  private lastWasLesson = false;
   private lastCourse = -1;
 
   readonly kind: QueueKind;
@@ -190,6 +191,13 @@ export class Queue {
 
   pick(b: Board, now: number, rng: Rng = Math.random): Question | LessonItem | null {
     const reviews = ranked(this.reviews(b, now), b, now, rng);
+    // a stop right after a stop breaks the queue's flow, so a question comes
+    // between two lessons wherever one is left: `knowledge.md`, Lessons
+    const lesson = () => {
+      const item = this.lessonItem(b);
+      if (item) this.offered.add(`${item.course.slug}:${item.lesson.slug}`);
+      return item;
+    };
     let q: Question | null = null;
     if (this.kind === 'drill') {
       const fresh = this.fresh(b, now, rng, true);
@@ -202,20 +210,26 @@ export class Queue {
         q = ranked(rest, b, now, rng)[0] ?? null;
       }
     } else {
-      if (!reviews.length) {
-        const item = this.lessonItem(b);
-        if (item) {
-          this.offered.add(`${item.course.slug}:${item.lesson.slug}`);
-          return item;
-        }
+      if (!reviews.length && !this.lastWasLesson) {
+        const item = lesson();
+        if (item) return this.served(item);
       }
       q = reviews[0] ?? this.fresh(b, now, rng, true);
     }
     q ??= this.ahead(b, now);
+    if (!q && this.lastWasLesson) {
+      const item = lesson();
+      if (item) return this.served(item);
+    }
     if (q) {
       this.asked.add(qkey(q));
     }
-    return q;
+    return this.served(q);
+  }
+
+  private served<T extends Question | LessonItem | null>(item: T): T {
+    this.lastWasLesson = isLessonItem(item);
+    return item;
   }
 
   /** Whether today's limit alone empties the queue: five more would let a new question in. */

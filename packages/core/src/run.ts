@@ -53,11 +53,19 @@ export class QueueRun {
     this.done = !this.current;
   }
 
+  private built: { catalog: Catalog; attempts: AttemptRecord[]; mine: number; b: Board } | null = null;
+
+  /** The board over the log and this queue's own answers, built again only once either moved. */
   board(src: QueueSource): Board | null {
     if (!src.catalog) return null;
+    const was = this.built;
+    if (was && was.catalog === src.catalog && was.attempts === src.attempts && was.mine === this.mine.length)
+      return was.b;
     const known = new Set(src.attempts.map(attemptKey));
     const extra = this.mine.filter((a) => !known.has(attemptKey(a)));
-    return Board.build(src.catalog, [...src.attempts, ...extra], this.course, this.include);
+    const b = Board.build(src.catalog, [...src.attempts, ...extra], this.course, this.include);
+    this.built = { catalog: src.catalog, attempts: src.attempts, mine: this.mine.length, b };
+    return b;
   }
 
   private pick(src: QueueSource, now = Date.now()): QueueItem | null {

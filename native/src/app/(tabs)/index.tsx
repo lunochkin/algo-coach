@@ -30,6 +30,7 @@ import { ContinueBar, ContinueNotice, useContinue } from '@/ui/continue';
 import { FocusCard } from '@/ui/focuscard';
 import { ModuleRow } from '@/ui/modules';
 import { Heading, Panel, PickPanel, PickRow } from '@/ui/rows';
+import { usePullSync } from '@/ui/pull';
 
 type Board = components['schemas']['Board'];
 type ListedCard = components['schemas']['ListedCard'];
@@ -58,6 +59,7 @@ export default function PracticeScreen() {
 
   const board = useEngine('/api/board');
   const cards = useEngine('/api/cards');
+  const pull = usePullSync(board.reload, cards.reload);
   const error = board.error ?? cards.error;
 
   return (
@@ -67,7 +69,7 @@ export default function PracticeScreen() {
         <AccountMenu />
       </Appbar.Header>
       {/* room under the last row for the bar over it */}
-      <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 160 }]}>
+      <ScrollView refreshControl={pull} contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 160 }]}>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
           {BOARD_NOTE}
         </Text>

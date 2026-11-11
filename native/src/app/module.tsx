@@ -65,6 +65,7 @@ import { Sheet } from '@/ui/sheet';
 import { useArchive } from '@/ui/pause';
 import { useStartSheet, type Scope } from '@/ui/start';
 import { Toggle } from '@/ui/toggle';
+import { usePullSync } from '@/ui/pull';
 
 const MIN_SCALE = 0.25;
 const MAX_SCALE = 2.5;
@@ -72,6 +73,7 @@ const MAX_FLING = 6000; // pt/s
 
 export default function ModuleScreen() {
   const st = useStore();
+  const pull = usePullSync();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const p = useLocalSearchParams<{ course?: string }>();
@@ -159,6 +161,7 @@ export default function ModuleScreen() {
         <>
           <SectionBar sections={sections} />
           <ScrollView
+            refreshControl={pull}
             ref={sections.scroll}
             onScroll={sections.onScroll}
             scrollEventThrottle={32}

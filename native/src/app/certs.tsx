@@ -33,12 +33,14 @@ import { CertRing, CertSheet } from '@/ui/certs';
 import { useStartSheet } from '@/ui/start';
 import { fromCopy, Loaded, styles, tones } from '@/ui/common';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
+import { usePullSync } from '@/ui/pull';
 
 const CELL = 54;
 
 /** Rows: a course's topics, then the course itself; columns: Foundation to Expert. */
 export default function CertsScreen() {
   const st = useStore();
+  const pull = usePullSync();
   const starter = useStartSheet();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -76,6 +78,7 @@ export default function CertsScreen() {
         <>
           <SectionBar sections={sections} />
           <ScrollView
+            refreshControl={pull}
             ref={sections.scroll}
             onScroll={sections.onScroll}
             scrollEventThrottle={32}

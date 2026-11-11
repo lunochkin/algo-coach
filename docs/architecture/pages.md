@@ -294,7 +294,9 @@ platforms.
   example, the pitfalls, the version notes and the diagram, each where the
   question carries one.
 - **A lesson the queue offers is a stop in the queue**, on both clients: the
-  lesson's title, why it is offered, and Read and Later as its presses. Read
+  lesson's title, its reading time, why it is offered, and Read and Later as
+  its presses. The reading time lets the reader choose between Read and Later
+  before opening the lesson. Read
   opens the lesson over the running queue, with its minutes, Mark read and
   its links to other lessons. Closing the lesson returns to the queue.
 - **Reading a lesson ends no queue.** The web opens the lesson in a dialog
@@ -531,6 +533,9 @@ what it offers. The inventory is the list both clients build to.
   copy.** With no connection the Practice tab, the Cards tab and each screen
   under them say so. The knowledge copy exists so a
   queue picks offline, and reading a card picks nothing.
+- **Pulling a list down on the phone syncs.** The knowledge log is sent and
+  received at once, and a screen reading the engine reads it again. A phone
+  has no reload, and a reader pulls to see the records another device wrote.
 - **The privacy policy is one text in `packages/core`, read on both
   clients.** The web serves it at `/privacy`, which the providers' consent
   screens name. The phone holds it as a screen opened from Login and
