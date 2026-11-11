@@ -5,14 +5,16 @@
 FROM node:26-slim AS pages
 WORKDIR /repo
 # the manifests alone first, so a page edit reuses the installed layer. Every
-# workspace's manifest is named, and only the web's packages and the core's
-# are installed: the native app's never reach the pages
+# workspace's manifest is named, and only the web's packages and the shared
+# ones it imports are installed: the native app's never reach the pages
 COPY package.json package-lock.json ./
 COPY packages/core/package.json packages/core/
+COPY packages/editor/package.json packages/editor/
 COPY native/package.json native/
 COPY web/package.json web/
-RUN npm ci --workspace web --workspace packages/core
+RUN npm ci --workspace web --workspace packages/core --workspace packages/editor
 COPY packages/core/ packages/core/
+COPY packages/editor/ packages/editor/
 COPY web/ web/
 RUN npm run build --workspace web
 
