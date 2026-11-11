@@ -1,6 +1,14 @@
 import { Link, useSearchParams } from 'react-router'
 
-import { continueWith, devLoginAs, LOGIN_INTRO, NO_SIGN_IN, refusal } from '@algo-coach/core'
+import {
+  continueWith,
+  devLoginAs,
+  LOGIN_INTRO,
+  NO_SIGN_IN,
+  refusal,
+  PRIVACY_LINK,
+  PRIVACY_NOTE,
+} from '@algo-coach/core'
 
 import { api, PRIVACY } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
@@ -58,9 +66,9 @@ export function LoginPage() {
       </Loaded>
 
       <p className="border-t pt-4 text-meta text-muted-foreground">
-        The app stores what you attempt and what a model says about it.{' '}
+        {PRIVACY_NOTE}{' '}
         <Link to={PRIVACY} className="text-foreground underline underline-offset-4">
-          Privacy policy
+          {PRIVACY_LINK}
         </Link>
       </p>
     </section>

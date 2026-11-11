@@ -183,8 +183,8 @@ both apps import, and each app keeps a look of its own. Decided 2026-11-10.
 - [x] Add the press starting a card run to the phone's card, below its
       ladder. Starting draws the probes and declares the study, and the
       sittings it measures are still sat on the web
-- [ ] Link the privacy policy from the phone's Login and Settings, opening
-      its web URL, and name the link in the inventory's phone column
+- [x] Serve the privacy policy on the phone as a screen, opened from Login
+      and Settings, with its text moved into `packages/core` for both clients
 
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both

@@ -41,3 +41,4 @@ export * from './sync';
 export * from './learner';
 export * from './engine';
 export * from './listing';
+export * from './privacy';

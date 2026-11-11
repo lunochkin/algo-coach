@@ -12,6 +12,8 @@ import {
   NO_SIGN_IN,
   SIGN_IN_LOADING,
   signInUnread,
+  PRIVACY_LINK,
+  PRIVACY_NOTE,
 } from '@algo-coach/core';
 import { offered, signIn, type Offered, type Provider } from '@/lib/auth';
 import { described } from '@/lib/engine';
@@ -132,6 +134,18 @@ export default function LoginScreen() {
         ))
       )}
       {error ? <HelperText type="error">{error}</HelperText> : null}
+      {/* the policy the web's login links, held in the app */}
+      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+        {PRIVACY_NOTE}{' '}
+        <Text
+          variant="bodySmall"
+          accessibilityRole="link"
+          style={{ color: theme.colors.primary, textDecorationLine: 'underline' }}
+          onPress={() => router.push('/privacy')}
+        >
+          {PRIVACY_LINK}
+        </Text>
+      </Text>
     </View>
   );
 }

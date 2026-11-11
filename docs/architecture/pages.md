@@ -407,7 +407,7 @@ what it offers. The inventory is the list both clients build to.
 | The settings | `/settings` | Settings | same |
 | The signed-in devices | a dialog from the account menu | a screen from the account menu | same |
 | The login | `/login` | Login | same |
-| The privacy policy | `/privacy` | none | web only |
+| The privacy policy | `/privacy` | Privacy, from Login and Settings | same |
 | The gallery | `/gallery`, in development | none | web only |
 
 ### Acts
@@ -476,9 +476,11 @@ what it offers. The inventory is the list both clients build to.
   copy.** With no connection the Practice tab, the Cards tab and each screen
   under them say so. The knowledge copy exists so a
   queue picks offline, and reading a card picks nothing.
-- **The privacy policy and the gallery are web only.** The providers' consent
-  screens link the policy by its URL, and the gallery is a tool for whoever
-  styles the web.
+- **The privacy policy is one text in `packages/core`, read on both
+  clients.** The web serves it at `/privacy`, which the providers' consent
+  screens name. The phone holds it as a screen opened from Login and
+  Settings, so it reads before any sign-in and with no connection.
+- **The gallery is web only.** It is a tool for whoever styles the web.
 - **An exam runs on its own page on the web and on the quiz screen on the
   phone.** The web's exam page holds its sample in memory, so a reload
   returns to its choices without discarding a record. The phone has no

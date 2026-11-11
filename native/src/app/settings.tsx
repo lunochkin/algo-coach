@@ -21,6 +21,7 @@ import {
   studyForm,
   SYNC_NOW,
   waitingToSend,
+  PRIVACY_LINK,
 } from '@algo-coach/core';
 import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
@@ -143,6 +144,14 @@ export default function SettingsScreen() {
             </Button>
           ) : null}
         </View>
+        <Button
+          mode="text"
+          icon="shield-account-outline"
+          style={{ alignSelf: 'flex-start' }}
+          onPress={() => router.push('/privacy')}
+        >
+          {PRIVACY_LINK}
+        </Button>
         {field('device', 'Device name')}
         {!deviceOk ? <HelperText type="error">Letters, digits, - and _ only</HelperText> : null}
         <Text variant="titleMedium">{STUDY}</Text>

@@ -106,3 +106,7 @@ const REFUSALS: Record<string, string> = {
   uninvited: 'That address has no invitation.',
 };
 export const refusal = (code: string) => REFUSALS[code] ?? REFUSALS.incomplete;
+
+// the privacy policy, linked from both clients' login
+export const PRIVACY_NOTE = 'The app stores what you attempt and what a model says about it.';
+export const PRIVACY_LINK = 'Privacy policy';

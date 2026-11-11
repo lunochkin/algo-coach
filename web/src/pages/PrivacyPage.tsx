@@ -1,17 +1,10 @@
+import { privacyPolicy, privacyUpdated } from '@algo-coach/core'
+
 import { LOGIN } from '@/api/client'
 import { Markdown } from '@/components/Markdown'
 import { PageHeader } from '@/components/PageHeader'
-import policy from '@/pages/privacy.md?raw'
 
-// the file opens with its title and the date it was last updated. Both are
-// the page's header, so they are taken off the prose rather than printed
-// twice
-const TITLE = /^#\s+(.+)$/m.exec(policy)?.[1] ?? 'Privacy policy'
-const UPDATED = /^Last updated:\s*(.+)$/m.exec(policy)?.[1] ?? null
-const BODY = policy
-  .replace(/^#\s+.+$/m, '')
-  .replace(/^Last updated:.*$/m, '')
-  .trimStart()
+const POLICY = privacyPolicy()
 
 export function PrivacyPage() {
   return (
@@ -20,10 +13,10 @@ export function PrivacyPage() {
           back. No section: the page opens with no session */}
       <PageHeader
         back={{ to: LOGIN, label: 'Sign in' }}
-        title={TITLE}
-        note={UPDATED && `Last updated ${UPDATED}`}
+        title={POLICY.title}
+        note={POLICY.updated && privacyUpdated(POLICY.updated)}
       />
-      <Markdown>{BODY}</Markdown>
+      <Markdown>{POLICY.body}</Markdown>
     </article>
   )
 }
