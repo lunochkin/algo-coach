@@ -1,6 +1,6 @@
 import { X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router'
+import { Navigate, useNavigate, useSearchParams } from 'react-router'
 
 import {
   continuePlan,
@@ -35,7 +35,7 @@ import { Ask } from '@/knowledge/Ask'
 import { linesOf, useKnowledge } from '@/knowledge/context'
 import { filteredScope } from '@/knowledge/filtered'
 import { useLearner } from '@/knowledge/learner'
-import { lessonPath } from '@/knowledge/paths'
+import { LessonOver, type Reading } from '@/knowledge/LessonOver'
 
 // learn's names, which a stint stores: the filtered queue is `drill` on the wire
 type Mode = 'next' | 'review' | 'drill'
@@ -103,6 +103,8 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
     return start && new QueueRun(start.queue, mode, start.course, start.include, held())
   })
   const [, rerender] = useState(0)
+  // a lesson read over the queue: the stop's and an answer's lesson links open it
+  const [lessonOpen, setLessonOpen] = useState<Reading>(null)
   const changed = () => rerender((n) => n + 1)
 
   // leaving through the navigation stores the stint too. The cleanup reads
@@ -190,6 +192,9 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
               `${current.lesson.course.slug}:${current.lesson.lesson.slug}`,
             )
           }
+          onRead={() =>
+            setLessonOpen({ course: current.lesson.course.slug, slug: current.lesson.lesson.slug })
+          }
           onNext={next}
         />
       ) : !done && current && 'q' in current ? (
@@ -200,6 +205,7 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
           head={questionHead(course, catalog.rules, current.q, current.tag, current.early)}
           onAnswered={onAnswered}
           onNext={next}
+          onLesson={(course, slug) => setLessonOpen({ course, slug })}
         />
       ) : (
         <Summary
@@ -209,6 +215,7 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
           onDone={() => navigate(scope ? `/knowledge/modules/${scope.course}` : HOME)}
         />
       )}
+      <LessonOver reading={lessonOpen} onRead={setLessonOpen} />
     </section>
   )
 }
@@ -240,9 +247,13 @@ function Summary(props: {
 // a lesson the queue offers is a stop: its title, why it is offered, and Read
 // opening the lesson page, whose way back returns here. `pages.md`, The
 // knowledge pages
-function LessonStop(props: { item: LessonItem; read: boolean; onNext: () => void }) {
-  const { item, read, onNext } = props
-  const { pathname, search } = useLocation()
+function LessonStop(props: {
+  item: LessonItem
+  read: boolean
+  onRead: () => void
+  onNext: () => void
+}) {
+  const { item, read, onRead, onNext } = props
   return (
     <Panel>
       <p className="text-meta text-brand-deep">{LESSON_STOP_KICKER}</p>
@@ -253,11 +264,7 @@ function LessonStop(props: { item: LessonItem; read: boolean; onNext: () => void
           <Button onClick={onNext}>{ASK_NEXT}</Button>
         ) : (
           <>
-            <Button asChild>
-              <Link to={lessonPath(item.course.slug, item.lesson.slug, '', `${pathname}${search}`)}>
-                {LESSON_STOP_READ}
-              </Link>
-            </Button>
+            <Button onClick={onRead}>{LESSON_STOP_READ}</Button>
             <Button variant="ghost" onClick={onNext}>
               {LESSON_STOP_LATER}
             </Button>

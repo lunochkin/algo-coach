@@ -11,8 +11,17 @@ import { anchor } from '@algo-coach/core'
 import { lessonPath } from '@/knowledge/paths'
 
 // a lesson's Markdown: its `lesson:` links stay in the app, and each heading
-// carries the anchor a link names, as the core reads them
-export function LessonText({ module, text }: { module: string; text: string }) {
+// carries the anchor a link names, as the core reads them. `onLesson` opens a
+// linked lesson in place, where leaving the page would end a queue
+export function LessonText({
+  module,
+  text,
+  onLesson,
+}: {
+  module: string
+  text: string
+  onLesson?: (slug: string) => void
+}) {
   return (
     <div className="prose max-w-none">
       <ReactMarkdown
@@ -24,6 +33,18 @@ export function LessonText({ module, text }: { module: string; text: string }) {
           a: ({ href = '', children }) => {
             if (!href.startsWith('lesson:')) return <a href={href}>{children}</a>
             const [slug, part = ''] = href.slice('lesson:'.length).split('#')
+            if (onLesson)
+              return (
+                <a
+                  href={lessonPath(module, slug, part)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    onLesson(slug)
+                  }}
+                >
+                  {children}
+                </a>
+              )
             return <Link to={lessonPath(module, slug, part)}>{children}</Link>
           },
         }}

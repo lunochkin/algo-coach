@@ -53,11 +53,13 @@ type Props = {
   onNext: () => void
   // an exam shows no verdict until its end: the answer moves on at once
   exam?: { last: boolean }
+  // opens an answer's lesson over the queue, which following its link would end
+  onLesson?: (course: string, slug: string) => void
 }
 
 // one question, one act at a time: the answer, then the verdict and Next.
 // `pages.md`, The knowledge pages
-export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
+export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Props) {
   // shuffled on each display, so a position carries no answer
   const order = useMemo(() => choiceOrder(q.choices.length), [q])
   const [picked, setPicked] = useState<number[]>([])
@@ -218,7 +220,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam }: Props) {
           >
             {detailsToggle(details)}
           </Button>
-          {details && <Details r={result} course={course} />}
+          {details && <Details r={result} course={course} onLesson={onLesson} />}
         </div>
       )}
 
@@ -283,7 +285,15 @@ export function Verdict({ r }: { r: Result }) {
   )
 }
 
-export function Details({ r, course }: { r: Result; course: Course | undefined }) {
+export function Details({
+  r,
+  course,
+  onLesson,
+}: {
+  r: Result
+  course: Course | undefined
+  onLesson?: (course: string, slug: string) => void
+}) {
   const answer = yourAnswer(r)
   const sections = detailSections(r.q)
   const lessons = taughtBy(r.q, course)
@@ -340,12 +350,22 @@ export function Details({ r, course }: { r: Result; course: Course | undefined }
       )}
       {lessons.map((x) => (
         <p key={x.slug} className="text-meta">
-          <Link
-            to={lessonPath(x.course, x.slug, x.anchor)}
-            className="underline underline-offset-2"
-          >
-            {x.label}
-          </Link>
+          {onLesson ? (
+            <button
+              type="button"
+              onClick={() => onLesson(x.course, x.slug)}
+              className="underline underline-offset-2"
+            >
+              {x.label}
+            </button>
+          ) : (
+            <Link
+              to={lessonPath(x.course, x.slug, x.anchor)}
+              className="underline underline-offset-2"
+            >
+              {x.label}
+            </Link>
+          )}
         </p>
       ))}
     </div>

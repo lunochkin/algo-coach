@@ -270,13 +270,12 @@ platforms.
   question carries one.
 - **A lesson the queue offers is a stop in the queue**, on both clients: the
   lesson's title, why it is offered, and Read and Later as its presses. Read
-  opens the lesson's page, and its way back returns to the queue. The lesson
-  page is the one place a lesson is read, with its minutes, Mark read and
-  its links to other lessons.
-- **On the web, Read leaves the queue, as any navigation does.** The queue
-  stores its stint, and the way back starts a queue of the same mode again,
-  as a reload does. The phone opens the lesson over the running queue, which
-  the lesson's way back returns to.
+  opens the lesson over the running queue, with its minutes, Mark read and
+  its links to other lessons. Closing the lesson returns to the queue.
+- **Reading a lesson ends no queue.** The web opens the lesson in a dialog
+  over the queue, and the phone opens it as a screen above the queue. A
+  lesson an answer's detail links to opens the same way, so a reader never
+  loses a running queue to a link.
 - **An open question reveals its key on a press.** The user then ticks the
   points recalled, the traps fallen into, and whether they said anything else
   wrong. `knowledge.md` gives the grade the ticks make.
@@ -393,7 +392,7 @@ what it offers. The inventory is the list both clients build to.
 | A module | `/knowledge/modules/:module` | Module | same |
 | The start sheet | a dialog on the module page | a dialog on Module | same |
 | A queue | `/knowledge/queue` | the quiz screen | same |
-| A lesson a queue offers | a stop opening the lesson page | a stop opening the lesson screen | by platform |
+| A lesson a queue offers | a stop opening the lesson over the queue | a stop opening the lesson screen | same |
 | A level exam's choices | `/knowledge/exam` | Exam | same |
 | An exam and its results | `/knowledge/exam` | the quiz screen | by platform |
 | The lessons | `/knowledge/lessons` | Lessons | same |
@@ -475,10 +474,6 @@ what it offers. The inventory is the list both clients build to.
   phone.** The web's exam page holds its sample in memory, so a reload
   returns to its choices without discarding a record. The phone has no
   reload, and its quiz screen runs every queue and exam.
-- **A lesson a queue offers differs by platform alone.** Each client stops
-  on the lesson and opens its page on Read. The web's page holds one route at a
-  time, so Read ends the queue and the way back starts it again. The phone
-  keeps the queue open beneath the lesson.
 - **Ordering by drag is the phone's, and up and down presses are the
   web's.** A drag needs a long press, which a pointer does not hold well.
 - **The engine's address, the device name and the reminder hour are
