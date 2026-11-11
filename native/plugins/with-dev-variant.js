@@ -24,14 +24,12 @@ module.exports = function withDevVariant(config) {
   config = withAppBuildGradle(config, (cfg) => {
     const marker = 'applicationIdSuffix ".dev"';
     if (!cfg.modResults.contents.includes(marker)) {
+      // the release block is left as generated: with-pinned-keystore matches its first lines
       cfg.modResults.contents = cfg.modResults.contents
+        .replace(/defaultConfig \{/, (m) => `${m}\n        manifestPlaceholders += [appScheme: "${scheme}"]`)
         .replace(
           /buildTypes \{\s*debug \{/,
           (m) => `${m}\n            ${marker}\n            manifestPlaceholders += [appScheme: "${scheme}dev"]`,
-        )
-        .replace(
-          /(buildTypes \{[\s\S]*?\n\s*release \{)/,
-          (m) => `${m}\n            manifestPlaceholders += [appScheme: "${scheme}"]`,
         );
     }
     return cfg;
