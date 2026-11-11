@@ -1,10 +1,11 @@
-import { levelName, subTitle } from './courses';
+import { levelName, subTitle, type Catalog } from './courses';
 import type { Lesson } from './graph';
 import { minutesOf } from './lessontext';
 import { bySavedOrder } from './order';
 import type { Board } from './schedule';
 import type { Course } from './types';
-import { aboutMinutes, LESSON_STOP_KICKER } from './words/queue';
+import { LESSON_FALLBACK } from './words/pages';
+import { aboutMinutes, LESSON_STOP_KICKER, lessonNote } from './words/queue';
 
 /**
  * A group of one module's lessons, as a long page's section. The bar names
@@ -67,6 +68,27 @@ export interface LessonRow {
   minutes: number; // 0 where the snapshot holds no text yet
   teaches: string;
   status: string;
+}
+
+/** Whether the user's latest mark on a lesson says it is read. */
+export function lessonRead(catalog: Catalog | null | undefined, course: string, lesson: string): boolean {
+  return !!catalog?.lessonsDone?.has(`${course}:${lesson}`);
+}
+
+/** A lesson's page: the lesson, its text, whether it is read, its title and the note under it. */
+export function lessonPage(catalog: Catalog | null | undefined, course: string, slug: string) {
+  const c = catalog?.courses.find((x) => x.slug === course) ?? null;
+  const x = c?.graph?.lesson(slug) ?? null;
+  const body = c?.lessonBodies[slug] ?? '';
+  const read = lessonRead(catalog, course, slug);
+  return {
+    c,
+    x,
+    body,
+    read,
+    title: x?.title ?? LESSON_FALLBACK,
+    note: c && x ? lessonNote(c.title, lessonMinutes(c, x) || null, read) : null,
+  };
 }
 
 /** A lesson's reading time, or 0 where the snapshot holds no text yet. */

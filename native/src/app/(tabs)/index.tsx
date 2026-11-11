@@ -42,11 +42,10 @@ export default function PracticeScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const st = useStore();
-  const [now] = useState(() => Date.now());
   const next = useContinue();
   // the knowledge modules, from the device's copy: the board is the overview
   // of every study, `pages.md`, Sections
-  const { board: learner, courseOrder } = st;
+  const { board: learner, courseOrder, now } = st;
   const all = useMemo(() => learner(null), [learner]);
   const modules = useMemo(
     () => (all ? bySavedOrder(moduleRows(all, now), (row) => row.c.slug, courseOrder) : []),

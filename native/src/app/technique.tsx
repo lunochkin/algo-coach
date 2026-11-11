@@ -63,23 +63,26 @@ export default function TechniqueScreen() {
                   <CardPanel technique={null} cards={cards} />
                 </>
               ) : null}
-              <Heading title={TECHNIQUE_PROBLEMS} count={rows.length} />
+              {/* no problems reads as the empty word alone, as on the web */}
               {rows.length === 0 ? (
                 <Blank>{TECHNIQUE_NONE}</Blank>
               ) : (
-                <PickPanel>
-                  {rows.map((row) => (
-                    <PickRow
-                      key={row.problem_id}
-                      title={row.title}
-                      badge={row.difficulty}
-                      stats={techniqueStats(row, now)}
-                      onPress={() =>
-                        router.push({ pathname: '/problem', params: { problem: row.problem_id, technique } })
-                      }
-                    />
-                  ))}
-                </PickPanel>
+                <>
+                  <Heading title={TECHNIQUE_PROBLEMS} count={rows.length} />
+                  <PickPanel>
+                    {rows.map((row) => (
+                      <PickRow
+                        key={row.problem_id}
+                        title={row.title}
+                        badge={row.difficulty}
+                        stats={techniqueStats(row, now)}
+                        onPress={() =>
+                          router.push({ pathname: '/problem', params: { problem: row.problem_id, technique } })
+                        }
+                      />
+                    ))}
+                  </PickPanel>
+                </>
               )}
             </>
           )}

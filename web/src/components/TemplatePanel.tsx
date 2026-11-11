@@ -1,12 +1,4 @@
-import {
-  RECALL_THIS,
-  revealLabel,
-  CARD_OPTIONAL,
-  FORM_UNCHECKED,
-  HIDE_FORM,
-  PROCEDURE,
-  FORM_NO_CASES,
-} from '@algo-coach/core'
+import { RECALL_THIS, HIDE_FORM } from '@algo-coach/core'
 import { useState } from 'react'
 
 import { Link } from 'react-router'
@@ -17,7 +9,7 @@ import { Markdown } from '@/components/Markdown'
 import { PythonCode, RevealPress } from '@/components/PythonCode'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { recallLine } from '@/lib/format'
+import { templateView } from '@/lib/format'
 
 // the form stays hidden until it is asked for: `content.md` gives why a form
 // is worth deriving before it is read. The trigger reads either way, since it
@@ -33,9 +25,7 @@ export function TemplatePanel({
   recalled: Recalled | undefined
 }) {
   const [revealed, setRevealed] = useState(false)
-  // `content.md`: a template no case checks is read on the card and never
-  // recalled
-  const recallable = (template.cases ?? []).length > 0
+  const view = templateView(template, recalled)
 
   return (
     <div className="overflow-hidden rounded-xl border bg-card">
@@ -43,19 +33,12 @@ export function TemplatePanel({
           identity, and the body carries the form and the acts on it */}
       <PanelStrip>
         <h3 className="font-medium">{template.title}</h3>
-        {template.optional && (
-          <Badge variant="outline" className="font-normal">
-            {CARD_OPTIONAL}
+        {view.badges.map((badge) => (
+          <Badge key={badge} variant="outline" className="font-normal">
+            {badge}
           </Badge>
-        )}
-        {template.kind === 'procedure' && (
-          <Badge variant="outline" className="font-normal">
-            {PROCEDURE}
-          </Badge>
-        )}
-        <span className="ml-auto text-meta text-muted-foreground">
-          {recallable ? recallLine(recalled) : FORM_NO_CASES}
-        </span>
+        ))}
+        <span className="ml-auto text-meta text-muted-foreground">{view.status}</span>
       </PanelStrip>
 
       <div className="space-y-stack px-4 py-3">
@@ -66,13 +49,13 @@ export function TemplatePanel({
         ) : (
           // the press is the cover: it names the length and nothing of the
           // form, and a reader decides from that whether to try recalling it
-          <RevealPress label={revealLabel(template.code)} onReveal={() => setRevealed(true)} />
+          <RevealPress label={view.reveal} onReveal={() => setRevealed(true)} />
         )}
 
         {revealed && template.notes && <Markdown>{template.notes}</Markdown>}
 
         <div className="flex flex-wrap items-center gap-stack">
-          {recallable ? (
+          {view.recallable ? (
             <Button variant="outline" size="sm" asChild>
               <Link
                 to={`/cards/${encodeURIComponent(card)}/recall/${encodeURIComponent(template.slug)}`}
@@ -81,7 +64,7 @@ export function TemplatePanel({
               </Link>
             </Button>
           ) : (
-            <span className="text-meta text-muted-foreground">{FORM_UNCHECKED}</span>
+            <span className="text-meta text-muted-foreground">{view.unchecked}</span>
           )}
           {revealed && (
             <Button

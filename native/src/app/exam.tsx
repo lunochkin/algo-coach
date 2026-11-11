@@ -147,7 +147,7 @@ function Choices({ catalog }: { catalog: Catalog }) {
         <Toggles>
           {lv.map((l) => (
             <Toggle key={l} on={level === l} onPress={() => setLevel(l)}>
-              {levelName(catalog.rules, l, true)}
+              {levelName(catalog.rules, l)}
             </Toggle>
           ))}
         </Toggles>

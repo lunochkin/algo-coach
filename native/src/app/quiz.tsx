@@ -74,6 +74,7 @@ import {
   initialAsk,
   keyPointLabel,
   lessonStopKicker,
+  lessonRead,
 } from '@algo-coach/core';
 import { EMPTY, type Edit, type Key, pressed } from '@/lib/keys';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
@@ -93,7 +94,7 @@ export default function Quiz() {
 function LessonStop({ item, bottom, onNext }: { item: LessonItem; bottom: number; onNext: () => void }) {
   const st = useStore();
   const theme = useTheme();
-  const read = !!st.catalog?.lessonsDone?.has(`${item.course.slug}:${item.lesson.slug}`);
+  const read = lessonRead(st.catalog, item.course.slug, item.lesson.slug);
   const open = () => router.push({ pathname: '/lesson', params: { course: item.course.slug, slug: item.lesson.slug } });
   return (
     <View style={{ flex: 1 }}>

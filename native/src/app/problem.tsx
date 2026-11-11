@@ -12,8 +12,6 @@ import {
   END_KEEP,
   END_NOTE,
   END_TITLE,
-  problemCards,
-  problemTried,
   RESTORE_SOLVE,
   SITTING_END,
   SITTING_ENDED,
@@ -24,7 +22,6 @@ import {
   submitLabel,
   type components,
   OF,
-  cardsOffered,
   PROBLEM_FALLBACK,
   SITTING_STATEMENT,
   SITTING_CODE,
@@ -36,7 +33,7 @@ import {
   submitToSitting,
   TOUCH_MS,
   touchSitting,
-  techniquesLine,
+  problemFacts,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -81,26 +78,26 @@ export default function ProblemScreen() {
   const error = picked.error ?? listed.error;
   const [now] = useState(() => Date.now());
   const record = picked.data;
-  const cards = record ? problemCards(listed.data ?? [], record.techniques, technique ?? null) : [];
+  const shown = record ? problemFacts(record, listed.data ?? [], technique ?? null, now) : null;
   const muted = { color: theme.colors.onSurfaceVariant };
 
-  const facts = record ? (
+  const facts = shown ? (
     <>
       <View style={[styles.row, { flexWrap: 'wrap' }]}>
-        {record.difficulty ? <Badge label={record.difficulty} /> : null}
+        <Badge label={shown.difficulty} />
         <Text variant="bodySmall" style={muted}>
-          {techniquesLine(record.techniques)}
+          {shown.techniques}
         </Text>
         <Text variant="bodySmall" style={muted}>
-          {problemTried(record, now)}
+          {shown.tried}
         </Text>
       </View>
-      {cards.length > 0 ? (
+      {shown.cardsLabel ? (
         <View style={[styles.row, { flexWrap: 'wrap' }]}>
           <Text variant="bodySmall" style={muted}>
-            {cardsOffered(cards.length)}
+            {shown.cardsLabel}
           </Text>
-          {cards.map((one) => (
+          {shown.cards.map((one) => (
             <TouchableRipple
               key={one.slug}
               accessibilityRole="link"

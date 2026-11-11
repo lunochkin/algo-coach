@@ -32,6 +32,7 @@ import {
   restoreLabel,
   STUDY_SETTINGS,
   type SettingName,
+  SIGNED_IN_DEVICES,
 } from '@algo-coach/core';
 import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
@@ -155,6 +156,17 @@ export default function SettingsScreen() {
             </Button>
           ) : null}
         </View>
+        {/* the account's devices, offered where the web's Settings page offers them */}
+        {st.hasToken ? (
+          <Button
+            mode="outlined"
+            icon="cellphone-link"
+            style={{ alignSelf: 'flex-start' }}
+            onPress={() => router.push('/devices')}
+          >
+            {SIGNED_IN_DEVICES}
+          </Button>
+        ) : null}
         <Button
           mode="text"
           icon="shield-account-outline"

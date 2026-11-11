@@ -27,6 +27,7 @@ import {
   queueLeft,
   OF,
   lessonStopKicker,
+  lessonRead,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -185,11 +186,7 @@ function Running({ mode, scope, catalog, learner }: RunningProps) {
       {!done && current && 'lesson' in current ? (
         <LessonStop
           item={current.lesson}
-          read={
-            !!catalog.lessonsDone?.has(
-              `${current.lesson.course.slug}:${current.lesson.lesson.slug}`,
-            )
-          }
+          read={lessonRead(catalog, current.lesson.course.slug, current.lesson.lesson.slug)}
           onRead={() =>
             setLessonOpen({ course: current.lesson.course.slug, slug: current.lesson.lesson.slug })
           }

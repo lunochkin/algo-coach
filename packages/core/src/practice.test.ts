@@ -10,12 +10,14 @@ import {
   ladderView,
   notInProgress,
   problemCards,
+  problemFacts,
   problemTried,
   readFailure,
   recallLine,
   revealLabel,
   techniqueCards,
   techniqueStats,
+  templateView,
   type components,
 } from './index';
 
@@ -120,6 +122,16 @@ describe("a problem's facts", () => {
     const cards = [card('dp', { family: 'dp' }), card('knapsack', { family: 'dp' }), card('bfs')];
     expect(problemCards(cards, ['dp', 'bfs'], 'dp').map((one) => one.slug)).toEqual(['dp', 'knapsack']);
     expect(problemCards(cards, ['dp', 'bfs'], null).map((one) => one.slug)).toEqual(['dp', 'knapsack', 'bfs']);
+  });
+
+  it('names a missing difficulty, and offers no cards label where no card is offered', () => {
+    const facts = problemFacts(
+      { difficulty: null, techniques: ['bfs'], attempt_count: 0, solved_count: 0, last_attempt_at: null },
+      [card('dp')],
+      null,
+      NOW,
+    );
+    expect(facts).toMatchObject({ difficulty: 'no difficulty', techniques: 'bfs', cards: [], cardsLabel: null });
   });
 });
 
@@ -236,6 +248,18 @@ describe("a card's templates", () => {
     expect(
       recallLine({ template_id: 'x', last_at: '2026-11-10T08:00:00Z', hints: ['notes'], verified: true }, NOW),
     ).toBe('Recalled today · passed · 1 hint');
+  });
+
+  it('says a form no case checks is read and never recalled, where the recall press would sit', () => {
+    const view = templateView({ cases: [], optional: true, kind: 'procedure', code: 'x\n' }, undefined, NOW);
+    expect(view).toMatchObject({
+      recallable: false,
+      badges: ['optional', 'procedure'],
+      status: 'No case checks this form',
+    });
+    expect(view.unchecked).not.toBeNull();
+    const checked = templateView({ cases: [{}] as never, optional: false, kind: 'code', code: 'x\n' }, undefined, NOW);
+    expect([checked.recallable, checked.unchecked, checked.status]).toEqual([true, null, 'Never recalled']);
   });
 
   it('covers a form with its length alone', () => {

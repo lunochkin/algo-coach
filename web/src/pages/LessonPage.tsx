@@ -5,19 +5,18 @@ import { Link, useLocation, useParams } from 'react-router'
 import {
   lessonParts,
   lessonsAround,
-  minutesOf,
   LESSON_MARK_READ,
   LESSON_MARK_UNREAD,
   LESSON_MISSING,
   LESSON_NEXT,
   LESSON_NO_TEXT,
   LESSON_RELATED,
-  lessonNote,
   newRecord,
   type Course,
   type Lesson,
   BACK_LESSONS,
   OF,
+  lessonPage,
 } from '@algo-coach/core'
 
 import { SectionHeading } from '@/components/SectionHeading'
@@ -38,23 +37,20 @@ export function LessonPage() {
   const { hash } = useLocation()
   const k = useKnowledge()
   const { catalog } = useLearner()
-  const c = catalog?.courses.find((x) => x.slug === module)
-  const x = c?.graph?.lesson(lesson)
-  const body = c?.lessonBodies[lesson] ?? ''
-  const read = !!catalog?.lessonsDone?.has(`${module}:${lesson}`)
+  const { c, x, body, read, title, note } = lessonPage(catalog, module, lesson)
 
   // opened at a section: scroll to it once the text is laid out
   useEffect(() => {
     if (hash) document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView()
   }, [hash, body])
 
-  const page = catalog ? { c: c ?? null, x: x ?? null } : undefined
+  const page = catalog ? { c, x } : undefined
   return (
     <article className="space-y-section">
       <PageHeader
         back={{ to: LESSONS, label: BACK_LESSONS }}
-        title={x?.title ?? lesson}
-        note={c && x ? lessonNote(c.title, body ? minutesOf(x, body) : null, read) : undefined}
+        title={title}
+        note={note ?? undefined}
       />
       <Loaded
         of={OF.lesson}

@@ -24,6 +24,7 @@ import {
   BACK_KNOWLEDGE,
   OF,
   SCOPE_COLUMN,
+  CERT_LEGEND,
 } from '@algo-coach/core'
 
 import { Loaded } from '@/components/Loaded'
@@ -77,6 +78,7 @@ export function CertificationsPage() {
         {(modules) => (
           <>
             <SectionBar items={sections.items} current={sections.current} onJump={sections.jump} />
+            <Legend />
             {modules.map(({ c, b, states }) => (
               <Grid
                 key={c.slug}
@@ -171,8 +173,25 @@ function Grid(props: {
   )
 }
 
-// one shape per state, as the phone's grid draws them
-function Cell({ s }: { s: CertStatus }) {
+// what each shape in the grid stands for, in the words core gives the states
+function Legend() {
+  return (
+    <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-muted-foreground">
+      {CERT_LEGEND.map((one) => (
+        <span key={one.state} className="inline-flex items-center gap-1.5">
+          {one.sample ?? (
+            <Cell s={{ state: one.state, coverage: 0.6, retention: 0.4 } as CertStatus} bare />
+          )}
+          {one.label}
+        </span>
+      ))}
+    </p>
+  )
+}
+
+// one shape per state, as the phone's grid draws them. `bare` leaves out the
+// share under a ring, which a legend's sample has none of
+function Cell({ s, bare = false }: { s: CertStatus; bare?: boolean }) {
   switch (s.state) {
     case 'earned':
       return <Trophy className="size-5 fill-brand text-brand" />
@@ -190,9 +209,11 @@ function Cell({ s }: { s: CertStatus }) {
       return (
         <span className="inline-flex flex-col items-center">
           <Ring coverage={s.coverage} retention={s.retention} />
-          <span className="text-micro text-muted-foreground tabular-nums">
-            {coverageShare(s.coverage)}
-          </span>
+          {!bare && (
+            <span className="text-micro text-muted-foreground tabular-nums">
+              {coverageShare(s.coverage)}
+            </span>
+          )}
         </span>
       )
   }

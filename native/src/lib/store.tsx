@@ -36,6 +36,7 @@ import {
   newRecord,
   SyncLoop,
   syncDelay,
+  NOT_SIGNED_IN,
 } from '@algo-coach/core';
 
 import { readCatalog } from './courses-cache';
@@ -77,6 +78,7 @@ interface Store {
   examSize: number;
   setSetting: (name: SettingName, n: number) => Promise<void>;
   newLimit: number;
+  now: number; // the moment the knowledge counts are read at, moved on each minute
   // the user's module order, a record of the log, so every device lists the modules alike
   courseOrder: string[];
   setCourseOrder: (slugs: string[]) => Promise<void>;
@@ -197,7 +199,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const runOnce = useCallback(async () => {
     const token = await getToken();
     if (!token) {
-      setSync((x) => ({ ...x, running: false, error: 'Not signed in: sign in from Settings' }));
+      setSync((x) => ({ ...x, running: false, error: NOT_SIGNED_IN }));
       return;
     }
     setSync((x) => ({ ...x, running: true }));
@@ -366,8 +368,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [requestSync, remind],
   );
 
-  // read on each render, so a raise ends at the rollover without a timer
-  const newLimit = learner.limitAt(Date.now());
+  // moved on each minute, as the web's learner moves it: a step falls due and a
+  // raise ends at the rollover with no record arriving
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const tick = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(tick);
+  }, []);
+  const newLimit = learner.limitAt(now);
   const raiseNew = useCallback(
     async (rec: RaiseRecord = newRecord.raise()) => {
       await DB.addLocal('raises', raisePath(settingsRef.current.device, rec.t), rec);
@@ -406,6 +414,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       examSize: learner.examSize,
       setSetting,
       newLimit,
+      now,
       raiseNew,
       courseOrder,
       setCourseOrder,
@@ -436,6 +445,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       learner,
       setSetting,
       newLimit,
+      now,
       raiseNew,
       courseOrder,
       setCourseOrder,

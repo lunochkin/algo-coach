@@ -1,9 +1,9 @@
 import {
   cardRow as cardRowAt,
   lastAt as lastAtFrom,
-  problemTried,
-  recallLine as recallLineAt,
+  problemFacts as problemFactsAt,
   techniqueStats,
+  templateView as templateViewAt,
 } from '@algo-coach/core'
 
 export { duration, share } from '@algo-coach/core'
@@ -21,10 +21,17 @@ export function cardRow(card: Parameters<typeof cardRowAt>[0], heading: string |
   return cardRowAt(card, heading, Date.now())
 }
 
-export function recallLine(one: Parameters<typeof recallLineAt>[0]) {
-  return recallLineAt(one, Date.now())
+export function templateView(
+  template: Parameters<typeof templateViewAt>[0],
+  recalled: Parameters<typeof templateViewAt>[1],
+) {
+  return templateViewAt(template, recalled, Date.now())
 }
 
-export function tried(picked: Parameters<typeof problemTried>[0]) {
-  return problemTried(picked, Date.now())
+export function problemFacts<C extends Parameters<typeof problemFactsAt>[1][number]>(
+  picked: Parameters<typeof problemFactsAt>[0],
+  cards: C[],
+  technique: string | null,
+) {
+  return problemFactsAt(picked, cards, technique, Date.now())
 }

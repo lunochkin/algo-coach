@@ -1,6 +1,6 @@
 // what the knowledge screens say about the module, for every platform: a
 // platform changes the look alone, and reads each sentence from here
-import { STATE_LABEL, type CertStatus } from '../certs';
+import { STATE_LABEL, type CertState, type CertStatus } from '../certs';
 import { subTitle, topicTitle } from '../courses';
 import type { CellState } from '../module';
 import { counted } from '../screens';
@@ -79,6 +79,16 @@ export const CERT_UNTARGET = 'Untarget';
 export function certCell(title: string, s: CertStatus): string {
   return `${title}: ${s.state === 'not_certified' ? `practice only, ${s.passed} of ${s.questions} passed` : STATE_LABEL[s.state]}`;
 }
+
+/** The certifications grid's legend, in the order a certification moves through its states. */
+export const CERT_LEGEND: { state: CertState; label: string; sample: string | null }[] = (
+  ['locked', 'in_progress', 'ready', 'earned', 'needs_refresh', 'insufficient_pool', 'not_certified', 'empty'] as const
+).map((state) => ({
+  state,
+  label: STATE_LABEL[state].toLowerCase(),
+  // a state the grid writes rather than draws reads beside its sample
+  sample: state === 'not_certified' ? 'n/m' : state === 'empty' ? '—' : null,
+}));
 
 export const practiceShare = (s: Pick<CertStatus, 'passed' | 'questions'>) =>
   s.questions ? `${s.passed}/${s.questions}` : '—';

@@ -2,22 +2,18 @@ import {
   BACK_PROBLEMS,
   BACK_BOARD,
   PROBLEM_FALLBACK,
-  NO_DIFFICULTY,
   OF,
-  techniqueStats,
   PROBLEM_RETIRED,
   PROBLEM_OPENING,
-  techniquesLine,
 } from '@algo-coach/core'
-import { lazy, useState } from 'react'
+import { lazy } from 'react'
 import { useParams, useSearchParams } from 'react-router'
 
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
-import { Panel, Stat, Stats } from '@/components/Panel'
-import { Badge } from '@/components/ui/badge'
+import { ProblemFacts } from '@/components/ProblemFacts'
 
 // the editor is the bulk of the bundle, and a retired problem needs none
 const SittingView = lazy(() =>
@@ -30,8 +26,6 @@ const SittingView = lazy(() =>
 // the pick came from
 export function ProblemPage() {
   const { problemId = '' } = useParams()
-  // the moment the page opened, which the retired record's counts are read at
-  const [now] = useState(() => Date.now())
   const [search] = useSearchParams()
   const technique = search.get('technique')
   const slug = search.get('card')
@@ -86,28 +80,16 @@ export function ProblemPage() {
                 : { to: `/techniques/${encodeURIComponent(technique)}`, label: technique }
         }
         title={picked.data?.title ?? PROBLEM_FALLBACK}
-        note={
-          picked.data && (
-            <span className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="font-normal">
-                {picked.data.difficulty ?? NO_DIFFICULTY}
-              </Badge>
-              <span>{techniquesLine(picked.data.techniques)}</span>
-            </span>
-          )
-        }
       />
       <Loaded of={OF.problem} state={picked}>
         {(picked) =>
           picked.retired ? (
-            <Panel>
-              <Stats>
-                {techniqueStats(picked, now).map((stat) => (
-                  <Stat key={stat.label} value={stat.value} label={stat.label} />
-                ))}
-              </Stats>
+            // a retired problem reads its facts as a served one does, then why
+            // nothing is served: `pages.md`, Sections
+            <div className="space-y-stack">
+              <ProblemFacts problemId={problemId} technique={technique} />
               <p className="text-meta text-muted-foreground">{PROBLEM_RETIRED}</p>
-            </Panel>
+            </div>
           ) : (
             <p className="text-meta text-muted-foreground">{PROBLEM_OPENING}</p>
           )

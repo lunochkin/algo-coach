@@ -8,8 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   RECALL_THIS,
   RECALL_TITLE,
-  recallLine,
-  revealLabel,
   type components,
   ladderView,
   LADDER_GAP,
@@ -28,13 +26,11 @@ import {
   HIDE_FORM,
   cardNote,
   cardProgress,
-  CARD_OPTIONAL,
-  PROCEDURE,
-  FORM_NO_CASES,
   RUNGS_SOLVED,
   FORMS_RECALLED,
   PROBES_DRAWN,
   nextRung,
+  templateView,
 } from '@algo-coach/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
@@ -147,8 +143,7 @@ function TemplateCard({
 }) {
   const theme = useTheme();
   const [revealed, setRevealed] = useState(false);
-  // a template no case checks is read on the card and never recalled
-  const recallable = (template.cases ?? []).length > 0;
+  const view = templateView(template, recalled, now);
 
   return (
     <Panel padded>
@@ -156,14 +151,15 @@ function TemplateCard({
         <Text variant="titleMedium" style={{ flexShrink: 1 }}>
           {template.title}
         </Text>
-        {template.optional ? <Badge label={CARD_OPTIONAL} /> : null}
-        {template.kind === 'procedure' ? <Badge label={PROCEDURE} /> : null}
+        {view.badges.map((badge) => (
+          <Badge key={badge} label={badge} />
+        ))}
       </View>
       <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-        {recallable ? recallLine(recalled, now) : FORM_NO_CASES}
+        {view.status}
       </Text>
       <Markdown>{template.trigger}</Markdown>
-      {recallable ? (
+      {view.recallable ? (
         <Button
           mode="contained-tonal"
           icon="pencil-outline"
@@ -172,7 +168,11 @@ function TemplateCard({
         >
           {RECALL_THIS}
         </Button>
-      ) : null}
+      ) : (
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          {view.unchecked}
+        </Text>
+      )}
       {revealed ? (
         <>
           <CodeBlock code={template.code} verbatim />
@@ -188,7 +188,7 @@ function TemplateCard({
           onPress={() => setRevealed(true)}
           style={{ alignSelf: 'flex-start' }}
         >
-          {revealLabel(template.code)}
+          {view.reveal}
         </Button>
       )}
     </Panel>

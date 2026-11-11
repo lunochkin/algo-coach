@@ -8,11 +8,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   lessonParts,
   lessonsAround,
-  minutesOf,
   sections,
   type Course,
   type Lesson,
-  lessonNote,
   LESSON_MARK_READ,
   LESSON_MARK_UNREAD,
   LESSON_MISSING,
@@ -20,7 +18,7 @@ import {
   LESSON_NO_TEXT,
   LESSON_RELATED,
   OF,
-  LESSON_FALLBACK,
+  lessonPage,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { Blank, BottomBar, fromCopy, HeaderNote, Loaded, styles } from '@/ui/common';
@@ -97,10 +95,7 @@ export default function LessonScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { course, slug, anchor } = useLocalSearchParams<{ course: string; slug: string; anchor?: string }>();
-  const c = st.catalog?.courses.find((x) => x.slug === course);
-  const lesson = c?.graph?.lesson(slug ?? '');
-  const done = !!st.catalog?.lessonsDone?.has(`${course}:${slug}`);
-  const body = c?.lessonBodies[slug ?? ''] ?? '';
+  const { c, x: lesson, body, read: done, title, note } = lessonPage(st.catalog, course ?? '', slug ?? '');
   // the parts read as a long screen's sections: `pages.md`, A page's areas
   const parts = useMemo(() => lessonParts(body), [body]);
   const titled = parts.filter((part) => part.title !== null);
@@ -133,9 +128,9 @@ export default function LessonScreen() {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={lesson?.title ?? LESSON_FALLBACK} />
+        <Appbar.Content title={title} />
       </Appbar.Header>
-      <HeaderNote lines={[lesson && c ? lessonNote(c.title, body ? minutesOf(lesson, body) : null, done) : null]} />
+      <HeaderNote lines={[note]} />
       {!lesson || !c ? (
         <View style={styles.page}>
           <Loaded
@@ -169,9 +164,11 @@ export default function LessonScreen() {
           </ScrollView>
         </>
       ) : (
-        <View style={styles.page}>
+        // a lesson with no text yet still names the lessons around it, as the web does
+        <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 128 }]}>
           <Blank>{LESSON_NO_TEXT}</Blank>
-        </View>
+          <Footer c={c} slug={slug ?? ''} />
+        </ScrollView>
       )}
       {lesson ? (
         <BottomBar bottom={insets.bottom}>

@@ -24,9 +24,9 @@ import { BottomBar, startQueue, styles } from '@/ui/common';
  */
 export function useContinue() {
   const st = useStore();
-  const { board, focus, newLimit } = st;
+  const { board, focus, newLimit, now } = st;
   const cont = useMemo(() => continuePlan(board, focus, null, newLimit), [board, focus, newLimit]);
-  const counts = useMemo(() => (cont ? continueCounts(cont, focus, Date.now()) : null), [cont, focus]);
+  const counts = useMemo(() => (cont ? continueCounts(cont, focus, now) : null), [cont, focus, now]);
   const [notice, setNotice] = useState('');
   const [action, setAction] = useState<{ label: string; run: () => void } | null>(null);
 

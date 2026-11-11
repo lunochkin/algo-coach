@@ -25,6 +25,7 @@ import {
 import { styles, tones } from './common';
 import { Panel } from './rows';
 import { Toggle } from './toggle';
+import { useStore } from '@/lib/store';
 
 // without the presses the card is a reading, as the Practice tab holds it:
 // the focus's presses live on the knowledge home alone
@@ -44,8 +45,9 @@ export function FocusCard(props: Props) {
   const { focus, b, queue } = props;
   const theme = useTheme();
   const tone = tones(theme.dark);
+  const { now } = useStore();
 
-  const info = useMemo(() => focusView(b, focus, queue, props.exams, Date.now()), [b, focus, queue, props.exams]);
+  const info = useMemo(() => focusView(b, focus, queue, props.exams, now), [b, focus, queue, props.exams, now]);
   const color: Record<FocusPart, string> = {
     mastered: tone.done,
     learning: theme.colors.primary,

@@ -163,3 +163,10 @@ export const caseLabel = (index: number, outcome: string, elapsedMs?: number | n
 /** A problem's techniques in one line, as its row and its page read them. */
 export const techniquesLine = (techniques: readonly string[]) => techniques.join(' · ');
 export const syncErrorLabel = (summary: string) => `Sync error: ${summary}. Tap for details.`;
+
+// the phone's sign-in, said where a dev build and a refused flow need it
+export const DEV_LOGIN_INTRO = 'The dev app syncs with the local engine.';
+export const SIGN_IN_CANCELLED = 'Sign-in was cancelled.';
+export const SIGN_IN_NO_CODE = 'Sign-in returned no code.';
+/** A lesson's node on a module's map, named for whoever reads the map aloud. */
+export const mapLessonLabel = (title: string) => `Lesson: ${title}`;

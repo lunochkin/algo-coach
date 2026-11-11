@@ -41,7 +41,7 @@ export function TechniquePage() {
           <CardPanel technique={null} cards={cards} />
         </section>
       )}
-      <Loaded of={OF.candidates} state={rows} blank={TECHNIQUE_NONE}>
+      <Loaded of={OF.technique} state={rows} blank={TECHNIQUE_NONE}>
         {(rows) => (
           <div className="space-y-stack">
             {/* no statement in the list: the clock starts when it is served */}

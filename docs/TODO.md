@@ -341,6 +341,31 @@ The author's first sittings on the phone, on 2026-11-11, found these.
 - [x] Sync on a pull down the phone's browsing screens, and read their engine
       data again
 
+### A second audit
+
+A second pass on 2026-11-11 compared both clients' screens once more, after
+the five moves above. Each item moves one piece into `packages/core` and
+removes the difference the pass found.
+
+- [x] Key the web's unsent code to the signed-in user, and delete every draft
+      at sign-out. A second account on one browser opened the first's code
+- [x] Move a template's view into core. The phone left out the note that a
+      form no case checks is read and never recalled
+- [x] Move the certifications legend's words into core, and give the web the
+      legend the phone draws
+- [x] Move a problem's facts into core, and read a retired problem by the
+      same facts on both clients. A missing difficulty read on one alone
+- [x] Move a lesson's page and whether it is read into core. The title
+      fallback differed, and the phone dropped the lessons around a lesson
+      with no text
+- [x] Move the phone's last literal words into core, read the exam's levels by
+      their full names, and offer the signed-in devices from the phone's
+      Settings
+- [x] Move the phone's knowledge counts onto a clock that moves each minute,
+      as the web's do
+- [ ] Offer Copy on a long failing value on the phone, once a clipboard
+      module is in the app's build
+
 ### Exit
 - [ ] Practise questions on the web and the phone against one log, with both
       showing the same state

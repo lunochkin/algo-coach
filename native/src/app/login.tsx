@@ -16,6 +16,7 @@ import {
   PRIVACY_NOTE,
   ENGINE_ADDRESS,
   ADDRESS_HINT,
+  DEV_LOGIN_INTRO,
 } from '@algo-coach/core';
 import { offered, signIn, type Offered, type Provider } from '@/lib/auth';
 import { described } from '@/lib/engine';
@@ -100,7 +101,7 @@ export default function LoginScreen() {
       }}
     >
       <Text variant="displaySmall">{APP_NAME}</Text>
-      <Text variant="bodyLarge">{__DEV__ ? 'The dev app syncs with the local engine.' : LOGIN_INTRO}</Text>
+      <Text variant="bodyLarge">{__DEV__ ? DEV_LOGIN_INTRO : LOGIN_INTRO}</Text>
       {!st.settings.origin ? (
         <>
           <TextInput

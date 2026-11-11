@@ -39,7 +39,8 @@ export default function Home() {
 
   const { board } = st;
   const b = useMemo(() => board(null), [board]);
-  const info = useMemo(() => (b ? { courses: moduleRows(b, Date.now()) } : null), [b]);
+  const { now } = st;
+  const info = useMemo(() => (b ? { courses: moduleRows(b, now) } : null), [b, now]);
 
   // The first certificate whose requirements are met but its exam (shown above Continue).
   const certToTake = useMemo(() => {

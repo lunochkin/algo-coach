@@ -24,6 +24,8 @@ import {
   PRACTICE,
   practiceLevel,
   OF,
+  CERT_LEGEND,
+  type CertState,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -185,29 +187,35 @@ function Cell(props: { status: CertStatus; title: string; onPress: () => void })
   );
 }
 
+// what each shape in the grid stands for: the words are core's, the icons the phone's
 function Legend() {
   const theme = useTheme();
   const amber = tones(theme.dark).open;
-  const item = (icon: string, color: string, label: string) => (
-    <View key={label} style={[styles.row, { gap: 4 }]}>
-      <MaterialCommunityIcons name={icon as never} size={16} color={color} />
-      <Text variant="labelSmall">{label}</Text>
-    </View>
-  );
+  const icon: Partial<Record<CertState, [string, string]>> = {
+    locked: ['lock-outline', theme.colors.onSurfaceDisabled],
+    in_progress: ['circle-slice-3', theme.colors.secondary],
+    ready: ['trophy-outline', theme.colors.primary],
+    earned: ['trophy', theme.colors.primary],
+    needs_refresh: ['refresh', amber],
+    insufficient_pool: ['text-box-remove-outline', amber],
+  };
   return (
     <View style={[styles.row, { flexWrap: 'wrap', columnGap: 12, rowGap: 4 }]}>
-      {item('lock-outline', theme.colors.onSurfaceDisabled, 'locked')}
-      {item('circle-slice-3', theme.colors.secondary, 'in progress')}
-      {item('trophy-outline', theme.colors.primary, 'ready for exam')}
-      {item('trophy', theme.colors.primary, 'earned')}
-      {item('refresh', amber, 'needs refresh')}
-      {item('text-box-remove-outline', amber, 'not enough questions yet')}
-      <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
-        n/m practice only
-      </Text>
-      <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
-        — no questions
-      </Text>
+      {CERT_LEGEND.map((one) => {
+        const drawn = icon[one.state];
+        return (
+          <View key={one.state} style={[styles.row, { gap: 4 }]}>
+            {drawn ? (
+              <MaterialCommunityIcons name={drawn[0] as never} size={16} color={drawn[1]} />
+            ) : (
+              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                {one.sample}
+              </Text>
+            )}
+            <Text variant="labelSmall">{one.label}</Text>
+          </View>
+        );
+      })}
     </View>
   );
 }

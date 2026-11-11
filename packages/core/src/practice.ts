@@ -1,6 +1,15 @@
 import { lastAt } from './account';
 import type { components } from './api/schema';
-import { studyingSince } from './words/pages';
+import {
+  CARD_OPTIONAL,
+  cardsOffered,
+  FORM_NO_CASES,
+  FORM_UNCHECKED,
+  NO_DIFFICULTY,
+  PROCEDURE,
+  studyingSince,
+  techniquesLine,
+} from './words/pages';
 
 // what the board and the cards list say, for every platform
 
@@ -9,6 +18,7 @@ type BoardReading = components['schemas']['Board'];
 type ListedCard = components['schemas']['ListedCard'];
 type Recalled = components['schemas']['Recalled'];
 type Picked = components['schemas']['Picked'];
+type Template = components['schemas']['Template'];
 
 export interface Stat {
   label: string;
@@ -208,6 +218,57 @@ export function recallLine(one: Recalled | undefined, now: number): string {
   const n = one.hints.length;
   const hints = n === 0 ? 'no hint taken' : n === 1 ? '1 hint' : `${n} hints`;
   return `Recalled ${lastAt(one.last_at, now)} · ${one.verified ? 'passed' : 'failed'} · ${hints}`;
+}
+
+/** How a card shows one template, on both clients, before the form is revealed. */
+export interface TemplateView {
+  recallable: boolean; // a template no case checks is read and never recalled: `content.md`
+  badges: string[];
+  status: string; // how its recall has gone, or why it has none
+  unchecked: string | null; // said where the recall press would sit
+  reveal: string;
+}
+
+export function templateView(
+  template: Pick<Template, 'cases' | 'optional' | 'kind' | 'code'>,
+  recalled: Recalled | undefined,
+  now: number,
+): TemplateView {
+  const recallable = (template.cases ?? []).length > 0;
+  return {
+    recallable,
+    badges: [template.optional ? CARD_OPTIONAL : null, template.kind === 'procedure' ? PROCEDURE : null].filter(
+      (one): one is string => one !== null,
+    ),
+    status: recallable ? recallLine(recalled, now) : FORM_NO_CASES,
+    unchecked: recallable ? null : FORM_UNCHECKED,
+    reveal: revealLabel(template.code),
+  };
+}
+
+/** A problem's facts, in the one line above its statement or its retired record. */
+export interface ProblemFacts<C> {
+  difficulty: string;
+  techniques: string;
+  tried: string;
+  cards: C[];
+  cardsLabel: string | null;
+}
+
+export function problemFacts<C extends Pick<ListedCard, 'technique' | 'family'>>(
+  picked: Pick<Picked, 'difficulty' | 'techniques' | 'attempt_count' | 'solved_count' | 'last_attempt_at'>,
+  cards: C[],
+  technique: string | null,
+  now: number,
+): ProblemFacts<C> {
+  const offered = problemCards(cards, picked.techniques, technique);
+  return {
+    difficulty: picked.difficulty ?? NO_DIFFICULTY,
+    techniques: techniquesLine(picked.techniques),
+    tried: problemTried(picked, now),
+    cards: offered,
+    cardsLabel: offered.length ? cardsOffered(offered.length) : null,
+  };
 }
 
 /** The press covering a form: its length, and nothing of the form. */

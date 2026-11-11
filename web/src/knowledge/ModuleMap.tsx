@@ -34,6 +34,8 @@ import {
   ZOOM_IN,
   mapOf,
   mapOpening,
+  mapLessonLabel,
+  LESSON_FALLBACK,
 } from '@algo-coach/core'
 
 import { Link } from 'react-router'
@@ -274,7 +276,7 @@ function Node(props: {
       onClick={select}
       className="cursor-pointer"
       role="button"
-      aria-label={n.kind === 'lesson' ? `Lesson: ${lesson?.title ?? n.sub}` : props.title}
+      aria-label={n.kind === 'lesson' ? mapLessonLabel(lesson?.title ?? n.sub) : props.title}
     >
       {n.kind === 'cert' ? (
         <>
@@ -318,7 +320,7 @@ function Node(props: {
             strokeWidth={picked ? 2.5 : 2}
           />
           <text x={n.x + 20} y={n.y + 22} className="fill-muted-foreground text-meta">
-            {lesson ? lessonNode(props.b.lessonState(props.c, lesson)) : 'lesson'}
+            {lesson ? lessonNode(props.b.lessonState(props.c, lesson)) : LESSON_FALLBACK}
           </text>
           <text x={n.x + 20} y={n.y + 40} className="fill-foreground text-meta">
             {cut(lesson?.title ?? n.sub, 19)}

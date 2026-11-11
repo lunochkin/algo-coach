@@ -1,7 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
 
-import { type components, refusal } from '@algo-coach/core';
+import { type components, refusal, SIGN_IN_CANCELLED, SIGN_IN_NO_CODE } from '@algo-coach/core';
 
 import { call, engine } from './engine';
 
@@ -43,12 +43,12 @@ export async function signIn(
   const challenge = base64url(new Uint8Array(digest));
   const url = `${origin}/api/auth/${provider}?client=${CLIENT}&code_challenge=${challenge}`;
   const result = await WebBrowser.openAuthSessionAsync(url, REDIRECT);
-  if (result.type !== 'success') throw new Error('sign-in cancelled');
+  if (result.type !== 'success') throw new Error(SIGN_IN_CANCELLED);
   const query = new URL(result.url).searchParams;
   const refused = query.get('refused');
   if (refused) throw new Error(refusal(refused));
   const code = query.get('code');
-  if (!code) throw new Error('sign-in returned no code');
+  if (!code) throw new Error(SIGN_IN_NO_CODE);
   const answer = await call(origin, '/auth/app/token', { body: { code, verifier, device } });
   const issued = (await answer.json()) as { token: string; user_id: string };
   return { token: issued.token, user: issued.user_id };

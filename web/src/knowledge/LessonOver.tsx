@@ -1,4 +1,4 @@
-import { lessonNote, minutesOf } from '@algo-coach/core'
+import { lessonPage } from '@algo-coach/core'
 
 import {
   Dialog,
@@ -17,10 +17,7 @@ export type Reading = { course: string; slug: string } | null
 export function LessonOver(props: { reading: Reading; onRead: (r: Reading) => void }) {
   const { reading, onRead } = props
   const { catalog } = useLearner()
-  const c = reading ? catalog?.courses.find((x) => x.slug === reading.course) : undefined
-  const x = reading ? c?.graph?.lesson(reading.slug) : undefined
-  const body = (reading && c?.lessonBodies[reading.slug]) || ''
-  const read = !!(c && x && catalog?.lessonsDone?.has(`${c.slug}:${x.slug}`))
+  const { c, x, body, read, note } = lessonPage(catalog, reading?.course ?? '', reading?.slug ?? '')
   return (
     <Dialog open={reading !== null} onOpenChange={(open) => open || onRead(null)}>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
@@ -28,9 +25,7 @@ export function LessonOver(props: { reading: Reading; onRead: (r: Reading) => vo
           <>
             <DialogHeader>
               <DialogTitle>{x.title}</DialogTitle>
-              <DialogDescription>
-                {lessonNote(c.title, body ? minutesOf(x, body) : null, read)}
-              </DialogDescription>
+              <DialogDescription>{note}</DialogDescription>
             </DialogHeader>
             <LessonBody
               c={c}

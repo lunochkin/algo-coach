@@ -4,6 +4,7 @@ import {
   Board,
   lessonGroups,
   lessonParts,
+  lessonPage,
   lessonSections,
   lessonStopKicker,
   lessonRow,
@@ -63,6 +64,12 @@ describe('the lessons', () => {
       ['toRead', ['first']],
       ['locked', ['second']],
     ]);
+  });
+
+  it("reads a lesson's page: its title, its note and whether it is read", () => {
+    const read = withLessons(catalog, [{ t: T, course: 'm', lesson: 'first', status: 'done' }] as never);
+    expect(lessonPage(read, 'm', 'first')).toMatchObject({ title: 'first', read: true, note: 'M · ~3 min · read' });
+    expect(lessonPage(read, 'm', 'nope')).toMatchObject({ x: null, title: 'Lesson', note: null });
   });
 
   it("names a lesson stop's reading time, to decide before opening it", () => {

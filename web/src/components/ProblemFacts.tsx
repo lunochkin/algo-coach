@@ -1,11 +1,9 @@
 import { Link } from 'react-router'
 
-import { problemCards, cardsOffered, techniquesLine } from '@algo-coach/core'
-
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Badge } from '@/components/ui/badge'
-import { tried } from '@/lib/format'
+import { problemFacts } from '@/lib/format'
 
 // what the picked problem's page carried, in one line above the statement:
 // the difficulty, the techniques, what the user has done on it, and the cards.
@@ -31,23 +29,21 @@ export function ProblemFacts({
   // nothing rather than a refusal over the statement
   const problem = picked.data
   if (!problem) return null
-  const offered = problemCards(cards.data ?? [], problem.techniques, technique)
+  const facts = problemFacts(problem, cards.data ?? [], technique)
 
   return (
     // spaced rather than dotted, as a row's counts are: a separator of its own
     // would start a line wherever the line wraps
     <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-muted-foreground">
-      {problem.difficulty && (
-        <Badge variant="outline" className="font-normal">
-          {problem.difficulty}
-        </Badge>
-      )}
-      <span>{techniquesLine(problem.techniques)}</span>
-      <span>{tried(problem)}</span>
-      {offered.length > 0 && (
+      <Badge variant="outline" className="font-normal">
+        {facts.difficulty}
+      </Badge>
+      <span>{facts.techniques}</span>
+      <span>{facts.tried}</span>
+      {facts.cardsLabel && (
         <span>
-          {cardsOffered(offered.length)}{' '}
-          {offered.map((card, index) => (
+          {facts.cardsLabel}{' '}
+          {facts.cards.map((card, index) => (
             <span key={card.slug}>
               {index > 0 && ', '}
               <Link
