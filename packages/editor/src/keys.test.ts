@@ -73,4 +73,13 @@ describe('a key from the app keyboard', () => {
     const state = typed(editing(doc, doc.indexOf('b = 1')), ['block', 'indent']);
     expect(state.doc.toString()).toBe('def f(a):\n    if a:\n            b = 1\n            c = 2\n    return a');
   });
+
+  it('pairs a bracket as it is typed, steps over the closing one, and deletes an empty pair', () => {
+    expect(typed(editing(), text('f(')).doc.toString()).toBe('f()');
+    const stepped = typed(editing(), text('f(x)'));
+    expect(stepped.doc.toString()).toBe('f(x)');
+    expect(stepped.selection.main.head).toBe(4);
+    expect(typed(editing(), [...text('['), 'back']).doc.toString()).toBe('');
+    expect(typed(editing(), text("'a")).doc.toString()).toBe("'a'");
+  });
 });

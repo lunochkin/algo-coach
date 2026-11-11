@@ -497,6 +497,9 @@ The page layout is not designed here, and using the loop decides it.
   library or from the code already typed. A solver offered `bisect_left` after
   three characters has recalled no form, and the sitting exists to measure
   recalling the form. The recall trainer Phase 11 adds holds the same rule.
+- **The editor pairs a bracket or a quote as it is typed**, on the web and
+  the phone alike. A closing bracket names nothing, so the pair recalls
+  nothing for the solver, and the two editors then behave as one.
 - **The editor opens on the user's latest code for the problem, where that code
   is work in progress.** The latest code is the newer of the unsent draft the
   browser holds and the code of the last attempt the engine stored. Reopening a

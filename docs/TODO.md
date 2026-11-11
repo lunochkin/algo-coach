@@ -219,7 +219,7 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
       canonical's widest line is 55 characters, where a phone fits 40
 - [x] Hide the app's keyboard on a press, so a whole solution reads on one
       screen. A median canonical is 18 lines
-- [ ] Pair brackets as they are typed, in the phone's editor and the web's
+- [x] Pair brackets as they are typed, in the phone's editor and the web's
       alike, so the two editors behave as one
 - [ ] Write into `flows.md` whether the keyboard offers the names the file
       already declares. The rule today refuses every name the code typed

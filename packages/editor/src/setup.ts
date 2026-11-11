@@ -1,15 +1,17 @@
+import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { history } from '@codemirror/commands';
 import { python } from '@codemirror/lang-python';
 import { bracketMatching, indentOnInput, indentUnit, syntaxHighlighting } from '@codemirror/language';
 import { EditorState, type Extension } from '@codemirror/state';
-import { highlightActiveLine, highlightActiveLineGutter, lineNumbers } from '@codemirror/view';
+import { highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers } from '@codemirror/view';
 
 import { HIGHLIGHTER } from './python';
 
 /**
- * How Python is edited on every client: highlighting and indentation, and no
- * `autocompletion()`. `flows.md` gives why the editor proposes nothing. A
- * client adds its own keymap and its own look.
+ * How Python is edited on every client: highlighting, indentation and paired
+ * brackets, and no `autocompletion()`. `flows.md` gives why the editor
+ * proposes nothing, and a closing bracket names nothing. A client adds its
+ * own keymap and its own look.
  */
 export function pythonEditing(): Extension[] {
   return [
@@ -21,6 +23,9 @@ export function pythonEditing(): Extension[] {
     indentUnit.of('    '),
     EditorState.tabSize.of(4),
     bracketMatching(),
+    closeBrackets(),
+    // backspace in an empty pair takes both halves
+    keymap.of(closeBracketsKeymap),
     syntaxHighlighting(HIGHLIGHTER),
     python(),
   ];

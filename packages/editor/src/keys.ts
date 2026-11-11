@@ -1,3 +1,4 @@
+import { deleteBracketPair, insertBracket } from '@codemirror/autocomplete';
 import {
   copyLineDown,
   deleteCharBackward,
@@ -40,7 +41,8 @@ export function keyed(state: EditorState, key: EditorKey): Transaction | null {
   const run = (command: StateCommand) => command({ state, dispatch: (tr) => (made = tr) });
   if (key === 'enter') run(insertNewlineAndIndent);
   // typed as a view command, and reads no more than the state where no view is given
-  else if (key === 'back') run(deleteCharBackward as unknown as StateCommand);
+  // a pair typed empty goes as one, as the system keyboard's backspace takes it
+  else if (key === 'back') run(deleteBracketPair) || run(deleteCharBackward as unknown as StateCommand);
   else if (key === 'indent') run(indentMore);
   else if (key === 'dedent') run(indentLess);
   else if (key === 'lineUp') run(moveLineUp);
@@ -61,6 +63,9 @@ export function keyed(state: EditorState, key: EditorKey): Transaction | null {
       scrollIntoView: true,
     });
   }
+  // a bracket or a quote pairs as the page's own typing pairs it, since the
+  // pairing reads the page's input and the app's keys never reach it
+  else if (key.insert.length === 1 && (made = insertBracket(state, key.insert))) return made;
   // marked as typed, or `indentOnInput` leaves `else:` where it was typed
   else made = state.update({ ...state.replaceSelection(key.insert), userEvent: 'input.type', scrollIntoView: true });
   return made;
