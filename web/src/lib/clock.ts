@@ -1,21 +1,17 @@
-const KEY = 'algo-coach:clock'
+import { CLOCK_PREFERENCE_KEY, clockStartsItself, preferenceAfter } from '@algo-coach/core'
 
-// whether a sitting's clock starts by itself when the statement is served.
-// Off until the user first starts a clock: `flows.md` has the clock started by
-// choice
+// the clock preference in this browser: core decides what a press sets
 export function autoStarts(): boolean {
   try {
-    return localStorage.getItem(KEY) === 'on'
+    return clockStartsItself(localStorage.getItem(CLOCK_PREFERENCE_KEY))
   } catch {
     return false
   }
 }
 
-// set by the user's own press alone: a pause the hidden page took says
-// nothing about how the user means to practise
-export function pressed(started: boolean): void {
+export function pressed(to: 'start' | 'pause' | 'resume'): void {
   try {
-    localStorage.setItem(KEY, started ? 'on' : 'off')
+    localStorage.setItem(CLOCK_PREFERENCE_KEY, preferenceAfter(to))
   } catch {
     // a browser refusing storage costs the preference, not the clock
   }

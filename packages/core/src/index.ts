@@ -42,4 +42,5 @@ export * from './learner';
 export * from './engine';
 export * from './listing';
 export * from './recall';
+export * from './sitting';
 export * from './privacy';

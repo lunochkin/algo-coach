@@ -1,3 +1,23 @@
+import {
+  CLAIM_NOTE,
+  CLAIM_TITLE,
+  CLOCK_PAUSE,
+  CLOCK_PAUSED,
+  CLOCK_RUNNING,
+  CLOCK_START,
+  clockState,
+  editorOpening,
+  END_KEEP,
+  END_NOTE,
+  END_TITLE,
+  RESTORE_SOLVE,
+  SITTING_END,
+  SITTING_ENDED,
+  sittingBack,
+  sittingRefused,
+  submitLabel,
+  visibilityMove,
+} from '@algo-coach/core'
 import { ChevronLeft } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
@@ -33,7 +53,7 @@ import {
 import { Verdict } from '@/components/Verdict'
 import { autoStarts, pressed } from '@/lib/clock'
 import { DEVICE } from '@/knowledge/copy'
-import { draftOf, keepDraft, opening } from '@/lib/draft'
+import { draftOf, keepDraft } from '@/lib/draft'
 
 type Moved = { sitting: Sitting; elapsedSec: number | null; at: number }
 
@@ -53,10 +73,10 @@ export function SittingView({ problemId, drilled, card }: Props) {
   const [named] = useState(() => search.get('sitting'))
   // the way back: the card the problem came from, where the next rung is, or
   // the board. An ended sitting stays on the page, so the solve reads back
-  const back =
-    card === null
-      ? { to: '/', label: 'Back to the board' }
-      : { to: `/cards/${encodeURIComponent(card)}`, label: 'Back to the card' }
+  const back = {
+    to: card === null ? '/' : `/cards/${encodeURIComponent(card)}`,
+    label: sittingBack(card),
+  }
   // the claim is asked once the sitting ends, and answering it closes the
   // dialog over the page rather than leaving it
   const [answered, setAnswered] = useState(false)
@@ -107,9 +127,8 @@ export function SittingView({ problemId, drilled, card }: Props) {
 
   const current = moved?.sitting ?? loaded.data?.sitting ?? null
   const sittingId = current?.id ?? null
-  const paused = current?.pauses?.at(-1)?.until === null
-  const ended = current?.ended_at != null
-  const unstarted = current === null || current.clock_started_at == null
+  const clockNow = clockState(current)
+  const { paused, ended, unstarted } = clockNow
 
   // the address names the sitting once one exists, replacing itself so the
   // way back leaves the problem rather than returning to it
@@ -196,7 +215,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
 
   // the user's own press on the clock, which alone sets the clock preference
   function press(to: 'start' | 'pause' | 'resume') {
-    pressed(to !== 'pause')
+    pressed(to)
     void move(to)
   }
 
@@ -216,15 +235,9 @@ export function SittingView({ problemId, drilled, card }: Props) {
   // hiding paused and nothing else
   useEffect(() => {
     function hid() {
-      // nothing to move before the sitting has been read
-      if (current === null || ended || unstarted) return
-      if (document.hidden && !paused) {
-        byHiding.current = true
-        void move('pause', { quiet: true })
-      } else if (!document.hidden && byHiding.current) {
-        byHiding.current = false
-        void move('resume', { quiet: true })
-      }
+      const next = visibilityMove(clockNow, document.hidden, byHiding.current)
+      byHiding.current = next.pausedByHiding
+      if (next.move) void move(next.move, { quiet: true })
     }
     document.addEventListener('visibilitychange', hid)
     return () => document.removeEventListener('visibilitychange', hid)
@@ -252,11 +265,14 @@ export function SittingView({ problemId, drilled, card }: Props) {
   const clock = moved ?? { elapsedSec: served.elapsed_sec, at: served.receivedAt }
   // a reload during the sitting restores what was typed in it, and a new
   // sitting opens on the work in progress `flows.md` carries
-  const kept = draftOf(problemId)
-  const blank = served.signature ? `${served.signature}\n    ` : ''
-  const own = kept !== null && sittingId !== null && kept.sitting === sittingId
-  const initial = own ? kept.code : (opening(kept, carried.data ?? null) ?? blank)
-  const keptRestored = own && kept.restored === true
+  const opened = editorOpening(
+    draftOf(problemId),
+    sittingId,
+    carried.data ?? null,
+    served.signature ?? null,
+  )
+  const initial = opened.code
+  const keptRestored = opened.restored
   const solve = carried.data?.solved_code ?? null
 
   // the user's own act: the solve is never carried, so it returns only here
@@ -322,7 +338,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
             {!paused && !ended && !unstarted && (
               <span
                 role="img"
-                aria-label="The clock is running"
+                aria-label={CLOCK_RUNNING}
                 className="size-2 rounded-full bg-clock-running"
               />
             )}
@@ -331,10 +347,12 @@ export function SittingView({ problemId, drilled, card }: Props) {
               receivedAt={clock.at}
               running={!paused && !ended && !unstarted}
             />
-            {paused && !ended && <span className="text-meta text-muted-foreground">paused</span>}
+            {paused && !ended && (
+              <span className="text-meta text-muted-foreground">{CLOCK_PAUSED}</span>
+            )}
             {ended ? (
               <>
-                <span className="text-meta text-muted-foreground">This sitting has ended</span>
+                <span className="text-meta text-muted-foreground">{SITTING_ENDED}</span>
               </>
             ) : (
               <>
@@ -348,7 +366,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
                     onClick={() => press(unstarted ? 'start' : 'resume')}
                     disabled={moving}
                   >
-                    Start
+                    {CLOCK_START}
                   </Button>
                 ) : (
                   <Button
@@ -357,26 +375,25 @@ export function SittingView({ problemId, drilled, card }: Props) {
                     onClick={() => press('pause')}
                     disabled={moving}
                   >
-                    Pause
+                    {CLOCK_PAUSE}
                   </Button>
                 )}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="outline" size="sm" disabled={moving}>
-                      End
+                      {SITTING_END}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>End the sitting?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        The clock stops for good, and no more submissions are taken. Each attempt is
-                        then asked about in turn.
-                      </AlertDialogDescription>
+                      <AlertDialogTitle>{END_TITLE}</AlertDialogTitle>
+                      <AlertDialogDescription>{END_NOTE}</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Keep solving</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => move('end')}>End</AlertDialogAction>
+                      <AlertDialogCancel>{END_KEEP}</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => move('end')}>
+                        {SITTING_END}
+                      </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -385,7 +402,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
           </div>
         </div>
       </div>
-      {refused && <p className="text-meta text-destructive">Refused: {refused}</p>}
+      {refused && <p className="text-meta text-destructive">{sittingRefused(refused)}</p>}
       {/* a paused clock leaves the page as it was: a pause stops the timing,
           not the practice */}
       {/* explicit columns: an implicit one grows to the editor's longest line,
@@ -412,7 +429,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <Button onClick={submit} disabled={running || ended}>
-              {running ? 'Running…' : 'Submit'}
+              {submitLabel(running)}
             </Button>
             {/* a keyboard's shortcut, so a narrow window leaves it out and the
                 restore press keeps the submit press's row */}
@@ -423,7 +440,7 @@ export function SittingView({ problemId, drilled, card }: Props) {
                 one is not an independent solve */}
             {solve !== null && !ended && (
               <Button variant="ghost" size="sm" className="ml-auto" onClick={restore}>
-                Restore my last solve
+                {RESTORE_SOLVE}
               </Button>
             )}
           </div>
@@ -441,10 +458,8 @@ export function SittingView({ problemId, drilled, card }: Props) {
       <Dialog open={ended && !answered} onOpenChange={(open) => open || setAnswered(true)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>The claim</DialogTitle>
-            <DialogDescription>
-              Asked of each attempt now, while the code is minutes old.
-            </DialogDescription>
+            <DialogTitle>{CLAIM_TITLE}</DialogTitle>
+            <DialogDescription>{CLAIM_NOTE}</DialogDescription>
           </DialogHeader>
           {ended && sittingId !== null && (
             <ClaimPrompt sittingId={sittingId} drilled={drilled} onDone={() => setAnswered(true)} />

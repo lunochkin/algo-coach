@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { duration } from '@/lib/format'
+import { duration, shownSeconds } from '@algo-coach/core'
 
 type Props = {
   // the engine's reading, none while the clock has not run, and the moment
@@ -23,14 +23,9 @@ export function ElapsedClock({ elapsedSec, receivedAt, running: asked }: Props) 
     return () => clearInterval(tick)
   }, [running])
 
-  // counted on from the engine's number with the page's monotonic clock, so a
-  // browser clock set wrong moves nothing
-  const shown =
-    elapsedSec === null
-      ? 0
-      : running
-        ? elapsedSec + Math.max(0, now - receivedAt) / 1000
-        : elapsedSec
+  // counted on with the page's monotonic clock, so a browser clock set wrong
+  // moves nothing
+  const shown = shownSeconds(elapsedSec, receivedAt, now, running)
 
   return (
     <span className="font-mono text-heading tabular-nums" aria-label="Elapsed time">

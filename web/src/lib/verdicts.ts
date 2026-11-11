@@ -1,8 +1,6 @@
-import { failures, OUTCOME_LABELS, SEVEREST } from '@algo-coach/core'
+import { failures, OUTCOME_LABELS, SEVEREST, severest } from '@algo-coach/core'
 
-import type { CaseResult } from '@/api/client'
-
-export { failures, SEVEREST }
+export { failures, SEVEREST, severest }
 
 // one token per outcome, beside the label core gives it: `pages.md` gives why
 // a wrong answer and a timeout are not one colour
@@ -22,7 +20,3 @@ export const OUTCOME = {
 } as const
 
 export type Outcome = keyof typeof OUTCOME
-
-export function severest(results: CaseResult[]): Outcome | undefined {
-  return SEVEREST.find((outcome) => results.some((one) => one.outcome === outcome))
-}

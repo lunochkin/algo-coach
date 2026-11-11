@@ -1,27 +1,30 @@
 import { useState } from 'react'
 
-import type { CaseResult, Failure, Submitted } from '@/api/client'
+import {
+  FAILURE_ARGS,
+  FAILURE_ERROR,
+  FAILURE_EXPECTED,
+  FAILURE_RETURNED,
+  submissionView,
+  type SubmissionView,
+} from '@algo-coach/core'
+
+import type { CaseResult, Submitted } from '@/api/client'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { OUTCOME, failures, severest } from '@/lib/verdicts'
+import { OUTCOME } from '@/lib/verdicts'
 
 export function Verdict({ submitted }: { submitted: Submitted }) {
-  const results = submitted.verification.results ?? []
-  const passed = results.filter((one) => one.outcome === 'passed').length
-  // the run reads as its severest case, so the line and the strip agree
-  const overall = severest(results)
-  // the mix of failures in words, since the strip carries it in colour alone
-  const mix = failures(results)
+  const view = submissionView(submitted)
 
   return (
     <div className="space-y-stack">
-      <p className={cn('font-medium', overall && OUTCOME[overall].text)}>
-        {submitted.attempt.solved ? 'Solved' : 'Not solved'}: {passed} of {results.length} cases
-        passed
+      <p className={cn('font-medium', view.overall && OUTCOME[view.overall].text)}>
+        {view.verdict}
       </p>
-      {mix.length > 0 && <p className="text-meta text-muted-foreground">{mix.join(' · ')}</p>}
-      <CaseStrip results={results} />
-      {submitted.failure && <FailureView failure={submitted.failure} index={indexOf(submitted)} />}
+      {view.failures && <p className="text-meta text-muted-foreground">{view.failures}</p>}
+      <CaseStrip results={submitted.verification.results ?? []} />
+      {view.failure && <FailureView failure={view.failure} />}
     </div>
   )
 }
@@ -43,16 +46,14 @@ export function CaseStrip({ results }: { results: CaseResult[] }) {
   )
 }
 
-function FailureView({ failure, index }: { failure: Failure; index: number }) {
+function FailureView({ failure }: { failure: NonNullable<SubmissionView['failure']> }) {
   return (
     <div className="space-y-2 rounded-md border p-3 text-meta">
-      <p className={cn('font-medium', OUTCOME[failure.outcome].text)}>
-        Case {index + 1}: {OUTCOME[failure.outcome].label}
-      </p>
-      <Value label="Arguments" value={failure.args} />
-      <Value label="Expected" value={failure.expected} />
-      {failure.outcome === 'wrong' && <Value label="Returned" value={failure.returned} />}
-      {failure.error && <Value label="Error" text={failure.error} />}
+      <p className={cn('font-medium', OUTCOME[failure.outcome].text)}>{failure.title}</p>
+      <Value label={FAILURE_ARGS} value={failure.args} />
+      <Value label={FAILURE_EXPECTED} value={failure.expected} />
+      {failure.outcome === 'wrong' && <Value label={FAILURE_RETURNED} value={failure.returned} />}
+      {failure.error && <Value label={FAILURE_ERROR} text={failure.error} />}
     </div>
   )
 }
@@ -88,9 +89,4 @@ function Value({ label, value, text }: { label: string; value?: unknown; text?: 
       </pre>
     </div>
   )
-}
-
-function indexOf(submitted: Submitted): number {
-  const results = submitted.verification.results ?? []
-  return results.findIndex((one) => one.case_id === submitted.failure?.case_id)
 }

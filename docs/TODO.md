@@ -223,7 +223,7 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
       alike, so the two editors behave as one
 - [ ] Write into `flows.md` whether the keyboard offers the names the file
       already declares. The rule today refuses every name the code typed
-- [ ] Move the sitting's state into core: the clock with its pauses and its
+- [x] Move the sitting's state into core: the clock with its pauses and its
       preference, the code the editor opens on, the verdict fold and the first
       failing case. `SittingView.tsx` holds them for the web
 - [ ] Move the claim and the self-label into core: the candidates, the
