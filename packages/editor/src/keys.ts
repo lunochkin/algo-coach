@@ -66,8 +66,8 @@ export function keyed(state: EditorState, key: EditorKey): Transaction | null {
   return made;
 }
 
-// a line up or down at the same column, held to the line's end: the phone's
-// editor wraps no line, so a column is a place on the screen
+// a line of the document up or down, at the same column, held to the line's
+// end. A wrapped line is one line here, as it is to the file
 function lineMove(state: EditorState, step: number): Transaction {
   return state.update({
     selection: EditorSelection.create(

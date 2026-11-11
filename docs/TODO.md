@@ -214,7 +214,7 @@ keyboard of the app's own: the system keyboard hides the symbols code and a
       strip dragging the cursor, indent and dedent. No key carries a form
 - [x] Add line keys to the editor's layer: move a line, indent or dedent a
       block, duplicate a line, and select the current block
-- [ ] Show the phone editor's indent at two characters per level while the
+- [x] Show the phone editor's indent at two characters per level while the
       file keeps four, and wrap a long line under its own indent. A median
       canonical's widest line is 55 characters, where a phone fits 40
 - [ ] Hide the app's keyboard on a press, so a whole solution reads on one

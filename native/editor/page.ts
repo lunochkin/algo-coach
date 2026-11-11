@@ -1,7 +1,7 @@
 // the page the phone's editor WebView loads: the shared Python setup, typed
 // through the app's keyboard. `just editor-page` bundles it into
 // `src/editor/page.ts`, which the app ships
-import { type EditorKey, keyed, pythonEditing } from '@algo-coach/editor';
+import { type EditorKey, keyed, narrowIndent, pythonEditing } from '@algo-coach/editor';
 import { EditorState } from '@codemirror/state';
 import { drawSelection, EditorView } from '@codemirror/view';
 
@@ -62,6 +62,7 @@ function open(doc: string, colors: Colors) {
       extensions: [
         ...pythonEditing(),
         drawSelection(),
+        narrowIndent(),
         // the app's keyboard types, and the system's never opens
         EditorView.contentAttributes.of({
           inputmode: 'none',

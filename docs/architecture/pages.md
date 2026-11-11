@@ -450,7 +450,10 @@ what it offers. The inventory is the list both clients build to.
   dedent, a strip the finger drags to move the caret, and a layer of
   Python's keywords. Its line keys move or duplicate a line, and select the
   block around the caret by indentation, wider on each press, so indent and
-  dedent move the block whole. A key carries a keyword at most, never a name
+  dedent move the block whole. The editor draws an indent level two
+  characters wide while the file keeps four, and wraps a long line under its
+  own indent. A phone fits some forty characters, where a median canonical's
+  widest line is fifty-five. A key carries a keyword at most, never a name
   or a line of a form, since a key carrying one would be a hint the recall
   measures. The screen opens from a template's press on Card, and a drawn
   recall opens beside a run, as on the web. A menu switches between the
